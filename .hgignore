@@ -1,0 +1,10 @@
+syntax: glob
+saturnin/imgui.ini
+saturnin/lib/imgui/extra_fonts/Cousine-Regular.ttf
+saturnin/lib/imgui/extra_fonts/DroidSans.ttf
+saturnin/lib/imgui/extra_fonts/Karla-Regular.ttf
+saturnin/lib/imgui/extra_fonts/ProggyClean.ttf
+saturnin/lib/imgui/extra_fonts/ProggyTiny.ttf
+saturnin/lib/imgui/extra_fonts/README.txt
+saturnin/lib/imgui/extra_fonts/Roboto-Medium.ttf
+saturnin/lib/imgui/extra_fonts/binary_to_compressed_c.cpp
