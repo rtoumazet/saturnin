@@ -7,11 +7,10 @@
     <BoostLibrariesDirectory>D:\Dev\Libraries\boost_1_62_0\x86\lib32-msvc-14.0</BoostLibrariesDirectory>
     <AspiSdkDirectory>D:\Dev\SDK\AspiSDK</AspiSdkDirectory>
     <WinDdkDirectory>D:\Dev\SDK\WinDDK\7600.16385.1\inc</WinDdkDirectory>
-    <LibDirectory>D:\Dev\Libraries</LibDirectory>
-    <ImguiDirectory>D:\Dev\Libraries\imgui-1.52</ImguiDirectory>
+    <ImguiDirectory>$(ProjectDir)lib\imgui</ImguiDirectory>
+    <gl3wDirectory>$(ProjectDir)lib\gl3w</gl3wDirectory>
     <GlfwDirectory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\include</GlfwDirectory>
     <GlfwLib32Directory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\lib-vc2015</GlfwLib32Directory>
-    <gl3wDirectory>D:\Dev\Libraries\gl3w</gl3wDirectory>
   </PropertyGroup>
   <PropertyGroup>
     <OutDir>$(BuildRootDirectory)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
@@ -44,20 +43,17 @@
     <BuildMacro Include="WinDdkDirectory">
       <Value>$(WinDdkDirectory)</Value>
     </BuildMacro>
-    <BuildMacro Include="LibDirectory">
-      <Value>$(LibDirectory)</Value>
-    </BuildMacro>
     <BuildMacro Include="ImguiDirectory">
       <Value>$(ImguiDirectory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="gl3wDirectory">
+      <Value>$(gl3wDirectory)</Value>
     </BuildMacro>
     <BuildMacro Include="GlfwDirectory">
       <Value>$(GlfwDirectory)</Value>
     </BuildMacro>
     <BuildMacro Include="GlfwLib32Directory">
       <Value>$(GlfwLib32Directory)</Value>
-    </BuildMacro>
-    <BuildMacro Include="gl3wDirectory">
-      <Value>$(gl3wDirectory)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
