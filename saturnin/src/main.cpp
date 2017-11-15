@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 {
 	// Setup window
 	glfwSetErrorCallback(error_callback);
+	
 	if (!glfwInit())
 		return 1;
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

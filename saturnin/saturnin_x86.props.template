@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <BuildRootDirectory>D:\Dev\build\</BuildRootDirectory>
+    <BoostIncludeDirectory>D:\Dev\Libraries\boost_1_62_0\x86</BoostIncludeDirectory>
+    <BoostLibrariesDirectory>D:\Dev\Libraries\boost_1_62_0\x86\lib32-msvc-14.0</BoostLibrariesDirectory>
+    <AspiSdkDirectory>D:\Dev\SDK\AspiSDK</AspiSdkDirectory>
+    <WinDdkDirectory>D:\Dev\SDK\WinDDK\7600.16385.1\inc</WinDdkDirectory>
+    <ImguiDirectory>$(ProjectDir)lib\imgui</ImguiDirectory>
+    <gl3wDirectory>$(ProjectDir)lib\gl3w</gl3wDirectory>
+    <GlfwDirectory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\include</GlfwDirectory>
+    <GlfwLib32Directory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\lib-vc2015</GlfwLib32Directory>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutDir>$(BuildRootDirectory)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(BuildRootDirectory)$(ProjectName)\obj\$(Configuration)\</IntDir>
+    <IncludePath>$(gl3wDirectory);$(GlfwDirectory);$(BoostIncludeDirectory);$(AspiSdkDirectory);$(WinDdkDirectory);$(VC_IncludePath);$(ImguiDirectory);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(BoostLibrariesDirectory);$(LibraryPath);$(GlfwLib32Directory)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/verbose:lib %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="BuildRootDirectory">
+      <Value>$(BuildRootDirectory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="BoostIncludeDirectory">
+      <Value>$(BoostIncludeDirectory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="BoostLibrariesDirectory">
+      <Value>$(BoostLibrariesDirectory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="AspiSdkDirectory">
+      <Value>$(AspiSdkDirectory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="WinDdkDirectory">
+      <Value>$(WinDdkDirectory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ImguiDirectory">
+      <Value>$(ImguiDirectory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="gl3wDirectory">
+      <Value>$(gl3wDirectory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GlfwDirectory">
+      <Value>$(GlfwDirectory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GlfwLib32Directory">
+      <Value>$(GlfwLib32Directory)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>
