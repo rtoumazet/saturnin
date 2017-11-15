@@ -23,6 +23,11 @@
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
+#include <boost/system/config.hpp>
+#include <boost/locale.hpp>
+
+using namespace std;
+using namespace boost::locale;
 //using namespace saturnin;
 
 static void error_callback(int error, const char* description)
@@ -39,7 +44,7 @@ int main(int argc, char *argv[])
 		return 1;
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -155,6 +160,16 @@ int main(int argc, char *argv[])
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
+
+	generator gen;
+	// Specify location of dictionaries
+	gen.add_messages_path(".");
+	gen.add_messages_domain("saturnin");
+	// Generate locales and imbue them to iostream
+	locale::global(gen(""));
+	cout.imbue(locale());
+	// Display a message using current system locale
+	cout << translate("Hello World") << endl;
 
 	// Main loop
 	while (!glfwWindowShouldClose(window))
