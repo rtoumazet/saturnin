@@ -1,8 +1,8 @@
 @echo off
-@set xgettext_path=D:\Dev\Libraries\gettext-tools-static-0.18.1.1\
-@set input_loc=--output-dir=D:\Dev\Sources\VS2017\saturnin-vs2017\saturnin\src
-@set output_loc=--output=D:\Dev\Sources\VS2017\saturnin-vs2017\saturnin\lang\saturnin.po
-@set files=--files-from=D:\Dev\Sources\VS2017\saturnin-vs2017\saturnin\lang\filelist.txt
+for /f "delims=" %%x in (config.txt) do (set "%%x")
+@set input_loc=--output-dir=%src_path%
+@set output_loc=--output=%lang_path%\saturnin.po
+@set files=--files-from=%lang_path%\filelist.txt
 
 @echo on
-%xgettext_path%xgettext.exe %input_loc% %output_loc% %files% --keyword=translate
+%xgettext_path%\xgettext.exe %input_loc% %output_loc% %files% --keyword=translate
