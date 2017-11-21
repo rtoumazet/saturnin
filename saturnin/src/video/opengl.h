@@ -16,3 +16,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+#include <cstdint>
+#include <vector>
+
+namespace saturnin {
+namespace video {
+
+	class OpenGl {
+
+	public:
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// \fn	OpenGl::OpenGl()
+		///
+		/// \brief	Default constructor.
+		///
+		/// \author	Runik
+		/// \date	20/11/2017
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		OpenGl::OpenGl() {};
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// \fn	~OpenGl::OpenGl()
+		///
+		/// \brief	Default constructor.
+		///
+		/// \author	Runik
+		/// \date	20/11/2017
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		OpenGl::~OpenGl() {};
+
+		void OpenGl::createFramebuffer();
+
+        uint32_t OpenGl::generateTexture();
+        uint32_t OpenGl::generateFramebuffer(const uint32_t texture);
+        uint32_t OpenGl::createVertexShader();
+        uint32_t OpenGl::createFragmentShader();
+        uint32_t OpenGl::createVertexBufferObject(const float vertices[]);
+        uint32_t OpenGl::createAndUseProgram(const uint32_t vertexShader, const uint32_t fragmentShader);
+        uint32_t OpenGl::createVertexArrayObject(const uint32_t vertexBufferObject, const float vertices[]);
+        void OpenGl::deleteShaders(std::vector<uint32_t> shaders);
+
+        bool OpenGl::creatingRenderTarget();
+    };
+
+};
+};
