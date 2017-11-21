@@ -20,6 +20,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
 #include <stdio.h>
+#include "video\opengl.h"
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
@@ -28,7 +29,7 @@
 
 using namespace std;
 using namespace boost::locale;
-//using namespace saturnin;
+using namespace saturnin::video;
 
 static void error_callback(int error, const char* description)
 {
@@ -71,6 +72,8 @@ int main(int argc, char *argv[])
 	bool show_video = true;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    OpenGl opengl;
+
 
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f,
@@ -78,90 +81,12 @@ int main(int argc, char *argv[])
 		0.0f,  0.5f, 0.0f
 	};
 
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
+    uint32_t texture        = opengl.generateTexture();
+    uint32_t fbo            = opengl.generateFramebuffer(texture);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-	const char* vertexShaderSource = R"(
-		#version 330 core
-		layout(location = 0) in vec3 aPos;
-
-		void main()
-		{
-			gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-		}
-	)";
-
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-
-	int  success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		//std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	const char* fragmentShaderSource = R"(
-		#version 330 core
-		out vec4 FragColor;
-
-		void main()
-		{
-		    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-		} 
-	)";
-
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
-
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-
-	}
-
-	glUseProgram(shaderProgram);
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-
-	// 1. bind Vertex Array Object
-	glBindVertexArray(VAO);
-	// 2. copy our vertices array in a buffer for OpenGL to use
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	// 3. then set our vertex attributes pointers
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-
-	generator gen;
+     
+   
+    generator gen;
 	// Specify location of dictionaries
 	gen.add_messages_path(".");
 	gen.add_messages_domain("saturnin");
@@ -206,10 +131,17 @@ int main(int argc, char *argv[])
 		}
 
 		if (show_video) {
+			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(320, 200));
 			ImGui::Begin("Video rendering", &show_video);
-			glUseProgram(shaderProgram);
-			glBindVertexArray(VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 3);
+			
+
+            ImGui::Text("Hello from another window!");
+			ImGui::GetWindowDrawList()->AddImage(
+				(void *)&texture,
+				ImVec2(ImGui::GetCursorScreenPos()),
+				ImVec2(ImGui::GetCursorScreenPos().x + 320 / 2,
+					ImGui::GetCursorScreenPos().y + 200 / 2), ImVec2(0, 0), ImVec2(1, 1));s
 
 			ImGui::End();
 		}
