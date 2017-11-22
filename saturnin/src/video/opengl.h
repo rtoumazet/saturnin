@@ -58,7 +58,8 @@ namespace video {
         uint32_t OpenGl::createVertexArrayObject(const uint32_t vertexBufferObject, const float vertices[]);
         void OpenGl::deleteShaders(std::vector<uint32_t> shaders);
 
-        bool OpenGl::creatingRenderTarget();
+        
+        uint32_t OpenGl::creatingRenderTarget();
     };
 
 };

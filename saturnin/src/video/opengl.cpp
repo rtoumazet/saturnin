@@ -55,6 +55,10 @@ namespace video {
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
+        // Set the list of draw buffers.
+        GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) cout << "Framebuffer error";
 
         return fbo;
@@ -128,7 +132,7 @@ namespace video {
             glDeleteShader(shader);
         }
     }
-    bool OpenGl::creatingRenderTarget()
+    uint32_t OpenGl::creatingRenderTarget()
     {
         // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
         GLuint FramebufferName = 0;
@@ -163,10 +167,9 @@ namespace video {
         // Something may have gone wrong during the process, depending on the capabilities of the GPU.This is how you check it :
 
         // Always check that our framebuffer is ok
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            return false;
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) cout << "Framebuffer error";
 
-        return true;
+        return FramebufferName;
 
     }
     uint32_t OpenGl::createAndUseProgram(const uint32_t vertexShader, const uint32_t fragmentShader)
@@ -205,7 +208,7 @@ namespace video {
         // 3. then set our vertex attributes pointers
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
-        return uint32_t();
+        return VAO;
     }
 };
 };

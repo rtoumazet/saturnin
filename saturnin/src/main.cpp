@@ -73,7 +73,14 @@ int main(int argc, char *argv[])
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     OpenGl opengl;
+    uint32_t fbo = opengl.creatingRenderTarget();
 
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glViewport(0, 0, 320, 200);
+
+    uint32_t vertexShader = opengl.createVertexShader();
+    uint32_t fragmentShader = opengl.createFragmentShader();
+    uint32_t programShader = opengl.createAndUseProgram(vertexShader, fragmentShader);
 
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f,
@@ -81,10 +88,11 @@ int main(int argc, char *argv[])
 		0.0f,  0.5f, 0.0f
 	};
 
-    uint32_t texture        = opengl.generateTexture();
-    uint32_t fbo            = opengl.generateFramebuffer(texture);
+    uint32_t vbo = opengl.createVertexBufferObject(vertices);
+    uint32_t vao = opengl.createVertexArrayObject(vbo, vertices);
 
-     
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
    
     generator gen;
 	// Specify location of dictionaries
@@ -137,11 +145,11 @@ int main(int argc, char *argv[])
 			
 
             ImGui::Text("Hello from another window!");
-			ImGui::GetWindowDrawList()->AddImage(
-				(void *)&texture,
-				ImVec2(ImGui::GetCursorScreenPos()),
-				ImVec2(ImGui::GetCursorScreenPos().x + 320 / 2,
-					ImGui::GetCursorScreenPos().y + 200 / 2), ImVec2(0, 0), ImVec2(1, 1));s
+			//ImGui::GetWindowDrawList()->AddImage(
+			//	(void *)&texture,
+			//	ImVec2(ImGui::GetCursorScreenPos()),
+			//	ImVec2(ImGui::GetCursorScreenPos().x + 320 / 2,
+			//		ImGui::GetCursorScreenPos().y + 200 / 2), ImVec2(0, 0), ImVec2(1, 1));
 
 			ImGui::End();
 		}
