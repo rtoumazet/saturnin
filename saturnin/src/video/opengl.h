@@ -54,12 +54,16 @@ namespace video {
         uint32_t OpenGl::createVertexShader();
         uint32_t OpenGl::createFragmentShader();
         uint32_t OpenGl::createVertexBufferObject(const float vertices[]);
-        uint32_t OpenGl::createAndUseProgram(const uint32_t vertexShader, const uint32_t fragmentShader);
+        uint32_t OpenGl::createProgramShader(const uint32_t vertexShader, const uint32_t fragmentShader);
         uint32_t OpenGl::createVertexArrayObject(const uint32_t vertexBufferObject, const float vertices[]);
         void OpenGl::deleteShaders(std::vector<uint32_t> shaders);
 
-        
-        uint32_t OpenGl::creatingRenderTarget();
+        void OpenGl::setupTriangle();
+        void OpenGl::drawTriangle();
+
+    private:
+        uint32_t programShader_;
+        uint32_t vao_;
     };
 
 };

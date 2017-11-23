@@ -73,27 +73,8 @@ int main(int argc, char *argv[])
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     OpenGl opengl;
-    uint32_t fbo = opengl.creatingRenderTarget();
+    opengl.setupTriangle();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glViewport(0, 0, 320, 200);
-
-    uint32_t vertexShader = opengl.createVertexShader();
-    uint32_t fragmentShader = opengl.createFragmentShader();
-    uint32_t programShader = opengl.createAndUseProgram(vertexShader, fragmentShader);
-
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f,  0.5f, 0.0f
-	};
-
-    uint32_t vbo = opengl.createVertexBufferObject(vertices);
-    uint32_t vao = opengl.createVertexArrayObject(vbo, vertices);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-   
     generator gen;
 	// Specify location of dictionaries
 	gen.add_messages_path(".");
@@ -162,9 +143,10 @@ int main(int argc, char *argv[])
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+        opengl.drawTriangle();
 
 		ImGui::Render();
-		glfwSwapBuffers(window);
+        glfwSwapBuffers(window);
 	}
 
 	// Cleanup

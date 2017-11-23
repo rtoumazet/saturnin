@@ -132,47 +132,49 @@ namespace video {
             glDeleteShader(shader);
         }
     }
-    uint32_t OpenGl::creatingRenderTarget()
+    void OpenGl::setupTriangle()
     {
-        // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-        GLuint FramebufferName = 0;
-        glGenFramebuffers(1, &FramebufferName);
-        glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+        float vertices[] = {
+            -0.5f, -0.5f, 0.0f,
+            0.5f, -0.5f, 0.0f,
+            0.0f,  0.5f, 0.0f
+        };
 
-        // Now we need to create the texture which will contain the RGB output of our shader.This code is very classic :
+        //uint32_t vbo = createVertexBufferObject(vertices);
+        uint32_t vertexShader = createVertexShader();
+        uint32_t fragmentShader = createFragmentShader();
+        programShader_ = createProgramShader(vertexShader, fragmentShader);
+        vector<uint32_t> shadersToDelete = {vertexShader, fragmentShader};
+        deleteShaders(shadersToDelete);
 
-        // The texture we're going to render to
-        GLuint renderedTexture;
-        glGenTextures(1, &renderedTexture);
+        unsigned int VBO;
+        glGenVertexArrays(1, &vao_);
+        glGenBuffers(1, &VBO);
+        // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+        glBindVertexArray(vao_);
 
-        // "Bind" the newly created texture : all future texture functions will modify this texture
-        glBindTexture(GL_TEXTURE_2D, renderedTexture);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        // Give an empty image to OpenGL ( the last "0" )
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 320, 200, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
 
-        // Poor filtering. Needed !
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        // Finally, we configure our framebuffer
-
-            // Set "renderedTexture" as our colour attachement #0
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
-
-        // Set the list of draw buffers.
-        GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
-
-        // Something may have gone wrong during the process, depending on the capabilities of the GPU.This is how you check it :
-
-        // Always check that our framebuffer is ok
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) cout << "Framebuffer error";
-
-        return FramebufferName;
+        // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+        // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+        glBindVertexArray(0);
 
     }
-    uint32_t OpenGl::createAndUseProgram(const uint32_t vertexShader, const uint32_t fragmentShader)
+    void OpenGl::drawTriangle()
+    {
+        glUseProgram(programShader_);
+        glBindVertexArray(vao_); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
+
+    uint32_t OpenGl::createProgramShader(const uint32_t vertexShader, const uint32_t fragmentShader)
     {
         uint32_t shaderProgram;
         shaderProgram = glCreateProgram();
@@ -188,16 +190,12 @@ namespace video {
             glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
             cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog << std::endl;
         }
-        glUseProgram(shaderProgram);
 
         return shaderProgram;
     }
     uint32_t OpenGl::createVertexArrayObject(const uint32_t vertexBufferObject, const float vertices[])
     {
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        unsigned int VAO;
+        uint32_t VAO;
         glGenVertexArrays(1, &VAO);
 
         // 1. bind Vertex Array Object
