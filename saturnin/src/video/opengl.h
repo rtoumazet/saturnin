@@ -47,10 +47,8 @@ namespace video {
 
 		OpenGl::~OpenGl() {};
 
-		void OpenGl::createFramebuffer();
+		uint32_t OpenGl::createFramebuffer();
 
-        uint32_t OpenGl::generateTexture();
-        uint32_t OpenGl::generateFramebuffer(const uint32_t texture);
         uint32_t OpenGl::createVertexShader();
         uint32_t OpenGl::createFragmentShader();
         uint32_t OpenGl::createVertexBufferObject(const float vertices[]);
@@ -60,6 +58,7 @@ namespace video {
 
         void OpenGl::setupTriangle();
         void OpenGl::drawTriangle();
+        void OpenGl::displayVideoWindow();
 
     private:
         uint32_t programShader_;
