@@ -43,8 +43,10 @@ int main(int argc, char *argv[])
 	
 	if (!glfwInit())
 		return 1;
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+
+    
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -54,7 +56,12 @@ int main(int argc, char *argv[])
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	GLFWwindow* window = glfwCreateWindow(1280, 720, "ImGui OpenGL3 example", NULL, NULL);
-	glfwMakeContextCurrent(window);
+	
+    uint32_t major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
+    uint32_t minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
+    uint32_t revision = glfwGetWindowAttrib(window, GLFW_CONTEXT_REVISION);
+    cout << "Context version :" << major << "." <<minor << " Revision: " << revision << endl;
+    glfwMakeContextCurrent(window);
 	glfwSwapInterval(1); // Enable vsync
 	gl3wInit();
 
