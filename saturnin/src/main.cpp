@@ -41,7 +41,18 @@ static void error_callback(int error, const char* description)
 
 int main(int argc, char *argv[])
 {
-    bool isLegacy = true;
+    generator gen;
+    // Specify location of dictionaries
+    gen.add_messages_path(".");
+    gen.add_messages_domain("saturnin");
+    // Generate locales and imbue them to iostream
+    locale::global(gen(""));
+    cout.imbue(locale());
+    // Display a message using current system locale
+    cout << translate("Hello World") << endl;
+
+
+    bool isLegacy = false;
     if (isLegacy) {
         return runLegacyOpenGl();
     }
@@ -54,11 +65,6 @@ int main(int argc, char *argv[])
 	
 	if (!glfwInit())
 		return 1;
-
-    
-    //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -98,15 +104,6 @@ int main(int argc, char *argv[])
     //uint32_t fbo = opengl.createFramebuffer();
     //opengl.setupTriangle();
 
-    generator gen;
-	// Specify location of dictionaries
-	gen.add_messages_path(".");
-	gen.add_messages_domain("saturnin");
-	// Generate locales and imbue them to iostream
-	locale::global(gen(""));
-	cout.imbue(locale());
-	// Display a message using current system locale
-	cout << translate("Hello World") << endl;
 
 	// Main loop
 	while (!glfwWindowShouldClose(window))
