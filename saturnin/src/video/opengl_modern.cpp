@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
 #include <GLFW/glfw3.h>
+#include "opengl.h"
 #include "opengl_modern.h"
 
 namespace saturnin {
@@ -29,6 +30,10 @@ namespace video {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
         GLFWwindow* window = glfwCreateWindow(1280, 720, "ImGui OpenGL3 example", NULL, NULL);
+        if (window == nullptr) {
+
+            return 1;
+        }
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1); // Enable vsync
         gl3wInit();
@@ -46,9 +51,14 @@ namespace video {
         //io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
         //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
-        bool show_test_window = true;
+        bool show_test_window    = true;
         bool show_another_window = false;
-        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+        bool show_video          = true;
+        ImVec4 clear_color       = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+        OpenGl opengl;
+        uint32_t fbo = opengl.createFramebuffer();
+        opengl.setupTriangle();
 
         // Main loop
         while (!glfwWindowShouldClose(window))
@@ -81,6 +91,44 @@ namespace video {
             {
                 ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
                 ImGui::ShowTestWindow(&show_test_window);
+            }
+
+            if (show_video) {
+            	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
+            	ImGui::SetNextWindowSize(ImVec2(320, 200 + 20)); // + 20 
+
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+                      
+            	ImGui::Begin("Video rendering", &show_video);
+            	
+
+                glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+                glViewport(0, 0, 320, 200);
+                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
+
+                //opengl.setupTriangle();
+                opengl.drawTriangle();
+
+                GLint ret;
+                glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &ret);
+                if (ret != GL_NONE) {
+                    int32_t texture = 0;
+                    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
+
+                    ImGui::GetWindowDrawList()->AddImage(
+                        (void *)texture,
+                        ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
+                        ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
+                        ImVec2(0, 1), ImVec2(1, 0));
+
+                }
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+                ImGui::End();
+                ImGui::PopStyleVar();
+                ImGui::PopStyleVar();
             }
 
             // Rendering
