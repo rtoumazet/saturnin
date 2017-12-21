@@ -22,7 +22,7 @@
 namespace saturnin {
 namespace video {
 
-
+    int32_t runModernOpenGl();
 
 };
 };

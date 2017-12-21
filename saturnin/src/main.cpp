@@ -20,9 +20,12 @@
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
 #include <stdio.h>
-#include "video\opengl.h"
+#include "video/opengl.h"
+#include "video/opengl_legacy.h"
+#include "video/opengl_modern.h"
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
+
 
 #include <boost/system/config.hpp>
 #include <boost/locale.hpp>
@@ -38,7 +41,15 @@ static void error_callback(int error, const char* description)
 
 int main(int argc, char *argv[])
 {
-	// Setup window
+    bool isLegacy = true;
+    if (isLegacy) {
+        return runLegacyOpenGl();
+    }
+    else {
+        return runModernOpenGl();
+    }
+    
+    // Setup window
 	glfwSetErrorCallback(error_callback);
 	
 	if (!glfwInit())
