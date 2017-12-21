@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
 #include <GLFW/glfw3.h>
+#include "opengl_modern.h"
 
 namespace saturnin {
 namespace video {
@@ -15,7 +16,7 @@ namespace video {
         fprintf(stderr, "Error %d: %s\n", error, description);
     }
 
-    int main(int, char**)
+    int32_t runModernOpenGl()
     {
         // Setup window
         glfwSetErrorCallback(error_callback);

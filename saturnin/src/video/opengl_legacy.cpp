@@ -14,7 +14,7 @@ namespace video {
         fprintf(stderr, "Error %d: %s\n", error, description);
     }
 
-    int main(int, char**)
+    int32_t runLegacyOpenGl()
     {
         // Setup window
         glfwSetErrorCallback(error_callback);
