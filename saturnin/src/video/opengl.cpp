@@ -64,7 +64,7 @@ namespace video {
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
         const char* vertexShaderSource = R"(
-		    #version 330 core
+		    #version 150 core
 		    layout(location = 0) in vec3 aPos;
 
 		    void main()
@@ -92,7 +92,7 @@ namespace video {
     uint32_t OpenGl::createFragmentShader()
     {
         const char* fragmentShaderSource = R"(
-        	#version 330 core
+        	#version 150 core
         	out vec4 FragColor;
 
         	void main()
