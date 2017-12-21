@@ -116,21 +116,27 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="lib\gl3w\GL\gl3w.c" />
+    <ClCompile Include="lib\gl3w\imgui_impl_glfw.cpp" />
     <ClCompile Include="lib\gl3w\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="lib\imgui\imgui.cpp" />
     <ClCompile Include="lib\imgui\imgui_demo.cpp" />
     <ClCompile Include="lib\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\video\opengl.cpp" />
+    <ClCompile Include="src\video\opengl_legacy.cpp" />
+    <ClCompile Include="src\video\opengl_modern.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\gl3w\GL\gl3w.h" />
     <ClInclude Include="lib\gl3w\GL\glcorearb.h" />
+    <ClInclude Include="lib\gl3w\imgui_impl_glfw.h" />
     <ClInclude Include="lib\gl3w\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="lib\imgui\imconfig.h" />
     <ClInclude Include="lib\imgui\imgui.h" />
     <ClInclude Include="lib\imgui\imgui_internal.h" />
     <ClInclude Include="src\video\opengl.h" />
+    <ClInclude Include="src\video\opengl_legacy.h" />
+    <ClInclude Include="src\video\opengl_modern.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

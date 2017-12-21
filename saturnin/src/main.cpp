@@ -47,11 +47,11 @@ int main(int argc, char *argv[])
     
     //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);
 
-    //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
 	bool show_video = true;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    OpenGl opengl;
-    uint32_t fbo = opengl.createFramebuffer();
-    opengl.setupTriangle();
+    //OpenGl opengl;
+    //uint32_t fbo = opengl.createFramebuffer();
+    //opengl.setupTriangle();
 
     generator gen;
 	// Specify location of dictionaries
@@ -125,47 +125,47 @@ int main(int argc, char *argv[])
 		}
 
         
-        if (show_video) {
-			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
-			ImGui::SetNextWindowSize(ImVec2(320, 200 + 20)); // + 20 
+  //      if (show_video) {
+		//	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
+		//	ImGui::SetNextWindowSize(ImVec2(320, 200 + 20)); // + 20 
 
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-            
-			ImGui::Begin("Video rendering", &show_video);
-			
+  //          ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  //          ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+  //          
+		//	ImGui::Begin("Video rendering", &show_video);
+		//	
 
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-            glViewport(0, 0, 320, 200);
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+  //          glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  //          glViewport(0, 0, 320, 200);
+  //          glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  //          glClear(GL_COLOR_BUFFER_BIT);
 
-            //opengl.setupTriangle();
-            opengl.drawTriangle();
+  //          //opengl.setupTriangle();
+  //          opengl.drawTriangle();
 
-            GLint ret;
-            glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &ret);
-            if (ret != GL_NONE) {
-                int32_t texture = 0;
-                glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
+  //          GLint ret;
+  //          glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &ret);
+  //          if (ret != GL_NONE) {
+  //              int32_t texture = 0;
+  //              glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
 
-                ImGui::GetWindowDrawList()->AddImage(
-                    (void *)texture,
-                    ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
-                    ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
-                    ImVec2(0, 1), ImVec2(1, 0));
+  //              ImGui::GetWindowDrawList()->AddImage(
+  //                  (void *)texture,
+  //                  ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
+  //                  ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
+  //                  ImVec2(0, 1), ImVec2(1, 0));
 
-            }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  //          }
+  //          glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
-            //ImGui::Text("Hello from another window!");
-			
-			ImGui::End();
-            ImGui::PopStyleVar();
-            ImGui::PopStyleVar();
-		}
+  //          //ImGui::Text("Hello from another window!");
+		//	
+		//	ImGui::End();
+  //          ImGui::PopStyleVar();
+  //          ImGui::PopStyleVar();
+		//}
 
 
 		// Rendering

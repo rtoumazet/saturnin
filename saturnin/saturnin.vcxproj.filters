@@ -45,6 +45,15 @@
     <ClCompile Include="src\video\opengl.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\opengl_legacy.cpp">
+      <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\opengl_modern.cpp">
+      <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\gl3w\imgui_impl_glfw.cpp">
+      <Filter>gl3w</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -67,6 +76,15 @@
     </ClInclude>
     <ClInclude Include="src\video\opengl.h">
       <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl_legacy.h">
+      <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl_modern.h">
+      <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\gl3w\imgui_impl_glfw.h">
+      <Filter>gl3w</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
