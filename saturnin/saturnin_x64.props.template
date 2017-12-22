@@ -3,19 +3,20 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <BuildRootDirectory>D:\Dev\build\</BuildRootDirectory>
-    <BoostIncludeDirectory>D:\Dev\Libraries\boost_1_62_0\x86</BoostIncludeDirectory>
-    <BoostLibrariesDirectory>D:\Dev\Libraries\boost_1_62_0\x86\lib32-msvc-14.0</BoostLibrariesDirectory>
+    <BoostIncludeDirectory>D:\Dev\Libraries\boost_1_65_1</BoostIncludeDirectory>
+    <BoostLibrariesDirectory>D:\Dev\Libraries\boost_1_65_1\lib64-msvc-14.1</BoostLibrariesDirectory>
     <AspiSdkDirectory>D:\Dev\SDK\AspiSDK</AspiSdkDirectory>
     <WinDdkDirectory>D:\Dev\SDK\WinDDK\7600.16385.1\inc</WinDdkDirectory>
     <ImguiDirectory>$(ProjectDir)lib\imgui</ImguiDirectory>
     <gl3wDirectory>$(ProjectDir)lib\gl3w</gl3wDirectory>
-    <GlfwDirectory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\include</GlfwDirectory>
-    <GlfwLib32Directory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\lib-vc2015</GlfwLib32Directory>
+    <GlfwDirectory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN64\include</GlfwDirectory>
+    <GlfwLib32Directory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN64\lib-vc2015</GlfwLib32Directory>
+    <LibConfigDirectory>D:\Dev\Libraries\libconfig-1.7.1\lib</LibConfigDirectory>
   </PropertyGroup>
   <PropertyGroup>
     <OutDir>$(BuildRootDirectory)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(BuildRootDirectory)$(ProjectName)\obj\$(Configuration)\</IntDir>
-    <IncludePath>$(gl3wDirectory);$(GlfwDirectory);$(BoostIncludeDirectory);$(AspiSdkDirectory);$(WinDdkDirectory);$(VC_IncludePath);$(ImguiDirectory);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>$(gl3wDirectory);$(GlfwDirectory);$(BoostIncludeDirectory);$(AspiSdkDirectory);$(WinDdkDirectory);$(VC_IncludePath);$(ImguiDirectory);$(LibConfigDirectory);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(BoostLibrariesDirectory);$(LibraryPath);$(GlfwLib32Directory)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
@@ -54,6 +55,9 @@
     </BuildMacro>
     <BuildMacro Include="GlfwLib32Directory">
       <Value>$(GlfwLib32Directory)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LibConfigDirectory">
+      <Value>$(LibConfigDirectory)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
