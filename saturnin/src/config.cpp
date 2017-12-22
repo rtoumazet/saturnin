@@ -17,15 +17,21 @@
 // limitations under the License.
 //
 
-#include "config.h"
+#pragma warning(disable:4275) // libconfig specific warning disable
+#include <libconfig.h++>
 
-using namespace libconfig;
+#include "config.h"
 
 namespace saturnin {
 namespace config {
 
     class Config {
-
+    public:
+        Config(const Config&) = delete;               // Copy constructor
+        Config(Config&&) = delete;                    // Move constructor
+        Config& operator=(const C&) & = delete;       // Copy assignment operator
+        Config& operator=(C&&) & = delete;            // Move assignment operator
+        ~Config() = default                           // Destructor
     };
 
 };

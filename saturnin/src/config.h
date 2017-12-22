@@ -18,10 +18,6 @@
 
 #pragma once
 
-#pragma warning(disable:4275) // libconfig specific warning disable
-#include <libconfig.h++>
-
-
 namespace saturnin {
 namespace config {
 
