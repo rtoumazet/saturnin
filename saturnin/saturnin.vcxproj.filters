@@ -54,6 +54,9 @@
     <ClCompile Include="lib\gl3w\imgui_impl_glfw.cpp">
       <Filter>gl3w</Filter>
     </ClCompile>
+    <ClCompile Include="src\config.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -85,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="lib\gl3w\imgui_impl_glfw.h">
       <Filter>gl3w</Filter>
+    </ClInclude>
+    <ClInclude Include="src\config.h">
+      <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

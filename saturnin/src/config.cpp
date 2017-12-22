@@ -17,9 +17,16 @@
 // limitations under the License.
 //
 
+#include "config.h"
+
+using namespace libconfig;
+
 namespace saturnin {
 namespace config {
 
+    class Config {
+
+    };
 
 };
 };

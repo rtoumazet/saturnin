@@ -17,8 +17,6 @@
 // limitations under the License.
 //
 
-#pragma warning(disable:4275) // libconfig specific warning disable
-#include <libconfig.h++>
 #include <stdio.h>
 #include "video/opengl_legacy.h"
 #include "video/opengl_modern.h"
@@ -31,7 +29,6 @@ using namespace std;
 //using namespace boost::filesystem;
 using namespace boost::locale;
 using namespace saturnin::video;
-using namespace libconfig;
 
 static void error_callback(int error, const char* description)
 {
@@ -50,22 +47,7 @@ int main(int argc, char *argv[])
     // Display a message using current system locale
     cout << translate("Hello World") << endl;
 
-    Config cfg;
-    
-    try {
-        
-        //path cfgPath = current_path() / "saturnin.cfg";
-        cfg.readFile("saturnin.cfg");
-    }
-    catch (const FileIOException &fioex) {
-        cout << translate("Could not read 'saturnin.cfg', file will be created");
-        cfg.clear();
-        Setting &root = cfg.getRoot();
-        root.add("video", Setting::TypeGroup);
-        Setting &video = root["video"];
-        video.add("legacy_opengl", Setting::TypeBoolean) = false;
-        cfg.writeFile("saturnin.cfg");
-    }
+
 
 
     bool isLegacy = false;
