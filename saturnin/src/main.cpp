@@ -23,10 +23,12 @@
 #include "video/opengl_legacy.h"
 #include "video/opengl_modern.h"
 
+#include <boost/filesystem.hpp>
 #include <boost/system/config.hpp>
 #include <boost/locale.hpp>
 
 using namespace std;
+//using namespace boost::filesystem;
 using namespace boost::locale;
 using namespace saturnin::video;
 using namespace libconfig;
@@ -51,6 +53,8 @@ int main(int argc, char *argv[])
     Config cfg;
     
     try {
+        
+        //path cfgPath = current_path() / "saturnin.cfg";
         cfg.readFile("saturnin.cfg");
     }
     catch (const FileIOException &fioex) {
