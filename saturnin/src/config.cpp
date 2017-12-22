@@ -1,5 +1,5 @@
 // 
-// opengl_legacy.h
+// config.cpp
 // Saturnin
 //
 // Copyright (c) 2003-2017 Renaud Toumazet
@@ -17,15 +17,9 @@
 // limitations under the License.
 //
 
-#pragma once
-
-#include <cstdint>
-#include <vector>
-
 namespace saturnin {
-namespace video {
+namespace config {
 
-    int32_t runLegacyOpenGl();
 
 };
 };
