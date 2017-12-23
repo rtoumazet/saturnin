@@ -1,5 +1,5 @@
 // 
-// opengl_legacy.h
+// config.h
 // Saturnin
 //
 // Copyright (c) 2003-2017 Renaud Toumazet
@@ -15,17 +15,32 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
 #pragma once
 
-#include <cstdint>
-#include <vector>
+#pragma warning(disable:4275) // libconfig specific warning disable
+#include <libconfig.h++>
 
 namespace saturnin {
-namespace video {
+namespace core {
+    class Config {
+    public:
 
-    int32_t runLegacyOpenGl();
+        //@{
+        // Constructors / Destructors
+        Config();
+        Config(const Config&) = delete;
+        Config(Config&&) = delete; 
+        Config& operator=(const Config&) & = delete;
+        Config& operator=(Config&&) & = delete;
+        ~Config() = default;
+        //@}
+        
+        bool Config::lookup(const std::string& path) const;
+    
+    private:
+        libconfig::Config cfg_; ///< Internal configuration object
 
+    };
 };
 };

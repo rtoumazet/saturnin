@@ -17,19 +17,20 @@
 // limitations under the License.
 //
 
-#pragma warning(disable:4275) // libconfig specific warning disable
-#include <libconfig.h++>
-#include <stdio.h>
+#include <iostream> // cout
+#include "config.h"
 #include "video/opengl_legacy.h"
 #include "video/opengl_modern.h"
 
-#include <boost/system/config.hpp>
+//#include <boost/filesystem.hpp>
+#include <boost/system/config.hpp> // needed for boost/locale
 #include <boost/locale.hpp>
 
 using namespace std;
+//using namespace boost::filesystem;
 using namespace boost::locale;
 using namespace saturnin::video;
-using namespace libconfig;
+using namespace saturnin::core;
 
 static void error_callback(int error, const char* description)
 {
@@ -45,30 +46,11 @@ int main(int argc, char *argv[])
     // Generate locales and imbue them to iostream
     locale::global(gen(""));
     cout.imbue(locale());
-    // Display a message using current system locale
     cout << translate("Hello World") << endl;
 
     Config cfg;
-    
-    try {
-        cfg.readFile("saturnin.cfg");
-    }
-    catch (const FileIOException &fioex) {
-        cout << translate("Could not read 'saturnin.cfg', file will be created");
-        cfg.clear();
-        Setting &root = cfg.getRoot();
-        root.add("video", Setting::TypeGroup);
-        Setting &video = root["video"];
-        video.add("legacy_opengl", Setting::TypeBoolean) = false;
-        cfg.writeFile("saturnin.cfg");
-    }
 
-
-    bool isLegacy = false;
-    if (isLegacy) {
-        return runLegacyOpenGl();
-    }
-    else {
-        return runModernOpenGl();
-    }
+    bool isLegacyOpenGl = cfg.lookup("rendering.legacy_opengl");
+;
+    if (isLegacyOpenGl) return runLegacyOpenGl(); else return runModernOpenGl();
 }
