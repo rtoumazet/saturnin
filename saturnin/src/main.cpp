@@ -19,6 +19,7 @@
 
 #include <iostream> // cout
 #include "config.h"
+#include "video/opengl.h"
 #include "video/opengl_legacy.h"
 #include "video/opengl_modern.h"
 
@@ -48,7 +49,22 @@ int main(int argc, char *argv[])
     cout.imbue(locale());
     cout << translate("Hello World") << endl;
 
+    
+    
     Config cfg;
+    if (!cfg.readFile("saturnin.cfg")) {
+        cout << translate("Creating configuration file.") << endl;
+        cfg.writeFile("saturnin.cfg");
+        if(!cfg.readFile("saturnin.cfg")) return 1;
+
+        if (OpenGl::isModernOpenGlCapable()) {
+            cfg.writeLegacyOpenGl(false);
+        }
+        else {
+            cfg.writeLegacyOpenGl(true);
+        }
+        cfg.writeFile("saturnin.cfg");
+    }
 
     bool isLegacyOpenGl = cfg.lookup("rendering.legacy_opengl");
 ;

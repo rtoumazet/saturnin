@@ -63,6 +63,8 @@ namespace video {
         void OpenGl::drawTriangle();
         void OpenGl::displayVideoWindow();
 
+        static bool OpenGl::isModernOpenGlCapable();
+
     private:
         uint32_t programShader_;
         uint32_t vao_;

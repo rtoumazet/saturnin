@@ -28,24 +28,38 @@ using namespace std;
 namespace saturnin {
 namespace core {
     Config::Config() {
-        
-        try {
-            cfg_.readFile("saturnin.cfg");
-        }
-        catch (const FileIOException &fioex) {
-            cout << translate("Could not read 'saturnin.cfg', file will be created");
-            cfg_.clear();
-            Setting& root = cfg_.getRoot();
-            root.add("rendering", Setting::TypeGroup);
-            Setting& rendering = root["rendering"];
-            rendering.add("legacy_opengl", Setting::TypeBoolean) = false;
-            cfg_.writeFile("saturnin.cfg");
-            
-        }
+
     };
 
     bool Config::lookup(const std::string& path) const {
         return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
     }
+    
+    void Config::writeFile(const std::string & filename) {
+        cfg_.writeFile(filename.c_str());
+    }
+
+    bool Config::readFile(const std::string & filename) {
+        try {
+            cfg_.readFile(filename.c_str());
+            return true;
+        }
+        catch (const FileIOException &fioex) {
+            cout << translate("Could not read the configuration file.") << endl;
+            return false;
+        }
+    }
+
+    void Config::writeLegacyOpenGl(const bool value) {
+        Setting& root = cfg_.getRoot();
+        if (!root.exists("rendering")) root.add("rendering", Setting::TypeGroup);
+        Setting& rendering = root["rendering"];
+        if (!rendering.exists("legacy_opengl")) rendering.add("legacy_opengl", Setting::TypeBoolean) = value;
+        else {
+            Setting& legacy_opengl = rendering["legacy_opengl"];
+            legacy_opengl = value;
+        }
+    }
+
 };
 };

@@ -35,8 +35,28 @@ namespace core {
         Config& operator=(Config&&) & = delete;
         ~Config() = default;
         //@}
-        
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn bool Config::lookup(const std::string& path) const;
+        ///
+        /// \brief  Looks up a given path to find its associated boolean value.
+        ///
+        /// \author Runik
+        /// \date   23/12/2017
+        ///
+        /// \param  path    Path to the value.
+        ///
+        /// \return Read value.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         bool Config::lookup(const std::string& path) const;
+
+        void Config::writeFile(const std::string& filename);
+
+        bool Config::readFile(const std::string& filename);
+
+        void Config::writeLegacyOpenGl(const bool value);
+
     
     private:
         libconfig::Config cfg_; ///< Internal configuration object
