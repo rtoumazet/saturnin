@@ -18,9 +18,29 @@
 
 #pragma once
 
+#pragma warning(disable:4275) // libconfig specific warning disable
+#include <libconfig.h++>
+
 namespace saturnin {
-namespace config {
+namespace core {
+    class Config {
+    public:
 
+        //@{
+        // Constructors / Destructors
+        Config();
+        Config(const Config&) = delete;
+        Config(Config&&) = delete; 
+        Config& operator=(const Config&) & = delete;
+        Config& operator=(Config&&) & = delete;
+        ~Config() = default;
+        //@}
+        
+        bool Config::lookup(const std::string& path) const;
+    
+    private:
+        libconfig::Config cfg_; ///< Internal configuration object
 
+    };
 };
 };

@@ -17,22 +17,35 @@
 // limitations under the License.
 //
 
-#pragma warning(disable:4275) // libconfig specific warning disable
-#include <libconfig.h++>
-
+#include <iostream> // cout
+#include <boost/locale.hpp> // translate
 #include "config.h"
 
-namespace saturnin {
-namespace config {
+using namespace boost::locale;
+using namespace libconfig;
+using namespace std;
 
-    class Config {
-    public:
-        Config(const Config&) = delete;               // Copy constructor
-        Config(Config&&) = delete;                    // Move constructor
-        Config& operator=(const C&) & = delete;       // Copy assignment operator
-        Config& operator=(C&&) & = delete;            // Move assignment operator
-        ~Config() = default                           // Destructor
+namespace saturnin {
+namespace core {
+    Config::Config() {
+        
+        try {
+            cfg_.readFile("saturnin.cfg");
+        }
+        catch (const FileIOException &fioex) {
+            cout << translate("Could not read 'saturnin.cfg', file will be created");
+            cfg_.clear();
+            Setting& root = cfg_.getRoot();
+            root.add("rendering", Setting::TypeGroup);
+            Setting& rendering = root["rendering"];
+            rendering.add("legacy_opengl", Setting::TypeBoolean) = false;
+            cfg_.writeFile("saturnin.cfg");
+            
+        }
     };
 
+    bool Config::lookup(const std::string& path) const {
+        return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
+    }
 };
 };
