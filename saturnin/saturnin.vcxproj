@@ -79,6 +79,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <PostBuildEvent>
       <Command>xcopy $(ProjectDir)lib\libconfig++.dll $(OutDir) /Y</Command>
@@ -128,6 +129,7 @@
     <ClCompile Include="lib\imgui\imgui_demo.cpp" />
     <ClCompile Include="lib\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\config.cpp" />
+    <ClCompile Include="src\locale.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\video\opengl.cpp" />
     <ClCompile Include="src\video\opengl_legacy.cpp" />
@@ -142,6 +144,7 @@
     <ClInclude Include="lib\imgui\imgui.h" />
     <ClInclude Include="lib\imgui\imgui_internal.h" />
     <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\locale.h" />
     <ClInclude Include="src\video\opengl.h" />
     <ClInclude Include="src\video\opengl_legacy.h" />
     <ClInclude Include="src\video\opengl_modern.h" />

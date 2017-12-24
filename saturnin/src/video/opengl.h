@@ -28,27 +28,15 @@ namespace video {
 	class OpenGl {
 
 	public:
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// \fn	OpenGl::OpenGl()
-		///
-		/// \brief	Default constructor.
-		///
-		/// \author	Runik
-		/// \date	20/11/2017
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		OpenGl::OpenGl() {};
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// \fn	~OpenGl::OpenGl()
-		///
-		/// \brief	Default constructor.
-		///
-		/// \author	Runik
-		/// \date	20/11/2017
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		OpenGl::~OpenGl() {};
+        //@{
+        // Constructors / Destructors
+        OpenGl()                           = default;
+        OpenGl(const OpenGl&)              = delete;
+        OpenGl(OpenGl&&)                   = delete;
+        OpenGl& operator=(const OpenGl&) & = delete;
+        OpenGl& operator=(OpenGl&&) &      = delete;
+        ~OpenGl()                          = default;
+        //@}
 
 		uint32_t OpenGl::createFramebuffer();
 
@@ -61,7 +49,20 @@ namespace video {
 
         void OpenGl::setupTriangle();
         void OpenGl::drawTriangle();
-        void OpenGl::displayVideoWindow();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn static bool OpenGl::isModernOpenGlCapable();
+        ///
+        /// \brief  Query if the current video card is capable of rendering modern opengl (ie version
+        ///         3.3+).
+        ///
+        /// \author Runik
+        /// \date   24/12/2017
+        ///
+        /// \return True if the video car can render modern OpenGL .
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        static bool OpenGl::isModernOpenGlCapable();
 
     private:
         uint32_t programShader_;

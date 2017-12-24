@@ -18,16 +18,16 @@
 //
 
 #include <iostream> // cout
+#include <boost/system/config.hpp> // needed for boost/locale
+#include <boost/locale.hpp> // translate
+#include "locale.h"
 #include "config.h"
+#include "video/opengl.h"
 #include "video/opengl_legacy.h"
 #include "video/opengl_modern.h"
 
-//#include <boost/filesystem.hpp>
-#include <boost/system/config.hpp> // needed for boost/locale
-#include <boost/locale.hpp>
 
 using namespace std;
-//using namespace boost::filesystem;
 using namespace boost::locale;
 using namespace saturnin::video;
 using namespace saturnin::core;
@@ -39,18 +39,13 @@ static void error_callback(int error, const char* description)
 
 int main(int argc, char *argv[])
 {
-    generator gen;
-    // Specify location of dictionaries
-    gen.add_messages_path(".");
-    gen.add_messages_domain("saturnin");
-    // Generate locales and imbue them to iostream
-    locale::global(gen(""));
-    cout.imbue(locale());
+    if ( !Locale::initialize() ) return 1;
     cout << translate("Hello World") << endl;
-
+    
     Config cfg;
+    if ( !cfg.initialize(OpenGl::isModernOpenGlCapable()) ) return 1;
 
     bool isLegacyOpenGl = cfg.lookup("rendering.legacy_opengl");
-;
+
     if (isLegacyOpenGl) return runLegacyOpenGl(); else return runModernOpenGl();
 }

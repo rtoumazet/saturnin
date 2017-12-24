@@ -57,6 +57,9 @@
     <ClCompile Include="src\config.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\locale.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -90,6 +93,9 @@
       <Filter>gl3w</Filter>
     </ClInclude>
     <ClInclude Include="src\config.h">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\locale.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
