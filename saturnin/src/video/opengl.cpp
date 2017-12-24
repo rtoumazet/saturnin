@@ -168,6 +168,30 @@ namespace video {
         glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 
+    /* static */
+    bool OpenGl::isModernOpenGlCapable()
+    {
+        bool isCapable = true;
+        if (!glfwInit()) isCapable = false;
+        else {
+            GLFWwindow* window = glfwCreateWindow(1280, 720, "Test", NULL, NULL);
+            if (window == nullptr) isCapable = false;
+            else {
+                uint32_t major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
+                uint32_t minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
+
+                if (major = 3) {
+                    if (minor < 3) isCapable = false;
+                }
+                else if (major < 3) isCapable = false;
+
+                glfwDestroyWindow(window);
+            }
+            glfwTerminate();
+        }
+        return isCapable;
+    }
+
     uint32_t OpenGl::createProgramShader(const uint32_t vertexShader, const uint32_t fragmentShader)
     {
         uint32_t shaderProgram;
