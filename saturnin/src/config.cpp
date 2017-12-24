@@ -27,10 +27,6 @@ using namespace std;
 
 namespace saturnin {
 namespace core {
-    Config::Config() {
-
-    };
-
     bool Config::lookup(const std::string& path) const {
         return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
     }
@@ -39,7 +35,7 @@ namespace core {
         cfg_.writeFile(filename.c_str());
     }
 
-    bool Config::readFile(const std::string & filename) {
+    bool Config::readFile(const std::string & filename){
         try {
             cfg_.readFile(filename.c_str());
             return true;
@@ -59,6 +55,19 @@ namespace core {
             Setting& legacy_opengl = rendering["legacy_opengl"];
             legacy_opengl = value;
         }
+    }
+
+    bool Config::initialize(const bool isModernOpenGlCapable) {
+        if (!readFile("saturnin.cfg")) {
+            cout << translate("Creating configuration file.") << endl;
+            writeFile("saturnin.cfg");
+            if (!readFile("saturnin.cfg")) return false;
+
+            writeLegacyOpenGl(!isModernOpenGlCapable);
+
+            writeFile("saturnin.cfg");
+        }
+        return true;
     }
 
 };

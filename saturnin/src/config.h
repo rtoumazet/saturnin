@@ -28,12 +28,12 @@ namespace core {
 
         //@{
         // Constructors / Destructors
-        Config();
-        Config(const Config&) = delete;
-        Config(Config&&) = delete; 
+        Config()                           = default;
+        Config(const Config&)              = delete;
+        Config(Config&&)                   = delete; 
         Config& operator=(const Config&) & = delete;
-        Config& operator=(Config&&) & = delete;
-        ~Config() = default;
+        Config& operator=(Config&&) &      = delete;
+        ~Config()                          = default;
         //@}
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,11 +51,61 @@ namespace core {
 
         bool Config::lookup(const std::string& path) const;
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Config::writeFile(const std::string& filename);
+        ///
+        /// \brief  Writes a file.
+        ///
+        /// \author Runik
+        /// \date   24/12/2017
+        ///
+        /// \param  filename    Filename of the file.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         void Config::writeFile(const std::string& filename);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn bool Config::readFile(const std::string& filename) const;
+        ///
+        /// \brief  Reads a file.
+        ///
+        /// \author Runik
+        /// \date   24/12/2017
+        ///
+        /// \param  filename    Filename of the file.
+        ///
+        /// \return True if it succeeds.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         bool Config::readFile(const std::string& filename);
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Config::writeLegacyOpenGl(const bool value);
+        ///
+        /// \brief  Writes the legacy_opengl option value.
+        ///
+        /// \author Runik
+        /// \date   24/12/2017
+        ///
+        /// \param  value   The value to write.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         void Config::writeLegacyOpenGl(const bool value);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn bool Config::initialize(const bool isModernOpenGlCapable);
+        ///
+        /// \brief  Initializes the configuration by reading 'saturnin.cfg'. The file is created if missing
+        ///
+        /// \author Runik
+        /// \date   24/12/2017
+        ///
+        /// \param  isModernOpenGlCapable   True if the graphics card supports modern Opengl.
+        ///
+        /// \return True if it succeeds.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        bool Config::initialize(const bool isModernOpenGlCapable);
 
     
     private:
