@@ -29,7 +29,7 @@ namespace video {
 #if __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-        GLFWwindow* window = glfwCreateWindow(1280, 720, "ImGui OpenGL3 example", NULL, NULL);
+        auto window = glfwCreateWindow(1280, 720, "ImGui OpenGL3 example", NULL, NULL);
         if (window == nullptr) {
 
             return 1;
