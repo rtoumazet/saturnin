@@ -143,6 +143,10 @@ namespace video {
                 glBegin(GL_TRIANGLES);
                 // Top face (y = 1.0f)
                 glColor3f(0.0f, 1.0f, 0.0f);     // Green
+                glTexCoord2f(0.0, 0.0); glVertex3f(1.0f, 1.0f, -1.0f);
+                glTexCoord2f(0.0, 1.0); glVertex3f(1.0f, 1.0f, 1.0f);
+                glTexCoord2f(1.0, 1.0); glVertex3f(1.0f, -1.0f, 1.0f);
+                glTexCoord2f(1.0, 0.0); glVertex3f(1.0f, -1.0f, -1.0f);
                 glVertex2f(-0.5f, -0.5);
                 glVertex2f(0.0f, 0.5f);
                 glVertex2f(0.5f, -0.5f);
@@ -324,7 +328,7 @@ namespace video {
         screenHDC = wglGetCurrentDC();
         screenCtx = wglGetCurrentContext();
         initPbuffer();
-        initTextures();
+        //initTextures();
     }
 };
 };
