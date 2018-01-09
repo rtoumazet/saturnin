@@ -19,9 +19,10 @@
 //
 
 #include <iostream> // cout
+//#include <GL/gl3w.h>
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h>
-#include <GL/gl3w.h>
+
 #include <GLFW/glfw3.h>
 
 using namespace std;
