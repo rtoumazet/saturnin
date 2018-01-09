@@ -1,7 +1,8 @@
 // ImGui - standalone example application for Glfw + OpenGL 2, using fixed pipeline
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 
-
+#include <epoxy/gl.h>
+#include <epoxy/wgl.h>
 #include <imgui.h>
 #include "imgui_impl_glfw.h"
 #include <iostream> // cout

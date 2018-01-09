@@ -4,7 +4,9 @@
 #include <imgui.h>
 #include "imgui_impl_glfw_gl3.h"
 #include <stdio.h>
-#include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
+//#include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
+#include <epoxy/gl.h>
+#include <epoxy/wgl.h>
 #include <GLFW/glfw3.h>
 #include "opengl.h"
 #include "opengl_modern.h"
@@ -36,7 +38,7 @@ namespace video {
         }
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1); // Enable vsync
-        gl3wInit();
+        //gl3wInit();
 
         // Setup ImGui binding
         ImGui_ImplGlfwGL3_Init(window, true);
