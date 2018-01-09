@@ -19,6 +19,8 @@
 //
 
 #include <iostream> // cout
+#include <epoxy/gl.h>
+#include <epoxy/wgl.h>
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 

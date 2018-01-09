@@ -1,20 +1,20 @@
 // ImGui - standalone example application for Glfw + OpenGL 2, using fixed pipeline
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 
-#include <epoxy/gl.h>
-#include <epoxy/wgl.h>
+
 #include <imgui.h>
 #include "imgui_impl_glfw.h"
 #include <iostream> // cout
 #include <GLFW/glfw3.h>
 #include "opengl_legacy.h"
+#include "opengl.h"
 
 using namespace std;
 
-static HPBUFFERARB pBuffer;
-static HDC         pBufferHDC, screenHDC;
-static HGLRC       pBufferCtx, screenCtx;
-static GLuint      pBufferTex, screenTex;
+//static HPBUFFERARB pBuffer;
+//static HDC         pBufferHDC, screenHDC;
+//static HGLRC       pBufferCtx, screenCtx;
+//static GLuint      pBufferTex, screenTex;
 
 namespace saturnin {
 namespace video {
@@ -35,38 +35,51 @@ namespace video {
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1); // Enable vsync
 
-        cout << epoxy_gl_version() << endl;
+        //cout << epoxy_gl_version() << endl;
 
-        epoxy_handle_external_wglMakeCurrent();
-        if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pbuffer"))
-            cout << "WGL_ARB_pbuffer not found !" << endl;
+        //epoxy_handle_external_wglMakeCurrent();
+        //if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pbuffer"))
+        //    cout << "WGL_ARB_pbuffer not found !" << endl;
 
-        if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pixel_format"))
-            cout << "WGL_ARB_pixel_format not found !" << endl;
+        //if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pixel_format"))
+        //    cout << "WGL_ARB_pixel_format not found !" << endl;
 
-        if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_render_texture"))
-            cout << "WGL_ARB_render_texture not found !" << endl;
+        //if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_render_texture"))
+        //    cout << "WGL_ARB_render_texture not found !" << endl;
+        //
+        //if (!epoxy_has_gl_extension("GL_ARB_framebuffer_object"))
+        //    cout << "GL_ARB_framebuffer_object not found !" << endl;
+        //
+        //if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
+        //    cout << "GL_EXT_framebuffer_object not found !" << endl;
 
-        init();
-        glDisable(GL_SCISSOR_TEST);
-        glDisable(GL_ALPHA_TEST);
-        glDisable(GL_STENCIL_TEST);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_DITHER);
-        glDisable(GL_INDEX_LOGIC_OP);
-        glDisable(GL_COLOR_LOGIC_OP);
-        glClearColor(0.0, 0.0, 0.0, 0.0);
-        glShadeModel(GL_FLAT);
+        //uint32_t framebuffer = 0;
+        //glGenFramebuffers(1, &framebuffer);
+        //glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-        //glEnable(GL_BLEND);
-        glEnable(GL_TEXTURE_2D);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        OpenGl opengl;
+        uint32_t fbo = opengl.createFramebuffer();
+        
+        //init();
+        //glDisable(GL_SCISSOR_TEST);
+        //glDisable(GL_ALPHA_TEST);
+        //glDisable(GL_STENCIL_TEST);
+        //glDisable(GL_DEPTH_TEST);
+        //glDisable(GL_DITHER);
+        //glDisable(GL_INDEX_LOGIC_OP);
+        //glDisable(GL_COLOR_LOGIC_OP);
+        //glClearColor(0.0, 0.0, 0.0, 0.0);
+        //glShadeModel(GL_FLAT);
 
-        //glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-        glDisable(GL_LIGHTING);
+        ////glEnable(GL_BLEND);
+        //glEnable(GL_TEXTURE_2D);
+        ////glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        glLoadIdentity();
+        ////glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+        //glDisable(GL_LIGHTING);
+
+        //glLoadIdentity();
 
         //glOrtho(0, 0, 320, 200); // Positionning Saturn coordinates
      
@@ -132,43 +145,43 @@ namespace video {
                 ImGui::Begin("Video rendering", &show_video);
 
 
-                if (!wglMakeCurrent(pBufferHDC, pBufferCtx)) __debugbreak();
-                glBindTexture(GL_TEXTURE_2D, pBufferTex);
+                ////if (!wglMakeCurrent(pBufferHDC, pBufferCtx)) __debugbreak();
+                ////glBindTexture(GL_TEXTURE_2D, pBufferTex);
 
-                glClearColor(0, 0, 0, 0);
-                glClear(GL_COLOR_BUFFER_BIT);
-                glMatrixMode(GL_MODELVIEW);
-                glLoadIdentity();
+                ////glClearColor(0, 0, 0, 0);
+                ////glClear(GL_COLOR_BUFFER_BIT);
+                ////glMatrixMode(GL_MODELVIEW);
+                ////glLoadIdentity();
 
-                glBegin(GL_TRIANGLES);
-                // Top face (y = 1.0f)
-                glColor3f(0.0f, 1.0f, 0.0f);     // Green
-                glTexCoord2f(0.0, 0.0); glVertex3f(1.0f, 1.0f, -1.0f);
-                glTexCoord2f(0.0, 1.0); glVertex3f(1.0f, 1.0f, 1.0f);
-                glTexCoord2f(1.0, 1.0); glVertex3f(1.0f, -1.0f, 1.0f);
-                glTexCoord2f(1.0, 0.0); glVertex3f(1.0f, -1.0f, -1.0f);
-                glVertex2f(-0.5f, -0.5);
-                glVertex2f(0.0f, 0.5f);
-                glVertex2f(0.5f, -0.5f);
-                glEnd();
+                ////glBegin(GL_TRIANGLES);
+                ////// Top face (y = 1.0f)
+                ////glColor3f(0.0f, 1.0f, 0.0f);     // Green
+                ////glTexCoord2f(0.0, 0.0); glVertex3f(1.0f, 1.0f, -1.0f);
+                ////glTexCoord2f(0.0, 1.0); glVertex3f(1.0f, 1.0f, 1.0f);
+                ////glTexCoord2f(1.0, 1.0); glVertex3f(1.0f, -1.0f, 1.0f);
+                ////glTexCoord2f(1.0, 0.0); glVertex3f(1.0f, -1.0f, -1.0f);
+                ////glVertex2f(-0.5f, -0.5);
+                ////glVertex2f(0.0f, 0.5f);
+                ////glVertex2f(0.5f, -0.5f);
+                ////glEnd();
 
-                if (!wglMakeCurrent(screenHDC, screenCtx))   __debugbreak();
-                glBindTexture(GL_TEXTURE_2D, screenTex);
+                ////if (!wglMakeCurrent(screenHDC, screenCtx))   __debugbreak();
+                ////glBindTexture(GL_TEXTURE_2D, screenTex);
 
-                glMatrixMode(GL_MODELVIEW);
-                glLoadIdentity();
+                ////glMatrixMode(GL_MODELVIEW);
+                ////glLoadIdentity();
 
-                if (!wglBindTexImageARB(pBuffer, WGL_FRONT_LEFT_ARB))                           __debugbreak();
-                //glCallList(list);
+                ////if (!wglBindTexImageARB(pBuffer, WGL_FRONT_LEFT_ARB))                           __debugbreak();
+                //////glCallList(list);
 
-                
-                ImGui::GetWindowDrawList()->AddImage(
-                    (void *)pBufferTex,
-                    ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
-                    ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
-                    ImVec2(0, 1), ImVec2(1, 0));
+                ////
+                ////ImGui::GetWindowDrawList()->AddImage(
+                ////    (void *)pBufferTex,
+                ////    ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
+                ////    ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
+                ////    ImVec2(0, 1), ImVec2(1, 0));
 
-                if (!wglReleaseTexImageARB(pBuffer, WGL_FRONT_LEFT_ARB))                        __debugbreak();
+                ////if (!wglReleaseTexImageARB(pBuffer, WGL_FRONT_LEFT_ARB))                        __debugbreak();
                 
 
                 //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -217,118 +230,6 @@ namespace video {
         glfwTerminate();
 
         return 0;
-    }
-
-    static void initPbuffer()
-    {
-        // Create the pbuffer with the help of glew and glut
-        int ia[] = {
-            WGL_DRAW_TO_PBUFFER_ARB, true,
-            WGL_BIND_TO_TEXTURE_RGBA_ARB, true,
-            WGL_DEPTH_BITS_ARB, 24,
-            WGL_RED_BITS_ARB,   8,
-            WGL_GREEN_BITS_ARB, 8,
-            WGL_BLUE_BITS_ARB,  8,
-            0, 0
-        };
-
-        float fa[] = {
-            0, 0
-        };
-        int fmts[64]; unsigned nfmts = 0;
-        if (!wglChoosePixelFormatARB(wglGetCurrentDC(), ia, fa, _countof(fmts), fmts, &nfmts) || !nfmts) {
-            printf("wglChoosePixelFormat FAILED -- nfmts %d,  GetLastError 0x%08X\n", nfmts, GetLastError());
-            getchar();  exit(0);
-        }
-
-        int pb[] = {
-            WGL_TEXTURE_FORMAT_ARB, WGL_TEXTURE_RGBA_ARB,
-            WGL_TEXTURE_TARGET_ARB, WGL_TEXTURE_2D_ARB,
-            WGL_PBUFFER_LARGEST_ARB, true,
-            0, 0
-        };
-        if (!(pBuffer = wglCreatePbufferARB(wglGetCurrentDC(), fmts[0], 320, 200, pb)))         __debugbreak();
-        if (!(pBufferHDC = wglGetPbufferDCARB(pBuffer)))                                        __debugbreak();
-        if (!(pBufferCtx = wglCreateContext(pBufferHDC)))                                       __debugbreak();
-
-        // Get it's actual size
-        int w;  if (!wglQueryPbufferARB(pBuffer, WGL_PBUFFER_WIDTH_ARB, &w))                    __debugbreak();
-        int h;  if (!wglQueryPbufferARB(pBuffer, WGL_PBUFFER_HEIGHT_ARB, &h))                   __debugbreak();
-
-        // Initialize it's projection matrix
-        if (!wglMakeCurrent(pBufferHDC, pBufferCtx))                                            __debugbreak();
-        //reshape(w, h);
-        glViewport(0, 0, 320, 200);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-
-        if (!wglMakeCurrent(screenHDC, screenCtx))                                              __debugbreak();
-        if (!wglShareLists(screenCtx, pBufferCtx))                                              __debugbreak();
-    }
-
-    static char *circles[] = {
-        "................",
-        "................",
-        "......xxxx......",
-        "....xxxxxxxx....",
-        "...xxxxxxxxxx...",
-        "...xxx....xxx...",
-        "..xxx......xxx..",
-        "..xxx......xxx..",
-        "..xxx......xxx..",
-        "..xxx......xxx..",
-        "...xxx....xxx...",
-        "...xxxxxxxxxx...",
-        "....xxxxxxxx....",
-        "......xxxx......",
-        "................",
-        "................",
-    };
-
-    static void initTextures()
-    {
-        GLubyte floorTexture[16][16][3];
-        GLubyte *loc;
-        int s, t;
-
-        /* Setup RGB image for the texture. */
-        loc = (GLubyte*)floorTexture;
-        for (t = 0; t < 16; t++) {
-            for (s = 0; s < 16; s++) {
-                if (circles[t][s] == 'x') {
-                    /* Nice green. */
-                    loc[0] = 0x1f;
-                    loc[1] = 0x8f;
-                    loc[2] = 0x1f;
-                }
-                else {
-                    /* Light gray. */
-                    loc[0] = 0xaa;
-                    loc[1] = 0xaa;
-                    loc[2] = 0xaa;
-                }
-                loc += 3;
-            }
-        }
-
-        // create, configure and initialize the textures
-        glGenTextures(1, &pBufferTex);
-        glBindTexture(GL_TEXTURE_2D,  pBufferTex);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, 16, 16, 0, GL_RGB, GL_UNSIGNED_BYTE, floorTexture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    }
-
-    void init(void)
-    {
-        screenHDC = wglGetCurrentDC();
-        screenCtx = wglGetCurrentContext();
-        initPbuffer();
-        //initTextures();
     }
 };
 };
