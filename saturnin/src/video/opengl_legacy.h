@@ -20,15 +20,11 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 
 namespace saturnin {
 namespace video {
 
     int32_t runLegacyOpenGl();
-    static void initPbuffer();
-    static void initTextures();
-    void init(void);
 
 };
 };

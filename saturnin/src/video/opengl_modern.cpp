@@ -1,12 +1,12 @@
 // ImGui - standalone example application for Glfw + OpenGL 3, using programmable pipeline
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 
-#include <imgui.h>
-#include "imgui_impl_glfw_gl3.h"
+#include <windows.h> // removes C4005 warning
 #include <stdio.h>
-//#include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h>
+#include <imgui/imgui.h>
+#include <imgui/bindings/imgui_impl_glfw_gl3.h>
 #include <GLFW/glfw3.h>
 #include "opengl.h"
 #include "opengl_modern.h"

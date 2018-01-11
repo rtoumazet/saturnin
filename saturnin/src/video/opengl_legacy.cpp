@@ -1,11 +1,12 @@
 // ImGui - standalone example application for Glfw + OpenGL 2, using fixed pipeline
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 
+#include <windows.h> // removes C4005 warning
+#include <iostream> // cout
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h>
-#include <imgui.h>
-#include "imgui_impl_glfw.h"
-#include <iostream> // cout
+#include <imgui/imgui.h>
+#include <imgui/bindings/imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
 #include "opengl_legacy.h"
 #include "opengl.h"
