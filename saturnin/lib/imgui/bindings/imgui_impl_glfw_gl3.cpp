@@ -6,7 +6,7 @@
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 // https://github.com/ocornut/imgui
 
-
+// Linked to version 1.52 of ImGui
 #include <windows.h> // removes C4005 warning
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h> 
