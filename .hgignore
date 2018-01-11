@@ -6,3 +6,4 @@ saturnin/saturnin_x86.props
 saturnin/lib/imgui/extra_fonts/*
 saturnin/lang/saturnin.po
 saturnin/lang/config.txt
+*.orig

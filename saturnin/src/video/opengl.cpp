@@ -18,8 +18,8 @@
 // limitations under the License.
 //
 
+#include <windows.h> // removes C4005 warning
 #include <iostream> // cout
-//#include <GL/gl3w.h>
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h>
 

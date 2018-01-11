@@ -16,11 +16,11 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{b238e819-99cc-478a-8495-e36e58cea0f1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gl3w">
-      <UniqueIdentifier>{0ac6ed0f-b09b-4fee-b2f9-e94feadb5b16}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Fichiers sources\video">
       <UniqueIdentifier>{7b286e76-41f2-40ec-bf42-f761323ec3c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui\bindings">
+      <UniqueIdentifier>{1eb93b8f-8e87-45a0-be07-ff98ebcd0bbc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -36,12 +36,6 @@
     <ClCompile Include="lib\imgui\imgui_draw.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="lib\gl3w\GL\gl3w.c">
-      <Filter>gl3w</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\gl3w\imgui_impl_glfw_gl3.cpp">
-      <Filter>gl3w</Filter>
-    </ClCompile>
     <ClCompile Include="src\video\opengl.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
@@ -51,14 +45,17 @@
     <ClCompile Include="src\video\opengl_modern.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
-    <ClCompile Include="lib\gl3w\imgui_impl_glfw.cpp">
-      <Filter>gl3w</Filter>
-    </ClCompile>
     <ClCompile Include="src\config.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\locale.cpp">
       <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\bindings\imgui_impl_glfw.cpp">
+      <Filter>imgui\bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\bindings\imgui_impl_glfw_gl3.cpp">
+      <Filter>imgui\bindings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -71,15 +68,6 @@
     <ClInclude Include="lib\imgui\imgui_internal.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="lib\gl3w\GL\gl3w.h">
-      <Filter>gl3w</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\gl3w\GL\glcorearb.h">
-      <Filter>gl3w</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\gl3w\imgui_impl_glfw_gl3.h">
-      <Filter>gl3w</Filter>
-    </ClInclude>
     <ClInclude Include="src\video\opengl.h">
       <Filter>Fichiers sources\video</Filter>
     </ClInclude>
@@ -89,14 +77,17 @@
     <ClInclude Include="src\video\opengl_modern.h">
       <Filter>Fichiers sources\video</Filter>
     </ClInclude>
-    <ClInclude Include="lib\gl3w\imgui_impl_glfw.h">
-      <Filter>gl3w</Filter>
-    </ClInclude>
     <ClInclude Include="src\config.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
     <ClInclude Include="src\locale.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\bindings\imgui_impl_glfw.h">
+      <Filter>imgui\bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\bindings\imgui_impl_glfw_gl3.h">
+      <Filter>imgui\bindings</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -2,9 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <ImguiDirectory>$(ProjectDir)lib\imgui</ImguiDirectory>
-    <gl3wDirectory>$(ProjectDir)lib\gl3w</gl3wDirectory>
-    <LibDirectory>$(ProjectDir)lib</LibDirectory>
+    <LibDirectory>$(ProjectDir)lib\</LibDirectory>
     <BuildRootDirectory>D:\Dev\build\</BuildRootDirectory>
     <BoostIncludeDirectory>D:\Dev\Libraries\boost_1_65_1</BoostIncludeDirectory>
     <BoostLibrariesDirectory>D:\Dev\Libraries\boost_1_65_1\lib32-msvc-14.1</BoostLibrariesDirectory>
@@ -20,15 +18,17 @@
   <PropertyGroup>
     <OutDir>$(BuildRootDirectory)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(BuildRootDirectory)$(ProjectName)\obj\$(Configuration)\</IntDir>
-    <IncludePath>$(epoxyIncludeDirectory);$(gl3wDirectory);$(GlfwDirectory);$(BoostIncludeDirectory);$(AspiSdkDirectory);$(WinDdkDirectory);$(VC_IncludePath);$(LibConfigDirectory);$(ImguiDirectory);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(epoxyLibDirectory);$(BoostLibrariesDirectory);$(LibraryPath);$(GlfwLib32Directory);$(LibDirectory)</LibraryPath>
+    <IncludePath>$(LibDirectory);$(epoxyIncludeDirectory);$(GlfwDirectory);$(BoostIncludeDirectory);$(AspiSdkDirectory);$(WinDdkDirectory);$(VC_IncludePath);$(LibConfigDirectory);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(epoxyLibDirectory);$(LibDirectory);$(BoostLibrariesDirectory);$(LibraryPath);$(GlfwLib32Directory)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;libconfig++.lib;epoxy.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/NODEFAULTLIB:msvcrt.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <PostBuildEvent>
       <Command>xcopy $(ProjectDir)lib\libconfig++.dll $(OutDir) /Y
@@ -36,12 +36,6 @@ xcopy $(epoxyBinDirectory)\epoxy-0.dll $(OutDir) /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <BuildMacro Include="ImguiDirectory">
-      <Value>$(ImguiDirectory)</Value>
-    </BuildMacro>
-    <BuildMacro Include="gl3wDirectory">
-      <Value>$(gl3wDirectory)</Value>
-    </BuildMacro>
     <BuildMacro Include="LibDirectory">
       <Value>$(LibDirectory)</Value>
     </BuildMacro>
