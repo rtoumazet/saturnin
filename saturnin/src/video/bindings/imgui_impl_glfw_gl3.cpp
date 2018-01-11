@@ -10,8 +10,8 @@
 #include <windows.h> // removes C4005 warning
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h> 
-#include <imgui/imgui.h>
-#include <imgui/bindings/imgui_impl_glfw_gl3.h>
+#include "../imgui/imgui.h"
+#include "imgui_impl_glfw_gl3.h"
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
 #undef APIENTRY

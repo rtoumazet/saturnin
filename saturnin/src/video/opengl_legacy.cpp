@@ -5,8 +5,8 @@
 #include <iostream> // cout
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h>
-#include <imgui/imgui.h>
-#include <imgui/bindings/imgui_impl_glfw.h>
+#include "imgui/imgui.h"
+#include "bindings/imgui_impl_glfw.h"
 #include <GLFW/glfw3.h>
 #include "opengl_legacy.h"
 #include "opengl.h"
