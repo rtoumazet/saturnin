@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h>
-#include <imgui/imgui.h>
-#include <imgui/bindings/imgui_impl_glfw_gl3.h>
+#include "imgui/imgui.h"
+#include "bindings/imgui_impl_glfw_gl3.h"
 #include <GLFW/glfw3.h>
 #include "opengl.h"
 #include "opengl_modern.h"
@@ -38,7 +38,6 @@ namespace video {
         }
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1); // Enable vsync
-        //gl3wInit();
 
         // Setup ImGui binding
         ImGui_ImplGlfwGL3_Init(window, true);

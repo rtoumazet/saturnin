@@ -13,28 +13,19 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{b238e819-99cc-478a-8495-e36e58cea0f1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Fichiers sources\video">
       <UniqueIdentifier>{7b286e76-41f2-40ec-bf42-f761323ec3c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="imgui\bindings">
-      <UniqueIdentifier>{1eb93b8f-8e87-45a0-be07-ff98ebcd0bbc}</UniqueIdentifier>
+    <Filter Include="Fichiers sources\video\imgui">
+      <UniqueIdentifier>{de8443ea-e879-4799-9e74-866c1fb1dadc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\video\bindings">
+      <UniqueIdentifier>{5a54d6a2-34a2-48f4-ae61-f18b5e44420d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
       <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_demo.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="src\video\opengl.cpp">
       <Filter>Fichiers sources\video</Filter>
@@ -51,23 +42,23 @@
     <ClCompile Include="src\locale.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="lib\imgui\bindings\imgui_impl_glfw.cpp">
-      <Filter>imgui\bindings</Filter>
+    <ClCompile Include="src\video\imgui\imgui.cpp">
+      <Filter>Fichiers sources\video\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="lib\imgui\bindings\imgui_impl_glfw_gl3.cpp">
-      <Filter>imgui\bindings</Filter>
+    <ClCompile Include="src\video\imgui\imgui_demo.cpp">
+      <Filter>Fichiers sources\video\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\imgui\imgui_draw.cpp">
+      <Filter>Fichiers sources\video\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\bindings\imgui_impl_glfw.cpp">
+      <Filter>Fichiers sources\video\bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\bindings\imgui_impl_glfw_gl3.cpp">
+      <Filter>Fichiers sources\video\bindings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib\imgui\imconfig.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\imgui.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\imgui_internal.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
     <ClInclude Include="src\video\opengl.h">
       <Filter>Fichiers sources\video</Filter>
     </ClInclude>
@@ -83,11 +74,29 @@
     <ClInclude Include="src\locale.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
-    <ClInclude Include="lib\imgui\bindings\imgui_impl_glfw.h">
-      <Filter>imgui\bindings</Filter>
+    <ClInclude Include="src\video\imgui\imconfig.h">
+      <Filter>Fichiers sources\video\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="lib\imgui\bindings\imgui_impl_glfw_gl3.h">
-      <Filter>imgui\bindings</Filter>
+    <ClInclude Include="src\video\imgui\imgui.h">
+      <Filter>Fichiers sources\video\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui\imgui_internal.h">
+      <Filter>Fichiers sources\video\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui\stb_rect_pack.h">
+      <Filter>Fichiers sources\video\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui\stb_textedit.h">
+      <Filter>Fichiers sources\video\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui\stb_truetype.h">
+      <Filter>Fichiers sources\video\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\bindings\imgui_impl_glfw.h">
+      <Filter>Fichiers sources\video\bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\bindings\imgui_impl_glfw_gl3.h">
+      <Filter>Fichiers sources\video\bindings</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
