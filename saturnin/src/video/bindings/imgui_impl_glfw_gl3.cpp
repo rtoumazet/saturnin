@@ -6,12 +6,12 @@
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 // https://github.com/ocornut/imgui
 
-
+// Linked to version 1.52 of ImGui
 #include <windows.h> // removes C4005 warning
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h> 
-#include <imgui/imgui.h>
-#include <imgui/bindings/imgui_impl_glfw_gl3.h>
+#include "../imgui/imgui.h"
+#include "imgui_impl_glfw_gl3.h"
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
 #undef APIENTRY

@@ -5,8 +5,8 @@
 #include <iostream> // cout
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h>
-#include <imgui/imgui.h>
-#include <imgui/bindings/imgui_impl_glfw.h>
+#include "imgui/imgui.h"
+#include "bindings/imgui_impl_glfw.h"
 #include <GLFW/glfw3.h>
 #include "opengl_legacy.h"
 #include "opengl.h"
@@ -55,36 +55,10 @@ namespace video {
         //if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
         //    cout << "GL_EXT_framebuffer_object not found !" << endl;
 
-        //uint32_t framebuffer = 0;
-        //glGenFramebuffers(1, &framebuffer);
-        //glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
         OpenGl opengl;
         uint32_t fbo = opengl.createFramebuffer();
+        //opengl.setupTriangle();
         
-        //init();
-        //glDisable(GL_SCISSOR_TEST);
-        //glDisable(GL_ALPHA_TEST);
-        //glDisable(GL_STENCIL_TEST);
-        //glDisable(GL_DEPTH_TEST);
-        //glDisable(GL_DITHER);
-        //glDisable(GL_INDEX_LOGIC_OP);
-        //glDisable(GL_COLOR_LOGIC_OP);
-        //glClearColor(0.0, 0.0, 0.0, 0.0);
-        //glShadeModel(GL_FLAT);
-
-        ////glEnable(GL_BLEND);
-        //glEnable(GL_TEXTURE_2D);
-        ////glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        ////glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-        //glDisable(GL_LIGHTING);
-
-        //glLoadIdentity();
-
-        //glOrtho(0, 0, 320, 200); // Positionning Saturn coordinates
-     
 
         // Setup ImGui binding
         ImGui_ImplGlfwGL2_Init(window, true);
@@ -134,7 +108,7 @@ namespace video {
             if (show_test_window)
             {
                 ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
-                ImGui::ShowTestWindow(&show_test_window);
+                ImGui::ShowTestWindow();
             }
 
             if (show_video) {
@@ -146,67 +120,33 @@ namespace video {
                 
                 ImGui::Begin("Video rendering", &show_video);
 
+                glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+                glViewport(0, 0, 320, 200);
+                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
 
-                ////if (!wglMakeCurrent(pBufferHDC, pBufferCtx)) __debugbreak();
-                ////glBindTexture(GL_TEXTURE_2D, pBufferTex);
+                //opengl.drawTriangle();
+                glBegin(GL_TRIANGLES);  
+                glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
+                glVertex3f(-0.5f, -0.5f, 0.0f);
+                glVertex3f(0.5f, -0.5f, 0.0f);
+                glVertex3f(0.0f, 0.5f, 0.0f);
+                glEnd();                      
 
-                ////glClearColor(0, 0, 0, 0);
-                ////glClear(GL_COLOR_BUFFER_BIT);
-                ////glMatrixMode(GL_MODELVIEW);
-                ////glLoadIdentity();
+                GLint ret;
+                glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &ret);
+                if (ret != GL_NONE) {
+                    int32_t texture = 0;
+                    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
 
-                ////glBegin(GL_TRIANGLES);
-                ////// Top face (y = 1.0f)
-                ////glColor3f(0.0f, 1.0f, 0.0f);     // Green
-                ////glTexCoord2f(0.0, 0.0); glVertex3f(1.0f, 1.0f, -1.0f);
-                ////glTexCoord2f(0.0, 1.0); glVertex3f(1.0f, 1.0f, 1.0f);
-                ////glTexCoord2f(1.0, 1.0); glVertex3f(1.0f, -1.0f, 1.0f);
-                ////glTexCoord2f(1.0, 0.0); glVertex3f(1.0f, -1.0f, -1.0f);
-                ////glVertex2f(-0.5f, -0.5);
-                ////glVertex2f(0.0f, 0.5f);
-                ////glVertex2f(0.5f, -0.5f);
-                ////glEnd();
+                    ImGui::GetWindowDrawList()->AddImage(
+                        (void *)texture,
+                        ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
+                        ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
+                        ImVec2(0, 1), ImVec2(1, 0));
 
-                ////if (!wglMakeCurrent(screenHDC, screenCtx))   __debugbreak();
-                ////glBindTexture(GL_TEXTURE_2D, screenTex);
-
-                ////glMatrixMode(GL_MODELVIEW);
-                ////glLoadIdentity();
-
-                ////if (!wglBindTexImageARB(pBuffer, WGL_FRONT_LEFT_ARB))                           __debugbreak();
-                //////glCallList(list);
-
-                ////
-                ////ImGui::GetWindowDrawList()->AddImage(
-                ////    (void *)pBufferTex,
-                ////    ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
-                ////    ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
-                ////    ImVec2(0, 1), ImVec2(1, 0));
-
-                ////if (!wglReleaseTexImageARB(pBuffer, WGL_FRONT_LEFT_ARB))                        __debugbreak();
-                
-
-                //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-                //glViewport(0, 0, 320, 200);
-                //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                //glClear(GL_COLOR_BUFFER_BIT);
-
-                ////opengl.drawTriangle();
-
-                //GLint ret;
-                //glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &ret);
-                //if (ret != GL_NONE) {
-                //    int32_t texture = 0;
-                //    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
-
-                //    ImGui::GetWindowDrawList()->AddImage(
-                //        (void *)texture,
-                //        ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
-                //        ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
-                //        ImVec2(0, 1), ImVec2(1, 0));
-
-                //}
-                //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                }
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
                 ImGui::End();
                 ImGui::PopStyleVar();

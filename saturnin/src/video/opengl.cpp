@@ -47,13 +47,7 @@ namespace video {
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureColorbuffer, 0);
         GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
-        //// create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
-        //unsigned int rbo;
-        //glGenRenderbuffers(1, &rbo);
-        //glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 320, 200); // use a single renderbuffer object for both a depth AND stencil buffer.
-        //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-                                                                                                      // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+        // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

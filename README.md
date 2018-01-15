@@ -14,8 +14,10 @@ After that, you must change saturnin property page from inside VS2017 to set up 
 You can then modify the files according to your setup.
 
 * Dependencies
-    * boost 1.62.0
+    * boost 1.65.1
 	* imgui 1.52
+	* libconfig 1.7.1 
+	* epoxy 1.4.3
 * Deployment instructions
 
 ### Contribution guidelines ###
