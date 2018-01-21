@@ -8,11 +8,12 @@
     <AspiSdkDir>D:\Dev\SDK\AspiSDK</AspiSdkDir>
     <WinDdkDir>D:\Dev\SDK\WinDDK\7600.16385.1\inc</WinDdkDir>
     <LibConfigIncDir>D:\Dev\Libraries\libconfig-1.7.1\lib</LibConfigIncDir>
+    <spdlogIncDir>D:\Dev\Libraries\spdlog-0.16.3\include</spdlogIncDir>
   </PropertyGroup>
   <PropertyGroup>
     <OutDir>$(BuildRootDir)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(BuildRootDir)$(ProjectName)\obj\$(Configuration)\</IntDir>
-    <IncludePath>$(LibDir);$(BoostIncDir);$(AspiSdkDir);$(WinDdkDir);$(LibConfigIncDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(LibDir);$(BoostIncDir);$(AspiSdkDir);$(WinDdkDir);$(LibConfigIncDir);$(spdlogIncDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemGroup>
@@ -33,6 +34,9 @@
     </BuildMacro>
     <BuildMacro Include="LibConfigIncDir">
       <Value>$(LibConfigIncDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="spdlogIncDir">
+      <Value>$(spdlogIncDir)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

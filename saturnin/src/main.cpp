@@ -20,6 +20,7 @@
 #include <iostream> // cout
 #include <boost/system/config.hpp> // needed for boost/locale
 #include <boost/locale.hpp> // translate
+#include <spdlog/sinks/file_sinks.h>
 #include "locale.h"
 #include "config.h"
 #include "video/opengl.h"
