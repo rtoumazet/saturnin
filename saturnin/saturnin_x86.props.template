@@ -2,24 +2,17 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <LibDirectory>$(ProjectDir)lib\</LibDirectory>
-    <BuildRootDirectory>D:\Dev\build\</BuildRootDirectory>
-    <BoostIncludeDirectory>D:\Dev\Libraries\boost_1_65_1</BoostIncludeDirectory>
-    <BoostLibrariesDirectory>D:\Dev\Libraries\boost_1_65_1\lib32-msvc-14.1</BoostLibrariesDirectory>
-    <AspiSdkDirectory>D:\Dev\SDK\AspiSDK</AspiSdkDirectory>
-    <WinDdkDirectory>D:\Dev\SDK\WinDDK\7600.16385.1\inc</WinDdkDirectory>
-    <GlfwDirectory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\include</GlfwDirectory>
-    <GlfwLib32Directory>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\lib-vc2015</GlfwLib32Directory>
-    <LibConfigDirectory>D:\Dev\Libraries\libconfig-1.7.1\lib</LibConfigDirectory>
-    <epoxyIncludeDirectory>D:\Dev\Libraries\libepoxy-shared-x86\include</epoxyIncludeDirectory>
-    <epoxyLibDirectory>D:\Dev\Libraries\libepoxy-shared-x86\lib</epoxyLibDirectory>
-    <epoxyBinDirectory>D:\Dev\Libraries\libepoxy-shared-x86\bin</epoxyBinDirectory>
+    <X86LibDir>$(ProjectDir)lib\x86\</X86LibDir>
+    <BoostX86LibDir>D:\Dev\Libraries\boost_1_65_1\lib32-msvc-14.1</BoostX86LibDir>
+    <GlfwX86IncDir>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\include</GlfwX86IncDir>
+    <GlfwX86LibDir>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\lib-vc2015</GlfwX86LibDir>
+    <epoxyX86IncDir>D:\Dev\Libraries\libepoxy-shared-x86\include</epoxyX86IncDir>
+    <epoxyX86LibDir>D:\Dev\Libraries\libepoxy-shared-x86\lib</epoxyX86LibDir>
+    <epoxyX86BinDir>D:\Dev\Libraries\libepoxy-shared-x86\bin</epoxyX86BinDir>
   </PropertyGroup>
   <PropertyGroup>
-    <OutDir>$(BuildRootDirectory)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(BuildRootDirectory)$(ProjectName)\obj\$(Configuration)\</IntDir>
-    <IncludePath>$(LibDirectory);$(epoxyIncludeDirectory);$(GlfwDirectory);$(BoostIncludeDirectory);$(AspiSdkDirectory);$(WinDdkDirectory);$(VC_IncludePath);$(LibConfigDirectory);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(epoxyLibDirectory);$(LibDirectory);$(BoostLibrariesDirectory);$(LibraryPath);$(GlfwLib32Directory)</LibraryPath>
+    <LibraryPath>$(X86LibDir);$(BoostX86LibDir);$(GlfwX86LibDir);$(epoxyX86LibDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(epoxyX86IncDir);$(GlfwX86IncDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
@@ -31,46 +24,31 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)lib\libconfig++.dll $(OutDir) /Y
-xcopy $(epoxyBinDirectory)\epoxy-0.dll $(OutDir) /Y</Command>
+      <Command>xcopy $(ProjectDir)bin\x86\libconfig++.dll $(OutDir) /Y
+xcopy $(epoxyX86BinDir)\epoxy-0.dll $(OutDir) /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <BuildMacro Include="LibDirectory">
-      <Value>$(LibDirectory)</Value>
+    <BuildMacro Include="X86LibDir">
+      <Value>$(X86LibDir)</Value>
     </BuildMacro>
-    <BuildMacro Include="BuildRootDirectory">
-      <Value>$(BuildRootDirectory)</Value>
+    <BuildMacro Include="BoostX86LibDir">
+      <Value>$(BoostX86LibDir)</Value>
     </BuildMacro>
-    <BuildMacro Include="BoostIncludeDirectory">
-      <Value>$(BoostIncludeDirectory)</Value>
+    <BuildMacro Include="GlfwX86IncDir">
+      <Value>$(GlfwX86IncDir)</Value>
     </BuildMacro>
-    <BuildMacro Include="BoostLibrariesDirectory">
-      <Value>$(BoostLibrariesDirectory)</Value>
+    <BuildMacro Include="GlfwX86LibDir">
+      <Value>$(GlfwX86LibDir)</Value>
     </BuildMacro>
-    <BuildMacro Include="AspiSdkDirectory">
-      <Value>$(AspiSdkDirectory)</Value>
+    <BuildMacro Include="epoxyX86IncDir">
+      <Value>$(epoxyX86IncDir)</Value>
     </BuildMacro>
-    <BuildMacro Include="WinDdkDirectory">
-      <Value>$(WinDdkDirectory)</Value>
+    <BuildMacro Include="epoxyX86LibDir">
+      <Value>$(epoxyX86LibDir)</Value>
     </BuildMacro>
-    <BuildMacro Include="GlfwDirectory">
-      <Value>$(GlfwDirectory)</Value>
-    </BuildMacro>
-    <BuildMacro Include="GlfwLib32Directory">
-      <Value>$(GlfwLib32Directory)</Value>
-    </BuildMacro>
-    <BuildMacro Include="LibConfigDirectory">
-      <Value>$(LibConfigDirectory)</Value>
-    </BuildMacro>
-    <BuildMacro Include="epoxyIncludeDirectory">
-      <Value>$(epoxyIncludeDirectory)</Value>
-    </BuildMacro>
-    <BuildMacro Include="epoxyLibDirectory">
-      <Value>$(epoxyLibDirectory)</Value>
-    </BuildMacro>
-    <BuildMacro Include="epoxyBinDirectory">
-      <Value>$(epoxyBinDirectory)</Value>
+    <BuildMacro Include="epoxyX86BinDir">
+      <Value>$(epoxyX86BinDir)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
