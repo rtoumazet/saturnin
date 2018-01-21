@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <LibDir>$(ProjectDir)lib\</LibDir>
+    <BuildRootDir>D:\Dev\build\</BuildRootDir>
+    <BoostIncDir>D:\Dev\Libraries\boost_1_65_1</BoostIncDir>
+    <AspiSdkDir>D:\Dev\SDK\AspiSDK</AspiSdkDir>
+    <WinDdkDir>D:\Dev\SDK\WinDDK\7600.16385.1\inc</WinDdkDir>
+    <LibConfigIncDir>D:\Dev\Libraries\libconfig-1.7.1\lib</LibConfigIncDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutDir>$(BuildRootDir)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(BuildRootDir)$(ProjectName)\obj\$(Configuration)\</IntDir>
+    <IncludePath>$(LibDir);$(BoostIncDir);$(AspiSdkDir);$(WinDdkDir);$(LibConfigIncDir);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup />
+  <ItemGroup>
+    <BuildMacro Include="LibDir">
+      <Value>$(LibDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="BuildRootDir">
+      <Value>$(BuildRootDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="BoostIncDir">
+      <Value>$(BoostIncDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="AspiSdkDir">
+      <Value>$(AspiSdkDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="WinDdkDir">
+      <Value>$(WinDdkDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LibConfigIncDir">
+      <Value>$(LibConfigIncDir)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>
