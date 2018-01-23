@@ -2,7 +2,7 @@
 // locale.cpp
 // Saturnin
 //
-// Copyright (c) 2003-2017 Renaud Toumazet
+// Copyright (c) 2018 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 // limitations under the License.
 //
 
-#include <iostream>         // cout
-#include <boost/locale.hpp> // generator
+#include <iostream>                // cout
+#include <boost/system/config.hpp> // needed by boost/locale
+#include <boost/locale.hpp>        // generator
 #include "locale.h"
 
 using namespace boost::locale;
@@ -40,5 +41,10 @@ namespace core {
 
         return true;
     }
+
+    string tr(const string& str) {
+        return translate(str);
+    }
+
 };
 };

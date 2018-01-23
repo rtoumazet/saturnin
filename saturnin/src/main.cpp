@@ -2,7 +2,7 @@
 // main.cpp
 // Saturnin
 //
-// Copyright (c) 2003-2017 Renaud Toumazet
+// Copyright (c) 2018 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
 //
 
 #include <iostream> // cout
-#include <boost/system/config.hpp> // needed for boost/locale
-#include <boost/locale.hpp> // translate
 #include <spdlog/sinks/file_sinks.h>
 #include "locale.h"
 #include "config.h"
@@ -29,7 +27,6 @@
 
 
 using namespace std;
-using namespace boost::locale;
 using namespace saturnin::video;
 using namespace saturnin::core;
 
@@ -41,7 +38,7 @@ static void error_callback(int error, const char* description)
 int main(int argc, char *argv[])
 {
     if ( !Locale::initialize() ) return 1;
-    cout << translate("Hello World") << endl;
+    cout << saturnin::core::tr("Hello World") << endl;
     
     Config cfg;
     if ( !cfg.initialize(OpenGl::isModernOpenGlCapable()) ) return 1;
