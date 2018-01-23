@@ -1,5 +1,5 @@
 // 
-// opengl_modern.h
+// log.h
 // Saturnin
 //
 // Copyright (c) 2018 Renaud Toumazet
@@ -15,16 +15,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
 #pragma once
 
-#include <cstdint>
+#pragma warning(disable:4275) // libconfig specific warning disable
+#include <libconfig.h++>
 
 namespace saturnin {
-namespace video {
+namespace core {
 
-    int32_t runModernOpenGl();
 
 };
 };

@@ -57,6 +57,9 @@
     <ClCompile Include="src\video\bindings\imgui_impl_glfw_gl3.cpp">
       <Filter>Fichiers sources\video\bindings</Filter>
     </ClCompile>
+    <ClCompile Include="src\log.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\video\opengl.h">
@@ -97,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="src\video\bindings\imgui_impl_glfw_gl3.h">
       <Filter>Fichiers sources\video\bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="src\log.h">
+      <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
