@@ -5,4 +5,4 @@ for /f "delims=" %%x in (config.txt) do (set "%%x")
 @set files=--files-from=%lang_path%\filelist.txt
 
 @echo on
-%xgettext_path%\xgettext.exe %input_loc% %output_loc% %files% --keyword=translate
+%xgettext_path%\xgettext.exe %input_loc% %output_loc% %files% --keyword=tr
