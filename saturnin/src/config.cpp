@@ -2,7 +2,7 @@
 // config.cpp
 // Saturnin
 //
-// Copyright (c) 2003-2017 Renaud Toumazet
+// Copyright (c) 2018 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

@@ -1,5 +1,21 @@
-// ImGui - standalone example application for Glfw + OpenGL 2, using fixed pipeline
-// If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
+// 
+// opengl_legacy.cpp
+// Saturnin
+//
+// Copyright (c) 2018 Renaud Toumazet
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
 #include <windows.h> // removes C4005 warning
 #include <iostream> // cout
@@ -140,7 +156,7 @@ namespace video {
                     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
 
                     ImGui::GetWindowDrawList()->AddImage(
-                        (void *)texture,
+                        reinterpret_cast<GLuint*>(texture),
                         ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
                         ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
                         ImVec2(0, 1), ImVec2(1, 0));

@@ -2,7 +2,7 @@
 // locale.h
 // Saturnin
 //
-// Copyright (c) 2003-2017 Renaud Toumazet
+// Copyright (c) 2018 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,5 +49,20 @@ namespace core {
 
         static bool initialize();
     };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn std::string tr(const std::string& str);
+    ///
+    /// \brief  Translates the given string.
+    ///
+    /// \author Runik
+    /// \date   23/01/2018
+    ///
+    /// \param  str The string to translate.
+    ///
+    /// \return The translated string.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    std::string tr(const std::string& str);
 };
 };

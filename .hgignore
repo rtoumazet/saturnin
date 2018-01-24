@@ -1,10 +1,9 @@
 syntax: glob
 saturnin/imgui.ini
-saturnin/saturnin_x64.props
-saturnin/saturnin_x86.props
 .vs/*
 saturnin/lib/imgui/extra_fonts/*
 saturnin/lang/saturnin.po
 saturnin/lang/config.txt
 *.orig
 saturnin/saturnin.cfg
+*.props
