@@ -7,3 +7,4 @@ saturnin/lang/config.txt
 *.orig
 saturnin/saturnin.cfg
 *.props
+dll_log/dll_log.vcxproj.user
