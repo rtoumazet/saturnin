@@ -15,22 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="targetver.h">
+    <ClCompile Include="src\dllmain.cpp">
       <Filter>Fichiers sources</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
+    </ClCompile>
+    <ClCompile Include="src\log_plugin.cpp">
       <Filter>Fichiers sources</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\log_test.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
+    <ClInclude Include="src\log_plugin.h">
       <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="dll_log.cpp">
+    </ClInclude>
+    <ClInclude Include="src\targetver.h">
       <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="dllmain.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
+    </ClInclude>
   </ItemGroup>
 </Project>
