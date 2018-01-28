@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "saturnin", "saturnin\saturnin.vcxproj", "{4EAD14E6-AE34-4A11-B275-8C59B810A30B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dll_log", "dll_log\dll_log.vcxproj", "{5864CB87-676F-433C-9DB0-15D214405227}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "saturnin_plugin_api", "saturnin_plugin_api", "{4178B0D5-3149-4077-8389-D7452F89948C}"
+	ProjectSection(SolutionItems) = preProject
+		saturnin_plugin_api\saturnin_plugin_api.h = saturnin_plugin_api\saturnin_plugin_api.h
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
