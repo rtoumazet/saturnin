@@ -21,12 +21,12 @@
 #include <iostream>
 #include <boost/config.hpp> // for BOOST_SYMBOL_EXPORT
 #include <spdlog/spdlog.h>
-#include "../../dll_plugin_api/base_plugin_api.h"
+#include "../../saturnin_plugin_api/saturnin_plugin_api.h"
 
 namespace saturnin {
     namespace log {
 
-        class my_plugin_log : public my_plugin_api {
+        class my_plugin_log : public saturnin_plugin_api {
         public:
             my_plugin_log();
             ~my_plugin_log();
