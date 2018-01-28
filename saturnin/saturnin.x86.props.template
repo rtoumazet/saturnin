@@ -3,7 +3,6 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <X86LibDir>$(ProjectDir)lib\x86\</X86LibDir>
-    <BoostX86LibDir>D:\Dev\Libraries\boost_1_65_1\lib32-msvc-14.1</BoostX86LibDir>
     <GlfwX86IncDir>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\include</GlfwX86IncDir>
     <GlfwX86LibDir>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\lib-vc2015</GlfwX86LibDir>
     <epoxyX86IncDir>D:\Dev\Libraries\libepoxy-shared-x86\include</epoxyX86IncDir>
@@ -11,8 +10,8 @@
     <epoxyX86BinDir>D:\Dev\Libraries\libepoxy-shared-x86\bin</epoxyX86BinDir>
   </PropertyGroup>
   <PropertyGroup>
-    <LibraryPath>$(X86LibDir);$(BoostX86LibDir);$(GlfwX86LibDir);$(epoxyX86LibDir);$(LibraryPath)</LibraryPath>
-    <IncludePath>$(epoxyX86IncDir);$(GlfwX86IncDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(X86LibDir);$(GlfwX86LibDir);$(epoxyX86LibDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(epoxyX86IncDir);$(GlfwX86IncDir);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
@@ -31,9 +30,6 @@ xcopy $(epoxyX86BinDir)\epoxy-0.dll $(OutDir) /Y</Command>
   <ItemGroup>
     <BuildMacro Include="X86LibDir">
       <Value>$(X86LibDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="BoostX86LibDir">
-      <Value>$(BoostX86LibDir)</Value>
     </BuildMacro>
     <BuildMacro Include="GlfwX86IncDir">
       <Value>$(GlfwX86IncDir)</Value>

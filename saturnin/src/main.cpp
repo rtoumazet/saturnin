@@ -18,7 +18,7 @@
 //
 
 #include <iostream> // cout
-#include <spdlog/sinks/file_sinks.h>
+//#include <spdlog/sinks/file_sinks.h>
 #include "locale.h"
 #include "config.h"
 #include "video/opengl.h"
