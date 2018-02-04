@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "saturnin", "saturnin\saturnin.vcxproj", "{4EAD14E6-AE34-4A11-B275-8C59B810A30B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5864CB87-676F-433C-9DB0-15D214405227} = {5864CB87-676F-433C-9DB0-15D214405227}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dll_log", "dll_log\dll_log.vcxproj", "{5864CB87-676F-433C-9DB0-15D214405227}"
 EndProject

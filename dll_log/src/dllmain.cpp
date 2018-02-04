@@ -1,5 +1,7 @@
 // dllmain.cpp : Définit le point d'entrée pour l'application DLL.
-#include "stdafx.h"
+//#include "stdafx.h"
+#define WIN32_LEAN_AND_MEAN 
+#include <Windows.h>
 #include "log_plugin.h"
 
 BOOL APIENTRY DllMain( HMODULE hModule,

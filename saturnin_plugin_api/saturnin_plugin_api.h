@@ -22,17 +22,17 @@
 
 namespace saturnin {
 
-    class saturnin_plugin_api {
+    class SaturninPluginApi {
     public:
         virtual std::string version() const = 0;
-        //virtual void log(const std::string&) const = 0;
+        virtual void log(const std::string&) const = 0;
         //virtual std::shared_ptr<spdlog::sinks::simple_file_sink_mt> createSink(const std::string& logger_path) = 0;
         //virtual std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::string& logger_path) = 0;
         //virtual std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink) = 0;
         //virtual std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::vector<spdlog::sink_ptr>& sinks) = 0;
         //virtual std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::string& logger_path, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& globalSink) = 0;
 
-        virtual ~saturnin_plugin_api() {}
+        virtual ~SaturninPluginApi() {}
     };
 
 }
