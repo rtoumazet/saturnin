@@ -20,33 +20,34 @@
 
 #include <iostream>
 #include <boost/config.hpp> // for BOOST_SYMBOL_EXPORT
-#include <spdlog/spdlog.h>
+//#include <spdlog/spdlog.h>
 #include "../../saturnin_plugin_api/saturnin_plugin_api.h"
 
 namespace saturnin {
-    namespace log {
+namespace log {
 
-        class my_plugin_log : public saturnin_plugin_api {
-        public:
-            my_plugin_log();
-            ~my_plugin_log();
+    class LogPlugin : public SaturninPluginApi {
+    public:
+        LogPlugin();
+        ~LogPlugin();
 
-            std::string version() const;
+        std::string version() const;
 
-            void log(const std::string& value) const;
+        void log(const std::string& value) const;
 
-            std::shared_ptr<spdlog::sinks::simple_file_sink_mt> createSink(const std::string& logger_path);
+        
+        //std::shared_ptr<spdlog::sinks::simple_file_sink_mt> createSink(const std::string& logger_path);
 
-            std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::string& logger_path);
-            std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
-            std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::vector<spdlog::sink_ptr>& sinks);
-            std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::string& logger_path, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& globalSink);
+        //std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::string& logger_path);
+        //std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
+        //std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::vector<spdlog::sink_ptr>& sinks);
+        //std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, const std::string& logger_path, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& globalSink);
 
-            void createOrEmptyDirectory(const std::string& path);
+        void createOrEmptyDirectory(const std::string& path);
 
-        private:
-            std::string pattern_;
-        };
+    private:
+        std::string pattern_;
+    };
 
-    }
-} // namespace my_namespace
+}
+}

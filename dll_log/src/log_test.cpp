@@ -1,7 +1,7 @@
 // LogTest.cpp : définit le point d'entrée pour l'application console.
 //
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <cstdlib> // EXIT_FAILURE
 #include <iostream>
 #include <boost/filesystem.hpp>
@@ -9,11 +9,6 @@
 #include "../LogDll/src/base_plugin_api.h"
 
 namespace dll = boost::dll;
-
-enum TransferType {
-    PROGRAM = 0,
-    DATA    = 1
-};
 
 int main(int argc, char* argv[])
 {
@@ -38,12 +33,6 @@ int main(int argc, char* argv[])
         cdrom->info("cdrom test");
         vdp1->info("vdp1 test");
 
-        std::map<std::string, TransferType> transferMap;
-        transferMap["PROGRAM"]  = TransferType::PROGRAM;
-        transferMap["DATA"]     = TransferType::DATA;
-
-        std::cout << "Program : " << transferMap["PROGRAM"] << std::endl;
-        std::cout << "Data: " << transferMap["DATA"] << std::endl;
     }
     catch (const boost::system::system_error& e) {
         std::cout << e.what() << std::endl;
