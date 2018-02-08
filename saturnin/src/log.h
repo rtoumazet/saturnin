@@ -178,9 +178,9 @@ namespace core {
         static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static void Log::createFile(const std::string& path);
+        /// \fn static void Log::removeFile(const std::string& path);
         ///
-        /// \brief  Creates or empty directory.
+        /// \brief  Creates the fileor empty directory.
         ///
         /// \author Runik
         /// \date   08/02/2018
@@ -188,10 +188,10 @@ namespace core {
         /// \param  path    Full pathname of the file.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static void createFile(const std::string& path);
+        static void removeFile(const std::string& path);
 
     private:
-        static std::map<std::string, std::shared_ptr<spdlog::logger>> loggers_;
+        static std::map<std::string, std::shared_ptr<spdlog::logger>> loggers_; ///< Map containing all the loggers used in the program
     };
 
 };
