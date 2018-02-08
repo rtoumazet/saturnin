@@ -25,75 +25,41 @@ using namespace std;
 
 namespace saturnin {
 namespace core {
+    std::map<std::string, std::shared_ptr<spdlog::logger>> Log::loggers_;
 
-    Log::Log() {
-        std::cout << "Constructing my_plugin_log" << std::endl;
-        pattern_ = "[%R] [%n] %v";
+    /* static */
+    bool Log::initialize() {
+        string pattern = "[%X][%n][%l] %v";
+        spdlog::set_pattern(pattern);
+        auto sink = createSink("logs/saturnin.log");
+        createLogger("vdp1", sink);
+        createLogger("vdp2", sink);
 
-        auto sink = std::make_shared<spdlog::sinks::simple_file_sink_mt>("logs/global.log");
-            
-        auto global = createLogger("global", sink);
-        auto cdrom = createLogger("cdrom", "logs/cdrom.log", sink);
-        auto vdp1 = createLogger("vdp1", "logs/vdp1.log", sink);
+        return true;
     }
 
-    void Log::log(const std::string& value) const {
-        auto console = spdlog::stdout_logger_mt("console");
-        console->info(value);
-    }
-
+    /* static */
     std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createSink(const std::string & logger_path)
     {
-        createOrEmptyDirectory(logger_path);
+        createFile(logger_path);
 
         return std::make_shared<spdlog::sinks::simple_file_sink_mt>(logger_path);
     }
 
-    std::shared_ptr<spdlog::logger> Log::createLogger(const std::string& logger_name, const std::string& logger_path) {
-        createOrEmptyDirectory(logger_path);
-        auto full_path = boost::filesystem::current_path() / logger_path;
-        auto logger = spdlog::basic_logger_mt(logger_name, full_path.string());
-        logger.get()->set_pattern(pattern_);
-        return logger;
-    }
-
-    std::shared_ptr<spdlog::logger> Log::createLogger(const std::string & logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink)
+    /* static */
+    void Log::createLogger(const std::string & logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink)
     {
         auto logger = std::make_shared<spdlog::logger>(logger_name, sink);
-        logger.get()->set_pattern(pattern_);
-        return logger;
+        loggers_[logger_name] = logger;
+        spdlog::register_logger(logger);
     }
 
-    std::shared_ptr<spdlog::logger> Log::createLogger(const std::string & logger_name, const std::vector<spdlog::sink_ptr>& sinks)
-    {
-        auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
-        logger.get()->set_pattern(pattern_);
-        return logger;
-    }
-
-    std::shared_ptr<spdlog::logger> Log::createLogger(const std::string & logger_name, const std::string & logger_path, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& globalSink)
-    {
-
-        createOrEmptyDirectory(logger_path);
-        std::vector<spdlog::sink_ptr> sinks;
-        sinks.push_back(globalSink);
-        sinks.push_back(std::make_shared<spdlog::sinks::simple_file_sink_mt>(logger_path));
-
-        auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
-        logger.get()->set_pattern(pattern_);
-        return logger;
-    }
-
-    void Log::createOrEmptyDirectory(const std::string& path) {
+    /* static */
+    void Log::createFile(const std::string& path) {
         auto full_path = boost::filesystem::current_path() / path;
         full_path.make_preferred();
         boost::filesystem::create_directories(full_path.parent_path());
         boost::filesystem::remove(full_path);
     }
-
-    Log::~Log() {
-        std::cout << "Destructing my_plugin_log ;o)" << std::endl;
-    }
-
 }
 }
