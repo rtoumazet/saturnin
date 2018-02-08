@@ -34,17 +34,24 @@ static void error_callback(int error, const char* description)
 	fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
+
 int main(int argc, char *argv[])
 {
     if ( !Locale::initialize() ) return 1;
     cout << saturnin::core::tr("Hello World") << endl;
     
-    Log log;
-    log.log("test");
+    //Log log;
+    //log.log(Log::Type::VDP1, WRN,"test");
+    Log::initialize();
 
-    spdlog::get("global")->debug("global test");
-    spdlog::get("cdrom")->error("cdrom test");
+    //spdlog::get("global")->debug("global test");
+    //spdlog::get("cdrom")->error("cdrom test");
     spdlog::get("vdp1")->warn("vdp1 test");
+    Log::error("vdp2", "Error {}", 1);
+    Log::error("sound", "snd");
+    Log::warning("vdp1", "snd");
+
+
 
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
