@@ -38,10 +38,8 @@ static void error_callback(int error, const char* description)
 int main(int argc, char *argv[])
 {
     if ( !Locale::initialize() ) return 1;
-    cout << saturnin::core::tr("Hello World") << endl;
+    cout << tr("Hello World") << endl;
     
-    //Log log;
-    //log.log(Log::Type::VDP1, WRN,"test");
     Log::initialize();
 
     //spdlog::get("global")->debug("global test");
@@ -64,23 +62,6 @@ int main(int argc, char *argv[])
     //        );
     //    std::cout << "Version:  " << plugin->version() << std::endl;
     //    plugin->log("test");
-
-    ////    auto globalSink = plugin->createSink("logs/global.log");
-    ////    auto global = plugin->createLogger("global", globalSink);
-    ////    auto cdrom = plugin->createLogger("cdrom", "logs/cdrom.log", globalSink);
-    ////    auto vdp1 = plugin->createLogger("vdp1", "logs/vdp1.log", globalSink);
-
-    ////    global->info("test global");
-    ////    cdrom->info("cdrom test");
-    ////    vdp1->info("vdp1 test");
-
-    //}
-    //catch (const boost::system::system_error& e) {
-    //    std::cout << e.what() << std::endl;
-    //}
-
-
-
 
     Config cfg;
     if ( !cfg.initialize(OpenGl::isModernOpenGlCapable()) ) return 1;
