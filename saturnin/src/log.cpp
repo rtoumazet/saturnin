@@ -41,7 +41,7 @@ namespace core {
     /* static */
     std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createSink(const std::string & logger_path)
     {
-        createFile(logger_path);
+        removeFile(logger_path);
 
         return std::make_shared<spdlog::sinks::simple_file_sink_mt>(logger_path);
     }
@@ -55,7 +55,7 @@ namespace core {
     }
 
     /* static */
-    void Log::createFile(const std::string& path) {
+    void Log::removeFile(const std::string& path) {
         auto full_path = boost::filesystem::current_path() / path;
         full_path.make_preferred();
         boost::filesystem::create_directories(full_path.parent_path());
