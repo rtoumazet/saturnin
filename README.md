@@ -7,8 +7,8 @@ Saturnin is a Sega Saturn emulator
 	
 	Before doing anything, remove template extensions from properties files:
 	
-	- props/*.props.template -> props/*.props  
-	- saturnin/props/*.props.template -> saturnin/props/*.props    
+	- props/\*.props.template -> props/\*.props  
+	- saturnin/props/\*.props.template -> saturnin/props/\*.props    
 
 After that, you must update user macros from properties sheets inside VS2017 to set up your directories. To do so, display the Propety Manager first 
 ( **View** | **Property Manager** ), then select one of the following sheets : **dll**, **solution.x86**, **solution.x64**, **saturnin.common**, **saturnin.x86**, **saturnin.x64**.
