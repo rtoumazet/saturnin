@@ -5,19 +5,18 @@ Saturnin is a Sega Saturn emulator
 * Summary of set up
 * Configuration
 	
-	Before doing anything, remove template extension from project files:
+	Before doing anything, remove template extensions from properties files:
 	
-	- saturnin_common.props.template -> saturnin_common.props  
-	- saturnin_x86.props.template -> saturnin_x86.props  
-	- saturnin_x64.props.template -> saturnin_x64.props  
+	- props/*.props.template -> props/*.props  
+	- saturnin/props/*.props.template -> saturnin/props/*.props    
 
-After that, you must change saturnin property page from inside VS2017 to set up your directories. To do so, display the Propety Manager first 
-( **View** | **Property Manager** ), then select **saturnin** | **Debug|Win32** | **saturnin_x86**, and **saturnin** | **Debug|Win64** | **saturnin_x64**.
+After that, you must update user macros from properties sheets inside VS2017 to set up your directories. To do so, display the Propety Manager first 
+( **View** | **Property Manager** ), then select one of the following sheets : **dll**, **solution.x86**, **solution.x64**, **saturnin.common**, **saturnin.x86**, **saturnin.x64**.
 You can then modify the files, adjusting the macros according to your setup.
 
 * Dependencies
     * boost 1.65.1
-	* imgui 1.52
+	* imgui 1.53
 	* libconfig 1.7.1 
 	* epoxy 1.4.3
 	* spdlog 0.16.3
