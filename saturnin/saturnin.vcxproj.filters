@@ -60,6 +60,9 @@
     <ClCompile Include="src\log.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\gui.cpp">
+      <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\video\opengl.h">
@@ -103,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="src\log.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\gui.h">
+      <Filter>Fichiers sources\video</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
