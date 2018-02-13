@@ -22,6 +22,9 @@
     <Filter Include="Fichiers sources\video\bindings">
       <UniqueIdentifier>{5a54d6a2-34a2-48f4-ae61-f18b5e44420d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\lodepng">
+      <UniqueIdentifier>{eefe1bcf-2326-44b6-a0a2-4dec1a22c902}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -62,6 +65,9 @@
     </ClCompile>
     <ClCompile Include="src\video\gui.cpp">
       <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\lodepng\lodepng.cpp">
+      <Filter>Fichiers sources\lodepng</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="src\video\gui.h">
       <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\lodepng\lodepng.h">
+      <Filter>Fichiers sources\lodepng</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

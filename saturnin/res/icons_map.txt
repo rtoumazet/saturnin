@@ -1,0 +1,9 @@
+appbar.control.play,0,0,76,76
+appbar.control.pause,0,77,76,76
+appbar.control.stop,77,0,76,76
+appbar.control.resume,77,77,76,76
+appbar.bug,0,154,76,76
+appbar.debug.step.into,77,154,76,76
+appbar.debug.step.out,154,0,76,76
+appbar.debug.step.over,154,77,76,76
+appbar.tools,154,154,76,76

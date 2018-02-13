@@ -23,6 +23,7 @@
 #include <epoxy/wgl.h>
 #include <GLFW/glfw3.h>
 #include "opengl.h"
+#include "../../lib/lodepng/lodepng.h"
 
 
 using namespace std;
@@ -222,6 +223,23 @@ namespace video {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
         return VAO;
+    }
+
+    bool OpenGl::loadPngImage(const string& imageFullPath) {
+        // Load file and decode image.
+        std::vector<uint8_t> image;
+        uint32_t width{};
+        uint32_t height{};
+        uint32_t error = lodepng::decode(image, width, height, imageFullPath);
+
+        // If there's an error, display it.
+        if (error != 0)
+        {
+            std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
+            return false;
+        }
+
+        return true;
     }
 };
 };
