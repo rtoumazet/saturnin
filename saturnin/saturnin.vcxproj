@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="lib\lodepng\lodepng.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\locale.cpp" />
     <ClCompile Include="src\log.cpp" />
@@ -142,6 +143,7 @@
     <ClCompile Include="src\video\opengl_modern.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lib\lodepng\lodepng.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\locale.h" />
     <ClInclude Include="src\log.h" />

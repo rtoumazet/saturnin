@@ -79,6 +79,8 @@ namespace video {
         uint32_t fbo = opengl.createFramebuffer();
         opengl.setupTriangle();
 
+        opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
+
         // Main loop
         while (!glfwWindowShouldClose(window))
         {

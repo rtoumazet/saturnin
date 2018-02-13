@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     Log::error("sound", "snd");
     Log::warning("vdp1", "snd");
 
-
+    
 
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
