@@ -27,6 +27,8 @@
 #include "opengl.h"
 #include "opengl_modern.h"
 
+
+
 using namespace saturnin;
 
 namespace saturnin {
@@ -79,8 +81,8 @@ namespace video {
         uint32_t fbo = opengl.createFramebuffer();
         opengl.setupTriangle();
 
-        opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
-
+        opengl.loadIcons();
+        
         // Main loop
         while (!glfwWindowShouldClose(window))
         {
