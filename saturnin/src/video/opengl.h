@@ -64,7 +64,8 @@ namespace video {
 
         static bool OpenGl::isModernOpenGlCapable();
 
-        bool loadPngImage(const std::string& imageFullPath);
+        bool loadPngImage(const std::vector<uint8_t>& imageData);
+        bool loadIcons();
 
     private:
         uint32_t programShader_;
