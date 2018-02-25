@@ -19,6 +19,7 @@
 #pragma once
 
 #include "imgui/imgui.h"
+#include <vector>
 
 namespace saturnin {
 namespace gui {
@@ -27,5 +28,6 @@ namespace gui {
     void showAnotherWindow(bool& show_another_window);
     void showTestWindow(bool& show_test_window);
     void showCoreWindow();
+    void showImageWindow(const uint32_t tex);
 }
 }
