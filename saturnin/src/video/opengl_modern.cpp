@@ -81,13 +81,22 @@ namespace video {
         uint32_t fbo = opengl.createFramebuffer();
         opengl.setupTriangle();
 
-        opengl.loadIcons();
+        std::vector<uint8_t> image;
+        opengl.loadIcons(image);
+        GLuint tex;
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 230, 230, 0, GL_RGB, GL_FLOAT, &image[0]);
         
         // Main loop
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
             ImGui_ImplGlfwGL3_NewFrame();
+
+            gui::showImageWindow(tex);
 
             gui::showCoreWindow();
             

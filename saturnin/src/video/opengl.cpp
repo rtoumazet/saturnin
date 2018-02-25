@@ -225,12 +225,11 @@ namespace video {
         return VAO;
     }
 
-    bool OpenGl::loadPngImage(const vector<uint8_t>& imageData) {
+    bool OpenGl::loadPngImage(const vector<uint8_t>& sourceData, vector<uint8_t>& image) {
         // Load file and decode image.
-        std::vector<uint8_t> image;
-        uint32_t width{};
-        uint32_t height{};
-        uint32_t error = lodepng::decode(image, width, height, imageData);
+        uint32_t width {};
+        uint32_t height {};
+        uint32_t error = lodepng::decode(image, width, height, sourceData);
 
         // If there's an error, display it.
         if (error != 0)
@@ -242,10 +241,10 @@ namespace video {
         return true;
     }
 
-    bool OpenGl::loadIcons() {
+    bool OpenGl::loadIcons(vector<uint8_t>& image) {
         //opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
         std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
-        return loadPngImage(icons_vector);
+        return loadPngImage(icons_vector, image);
     }
 };
 };

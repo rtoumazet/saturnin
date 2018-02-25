@@ -87,5 +87,14 @@ namespace gui {
 
         ImGui::End();
     }
+
+    void showImageWindow(const uint32_t tex) {
+        bool test = true;
+
+        
+        ImGui::Begin("Another Window", &test);
+        ImGui::Image((void*)tex, ImVec2(230,230));
+        ImGui::End();
+    }
 }
 }
