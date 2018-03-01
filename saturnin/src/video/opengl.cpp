@@ -229,7 +229,7 @@ namespace video {
         // Load file and decode image.
         uint32_t width {};
         uint32_t height {};
-        uint32_t error = lodepng::decode(image, width, height, sourceData);
+        uint32_t error = lodepng::decode(image, width, height, sourceData, LCT_RGB);
 
         // If there's an error, display it.
         if (error != 0)
@@ -244,6 +244,7 @@ namespace video {
     bool OpenGl::loadIcons(vector<uint8_t>& image) {
         //opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
         std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
+        //std::vector<uint8_t> icons_vector(icons_png_unc, icons_png_unc + sizeof(icons_png_unc));
         return loadPngImage(icons_vector, image);
     }
 };
