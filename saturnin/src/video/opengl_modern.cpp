@@ -89,7 +89,7 @@ namespace video {
         glBindTexture(GL_TEXTURE_2D, tex);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexImage2D(GL_TEXTURE_2D, 0, 4, 230, 230, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
+        glTexImage2D(GL_TEXTURE_2D, 0, 4, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
         
         // Main loop
         while (!glfwWindowShouldClose(window))

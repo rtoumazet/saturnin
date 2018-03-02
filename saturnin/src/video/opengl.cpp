@@ -244,7 +244,6 @@ namespace video {
     bool OpenGl::loadIcons(vector<uint8_t>& image) {
         //opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
         std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
-        //std::vector<uint8_t> icons_vector(icons_png_unc, icons_png_unc + sizeof(icons_png_unc));
         return loadPngImage(icons_vector, image);
     }
 };

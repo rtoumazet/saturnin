@@ -96,12 +96,28 @@ namespace video {
         bool show_video          = true;
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+        std::vector<uint8_t> image;
+        opengl.loadIcons(image);
+        GLuint tex;
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+        //glTexParameteri(GL_TEXTURE_2D, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        std::vector<uint8_t> img {0xFF,0x00,0x00,0xFF,0xFF,0x00,0x00,0xFF ,0xFF,0x00,0x00,0xFF ,0x00,0xFF,0x00,0xFF };
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, &img[0]);
+
         // Main loop
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
             ImGui_ImplGlfwGL2_NewFrame();
 
+            gui::showImageWindow(tex);
+            
             gui::showCoreWindow();
 
             gui::showSimpleWindow(show_test_window, show_another_window);
