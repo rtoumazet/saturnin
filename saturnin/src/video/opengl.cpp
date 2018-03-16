@@ -229,7 +229,7 @@ namespace video {
         // Load file and decode image.
         uint32_t width {};
         uint32_t height {};
-        uint32_t error = lodepng::decode(image, width, height, sourceData, LCT_RGB);
+        uint32_t error = lodepng::decode(image, width, height, sourceData, LCT_RGBA);
 
         // If there's an error, display it.
         if (error != 0)
