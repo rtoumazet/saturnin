@@ -107,8 +107,9 @@ namespace video {
         //glTexParameteri(GL_TEXTURE_2D, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        std::vector<uint8_t> img {0xFF,0x00,0x00,0xFF,0xFF,0x00,0x00,0xFF ,0xFF,0x00,0x00,0xFF ,0x00,0xFF,0x00,0xFF };
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, &img[0]);
+        //std::vector<uint8_t> img {0xFF,0x00,0x00,0xFF,0xFF,0x00,0x00,0xFF ,0xFF,0x00,0x00,0xFF ,0x00,0xFF,0x00,0xFF };
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, &img[0]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0xe6, 0xe6, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
 
         // Main loop
         while (!glfwWindowShouldClose(window))
