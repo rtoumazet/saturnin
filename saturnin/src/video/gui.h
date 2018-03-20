@@ -27,7 +27,7 @@ namespace gui {
     void showSimpleWindow(bool& show_test_window, bool& show_another_window);
     void showAnotherWindow(bool& show_another_window);
     void showTestWindow(bool& show_test_window);
-    void showCoreWindow();
+    void showCoreWindow(const uint32_t tex);
     void showImageWindow(const uint32_t tex);
 }
 }
