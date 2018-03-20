@@ -99,7 +99,7 @@ namespace video {
 
             gui::showImageWindow(tex);
 
-            gui::showCoreWindow();
+            gui::showCoreWindow(tex);
             
             gui::showSimpleWindow(show_test_window, show_another_window);
 

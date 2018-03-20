@@ -56,7 +56,7 @@ namespace gui {
         }
     }
 
-    void showCoreWindow() {
+    void showCoreWindow(const uint32_t tex) {
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
         window_flags |= ImGuiWindowFlags_NoResize;
@@ -69,7 +69,8 @@ namespace gui {
         bool show_window;
         ImGui::Begin("Core", &show_window, window_flags);
         //if (ImGui::Button("Play")) show_test_window ^= 1;
-        ImGui::Button("Play");
+        //ImGui::Button("Play");
+        ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.1000), ImVec2(0.2333, 0.2333), 0, ImVec4(255,255,255,255), ImVec4(255, 255, 255, 128));
         ImGui::SameLine();
         ImGui::Button("Pause");
         ImGui::SameLine();
