@@ -70,11 +70,13 @@ namespace gui {
         ImGui::Begin("Core", &show_window, window_flags);
         //if (ImGui::Button("Play")) show_test_window ^= 1;
         //ImGui::Button("Play");
-        ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.1000), ImVec2(0.2333, 0.2333), 0, ImVec4(255,255,255,255), ImVec4(255, 255, 255, 128));
+        ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.1000), ImVec2(0.2333, 0.2333), 0);
         ImGui::SameLine();
-        ImGui::Button("Pause");
+        //ImGui::Button("Pause");
+        ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.5000), ImVec2(0.2333, 0.5000), 0);
         ImGui::SameLine();
-        ImGui::Button("Stop");
+        //ImGui::Button("Stop");
+        ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.5000, 0.1000), ImVec2(0.5333, 0.2333), 0);
         ImGui::SameLine();
 
         //ImGui::SameLine();
