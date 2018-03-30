@@ -24,7 +24,7 @@ You can then modify the files, adjusting the macros according to your setup.
 
 ### Contribution guidelines ###
 
-* [Saturnin Style Guide][Saturnin Style Guide]
+* [Saturnin Style Guide](Saturnin Style Guide)
 * Code review
 * Other guidelines
 
