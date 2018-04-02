@@ -73,6 +73,7 @@
     <Import Project="props\saturnin.x64.props" />
     <Import Project="saturnin.common.props" />
     <Import Project="..\props\solution.x64.props" />
+    <Import Project="props\saturnin.common.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -139,8 +140,6 @@
     <ClCompile Include="src\video\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\video\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\video\opengl.cpp" />
-    <ClCompile Include="src\video\opengl_legacy.cpp" />
-    <ClCompile Include="src\video\opengl_modern.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\lodepng\lodepng.h" />
@@ -157,8 +156,6 @@
     <ClInclude Include="src\video\imgui\stb_textedit.h" />
     <ClInclude Include="src\video\imgui\stb_truetype.h" />
     <ClInclude Include="src\video\opengl.h" />
-    <ClInclude Include="src\video\opengl_legacy.h" />
-    <ClInclude Include="src\video\opengl_modern.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\icons.png.inc" />
