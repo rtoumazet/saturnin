@@ -22,8 +22,8 @@
 #include "config.h"
 #include "log.h"
 #include "video/opengl.h"
-#include "video/opengl_legacy.h"
-#include "video/opengl_modern.h"
+//#include "video/opengl_legacy.h"
+//#include "video/opengl_modern.h"
 
 using namespace std;
 using namespace saturnin::video;
@@ -38,8 +38,8 @@ static void error_callback(int error, const char* description)
 int main(int argc, char *argv[])
 {
     if ( !Locale::initialize() ) return 1;
-    cout << tr("Hello World") << endl;
-    
+   
+    std::cout << tr("Hello World") << std::endl;
     Log::initialize();
 
     //spdlog::get("global")->debug("global test");
@@ -69,4 +69,6 @@ int main(int argc, char *argv[])
     bool isLegacyOpenGl = cfg.lookup("rendering.legacy_opengl");
 
     if (isLegacyOpenGl) return runLegacyOpenGl(); else return runModernOpenGl();
+
+   
 };

@@ -72,5 +72,8 @@ namespace video {
         uint32_t vao_;
     };
 
+    int32_t runLegacyOpenGl();
+
+    int32_t runModernOpenGl();
 };
 };
