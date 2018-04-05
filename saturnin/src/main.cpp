@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     //    plugin->log("test");
 
     Config cfg;
-    if ( !cfg.initialize(OpenGl::isModernOpenGlCapable()) ) return 1;
+    if ( !cfg.initialize(isModernOpenGlCapable()) ) return 1;
 
     bool isLegacyOpenGl = cfg.lookup("rendering.legacy_opengl");
 
