@@ -11,7 +11,7 @@ Saturnin is a Sega Saturn emulator
 	- saturnin/props/\*.props.template -> saturnin/props/\*.props    
 
     After that, you must update user macros from properties sheets inside VS2017 to set up your directories. To do so, display the Property Manager first 
-    ( **View** | **Property Manager** ), then update each of the following sheets : **dll**, **solution.x86**, **solution.x64**, **saturnin.common**, **saturnin.x86**, **saturnin.x64**.
+    ( **View** | **Property Manager** ), then update each of the following sheets : "**dll**", "**solution.x86**", "**solution.x64**", "**saturnin.common**", "**saturnin.x86**", "**saturnin.x64**".
     
 	You can then modify the files, adjusting the macros according to your setup.
 
