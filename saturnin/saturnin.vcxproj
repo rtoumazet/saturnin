@@ -144,8 +144,10 @@
   <ItemGroup>
     <ClInclude Include="lib\lodepng\lodepng.h" />
     <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\emustate.h" />
     <ClInclude Include="src\locale.h" />
     <ClInclude Include="src\log.h" />
+    <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\video\bindings\imgui_impl_glfw.h" />
     <ClInclude Include="src\video\bindings\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="src\video\gui.h" />
