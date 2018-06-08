@@ -22,7 +22,7 @@
 namespace saturnin {
 namespace gui {
 
-    void showSimpleWindow(bool& show_test_window, bool& show_another_window) {
+    void show_simple_window(bool& show_test_window, bool& show_another_window) {
         // 1. Show a simple window
         // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
         {
@@ -37,7 +37,7 @@ namespace gui {
         }
     }
 
-    void showAnotherWindow(bool& show_another_window) {
+    void show_another_window(bool& show_another_window) {
         // 2. Show another simple window, this time using an explicit Begin/End pair
         if (show_another_window)
         {
@@ -47,7 +47,7 @@ namespace gui {
         }
     }
 
-    void showTestWindow(bool& show_test_window) {
+    void show_test_window(bool& show_test_window) {
         // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
         if (show_test_window)
         {
@@ -56,7 +56,7 @@ namespace gui {
         }
     }
 
-    void showCoreWindow(const uint32_t tex) {
+    void show_core_window(const uint32_t tex) {
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
         window_flags |= ImGuiWindowFlags_NoResize;
@@ -99,7 +99,7 @@ namespace gui {
         ImGui::End();
     }
 
-    void showImageWindow(const uint32_t tex) {
+    void show_image_window(const uint32_t tex) {
         bool test = true;
 
         ImGui::Begin("Another Window", &test);

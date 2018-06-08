@@ -16,10 +16,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \file	locale.h
+///
+/// \brief	Declares everything related to localization. 
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma warning(disable:4275) // libconfig specific warning disable
-#include <libconfig.h++>
+#pragma once
 
 namespace saturnin {
 namespace core {

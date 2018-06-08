@@ -16,6 +16,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \file	log.h
+///
+/// \brief	Declares the static Log class. 
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma once
 
 #include <memory>
@@ -149,7 +156,7 @@ namespace core {
        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createSink(const std::string& logger_path);
+        /// \fn static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::create_sink(const std::string& logger_path);
         ///
         /// \brief  Creates a sink.
         ///
@@ -161,10 +168,10 @@ namespace core {
         /// \return The new sink.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> createSink(const std::string& logger_path);
+        static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> create_sink(const std::string& logger_path);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static void Log::createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
+        /// \fn static void Log::create_logger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
         ///
         /// \brief  Creates a logger.
         ///
@@ -175,7 +182,7 @@ namespace core {
         /// \param  sink        The sink.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
+        static void create_logger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn static void Log::removeFile(const std::string& path);
@@ -188,7 +195,7 @@ namespace core {
         /// \param  path    Full pathname of the file.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static void removeFile(const std::string& path);
+        static void remove_file(const std::string& path);
 
     private:
         static std::map<std::string, std::shared_ptr<spdlog::logger>> loggers_; ///< Map containing all the loggers used in the program

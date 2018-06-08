@@ -34,7 +34,7 @@ using namespace std;
 namespace saturnin {
 namespace video {
     
-    uint32_t OpenGl::createFramebuffer()
+    uint32_t Opengl::create_framebuffer()
     {
         uint32_t framebuffer = 0;
         glGenFramebuffers(1, &framebuffer);
@@ -59,12 +59,12 @@ namespace video {
         return framebuffer;
     }
     
-    uint32_t OpenGl::createVertexShader()
+    uint32_t Opengl::create_vertex_shader()
     {
-        uint32_t vertexShader;
-        vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        uint32_t vertex_shader;
+        vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 
-        const char* vertexShaderSource = R"(
+        const char* vertex_shader_source = R"(
 		    #version 330 core
 		    layout(location = 0) in vec3 aPos;
 
@@ -74,25 +74,25 @@ namespace video {
 		    }
         )";
 
-        glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-        glCompileShader(vertexShader);
+        glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
+        glCompileShader(vertex_shader);
 
         int32_t  success;
         
-        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+        glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
 
         if (!success)
         {
-            char infoLog[512];
-            glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-            cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+            char info_log[512];
+            glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
+            cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
         }
 
-        return vertexShader;
+        return vertex_shader;
     }
-    uint32_t OpenGl::createFragmentShader()
+    uint32_t Opengl::create_fragment_shader()
     {
-        const char* fragmentShaderSource = R"(
+        const char* fragment_shader_source = R"(
         	#version 330 core
         	out vec4 FragColor;
 
@@ -102,14 +102,14 @@ namespace video {
         	} 
         )";
 
-        uint32_t fragmentShader;
-        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-        glCompileShader(fragmentShader);
+        uint32_t fragment_shader;
+        fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
+        glCompileShader(fragment_shader);
 
-        return fragmentShader;
+        return fragment_shader;
     }
-    uint32_t OpenGl::createVertexBufferObject(const float vertices[])
+    uint32_t Opengl::create_vertex_buffer_object(const float vertices[])
     {
         uint32_t vbo;
         glGenBuffers(1, &vbo);
@@ -121,13 +121,13 @@ namespace video {
         return vbo;
     }
     
-    void OpenGl::deleteShaders(std::vector<uint32_t> shaders)
+    void Opengl::delete_shaders(std::vector<uint32_t> shaders)
     {
         for (auto shader : shaders) {
             glDeleteShader(shader);
         }
     }
-    void OpenGl::setupTriangle()
+    void Opengl::setup_triangle()
     {
         float vertices[] = {
             -0.5f, -0.5f, 0.0f,
@@ -136,11 +136,11 @@ namespace video {
         };
 
         //uint32_t vbo = createVertexBufferObject(vertices);
-        uint32_t vertexShader = createVertexShader();
-        uint32_t fragmentShader = createFragmentShader();
-        programShader_ = createProgramShader(vertexShader, fragmentShader);
-        vector<uint32_t> shadersToDelete = {vertexShader, fragmentShader};
-        deleteShaders(shadersToDelete);
+        uint32_t vertex_shader = create_vertex_shader();
+        uint32_t fragment_shader = create_fragment_shader();
+        program_shader_ = create_program_shader(vertex_shader, fragment_shader);
+        vector<uint32_t> shaders_to_delete = {vertex_shader, fragment_shader};
+        delete_shaders(shaders_to_delete);
 
         unsigned int VBO;
         glGenVertexArrays(1, &vao_);
@@ -162,41 +162,41 @@ namespace video {
         glBindVertexArray(0);
 
     }
-    void OpenGl::drawTriangle()
+    void Opengl::draw_triangle()
     {
-        glUseProgram(programShader_);
+        glUseProgram(program_shader_);
         glBindVertexArray(vao_); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 
-    uint32_t OpenGl::createProgramShader(const uint32_t vertexShader, const uint32_t fragmentShader)
+    uint32_t Opengl::create_program_shader(const uint32_t vertex_shader, const uint32_t fragment_shader)
     {
-        uint32_t shaderProgram;
-        shaderProgram = glCreateProgram();
+        uint32_t shader_program;
+        shader_program = glCreateProgram();
 
-        glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
-        glLinkProgram(shaderProgram);
+        glAttachShader(shader_program, vertex_shader);
+        glAttachShader(shader_program, fragment_shader);
+        glLinkProgram(shader_program);
 
         GLint success = 0;
-        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+        glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
         if (!success) {
-            char infoLog[256];
-            glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-            cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog << std::endl;
+            char info_log[256];
+            glGetProgramInfoLog(shader_program, 512, NULL, info_log);
+            cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << info_log << std::endl;
         }
 
-        return shaderProgram;
+        return shader_program;
     }
-    uint32_t OpenGl::createVertexArrayObject(const uint32_t vertexBufferObject, const float vertices[])
+    uint32_t Opengl::create_vertex_array_object(const uint32_t vertex_buffer_object, const float vertices[])
     {
         uint32_t VAO;
         glGenVertexArrays(1, &VAO);
 
         // 1. bind Vertex Array Object
         glBindVertexArray(VAO);
-        // 2. copy our vertices array in a buffer for OpenGL to use
-        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+        // 2. copy our vertices array in a buffer for Opengl to use
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
         // 3. then set our vertex attributes pointers
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -204,11 +204,11 @@ namespace video {
         return VAO;
     }
 
-    bool OpenGl::loadPngImage(const vector<uint8_t>& sourceData, vector<uint8_t>& image) {
+    bool Opengl::load_png_image(const vector<uint8_t>& source_data, vector<uint8_t>& image) {
         // Load file and decode image.
         uint32_t width {};
         uint32_t height {};
-        uint32_t error = lodepng::decode(image, width, height, sourceData, LCT_RGBA);
+        uint32_t error = lodepng::decode(image, width, height, source_data, LCT_RGBA);
 
         // If there's an error, display it.
         if (error != 0)
@@ -220,10 +220,10 @@ namespace video {
         return true;
     }
 
-    bool OpenGl::loadIcons(vector<uint8_t>& image) {
-        //opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
+    bool Opengl::load_icons(vector<uint8_t>& image) {
+        //Opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
         std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
-        return loadPngImage(icons_vector, image);
+        return load_png_image(icons_vector, image);
     }
 
     static void error_callback(int error, const char* description)
@@ -231,37 +231,36 @@ namespace video {
         fprintf(stderr, "Error %d: %s\n", error, description);
     }
 
-    bool isModernOpenGlCapable()
+    bool is_modern_opengl_capable()
     {
-        bool isCapable = true;
-        if (!glfwInit()) isCapable = false;
+        if (!glfwInit()) return false;
         else {
             GLFWwindow* window = glfwCreateWindow(1280, 720, "Test", NULL, NULL);
-            if (window == nullptr) isCapable = false;
+            if (window == nullptr) return false;
             else {
                 uint32_t major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
                 uint32_t minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
 
                 if (major = 3) {
-                    if (minor < 3) isCapable = false;
+                    if (minor < 3) return false;
                 }
-                else if (major < 3) isCapable = false;
+                else if (major < 3) return false;
 
                 glfwDestroyWindow(window);
             }
             glfwTerminate();
         }
-        return isCapable;
+        return true;
     }
 
-    int32_t runLegacyOpenGl()
+    int32_t run_legacy_opengl()
     {
         // Setup window
         glfwSetErrorCallback(error_callback);
         if (!glfwInit())
             return 1;
 
-        auto window = glfwCreateWindow(1280, 720, "ImGui OpenGL2 example", NULL, NULL);
+        auto window = glfwCreateWindow(1280, 720, "ImGui Opengl2 example", NULL, NULL);
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1); // Enable vsync
 
@@ -283,9 +282,9 @@ namespace video {
                              //if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
                              //    cout << "GL_EXT_framebuffer_object not found !" << endl;
 
-        OpenGl opengl;
-        uint32_t fbo = opengl.createFramebuffer();
-        //opengl.setupTriangle();
+        Opengl Opengl;
+        uint32_t fbo = Opengl.create_framebuffer();
+        //Opengl.setupTriangle();
 
 
         // Setup ImGui binding
@@ -307,7 +306,7 @@ namespace video {
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
         std::vector<uint8_t> image;
-        opengl.loadIcons(image);
+        Opengl.load_icons(image);
         GLuint tex;
         glEnable(GL_TEXTURE_2D);
         glGenTextures(1, &tex);
@@ -327,15 +326,15 @@ namespace video {
             glfwPollEvents();
             ImGui_ImplGlfwGL2_NewFrame();
 
-            gui::showImageWindow(tex);
+            gui::show_image_window(tex);
 
-            gui::showCoreWindow(tex);
+            gui::show_core_window(tex);
 
-            gui::showSimpleWindow(show_test_window, show_another_window);
+            gui::show_simple_window(show_test_window, show_another_window);
 
-            gui::showAnotherWindow(show_another_window);
+            gui::show_another_window(show_another_window);
 
-            gui::showTestWindow(show_test_window);
+            gui::show_test_window(show_test_window);
 
             {
                 ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
@@ -351,7 +350,7 @@ namespace video {
                 glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                 glClear(GL_COLOR_BUFFER_BIT);
 
-                //opengl.drawTriangle();
+                //Opengl.drawTriangle();
                 glBegin(GL_TRIANGLES);
                 glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
                 glVertex3f(-0.5f, -0.5f, 0.0f);
@@ -385,7 +384,7 @@ namespace video {
             glViewport(0, 0, display_w, display_h);
             glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
             glClear(GL_COLOR_BUFFER_BIT);
-            //glUseProgram(0); // You may want this if using this code in an OpenGL 3+ context where shaders may be bound
+            //glUseProgram(0); // You may want this if using this code in an Opengl 3+ context where shaders may be bound
 
 
 
@@ -400,7 +399,7 @@ namespace video {
         return 0;
     }
 
-    int32_t runModernOpenGl()
+    int32_t run_modern_opengl()
     {
         // Setup window
         glfwSetErrorCallback(error_callback);
@@ -410,9 +409,9 @@ namespace video {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
 #if __APPLE__
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_Opengl_FORWARD_COMPAT, GL_TRUE);
 #endif
-        auto window = glfwCreateWindow(1280, 720, "ImGui OpenGL3 example", NULL, NULL);
+        auto window = glfwCreateWindow(1280, 720, "ImGui Opengl3 example", NULL, NULL);
         if (window == nullptr) {
 
             return 1;
@@ -438,12 +437,12 @@ namespace video {
         bool show_video = true;
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-        OpenGl opengl;
-        uint32_t fbo = opengl.createFramebuffer();
-        opengl.setupTriangle();
+        Opengl Opengl;
+        uint32_t fbo = Opengl.create_framebuffer();
+        Opengl.setup_triangle();
 
         std::vector<uint8_t> image;
-        opengl.loadIcons(image);
+        Opengl.load_icons(image);
         GLuint tex;
         glEnable(GL_TEXTURE_2D);
         glGenTextures(1, &tex);
@@ -458,15 +457,15 @@ namespace video {
             glfwPollEvents();
             ImGui_ImplGlfwGL3_NewFrame();
 
-            gui::showImageWindow(tex);
+            gui::show_image_window(tex);
 
-            gui::showCoreWindow(tex);
+            gui::show_core_window(tex);
 
-            gui::showSimpleWindow(show_test_window, show_another_window);
+            gui::show_simple_window(show_test_window, show_another_window);
 
-            gui::showAnotherWindow(show_another_window);
+            gui::show_another_window(show_another_window);
 
-            gui::showTestWindow(show_test_window);
+            gui::show_test_window(show_test_window);
 
             {
                 ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
@@ -482,8 +481,8 @@ namespace video {
                 glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                 glClear(GL_COLOR_BUFFER_BIT);
 
-                //opengl.setupTriangle();
-                opengl.drawTriangle();
+                //Opengl.setupTriangle();
+                Opengl.draw_triangle();
 
                 GLint ret;
                 glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &ret);

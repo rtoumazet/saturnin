@@ -16,6 +16,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \file	gui.h
+///
+/// \brief	Declares everything related to GUI display.
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma once
 
 #include "imgui/imgui.h"
@@ -24,10 +31,10 @@
 namespace saturnin {
 namespace gui {
 
-    void showSimpleWindow(bool& show_test_window, bool& show_another_window);
-    void showAnotherWindow(bool& show_another_window);
-    void showTestWindow(bool& show_test_window);
-    void showCoreWindow(const uint32_t tex);
-    void showImageWindow(const uint32_t tex);
+    void show_simple_window(bool& show_test_window, bool& show_another_window);
+    void show_another_window(bool& show_another_window);
+    void show_test_window(bool& show_test_window);
+    void show_core_window(const uint32_t tex);
+    void show_image_window(const uint32_t tex);
 }
 }
