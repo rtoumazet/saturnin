@@ -35,7 +35,7 @@ namespace core {
         cfg_.writeFile(filename.c_str());
     }
 
-    bool Config::readFile(const std::string & filename){
+    bool Config::read_file(const std::string & filename){
         try {
             cfg_.readFile(filename.c_str());
             return true;
@@ -46,7 +46,7 @@ namespace core {
         }
     }
 
-    void Config::writeLegacyOpenGl(const bool value) {
+    void Config::write_legacy_opengl(const bool value) {
         Setting& root = cfg_.getRoot();
         if (!root.exists("rendering")) root.add("rendering", Setting::TypeGroup);
         Setting& rendering = root["rendering"];
@@ -58,12 +58,12 @@ namespace core {
     }
 
     bool Config::initialize(const bool isModernOpenGlCapable) {
-        if (!readFile("saturnin.cfg")) {
+        if (!read_file("saturnin.cfg")) {
             cout << translate("Creating configuration file.") << endl;
             write_file("saturnin.cfg");
-            if (!readFile("saturnin.cfg")) return false;
+            if (!read_file("saturnin.cfg")) return false;
 
-            writeLegacyOpenGl(!isModernOpenGlCapable);
+            write_legacy_opengl(!isModernOpenGlCapable);
 
             write_file("saturnin.cfg");
         }

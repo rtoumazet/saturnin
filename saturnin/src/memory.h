@@ -70,6 +70,7 @@ namespace core {
     ///
     /// \brief  Reads a value from an array.
     ///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively
+    ///         Usage : auto val = read<32>(memory, 0);
     ///         
     /// \author Runik
     /// \date   07/06/2018
@@ -77,10 +78,10 @@ namespace core {
     /// \param  arr The array to read from.
     /// \param  adr The address.
     ///
-    /// \return A SizedUInt&lt;Size&gt;
+    /// \return A SizedUInt<Size>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template<size_t Size>   ///< The sized u int
+    template<size_t Size> 
     using SizedUInt = std::conditional_t<Size == 8, uint8_t,
         std::conditional_t<Size == 16, uint16_t,
         std::conditional_t<Size == 32, uint32_t, void>>>;
@@ -102,6 +103,7 @@ namespace core {
     ///
     /// \brief  Writes a value to an array.
     ///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively.
+    ///         Usage : write<32>(memory, 0, 0x12345678);
     ///         
     /// \author Runik
     /// \date   07/06/2018
