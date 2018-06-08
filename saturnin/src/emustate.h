@@ -27,11 +27,30 @@
 
 #pragma once
 
+#include <memory> // unique_ptr, make_unique
+
 namespace saturnin {
 namespace core {
 
+    /// \name Class declarations.
+    /// Used to speed up build time as the .h files are included in the .cpp
+    ///
+    //@{
+    //class CSH2;
+    class Memory;
+    //class COGL;
+    //class InterruptHandler;
+    //class Log;
+    //class CCdRom;
+    //class SMPC;
+    //class SCU;
+    //class Vdp1;
+    //class Vdp2;
+    //class SCSP;
+    //@}
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \enum	HardwareMode
+    /// \enum	Hardware_mode
     ///
     /// \brief	Values that represent the hardware mode. 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,7 +61,7 @@ namespace core {
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \enum	RomType
+    /// \enum	Rom_type
     ///
     /// \brief	Values that represent the ROM type. 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +73,7 @@ namespace core {
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \enum	RomLoad
+    /// \enum	Rom_load
     ///
     /// \brief	Values that represent the way ROM is loaded. 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,9 +84,10 @@ namespace core {
         even_interleaved ///< Loads data on even bytes.
     };
 
-    class Emu_state {
-    public:
-        bool initialize();
+    struct Emu_state {
+        Hardware_mode current_hardware_mode;
+
+        std::unique_ptr<Memory> memory = std::make_unique<Memory>();
     };
 }
 }

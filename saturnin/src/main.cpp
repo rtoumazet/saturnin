@@ -22,6 +22,8 @@
 #include "config.h"
 #include "log.h"
 #include "video/opengl.h"
+#include "emustate.h"
+#include "memory.h"
 //#include "video/opengl_legacy.h"
 //#include "video/opengl_modern.h"
 
@@ -49,7 +51,10 @@ int main(int argc, char *argv[])
     Log::error("sound", "snd");
     Log::warning("vdp1", "snd");
 
-    
+    Emu_state emu_state;
+
+    write<32>(emu_state.memory->workram_low, 0, 0x12345678);
+    auto val = read<16>(emu_state.memory->workram_low, 2);
 
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
