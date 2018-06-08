@@ -56,7 +56,7 @@ namespace gui {
         }
     }
 
-    void showCoreWindow() {
+    void showCoreWindow(const uint32_t tex) {
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
         window_flags |= ImGuiWindowFlags_NoResize;
@@ -69,11 +69,22 @@ namespace gui {
         bool show_window;
         ImGui::Begin("Core", &show_window, window_flags);
         //if (ImGui::Button("Play")) show_test_window ^= 1;
-        ImGui::Button("Play");
+        if (ImGui::Button("Play")) {
+            ImGui::OpenPopup("testpopup");
+        }
+
+        if (ImGui::BeginPopup("testpopup")) {
+            ImGui::Text("TEST");
+            ImGui::EndPopup();
+        }
+
+        //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.1000), ImVec2(0.2333, 0.2333), 0);
         ImGui::SameLine();
         ImGui::Button("Pause");
+        //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.5000), ImVec2(0.2333, 0.5000), 0);
         ImGui::SameLine();
         ImGui::Button("Stop");
+        //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.5000, 0.1000), ImVec2(0.5333, 0.2333), 0);
         ImGui::SameLine();
 
         //ImGui::SameLine();
@@ -92,8 +103,8 @@ namespace gui {
         bool test = true;
 
         ImGui::Begin("Another Window", &test);
-        //ImGui::Image((void*)tex, ImVec2(230,230));
-        ImGui::Image((ImTextureID)tex, ImVec2(230, 230), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+        //ImGui::Image((ImTextureID)tex, ImVec2(230, 230), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+        ImGui::Image((ImTextureID)tex, ImVec2(230, 230), ImVec2(0, 0), ImVec2(0.3333, 0.3333), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
         ImGui::End();
     }
 }

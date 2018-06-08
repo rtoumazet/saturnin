@@ -1,5 +1,5 @@
 // 
-// opengl_modern.h
+// emustate.h
 // Saturnin
 //
 // Copyright (c) 2018 Renaud Toumazet
@@ -15,16 +15,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
+// 
 
 #pragma once
 
-#include <cstdint>
-
 namespace saturnin {
-namespace video {
-
-    int32_t runModernOpenGl();
-
-};
-};
+namespace core {
+    class EmuState {
+    public:
+        bool Initialize();
+    };
+}
+}

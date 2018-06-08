@@ -50,20 +50,6 @@ namespace video {
         void OpenGl::setupTriangle();
         void OpenGl::drawTriangle();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static bool OpenGl::isModernOpenGlCapable();
-        ///
-        /// \brief  Query if the current video card is capable of rendering modern opengl (ie version
-        ///         3.3+).
-        ///
-        /// \author Runik
-        /// \date   24/12/2017
-        ///
-        /// \return True if the video car can render modern OpenGL .
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        static bool OpenGl::isModernOpenGlCapable();
-
         bool loadPngImage(const std::vector<uint8_t>& sourceData, std::vector<uint8_t>& image);
         bool loadIcons(std::vector<uint8_t>& image);
 
@@ -72,5 +58,45 @@ namespace video {
         uint32_t vao_;
     };
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn bool OpenGl::isModernOpenGlCapable();
+    ///
+    /// \brief  Query if the current video card is capable of rendering modern opengl (ie version
+    ///         3.3+).
+    ///
+    /// \author Runik
+    /// \date   24/12/2017
+    ///
+    /// \return True if the video car can render modern OpenGL .
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool isModernOpenGlCapable();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn int32_t runLegacyOpenGl();
+    ///
+    /// \brief  Executes OpenGL code in legacy mode.
+    ///
+    /// \author Runik
+    /// \date   03/04/2018
+    ///
+    /// \return An int32_t.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    int32_t runLegacyOpenGl();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn int32_t runModernOpenGl();
+    ///
+    /// \brief  Executes OpenGL code in modern mode (3.3+).
+    ///
+    /// \author Runik
+    /// \date   03/04/2018
+    ///
+    /// \return An int32_t.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    int32_t runModernOpenGl();
 };
 };
