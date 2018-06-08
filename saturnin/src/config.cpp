@@ -31,7 +31,7 @@ namespace core {
         return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
     }
     
-    void Config::writeFile(const std::string & filename) {
+    void Config::write_file(const std::string & filename) {
         cfg_.writeFile(filename.c_str());
     }
 
@@ -60,12 +60,12 @@ namespace core {
     bool Config::initialize(const bool isModernOpenGlCapable) {
         if (!readFile("saturnin.cfg")) {
             cout << translate("Creating configuration file.") << endl;
-            writeFile("saturnin.cfg");
+            write_file("saturnin.cfg");
             if (!readFile("saturnin.cfg")) return false;
 
             writeLegacyOpenGl(!isModernOpenGlCapable);
 
-            writeFile("saturnin.cfg");
+            write_file("saturnin.cfg");
         }
         return true;
     }

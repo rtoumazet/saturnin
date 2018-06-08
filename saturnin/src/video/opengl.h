@@ -17,6 +17,12 @@
 // limitations under the License.
 //
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \file	opengl.h
+///
+/// \brief	Declares the OpenGl class and related functions. 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma once
 
 #include <cstdint>
@@ -25,42 +31,42 @@
 namespace saturnin {
 namespace video {
 
-	class OpenGl {
+	class Opengl {
 
 	public:
         //@{
         // Constructors / Destructors
-        OpenGl()                           = default;
-        OpenGl(const OpenGl&)              = delete;
-        OpenGl(OpenGl&&)                   = delete;
-        OpenGl& operator=(const OpenGl&) & = delete;
-        OpenGl& operator=(OpenGl&&) &      = delete;
-        ~OpenGl()                          = default;
+        Opengl()                           = default;
+        Opengl(const Opengl&)              = delete;
+        Opengl(Opengl&&)                   = delete;
+        Opengl& operator=(const Opengl&) & = delete;
+        Opengl& operator=(Opengl&&) &      = delete;
+        ~Opengl()                          = default;
         //@}
 
-		uint32_t OpenGl::createFramebuffer();
+		uint32_t create_framebuffer();
 
-        uint32_t OpenGl::createVertexShader();
-        uint32_t OpenGl::createFragmentShader();
-        uint32_t OpenGl::createVertexBufferObject(const float vertices[]);
-        uint32_t OpenGl::createProgramShader(const uint32_t vertexShader, const uint32_t fragmentShader);
-        uint32_t OpenGl::createVertexArrayObject(const uint32_t vertexBufferObject, const float vertices[]);
-        void OpenGl::deleteShaders(std::vector<uint32_t> shaders);
+        uint32_t create_vertex_shader();
+        uint32_t create_fragment_shader();
+        uint32_t create_vertex_buffer_object(const float vertices[]);
+        uint32_t create_program_shader(const uint32_t vertex_shader, const uint32_t fragment_shader);
+        uint32_t create_vertex_array_object(const uint32_t vertex_buffer_object, const float vertices[]);
+        void delete_shaders(std::vector<uint32_t> shaders);
 
-        void OpenGl::setupTriangle();
-        void OpenGl::drawTriangle();
+        void setup_triangle();
+        void draw_triangle();
 
-        bool loadPngImage(const std::vector<uint8_t>& sourceData, std::vector<uint8_t>& image);
-        bool loadIcons(std::vector<uint8_t>& image);
+        bool load_png_image(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
+        bool load_icons(std::vector<uint8_t>& image);
 
     private:
-        uint32_t programShader_;
+        uint32_t program_shader_;
         uint32_t vao_;
     };
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool OpenGl::isModernOpenGlCapable();
+    /// \fn bool OpenGl::is_modern_opengl_capable();
     ///
     /// \brief  Query if the current video card is capable of rendering modern opengl (ie version
     ///         3.3+).
@@ -71,10 +77,10 @@ namespace video {
     /// \return True if the video car can render modern OpenGL .
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool isModernOpenGlCapable();
+    bool is_modern_opengl_capable();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn int32_t runLegacyOpenGl();
+    /// \fn int32_t run_legacy_opengl();
     ///
     /// \brief  Executes OpenGL code in legacy mode.
     ///
@@ -84,10 +90,10 @@ namespace video {
     /// \return An int32_t.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int32_t runLegacyOpenGl();
+    int32_t run_legacy_opengl();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn int32_t runModernOpenGl();
+    /// \fn int32_t run_modern_opengl();
     ///
     /// \brief  Executes OpenGL code in modern mode (3.3+).
     ///
@@ -97,6 +103,6 @@ namespace video {
     /// \return An int32_t.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int32_t runModernOpenGl();
+    int32_t run_modern_opengl();
 };
 };

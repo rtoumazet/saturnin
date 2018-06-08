@@ -64,11 +64,11 @@ int main(int argc, char *argv[])
     //    plugin->log("test");
 
     Config cfg;
-    if ( !cfg.initialize(isModernOpenGlCapable()) ) return 1;
+    if ( !cfg.initialize(is_modern_opengl_capable()) ) return 1;
 
-    bool isLegacyOpenGl = cfg.lookup("rendering.legacy_opengl");
+    bool is_legacy_opengl = cfg.lookup("rendering.legacy_opengl");
 
-    if (isLegacyOpenGl) return runLegacyOpenGl(); else return runModernOpenGl();
+    if (is_legacy_opengl) return run_legacy_opengl(); else return run_modern_opengl();
 
    
 };

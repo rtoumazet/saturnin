@@ -17,6 +17,12 @@
 // limitations under the License.
 // 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \file	memory.h
+///
+/// \brief	Declares the memory class and the memory handlers. 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma once
 
 #include <array> // array
@@ -35,6 +41,10 @@ namespace core {
 
     class Memory {
     public:
+        
+        /// \name Saturn memory map definition.
+        ///
+
         std::array <uint8_t, 0x100000>	workram_low;          ///< low workram (1MB).
         std::array <uint8_t, 0x100000>  workram_high;         ///< high workram (1MB).
         std::array <uint8_t, 0x80000>   rom;                  ///< ROM (512KB).
