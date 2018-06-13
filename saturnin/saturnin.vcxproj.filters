@@ -110,7 +110,10 @@
     <ClInclude Include="src\memory.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
-    <ClInclude Include="src\emustate.h">
+    <ClInclude Include="src\emulator_context.h">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stv_definitions.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
