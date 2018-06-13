@@ -1,5 +1,5 @@
 // 
-// emustate.h
+// emulator_context.h
 // Saturnin
 //
 // Copyright (c) 2018 Renaud Toumazet
@@ -18,16 +18,17 @@
 // 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \file	emustate.h
+/// \file	emulator_context.h
 ///
-/// \brief	Emulation state class. 
+/// \brief	Emulator context structure. 
 ///
-/// Class used to handle emulation state data
+/// Structure used to handle the emulator state data
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #include <memory> // unique_ptr, make_unique
+#include <string> // string
 
 namespace saturnin {
 namespace core {
@@ -52,7 +53,7 @@ namespace core {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \enum	Hardware_mode
     ///
-    /// \brief	Values that represent the hardware mode. 
+    /// \brief	Hardware mode used. 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     enum class Hardware_mode {
@@ -63,7 +64,7 @@ namespace core {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \enum	Rom_type
     ///
-    /// \brief	Values that represent the ROM type. 
+    /// \brief	ROM type. 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     enum class Rom_type {
@@ -75,19 +76,51 @@ namespace core {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \enum	Rom_load
     ///
-    /// \brief	Values that represent the way ROM is loaded. 
+    /// \brief	Way ROM data is loaded. 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     enum class Rom_load {
-        not_interleaved, ///< Loads data sequentially. 
-        odd_interleaved, ///< Loads data on odd bytes. 
-        even_interleaved ///< Loads data on even bytes.
+        not_interleaved, ///< Data loaded sequentially. 
+        odd_interleaved, ///< Data loaded on odd bytes. 
+        even_interleaved ///< Data loaded on even bytes.
     };
 
-    struct Emu_state {
-        Hardware_mode current_hardware_mode;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   Emulation_status
+    ///
+    /// \brief  State of the emulation.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        std::unique_ptr<Memory> memory = std::make_unique<Memory>();
+    enum class Emulation_status {
+        running,    ///< Emulator is running
+        paused,     ///< Emulator is paused
+        stopped     ///< Emulator is stopped
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct Emulator_context
+    ///
+    /// \brief  Regroups everything related to the emulator state.
+    ///
+    /// \author Runik
+    /// \date   12/06/2018
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Emulator_context {
+        std::unique_ptr<Memory> memory{ std::make_unique<Memory>() };
+
+        Hardware_mode    hardware_mode   { Hardware_mode::saturn };     ///< Hardware mode
+        Emulation_status emulation_status{ Emulation_status::stopped }; ///< Emulation status
+
+        /// \name Command line variables
+        ///
+        //@{
+        std::string command_line{ "" };         ///< Command line content
+        bool        autoload_binary  { false }; ///< True when the binary has to be automatically loaded.
+        uint32_t    binary_address { 0 };       ///< The PC will be set to this address after loading the binary.
+        //@}
+        
+        uint8_t stv_rom; ///< Crurrent ST-V ROM loaded
     };
 }
 }
