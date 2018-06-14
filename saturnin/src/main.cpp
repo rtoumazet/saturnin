@@ -22,7 +22,7 @@
 #include "config.h"
 #include "log.h"
 #include "video/opengl.h"
-#include "emustate.h"
+#include "emulator_context.h"
 #include "memory.h"
 //#include "video/opengl_legacy.h"
 //#include "video/opengl_modern.h"
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     Log::error("sound", "snd");
     Log::warning("vdp1", "snd");
 
-    Emu_state emu_state;
+    Emulator_context emu_state;
 
     write<32>(emu_state.memory->workram_low, 0, 0x12345678);
     auto val = read<16>(emu_state.memory->workram_low, 2);
