@@ -17,36 +17,39 @@
 // limitations under the License.
 // 
 
+#include <fstream> // ifstream
 #include "memory.h"
+
+using namespace std;
 
 namespace saturnin {
 namespace core {
 
     bool Memory::StvLoadRomToMemory(const string &		zipname,
-        const string &		romname,
-        uint8_t *			destination,
-        const uint32_t &	size,
+        const string & rom_name,
+        uint8_t *	   destination,
+        const uint32_t size,
         const Rom_load rom_load,
         const uint8_t  times_mirrored,
         const Rom_type rom_type)
     {
 
-        HZIP zipFileHandle;
+        //HZIP zipFileHandle;
 
-        zipFileHandle = OpenZip((void*)zipname.c_str(), 0, ZIP_FILENAME);
-        if (!zipFileHandle) {
-            std::cout << "Error opening zip file" << endl;
-        }
-        else {
-            std::cout << "Zip file opened" << endl;
+        //zipFileHandle = OpenZip((void*)zipname.c_str(), 0, ZIP_FILENAME);
+        //if (!zipFileHandle) {
+        //    std::cout << "Error opening zip file" << endl;
+        //}
+        //else {
+        //    std::cout << "Zip file opened" << endl;
 
-            ZIPENTRY ze;
-            //int32_t index = 0;
-            int index = 0;
-            if (FindZipItem(zipFileHandle, romname.c_str(), true, &index, &ze) != ZR_OK) {
-                MessageBox(NULL, "Couldn't find the file in the zip", NULL, MB_OK);
-            }
-            else {
+        //    ZIPENTRY ze;
+        //    //int32_t index = 0;
+        //    int index = 0;
+        //    if (FindZipItem(zipFileHandle, romname.c_str(), true, &index, &ze) != ZR_OK) {
+        //        MessageBox(NULL, "Couldn't find the file in the zip", NULL, MB_OK);
+        //    }
+        //    else {
                 if (rom_type == Rom_type::bios) {
                     //int8_t* content = new int8_t[size];
                     //UnzipItem(zipFileHandle, index, (void *)content, size, ZIP_MEMORY);
@@ -139,10 +142,57 @@ namespace core {
                     break;
                     }
                 }
-            }
-        }
+        //    }
+        //}
 
         return false;
+    }
+
+    void Memory::load_bios(const Emulator_context& context)
+    {
+        array <int8_t, 0x200> biosNameArray; 
+        biosNameArray.assign(' ');
+        uint32_t length = 0;
+
+        switch (context.hardware_mode) {
+        case Hardware_mode::saturn:
+            //length = GetPrivateProfileString("Path", "Saturn bios", "", reinterpret_cast<LPSTR>(&biosNameArray), 0x200, GetIniFile().c_str());
+            break;
+        case Hardware_mode::stv:
+            //length = GetPrivateProfileString("Path", "STV bios", "", reinterpret_cast<LPSTR>(&biosNameArray), 0x200, GetIniFile().c_str());
+            break;
+        }
+
+        string biosNameString(biosNameArray.begin(), biosNameArray.begin() + length);
+        ifstream ifile(biosNameString, ios::binary);
+        if (ifile) {
+            stringstream buffer; // buffer will hold the whole file
+            buffer << ifile.rdbuf(); // copying the whole file content in the buffer
+            ifile.close(); // file isn't needed anymore
+
+            uint32_t counter = buffer.str().size();
+            string str = buffer.str();
+            // filling the rom data
+            switch (context.hardware_mode) {
+            case Hardware_mode::saturn:
+                for (uint32_t i = 0; i<counter; i += 4) {
+                    context.memory->rom[i+0] = str[i+0];
+                    context.memory->rom[i+1] = str[i+1];
+                    context.memory->rom[i+2] = str[i+2];
+                    context.memory->rom[i+3] = str[i+3];
+                }
+                break;
+            case Hardware_mode::stv:
+                // Needs byteswapping
+                for (uint32_t i = 0; i<counter; i += 4) {
+                    context.memory->rom[i + 1] = str[i + 0];
+                    context.memory->rom[i + 0] = str[i + 1];
+                    context.memory->rom[i + 3] = str[i + 2];
+                    context.memory->rom[i + 2] = str[i + 3];
+                }
+                break;
+            }
+        }
     }
 
 }
