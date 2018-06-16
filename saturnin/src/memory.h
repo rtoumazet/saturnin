@@ -27,6 +27,8 @@
 
 #include <array> // array
 
+#include "emulator_context.h"
+
 namespace saturnin {
 namespace core {
 
@@ -94,6 +96,8 @@ namespace core {
         std::array <uint8_t, 0x3000000>	cart;                 ///< Cart (50MB).
         std::array <uint8_t, 0x400>		cache_addresses;      ///< Cache addresses (1KB).
         std::array <uint8_t, 0x1000>	cache_data;           ///< Cache data (4KB).
+
+        void load_bios(const Emulator_context&);
     };
 
 
