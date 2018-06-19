@@ -107,7 +107,74 @@ namespace core {
 
         bool Config::initialize(const bool isModernOpenGlCapable);
 
-    
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn libconfig::Setting&& Config::get_group(libconfig::Setting& root, const std::string& group_name);
+        ///
+        /// \brief  Adds a group.
+        ///
+        /// \author Runik
+        /// \date   18/06/2018
+        ///
+        /// \param [in,out] root        Setting to get the group from.
+        /// \param          group_name  Name of the group to get.
+        ///
+        /// \return A reference to a Setting.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        libconfig::Setting& Config::get_group(libconfig::Setting& root, const std::string& group_name);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Config::write_value(libconfig::Setting& root, const std::string& key, const std::string& value);
+        ///
+        /// \brief  Writes a value.
+        ///
+        /// \author Runik
+        /// \date   18/06/2018
+        ///
+        /// \param [in,out] root    Root setting.
+        /// \param          key     Key to modify.
+        /// \param          value   Value of the key.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //void Config::write_value(libconfig::Setting& root, const std::string& key, const std::string& value);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Config::write_value(libconfig::Setting&, const std::string&, const bool);
+        ///
+        /// \brief  Writes a value.
+        ///
+        /// \author Runik
+        /// \date   18/06/2018
+        ///
+        /// \param [in,out] parameter1  The root.
+        /// \param          parameter2  The key.
+        /// \param          bool        The value.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //void Config::write_value(libconfig::Setting&, const std::string&, const bool);
+
+        //template <class T> class ToMySetting {};
+        //template <> ToMySetting<bool>  { static libconfig::Setting::Type index = { libconfig::Setting::TypeBoolean }; };
+        ////template <> ToMySetting<int> { static libconfig::Setting::Type index = { libconfig::Setting::TypeInt }; };
+        ////template <> ToMySetting<char*> { static libconfig::Setting::Type index = { libconfig::Setting::TypeString }; };
+
+        template <class T> struct ToMySetting;
+        template <> struct ToMySetting<bool>        { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
+        template <> struct ToMySetting<uint32_t>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
+        template <> struct ToMySetting<uint64_t>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
+        template <> struct ToMySetting<float>       { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeFloat; };
+        template <> struct ToMySetting<const char*> { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
+
+        template<class T>
+        void write_value(libconfig::Setting& root, const std::string& key, const T& value)
+        {
+            if (!root.exists(key.c_str())) root.add(key.c_str(), ToMySetting<T>::index) = value;
+            else {
+                libconfig::Setting& s = root[key.c_str()];
+                s = value;
+            }
+        }
+   
     private:
         libconfig::Config cfg_; ///< Internal configuration object
 

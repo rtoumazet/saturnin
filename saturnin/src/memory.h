@@ -97,7 +97,18 @@ namespace core {
         std::array <uint8_t, 0x400>		cache_addresses;      ///< Cache addresses (1KB).
         std::array <uint8_t, 0x1000>	cache_data;           ///< Cache data (4KB).
 
-        void load_bios(const Emulator_context&);
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Memory::load_bios(const Hardware_mode mode);
+        ///
+        /// \brief  Loads the BIOS into memory.
+        ///
+        /// \author Runik
+        /// \date   18/06/2018
+        ///
+        /// \param  mode    Hardware mode of the bios to load.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void load_bios(const Hardware_mode mode);
     };
 
 

@@ -47,14 +47,19 @@ namespace core {
     }
 
     void Config::write_legacy_opengl(const bool value) {
-        Setting& root = cfg_.getRoot();
-        if (!root.exists("rendering")) root.add("rendering", Setting::TypeGroup);
-        Setting& rendering = root["rendering"];
-        if (!rendering.exists("legacy_opengl")) rendering.add("legacy_opengl", Setting::TypeBoolean) = value;
-        else {
-            Setting& legacy_opengl = rendering["legacy_opengl"];
-            legacy_opengl = value;
-        }
+        Setting& rendering = get_group(cfg_.getRoot(), "rendering");
+        
+        
+        //if (!rendering.exists("legacy_opengl")) rendering.add("legacy_opengl", Setting::TypeBoolean) = value;
+        //else {
+        //    Setting& legacy_opengl = rendering["legacy_opengl"];
+        //    legacy_opengl = value;
+        //}
+        write_value(rendering, "legacy_opengl", value);
+        
+        string str{ "str" };
+        write_value(rendering, "test_string", str.c_str());
+
     }
 
     bool Config::initialize(const bool isModernOpenGlCapable) {
@@ -69,6 +74,28 @@ namespace core {
         }
         return true;
     }
+
+    Setting& Config::get_group(Setting& root, const string& group_name) {
+        if (!root.exists(group_name.c_str())) root.add(group_name.c_str(), Setting::TypeGroup);
+        return root[group_name.c_str()];
+    }
+
+    //void Config::write_value(Setting& root, const string& key, const string& value) {
+    //    if (!root.exists(key.c_str())) root.add(key.c_str(), Setting::TypeString) = value;
+    //    else {
+    //        Setting& s = root[key.c_str()];
+    //        s = value;
+    //    }
+
+    //}
+
+    //void Config::write_value(Setting& root, const string& key, const bool value) {
+    //    if (!root.exists(key.c_str())) root.add(key.c_str(), Setting::TypeBoolean) = value;
+    //    else {
+    //        Setting& s = root[key.c_str()];
+    //        s = value;
+    //    }
+    //}
 
 };
 };
