@@ -73,6 +73,9 @@ int main(int argc, char *argv[])
 
     bool is_legacy_opengl = cfg.lookup("rendering.legacy_opengl");
 
+    cfg.test();
+
+
     if (is_legacy_opengl) return run_legacy_opengl(); else return run_modern_opengl();
 
    

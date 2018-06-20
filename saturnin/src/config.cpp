@@ -57,8 +57,8 @@ namespace core {
         //}
         write_value(rendering, "legacy_opengl", value);
         
-        string str{ "str" };
-        write_value(rendering, "test_string", str.c_str());
+        //string str{ "str" };
+        //write_value(rendering, "test_string", str.c_str());
 
     }
 
@@ -67,6 +67,10 @@ namespace core {
             cout << translate("Creating configuration file.") << endl;
             write_file("saturnin.cfg");
             if (!read_file("saturnin.cfg")) return false;
+
+            // generating parameters skeleton
+            Setting& root = cfg_.getRoot();
+            root.add("rendering", Setting::TypeGroup);
 
             write_legacy_opengl(!isModernOpenGlCapable);
 
@@ -78,6 +82,18 @@ namespace core {
     Setting& Config::get_group(Setting& root, const string& group_name) {
         if (!root.exists(group_name.c_str())) root.add(group_name.c_str(), Setting::TypeGroup);
         return root[group_name.c_str()];
+    }
+
+    void Config::test() {
+        Setting& root = cfg_.getRoot();
+        std::string str{"test"};
+        
+        //write_value(root, "test_string", str);
+        write_value(root, "test_c_string", str.c_str());
+        write_value(root, "test_string", std::string{ "test" });
+        write_value(root, "test_char_array", "test");
+
+        write_file("saturnin.cfg");
     }
 
     //void Config::write_value(Setting& root, const string& key, const string& value) {
