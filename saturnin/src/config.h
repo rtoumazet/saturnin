@@ -153,6 +153,8 @@ namespace core {
 
         //void Config::write_value(libconfig::Setting&, const std::string&, const bool);
 
+        void Config::test();
+
         //template <class T> class ToMySetting {};
         //template <> ToMySetting<bool>  { static libconfig::Setting::Type index = { libconfig::Setting::TypeBoolean }; };
         ////template <> ToMySetting<int> { static libconfig::Setting::Type index = { libconfig::Setting::TypeInt }; };
@@ -174,7 +176,16 @@ namespace core {
                 s = value;
             }
         }
-   
+
+        void write_value(libconfig::Setting& root, const std::string& key, const std::string& value)
+        {
+            if (!root.exists(key.c_str())) root.add(key.c_str(), libconfig::Setting::TypeString) = value.c_str();
+            else {
+                libconfig::Setting& s = root[key.c_str()];
+                s = value.c_str();
+            }
+        }
+
     private:
         libconfig::Config cfg_; ///< Internal configuration object
 
