@@ -57,17 +57,9 @@ namespace core {
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \enum   Emulation_status
-    ///
-    /// \brief  State of the emulation.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \class  Memory
     ///
-    /// \brief  Regroups everything related to the Saturn memory map.
+    /// \brief  Encapsulates Saturn memory map and related methods.
     ///
     /// \author Runik
     /// \date   07/06/2018
@@ -98,7 +90,7 @@ namespace core {
         std::array <uint8_t, 0x1000>	cache_data;           ///< Cache data (4KB).
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Memory::load_bios(const Hardware_mode mode);
+        /// \fn void Memory::loadBios(const Hardware_mode mode);
         ///
         /// \brief  Loads the BIOS into memory.
         ///
@@ -108,7 +100,7 @@ namespace core {
         /// \param  mode    Hardware mode of the bios to load.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void load_bios(const Hardware_mode mode);
+        void loadBios(const Hardware_mode mode);
     };
 
 

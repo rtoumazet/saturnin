@@ -63,6 +63,9 @@
     <ClCompile Include="lib\lodepng\lodepng.cpp">
       <Filter>Fichiers sources\lodepng</Filter>
     </ClCompile>
+    <ClCompile Include="src\memory.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\video\opengl.h">

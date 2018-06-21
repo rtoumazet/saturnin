@@ -27,59 +27,53 @@ using namespace std;
 
 namespace saturnin {
 namespace core {
+
     bool Config::lookup(const std::string& path) const {
         return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
     }
     
-    void Config::write_file(const std::string & filename) {
+    void Config::writeFile(const std::string & filename) {
         cfg_.writeFile(filename.c_str());
     }
 
-    bool Config::read_file(const std::string & filename){
+    bool Config::readFile(const std::string & filename){
         try {
             cfg_.readFile(filename.c_str());
             return true;
         }
         catch (const FileIOException &fioex) {
-            cout << translate("Could not read the configuration file.") << endl;
+            
+            cout << translate("Could not read the configuration file: ") << fioex.what() << endl;
             return false;
         }
     }
 
-    void Config::write_legacy_opengl(const bool value) {
-        Setting& rendering = get_group(cfg_.getRoot(), "rendering");
-        
-        
-        //if (!rendering.exists("legacy_opengl")) rendering.add("legacy_opengl", Setting::TypeBoolean) = value;
-        //else {
-        //    Setting& legacy_opengl = rendering["legacy_opengl"];
-        //    legacy_opengl = value;
-        //}
-        write_value(rendering, "legacy_opengl", value);
-        
-        //string str{ "str" };
-        //write_value(rendering, "test_string", str.c_str());
-
-    }
-
     bool Config::initialize(const bool isModernOpenGlCapable) {
-        if (!read_file("saturnin.cfg")) {
+        if (!readFile(filename_)) {
             cout << translate("Creating configuration file.") << endl;
-            write_file("saturnin.cfg");
-            if (!read_file("saturnin.cfg")) return false;
+            writeFile(filename_);
+            if (!readFile(filename_)) return false;
 
-            // generating parameters skeleton
-            Setting& root = cfg_.getRoot();
-            root.add("rendering", Setting::TypeGroup);
+            generateConfigurationTree(isModernOpenGlCapable);
 
-            write_legacy_opengl(!isModernOpenGlCapable);
-
-            write_file("saturnin.cfg");
+            writeFile(filename_);
         }
         return true;
     }
 
-    Setting& Config::get_group(Setting& root, const string& group_name) {
+    void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
+        Setting& root      = cfg_.getRoot();
+        
+        Setting& rendering = root.add("rendering", Setting::TypeGroup);
+        writeValue(rendering, "legacy_opengl", !isModernOpenglCapable);
+
+        Setting& paths = root.add("paths", Setting::TypeGroup);
+        writeValue(paths, "roms_stv", "");
+        writeValue(paths, "bios_stv", "");
+        writeValue(paths, "bios_saturn", "");
+    }
+
+    Setting& Config::getGroup(Setting& root, const string& group_name) {
         if (!root.exists(group_name.c_str())) root.add(group_name.c_str(), Setting::TypeGroup);
         return root[group_name.c_str()];
     }
@@ -88,30 +82,24 @@ namespace core {
         Setting& root = cfg_.getRoot();
         std::string str{"test"};
         
-        //write_value(root, "test_string", str);
-        write_value(root, "test_c_string", str.c_str());
-        write_value(root, "test_string", std::string{ "test" });
-        write_value(root, "test_char_array", "test");
+        writeValue(root, "test_c_string", str.c_str());
+        writeValue(root, "test_string", std::string{ "test" });
+        writeValue(root, "test_char_array", "test");
 
-        write_file("saturnin.cfg");
+        writeFile(filename_);
     }
 
-    //void Config::write_value(Setting& root, const string& key, const string& value) {
-    //    if (!root.exists(key.c_str())) root.add(key.c_str(), Setting::TypeString) = value;
-    //    else {
-    //        Setting& s = root[key.c_str()];
-    //        s = value;
-    //    }
+    Setting& Config::readValue(const std::string& value) {
+        return cfg_.lookup(value.c_str());
 
-    //}
+        //try {
+        //    bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
+        //    if (is_legacy_opengl) return run_legacy_opengl(); else return run_modern_opengl();
+        //}
+        //catch (const  SettingNotFoundException& e) {
+        //    cout << tr("Setting not found: ") << e.what() << endl;
 
-    //void Config::write_value(Setting& root, const string& key, const bool value) {
-    //    if (!root.exists(key.c_str())) root.add(key.c_str(), Setting::TypeBoolean) = value;
-    //    else {
-    //        Setting& s = root[key.c_str()];
-    //        s = value;
-    //    }
-    //}
-
+        //}
+    }
 };
 };

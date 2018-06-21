@@ -68,15 +68,10 @@ int main(int argc, char *argv[])
     //    std::cout << "Version:  " << plugin->version() << std::endl;
     //    plugin->log("test");
 
-    Config cfg;
-    if ( !cfg.initialize(is_modern_opengl_capable()) ) return 1;
-
-    bool is_legacy_opengl = cfg.lookup("rendering.legacy_opengl");
-
-    cfg.test();
-
-
+    Config cfg("saturnin.cfg");
+    if ( !cfg.initialize(isModernOpenglCapable()) ) return 1;
+    
+    bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
     if (is_legacy_opengl) return run_legacy_opengl(); else return run_modern_opengl();
-
-   
+  
 };
