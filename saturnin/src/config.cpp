@@ -18,10 +18,11 @@
 //
 
 #include <iostream> // cout
-#include <boost/locale.hpp> // translate
 #include "config.h"
+#include "locale.h"
+#include "log.h"
 
-using namespace boost::locale;
+
 using namespace libconfig;
 using namespace std;
 
@@ -43,14 +44,14 @@ namespace core {
         }
         catch (const FileIOException &fioex) {
             
-            cout << translate("Could not read the configuration file: ") << fioex.what() << endl;
+            cout << tr("Could not read the configuration file: ") << fioex.what() << endl;
             return false;
         }
     }
 
     bool Config::initialize(const bool isModernOpenGlCapable) {
         if (!readFile(filename_)) {
-            cout << translate("Creating configuration file.") << endl;
+            cout << tr("Creating configuration file.") << endl;
             writeFile(filename_);
             if (!readFile(filename_)) return false;
 
@@ -90,7 +91,15 @@ namespace core {
     }
 
     Setting& Config::readValue(const std::string& value) {
-        return cfg_.lookup(value.c_str());
+        try {
+            return cfg_.lookup(value.c_str());
+        }
+        catch (const SettingNotFoundException& e) {
+            
+            cout << tr("Setting not found: ") << e.getPath() << endl;
+            Log::error("config", "snd");
+            std::exit(EXIT_FAILURE);
+        }
 
         //try {
         //    bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
