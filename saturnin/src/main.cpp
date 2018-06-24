@@ -72,7 +72,6 @@ int main(int argc, char *argv[])
     if ( !cfg.initialize(isModernOpenglCapable()) ) return 1;
     
     bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
-    bool is_legacy_opengl2 = cfg.readValue("rendering.egacy_opengl");
     if (is_legacy_opengl) return run_legacy_opengl(); else return run_modern_opengl();
   
 };
