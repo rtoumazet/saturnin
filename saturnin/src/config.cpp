@@ -96,8 +96,10 @@ namespace core {
         }
         catch (const SettingNotFoundException& e) {
             
-            cout << tr("Setting not found: ") << e.getPath() << endl;
-            Log::error("config", "snd");
+            auto errorString = tr("Setting not found: '{}'");
+            Log::error("config", errorString, e.getPath());
+            Log::error("config", tr("Exiting ..."));
+
             std::exit(EXIT_FAILURE);
         }
 
