@@ -83,8 +83,15 @@ namespace core {
 
         template <typename... Args>
         static inline void error(const std::string& logger_name, const std::string& value, const Args&... args) {
-            if (loggerExists(logger_name)) loggers_.at(logger_name)->error(value.c_str(), args...);
-            if (loggerExists("console")) loggers_.at("console")->error(value.c_str(), args...); // errors are also logged to console
+            if (loggerExists(logger_name)) {
+                loggers_.at(logger_name)->error(value.c_str(), args...);
+                auto message{ "[{}] " + value };
+                loggers_.at("console")->error(message.c_str(), logger_name, args...);
+            }
+            else {
+                auto message{ tr(" Log '{}' not defined !") };
+                loggers_.at("console")->error(message.c_str(), logger_name.c_str());
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +111,11 @@ namespace core {
         template <typename... Args>
         static inline void warning(const std::string& logger_name, const std::string& value, const Args&... args) {
             if (loggerExists(logger_name)) loggers_.at(logger_name)->warn(value.c_str(), args...);
-            if (loggerExists("console")) loggers_.at("console")->warn(value.c_str(), args...); // warnings are also logged to console
+            if (loggerExists("console")) {
+                // warnings are also logged to console, using original logger name
+                auto message{"[{}] "+value};
+                loggers_.at("console")->warn(message.c_str(), logger_name, args...); 
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
