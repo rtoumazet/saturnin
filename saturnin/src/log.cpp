@@ -30,14 +30,14 @@ namespace core {
     /* static */
     bool Log::initialize() {
         createConsole();
-        
         //spdlog::stdout_color_mt("console"); // console is in the global namespace
-        string pattern = "[%X][%n][%l] %v";
-        spdlog::set_pattern(pattern);
+        //string pattern = "[%X][%n][%l] %v";
+        //spdlog::set_pattern(pattern);
         auto sink = createFileSink("logs/saturnin.log");
         createLogger("vdp1", sink);
         createLogger("vdp2", sink);
         createLogger("config", sink);
+        
 
         return true;
     }
@@ -60,6 +60,8 @@ namespace core {
     void Log::createLogger(const std::string & logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink)
     {
         auto logger = std::make_shared<spdlog::logger>(logger_name, sink);
+        string pattern = "[%X][%n][%l] %v";
+        logger->set_pattern(pattern);
         loggers_[logger_name] = logger;
         spdlog::register_logger(logger);
     }
@@ -68,6 +70,8 @@ namespace core {
     void Log::createConsole()
     {
         auto console = spdlog::stdout_color_mt("console");
+        std::string pattern = "[%X][%l]%v";
+        console->set_pattern(pattern);
         loggers_["console"] = console;
         // no need to register the console as it already exists
     }
