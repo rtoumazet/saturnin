@@ -1,6 +1,7 @@
 @echo off
 for /f "delims=" %%x in (config.txt) do (set "%%x")
-@set input_loc=--output-dir=%src_path%
+rem @set input_loc=--output-dir=%src_path%
+@set input_loc=-D %src_path%
 @set output_loc=--output=%lang_path%\saturnin.po
 @set files=--files-from=%lang_path%\filelist.txt
 
