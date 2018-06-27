@@ -29,10 +29,20 @@
 #include <string>
 #include <map>
 #include <spdlog/spdlog.h>
+#include "locale.h" // tr
 
 namespace saturnin {
 namespace core {
-    
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \class  Log
+    ///
+    /// \brief  Handles logging in the emulator. Spdlog wrapper.
+    ///
+    /// \author Runik
+    /// \date   21/06/2018
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     class Log {
     public:
         //@{
@@ -74,7 +84,17 @@ namespace core {
 
         template <typename... Args>
         static inline void error(const std::string& logger_name, const std::string& value, const Args&... args) {
-            if (loggerExists(logger_name)) loggers_.at(logger_name)->error(value.c_str(), args...);
+            try {
+                if (loggerExists(logger_name)) {
+                    loggers_.at(logger_name)->error(value.c_str(), args...);
+                    // errors are also logged to console, using original logger name
+                    auto message{ "[{}] " + value };
+                    loggers_.at("console")->error(message.c_str(), logger_name, args...);
+                }
+            }
+            catch (const std::runtime_error& e) {
+                loggers_.at("console")->warn(e.what());
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +113,17 @@ namespace core {
 
         template <typename... Args>
         static inline void warning(const std::string& logger_name, const std::string& value, const Args&... args) {
-            if (loggerExists(logger_name)) loggers_.at(logger_name)->warn(value.c_str(), args...);
+            try {
+                if (loggerExists(logger_name)) {
+                    loggers_.at(logger_name)->warn(value.c_str(), args...);
+                    // warnings are also logged to console, using original logger name
+                    auto message{ "[{}] " + value };
+                    loggers_.at("console")->warn(message.c_str(), logger_name, args...);
+                }
+            }
+            catch (const std::runtime_error& e) {
+                loggers_.at("console")->warn(e.what());
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +165,7 @@ namespace core {
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static inline bool Log::loggerExists(const std::string& logger_name)
+        /// \fn static inline bool Log::loggerExists(const std::string& logger_name);
         ///
         /// \brief  Queries if a given logger exists.
         ///
@@ -147,16 +177,15 @@ namespace core {
         /// \return True if the logger exists.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static inline bool loggerExists(const std::string& logger_name) {
+        static inline bool loggerExists(const std::string& logger_name){
             if (loggers_.count(logger_name) == 0) {
-                auto console = spdlog::stdout_color_mt("console");
-                console->error("Logger '{}' not defined !", logger_name);
-                return false;
-            } else  return true;
-       }
+                throw std::runtime_error( tr("Log '"+logger_name+"' is not defined !"));
+            }
+            return true;
+        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::create_sink(const std::string& logger_path);
+        /// \fn static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createFileSink(const std::string& logger_path);
         ///
         /// \brief  Creates a sink.
         ///
@@ -168,10 +197,13 @@ namespace core {
         /// \return The new sink.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> create_sink(const std::string& logger_path);
+        static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> createFileSink(const std::string& logger_path);
+        
+        
+        static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> createConsoleSink();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static void Log::create_logger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
+        /// \fn static void Log::createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
         ///
         /// \brief  Creates a logger.
         ///
@@ -182,7 +214,19 @@ namespace core {
         /// \param  sink        The sink.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static void create_logger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
+        static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn static void Log::createConsole();
+        ///
+        /// \brief  Creates the console logger. Will be accessible using "console" name.
+        ///
+        /// \author Runik
+        /// \date   23/06/2018
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        static void createConsole();
+
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn static void Log::removeFile(const std::string& path);
@@ -195,7 +239,7 @@ namespace core {
         /// \param  path    Full pathname of the file.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static void remove_file(const std::string& path);
+        static void removeFile(const std::string& path);
 
     private:
         static std::map<std::string, std::shared_ptr<spdlog::logger>> loggers_; ///< Map containing all the loggers used in the program

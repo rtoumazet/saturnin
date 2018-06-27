@@ -29,33 +29,50 @@ namespace core {
 
     /* static */
     bool Log::initialize() {
-        string pattern = "[%X][%n][%l] %v";
-        spdlog::set_pattern(pattern);
-        auto sink = create_sink("logs/saturnin.log");
-        create_logger("vdp1", sink);
-        create_logger("vdp2", sink);
+        createConsole();
+        auto sink = createFileSink("logs/saturnin.log");
+        createLogger("vdp1", sink);
+        createLogger("vdp2", sink);
+        createLogger("config", sink);
 
         return true;
     }
 
     /* static */
-    std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::create_sink(const std::string & logger_path)
+    std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createFileSink(const std::string & logger_path)
     {
-        remove_file(logger_path);
+        removeFile(logger_path);
 
         return std::make_shared<spdlog::sinks::simple_file_sink_mt>(logger_path);
     }
 
     /* static */
-    void Log::create_logger(const std::string & logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink)
+    std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> Log::createConsoleSink()
+    {
+        return std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
+    }
+
+    /* static */
+    void Log::createLogger(const std::string & logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink)
     {
         auto logger = std::make_shared<spdlog::logger>(logger_name, sink);
+        string pattern = "[%X][%n][%l] %v";
+        logger->set_pattern(pattern);
         loggers_[logger_name] = logger;
         spdlog::register_logger(logger);
     }
 
     /* static */
-    void Log::remove_file(const std::string& path) {
+    void Log::createConsole()
+    {
+        auto console = spdlog::stdout_color_mt("console");
+        std::string pattern = "[%X][%l] %v";
+        console->set_pattern(pattern);
+        loggers_["console"] = console;
+        // no need to register the console as it already exists
+    }
+    /* static */
+    void Log::removeFile(const std::string& path) {
         auto full_path = boost::filesystem::current_path() / path;
         full_path.make_preferred();
         boost::filesystem::create_directories(full_path.parent_path());

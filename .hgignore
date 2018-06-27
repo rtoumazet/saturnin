@@ -8,3 +8,5 @@ saturnin/lang/config.txt
 saturnin/saturnin.cfg
 *.props
 dll_log/dll_log.vcxproj.user
+doxygen/*
+*_suppressions.cfg

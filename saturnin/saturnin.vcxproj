@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -133,6 +133,7 @@
     <ClCompile Include="src\locale.cpp" />
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\memory.cpp" />
     <ClCompile Include="src\video\bindings\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\video\bindings\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="src\video\gui.cpp" />

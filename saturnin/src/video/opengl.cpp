@@ -231,7 +231,7 @@ namespace video {
         fprintf(stderr, "Error %d: %s\n", error, description);
     }
 
-    bool is_modern_opengl_capable()
+    bool isModernOpenglCapable()
     {
         if (!glfwInit()) return false;
         else {
@@ -241,7 +241,7 @@ namespace video {
                 uint32_t major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
                 uint32_t minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
 
-                if (major = 3) {
+                if (major == 3) {
                     if (minor < 3) return false;
                 }
                 else if (major < 3) return false;

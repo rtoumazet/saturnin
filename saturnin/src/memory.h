@@ -27,13 +27,39 @@
 
 #include <array> // array
 
+#include "emulator_context.h"
+
 namespace saturnin {
 namespace core {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum	Rom_type
+    ///
+    /// \brief	ROM type. 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class Rom_type {
+        program, ///< Program ROM.
+        graphic, ///< Graphic ROM.
+        bios	 ///< Bios.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum	Rom_load
+    ///
+    /// \brief	Way ROM data is loaded. 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class Rom_load {
+        not_interleaved, ///< Data loaded sequentially. 
+        odd_interleaved, ///< Data loaded on odd bytes. 
+        even_interleaved ///< Data loaded on even bytes.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \class  Memory
     ///
-    /// \brief  Regroups everything related to the Saturn memory map.
+    /// \brief  Encapsulates Saturn memory map and related methods.
     ///
     /// \author Runik
     /// \date   07/06/2018
@@ -62,6 +88,19 @@ namespace core {
         std::array <uint8_t, 0x3000000>	cart;                 ///< Cart (50MB).
         std::array <uint8_t, 0x400>		cache_addresses;      ///< Cache addresses (1KB).
         std::array <uint8_t, 0x1000>	cache_data;           ///< Cache data (4KB).
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Memory::loadBios(const Hardware_mode mode);
+        ///
+        /// \brief  Loads the BIOS into memory.
+        ///
+        /// \author Runik
+        /// \date   18/06/2018
+        ///
+        /// \param  mode    Hardware mode of the bios to load.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void loadBios(const Hardware_mode mode);
     };
 
 
