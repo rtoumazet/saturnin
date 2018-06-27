@@ -29,6 +29,7 @@
 #include <string>
 #include <map>
 #include <spdlog/spdlog.h>
+#include "locale.h" // tr
 
 namespace saturnin {
 namespace core {
@@ -83,14 +84,16 @@ namespace core {
 
         template <typename... Args>
         static inline void error(const std::string& logger_name, const std::string& value, const Args&... args) {
-            if (loggerExists(logger_name)) {
-                loggers_.at(logger_name)->error(value.c_str(), args...);
-                auto message{ "[{}] " + value };
-                loggers_.at("console")->error(message.c_str(), logger_name, args...);
+            try {
+                if (loggerExists(logger_name)) {
+                    loggers_.at(logger_name)->error(value.c_str(), args...);
+                    // errors are also logged to console, using original logger name
+                    auto message{ "[{}] " + value };
+                    loggers_.at("console")->error(message.c_str(), logger_name, args...);
+                }
             }
-            else {
-                auto message{ tr(" Log '{}' not defined !") };
-                loggers_.at("console")->error(message.c_str(), logger_name.c_str());
+            catch (const std::runtime_error& e) {
+                loggers_.at("console")->warn(e.what());
             }
         }
 
@@ -110,11 +113,16 @@ namespace core {
 
         template <typename... Args>
         static inline void warning(const std::string& logger_name, const std::string& value, const Args&... args) {
-            if (loggerExists(logger_name)) loggers_.at(logger_name)->warn(value.c_str(), args...);
-            if (loggerExists("console")) {
-                // warnings are also logged to console, using original logger name
-                auto message{"[{}] "+value};
-                loggers_.at("console")->warn(message.c_str(), logger_name, args...); 
+            try {
+                if (loggerExists(logger_name)) {
+                    loggers_.at(logger_name)->warn(value.c_str(), args...);
+                    // warnings are also logged to console, using original logger name
+                    auto message{ "[{}] " + value };
+                    loggers_.at("console")->warn(message.c_str(), logger_name, args...);
+                }
+            }
+            catch (const std::runtime_error& e) {
+                loggers_.at("console")->warn(e.what());
             }
         }
 
@@ -171,11 +179,9 @@ namespace core {
 
         static inline bool loggerExists(const std::string& logger_name){
             if (loggers_.count(logger_name) == 0) {
-                //spdlog::get("console")->error("Logger '{}' not defined !", logger_name);
-                //Log::error("console", "Logger '{}' not defined !", logger_name);
-                return false;
+                throw std::runtime_error( tr("Log '"+logger_name+"' is not defined !"));
             }
-            else  return true;
+            return true;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
