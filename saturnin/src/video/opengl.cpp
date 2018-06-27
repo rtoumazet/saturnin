@@ -253,7 +253,7 @@ namespace video {
         return true;
     }
 
-    int32_t run_legacy_opengl()
+    int32_t runLegacyOpengl()
     {
         // Setup window
         glfwSetErrorCallback(error_callback);
@@ -399,7 +399,7 @@ namespace video {
         return 0;
     }
 
-    int32_t run_modern_opengl()
+    int32_t runModernOpengl()
     {
         // Setup window
         glfwSetErrorCallback(error_callback);

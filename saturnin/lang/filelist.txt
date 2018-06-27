@@ -1,1 +1,7 @@
-..\src\main.cpp
+config.cpp
+config.h
+locale.cpp
+locale.h
+log.h
+main.cpp
+memory.cpp
