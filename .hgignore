@@ -10,3 +10,4 @@ saturnin/saturnin.cfg
 dll_log/dll_log.vcxproj.user
 doxygen/*
 *_suppressions.cfg
+saturnin/lang/filelist_tmp.txt
