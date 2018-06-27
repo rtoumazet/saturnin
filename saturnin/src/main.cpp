@@ -22,7 +22,7 @@
 #include "config.h"
 #include "log.h"
 #include "video/opengl.h"
-#include "emustate.h"
+#include "emulator_context.h"
 #include "memory.h"
 //#include "video/opengl_legacy.h"
 //#include "video/opengl_modern.h"
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     Log::error("sound", "snd");
     Log::warning("vdp1", "snd");
 
-    Emu_state emu_state;
+    Emulator_context emu_state;
 
     write<32>(emu_state.memory->workram_low, 0, 0x12345678);
     auto val = read<16>(emu_state.memory->workram_low, 2);
@@ -68,12 +68,10 @@ int main(int argc, char *argv[])
     //    std::cout << "Version:  " << plugin->version() << std::endl;
     //    plugin->log("test");
 
-    Config cfg;
-    if ( !cfg.initialize(is_modern_opengl_capable()) ) return 1;
-
-    bool is_legacy_opengl = cfg.lookup("rendering.legacy_opengl");
-
+    Config cfg("saturnin.cfg");
+    if ( !cfg.initialize(isModernOpenglCapable()) ) return 1;
+    
+    bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
     if (is_legacy_opengl) return run_legacy_opengl(); else return run_modern_opengl();
-
-   
+  
 };

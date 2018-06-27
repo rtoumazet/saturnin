@@ -18,57 +18,99 @@
 //
 
 #include <iostream> // cout
-#include <boost/locale.hpp> // translate
 #include "config.h"
+#include "locale.h"
+#include "log.h"
 
-using namespace boost::locale;
+
 using namespace libconfig;
 using namespace std;
 
 namespace saturnin {
 namespace core {
+
     bool Config::lookup(const std::string& path) const {
         return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
     }
     
-    void Config::write_file(const std::string & filename) {
+    void Config::writeFile(const std::string & filename) {
         cfg_.writeFile(filename.c_str());
     }
 
-    bool Config::read_file(const std::string & filename){
+    bool Config::readFile(const std::string & filename){
         try {
             cfg_.readFile(filename.c_str());
             return true;
         }
         catch (const FileIOException &fioex) {
-            cout << translate("Could not read the configuration file.") << endl;
+            
+            cout << tr("Could not read the configuration file: ") << fioex.what() << endl;
             return false;
         }
     }
 
-    void Config::write_legacy_opengl(const bool value) {
-        Setting& root = cfg_.getRoot();
-        if (!root.exists("rendering")) root.add("rendering", Setting::TypeGroup);
-        Setting& rendering = root["rendering"];
-        if (!rendering.exists("legacy_opengl")) rendering.add("legacy_opengl", Setting::TypeBoolean) = value;
-        else {
-            Setting& legacy_opengl = rendering["legacy_opengl"];
-            legacy_opengl = value;
-        }
-    }
-
     bool Config::initialize(const bool isModernOpenGlCapable) {
-        if (!read_file("saturnin.cfg")) {
-            cout << translate("Creating configuration file.") << endl;
-            write_file("saturnin.cfg");
-            if (!read_file("saturnin.cfg")) return false;
+        if (!readFile(filename_)) {
+            cout << tr("Creating configuration file.") << endl;
+            writeFile(filename_);
+            if (!readFile(filename_)) return false;
 
-            write_legacy_opengl(!isModernOpenGlCapable);
+            generateConfigurationTree(isModernOpenGlCapable);
 
-            write_file("saturnin.cfg");
+            writeFile(filename_);
         }
         return true;
     }
 
+    void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
+        Setting& root      = cfg_.getRoot();
+        
+        Setting& rendering = root.add("rendering", Setting::TypeGroup);
+        writeValue(rendering, "legacy_opengl", !isModernOpenglCapable);
+
+        Setting& paths = root.add("paths", Setting::TypeGroup);
+        writeValue(paths, "roms_stv", "");
+        writeValue(paths, "bios_stv", "");
+        writeValue(paths, "bios_saturn", "");
+    }
+
+    Setting& Config::getGroup(Setting& root, const string& group_name) {
+        if (!root.exists(group_name.c_str())) root.add(group_name.c_str(), Setting::TypeGroup);
+        return root[group_name.c_str()];
+    }
+
+    void Config::test() {
+        Setting& root = cfg_.getRoot();
+        std::string str{"test"};
+        
+        writeValue(root, "test_c_string", str.c_str());
+        writeValue(root, "test_string", std::string{ "test" });
+        writeValue(root, "test_char_array", "test");
+
+        writeFile(filename_);
+    }
+
+    Setting& Config::readValue(const std::string& value) {
+        try {
+            return cfg_.lookup(value.c_str());
+        }
+        catch (const SettingNotFoundException& e) {
+            
+            auto errorString = tr("Setting not found: '{}'");
+            Log::error("config", errorString, e.getPath());
+            Log::error("config", tr("Exiting ..."));
+
+            std::exit(EXIT_FAILURE);
+        }
+
+        //try {
+        //    bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
+        //    if (is_legacy_opengl) return run_legacy_opengl(); else return run_modern_opengl();
+        //}
+        //catch (const  SettingNotFoundException& e) {
+        //    cout << tr("Setting not found: ") << e.what() << endl;
+
+        //}
+    }
 };
 };
