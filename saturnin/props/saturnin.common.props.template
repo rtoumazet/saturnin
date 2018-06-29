@@ -7,9 +7,10 @@
     <WinDdkDir>D:\Dev\SDK\WinDDK\7600.16385.1\inc</WinDdkDir>
     <LibConfigIncDir>D:\Dev\Libraries\libconfig-1.7.1\lib</LibConfigIncDir>
     <SpdlogIncDir>D:\Dev\Libraries\spdlog-0.16.3\include</SpdlogIncDir>
+    <fmtIncDir>D:\Dev\Libraries\fmt-5.0.0\include</fmtIncDir>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(LibDir);$(AspiSdkDir);$(WinDdkDir);$(LibConfigIncDir);$(SpdlogIncDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(LibDir);$(AspiSdkDir);$(WinDdkDir);$(LibConfigIncDir);$(SpdlogIncDir);$(fmtIncDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemGroup>
@@ -27,6 +28,9 @@
     </BuildMacro>
     <BuildMacro Include="SpdlogIncDir">
       <Value>$(SpdlogIncDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="fmtIncDir">
+      <Value>$(fmtIncDir)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

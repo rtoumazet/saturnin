@@ -29,6 +29,7 @@
 #include <string>
 #include <map>
 #include <spdlog/spdlog.h>
+#include <fmt/format.h>
 #include "locale.h" // tr
 
 namespace saturnin {
@@ -179,7 +180,7 @@ namespace core {
 
         static inline bool loggerExists(const std::string& logger_name){
             if (loggers_.count(logger_name) == 0) {
-                throw std::runtime_error( tr("Log '"+logger_name+"' is not defined !"));
+                throw std::runtime_error( fmt::format(tr("Log '{0}' is not defined !"), logger_name));
             }
             return true;
         }
