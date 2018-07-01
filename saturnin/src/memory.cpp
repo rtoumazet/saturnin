@@ -156,6 +156,7 @@ namespace core {
 
         switch (mode) {
         case Hardware_mode::saturn:
+            
             //length = GetPrivateProfileString("Path", "Saturn bios", "", reinterpret_cast<LPSTR>(&biosNameArray), 0x200, GetIniFile().c_str());
             break;
         case Hardware_mode::stv:

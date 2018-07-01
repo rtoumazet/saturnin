@@ -41,20 +41,17 @@ int main(int argc, char *argv[])
 {
     if ( !Locale::initialize() ) return 1;
    
-    std::cout << tr("Hello World") << std::endl;
     Log::initialize();
 
-    //spdlog::get("global")->debug("global test");
-    //spdlog::get("cdrom")->error("cdrom test");
-    spdlog::get("vdp1")->warn("vdp1 test");
-    Log::error("vdp2", "Error {}", 1);
-    Log::error("sound", "snd");
-    Log::warning("vdp1", "snd");
-
+    Config cfg("saturnin.cfg");
     Emulator_context emu_state;
+    emu_state.config = make_unique<Config>(cfg);
+    
+    if (!emu_state.config->initialize(isModernOpenglCapable())) return 1;
 
-    write<32>(emu_state.memory->workram_low, 0, 0x12345678);
-    auto val = read<16>(emu_state.memory->workram_low, 2);
+
+    //write<32>(emu_state.memory->workram_low, 0, 0x12345678);
+    //auto val = read<16>(emu_state.memory->workram_low, 2);
 
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
@@ -68,10 +65,9 @@ int main(int argc, char *argv[])
     //    std::cout << "Version:  " << plugin->version() << std::endl;
     //    plugin->log("test");
 
-    Config cfg("saturnin.cfg");
-    if ( !cfg.initialize(isModernOpenglCapable()) ) return 1;
+
     
-    bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
+    bool is_legacy_opengl = emu_state.config->readValue("rendering.legacy_opengl");
     if (is_legacy_opengl) return runLegacyOpengl(); else return runModernOpengl();
   
 };
