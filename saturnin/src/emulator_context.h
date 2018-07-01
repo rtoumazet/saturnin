@@ -20,15 +20,16 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	emulator_context.h
 ///
-/// \brief	Emulator context structure. 
+/// \brief	Emulator context struct. 
 ///
-/// Structure used to handle the emulator state data
+/// Class used to handle the emulator state
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
+#include "config.h"
 
 namespace saturnin {
 namespace core {
@@ -74,7 +75,7 @@ namespace core {
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \struct Emulator_context
+    /// \class  Emulator_context
     ///
     /// \brief  Regroups everything related to the emulator state.
     ///
@@ -83,6 +84,7 @@ namespace core {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Emulator_context {
+        std::unique_ptr<Config> config;
         std::unique_ptr<Memory> memory{ std::make_unique<Memory>() };
 
         Hardware_mode    hardware_mode   { Hardware_mode::saturn };     ///< Hardware mode
@@ -96,7 +98,7 @@ namespace core {
         uint32_t    binary_address { 0 };       ///< The PC will be set to this address after loading the binary.
         //@}
         
-        uint8_t stv_rom; ///< Crurrent ST-V ROM loaded
+        uint8_t stv_rom; ///< Current ST-V ROM loaded
     };
 }
 }

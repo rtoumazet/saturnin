@@ -188,19 +188,29 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createFileSink(const std::string& logger_path);
         ///
-        /// \brief  Creates a sink.
+        /// \brief  Creates a file sink.
         ///
         /// \author Runik
         /// \date   08/02/2018
         ///
         /// \param  logger_path Full pathname of the logger file.
         ///
-        /// \return The new sink.
+        /// \return Sink linked to the logger file.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> createFileSink(const std::string& logger_path);
-        
-        
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> Log::createConsoleSink();
+        ///
+        /// \brief  Creates a color console sink.
+        ///
+        /// \author Runik
+        /// \date   30/06/2018
+        ///
+        /// \return Sink linked to the color console.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> createConsoleSink();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,11 +238,10 @@ namespace core {
 
         static void createConsole();
 
-
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn static void Log::removeFile(const std::string& path);
         ///
-        /// \brief  Creates the fileor empty directory.
+        /// \brief  Removes the file if it exists, creates the the directory if it doesn't exist.
         ///
         /// \author Runik
         /// \date   08/02/2018

@@ -63,7 +63,7 @@ namespace core {
     }
 
     void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
-        Setting& root      = cfg_.getRoot();
+        Setting& root = cfg_.getRoot();
         
         Setting& rendering = root.add("rendering", Setting::TypeGroup);
         writeValue(rendering, "legacy_opengl", !isModernOpenglCapable);

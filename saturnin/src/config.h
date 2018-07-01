@@ -213,7 +213,7 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn void Config::generateConfigurationTree(const bool isModernOpenglCapable);
         ///
-        /// \brief  Generates the configuration tree in the configuration file.
+        /// \brief  Generates the configuration tree with default values in the configuration file.
         ///
         /// \author Runik
         /// \date   21/06/2018

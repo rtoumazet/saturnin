@@ -26,6 +26,7 @@
 #pragma once
 
 #include <array> // array
+#include <memory> // shared_pointer
 
 #include "emulator_context.h"
 
@@ -101,6 +102,9 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         void loadBios(const Hardware_mode mode);
+
+    private:
+        std::shared_ptr<Config> config_;
     };
 
 
