@@ -45,9 +45,9 @@ int main(int argc, char *argv[])
 
     Config cfg("saturnin.cfg");
     Emulator_context emu_state;
-    emu_state.config = make_unique<Config>(cfg);
+    emu_state.memory->config_ = make_shared<Config>(cfg);
     
-    if (!emu_state.config->initialize(isModernOpenglCapable())) return 1;
+    if (!cfg.initialize(isModernOpenglCapable())) return 1;
 
 
     //write<32>(emu_state.memory->workram_low, 0, 0x12345678);
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
 
     
-    bool is_legacy_opengl = emu_state.config->readValue("rendering.legacy_opengl");
+    bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
     if (is_legacy_opengl) return runLegacyOpengl(); else return runModernOpengl();
   
 };

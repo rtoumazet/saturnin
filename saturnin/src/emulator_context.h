@@ -84,7 +84,7 @@ namespace core {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Emulator_context {
-        std::unique_ptr<Config> config;
+        Emulator_context(Config cfg);
         std::unique_ptr<Memory> memory{ std::make_unique<Memory>() };
 
         Hardware_mode    hardware_mode   { Hardware_mode::saturn };     ///< Hardware mode
@@ -100,5 +100,9 @@ namespace core {
         
         uint8_t stv_rom; ///< Current ST-V ROM loaded
     };
+
+    Emulator_context::Emulator_context(Config cfg) {
+        memory->
+    }
 }
 }
