@@ -69,6 +69,17 @@ namespace core {
     class Memory {
     public:
         
+        //@{
+        // Constructors / Destructors
+        Memory() = delete;
+        Memory(std::shared_ptr<Config> config) : config_{ config } {};
+        Memory(const Memory&) = delete;
+        Memory(Memory&&) = delete;
+        Memory& operator=(const Memory&) & = delete;
+        Memory& operator=(Memory&&) & = delete;
+        ~Memory() = default;
+        //@}
+
         /// \name Saturn memory map definition.
         ///
 

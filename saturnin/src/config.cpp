@@ -102,15 +102,6 @@ namespace core {
 
             std::exit(EXIT_FAILURE);
         }
-
-        //try {
-        //    bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
-        //    if (is_legacy_opengl) return run_legacy_opengl(); else return run_modern_opengl();
-        //}
-        //catch (const  SettingNotFoundException& e) {
-        //    cout << tr("Setting not found: ") << e.what() << endl;
-
-        //}
     }
 };
 };
