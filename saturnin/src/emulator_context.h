@@ -67,7 +67,7 @@ namespace core {
     ///
     /// \brief  State of the emulation.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+
     enum class Emulation_status {
         running,    ///< Emulator is running
         paused,     ///< Emulator is paused
@@ -83,26 +83,36 @@ namespace core {
     /// \date   12/06/2018
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    struct Emulator_context {
-        Emulator_context(Config cfg);
-        std::unique_ptr<Memory> memory{ std::make_unique<Memory>() };
+    class Emulator_context {
+    public:
+        //@{
+        // Constructors / Destructors
+        Emulator_context();
+        Emulator_context(const Emulator_context&) = delete;
+        Emulator_context(Emulator_context&&)      = delete;
+        Emulator_context& operator                =(const Emulator_context&) & = delete;
+        Emulator_context& operator                =(Emulator_context&&) & = delete;
+        ~Emulator_context()                       = default;
+        //@}
+        // 
+        std::shared_ptr<Config> config_;
 
-        Hardware_mode    hardware_mode   { Hardware_mode::saturn };     ///< Hardware mode
+        std::unique_ptr<Memory> memory_;
+
+        Hardware_mode    hardware_mode{ Hardware_mode::saturn };     ///< Hardware mode
         Emulation_status emulation_status{ Emulation_status::stopped }; ///< Emulation status
 
         /// \name Command line variables
         ///
         //@{
         std::string command_line{ "" };         ///< Command line content
-        bool        autoload_binary  { false }; ///< True when the binary has to be automatically loaded.
-        uint32_t    binary_address { 0 };       ///< The PC will be set to this address after loading the binary.
+        bool        autoload_binary{ false }; ///< True when the binary has to be automatically loaded.
+        uint32_t    binary_address{ 0 };       ///< The PC will be set to this address after loading the binary.
         //@}
-        
-        uint8_t stv_rom; ///< Current ST-V ROM loaded
-    };
 
-    Emulator_context::Emulator_context(Config cfg) {
-        memory->
-    }
+        uint8_t stv_rom; ///< Current ST-V ROM loaded
+
+
+    };
 }
 }

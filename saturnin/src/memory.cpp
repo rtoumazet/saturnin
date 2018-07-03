@@ -148,7 +148,7 @@ namespace core {
     //    return false;
     //}
 
-    void Memory::loadBios(const Hardware_mode mode)
+void Memory::loadBios(const Hardware_mode mode)
     {
         //array <int8_t, 0x200> biosNameArray; 
         //biosNameArray.assign(' ');

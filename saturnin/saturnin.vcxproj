@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="lib\lodepng\lodepng.cpp" />
     <ClCompile Include="src\config.cpp" />
+    <ClCompile Include="src\emulator_context.cpp" />
     <ClCompile Include="src\locale.cpp" />
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\main.cpp" />

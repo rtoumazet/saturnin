@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
     Config cfg("saturnin.cfg");
     Emulator_context emu_state;
-    emu_state.memory->config_ = make_shared<Config>(cfg);
+    //emu_state.memory->config_ = make_shared<Config>(cfg);
     
     if (!cfg.initialize(isModernOpenglCapable())) return 1;
 
