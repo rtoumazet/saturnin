@@ -71,8 +71,7 @@ namespace core {
         
         //@{
         // Constructors / Destructors
-        Memory() = delete;
-        Memory(std::shared_ptr<Config> config) : config_{ config } {};
+        Memory() = default;
         Memory(const Memory&) = delete;
         Memory(Memory&&) = delete;
         Memory& operator=(const Memory&) & = delete;
@@ -115,7 +114,7 @@ namespace core {
         void loadBios(const Hardware_mode mode);
 
     private:
-        std::shared_ptr<Config> config_;
+        //std::shared_ptr<Config> config_;
     };
 
 
