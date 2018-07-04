@@ -23,9 +23,10 @@ namespace saturnin {
 namespace core {
 
     Emulator_context::Emulator_context() {
-        Config config("saturnin.cfg");
+        //Config config("saturnin.cfg");
 
-        std::unique_ptr<Memory> memory{ std::make_unique<Memory>(config) };
+        //std::unique_ptr<Memory> memory{ std::make_unique<Memory>(config) };
+        memory_ = std::make_unique<Memory>(new Memory);
 
         Hardware_mode    hardware_mode{ Hardware_mode::saturn };     ///< Hardware mode
         Emulation_status emulation_status{ Emulation_status::stopped }; ///< Emulation status

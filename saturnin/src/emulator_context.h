@@ -30,6 +30,7 @@
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
 #include "config.h"
+#include "memory.h"
 
 namespace saturnin {
 namespace core {
@@ -39,7 +40,7 @@ namespace core {
     ///
     //@{
     //class CSH2;
-    class Memory;
+//    class Memory;
     //class COGL;
     //class InterruptHandler;
     //class Log;
@@ -95,9 +96,9 @@ namespace core {
         ~Emulator_context()                       = default;
         //@}
         // 
-        std::shared_ptr<Config> config_;
+        //std::shared_ptr<Config> config_;
 
-        std::unique_ptr<Memory> memory_;
+        std::unique_ptr<Memory*> memory_;
 
         Hardware_mode    hardware_mode{ Hardware_mode::saturn };     ///< Hardware mode
         Emulation_status emulation_status{ Emulation_status::stopped }; ///< Emulation status
