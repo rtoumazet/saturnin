@@ -72,10 +72,10 @@ namespace core {
         //@{
         // Constructors / Destructors
         Memory() = default;
-        Memory(const Memory&) = delete;
-        Memory(Memory&&) = delete;
-        Memory& operator=(const Memory&) & = delete;
-        Memory& operator=(Memory&&) & = delete;
+        Memory(const Memory&) = default;
+        Memory(Memory&&) = default;
+        Memory& operator=(const Memory&) & = default;
+        Memory& operator=(Memory&&) & = default;
         ~Memory() = default;
         //@}
 

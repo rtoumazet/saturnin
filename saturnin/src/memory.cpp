@@ -24,7 +24,6 @@ using namespace std;
 
 namespace saturnin {
 namespace core {
-
     //bool Memory::StvLoadRomToMemory(const string &		zipname,
     //    const string & rom_name,
     //    uint8_t *	   destination,
@@ -148,8 +147,7 @@ namespace core {
     //    return false;
     //}
 
-void Memory::loadBios(const Hardware_mode mode)
-    {
+void Memory::loadBios(const Hardware_mode mode){
         //array <int8_t, 0x200> biosNameArray; 
         //biosNameArray.assign(' ');
         //uint32_t length = 0;

@@ -23,9 +23,6 @@
 #include "log.h"
 #include "video/opengl.h"
 #include "emulator_context.h"
-#include "memory.h"
-//#include "video/opengl_legacy.h"
-//#include "video/opengl_modern.h"
 
 using namespace std;
 using namespace saturnin::video;
