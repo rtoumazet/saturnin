@@ -122,6 +122,9 @@
     <ClInclude Include="src\stv_definitions.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
+    <ClInclude Include="src\emulator_enums.h">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\icons.png.inc">

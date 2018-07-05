@@ -147,6 +147,7 @@
     <ClInclude Include="lib\lodepng\lodepng.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\emulator_context.h" />
+    <ClInclude Include="src\emulator_enums.h" />
     <ClInclude Include="src\locale.h" />
     <ClInclude Include="src\log.h" />
     <ClInclude Include="src\memory.h" />
