@@ -29,7 +29,9 @@
 
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
+#include "emulator_enums.h"
 #include "config.h"
+#include "memory.h"
 
 namespace saturnin {
 namespace core {
@@ -39,7 +41,7 @@ namespace core {
     ///
     //@{
     //class CSH2;
-    class Memory;
+    //class Memory;
     //class COGL;
     //class InterruptHandler;
     //class Log;
@@ -51,28 +53,6 @@ namespace core {
     //class SCSP;
     //@}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \enum	Hardware_mode
-    ///
-    /// \brief	Hardware mode used. 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    enum class Hardware_mode {
-        saturn, ///< Saturn.
-        stv     ///< ST-V.
-    };
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \enum   Emulation_status
-    ///
-    /// \brief  State of the emulation.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    enum class Emulation_status {
-        running,    ///< Emulator is running
-        paused,     ///< Emulator is paused
-        stopped     ///< Emulator is stopped
-    };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \class  Emulator_context
@@ -88,11 +68,11 @@ namespace core {
         //@{
         // Constructors / Destructors
         Emulator_context();
-        Emulator_context(const Emulator_context&) = delete;
-        Emulator_context(Emulator_context&&)      = delete;
-        Emulator_context& operator                =(const Emulator_context&) & = delete;
-        Emulator_context& operator                =(Emulator_context&&) & = delete;
-        ~Emulator_context()                       = default;
+        Emulator_context(const Emulator_context&)              = delete;
+        Emulator_context(Emulator_context&&)                   = delete;
+        Emulator_context& operator=(const Emulator_context&) & = delete;
+        Emulator_context& operator=(Emulator_context&&) &      = delete;
+        ~Emulator_context()                                    = default;
         //@}
         // 
         std::shared_ptr<Config> config_;

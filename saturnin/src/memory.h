@@ -28,7 +28,7 @@
 #include <array> // array
 #include <memory> // shared_pointer
 
-#include "emulator_context.h"
+#include "emulator_enums.h"
 
 namespace saturnin {
 namespace core {
@@ -71,34 +71,34 @@ namespace core {
         
         //@{
         // Constructors / Destructors
-        Memory() = default;
-        Memory(const Memory&) = delete;
-        Memory(Memory&&) = delete;
+        Memory()                           = default;
+        Memory(const Memory&)              = delete;
+        Memory(Memory&&)                   = delete;
         Memory& operator=(const Memory&) & = delete;
-        Memory& operator=(Memory&&) & = delete;
-        ~Memory() = default;
+        Memory& operator=(Memory&&) &      = delete;
+        ~Memory()                          = default;
         //@}
 
         /// \name Saturn memory map definition.
         ///
 
-        std::array <uint8_t, 0x100000>	workram_low;          ///< low workram (1MB).
-        std::array <uint8_t, 0x100000>  workram_high;         ///< high workram (1MB).
-        std::array <uint8_t, 0x80000>   rom;                  ///< ROM (512KB).
-        std::array <uint8_t, 0x80>		smpc;                 ///< SMPC (128B).
-        std::array <uint8_t, 0x10000>	backup_ram;           ///< Backup RAM (64KB).
-        std::array <uint8_t, 0xD0>		scu;                  ///< SCU (208B)
-        std::array <uint8_t, 0x80000>	vdp2_vram;            ///< VDP2 video RAM (512KB)
-        std::array <uint8_t, 0x1000>	vdp2_cram;            ///< VDP2 color RAM (4KB).
-        std::array <uint8_t, 0x200>		vdp2_registers;       ///< VDP2 registers (512B).
-        std::array <uint8_t, 0x80000>	vdp1_vram;            ///< VDP1 video RAM (512KB).
-        std::array <uint8_t, 0x40000>	vdp1_framebuffer;     ///< VDP1 framebuffer (256KB).
-        std::array <uint8_t, 0x18>		vdp1_registers;       ///< VDP1 registers (24B).
-        std::array <uint8_t, 0x100000>	sound_ram;            ///< Sound RAM (1MB).
-        std::array <uint8_t, 0x100>		stv_io;               ///< STV I/O (256B).
-        std::array <uint8_t, 0x3000000>	cart;                 ///< Cart (50MB).
-        std::array <uint8_t, 0x400>		cache_addresses;      ///< Cache addresses (1KB).
-        std::array <uint8_t, 0x1000>	cache_data;           ///< Cache data (4KB).
+        std::array <uint8_t, 0x100000>  workram_low;      ///< low workram (1MB).
+        std::array <uint8_t, 0x100000>  workram_high;     ///< high workram (1MB).
+        std::array <uint8_t, 0x80000>   rom;              ///< ROM (512KB).
+        std::array <uint8_t, 0x80>      smpc;             ///< SMPC (128B).
+        std::array <uint8_t, 0x10000>   backup_ram;       ///< Backup RAM (64KB).
+        std::array <uint8_t, 0xD0>      scu;              ///< SCU (208B)
+        std::array <uint8_t, 0x80000>   vdp2_vram;        ///< VDP2 video RAM (512KB)
+        std::array <uint8_t, 0x1000>    vdp2_cram;        ///< VDP2 color RAM (4KB).
+        std::array <uint8_t, 0x200>     vdp2_registers;   ///< VDP2 registers (512B).
+        std::array <uint8_t, 0x80000>   vdp1_vram;        ///< VDP1 video RAM (512KB).
+        std::array <uint8_t, 0x40000>   vdp1_framebuffer; ///< VDP1 framebuffer (256KB).
+        std::array <uint8_t, 0x18>      vdp1_registers;   ///< VDP1 registers (24B).
+        std::array <uint8_t, 0x100000>  sound_ram;        ///< Sound RAM (1MB).
+        std::array <uint8_t, 0x100>     stv_io;           ///< STV I/O (256B).
+        std::array <uint8_t, 0x3000000> cart;             ///< Cart (50MB).
+        std::array <uint8_t, 0x400>     cache_addresses;  ///< Cache addresses (1KB).
+        std::array <uint8_t, 0x1000>    cache_data;       ///< Cache data (4KB).
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn void Memory::loadBios(const Hardware_mode mode);
@@ -111,7 +111,7 @@ namespace core {
         /// \param  mode    Hardware mode of the bios to load.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void loadBios(const Hardware_mode mode);
+        void loadBios(const saturnin::core::Hardware_mode mode);
 
     private:
         //std::shared_ptr<Config> config_;
