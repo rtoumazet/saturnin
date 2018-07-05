@@ -42,6 +42,14 @@ namespace core {
     class Config {
     public:
 
+        static const std::string group_rendering;
+        static const std::string group_paths;
+
+        static const std::string key_legacy_opengl;
+        static const std::string key_roms_stv;
+        static const std::string key_bios_stv;
+        static const std::string key_bios_saturn;
+
         //@{
         // Constructors / Destructors
         Config()                           = delete;

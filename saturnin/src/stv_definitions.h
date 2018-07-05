@@ -31,6 +31,7 @@
 namespace saturnin {
 namespace core {
     enum class Rom_stv : std::uint8_t {
+        none                     = 0  ,  ///< None
         astra_superstars         = 1  ,  ///< Astra Superstars (IC13).
         baku_baku_animals        = 2  ,  ///< Baku Baku Animal (IC13)
         columns_97               = 3  ,  ///< Columns 97 (IC13)
@@ -86,7 +87,7 @@ namespace core {
         print_club_2             = 53 , ///< Print Club 2
         print_club_2_vol_3       = 54 , ///< Print Club 2 Vol. 3
         print_club_pokemon_b     = 55 , ///< Print Club Pokemon B
-        decathlete               = 56 , ///< Decathlete
+        decathlete_alt           = 56 , ///< Decathlete alternate version
         magical_zunou_power      = 57 , ///< Magical Zunou Power
         technical_bowling        = 58 , ///< Technical Bowling
         microman_battle_charge   = 59 , ///< Microman Battle Charge

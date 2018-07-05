@@ -32,6 +32,7 @@
 #include "emulator_enums.h"
 #include "config.h"
 #include "memory.h"
+#include "stv_definitions.h"
 
 namespace saturnin {
 namespace core {
@@ -75,23 +76,51 @@ namespace core {
         ~Emulator_context()                                    = default;
         //@}
         // 
-        std::shared_ptr<Config> config_;
 
-        std::unique_ptr<Memory> memory_;
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn std::shared_ptr<Config>& Emulator_context::config()
+        ///
+        /// \brief  Returns a reference to the shared config object.
+        ///
+        /// \author Runik
+        /// \date   05/07/2018
+        ///
+        /// \return A reference to a std::shared_ptr&lt;Config&gt;
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        std::shared_ptr<Config>& config() { return config_; };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn std::unique_ptr<Memory>& Emulator_context::memory()
+        ///
+        /// \brief  Returns a reference to the memory object.
+        ///
+        /// \author Runik
+        /// \date   05/07/2018
+        ///
+        /// \return A reference to a std::unique_ptr&lt;Memory&gt;
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        std::unique_ptr<Memory>& memory(){return memory_;};
+
 
         Hardware_mode    hardware_mode{ Hardware_mode::saturn };     ///< Hardware mode
         Emulation_status emulation_status{ Emulation_status::stopped }; ///< Emulation status
 
+
+    private:
+        std::shared_ptr<Config> config_; ///< Configuration object
+        std::unique_ptr<Memory> memory_; ///< Memory object
+
         /// \name Command line variables
         ///
         //@{
-        std::string command_line{ "" };         ///< Command line content
-        bool        autoload_binary{ false }; ///< True when the binary has to be automatically loaded.
-        uint32_t    binary_address{ 0 };       ///< The PC will be set to this address after loading the binary.
+        std::string command_line_{ "" };       ///< Command line content
+        bool        binary_autoload_{ false }; ///< True when the binary has to be automatically loaded.
+        uint32_t    binary_address_{ 0 };      ///< The PC will be set to this address after loading the binary.
         //@}
 
-        uint8_t stv_rom; ///< Current ST-V ROM loaded
-
+        Rom_stv stv_rom_{ Rom_stv::none }; ///< Current ST-V ROM loaded
 
     };
 }

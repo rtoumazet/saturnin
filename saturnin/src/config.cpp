@@ -29,6 +29,14 @@ using namespace std;
 namespace saturnin {
 namespace core {
 
+    const std::string Config::group_rendering{ "rendering" };
+    const std::string Config::group_paths{ "paths" };
+
+    const std::string Config::key_legacy_opengl{ "legacy_opengl" };
+    const std::string Config::key_roms_stv{ "roms_stv" };
+    const std::string Config::key_bios_stv{ "bios_stv" };
+    const std::string Config::key_bios_saturn{ "bios_saturn" };
+
     bool Config::lookup(const std::string& path) const {
         return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
     }
@@ -65,13 +73,13 @@ namespace core {
     void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
         Setting& root = cfg_.getRoot();
         
-        Setting& rendering = root.add("rendering", Setting::TypeGroup);
-        writeValue(rendering, "legacy_opengl", !isModernOpenglCapable);
+        Setting& rendering = root.add(group_rendering, Setting::TypeGroup);
+        writeValue(rendering, key_legacy_opengl, !isModernOpenglCapable);
 
-        Setting& paths = root.add("paths", Setting::TypeGroup);
-        writeValue(paths, "roms_stv", "");
-        writeValue(paths, "bios_stv", "");
-        writeValue(paths, "bios_saturn", "");
+        Setting& paths = root.add(group_paths, Setting::TypeGroup);
+        writeValue(paths, key_roms_stv, "");
+        writeValue(paths, key_bios_stv, "");
+        writeValue(paths, key_bios_saturn, "");
     }
 
     Setting& Config::getGroup(Setting& root, const string& group_name) {
