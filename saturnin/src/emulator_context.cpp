@@ -23,22 +23,8 @@ namespace saturnin {
 namespace core {
 
     Emulator_context::Emulator_context() {
-        Config config("saturnin.cfg");
-
-        //std::unique_ptr<Memory> memory{ std::make_unique<Memory>(config) };
-
-        Hardware_mode    hardware_mode{ Hardware_mode::saturn };     ///< Hardware mode
-        Emulation_status emulation_status{ Emulation_status::stopped }; ///< Emulation status
-
-                                                                        /// \name Command line variables
-                                                                        ///
-                                                                        //@{
-        std::string command_line{ "" };         ///< Command line content
-        bool        autoload_binary{ false }; ///< True when the binary has to be automatically loaded.
-        uint32_t    binary_address{ 0 };       ///< The PC will be set to this address after loading the binary.
-                                               //@}
-
-        uint8_t stv_rom; ///< Current ST-V ROM loaded
+        config_ = std::make_shared<Config>("saturnin.cfg");
+        memory_ = std::make_unique<Memory>(config_);
     }
 
 }

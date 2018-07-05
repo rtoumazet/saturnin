@@ -43,15 +43,12 @@ int main(int argc, char *argv[])
    
     Log::initialize();
 
-    Config cfg("saturnin.cfg");
-    Emulator_context emu_state;
-    //emu_state.memory->config_ = make_shared<Config>(cfg);
-    
-    if (!cfg.initialize(isModernOpenglCapable())) return 1;
+    Emulator_context state;
+   if (!state.config()->initialize(isModernOpenglCapable())) return 1;
 
 
-    //write<32>(emu_state.memory->workram_low, 0, 0x12345678);
-    //auto val = read<16>(emu_state.memory->workram_low, 2);
+    write<32>(state.memory()->workram_low, 0, 0x12345678);
+    auto val = read<16>(state.memory()->workram_low, 2);
 
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
@@ -67,7 +64,7 @@ int main(int argc, char *argv[])
 
 
     
-    bool is_legacy_opengl = cfg.readValue("rendering.legacy_opengl");
+    bool is_legacy_opengl = state.config()->readValue("rendering.legacy_opengl");
     if (is_legacy_opengl) return runLegacyOpengl(); else return runModernOpengl();
   
 };

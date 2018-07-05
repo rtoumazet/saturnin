@@ -148,21 +148,26 @@ namespace core {
     //    return false;
     //}
 
-void Memory::loadBios(const Hardware_mode mode)
-    {
+void Memory::loadBios(const Hardware_mode mode){
         //array <int8_t, 0x200> biosNameArray; 
         //biosNameArray.assign(' ');
         //uint32_t length = 0;
 
-        switch (mode) {
-        case Hardware_mode::saturn:
+    string bios_key{};
+    switch (mode) {
+    case Hardware_mode::saturn: {
+        bios_key = Config::key_bios_saturn;
+        break;
+    case Hardware_mode::stv:
+        bios_key = Config::key_bios_stv;
+        break;
+    default:
+        
+        break;
+    }
             
-            //length = GetPrivateProfileString("Path", "Saturn bios", "", reinterpret_cast<LPSTR>(&biosNameArray), 0x200, GetIniFile().c_str());
-            break;
-        case Hardware_mode::stv:
-            //length = GetPrivateProfileString("Path", "STV bios", "", reinterpret_cast<LPSTR>(&biosNameArray), 0x200, GetIniFile().c_str());
-            break;
-        }
+    string bios_path{ config_->readValue("bios_saturn") };
+
 
         //string biosNameString(biosNameArray.begin(), biosNameArray.begin() + length);
         //ifstream ifile(biosNameString, ios::binary);
