@@ -24,7 +24,6 @@ using namespace std;
 
 namespace saturnin {
 namespace core {
-
     //bool Memory::StvLoadRomToMemory(const string &		zipname,
     //    const string & rom_name,
     //    uint8_t *	   destination,
