@@ -30,12 +30,12 @@ namespace saturnin {
 namespace core {
 
     const std::string Config::group_rendering{ "rendering" };
-    const std::string Config::group_paths{ "paths" };
+    const std::string Config::key_legacy_opengl{ "rendering.legacy_opengl" };
 
-    const std::string Config::key_legacy_opengl{ "legacy_opengl" };
-    const std::string Config::key_roms_stv{ "roms_stv" };
-    const std::string Config::key_bios_stv{ "bios_stv" };
-    const std::string Config::key_bios_saturn{ "bios_saturn" };
+    const std::string Config::group_paths{ "paths" };
+    const std::string Config::key_roms_stv{ "paths.roms_stv" };
+    const std::string Config::key_bios_stv{ "paths.bios_stv" };
+    const std::string Config::key_bios_saturn{ "paths.bios_saturn" };
 
     bool Config::lookup(const std::string& path) const {
         return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
