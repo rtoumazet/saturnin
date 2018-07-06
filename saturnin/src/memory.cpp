@@ -17,7 +17,10 @@
 // limitations under the License.
 // 
 
+#include <sstream> // stringstream
 #include <fstream> // ifstream
+#include "locale.h"
+#include "log.h"
 #include "memory.h"
 
 using namespace std;
@@ -147,26 +150,51 @@ namespace core {
     //    return false;
     //}
 
-void Memory::loadBios(const Hardware_mode mode){
-        //array <int8_t, 0x200> biosNameArray; 
-        //biosNameArray.assign(' ');
-        //uint32_t length = 0;
+    void Memory::loadBios(const Hardware_mode mode) {
+        string bios_key{};
+        switch (mode) {
+        case Hardware_mode::saturn:
+            bios_key = Config::key_bios_saturn;
+            break;
+        case Hardware_mode::stv:
+            bios_key = Config::key_bios_stv;
+            break;
+        default:
+            Log::error("config", tr("Unknown hardware mode"));
+            Log::error("config", tr("Exiting ..."));
+            exit(EXIT_FAILURE);
+            break;
+        }
 
-    string bios_key{};
-    switch (mode) {
-    case Hardware_mode::saturn: {
-        bios_key = Config::key_bios_saturn;
-        break;
-    case Hardware_mode::stv:
-        bios_key = Config::key_bios_stv;
-        break;
-    default:
-        
-        break;
-    }
-            
-    string bios_path{ config_->readValue("bios_saturn") };
+        string bios_path = config_->readValue(bios_key).c_str();
+        ifstream input_file(bios_path, ios::binary);
+        if (input_file) {
+            stringstream buffer;
+            buffer << input_file.rdbuf();
+            input_file.close();
 
+            uint32_t counter{ buffer.str().size() };
+            string str = buffer.str();
+            switch (mode) {
+            case Hardware_mode::saturn:
+                for (uint32_t i = 0; i<counter; i += 4) {
+                    this->rom[i+0] = str[i+0];
+                    this->rom[i+1] = str[i+1];
+                    this->rom[i+2] = str[i+2];
+                    this->rom[i+3] = str[i+3];
+                }
+                break;
+            case Hardware_mode::stv:
+                // Needs byteswapping
+                for (uint32_t i = 0; i<counter; i += 4) {
+                    this->rom[i + 1] = str[i + 0];
+                    this->rom[i + 0] = str[i + 1];
+                    this->rom[i + 3] = str[i + 2];
+                    this->rom[i + 2] = str[i + 3];
+                }
+                break;
+            }
+        }
 
         //string biosNameString(biosNameArray.begin(), biosNameArray.begin() + length);
         //ifstream ifile(biosNameString, ios::binary);
@@ -199,6 +227,5 @@ void Memory::loadBios(const Hardware_mode mode){
         //    }
         //}
     }
-
 }
 }

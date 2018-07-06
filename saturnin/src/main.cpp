@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
     Emulator_context state;
    if (!state.config()->initialize(isModernOpenglCapable())) return 1;
 
+   state.memory()->loadBios(Hardware_mode::saturn);
 
     write<32>(state.memory()->workram_low, 0, 0x12345678);
     auto val = read<16>(state.memory()->workram_low, 2);
@@ -61,7 +62,7 @@ int main(int argc, char *argv[])
 
 
     
-    bool is_legacy_opengl = state.config()->readValue("rendering.legacy_opengl");
+    bool is_legacy_opengl = state.config()->readValue(Config::key_legacy_opengl);
     if (is_legacy_opengl) return runLegacyOpengl(); else return runModernOpengl();
   
 };
