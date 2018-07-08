@@ -17,6 +17,7 @@
 // limitations under the License.
 //
 
+#include <cstdarg> // va_*
 #include <iostream> // cout
 #include "config.h"
 #include "locale.h"
@@ -30,12 +31,12 @@ namespace saturnin {
 namespace core {
 
     const std::string Config::group_rendering{ "rendering" };
-    const std::string Config::key_legacy_opengl{ "rendering.legacy_opengl" };
+    const std::string Config::key_legacy_opengl{ "legacy_opengl" };
 
     const std::string Config::group_paths{ "paths" };
-    const std::string Config::key_roms_stv{ "paths.roms_stv" };
-    const std::string Config::key_bios_stv{ "paths.bios_stv" };
-    const std::string Config::key_bios_saturn{ "paths.bios_saturn" };
+    const std::string Config::key_roms_stv{ "roms_stv" };
+    const std::string Config::key_bios_stv{ "bios_stv" };
+    const std::string Config::key_bios_saturn{ "bios_saturn" };
 
     bool Config::lookup(const std::string& path) const {
         return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
@@ -60,11 +61,7 @@ namespace core {
     bool Config::initialize(const bool isModernOpenGlCapable) {
         if (!readFile(filename_)) {
             cout << tr("Creating configuration file.") << endl;
-            writeFile(filename_);
-            if (!readFile(filename_)) return false;
-
             generateConfigurationTree(isModernOpenGlCapable);
-
             writeFile(filename_);
         }
         return true;
@@ -72,14 +69,14 @@ namespace core {
 
     void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
         Setting& root = cfg_.getRoot();
-        
-        Setting& rendering = root.add(group_rendering, Setting::TypeGroup);
-        writeValue(rendering, key_legacy_opengl, !isModernOpenglCapable);
 
-        Setting& paths = root.add(group_paths, Setting::TypeGroup);
-        writeValue(paths, key_roms_stv, "");
-        writeValue(paths, key_bios_stv, "");
-        writeValue(paths, key_bios_saturn, "");
+        Setting& rendering = root.add(buildValue( group_rendering ).c_str(), Setting::TypeGroup);
+        writeValue(rendering, buildValue( key_legacy_opengl ).c_str(), !isModernOpenglCapable);
+
+        Setting& paths = root.add(group_paths.c_str(), Setting::TypeGroup);
+        writeValue(paths, key_roms_stv.c_str(), "");
+        writeValue(paths, key_bios_stv.c_str(), "");
+        writeValue(paths, key_bios_saturn.c_str(), "");
     }
 
     Setting& Config::getGroup(Setting& root, const string& group_name) {

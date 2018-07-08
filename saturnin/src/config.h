@@ -26,6 +26,8 @@
 
 #pragma warning(disable:4275) // libconfig specific warning disable
 #include <libconfig.h++>
+#include <iostream>
+#include <sstream>
 
 namespace saturnin {
 namespace core {
@@ -135,7 +137,6 @@ namespace core {
 
         libconfig::Setting& getGroup(libconfig::Setting& root, const std::string& group_name);
 
-
         void test();
 
 
@@ -236,5 +237,19 @@ namespace core {
         libconfig::Config cfg_; ///< Internal configuration object
 
     };
+
+    template<typename T>
+    std::string buildValue(const T& value)
+    {
+        std::ostringstream oss;
+        oss << value;
+        return oss.str();
+    }
+
+    template<typename T, typename ... Args >
+    std::string buildValue(const T& value, const Args& ... args)
+    {
+        return buildValue(value) + "." + buildValue(args...);
+    }
 };
 };

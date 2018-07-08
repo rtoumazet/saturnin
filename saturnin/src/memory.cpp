@@ -154,10 +154,10 @@ namespace core {
         string bios_key{};
         switch (mode) {
         case Hardware_mode::saturn:
-            bios_key = Config::key_bios_saturn;
+            bios_key = buildValue(Config::group_paths, Config::key_bios_saturn);
             break;
         case Hardware_mode::stv:
-            bios_key = Config::key_bios_stv;
+            bios_key = buildValue(Config::group_paths, Config::key_bios_stv);
             break;
         default:
             Log::error("config", tr("Unknown hardware mode"));
@@ -173,11 +173,11 @@ namespace core {
             buffer << input_file.rdbuf();
             input_file.close();
 
-            uint32_t counter{ buffer.str().size() };
+            size_t counter{ buffer.str().size() };
             string str = buffer.str();
             switch (mode) {
             case Hardware_mode::saturn:
-                for (uint32_t i = 0; i<counter; i += 4) {
+                for (size_t i = 0; i<counter; i += 4) {
                     this->rom[i+0] = str[i+0];
                     this->rom[i+1] = str[i+1];
                     this->rom[i+2] = str[i+2];
@@ -186,7 +186,7 @@ namespace core {
                 break;
             case Hardware_mode::stv:
                 // Needs byteswapping
-                for (uint32_t i = 0; i<counter; i += 4) {
+                for (size_t i = 0; i<counter; i += 4) {
                     this->rom[i + 1] = str[i + 0];
                     this->rom[i + 0] = str[i + 1];
                     this->rom[i + 3] = str[i + 2];
@@ -195,37 +195,6 @@ namespace core {
                 break;
             }
         }
-
-        //string biosNameString(biosNameArray.begin(), biosNameArray.begin() + length);
-        //ifstream ifile(biosNameString, ios::binary);
-        //if (ifile) {
-        //    stringstream buffer; // buffer will hold the whole file
-        //    buffer << ifile.rdbuf(); // copying the whole file content in the buffer
-        //    ifile.close(); // file isn't needed anymore
-
-        //    uint32_t counter = buffer.str().size();
-        //    string str = buffer.str();
-        //    // filling the rom data
-        //    switch (mode) {
-        //    case Hardware_mode::saturn:
-        //        for (uint32_t i = 0; i<counter; i += 4) {
-        //            this->rom[i+0] = str[i+0];
-        //            this->rom[i+1] = str[i+1];
-        //            this->rom[i+2] = str[i+2];
-        //            this->rom[i+3] = str[i+3];
-        //        }
-        //        break;
-        //    case Hardware_mode::stv:
-        //        // Needs byteswapping
-        //        for (uint32_t i = 0; i<counter; i += 4) {
-        //            this->rom[i + 1] = str[i + 0];
-        //            this->rom[i + 0] = str[i + 1];
-        //            this->rom[i + 3] = str[i + 2];
-        //            this->rom[i + 2] = str[i + 3];
-        //        }
-        //        break;
-        //    }
-        //}
     }
 }
 }
