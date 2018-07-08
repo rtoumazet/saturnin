@@ -9,6 +9,8 @@
   <PropertyGroup>
     <IncludePath>$(BoostRootDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(BoostX64LibDir);$(LibraryPath)</LibraryPath>
+    <OutDir>$(BuildRootDir)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(BuildRootDir)$(ProjectName)\obj\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
