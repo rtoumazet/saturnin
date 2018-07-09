@@ -29,6 +29,7 @@ using namespace std;
 
 namespace saturnin {
 namespace core {
+    static std::map<Config_keys, const char *> keys_write = { {Config_keys::rendering, "rendering"} };
 
     const std::string Config::group_rendering{ "rendering" };
     const std::string Config::key_legacy_opengl{ "legacy_opengl" };
