@@ -27,10 +27,25 @@
 #pragma warning(disable:4275) // libconfig specific warning disable
 #include <libconfig.h++>
 #include <iostream>
+#include <map>
 #include <sstream>
 
 namespace saturnin {
 namespace core {
+
+    enum class Config_keys {
+        rendering,
+        legacy_opengl,
+        paths,
+        roms_stv,
+        bios_stv,
+        bios_saturn
+    };
+
+    //Key_values const keys[];
+
+    extern std::map<Config_keys, const char *> keys_write;
+    //static std::map<Config_keys, const char *> keys_read;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \class  Config
