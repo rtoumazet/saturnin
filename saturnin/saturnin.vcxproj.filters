@@ -25,6 +25,12 @@
     <Filter Include="Fichiers sources\lodepng">
       <UniqueIdentifier>{eefe1bcf-2326-44b6-a0a2-4dec1a22c902}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\video\imgui-new">
+      <UniqueIdentifier>{2300c9cb-dc13-45d3-863b-ecfff4ce4614}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\video\bindings-new">
+      <UniqueIdentifier>{6a938d32-8c74-4f59-ad3d-159cdcaf4169}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\video\opengl.cpp">
@@ -68,6 +74,24 @@
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\bindings-new\imgui_impl_glfw.cpp">
+      <Filter>Fichiers sources\video\imgui-new</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\bindings-new\imgui_impl_opengl2.cpp">
+      <Filter>Fichiers sources\video\imgui-new</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\bindings-new\imgui_impl_opengl3.cpp">
+      <Filter>Fichiers sources\video\imgui-new</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\imgui-new\imgui.cpp">
+      <Filter>Fichiers sources\video\bindings-new</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\imgui-new\imgui_demo.cpp">
+      <Filter>Fichiers sources\video\bindings-new</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\imgui-new\imgui_draw.cpp">
+      <Filter>Fichiers sources\video\bindings-new</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +148,33 @@
     </ClInclude>
     <ClInclude Include="src\emulator_enums.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\bindings-new\imgui_impl_glfw.h">
+      <Filter>Fichiers sources\video\imgui-new</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\bindings-new\imgui_impl_opengl2.h">
+      <Filter>Fichiers sources\video\imgui-new</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\bindings-new\imgui_impl_opengl3.h">
+      <Filter>Fichiers sources\video\imgui-new</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui-new\imconfig.h">
+      <Filter>Fichiers sources\video\bindings-new</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui-new\imgui.h">
+      <Filter>Fichiers sources\video\bindings-new</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui-new\imgui_internal.h">
+      <Filter>Fichiers sources\video\bindings-new</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui-new\stb_rect_pack.h">
+      <Filter>Fichiers sources\video\bindings-new</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui-new\stb_textedit.h">
+      <Filter>Fichiers sources\video\bindings-new</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui-new\stb_truetype.h">
+      <Filter>Fichiers sources\video\bindings-new</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

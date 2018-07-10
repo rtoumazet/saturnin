@@ -19,7 +19,7 @@
 
 #include <sstream> // stringstream
 #include <fstream> // ifstream
-#include <istream> // istream
+//#include <istream> // istream
 //#include <../../ZipLib/ZipFile.h>
 //#include <streams/memstream.h>
 //#include <methods/DeflateMethod.h>
