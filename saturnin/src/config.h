@@ -42,10 +42,6 @@ namespace core {
         bios_saturn
     };
 
-    //Key_values const keys[];
-
-    extern std::map<Config_keys, const char *> keys_write;
-    //static std::map<Config_keys, const char *> keys_read;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \class  Config
@@ -59,13 +55,15 @@ namespace core {
     class Config {
     public:
 
-        static const std::string group_rendering;
-        static const std::string group_paths;
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \typedef    std::map<Config_keys, const char *> Map_keys
+        ///
+        /// \brief  Defines an alias representing the link between enumerators and keys.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static const std::string key_legacy_opengl;
-        static const std::string key_roms_stv;
-        static const std::string key_bios_stv;
-        static const std::string key_bios_saturn;
+        typedef std::map<Config_keys, const char *>Map_keys;
+        static Map_keys keys_write; ///< Contains the config keys used for creation (i.e. the naked key without the full path)
+        static Map_keys keys_read;  ///< Contains the config keys used for read access (i.e. the naked key with its full path)
 
         //@{
         // Constructors / Destructors
@@ -247,24 +245,10 @@ namespace core {
 
         void generateConfigurationTree(const bool isModernOpenglCapable);
 
-        std::string filename_;
+        std::string filename_;  ///< Name of the configuraiotn file used
         
         libconfig::Config cfg_; ///< Internal configuration object
 
     };
-
-    template<typename T>
-    std::string buildValue(const T& value)
-    {
-        std::ostringstream oss;
-        oss << value;
-        return oss.str();
-    }
-
-    template<typename T, typename ... Args >
-    std::string buildValue(const T& value, const Args& ... args)
-    {
-        return buildValue(value) + "." + buildValue(args...);
-    }
 };
 };

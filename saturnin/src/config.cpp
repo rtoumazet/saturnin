@@ -29,15 +29,22 @@ using namespace std;
 
 namespace saturnin {
 namespace core {
-    static std::map<Config_keys, const char *> keys_write = { {Config_keys::rendering, "rendering"} };
-
-    const std::string Config::group_rendering{ "rendering" };
-    const std::string Config::key_legacy_opengl{ "legacy_opengl" };
-
-    const std::string Config::group_paths{ "paths" };
-    const std::string Config::key_roms_stv{ "roms_stv" };
-    const std::string Config::key_bios_stv{ "bios_stv" };
-    const std::string Config::key_bios_saturn{ "bios_saturn" };
+    Config::Map_keys Config::keys_write = {
+        { Config_keys::rendering,     "rendering"},
+        { Config_keys::legacy_opengl, "legacy_opengl" },
+        { Config_keys::paths,         "paths" },
+        { Config_keys::roms_stv,      "roms_stv" },
+        { Config_keys::bios_stv,      "bios_stv" },
+        { Config_keys::bios_saturn,   "bios_saturn" }
+    };
+    Config::Map_keys Config::keys_read = {
+        { Config_keys::rendering,     "rendering" },
+        { Config_keys::legacy_opengl, "rendering.legacy_opengl" },
+        { Config_keys::paths,         "paths" },
+        { Config_keys::roms_stv,      "paths.roms_stv" },
+        { Config_keys::bios_stv,      "paths.bios_stv" },
+        { Config_keys::bios_saturn,   "paths.bios_saturn" }
+    };
 
     bool Config::lookup(const std::string& path) const {
         return cfg_.lookup(path.c_str()); // c_str() is needed, method will fail with a string
@@ -71,13 +78,13 @@ namespace core {
     void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
         Setting& root = cfg_.getRoot();
 
-        Setting& rendering = root.add(buildValue( group_rendering ).c_str(), Setting::TypeGroup);
-        writeValue(rendering, buildValue( key_legacy_opengl ).c_str(), !isModernOpenglCapable);
+        Setting& rendering = root.add(keys_write[Config_keys::rendering], Setting::TypeGroup);
+        writeValue(rendering, keys_write[Config_keys::legacy_opengl], !isModernOpenglCapable);
 
-        Setting& paths = root.add(group_paths.c_str(), Setting::TypeGroup);
-        writeValue(paths, key_roms_stv.c_str(), "");
-        writeValue(paths, key_bios_stv.c_str(), "");
-        writeValue(paths, key_bios_saturn.c_str(), "");
+        Setting& paths = root.add(keys_write[Config_keys::paths], Setting::TypeGroup);
+        writeValue(paths, keys_write[Config_keys::roms_stv], "");
+        writeValue(paths, keys_write[Config_keys::bios_stv], "");
+        writeValue(paths, keys_write[Config_keys::bios_saturn], "");
     }
 
     Setting& Config::getGroup(Setting& root, const string& group_name) {
