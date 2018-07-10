@@ -19,6 +19,11 @@
 
 #include <sstream> // stringstream
 #include <fstream> // ifstream
+#include <istream> // istream
+//#include <../../ZipLib/ZipFile.h>
+//#include <streams/memstream.h>
+//#include <methods/DeflateMethod.h>
+#include "config.h"
 #include "locale.h"
 #include "log.h"
 #include "memory.h"
@@ -27,6 +32,23 @@ using namespace std;
 
 namespace saturnin {
 namespace core {
+    bool Memory::loadRom() {
+        string rom_path{ Config::keys_read[Config_keys::roms_stv] };
+        rom_path += "\astrass.zip";
+        
+        //ZipArchive::Ptr archive = ZipFile::Open(rom_path);
+        //ZipArchiveEntry::Ptr entry = archive->GetEntry("EPR20825.13");
+
+        //std::istream* decompressStream = entry->GetDecompressionStream();
+
+        //std::string line;
+        //std::getline(*decompressStream, line);
+
+        return true;
+
+    }
+
+
     //bool Memory::StvLoadRomToMemory(const string &		zipname,
     //    const string & rom_name,
     //    uint8_t *	   destination,
@@ -34,8 +56,8 @@ namespace core {
     //    const Rom_load rom_load,
     //    const uint8_t  times_mirrored,
     //    const Rom_type rom_type)
-    //{
 
+        
     //    //HZIP zipFileHandle;
 
     //    //zipFileHandle = OpenZip((void*)zipname.c_str(), 0, ZIP_FILENAME);
@@ -154,10 +176,10 @@ namespace core {
         string bios_key{};
         switch (mode) {
         case Hardware_mode::saturn:
-            bios_key = buildValue(Config::group_paths, Config::key_bios_saturn);
+            bios_key = Config::keys_read[Config_keys::bios_saturn];
             break;
         case Hardware_mode::stv:
-            bios_key = buildValue(Config::group_paths, Config::key_bios_stv);
+            bios_key = Config::keys_read[Config_keys::bios_stv];
             break;
         default:
             Log::error("config", tr("Unknown hardware mode"));

@@ -115,6 +115,8 @@ namespace core {
 
         void loadBios(const saturnin::core::Hardware_mode mode);
 
+        bool loadRom();
+
     private:
         std::shared_ptr<Config> config_;
     };

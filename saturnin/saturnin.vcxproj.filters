@@ -27,9 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\video\opengl.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
@@ -67,6 +64,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\emulator_context.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
