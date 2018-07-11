@@ -17,7 +17,6 @@
 // limitations under the License.
 //
 
-#include <cstdarg> // va_*
 #include <iostream> // cout
 #include "config.h"
 #include "locale.h"
