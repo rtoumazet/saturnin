@@ -24,8 +24,11 @@
 #include <GLFW/glfw3.h>
 #include "opengl.h"
 #include "gui.h"
-#include "bindings/imgui_impl_glfw.h"
-#include "bindings/imgui_impl_glfw_gl3.h"
+#include "../../lib/imgui/imgui.h"
+#include "../../lib/imgui/imgui_impl_glfw.h"
+#include "../../lib/imgui/imgui_impl_opengl2.h"
+#include "../../lib/imgui/imgui_impl_opengl3.h"
+
 #include "../../lib/lodepng/lodepng.h"
 #include "../../res/icons.png.inc"
 
@@ -287,8 +290,15 @@ namespace video {
         //Opengl.setupTriangle();
 
 
-        // Setup ImGui binding
-        ImGui_ImplGlfwGL2_Init(window, true);
+        // Setup Dear ImGui binding
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+        // 
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL2_Init();
 
         // Load Fonts
         // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
@@ -324,7 +334,9 @@ namespace video {
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
-            ImGui_ImplGlfwGL2_NewFrame();
+            ImGui_ImplOpenGL2_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
             gui::show_image_window(tex);
 
@@ -393,7 +405,11 @@ namespace video {
         }
 
         // Cleanup
-        ImGui_ImplGlfwGL2_Shutdown();
+        ImGui_ImplOpenGL2_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
+        glfwDestroyWindow(window);
         glfwTerminate();
 
         return 0;
@@ -405,22 +421,40 @@ namespace video {
         glfwSetErrorCallback(error_callback);
         if (!glfwInit())
             return 1;
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+
+        // Decide GL+GLSL versions
 #if __APPLE__
-        glfwWindowHint(GLFW_Opengl_FORWARD_COMPAT, GL_TRUE);
+        // GL 3.2 + GLSL 150
+        const char* glsl_version = "#version 150";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+#else
+        // GL 3.0 + GLSL 130
+        const char* glsl_version = "#version 130";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+        //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
         auto window = glfwCreateWindow(1280, 720, "ImGui Opengl3 example", NULL, NULL);
         if (window == nullptr) {
-
             return 1;
         }
+
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1); // Enable vsync
 
-                             // Setup ImGui binding
-        ImGui_ImplGlfwGL3_Init(window, true);
+        // Setup Dear ImGui binding
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+        // 
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init(glsl_version);
 
         // Load Fonts
         // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
@@ -455,7 +489,11 @@ namespace video {
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
-            ImGui_ImplGlfwGL3_NewFrame();
+
+            // Start the ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
             gui::show_image_window(tex);
 
@@ -515,7 +553,11 @@ namespace video {
         }
 
         // Cleanup
-        ImGui_ImplGlfwGL3_Shutdown();
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
+        glfwDestroyWindow(window);
         glfwTerminate();
 
         return 0;

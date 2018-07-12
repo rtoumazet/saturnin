@@ -127,6 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="lib\imgui\imgui.cpp" />
+    <ClCompile Include="lib\imgui\imgui_demo.cpp" />
+    <ClCompile Include="lib\imgui\imgui_draw.cpp" />
+    <ClCompile Include="lib\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp" />
+    <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="lib\lodepng\lodepng.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\emulator_context.cpp" />
@@ -134,15 +140,19 @@
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory.cpp" />
-    <ClCompile Include="src\video\bindings\imgui_impl_glfw.cpp" />
-    <ClCompile Include="src\video\bindings\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="src\video\gui.cpp" />
-    <ClCompile Include="src\video\imgui\imgui.cpp" />
-    <ClCompile Include="src\video\imgui\imgui_demo.cpp" />
-    <ClCompile Include="src\video\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\video\opengl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lib\imgui\imconfig.h" />
+    <ClInclude Include="lib\imgui\imgui.h" />
+    <ClInclude Include="lib\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="lib\imgui\imgui_impl_opengl2.h" />
+    <ClInclude Include="lib\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="lib\imgui\imgui_internal.h" />
+    <ClInclude Include="lib\imgui\stb_rect_pack.h" />
+    <ClInclude Include="lib\imgui\stb_textedit.h" />
+    <ClInclude Include="lib\imgui\stb_truetype.h" />
     <ClInclude Include="lib\lodepng\lodepng.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\emulator_context.h" />
@@ -151,15 +161,7 @@
     <ClInclude Include="src\log.h" />
     <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\stv_definitions.h" />
-    <ClInclude Include="src\video\bindings\imgui_impl_glfw.h" />
-    <ClInclude Include="src\video\bindings\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="src\video\gui.h" />
-    <ClInclude Include="src\video\imgui\imconfig.h" />
-    <ClInclude Include="src\video\imgui\imgui.h" />
-    <ClInclude Include="src\video\imgui\imgui_internal.h" />
-    <ClInclude Include="src\video\imgui\stb_rect_pack.h" />
-    <ClInclude Include="src\video\imgui\stb_textedit.h" />
-    <ClInclude Include="src\video\imgui\stb_truetype.h" />
     <ClInclude Include="src\video\opengl.h" />
   </ItemGroup>
   <ItemGroup>
