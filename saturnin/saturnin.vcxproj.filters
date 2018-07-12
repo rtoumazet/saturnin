@@ -16,14 +16,11 @@
     <Filter Include="Fichiers sources\video">
       <UniqueIdentifier>{7b286e76-41f2-40ec-bf42-f761323ec3c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fichiers sources\video\imgui">
-      <UniqueIdentifier>{de8443ea-e879-4799-9e74-866c1fb1dadc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Fichiers sources\video\bindings">
-      <UniqueIdentifier>{5a54d6a2-34a2-48f4-ae61-f18b5e44420d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Fichiers sources\lodepng">
       <UniqueIdentifier>{eefe1bcf-2326-44b6-a0a2-4dec1a22c902}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\imgui">
+      <UniqueIdentifier>{7f2b5416-e7d3-4805-8d14-ce890d999203}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -35,21 +32,6 @@
     </ClCompile>
     <ClCompile Include="src\locale.cpp">
       <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\imgui\imgui.cpp">
-      <Filter>Fichiers sources\video\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\imgui\imgui_demo.cpp">
-      <Filter>Fichiers sources\video\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\imgui\imgui_draw.cpp">
-      <Filter>Fichiers sources\video\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\bindings\imgui_impl_glfw.cpp">
-      <Filter>Fichiers sources\video\bindings</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\bindings\imgui_impl_glfw_gl3.cpp">
-      <Filter>Fichiers sources\video\bindings</Filter>
     </ClCompile>
     <ClCompile Include="src\log.cpp">
       <Filter>Fichiers sources</Filter>
@@ -69,6 +51,24 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_draw.cpp">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui.cpp">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_demo.cpp">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_impl_glfw.cpp">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\video\opengl.h">
@@ -79,30 +79,6 @@
     </ClInclude>
     <ClInclude Include="src\locale.h">
       <Filter>Fichiers sources</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\imgui\imconfig.h">
-      <Filter>Fichiers sources\video\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\imgui\imgui.h">
-      <Filter>Fichiers sources\video\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\imgui\imgui_internal.h">
-      <Filter>Fichiers sources\video\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\imgui\stb_rect_pack.h">
-      <Filter>Fichiers sources\video\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\imgui\stb_textedit.h">
-      <Filter>Fichiers sources\video\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\imgui\stb_truetype.h">
-      <Filter>Fichiers sources\video\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\bindings\imgui_impl_glfw.h">
-      <Filter>Fichiers sources\video\bindings</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\bindings\imgui_impl_glfw_gl3.h">
-      <Filter>Fichiers sources\video\bindings</Filter>
     </ClInclude>
     <ClInclude Include="src\log.h">
       <Filter>Fichiers sources</Filter>
@@ -124,6 +100,33 @@
     </ClInclude>
     <ClInclude Include="src\emulator_enums.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\stb_truetype.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imconfig.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_internal.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\stb_rect_pack.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\stb_textedit.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_impl_glfw.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_impl_opengl2.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_impl_opengl3.h">
+      <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
