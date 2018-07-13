@@ -264,6 +264,9 @@ namespace video {
             return 1;
 
         auto window = glfwCreateWindow(1280, 720, "ImGui Opengl2 example", NULL, NULL);
+        if (window == NULL)
+            return 1;
+
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1); // Enable vsync
 
@@ -299,6 +302,10 @@ namespace video {
         // 
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL2_Init();
+
+        // Setup style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsClassic();
 
         // Load Fonts
         // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
@@ -397,10 +404,12 @@ namespace video {
             glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
             glClear(GL_COLOR_BUFFER_BIT);
             //glUseProgram(0); // You may want this if using this code in an Opengl 3+ context where shaders may be bound
-
-
-
+            
             ImGui::Render();
+            
+            ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+
+            glfwMakeContextCurrent(window);
             glfwSwapBuffers(window);
         }
 
@@ -455,6 +464,10 @@ namespace video {
         // 
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
+
+        // Setup style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsClassic();
 
         // Load Fonts
         // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
@@ -548,7 +561,12 @@ namespace video {
             glViewport(0, 0, display_w, display_h);
             glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
             glClear(GL_COLOR_BUFFER_BIT);
+
             ImGui::Render();
+
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            glfwMakeContextCurrent(window);
             glfwSwapBuffers(window);
         }
 
