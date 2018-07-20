@@ -5,23 +5,21 @@
     <X64LibDir>$(ProjectDir)lib\x64\</X64LibDir>
     <GlfwX64IncDir>D:\Dev\Libraries\glfw-3.2.1.bin.WIN64\include</GlfwX64IncDir>
     <GlfwX64LibDir>D:\Dev\Libraries\glfw-3.2.1.bin.WIN64\lib-vc2015</GlfwX64LibDir>
-    <epoxyX64IncDir>D:\Dev\Libraries\libepoxy-shared-x64\include</epoxyX64IncDir>
-    <epoxyX64LibDir>D:\Dev\Libraries\libepoxy-shared-x64\lib</epoxyX64LibDir>
-    <epoxyX64BinDir>D:\Dev\Libraries\libepoxy-shared-x64\bin</epoxyX64BinDir>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(epoxyX64IncDir);$(GlfwX64IncDir);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(X64LibDir);$(GlfwX64LibDir);$(epoxyX64LibDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(GlfwX64IncDir);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(X64LibDir);$(GlfwX64LibDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;epoxy.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy $(epoxyX64BinDir)\epoxy-0.dll $(OutDir) /Y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -33,15 +31,6 @@
     </BuildMacro>
     <BuildMacro Include="GlfwX64LibDir">
       <Value>$(GlfwX64LibDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="epoxyX64IncDir">
-      <Value>$(epoxyX64IncDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="epoxyX64LibDir">
-      <Value>$(epoxyX64LibDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="epoxyX64BinDir">
-      <Value>$(epoxyX64BinDir)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
