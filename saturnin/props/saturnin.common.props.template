@@ -5,10 +5,9 @@
     <LibDir>$(ProjectDir)lib\</LibDir>
     <AspiSdkDir>D:\Dev\SDK\AspiSDK</AspiSdkDir>
     <WinDdkDir>D:\Dev\SDK\WinDDK\7600.16385.1\inc</WinDdkDir>
-    <LibConfigIncDir>D:\Dev\Libraries\libconfig-1.7.1\lib</LibConfigIncDir>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(LibDir);$(AspiSdkDir);$(WinDdkDir);$(LibConfigIncDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(LibDir);$(AspiSdkDir);$(WinDdkDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
@@ -24,9 +23,6 @@
     </BuildMacro>
     <BuildMacro Include="WinDdkDir">
       <Value>$(WinDdkDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="LibConfigIncDir">
-      <Value>$(LibConfigIncDir)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

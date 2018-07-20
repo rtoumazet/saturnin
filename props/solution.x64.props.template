@@ -20,8 +20,7 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)bin\x64\libconfig++.dll $(OutDir) /Y
-xcopy $(epoxyX64BinDir)\epoxy-0.dll $(OutDir) /Y</Command>
+      <Command>xcopy $(epoxyX64BinDir)\epoxy-0.dll $(OutDir) /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
