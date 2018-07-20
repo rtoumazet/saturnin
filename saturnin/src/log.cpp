@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <boost/filesystem.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include "log.h"
 
 using namespace std;
