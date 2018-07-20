@@ -5,17 +5,14 @@
     <X86LibDir>$(ProjectDir)lib\x86\</X86LibDir>
     <GlfwX86IncDir>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\include</GlfwX86IncDir>
     <GlfwX86LibDir>D:\Dev\Libraries\glfw-3.2.1.bin.WIN32\lib-vc2015</GlfwX86LibDir>
-    <epoxyX86IncDir>D:\Dev\Libraries\libepoxy-shared-x86\include</epoxyX86IncDir>
-    <epoxyX86LibDir>D:\Dev\Libraries\libepoxy-shared-x86\lib</epoxyX86LibDir>
-    <epoxyX86BinDir>D:\Dev\Libraries\libepoxy-shared-x86\bin</epoxyX86BinDir>
   </PropertyGroup>
   <PropertyGroup>
-    <LibraryPath>$(X86LibDir);$(GlfwX86LibDir);$(epoxyX86LibDir);$(LibraryPath)</LibraryPath>
-    <IncludePath>$(epoxyX86IncDir);$(GlfwX86IncDir);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(X86LibDir);$(GlfwX86LibDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(GlfwX86IncDir);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;epoxy.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/NODEFAULTLIB:msvcrt.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ClCompile>
@@ -23,7 +20,8 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy $(epoxyX86BinDir)\epoxy-0.dll $(OutDir) /Y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -35,15 +33,6 @@
     </BuildMacro>
     <BuildMacro Include="GlfwX86LibDir">
       <Value>$(GlfwX86LibDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="epoxyX86IncDir">
-      <Value>$(epoxyX86IncDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="epoxyX86LibDir">
-      <Value>$(epoxyX86LibDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="epoxyX86BinDir">
-      <Value>$(epoxyX86BinDir)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
