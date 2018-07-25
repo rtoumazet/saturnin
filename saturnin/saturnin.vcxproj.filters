@@ -51,15 +51,6 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_draw.cpp">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui.cpp">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_demo.cpp">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClCompile>
     <ClCompile Include="lib\imgui\imgui_impl_glfw.cpp">
       <Filter>Fichiers sources\imgui</Filter>
     </ClCompile>
@@ -100,24 +91,6 @@
     </ClInclude>
     <ClInclude Include="src\emulator_enums.h">
       <Filter>Fichiers sources</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\stb_truetype.h">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\imconfig.h">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\imgui.h">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\imgui_internal.h">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\stb_rect_pack.h">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\stb_textedit.h">
-      <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
     <ClInclude Include="lib\imgui\imgui_impl_glfw.h">
       <Filter>Fichiers sources\imgui</Filter>
