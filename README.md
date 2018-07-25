@@ -16,10 +16,10 @@ Saturnin is a Sega Saturn emulator
 	You can then modify the files, adjusting the macros according to your setup.
 
 * Dependencies
-    * boost 1.65.1 (filesystem, etc.)
 	* imgui 1.53 (gui)
-	* using vcpkg:
-	    * epoxy 1.4.3 (opengl functions management)
+  	* using vcpkg:
+        * boost 1.67.0 (filesystem, locale)
+        * epoxy 1.4.3 (opengl functions management)
 		* libconfig 1.7.1 (configuration)
 		* spdlog 0.16.3 (logging + string formatting)
 * Deployment instructions
