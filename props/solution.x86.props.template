@@ -3,12 +3,10 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <BuildRootDir>D:\Dev\build\</BuildRootDir>
-    <BoostRootDir>D:\Dev\Libraries\boost_1_65_1</BoostRootDir>
-    <BoostX86LibDir>$(BoostRootDir)\lib32-msvc-14.1</BoostX86LibDir>
   </PropertyGroup>
   <PropertyGroup>
-    <LibraryPath>$(BoostX86LibDir);$(LibraryPath)</LibraryPath>
-    <IncludePath>$(BoostRootDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
     <OutDir>$(BuildRootDir)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(BuildRootDir)$(ProjectName)\obj\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -28,12 +26,6 @@
   <ItemGroup>
     <BuildMacro Include="BuildRootDir">
       <Value>$(BuildRootDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="BoostRootDir">
-      <Value>$(BoostRootDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="BoostX86LibDir">
-      <Value>$(BoostX86LibDir)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
