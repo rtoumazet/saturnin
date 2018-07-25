@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 
-#include "../../lib/imgui/imgui.h"
+#include <imgui.h>
 #include "gui.h"
 
 namespace saturnin {
