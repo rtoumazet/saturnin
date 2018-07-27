@@ -19,33 +19,40 @@
 
 #include <sstream> // stringstream
 #include <fstream> // ifstream
-//#include <istream> // istream
-//#include <../../ZipLib/ZipFile.h>
-//#include <streams/memstream.h>
-//#include <methods/DeflateMethod.h>
+#include "../lib/libzippp/libzippp.h"
 #include "config.h"
 #include "locale.h"
 #include "log.h"
 #include "memory.h"
 
+using namespace libzippp;
 using namespace std;
+
 
 namespace saturnin {
 namespace core {
     bool Memory::loadRom() {
-        string rom_path{ Config::keys_read[Config_keys::roms_stv] };
-        rom_path += "\astrass.zip";
+        string rom_path{ config_->readValue(Config_keys::roms_stv).c_str() };
+        rom_path += "\\astrass.zip";
+
+        ZipArchive zf(rom_path);
+        if (zf.open(ZipArchive::READ_ONLY)) {
+            string filename{ "EPR20825.13" };
+            if (zf.hasEntry(filename, false, false)) {
+                ZipEntry entry = zf.getEntry(filename, false, false);
+                std::unique_ptr<uint8_t[]> data(static_cast<uint8_t*>(entry.readAsBinary()));
+                auto e = data[2];
+            }
+            else {
+                string str = fmt::format(tr("File '{0}' not found in zip file !"), filename);
+                Log::warning("memory", str);
+            }
+            
+
+            zf.close();
+        }
         
-        //ZipArchive::Ptr archive = ZipFile::Open(rom_path);
-        //ZipArchiveEntry::Ptr entry = archive->GetEntry("EPR20825.13");
-
-        //std::istream* decompressStream = entry->GetDecompressionStream();
-
-        //std::string line;
-        //std::getline(*decompressStream, line);
-
         return true;
-
     }
 
 
@@ -173,13 +180,13 @@ namespace core {
     //}
 
     void Memory::loadBios(const Hardware_mode mode) {
-        string bios_key{};
+        string bios_path{};
         switch (mode) {
         case Hardware_mode::saturn:
-            bios_key = Config::keys_read[Config_keys::bios_saturn];
+            bios_path = config_->readValue(Config_keys::bios_saturn).c_str();
             break;
         case Hardware_mode::stv:
-            bios_key = Config::keys_read[Config_keys::bios_stv];
+            bios_path = config_->readValue(Config_keys::bios_stv).c_str();
             break;
         default:
             Log::error("config", tr("Unknown hardware mode"));
@@ -188,7 +195,6 @@ namespace core {
             break;
         }
 
-        string bios_path = config_->readValue(bios_key).c_str();
         ifstream input_file(bios_path, ios::binary);
         if (input_file) {
             stringstream buffer;

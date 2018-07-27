@@ -228,7 +228,8 @@ namespace core {
             }
         }
 
-       libconfig::Setting& readValue(const std::string& value);
+       //libconfig::Setting& readValue(const std::string& value);
+       libconfig::Setting& readValue(const Config_keys& value);
 
     private:
 
