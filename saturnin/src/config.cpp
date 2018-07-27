@@ -102,9 +102,11 @@ namespace core {
         writeFile(filename_);
     }
 
-    Setting& Config::readValue(const std::string& value) {
+    //Setting& Config::readValue(const std::string& value) {
+    Setting& Config::readValue(const Config_keys& value) {
         try {
-            return cfg_.lookup(value.c_str());
+            string key{ Config::keys_read[value] };
+            return cfg_.lookup(key.c_str());
         }
         catch (const SettingNotFoundException& e) {
             
