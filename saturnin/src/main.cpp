@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
    if (!state.config()->initialize(isModernOpenglCapable())) return 1;
 
    state.memory()->loadBios(Hardware_mode::saturn);
-   state.memory()->loadRom();
+   //state.memory()->loadRom();
 
     write<32>(state.memory()->workram_low, 0, 0x12345678);
     auto val = read<16>(state.memory()->workram_low, 2);
