@@ -43,7 +43,8 @@
 #if defined(__APPLE__)
 #include <OpenGL/gl.h>
 #else
-#include <GL/gl.h>
+//#include <GL/gl.h>
+#include <epoxy/gl.h>
 #endif
 
 // OpenGL Data
