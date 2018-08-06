@@ -5,8 +5,6 @@
     <BuildRootDir>D:\Dev\build\</BuildRootDir>
   </PropertyGroup>
   <PropertyGroup>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath)</IncludePath>
     <OutDir>$(BuildRootDir)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(BuildRootDir)$(ProjectName)\obj\$(Configuration)\</IntDir>
   </PropertyGroup>
