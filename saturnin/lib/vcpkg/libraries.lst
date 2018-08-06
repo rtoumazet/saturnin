@@ -1,0 +1,8 @@
+boost-locale
+boost-filesystem
+glfw3
+imgui
+libconfig
+libepoxy
+libzip
+spdlog
