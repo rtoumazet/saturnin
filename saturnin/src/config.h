@@ -25,6 +25,7 @@
 #pragma once
 
 #pragma warning(disable:4275) // libconfig specific warning disable
+#define LIBCONFIG_STATIC
 #include <libconfig.h++>
 #include <iostream>
 #include <map>

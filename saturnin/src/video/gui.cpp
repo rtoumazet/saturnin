@@ -105,7 +105,7 @@ namespace gui {
 
         ImGui::Begin("Another Window", &test);
         //ImGui::Image((ImTextureID)tex, ImVec2(230, 230), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-        ImGui::Image((ImTextureID)tex, ImVec2(230, 230), ImVec2(0, 0), ImVec2(0.3333, 0.3333), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+        ImGui::Image((ImTextureID)(intptr_t)(tex), ImVec2(230, 230), ImVec2(0, 0), ImVec2(0.3333f, 0.3333f), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
         ImGui::End();
     }
 }
