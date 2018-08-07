@@ -384,7 +384,7 @@ namespace video {
                     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
 
                     ImGui::GetWindowDrawList()->AddImage(
-                        reinterpret_cast<GLuint*>(texture),
+                        (ImTextureID)(intptr_t)texture,
                         ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
                         ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
                         ImVec2(0, 1), ImVec2(1, 0));
@@ -542,7 +542,7 @@ namespace video {
                     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
 
                     ImGui::GetWindowDrawList()->AddImage(
-                        reinterpret_cast<GLuint*>(texture),
+                        (ImTextureID)(intptr_t)texture,
                         ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
                         ImVec2(ImGui::GetCursorScreenPos().x + 320, ImGui::GetCursorScreenPos().y + 200),
                         ImVec2(0, 1), ImVec2(1, 0));
