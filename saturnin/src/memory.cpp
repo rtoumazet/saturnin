@@ -31,49 +31,51 @@ using namespace std;
 
 namespace saturnin {
 namespace core {
-    //bool Memory::loadRom(const string& zip_name,
-    //                    const string& file_name,
-    //                    uint8_t*	   destination,
-    //                    const uint32_t size,
-    //                    const Rom_load rom_load,
-    //                    const uint8_t  times_mirrored,
-    //                    const Rom_type rom_type) {
-    //    string rom_path{ config_->readValue(Config_keys::roms_stv).c_str() };
-    //    rom_path += "\\" + zip_name + ".zip";
+    bool Memory::loadRom(const string& zip_name,
+                        const string& file_name,
+                        uint8_t*	   destination,
+                        const uint32_t size,
+                        const Rom_load rom_load,
+                        const uint8_t  times_mirrored,
+                        const Rom_type rom_type) {
+        string rom_path{ config_->readValue(Config_keys::roms_stv).c_str() };
+        rom_path += "\\" + zip_name + ".zip";
 
-    //    ZipArchive zf(rom_path);
-    //    if (zf.open(ZipArchive::READ_ONLY)) {
-    //        if (zf.hasEntry(file_name, false, false)) {
-    //            ZipEntry entry = zf.getEntry(file_name, false, false);
-    //            std::unique_ptr<uint8_t[]> data(static_cast<uint8_t*>(entry.readAsBinary()));
-    //            //auto e = data[2];
+        ZipArchive zf(rom_path);
+        if (zf.open(ZipArchive::READ_ONLY)) {
+            if (zf.hasEntry(file_name, false, false)) {
+                ZipEntry entry = zf.getEntry(file_name, false, false);
+                std::unique_ptr<uint8_t[]> data(static_cast<uint8_t*>(entry.readAsBinary()));
+                //auto e = data[2];
 
-    //            if (rom_type == Rom_type::bios) {
-    //                uint32_t counter = size / 4;
-    //                // filling the rom data
-    //                // Needs byteswapping
-    //                for (uint32_t i = 0; i < counter; ++i) {
-    //                    destination[i * 4 + 1] = data[i * 4 + 0];
-    //                    destination[i * 4 + 0] = data[i * 4 + 1];
-    //                    destination[i * 4 + 3] = data[i * 4 + 2];
-    //                    destination[i * 4 + 2] = data[i * 4 + 3];
-    //                }
-    //            }
-    //            else {
+                if (rom_type == Rom_type::bios) {
+                    uint32_t counter = size / 4;
+                    // filling the rom data
+                    // Needs byteswapping
+                    for (uint32_t i = 0; i < counter; ++i) {
+                        destination[i * 4 + 1] = data[i * 4 + 0];
+                        destination[i * 4 + 0] = data[i * 4 + 1];
+                        destination[i * 4 + 3] = data[i * 4 + 2];
+                        destination[i * 4 + 2] = data[i * 4 + 3];
+                    }
+                }
+                else {
 
-    //            }
-    //        }
-    //        else {
-    //            string str = fmt::format(tr("File '{0}' not found in zip file !"), file_name);
-    //            Log::warning("memory", str);
-    //        }
-    //        
+                }
+            }
+            else {
+                zf.close();
+                string str = fmt::format(tr("File '{0}' not found in zip file !"), file_name);
+                Log::warning("memory", str);
+                return false;
+            }
+            
 
-    //        zf.close();
-    //    }
-    //    
-    //    return true;
-    //}
+            zf.close();
+        }
+        
+        return true;
+    }
 
 
     //bool Memory::StvLoadRomToMemory(const string &		zipname,
