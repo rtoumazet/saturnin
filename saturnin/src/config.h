@@ -25,7 +25,8 @@
 #pragma once
 
 #pragma warning(disable:4275) // libconfig specific warning disable
-#define LIBCONFIG_STATIC
+//#define LIBCONFIG_STATIC
+//#include <Shlwapi.h>
 #include <libconfig.h++>
 #include <iostream>
 #include <map>
