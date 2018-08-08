@@ -115,7 +115,13 @@ namespace core {
 
         void loadBios(const saturnin::core::Hardware_mode mode);
 
-        //bool loadRom();
+        bool loadRom(   const std::string&  zip_name,
+                        const std::string&  file_name,
+                        uint8_t*	        destination,
+                        const uint32_t      size,
+                        const Rom_load      rom_load,
+                        const uint8_t       times_mirrored,
+                        const Rom_type      rom_type);
 
     private:
         std::shared_ptr<Config> config_;
