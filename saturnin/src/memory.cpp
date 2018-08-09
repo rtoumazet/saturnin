@@ -46,7 +46,6 @@ namespace core {
             if (zf.hasEntry(file_name, false, false)) {
                 ZipEntry entry = zf.getEntry(file_name, false, false);
                 std::unique_ptr<uint8_t[]> data(static_cast<uint8_t*>(entry.readAsBinary()));
-                //auto e = data[2];
 
                 if (rom_type == Rom_type::bios) {
                     uint32_t counter = size / 4;
@@ -60,6 +59,25 @@ namespace core {
                     }
                 }
                 else {
+                    switch (rom_load) {
+                    case Rom_load::not_interleaved:
+                    {
+                        const auto &src_begin = data.get();
+                        std::move(src_begin, std::next(src_begin, size), destination);
+
+                        // Bios region is forced for program roms
+                        if (rom_type == Rom_type::program) cart[0x40] = rom[0x808]; // FIXME 
+
+                        if (times_mirrored > 0) {
+                            for (uint8_t i = 1; i <= times_mirrored; ++i) {
+                                std::copy(destination, destination + size - 1, destination + (i*size));                                              
+                            }
+                        }
+                        break;
+                    }
+                    case Rom_load::odd_interleaved:
+                        break;
+                    }
 
                 }
             }

@@ -57,14 +57,14 @@
     <ClCompile Include="lib\imgui\imgui_impl_glfw.cpp">
       <Filter>Fichiers sources\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClCompile>
     <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp">
       <Filter>Fichiers sources\imgui</Filter>
     </ClCompile>
     <ClCompile Include="lib\libzippp\libzippp.cpp">
       <Filter>Fichiers sources\libzippp</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp">
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
