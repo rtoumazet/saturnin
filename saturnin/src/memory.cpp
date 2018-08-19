@@ -59,6 +59,7 @@ namespace core {
                     }
                 }
                 else {
+                    const uint32_t stv_bios_region_address = 0x808;
                     switch (rom_load) {
                     case Rom_load::not_interleaved:
                     {
@@ -66,7 +67,7 @@ namespace core {
                         std::move(src_begin, std::next(src_begin, size), destination);
 
                         // Bios region is forced for program roms
-                        if (rom_type == Rom_type::program) cart[0x40] = rom[0x808]; // FIXME 
+                        if (rom_type == Rom_type::program) cart[0x40] = rom[stv_bios_region_address]; // FIXME 
 
                         if (times_mirrored > 0) {
                             for (uint8_t i = 1; i <= times_mirrored; ++i) {
@@ -82,7 +83,7 @@ namespace core {
                         }
                         
                         // bios region is forced for program roms
-                        if (rom_type == Rom_type::program) cart[0x81] = rom[0x808]; // FIXME
+                        if (rom_type == Rom_type::program) cart[0x81] = rom[stv_bios_region_address]; // FIXME
 
                         if (times_mirrored > 0) {
                             for (uint8_t i=1; i<=times_mirrored; ++i) {
@@ -97,7 +98,7 @@ namespace core {
                         }
 
                         // bios region is forced for program roms
-                        if (rom_type == Rom_type::program) cart[0x81] = rom[0x808]; // FIXME
+                        if (rom_type == Rom_type::program) cart[0x80] = rom[stv_bios_region_address]; // FIXME
                         
                         if (times_mirrored > 0) {
                             for (uint8_t i = 1; i <= times_mirrored; ++i) {
@@ -146,27 +147,15 @@ namespace core {
             buffer << input_file.rdbuf();
             input_file.close();
 
-            size_t counter{ buffer.str().size() };
             string str = buffer.str();
             
-            std::move(&buffer.str()[0], std::next(&buffer.str()[0], counter), &this->rom[0]);
-
             switch (mode) {
             case Hardware_mode::saturn:
-                //std::move(src_begin, std::next(src_begin, size), destination);
-                
-                
-                for (size_t i = 0; i<counter; i += 4) {
-                    this->rom[i+0] = buffer.str()[i+0];
-                    //this->rom[i+0] = str[i+0];
-                    this->rom[i+1] = str[i+1];
-                    this->rom[i+2] = str[i+2];
-                    this->rom[i+3] = str[i+3];
-                }
+                std::move(str.begin(), str.end(), this->rom.data());
                 break;
             case Hardware_mode::stv:
                 // Needs byteswapping
-                for (size_t i = 0; i<counter; i+=4) {
+                for (size_t i = 0; i<str.size(); i+=4) {
                     this->rom[i+1] = str[i+0];
                     this->rom[i+0] = str[i+1];
                     this->rom[i+3] = str[i+2];
