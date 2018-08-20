@@ -65,8 +65,6 @@ int main(int argc, char *argv[])
     //    plugin->log("test");
 
 
-    
-    //bool is_legacy_opengl = state.config()->readValue(Config::keys_read[Config_keys::legacy_opengl]);
     bool is_legacy_opengl = state.config()->readValue(Config_keys::legacy_opengl);
     if (is_legacy_opengl) return runLegacyOpengl(); else return runModernOpengl();
   
