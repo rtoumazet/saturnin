@@ -124,6 +124,8 @@ namespace core {
                         const Rom_type      rom_type);
 
     private:
+        void mirrorRom(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load);
+
         std::shared_ptr<Config> config_;
     };
 
