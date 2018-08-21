@@ -22,6 +22,7 @@
 #include <epoxy/gl.h>
 #include <epoxy/wgl.h>
 #include <GLFW/glfw3.h>
+#include <lodepng.h>
 #include "opengl.h"
 #include "gui.h"
 #include <imgui.h>
@@ -29,7 +30,6 @@
 #include "../../lib/imgui/imgui_impl_opengl2.h"
 #include "../../lib/imgui/imgui_impl_opengl3.h"
 
-#include "../../lib/lodepng/lodepng.h"
 #include "../../res/icons.png.inc"
 
 using namespace std;

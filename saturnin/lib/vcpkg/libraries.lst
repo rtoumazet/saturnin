@@ -5,4 +5,5 @@ imgui
 libconfig
 libepoxy
 libzip
+lodepng
 spdlog

@@ -146,7 +146,6 @@
     <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp" />
     <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="lib\libzippp\libzippp.cpp" />
-    <ClCompile Include="lib\lodepng\lodepng.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\emulator_context.cpp" />
     <ClCompile Include="src\locale.cpp" />
@@ -161,7 +160,6 @@
     <ClInclude Include="lib\imgui\imgui_impl_opengl2.h" />
     <ClInclude Include="lib\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="lib\libzippp\libzippp.h" />
-    <ClInclude Include="lib\lodepng\lodepng.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\emulator_context.h" />
     <ClInclude Include="src\emulator_enums.h" />
