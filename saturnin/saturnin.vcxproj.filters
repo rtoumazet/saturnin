@@ -16,9 +16,6 @@
     <Filter Include="Fichiers sources\video">
       <UniqueIdentifier>{7b286e76-41f2-40ec-bf42-f761323ec3c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fichiers sources\lodepng">
-      <UniqueIdentifier>{eefe1bcf-2326-44b6-a0a2-4dec1a22c902}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Fichiers sources\imgui">
       <UniqueIdentifier>{7f2b5416-e7d3-4805-8d14-ce890d999203}</UniqueIdentifier>
     </Filter>
@@ -41,9 +38,6 @@
     </ClCompile>
     <ClCompile Include="src\video\gui.cpp">
       <Filter>Fichiers sources\video</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\lodepng\lodepng.cpp">
-      <Filter>Fichiers sources\lodepng</Filter>
     </ClCompile>
     <ClCompile Include="src\memory.cpp">
       <Filter>Fichiers sources</Filter>
@@ -82,9 +76,6 @@
     </ClInclude>
     <ClInclude Include="src\video\gui.h">
       <Filter>Fichiers sources\video</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\lodepng\lodepng.h">
-      <Filter>Fichiers sources\lodepng</Filter>
     </ClInclude>
     <ClInclude Include="src\memory.h">
       <Filter>Fichiers sources</Filter>
