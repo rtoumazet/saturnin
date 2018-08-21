@@ -110,10 +110,35 @@ namespace core {
         /// \author Runik
         /// \date   18/06/2018
         ///
-        /// \param  mode    Hardware mode of the bios to load.
+        /// \param  mode    Hardware mode of the bios to load (Saturn/ST-V).
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         void loadBios(const saturnin::core::Hardware_mode mode);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn bool Memory::loadRom(   const std::string& zip_name, 
+        ///                             const std::string& file_name, 
+        ///                             uint8_t* destination, 
+        ///                             const uint32_t size, 
+        ///                             const Rom_load rom_load, 
+        ///                             const uint8_t times_mirrored, 
+        ///                             const Rom_type rom_type);
+        ///
+        /// \brief  Loads a ST-V rom from a zip file in memory (cart area).
+        ///
+        /// \author Runik
+        /// \date   21/08/2018
+        ///
+        /// \param          zip_name        Name of the zip file container.
+        /// \param          file_name       Filename inside the zip to load.
+        /// \param [in,out] destination     If non-null, destination of the file content.
+        /// \param          size            Size of data to load.
+        /// \param          rom_load        Type of loading used (non interleaved, odd interleaved or even interleaved).
+        /// \param          times_mirrored  Number of times the data has to be mirrored after the initial loading.
+        /// \param          rom_type        Rom type (bios, program or graphic).
+        ///
+        /// \return True if it succeeds.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         bool loadRom(   const std::string&  zip_name,
                         const std::string&  file_name,
@@ -124,9 +149,27 @@ namespace core {
                         const Rom_type      rom_type);
 
     private:
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Memory::mirrorRom( uint8_t* data, 
+        ///                             const uint32_t size, 
+        ///                             const uint8_t times_mirrored, 
+        ///                             const Rom_load rom_load);
+        ///
+        /// \brief  Mirrors data in memory.
+        ///
+        /// \author Runik
+        /// \date   21/08/2018
+        ///
+        /// \param [in,out] data            If non-null, the array containing the data to be mirrored.
+        /// \param          size            Size of the data to mirror.
+        /// \param          times_mirrored  Number of times the data has to be mirrored.
+        /// \param          rom_load        Type of loading used (non interleaved, odd interleaved or even interleaved).
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         void mirrorRom(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load);
 
-        std::shared_ptr<Config> config_;
+        std::shared_ptr<Config> config_;    ///< Configuration object
     };
 
 

@@ -31,7 +31,7 @@
 //#include <spdlog/spdlog.h>
 //#include <fmt/format.h>
 //#include <spdlog/spdlog.h>
-#include <spdlog/sinks/simple_file_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/wincolor_sink.h>
 //#include <spdlog/fmt/fmt.h>
 #include "locale.h" // tr
@@ -39,16 +39,16 @@
 namespace saturnin {
 namespace core {
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \class  Log
-    ///
-    /// \brief  Handles logging in the emulator. Spdlog wrapper.
-    ///
-    /// \author Runik
-    /// \date   21/06/2018
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Log
+///
+/// \brief  Handles logging in the emulator. Spdlog wrapper.
+///
+/// \author Runik
+/// \date   21/06/2018
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    class Log {
+class Log {
     public:
         //@{
         // Constructors / Destructors
@@ -202,7 +202,7 @@ namespace core {
         /// \return Sink linked to the logger file.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> createFileSink(const std::string& logger_path);
+        static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> createFileSink(const std::string& logger_path);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> Log::createConsoleSink();
@@ -229,7 +229,7 @@ namespace core {
         /// \param  sink        The sink.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
+        static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn static void Log::createConsole();
@@ -257,7 +257,7 @@ namespace core {
 
     private:
         static std::map<std::string, std::shared_ptr<spdlog::logger>> loggers_; ///< Map containing all the loggers used in the program
-    };
+};
 
 };
 };
