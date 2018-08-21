@@ -91,9 +91,9 @@ bool Memory::loadRom(const string& zip_name,
                     }
 
                     // bios region is forced for program roms
-                    if (rom_type == Rom_type::program) cart[region_cart_address] = rom[stv_bios_region_address];
+                    if (rom_type == Rom_type::program) this->cart[region_cart_address] = this->rom[stv_bios_region_address];
 
-                    mirrorRom(destination, size, times_mirrored, rom_load);
+                    mirrorData(destination, size, times_mirrored, rom_load);
                     break;
                 }
                 default: {
@@ -117,20 +117,6 @@ bool Memory::loadRom(const string& zip_name,
         return false;
     }
     return true;
-}
-
-void Memory::mirrorRom(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
-    if (times_mirrored > 0) {
-        uint32_t multiple{};
-        switch (rom_load) {
-        case Rom_load::not_interleaved: multiple = 1; break;
-        case Rom_load::even_interleaved:multiple = 2; break;
-        case Rom_load::odd_interleaved: multiple = 2; break;
-        }
-        for (uint8_t i = 1; i <= times_mirrored; ++i) {
-            std::copy(data, data + size*multiple - 1, data + (i*size*multiple));
-        }
-    }
 }
 
 void Memory::loadBios(const Hardware_mode mode) {
@@ -169,6 +155,20 @@ void Memory::loadBios(const Hardware_mode mode) {
                 }
                 break;
             }
+        }
+    }
+}
+
+void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
+    if (times_mirrored > 0) {
+        uint32_t multiple{};
+        switch (rom_load) {
+            case Rom_load::not_interleaved: multiple = 1; break;
+            case Rom_load::even_interleaved:multiple = 2; break;
+            case Rom_load::odd_interleaved: multiple = 2; break;
+        }
+        for (uint8_t i = 1; i <= times_mirrored; ++i) {
+            std::copy(data, data + size * multiple - 1, data + (i*size*multiple));
         }
     }
 }

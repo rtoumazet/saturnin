@@ -149,26 +149,6 @@ namespace core {
                         const Rom_type      rom_type);
 
     private:
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Memory::mirrorRom( uint8_t* data, 
-        ///                             const uint32_t size, 
-        ///                             const uint8_t times_mirrored, 
-        ///                             const Rom_load rom_load);
-        ///
-        /// \brief  Mirrors data in memory.
-        ///
-        /// \author Runik
-        /// \date   21/08/2018
-        ///
-        /// \param [in,out] data            If non-null, the array containing the data to be mirrored.
-        /// \param          size            Size of the data to mirror.
-        /// \param          times_mirrored  Number of times the data has to be mirrored.
-        /// \param          rom_load        Type of loading used (non interleaved, odd interleaved or even interleaved).
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        void mirrorRom(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load);
-
         std::shared_ptr<Config> config_;    ///< Configuration object
     };
 
@@ -235,6 +215,23 @@ namespace core {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Memory::mirrorRom( uint8_t* data, 
+    ///                             const uint32_t size, 
+    ///                             const uint8_t times_mirrored, 
+    ///                             const Rom_load rom_load);
+    ///
+    /// \brief  Mirrors data in memory. Data between 0 and size-1 will mirrored times_mirrored times
+    ///
+    /// \author Runik
+    /// \date   21/08/2018
+    ///
+    /// \param [in,out] data            If non-null, the array containing the data to be mirrored.
+    /// \param          size            Size of the data to mirror.
+    /// \param          times_mirrored  Number of times the data has to be mirrored.
+    /// \param          rom_load        Type of loading used (non interleaved, odd interleaved or even interleaved).
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load);
 }
 }
