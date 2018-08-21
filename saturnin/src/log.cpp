@@ -41,11 +41,11 @@ namespace core {
     }
 
     /* static */
-    std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createFileSink(const std::string & logger_path)
+    std::shared_ptr<spdlog::sinks::basic_file_sink_mt> Log::createFileSink(const std::string & logger_path)
     {
         removeFile(logger_path);
 
-        return std::make_shared<spdlog::sinks::simple_file_sink_mt>(logger_path);
+        return std::make_shared<spdlog::sinks::basic_file_sink_mt>(logger_path);
     }
 
     /* static */
@@ -55,7 +55,7 @@ namespace core {
     }
 
     /* static */
-    void Log::createLogger(const std::string & logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink)
+    void Log::createLogger(const std::string & logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink)
     {
         auto logger = std::make_shared<spdlog::logger>(logger_name, sink);
         string pattern = "[%X][%n][%l] %v";
