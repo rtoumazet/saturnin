@@ -29,20 +29,29 @@ using namespace std;
 namespace saturnin {
 namespace core {
     Config::Map_keys Config::keys_write = {
-        { Config_keys::rendering,     "rendering"},
-        { Config_keys::legacy_opengl, "legacy_opengl" },
-        { Config_keys::paths,         "paths" },
-        { Config_keys::roms_stv,      "roms_stv" },
-        { Config_keys::bios_stv,      "bios_stv" },
-        { Config_keys::bios_saturn,   "bios_saturn" }
+        { Access_keys::config_rendering,     "rendering"},
+        { Access_keys::config_legacy_opengl, "legacy_opengl" },
+        { Access_keys::config_paths,         "paths" },
+        { Access_keys::config_roms_stv,      "roms_stv" },
+        { Access_keys::config_bios_stv,      "bios_stv" },
+        { Access_keys::config_bios_saturn,   "bios_saturn" },
     };
     Config::Map_keys Config::keys_read = {
-        { Config_keys::rendering,     "rendering" },
-        { Config_keys::legacy_opengl, "rendering.legacy_opengl" },
-        { Config_keys::paths,         "paths" },
-        { Config_keys::roms_stv,      "paths.roms_stv" },
-        { Config_keys::bios_stv,      "paths.bios_stv" },
-        { Config_keys::bios_saturn,   "paths.bios_saturn" }
+        { Access_keys::config_rendering,     "rendering" },
+        { Access_keys::config_legacy_opengl, "rendering.legacy_opengl" },
+        { Access_keys::config_paths,         "paths" },
+        { Access_keys::config_roms_stv,      "paths.roms_stv" },
+        { Access_keys::config_bios_stv,      "paths.bios_stv" },
+        { Access_keys::config_bios_saturn,   "paths.bios_saturn" },
+        { Access_keys::stv_game_name,        "game_name" },
+        { Access_keys::stv_zip_name,         "zip_name" },
+        { Access_keys::stv_parent_set,       "parent_set" },
+        { Access_keys::stv_version,          "version" },
+        { Access_keys::stv_release_date,     "release_date" },
+        { Access_keys::stv_region,           "region" },
+        { Access_keys::stv_files,            "files" }
+
+
     };
 
     bool Config::lookup(const std::string& path) const {
@@ -60,7 +69,7 @@ namespace core {
         }
         catch (const FileIOException &fioex) {
             
-            cout << tr("Could not read the configuration file: ") << fioex.what() << endl;
+            cout << fmt::format(tr("Could not read file {0} : ")) << fioex.what() << endl;
             return false;
         }
     }
@@ -77,13 +86,13 @@ namespace core {
     void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
         Setting& root = cfg_.getRoot();
 
-        Setting& rendering = root.add(keys_write[Config_keys::rendering], Setting::TypeGroup);
-        writeValue(rendering, keys_write[Config_keys::legacy_opengl], !isModernOpenglCapable);
+        Setting& rendering = root.add(keys_write[Access_keys::config_rendering], Setting::TypeGroup);
+        writeValue(rendering, keys_write[Access_keys::config_legacy_opengl], !isModernOpenglCapable);
 
-        Setting& paths = root.add(keys_write[Config_keys::paths], Setting::TypeGroup);
-        writeValue(paths, keys_write[Config_keys::roms_stv], "");
-        writeValue(paths, keys_write[Config_keys::bios_stv], "");
-        writeValue(paths, keys_write[Config_keys::bios_saturn], "");
+        Setting& paths = root.add(keys_write[Access_keys::config_paths], Setting::TypeGroup);
+        writeValue(paths, keys_write[Access_keys::config_roms_stv], "");
+        writeValue(paths, keys_write[Access_keys::config_bios_stv], "");
+        writeValue(paths, keys_write[Access_keys::config_bios_saturn], "");
     }
 
     Setting& Config::getGroup(Setting& root, const string& group_name) {
@@ -103,7 +112,7 @@ namespace core {
     }
 
     //Setting& Config::readValue(const std::string& value) {
-    Setting& Config::readValue(const Config_keys& value) {
+    Setting& Config::readValue(const Access_keys& value) {
         try {
             string key{ Config::keys_read[value] };
             return cfg_.lookup(key.c_str());

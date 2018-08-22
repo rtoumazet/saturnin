@@ -35,15 +35,21 @@
 namespace saturnin {
 namespace core {
 
-    enum class Config_keys {
-        rendering,
-        legacy_opengl,
-        paths,
-        roms_stv,
-        bios_stv,
-        bios_saturn
+    enum class Access_keys {
+        config_rendering,
+        config_legacy_opengl,
+        config_paths,
+        config_roms_stv,
+        config_bios_stv,
+        config_bios_saturn,
+        stv_game_name,
+        stv_zip_name,
+        stv_parent_set,
+        stv_version,
+        stv_release_date,
+        stv_region,
+        stv_files
     };
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \class  Config
@@ -58,14 +64,14 @@ namespace core {
     public:
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<Config_keys, const char *> Map_keys
+        /// \typedef    std::map<Access_keys, const char *> Map_keys
         ///
         /// \brief  Defines an alias representing the link between enumerators and keys.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<Config_keys, const char *>Map_keys;
-        static Map_keys keys_write; ///< Contains the config keys used for creation (i.e. the naked key without the full path)
-        static Map_keys keys_read;  ///< Contains the config keys used for read access (i.e. the naked key with its full path)
+        typedef std::map<Access_keys, const char *>Map_keys;
+        static Map_keys keys_write; ///< Contains the keys used for creation (i.e. the naked key without the full path)
+        static Map_keys keys_read;  ///< Contains the keys used for read access (i.e. the naked key with its full path)
 
         //@{
         // Constructors / Destructors
@@ -231,7 +237,7 @@ namespace core {
         }
 
        //libconfig::Setting& readValue(const std::string& value);
-       libconfig::Setting& readValue(const Config_keys& value);
+       libconfig::Setting& readValue(const Access_keys& value);
 
     private:
 

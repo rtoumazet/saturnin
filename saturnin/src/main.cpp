@@ -46,8 +46,11 @@ int main(int argc, char *argv[])
    state.memory()->loadBios(Hardware_mode::saturn);
    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::not_interleaved, 1, Rom_type::program);
-   state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
+   //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::even_interleaved, 1, Rom_type::program);
+
+   Config stv("stv/astrass.cfg");
+   string game_name = stv.readValue(Access_keys::stv_game_name);
 
     write<32>(state.memory()->workram_low, 0, 0x12345678);
     auto val = read<16>(state.memory()->workram_low, 2);
@@ -65,7 +68,7 @@ int main(int argc, char *argv[])
     //    plugin->log("test");
 
 
-    bool is_legacy_opengl = state.config()->readValue(Config_keys::legacy_opengl);
+    bool is_legacy_opengl = state.config()->readValue(Access_keys::config_legacy_opengl);
     if (is_legacy_opengl) return runLegacyOpengl(); else return runModernOpengl();
   
 };
