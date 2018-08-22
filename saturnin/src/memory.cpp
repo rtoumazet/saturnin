@@ -39,7 +39,7 @@ bool Memory::loadRom(const string& zip_name,
                     const Rom_load rom_load,
                     const uint8_t  times_mirrored,
                     const Rom_type rom_type) {
-    string rom_path{ config_->readValue(Config_keys::roms_stv).c_str() };
+    string rom_path{ config_->readValue(Access_keys::config_roms_stv).c_str() };
     rom_path += "\\" + zip_name + ".zip";
 
     ZipArchive zf(rom_path);
@@ -122,8 +122,8 @@ bool Memory::loadRom(const string& zip_name,
 void Memory::loadBios(const Hardware_mode mode) {
     string bios_path{};
     switch (mode) {
-        case Hardware_mode::saturn: bios_path = config_->readValue(Config_keys::bios_saturn).c_str(); break;
-        case Hardware_mode::stv:    bios_path = config_->readValue(Config_keys::bios_stv).c_str(); break;
+        case Hardware_mode::saturn: bios_path = config_->readValue(Access_keys::config_bios_saturn).c_str(); break;
+        case Hardware_mode::stv:    bios_path = config_->readValue(Access_keys::config_bios_stv).c_str(); break;
         default: {
             Log::error("config", tr("Unknown hardware mode"));
             Log::error("config", tr("Exiting ..."));
