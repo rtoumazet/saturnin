@@ -22,7 +22,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "log.h"
 
-using namespace std;
+namespace fs = std::filesystem;
 
 namespace saturnin {
 namespace core {
@@ -58,7 +58,7 @@ namespace core {
     void Log::createLogger(const std::string & logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink)
     {
         auto logger = std::make_shared<spdlog::logger>(logger_name, sink);
-        string pattern = "[%X][%n][%l] %v";
+        std::string pattern = "[%X][%n][%l] %v";
         logger->set_pattern(pattern);
         loggers_[logger_name] = logger;
         spdlog::register_logger(logger);
@@ -75,10 +75,10 @@ namespace core {
     }
     /* static */
     void Log::removeFile(const std::string& path) {
-        auto full_path = filesystem::current_path() / path;
+        auto full_path = fs::current_path() / path;
         full_path.make_preferred();
-        filesystem::create_directories(full_path.parent_path());
-        filesystem::remove(full_path);
+        fs::create_directories(full_path.parent_path());
+        fs::remove(full_path);
     }
 }
 }

@@ -18,15 +18,15 @@
 //
 
 #include <iostream> // cout
+#include <filesystem> // filesystem
 #include "locale.h"
 #include "config.h"
 #include "log.h"
 #include "video/opengl.h"
 #include "emulator_context.h"
 
-using namespace std;
-using namespace saturnin::video;
-using namespace saturnin::core;
+namespace video = saturnin::video;
+namespace core  = saturnin::core;
 
 static void error_callback(int error, const char* description)
 {
@@ -36,26 +36,29 @@ static void error_callback(int error, const char* description)
 
 int main(int argc, char *argv[])
 {
-    if ( !Locale::initialize() ) return 1;
+    if ( !core::Locale::initialize() ) return 1;
    
-    Log::initialize();
+    std::cout << core::tr("Hello world.") << std::endl;
 
-    Emulator_context state;
-   if (!state.config()->initialize(isModernOpenglCapable())) return 1;
+    core::Log::initialize();
 
-   state.memory()->loadBios(Hardware_mode::saturn);
+    core::Emulator_context state;
+    if (!state.config()->initialize(video::isModernOpenglCapable())) return 1;
+
+   state.memory()->loadBios(core::Hardware_mode::saturn);
    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::not_interleaved, 1, Rom_type::program);
-   //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
+   //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, core::Rom_load::odd_interleaved, 1, core::Rom_type::program);
    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::even_interleaved, 1, Rom_type::program);
 
-   string file{ "stv\\astra_superstars.cfg" };
-   Config stv(file);
-   stv.readFile(file);
-   string game_name = stv.readValue(Access_keys::stv_game_name);
+   auto full_path = std::filesystem::current_path() / "stv" / "astra_superstars.cfg";
 
-    write<32>(state.memory()->workram_low, 0, 0x12345678);
-    auto val = read<16>(state.memory()->workram_low, 2);
+   core::Config stv(full_path.string());
+   stv.readFile(full_path.string());
+   std::string game_name = stv.readValue(core::Access_keys::stv_game_name);
+
+   core::write<32>(state.memory()->workram_low, 0, 0x12345678);
+    auto val = core::read<16>(state.memory()->workram_low, 2);
 
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
@@ -70,7 +73,7 @@ int main(int argc, char *argv[])
     //    plugin->log("test");
 
 
-    bool is_legacy_opengl = state.config()->readValue(Access_keys::config_legacy_opengl);
-    if (is_legacy_opengl) return runLegacyOpengl(); else return runModernOpengl();
+    bool is_legacy_opengl = state.config()->readValue(core::Access_keys::config_legacy_opengl);
+    if (is_legacy_opengl) return video::runLegacyOpengl(); else return video::runModernOpengl();
   
 };
