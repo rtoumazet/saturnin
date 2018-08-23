@@ -1,5 +1,4 @@
 boost-locale
-boost-filesystem
 glfw3
 imgui
 libconfig

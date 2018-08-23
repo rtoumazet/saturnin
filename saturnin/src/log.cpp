@@ -18,7 +18,7 @@
 //
 
 #include <iostream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "log.h"
 
@@ -75,10 +75,10 @@ namespace core {
     }
     /* static */
     void Log::removeFile(const std::string& path) {
-        auto full_path = boost::filesystem::current_path() / path;
+        auto full_path = filesystem::current_path() / path;
         full_path.make_preferred();
-        boost::filesystem::create_directories(full_path.parent_path());
-        boost::filesystem::remove(full_path);
+        filesystem::create_directories(full_path.parent_path());
+        filesystem::remove(full_path);
     }
 }
 }

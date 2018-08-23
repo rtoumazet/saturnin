@@ -49,7 +49,9 @@ int main(int argc, char *argv[])
    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::even_interleaved, 1, Rom_type::program);
 
-   Config stv("stv/astrass.cfg");
+   string file{ "stv\\astra_superstars.cfg" };
+   Config stv(file);
+   stv.readFile(file);
    string game_name = stv.readValue(Access_keys::stv_game_name);
 
     write<32>(state.memory()->workram_low, 0, 0x12345678);

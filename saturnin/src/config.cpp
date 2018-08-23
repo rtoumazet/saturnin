@@ -69,7 +69,9 @@ namespace core {
         }
         catch (const FileIOException &fioex) {
             
-            cout << fmt::format(tr("Could not read file {0} : ")) << fioex.what() << endl;
+            auto errorString = fmt::format(tr("Could not read file {0} : {1}"), filename, fioex.what());
+            //cout << fmt::format(tr("Could not read file {0} "), filename) << fioex.what() << endl;
+            Log::error("config", errorString);
             return false;
         }
     }
