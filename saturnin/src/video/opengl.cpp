@@ -32,7 +32,6 @@
 
 #include "../../res/icons.png.inc"
 
-using namespace std;
 
 namespace saturnin {
 namespace video {
@@ -56,7 +55,7 @@ namespace video {
         glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
         // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+            std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         return framebuffer;
@@ -88,7 +87,7 @@ namespace video {
         {
             char info_log[512];
             glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
-            cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
+            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
         }
 
         return vertex_shader;
@@ -142,7 +141,7 @@ namespace video {
         uint32_t vertex_shader = create_vertex_shader();
         uint32_t fragment_shader = create_fragment_shader();
         program_shader_ = create_program_shader(vertex_shader, fragment_shader);
-        vector<uint32_t> shaders_to_delete = {vertex_shader, fragment_shader};
+        std::vector<uint32_t> shaders_to_delete = {vertex_shader, fragment_shader};
         delete_shaders(shaders_to_delete);
 
         unsigned int VBO;
@@ -186,7 +185,7 @@ namespace video {
         if (!success) {
             char info_log[256];
             glGetProgramInfoLog(shader_program, 512, NULL, info_log);
-            cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << info_log << std::endl;
+            std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << info_log << std::endl;
         }
 
         return shader_program;
@@ -207,7 +206,7 @@ namespace video {
         return VAO;
     }
 
-    bool Opengl::load_png_image(const vector<uint8_t>& source_data, vector<uint8_t>& image) {
+    bool Opengl::load_png_image(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) {
         // Load file and decode image.
         uint32_t width {};
         uint32_t height {};
@@ -223,7 +222,7 @@ namespace video {
         return true;
     }
 
-    bool Opengl::load_icons(vector<uint8_t>& image) {
+    bool Opengl::load_icons(std::vector<uint8_t>& image) {
         //Opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
         std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
         return load_png_image(icons_vector, image);

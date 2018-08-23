@@ -18,12 +18,10 @@
 //
 
 #include <iostream>                // cout
-#include <boost/system/config.hpp> // needed by boost/locale
 #include <boost/locale.hpp>        // generator
 #include "locale.h"
 
-using namespace boost::locale;
-using namespace std;
+namespace locale = boost::locale;
 
 namespace saturnin {
 namespace core {
@@ -31,19 +29,19 @@ namespace core {
     /* static */
     bool Locale::initialize()
     {
-        generator gen;
+        locale::generator gen;
         // Specify location of dictionaries
-        gen.add_messages_path(".");
+        gen.add_messages_path("./lang");
         gen.add_messages_domain("saturnin");
         // Generate locales and imbue them to iostream
-        locale::global(gen(""));
-        cout.imbue(locale());
+        std::locale::global(gen("fr"));
+        std::cout.imbue(std::locale());
 
         return true;
     }
 
-    string tr(const string& str) {
-        return translate(str);
+    std::string tr(const std::string& str) {
+        return locale::translate(str);
     }
 
 };

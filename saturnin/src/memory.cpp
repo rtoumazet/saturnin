@@ -19,33 +19,36 @@
 
 #include <sstream> // stringstream
 #include <fstream> // ifstream
+#include <filesystem> // filesystem
 #include "../lib/libzippp/libzippp.h"
 #include "config.h"
 #include "locale.h"
 #include "log.h"
 #include "memory.h"
 
-using namespace libzippp;
-using namespace std;
-
+namespace lzpp = libzippp;
+namespace fs = std::filesystem;
 
 namespace saturnin {
 namespace core {
 
-bool Memory::loadRom(const string& zip_name,
-                    const string&  file_name,
+bool Memory::loadRom(const std::string& zip_name,
+                    const std::string&  file_name,
                     uint8_t*	   destination,
                     const uint32_t size,
                     const Rom_load rom_load,
                     const uint8_t  times_mirrored,
                     const Rom_type rom_type) {
-    string rom_path{ config_->readValue(Access_keys::config_roms_stv).c_str() };
-    rom_path += "\\" + zip_name + ".zip";
 
-    ZipArchive zf(rom_path);
-    if (zf.open(ZipArchive::READ_ONLY)) {
+    std::string zip = zip_name + ".zip";
+    fs::path rom_path{ config_->readValue(Access_keys::config_roms_stv).c_str() };
+    rom_path /= zip;
+    //rom_path += "\\" + zip_name + ".zip";
+
+    lzpp::ZipArchive zf(rom_path.string());
+    if (zf.open(lzpp::ZipArchive::READ_ONLY)) {
         if (zf.hasEntry(file_name, false, false)) {
-            ZipEntry entry = zf.getEntry(file_name, false, false);
+            lzpp::ZipEntry entry = zf.getEntry(file_name, false, false);
             std::unique_ptr<uint8_t[]> data(static_cast<uint8_t*>(entry.readAsBinary()));
 
             switch (rom_type) {
@@ -105,14 +108,14 @@ bool Memory::loadRom(const string& zip_name,
         }
         else {
             zf.close();
-            string str = fmt::format(tr("File '{0}' not found in zip file !"), file_name);
+            std::string str = fmt::format(tr("File '{0}' not found in zip file !"), file_name);
             Log::warning("memory", str);
             return false;
         }
         zf.close();
     }
     else {
-        string str = fmt::format(tr("Zip file '{0}' not found !"), rom_path);
+        std::string str = fmt::format(tr("Zip file '{0}' not found !"), rom_path.string());
         Log::warning("memory", str);
         return false;
     }
@@ -120,7 +123,7 @@ bool Memory::loadRom(const string& zip_name,
 }
 
 void Memory::loadBios(const Hardware_mode mode) {
-    string bios_path{};
+    std::string bios_path{};
     switch (mode) {
         case Hardware_mode::saturn: bios_path = config_->readValue(Access_keys::config_bios_saturn).c_str(); break;
         case Hardware_mode::stv:    bios_path = config_->readValue(Access_keys::config_bios_stv).c_str(); break;
@@ -132,13 +135,13 @@ void Memory::loadBios(const Hardware_mode mode) {
         }
     }
 
-    ifstream input_file(bios_path, ios::binary);
+    std::ifstream input_file(bios_path, std::ios::binary);
     if (input_file) {
-        stringstream buffer;
+        std::stringstream buffer;
         buffer << input_file.rdbuf();
         input_file.close();
 
-        string str = buffer.str();
+        std::string str = buffer.str();
             
         switch (mode) {
             case Hardware_mode::saturn: {

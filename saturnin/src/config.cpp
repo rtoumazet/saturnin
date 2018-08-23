@@ -23,8 +23,7 @@
 #include "log.h"
 
 
-using namespace libconfig;
-using namespace std;
+namespace libcfg = libconfig;
 
 namespace saturnin {
 namespace core {
@@ -67,7 +66,7 @@ namespace core {
             cfg_.readFile(filename.c_str());
             return true;
         }
-        catch (const FileIOException &fioex) {
+        catch (const libcfg::FileIOException &fioex) {
             
             auto errorString = fmt::format(tr("Could not read file {0} : {1}"), filename, fioex.what());
             //cout << fmt::format(tr("Could not read file {0} "), filename) << fioex.what() << endl;
@@ -78,7 +77,7 @@ namespace core {
 
     bool Config::initialize(const bool isModernOpenGlCapable) {
         if (!readFile(filename_)) {
-            cout << tr("Creating configuration file.") << endl;
+            std::cout << tr("Creating configuration file.") << std::endl;
             generateConfigurationTree(isModernOpenGlCapable);
             writeFile(filename_);
         }
@@ -86,24 +85,24 @@ namespace core {
     }
 
     void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
-        Setting& root = cfg_.getRoot();
+        libcfg::Setting& root = cfg_.getRoot();
 
-        Setting& rendering = root.add(keys_write[Access_keys::config_rendering], Setting::TypeGroup);
+        libcfg::Setting& rendering = root.add(keys_write[Access_keys::config_rendering], libcfg::Setting::TypeGroup);
         writeValue(rendering, keys_write[Access_keys::config_legacy_opengl], !isModernOpenglCapable);
 
-        Setting& paths = root.add(keys_write[Access_keys::config_paths], Setting::TypeGroup);
+        libcfg::Setting& paths = root.add(keys_write[Access_keys::config_paths], libcfg::Setting::TypeGroup);
         writeValue(paths, keys_write[Access_keys::config_roms_stv], "");
         writeValue(paths, keys_write[Access_keys::config_bios_stv], "");
         writeValue(paths, keys_write[Access_keys::config_bios_saturn], "");
     }
 
-    Setting& Config::getGroup(Setting& root, const string& group_name) {
-        if (!root.exists(group_name.c_str())) root.add(group_name.c_str(), Setting::TypeGroup);
+    libcfg::Setting& Config::getGroup(libcfg::Setting& root, const std::string& group_name) {
+        if (!root.exists(group_name.c_str())) root.add(group_name.c_str(), libcfg::Setting::TypeGroup);
         return root[group_name.c_str()];
     }
 
     void Config::test() {
-        Setting& root = cfg_.getRoot();
+        libcfg::Setting& root = cfg_.getRoot();
         std::string str{"test"};
         
         writeValue(root, "test_c_string", str.c_str());
@@ -113,13 +112,12 @@ namespace core {
         writeFile(filename_);
     }
 
-    //Setting& Config::readValue(const std::string& value) {
-    Setting& Config::readValue(const Access_keys& value) {
+    libcfg::Setting& Config::readValue(const Access_keys& value) {
         try {
-            string key{ Config::keys_read[value] };
+            std::string key{ Config::keys_read[value] };
             return cfg_.lookup(key.c_str());
         }
-        catch (const SettingNotFoundException& e) {
+        catch (const libcfg::SettingNotFoundException& e) {
             
             auto errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
             Log::error("config", errorString);
