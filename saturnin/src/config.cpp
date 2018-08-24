@@ -28,6 +28,8 @@ namespace libcfg = libconfig;
 namespace saturnin {
 namespace core {
     Config::Map_keys Config::keys_write = {
+        { Access_keys::config_global,        "global"},
+        { Access_keys::config_language,      "language"},
         { Access_keys::config_rendering,     "rendering"},
         { Access_keys::config_legacy_opengl, "legacy_opengl" },
         { Access_keys::config_paths,         "paths" },
@@ -36,6 +38,8 @@ namespace core {
         { Access_keys::config_bios_saturn,   "bios_saturn" },
     };
     Config::Map_keys Config::keys_read = {
+        { Access_keys::config_global,        "global"},
+        { Access_keys::config_language,      "global.language"},
         { Access_keys::config_rendering,     "rendering" },
         { Access_keys::config_legacy_opengl, "rendering.legacy_opengl" },
         { Access_keys::config_paths,         "paths" },
@@ -87,6 +91,9 @@ namespace core {
     void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
         libcfg::Setting& root = cfg_.getRoot();
 
+        libcfg::Setting& global = root.add(keys_write[Access_keys::config_global], libcfg::Setting::TypeGroup);
+        writeValue(global, keys_write[Access_keys::config_language], "en");
+        
         libcfg::Setting& rendering = root.add(keys_write[Access_keys::config_rendering], libcfg::Setting::TypeGroup);
         writeValue(rendering, keys_write[Access_keys::config_legacy_opengl], !isModernOpenglCapable);
 

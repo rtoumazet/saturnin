@@ -36,14 +36,16 @@ static void error_callback(int error, const char* description)
 
 int main(int argc, char *argv[])
 {
-    if ( !core::Locale::initialize() ) return 1;
+    core::Emulator_context state;
+    if (!state.config()->initialize(video::isModernOpenglCapable())) return 1;
+
+    std::string country = state.config()->readValue(core::Access_keys::config_language);
+    if ( !core::Locale::initialize(country) ) return 1;
    
     std::cout << core::tr("Hello world.") << std::endl;
 
     core::Log::initialize();
 
-    core::Emulator_context state;
-    if (!state.config()->initialize(video::isModernOpenglCapable())) return 1;
 
    state.memory()->loadBios(core::Hardware_mode::saturn);
    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
