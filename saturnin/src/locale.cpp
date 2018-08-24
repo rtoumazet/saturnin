@@ -26,15 +26,14 @@ namespace locale = boost::locale;
 namespace saturnin {
 namespace core {
 
-    /* static */
-    bool Locale::initialize()
-    {
+/* static */
+bool Locale::initialize(const std::string& country = "" ) {
         locale::generator gen;
         // Specify location of dictionaries
         gen.add_messages_path("./lang");
         gen.add_messages_domain("saturnin");
         // Generate locales and imbue them to iostream
-        std::locale::global(gen("fr"));
+        std::locale::global(gen(country));
         std::cout.imbue(std::locale());
 
         return true;

@@ -36,6 +36,8 @@ namespace saturnin {
 namespace core {
 
     enum class Access_keys {
+        config_global,
+        config_language,
         config_rendering,
         config_legacy_opengl,
         config_paths,
