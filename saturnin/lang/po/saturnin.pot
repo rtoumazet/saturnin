@@ -1,0 +1,58 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Renaud TOUMAZET
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Saturnin\n"
+"Report-Msgid-Bugs-To: saturnin@runik.info\n"
+"POT-Creation-Date: 2018-08-24 14:23+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: config.cpp:71
+msgid "Could not read file {0} : {1}"
+msgstr ""
+
+#: config.cpp:80
+msgid "Creating configuration file."
+msgstr ""
+
+#: config.cpp:122
+msgid "Setting '{0}' not found !"
+msgstr ""
+
+#: config.cpp:124 memory.cpp:132
+msgid "Exiting ..."
+msgstr ""
+
+#: log.h:183
+msgid "Log '{0}' is not defined !"
+msgstr ""
+
+#: main.cpp:41
+msgid "Hello world."
+msgstr ""
+
+#: memory.cpp:103
+msgid "Unknown rom type while loading {0}.zip"
+msgstr ""
+
+#: memory.cpp:111
+msgid "File '{0}' not found in zip file !"
+msgstr ""
+
+#: memory.cpp:118
+msgid "Zip file '{0}' not found !"
+msgstr ""
+
+#: memory.cpp:131
+msgid "Unknown hardware mode"
+msgstr ""
