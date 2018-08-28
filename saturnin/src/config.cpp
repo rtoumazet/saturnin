@@ -22,7 +22,6 @@
 #include "locale.h"
 #include "log.h"
 
-
 namespace libcfg = libconfig;
 
 namespace saturnin {
@@ -37,6 +36,7 @@ namespace core {
         { Access_keys::config_bios_stv,      "bios_stv" },
         { Access_keys::config_bios_saturn,   "bios_saturn" },
     };
+
     Config::Map_keys Config::keys_read = {
         { Access_keys::config_global,        "global"},
         { Access_keys::config_language,      "global.language"},
@@ -53,8 +53,18 @@ namespace core {
         { Access_keys::stv_release_date,     "release_date" },
         { Access_keys::stv_region,           "region" },
         { Access_keys::stv_files,            "files" }
+    };
 
+    Config::Map_rom_load rom_load = {
+        {"NOT_INTERLEAVED", Rom_load::not_interleaved},
+        {"ODD_INTERLEAVED", Rom_load::odd_interleaved},
+        {"EVEN_INTERLEAVED", Rom_load::even_interleaved}
+    };
 
+    Config::Map_rom_type rom_type = {
+        {"PROGRAM", Rom_type::program},
+        {"GRAPHIC", Rom_type::graphic},
+        {"BIOS",    Rom_type::bios}
     };
 
     bool Config::lookup(const std::string& path) const {

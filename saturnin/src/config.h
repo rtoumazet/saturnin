@@ -31,6 +31,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include "memory.h" // Rom_load, Rom_type
 
 namespace saturnin {
 namespace core {
@@ -74,6 +75,26 @@ namespace core {
         typedef std::map<Access_keys, const char *>Map_keys;
         static Map_keys keys_write; ///< Contains the keys used for creation (i.e. the naked key without the full path)
         static Map_keys keys_read;  ///< Contains the keys used for read access (i.e. the naked key with its full path)
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \typedef    std::map<const std::string, const uint8_t>Map_rom_load
+        ///
+        /// \brief  Defines an alias representing the correspondance between the rom load string value
+        ///         defined in the config file and the rom load type.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        typedef std::map<const std::string, const Rom_load>Map_rom_load;
+        static Map_rom_load rom_load;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \typedef    std::map<const std::string, const Rom_type>Map_rom_type
+        ///
+        /// \brief  Defines an alias representing the correspondance between the rom type string value
+        ///         defined in the config file and the rom type type.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        typedef std::map<const std::string, const Rom_type>Map_rom_type;
+        static Map_rom_type rom_type;
 
         //@{
         // Constructors / Destructors
@@ -238,7 +259,19 @@ namespace core {
             }
         }
 
-       //libconfig::Setting& readValue(const std::string& value);
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+       /// \fn  libconfig::Setting& Config::readValue(const Access_keys& value);
+       ///
+       /// \brief   Reads a value from the specified root setting.
+       ///
+       /// \author  Runik
+       /// \date    28/08/2018
+       ///
+       /// \param   value   key of the value to read.
+       ///
+       /// \return  Read value.
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+
        libconfig::Setting& readValue(const Access_keys& value);
 
     private:

@@ -58,6 +58,8 @@ namespace core {
         even_interleaved ///< Data loaded on even bytes.
     };
 
+    class Config;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \class  Memory
     ///
@@ -147,6 +149,21 @@ namespace core {
                         const Rom_load      rom_load,
                         const uint8_t       times_mirrored,
                         const Rom_type      rom_type);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn bool Memory::loadStvGame(const std::string& file_name);
+        ///
+        /// \brief  Loads a ST-V game.
+        ///
+        /// \author Runik
+        /// \date   28/08/2018
+        ///
+        /// \param  file_name   configuration file name, with cfg extension.
+        ///
+        /// \return True if the game is loaded.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        bool loadStvGame(const std::string& config_filename);
 
     private:
         std::shared_ptr<Config> config_;    ///< Configuration object
