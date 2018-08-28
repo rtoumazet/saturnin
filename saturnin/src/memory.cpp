@@ -162,6 +162,39 @@ void Memory::loadBios(const Hardware_mode mode) {
     }
 }
 
+bool Memory::loadStvGame(const std::string& config_filename) {
+    auto full_path = std::filesystem::current_path() / "stv" / config_filename;
+
+    core::Config stv(full_path.string());
+    stv.readFile(full_path.string());
+
+    std::string game_name       = stv.readValue(core::Access_keys::stv_game_name);
+    std::string zip_name        = stv.readValue(core::Access_keys::stv_zip_name);
+    std::string parent_set      = stv.readValue(core::Access_keys::stv_parent_set);
+    std::string version         = stv.readValue(core::Access_keys::stv_version);
+    std::string release_date    = stv.readValue(core::Access_keys::stv_release_date);
+    std::string region          = stv.readValue(core::Access_keys::stv_region);
+    libconfig::Setting& files   = stv.readValue(core::Access_keys::stv_files);
+    for (uint8_t i=0; i < files.getLength(); ++i) {
+        const std::string rom_name      = files[i][0];
+        const uint32_t    load_address  = files[i][1];
+        const uint32_t    load_size     = files[i][2];
+        const auto        rom_load      = Config::rom_load[files[i][3]];
+        const uint32_t    times_mirrored= files[i][4];
+        const auto        rom_type      = Config::rom_type[files[i][5]];
+        this->loadRom(zip_name, 
+                      rom_name, 
+                      &this->cart[load_address], 
+                      load_size, 
+                      rom_load, 
+                      times_mirrored, 
+                      rom_type);
+    }
+
+    return true;
+    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
+}
+
 void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
     if (times_mirrored > 0) {
         uint32_t multiple{};
