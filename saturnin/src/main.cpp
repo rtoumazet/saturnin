@@ -39,12 +39,14 @@ int main(int argc, char *argv[])
     core::Emulator_context state;
     if (!state.config()->initialize(video::isModernOpenglCapable())) return 1;
 
+    core::Log::initialize();
+
     std::string country = state.config()->readValue(core::Access_keys::config_language);
     if ( !core::Locale::initialize(country) ) return 1;
    
     std::cout << core::tr("Hello world.") << std::endl;
 
-    core::Log::initialize();
+
 
 
    state.memory()->loadBios(core::Hardware_mode::saturn);

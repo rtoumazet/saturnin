@@ -190,9 +190,7 @@ bool Memory::loadStvGame(const std::string& config_filename) {
                       times_mirrored, 
                       rom_type);
     }
-
     return true;
-    //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
 }
 
 void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
