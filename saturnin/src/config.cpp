@@ -55,13 +55,13 @@ namespace core {
         { Access_keys::stv_files,            "files" }
     };
 
-    Config::Map_rom_load rom_load = {
+    Config::Map_rom_load Config::rom_load = {
         {"NOT_INTERLEAVED", Rom_load::not_interleaved},
         {"ODD_INTERLEAVED", Rom_load::odd_interleaved},
         {"EVEN_INTERLEAVED", Rom_load::even_interleaved}
     };
 
-    Config::Map_rom_type rom_type = {
+    Config::Map_rom_type Config::rom_type = {
         {"PROGRAM", Rom_type::program},
         {"GRAPHIC", Rom_type::graphic},
         {"BIOS",    Rom_type::bios}
