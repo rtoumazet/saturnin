@@ -153,7 +153,7 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn bool Memory::loadStvGame(const std::string& file_name);
         ///
-        /// \brief  Loads a ST-V game.
+        /// \brief  Loads a ST-V game into the cart area.
         ///
         /// \author Runik
         /// \date   28/08/2018
@@ -164,6 +164,17 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         bool loadStvGame(const std::string& config_filename);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Memory::swapCartArea();
+        ///
+        /// \brief  Swaps data in the cart area if needed.
+        ///
+        /// \author Runik
+        /// \date   30/08/2018
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void swapCartArea();
 
     private:
         std::shared_ptr<Config> config_;    ///< Configuration object

@@ -49,20 +49,11 @@ int main(int argc, char *argv[])
 
 
 
-   state.memory()->loadBios(core::Hardware_mode::saturn);
-   //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::odd_interleaved, 1, Rom_type::program);
-   //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::not_interleaved, 1, Rom_type::program);
-   //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, core::Rom_load::odd_interleaved, 1, core::Rom_type::program);
-   //state.memory()->loadRom("astrass", "EPR20825.13", &state.memory()->cart[0], 0x100000, Rom_load::even_interleaved, 1, Rom_type::program);
+    state.memory()->loadBios(core::Hardware_mode::saturn);
 
-   //auto full_path = std::filesystem::current_path() / "stv" / "astra_superstars.cfg";
+    state.memory()->loadStvGame("astra_superstars.cfg");
 
-   //core::Config stv(full_path.string());
-   //stv.readFile(full_path.string());
-   //std::string game_name = stv.readValue(core::Access_keys::stv_game_name);
-   state.memory()->loadStvGame("astra_superstars.cfg");
-
-   core::write<32>(state.memory()->workram_low, 0, 0x12345678);
+    core::write<32>(state.memory()->workram_low, 0, 0x12345678);
     auto val = core::read<16>(state.memory()->workram_low, 2);
 
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
