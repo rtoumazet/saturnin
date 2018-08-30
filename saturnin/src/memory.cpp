@@ -168,13 +168,13 @@ bool Memory::loadStvGame(const std::string& config_filename) {
     core::Config stv(full_path.string());
     stv.readFile(full_path.string());
 
-    std::string game_name       = stv.readValue(core::Access_keys::stv_game_name);
-    std::string zip_name        = stv.readValue(core::Access_keys::stv_zip_name);
-    std::string parent_set      = stv.readValue(core::Access_keys::stv_parent_set);
-    std::string version         = stv.readValue(core::Access_keys::stv_version);
-    std::string release_date    = stv.readValue(core::Access_keys::stv_release_date);
-    std::string region          = stv.readValue(core::Access_keys::stv_region);
-    libconfig::Setting& files   = stv.readValue(core::Access_keys::stv_files);
+    const std::string game_name       = stv.readValue(core::Access_keys::stv_game_name);
+    const std::string zip_name        = stv.readValue(core::Access_keys::stv_zip_name);
+    const std::string parent_set      = stv.readValue(core::Access_keys::stv_parent_set);
+    const std::string version         = stv.readValue(core::Access_keys::stv_version);
+    const std::string release_date    = stv.readValue(core::Access_keys::stv_release_date);
+    const std::string region          = stv.readValue(core::Access_keys::stv_region);
+    const libconfig::Setting& files   = stv.readValue(core::Access_keys::stv_files);
     for (uint8_t i=0; i < files.getLength(); ++i) {
         const std::string rom_name      = files[i][0];
         const uint32_t    load_address  = files[i][1];
@@ -182,15 +182,36 @@ bool Memory::loadStvGame(const std::string& config_filename) {
         const auto        rom_load      = Config::rom_load[files[i][3]];
         const uint32_t    times_mirrored= files[i][4];
         const auto        rom_type      = Config::rom_type[files[i][5]];
-        this->loadRom(zip_name, 
-                      rom_name, 
-                      &this->cart[load_address], 
-                      load_size, 
-                      rom_load, 
-                      times_mirrored, 
-                      rom_type);
+        if (!this->loadRom(zip_name,
+                           rom_name,
+                           &this->cart[load_address],
+                           load_size,
+                           rom_load,
+                           times_mirrored,
+                           rom_type)) {
+            return false;
+        }
     }
+
+    swapCartArea();
+
     return true;
+}
+
+void Memory::swapCartArea() {
+    const uint32_t program_rom_size = 0x400000;
+
+    // ST-V data begins with 'SEGA' string.
+    // If the first byte of the string is 'E', it means the program data has to be swapped
+    if (this->cart[0] == 'E') {
+        for (int32_t i = 0; i < program_rom_size; i += 2) {
+            std::swap(this->cart[i], this->cart[i + 1]);
+        }
+    }
+
+    for (int32_t i = program_rom_size; i < this->cart.size(); i += 2) {
+        std::swap(this->cart[i], this->cart[i + 1]);
+    }
 }
 
 void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
