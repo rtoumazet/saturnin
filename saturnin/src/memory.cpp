@@ -19,7 +19,7 @@
 
 #include <sstream> // stringstream
 #include <fstream> // ifstream
-#include <filesystem> // filesystem
+//#include <filesystem> // filesystem
 #include "../lib/libzippp/libzippp.h"
 #include "config.h"
 #include "locale.h"
@@ -204,12 +204,12 @@ void Memory::swapCartArea() {
     // ST-V data begins with 'SEGA' string.
     // If the first byte of the string is 'E', it means the program data has to be swapped
     if (this->cart[0] == 'E') {
-        for (int32_t i = 0; i < program_rom_size; i += 2) {
+        for (uint32_t i = 0; i < program_rom_size; i += 2) {
             std::swap(this->cart[i], this->cart[i + 1]);
         }
     }
 
-    for (int32_t i = program_rom_size; i < this->cart.size(); i += 2) {
+    for (uint32_t i = program_rom_size; i < this->cart.size(); i += 2) {
         std::swap(this->cart[i], this->cart[i + 1]);
     }
 }
@@ -228,5 +228,15 @@ void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored
     }
 }
 
+std::vector<fs::path> listStvConfigurationFiles() {
+    auto full_path = std::filesystem::current_path() / "stv";
+    std::vector<fs::path> files;
+    for (auto& p : fs::directory_iterator(full_path)) {
+        if ((p.path().extension() == ".cfg") && (p.path().filename() != "dummy.cfg")){
+              files.push_back(p.path().filename());
+        }
+    }
+    return files;
+}
 }
 }

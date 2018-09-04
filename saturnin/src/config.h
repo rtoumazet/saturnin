@@ -31,6 +31,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <string> // string
 #include "memory.h" // Rom_load, Rom_type
 
 namespace saturnin {
@@ -53,6 +54,9 @@ namespace core {
         stv_region,
         stv_files
     };
+
+    enum class Rom_load;
+    enum class Rom_type;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \class  Config
@@ -289,7 +293,7 @@ namespace core {
 
         void generateConfigurationTree(const bool isModernOpenglCapable);
 
-        std::string filename_;  ///< Name of the configuraiotn file used
+        std::string filename_;  ///< Name of the configuration file used
         
         libconfig::Config cfg_; ///< Internal configuration object
 
