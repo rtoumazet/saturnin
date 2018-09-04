@@ -18,7 +18,6 @@
 //
 
 #include <iostream> // cout
-#include <filesystem> // filesystem
 #include "locale.h"
 #include "config.h"
 #include "log.h"
@@ -51,7 +50,7 @@ int main(int argc, char *argv[])
 
     state.memory()->loadBios(core::Hardware_mode::saturn);
 
-    state.memory()->loadStvGame("astra_superstars.cfg");
+    //state.memory()->loadStvGame("astra_superstars.cfg");
 
     core::write<32>(state.memory()->workram_low, 0, 0x12345678);
     auto val = core::read<16>(state.memory()->workram_low, 2);

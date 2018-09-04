@@ -26,7 +26,9 @@
 #pragma once
 
 #include <array> // array
+#include <filesystem> // filesystem
 #include <memory> // shared_pointer
+#include <vector> // vector
 
 #include "emulator_enums.h"
 #include "config.h"
@@ -261,5 +263,18 @@ namespace core {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn std::vector<std::filesystem::path> listStvConfigurationFiles();
+    ///
+    /// \brief  Returns a vector populated with valid ST-V configuration files found in.
+    ///
+    /// \author Runik
+    /// \date   04/09/2018
+    ///
+    /// \return The stv configuration files.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    std::vector<std::filesystem::path> listStvConfigurationFiles();
 }
 }
