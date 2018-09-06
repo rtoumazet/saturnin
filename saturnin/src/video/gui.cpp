@@ -116,7 +116,15 @@ namespace gui {
     void showStvWindow() {
         auto files = core::listStvConfigurationFiles();
 
-        //ImGui::ListBox()
+        std::vector<std::string> vec;
+        vec.push_back("test1");
+        vec.push_back("test2");
+        static int listbox_item_current = 1;
+        
+        bool test = true;
+        ImGui::Begin("ST-V window", &test);
+        ImGui::ListBox("Test", &listbox_item_current, vec);
+        ImGui::End();
     }
 }
 }

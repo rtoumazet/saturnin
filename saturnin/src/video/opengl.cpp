@@ -515,6 +515,8 @@ namespace video {
 
             gui::show_another_window(show_another_window);
 
+            gui::showStvWindow();
+
             gui::show_test_window(show_test_window);
 
             {

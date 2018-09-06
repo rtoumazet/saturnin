@@ -60,6 +60,9 @@
     <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp">
       <Filter>Fichiers sources\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\imgui_wrapper.cpp">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\video\opengl.h">
@@ -100,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="lib\libzippp\libzippp.h">
       <Filter>Fichiers sources\libzippp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\imgui_wrapper.h">
+      <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

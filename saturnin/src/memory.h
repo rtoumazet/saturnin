@@ -275,6 +275,6 @@ namespace core {
     /// \return The stv configuration files.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::vector<std::filesystem::path> listStvConfigurationFiles();
+    std::vector<std::string> listStvConfigurationFiles();
 }
 }
