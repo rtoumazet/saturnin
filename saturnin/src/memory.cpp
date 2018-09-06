@@ -228,12 +228,12 @@ void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored
     }
 }
 
-std::vector<fs::path> listStvConfigurationFiles() {
-    auto full_path = std::filesystem::current_path() / "stv";
-    std::vector<fs::path> files;
+std::vector<std::string> listStvConfigurationFiles() {
+    auto full_path = fs::current_path() / "stv";
+    std::vector<std::string> files;
     for (auto& p : fs::directory_iterator(full_path)) {
         if ((p.path().extension() == ".cfg") && (p.path().filename() != "dummy.cfg")){
-              files.push_back(p.path().filename());
+              files.push_back(p.path().filename().string());
         }
     }
     return files;

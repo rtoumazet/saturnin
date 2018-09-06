@@ -1,5 +1,5 @@
 // 
-// gui.h
+// imgui_wrapper.h
 // Saturnin
 //
 // Copyright (c) 2018 Renaud Toumazet
@@ -17,25 +17,21 @@
 // limitations under the License.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \file	gui.h
+/// \file	imgui_wrapper.h
 ///
-/// \brief	Declares everything related to GUI display.
-///
+/// \brief	Regroups various wrappers for imgui
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-//#include "imgui/imgui.h"
+#include <imgui.h>
 #include <vector>
 
-namespace saturnin {
-namespace gui {
+namespace ImGui
+{
 
-    void show_simple_window(bool& show_test_window, bool& show_another_window);
-    void show_another_window(bool& show_another_window);
-    void show_test_window(bool& show_test_window);
-    void show_core_window(const uint32_t tex);
-    void show_image_window(const uint32_t tex);
-    void showStvWindow();
-}
+bool Combo(const char* label, int* currIndex, std::vector<std::string>& values);
+
+bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values);
+
 }
