@@ -123,7 +123,7 @@ namespace gui {
         
         bool test = true;
         ImGui::Begin("ST-V window", &test);
-        ImGui::ListBox("Test", &listbox_item_current, vec);
+        ImGui::ListBox("Test", &listbox_item_current, files);
         ImGui::End();
     }
 }
