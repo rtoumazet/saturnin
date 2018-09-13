@@ -19,7 +19,6 @@
 
 #include <sstream> // stringstream
 #include <fstream> // ifstream
-//#include <filesystem> // filesystem
 #include "../lib/libzippp/libzippp.h"
 #include "config.h"
 #include "locale.h"
@@ -166,7 +165,7 @@ bool Memory::loadStvGame(const std::string& config_filename) {
     auto full_path = std::filesystem::current_path() / "stv" / config_filename;
 
     core::Config stv(full_path.string());
-    stv.readFile(full_path.string());
+    stv.readFile();
 
     const std::string game_name       = stv.readValue(core::Access_keys::stv_game_name);
     const std::string zip_name        = stv.readValue(core::Access_keys::stv_zip_name);
