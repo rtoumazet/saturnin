@@ -255,8 +255,7 @@ namespace video {
         return true;
     }
 
-    int32_t runLegacyOpengl()
-    {
+    int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
         // Setup window
         glfwSetErrorCallback(error_callback);
         if (!glfwInit())
@@ -425,8 +424,7 @@ namespace video {
         return 0;
     }
 
-    int32_t runModernOpengl()
-    {
+    int32_t runModernOpengl(std::shared_ptr<core::Config>& config) {
         // Setup window
         glfwSetErrorCallback(error_callback);
         if (!glfwInit())
@@ -518,6 +516,8 @@ namespace video {
             gui::show_another_window(show_another_window);
 
             gui::showStvWindow();
+
+            gui::showOptionsWindow(config);
 
             gui::show_test_window(show_test_window);
 

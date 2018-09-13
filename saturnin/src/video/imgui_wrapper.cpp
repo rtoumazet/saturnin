@@ -26,8 +26,7 @@ namespace ImGui {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn static auto vectorGetter = [](void* vec, int idx, const char** out_text)
 ///
-/// \brief  Function lambda returning const char * for a string in a vector.
-///         Is used by ImGui wrapper functions.
+/// \brief  Function lambda allowing to use vector of strings in ImGui functions.
 ///
 /// \author Runik
 /// \date   06/09/2018
@@ -45,21 +44,6 @@ static auto vectorGetter = [](void* vec, int idx, const char** out_text) {
     return true;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn bool Combo(const char* label, int* currIndex, std::vector<std::string>& values)
-///
-/// \brief  Wrapper for ImGui combos allowing the use of vector of strings
-///
-/// \author Runik
-/// \date   06/09/2018
-///
-/// \param          label       Label of the combo.
-/// \param [in,out] currIndex   Current index selected.
-/// \param [in,out] values      Values to display in the combo.
-///
-/// \return True if it succeeds.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 bool Combo(const char* label, int* currIndex, std::vector<std::string>& values) {
     if (values.empty()) { return false; }
     return Combo(label, 
@@ -68,21 +52,6 @@ bool Combo(const char* label, int* currIndex, std::vector<std::string>& values) 
                  static_cast<void*>(&values), 
                  values.size());
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values)
-///
-/// \brief  Wrapper for ImGui listboxes allowing the use of vector of strings
-///
-/// \author Runik
-/// \date   06/09/2018
-///
-/// \param          label       Label of the combo.
-/// \param [in,out] currIndex   Current index selected.
-/// \param [in,out] values      Values to display in the combo.
-///
-/// \return True if it succeeds.
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values) {
     if (values.empty()) { return false; }

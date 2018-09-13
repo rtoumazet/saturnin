@@ -28,6 +28,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "../config.h"
+
 namespace saturnin {
 namespace video {
 
@@ -80,29 +82,33 @@ namespace video {
     bool isModernOpenglCapable();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn int32_t run_legacy_opengl();
+    /// \fn int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config);
     ///
     /// \brief  Executes OpenGL code in legacy mode.
     ///
     /// \author Runik
     /// \date   03/04/2018
     ///
+    /// \param [in,out] config  A reference to the configuration object.
+    ///
     /// \return An int32_t.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int32_t runLegacyOpengl();
+    int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn int32_t run_modern_opengl();
+    /// \fn int32_t runModernOpengl(std::shared_ptr<core::Config>& config);
     ///
     /// \brief  Executes OpenGL code in modern mode (3.3+).
     ///
     /// \author Runik
     /// \date   03/04/2018
     ///
+    /// \param [in,out] config  A reference to the configuration object.
+    ///
     /// \return An int32_t.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int32_t runModernOpengl();
+    int32_t runModernOpengl(std::shared_ptr<core::Config>& config);
 };
 };

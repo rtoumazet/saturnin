@@ -27,6 +27,7 @@
 
 //#include "imgui/imgui.h"
 #include <vector>
+#include "../config.h"
 
 namespace saturnin {
 namespace gui {
@@ -37,5 +38,7 @@ namespace gui {
     void show_core_window(const uint32_t tex);
     void show_image_window(const uint32_t tex);
     void showStvWindow();
+    void showOptionsWindow(std::shared_ptr<core::Config>&);
+    void buildGui(std::shared_ptr<core::Config>&);
 }
 }

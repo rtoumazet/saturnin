@@ -20,7 +20,9 @@
 #include <imgui.h>
 #include <filesystem> // filesystem
 #include "gui.h"
+#include "../locale.h" // tr
 #include "../memory.h"
+
 
 namespace core = saturnin::core;
 
@@ -123,8 +125,63 @@ namespace gui {
         
         bool test = true;
         ImGui::Begin("ST-V window", &test);
-        ImGui::ListBox("Test", &listbox_item_current, files);
+        ImGui::ListBox("", &listbox_item_current, files);
+        ImGui::Combo("", &listbox_item_current, files);
         ImGui::End();
+    }
+
+    void showOptionsWindow(std::shared_ptr<core::Config>& config) {
+        bool opened{ true };
+
+        const std::string str = config->readValue(core::Access_keys::config_bios_saturn);
+        std::vector<char> bios_saturn(str.c_str(), str.c_str() + str.size() + 1u);
+        bios_saturn.reserve(255);
+
+        ImGui::SetNextWindowSize(ImVec2(600, 300));
+        ImGui::Begin("Options", &opened);
+        ImGui::PushItemWidth(-10);
+        ImGui::Spacing();
+        if (ImGui::CollapsingHeader(core::tr("Hardware mode").c_str())) {
+
+        }
+        if (ImGui::CollapsingHeader(core::tr("Language").c_str())) {
+
+        }
+        if (ImGui::CollapsingHeader(core::tr("Paths").c_str())) {
+            
+            ImGui::Text(core::tr("Saturn bios").c_str());
+            ImGui::SameLine(100);
+
+            if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.size(), ImGuiInputTextFlags_EnterReturnsTrue)) {
+                config->writeValue(core::Access_keys::config_bios_saturn, bios_saturn.data());
+            }
+
+            //ImGui::Text(core::tr("ST-V bios").c_str());
+            //ImGui::SameLine(100);
+            //ImGui::InputText("##bios_stv", (char*)config->readValue(core::Access_keys::config_bios_stv).c_str(), 255);
+
+            //ImGui::Text(core::tr("ST-V roms").c_str());
+            //ImGui::SameLine(100);
+            //ImGui::InputText("##roms_stv", (char*)config->readValue(core::Access_keys::config_roms_stv).c_str(), 255);
+            
+            if (ImGui::Button("Save")) {
+                config->writeFile();
+            }
+            
+            ImGui::Separator();
+        }
+        if (ImGui::CollapsingHeader(core::tr("CD-Rom").c_str())) {
+
+        }
+        if (ImGui::CollapsingHeader(core::tr("Sound").c_str())) {
+
+        }
+        ImGui::End();
+    }
+
+    void buildGui(std::shared_ptr<core::Config>& config) {
+
+    
     }
 }
 }

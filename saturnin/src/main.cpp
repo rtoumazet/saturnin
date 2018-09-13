@@ -69,6 +69,6 @@ int main(int argc, char *argv[])
 
 
     bool is_legacy_opengl = state.config()->readValue(core::Access_keys::config_legacy_opengl);
-    if (is_legacy_opengl) return video::runLegacyOpengl(); else return video::runModernOpengl();
+    if (is_legacy_opengl) return video::runLegacyOpengl(state.config()); else return video::runModernOpengl(state.config());
   
 };

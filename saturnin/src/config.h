@@ -32,6 +32,7 @@
 #include <map>
 #include <sstream>
 #include <string> // string
+#include "log.h"
 #include "memory.h" // Rom_load, Rom_type
 
 namespace saturnin {
@@ -77,8 +78,8 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         typedef std::map<Access_keys, const char *>Map_keys;
-        static Map_keys keys_write; ///< Contains the keys used for creation (i.e. the naked key without the full path)
-        static Map_keys keys_read;  ///< Contains the keys used for read access (i.e. the naked key with its full path)
+        static Map_keys single_keys; ///< Contains the keys alone (without their path).
+        static Map_keys full_keys;  ///< Contains the keys with their full path.
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \typedef    std::map<const std::string, const uint8_t>Map_rom_load
@@ -112,47 +113,28 @@ namespace core {
         //@}
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn bool Config::lookup(const std::string& path) const;
+        /// \fn void Config::writeFile();
         ///
-        /// \brief  Looks up a given path to find its associated boolean value.
+        /// \brief  Writes the current configuration to the file linked to the object.
         ///
         /// \author Runik
-        /// \date   23/12/2017
-        ///
-        /// \param  path    Path to the value.
-        ///
-        /// \return Read value.
+        /// \date   13/09/2018
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        bool lookup(const std::string& path) const;
+        void writeFile();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Config::writeFile(const std::string& filename);
+        /// \fn bool Config::readFile();
         ///
-        /// \brief  Writes a file.
+        /// \brief  Reads the configuration file linked to the object.
         ///
         /// \author Runik
         /// \date   24/12/2017
-        ///
-        /// \param  filename    Filename of the file.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        void writeFile(const std::string& filename);
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn bool Config::readFile(const std::string& filename);
-        ///
-        /// \brief  Reads a file.
-        ///
-        /// \author Runik
-        /// \date   24/12/2017
-        ///
-        /// \param  filename    Filename of the file.
         ///
         /// \return True if it succeeds.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        bool readFile(const std::string& filename);
+        bool readFile();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn bool Config::initialize(const bool isModernOpenGlCapable);
@@ -261,6 +243,42 @@ namespace core {
                 libconfig::Setting& s = root[key.c_str()];
                 s = value;
             }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Config::writeValue(const std::string& key, const T& value)
+        ///
+        /// \brief  Writes a value for the specified key.
+        ///
+        /// \author Runik
+        /// \date   21/06/2018
+        ///
+        /// \param          key     Path of the value to write.
+        /// \param          value   Value to write.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        template<class T>
+        void writeValue(const Access_keys& key, const T& value) {
+            try {
+                libconfig::Setting &setting = cfg_.lookup(Config::full_keys[key]);
+                setting = value;
+            }
+            catch (const libconfig::SettingNotFoundException& e) {
+                std::string s = e.getPath();
+                auto errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
+            //    //Log::error("config", errorString);
+            //    //Log::error("config", tr("Exiting ..."));
+
+            //    std::exit(EXIT_FAILURE);
+            }
+            //catch (const libconfig::SettingTypeException& e) {
+
+            //    //auto errorString = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
+            //    //Log::error("config", errorString);
+            //    //Log::error("config", tr("Exiting ..."));
+
+            //    std::exit(EXIT_FAILURE);
+            //}
         }
 
        ////////////////////////////////////////////////////////////////////////////////////////////////////
