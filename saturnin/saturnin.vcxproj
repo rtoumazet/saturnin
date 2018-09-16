@@ -169,6 +169,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory.cpp" />
+    <ClCompile Include="src\utilities.cpp" />
     <ClCompile Include="src\video\gui.cpp" />
     <ClCompile Include="src\video\imgui_wrapper.cpp" />
     <ClCompile Include="src\video\opengl.cpp" />
@@ -185,6 +186,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="src\log.h" />
     <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\stv_definitions.h" />
+    <ClInclude Include="src\utilities.h" />
     <ClInclude Include="src\video\gui.h" />
     <ClInclude Include="src\video\imgui_wrapper.h" />
     <ClInclude Include="src\video\opengl.h" />

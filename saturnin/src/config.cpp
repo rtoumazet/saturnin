@@ -21,31 +21,42 @@
 #include "config.h"
 #include "locale.h"
 #include "log.h"
+#include "utilities.h" // toUnderlying
 
-namespace libcfg = libconfig;
+namespace libcfg    = libconfig;
+namespace fs        = std::filesystem;
+namespace util      = saturnin::utilities;
 
 namespace saturnin {
 namespace core {
     Config::Map_keys Config::single_keys = {
         { Access_keys::config_global,        "global"},
         { Access_keys::config_language,      "language"},
+        { Access_keys::config_hardware_mode, "hardware_mode" },
         { Access_keys::config_rendering,     "rendering"},
         { Access_keys::config_legacy_opengl, "legacy_opengl" },
         { Access_keys::config_paths,         "paths" },
         { Access_keys::config_roms_stv,      "roms_stv" },
         { Access_keys::config_bios_stv,      "bios_stv" },
         { Access_keys::config_bios_saturn,   "bios_saturn" },
+        { Access_keys::config_cdrom,         "cdrom" },
+        { Access_keys::config_drive,         "drive" },
+        { Access_keys::config_access_method, "access_method" },
     };
 
     Config::Map_keys Config::full_keys = {
         { Access_keys::config_global,        "global"},
         { Access_keys::config_language,      "global.language"},
+        { Access_keys::config_hardware_mode, "global.hardware_mode" },
         { Access_keys::config_rendering,     "rendering" },
         { Access_keys::config_legacy_opengl, "rendering.legacy_opengl" },
         { Access_keys::config_paths,         "paths" },
         { Access_keys::config_roms_stv,      "paths.roms_stv" },
         { Access_keys::config_bios_stv,      "paths.bios_stv" },
         { Access_keys::config_bios_saturn,   "paths.bios_saturn" },
+        { Access_keys::config_cdrom,         "cdrom" },
+        { Access_keys::config_drive,         "cdrom.drive" },
+        { Access_keys::config_access_method, "cdrom.access_method" },
         { Access_keys::stv_game_name,        "game_name" },
         { Access_keys::stv_zip_name,         "zip_name" },
         { Access_keys::stv_parent_set,       "parent_set" },
@@ -99,6 +110,7 @@ namespace core {
 
         libcfg::Setting& global = root.add(single_keys[Access_keys::config_global], libcfg::Setting::TypeGroup);
         this->writeValue(global, single_keys[Access_keys::config_language], "en");
+        this->writeValue(global, single_keys[Access_keys::config_hardware_mode], util::toUnderlying(Hardware_mode::saturn));
         
         libcfg::Setting& rendering = root.add(single_keys[Access_keys::config_rendering], libcfg::Setting::TypeGroup);
         this->writeValue(rendering, single_keys[Access_keys::config_legacy_opengl], !isModernOpenglCapable);
@@ -107,6 +119,11 @@ namespace core {
         this->writeValue(paths, single_keys[Access_keys::config_roms_stv], "");
         this->writeValue(paths, single_keys[Access_keys::config_bios_stv], "");
         this->writeValue(paths, single_keys[Access_keys::config_bios_saturn], "");
+
+        libcfg::Setting& cdrom = root.add(single_keys[Access_keys::config_cdrom], libcfg::Setting::TypeGroup);
+        this->writeValue(cdrom, single_keys[Access_keys::config_drive], "");
+        this->writeValue(cdrom, single_keys[Access_keys::config_access_method], 0); // Add SPTI by default
+
     }
 
     libcfg::Setting& Config::getGroup(libcfg::Setting& root, const std::string& group_name) {
@@ -137,6 +154,17 @@ namespace core {
 
             std::exit(EXIT_FAILURE);
         }
+    }
+
+    std::vector<std::string> Config::listAvailableLanguages() {
+        auto full_path = fs::current_path() / "lang";
+        std::vector<std::string> files{ "en" }; // english is the default language, even if the directory isn't present
+        for (auto& p : fs::directory_iterator(full_path)) {
+            if ((p.is_directory()) && (p.path().filename().string() != "en")) {
+                files.push_back(p.path().filename().string());
+            }
+        }
+        return files;
     }
 };
 };
