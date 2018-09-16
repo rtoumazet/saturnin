@@ -26,6 +26,7 @@
 
 #include <imgui.h>
 #include <vector>
+#include <string>
 
 namespace ImGui
 {

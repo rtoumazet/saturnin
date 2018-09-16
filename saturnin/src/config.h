@@ -41,12 +41,19 @@ namespace core {
     enum class Access_keys {
         config_global,
         config_language,
+        config_hardware_mode,
         config_rendering,
         config_legacy_opengl,
         config_paths,
         config_roms_stv,
         config_bios_stv,
         config_bios_saturn,
+        config_cdrom,
+        config_drive,
+        config_access_method,
+        config_sound,
+        config_soundcard,
+        config_sound_disabled,
         stv_game_name,
         stv_zip_name,
         stv_parent_set,
@@ -186,7 +193,9 @@ namespace core {
         template <class T> struct ToMySetting;
         template <> struct ToMySetting<bool>        { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
         template <> struct ToMySetting<uint32_t>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
+        template <> struct ToMySetting<int32_t>     { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
         template <> struct ToMySetting<uint64_t>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
+        template <> struct ToMySetting<int64_t>     { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
         template <> struct ToMySetting<float>       { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeFloat; };
         template <> struct ToMySetting<const char*> { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
 
@@ -266,19 +275,19 @@ namespace core {
             catch (const libconfig::SettingNotFoundException& e) {
                 std::string s = e.getPath();
                 auto errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
-            //    //Log::error("config", errorString);
-            //    //Log::error("config", tr("Exiting ..."));
+                Log::error("config", errorString);
+                Log::error("config", tr("Exiting ..."));
 
-            //    std::exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
-            //catch (const libconfig::SettingTypeException& e) {
+            catch (const libconfig::SettingTypeException& e) {
 
-            //    //auto errorString = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
-            //    //Log::error("config", errorString);
-            //    //Log::error("config", tr("Exiting ..."));
+                auto errorString = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
+                Log::error("config", errorString);
+                Log::error("config", tr("Exiting ..."));
 
-            //    std::exit(EXIT_FAILURE);
-            //}
+                std::exit(EXIT_FAILURE);
+            }
         }
 
        ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -295,6 +304,19 @@ namespace core {
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
        libconfig::Setting& readValue(const Access_keys& value);
+
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+       /// \fn  std::vector<std::string> Config::listAvailableLanguages();
+       ///
+       /// \brief   Returns a vector populated with available languages.
+       ///
+       /// \author  Runik
+       /// \date    15/09/2018
+       ///
+       /// \return  Available languages.
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+       std::vector<std::string> listAvailableLanguages();
 
     private:
 

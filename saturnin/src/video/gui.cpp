@@ -21,10 +21,12 @@
 #include <filesystem> // filesystem
 #include "gui.h"
 #include "../locale.h" // tr
-#include "../memory.h"
+//#include "../memory.h"
+#include "../utilities.h" // stringToVector
 
 
 namespace core = saturnin::core;
+namespace util = saturnin::utilities;
 
 namespace saturnin {
 namespace gui {
@@ -133,49 +135,82 @@ namespace gui {
     void showOptionsWindow(std::shared_ptr<core::Config>& config) {
         bool opened{ true };
 
-        const std::string str = config->readValue(core::Access_keys::config_bios_saturn);
-        std::vector<char> bios_saturn(str.c_str(), str.c_str() + str.size() + 1u);
-        bios_saturn.reserve(255);
 
         ImGui::SetNextWindowSize(ImVec2(600, 300));
         ImGui::Begin("Options", &opened);
         ImGui::PushItemWidth(-10);
         ImGui::Spacing();
         if (ImGui::CollapsingHeader(core::tr("Hardware mode").c_str())) {
-
+            static int mode = config->readValue(core::Access_keys::config_hardware_mode);
+            if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::Hardware_mode::saturn))) {
+                config->writeValue(core::Access_keys::config_hardware_mode, util::toUnderlying(core::Hardware_mode::saturn));
+            }
+            ImGui::SameLine();
+            if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::Hardware_mode::stv))) {
+                config->writeValue(core::Access_keys::config_hardware_mode, util::toUnderlying(core::Hardware_mode::stv));
+            }
         }
+
         if (ImGui::CollapsingHeader(core::tr("Language").c_str())) {
+            ImGui::Text(core::tr("Language").c_str());
+            ImGui::SameLine(100);
 
+            static auto locales = config->listAvailableLanguages();
+            std::string l = config->readValue(core::Access_keys::config_language);
+            auto it = std::find_if(locales.begin(), locales.end(), [&l](std::string& str) {
+                return l == str;
+            });
+            static int index = it - locales.begin();
+
+            if (ImGui::Combo("##language", &index, locales)) {
+                config->writeValue(core::Access_keys::config_language, locales[index]);
+            }
         }
+
         if (ImGui::CollapsingHeader(core::tr("Paths").c_str())) {
             
             ImGui::Text(core::tr("Saturn bios").c_str());
             ImGui::SameLine(100);
 
-            if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.size(), ImGuiInputTextFlags_EnterReturnsTrue)) {
-                config->writeValue(core::Access_keys::config_bios_saturn, bios_saturn.data());
+            auto bios_saturn = util::stringToVector(config->readValue(core::Access_keys::config_bios_saturn), 255);
+            if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
+               config->writeValue(core::Access_keys::config_bios_saturn, bios_saturn.data());
             }
 
-            //ImGui::Text(core::tr("ST-V bios").c_str());
-            //ImGui::SameLine(100);
-            //ImGui::InputText("##bios_stv", (char*)config->readValue(core::Access_keys::config_bios_stv).c_str(), 255);
-
-            //ImGui::Text(core::tr("ST-V roms").c_str());
-            //ImGui::SameLine(100);
-            //ImGui::InputText("##roms_stv", (char*)config->readValue(core::Access_keys::config_roms_stv).c_str(), 255);
-            
-            if (ImGui::Button("Save")) {
-                config->writeFile();
+            ImGui::Text(core::tr("ST-V bios").c_str());
+            ImGui::SameLine(100);
+            auto bios_stv = util::stringToVector(config->readValue(core::Access_keys::config_bios_stv), 255);
+            if (ImGui::InputText("##bios_stv", bios_stv.data(), bios_stv.capacity())) {
+                config->writeValue(core::Access_keys::config_bios_stv, bios_stv.data());
             }
-            
+
+            ImGui::Text(core::tr("ST-V roms").c_str());
+            ImGui::SameLine(100);
+            auto roms_stv = util::stringToVector(config->readValue(core::Access_keys::config_roms_stv), 255);
+            if (ImGui::InputText("##roms_stv", roms_stv.data(), roms_stv.capacity())) {
+                config->writeValue(core::Access_keys::config_roms_stv, roms_stv.data());
+            }
+
             ImGui::Separator();
         }
-        if (ImGui::CollapsingHeader(core::tr("CD-Rom").c_str())) {
 
+        if (ImGui::CollapsingHeader(core::tr("CD-Rom").c_str())) {
+            // Drive
+            // Access method
+            // CD-Rom system ID
         }
+
         if (ImGui::CollapsingHeader(core::tr("Sound").c_str())) {
 
         }
+
+        static std::string status_message{};
+        if (ImGui::Button("Save")) {
+            config->writeFile();
+            status_message = core::tr("Configuration saved.");
+        }
+        ImGui::Text(status_message.c_str());
+        
         ImGui::End();
     }
 

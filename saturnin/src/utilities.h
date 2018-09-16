@@ -1,5 +1,5 @@
 // 
-// emulator_enums.h
+// utilities.h
 // Saturnin
 //
 // Copyright (c) 2018 Renaud Toumazet
@@ -15,43 +15,45 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \file	emulator_enums.h
+/// \file	utilities.h
 ///
-/// \brief	Emulator enumerations. 
+/// \brief	Regroups various free functions utilities.
 ///
-/// Regroups enumerations related to the emulator context
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
+#include <string> // string
+#include <type_traits> // underlying_type_t
+#include <vector> // vector
+
 namespace saturnin {
-namespace core {
+namespace utilities {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum	Hardware_mode
+/// \fn std::vector<char> stringToVector(const std::string& source, const uint32_t reserved_size);
 ///
-/// \brief	Hardware mode used. 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class Hardware_mode {
-    saturn  = 0, ///< Saturn.
-    stv     = 1  ///< ST-V.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   Emulation_status
+/// \brief  String to vector.
 ///
-/// \brief  State of the emulation.
+/// \author Runik
+/// \date   15/09/2018
+///
+/// \param  source          Source string to change in vector.
+/// \param  reserved_size   Reserved size for the new vector.
+///
+/// \return A std::vector&lt;char&gt;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Emulation_status {
-    running,    ///< Emulator is running
-    paused,     ///< Emulator is paused
-    stopped     ///< Emulator is stopped
-};
+std::vector<char> stringToVector(const std::string& source, const uint32_t reserved_size);
+
+
+
+template <typename E>
+constexpr auto toUnderlying(E e) noexcept {
+    return static_cast<std::underlying_type_t<E>>(e);
+}
 
 }
 }
