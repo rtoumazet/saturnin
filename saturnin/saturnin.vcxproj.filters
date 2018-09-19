@@ -22,6 +22,9 @@
     <Filter Include="Fichiers sources\libzippp">
       <UniqueIdentifier>{eab4e7a3-3fcc-4d37-8175-062fb0fff3a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\cdrom">
+      <UniqueIdentifier>{dfa6a1f7-eaf2-4ef2-bc54-392bf38d9642}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\video\opengl.cpp">
@@ -65,6 +68,15 @@
     </ClCompile>
     <ClCompile Include="src\utilities.cpp">
       <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cdrom\scsi.cpp">
+      <Filter>Fichiers sources\cdrom</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cdrom\aspi.cpp">
+      <Filter>Fichiers sources\cdrom</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cdrom\spti.cpp">
+      <Filter>Fichiers sources\cdrom</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +124,15 @@
     </ClInclude>
     <ClInclude Include="src\utilities.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cdrom\scsi.h">
+      <Filter>Fichiers sources\cdrom</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cdrom\aspi.h">
+      <Filter>Fichiers sources\cdrom</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cdrom\spti.h">
+      <Filter>Fichiers sources\cdrom</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
