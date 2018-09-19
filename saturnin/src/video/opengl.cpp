@@ -353,6 +353,8 @@ namespace video {
 
             gui::showStvWindow();
 
+            gui::showOptionsWindow(config);
+
             gui::show_test_window(show_test_window);
 
             {
