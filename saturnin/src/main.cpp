@@ -35,10 +35,10 @@ static void error_callback(int error, const char* description)
 
 int main(int argc, char *argv[])
 {
+    core::Log::initialize();
+
     core::Emulator_context state;
     if (!state.config()->initialize(video::isModernOpenglCapable())) return 1;
-
-    core::Log::initialize();
 
     std::string country = state.config()->readValue(core::Access_keys::config_language);
     if ( !core::Locale::initialize(country) ) return 1;
