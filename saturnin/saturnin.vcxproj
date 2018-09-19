@@ -31,27 +31,27 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -163,6 +163,9 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp" />
     <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="lib\libzippp\libzippp.cpp" />
+    <ClCompile Include="src\cdrom\aspi.cpp" />
+    <ClCompile Include="src\cdrom\scsi.cpp" />
+    <ClCompile Include="src\cdrom\spti.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\emulator_context.cpp" />
     <ClCompile Include="src\locale.cpp" />
@@ -179,6 +182,9 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="lib\imgui\imgui_impl_opengl2.h" />
     <ClInclude Include="lib\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="lib\libzippp\libzippp.h" />
+    <ClInclude Include="src\cdrom\aspi.h" />
+    <ClInclude Include="src\cdrom\scsi.h" />
+    <ClInclude Include="src\cdrom\spti.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\emulator_context.h" />
     <ClInclude Include="src\emulator_enums.h" />
