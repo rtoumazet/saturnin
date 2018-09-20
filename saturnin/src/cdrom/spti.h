@@ -25,11 +25,12 @@
 
 #include <cstdint>
 #include <string>
+#include "scsi.h"
 
 namespace saturnin {
 namespace cdrom {
 
-const uint8_t SptiTimeout = 5;
+const uint8_t spti_timeout = 5; // in seconds
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class	Spti
@@ -45,7 +46,7 @@ class Spti {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static bool initialize()
     ///
-    /// \brief	Initialises this object. 
+    /// \brief	Initialises the SPTI context.
     ///
     /// \author	Runik
     /// \date	01/03/2010
@@ -55,105 +56,113 @@ class Spti {
     static bool initialize();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static void deInitialize()
+    /// \fn static void Spti::shutdown();
     ///
-    /// \brief	Releases everything related to this object. 
+    /// \brief  Releases the SPTI context.
     ///
-    /// \author	Runik
-    /// \date	01/03/2010
+    /// \author Runik
+    /// \date   01/03/2010
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     static void shutdown();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static int32_t scanBus()
+    /// \fn static int32_t Spti::scanBus();
     ///
-    /// \brief	Scans the bus. 
+    /// \brief  Scans the bus to get cdrom drives information.
     ///
-    /// \author	Runik
-    /// \date	01/03/2010
+    /// \author Runik
+    /// \date   01/03/2010
     ///
-    /// \return	number of drive. 
+    /// \return number of drive.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     static int32_t scanBus();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static void test()
+    /// \fn static void Spti::test();
     ///
-    /// \brief	Unused. 
+    /// \brief  Unused.
     ///
-    /// \author	Runik
-    /// \date	01/03/2010
+    /// \author Runik
+    /// \date   01/03/2010
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     static void test();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static string readSector(const uint32_t & fad, const int32_t & nb)
+    /// \fn static std::string Spti::readSector(const std::uint32_t & fad, const std::int32_t & nb);
     ///
-    /// \brief	Reads sector(s). 
+    /// \brief  Reads sector(s).
     ///
-    /// \author	Runik
-    /// \date	01/03/2010
+    /// \author Runik
+    /// \date   01/03/2010
     ///
-    /// \param	fad	FAD where to read the sector. 
-    /// \param	nb	Number of sectors to read. 
+    /// \param  fad FAD where to read the sector.
+    /// \param  nb  Number of sectors to read.
     ///
-    /// \return	The sector. 
+    /// \return The sector.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     static std::string readSector(const std::uint32_t & fad, const std::int32_t & nb);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static string readOneSector(const uint32_t & fad)
+    /// \fn static std::string Spti::readOneSector(const std::uint32_t & fad);
     ///
-    /// \brief	Reads one sector. 
+    /// \brief  Reads one sector.
     ///
-    /// \author	Runik
-    /// \date	19/03/2015
+    /// \author Runik
+    /// \date   19/03/2015
     ///
-    /// \param	fad	FAD where to read the sector. 
+    /// \param  fad FAD where to read the sector.
     ///
-    /// \return	Sector read. 
+    /// \return Sector read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     static std::string readOneSector(const std::uint32_t & fad);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static void inquiry(const HANDLE & hHdl, SCSI_DriveInfo & diDrive)
+    /// \fn static void Spti::inquiry(const HANDLE & h, ScsiDriveInfo & di);
     ///
-    /// \brief	Inquiries the parameter drive. 
+    /// \brief  Inquiries the parameter drive.
     ///
-    /// \author	Runik
-    /// \date	01/03/2010
+    /// \author Runik
+    /// \date   01/03/2010
     ///
-    /// \param	hHdl			Handle. 
-    /// \param [in,out]	diDrive	The drive information. 
+    /// \param          h   Handle to the drive.
+    /// \param [in,out] di  The drive structure information.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static void inquiry(const HANDLE & hHdl, ScsiDriveInfo & diDrive);
+
+    static void inquiry(const HANDLE & h, ScsiDriveInfo & di);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static void getAdapterAddress(const HANDLE & hHdl, SCSI_DriveInfo & diDrive)
+    /// \fn static void Spti::getAdapterAddress(const HANDLE & h, ScsiDriveInfo & di);
     ///
-    /// \brief	Fills the SCSI_Drive structure with the drive address. 
+    /// \brief  Fills the SCSI_Drive structure with the drive address.
     ///
-    /// \author	Runik
-    /// \date	01/03/2010
+    /// \author Runik
+    /// \date   01/03/2010
     ///
-    /// \param	hHdl			Handle. 
-    /// \param [in,out]	diDrive	the drive structure. 
+    /// \param          h   Handle to the drive.
+    /// \param [in,out] di  the drive structure information.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static void	getAdapterAddress(const HANDLE & hHdl, ScsiDriveInfo & diDrive);
+
+    static void	getAdapterAddress(const HANDLE & h, ScsiDriveInfo & di);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static bool readToc(SCSI_TOC& TOCData)
+    /// \fn static bool Spti::readToc(ScsiToc& toc_data);
     ///
-    /// \brief	Reads the CD TOC. 
+    /// \brief  Reads the CD TOC.
     ///
-    /// \author	Runik
-    /// \date	01/03/2010
+    /// \author Runik
+    /// \date   01/03/2010
     ///
-    /// \param [in,out]	TOCData	information describing the toc. 
+    /// \param [in,out] toc_data    information describing the toc.
     ///
-    /// \return	true if it succeeds, false if it fails. 
+    /// \return true if successful.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static bool	readToc(ScsiToc& TOCData);
+
+    static bool	readToc(ScsiToc& toc_data);
 };
 }
 }
