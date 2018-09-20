@@ -49,7 +49,18 @@ namespace utilities {
 std::vector<char> stringToVector(const std::string& source, const uint32_t reserved_size);
 
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn constexpr auto toUnderlying(E e) noexcept
+///
+/// \brief  Converts an e to an underlying.
+///
+/// \author Runik
+/// \date   17/09/2018
+///
+/// \param  e   The enumeration to process.
+///
+/// \return The enumeration underlying value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename E>
 constexpr auto toUnderlying(E e) noexcept {
     return static_cast<std::underlying_type_t<E>>(e);
