@@ -78,6 +78,9 @@
     <ClCompile Include="src\cdrom\spti.cpp">
       <Filter>Fichiers sources\cdrom</Filter>
     </ClCompile>
+    <ClCompile Include="src\cdrom\cdrom.cpp">
+      <Filter>Fichiers sources\cdrom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\video\opengl.h">
@@ -132,6 +135,12 @@
       <Filter>Fichiers sources\cdrom</Filter>
     </ClInclude>
     <ClInclude Include="src\cdrom\spti.h">
+      <Filter>Fichiers sources\cdrom</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cdrom\cdrom.h">
+      <Filter>Fichiers sources\cdrom</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cdrom\iso9660.h">
       <Filter>Fichiers sources\cdrom</Filter>
     </ClInclude>
   </ItemGroup>

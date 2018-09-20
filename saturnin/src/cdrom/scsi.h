@@ -62,11 +62,11 @@ struct ScsiDriveInfo {
 /// \date	28/02/2010
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScsiTocTrack {
-    std::uint8_t reserved;
-    std::uint8_t adr_ctrl;
-    std::uint8_t trackno;
-    std::uint8_t reserved1;
-    std::uint8_t addr[4];
+    uint8_t reserved;
+    uint8_t adr_ctrl;
+    uint8_t trackno;
+    uint8_t reserved1;
+    uint8_t addr[4];
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,9 +78,9 @@ struct ScsiTocTrack {
 /// \date	28/02/2010
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScsiToc {
-    std::uint8_t size[2];
-    std::uint8_t first;
-    std::uint8_t last;
+    uint8_t size[2];
+    uint8_t first;
+    uint8_t last;
     ScsiTocTrack track[scsi_max_toc_tracks];
 };
 
