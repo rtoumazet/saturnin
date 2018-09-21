@@ -215,9 +215,9 @@ bool Spti::readToc(ScsiToc& toc)
     uint32_t out_bytes{};
     CDROM_TOC cdrom_toc;
     // getting the handle to the current drive
-    HANDLE hDrive = Scsi::openDrive(CCdRom::SCSI_Letter);
+    HANDLE drive_handle = Scsi::openDrive(Cdrom::scsi_letter);
     // sending the command
-    if (!DeviceIoControl(hDrive,
+    if (!DeviceIoControl(drive_handle,
                          IOCTL_CDROM_READ_TOC, NULL, 0,
                          &cdrom_toc,
                          sizeof(cdrom_toc),
