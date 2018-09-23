@@ -16,7 +16,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <windows.h>
+
 #include "utilities.h"
+
 
 namespace saturnin {
 namespace utilities {
@@ -25,6 +28,31 @@ std::vector<char> stringToVector(const std::string& source, const uint32_t reser
     std::vector<char> v(source.c_str(), source.c_str() + source.size() + 1u);
     v.reserve(reserved_size);
     return v;
+}
+
+std::string getLastErrorMessage() {
+    DWORD error = GetLastError();
+    if (error) {
+        LPVOID buffer;
+        DWORD buf_len = FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            error,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&buffer,
+            0, NULL);
+        if (buf_len) {
+            LPCSTR str = (LPCSTR)buffer;
+            std::string result(str, str + buf_len);
+
+            LocalFree(buffer);
+
+            return result;
+        }
+    }
+    return std::string();
 }
 
 }

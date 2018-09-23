@@ -20,12 +20,15 @@
 #include <windows.h>
 #include <ntddscsi.h>
 #include <ntddcdrm.h>
-//#include <scsidefs.h>
-#include <boost/lexical_cast.hpp>
 #pragma warning(pop) 
 
 #include "cdrom.h"
 #include "spti.h"
+#include"..\locale.h"
+#include"..\log.h"
+#include "..\utilities.h"
+
+namespace util = saturnin::utilities;
 
 namespace saturnin {
 namespace cdrom {
@@ -84,14 +87,14 @@ std::string Spti::readOneSector(const uint32_t& fad) {
     SCSI_PASS_THROUGH_DIRECT input_buffer{};
 
     input_buffer.Length = sizeof(SCSI_PASS_THROUGH_DIRECT);
-    input_buffer.CdbLength = 12; // pSC->SRB_CDBLen;
-    input_buffer.DataTransferLength = sector_size; // pSC->SRB_BufLen;
+    input_buffer.CdbLength = 12;
+    input_buffer.DataTransferLength = sector_size;
     input_buffer.TimeOutValue = 60;
     input_buffer.DataBuffer = &output_buffer[0];
     input_buffer.SenseInfoLength = 0;
     input_buffer.PathId = Cdrom::scsi_path;
-    input_buffer.TargetId = Cdrom::scsi_target; // pSC->SRB_Target;
-    input_buffer.Lun = Cdrom::scsi_lun; // pSC->SRB_Lun;
+    input_buffer.TargetId = Cdrom::scsi_target;
+    input_buffer.Lun = Cdrom::scsi_lun;
     input_buffer.SenseInfoOffset = 0; // offsetof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER, ucSenseBuf);
     input_buffer.DataIn = SCSI_IOCTL_DATA_IN;
     input_buffer.Cdb[0] = 0xBE;
@@ -101,8 +104,8 @@ std::string Spti::readOneSector(const uint32_t& fad) {
     input_buffer.Cdb[5] = static_cast<uint8_t>(real_fad);
     input_buffer.Cdb[6] = 0;
     input_buffer.Cdb[7] = 0;
-    input_buffer.Cdb[8] = 1;                                    // one frame read
-    input_buffer.Cdb[9] = 0x10;                                 // getting only main channel data
+    input_buffer.Cdb[8] = 1;     // one frame read
+    input_buffer.Cdb[9] = 0x10;  // getting only main channel data
 
     HANDLE drive_handle = Scsi::openDrive(Cdrom::scsi_letter);
     uint32_t dummy{};
@@ -114,7 +117,7 @@ std::string Spti::readOneSector(const uint32_t& fad) {
                          reinterpret_cast<LPDWORD>(&dummy),
                          NULL)) {
 
-        MessageBox(NULL, qApp->tr("Drive isn't accessible").toStdWString().c_str(), NULL, MB_OK);
+        core::Log::warning("cdrom", core::tr("Drive isn't accessible"));
 
     }
     else {
@@ -128,8 +131,7 @@ std::string Spti::readOneSector(const uint32_t& fad) {
                              reinterpret_cast<LPDWORD>(&dummy),
                              NULL)) {
 
-            std::wstring str = qApp->tr("DeviceIOControl error=").toStdWString() + lexical_cast<wstring>(GetLastError());
-            MessageBox(NULL, str.c_str(), qApp->tr("SPTI error / read sector").toStdWString().c_str(), MB_OK);
+            core::Log::warning("cdrom", util::getLastErrorMessage());
         }
     }
 
@@ -164,9 +166,9 @@ void Spti::inquiry(const HANDLE& drive_handle, ScsiDriveInfo& di) {
     input_buffer.DataBuffer         = &output_buffer[0];
     input_buffer.SenseInfoLength    = 0;
     input_buffer.CdbLength          = 6;
-    input_buffer.Cdb[0]             = SCSI_INQUIRY;
-    input_buffer.Cdb[4]             = 36;  // allocation length per szBuffer [ ]
-    input_buffer.TimeOutValue       = spti_timeout; // timeout is set to 5 secs
+    input_buffer.Cdb[0]             = scsi_inquiry;
+    input_buffer.Cdb[4]             = 36;
+    input_buffer.TimeOutValue       = spti_timeout; 
 
     uint32_t dummy{};
     if (!DeviceIoControl(drive_handle,
@@ -177,8 +179,8 @@ void Spti::inquiry(const HANDLE& drive_handle, ScsiDriveInfo& di) {
                          sizeof(input_buffer),
                          reinterpret_cast<LPDWORD>(&dummy),
                          NULL)) {
-        std::wstring str = qApp->tr("DeviceIOControl error=").toStdWString() + lexical_cast<wstring>(GetLastError());
-        MessageBox(NULL, str.c_str(), qApp->tr("SPTI error / Inquiry").toStdWString().c_str(), MB_OK);
+        
+        core::Log::warning("cdrom", util::getLastErrorMessage());
 
     }
     else {
@@ -193,7 +195,7 @@ void Spti::getAdapterAddress(const HANDLE& drive_handle, ScsiDriveInfo& di) {
 
     di.path   = -1;
     di.target = -1;
-    di.lun    = -1; // initializing the data
+    di.lun    = -1; 
     if (drive_handle == 0) return;
 
     //pSA = reinterpret_cast<PSCSI_ADDRESS>(&v[0]);
@@ -201,9 +203,15 @@ void Spti::getAdapterAddress(const HANDLE& drive_handle, ScsiDriveInfo& di) {
     psa->Length = sizeof(SCSI_ADDRESS);
 
     uint32_t status{};
-    if (!DeviceIoControl(drive_handle, IOCTL_SCSI_GET_ADDRESS, NULL, 0, psa, sizeof(SCSI_ADDRESS), reinterpret_cast<LPDWORD>(&status), NULL))  return;
+    if (!DeviceIoControl(drive_handle, 
+                         IOCTL_SCSI_GET_ADDRESS, 
+                         NULL, 
+                         0, 
+                         psa, 
+                         sizeof(SCSI_ADDRESS), 
+                         reinterpret_cast<LPDWORD>(&status), 
+                         NULL))  return;
 
-    // Address is returned
     di.path   = psa->PortNumber;
     di.target = psa->TargetId;
     di.lun    = psa->Lun;
@@ -214,17 +222,13 @@ bool Spti::readToc(ScsiToc& toc)
 {
     uint32_t out_bytes{};
     CDROM_TOC cdrom_toc;
-    // getting the handle to the current drive
     HANDLE drive_handle = Scsi::openDrive(Cdrom::scsi_letter);
-    // sending the command
     if (!DeviceIoControl(drive_handle,
                          IOCTL_CDROM_READ_TOC, NULL, 0,
                          &cdrom_toc,
                          sizeof(cdrom_toc),
                          reinterpret_cast<LPDWORD>(&out_bytes),
-                         (LPOVERLAPPED)NULL))
-    {
-        // error
+                         (LPOVERLAPPED)NULL)) {
         return false;
     }
 

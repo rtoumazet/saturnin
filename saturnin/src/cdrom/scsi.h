@@ -35,6 +35,9 @@ namespace cdrom {
 const uint8_t scsi_max_drives       = 10;  ///< Maximum number of drives checked on the host system. 
 const uint8_t scsi_max_toc_tracks   = 100; ///< Maximum number of tracks saved in the TOC
 
+// SCSI COMMANDS
+const uint8_t scsi_inquiry = 0x12;   ///< Inquiry (MANDATORY)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	ScsiDriveInfo
 ///
@@ -70,13 +73,14 @@ struct ScsiTocTrack {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct	ScsiToc
+/// \struct ScsiToc
 ///
-/// \brief	TOC struct.
+/// \brief  TOC struct.
 ///
-/// \author	Runik
-/// \date	28/02/2010
+/// \author Runik
+/// \date   28/02/2010
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct ScsiToc {
     uint8_t size[2];
     uint8_t first;
