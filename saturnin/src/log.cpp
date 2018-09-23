@@ -36,6 +36,7 @@ namespace core {
         createLogger("vdp1", sink);
         createLogger("vdp2", sink);
         createLogger("config", sink);
+        createLogger("cdrom", sink);
 
         return true;
     }
