@@ -27,8 +27,8 @@
 #include <string>
 #include <cstdint>
 #include <functional>   // function
-#include <scsidefs.h>
-#include <wnaspi32.h>
+//#include <scsidefs.h>
+//#include <wnaspi32.h>
 
 namespace saturnin {
 namespace cdrom {
@@ -38,7 +38,7 @@ namespace cdrom {
 ///
 /// \brief	Used to load "SendASPI32Command".
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef uint32_t(WINAPI* func)(LPSRB);
+//typedef uint32_t(WINAPI* func)(LPSRB);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class	Aspi
