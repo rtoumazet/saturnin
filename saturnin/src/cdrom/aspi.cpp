@@ -36,8 +36,7 @@ HINSTANCE Aspi::hWnAspi32;
 //function<uint32_t(LPSRB)>	Aspi::pfSendAspi32Command;
 
 
-bool Aspi::initialize()
-{
+bool Aspi::initialize() {
 
     ////hinstWNASPI32=LoadLibrary("WNASPI32");
     //hWnAspi32 = LoadLibrary(L"WNASPI32");
@@ -96,13 +95,11 @@ bool Aspi::initialize()
     return true;
 }
 
-void Aspi::shutdown()
-{
+void Aspi::shutdown() {
 //    FreeLibrary(hWnAspi32);
 }
 
-int32_t Aspi::scanBus()
-{
+int32_t Aspi::scanBus() {
     //int8_t byHaId;
     //int8_t byTarget;
     //SRB_GDEVBlock srbGDEVBlock;
@@ -142,8 +139,7 @@ int32_t Aspi::scanBus()
     return 0;
 }
 
-void Aspi::inquiry(ScsiDriveInfo & di)
-{
+void Aspi::inquiry(ScsiDriveInfo & di) {
     //vector<int8_t> v(36);
     //SRB_ExecSCSICmd srbExec;
 
@@ -175,8 +171,7 @@ void Aspi::inquiry(ScsiDriveInfo & di)
     ////delete[] byBuffer;
 }
 
-std:string Aspi::readSector(const uint32_t & dwFAD, const int32_t & iNb)
-{
+std::string Aspi::readSector(const uint32_t & dwFAD, const int32_t & iNb) {
     //// CDROM fad
     //uint32_t dwRealFAD = dwFAD - 150;
     //vector<int8_t> v(2048 * iNb);
@@ -212,11 +207,12 @@ std:string Aspi::readSector(const uint32_t & dwFAD, const int32_t & iNb)
 
     //string str_return(v.begin(), v.end());
     //return str_return; // returning the string
-    return  std::string();
+    std::string str{};
+
+    return  str;
 }
 
-void Aspi::setTimeOut()
-{
+void Aspi::setTimeOut() {
 //#ifdef _LOGS
 //    //pLog->CdBlockWrite("Setting ASPI timeout");
 //#endif
@@ -247,8 +243,7 @@ void Aspi::setTimeOut()
 //    }
 }
 
-void Aspi::resetBus()
-{
+void Aspi::resetBus() {
 //    HANDLE heventSRB;
 //    SRB_BusDeviceReset srbReset;
 //
@@ -292,42 +287,43 @@ void Aspi::resetBus()
 //    }
 }
 
-bool Aspi::readToc(SCSI_TOC &TOCData)
-{
-    //pLog->CdBlockWrite("Trying to read CD TOC..");
-    //BYTE TOCBuffer[1024];
-    uint8_t TOCBuffer[1024];
+bool Aspi::readToc(ScsiToc &TOCData) {
+    ////pLog->CdBlockWrite("Trying to read CD TOC..");
+    ////BYTE TOCBuffer[1024];
+    //uint8_t TOCBuffer[1024];
 
-    SRB_ExecSCSICmd srbExec;
-    memset(&srbExec, 0, sizeof(SRB_ExecSCSICmd));
+    //SRB_ExecSCSICmd srbExec;
+    //memset(&srbExec, 0, sizeof(SRB_ExecSCSICmd));
 
-    srbExec.SRB_Cmd = SC_EXEC_SCSI_CMD;
-    srbExec.SRB_HaId = CCdRom::SCSI_Path;
-    srbExec.SRB_Flags = SRB_DIR_IN;
-    srbExec.SRB_Target = CCdRom::SCSI_Target;
-    srbExec.SRB_Lun = CCdRom::SCSI_Lun;
-    srbExec.SRB_BufLen = 1024;
-    srbExec.SRB_BufPointer = TOCBuffer;
-    srbExec.SRB_SenseLen = SENSE_LEN;
-    srbExec.SRB_CDBLen = 10;
-    srbExec.CDBByte[0] = SCSI_READ_TOC;
-    srbExec.CDBByte[2] = 0x00;
-    srbExec.CDBByte[7] = sizeof(Aspi_TOC) >> 8;
-    srbExec.CDBByte[8] = sizeof(Aspi_TOC) & 0xFF;
-    pfSendAspi32Command((LPSRB)&srbExec);
+    //srbExec.SRB_Cmd = SC_EXEC_SCSI_CMD;
+    //srbExec.SRB_HaId = CCdRom::SCSI_Path;
+    //srbExec.SRB_Flags = SRB_DIR_IN;
+    //srbExec.SRB_Target = CCdRom::SCSI_Target;
+    //srbExec.SRB_Lun = CCdRom::SCSI_Lun;
+    //srbExec.SRB_BufLen = 1024;
+    //srbExec.SRB_BufPointer = TOCBuffer;
+    //srbExec.SRB_SenseLen = SENSE_LEN;
+    //srbExec.SRB_CDBLen = 10;
+    //srbExec.CDBByte[0] = SCSI_READ_TOC;
+    //srbExec.CDBByte[2] = 0x00;
+    //srbExec.CDBByte[7] = sizeof(Aspi_TOC) >> 8;
+    //srbExec.CDBByte[8] = sizeof(Aspi_TOC) & 0xFF;
+    //pfSendAspi32Command((LPSRB)&srbExec);
 
-    while (srbExec.SRB_Status == SS_PENDING) Sleep(10);
+    //while (srbExec.SRB_Status == SS_PENDING) Sleep(10);
 
-    if (srbExec.SRB_Status == SS_COMP)
-    {
-        TOCData = reinterpret_cast<SCSI_TOC &>(TOCBuffer);
-        return true;
-    }
-    else
-    {
-        //pLog->CdBlockWrite("*TOC reading failed!*");
-        return false;
-    }
+    //if (srbExec.SRB_Status == SS_COMP)
+    //{
+    //    TOCData = reinterpret_cast<SCSI_TOC &>(TOCBuffer);
+    //    return true;
+    //}
+    //else
+    //{
+    //    //pLog->CdBlockWrite("*TOC reading failed!*");
+    //    return false;
+    //}
+    return true;
 }
+
 }
 }
