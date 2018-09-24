@@ -204,13 +204,19 @@ namespace gui {
 
         }
 
+        static uint16_t counter{};
         static std::string status_message{};
         if (ImGui::Button("Save")) {
             config->writeFile();
             status_message = core::tr("Configuration saved.");
+            counter = 5 * 60;
         }
-        ImGui::Text(status_message.c_str());
         
+        if (counter > 0) counter--;
+        else status_message.clear();
+
+        ImGui::Text(status_message.c_str());
+
         ImGui::End();
     }
 
