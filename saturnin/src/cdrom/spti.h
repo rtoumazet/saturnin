@@ -91,7 +91,7 @@ class Spti {
     static void test();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static std::string Spti::readSector(const std::uint32_t & fad, const std::int32_t & nb);
+    /// \fn static std::string Spti::readSector(const std::uint32_t & fad, const std::int32_t & nb, const core::Config& cfg);
     ///
     /// \brief  Reads sector(s).
     ///
@@ -100,6 +100,7 @@ class Spti {
     ///
     /// \param  fad FAD where to read the sector.
     /// \param  nb  Number of sectors to read.
+    /// \param  cfg The configuration object.
     ///
     /// \return The sector.
     ////////////////////////////////////////////////////////////////////////////////////////////////////

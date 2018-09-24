@@ -157,7 +157,7 @@ class Aspi
     ///
     /// \return	pointed function error code 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static std::function<uint32_t(void)> pfGetAspi32SupportInfo;
+    //static std::function<uint32_t(void)> pfGetAspi32SupportInfo;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \property	static boost::function<uint32_t (LPSRB)> pfSendAspi32Command
@@ -166,7 +166,7 @@ class Aspi
     ///
     /// \return	pointed function error code. 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static std::function<uint32_t(LPSRB)> pfSendAspi32Command;
+    //static std::function<uint32_t(LPSRB)> pfSendAspi32Command;
 };
 }
 }
