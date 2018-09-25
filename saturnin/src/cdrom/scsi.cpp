@@ -26,24 +26,27 @@ namespace cdrom {
 
 // Static declarations
 std::function<bool(void)>								        Scsi::initialize;
-std::function<int32_t(void)>								    Scsi::scanBus;
+std::function<uint8_t(void)>								    Scsi::scanBus;
 std::function<std::string(const uint32_t &, const int32_t &)>	Scsi::readSector;
 std::function<void(void)>								        Scsi::shutdown;
 std::function<bool(ScsiToc& toc_data)>					        Scsi::readToc;
 
 
 HANDLE Scsi::openDrive(const wchar_t letter) {
-    // returns a handle to the parameter drive
-    HANDLE hCd = 0;
+    HANDLE h = 0;
     std::wstring drive_name = L"\\\\.\\";
     drive_name += letter;
     drive_name += L":";
 
-    hCd = CreateFile(drive_name.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ,
-                     NULL, OPEN_EXISTING, 0, NULL);
-    if (hCd == INVALID_HANDLE_VALUE) return NULL;
+    h = CreateFile(drive_name.c_str(),
+                   GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ,
+                   NULL, 
+                   OPEN_EXISTING, 
+                   0, 
+                   NULL);
+    if (h == INVALID_HANDLE_VALUE) return NULL;
 
-    return hCd;
+    return h;
 }
 
 void Scsi::settingUpAspiFunctions() {
