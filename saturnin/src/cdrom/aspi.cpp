@@ -99,7 +99,7 @@ void Aspi::shutdown() {
 //    FreeLibrary(hWnAspi32);
 }
 
-int32_t Aspi::scanBus() {
+uint8_t Aspi::scanBus() {
     //int8_t byHaId;
     //int8_t byTarget;
     //SRB_GDEVBlock srbGDEVBlock;

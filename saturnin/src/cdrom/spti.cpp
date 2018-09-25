@@ -18,6 +18,7 @@
 //
 #pragma warning(push, 3) 
 #include <windows.h>
+#include <memory>
 #include <ntddscsi.h>
 #include <ntddcdrm.h>
 #pragma warning(pop) 
@@ -51,9 +52,9 @@ void Spti::shutdown() {
 }
 
 /* static */
-int32_t Spti::scanBus() {
+uint8_t Spti::scanBus() {
     std::wstring path = L"C:\\";
-    int8_t index{};
+    uint8_t index{};
 
     for (path[0] = 'C'; path[0] <= 'Z'; path[0]++) {
         if (GetDriveType(path.c_str()) == DRIVE_CDROM) {
@@ -199,22 +200,22 @@ void Spti::getAdapterAddress(const HANDLE& drive_handle, ScsiDriveInfo& di) {
     if (drive_handle == 0) return;
 
     //pSA = reinterpret_cast<PSCSI_ADDRESS>(&v[0]);
-    PSCSI_ADDRESS psa{};
-    psa->Length = sizeof(SCSI_ADDRESS);
+    SCSI_ADDRESS psa{};
+    psa.Length = sizeof(SCSI_ADDRESS);
 
     uint32_t status{};
     if (!DeviceIoControl(drive_handle, 
                          IOCTL_SCSI_GET_ADDRESS, 
                          NULL, 
                          0, 
-                         psa, 
+                         (LPVOID)&psa, 
                          sizeof(SCSI_ADDRESS), 
                          reinterpret_cast<LPDWORD>(&status), 
                          NULL))  return;
 
-    di.path   = psa->PortNumber;
-    di.target = psa->TargetId;
-    di.lun    = psa->Lun;
+    di.path   = psa.PortNumber;
+    di.target = psa.TargetId;
+    di.lun    = psa.Lun;
 }
 
 /* static */
