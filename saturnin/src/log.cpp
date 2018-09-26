@@ -32,6 +32,7 @@ namespace core {
     bool Log::initialize() {
         createConsole();
         auto sink = createFileSink("logs/saturnin.log");
+        createLogger("main", sink);
         createLogger("memory", sink);
         createLogger("vdp1", sink);
         createLogger("vdp2", sink);

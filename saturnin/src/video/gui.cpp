@@ -204,28 +204,10 @@ namespace gui {
         // CD-ROM header
         if (ImGui::CollapsingHeader(core::tr("CD-Rom").c_str())) {
             // For now ASPI isn't supported, SPTI is used in every case
-            cdrom::Scsi::settingUpSptiFunctions();
-            if (cdrom::Scsi::initialize()) {
-                uint8_t max_drives{ cdrom::Scsi::scanBus() };
-                uint8_t current_drive{};
-                std::wstring full_drive_name{};
-                std::vector<std::string> drives_list{core::tr("Not selected")};
-                while (current_drive < max_drives) {
-                    full_drive_name = cdrom::Cdrom::di_list[current_drive].letter;
-                    full_drive_name += L" - ";
-                    full_drive_name += cdrom::Cdrom::di_list[current_drive].name;
-                    std::string str(full_drive_name.begin(), full_drive_name.end());
-                    drives_list.push_back(str);
-                    ++current_drive;
-                }
-    
-                ImGui::Text(core::tr("Drive").c_str());
-                ImGui::SameLine(100);
-                static int current_item{};
-                ImGui::Combo("", &current_item, drives_list);
-
-
-            }
+            ImGui::Text(core::tr("Drive").c_str());
+            ImGui::SameLine(100);
+            static int current_item{};
+            ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list);
 
             //// getting the drive letter stored in the ini file
             //std::array<int8_t, 6> driveValue; driveValue.assign(' ');

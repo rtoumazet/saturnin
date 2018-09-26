@@ -34,15 +34,22 @@ namespace util = saturnin::utilities;
 namespace saturnin {
 namespace cdrom {
 
-// to be removed when cdrom.cpp is added to the project
-//SCSI_DriveInfo	CCdRom::diList[SCSI_MAX_DRIVES];
-//int8_t			CCdRom::SCSI_Path = -1;
-//int8_t			CCdRom::SCSI_Target = -1;
-//int8_t			CCdRom::SCSI_Lun = -1;
-//wchar_t			CCdRom::SCSI_Letter = 0;
-
 /* static */
 bool Spti::initialize() {
+    uint8_t max_drives{ Spti::scanBus() };
+    uint8_t current_drive{};
+    std::wstring full_drive_name{};
+    Cdrom::scsi_drives_list.push_back(core::tr("Not selected"));
+    
+    while (current_drive < max_drives) {
+        full_drive_name = cdrom::Cdrom::di_list[current_drive].letter;
+        full_drive_name += L" - ";
+        full_drive_name += cdrom::Cdrom::di_list[current_drive].name;
+        std::string str(full_drive_name.begin(), full_drive_name.end());
+        Cdrom::scsi_drives_list.push_back(str);
+        ++current_drive;
+    }
+
     return true;
 }
 

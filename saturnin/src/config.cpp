@@ -19,12 +19,14 @@
 
 #include <iostream> // cout
 #include "config.h"
+#include "cdrom/cdrom.h"
 #include "locale.h"
 #include "log.h"
 #include "utilities.h" // toUnderlying
 
 namespace libcfg    = libconfig;
 namespace fs        = std::filesystem;
+namespace cdrom     = saturnin::cdrom;
 namespace util      = saturnin::utilities;
 
 namespace saturnin {
@@ -78,6 +80,11 @@ namespace core {
         {"BIOS",    Rom_type::bios}
     };
 
+    Config::Map_cdrom_access Config::cdrom_access = {
+        {"ASPI", cdrom::Cdrom_access_method::aspi},
+        {"SPTI", cdrom::Cdrom_access_method::spti}
+    };
+
     void Config::writeFile() {
         cfg_.writeFile(this->filename_.c_str());
     }
@@ -122,8 +129,7 @@ namespace core {
 
         libcfg::Setting& cdrom = root.add(single_keys[Access_keys::config_cdrom], libcfg::Setting::TypeGroup);
         this->writeValue(cdrom, single_keys[Access_keys::config_drive], "");
-        this->writeValue(cdrom, single_keys[Access_keys::config_access_method], 0); // Add SPTI by default
-
+        this->writeValue(cdrom, single_keys[Access_keys::config_access_method], Config::cdrom_access.[util::toUnderlying(cdrom::Cdrom_access_method::spti)]);
     }
 
     libcfg::Setting& Config::getGroup(libcfg::Setting& root, const std::string& group_name) {
