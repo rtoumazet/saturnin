@@ -29,21 +29,21 @@
 //#include "../sh2.h"
 //#include "../utilities.h"
 
-// NAMESPACES
 namespace saturnin {
 namespace cdrom {
 
-// Static variables initilization
-uint8_t			Cdrom::access_method = ASPI;
+// Static variables initialization
+Cdrom_access_method	Cdrom::access_method = Cdrom_access_method::aspi;
 
-ScsiDriveInfo	Cdrom::di_list[scsi_max_drives];
-int8_t			Cdrom::scsi_path = -1;
-int8_t			Cdrom::scsi_target = -1;
-int8_t			Cdrom::scsi_lun = -1;
-wchar_t			Cdrom::scsi_letter = 0;
+ScsiDriveInfo	    Cdrom::di_list[scsi_max_drives];
+int8_t		    	Cdrom::scsi_path = -1;
+int8_t			    Cdrom::scsi_target = -1;
+int8_t			    Cdrom::scsi_lun = -1;
+wchar_t			    Cdrom::scsi_letter = 0;
 
-ScsiToc 		Cdrom::toc_data;
+ScsiToc 		    Cdrom::toc_data;
 
+std::vector<std::string>    Cdrom::scsi_drives_list = {};
 
 //CCdRom::CCdRom()
 //{

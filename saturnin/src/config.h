@@ -34,6 +34,9 @@
 #include <string> // string
 #include "log.h"
 #include "memory.h" // Rom_load, Rom_type
+#include "cdrom/cdrom.h" // Cdrom_access_method
+
+namespace cdrom = saturnin::cdrom;
 
 namespace saturnin {
 namespace core {
@@ -107,6 +110,16 @@ namespace core {
 
         typedef std::map<const std::string, const Rom_type>Map_rom_type;
         static Map_rom_type rom_type;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \typedef    std::map<const std::string, const cdrom::Cdrom_access_method>Map_cdrom_access
+        ///
+        /// \brief  Defines an alias representing the correspondance between the cdrom access method string 
+        ///         value defined in the config file and the cdrom access method type.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        typedef std::map<const std::string, const cdrom::Cdrom_access_method>Map_cdrom_access;
+        static Map_cdrom_access cdrom_access;
 
         //@{
         // Constructors / Destructors

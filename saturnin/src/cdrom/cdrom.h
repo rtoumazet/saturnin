@@ -240,9 +240,10 @@ struct DirFileInfos
 ///
 /// \brief	Values that represent CdromAccessMethod. 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-enum CdromAccessMethod {
-    ASPI,	///< Aspi mode access. 
-    SPTI	///< SPTI mode access. 
+
+enum class Cdrom_access_method {
+    aspi,	///< Aspi mode access. 
+    spti	///< SPTI mode access. 
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -257,16 +258,17 @@ enum CdromAccessMethod {
 class Cdrom
 {
     public:
-    static uint8_t   access_method; ///< Current CD-ROM access method.
+    static Cdrom_access_method      access_method; ///< Current CD-ROM access method.
 
     /// \name SCSI variables
     //@{
-    static ScsiDriveInfo    di_list[scsi_max_drives];///< List of drives available. 
-    static int8_t           scsi_path;	            ///< Path. 
-    static int8_t           scsi_target;	        ///< Target. 
-    static int8_t           scsi_lun;	            ///< LUN. 
-    static wchar_t          scsi_letter;	        ///< Letter. 
-    static ScsiToc	        toc_data;	            ///< TOC data. 
+    static ScsiDriveInfo            di_list[scsi_max_drives]; ///< List of drives available. 
+    static int8_t                   scsi_path;	              ///< Path. 
+    static int8_t                   scsi_target;	          ///< Target. 
+    static int8_t                   scsi_lun;	              ///< LUN. 
+    static wchar_t                  scsi_letter;	          ///< Letter. 
+    static ScsiToc	                toc_data;	              ///< TOC data. 
+    static std::vector<std::string> scsi_drives_list;         ///< List of drives detected
     //@}
 
 
