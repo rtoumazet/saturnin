@@ -206,6 +206,8 @@ namespace gui {
             // For now ASPI isn't supported, SPTI is used in every case
             ImGui::Text(core::tr("Drive").c_str());
             ImGui::SameLine(100);
+            std::string access_method = config->readValue(core::Access_keys::config_access_method);
+
             static int current_item{};
             ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list);
 
