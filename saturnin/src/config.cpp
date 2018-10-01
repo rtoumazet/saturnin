@@ -129,14 +129,12 @@ namespace core {
 
         libcfg::Setting& cdrom = root.add(single_keys[Access_keys::config_cdrom], libcfg::Setting::TypeGroup);
         this->writeValue(cdrom, single_keys[Access_keys::config_drive], "");
-        
-        auto find_val = cdrom::Cdrom_access_method::spti;
-        auto it = std::find_if(Config::cdrom_access.begin(), Config::cdrom_access.end(), [find_val](const Config::Map_cdrom_access::value_type & p) {
-            return p.second == find_val;
-        });
-        if (it != Config::cdrom_access.end()) {
-            auto v = *it;
-            this->writeValue(cdrom, single_keys[Access_keys::config_access_method], v.first);
+        core::Config::Map_cdrom_access::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::spti);
+        if (it != core::Config::cdrom_access.end()) {
+            this->writeValue(cdrom, single_keys[Access_keys::config_access_method], it->first);
+        }
+        else {
+            core::Log::warning("config", core::tr("Drive access method unknown ..."));
         }
     }
 
