@@ -206,7 +206,7 @@ namespace gui {
             // For now ASPI isn't supported, SPTI is used in every case
             ImGui::Text(core::tr("Drive").c_str());
             ImGui::SameLine(100);
-            std::string access_method = config->readValue(core::Access_keys::config_access_method);
+            
 
             static int current_item{};
             ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list);
@@ -222,6 +222,31 @@ namespace gui {
             
             // Drive
             // Access method
+            std::string access_method = config->readValue(core::Access_keys::config_access_method);
+            ImGui::Text(core::tr("Access method").c_str());
+            ImGui::SameLine(100);
+
+            static int method = util::toUnderlying(core::Config::cdrom_access[access_method]);
+            if (ImGui::RadioButton("SPTI", &method, util::toUnderlying(cdrom::Cdrom_access_method::spti))) {
+                core::Config::Map_cdrom_access::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::spti);
+                if (it != core::Config::cdrom_access.end()) {
+                    config->writeValue(core::Access_keys::config_access_method, it->first);
+                }
+                else {
+                    core::Log::warning("config", core::tr("Drive access method unknown ..."));
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::RadioButton("ASPI", &method, util::toUnderlying(cdrom::Cdrom_access_method::aspi))) {
+                core::Config::Map_cdrom_access::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::aspi);
+                if (it != core::Config::cdrom_access.end()) {
+                    config->writeValue(core::Access_keys::config_access_method, it->first);
+                }
+                else {
+                    core::Log::warning("config", core::tr("Drive access method unknown ..."));
+                }
+            }
+
             // CD-Rom system ID
         }
 
