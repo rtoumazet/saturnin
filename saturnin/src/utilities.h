@@ -78,32 +78,28 @@ constexpr auto toUnderlying(E e) noexcept {
     return static_cast<std::underlying_type_t<E>>(e);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template <typename M, typename V> const auto getKeyFromValue(const M& map, const V find_value)
+///
+/// \brief  Gets the key from it's value in a 1<->1 map.
+///
+/// \author Runik
+/// \date   02/10/2018
+///
+/// \tparam M   Map type.
+/// \tparam V   Value type.
+/// \param  map         The map to search.
+/// \param  find_value  The value to find.
+///
+/// \return An iterator corresponding to the found key, or end().
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 template <typename M, typename V>
 const auto getKeyFromValue(const M& map, const V find_value) {
-    auto it = std::find_if(map.begin(),
+    return std::find_if(map.begin(),
                            map.end(),
                            [find_value](const M::value_type & p) { return p.second == find_value; });
-    return it;
-    //if (it != map.end()) {
-    //    auto v = *it;
-    //    return v.first;
-    ////    config->writeValue(core::Access_keys::config_access_method, v.first);
-    //}
-    //else {
-    //    core::Log::error("config", core::tr("Value not found ..."));
-    //    std::exit(EXIT_FAILURE);
-    //}
 }
 
-//auto find_val = cdrom::Cdrom_access_method::aspi;
-//auto it = std::find_if(core::Config::cdrom_access.begin(),
-//                       core::Config::cdrom_access.end(),
-//                       [find_val](const core::Config::Map_cdrom_access::value_type & p) {
-//    return p.second == find_val;
-//});
-//if (it != core::Config::cdrom_access.end()) {
-//    auto v = *it;
-//    config->writeValue(core::Access_keys::config_access_method, v.first);
-//}
 }
 }

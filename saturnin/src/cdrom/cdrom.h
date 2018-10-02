@@ -412,10 +412,10 @@ class Cdrom
 
     /// \name CD block memory accessors
     //@{
-    void			WriteByte(uint32_t address, uint8_t data);
-    void			WriteWord(uint32_t address, uint16_t data);
-    void			WriteLong(uint32_t address, uint32_t data);
-    uint8_t	ReadByte(uint32_t address);
+    void		WriteByte(uint32_t address, uint8_t data);
+    void		WriteWord(uint32_t address, uint16_t data);
+    void		WriteLong(uint32_t address, uint32_t data);
+    uint8_t	    ReadByte(uint32_t address);
     uint16_t	ReadWord(uint32_t address);
     uint32_t	ReadLong(uint32_t address);
     //@}

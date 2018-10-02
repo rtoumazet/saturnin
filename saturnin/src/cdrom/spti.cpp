@@ -63,7 +63,7 @@ uint8_t Spti::scanBus() {
     std::wstring path = L"C:\\";
     uint8_t index{};
 
-    for (path[0] = 'C'; path[0] <= 'Z'; path[0]++) {
+    for (path[0] = 'C'; path[0] <= 'Z'; ++path[0]) {
         if (GetDriveType(path.c_str()) == DRIVE_CDROM) {
             HANDLE drive_handle = Scsi::openDrive(path[0]);
             if (drive_handle != INVALID_HANDLE_VALUE) {

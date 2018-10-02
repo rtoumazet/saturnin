@@ -107,11 +107,11 @@ class Scsi {
     /// \author	Runik
     /// \date	28/02/2010
     ///
-    /// \param	cLetter	Letter of the drive to get the handle to. 
+    /// \param	letter	Letter of the drive to get the handle to. 
     ///
     /// \return	Handle to the drive. 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static HANDLE openDrive(const wchar_t cLetter);
+    static HANDLE openDrive(const wchar_t letter);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static void settingUpAspiFunctions()

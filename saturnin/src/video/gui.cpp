@@ -203,25 +203,18 @@ namespace gui {
 
         // CD-ROM header
         if (ImGui::CollapsingHeader(core::tr("CD-Rom").c_str())) {
-            // For now ASPI isn't supported, SPTI is used in every case
+            // Drive
             ImGui::Text(core::tr("Drive").c_str());
             ImGui::SameLine(100);
-            
 
             static int current_item{};
+            std::string drive = config->readValue(core::Access_keys::config_drive);
+            //config->writeValue(Access_keys::config_drive, drive);
             ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list);
 
-            //// getting the drive letter stored in the ini file
-            //std::array<int8_t, 6> driveValue; driveValue.assign(' ');
-            //GetPrivateProfileString("CD-ROM", "Drive", "", reinterpret_cast<LPSTR>(&driveValue), 6, GetIniFile().c_str());
-            //// getting the index of the saved drive in the drive list
-            //string strTemp(driveValue.begin(), driveValue.end());
-            //if (strTemp.compare("") == 0) iCurrentDrive = -1;
-            //else iCurrentDrive = SendMessage(GetDlgItem(hDlg, IDC_CD), CB_FINDSTRING, -1, reinterpret_cast<LPARAM>(strTemp.c_str()));
-
             
-            // Drive
             // Access method
+            // For now ASPI isn't supported, SPTI is used in every case
             std::string access_method = config->readValue(core::Access_keys::config_access_method);
             ImGui::Text(core::tr("Access method").c_str());
             ImGui::SameLine(100);

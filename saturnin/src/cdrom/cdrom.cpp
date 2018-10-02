@@ -33,7 +33,7 @@ namespace saturnin {
 namespace cdrom {
 
 // Static variables initialization
-Cdrom_access_method	Cdrom::access_method = Cdrom_access_method::aspi;
+Cdrom_access_method	Cdrom::access_method = Cdrom_access_method::spti;
 
 ScsiDriveInfo	    Cdrom::di_list[scsi_max_drives];
 int8_t		    	Cdrom::scsi_path = -1;
