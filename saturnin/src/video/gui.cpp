@@ -210,6 +210,8 @@ namespace gui {
             static int current_item{};
             std::string drive = config->readValue(core::Access_keys::config_drive);
             //config->writeValue(Access_keys::config_drive, drive);
+            std::string str{ "0:0:0" };
+            auto vec = util::explode(str, ':');
             ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list);
 
             
