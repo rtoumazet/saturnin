@@ -121,6 +121,16 @@ namespace core {
         typedef std::map<const std::string, const cdrom::Cdrom_access_method>Map_cdrom_access;
         static Map_cdrom_access cdrom_access;
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \typedef    std::map<const std::string, const core::Hardware_mode>Map_hardware_mode
+        ///
+        /// \brief  Defines an alias representing the correspondance between the hardware mode string 
+        ///         value defined in the config file and the hardware mode type.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        typedef std::map<const std::string, const core::Hardware_mode>Map_hardware_mode;
+        static Map_hardware_mode hardware_mode;
+
         //@{
         // Constructors / Destructors
         Config()                           = delete;

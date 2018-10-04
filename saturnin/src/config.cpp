@@ -85,6 +85,11 @@ namespace core {
         {"SPTI", cdrom::Cdrom_access_method::spti}
     };
 
+    Config::Map_hardware_mode Config::hardware_mode= {
+        {"SATURN", core::Hardware_mode::saturn},
+        {"STV", core::Hardware_mode::stv}
+    };
+
     void Config::writeFile() {
         cfg_.writeFile(this->filename_.c_str());
     }
@@ -118,7 +123,11 @@ namespace core {
         libcfg::Setting& global = root.add(single_keys[Access_keys::config_global], libcfg::Setting::TypeGroup);
         this->writeValue(global, single_keys[Access_keys::config_language], "en");
         this->writeValue(global, single_keys[Access_keys::config_hardware_mode], util::toUnderlying(Hardware_mode::saturn));
-        
+        core::Config::Map_hardware_mode::const_iterator it_hm = util::getKeyFromValue(core::Config::hardware_mode, core::Hardware_mode::saturn);
+        if (it_hm != core::Config::hardware_mode.end()) {
+            this->writeValue(global, single_keys[Access_keys::config_hardware_mode], it_hm->first);
+        }
+
         libcfg::Setting& rendering = root.add(single_keys[Access_keys::config_rendering], libcfg::Setting::TypeGroup);
         this->writeValue(rendering, single_keys[Access_keys::config_legacy_opengl], !isModernOpenglCapable);
 
@@ -128,7 +137,7 @@ namespace core {
         this->writeValue(paths, single_keys[Access_keys::config_bios_saturn], "");
 
         libcfg::Setting& cdrom = root.add(single_keys[Access_keys::config_cdrom], libcfg::Setting::TypeGroup);
-        this->writeValue(cdrom, single_keys[Access_keys::config_drive], "");
+        this->writeValue(cdrom, single_keys[Access_keys::config_drive], "-1:-1:-1");
         core::Config::Map_cdrom_access::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::spti);
         if (it != core::Config::cdrom_access.end()) {
             this->writeValue(cdrom, single_keys[Access_keys::config_access_method], it->first);

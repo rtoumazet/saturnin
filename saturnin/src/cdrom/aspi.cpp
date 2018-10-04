@@ -99,7 +99,7 @@ void Aspi::shutdown() {
 //    FreeLibrary(hWnAspi32);
 }
 
-uint8_t Aspi::scanBus() {
+std::vector<ScsiDriveInfo> Aspi::scanBus() {
     //int8_t byHaId;
     //int8_t byTarget;
     //SRB_GDEVBlock srbGDEVBlock;
@@ -136,7 +136,7 @@ uint8_t Aspi::scanBus() {
     //    }
     //}
     //return iTotalDrives;
-    return 0;
+    return std::vector<ScsiDriveInfo>{};
 }
 
 void Aspi::inquiry(ScsiDriveInfo & di) {

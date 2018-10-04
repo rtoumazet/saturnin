@@ -101,18 +101,21 @@ const auto getKeyFromValue(const M& map, const V find_value) {
                            [find_value](const M::value_type & p) { return p.second == find_value; });
 }
 
-std::vector<std::string> explode(std::string const & s, char delim)
-{
-    std::vector<std::string> result;
-    std::istringstream iss(s);
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn std::vector<std::string> explode(std::string const & s, char delim);
+///
+/// \brief  Explodes the string based on the delimiter.
+///
+/// \author Runik
+/// \date   04/10/2018
+///
+/// \param  s       String to process.
+/// \param  delim   The delimiter.
+///
+/// \return A vector of strings
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    for (std::string token; std::getline(iss, token, delim); )
-    {
-        result.push_back(std::move(token));
-    }
-
-    return result;
-}
+std::vector<std::string> explode(std::string const & s, char delim);
 
 }
 }

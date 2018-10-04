@@ -146,13 +146,20 @@ namespace gui {
         
         // Hardware mode header
         if (ImGui::CollapsingHeader(core::tr("Hardware mode").c_str())) {
-            static int mode = config->readValue(core::Access_keys::config_hardware_mode);
+            
+            std::string hardware_mode = config->readValue(core::Access_keys::config_hardware_mode);
+            static int mode = util::toUnderlying(core::Config::hardware_mode[hardware_mode]);
+
             if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::Hardware_mode::saturn))) {
-                config->writeValue(core::Access_keys::config_hardware_mode, util::toUnderlying(core::Hardware_mode::saturn));
+                core::Config::Map_hardware_mode::const_iterator it = util::getKeyFromValue(core::Config::hardware_mode, core::Hardware_mode::saturn);
+                if (it != core::Config::hardware_mode.end()) config->writeValue(core::Access_keys::config_hardware_mode, it->first);
+                else core::Log::warning("config", core::tr("Hardware mode unknown ..."));
             }
             ImGui::SameLine();
             if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::Hardware_mode::stv))) {
-                config->writeValue(core::Access_keys::config_hardware_mode, util::toUnderlying(core::Hardware_mode::stv));
+                core::Config::Map_hardware_mode::const_iterator it = util::getKeyFromValue(core::Config::hardware_mode, core::Hardware_mode::stv);
+                if (it != core::Config::hardware_mode.end()) config->writeValue(core::Access_keys::config_hardware_mode, it->first);
+                else core::Log::warning("config", core::tr("Hardware mode unknown ..."));
             }
         }
 
@@ -207,20 +214,28 @@ namespace gui {
             ImGui::Text(core::tr("Drive").c_str());
             ImGui::SameLine(100);
 
-            static int current_item{};
             std::string drive = config->readValue(core::Access_keys::config_drive);
-            //config->writeValue(Access_keys::config_drive, drive);
-            std::string str{ "0:0:0" };
-            auto vec = util::explode(str, ':');
-            ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list);
-
+            static int current_item{};
+            auto drive_parts = util::explode(drive, ':');
+            if (drive_parts.size() == 3) {
+                current_item = cdrom::Cdrom::getDriveIndice(std::stoi(drive_parts[0]), std::stoi(drive_parts[1]), std::stoi(drive_parts[2]));
+            }
+            
+            if (ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list)) {
+                std::string value = std::to_string(cdrom::Cdrom::di_list[current_item].path);
+                value += ':';
+                value += std::to_string(cdrom::Cdrom::di_list[current_item].target);
+                value += ':';
+                value += std::to_string(cdrom::Cdrom::di_list[current_item].lun);
+                config->writeValue(core::Access_keys::config_drive, value);
+            }
             
             // Access method
             // For now ASPI isn't supported, SPTI is used in every case
-            std::string access_method = config->readValue(core::Access_keys::config_access_method);
             ImGui::Text(core::tr("Access method").c_str());
             ImGui::SameLine(100);
 
+            std::string access_method = config->readValue(core::Access_keys::config_access_method);
             static int method = util::toUnderlying(core::Config::cdrom_access[access_method]);
             if (ImGui::RadioButton("SPTI", &method, util::toUnderlying(cdrom::Cdrom_access_method::spti))) {
                 core::Config::Map_cdrom_access::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::spti);

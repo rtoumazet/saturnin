@@ -75,16 +75,17 @@ class Aspi
     static void	shutdown();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static int32_t scanBus()
+    /// \fn static std::vector<ScsiDriveInfo> Aspi::scanBus();
     ///
-    /// \brief	Scans the bus. 
+    /// \brief  Scans the bus.
     ///
-    /// \author	Runik
-    /// \date	01/03/2010
+    /// \author Runik
+    /// \date   01/03/2010
     ///
-    /// \return	The number of drives found. 
+    /// \return The list of drives found.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static uint8_t scanBus();
+
+    static std::vector<ScsiDriveInfo> scanBus();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static std::string readSector(const uint32_t & fad, const int32_t & nb)

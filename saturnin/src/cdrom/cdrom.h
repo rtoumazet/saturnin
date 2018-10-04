@@ -262,7 +262,8 @@ class Cdrom
 
     /// \name SCSI variables
     //@{
-    static ScsiDriveInfo            di_list[scsi_max_drives]; ///< List of drives available. 
+    //static ScsiDriveInfo            di_list[scsi_max_drives]; ///< List of drives available. 
+    static std::vector<ScsiDriveInfo> di_list; ///< List of drives available. 
     static int8_t                   scsi_path;	              ///< Path. 
     static int8_t                   scsi_target;	          ///< Target. 
     static int8_t                   scsi_lun;	              ///< LUN. 
@@ -271,7 +272,24 @@ class Cdrom
     static std::vector<std::string> scsi_drives_list;         ///< List of drives detected
     //@}
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8_t lun);
+    ///
+    /// \brief  Gets drive indice from path/target/lun triplet.
+    ///
+    /// \author Runik
+    /// \date   04/10/2018
+    ///
+    /// \param  path    scsi path.
+    /// \param  target  scsi target.
+    /// \param  lun     scsi lun.
+    ///
+    /// \return The drive indice.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    static uint8_t getDriveIndice(const int8_t path, const int8_t target, const int8_t lun);
+
+   
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn     uint8_t GetCdDriveStatus()
     ///
@@ -598,6 +616,7 @@ class Cdrom
     uint32_t	numOfSectorToPut;
     //@}
 };
+
 }
 }
 
