@@ -138,7 +138,7 @@ class Scsi {
     /// Will hold the pointer to the Spti or Aspi functions
     //@{
     static std::function<bool(void)>									    initialize;
-    static std::function<uint8_t(void)>							            scanBus;
+    static std::function<std::vector<ScsiDriveInfo>(void)>  	            scanBus;
     static std::function<::std::string(const uint32_t &, const int32_t &)>  readSector;
     static std::function<void(void)>									    shutdown;
     static std::function<bool(ScsiToc& toc_data)>						    readToc;

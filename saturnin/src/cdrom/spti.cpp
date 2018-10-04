@@ -36,20 +36,19 @@ namespace cdrom {
 
 /* static */
 bool Spti::initialize() {
-    uint8_t max_drives{ Spti::scanBus() };
-    uint8_t current_drive{};
+    Cdrom::di_list.clear();
+    Cdrom::di_list = Spti::scanBus();
     std::wstring full_drive_name{};
-    Cdrom::scsi_drives_list.push_back(core::tr("Not selected"));
+    //Cdrom::scsi_drives_list.push_back(core::tr("Not selected"));
     
-    while (current_drive < max_drives) {
-        full_drive_name = cdrom::Cdrom::di_list[current_drive].letter;
-        full_drive_name += L" - ";
-        full_drive_name += cdrom::Cdrom::di_list[current_drive].name;
+    for (auto &di : Cdrom::di_list) {
+        full_drive_name = di.letter;
+        full_drive_name += L" ";
+        full_drive_name += di.name;
         std::string str(full_drive_name.begin(), full_drive_name.end());
         Cdrom::scsi_drives_list.push_back(str);
-        ++current_drive;
     }
-
+    
     return true;
 }
 
@@ -59,26 +58,35 @@ void Spti::shutdown() {
 }
 
 /* static */
-uint8_t Spti::scanBus() {
+std::vector<ScsiDriveInfo> Spti::scanBus() {
+    std::vector<ScsiDriveInfo> drives;
     std::wstring path = L"C:\\";
-    uint8_t index{};
+
+    ScsiDriveInfo unselected{};
+    unselected.letter = L"";
+    unselected.path   = -1;
+    unselected.target = -1;
+    unselected.lun    = -1;
+    std::string name  = core::tr("Not selected");
+    std::wstring wname(name.begin(), name.end());
+    unselected.name   = wname;
+    drives.push_back(unselected);
 
     for (path[0] = 'C'; path[0] <= 'Z'; ++path[0]) {
         if (GetDriveType(path.c_str()) == DRIVE_CDROM) {
             HANDLE drive_handle = Scsi::openDrive(path[0]);
             if (drive_handle != INVALID_HANDLE_VALUE) {
-                Cdrom::di_list[index].letter = path.c_str(); // adding the drive to the list
-                Spti::getAdapterAddress(drive_handle, Cdrom::di_list[index]); // getting the address of the current letter drive
+                ScsiDriveInfo di{};
+                di.letter = path.c_str();
+                Spti::getAdapterAddress(drive_handle, di);
+                Spti::inquiry(drive_handle, di);
+                drives.push_back(di);
 
-                if ((Cdrom::di_list[index].path != -1) && (Cdrom::di_list[index].target!= -1) && (Cdrom::di_list[index].lun != -1)) {
-                    Spti::inquiry(drive_handle, Cdrom::di_list[index]); // filling the current structure with inquiry data
-                }
                 CloseHandle(drive_handle);
-                ++index; // moving to the next drive
             }
         }
     }
-    return index; // number of drives is returned
+    return drives;
 }
 
 /* static */

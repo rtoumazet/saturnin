@@ -35,15 +35,25 @@ namespace cdrom {
 // Static variables initialization
 Cdrom_access_method	Cdrom::access_method = Cdrom_access_method::spti;
 
-ScsiDriveInfo	    Cdrom::di_list[scsi_max_drives];
-int8_t		    	Cdrom::scsi_path = -1;
-int8_t			    Cdrom::scsi_target = -1;
-int8_t			    Cdrom::scsi_lun = -1;
-wchar_t			    Cdrom::scsi_letter = 0;
+//ScsiDriveInfo	    Cdrom::di_list[scsi_max_drives];
+std::vector<ScsiDriveInfo>  Cdrom::di_list;
+int8_t		    	        Cdrom::scsi_path = -1;
+int8_t			            Cdrom::scsi_target = -1;
+int8_t			            Cdrom::scsi_lun = -1;
+wchar_t			            Cdrom::scsi_letter = 0;
 
-ScsiToc 		    Cdrom::toc_data;
+ScsiToc 		            Cdrom::toc_data;
 
 std::vector<std::string>    Cdrom::scsi_drives_list = {};
+
+/* static */
+uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8_t lun) {
+
+    auto it = std::find_if(di_list.begin(),
+                           di_list.end(),
+                            [path, target, lun](const ScsiDriveInfo& di) { return (di.path == path) && (di.target == target) && (di.lun == lun); });
+    return it - di_list.begin(); // returns the indice
+}
 
 //CCdRom::CCdRom()
 //{

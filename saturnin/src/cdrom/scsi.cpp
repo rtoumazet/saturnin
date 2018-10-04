@@ -26,7 +26,7 @@ namespace cdrom {
 
 // Static declarations
 std::function<bool(void)>								        Scsi::initialize;
-std::function<uint8_t(void)>								    Scsi::scanBus;
+std::function<std::vector<ScsiDriveInfo>(void)>				    Scsi::scanBus;
 std::function<std::string(const uint32_t &, const int32_t &)>	Scsi::readSector;
 std::function<void(void)>								        Scsi::shutdown;
 std::function<bool(ScsiToc& toc_data)>					        Scsi::readToc;
