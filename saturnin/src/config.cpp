@@ -122,7 +122,6 @@ namespace core {
 
         libcfg::Setting& global = root.add(single_keys[Access_keys::config_global], libcfg::Setting::TypeGroup);
         this->writeValue(global, single_keys[Access_keys::config_language], "en");
-        this->writeValue(global, single_keys[Access_keys::config_hardware_mode], util::toUnderlying(Hardware_mode::saturn));
         core::Config::Map_hardware_mode::const_iterator it_hm = util::getKeyFromValue(core::Config::hardware_mode, core::Hardware_mode::saturn);
         if (it_hm != core::Config::hardware_mode.end()) {
             this->writeValue(global, single_keys[Access_keys::config_hardware_mode], it_hm->first);
