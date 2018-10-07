@@ -44,6 +44,9 @@ namespace core {
         { Access_keys::config_cdrom,         "cdrom" },
         { Access_keys::config_drive,         "drive" },
         { Access_keys::config_access_method, "access_method" },
+        { Access_keys::config_sound,         "sound" },
+        { Access_keys::config_soundcard,     "soundcard" },
+        { Access_keys::config_sound_disabled,"disabled" },
     };
 
     Config::Map_keys Config::full_keys = {
@@ -59,6 +62,9 @@ namespace core {
         { Access_keys::config_cdrom,         "cdrom" },
         { Access_keys::config_drive,         "cdrom.drive" },
         { Access_keys::config_access_method, "cdrom.access_method" },
+        { Access_keys::config_sound,         "sound" },
+        { Access_keys::config_soundcard,     "sound.soundcard" },
+        { Access_keys::config_sound_disabled,"sound.disabled" },
         { Access_keys::stv_game_name,        "game_name" },
         { Access_keys::stv_zip_name,         "zip_name" },
         { Access_keys::stv_parent_set,       "parent_set" },
@@ -144,6 +150,9 @@ namespace core {
         else {
             core::Log::warning("config", core::tr("Drive access method unknown ..."));
         }
+
+        libcfg::Setting& sound = root.add(single_keys[Access_keys::config_sound], libcfg::Setting::TypeGroup);
+        this->writeValue(sound, single_keys[Access_keys::config_sound_disabled], false);
     }
 
     libcfg::Setting& Config::getGroup(libcfg::Setting& root, const std::string& group_name) {

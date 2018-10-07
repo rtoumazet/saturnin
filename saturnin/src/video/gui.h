@@ -36,9 +36,9 @@ namespace gui {
     void show_another_window(bool& show_another_window);
     void show_test_window(bool& show_test_window);
     void show_core_window(const uint32_t tex);
-    void show_image_window(const uint32_t tex);
-    void showStvWindow();
-    void showOptionsWindow(std::shared_ptr<core::Config>&);
+    void showRenderingWindow(const uint32_t tex);
+    void showStvWindow(bool *opened);
+    void showOptionsWindow(std::shared_ptr<core::Config>&, bool *opened);
     void buildGui(std::shared_ptr<core::Config>&);
 }
 }
