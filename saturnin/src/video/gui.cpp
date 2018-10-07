@@ -111,16 +111,15 @@ namespace gui {
         ImGui::End();
     }
 
-    void show_image_window(const uint32_t tex) {
-        bool test = true;
+    void showRenderingWindow(const uint32_t tex, bool* opened) {
 
-        ImGui::Begin("Another Window", &test);
+        ImGui::Begin("Another Window", opened);
         //ImGui::Image((ImTextureID)tex, ImVec2(230, 230), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
         ImGui::Image((ImTextureID)(intptr_t)(tex), ImVec2(230, 230), ImVec2(0, 0), ImVec2(0.3333f, 0.3333f), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
         ImGui::End();
     }
 
-    void showStvWindow() {
+    void showStvWindow(bool *opened) {
         auto files = core::listStvConfigurationFiles();
 
         std::vector<std::string> vec;
@@ -128,24 +127,22 @@ namespace gui {
         vec.push_back("test2");
         static int listbox_item_current = 1;
         
-        bool test = true;
-        ImGui::Begin("ST-V window", &test);
-        ImGui::ListBox("", &listbox_item_current, files);
+        ImGui::Begin("ST-V window", opened);
         ImGui::Combo("", &listbox_item_current, files);
         ImGui::End();
     }
 
-    void showOptionsWindow(std::shared_ptr<core::Config>& config) {
-        bool opened{ true };
-
+    void showOptionsWindow(std::shared_ptr<core::Config>& config, bool *opened) {
 
         ImGui::SetNextWindowSize(ImVec2(600, 300));
-        ImGui::Begin("Options", &opened);
+        ImGui::Begin("Options", opened);
         ImGui::PushItemWidth(-10);
         ImGui::Spacing();
         
-        // Hardware mode header
-        if (ImGui::CollapsingHeader(core::tr("Hardware mode").c_str())) {
+        // General header
+        if (ImGui::CollapsingHeader(core::tr("General").c_str())) {
+            ImGui::Text(core::tr("Hardware mode").c_str());
+            ImGui::SameLine(150);
             
             std::string hardware_mode = config->readValue(core::Access_keys::config_hardware_mode);
             static int mode = util::toUnderlying(core::Config::hardware_mode[hardware_mode]);
@@ -161,10 +158,7 @@ namespace gui {
                 if (it != core::Config::hardware_mode.end()) config->writeValue(core::Access_keys::config_hardware_mode, it->first);
                 else core::Log::warning("config", core::tr("Hardware mode unknown ..."));
             }
-        }
 
-        // Language header
-        if (ImGui::CollapsingHeader(core::tr("Language").c_str())) {
             ImGui::Text(core::tr("Language").c_str());
             ImGui::SameLine(100);
 
@@ -174,11 +168,11 @@ namespace gui {
                 return l == str;
             });
             static int index = it - locales.begin();
-
             if (ImGui::Combo("##language", &index, locales)) {
                 config->writeValue(core::Access_keys::config_language, locales[index]);
             }
         }
+
 
         // Paths header
         if (ImGui::CollapsingHeader(core::tr("Paths").c_str())) {
@@ -262,7 +256,13 @@ namespace gui {
 
         // Sound header
         if (ImGui::CollapsingHeader(core::tr("Sound").c_str())) {
+            ImGui::Text(core::tr("Sound disabled").c_str());
+            ImGui::SameLine(150);
 
+            static bool disabled = config->readValue(core::Access_keys::config_sound_disabled);
+            if (ImGui::Checkbox("", &disabled)) {
+                config->writeValue(core::Access_keys::config_sound_disabled, disabled);
+            }
         }
 
         static uint16_t counter{};
@@ -273,7 +273,7 @@ namespace gui {
             counter = 5 * 60;
         }
         
-        if (counter > 0) counter--;
+        if (counter > 0) --counter;
         else status_message.clear();
 
         ImGui::Text(status_message.c_str());
@@ -282,8 +282,28 @@ namespace gui {
     }
 
     void buildGui(std::shared_ptr<core::Config>& config) {
+        static bool show_options     = false;
+        static bool show_load_stv    = false;
+        static bool show_load_binary = false;
 
-    
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu(core::tr("File").c_str())) {
+                ImGui::MenuItem(core::tr("Load ST-V rom").c_str(), NULL, &show_load_stv);
+                ImGui::MenuItem(core::tr("Load binary file").c_str(), NULL, &show_load_binary);
+                ImGui::EndMenu();
+            }
+
+            ImGui::MenuItem(core::tr("Options").c_str(), NULL, &show_options);
+        }
+        ImGui::EndMainMenuBar();
+
+        //ImGui::BeginChild()
+        
+        //showRenderingWindow();
+
+        if (show_options)   showOptionsWindow(config, &show_options);
+        if (show_load_stv)  showStvWindow(&show_load_stv);
+        //if (show_load_binary)  showStvWindow(&show_load_binary);
     }
 }
 }

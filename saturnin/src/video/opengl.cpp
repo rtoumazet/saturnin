@@ -343,17 +343,15 @@ namespace video {
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            gui::show_image_window(tex);
+            gui::buildGui(config);
+            
+//            gui::show_image_window(tex);
 
             gui::show_core_window(tex);
 
             gui::show_simple_window(show_test_window, show_another_window);
 
             gui::show_another_window(show_another_window);
-
-            gui::showStvWindow();
-
-            gui::showOptionsWindow(config);
 
             gui::show_test_window(show_test_window);
 
@@ -509,17 +507,15 @@ namespace video {
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            gui::show_image_window(tex);
+            gui::buildGui(config);
+            
+            //gui::show_image_window(tex);
 
             gui::show_core_window(tex);
 
             gui::show_simple_window(show_test_window, show_another_window);
 
             gui::show_another_window(show_another_window);
-
-            gui::showStvWindow();
-
-            gui::showOptionsWindow(config);
 
             gui::show_test_window(show_test_window);
 
