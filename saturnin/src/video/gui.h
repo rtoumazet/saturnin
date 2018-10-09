@@ -27,18 +27,20 @@
 
 //#include "imgui/imgui.h"
 #include <vector>
+#include "opengl.h"
 #include "../config.h"
+
+namespace video = saturnin::video;
 
 namespace saturnin {
 namespace gui {
 
-    void show_simple_window(bool& show_test_window, bool& show_another_window);
-    void show_another_window(bool& show_another_window);
     void show_test_window(bool& show_test_window);
     void show_core_window(const uint32_t tex);
-    void showRenderingWindow(const uint32_t tex);
+    void showRenderingWindow(video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height);
     void showStvWindow(bool *opened);
     void showOptionsWindow(std::shared_ptr<core::Config>&, bool *opened);
-    void buildGui(std::shared_ptr<core::Config>&);
+    void buildGui(std::shared_ptr<core::Config>&, video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height);
+    void renderToTexture(int32_t texture, const uint32_t width, const uint32_t height);
 }
 }

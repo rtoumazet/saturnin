@@ -38,7 +38,8 @@ namespace video {
 	public:
         //@{
         // Constructors / Destructors
-        Opengl()                           = default;
+        Opengl()                           = delete;
+        Opengl(std::shared_ptr<core::Config> config);
         Opengl(const Opengl&)              = delete;
         Opengl(Opengl&&)                   = delete;
         Opengl& operator=(const Opengl&) & = delete;
@@ -46,7 +47,83 @@ namespace video {
         ~Opengl()                          = default;
         //@}
 
-		uint32_t create_framebuffer();
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn uint32_t Opengl::createFramebuffer();
+        ///
+        /// \brief  Creates the framebuffer used to display the Saturn data.
+        ///
+        /// \author Runik
+        /// \date   09/10/2018
+        ///
+        /// \return The new framebuffer.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		uint32_t createFramebuffer();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Opengl::preRendering(uint32_t& fbo);
+        ///
+        /// \brief  Pre rendering functions.
+        ///
+        /// \author Runik
+        /// \date   09/10/2018
+        ///
+        /// \param [in,out] fbo The framebuffer used for rendering.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void preRendering(uint32_t& fbo);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Opengl::postRendering();
+        ///
+        /// \brief  Post rendering functions.
+        ///
+        /// \author Runik
+        /// \date   09/10/2018
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void postRendering();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn int32_t Opengl::bindTextureToFramebuffer();
+        ///
+        /// \brief  Binds a texture to the current framebuffer.
+        ///
+        /// \author Runik
+        /// \date   09/10/2018
+        ///
+        /// \return The texture id.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        int32_t bindTextureToFramebuffer();
+
+        std::function<int32_t(void)> calculateRendering;    ///< function pointer to the rendering function
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn int32_t Opengl::calculateLegacyRendering();
+        ///
+        /// \brief  Calculates the OpenGL rendering in legacy mode.
+        ///
+        /// \author Runik
+        /// \date   09/10/2018
+        ///
+        /// \return The id of the calculated texture.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        int32_t calculateLegacyRendering();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn int32_t Opengl::calculateModernRendering();
+        ///
+        /// \brief  Calculates the OpenGL rendering in modern modern.
+        ///
+        /// \author Runik
+        /// \date   09/10/2018
+        ///
+        /// \return The id of the calculated texture.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        int32_t calculateModernRendering();
 
         uint32_t create_vertex_shader();
         uint32_t create_fragment_shader();
@@ -55,15 +132,36 @@ namespace video {
         uint32_t create_vertex_array_object(const uint32_t vertex_buffer_object, const float vertices[]);
         void delete_shaders(std::vector<uint32_t> shaders);
 
-        void setup_triangle();
-        void draw_triangle();
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Opengl::setupTriangle();
+        ///
+        /// \brief  Sets up the triangle using shaders using modern OpenGL.
+        ///
+        /// \author Runik
+        /// \date   09/10/2018
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void setupTriangle();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Opengl::drawTriangle();
+        ///
+        /// \brief  Draws a triangle using modern OpenGL.
+        ///
+        /// \author Runik
+        /// \date   09/10/2018
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void drawTriangle();
 
         bool load_png_image(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
         bool load_icons(std::vector<uint8_t>& image);
 
     private:
-        uint32_t program_shader_;
-        uint32_t vao_;
+    
+        uint32_t                      program_shader_;
+        uint32_t                      vao_;
+        std::shared_ptr<core::Config> config_;    ///< Configuration object
     };
 
 
