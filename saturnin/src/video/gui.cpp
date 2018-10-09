@@ -27,37 +27,37 @@
 #include "../cdrom/scsi.h" // settingUpSptiFunctions, initialize
 
 
-namespace core = saturnin::core;
-namespace util = saturnin::utilities;
+namespace core  = saturnin::core;
+namespace util  = saturnin::utilities;
 namespace cdrom = saturnin::cdrom;
 
 namespace saturnin {
 namespace gui {
 
-    void show_simple_window(bool& show_test_window, bool& show_another_window) {
-        // 1. Show a simple window
-        // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
-        {
-            ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-            static float f = 0.0f;
-            ImGui::Text("Hello, world!");
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            ImGui::ColorEdit3("clear color", (float*)&clear_color);
-            if (ImGui::Button("Test Window")) show_test_window ^= 1;
-            if (ImGui::Button("Another Window")) show_another_window ^= 1;
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        }
-    }
+    //void show_simple_window(bool& show_test_window, bool& show_another_window) {
+    //    // 1. Show a simple window
+    //    // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
+    //    {
+    //        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    //        static float f = 0.0f;
+    //        ImGui::Text("Hello, world!");
+    //        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    //        ImGui::ColorEdit3("clear color", (float*)&clear_color);
+    //        if (ImGui::Button("Test Window")) show_test_window ^= 1;
+    //        if (ImGui::Button("Another Window")) show_another_window ^= 1;
+    //        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    //    }
+    //}
 
-    void show_another_window(bool& show_another_window) {
-        // 2. Show another simple window, this time using an explicit Begin/End pair
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);
-            ImGui::Text("Hello from another window!");
-            ImGui::End();
-        }
-    }
+    //void show_another_window(bool& show_another_window) {
+    //    // 2. Show another simple window, this time using an explicit Begin/End pair
+    //    if (show_another_window)
+    //    {
+    //        ImGui::Begin("Another Window", &show_another_window);
+    //        ImGui::Text("Hello from another window!");
+    //        ImGui::End();
+    //    }
+    //}
 
     void show_test_window(bool& show_test_window) {
         // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
@@ -111,20 +111,34 @@ namespace gui {
         ImGui::End();
     }
 
-    void showRenderingWindow(const uint32_t tex, bool* opened) {
+    void showRenderingWindow(video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height) {
+        ImGui::SetNextWindowPos(ImVec2(0, 0 + 20), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(static_cast<float>(width), static_cast<float>(height + 20))); // + 20 
 
-        ImGui::Begin("Another Window", opened);
-        //ImGui::Image((ImTextureID)tex, ImVec2(230, 230), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-        ImGui::Image((ImTextureID)(intptr_t)(tex), ImVec2(230, 230), ImVec2(0, 0), ImVec2(0.3333f, 0.3333f), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+        //bool show_video = true;
+        ImGui::Begin("Video rendering", NULL, ImGuiWindowFlags_NoCollapse);
+        //ImGui::BeginChild("Video rendering");
+
+        opengl.preRendering(fbo);
+
+        int32_t texture = opengl.calculateRendering();
+        if (texture != 0) {
+            gui::renderToTexture(texture, width, height);
+        }
+
+        opengl.postRendering();
+
         ImGui::End();
+        ImGui::PopStyleVar();
+        ImGui::PopStyleVar();
     }
 
     void showStvWindow(bool *opened) {
         auto files = core::listStvConfigurationFiles();
 
-        std::vector<std::string> vec;
-        vec.push_back("test1");
-        vec.push_back("test2");
         static int listbox_item_current = 1;
         
         ImGui::Begin("ST-V window", opened);
@@ -160,7 +174,7 @@ namespace gui {
             }
 
             ImGui::Text(core::tr("Language").c_str());
-            ImGui::SameLine(100);
+            ImGui::SameLine(150);
 
             static auto locales = config->listAvailableLanguages();
             std::string l = config->readValue(core::Access_keys::config_language);
@@ -173,12 +187,22 @@ namespace gui {
             }
         }
 
+        // Rendering header
+        if (ImGui::CollapsingHeader(core::tr("Rendering").c_str())) {
+            ImGui::Text(core::tr("Legacy OpenGL").c_str());
+            ImGui::SameLine(150);
+
+            static bool is_legacy = config->readValue(core::Access_keys::config_legacy_opengl);
+            if (ImGui::Checkbox("", &is_legacy)) {
+                config->writeValue(core::Access_keys::config_legacy_opengl, is_legacy);
+            }
+        }
 
         // Paths header
         if (ImGui::CollapsingHeader(core::tr("Paths").c_str())) {
             
             ImGui::Text(core::tr("Saturn bios").c_str());
-            ImGui::SameLine(100);
+            ImGui::SameLine(150);
 
             auto bios_saturn = util::stringToVector(config->readValue(core::Access_keys::config_bios_saturn), 255);
             if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
@@ -186,14 +210,14 @@ namespace gui {
             }
 
             ImGui::Text(core::tr("ST-V bios").c_str());
-            ImGui::SameLine(100);
+            ImGui::SameLine(150);
             auto bios_stv = util::stringToVector(config->readValue(core::Access_keys::config_bios_stv), 255);
             if (ImGui::InputText("##bios_stv", bios_stv.data(), bios_stv.capacity())) {
                 config->writeValue(core::Access_keys::config_bios_stv, bios_stv.data());
             }
 
             ImGui::Text(core::tr("ST-V roms").c_str());
-            ImGui::SameLine(100);
+            ImGui::SameLine(150);
             auto roms_stv = util::stringToVector(config->readValue(core::Access_keys::config_roms_stv), 255);
             if (ImGui::InputText("##roms_stv", roms_stv.data(), roms_stv.capacity())) {
                 config->writeValue(core::Access_keys::config_roms_stv, roms_stv.data());
@@ -206,7 +230,7 @@ namespace gui {
         if (ImGui::CollapsingHeader(core::tr("CD-Rom").c_str())) {
             // Drive
             ImGui::Text(core::tr("Drive").c_str());
-            ImGui::SameLine(100);
+            ImGui::SameLine(150);
 
             std::string drive = config->readValue(core::Access_keys::config_drive);
             static int current_item{};
@@ -227,7 +251,7 @@ namespace gui {
             // Access method
             // For now ASPI isn't supported, SPTI is used in every case
             ImGui::Text(core::tr("Access method").c_str());
-            ImGui::SameLine(100);
+            ImGui::SameLine(150);
 
             std::string access_method = config->readValue(core::Access_keys::config_access_method);
             static int method = util::toUnderlying(core::Config::cdrom_access[access_method]);
@@ -281,7 +305,7 @@ namespace gui {
         ImGui::End();
     }
 
-    void buildGui(std::shared_ptr<core::Config>& config) {
+    void buildGui(std::shared_ptr<core::Config>& config, video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height) {
         static bool show_options     = false;
         static bool show_load_stv    = false;
         static bool show_load_binary = false;
@@ -299,11 +323,19 @@ namespace gui {
 
         //ImGui::BeginChild()
         
-        //showRenderingWindow();
+        showRenderingWindow(opengl, fbo, width, height);
 
         if (show_options)   showOptionsWindow(config, &show_options);
         if (show_load_stv)  showStvWindow(&show_load_stv);
         //if (show_load_binary)  showStvWindow(&show_load_binary);
+    }
+
+    void renderToTexture(int32_t texture, const uint32_t width, const uint32_t height) {
+        ImGui::GetWindowDrawList()->AddImage(
+            (ImTextureID)(intptr_t)texture,
+            ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
+            ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
+            ImVec2(0, 1), ImVec2(1, 0));
     }
 }
 }
