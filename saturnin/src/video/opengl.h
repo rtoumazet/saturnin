@@ -97,8 +97,6 @@ namespace video {
 
         int32_t bindTextureToFramebuffer();
 
-        std::function<int32_t(void)> calculateRendering;    ///< function pointer to the rendering function
-
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn int32_t Opengl::calculateLegacyRendering();
         ///
@@ -125,12 +123,12 @@ namespace video {
 
         int32_t calculateModernRendering();
 
-        uint32_t create_vertex_shader();
-        uint32_t create_fragment_shader();
-        uint32_t create_vertex_buffer_object(const float vertices[]);
-        uint32_t create_program_shader(const uint32_t vertex_shader, const uint32_t fragment_shader);
-        uint32_t create_vertex_array_object(const uint32_t vertex_buffer_object, const float vertices[]);
-        void delete_shaders(std::vector<uint32_t> shaders);
+        uint32_t createVertexShader();
+        uint32_t createFragmentShader();
+        //uint32_t create_vertex_buffer_object(const float vertices[]);
+        uint32_t createProgramShader(const uint32_t vertex_shader, const uint32_t fragment_shader);
+        //uint32_t createVertexArrayObject(const uint32_t vertex_buffer_object, const float vertices[]);
+        void deleteShaders(std::vector<uint32_t> shaders);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn void Opengl::setupTriangle();
@@ -156,6 +154,8 @@ namespace video {
 
         bool load_png_image(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
         bool load_icons(std::vector<uint8_t>& image);
+
+        std::function<int32_t(void)> calculateRendering;    ///< function pointer to the rendering function
 
     private:
     
