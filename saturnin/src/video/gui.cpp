@@ -115,11 +115,19 @@ namespace gui {
         ImGui::SetNextWindowPos(ImVec2(0, 0 + 20), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(static_cast<float>(width), static_cast<float>(height + 20))); // + 20 
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-        //bool show_video = true;
-        ImGui::Begin("Video rendering", NULL, ImGuiWindowFlags_NoCollapse);
+        //ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar;
+        flags |= ImGuiWindowFlags_NoResize;
+        flags |= ImGuiWindowFlags_NoScrollbar;
+        flags |= ImGuiWindowFlags_NoInputs;
+        flags |= ImGuiWindowFlags_NoSavedSettings;
+        flags |= ImGuiWindowFlags_NoFocusOnAppearing;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+        ImGui::Begin("Video rendering", NULL, flags);
         //ImGui::BeginChild("Video rendering");
 
         opengl.preRendering(fbo);
@@ -133,7 +141,8 @@ namespace gui {
 
         ImGui::End();
         ImGui::PopStyleVar();
-        ImGui::PopStyleVar();
+        //ImGui::PopStyleVar();
+        //ImGui::PopStyleVar();
     }
 
     void showStvWindow(bool *opened) {

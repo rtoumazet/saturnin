@@ -30,7 +30,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (!state.run()) {
-        core::Log::error("main", core::tr("An error occured during program execution ..."));
-        std::exit(EXIT_FAILURE);
+        std::exit(EXIT_SUCCESS);
     }
 };

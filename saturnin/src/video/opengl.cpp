@@ -40,13 +40,9 @@ namespace video {
 Opengl::Opengl(std::shared_ptr<core::Config> config) {
     config_ = config;
     bool is_legacy = config->readValue(core::Access_keys::config_legacy_opengl);
-    if (is_legacy) {
-        
-        calculateRendering = std::bind(&Opengl::calculateLegacyRendering, this);
-    }
-    else {
-        calculateRendering = std::bind(&Opengl::calculateModernRendering, this);
-    }
+    if (is_legacy)  calculateRendering = std::bind(&Opengl::calculateLegacyRendering, this);
+    else            calculateRendering = std::bind(&Opengl::calculateModernRendering, this);
+    
 }
 
 uint32_t Opengl::createFramebuffer()
@@ -74,7 +70,7 @@ uint32_t Opengl::createFramebuffer()
     return framebuffer;
 }
     
-uint32_t Opengl::create_vertex_shader()
+uint32_t Opengl::createVertexShader()
 {
     uint32_t vertex_shader;
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -105,7 +101,7 @@ uint32_t Opengl::create_vertex_shader()
 
     return vertex_shader;
 }
-uint32_t Opengl::create_fragment_shader()
+uint32_t Opengl::createFragmentShader()
 {
     const char* fragment_shader_source = R"(
         #version 330 core
@@ -124,19 +120,19 @@ uint32_t Opengl::create_fragment_shader()
 
     return fragment_shader;
 }
-uint32_t Opengl::create_vertex_buffer_object(const float vertices[])
-{
-    uint32_t vbo;
-    glGenBuffers(1, &vbo);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    return vbo;
-}
+//uint32_t Opengl::create_vertex_buffer_object(const float vertices[])
+//{
+//    uint32_t vbo;
+//    glGenBuffers(1, &vbo);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+//
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+//
+//    return vbo;
+//}
     
-void Opengl::delete_shaders(std::vector<uint32_t> shaders)
+void Opengl::deleteShaders(std::vector<uint32_t> shaders)
 {
     for (auto shader : shaders) {
         glDeleteShader(shader);
@@ -150,20 +146,20 @@ void Opengl::setupTriangle()
         0.0f,  0.5f, 0.0f
     };
 
-    //uint32_t vbo = createVertexBufferObject(vertices);
-    uint32_t vertex_shader = create_vertex_shader();
-    uint32_t fragment_shader = create_fragment_shader();
-    program_shader_ = create_program_shader(vertex_shader, fragment_shader);
+    //uint32_t vbo                          = createVertexBufferObject(vertices);
+    uint32_t vertex_shader                  = createVertexShader();
+    uint32_t fragment_shader                = createFragmentShader();
+    program_shader_                         = createProgramShader(vertex_shader, fragment_shader);
     std::vector<uint32_t> shaders_to_delete = {vertex_shader, fragment_shader};
-    delete_shaders(shaders_to_delete);
+    deleteShaders(shaders_to_delete);
 
-    unsigned int VBO;
+    unsigned int vbo;
     glGenVertexArrays(1, &vao_);
-    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &vbo);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(vao_);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -184,7 +180,7 @@ void Opengl::drawTriangle()
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-uint32_t Opengl::create_program_shader(const uint32_t vertex_shader, const uint32_t fragment_shader)
+uint32_t Opengl::createProgramShader(const uint32_t vertex_shader, const uint32_t fragment_shader)
 {
     uint32_t shader_program;
     shader_program = glCreateProgram();
@@ -203,21 +199,21 @@ uint32_t Opengl::create_program_shader(const uint32_t vertex_shader, const uint3
 
     return shader_program;
 }
-uint32_t Opengl::create_vertex_array_object(const uint32_t vertex_buffer_object, const float vertices[])
-{
-    uint32_t VAO;
-    glGenVertexArrays(1, &VAO);
-
-    // 1. bind Vertex Array Object
-    glBindVertexArray(VAO);
-    // 2. copy our vertices array in a buffer for Opengl to use
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    // 3. then set our vertex attributes pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    return VAO;
-}
+//uint32_t Opengl::createVertexArrayObject(const uint32_t vertex_buffer_object, const float vertices[])
+//{
+//    uint32_t VAO;
+//    glGenVertexArrays(1, &VAO);
+//
+//    // 1. bind Vertex Array Object
+//    glBindVertexArray(VAO);
+//    // 2. copy our vertices array in a buffer for Opengl to use
+//    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+//    // 3. then set our vertex attributes pointers
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+//    glEnableVertexAttribArray(0);
+//    return VAO;
+//}
 
 bool Opengl::load_png_image(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) {
     // Load file and decode image.
@@ -392,9 +388,9 @@ int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        gui::buildGui(config, opengl, fbo, 640, 480);
-            
-        gui::show_test_window(show_test_window);
+        //gui::buildGui(config, opengl, fbo, 640, 480);
+        //    
+        //gui::show_test_window(show_test_window);
 
         // Rendering
         int display_w, display_h;
@@ -403,7 +399,12 @@ int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         //glUseProgram(0); // You may want this if using this code in an Opengl 3+ context where shaders may be bound
-            
+
+        gui::buildGui(config, opengl, fbo, display_w, display_h);
+
+        gui::show_test_window(show_test_window);
+
+
         ImGui::Render();
             
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
