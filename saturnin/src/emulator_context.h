@@ -37,6 +37,8 @@
 namespace saturnin {
 namespace core {
 
+static std::string saturnin_version = "1.00";
+
     /// \name Class declarations.
     /// Used to speed up build time as the .h files are included in the .cpp
     ///
