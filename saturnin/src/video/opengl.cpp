@@ -30,6 +30,7 @@
 #include "../../lib/imgui/imgui_impl_glfw.h"
 #include "../../lib/imgui/imgui_impl_opengl2.h"
 #include "../../lib/imgui/imgui_impl_opengl3.h"
+#include "../emulator_context.h" // saturnin_version
 
 #include "../../res/icons.png.inc"
 
@@ -55,8 +56,10 @@ uint32_t Opengl::createFramebuffer()
     glGenTextures(1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 320, 200, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureColorbuffer, 0);
@@ -260,12 +263,20 @@ int32_t Opengl::bindTextureToFramebuffer() {
 }
 
 int32_t Opengl::calculateLegacyRendering() {
+    static int i = 0;
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, 0.0f);
+    glRotatef(i, 0.0f, 0.0f, 1.0f);
+    
     glBegin(GL_TRIANGLES);
     glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
     glVertex3f(-0.5f, -0.5f, 0.0f);
     glVertex3f(0.5f, -0.5f, 0.0f);
     glVertex3f(0.0f, 0.5f, 0.0f);
     glEnd();
+
+    glPopMatrix();
+    ++i;
 
     return this->bindTextureToFramebuffer();
 }
@@ -309,7 +320,8 @@ int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
     if (!glfwInit())
         return 1;
 
-    auto window = glfwCreateWindow(1280, 720, "ImGui Opengl2 example", NULL, NULL);
+    std::string window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
+    auto window = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
     if (window == NULL)
         return 1;
 
@@ -446,7 +458,8 @@ int32_t runModernOpengl(std::shared_ptr<core::Config>& config) {
     //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
-    auto window = glfwCreateWindow(1280, 720, "ImGui Opengl3 example", NULL, NULL);
+    std::string window_title = fmt::format(core::tr("Saturnin {0} - Modern rendering"), core::saturnin_version);
+    auto window = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
     if (window == nullptr) {
         return 1;
     }
@@ -507,18 +520,20 @@ int32_t runModernOpengl(std::shared_ptr<core::Config>& config) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        gui::buildGui(config, opengl, fbo, 640, 480);
             
         gui::show_test_window(show_test_window);
 
         // Rendering
-        ImGui::Render();
         int display_w, display_h;
         glfwMakeContextCurrent(window);
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        gui::buildGui(config, opengl, fbo, display_w, display_h);
+
+        ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwMakeContextCurrent(window);
