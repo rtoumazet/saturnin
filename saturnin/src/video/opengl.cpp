@@ -17,12 +17,8 @@
 // limitations under the License.
 //
 
-#include <windows.h> // removes C4005 warning
 #include <functional> // function
 #include <iostream> // cout
-#include <epoxy/gl.h>
-#include <epoxy/wgl.h>
-#include <GLFW/glfw3.h>
 #include <lodepng.h>
 #include "opengl.h"
 #include "gui.h"
@@ -30,7 +26,6 @@
 #include "../../lib/imgui/imgui_impl_glfw.h"
 #include "../../lib/imgui/imgui_impl_opengl2.h"
 #include "../../lib/imgui/imgui_impl_opengl3.h"
-#include "../emulator_context.h" // saturnin_version
 
 #include "../../res/icons.png.inc"
 
@@ -314,16 +309,19 @@ bool isModernOpenglCapable()
     return true;
 }
 
-int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
+int32_t runLegacyOpengl(core::Emulator_context& state) {
     // Setup window
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())
-        return 1;
+        return EXIT_FAILURE;
 
     std::string window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
     auto window = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
     if (window == NULL)
-        return 1;
+        return EXIT_FAILURE;
+
+    glfwSetWindowCloseCallback(window, windowCloseCallback);
+    glfwSetWindowUserPointer(window, (void*)&state);
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
@@ -346,7 +344,7 @@ int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
                             //if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
                             //    cout << "GL_EXT_framebuffer_object not found !" << endl;
 
-    Opengl opengl(config);
+    Opengl opengl(state.config());
     uint32_t fbo = opengl.createFramebuffer();
     //Opengl.setupTriangle();
 
@@ -376,21 +374,7 @@ int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
     bool show_test_window = true;
-    bool show_another_window = false;
-    bool show_video = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    //std::vector<uint8_t> image;
-    //opengl.load_icons(image);
-    //GLuint tex;
-    //glEnable(GL_TEXTURE_2D);
-    //glGenTextures(1, &tex);
-    //glBindTexture(GL_TEXTURE_2D, tex);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0xe6, 0xe6, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -400,10 +384,6 @@ int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        //gui::buildGui(config, opengl, fbo, 640, 480);
-        //    
-        //gui::show_test_window(show_test_window);
-
         // Rendering
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -412,7 +392,9 @@ int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
         glClear(GL_COLOR_BUFFER_BIT);
         //glUseProgram(0); // You may want this if using this code in an Opengl 3+ context where shaders may be bound
 
-        gui::buildGui(config, opengl, fbo, display_w, display_h);
+        gui::buildGui(state, opengl, fbo, display_w, display_h);
+
+        if (state.rendering_status_ == core::Rendering_status::reset) glfwSetWindowShouldClose(window, true);
 
         gui::show_test_window(show_test_window);
 
@@ -433,14 +415,14 @@ int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config) {
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
-int32_t runModernOpengl(std::shared_ptr<core::Config>& config) {
+int32_t runModernOpengl(core::Emulator_context& state) {
     // Setup window
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())
-        return 1;
+        return EXIT_FAILURE;
 
     // Decide GL+GLSL versions
 #if __APPLE__
@@ -461,8 +443,11 @@ int32_t runModernOpengl(std::shared_ptr<core::Config>& config) {
     std::string window_title = fmt::format(core::tr("Saturnin {0} - Modern rendering"), core::saturnin_version);
     auto window = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
     if (window == nullptr) {
-        return 1;
+        return EXIT_FAILURE;
     }
+
+    glfwSetWindowCloseCallback(window, windowCloseCallback);
+    glfwSetWindowUserPointer(window, (void*)&state);
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
@@ -496,7 +481,7 @@ int32_t runModernOpengl(std::shared_ptr<core::Config>& config) {
     bool show_video = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    Opengl opengl(config);
+    Opengl opengl(state.config());
     uint32_t fbo = opengl.createFramebuffer();
     //opengl.setup_triangle();
 
@@ -531,7 +516,9 @@ int32_t runModernOpengl(std::shared_ptr<core::Config>& config) {
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        gui::buildGui(config, opengl, fbo, display_w, display_h);
+        gui::buildGui(state, opengl, fbo, display_w, display_h);
+
+        if (state.rendering_status_ == core::Rendering_status::reset) glfwSetWindowShouldClose(window, true);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -548,7 +535,12 @@ int32_t runModernOpengl(std::shared_ptr<core::Config>& config) {
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    return 0;
+    return EXIT_SUCCESS;
+}
+
+void windowCloseCallback(GLFWwindow* window) {
+    core::Emulator_context *state = reinterpret_cast<core::Emulator_context*>(glfwGetWindowUserPointer(window));
+    state->rendering_status_ = core::Rendering_status::stopped;
 }
 
 };

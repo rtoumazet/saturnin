@@ -67,9 +67,14 @@ bool Emulator_context::run() {
     auto val = core::read<16>(this->memory()->workram_low, 2);
     // TESTING //
 
+    uint8_t status{};
+    while (rendering_status_ != Rendering_status::stopped) {
+        rendering_status_ = Rendering_status::running;
+        bool is_legacy_opengl = this->config()->readValue(core::Access_keys::config_legacy_opengl);
+        status = (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
 
-    bool is_legacy_opengl = this->config()->readValue(core::Access_keys::config_legacy_opengl);
-    if (is_legacy_opengl) return video::runLegacyOpengl(this->config()); else return video::runModernOpengl(this->config());
+    }
+    return status;
 }
 
 }

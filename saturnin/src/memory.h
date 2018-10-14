@@ -246,7 +246,7 @@ namespace core {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Memory::mirrorRom( uint8_t* data, 
+    /// \fn void Memory::mirrorData( uint8_t* data, 
     ///                             const uint32_t size, 
     ///                             const uint8_t times_mirrored, 
     ///                             const Rom_load rom_load);

@@ -50,7 +50,20 @@ enum class Hardware_mode {
 enum class Emulation_status {
     running,    ///< Emulator is running
     paused,     ///< Emulator is paused
-    stopped     ///< Emulator is stopped
+    stopped,    ///< Emulator is stopped
+    reset       ///< Emulator is reset
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Rendering_status
+///
+/// \brief  Rendering status. Needed to reset display when modifying rendring type in the options.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Rendering_status {
+    running,
+    reset,
+    stopped
 };
 
 }

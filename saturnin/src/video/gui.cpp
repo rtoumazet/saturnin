@@ -21,10 +21,8 @@
 #include <filesystem> // filesystem
 #include "gui.h"
 #include "../locale.h" // tr
-//#include "../memory.h"
 #include "../utilities.h" // stringToVector
 #include "../cdrom/cdrom.h" // Cdrom
-#include "../cdrom/scsi.h" // settingUpSptiFunctions, initialize
 
 
 namespace core  = saturnin::core;
@@ -155,44 +153,46 @@ namespace gui {
         ImGui::End();
     }
 
-    void showOptionsWindow(std::shared_ptr<core::Config>& config, bool *opened) {
+    void showOptionsWindow(core::Emulator_context& state, bool *opened) {
 
+        static bool reset_rendering{}; // used to check if rendering has to be reset after changing the option
         ImGui::SetNextWindowSize(ImVec2(600, 300));
         ImGui::Begin("Options", opened);
         ImGui::PushItemWidth(-10);
         ImGui::Spacing();
+
         
         // General header
         if (ImGui::CollapsingHeader(core::tr("General").c_str())) {
             ImGui::Text(core::tr("Hardware mode").c_str());
             ImGui::SameLine(150);
             
-            std::string hardware_mode = config->readValue(core::Access_keys::config_hardware_mode);
+            std::string hardware_mode = state.config()->readValue(core::Access_keys::config_hardware_mode);
             static int mode = util::toUnderlying(core::Config::hardware_mode[hardware_mode]);
 
             if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::Hardware_mode::saturn))) {
                 core::Config::Map_hardware_mode::const_iterator it = util::getKeyFromValue(core::Config::hardware_mode, core::Hardware_mode::saturn);
-                if (it != core::Config::hardware_mode.end()) config->writeValue(core::Access_keys::config_hardware_mode, it->first);
+                if (it != core::Config::hardware_mode.end()) state.config()->writeValue(core::Access_keys::config_hardware_mode, it->first);
                 else core::Log::warning("config", core::tr("Hardware mode unknown ..."));
             }
             ImGui::SameLine();
             if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::Hardware_mode::stv))) {
                 core::Config::Map_hardware_mode::const_iterator it = util::getKeyFromValue(core::Config::hardware_mode, core::Hardware_mode::stv);
-                if (it != core::Config::hardware_mode.end()) config->writeValue(core::Access_keys::config_hardware_mode, it->first);
+                if (it != core::Config::hardware_mode.end()) state.config()->writeValue(core::Access_keys::config_hardware_mode, it->first);
                 else core::Log::warning("config", core::tr("Hardware mode unknown ..."));
             }
 
             ImGui::Text(core::tr("Language").c_str());
             ImGui::SameLine(150);
 
-            static auto locales = config->listAvailableLanguages();
-            std::string l = config->readValue(core::Access_keys::config_language);
+            static auto locales = state.config()->listAvailableLanguages();
+            std::string l = state.config()->readValue(core::Access_keys::config_language);
             auto it = std::find_if(locales.begin(), locales.end(), [&l](std::string& str) {
                 return l == str;
             });
             static int index = it - locales.begin();
             if (ImGui::Combo("##language", &index, locales)) {
-                config->writeValue(core::Access_keys::config_language, locales[index]);
+                state.config()->writeValue(core::Access_keys::config_language, locales[index]);
             }
         }
 
@@ -201,9 +201,11 @@ namespace gui {
             ImGui::Text(core::tr("Legacy OpenGL").c_str());
             ImGui::SameLine(150);
 
-            static bool is_legacy = config->readValue(core::Access_keys::config_legacy_opengl);
+            static bool is_legacy = state.config()->readValue(core::Access_keys::config_legacy_opengl);
+            bool initial_rendering = is_legacy;
             if (ImGui::Checkbox("", &is_legacy)) {
-                config->writeValue(core::Access_keys::config_legacy_opengl, is_legacy);
+                state.config()->writeValue(core::Access_keys::config_legacy_opengl, is_legacy);
+                if (initial_rendering != is_legacy) reset_rendering = true;
             }
         }
 
@@ -213,23 +215,23 @@ namespace gui {
             ImGui::Text(core::tr("Saturn bios").c_str());
             ImGui::SameLine(150);
 
-            auto bios_saturn = util::stringToVector(config->readValue(core::Access_keys::config_bios_saturn), 255);
+            auto bios_saturn = util::stringToVector(state.config()->readValue(core::Access_keys::config_bios_saturn), 255);
             if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
-               config->writeValue(core::Access_keys::config_bios_saturn, bios_saturn.data());
+                state.config()->writeValue(core::Access_keys::config_bios_saturn, bios_saturn.data());
             }
 
             ImGui::Text(core::tr("ST-V bios").c_str());
             ImGui::SameLine(150);
-            auto bios_stv = util::stringToVector(config->readValue(core::Access_keys::config_bios_stv), 255);
+            auto bios_stv = util::stringToVector(state.config()->readValue(core::Access_keys::config_bios_stv), 255);
             if (ImGui::InputText("##bios_stv", bios_stv.data(), bios_stv.capacity())) {
-                config->writeValue(core::Access_keys::config_bios_stv, bios_stv.data());
+                state.config()->writeValue(core::Access_keys::config_bios_stv, bios_stv.data());
             }
 
             ImGui::Text(core::tr("ST-V roms").c_str());
             ImGui::SameLine(150);
-            auto roms_stv = util::stringToVector(config->readValue(core::Access_keys::config_roms_stv), 255);
+            auto roms_stv = util::stringToVector(state.config()->readValue(core::Access_keys::config_roms_stv), 255);
             if (ImGui::InputText("##roms_stv", roms_stv.data(), roms_stv.capacity())) {
-                config->writeValue(core::Access_keys::config_roms_stv, roms_stv.data());
+                state.config()->writeValue(core::Access_keys::config_roms_stv, roms_stv.data());
             }
 
             ImGui::Separator();
@@ -241,7 +243,7 @@ namespace gui {
             ImGui::Text(core::tr("Drive").c_str());
             ImGui::SameLine(150);
 
-            std::string drive = config->readValue(core::Access_keys::config_drive);
+            std::string drive = state.config()->readValue(core::Access_keys::config_drive);
             static int current_item{};
             auto drive_parts = util::explode(drive, ':');
             if (drive_parts.size() == 3) {
@@ -254,7 +256,7 @@ namespace gui {
                 value += std::to_string(cdrom::Cdrom::di_list[current_item].target);
                 value += ':';
                 value += std::to_string(cdrom::Cdrom::di_list[current_item].lun);
-                config->writeValue(core::Access_keys::config_drive, value);
+                state.config()->writeValue(core::Access_keys::config_drive, value);
             }
             
             // Access method
@@ -262,12 +264,12 @@ namespace gui {
             ImGui::Text(core::tr("Access method").c_str());
             ImGui::SameLine(150);
 
-            std::string access_method = config->readValue(core::Access_keys::config_access_method);
+            std::string access_method = state.config()->readValue(core::Access_keys::config_access_method);
             static int method = util::toUnderlying(core::Config::cdrom_access[access_method]);
             if (ImGui::RadioButton("SPTI", &method, util::toUnderlying(cdrom::Cdrom_access_method::spti))) {
                 core::Config::Map_cdrom_access::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::spti);
                 if (it != core::Config::cdrom_access.end()) {
-                    config->writeValue(core::Access_keys::config_access_method, it->first);
+                    state.config()->writeValue(core::Access_keys::config_access_method, it->first);
                 }
                 else {
                     core::Log::warning("config", core::tr("Drive access method unknown ..."));
@@ -277,7 +279,7 @@ namespace gui {
             if (ImGui::RadioButton("ASPI", &method, util::toUnderlying(cdrom::Cdrom_access_method::aspi))) {
                 core::Config::Map_cdrom_access::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::aspi);
                 if (it != core::Config::cdrom_access.end()) {
-                    config->writeValue(core::Access_keys::config_access_method, it->first);
+                    state.config()->writeValue(core::Access_keys::config_access_method, it->first);
                 }
                 else {
                     core::Log::warning("config", core::tr("Drive access method unknown ..."));
@@ -292,18 +294,23 @@ namespace gui {
             ImGui::Text(core::tr("Sound disabled").c_str());
             ImGui::SameLine(150);
 
-            static bool disabled = config->readValue(core::Access_keys::config_sound_disabled);
+            static bool disabled = state.config()->readValue(core::Access_keys::config_sound_disabled);
             if (ImGui::Checkbox("", &disabled)) {
-                config->writeValue(core::Access_keys::config_sound_disabled, disabled);
+                state.config()->writeValue(core::Access_keys::config_sound_disabled, disabled);
             }
         }
 
         static uint16_t counter{};
         static std::string status_message{};
         if (ImGui::Button("Save")) {
-            config->writeFile();
+            state.config()->writeFile();
             status_message = core::tr("Configuration saved.");
             counter = 5 * 60;
+
+            if (reset_rendering) {
+                state.rendering_status_ = core::Rendering_status::reset;
+                reset_rendering = false;
+            }
         }
         
         if (counter > 0) --counter;
@@ -314,7 +321,7 @@ namespace gui {
         ImGui::End();
     }
 
-    void buildGui(std::shared_ptr<core::Config>& config, video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height) {
+    void buildGui(core::Emulator_context& state, video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height) {
         static bool show_options     = false;
         static bool show_load_stv    = false;
         static bool show_load_binary = false;
@@ -334,7 +341,7 @@ namespace gui {
         
         showRenderingWindow(opengl, fbo, width, height);
 
-        if (show_options)   showOptionsWindow(config, &show_options);
+        if (show_options)   showOptionsWindow(state, &show_options);
         if (show_load_stv)  showStvWindow(&show_load_stv);
         //if (show_load_binary)  showStvWindow(&show_load_binary);
     }
