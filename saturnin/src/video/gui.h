@@ -28,7 +28,7 @@
 //#include "imgui/imgui.h"
 #include <vector>
 #include "opengl.h"
-#include "../config.h"
+#include "../emulator_context.h"
 
 namespace video = saturnin::video;
 
@@ -39,8 +39,8 @@ namespace gui {
     void show_core_window(const uint32_t tex);
     void showRenderingWindow(video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height);
     void showStvWindow(bool *opened);
-    void showOptionsWindow(std::shared_ptr<core::Config>&, bool *opened);
-    void buildGui(std::shared_ptr<core::Config>&, video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height);
+    void showOptionsWindow(core::Emulator_context&, bool *opened);
+    void buildGui(core::Emulator_context&, video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height);
     void renderToTexture(int32_t texture, const uint32_t width, const uint32_t height);
 }
 }
