@@ -68,8 +68,8 @@ bool Emulator_context::run() {
     // TESTING //
 
     uint8_t status{};
-    while (rendering_status_ != Rendering_status::stopped) {
-        rendering_status_ = Rendering_status::running;
+    while (this->rendering_status_ != Rendering_status::stopped) {
+        this->rendering_status_ = Rendering_status::running;
         bool is_legacy_opengl = this->config()->readValue(core::Access_keys::config_legacy_opengl);
         status = (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
 
