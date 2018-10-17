@@ -194,6 +194,23 @@ namespace core {
 
     private:
         std::shared_ptr<Config> config_;    ///< Configuration object
+
+        /// \name Memory handlers functions typedefs
+        /// std::function is not used here, as it implies a huge performance hit during execution
+        //@{
+        template<size_t Size>
+        using SizedUInt = std::conditional_t<Size == 8, uint8_t,
+            std::conditional_t<Size == 16, uint16_t,
+            std::conditional_t<Size == 32, uint32_t, void>>>;
+        template<size_t Size>
+        using WriteType = void(*)(const uint32_t address, const SizedUInt<Size> data);
+        template<size_t Size>
+        using ReadType = SizedUInt<Size>(*)(const uint32_t address);
+        //@}
+
+        WriteType<8>    WriteByteHandler[0x10000];
+        WriteType<16>   WriteWordHandler[0x10000];
+        WriteType<32>   WriteLongHandler[0x10000];
     };
 
 
