@@ -213,6 +213,10 @@ void Memory::swapCartArea() {
     }
 }
 
+void Memory::initializeHandlers() {
+    
+}
+
 void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
     if (times_mirrored > 0) {
         uint32_t multiple{};
@@ -237,5 +241,9 @@ std::vector<std::string> listStvConfigurationFiles() {
     }
     return files;
 }
+
+// Handlers
+
+
 }
 }
