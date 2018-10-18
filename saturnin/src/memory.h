@@ -36,276 +36,281 @@
 namespace saturnin {
 namespace core {
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \enum	Rom_type
-    ///
-    /// \brief	ROM type. 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+const uint32_t memory_handler_size = 0x10000;
 
-    enum class Rom_type {
-        program, ///< Program ROM.
-        graphic, ///< Graphic ROM.
-        bios	 ///< Bios.
-    };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum	Rom_type
+///
+/// \brief	ROM type. 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \enum	Rom_load
-    ///
-    /// \brief	Way ROM data is loaded. 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+enum class Rom_type {
+    program, ///< Program ROM.
+    graphic, ///< Graphic ROM.
+    bios	 ///< Bios.
+};
 
-    enum class Rom_load {
-        not_interleaved, ///< Data loaded sequentially. 
-        odd_interleaved, ///< Data loaded on odd bytes. 
-        even_interleaved ///< Data loaded on even bytes.
-    };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum	Rom_load
+///
+/// \brief	Way ROM data is loaded. 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \enum	Memory_access
-    ///
-    /// \brief	Way memory data can be accessed
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    enum class Memory_access {
-        read8,
-        read16,
-        read32,
-        write8,
-        write16,
-        write32
-    };
+enum class Rom_load {
+    not_interleaved, ///< Data loaded sequentially. 
+    odd_interleaved, ///< Data loaded on odd bytes. 
+    even_interleaved ///< Data loaded on even bytes.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum	Memory_access
+///
+/// \brief	Way memory data can be accessed
+////////////////////////////////////////////////////////////////////////////////////////////////////
+enum class Memory_access {
+    read8,
+    read16,
+    read32,
+    write8,
+    write16,
+    write32
+};
     
-    class Config; 
+class Config; 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \class  Memory
-    ///
-    /// \brief  Encapsulates Saturn memory map and related methods.
-    ///
-    /// \author Runik
-    /// \date   07/06/2018
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+template<size_t Size>
+using SizedUInt = std::conditional_t<Size == 8, uint8_t,
+    std::conditional_t<Size == 16, uint16_t,
+    std::conditional_t<Size == 32, uint32_t, void>>>;
 
-    class Memory {
-    public:
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Memory
+///
+/// \brief  Encapsulates Saturn memory map and related methods.
+///
+/// \author Runik
+/// \date   07/06/2018
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Memory {
+public:
         
-        //@{
-        // Constructors / Destructors
-        Memory()                           = default;
-        Memory(std::shared_ptr<Config> config) : config_(config) {};
-        Memory(const Memory&)              = delete;
-        Memory(Memory&&)                   = delete;
-        Memory& operator=(const Memory&) & = delete;
-        Memory& operator=(Memory&&) &      = delete;
-        ~Memory()                          = default;
-        //@}
+    //@{
+    // Constructors / Destructors
+    Memory()                           = default;
+    Memory(std::shared_ptr<Config> config) : config_(config) {};
+    Memory(const Memory&)              = delete;
+    Memory(Memory&&)                   = delete;
+    Memory& operator=(const Memory&) & = delete;
+    Memory& operator=(Memory&&) &      = delete;
+    ~Memory()                          = default;
+    //@}
 
-        /// \name Saturn memory map definition.
-        ///
+    /// \name Saturn memory map definition.
+    ///
 
-        std::array <uint8_t, 0x100000>  workram_low;      ///< low workram (1MB).
-        std::array <uint8_t, 0x100000>  workram_high;     ///< high workram (1MB).
-        std::array <uint8_t, 0x80000>   rom;              ///< ROM (512KB).
-        std::array <uint8_t, 0x80>      smpc;             ///< SMPC (128B).
-        std::array <uint8_t, 0x10000>   backup_ram;       ///< Backup RAM (64KB).
-        std::array <uint8_t, 0xD0>      scu;              ///< SCU (208B)
-        std::array <uint8_t, 0x80000>   vdp2_vram;        ///< VDP2 video RAM (512KB)
-        std::array <uint8_t, 0x1000>    vdp2_cram;        ///< VDP2 color RAM (4KB).
-        std::array <uint8_t, 0x200>     vdp2_registers;   ///< VDP2 registers (512B).
-        std::array <uint8_t, 0x80000>   vdp1_vram;        ///< VDP1 video RAM (512KB).
-        std::array <uint8_t, 0x40000>   vdp1_framebuffer; ///< VDP1 framebuffer (256KB).
-        std::array <uint8_t, 0x18>      vdp1_registers;   ///< VDP1 registers (24B).
-        std::array <uint8_t, 0x100000>  sound_ram;        ///< Sound RAM (1MB).
-        std::array <uint8_t, 0x100>     stv_io;           ///< STV I/O (256B).
-        std::array <uint8_t, 0x3000000> cart;             ///< Cart (50MB).
-        std::array <uint8_t, 0x400>     cache_addresses;  ///< Cache addresses (1KB).
-        std::array <uint8_t, 0x1000>    cache_data;       ///< Cache data (4KB).
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Memory::loadBios(const Hardware_mode mode);
-        ///
-        /// \brief  Loads the BIOS into memory.
-        ///
-        /// \author Runik
-        /// \date   18/06/2018
-        ///
-        /// \param  mode    Hardware mode of the bios to load (Saturn/ST-V).
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        void loadBios(const saturnin::core::Hardware_mode mode);
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn bool Memory::loadRom(   const std::string& zip_name, 
-        ///                             const std::string& file_name, 
-        ///                             uint8_t* destination, 
-        ///                             const uint32_t size, 
-        ///                             const Rom_load rom_load, 
-        ///                             const uint8_t times_mirrored, 
-        ///                             const Rom_type rom_type);
-        ///
-        /// \brief  Loads a ST-V rom from a zip file in memory (cart area).
-        ///
-        /// \author Runik
-        /// \date   21/08/2018
-        ///
-        /// \param          zip_name        Name of the zip file container.
-        /// \param          file_name       Filename inside the zip to load.
-        /// \param [in,out] destination     If non-null, destination of the file content.
-        /// \param          size            Size of data to load.
-        /// \param          rom_load        Type of loading used (non interleaved, odd interleaved or even interleaved).
-        /// \param          times_mirrored  Number of times the data has to be mirrored after the initial loading.
-        /// \param          rom_type        Rom type (bios, program or graphic).
-        ///
-        /// \return True if it succeeds.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        bool loadRom(   const std::string&  zip_name,
-                        const std::string&  file_name,
-                        uint8_t*	        destination,
-                        const uint32_t      size,
-                        const Rom_load      rom_load,
-                        const uint8_t       times_mirrored,
-                        const Rom_type      rom_type);
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn bool Memory::loadStvGame(const std::string& file_name);
-        ///
-        /// \brief  Loads a ST-V game into the cart area.
-        ///
-        /// \author Runik
-        /// \date   28/08/2018
-        ///
-        /// \param  file_name   configuration file name, with cfg extension.
-        ///
-        /// \return True if the game is loaded.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        bool loadStvGame(const std::string& config_filename);
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Memory::swapCartArea();
-        ///
-        /// \brief  Swaps data in the cart area if needed.
-        ///
-        /// \author Runik
-        /// \date   30/08/2018
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        void swapCartArea();
-
-    private:
-        std::shared_ptr<Config> config_;    ///< Configuration object
-
-        /// \name Memory handlers functions typedefs
-        /// std::function is not used here, as it implies a huge performance hit during execution
-        //@{
-        template<size_t Size>
-        using SizedUInt = std::conditional_t<Size == 8, uint8_t,
-            std::conditional_t<Size == 16, uint16_t,
-            std::conditional_t<Size == 32, uint32_t, void>>>;
-        template<size_t Size>
-        using WriteType = void(*)(const uint32_t address, const SizedUInt<Size> data);
-        template<size_t Size>
-        using ReadType = SizedUInt<Size>(*)(const uint32_t address);
-        //@}
-
-        WriteType<8>    WriteByteHandler[0x10000];
-        WriteType<16>   WriteWordHandler[0x10000];
-        WriteType<32>   WriteLongHandler[0x10000];
-    };
-
+    std::array <uint8_t, 0x100000>  workram_low;      ///< low workram (1MB).
+    std::array <uint8_t, 0x100000>  workram_high;     ///< high workram (1MB).
+    std::array <uint8_t, 0x80000>   rom;              ///< ROM (512KB).
+    std::array <uint8_t, 0x80>      smpc;             ///< SMPC (128B).
+    std::array <uint8_t, 0x10000>   backup_ram;       ///< Backup RAM (64KB).
+    std::array <uint8_t, 0xD0>      scu;              ///< SCU (208B)
+    std::array <uint8_t, 0x80000>   vdp2_vram;        ///< VDP2 video RAM (512KB)
+    std::array <uint8_t, 0x1000>    vdp2_cram;        ///< VDP2 color RAM (4KB).
+    std::array <uint8_t, 0x200>     vdp2_registers;   ///< VDP2 registers (512B).
+    std::array <uint8_t, 0x80000>   vdp1_vram;        ///< VDP1 video RAM (512KB).
+    std::array <uint8_t, 0x40000>   vdp1_framebuffer; ///< VDP1 framebuffer (256KB).
+    std::array <uint8_t, 0x18>      vdp1_registers;   ///< VDP1 registers (24B).
+    std::array <uint8_t, 0x100000>  sound_ram;        ///< Sound RAM (1MB).
+    std::array <uint8_t, 0x100>     stv_io;           ///< STV I/O (256B).
+    std::array <uint8_t, 0x3000000> cart;             ///< Cart (50MB).
+    std::array <uint8_t, 0x400>     cache_addresses;  ///< Cache addresses (1KB).
+    std::array <uint8_t, 0x1000>    cache_data;       ///< Cache data (4KB).
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn SizedUInt<Size> read(const std::array<T, N>& arr, const uint32_t adr)
+    /// \fn void Memory::loadBios(const Hardware_mode mode);
     ///
-    /// \brief  Reads a value from an array.
-    ///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively
-    ///         Usage : auto val = read<32>(memory, 0);
-    ///         
+    /// \brief  Loads the BIOS into memory.
+    ///
     /// \author Runik
-    /// \date   07/06/2018
+    /// \date   18/06/2018
     ///
-    /// \param  arr The array to read from.
-    /// \param  adr The address.
-    ///
-    /// \return A SizedUInt<Size>
+    /// \param  mode    Hardware mode of the bios to load (Saturn/ST-V).
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template<size_t Size> 
-    using SizedUInt = std::conditional_t<Size == 8, uint8_t,
-        std::conditional_t<Size == 16, uint16_t,
-        std::conditional_t<Size == 32, uint32_t, void>>>;
-
-    template<size_t Size, typename T, size_t N>
-    SizedUInt<Size> read(const std::array<T, N>& arr, const uint32_t adr)
-    {
-        SizedUInt<Size> returnValue{ arr[adr] };
-        for (uint8_t i = 1; i < sizeof(SizedUInt<Size>); ++i) {
-            returnValue <<= 8;
-            returnValue |= arr[adr + i];
-        }
-        return returnValue;
-    }
-
+    void loadBios(const saturnin::core::Hardware_mode mode);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void write(std::array<T, N>& arr, uint32_t adr, SizedUInt<Size> value)
-    ///
-    /// \brief  Writes a value to an array.
-    ///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively.
-    ///         Usage : write<32>(memory, 0, 0x12345678);
-    ///         
-    /// \author Runik
-    /// \date   07/06/2018
-    ///
-    /// \param [in,out] arr     The array to write to.
-    /// \param          adr     The address to write data to in the array.
-    /// \param          value   The value to write.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    template<size_t Size>
-    using SizedUInt = std::conditional_t<Size == 8, uint8_t,
-        std::conditional_t<Size == 16, uint16_t,
-        std::conditional_t<Size == 32, uint32_t, void>>>;
-
-    template<size_t Size, typename T, size_t N>
-    void write(std::array<T, N>& arr, const uint32_t adr, const SizedUInt<Size> value)
-    {
-        constexpr uint8_t bitsByByte{ std::numeric_limits<uint8_t>::digits };
-        constexpr uint8_t offset{ std::numeric_limits<SizedUInt<Size>>::digits };
-        for (uint8_t i = 0; i <= sizeof(SizedUInt<Size>) - 1; ++i) {
-            arr[adr + i] = (value >> (offset - (bitsByByte * i + bitsByByte))) & 0xff;
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Memory::mirrorData( uint8_t* data, 
+    /// \fn bool Memory::loadRom(   const std::string& zip_name, 
+    ///                             const std::string& file_name, 
+    ///                             uint8_t* destination, 
     ///                             const uint32_t size, 
+    ///                             const Rom_load rom_load, 
     ///                             const uint8_t times_mirrored, 
-    ///                             const Rom_load rom_load);
+    ///                             const Rom_type rom_type);
     ///
-    /// \brief  Mirrors data in memory. Data between 0 and size-1 will mirrored times_mirrored times
+    /// \brief  Loads a ST-V rom from a zip file in memory (cart area).
     ///
     /// \author Runik
     /// \date   21/08/2018
     ///
-    /// \param [in,out] data            If non-null, the array containing the data to be mirrored.
-    /// \param          size            Size of the data to mirror.
-    /// \param          times_mirrored  Number of times the data has to be mirrored.
+    /// \param          zip_name        Name of the zip file container.
+    /// \param          file_name       Filename inside the zip to load.
+    /// \param [in,out] destination     If non-null, destination of the file content.
+    /// \param          size            Size of data to load.
     /// \param          rom_load        Type of loading used (non interleaved, odd interleaved or even interleaved).
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn std::vector<std::filesystem::path> listStvConfigurationFiles();
+    /// \param          times_mirrored  Number of times the data has to be mirrored after the initial loading.
+    /// \param          rom_type        Rom type (bios, program or graphic).
     ///
-    /// \brief  Returns a vector populated with valid ST-V configuration files found in.
+    /// \return True if it succeeds.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool loadRom(   const std::string&  zip_name,
+                    const std::string&  file_name,
+                    uint8_t*	        destination,
+                    const uint32_t      size,
+                    const Rom_load      rom_load,
+                    const uint8_t       times_mirrored,
+                    const Rom_type      rom_type);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn bool Memory::loadStvGame(const std::string& file_name);
+    ///
+    /// \brief  Loads a ST-V game into the cart area.
     ///
     /// \author Runik
-    /// \date   04/09/2018
+    /// \date   28/08/2018
     ///
-    /// \return The stv configuration files.
+    /// \param  file_name   configuration file name, with cfg extension.
+    ///
+    /// \return True if the game is loaded.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::vector<std::string> listStvConfigurationFiles();
+    bool loadStvGame(const std::string& config_filename);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Memory::swapCartArea();
+    ///
+    /// \brief  Swaps data in the cart area if needed.
+    ///
+    /// \author Runik
+    /// \date   30/08/2018
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void swapCartArea();
+
+private:
+    void initializeHandlers();
+    
+    std::shared_ptr<Config> config_;    ///< Configuration object
+
+    /// \name Memory handlers functions typedefs
+    /// std::function is not used here, as it implies a huge performance hit during execution
+    //@{
+    template<size_t Size>
+    using WriteType = void(*)(const uint32_t address, const SizedUInt<Size> data);
+    template<size_t Size>
+    using ReadType = SizedUInt<Size>(*)(const uint32_t address);
+    //@}
+
+    std::array<WriteType<8>, memory_handler_size>   write_8_handler_;
+    std::array<WriteType<16>, memory_handler_size>  write_16_handler_;
+    std::array<WriteType<32>, memory_handler_size>  write_32_handler_;
+    std::array<ReadType<8>, memory_handler_size>    read_8_handler_;
+    std::array<ReadType<16>, memory_handler_size>   read_16_handler_;
+    std::array<ReadType<32>, memory_handler_size>   read_32_handler_;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn SizedUInt<Size> read(const std::array<T, N>& arr, const uint32_t adr)
+///
+/// \brief  Reads a value from an array.
+///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively
+///         Usage : auto val = read<32>(memory, 0);
+///         
+/// \author Runik
+/// \date   07/06/2018
+///
+/// \param  arr The array to read from.
+/// \param  adr The address.
+///
+/// \return A SizedUInt<Size>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t Size, typename T, size_t N>
+SizedUInt<Size> read(const std::array<T, N>& arr, const uint32_t adr) {
+    SizedUInt<Size> returnValue{ arr[adr] };
+    for (uint8_t i = 1; i < sizeof(SizedUInt<Size>); ++i) {
+        returnValue <<= 8;
+        returnValue |= arr[adr + i];
+    }
+    return returnValue;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void write(std::array<T, N>& arr, uint32_t adr, SizedUInt<Size> value)
+///
+/// \brief  Writes a value to an array.
+///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively.
+///         Usage : write<32>(memory, 0, 0x12345678);
+///         
+/// \author Runik
+/// \date   07/06/2018
+///
+/// \param [in,out] arr     The array to write to.
+/// \param          adr     The address to write data to in the array.
+/// \param          value   The value to write.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t Size, typename T, size_t N>
+void write(std::array<T, N>& arr, const uint32_t adr, const SizedUInt<Size> value) {
+    constexpr uint8_t bitsByByte{ std::numeric_limits<uint8_t>::digits };
+    constexpr uint8_t offset{ std::numeric_limits<SizedUInt<Size>>::digits };
+    for (uint8_t i = 0; i <= sizeof(SizedUInt<Size>) - 1; ++i) {
+        arr[adr + i] = (value >> (offset - (bitsByByte * i + bitsByByte))) & 0xff;
+    }
+}
+
+template<size_t Size>
+void dummyWrite(const uint32_t adr, const SizedUInt<Size> data) {
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void Memory::mirrorData( uint8_t* data, 
+///                             const uint32_t size, 
+///                             const uint8_t times_mirrored, 
+///                             const Rom_load rom_load);
+///
+/// \brief  Mirrors data in memory. Data between 0 and size-1 will mirrored times_mirrored times
+///
+/// \author Runik
+/// \date   21/08/2018
+///
+/// \param [in,out] data            If non-null, the array containing the data to be mirrored.
+/// \param          size            Size of the data to mirror.
+/// \param          times_mirrored  Number of times the data has to be mirrored.
+/// \param          rom_load        Type of loading used (non interleaved, odd interleaved or even interleaved).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn std::vector<std::filesystem::path> listStvConfigurationFiles();
+///
+/// \brief  Returns a vector populated with valid ST-V configuration files found in.
+///
+/// \author Runik
+/// \date   04/09/2018
+///
+/// \return The stv configuration files.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::vector<std::string> listStvConfigurationFiles();
+
 }
 }
