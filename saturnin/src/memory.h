@@ -208,18 +208,17 @@ private:
     /// \name Memory handlers functions typedefs
     /// std::function is not used here, as it implies a huge performance hit during execution
     //@{
-    template<size_t Size>
-    using WriteType = void(*)(const uint32_t address, const SizedUInt<Size> data);
-    template<size_t Size>
-    using ReadType = SizedUInt<Size>(*)(const uint32_t address);
+    template <typename R, typename ...ARGS> using function = R(*)(ARGS...);
+    template<size_t Size> using WriteType   = function<void, const uint32_t, const SizedUInt<Size>>;
+    template<size_t Size> using ReadType    = function<SizedUInt<Size>, const uint32_t>;
     //@}
 
-    std::array<WriteType<8>, memory_handler_size>   write_8_handler_;
-    std::array<WriteType<16>, memory_handler_size>  write_16_handler_;
-    std::array<WriteType<32>, memory_handler_size>  write_32_handler_;
-    std::array<ReadType<8>, memory_handler_size>    read_8_handler_;
-    std::array<ReadType<16>, memory_handler_size>   read_16_handler_;
-    std::array<ReadType<32>, memory_handler_size>   read_32_handler_;
+    std::array<WriteType<8>,  memory_handler_size> write_8_handler_;
+    std::array<WriteType<16>, memory_handler_size> write_16_handler_;
+    std::array<WriteType<32>, memory_handler_size> write_32_handler_;
+    std::array<ReadType<8>,   memory_handler_size> read_8_handler_;
+    std::array<ReadType<16>,  memory_handler_size> read_16_handler_;
+    std::array<ReadType<32>,  memory_handler_size> read_32_handler_;
 };
 
 
@@ -274,9 +273,17 @@ void write(std::array<T, N>& arr, const uint32_t adr, const SizedUInt<Size> valu
     }
 }
 
+// Handlers
+// Dummy
 template<size_t Size>
-void dummyWrite(const uint32_t adr, const SizedUInt<Size> data) {
+void writeDummy(const uint32_t adr, const SizedUInt<Size> data) {
+    core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), Size, adr, data));
+}
 
+template<size_t Size>
+SizedUInt<Size> readDummy(const uint32_t adr) {
+    core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), Size, adr));
+    return SizedUInt<Size>{};
 }
 
 
