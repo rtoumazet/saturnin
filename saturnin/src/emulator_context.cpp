@@ -65,6 +65,11 @@ bool Emulator_context::run() {
     std::cout << core::tr("Hello world.") << std::endl;
     core::write<32>(this->memory()->workram_low, 0, 0x12345678);
     auto val = core::read<16>(this->memory()->workram_low, 2);
+    
+    core::writeDummy<8>(0x12345678, 0x0);
+    core::writeDummy<32>(0x12345678, 0x0);
+    core::readDummy<16>(0x0);
+    core::readDummy<32>(0x0);
     // TESTING //
 
     uint8_t status{};
