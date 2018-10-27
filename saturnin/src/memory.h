@@ -219,6 +219,50 @@ private:
     std::array<ReadType<8>,   memory_handler_size> read_8_handler_;
     std::array<ReadType<16>,  memory_handler_size> read_16_handler_;
     std::array<ReadType<32>,  memory_handler_size> read_32_handler_;
+
+
+        using Handler = std::conditional_t<Size == 8, this->read_8_handler_,
+            std::conditional_t<Size == 16, read_16_handler_,
+            std::conditional_t<Size == 32, read_32_handler_, void>>>;
+        template<size_t Size>
+   void initializeReadHandler(uint32_t begin,
+                               uint32_t end,
+                               ReadType<Size> func) {
+        begin >>= 16;
+        end >>= 16;
+   /*     switch (Size) {
+            case 8:
+                for (uint32_t current = begin; current <= end; ++current) {
+                    read_8_handler_[current & 0xFFFF] = func;
+                }
+                break;
+            case 16:
+                for (uint32_t current = begin; current <= end; ++current) {
+                    read_16_handler_[current & 0xFFFF] = func;
+                }
+                break;
+            case 32:
+                for (uint32_t current = begin; current <= end; ++current) {
+                    read_32_handler_[current & 0xFFFF] = func;
+                }
+                break;
+        }*/
+
+    }
+
+    //template<size_t Size, size_t N>
+    //void initializeWriteHandler(uint32_t begin,
+    //                           uint32_t end,
+    //                           WriteType<Size> *func,
+    //                           std::array<WriteType<Size>, N> *handler) {
+    //    begin >>= 16;
+    //    end >>= 16;
+
+    //    for (uint32_t current = begin; current <= end; ++current) {
+    //        handler[current & 0xFFFF] = func;
+    //    }
+    //}
+
 };
 
 

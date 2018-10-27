@@ -214,7 +214,9 @@ void Memory::swapCartArea() {
 }
 
 void Memory::initializeHandlers() {
-    
+    initializeReadHandler<8>(0x00000000, 0xFFFFFFFF, &readDummy<8>);
+    //initializeReadHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
+    //initializeReadHandler<32>(0x00000000, 0xFFFFFFFF, readDummy<32>);
 }
 
 void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
