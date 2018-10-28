@@ -70,6 +70,8 @@ bool Emulator_context::run() {
     core::writeDummy<32>(0x12345678, 0x0);
     core::readDummy<16>(0x0);
     core::readDummy<32>(0x0);
+
+    auto blah = this->memory()->readT<8>(0);
     // TESTING //
 
     uint8_t status{};
