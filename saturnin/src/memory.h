@@ -28,6 +28,7 @@
 #include <array> // array
 #include <filesystem> // filesystem
 #include <memory> // shared_pointer
+#include <tuple>
 #include <vector> // vector
 
 #include "emulator_enums.h"
@@ -98,8 +99,10 @@ public:
         
     //@{
     // Constructors / Destructors
-    Memory()                           = default;
-    Memory(std::shared_ptr<Config> config) : config_(config) {};
+    Memory()                           = delete;
+    Memory(std::shared_ptr<Config> config) : config_(config) {
+        initializeHandlers();
+    };
     Memory(const Memory&)              = delete;
     Memory(Memory&&)                   = delete;
     Memory& operator=(const Memory&) & = delete;
@@ -200,6 +203,12 @@ public:
 
     void swapCartArea();
 
+    template<size_t S>
+    SizedUInt<S> readT(const uint32_t adr) {
+        auto& handler = std::get < ReadHandler<S>& >(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
+        return handler[adr >> 16](adr);
+    }
+
 private:
     void initializeHandlers();
     
@@ -209,45 +218,38 @@ private:
     /// std::function is not used here, as it implies a huge performance hit during execution
     //@{
     template <typename R, typename ...ARGS> using function = R(*)(ARGS...);
-    template<size_t Size> using WriteType   = function<void, const uint32_t, const SizedUInt<Size>>;
-    template<size_t Size> using ReadType    = function<SizedUInt<Size>, const uint32_t>;
+    template<size_t S> using WriteType   = function<void, const uint32_t, const SizedUInt<S>>;
+    template<size_t S> using ReadType    = function<SizedUInt<S>, const uint32_t>;
     //@}
 
-    std::array<WriteType<8>,  memory_handler_size> write_8_handler_;
-    std::array<WriteType<16>, memory_handler_size> write_16_handler_;
-    std::array<WriteType<32>, memory_handler_size> write_32_handler_;
-    std::array<ReadType<8>,   memory_handler_size> read_8_handler_;
-    std::array<ReadType<16>,  memory_handler_size> read_16_handler_;
-    std::array<ReadType<32>,  memory_handler_size> read_32_handler_;
+    //std::array<WriteType<8>,  memory_handler_size> write_8_handler_;
+    //std::array<WriteType<16>, memory_handler_size> write_16_handler_;
+    //std::array<WriteType<32>, memory_handler_size> write_32_handler_;
+    //std::array<ReadType<8>,   memory_handler_size> read_8_handler_;
+    //std::array<ReadType<16>,  memory_handler_size> read_16_handler_;
+    //std::array<ReadType<32>,  memory_handler_size> read_32_handler_;
 
+    template<class ReadType>
+    using ReadHandlerType = std::array<ReadType, memory_handler_size>;
+    template<std::size_t S>
+    using ReadHandler = ReadHandlerType<ReadType<S>>;
 
-        using Handler = std::conditional_t<Size == 8, this->read_8_handler_,
-            std::conditional_t<Size == 16, read_16_handler_,
-            std::conditional_t<Size == 32, read_32_handler_, void>>>;
-        template<size_t Size>
-   void initializeReadHandler(uint32_t begin,
+    ReadHandler<8> read_8_handler_;
+    ReadHandler<16> read_16_handler_;
+    ReadHandler<32> read_32_handler_;
+
+    template<size_t S>
+    void initializeReadHandler(uint32_t begin,
                                uint32_t end,
-                               ReadType<Size> func) {
+                               ReadType<S> func) {
         begin >>= 16;
         end >>= 16;
-   /*     switch (Size) {
-            case 8:
-                for (uint32_t current = begin; current <= end; ++current) {
-                    read_8_handler_[current & 0xFFFF] = func;
-                }
-                break;
-            case 16:
-                for (uint32_t current = begin; current <= end; ++current) {
-                    read_16_handler_[current & 0xFFFF] = func;
-                }
-                break;
-            case 32:
-                for (uint32_t current = begin; current <= end; ++current) {
-                    read_32_handler_[current & 0xFFFF] = func;
-                }
-                break;
-        }*/
 
+        for (uint32_t current = begin; current <= end; ++current) {
+            auto& handler = std::get < ReadHandler<S>& >(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
+            //auto& handler = std::get < ReadHandlerType<ReadType<Size>>(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
+            handler[current & 0xFFFF] = func;
+        }
     }
 
     //template<size_t Size, size_t N>
@@ -267,7 +269,7 @@ private:
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn SizedUInt<Size> read(const std::array<T, N>& arr, const uint32_t adr)
+/// \fn SizedUInt<S> read(const std::array<T, N>& arr, const uint32_t adr)
 ///
 /// \brief  Reads a value from an array.
 ///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively
@@ -279,13 +281,13 @@ private:
 /// \param  arr The array to read from.
 /// \param  adr The address.
 ///
-/// \return A SizedUInt<Size>
+/// \return A SizedUInt<S>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<size_t Size, typename T, size_t N>
-SizedUInt<Size> read(const std::array<T, N>& arr, const uint32_t adr) {
-    SizedUInt<Size> returnValue{ arr[adr] };
-    for (uint8_t i = 1; i < sizeof(SizedUInt<Size>); ++i) {
+template<size_t S, typename T, size_t N>
+SizedUInt<S> read(const std::array<T, N>& arr, const uint32_t adr) {
+    SizedUInt<S> returnValue{ arr[adr] };
+    for (uint8_t i = 1; i < sizeof(SizedUInt<S>); ++i) {
         returnValue <<= 8;
         returnValue |= arr[adr + i];
     }
@@ -294,7 +296,7 @@ SizedUInt<Size> read(const std::array<T, N>& arr, const uint32_t adr) {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void write(std::array<T, N>& arr, uint32_t adr, SizedUInt<Size> value)
+/// \fn void write(std::array<T, N>& arr, uint32_t adr, SizedUInt<S> value)
 ///
 /// \brief  Writes a value to an array.
 ///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively.
@@ -308,26 +310,26 @@ SizedUInt<Size> read(const std::array<T, N>& arr, const uint32_t adr) {
 /// \param          value   The value to write.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<size_t Size, typename T, size_t N>
-void write(std::array<T, N>& arr, const uint32_t adr, const SizedUInt<Size> value) {
+template<size_t S, typename T, size_t N>
+void write(std::array<T, N>& arr, const uint32_t adr, const SizedUInt<S> value) {
     constexpr uint8_t bitsByByte{ std::numeric_limits<uint8_t>::digits };
-    constexpr uint8_t offset{ std::numeric_limits<SizedUInt<Size>>::digits };
-    for (uint8_t i = 0; i <= sizeof(SizedUInt<Size>) - 1; ++i) {
+    constexpr uint8_t offset{ std::numeric_limits<SizedUInt<S>>::digits };
+    for (uint8_t i = 0; i <= sizeof(SizedUInt<S>) - 1; ++i) {
         arr[adr + i] = (value >> (offset - (bitsByByte * i + bitsByByte))) & 0xff;
     }
 }
 
 // Handlers
 // Dummy
-template<size_t Size>
-void writeDummy(const uint32_t adr, const SizedUInt<Size> data) {
-    core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), Size, adr, data));
+template<size_t S>
+void writeDummy(const uint32_t adr, const SizedUInt<S> data) {
+    core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), S, adr, data));
 }
 
-template<size_t Size>
-SizedUInt<Size> readDummy(const uint32_t adr) {
-    core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), Size, adr));
-    return SizedUInt<Size>{};
+template<size_t S>
+SizedUInt<S> readDummy(const uint32_t adr) {
+    core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), S, adr));
+    return SizedUInt<S>{};
 }
 
 
