@@ -204,7 +204,7 @@ public:
     void swapCartArea();
 
     template<size_t S>
-    SizedUInt<S> readT(const uint32_t adr) {
+    SizedUInt<S> read(const uint32_t adr) {
         auto& handler = std::get < ReadHandler<S>& >(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
         return handler[adr >> 16](adr);
     }
@@ -218,25 +218,23 @@ private:
     /// std::function is not used here, as it implies a huge performance hit during execution
     //@{
     template <typename R, typename ...ARGS> using function = R(*)(ARGS...);
-    template<size_t S> using WriteType   = function<void, const uint32_t, const SizedUInt<S>>;
-    template<size_t S> using ReadType    = function<SizedUInt<S>, const uint32_t>;
+    template<size_t S>        using ReadType         = function<SizedUInt<S>, const uint32_t>;
+    template<size_t S>        using WriteType        = function<void, const uint32_t, const SizedUInt<S>>;
+    template<class ReadType>  using ReadHandlerType  = std::array<ReadType, memory_handler_size>;
+    template<class WriteType> using WriteHandlerType = std::array<WriteType, memory_handler_size>;
+    template<std::size_t S>   using ReadHandler      = ReadHandlerType<ReadType<S>>;
+    template<std::size_t S>   using WriteHandler     = WriteHandlerType<WriteType<S>>;
     //@}
 
-    //std::array<WriteType<8>,  memory_handler_size> write_8_handler_;
-    //std::array<WriteType<16>, memory_handler_size> write_16_handler_;
-    //std::array<WriteType<32>, memory_handler_size> write_32_handler_;
-    //std::array<ReadType<8>,   memory_handler_size> read_8_handler_;
-    //std::array<ReadType<16>,  memory_handler_size> read_16_handler_;
-    //std::array<ReadType<32>,  memory_handler_size> read_32_handler_;
-
-    template<class ReadType>
-    using ReadHandlerType = std::array<ReadType, memory_handler_size>;
-    template<std::size_t S>
-    using ReadHandler = ReadHandlerType<ReadType<S>>;
-
-    ReadHandler<8> read_8_handler_;
-    ReadHandler<16> read_16_handler_;
-    ReadHandler<32> read_32_handler_;
+    /// \Memory handlers
+    //@{
+    ReadHandler<8>   read_8_handler_;
+    ReadHandler<16>  read_16_handler_;
+    ReadHandler<32>  read_32_handler_;
+    WriteHandler<8>  write_8_handler_;
+    WriteHandler<16> write_16_handler_;
+    WriteHandler<32> write_32_handler_;
+    //@}
 
     template<size_t S>
     void initializeReadHandler(uint32_t begin,
@@ -245,26 +243,43 @@ private:
         begin >>= 16;
         end >>= 16;
 
+        auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
         for (uint32_t current = begin; current <= end; ++current) {
-            auto& handler = std::get < ReadHandler<S>& >(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
-            //auto& handler = std::get < ReadHandlerType<ReadType<Size>>(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
+            auto& handler = std::get < ReadHandler<S>& >(t);
             handler[current & 0xFFFF] = func;
         }
     }
 
-    //template<size_t Size, size_t N>
-    //void initializeWriteHandler(uint32_t begin,
-    //                           uint32_t end,
-    //                           WriteType<Size> *func,
-    //                           std::array<WriteType<Size>, N> *handler) {
-    //    begin >>= 16;
-    //    end >>= 16;
+    template<size_t S>
+    void initializeWriteHandler(uint32_t begin,
+                                uint32_t end,
+                                WriteType<S> func) {
+        begin >>= 16;
+        end >>= 16;
 
-    //    for (uint32_t current = begin; current <= end; ++current) {
-    //        handler[current & 0xFFFF] = func;
-    //    }
-    //}
+        auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
+        for (uint32_t current = begin; current <= end; ++current) {
+            auto& handler = std::get < WriteHandler<S>& >(t);
+            handler[current & 0xFFFF] = func;
+        }
+    }
 
+    // Handlers
+    template<size_t S>
+    void writeDummy(const uint32_t addr, const SizedUInt<S> data) {
+        core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), S, adr, data));
+    }
+
+    template<size_t S>
+    SizedUInt<S> readDummy(const uint32_t addr) {
+        core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), S, adr));
+        return SizedUInt<S>{};
+    }
+
+    template<size_t S>
+    SizedUInt<S> readRom(const uint32_t addr) {
+        return read<S>(this->rom, addr & 0x7FFFF);
+    }
 };
 
 
@@ -285,7 +300,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<size_t S, typename T, size_t N>
-SizedUInt<S> read(const std::array<T, N>& arr, const uint32_t adr) {
+SizedUInt<S> rawRead(const std::array<T, N>& arr, const uint32_t adr) {
     SizedUInt<S> returnValue{ arr[adr] };
     for (uint8_t i = 1; i < sizeof(SizedUInt<S>); ++i) {
         returnValue <<= 8;
@@ -311,7 +326,7 @@ SizedUInt<S> read(const std::array<T, N>& arr, const uint32_t adr) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<size_t S, typename T, size_t N>
-void write(std::array<T, N>& arr, const uint32_t adr, const SizedUInt<S> value) {
+void rawWrite(std::array<T, N>& arr, const uint32_t adr, const SizedUInt<S> value) {
     constexpr uint8_t bitsByByte{ std::numeric_limits<uint8_t>::digits };
     constexpr uint8_t offset{ std::numeric_limits<SizedUInt<S>>::digits };
     for (uint8_t i = 0; i <= sizeof(SizedUInt<S>) - 1; ++i) {
@@ -319,18 +334,7 @@ void write(std::array<T, N>& arr, const uint32_t adr, const SizedUInt<S> value) 
     }
 }
 
-// Handlers
-// Dummy
-template<size_t S>
-void writeDummy(const uint32_t adr, const SizedUInt<S> data) {
-    core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), S, adr, data));
-}
 
-template<size_t S>
-SizedUInt<S> readDummy(const uint32_t adr) {
-    core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), S, adr));
-    return SizedUInt<S>{};
-}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
