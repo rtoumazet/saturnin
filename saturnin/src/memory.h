@@ -28,7 +28,6 @@
 #include <array> // array
 #include <filesystem> // filesystem
 #include <memory> // shared_pointer
-#include <tuple>
 #include <vector> // vector
 
 #include "emulator_enums.h"
@@ -203,11 +202,38 @@ public:
 
     void swapCartArea();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<size_t S> SizedUInt<S> Memory::read(const uint32_t addr);
+    ///
+    /// \brief  Saturn memory global read method.
+    ///
+    /// \author Runik
+    /// \date   04/11/2018
+    ///
+    /// \tparam S       Size of the data in bits.
+    /// \param  addr    Address to read in the memory map.
+    ///
+    /// \return         Data read
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     template<size_t S>
-    SizedUInt<S> read(const uint32_t adr) {
-        auto& handler = std::get < ReadHandler<S>& >(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
-        return handler[adr >> 16](adr);
-    }
+    SizedUInt<S> read(const uint32_t addr);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<size_t S> void Memory::write(const uint32_t addr, const SizedUInt<S> data);
+    ///
+    /// \brief  Writes.
+    ///
+    /// \author Runik
+    /// \date   04/11/2018
+    ///
+    /// \tparam S       Size of the data in bits.
+    /// \param  addr    Address to write to in the memory map.
+    /// \param  data    Data to write.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<size_t S>
+    void write(const uint32_t addr, const SizedUInt<S> data);
 
 private:
     void initializeHandlers();
@@ -218,8 +244,8 @@ private:
     /// std::function is not used here, as it implies a huge performance hit during execution
     //@{
     template <typename R, typename ...ARGS> using function = R(*)(ARGS...);
-    template<size_t S>        using ReadType         = function<SizedUInt<S>, const uint32_t>;
-    template<size_t S>        using WriteType        = function<void, const uint32_t, const SizedUInt<S>>;
+    template<size_t S>        using ReadType         = function<SizedUInt<S>, const Memory&, const uint32_t>;
+    template<size_t S>        using WriteType        = function<void, Memory&, const uint32_t, const SizedUInt<S>>;
     template<class ReadType>  using ReadHandlerType  = std::array<ReadType, memory_handler_size>;
     template<class WriteType> using WriteHandlerType = std::array<WriteType, memory_handler_size>;
     template<std::size_t S>   using ReadHandler      = ReadHandlerType<ReadType<S>>;
@@ -236,109 +262,43 @@ private:
     WriteHandler<32> write_32_handler_;
     //@}
 
-    template<size_t S>
-    void initializeReadHandler(uint32_t begin,
-                               uint32_t end,
-                               ReadType<S> func) {
-        begin >>= 16;
-        end >>= 16;
-
-        auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
-        for (uint32_t current = begin; current <= end; ++current) {
-            auto& handler = std::get < ReadHandler<S>& >(t);
-            handler[current & 0xFFFF] = func;
-        }
-    }
-
-    template<size_t S>
-    void initializeWriteHandler(uint32_t begin,
-                                uint32_t end,
-                                WriteType<S> func) {
-        begin >>= 16;
-        end >>= 16;
-
-        auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
-        for (uint32_t current = begin; current <= end; ++current) {
-            auto& handler = std::get < WriteHandler<S>& >(t);
-            handler[current & 0xFFFF] = func;
-        }
-    }
-
-    // Handlers
-    template<size_t S>
-    void writeDummy(const uint32_t addr, const SizedUInt<S> data) {
-        core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), S, adr, data));
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<size_t S> void Memory::initializeReadHandler(uint32_t begin, uint32_t end, ReadType<S> func);
+    ///
+    /// \brief  Binds the read function to a memory range in the Saturn memory.
+    ///
+    /// \author Runik
+    /// \date   04/11/2018
+    ///
+    /// \tparam S       Size of the data in bits.
+    /// \param  begin   Start address.
+    /// \param  end     End address.
+    /// \param  func    Function to bind.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<size_t S>
-    SizedUInt<S> readDummy(const uint32_t addr) {
-        core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), S, adr));
-        return SizedUInt<S>{};
-    }
+    void initializeReadHandler(uint32_t begin, uint32_t end, ReadType<S> func);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<size_t S> void Memory::initializeWriteHandler(uint32_t begin, uint32_t end, WriteType<S> func);
+    ///
+    /// \brief  Binds the write function to a memory range in the Saturn memory.
+    ///
+    /// \author Runik
+    /// \date   04/11/2018
+    ///
+    /// \tparam S       Size of the data in bits.
+    /// \param  begin   Start address.
+    /// \param  end     End address.
+    /// \param  func    Function to bind.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<size_t S>
-    SizedUInt<S> readRom(const uint32_t addr) {
-        return read<S>(this->rom, addr & 0x7FFFF);
-    }
+    void initializeWriteHandler(uint32_t begin, uint32_t end, WriteType<S> func);
 };
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn SizedUInt<S> read(const std::array<T, N>& arr, const uint32_t adr)
-///
-/// \brief  Reads a value from an array.
-///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively
-///         Usage : auto val = read<32>(memory, 0);
-///         
-/// \author Runik
-/// \date   07/06/2018
-///
-/// \param  arr The array to read from.
-/// \param  adr The address.
-///
-/// \return A SizedUInt<S>
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<size_t S, typename T, size_t N>
-SizedUInt<S> rawRead(const std::array<T, N>& arr, const uint32_t adr) {
-    SizedUInt<S> returnValue{ arr[adr] };
-    for (uint8_t i = 1; i < sizeof(SizedUInt<S>); ++i) {
-        returnValue <<= 8;
-        returnValue |= arr[adr + i];
-    }
-    return returnValue;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void write(std::array<T, N>& arr, uint32_t adr, SizedUInt<S> value)
-///
-/// \brief  Writes a value to an array.
-///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively.
-///         Usage : write<32>(memory, 0, 0x12345678);
-///         
-/// \author Runik
-/// \date   07/06/2018
-///
-/// \param [in,out] arr     The array to write to.
-/// \param          adr     The address to write data to in the array.
-/// \param          value   The value to write.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<size_t S, typename T, size_t N>
-void rawWrite(std::array<T, N>& arr, const uint32_t adr, const SizedUInt<S> value) {
-    constexpr uint8_t bitsByByte{ std::numeric_limits<uint8_t>::digits };
-    constexpr uint8_t offset{ std::numeric_limits<SizedUInt<S>>::digits };
-    for (uint8_t i = 0; i <= sizeof(SizedUInt<S>) - 1; ++i) {
-        arr[adr + i] = (value >> (offset - (bitsByByte * i + bitsByByte))) & 0xff;
-    }
-}
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void Memory::mirrorData( uint8_t* data, 
+/// \fn void mirrorData( uint8_t* data, 
 ///                             const uint32_t size, 
 ///                             const uint8_t times_mirrored, 
 ///                             const Rom_load rom_load);
@@ -369,5 +329,170 @@ void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored
 
 std::vector<std::string> listStvConfigurationFiles();
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn SizedUInt<S> read(const std::array<T, N>& arr, const uint32_t addr)
+///
+/// \brief  Reads a value from an array.
+///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively
+///         Usage : auto val = read<32>(memory, 0);
+///         
+/// \author Runik
+/// \date   07/06/2018
+///
+/// \param  arr The array to read from.
+/// \param  adr The address.
+///
+/// \return Data read
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S, typename T, size_t N>
+SizedUInt<S> rawRead(const std::array<T, N>& arr, const uint32_t addr);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void write(std::array<T, N>& arr, uint32_t adr, SizedUInt<S> value)
+///
+/// \brief  Writes a value to an array.
+///         Maps 8, 16 and 32 to uint8_t, uint16_t and uint32_t, respectively.
+///         Usage : write<32>(memory, 0, 0x12345678);
+///         
+/// \author Runik
+/// \date   07/06/2018
+///
+/// \param [in,out] arr     The array to write to.
+/// \param          adr     The address to write data to in the array.
+/// \param          value   The value to write.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S, typename T, size_t N>
+void rawWrite(std::array<T, N>& arr, const uint32_t addr, const SizedUInt<S> value);
+
+// Handlers
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<size_t S> void writeDummy(const Memory& m, const uint32_t addr, const SizedUInt<S> data)
+///
+/// \brief  Dummy write handler.
+///
+/// \author Runik
+/// \date   01/11/2018
+///
+/// \tparam S       Size of the data in bits.
+/// \param  m       Memory to process.
+/// \param  addr    Address to write to.
+/// \param  data    Data to write.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S>
+void writeDummy(const Memory& m, const uint32_t addr, const SizedUInt<S> data);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<size_t S> SizedUInt<S> readDummy(const Memory& m, const uint32_t addr)
+///
+/// \brief  Dummy read handler.
+///
+/// \author Runik
+/// \date   01/11/2018
+///
+/// \tparam S       Size of the data in bits.
+/// \param  m       Memory to process.
+/// \param  addr    Address to read.
+///
+/// \return Data read.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S>
+SizedUInt<S> readDummy(const Memory& m, const uint32_t addr);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<size_t S> SizedUInt<S> readRom(const Memory& m, const uint32_t addr)
+///
+/// \brief  ROM read handler.
+///
+/// \author Runik
+/// \date   01/11/2018
+///
+/// \tparam S       Size of the data in bits.
+/// \param  m       Memory to process.
+/// \param  addr    Address to read.
+///
+/// \return Data read.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S>
+SizedUInt<S> readRom(const Memory& m, const uint32_t addr);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<size_t S> SizedUInt<S> readSmpc(const Memory& m, const uint32_t addr)
+///
+/// \brief  SMPC read handler.
+///
+/// \author Runik
+/// \date   01/11/2018
+///
+/// \tparam S       Size of the data in bits.
+/// \param  m       Memory to process.
+/// \param  addr    Address to read.
+///
+/// \return Data read.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S>
+SizedUInt<S> readSmpc(const Memory& m, const uint32_t addr);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<size_t S> void writeSmpc(Memory& m, const uint32_t addr, const SizedUInt<S> data)
+///
+/// \brief  SMPC write handler.
+///
+/// \author Runik
+/// \date   01/11/2018
+///
+/// \tparam S       Size of the data in bits.
+/// \param  m       Memory to process.
+/// \param  addr    Address to write to.
+/// \param  data    Data to write.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S>
+void writeSmpc(Memory& m, const uint32_t addr, const SizedUInt<S> data);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<size_t S> SizedUInt<S> readBackupRam(const Memory& m, const uint32_t addr);
+///
+/// \brief  Backup RAM read handler.
+///
+/// \author Runik
+/// \date   04/11/2018
+///
+/// \tparam S       Size of the data in bits.
+/// \param  m       Memory to process.
+/// \param  addr    Address to read.
+///
+/// \return Data read.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S>
+SizedUInt<S> readBackupRam(const Memory& m, const uint32_t addr);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<size_t S> void writeBackupRam(Memory& m, const uint32_t addr, const SizedUInt<S> data)
+///
+/// \brief  Backup RAM write handler.
+///
+/// \author Runik
+/// \date   04/11/2018
+///
+/// \tparam S       Size of the data in bits.
+/// \param  m       Memory to process.
+/// \param  addr    Address to write to.
+/// \param  data    Data to write.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S>
+void writeBackupRam(Memory& m, const uint32_t addr, const SizedUInt<S> data);
+
+
 }
 }
+
+#include "memory_impl.h"

@@ -65,11 +65,11 @@ bool Emulator_context::run() {
     std::cout << core::tr("Hello world.") << std::endl;
     core::rawWrite<32>(this->memory()->workram_low, 0, 0x12345678);
     auto val = core::rawRead<16>(this->memory()->workram_low, 2);
-    
-    core::writeDummy<8>(0x12345678, 0x0);
-    core::writeDummy<32>(0x12345678, 0x0);
-    core::readDummy<16>(0x0);
-    core::readDummy<32>(0x0);
+    core::rawWrite<32>(this->memory()->rom, 0, 0x12345678);
+    //core::writeDummy<8>(0x12345678, 0x0);
+    //core::writeDummy<32>(0x12345678, 0x0);
+    //core::readDummy<16>(0x0);
+    //core::readDummy<32>(0x0);
 
     auto blah = this->memory()->read<8>(0);
     // TESTING //
