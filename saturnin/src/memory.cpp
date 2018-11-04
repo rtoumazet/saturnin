@@ -214,9 +214,38 @@ void Memory::swapCartArea() {
 }
 
 void Memory::initializeHandlers() {
-    initializeReadHandler<8>(0x00000000, 0xFFFFFFFF,  readDummy<8>);
+    initializeReadHandler<8>( 0x00000000, 0xFFFFFFFF, readDummy<8>);
     initializeReadHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
     initializeReadHandler<32>(0x00000000, 0xFFFFFFFF, readDummy<32>);
+
+    initializeReadHandler<8>( 0x00000000, 0x000FFFFF, readRom<8>);
+    initializeReadHandler<16>(0x00000000, 0x000FFFFF, readRom<16>);
+    initializeReadHandler<32>(0x00000000, 0x000FFFFF, readRom<32>);
+    
+    initializeReadHandler<8>( 0x20000000, 0x200FFFFF, readRom<8>);
+    initializeReadHandler<16>(0x20000000, 0x200FFFFF, readRom<16>);
+    initializeReadHandler<32>(0x20000000, 0x200FFFFF, readRom<32>);
+
+    initializeReadHandler<8>( 0x00100000, 0x0017FFFF, readSmpc<8>);
+    initializeReadHandler<16>(0x00100000, 0x0017FFFF, readSmpc<16>);
+    initializeReadHandler<32>(0x00100000, 0x0017FFFF, readSmpc<32>);
+    initializeWriteHandler<8>( 0x00100000, 0x0017FFFF, writeSmpc<8>);
+    initializeWriteHandler<16>(0x00100000, 0x0017FFFF, writeSmpc<16>);
+    initializeWriteHandler<32>(0x00100000, 0x0017FFFF, writeSmpc<32>);
+
+    initializeReadHandler<8>( 0x20100000, 0x2017FFFF, readSmpc<8>);
+    initializeReadHandler<16>(0x20100000, 0x2017FFFF, readSmpc<16>);
+    initializeReadHandler<32>(0x20100000, 0x2017FFFF, readSmpc<32>);
+    initializeWriteHandler<8>( 0x20100000, 0x2017FFFF, writeSmpc<8>);
+    initializeWriteHandler<16>(0x20100000, 0x2017FFFF, writeSmpc<16>);
+    initializeWriteHandler<32>(0x20100000, 0x2017FFFF, writeSmpc<32>);
+
+    initializeReadHandler<8>( 0x20180000, 0x201FFFFF, readBackupRam<8>);
+    initializeReadHandler<16>(0x20180000, 0x201FFFFF, readBackupRam<16>);
+    initializeReadHandler<32>(0x20180000, 0x201FFFFF, readBackupRam<32>);
+    initializeWriteHandler<8>( 0x20180000, 0x201FFFFF, writeBackupRam<8>);
+    initializeWriteHandler<16>(0x20180000, 0x201FFFFF, writeBackupRam<16>);
+    initializeWriteHandler<32>(0x20180000, 0x201FFFFF, writeBackupRam<32>);
 }
 
 void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
