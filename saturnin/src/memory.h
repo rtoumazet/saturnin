@@ -278,6 +278,8 @@ private:
 
     template<size_t S>
     void initializeReadHandler(uint32_t begin, uint32_t end, ReadType<S> func);
+    
+    void initializeReadHandlerGlobal(uint32_t begin, uint32_t end, ReadType func);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<size_t S> void Memory::initializeWriteHandler(uint32_t begin, uint32_t end, WriteType<S> func);
@@ -491,6 +493,40 @@ SizedUInt<S> readBackupRam(const Memory& m, const uint32_t addr);
 template<size_t S>
 void writeBackupRam(Memory& m, const uint32_t addr, const SizedUInt<S> data);
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<size_t S> SizedUInt<S> readWorkramLow(const Memory& m, const uint32_t addr);
+///
+/// \brief  Low workram read handler.
+///
+/// \author Runik
+/// \date   06/11/2018
+///
+/// \tparam S       Size of the data in bits.
+/// \param  m       Memory to process.
+/// \param  addr    Address to read.
+///
+/// \return Data read.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S>
+SizedUInt<S> readWorkramLow(const Memory& m, const uint32_t addr);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<size_t S> void writeWorkramLow(Memory& m, const uint32_t addr, const SizedUInt<S> data)
+///
+/// \brief  Low workram write handler.
+///
+/// \author Runik
+/// \date   06/11/2018
+///
+/// \tparam S       Size of the data in bits.
+/// \param  m       Memory to process.
+/// \param  addr    Address to write to.
+/// \param  data    Data to write.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t S>
+void writeWorkramLow(Memory& m, const uint32_t addr, const SizedUInt<S> data);
 
 }
 }

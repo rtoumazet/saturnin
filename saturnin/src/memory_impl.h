@@ -44,6 +44,19 @@ void Memory::initializeReadHandler(uint32_t begin,
         handler[current & 0xFFFF] = func;
     }
 }
+template<size_t S>
+void Memory::initializeReadHandlerGlobal(uint32_t begin,
+                                   uint32_t end,
+                                   ReadType<S> func) {
+    begin >>= 16;
+    end >>= 16;
+
+    auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
+    for (uint32_t current = begin; current <= end; ++current) {
+        auto& handler = std::get < ReadHandler<S>& >(t);
+        handler[current & 0xFFFF] = func;
+    }
+}
 
 template<size_t S>
 void Memory::initializeWriteHandler(uint32_t begin,
@@ -92,6 +105,7 @@ void rawWrite(std::array<T, N>& arr, const uint32_t addr, const SizedUInt<S> val
 
 // Handlers
 
+// Dummy handlers
 template<size_t S>
 void writeDummy(const Memory& m, const uint32_t addr, const SizedUInt<S> data) {
     core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), S, addr, data));
@@ -103,17 +117,19 @@ SizedUInt<S> readDummy(const Memory& m, const uint32_t addr) {
     return SizedUInt<S>{};
 }
 
+// ROM handlers
 template<size_t S>
 SizedUInt<S> readRom(const Memory& m, const uint32_t addr) {
     return rawRead<S>(m.rom, addr & 0x7FFFF);
 }
 
+// SMPC handlers
 template<size_t S>
 SizedUInt<S> readSmpc(const Memory& m, const uint32_t addr) {
     return rawRead<S>(m.smpc, addr & 0x7F);
 }
 
-// SMPC read handler specialization for 8 bits data.
+// Specialization for 8 bits data.
 inline SizedUInt<8> readSmpc(const Memory& m, const uint32_t addr) {
     core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
     return 0;
@@ -124,11 +140,12 @@ void writeSmpc(Memory& m, const uint32_t addr, const SizedUInt<S> data) {
     rawWrite<S>(m.smpc, addr & 0x7F, data);
 }
 
-// SMPC write handler specialization for 8 bits data.
+// Specialization for 8 bits data.
 inline void writeSmpc(Memory& m, const uint32_t addr, const SizedUInt<8> data) {
     core::Log::warning("memory", fmt::format(core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data));
 }
 
+// Backup RAM handlers
 template<size_t S>
 SizedUInt<S> readBackupRam(const Memory& m, const uint32_t addr) {
     return rawRead<S>(m.backup_ram, addr & 0xFFFF);
@@ -137,6 +154,17 @@ SizedUInt<S> readBackupRam(const Memory& m, const uint32_t addr) {
 template<size_t S>
 void writeBackupRam(Memory& m, const uint32_t addr, const SizedUInt<S> data) {
     rawWrite<S>(m.backup_ram, addr & 0xFFFF, data);
+}
+
+// Low workram handlers
+template<size_t S>
+SizedUInt<S> readWorkramLow(const Memory& m, const uint32_t addr) {
+    return rawRead<S>(m.workram_low, addr & 0xFFFFF);
+}
+
+template<size_t S>
+void writeWorkramLow(Memory& m, const uint32_t addr, const SizedUInt<S> data) {
+    rawWrite<S>(m.workram_low, addr & 0xFFFFF, data);
 }
 
 }
