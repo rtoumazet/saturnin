@@ -214,10 +214,12 @@ void Memory::swapCartArea() {
 }
 
 void Memory::initializeHandlers() {
+    // Dummy access
     initializeReadHandler<8>( 0x00000000, 0xFFFFFFFF, readDummy<8>);
     initializeReadHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
     initializeReadHandler<32>(0x00000000, 0xFFFFFFFF, readDummy<32>);
 
+    // ROM access
     initializeReadHandler<8>( 0x00000000, 0x000FFFFF, readRom<8>);
     initializeReadHandler<16>(0x00000000, 0x000FFFFF, readRom<16>);
     initializeReadHandler<32>(0x00000000, 0x000FFFFF, readRom<32>);
@@ -226,6 +228,7 @@ void Memory::initializeHandlers() {
     initializeReadHandler<16>(0x20000000, 0x200FFFFF, readRom<16>);
     initializeReadHandler<32>(0x20000000, 0x200FFFFF, readRom<32>);
 
+    // SMPC access
     initializeReadHandler<8>( 0x00100000, 0x0017FFFF, readSmpc<8>);
     initializeReadHandler<16>(0x00100000, 0x0017FFFF, readSmpc<16>);
     initializeReadHandler<32>(0x00100000, 0x0017FFFF, readSmpc<32>);
@@ -240,12 +243,277 @@ void Memory::initializeHandlers() {
     initializeWriteHandler<16>(0x20100000, 0x2017FFFF, writeSmpc<16>);
     initializeWriteHandler<32>(0x20100000, 0x2017FFFF, writeSmpc<32>);
 
+    // Backup RAM access
+    initializeReadHandler<8>( 0x00180000, 0x001FFFFF, readBackupRam<8>);
+    initializeReadHandler<16>(0x00180000, 0x001FFFFF, readBackupRam<16>);
+    initializeReadHandler<32>(0x00180000, 0x001FFFFF, readBackupRam<32>);
+    initializeWriteHandler<8>( 0x00180000, 0x001FFFFF, writeBackupRam<8>);
+    initializeWriteHandler<16>(0x00180000, 0x001FFFFF, writeBackupRam<16>);
+    initializeWriteHandler<32>(0x00180000, 0x001FFFFF, writeBackupRam<32>);
+
     initializeReadHandler<8>( 0x20180000, 0x201FFFFF, readBackupRam<8>);
     initializeReadHandler<16>(0x20180000, 0x201FFFFF, readBackupRam<16>);
     initializeReadHandler<32>(0x20180000, 0x201FFFFF, readBackupRam<32>);
     initializeWriteHandler<8>( 0x20180000, 0x201FFFFF, writeBackupRam<8>);
     initializeWriteHandler<16>(0x20180000, 0x201FFFFF, writeBackupRam<16>);
     initializeWriteHandler<32>(0x20180000, 0x201FFFFF, writeBackupRam<32>);
+
+    // Low workram access
+    initializeReadHandler<8>(0x00200000, 0x002FFFFF, readWorkramLow<8>);
+    initializeReadHandler<16>(0x00200000, 0x002FFFFF, readWorkramLow<16>);
+    initializeReadHandler<32>(0x00200000, 0x002FFFFF, readWorkramLow<32>);
+    initializeWriteHandler<8>(0x00200000, 0x002FFFFF, writeWorkramLow<8>);
+    initializeWriteHandler<16>(0x00200000, 0x002FFFFF, writeWorkramLow<16>);
+    initializeWriteHandler<32>(0x00200000, 0x002FFFFF, writeWorkramLow<32>);
+
+    initializeReadHandler<8>(0x20200000, 0x202FFFFF, readWorkramLow <8>);
+    initializeReadHandler<16>(0x20200000, 0x202FFFFF, readWorkramLow<16>);
+    initializeReadHandler<32>(0x20200000, 0x202FFFFF, readWorkramLow<32>);
+    initializeWriteHandler<8>(0x20200000, 0x202FFFFF, writeWorkramLow<8>);
+    initializeWriteHandler<16>(0x20200000, 0x202FFFFF, writeWorkramLow<16>);
+    initializeWriteHandler<32>(0x20200000, 0x202FFFFF, writeWorkramLow<32>);
+    //MapMemoryTableWriteByte(0x00200000, 0x002FFFFF, &RAMLWriteByte);
+    //MapMemoryTableWriteWord(0x00200000, 0x002FFFFF, &RAMLWriteWord);
+    //MapMemoryTableWriteLong(0x00200000, 0x002FFFFF, &RAMLWriteLong);
+    //MapMemoryTableReadByte(0x00200000, 0x002FFFFF, &RAMLReadByte);
+    //MapMemoryTableReadWord(0x00200000, 0x002FFFFF, &RAMLReadWord);
+    //MapMemoryTableReadLong(0x00200000, 0x002FFFFF, &RAMLReadLong);
+
+    //MapMemoryTableWriteByte(0x20200000, 0x202FFFFF, &RAMLWriteByte);
+    //MapMemoryTableWriteWord(0x20200000, 0x202FFFFF, &RAMLWriteWord);
+    //MapMemoryTableWriteLong(0x20200000, 0x202FFFFF, &RAMLWriteLong);
+    //MapMemoryTableReadByte(0x20200000, 0x202FFFFF, &RAMLReadByte);
+    //MapMemoryTableReadWord(0x20200000, 0x202FFFFF, &RAMLReadWord);
+    //MapMemoryTableReadLong(0x20200000, 0x202FFFFF, &RAMLReadLong);
+
+    //// STV I/O access
+    //MapMemoryTableWriteByte(0x00400000, 0x004FFFFF, &STVIOWriteByte);
+    //MapMemoryTableWriteWord(0x00400000, 0x004FFFFF, &STVIOWriteWord);
+    //MapMemoryTableWriteLong(0x00400000, 0x004FFFFF, &STVIOWriteLong);
+    //MapMemoryTableReadByte(0x00400000, 0x004FFFFF, &STVIOReadByte);
+    //MapMemoryTableReadWord(0x00400000, 0x004FFFFF, &STVIOReadWord);
+    //MapMemoryTableReadLong(0x00400000, 0x004FFFFF, &STVIOReadLong);
+
+    //MapMemoryTableWriteByte(0x20400000, 0x204FFFFF, &STVIOWriteByte);
+    //MapMemoryTableWriteWord(0x20400000, 0x204FFFFF, &STVIOWriteWord);
+    //MapMemoryTableWriteLong(0x20400000, 0x204FFFFF, &STVIOWriteLong);
+    //MapMemoryTableReadByte(0x20400000, 0x204FFFFF, &STVIOReadByte);
+    //MapMemoryTableReadWord(0x20400000, 0x204FFFFF, &STVIOReadWord);
+    //MapMemoryTableReadLong(0x20400000, 0x204FFFFF, &STVIOReadLong);
+
+    //// Cart access
+    //MapMemoryTableWriteByte(0x02000000, 0x04FFFFFF, &CartWriteByte);
+    //MapMemoryTableWriteWord(0x02000000, 0x04FFFFFF, &CartWriteWord);
+    //MapMemoryTableWriteLong(0x02000000, 0x04FFFFFF, &CartWriteLong);
+    //MapMemoryTableReadByte(0x02000000, 0x04FFFFFF, &CartReadByte);
+    //MapMemoryTableReadWord(0x02000000, 0x04FFFFFF, &CartReadWord);
+    //MapMemoryTableReadLong(0x02000000, 0x04FFFFFF, &CartReadLong);
+
+    //MapMemoryTableWriteByte(0x22000000, 0x24FFFFFF, &CartWriteByte);
+    //MapMemoryTableWriteWord(0x22000000, 0x24FFFFFF, &CartWriteWord);
+    //MapMemoryTableWriteLong(0x22000000, 0x24FFFFFF, &CartWriteLong);
+    //MapMemoryTableReadByte(0x22000000, 0x24FFFFFF, &CartReadByte);
+    //MapMemoryTableReadWord(0x22000000, 0x24FFFFFF, &CartReadWord);
+    //MapMemoryTableReadLong(0x22000000, 0x24FFFFFF, &CartReadLong);
+
+    //// CdBlock access
+    //MapMemoryTableWriteByte(0x05800000, 0x058FFFFF, &CdBlockWriteByte);
+    //MapMemoryTableWriteWord(0x05800000, 0x058FFFFF, &CdBlockWriteWord);
+    //MapMemoryTableWriteLong(0x05800000, 0x058FFFFF, &CdBlockWriteLong);
+    //MapMemoryTableReadByte(0x05800000, 0x058FFFFF, &CdBlockReadByte);
+    //MapMemoryTableReadWord(0x05800000, 0x058FFFFF, &CdBlockReadWord);
+    //MapMemoryTableReadLong(0x05800000, 0x058FFFFF, &CdBlockReadLong);
+
+    //MapMemoryTableWriteByte(0x25800000, 0x258FFFFF, &CdBlockWriteByte);
+    //MapMemoryTableWriteWord(0x25800000, 0x258FFFFF, &CdBlockWriteWord);
+    //MapMemoryTableWriteLong(0x25800000, 0x258FFFFF, &CdBlockWriteLong);
+    //MapMemoryTableReadByte(0x25800000, 0x258FFFFF, &CdBlockReadByte);
+    //MapMemoryTableReadWord(0x25800000, 0x258FFFFF, &CdBlockReadWord);
+    //MapMemoryTableReadLong(0x25800000, 0x258FFFFF, &CdBlockReadLong);
+
+    //// SCSP access
+    //MapMemoryTableWriteByte(0x05A00000, 0x05BFFFFF, &SCSPWriteByte);
+    //MapMemoryTableWriteWord(0x05A00000, 0x05BFFFFF, &SCSPWriteWord);
+    //MapMemoryTableWriteLong(0x05A00000, 0x05BFFFFF, &SCSPWriteLong);
+    //MapMemoryTableReadByte(0x05A00000, 0x05BFFFFF, &SCSPReadByte);
+    //MapMemoryTableReadWord(0x05A00000, 0x05BFFFFF, &SCSPReadWord);
+    //MapMemoryTableReadLong(0x05A00000, 0x05BFFFFF, &SCSPReadLong);
+
+    //MapMemoryTableWriteByte(0x25A00000, 0x25BFFFFF, &SCSPWriteByte);
+    //MapMemoryTableWriteWord(0x25A00000, 0x25BFFFFF, &SCSPWriteWord);
+    //MapMemoryTableWriteLong(0x25A00000, 0x25BFFFFF, &SCSPWriteLong);
+    //MapMemoryTableReadByte(0x25A00000, 0x25BFFFFF, &SCSPReadByte);
+    //MapMemoryTableReadWord(0x25A00000, 0x25BFFFFF, &SCSPReadWord);
+    //MapMemoryTableReadLong(0x25A00000, 0x25BFFFFF, &SCSPReadLong);
+
+    //// VDP1 RAM access
+    //MapMemoryTableWriteByte(0x05C00000, 0x05C7FFFF, &VDP1RAMWriteByte);
+    //MapMemoryTableWriteWord(0x05C00000, 0x05C7FFFF, &VDP1RAMWriteWord);
+    //MapMemoryTableWriteLong(0x05C00000, 0x05C7FFFF, &VDP1RAMWriteLong);
+    //MapMemoryTableReadByte(0x05C00000, 0x05C7FFFF, &VDP1RAMReadByte);
+    //MapMemoryTableReadWord(0x05C00000, 0x05C7FFFF, &VDP1RAMReadWord);
+    //MapMemoryTableReadLong(0x05C00000, 0x05C7FFFF, &VDP1RAMReadLong);
+
+    //MapMemoryTableWriteByte(0x25C00000, 0x25C7FFFF, &VDP1RAMWriteByte);
+    //MapMemoryTableWriteWord(0x25C00000, 0x25C7FFFF, &VDP1RAMWriteWord);
+    //MapMemoryTableWriteLong(0x25C00000, 0x25C7FFFF, &VDP1RAMWriteLong);
+    //MapMemoryTableReadByte(0x25C00000, 0x25C7FFFF, &VDP1RAMReadByte);
+    //MapMemoryTableReadWord(0x25C00000, 0x25C7FFFF, &VDP1RAMReadWord);
+    //MapMemoryTableReadLong(0x25C00000, 0x25C7FFFF, &VDP1RAMReadLong);
+
+    //// VDP1 framebuffer access
+    //MapMemoryTableWriteByte(0x05C80000, 0x05CFFFFF, &VDP1FBWriteByte);
+    //MapMemoryTableWriteWord(0x05C80000, 0x05CFFFFF, &VDP1FBWriteWord);
+    //MapMemoryTableWriteLong(0x05C80000, 0x05CFFFFF, &VDP1FBWriteLong);
+    //MapMemoryTableReadByte(0x05C80000, 0x05CFFFFF, &VDP1FBReadByte);
+    //MapMemoryTableReadWord(0x05C80000, 0x05CFFFFF, &VDP1FBReadWord);
+    //MapMemoryTableReadLong(0x05C80000, 0x05CFFFFF, &VDP1FBReadLong);
+
+    //MapMemoryTableWriteByte(0x25C80000, 0x25CFFFFF, &VDP1FBWriteByte);
+    //MapMemoryTableWriteWord(0x25C80000, 0x25CFFFFF, &VDP1FBWriteWord);
+    //MapMemoryTableWriteLong(0x25C80000, 0x25CFFFFF, &VDP1FBWriteLong);
+    //MapMemoryTableReadByte(0x25C80000, 0x25CFFFFF, &VDP1FBReadByte);
+    //MapMemoryTableReadWord(0x25C80000, 0x25CFFFFF, &VDP1FBReadWord);
+    //MapMemoryTableReadLong(0x25C80000, 0x25CFFFFF, &VDP1FBReadLong);
+
+    //// VDP1 Registers access
+    //MapMemoryTableWriteByte(0x05D00000, 0x05D7FFFF, &VDP1RegWriteByte);
+    //MapMemoryTableWriteWord(0x05D00000, 0x05D7FFFF, &VDP1RegWriteWord);
+    //MapMemoryTableWriteLong(0x05D00000, 0x05D7FFFF, &VDP1RegWriteLong);
+    //MapMemoryTableReadByte(0x05D00000, 0x05D7FFFF, &VDP1RegReadByte);
+    //MapMemoryTableReadWord(0x05D00000, 0x05D7FFFF, &VDP1RegReadWord);
+    //MapMemoryTableReadLong(0x05D00000, 0x05D7FFFF, &VDP1RegReadLong);
+
+    //MapMemoryTableWriteByte(0x25D00000, 0x25D7FFFF, &VDP1RegWriteByte);
+    //MapMemoryTableWriteWord(0x25D00000, 0x25D7FFFF, &VDP1RegWriteWord);
+    //MapMemoryTableWriteLong(0x25D00000, 0x25D7FFFF, &VDP1RegWriteLong);
+    //MapMemoryTableReadByte(0x25D00000, 0x25D7FFFF, &VDP1RegReadByte);
+    //MapMemoryTableReadWord(0x25D00000, 0x25D7FFFF, &VDP1RegReadWord);
+    //MapMemoryTableReadLong(0x25D00000, 0x25D7FFFF, &VDP1RegReadLong);
+
+    //// VDP2 VRAM access
+    //MapMemoryTableWriteByte(0x05E00000, 0x05EFFFFF, &VDP2VRAMWriteByte);
+    //MapMemoryTableWriteWord(0x05E00000, 0x05EFFFFF, &VDP2VRAMWriteWord);
+    //MapMemoryTableWriteLong(0x05E00000, 0x05EFFFFF, &VDP2VRAMWriteLong);
+    //MapMemoryTableReadByte(0x05E00000, 0x05EFFFFF, &VDP2VRAMReadByte);
+    //MapMemoryTableReadWord(0x05E00000, 0x05EFFFFF, &VDP2VRAMReadWord);
+    //MapMemoryTableReadLong(0x05E00000, 0x05EFFFFF, &VDP2VRAMReadLong);
+
+    //MapMemoryTableWriteByte(0x25E00000, 0x25EFFFFF, &VDP2VRAMWriteByte);
+    //MapMemoryTableWriteWord(0x25E00000, 0x25EFFFFF, &VDP2VRAMWriteWord);
+    //MapMemoryTableWriteLong(0x25E00000, 0x25EFFFFF, &VDP2VRAMWriteLong);
+    //MapMemoryTableReadByte(0x25E00000, 0x25EFFFFF, &VDP2VRAMReadByte);
+    //MapMemoryTableReadWord(0x25E00000, 0x25EFFFFF, &VDP2VRAMReadWord);
+    //MapMemoryTableReadLong(0x25E00000, 0x25EFFFFF, &VDP2VRAMReadLong);
+
+    //// VDP2 CRAM access
+    //MapMemoryTableWriteByte(0x05F00000, 0x05F7FFFF, &VDP2CRAMWriteByte);
+    //MapMemoryTableWriteWord(0x05F00000, 0x05F7FFFF, &VDP2CRAMWriteWord);
+    //MapMemoryTableWriteLong(0x05F00000, 0x05F7FFFF, &VDP2CRAMWriteLong);
+    //MapMemoryTableReadByte(0x05F00000, 0x05F7FFFF, &VDP2CRAMReadByte);
+    //MapMemoryTableReadWord(0x05F00000, 0x05F7FFFF, &VDP2CRAMReadWord);
+    //MapMemoryTableReadLong(0x05F00000, 0x05F7FFFF, &VDP2CRAMReadLong);
+
+    //MapMemoryTableWriteByte(0x25F00000, 0x25F7FFFF, &VDP2CRAMWriteByte);
+    //MapMemoryTableWriteWord(0x25F00000, 0x25F7FFFF, &VDP2CRAMWriteWord);
+    //MapMemoryTableWriteLong(0x25F00000, 0x25F7FFFF, &VDP2CRAMWriteLong);
+    //MapMemoryTableReadByte(0x25F00000, 0x25F7FFFF, &VDP2CRAMReadByte);
+    //MapMemoryTableReadWord(0x25F00000, 0x25F7FFFF, &VDP2CRAMReadWord);
+    //MapMemoryTableReadLong(0x25F00000, 0x25F7FFFF, &VDP2CRAMReadLong);
+
+    //// VDP2 Registers access
+    //MapMemoryTableWriteByte(0x05F80000, 0x05FBFFFF, &VDP2RegWriteByte);
+    //MapMemoryTableWriteWord(0x05F80000, 0x05FBFFFF, &VDP2RegWriteWord);
+    //MapMemoryTableWriteLong(0x05F80000, 0x05FBFFFF, &VDP2RegWriteLong);
+    //MapMemoryTableReadByte(0x05F80000, 0x05FBFFFF, &VDP2RegReadByte);
+    //MapMemoryTableReadWord(0x05F80000, 0x05FBFFFF, &VDP2RegReadWord);
+    //MapMemoryTableReadLong(0x05F80000, 0x05FBFFFF, &VDP2RegReadLong);
+
+    //MapMemoryTableWriteByte(0x25F80000, 0x25FBFFFF, &VDP2RegWriteByte);
+    //MapMemoryTableWriteWord(0x25F80000, 0x25FBFFFF, &VDP2RegWriteWord);
+    //MapMemoryTableWriteLong(0x25F80000, 0x25FBFFFF, &VDP2RegWriteLong);
+    //MapMemoryTableReadByte(0x25F80000, 0x25FBFFFF, &VDP2RegReadByte);
+    //MapMemoryTableReadWord(0x25F80000, 0x25FBFFFF, &VDP2RegReadWord);
+    //MapMemoryTableReadLong(0x25F80000, 0x25FBFFFF, &VDP2RegReadLong);
+
+    //// SCU access
+    //MapMemoryTableWriteByte(0x05FE0000, 0x05FEFFFF, &SCUWriteByte);
+    //MapMemoryTableWriteWord(0x05FE0000, 0x05FEFFFF, &SCUWriteWord);
+    //MapMemoryTableWriteLong(0x05FE0000, 0x05FEFFFF, &SCUWriteLong);
+    //MapMemoryTableReadByte(0x05FE0000, 0x05FEFFFF, &SCUReadByte);
+    //MapMemoryTableReadWord(0x05FE0000, 0x05FEFFFF, &SCUReadWord);
+    //MapMemoryTableReadLong(0x05FE0000, 0x05FEFFFF, &SCUReadLong);
+
+    //MapMemoryTableWriteByte(0x25FE0000, 0x25FEFFFF, &SCUWriteByte);
+    //MapMemoryTableWriteWord(0x25FE0000, 0x25FEFFFF, &SCUWriteWord);
+    //MapMemoryTableWriteLong(0x25FE0000, 0x25FEFFFF, &SCUWriteLong);
+    //MapMemoryTableReadByte(0x25FE0000, 0x25FEFFFF, &SCUReadByte);
+    //MapMemoryTableReadWord(0x25FE0000, 0x25FEFFFF, &SCUReadWord);
+    //MapMemoryTableReadLong(0x25FE0000, 0x25FEFFFF, &SCUReadLong);
+
+    //// Workram high access
+    //MapMemoryTableWriteByte(0x06000000, 0x07FFFFFF, &RAMHWriteByte);
+    //MapMemoryTableWriteWord(0x06000000, 0x07FFFFFF, &RAMHWriteWord);
+    //MapMemoryTableWriteLong(0x06000000, 0x07FFFFFF, &RAMHWriteLong);
+    //MapMemoryTableReadByte(0x06000000, 0x07FFFFFF, &RAMHReadByte);
+    //MapMemoryTableReadWord(0x06000000, 0x07FFFFFF, &RAMHReadWord);
+    //MapMemoryTableReadLong(0x06000000, 0x07FFFFFF, &RAMHReadLong);
+
+    //MapMemoryTableWriteByte(0x26000000, 0x27FFFFFF, &RAMHWriteByte);
+    //MapMemoryTableWriteWord(0x26000000, 0x27FFFFFF, &RAMHWriteWord);
+    //MapMemoryTableWriteLong(0x26000000, 0x27FFFFFF, &RAMHWriteLong);
+    //MapMemoryTableReadByte(0x26000000, 0x27FFFFFF, &RAMHReadByte);
+    //MapMemoryTableReadWord(0x26000000, 0x27FFFFFF, &RAMHReadWord);
+    //MapMemoryTableReadLong(0x26000000, 0x27FFFFFF, &RAMHReadLong);
+
+    //// Master FRT access
+    //MapMemoryTableWriteByte(0x01000000, 0x017FFFFF, &MasterFRTWriteByte);
+    //MapMemoryTableWriteWord(0x01000000, 0x017FFFFF, &MasterFRTWriteWord);
+    //MapMemoryTableWriteLong(0x01000000, 0x017FFFFF, &MasterFRTWriteLong);
+
+    //MapMemoryTableWriteByte(0x21000000, 0x217FFFFF, &MasterFRTWriteByte);
+    //MapMemoryTableWriteWord(0x21000000, 0x217FFFFF, &MasterFRTWriteWord);
+    //MapMemoryTableWriteLong(0x21000000, 0x217FFFFF, &MasterFRTWriteLong);
+
+    //// Slave FRT access
+    //MapMemoryTableWriteByte(0x01800000, 0x01FFFFFF, &SlaveFRTWriteByte);
+    //MapMemoryTableWriteWord(0x01800000, 0x01FFFFFF, &SlaveFRTWriteWord);
+    //MapMemoryTableWriteLong(0x01800000, 0x01FFFFFF, &SlaveFRTWriteLong);
+
+    //MapMemoryTableWriteByte(0x21800000, 0x21FFFFFF, &SlaveFRTWriteByte);
+    //MapMemoryTableWriteWord(0x21800000, 0x21FFFFFF, &SlaveFRTWriteWord);
+    //MapMemoryTableWriteLong(0x21800000, 0x21FFFFFF, &SlaveFRTWriteLong);
+
+    //// SH2 register access
+    //MapMemoryTableWriteByte(0xFFFFFE00, 0xFFFFFFFF, &SH2WriteByte);
+    //MapMemoryTableWriteWord(0xFFFFFE00, 0xFFFFFFFF, &SH2WriteWord);
+    //MapMemoryTableWriteLong(0xFFFFFE00, 0xFFFFFFFF, &SH2WriteLong);
+    //MapMemoryTableReadByte(0xFFFFFE00, 0xFFFFFFFF, &SH2ReadByte);
+    //MapMemoryTableReadWord(0xFFFFFE00, 0xFFFFFFFF, &SH2ReadWord);
+    //MapMemoryTableReadLong(0xFFFFFE00, 0xFFFFFFFF, &SH2ReadLong);
+
+    //// Cache addresses access
+    //MapMemoryTableWriteByte(0x60000000, 0x6FFFFFFF, &CacheAddressesWriteByte);
+    //MapMemoryTableWriteWord(0x60000000, 0x6FFFFFFF, &CacheAddressesWriteWord);
+    //MapMemoryTableWriteLong(0x60000000, 0x6FFFFFFF, &CacheAddressesWriteLong);
+    //MapMemoryTableReadByte(0x60000000, 0x6FFFFFFF, &CacheAddressesReadByte);
+    //MapMemoryTableReadWord(0x60000000, 0x6FFFFFFF, &CacheAddressesReadWord);
+    //MapMemoryTableReadLong(0x60000000, 0x6FFFFFFF, &CacheAddressesReadLong);
+
+    //// Cache data access
+    //MapMemoryTableWriteByte(0xC0000000, 0xCFFFFFFF, &CacheDataWriteByte);
+    //MapMemoryTableWriteWord(0xC0000000, 0xCFFFFFFF, &CacheDataWriteWord);
+    //MapMemoryTableWriteLong(0xC0000000, 0xCFFFFFFF, &CacheDataWriteLong);
+    //MapMemoryTableReadByte(0xC0000000, 0xCFFFFFFF, &CacheDataReadByte);
+    //MapMemoryTableReadWord(0xC0000000, 0xCFFFFFFF, &CacheDataReadWord);
+    //MapMemoryTableReadLong(0xC0000000, 0xCFFFFFFF, &CacheDataReadLong);
+
+    //MapMemoryTableWriteByte(0x80000000, 0x8FFFFFFF, &CacheDataWriteByte);
+    //MapMemoryTableWriteWord(0x80000000, 0x8FFFFFFF, &CacheDataWriteWord);
+    //MapMemoryTableWriteLong(0x80000000, 0x8FFFFFFF, &CacheDataWriteLong);
+    //MapMemoryTableReadByte(0x80000000, 0x8FFFFFFF, &CacheDataReadByte);
+    //MapMemoryTableReadWord(0x80000000, 0x8FFFFFFF, &CacheDataReadWord);
+    //MapMemoryTableReadLong(0x80000000, 0x8FFFFFFF, &CacheDataReadLong);
 }
 
 void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
