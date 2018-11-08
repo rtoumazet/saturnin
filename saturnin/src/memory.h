@@ -279,7 +279,11 @@ private:
     template<size_t S>
     void initializeReadHandler(uint32_t begin, uint32_t end, ReadType<S> func);
     
-    void initializeReadHandlerGlobal(uint32_t begin, uint32_t end, ReadType func);
+    template<class T>
+    void initializeReadHandlerGlobal(uint32_t begin, uint32_t end, T func);
+
+    template <size_t S, typename R, typename ...ARGS>
+    void initializeHandler(uint32_t begin, uint32_t end, function<R, ARGS...>);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<size_t S> void Memory::initializeWriteHandler(uint32_t begin, uint32_t end, WriteType<S> func);
@@ -385,7 +389,7 @@ void rawWrite(std::array<T, N>& arr, const uint32_t addr, const SizedUInt<S> val
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<size_t S>
-void writeDummy(const Memory& m, const uint32_t addr, const SizedUInt<S> data);
+void writeDummy(Memory& m, const uint32_t addr, const SizedUInt<S> data);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<size_t S> SizedUInt<S> readDummy(const Memory& m, const uint32_t addr)

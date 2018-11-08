@@ -215,9 +215,18 @@ void Memory::swapCartArea() {
 
 void Memory::initializeHandlers() {
     // Dummy access
-    initializeReadHandler<8>( 0x00000000, 0xFFFFFFFF, readDummy<8>);
-    initializeReadHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
-    initializeReadHandler<32>(0x00000000, 0xFFFFFFFF, readDummy<32>);
+    //initializeReadHandler<8>( 0x00000000, 0xFFFFFFFF, readDummy<8>);
+    //initializeReadHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
+    //initializeReadHandler<32>(0x00000000, 0xFFFFFFFF, readDummy<32>);
+    //initializeWriteHandler<8>(0x00000000, 0xFFFFFFFF, writeDummy<8>);
+    //initializeWriteHandler<16>(0x00000000, 0xFFFFFFFF, writeDummy<16>);
+    //initializeWriteHandler<32>(0x00000000, 0xFFFFFFFF, writeDummy<32>);
+    initializeHandler<8>(0x00000000, 0xFFFFFFFF, readDummy<8>);
+    initializeHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
+    initializeHandler<32>(0x00000000, 0xFFFFFFFF, readDummy<32>);
+    initializeHandler<8>(0x00000000, 0xFFFFFFFF, writeDummy<8>);
+    initializeHandler<16>(0x00000000, 0xFFFFFFFF, writeDummy<16>);
+    initializeHandler<32>(0x00000000, 0xFFFFFFFF, writeDummy<32>);
 
     // ROM access
     initializeReadHandler<8>( 0x00000000, 0x000FFFFF, readRom<8>);
