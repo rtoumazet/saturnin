@@ -44,17 +44,40 @@ void Memory::initializeReadHandler(uint32_t begin,
         handler[current & 0xFFFF] = func;
     }
 }
-template<size_t S>
+template<class T>
 void Memory::initializeReadHandlerGlobal(uint32_t begin,
                                    uint32_t end,
-                                   ReadType<S> func) {
+                                   T func) {
     begin >>= 16;
     end >>= 16;
 
-    auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
     for (uint32_t current = begin; current <= end; ++current) {
-        auto& handler = std::get < ReadHandler<S>& >(t);
-        handler[current & 0xFFFF] = func;
+        read_8_handler_ = [current & 0xFFFF] = func<8>;
+        read_16_handler_ = [current & 0xFFFF] = func<16>;
+        read_32_handler_ = [current & 0xFFFF] = func<32>;
+    }
+}
+
+template <size_t S, typename R, typename ...ARGS>
+void Memory::initializeHandler(uint32_t begin, uint32_t end, function<R, ARGS...> func) {
+
+    begin >>= 16;
+    end >>= 16;
+
+    if (std::is_void<R>::value) {
+        // void return type implies write functions
+        auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
+        for (uint32_t current = begin; current <= end; ++current) {
+            auto& handler = std::get < WriteHandler<S>& >(t);
+            handler[current & 0xFFFF] = func;
+        }
+    } else {
+        // read functions
+        auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
+        //for (uint32_t current = begin; current <= end; ++current) {
+        //    auto& handler = std::get < ReadHandler<S>& >(t);
+        //    handler[current & 0xFFFF] = func;
+        //}
     }
 }
 
@@ -107,7 +130,7 @@ void rawWrite(std::array<T, N>& arr, const uint32_t addr, const SizedUInt<S> val
 
 // Dummy handlers
 template<size_t S>
-void writeDummy(const Memory& m, const uint32_t addr, const SizedUInt<S> data) {
+void writeDummy(Memory& m, const uint32_t addr, const SizedUInt<S> data) {
     core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), S, addr, data));
 }
 
