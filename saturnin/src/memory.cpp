@@ -228,59 +228,59 @@ void Memory::initializeHandlers() {
     initializeHandler<16>(0x00000000, 0xFFFFFFFF, writeDummy<16>);
     initializeHandler<32>(0x00000000, 0xFFFFFFFF, writeDummy<32>);
 
-    // ROM access
-    initializeReadHandler<8>( 0x00000000, 0x000FFFFF, readRom<8>);
-    initializeReadHandler<16>(0x00000000, 0x000FFFFF, readRom<16>);
-    initializeReadHandler<32>(0x00000000, 0x000FFFFF, readRom<32>);
-    
-    initializeReadHandler<8>( 0x20000000, 0x200FFFFF, readRom<8>);
-    initializeReadHandler<16>(0x20000000, 0x200FFFFF, readRom<16>);
-    initializeReadHandler<32>(0x20000000, 0x200FFFFF, readRom<32>);
+    //// ROM access
+    //initializeReadHandler<8>( 0x00000000, 0x000FFFFF, readRom<8>);
+    //initializeReadHandler<16>(0x00000000, 0x000FFFFF, readRom<16>);
+    //initializeReadHandler<32>(0x00000000, 0x000FFFFF, readRom<32>);
+    //
+    //initializeReadHandler<8>( 0x20000000, 0x200FFFFF, readRom<8>);
+    //initializeReadHandler<16>(0x20000000, 0x200FFFFF, readRom<16>);
+    //initializeReadHandler<32>(0x20000000, 0x200FFFFF, readRom<32>);
 
-    // SMPC access
-    initializeReadHandler<8>( 0x00100000, 0x0017FFFF, readSmpc<8>);
-    initializeReadHandler<16>(0x00100000, 0x0017FFFF, readSmpc<16>);
-    initializeReadHandler<32>(0x00100000, 0x0017FFFF, readSmpc<32>);
-    initializeWriteHandler<8>( 0x00100000, 0x0017FFFF, writeSmpc<8>);
-    initializeWriteHandler<16>(0x00100000, 0x0017FFFF, writeSmpc<16>);
-    initializeWriteHandler<32>(0x00100000, 0x0017FFFF, writeSmpc<32>);
+    //// SMPC access
+    //initializeReadHandler<8>( 0x00100000, 0x0017FFFF, readSmpc<8>);
+    //initializeReadHandler<16>(0x00100000, 0x0017FFFF, readSmpc<16>);
+    //initializeReadHandler<32>(0x00100000, 0x0017FFFF, readSmpc<32>);
+    //initializeWriteHandler<8>( 0x00100000, 0x0017FFFF, writeSmpc<8>);
+    //initializeWriteHandler<16>(0x00100000, 0x0017FFFF, writeSmpc<16>);
+    //initializeWriteHandler<32>(0x00100000, 0x0017FFFF, writeSmpc<32>);
 
-    initializeReadHandler<8>( 0x20100000, 0x2017FFFF, readSmpc<8>);
-    initializeReadHandler<16>(0x20100000, 0x2017FFFF, readSmpc<16>);
-    initializeReadHandler<32>(0x20100000, 0x2017FFFF, readSmpc<32>);
-    initializeWriteHandler<8>( 0x20100000, 0x2017FFFF, writeSmpc<8>);
-    initializeWriteHandler<16>(0x20100000, 0x2017FFFF, writeSmpc<16>);
-    initializeWriteHandler<32>(0x20100000, 0x2017FFFF, writeSmpc<32>);
+    //initializeReadHandler<8>( 0x20100000, 0x2017FFFF, readSmpc<8>);
+    //initializeReadHandler<16>(0x20100000, 0x2017FFFF, readSmpc<16>);
+    //initializeReadHandler<32>(0x20100000, 0x2017FFFF, readSmpc<32>);
+    //initializeWriteHandler<8>( 0x20100000, 0x2017FFFF, writeSmpc<8>);
+    //initializeWriteHandler<16>(0x20100000, 0x2017FFFF, writeSmpc<16>);
+    //initializeWriteHandler<32>(0x20100000, 0x2017FFFF, writeSmpc<32>);
 
-    // Backup RAM access
-    initializeReadHandler<8>( 0x00180000, 0x001FFFFF, readBackupRam<8>);
-    initializeReadHandler<16>(0x00180000, 0x001FFFFF, readBackupRam<16>);
-    initializeReadHandler<32>(0x00180000, 0x001FFFFF, readBackupRam<32>);
-    initializeWriteHandler<8>( 0x00180000, 0x001FFFFF, writeBackupRam<8>);
-    initializeWriteHandler<16>(0x00180000, 0x001FFFFF, writeBackupRam<16>);
-    initializeWriteHandler<32>(0x00180000, 0x001FFFFF, writeBackupRam<32>);
+    //// Backup RAM access
+    //initializeReadHandler<8>( 0x00180000, 0x001FFFFF, readBackupRam<8>);
+    //initializeReadHandler<16>(0x00180000, 0x001FFFFF, readBackupRam<16>);
+    //initializeReadHandler<32>(0x00180000, 0x001FFFFF, readBackupRam<32>);
+    //initializeWriteHandler<8>( 0x00180000, 0x001FFFFF, writeBackupRam<8>);
+    //initializeWriteHandler<16>(0x00180000, 0x001FFFFF, writeBackupRam<16>);
+    //initializeWriteHandler<32>(0x00180000, 0x001FFFFF, writeBackupRam<32>);
 
-    initializeReadHandler<8>( 0x20180000, 0x201FFFFF, readBackupRam<8>);
-    initializeReadHandler<16>(0x20180000, 0x201FFFFF, readBackupRam<16>);
-    initializeReadHandler<32>(0x20180000, 0x201FFFFF, readBackupRam<32>);
-    initializeWriteHandler<8>( 0x20180000, 0x201FFFFF, writeBackupRam<8>);
-    initializeWriteHandler<16>(0x20180000, 0x201FFFFF, writeBackupRam<16>);
-    initializeWriteHandler<32>(0x20180000, 0x201FFFFF, writeBackupRam<32>);
+    //initializeReadHandler<8>( 0x20180000, 0x201FFFFF, readBackupRam<8>);
+    //initializeReadHandler<16>(0x20180000, 0x201FFFFF, readBackupRam<16>);
+    //initializeReadHandler<32>(0x20180000, 0x201FFFFF, readBackupRam<32>);
+    //initializeWriteHandler<8>( 0x20180000, 0x201FFFFF, writeBackupRam<8>);
+    //initializeWriteHandler<16>(0x20180000, 0x201FFFFF, writeBackupRam<16>);
+    //initializeWriteHandler<32>(0x20180000, 0x201FFFFF, writeBackupRam<32>);
 
-    // Low workram access
-    initializeReadHandler<8>(0x00200000, 0x002FFFFF, readWorkramLow<8>);
-    initializeReadHandler<16>(0x00200000, 0x002FFFFF, readWorkramLow<16>);
-    initializeReadHandler<32>(0x00200000, 0x002FFFFF, readWorkramLow<32>);
-    initializeWriteHandler<8>(0x00200000, 0x002FFFFF, writeWorkramLow<8>);
-    initializeWriteHandler<16>(0x00200000, 0x002FFFFF, writeWorkramLow<16>);
-    initializeWriteHandler<32>(0x00200000, 0x002FFFFF, writeWorkramLow<32>);
+    //// Low workram access
+    //initializeReadHandler<8>(0x00200000, 0x002FFFFF, readWorkramLow<8>);
+    //initializeReadHandler<16>(0x00200000, 0x002FFFFF, readWorkramLow<16>);
+    //initializeReadHandler<32>(0x00200000, 0x002FFFFF, readWorkramLow<32>);
+    //initializeWriteHandler<8>(0x00200000, 0x002FFFFF, writeWorkramLow<8>);
+    //initializeWriteHandler<16>(0x00200000, 0x002FFFFF, writeWorkramLow<16>);
+    //initializeWriteHandler<32>(0x00200000, 0x002FFFFF, writeWorkramLow<32>);
 
-    initializeReadHandler<8>(0x20200000, 0x202FFFFF, readWorkramLow <8>);
-    initializeReadHandler<16>(0x20200000, 0x202FFFFF, readWorkramLow<16>);
-    initializeReadHandler<32>(0x20200000, 0x202FFFFF, readWorkramLow<32>);
-    initializeWriteHandler<8>(0x20200000, 0x202FFFFF, writeWorkramLow<8>);
-    initializeWriteHandler<16>(0x20200000, 0x202FFFFF, writeWorkramLow<16>);
-    initializeWriteHandler<32>(0x20200000, 0x202FFFFF, writeWorkramLow<32>);
+    //initializeReadHandler<8>(0x20200000, 0x202FFFFF, readWorkramLow <8>);
+    //initializeReadHandler<16>(0x20200000, 0x202FFFFF, readWorkramLow<16>);
+    //initializeReadHandler<32>(0x20200000, 0x202FFFFF, readWorkramLow<32>);
+    //initializeWriteHandler<8>(0x20200000, 0x202FFFFF, writeWorkramLow<8>);
+    //initializeWriteHandler<16>(0x20200000, 0x202FFFFF, writeWorkramLow<16>);
+    //initializeWriteHandler<32>(0x20200000, 0x202FFFFF, writeWorkramLow<32>);
     //MapMemoryTableWriteByte(0x00200000, 0x002FFFFF, &RAMLWriteByte);
     //MapMemoryTableWriteWord(0x00200000, 0x002FFFFF, &RAMLWriteWord);
     //MapMemoryTableWriteLong(0x00200000, 0x002FFFFF, &RAMLWriteLong);

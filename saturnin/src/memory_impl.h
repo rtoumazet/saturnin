@@ -32,7 +32,8 @@ namespace saturnin {
 namespace core {
 
 template<size_t S>
-void Memory::initializeReadHandler(uint32_t begin,
+//void Memory::initializeReadHandler(uint32_t begin,
+void Memory::initializeHandler(uint32_t begin,
                            uint32_t end,
                            ReadType<S> func) {
     begin >>= 16;
@@ -58,33 +59,36 @@ void Memory::initializeReadHandlerGlobal(uint32_t begin,
     }
 }
 
-template <size_t S, typename R, typename ...ARGS>
-void Memory::initializeHandler(uint32_t begin, uint32_t end, function<R, ARGS...> func) {
-
-    begin >>= 16;
-    end >>= 16;
-
-    if (std::is_void<R>::value) {
-        // void return type implies write functions
-        auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
-        for (uint32_t current = begin; current <= end; ++current) {
-            auto& handler = std::get < WriteHandler<S>& >(t);
-            handler[current & 0xFFFF] = func;
-        }
-    } else {
-        // read functions
-        auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
-        //for (uint32_t current = begin; current <= end; ++current) {
-        //    auto& handler = std::get < ReadHandler<S>& >(t);
-        //    handler[current & 0xFFFF] = func;
-        //}
-    }
-}
+//template <size_t S, typename R, typename ...ARGS>
+//void Memory::initializeHandler(uint32_t begin, uint32_t end, function<R, ARGS...> func) {
+//
+//    begin >>= 16;
+//    end >>= 16;
+//
+//    if (std::is_void<R>::value) {
+//        // void return type implies write functions
+//        auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
+//        for (uint32_t current = begin; current <= end; ++current) {
+//            auto& handler = std::get < WriteHandler<S>& >(t);
+//            handler[current & 0xFFFF] = func;
+//        }
+//    } else {
+//        // read functions
+//        auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
+//        //for (uint32_t current = begin; current <= end; ++current) {
+//        //    auto& handler = std::get < ReadHandler<S>& >(t);
+//        //    handler[current & 0xFFFF] = func;
+//        //}
+//    }
+//}
 
 template<size_t S>
-void Memory::initializeWriteHandler(uint32_t begin,
-                            uint32_t end,
-                            WriteType<S> func) {
+//void Memory::initializeWriteHandler(uint32_t begin,
+//                            uint32_t end,
+//                            WriteType<S> func) {
+	void Memory::initializeHandler(uint32_t begin,
+		uint32_t end,
+		WriteType<S> func) {
     begin >>= 16;
     end >>= 16;
 
