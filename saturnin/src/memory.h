@@ -277,13 +277,14 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<size_t S>
-    void initializeReadHandler(uint32_t begin, uint32_t end, ReadType<S> func);
+    //void initializeReadHandler(uint32_t begin, uint32_t end, ReadType<S> func);
+    void initializeHandler(uint32_t begin, uint32_t end, ReadType<S> func);
     
     template<class T>
     void initializeReadHandlerGlobal(uint32_t begin, uint32_t end, T func);
 
-    template <size_t S, typename R, typename ...ARGS>
-    void initializeHandler(uint32_t begin, uint32_t end, function<R, ARGS...>);
+    //template <size_t S, typename R, typename ...ARGS>
+    //void initializeHandler(uint32_t begin, uint32_t end, function<R, ARGS...>);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<size_t S> void Memory::initializeWriteHandler(uint32_t begin, uint32_t end, WriteType<S> func);
@@ -300,7 +301,8 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<size_t S>
-    void initializeWriteHandler(uint32_t begin, uint32_t end, WriteType<S> func);
+    //void initializeWriteHandler(uint32_t begin, uint32_t end, WriteType<S> func);
+    void initializeHandler(uint32_t begin, uint32_t end, WriteType<S> func);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
