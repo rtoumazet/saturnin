@@ -263,7 +263,7 @@ private:
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<size_t S> void Memory::initializeReadHandler(uint32_t begin, uint32_t end, ReadType<S> func);
+    /// \fn template<size_t S> void Memory::initializeHandler(uint32_t begin, uint32_t end, ReadType<S> func);
     ///
     /// \brief  Binds the read function to a memory range in the Saturn memory.
     ///
@@ -277,17 +277,15 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<size_t S>
-    //void initializeReadHandler(uint32_t begin, uint32_t end, ReadType<S> func);
     void initializeHandler(uint32_t begin, uint32_t end, ReadType<S> func);
-    
-    template<class T>
-    void initializeReadHandlerGlobal(uint32_t begin, uint32_t end, T func);
 
-    //template <size_t S, typename R, typename ...ARGS>
-    //void initializeHandler(uint32_t begin, uint32_t end, function<R, ARGS...>);
+    template<typename LHS, typename RHS, typename FUNC, typename OUT = typename std::result_of<FUNC(LHS, RHS)>::type>
+        constexpr OUT initializeReadHandler(LHS lhs, RHS rhs, FUNC func) {
+        return func(lhs, rhs);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<size_t S> void Memory::initializeWriteHandler(uint32_t begin, uint32_t end, WriteType<S> func);
+    /// \fn template<size_t S> void Memory::initializeHandler(uint32_t begin, uint32_t end, WriteType<S> func);
     ///
     /// \brief  Binds the write function to a memory range in the Saturn memory.
     ///
@@ -301,7 +299,6 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<size_t S>
-    //void initializeWriteHandler(uint32_t begin, uint32_t end, WriteType<S> func);
     void initializeHandler(uint32_t begin, uint32_t end, WriteType<S> func);
 };
 
