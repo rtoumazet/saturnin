@@ -45,50 +45,11 @@ void Memory::initializeHandler(uint32_t begin,
         handler[current & 0xFFFF] = func;
     }
 }
-template<class T>
-void Memory::initializeReadHandlerGlobal(uint32_t begin,
-                                   uint32_t end,
-                                   T func) {
-    begin >>= 16;
-    end >>= 16;
-
-    for (uint32_t current = begin; current <= end; ++current) {
-        read_8_handler_ = [current & 0xFFFF] = func<8>;
-        read_16_handler_ = [current & 0xFFFF] = func<16>;
-        read_32_handler_ = [current & 0xFFFF] = func<32>;
-    }
-}
-
-//template <size_t S, typename R, typename ...ARGS>
-//void Memory::initializeHandler(uint32_t begin, uint32_t end, function<R, ARGS...> func) {
-//
-//    begin >>= 16;
-//    end >>= 16;
-//
-//    if (std::is_void<R>::value) {
-//        // void return type implies write functions
-//        auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
-//        for (uint32_t current = begin; current <= end; ++current) {
-//            auto& handler = std::get < WriteHandler<S>& >(t);
-//            handler[current & 0xFFFF] = func;
-//        }
-//    } else {
-//        // read functions
-//        auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
-//        //for (uint32_t current = begin; current <= end; ++current) {
-//        //    auto& handler = std::get < ReadHandler<S>& >(t);
-//        //    handler[current & 0xFFFF] = func;
-//        //}
-//    }
-//}
 
 template<size_t S>
-//void Memory::initializeWriteHandler(uint32_t begin,
-//                            uint32_t end,
-//                            WriteType<S> func) {
 	void Memory::initializeHandler(uint32_t begin,
-		uint32_t end,
-		WriteType<S> func) {
+		                            uint32_t end,
+		                            WriteType<S> func) {
     begin >>= 16;
     end >>= 16;
 
@@ -97,6 +58,12 @@ template<size_t S>
         auto& handler = std::get < WriteHandler<S>& >(t);
         handler[current & 0xFFFF] = func;
     }
+}
+
+template<template<typename> class Func>
+void Memory::initializeReadHandler(uint32_t begin, uint32_t end, Func func) {
+
+
 }
 
 template<size_t S>
