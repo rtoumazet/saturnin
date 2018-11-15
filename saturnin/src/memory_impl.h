@@ -60,12 +60,6 @@ template<size_t S>
     }
 }
 
-template<template<typename> class Func>
-void Memory::initializeReadHandler(uint32_t begin, uint32_t end, Func func) {
-
-
-}
-
 template<size_t S>
 SizedUInt<S> Memory::read(const uint32_t addr) {
     auto& handler = std::get < ReadHandler<S>& >(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));

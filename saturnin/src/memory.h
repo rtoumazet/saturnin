@@ -279,9 +279,11 @@ private:
     template<size_t S>
     void initializeHandler(uint32_t begin, uint32_t end, ReadType<S> func);
 
-    template<typename LHS, typename RHS, typename FUNC, typename OUT = typename std::result_of<FUNC(LHS, RHS)>::type>
-        constexpr OUT initializeReadHandler(LHS lhs, RHS rhs, FUNC func) {
-        return func(lhs, rhs);
+    template <size_t S, typename Func = typename std::result_of<ReadType<S>>::type>
+    void initializeReadHandler(uint32_t begin, uint32_t end, Func func) {
+        initializeHandler<8>(0x00000000, 0xFFFFFFFF, Func<uint8_t>);
+        initializeHandler<16>(0x00000000, 0xFFFFFFFF, Func<uint16_t>);
+        initializeHandler<32>(0x00000000, 0xFFFFFFFF, Func<uint32_t>);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

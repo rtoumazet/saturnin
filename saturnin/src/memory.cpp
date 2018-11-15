@@ -221,6 +221,9 @@ void Memory::initializeHandlers() {
     //initializeWriteHandler<8>(0x00000000, 0xFFFFFFFF, writeDummy<8>);
     //initializeWriteHandler<16>(0x00000000, 0xFFFFFFFF, writeDummy<16>);
     //initializeWriteHandler<32>(0x00000000, 0xFFFFFFFF, writeDummy<32>);
+
+    initializeReadHandler(0x00000000, 0xFFFFFFFF, readDummy<8>);
+
     initializeHandler<8>(0x00000000, 0xFFFFFFFF, readDummy<8>);
     initializeHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
     initializeHandler<32>(0x00000000, 0xFFFFFFFF, readDummy<32>);
