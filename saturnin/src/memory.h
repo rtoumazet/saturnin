@@ -279,12 +279,35 @@ private:
     template<size_t S>
     void initializeHandler(uint32_t begin, uint32_t end, ReadType<S> func);
 
-    template <size_t S, typename Func = typename std::result_of<ReadType<S>>::type>
-    void initializeReadHandler(uint32_t begin, uint32_t end, Func func) {
-        initializeHandler<8>(0x00000000, 0xFFFFFFFF, Func<uint8_t>);
-        initializeHandler<16>(0x00000000, 0xFFFFFFFF, Func<uint16_t>);
-        initializeHandler<32>(0x00000000, 0xFFFFFFFF, Func<uint32_t>);
+    
+    constexpr void initializeReadHandler(size_t begin, uint32_t end) {
+        constexpr std::array<size_t, 3> arr{ 8,16,32 };
+        for (auto a : arr) {
+            initializeHandler<a>(begin, end, readDummy<a>);
+        }
+    
     }
+    //template <size_t S, typename Func = ReadTypeWrapper<S>>
+    //void initializeReadHandler(uint32_t begin, uint32_t end, Func func) {
+    //    initializeHandler<8>(0x00000000, 0xFFFFFFFF, Func<8>()());
+    //    initializeHandler<16>(0x00000000, 0xFFFFFFFF, Func<16>()());
+    //    initializeHandler<32>(0x00000000, 0xFFFFFFFF, Func<32>()());
+    //}
+    
+    //template <function<typename T, const Memory&, const uint32_t>>
+    //void initializeReadHandler(uint32_t begin, uint32_t end) {
+    //    initializeHandler<8>(0x00000000, 0xFFFFFFFF, func<8>()());
+    //    initializeHandler<16>(0x00000000, 0xFFFFFFFF, func<16>()());
+    //    initializeHandler<32>(0x00000000, 0xFFFFFFFF, func<32>()());
+    //}
+
+    //struct executor {
+    //    template <size_t S>
+    //    void func(std::string_view const & sw) const
+    //    {
+    //        execute<T>(sw);
+    //    }
+    //};
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<size_t S> void Memory::initializeHandler(uint32_t begin, uint32_t end, WriteType<S> func);
