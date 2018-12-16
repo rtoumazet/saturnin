@@ -63,15 +63,15 @@ bool Emulator_context::run() {
     //    plugin->log("test");
 
     std::cout << core::tr("Hello world.") << std::endl;
-    core::rawWrite<32>(this->memory()->workram_low, 0, 0x12345678);
-    auto val = core::rawRead<16>(this->memory()->workram_low, 2);
-    core::rawWrite<32>(this->memory()->rom, 0, 0x12345678);
+    core::rawWrite<uint32_t>(this->memory()->workram_low, 0, 0x12345678);
+    auto val = core::rawRead<uint16_t>(this->memory()->workram_low, 2);
+    core::rawWrite<uint32_t>(this->memory()->rom, 0, 0x12345678);
     //core::writeDummy<8>(0x12345678, 0x0);
     //core::writeDummy<32>(0x12345678, 0x0);
     //core::readDummy<16>(0x0);
     //core::readDummy<32>(0x0);
 
-    auto blah = this->memory()->read<8>(0);
+    auto blah = this->memory()->read<uint8_t>(0);
     // TESTING //
 
     uint8_t status{};
