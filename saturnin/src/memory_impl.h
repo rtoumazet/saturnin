@@ -31,62 +31,71 @@
 namespace saturnin {
 namespace core {
 
-template<size_t S>
-//void Memory::initializeReadHandler(uint32_t begin,
-void Memory::initializeHandler(uint32_t begin,
-                           uint32_t end,
-                           ReadType<S> func) {
+template<typename T>
+void Memory::initializeHandler(u32 begin,
+                           u32 end,
+                           ReadType<T> func) {
     begin >>= 16;
     end >>= 16;
 
     auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
-    for (uint32_t current = begin; current <= end; ++current) {
-        auto& handler = std::get < ReadHandler<S>& >(t);
+    for (u32 current = begin; current <= end; ++current) {
+        auto& handler = std::get < ReadHandler<T>& >(t);
         handler[current & 0xFFFF] = func;
     }
 }
 
-template<size_t S>
-	void Memory::initializeHandler(uint32_t begin,
-		                            uint32_t end,
-		                            WriteType<S> func) {
+template<typename T>
+	void Memory::initializeHandler(u32 begin,
+		                            u32 end,
+		                            WriteType<T> func) {
     begin >>= 16;
     end >>= 16;
 
     auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
-    for (uint32_t current = begin; current <= end; ++current) {
-        auto& handler = std::get < WriteHandler<S>& >(t);
+    for (u32 current = begin; current <= end; ++current) {
+        auto& handler = std::get < WriteHandler<T>& >(t);
         handler[current & 0xFFFF] = func;
     }
 }
 
-template<size_t S>
-SizedUInt<S> Memory::read(const uint32_t addr) {
-    auto& handler = std::get < ReadHandler<S>& >(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
+template <template <class> class ReadType, class... T>
+auto Memory::initializeHandlers(u32 begin, u32 end) {
+    (initializeHandler<T>(begin, end, ReadType<T>{}), ...);
+}
+
+template <template <class> class WriteType, class... T>
+auto Memory::initializeWriteHandlers(u32 begin, u32 end) {
+    (initializeHandler<T>(begin, end, WriteType<T>{}), ...);
+}
+
+template<typename T>
+T Memory::read(const u32 addr) {
+    auto& handler = std::get < ReadHandler<T>& >(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
     return handler[addr >> 16](*this, addr);
 }
 
-template<size_t S>
-void Memory::write(const uint32_t addr, const SizedUInt<S> data) {
-    auto& handler = std::get < WriteHandler<S>& >(std::tie(write_8_handler_, write_16_handler_, write_32_handler_));
+template<typename T>
+void Memory::write(const u32 addr, const T data) {
+    auto& handler = std::get < WriteHandler<T>& >(std::tie(write_8_handler_, write_16_handler_, write_32_handler_));
     handler[addr >> 16](*this, addr, data);
 }
 
-template<size_t S, typename T, size_t N>
-SizedUInt<S> rawRead(const std::array<T, N>& arr, const uint32_t addr) {
-    SizedUInt<S> returnValue{ arr[addr] };
-    for (uint8_t i = 1; i < sizeof(SizedUInt<S>); ++i) {
+template<typename U, typename T, size_t N>
+U rawRead(const std::array<T, N>& arr, const u32 addr) {
+    U returnValue{ arr[addr] };
+    for (u8 i = 1; i < sizeof(U); ++i) {
         returnValue <<= 8;
         returnValue |= arr[addr + i];
     }
     return returnValue;
 }
 
-template<size_t S, typename T, size_t N>
-void rawWrite(std::array<T, N>& arr, const uint32_t addr, const SizedUInt<S> value) {
-    constexpr uint8_t bitsByByte{ std::numeric_limits<uint8_t>::digits };
-    constexpr uint8_t offset{ std::numeric_limits<SizedUInt<S>>::digits };
-    for (uint8_t i = 0; i <= sizeof(SizedUInt<S>) - 1; ++i) {
+template<typename U, typename T, size_t N>
+void rawWrite(std::array<T, N>& arr, const u32 addr, const U value) {
+    constexpr u8 bitsByByte{ std::numeric_limits<u8>::digits };
+    constexpr u8 offset{ std::numeric_limits<U>::digits };
+    for (u8 i = 0; i <= sizeof(U) - 1; ++i) {
         arr[addr + i] = (value >> (offset - (bitsByByte * i + bitsByByte))) & 0xff;
     }
 }
@@ -94,64 +103,73 @@ void rawWrite(std::array<T, N>& arr, const uint32_t addr, const SizedUInt<S> val
 // Handlers
 
 // Dummy handlers
-template<size_t S>
-void writeDummy(Memory& m, const uint32_t addr, const SizedUInt<S> data) {
-    core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), S, addr, data));
-}
+//template<typename T>
+//void writeDummy(Memory& m, const u32 addr, const T data) {
+//    core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
+//}
 
-template<size_t S>
-SizedUInt<S> readDummy(const Memory& m, const uint32_t addr) {
-    core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), S, addr));
-    return SizedUInt<S>{};
-}
+/*template<typename T>
+T readDummy(const Memory& m, const u32 addr) {
+    core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
+    return T{};
+}*/
+//template<typename T>
+//struct readDummy {
+//    operator Memory::ReadType<T>() const {
+//        return [](const u32 addr) -> T {
+//            core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
+//            return T{};
+//        };
+//    }
+//};
 
 // ROM handlers
-template<size_t S>
-SizedUInt<S> readRom(const Memory& m, const uint32_t addr) {
+template<typename T>
+T readRom(const Memory& m, const u32 addr) {
     return rawRead<S>(m.rom, addr & 0x7FFFF);
 }
 
 // SMPC handlers
-template<size_t S>
-SizedUInt<S> readSmpc(const Memory& m, const uint32_t addr) {
+template<typename T>
+T readSmpc(const Memory& m, const u32 addr) {
     return rawRead<S>(m.smpc, addr & 0x7F);
 }
 
 // Specialization for 8 bits data.
-inline SizedUInt<8> readSmpc(const Memory& m, const uint32_t addr) {
+inline u8 readSmpc(const Memory& m, const u32 addr) {
     core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
     return 0;
 }
 
-template<size_t S>
-void writeSmpc(Memory& m, const uint32_t addr, const SizedUInt<S> data) {
+template<typename T>
+void writeSmpc(Memory& m, const u32 addr, const T data) {
     rawWrite<S>(m.smpc, addr & 0x7F, data);
 }
 
 // Specialization for 8 bits data.
-inline void writeSmpc(Memory& m, const uint32_t addr, const SizedUInt<8> data) {
+inline void writeSmpc(Memory& m, const u32 addr, const u8 data) {
     core::Log::warning("memory", fmt::format(core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data));
 }
 
 // Backup RAM handlers
-template<size_t S>
-SizedUInt<S> readBackupRam(const Memory& m, const uint32_t addr) {
+template<typename T>
+T readBackupRam(const Memory& m, const u32 addr) {
     return rawRead<S>(m.backup_ram, addr & 0xFFFF);
 }
 
-template<size_t S>
-void writeBackupRam(Memory& m, const uint32_t addr, const SizedUInt<S> data) {
+template<typename T>
+void writeBackupRam(Memory& m, const u32 addr, const T data) {
     rawWrite<S>(m.backup_ram, addr & 0xFFFF, data);
 }
 
 // Low workram handlers
-template<size_t S>
-SizedUInt<S> readWorkramLow(const Memory& m, const uint32_t addr) {
+template<typename T>
+T readWorkramLow(const Memory& m, const u32 addr) {
     return rawRead<S>(m.workram_low, addr & 0xFFFFF);
 }
 
-template<size_t S>
-void writeWorkramLow(Memory& m, const uint32_t addr, const SizedUInt<S> data) {
+template<typename T>
+void writeWorkramLow(Memory& m, const u32 addr, const T data) {
     rawWrite<S>(m.workram_low, addr & 0xFFFFF, data);
 }
 

@@ -33,10 +33,10 @@ namespace core {
 
 bool Memory::loadRom(const std::string& zip_name,
                     const std::string&  file_name,
-                    uint8_t*	   destination,
-                    const uint32_t size,
+                    u8*	   destination,
+                    const u32 size,
                     const Rom_load rom_load,
-                    const uint8_t  times_mirrored,
+                    const u8  times_mirrored,
                     const Rom_type rom_type) {
 
     std::string zip = zip_name + ".zip";
@@ -48,13 +48,13 @@ bool Memory::loadRom(const std::string& zip_name,
     if (zf.open(lzpp::ZipArchive::READ_ONLY)) {
         if (zf.hasEntry(file_name, false, false)) {
             lzpp::ZipEntry entry = zf.getEntry(file_name, false, false);
-            std::unique_ptr<uint8_t[]> data(static_cast<uint8_t*>(entry.readAsBinary()));
+            std::unique_ptr<u8[]> data(static_cast<u8*>(entry.readAsBinary()));
 
             switch (rom_type) {
                 case Rom_type::bios: {
-                    uint32_t counter = size / 4;
+                    u32 counter = size / 4;
                     // Needs byteswapping
-                    for (uint32_t i = 0; i < counter; ++i) {
+                    for (u32 i = 0; i < counter; ++i) {
                         destination[i * 4 + 1] = data[i * 4 + 0];
                         destination[i * 4 + 0] = data[i * 4 + 1];
                         destination[i * 4 + 3] = data[i * 4 + 2];
@@ -64,8 +64,8 @@ bool Memory::loadRom(const std::string& zip_name,
                 }
                 case Rom_type::program:
                 case Rom_type::graphic: {
-                    const uint32_t stv_bios_region_address = 0x808;
-                    uint32_t region_cart_address{};
+                    const u32 stv_bios_region_address = 0x808;
+                    u32 region_cart_address{};
                     switch (rom_load) {
                         case Rom_load::not_interleaved: {
                             const auto &src_begin = data.get();
@@ -75,7 +75,7 @@ bool Memory::loadRom(const std::string& zip_name,
                             break;
                         }
                         case Rom_load::odd_interleaved: {  // Data is loaded on odd bytes only
-                            for (uint32_t i = 0; i < size; ++i) {
+                            for (u32 i = 0; i < size; ++i) {
                                 destination[(i * 2 + 1)] = data[i];
                             }
 
@@ -83,7 +83,7 @@ bool Memory::loadRom(const std::string& zip_name,
                             break;
                         }
                         case Rom_load::even_interleaved: { // Data is loaded on even bytes only
-                            for (uint32_t i = 0; i < size; ++i) {
+                            for (u32 i = 0; i < size; ++i) {
                                 destination[i * 2] = data[i];
                             }
 
@@ -174,12 +174,12 @@ bool Memory::loadStvGame(const std::string& config_filename) {
     const std::string release_date    = stv.readValue(core::Access_keys::stv_release_date);
     const std::string region          = stv.readValue(core::Access_keys::stv_region);
     const libconfig::Setting& files   = stv.readValue(core::Access_keys::stv_files);
-    for (uint8_t i=0; i < files.getLength(); ++i) {
+    for (u8 i=0; i < files.getLength(); ++i) {
         const std::string rom_name      = files[i][0];
-        const uint32_t    load_address  = files[i][1];
-        const uint32_t    load_size     = files[i][2];
+        const u32    load_address  = files[i][1];
+        const u32    load_size     = files[i][2];
         const auto        rom_load      = Config::rom_load[files[i][3]];
-        const uint32_t    times_mirrored= files[i][4];
+        const u32    times_mirrored= files[i][4];
         const auto        rom_type      = Config::rom_type[files[i][5]];
         if (!this->loadRom(zip_name,
                            rom_name,
@@ -198,22 +198,22 @@ bool Memory::loadStvGame(const std::string& config_filename) {
 }
 
 void Memory::swapCartArea() {
-    const uint32_t program_rom_size = 0x400000;
+    const u32 program_rom_size = 0x400000;
 
     // ST-V data begins with 'SEGA' string.
     // If the first byte of the string is 'E', it means the program data has to be swapped
     if (this->cart[0] == 'E') {
-        for (uint32_t i = 0; i < program_rom_size; i += 2) {
+        for (u32 i = 0; i < program_rom_size; i += 2) {
             std::swap(this->cart[i], this->cart[i + 1]);
         }
     }
 
-    for (uint32_t i = program_rom_size; i < this->cart.size(); i += 2) {
+    for (u32 i = program_rom_size; i < this->cart.size(); i += 2) {
         std::swap(this->cart[i], this->cart[i + 1]);
     }
 }
 
-void Memory::initializeHandlers() {
+void Memory::initializeHandlers2() {
     // Dummy access
     //initializeReadHandler<8>( 0x00000000, 0xFFFFFFFF, readDummy<8>);
     //initializeReadHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
@@ -224,12 +224,17 @@ void Memory::initializeHandlers() {
 
     //initializeReadHandler(0x00000000, 0xFFFFFFFF, readDummy<8>);
 
-    initializeHandler<8>(0x00000000, 0xFFFFFFFF, readDummy<8>);
-    initializeHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
-    initializeHandler<32>(0x00000000, 0xFFFFFFFF, readDummy<32>);
-    initializeHandler<8>(0x00000000, 0xFFFFFFFF, writeDummy<8>);
-    initializeHandler<16>(0x00000000, 0xFFFFFFFF, writeDummy<16>);
-    initializeHandler<32>(0x00000000, 0xFFFFFFFF, writeDummy<32>);
+    //initializeHandler(0x00000000, 0xFFFFFFFF, readDummy<u8>);
+    //initializeHandler(0x00000000, 0xFFFFFFFF, readDummy<u16>);
+    //initializeHandler(0x00000000, 0xFFFFFFFF, readDummy<u32>);
+    initializeHandlers<readDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
+
+    //initializeHandler(0x00000000, 0xFFFFFFFF, writeDummy<u8>);
+    //initializeHandler(0x00000000, 0xFFFFFFFF, writeDummy<u16>);
+    //initializeHandler(0x00000000, 0xFFFFFFFF, writeDummy<u32>);
+    
+    initializeWriteHandlers<writeDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
+
 
     //// ROM access
     //initializeReadHandler<8>( 0x00000000, 0x000FFFFF, readRom<8>);
@@ -528,15 +533,15 @@ void Memory::initializeHandlers() {
     //MapMemoryTableReadLong(0x80000000, 0x8FFFFFFF, &CacheDataReadLong);
 }
 
-void mirrorData(uint8_t* data, const uint32_t size, const uint8_t times_mirrored, const Rom_load rom_load) {
+void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const Rom_load rom_load) {
     if (times_mirrored > 0) {
-        uint32_t multiple{};
+        u32 multiple{};
         switch (rom_load) {
             case Rom_load::not_interleaved: multiple = 1; break;
             case Rom_load::even_interleaved:multiple = 2; break;
             case Rom_load::odd_interleaved: multiple = 2; break;
         }
-        for (uint8_t i = 1; i <= times_mirrored; ++i) {
+        for (u8 i = 1; i <= times_mirrored; ++i) {
             std::copy(data, data + size * multiple - 1, data + (i*size*multiple));
         }
     }
