@@ -227,7 +227,7 @@ void Memory::initializeHandlers2() {
     //initializeHandler(0x00000000, 0xFFFFFFFF, readDummy<u8>);
     //initializeHandler(0x00000000, 0xFFFFFFFF, readDummy<u16>);
     //initializeHandler(0x00000000, 0xFFFFFFFF, readDummy<u32>);
-    initializeHandlers<readDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
+    initializeReadHandlers<readDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
 
     //initializeHandler(0x00000000, 0xFFFFFFFF, writeDummy<u8>);
     //initializeHandler(0x00000000, 0xFFFFFFFF, writeDummy<u16>);

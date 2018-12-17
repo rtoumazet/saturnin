@@ -267,7 +267,7 @@ private:
     void initializeHandler(u32 begin, u32 end, ReadType<T> func);
 
     template <template <class> class ReadType, class... T>
-    auto initializeHandlers(u32 begin, u32 end);
+    auto initializeReadHandlers(u32 begin, u32 end);
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::initializeHandler(u32 begin, u32 end, WriteType<T> func);
@@ -381,7 +381,7 @@ void rawWrite(std::array<T, N>& arr, const u32 addr, const U value);
 
 template<typename T>
 struct writeDummy {
-    operator Memory::WriteType<T>() {
+    operator Memory::WriteType<T>() const {
         return [](const Memory& m, const u32 addr, const T data) {
             core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
         };
