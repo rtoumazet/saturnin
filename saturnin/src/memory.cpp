@@ -213,39 +213,21 @@ void Memory::swapCartArea() {
     }
 }
 
-void Memory::initializeHandlers2() {
+void Memory::initializeHandlers() {
     // Dummy access
-    //initializeReadHandler<8>( 0x00000000, 0xFFFFFFFF, readDummy<8>);
-    //initializeReadHandler<16>(0x00000000, 0xFFFFFFFF, readDummy<16>);
-    //initializeReadHandler<32>(0x00000000, 0xFFFFFFFF, readDummy<32>);
-    //initializeWriteHandler<8>(0x00000000, 0xFFFFFFFF, writeDummy<8>);
-    //initializeWriteHandler<16>(0x00000000, 0xFFFFFFFF, writeDummy<16>);
-    //initializeWriteHandler<32>(0x00000000, 0xFFFFFFFF, writeDummy<32>);
-
-    //initializeReadHandler(0x00000000, 0xFFFFFFFF, readDummy<8>);
-
-    //initializeHandler(0x00000000, 0xFFFFFFFF, readDummy<u8>);
-    //initializeHandler(0x00000000, 0xFFFFFFFF, readDummy<u16>);
-    //initializeHandler(0x00000000, 0xFFFFFFFF, readDummy<u32>);
     initializeReadHandlers<readDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
-
-    //initializeHandler(0x00000000, 0xFFFFFFFF, writeDummy<u8>);
-    //initializeHandler(0x00000000, 0xFFFFFFFF, writeDummy<u16>);
-    //initializeHandler(0x00000000, 0xFFFFFFFF, writeDummy<u32>);
-    
     initializeWriteHandlers<writeDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
 
 
-    //// ROM access
-    //initializeReadHandler<8>( 0x00000000, 0x000FFFFF, readRom<8>);
-    //initializeReadHandler<16>(0x00000000, 0x000FFFFF, readRom<16>);
-    //initializeReadHandler<32>(0x00000000, 0x000FFFFF, readRom<32>);
-    //
-    //initializeReadHandler<8>( 0x20000000, 0x200FFFFF, readRom<8>);
-    //initializeReadHandler<16>(0x20000000, 0x200FFFFF, readRom<16>);
-    //initializeReadHandler<32>(0x20000000, 0x200FFFFF, readRom<32>);
+    // ROM access
+    initializeReadHandlers<readRom, u8, u16, u32>(0x00000000, 0x000FFFFF);
+    initializeReadHandlers<readRom, u8, u16, u32>(0x20000000, 0x200FFFFF);
 
-    //// SMPC access
+    // SMPC access
+    initializeReadHandlers<readSmpc, u8, u16, u32>(0x00100000, 0x0017FFFF);
+    initializeReadHandlers<readSmpc, u8, u16, u32>(0x20100000, 0x2017FFFF);
+
+    
     //initializeReadHandler<8>( 0x00100000, 0x0017FFFF, readSmpc<8>);
     //initializeReadHandler<16>(0x00100000, 0x0017FFFF, readSmpc<16>);
     //initializeReadHandler<32>(0x00100000, 0x0017FFFF, readSmpc<32>);
