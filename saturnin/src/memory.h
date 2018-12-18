@@ -87,7 +87,7 @@ public:
     // Constructors / Destructors
     Memory()                           = delete;
     Memory(std::shared_ptr<Config> config) : config_(config) {
-        initializeHandlers2();
+        initializeHandlers();
     };
     Memory(const Memory&)              = delete;
     Memory(Memory&&)                   = delete;
@@ -235,7 +235,7 @@ public:
     void write(const u32 addr, const T data);
 
 private:
-    void initializeHandlers2();
+    void initializeHandlers();
     
     std::shared_ptr<Config> config_;    ///< Configuration object
 
@@ -363,51 +363,35 @@ void rawWrite(std::array<T, N>& arr, const u32 addr, const U value);
 // Handlers
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void writeDummy(const Memory& m, const u32 addr, const T data)
+/// \struct writeDummy
 ///
-/// \brief  Dummy write handler.
+/// \brief  Write dummy handler.
 ///
 /// \author Runik
-/// \date   01/11/2018
+/// \date   18/12/2018
 ///
-/// \tparam T       Type of data.
-/// \param  m       Memory to process.
-/// \param  addr    Address to write to.
-/// \param  data    Data to write.
+/// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//template<typename T>
-//void writeDummy(Memory& m, const u32 addr, const T data);
 
 template<typename T>
 struct writeDummy {
     operator Memory::WriteType<T>() const {
-        return [](const Memory& m, const u32 addr, const T data) {
+        return [](Memory& m, const u32 addr, const T data) {
             core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
         };
     }
 };
-//void writeDummy(Memory& m, const u32 addr, const T data) {
-//    core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
-//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> T readDummy(const Memory& m, const u32 addr)
+/// \struct readDummy
 ///
-/// \brief  Dummy read handler.
+/// \brief  Read dummy handler.
 ///
 /// \author Runik
 /// \date   01/11/2018
 ///
-/// \tparam S       Size of the data in bits.
-/// \param  m       Memory to process.
-/// \param  addr    Address to read.
-///
-/// \return Data read.
+/// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//template<typename T>
-//T readDummy(const Memory& m, const u32 addr);
 
 template<typename T>
 struct readDummy {
@@ -420,22 +404,22 @@ struct readDummy {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> T readRom(const Memory& m, const u32 addr)
+/// \struct readRom
 ///
 /// \brief  ROM read handler.
 ///
 /// \author Runik
 /// \date   01/11/2018
 ///
-/// \tparam T       Type of data.
-/// \param  m       Memory to process.
-/// \param  addr    Address to read.
-///
-/// \return Data read.
+/// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-T readRom(const Memory& m, const u32 addr);
+struct readRom{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.rom, addr & 0x7FFFF);};
+    }
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T> T readSmpc(const Memory& m, const u32 addr)
@@ -452,8 +436,43 @@ T readRom(const Memory& m, const u32 addr);
 /// \return Data read.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//template<typename T>
+//T readSmpc(const Memory& m, const u32 addr);
+
+//// SMPC handlers
+//template<typename T>
+//T readSmpc(const Memory& m, const u32 addr) {
+//    return rawRead<S>(m.smpc, addr & 0x7F);
+//}
+
 template<typename T>
-T readSmpc(const Memory& m, const u32 addr);
+struct readSmpc{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T { 
+            return rawRead<T>(m.smpc, addr & 0x7F); 
+        };
+    }
+    
+    // Specialization for 8 bits data.
+    operator Memory::ReadType<u8>() const {
+        return [](const Memory& m, const u32 addr) -> u8 {
+            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
+            return 0;
+        };
+    }
+};
+
+// Specialization for 8 bits data.
+//template<typename T>
+//struct readSmpc {
+//    operator Memory::ReadType<u8>() const {
+//        return [](const Memory& m, const u32 addr) -> u8 { 
+//            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
+//            return 0;
+//        };
+//    }
+//};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T> void writeSmpc(Memory& m, const u32 addr, const T data)

@@ -102,44 +102,17 @@ void rawWrite(std::array<T, N>& arr, const u32 addr, const U value) {
 
 // Handlers
 
-// Dummy handlers
+//// SMPC handlers
 //template<typename T>
-//void writeDummy(Memory& m, const u32 addr, const T data) {
-//    core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
+//T readSmpc(const Memory& m, const u32 addr) {
+//    return rawRead<S>(m.smpc, addr & 0x7F);
 //}
 
-/*template<typename T>
-T readDummy(const Memory& m, const u32 addr) {
-    core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
-    return T{};
-}*/
-//template<typename T>
-//struct readDummy {
-//    operator Memory::ReadType<T>() const {
-//        return [](const u32 addr) -> T {
-//            core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
-//            return T{};
-//        };
-//    }
-//};
-
-// ROM handlers
-template<typename T>
-T readRom(const Memory& m, const u32 addr) {
-    return rawRead<S>(m.rom, addr & 0x7FFFF);
-}
-
-// SMPC handlers
-template<typename T>
-T readSmpc(const Memory& m, const u32 addr) {
-    return rawRead<S>(m.smpc, addr & 0x7F);
-}
-
-// Specialization for 8 bits data.
-inline u8 readSmpc(const Memory& m, const u32 addr) {
-    core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
-    return 0;
-}
+//// Specialization for 8 bits data.
+//inline u8 readSmpc(const Memory& m, const u32 addr) {
+//    core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
+//    return 0;
+//}
 
 template<typename T>
 void writeSmpc(Memory& m, const u32 addr, const T data) {
