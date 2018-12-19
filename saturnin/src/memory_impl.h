@@ -59,14 +59,9 @@ template<typename T>
     }
 }
 
-template <template <class> class ReadType, class... T>
-auto Memory::initializeReadHandlers(u32 begin, u32 end) {
-    (initializeHandler<T>(begin, end, ReadType<T>{}), ...);
-}
-
-template <template <class> class WriteType, class... T>
-auto Memory::initializeWriteHandlers(u32 begin, u32 end) {
-    (initializeHandler<T>(begin, end, WriteType<T>{}), ...);
+template <template <class> class OpType, class... T>
+auto Memory::initializeHandlers(u32 begin, u32 end) {
+    (initializeHandler<T>(begin, end, OpType<T>{}), ...);
 }
 
 template<typename T>
