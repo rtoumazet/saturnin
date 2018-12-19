@@ -267,7 +267,7 @@ private:
     void initializeHandler(u32 begin, u32 end, ReadType<T> func);
 
     template <template <class> class ReadType, class... T>
-    auto initializeReadHandlers(u32 begin, u32 end);
+    auto initializeHandlers(u32 begin, u32 end);
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::initializeHandler(u32 begin, u32 end, WriteType<T> func);
@@ -286,8 +286,8 @@ private:
     template<typename T>
     void initializeHandler(u32 begin, u32 end, WriteType<T> func);
 
-    template <template <class> class WriteType, class... T>
-    auto initializeWriteHandlers(u32 begin, u32 end);
+    //template <template <class> class WriteType, class... T>
+    //auto initializeWriteHandlers(u32 begin, u32 end);
 
 };
 
@@ -452,8 +452,11 @@ struct readSmpc{
             return rawRead<T>(m.smpc, addr & 0x7F); 
         };
     }
-    
-    // Specialization for 8 bits data.
+};
+
+// Specialization for 8 bits data.
+template<>
+struct readSmpc<uint8_t> {
     operator Memory::ReadType<u8>() const {
         return [](const Memory& m, const u32 addr) -> u8 {
             core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));

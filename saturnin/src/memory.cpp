@@ -215,17 +215,17 @@ void Memory::swapCartArea() {
 
 void Memory::initializeHandlers() {
     // Dummy access
-    initializeReadHandlers<readDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
-    initializeWriteHandlers<writeDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
+    initializeHandlers<readDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
+    initializeHandlers<writeDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
 
 
     // ROM access
-    initializeReadHandlers<readRom, u8, u16, u32>(0x00000000, 0x000FFFFF);
-    initializeReadHandlers<readRom, u8, u16, u32>(0x20000000, 0x200FFFFF);
+    initializeHandlers<readRom, u8, u16, u32>(0x00000000, 0x000FFFFF);
+    initializeHandlers<readRom, u8, u16, u32>(0x20000000, 0x200FFFFF);
 
     // SMPC access
-    initializeReadHandlers<readSmpc, u8, u16, u32>(0x00100000, 0x0017FFFF);
-    initializeReadHandlers<readSmpc, u8, u16, u32>(0x20100000, 0x2017FFFF);
+    //initializeHandlers<readSmpc, u8, u16, u32>(0x00100000, 0x0017FFFF);
+    //initializeHandlers<readSmpc, u8, u16, u32>(0x20100000, 0x2017FFFF);
 
     
     //initializeReadHandler<8>( 0x00100000, 0x0017FFFF, readSmpc<8>);
