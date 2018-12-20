@@ -143,9 +143,6 @@
     <ClInclude Include="src\cdrom\iso9660.h">
       <Filter>Fichiers sources\cdrom</Filter>
     </ClInclude>
-    <ClInclude Include="src\memory_impl.h">
-      <Filter>Fichiers sources</Filter>
-    </ClInclude>
     <ClInclude Include="src\emulator_defs.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
