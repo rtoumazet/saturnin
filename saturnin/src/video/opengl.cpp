@@ -258,7 +258,7 @@ int32_t Opengl::bindTextureToFramebuffer() {
 }
 
 int32_t Opengl::calculateLegacyRendering() {
-    static int i = 0;
+    static float i = 0;
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 0.0f);
     glRotatef(i, 0.0f, 0.0f, 1.0f);

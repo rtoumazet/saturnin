@@ -216,12 +216,14 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    T read(const u32 addr);
-
+    T read(const u32 addr) {
+        auto& handler = std::get < ReadHandler<T>& >(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
+        return handler[addr >> 16](*this, addr);
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::write(const u32 addr, const T data);
     ///
-    /// \brief  Writes.
+    /// \brief  Saturn memory global write method.
     ///
     /// \author Runik
     /// \date   04/11/2018
@@ -232,7 +234,10 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    void write(const u32 addr, const T data);
+    void write(const u32 addr, const T data) {
+        auto& handler = std::get < WriteHandler<T>& >(std::tie(write_8_handler_, write_16_handler_, write_32_handler_));
+        handler[addr >> 16](*this, addr, data);
+    }
 
 private:
     void initializeHandlers();
@@ -264,11 +269,19 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    void initializeHandler(u32 begin, u32 end, ReadType<T> func);
+    void initializeHandler(u32 begin,
+                                   u32 end,
+                                   ReadType<T> func) {
+        begin >>= 16;
+        end >>= 16;
 
-    template <template <class> class ReadType, class... T>
-    auto initializeHandlers(u32 begin, u32 end);
-    
+        auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
+        for (u32 current = begin; current <= end; ++current) {
+            auto& handler = std::get < ReadHandler<T>& >(t);
+            handler[current & 0xFFFF] = func;
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::initializeHandler(u32 begin, u32 end, WriteType<T> func);
     ///
@@ -284,10 +297,37 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    void initializeHandler(u32 begin, u32 end, WriteType<T> func);
+    void initializeHandler(u32 begin,
+                                   u32 end,
+                                   WriteType<T> func) {
+        begin >>= 16;
+        end >>= 16;
 
-    //template <template <class> class WriteType, class... T>
-    //auto initializeWriteHandlers(u32 begin, u32 end);
+        auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
+        for (u32 current = begin; current <= end; ++current) {
+            auto& handler = std::get < WriteHandler<T>& >(t);
+            handler[current & 0xFFFF] = func;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template <template <class> class OpType, class... T> auto Memory::initializeHandlers(u32 begin, u32 end)
+    ///
+    /// \brief  Initializes a group of handlers.
+    ///
+    /// \author Runik
+    /// \date   20/12/2018
+    ///
+    /// \param  begin   Start address.
+    /// \param  end     End address.
+    ///
+    /// \return An auto.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <template <class> class OpType, class... T>
+    auto initializeHandlers(u32 begin, u32 end) {
+        (initializeHandler<T>(begin, end, OpType<T>{}), ...);
+    }
 
 };
 
@@ -324,41 +364,58 @@ void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const Rom_loa
 std::vector<std::string> listStvConfigurationFiles();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn U read(const std::array<T, N>& arr, const u32 addr)
+/// \fn template<typename T, typename U, size_t N> T rawRead(const std::array<U, N>& arr, const u32 addr)
 ///
-/// \brief  Reads a value from an array.
-///         Maps 8, 16 and 32 to u8, uint16_t and u32, respectively
-///         Usage : auto val = read<32>(memory, 0);
-///         
+/// \brief  Reads a value from an array. 
+///         Usage : auto val = read<u32>(memory, 0);
+///
 /// \author Runik
 /// \date   07/06/2018
 ///
-/// \param  arr The array to read from.
-/// \param  adr The address.
+/// \tparam T   Type of data to read.
+/// \tparam U   Type of data stored in the array.
+/// \tparam N   Size of the array.
+/// \param  arr     The array to read from.
+/// \param  addr    The address to read data from.
 ///
-/// \return Data read
+/// \return Data read.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename U, typename T, size_t N>
-U rawRead(const std::array<T, N>& arr, const u32 addr);
+template<typename T, typename U, size_t N>
+T rawRead(const std::array<U, N>& arr, const u32 addr) {
+    T returnValue{ arr[addr] };
+    for (u8 i = 1; i < sizeof(T); ++i) {
+        returnValue <<= 8;
+        returnValue |= arr[addr + i];
+    }
+    return returnValue;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void write(std::array<T, N>& arr, u32 adr, U value)
+/// \fn template<typename T, typename U, size_t N> void rawWrite(std::array<U, N>& arr, const u32 addr, const T value)
 ///
-/// \brief  Writes a value to an array.
-///         Maps 8, 16 and 32 to u8, uint16_t and u32, respectively.
-///         Usage : write<32>(memory, 0, 0x12345678);
-///         
+/// \brief  Writes a value to an array. Maps 8, 16 and 32 to u8, uint16_t and u32, respectively.
+///         Usage : write&lt;32&gt;(memory, 0, 0x12345678);
+///
 /// \author Runik
 /// \date   07/06/2018
 ///
+/// \tparam T   Type of data to write.
+/// \tparam U   Type of data stored in the array.
+/// \tparam N   Size of the array.
 /// \param [in,out] arr     The array to write to.
-/// \param          adr     The address to write data to in the array.
+/// \param          addr    The address to write data to.
 /// \param          value   The value to write.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename U, typename T, size_t N>
-void rawWrite(std::array<T, N>& arr, const u32 addr, const U value);
+template<typename T, typename U, size_t N>
+void rawWrite(std::array<U, N>& arr, const u32 addr, const T value) {
+    constexpr u8 bitsByByte{ std::numeric_limits<u8>::digits };
+    constexpr u8 offset{ std::numeric_limits<T>::digits };
+    for (u8 i = 0; i <= sizeof(T) - 1; ++i) {
+        arr[addr + i] = (value >> (offset - (bitsByByte * i + bitsByByte))) & 0xff;
+    }
+}
 
 // Handlers
 
@@ -422,28 +479,15 @@ struct readRom{
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> T readSmpc(const Memory& m, const u32 addr)
+/// \struct readSmpc
 ///
 /// \brief  SMPC read handler.
 ///
 /// \author Runik
 /// \date   01/11/2018
 ///
-/// \tparam T       Type of data.
-/// \param  m       Memory to process.
-/// \param  addr    Address to read.
-///
-/// \return Data read.
+/// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//template<typename T>
-//T readSmpc(const Memory& m, const u32 addr);
-
-//// SMPC handlers
-//template<typename T>
-//T readSmpc(const Memory& m, const u32 addr) {
-//    return rawRead<S>(m.smpc, addr & 0x7F);
-//}
 
 template<typename T>
 struct readSmpc{
@@ -465,106 +509,174 @@ struct readSmpc<uint8_t> {
     }
 };
 
-// Specialization for 8 bits data.
-//template<typename T>
-//struct readSmpc {
-//    operator Memory::ReadType<u8>() const {
-//        return [](const Memory& m, const u32 addr) -> u8 { 
-//            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
-//            return 0;
-//        };
-//    }
-//};
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void writeSmpc(Memory& m, const u32 addr, const T data)
+/// \struct writeSmpc
 ///
 /// \brief  SMPC write handler.
 ///
 /// \author Runik
 /// \date   01/11/2018
 ///
-/// \tparam T       Type of data.
-/// \param  m       Memory to process.
-/// \param  addr    Address to write to.
-/// \param  data    Data to write.
+/// \tparam T   type of data to write (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-void writeSmpc(Memory& m, const u32 addr, const T data);
+struct writeSmpc {
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.smpc, addr & 0x7F, data);
+        };
+    }
+};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> T readBackupRam(const Memory& m, const u32 addr);
-///
-/// \brief  Backup RAM read handler.
-///
-/// \author Runik
-/// \date   04/11/2018
-///
-/// \tparam T       Type of data.
-/// \param  m       Memory to process.
-/// \param  addr    Address to read.
-///
-/// \return Data read.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+// Specialization for 8 bits data.
+template<>
+struct writeSmpc<uint8_t> {
+    operator Memory::WriteType<u8>() const {
+        return [](Memory& m, const u32 addr, const u8 data) {
+            core::Log::warning("memory", fmt::format(core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data));
+        };
+    }
+};
 
-template<typename T>
-T readBackupRam(const Memory& m, const u32 addr);
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
+ /// \struct    readBackupRam
+ ///
+ /// \brief Backup RAM read handler.
+ ///
+ /// \author    Runik
+ /// \date  04/11/2018
+ ///
+ /// \tparam T   type of data to read (u8, u16 or u32).
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void writeBackupRam(Memory& m, const u32 addr, const T data)
-///
-/// \brief  Backup RAM write handler.
-///
-/// \author Runik
-/// \date   04/11/2018
-///
-/// \tparam T       Type of data.
-/// \param  m       Memory to process.
-/// \param  addr    Address to write to.
-/// \param  data    Data to write.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+ template<typename T>
+ struct readBackupRam {
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.backup_ram, addr & 0xFFFF);
+        };
+    }
+ };
 
-template<typename T>
-void writeBackupRam(Memory& m, const u32 addr, const T data);
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
+ /// \struct    writeBackupRam
+ ///
+ /// \brief Backup RAM write handler.
+ ///
+ /// \author    Runik
+ /// \date  04/11/2018
+ ///
+ /// \tparam T   type of data to write (u8, u16 or u32).
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> T readWorkramLow(const Memory& m, const u32 addr);
-///
-/// \brief  Low workram read handler.
-///
-/// \author Runik
-/// \date   06/11/2018
-///
-/// \tparam T       Type of data.
-/// \param  m       Memory to process.
-/// \param  addr    Address to read.
-///
-/// \return Data read.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+ template<typename T>
+ struct writeBackupRam {
+     operator Memory::WriteType<T>() const {
+         return [](Memory& m, const u32 addr, const T data) {
+             rawWrite<T>(m.backup_ram, addr & 0xFFFF, data);
+         };
+     }
+ };
 
-template<typename T>
-T readWorkramLow(const Memory& m, const u32 addr);
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
+ /// \struct    readWorkramLow
+ ///
+ /// \brief Low workram read handler.
+ ///
+ /// \author    Runik
+ /// \date  06/11/2018
+ ///
+ /// \tparam T   type of data to read (u8, u16 or u32).
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void writeWorkramLow(Memory& m, const u32 addr, const T data)
-///
-/// \brief  Low workram write handler.
-///
-/// \author Runik
-/// \date   06/11/2018
-///
-/// \tparam T       Type of data.
-/// \param  m       Memory to process.
-/// \param  addr    Address to write to.
-/// \param  data    Data to write.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+ template<typename T>
+ struct readWorkramLow {
+     operator Memory::ReadType<T>() const {
+         return [](const Memory& m, const u32 addr) -> T {
+             return rawRead<T>(m.workram_low, addr & 0xFFFFF);
+         };
+     }
+ };
 
-template<typename T>
-void writeWorkramLow(Memory& m, const u32 addr, const T data);
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
+ /// \struct    writeWorkramLow
+ ///
+ /// \brief Low workram write handler.
+ ///
+ /// \author    Runik
+ /// \date  06/11/2018
+ ///
+ /// \tparam T   type of data to write (u8, u16 or u32).
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ template<typename T>
+ struct writeWorkramLow {
+     operator Memory::WriteType<T>() const {
+         return [](Memory& m, const u32 addr, const T data) {
+             rawWrite<T>(m.workram_low, addr & 0xFFFFF, data);
+         };
+     }
+ };
+
+ template<typename T>
+ struct readStvIo{
+     operator Memory::ReadType<T>() const {
+         return [](const Memory& m, const u32 addr) -> T {
+             return rawRead<T>(m.stv_io, addr & 0xFF);
+         };
+     }
+ };
+
+ // Specialization for 8 bits data.
+ template<>
+ struct readStvIo<uint8_t> {
+     operator Memory::ReadType<u8>() const {
+         return [](const Memory& m, const u32 addr) -> u8 {
+             u8 data{};
+             if ((addr & 0x00FFFFFF) == 0x400001)
+             {
+                 if (GetAsyncKeyState(0x58) & 0x8000) data |= 0x01; //p1 A
+                 if (GetAsyncKeyState(0x46) & 0x8000) data |= 0x02; //p1 B
+                 if (GetAsyncKeyState(0x44) & 0x8000) data |= 0x04; //p1 C
+                 if (GetAsyncKeyState(0x53) & 0x8000) data |= 0x08; //p1 D
+                 if (GetAsyncKeyState(VK_DOWN) & 0x8000) data |= 0x10; //p1 DOWN
+                 if (GetAsyncKeyState(VK_UP) & 0x8000) data |= 0x20; //p1 UP
+                 if (GetAsyncKeyState(VK_LEFT) & 0x8000) data |= 0x80; //p1 LEFT
+                 if (GetAsyncKeyState(VK_RIGHT) & 0x8000) data |= 0x40; //p1 RIGHT
+             }
+             else if ((addr & 0x00FFFFFF) == 0x400003)
+             {
+                 //if (GetAsyncKeyState(VK_X)&0x8000) data|=0x01; //p2 A
+                 //if (GetAsyncKeyState(VK_F)&0x8000) data|=0x02; //p2 B
+                 //if (GetAsyncKeyState(VK_D)&0x8000) data|=0x04; //p2 C
+                 //if (GetAsyncKeyState(VK_S)&0x8000) data|=0x08; //p2 D
+                 //if (GetAsyncKeyState(VK_DOWN)&0x8000) data|=0x10; //p2 DOWN
+                 //if (GetAsyncKeyState(VK_UP)&0x8000) data|=0x20; //p2 UP
+                 //if (GetAsyncKeyState(VK_LEFT)&0x8000) data|=0x80; //p2 LEFT
+                 //if (GetAsyncKeyState(VK_RIGHT)&0x8000) data|=0x40; //p2 RIGHT
+             }
+             else if ((addr & 0x00FFFFFF) == 0x400005)
+             {
+                 if (GetAsyncKeyState(VK_F3) & 0x8000) data |= 0x01; // P1 Coin 
+                 //if (GetAsyncKeyState(VK_4)&0x8000) data|=0x02; // P2 Coin
+                 //if (GetAsyncKeyState(VK_F1)&0x8000) data|=0x04; // Test
+                 //if (GetAsyncKeyState(VK_F2)&0x8000) data|=0x08; // Service
+                 if (GetAsyncKeyState(VK_F4) & 0x8000) data |= 0x10; // P1 Start
+                 //if (GetAsyncKeyState(VK_2)&0x8000) data|=0x20; // P2 Start
+                 //if (GetAsyncKeyState(VK_7)&0x8000) data|=0x40;
+                 //if (GetAsyncKeyState(VK_8)&0x8000) data|=0x80;
+             }
+             else
+             {
+                 data = rawRead<u8>(m.stv_io, addr & 0xFF);
+                 if ((addr & 0x00FFFFFF) == 0x400007) data |= 0x3;
+             }
+             data = ~data;
+             return data;
+         };
+     }
+ };
 
 }
 }
-
-#include "memory_impl.h"
