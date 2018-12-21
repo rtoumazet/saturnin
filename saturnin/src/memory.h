@@ -628,49 +628,47 @@ struct writeSmpc<uint8_t> {
      }
  };
 
- // Specialization for 8 bits data.
- template<>
- struct readStvIo<uint8_t> {
-     operator Memory::ReadType<u8>() const {
-         return [](const Memory& m, const u32 addr) -> u8 {
+// Specialization for 8 bits data.
+template<>
+struct readStvIo<uint8_t> {
+    operator Memory::ReadType<u8>() const {
+        return [](const Memory& m, const u32 addr) -> u8 {
+             // WIP use gainput to manage inputs
              u8 data{};
-             if ((addr & 0x00FFFFFF) == 0x400001)
-             {
-                 if (GetAsyncKeyState(0x58) & 0x8000) data |= 0x01; //p1 A
-                 if (GetAsyncKeyState(0x46) & 0x8000) data |= 0x02; //p1 B
-                 if (GetAsyncKeyState(0x44) & 0x8000) data |= 0x04; //p1 C
-                 if (GetAsyncKeyState(0x53) & 0x8000) data |= 0x08; //p1 D
-                 if (GetAsyncKeyState(VK_DOWN) & 0x8000) data |= 0x10; //p1 DOWN
-                 if (GetAsyncKeyState(VK_UP) & 0x8000) data |= 0x20; //p1 UP
-                 if (GetAsyncKeyState(VK_LEFT) & 0x8000) data |= 0x80; //p1 LEFT
-                 if (GetAsyncKeyState(VK_RIGHT) & 0x8000) data |= 0x40; //p1 RIGHT
-             }
-             else if ((addr & 0x00FFFFFF) == 0x400003)
-             {
-                 //if (GetAsyncKeyState(VK_X)&0x8000) data|=0x01; //p2 A
-                 //if (GetAsyncKeyState(VK_F)&0x8000) data|=0x02; //p2 B
-                 //if (GetAsyncKeyState(VK_D)&0x8000) data|=0x04; //p2 C
-                 //if (GetAsyncKeyState(VK_S)&0x8000) data|=0x08; //p2 D
-                 //if (GetAsyncKeyState(VK_DOWN)&0x8000) data|=0x10; //p2 DOWN
-                 //if (GetAsyncKeyState(VK_UP)&0x8000) data|=0x20; //p2 UP
-                 //if (GetAsyncKeyState(VK_LEFT)&0x8000) data|=0x80; //p2 LEFT
-                 //if (GetAsyncKeyState(VK_RIGHT)&0x8000) data|=0x40; //p2 RIGHT
-             }
-             else if ((addr & 0x00FFFFFF) == 0x400005)
-             {
-                 if (GetAsyncKeyState(VK_F3) & 0x8000) data |= 0x01; // P1 Coin 
-                 //if (GetAsyncKeyState(VK_4)&0x8000) data|=0x02; // P2 Coin
-                 //if (GetAsyncKeyState(VK_F1)&0x8000) data|=0x04; // Test
-                 //if (GetAsyncKeyState(VK_F2)&0x8000) data|=0x08; // Service
-                 if (GetAsyncKeyState(VK_F4) & 0x8000) data |= 0x10; // P1 Start
-                 //if (GetAsyncKeyState(VK_2)&0x8000) data|=0x20; // P2 Start
-                 //if (GetAsyncKeyState(VK_7)&0x8000) data|=0x40;
-                 //if (GetAsyncKeyState(VK_8)&0x8000) data|=0x80;
-             }
-             else
-             {
-                 data = rawRead<u8>(m.stv_io, addr & 0xFF);
-                 if ((addr & 0x00FFFFFF) == 0x400007) data |= 0x3;
+             switch (addr & 0x00FFFFFF) {
+                 case 0x400001:
+                     if (GetAsyncKeyState('X') & 0x8000) data |= 0x01; //p1 A
+                     if (GetAsyncKeyState('F') & 0x8000) data |= 0x02; //p1 B
+                     if (GetAsyncKeyState('D') & 0x8000) data |= 0x04; //p1 C
+                     if (GetAsyncKeyState('S') & 0x8000) data |= 0x08; //p1 D
+                     if (GetAsyncKeyState(VK_DOWN) & 0x8000) data |= 0x10; //p1 DOWN
+                     if (GetAsyncKeyState(VK_UP) & 0x8000) data |= 0x20; //p1 UP
+                     if (GetAsyncKeyState(VK_LEFT) & 0x8000) data |= 0x80; //p1 LEFT
+                     if (GetAsyncKeyState(VK_RIGHT) & 0x8000) data |= 0x40; //p1 RIGHT
+                     break;
+                 case 0x400003:
+                     //if (GetAsyncKeyState(VK_X)&0x8000) data|=0x01; //p2 A
+                     //if (GetAsyncKeyState(VK_F)&0x8000) data|=0x02; //p2 B
+                     //if (GetAsyncKeyState(VK_D)&0x8000) data|=0x04; //p2 C
+                     //if (GetAsyncKeyState(VK_S)&0x8000) data|=0x08; //p2 D
+                     //if (GetAsyncKeyState(VK_DOWN)&0x8000) data|=0x10; //p2 DOWN
+                     //if (GetAsyncKeyState(VK_UP)&0x8000) data|=0x20; //p2 UP
+                     //if (GetAsyncKeyState(VK_LEFT)&0x8000) data|=0x80; //p2 LEFT
+                     //if (GetAsyncKeyState(VK_RIGHT)&0x8000) data|=0x40; //p2 RIGHT
+                     break;
+                 case 0x400005:
+                     if (GetAsyncKeyState(VK_F3) & 0x8000) data |= 0x01; // P1 Coin 
+                     //if (GetAsyncKeyState(VK_4)&0x8000) data|=0x02; // P2 Coin
+                     //if (GetAsyncKeyState(VK_F1)&0x8000) data|=0x04; // Test
+                     //if (GetAsyncKeyState(VK_F2)&0x8000) data|=0x08; // Service
+                     if (GetAsyncKeyState(VK_F4) & 0x8000) data |= 0x10; // P1 Start
+                     //if (GetAsyncKeyState(VK_2)&0x8000) data|=0x20; // P2 Start
+                     //if (GetAsyncKeyState(VK_7)&0x8000) data|=0x40;
+                     //if (GetAsyncKeyState(VK_8)&0x8000) data|=0x80;
+                     break;
+                 default:
+                     data = rawRead<u8>(m.stv_io, addr & 0xFF);
+                     if ((addr & 0x00FFFFFF) == 0x400007) data |= 0x3;
              }
              data = ~data;
              return data;

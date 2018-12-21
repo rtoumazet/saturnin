@@ -244,13 +244,9 @@ void Memory::initializeHandlers() {
     initializeHandlers<writeBackupRam, u8, u16, u32>(0x00200000, 0x002FFFFF);
     initializeHandlers<writeBackupRam, u8, u16, u32>(0x20200000, 0x202FFFFF);
 
-    //// STV I/O access
-    //MapMemoryTableWriteByte(0x00400000, 0x004FFFFF, &STVIOWriteByte);
-    //MapMemoryTableWriteWord(0x00400000, 0x004FFFFF, &STVIOWriteWord);
-    //MapMemoryTableWriteLong(0x00400000, 0x004FFFFF, &STVIOWriteLong);
-    //MapMemoryTableReadByte(0x00400000, 0x004FFFFF, &STVIOReadByte);
-    //MapMemoryTableReadWord(0x00400000, 0x004FFFFF, &STVIOReadWord);
-    //MapMemoryTableReadLong(0x00400000, 0x004FFFFF, &STVIOReadLong);
+    // STV I/O access
+    initializeHandlers<readBackupRam, u8, u16, u32>(0x00400000, 0x004FFFFF);
+    initializeHandlers<readBackupRam, u8, u16, u32>(0x20400000, 0x204FFFFF);
 
     //MapMemoryTableWriteByte(0x20400000, 0x204FFFFF, &STVIOWriteByte);
     //MapMemoryTableWriteWord(0x20400000, 0x204FFFFF, &STVIOWriteWord);
