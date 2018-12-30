@@ -37,7 +37,16 @@
 namespace saturnin {
 namespace core {
 
-const u32 memory_handler_size = 0x10000;
+static const u32 stv_io_port_a{ 0x400001 };
+static const u32 stv_io_port_b{ 0x400003 };
+static const u32 stv_io_port_c{ 0x400005 };
+static const u32 stv_io_port_d{ 0x400007 };
+
+static const u32 stv_protection_register_address{ 0x04FFFFFC };
+static const u32 stv_protection_enabled{ 0x04FFFFF1 };
+static       u32 stv_protection_offset{};
+
+static const u32 memory_handler_size{ 0x10000 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	Rom_type
@@ -65,12 +74,6 @@ enum class Rom_load {
 
 class Config; 
 
-//template<typename Tize>
-//using SizedUInt = std::conditional_t<Size == 8, u8,
-//    std::conditional_t<Size == 16, uint16_t,
-//    std::conditional_t<Size == 32, u32, void>>>;
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Memory
 ///
@@ -86,7 +89,7 @@ public:
     //@{
     // Constructors / Destructors
     Memory()                           = delete;
-    Memory(std::shared_ptr<Config> config) : config_(config) {
+    Memory(std::shared_ptr<Config> config, Hardware_mode hm) : config_(config), hardware_mode_(hm) {
         initializeHandlers();
     };
     Memory(const Memory&)              = delete;
@@ -111,23 +114,31 @@ public:
     /// \name Saturn memory map definition.
     ///
 
-    std::array <u8, 0x100000>  workram_low;      ///< low workram (1MB).
-    std::array <u8, 0x100000>  workram_high;     ///< high workram (1MB).
-    std::array <u8, 0x80000>   rom;              ///< ROM (512KB).
-    std::array <u8, 0x80>      smpc;             ///< SMPC (128B).
-    std::array <u8, 0x10000>   backup_ram;       ///< Backup RAM (64KB).
-    std::array <u8, 0xD0>      scu;              ///< SCU (208B)
-    std::array <u8, 0x80000>   vdp2_vram;        ///< VDP2 video RAM (512KB)
-    std::array <u8, 0x1000>    vdp2_cram;        ///< VDP2 color RAM (4KB).
-    std::array <u8, 0x200>     vdp2_registers;   ///< VDP2 registers (512B).
-    std::array <u8, 0x80000>   vdp1_vram;        ///< VDP1 video RAM (512KB).
-    std::array <u8, 0x40000>   vdp1_framebuffer; ///< VDP1 framebuffer (256KB).
-    std::array <u8, 0x18>      vdp1_registers;   ///< VDP1 registers (24B).
-    std::array <u8, 0x100000>  sound_ram;        ///< Sound RAM (1MB).
-    std::array <u8, 0x100>     stv_io;           ///< STV I/O (256B).
-    std::array <u8, 0x3000000> cart;             ///< Cart (50MB).
-    std::array <u8, 0x400>     cache_addresses;  ///< Cache addresses (1KB).
-    std::array <u8, 0x1000>    cache_data;       ///< Cache data (4KB).
+    std::array <u8, 0x100000>  workram_low_;      ///< low workram (1MB).
+    std::array <u8, 0x100000>  workram_high_;     ///< high workram (1MB).
+    std::array <u8, 0x80000>   rom_;              ///< ROM (512KB).
+    std::array <u8, 0x80>      smpc_;             ///< SMPC (128B).
+    std::array <u8, 0x10000>   backup_ram_;       ///< Backup RAM (64KB).
+    std::array <u8, 0xD0>      scu_;              ///< SCU (208B)
+    std::array <u8, 0x80000>   vdp2_vram_;        ///< VDP2 video RAM (512KB)
+    std::array <u8, 0x1000>    vdp2_cram_;        ///< VDP2 color RAM (4KB).
+    std::array <u8, 0x200>     vdp2_registers_;   ///< VDP2 registers (512B).
+    std::array <u8, 0x80000>   vdp1_vram_;        ///< VDP1 video RAM (512KB).
+    std::array <u8, 0x40000>   vdp1_framebuffer_; ///< VDP1 framebuffer (256KB).
+    std::array <u8, 0x18>      vdp1_registers_;   ///< VDP1 registers (24B).
+    std::array <u8, 0x100000>  sound_ram_;        ///< Sound RAM (1MB).
+    std::array <u8, 0x100>     stv_io_;           ///< STV I/O (256B).
+    std::array <u8, 0x3000000> cart_;             ///< Cart (50MB).
+    std::array <u8, 0x400>     cache_addresses_;  ///< Cache addresses (1KB).
+    std::array <u8, 0x1000>    cache_data_;       ///< Cache data (4KB).
+
+    Hardware_mode hardware_mode_{Hardware_mode::saturn}; ///< Current hardware mode
+    
+    bool vdp2_cram_was_accessed_{ false }; ///< true when VDP2 color ram was accessed
+
+    bool master_sh2_is_operating_{ true }; ///< true when master SH2 is operating, false when it's slave SH2
+    bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
+    bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::loadBios(const Hardware_mode mode);
@@ -169,10 +180,10 @@ public:
 
     bool loadRom(   const std::string&  zip_name,
                     const std::string&  file_name,
-                    u8*	        destination,
-                    const u32      size,
+                    u8*	                destination,
+                    const u32           size,
                     const Rom_load      rom_load,
-                    const u8       times_mirrored,
+                    const u8            times_mirrored,
                     const Rom_type      rom_type);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,6 +211,12 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void swapCartArea();
+
+    u32 readStvProtection(const u32 addr, u32 data) const;
+
+    void writeStvProtection(const u32 addr, u32 data);
+
+    bool isStvProtectionEnabled() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> T Memory::read(const u32 addr);
@@ -242,7 +259,7 @@ public:
 private:
     void initializeHandlers();
     
-    std::shared_ptr<Config> config_;    ///< Configuration object
+    std::shared_ptr<Config> config_;                    ///< Configuration object
 
     /// \Memory handlers
     //@{
@@ -253,6 +270,9 @@ private:
     WriteHandler<u16> write_16_handler_;
     WriteHandler<u32> write_32_handler_;
     //@}
+    
+    u32 stv_protection_offset_{};
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::initializeHandler(u32 begin, u32 end, ReadType<T> func);
@@ -474,7 +494,7 @@ struct readDummy {
 template<typename T>
 struct readRom{
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.rom, addr & 0x7FFFF);};
+        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.rom_, addr & 0x7FFFF);};
     }
 };
 
@@ -493,7 +513,7 @@ template<typename T>
 struct readSmpc{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T { 
-            return rawRead<T>(m.smpc, addr & 0x7F); 
+            return rawRead<T>(m.smpc_, addr & 0x7F); 
         };
     }
 };
@@ -524,7 +544,7 @@ template<typename T>
 struct writeSmpc {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.smpc, addr & 0x7F, data);
+            rawWrite<T>(m.smpc_, addr & 0x7F, data);
         };
     }
 };
@@ -554,7 +574,7 @@ struct writeSmpc<uint8_t> {
  struct readBackupRam {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.backup_ram, addr & 0xFFFF);
+            return rawRead<T>(m.backup_ram_, addr & 0xFFFF);
         };
     }
  };
@@ -574,7 +594,7 @@ struct writeSmpc<uint8_t> {
  struct writeBackupRam {
      operator Memory::WriteType<T>() const {
          return [](Memory& m, const u32 addr, const T data) {
-             rawWrite<T>(m.backup_ram, addr & 0xFFFF, data);
+             rawWrite<T>(m.backup_ram_, addr & 0xFFFF, data);
          };
      }
  };
@@ -594,7 +614,7 @@ struct writeSmpc<uint8_t> {
  struct readWorkramLow {
      operator Memory::ReadType<T>() const {
          return [](const Memory& m, const u32 addr) -> T {
-             return rawRead<T>(m.workram_low, addr & 0xFFFFF);
+             return rawRead<T>(m.workram_low_, addr & 0xFFFFF);
          };
      }
  };
@@ -614,29 +634,40 @@ struct writeSmpc<uint8_t> {
  struct writeWorkramLow {
      operator Memory::WriteType<T>() const {
          return [](Memory& m, const u32 addr, const T data) {
-             rawWrite<T>(m.workram_low, addr & 0xFFFFF, data);
+             rawWrite<T>(m.workram_low_, addr & 0xFFFFF, data);
          };
      }
  };
+
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
+ /// \struct    readStvIo
+ ///
+ /// \brief Stv i/o read handler.
+ ///
+ /// \author    Runik
+ /// \date  22/12/2018
+ ///
+ /// \tparam T   type of data to read (u8, u16 or u32).
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
 
  template<typename T>
  struct readStvIo{
      operator Memory::ReadType<T>() const {
          return [](const Memory& m, const u32 addr) -> T {
-             return rawRead<T>(m.stv_io, addr & 0xFF);
+             return rawRead<T>(m.stv_io_, addr & 0xFF);
          };
      }
  };
 
 // Specialization for 8 bits data.
 template<>
-struct readStvIo<uint8_t> {
+struct readStvIo<u8> {
     operator Memory::ReadType<u8>() const {
         return [](const Memory& m, const u32 addr) -> u8 {
-             // WIP use gainput to manage inputs
+             // WIP use gainput/glfw3 to manage inputs
              u8 data{};
              switch (addr & 0x00FFFFFF) {
-                 case 0x400001:
+                 case stv_io_port_a:
                      if (GetAsyncKeyState('X') & 0x8000) data |= 0x01; //p1 A
                      if (GetAsyncKeyState('F') & 0x8000) data |= 0x02; //p1 B
                      if (GetAsyncKeyState('D') & 0x8000) data |= 0x04; //p1 C
@@ -646,7 +677,7 @@ struct readStvIo<uint8_t> {
                      if (GetAsyncKeyState(VK_LEFT) & 0x8000) data |= 0x80; //p1 LEFT
                      if (GetAsyncKeyState(VK_RIGHT) & 0x8000) data |= 0x40; //p1 RIGHT
                      break;
-                 case 0x400003:
+                 case stv_io_port_b:
                      //if (GetAsyncKeyState(VK_X)&0x8000) data|=0x01; //p2 A
                      //if (GetAsyncKeyState(VK_F)&0x8000) data|=0x02; //p2 B
                      //if (GetAsyncKeyState(VK_D)&0x8000) data|=0x04; //p2 C
@@ -656,7 +687,7 @@ struct readStvIo<uint8_t> {
                      //if (GetAsyncKeyState(VK_LEFT)&0x8000) data|=0x80; //p2 LEFT
                      //if (GetAsyncKeyState(VK_RIGHT)&0x8000) data|=0x40; //p2 RIGHT
                      break;
-                 case 0x400005:
+                 case stv_io_port_c:
                      if (GetAsyncKeyState(VK_F3) & 0x8000) data |= 0x01; // P1 Coin 
                      //if (GetAsyncKeyState(VK_4)&0x8000) data|=0x02; // P2 Coin
                      //if (GetAsyncKeyState(VK_F1)&0x8000) data|=0x04; // Test
@@ -666,15 +697,722 @@ struct readStvIo<uint8_t> {
                      //if (GetAsyncKeyState(VK_7)&0x8000) data|=0x40;
                      //if (GetAsyncKeyState(VK_8)&0x8000) data|=0x80;
                      break;
+                 case stv_io_port_d:
+                     data = rawRead<u8>(m.stv_io_, addr & 0xFF);
+                     data |= 0x3;
+                     break;
                  default:
-                     data = rawRead<u8>(m.stv_io, addr & 0xFF);
-                     if ((addr & 0x00FFFFFF) == 0x400007) data |= 0x3;
+                     data = rawRead<u8>(m.stv_io_, addr & 0xFF);
              }
              data = ~data;
              return data;
          };
      }
  };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeStvIo
+///
+/// \brief  Stv i/o write handler.
+///
+/// \author Runik
+/// \date   22/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeStvIo{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.stv_io_, addr & 0xFF, data);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn inline u32 calculateRelativeCartAddress(const u32 addr)
+///
+/// \brief  Calculates the relative cart address from a real address.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \param  addr    The real address.
+///
+/// \return The calculated relative cart address.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline u32 calculateRelativeCartAddress(const u32 addr) {
+    u32 temp{ (addr >> 1) & 0x02000000 };
+    return (addr & 0x01FFFFFF) | temp;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readCart
+///
+/// \brief  Cart read handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readCart{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            u32 relative_addr = calculateRelativeCartAddress(addr);
+            return rawRead<T>(m.cart_, relative_addr);
+        };
+    }
+};
+
+// Specialization for 32 bits data.
+template<>
+struct readCart<u32> {
+    operator Memory::ReadType<u32>() const {
+        return [](const Memory& m, const u32 addr) -> u32 {
+            u32 relative_addr = calculateRelativeCartAddress(addr);
+            u32 data{ rawRead<u32>(m.cart_, relative_addr) };
+
+            if ((addr & 0x0FFFFFFF) == stv_protection_register_address) {
+                if (m.hardware_mode_ == Hardware_mode::stv) {
+                    data = m.readStvProtection(addr, data);
+                }
+            }
+            return data;
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeCart
+///
+/// \brief  Cart write handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeCart{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            u32 relative_addr = calculateRelativeCartAddress(addr);
+            rawWrite<T>(m.cart_, relative_addr, data);
+        };
+    }
+};
+
+// Specialization for 8 bits data.
+template<>
+struct writeCart<u8> {
+    operator Memory::WriteType<u8>() const {
+        return [](Memory& m, const u32 addr, const u8 data) {
+            
+            if (m.hardware_mode_ == Hardware_mode::stv) {
+                if ((addr & 0x0FFFFFFF) == stv_protection_enabled) {
+                    if (data == 0x1) { // Is the protection enabled ?
+                        m.writeStvProtection(addr, data);
+                    }
+                }
+            }
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readCdBlock
+///
+/// \brief  CD block read handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readCdBlock{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T)*8, addr));
+            return 0;
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeCdBlock
+///
+/// \brief  CD block write handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeCdBlock{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            core::Log::error("memory", fmt::format(core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"), sizeof(T)*8, addr, data));
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readScsp
+///
+/// \brief  SCSP read handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readScsp{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * 8, addr));
+            return 0;
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeScsp
+///
+/// \brief  SCSP write handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeScsp{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            core::Log::error("memory", fmt::format(core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"), sizeof(T) * 8, addr, data));
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readVdp1Ram
+///
+/// \brief  VDP1 RAM read handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readVdp1Ram{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.vdp1_vram_, addr & 0x7FFFF);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeVdp1Ram
+///
+/// \brief  VDP1 RAM write handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeVdp1Ram{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.vdp1_vram_, addr & 0x7FFFF, data);
+            // :TODO: Handle character address cache
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readVdp1Framebuffer
+///
+/// \brief  VDP1 framebuffer read handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readVdp1Framebuffer{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.vdp1_framebuffer_, addr & 0x3FFFF);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeVdp1Framebuffer
+///
+/// \brief  VDP1 framebuffer write handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeVdp1Framebuffer{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.vdp1_framebuffer_, addr & 0x3FFFF, data);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readVdp1Registers
+///
+/// \brief  VDP1 registers read handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readVdp1Registers{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.vdp1_registers_, addr & 0x1F);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeVdp1Registers
+///
+/// \brief  VDP1 registers write handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeVdp1Registers{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.vdp1_registers_, addr & 0x1F, data);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readVdp2Vram
+///
+/// \brief  VDP2 VRAM read handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readVdp2Vram{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.vdp2_vram_, addr & 0x7FFFF);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeVdp2Vram
+///
+/// \brief  VDP2 VRAM write handler.
+///
+/// \author Runik
+/// \date   28/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeVdp2Vram {
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.vdp2_vram_, addr & 0x7FFFF, data);
+            // :TODO: handle VDP2 page cache
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readVdp2Cram
+///
+/// \brief  VDP2 CRAM read handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readVdp2Cram {
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.vdp2_cram_, addr & 0xFFF);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeVdp2Cram
+///
+/// \brief  VDP2 CRAM write handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeVdp2Cram {
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.vdp2_cram_, addr & 0xFFF, data);
+            m.vdp2_cram_was_accessed_ = true;
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readVdp2Registers
+///
+/// \brief  VDP2 registers read handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readVdp2Registers {
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.vdp2_registers_, addr & 0x1FF);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeVdp2Registers
+///
+/// \brief  VDP2 registers read handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeVdp2Registers {
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.vdp2_registers_, addr & 0x1FF, data);
+            // :TODO: handle bitmap update
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readScu
+///
+/// \brief  SCU read handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readScu {
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.scu_, addr & 0xFF);
+        };
+    }
+};
+
+// Specialization for 32 bits data.
+template<>
+struct readScu<u32> {
+    operator Memory::ReadType<u32>() const {
+        return [](const Memory& m, const u32 addr) -> u32 {
+            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr));
+
+            return 0;
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeScu
+///
+/// \brief  SCU write handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeScu{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.scu_, addr, data);
+        };
+    }
+};
+
+// Specialization for 32 bits data.
+template<>
+struct writeCart<u32> {
+    operator Memory::WriteType<u32>() const {
+        return [](Memory& m, const u32 addr, const u32 data) {
+            core::Log::error("memory", fmt::format(core::tr("Write({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr));
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readWorkramHigh
+///
+/// \brief  High workram read handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readWorkramHigh{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.workram_high_, addr & 0xFFFFF);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeWorkramHigh
+///
+/// \brief  High workram write handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeWorkramHigh{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.workram_high_, addr & 0xFFFFF, data);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readSh2Registers
+///
+/// \brief  SH2 registers read handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readSh2Registers {
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SH2{:#0x}"), sizeof(u32) * 8, addr));
+            return 0;
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeSh2Registers
+///
+/// \brief SH2 regisers write handler.
+///
+/// \author Runik
+/// \date   29/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeSh2Registers{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            core::Log::error("memory", fmt::format(core::tr("Write ({}) needs to be handled through SH2 {:#0x} : {:#x}"), sizeof(T) * 8, addr, data));
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeMasterSh2Frt
+///
+/// \brief  Master SH2 FRT write handler.
+///
+/// \author Runik
+/// \date   30/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeMasterSh2Frt {
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            m.interrupt_signal_is_sent_from_master_sh2_ = true;
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeSlaveSh2Frt
+///
+/// \brief  Slave SH2 FRT write handler.
+///
+/// \author Runik
+/// \date   30/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeSlaveSh2Frt{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            m.interrupt_signal_is_sent_from_slave_sh2_ = true;
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readCacheAdresses
+///
+/// \brief  Cache adresses read handler.
+///
+/// \author Runik
+/// \date   30/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readCacheAddresses {
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.cache_addresses_, addr & 0x3FF);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeCacheAddresses
+///
+/// \brief  Cache addresses write handler.
+///
+/// \author Runik
+/// \date   30/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeCacheAddresses{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.cache_addresses_, addr & 0x3FF, data);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct readCacheData
+///
+/// \brief  Cache data read handler.
+///
+/// \author Runik
+/// \date   30/12/2018
+///
+/// \tparam T   type of data to read (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct readCacheData{
+    operator Memory::ReadType<T>() const {
+        return [](const Memory& m, const u32 addr) -> T {
+            return rawRead<T>(m.cache_data_, addr & 0xFFF);
+        };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct writeCacheData
+///
+/// \brief  Cache data write handler.
+///
+/// \author Runik
+/// \date   30/12/2018
+///
+/// \tparam T   type of data to write (u8, u16 or u32).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeCacheData{
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            rawWrite<T>(m.cache_data_, addr & 0xFFF, data);
+        };
+    }
+};
 
 }
 }

@@ -29,7 +29,7 @@ namespace core {
 
 Emulator_context::Emulator_context() {
     config_ = std::make_shared<Config>("saturnin.cfg");
-    memory_ = std::make_unique<Memory>(config_);
+    memory_ = std::make_unique<Memory>(config_, this->hardware_mode_);
 }
 
 bool Emulator_context::initialize() {
@@ -63,9 +63,9 @@ bool Emulator_context::run() {
     //    plugin->log("test");
 
     std::cout << core::tr("Hello world.") << std::endl;
-    core::rawWrite<uint32_t>(this->memory()->workram_low, 0, 0x12345678);
-    auto val = core::rawRead<uint16_t>(this->memory()->workram_low, 2);
-    core::rawWrite<uint32_t>(this->memory()->rom, 0, 0x12345678);
+    core::rawWrite<uint32_t>(this->memory()->workram_low_, 0, 0x12345678);
+    auto val = core::rawRead<uint16_t>(this->memory()->workram_low_, 2);
+    core::rawWrite<uint32_t>(this->memory()->rom_, 0, 0x12345678);
     //core::writeDummy<8>(0x12345678, 0x0);
     //core::writeDummy<32>(0x12345678, 0x0);
     //core::readDummy<16>(0x0);
