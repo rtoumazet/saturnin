@@ -146,6 +146,9 @@
     <ClInclude Include="src\emulator_defs.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
+    <ClInclude Include="src\sh2.h">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\icons.png.inc">

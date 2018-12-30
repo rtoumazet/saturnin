@@ -93,7 +93,7 @@ bool Memory::loadRom(const std::string& zip_name,
                     }
 
                     // bios region is forced for program roms
-                    if (rom_type == Rom_type::program) this->cart[region_cart_address] = this->rom[stv_bios_region_address];
+                    if (rom_type == Rom_type::program) this->cart_[region_cart_address] = this->rom_[stv_bios_region_address];
 
                     mirrorData(destination, size, times_mirrored, rom_load);
                     break;
@@ -144,16 +144,16 @@ void Memory::loadBios(const Hardware_mode mode) {
             
         switch (mode) {
             case Hardware_mode::saturn: {
-                std::move(str.begin(), str.end(), this->rom.data());
+                std::move(str.begin(), str.end(), this->rom_.data());
                 break;
             }
             case Hardware_mode::stv: {
                 // Needs byteswapping
                 for (size_t i = 0; i < str.size(); i += 4) {
-                    this->rom[i + 1] = str[i + 0];
-                    this->rom[i + 0] = str[i + 1];
-                    this->rom[i + 3] = str[i + 2];
-                    this->rom[i + 2] = str[i + 3];
+                    this->rom_[i + 1] = str[i + 0];
+                    this->rom_[i + 0] = str[i + 1];
+                    this->rom_[i + 3] = str[i + 2];
+                    this->rom_[i + 2] = str[i + 3];
                 }
                 break;
             }
@@ -183,7 +183,7 @@ bool Memory::loadStvGame(const std::string& config_filename) {
         const auto        rom_type      = Config::rom_type[files[i][5]];
         if (!this->loadRom(zip_name,
                            rom_name,
-                           &this->cart[load_address],
+                           &this->cart_[load_address],
                            load_size,
                            rom_load,
                            times_mirrored,
@@ -202,14 +202,14 @@ void Memory::swapCartArea() {
 
     // ST-V data begins with 'SEGA' string.
     // If the first byte of the string is 'E', it means the program data has to be swapped
-    if (this->cart[0] == 'E') {
+    if (this->cart_[0] == 'E') {
         for (u32 i = 0; i < program_rom_size; i += 2) {
-            std::swap(this->cart[i], this->cart[i + 1]);
+            std::swap(this->cart_[i], this->cart_[i + 1]);
         }
     }
 
-    for (u32 i = program_rom_size; i < this->cart.size(); i += 2) {
-        std::swap(this->cart[i], this->cart[i + 1]);
+    for (u32 i = program_rom_size; i < this->cart_.size(); i += 2) {
+        std::swap(this->cart_[i], this->cart_[i + 1]);
     }
 }
 
@@ -238,236 +238,214 @@ void Memory::initializeHandlers() {
     initializeHandlers<writeBackupRam, u8, u16, u32>(0x20180000, 0x201FFFFF);
 
     // Low workram access
-    initializeHandlers<readBackupRam, u8, u16, u32>(0x00200000, 0x002FFFFF);
-    initializeHandlers<readBackupRam, u8, u16, u32>(0x20200000, 0x202FFFFF);
+    initializeHandlers<readWorkramLow, u8, u16, u32>(0x00200000, 0x002FFFFF);
+    initializeHandlers<readWorkramLow, u8, u16, u32>(0x20200000, 0x202FFFFF);
     
-    initializeHandlers<writeBackupRam, u8, u16, u32>(0x00200000, 0x002FFFFF);
-    initializeHandlers<writeBackupRam, u8, u16, u32>(0x20200000, 0x202FFFFF);
+    initializeHandlers<writeWorkramLow, u8, u16, u32>(0x00200000, 0x002FFFFF);
+    initializeHandlers<writeWorkramLow, u8, u16, u32>(0x20200000, 0x202FFFFF);
 
     // STV I/O access
-    initializeHandlers<readBackupRam, u8, u16, u32>(0x00400000, 0x004FFFFF);
-    initializeHandlers<readBackupRam, u8, u16, u32>(0x20400000, 0x204FFFFF);
+    initializeHandlers<readStvIo, u8, u16, u32>(0x00400000, 0x004FFFFF);
+    initializeHandlers<readStvIo, u8, u16, u32>(0x20400000, 0x204FFFFF);
 
-    //MapMemoryTableWriteByte(0x20400000, 0x204FFFFF, &STVIOWriteByte);
-    //MapMemoryTableWriteWord(0x20400000, 0x204FFFFF, &STVIOWriteWord);
-    //MapMemoryTableWriteLong(0x20400000, 0x204FFFFF, &STVIOWriteLong);
-    //MapMemoryTableReadByte(0x20400000, 0x204FFFFF, &STVIOReadByte);
-    //MapMemoryTableReadWord(0x20400000, 0x204FFFFF, &STVIOReadWord);
-    //MapMemoryTableReadLong(0x20400000, 0x204FFFFF, &STVIOReadLong);
+    initializeHandlers<writeStvIo, u8, u16, u32>(0x00400000, 0x004FFFFF);
+    initializeHandlers<writeStvIo, u8, u16, u32>(0x20400000, 0x204FFFFF);
 
-    //// Cart access
-    //MapMemoryTableWriteByte(0x02000000, 0x04FFFFFF, &CartWriteByte);
-    //MapMemoryTableWriteWord(0x02000000, 0x04FFFFFF, &CartWriteWord);
-    //MapMemoryTableWriteLong(0x02000000, 0x04FFFFFF, &CartWriteLong);
-    //MapMemoryTableReadByte(0x02000000, 0x04FFFFFF, &CartReadByte);
-    //MapMemoryTableReadWord(0x02000000, 0x04FFFFFF, &CartReadWord);
-    //MapMemoryTableReadLong(0x02000000, 0x04FFFFFF, &CartReadLong);
+    // Cart access
+    initializeHandlers<readCart, u8, u16, u32>(0x02000000, 0x04FFFFFF);
+    initializeHandlers<readCart, u8, u16, u32>(0x22000000, 0x24FFFFFF);
+    
+    initializeHandlers<writeCart, u8, u16, u32>(0x02000000, 0x04FFFFFF);
+    initializeHandlers<writeCart, u8, u16, u32>(0x22000000, 0x24FFFFFF);
+    
+    // CdBlock access
+    initializeHandlers<readCdBlock, u8, u16, u32>(0x05800000, 0x058FFFFF);
+    initializeHandlers<readCdBlock, u8, u16, u32>(0x25800000, 0x258FFFFF);
 
-    //MapMemoryTableWriteByte(0x22000000, 0x24FFFFFF, &CartWriteByte);
-    //MapMemoryTableWriteWord(0x22000000, 0x24FFFFFF, &CartWriteWord);
-    //MapMemoryTableWriteLong(0x22000000, 0x24FFFFFF, &CartWriteLong);
-    //MapMemoryTableReadByte(0x22000000, 0x24FFFFFF, &CartReadByte);
-    //MapMemoryTableReadWord(0x22000000, 0x24FFFFFF, &CartReadWord);
-    //MapMemoryTableReadLong(0x22000000, 0x24FFFFFF, &CartReadLong);
+    initializeHandlers<writeCdBlock, u8, u16, u32>(0x05800000, 0x058FFFFF);
+    initializeHandlers<writeCdBlock, u8, u16, u32>(0x25800000, 0x258FFFFF);
 
-    //// CdBlock access
-    //MapMemoryTableWriteByte(0x05800000, 0x058FFFFF, &CdBlockWriteByte);
-    //MapMemoryTableWriteWord(0x05800000, 0x058FFFFF, &CdBlockWriteWord);
-    //MapMemoryTableWriteLong(0x05800000, 0x058FFFFF, &CdBlockWriteLong);
-    //MapMemoryTableReadByte(0x05800000, 0x058FFFFF, &CdBlockReadByte);
-    //MapMemoryTableReadWord(0x05800000, 0x058FFFFF, &CdBlockReadWord);
-    //MapMemoryTableReadLong(0x05800000, 0x058FFFFF, &CdBlockReadLong);
+    // SCSP access
+    initializeHandlers<readScsp, u8, u16, u32>(0x05A00000, 0x05BFFFFF);
+    initializeHandlers<readScsp, u8, u16, u32>(0x25A00000, 0x25BFFFFF);
+    
+    initializeHandlers<writeScsp, u8, u16, u32>(0x05A00000, 0x05BFFFFF);
+    initializeHandlers<writeScsp, u8, u16, u32>(0x25A00000, 0x25BFFFFF);
 
-    //MapMemoryTableWriteByte(0x25800000, 0x258FFFFF, &CdBlockWriteByte);
-    //MapMemoryTableWriteWord(0x25800000, 0x258FFFFF, &CdBlockWriteWord);
-    //MapMemoryTableWriteLong(0x25800000, 0x258FFFFF, &CdBlockWriteLong);
-    //MapMemoryTableReadByte(0x25800000, 0x258FFFFF, &CdBlockReadByte);
-    //MapMemoryTableReadWord(0x25800000, 0x258FFFFF, &CdBlockReadWord);
-    //MapMemoryTableReadLong(0x25800000, 0x258FFFFF, &CdBlockReadLong);
+    // VDP1 RAM access
+    initializeHandlers<readVdp1Ram, u8, u16, u32>(0x05C00000, 0x05C7FFFF);
+    initializeHandlers<readVdp1Ram, u8, u16, u32>(0x25C00000, 0x25C7FFFF);
 
-    //// SCSP access
-    //MapMemoryTableWriteByte(0x05A00000, 0x05BFFFFF, &SCSPWriteByte);
-    //MapMemoryTableWriteWord(0x05A00000, 0x05BFFFFF, &SCSPWriteWord);
-    //MapMemoryTableWriteLong(0x05A00000, 0x05BFFFFF, &SCSPWriteLong);
-    //MapMemoryTableReadByte(0x05A00000, 0x05BFFFFF, &SCSPReadByte);
-    //MapMemoryTableReadWord(0x05A00000, 0x05BFFFFF, &SCSPReadWord);
-    //MapMemoryTableReadLong(0x05A00000, 0x05BFFFFF, &SCSPReadLong);
+    initializeHandlers<writeVdp1Ram, u8, u16, u32>(0x05C00000, 0x05C7FFFF);
+    initializeHandlers<writeVdp1Ram, u8, u16, u32>(0x25C00000, 0x25C7FFFF);
 
-    //MapMemoryTableWriteByte(0x25A00000, 0x25BFFFFF, &SCSPWriteByte);
-    //MapMemoryTableWriteWord(0x25A00000, 0x25BFFFFF, &SCSPWriteWord);
-    //MapMemoryTableWriteLong(0x25A00000, 0x25BFFFFF, &SCSPWriteLong);
-    //MapMemoryTableReadByte(0x25A00000, 0x25BFFFFF, &SCSPReadByte);
-    //MapMemoryTableReadWord(0x25A00000, 0x25BFFFFF, &SCSPReadWord);
-    //MapMemoryTableReadLong(0x25A00000, 0x25BFFFFF, &SCSPReadLong);
-
-    //// VDP1 RAM access
-    //MapMemoryTableWriteByte(0x05C00000, 0x05C7FFFF, &VDP1RAMWriteByte);
-    //MapMemoryTableWriteWord(0x05C00000, 0x05C7FFFF, &VDP1RAMWriteWord);
-    //MapMemoryTableWriteLong(0x05C00000, 0x05C7FFFF, &VDP1RAMWriteLong);
-    //MapMemoryTableReadByte(0x05C00000, 0x05C7FFFF, &VDP1RAMReadByte);
-    //MapMemoryTableReadWord(0x05C00000, 0x05C7FFFF, &VDP1RAMReadWord);
-    //MapMemoryTableReadLong(0x05C00000, 0x05C7FFFF, &VDP1RAMReadLong);
-
-    //MapMemoryTableWriteByte(0x25C00000, 0x25C7FFFF, &VDP1RAMWriteByte);
-    //MapMemoryTableWriteWord(0x25C00000, 0x25C7FFFF, &VDP1RAMWriteWord);
-    //MapMemoryTableWriteLong(0x25C00000, 0x25C7FFFF, &VDP1RAMWriteLong);
-    //MapMemoryTableReadByte(0x25C00000, 0x25C7FFFF, &VDP1RAMReadByte);
-    //MapMemoryTableReadWord(0x25C00000, 0x25C7FFFF, &VDP1RAMReadWord);
-    //MapMemoryTableReadLong(0x25C00000, 0x25C7FFFF, &VDP1RAMReadLong);
-
-    //// VDP1 framebuffer access
-    //MapMemoryTableWriteByte(0x05C80000, 0x05CFFFFF, &VDP1FBWriteByte);
-    //MapMemoryTableWriteWord(0x05C80000, 0x05CFFFFF, &VDP1FBWriteWord);
-    //MapMemoryTableWriteLong(0x05C80000, 0x05CFFFFF, &VDP1FBWriteLong);
-    //MapMemoryTableReadByte(0x05C80000, 0x05CFFFFF, &VDP1FBReadByte);
-    //MapMemoryTableReadWord(0x05C80000, 0x05CFFFFF, &VDP1FBReadWord);
-    //MapMemoryTableReadLong(0x05C80000, 0x05CFFFFF, &VDP1FBReadLong);
-
-    //MapMemoryTableWriteByte(0x25C80000, 0x25CFFFFF, &VDP1FBWriteByte);
-    //MapMemoryTableWriteWord(0x25C80000, 0x25CFFFFF, &VDP1FBWriteWord);
-    //MapMemoryTableWriteLong(0x25C80000, 0x25CFFFFF, &VDP1FBWriteLong);
-    //MapMemoryTableReadByte(0x25C80000, 0x25CFFFFF, &VDP1FBReadByte);
-    //MapMemoryTableReadWord(0x25C80000, 0x25CFFFFF, &VDP1FBReadWord);
-    //MapMemoryTableReadLong(0x25C80000, 0x25CFFFFF, &VDP1FBReadLong);
+    // VDP1 framebuffer access
+    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(0x05C80000, 0x05CFFFFF);
+    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(0x25C80000, 0x25CFFFFF);
+    
+    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(0x05C80000, 0x05CFFFFF);
+    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(0x25C80000, 0x25CFFFFF);
 
     //// VDP1 Registers access
-    //MapMemoryTableWriteByte(0x05D00000, 0x05D7FFFF, &VDP1RegWriteByte);
-    //MapMemoryTableWriteWord(0x05D00000, 0x05D7FFFF, &VDP1RegWriteWord);
-    //MapMemoryTableWriteLong(0x05D00000, 0x05D7FFFF, &VDP1RegWriteLong);
-    //MapMemoryTableReadByte(0x05D00000, 0x05D7FFFF, &VDP1RegReadByte);
-    //MapMemoryTableReadWord(0x05D00000, 0x05D7FFFF, &VDP1RegReadWord);
-    //MapMemoryTableReadLong(0x05D00000, 0x05D7FFFF, &VDP1RegReadLong);
+    initializeHandlers<readVdp1Registers, u8, u16, u32>(0x05D00000, 0x05D7FFFF);
+    initializeHandlers<readVdp1Registers, u8, u16, u32>(0x25D00000, 0x25D7FFFF);
 
-    //MapMemoryTableWriteByte(0x25D00000, 0x25D7FFFF, &VDP1RegWriteByte);
-    //MapMemoryTableWriteWord(0x25D00000, 0x25D7FFFF, &VDP1RegWriteWord);
-    //MapMemoryTableWriteLong(0x25D00000, 0x25D7FFFF, &VDP1RegWriteLong);
-    //MapMemoryTableReadByte(0x25D00000, 0x25D7FFFF, &VDP1RegReadByte);
-    //MapMemoryTableReadWord(0x25D00000, 0x25D7FFFF, &VDP1RegReadWord);
-    //MapMemoryTableReadLong(0x25D00000, 0x25D7FFFF, &VDP1RegReadLong);
+    initializeHandlers<writeVdp1Registers, u8, u16, u32>(0x05D00000, 0x05D7FFFF);
+    initializeHandlers<writeVdp1Registers, u8, u16, u32>(0x25D00000, 0x25D7FFFF);
 
-    //// VDP2 VRAM access
-    //MapMemoryTableWriteByte(0x05E00000, 0x05EFFFFF, &VDP2VRAMWriteByte);
-    //MapMemoryTableWriteWord(0x05E00000, 0x05EFFFFF, &VDP2VRAMWriteWord);
-    //MapMemoryTableWriteLong(0x05E00000, 0x05EFFFFF, &VDP2VRAMWriteLong);
-    //MapMemoryTableReadByte(0x05E00000, 0x05EFFFFF, &VDP2VRAMReadByte);
-    //MapMemoryTableReadWord(0x05E00000, 0x05EFFFFF, &VDP2VRAMReadWord);
-    //MapMemoryTableReadLong(0x05E00000, 0x05EFFFFF, &VDP2VRAMReadLong);
+    // VDP2 VRAM access
+    initializeHandlers<readVdp2Vram, u8, u16, u32>(0x05E00000, 0x05EFFFFF);
+    initializeHandlers<readVdp2Vram, u8, u16, u32>(0x25E00000, 0x25EFFFFF);
+    
+    initializeHandlers<writeVdp2Vram, u8, u16, u32>(0x05E00000, 0x05EFFFFF);
+    initializeHandlers<writeVdp2Vram, u8, u16, u32>(0x25E00000, 0x25EFFFFF);
 
-    //MapMemoryTableWriteByte(0x25E00000, 0x25EFFFFF, &VDP2VRAMWriteByte);
-    //MapMemoryTableWriteWord(0x25E00000, 0x25EFFFFF, &VDP2VRAMWriteWord);
-    //MapMemoryTableWriteLong(0x25E00000, 0x25EFFFFF, &VDP2VRAMWriteLong);
-    //MapMemoryTableReadByte(0x25E00000, 0x25EFFFFF, &VDP2VRAMReadByte);
-    //MapMemoryTableReadWord(0x25E00000, 0x25EFFFFF, &VDP2VRAMReadWord);
-    //MapMemoryTableReadLong(0x25E00000, 0x25EFFFFF, &VDP2VRAMReadLong);
+    // VDP2 CRAM access
+    initializeHandlers<readVdp2Cram, u8, u16, u32>(0x05F00000, 0x05F7FFFF);
+    initializeHandlers<readVdp2Cram, u8, u16, u32>(0x25F00000, 0x25F7FFFF);
 
-    //// VDP2 CRAM access
-    //MapMemoryTableWriteByte(0x05F00000, 0x05F7FFFF, &VDP2CRAMWriteByte);
-    //MapMemoryTableWriteWord(0x05F00000, 0x05F7FFFF, &VDP2CRAMWriteWord);
-    //MapMemoryTableWriteLong(0x05F00000, 0x05F7FFFF, &VDP2CRAMWriteLong);
-    //MapMemoryTableReadByte(0x05F00000, 0x05F7FFFF, &VDP2CRAMReadByte);
-    //MapMemoryTableReadWord(0x05F00000, 0x05F7FFFF, &VDP2CRAMReadWord);
-    //MapMemoryTableReadLong(0x05F00000, 0x05F7FFFF, &VDP2CRAMReadLong);
+    initializeHandlers<writeVdp2Cram, u8, u16, u32>(0x05F00000, 0x05F7FFFF);
+    initializeHandlers<writeVdp2Cram, u8, u16, u32>(0x25F00000, 0x25F7FFFF);
 
-    //MapMemoryTableWriteByte(0x25F00000, 0x25F7FFFF, &VDP2CRAMWriteByte);
-    //MapMemoryTableWriteWord(0x25F00000, 0x25F7FFFF, &VDP2CRAMWriteWord);
-    //MapMemoryTableWriteLong(0x25F00000, 0x25F7FFFF, &VDP2CRAMWriteLong);
-    //MapMemoryTableReadByte(0x25F00000, 0x25F7FFFF, &VDP2CRAMReadByte);
-    //MapMemoryTableReadWord(0x25F00000, 0x25F7FFFF, &VDP2CRAMReadWord);
-    //MapMemoryTableReadLong(0x25F00000, 0x25F7FFFF, &VDP2CRAMReadLong);
+    // VDP2 Registers access
+    initializeHandlers<readVdp2Registers, u8, u16, u32>(0x05F80000, 0x05FBFFFF);
+    initializeHandlers<readVdp2Registers, u8, u16, u32>(0x25F80000, 0x25FBFFFF);
+    
+    initializeHandlers<writeVdp2Registers, u8, u16, u32>(0x05F80000, 0x05FBFFFF);
+    initializeHandlers<writeVdp2Registers, u8, u16, u32>(0x25F80000, 0x25FBFFFF);
 
-    //// VDP2 Registers access
-    //MapMemoryTableWriteByte(0x05F80000, 0x05FBFFFF, &VDP2RegWriteByte);
-    //MapMemoryTableWriteWord(0x05F80000, 0x05FBFFFF, &VDP2RegWriteWord);
-    //MapMemoryTableWriteLong(0x05F80000, 0x05FBFFFF, &VDP2RegWriteLong);
-    //MapMemoryTableReadByte(0x05F80000, 0x05FBFFFF, &VDP2RegReadByte);
-    //MapMemoryTableReadWord(0x05F80000, 0x05FBFFFF, &VDP2RegReadWord);
-    //MapMemoryTableReadLong(0x05F80000, 0x05FBFFFF, &VDP2RegReadLong);
+    // SCU access
+    initializeHandlers<readScu, u8, u16, u32>(0x05FE0000, 0x05FEFFFF);
+    initializeHandlers<readScu, u8, u16, u32>(0x25FE0000, 0x25FEFFFF);
 
-    //MapMemoryTableWriteByte(0x25F80000, 0x25FBFFFF, &VDP2RegWriteByte);
-    //MapMemoryTableWriteWord(0x25F80000, 0x25FBFFFF, &VDP2RegWriteWord);
-    //MapMemoryTableWriteLong(0x25F80000, 0x25FBFFFF, &VDP2RegWriteLong);
-    //MapMemoryTableReadByte(0x25F80000, 0x25FBFFFF, &VDP2RegReadByte);
-    //MapMemoryTableReadWord(0x25F80000, 0x25FBFFFF, &VDP2RegReadWord);
-    //MapMemoryTableReadLong(0x25F80000, 0x25FBFFFF, &VDP2RegReadLong);
+    initializeHandlers<writeScu, u8, u16, u32>(0x05FE0000, 0x05FEFFFF);
+    initializeHandlers<writeScu, u8, u16, u32>(0x25FE0000, 0x25FEFFFF);
 
-    //// SCU access
-    //MapMemoryTableWriteByte(0x05FE0000, 0x05FEFFFF, &SCUWriteByte);
-    //MapMemoryTableWriteWord(0x05FE0000, 0x05FEFFFF, &SCUWriteWord);
-    //MapMemoryTableWriteLong(0x05FE0000, 0x05FEFFFF, &SCUWriteLong);
-    //MapMemoryTableReadByte(0x05FE0000, 0x05FEFFFF, &SCUReadByte);
-    //MapMemoryTableReadWord(0x05FE0000, 0x05FEFFFF, &SCUReadWord);
-    //MapMemoryTableReadLong(0x05FE0000, 0x05FEFFFF, &SCUReadLong);
+    // Workram high access
+    initializeHandlers<readWorkramHigh, u8, u16, u32>(0x06000000, 0x07FFFFFF);
+    initializeHandlers<readWorkramHigh, u8, u16, u32>(0x26000000, 0x27FFFFFF);
 
-    //MapMemoryTableWriteByte(0x25FE0000, 0x25FEFFFF, &SCUWriteByte);
-    //MapMemoryTableWriteWord(0x25FE0000, 0x25FEFFFF, &SCUWriteWord);
-    //MapMemoryTableWriteLong(0x25FE0000, 0x25FEFFFF, &SCUWriteLong);
-    //MapMemoryTableReadByte(0x25FE0000, 0x25FEFFFF, &SCUReadByte);
-    //MapMemoryTableReadWord(0x25FE0000, 0x25FEFFFF, &SCUReadWord);
-    //MapMemoryTableReadLong(0x25FE0000, 0x25FEFFFF, &SCUReadLong);
+    initializeHandlers<writeWorkramHigh, u8, u16, u32>(0x06000000, 0x07FFFFFF);
+    initializeHandlers<writeWorkramHigh, u8, u16, u32>(0x26000000, 0x27FFFFFF);
 
-    //// Workram high access
-    //MapMemoryTableWriteByte(0x06000000, 0x07FFFFFF, &RAMHWriteByte);
-    //MapMemoryTableWriteWord(0x06000000, 0x07FFFFFF, &RAMHWriteWord);
-    //MapMemoryTableWriteLong(0x06000000, 0x07FFFFFF, &RAMHWriteLong);
-    //MapMemoryTableReadByte(0x06000000, 0x07FFFFFF, &RAMHReadByte);
-    //MapMemoryTableReadWord(0x06000000, 0x07FFFFFF, &RAMHReadWord);
-    //MapMemoryTableReadLong(0x06000000, 0x07FFFFFF, &RAMHReadLong);
+    // Master FRT access
+    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(0x01000000, 0x017FFFFF);
+    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(0x21000000, 0x217FFFFF);
 
-    //MapMemoryTableWriteByte(0x26000000, 0x27FFFFFF, &RAMHWriteByte);
-    //MapMemoryTableWriteWord(0x26000000, 0x27FFFFFF, &RAMHWriteWord);
-    //MapMemoryTableWriteLong(0x26000000, 0x27FFFFFF, &RAMHWriteLong);
-    //MapMemoryTableReadByte(0x26000000, 0x27FFFFFF, &RAMHReadByte);
-    //MapMemoryTableReadWord(0x26000000, 0x27FFFFFF, &RAMHReadWord);
-    //MapMemoryTableReadLong(0x26000000, 0x27FFFFFF, &RAMHReadLong);
+    // Slave FRT access
+    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(0x01800000, 0x01FFFFFF);
+    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(0x21800000, 0x21FFFFFF);
 
-    //// Master FRT access
-    //MapMemoryTableWriteByte(0x01000000, 0x017FFFFF, &MasterFRTWriteByte);
-    //MapMemoryTableWriteWord(0x01000000, 0x017FFFFF, &MasterFRTWriteWord);
-    //MapMemoryTableWriteLong(0x01000000, 0x017FFFFF, &MasterFRTWriteLong);
+    // SH2 register access
+    initializeHandlers<readSh2Registers, u8, u16, u32>(0xFFFFFE00, 0xFFFFFFFF);
+    initializeHandlers<writeSh2Registers, u8, u16, u32>(0xFFFFFE00, 0xFFFFFFFF);
 
-    //MapMemoryTableWriteByte(0x21000000, 0x217FFFFF, &MasterFRTWriteByte);
-    //MapMemoryTableWriteWord(0x21000000, 0x217FFFFF, &MasterFRTWriteWord);
-    //MapMemoryTableWriteLong(0x21000000, 0x217FFFFF, &MasterFRTWriteLong);
+    // Cache addresses access
+    initializeHandlers<readCacheAddresses, u8, u16, u32>(0x60000000, 0x6FFFFFFF);
+    initializeHandlers<writeCacheAddresses, u8, u16, u32>(0x60000000, 0x6FFFFFFF);
 
-    //// Slave FRT access
-    //MapMemoryTableWriteByte(0x01800000, 0x01FFFFFF, &SlaveFRTWriteByte);
-    //MapMemoryTableWriteWord(0x01800000, 0x01FFFFFF, &SlaveFRTWriteWord);
-    //MapMemoryTableWriteLong(0x01800000, 0x01FFFFFF, &SlaveFRTWriteLong);
+    // Cache data access
+    initializeHandlers<readCacheData, u8, u16, u32>(0x80000000, 0x8FFFFFFF);
+    initializeHandlers<readCacheData, u8, u16, u32>(0xC0000000, 0xCFFFFFFF);
 
-    //MapMemoryTableWriteByte(0x21800000, 0x21FFFFFF, &SlaveFRTWriteByte);
-    //MapMemoryTableWriteWord(0x21800000, 0x21FFFFFF, &SlaveFRTWriteWord);
-    //MapMemoryTableWriteLong(0x21800000, 0x21FFFFFF, &SlaveFRTWriteLong);
+    initializeHandlers<writeCacheData, u8, u16, u32>(0x80000000, 0x8FFFFFFF);
+    initializeHandlers<writeCacheData, u8, u16, u32>(0xC0000000, 0xCFFFFFFF);
+}
 
-    //// SH2 register access
-    //MapMemoryTableWriteByte(0xFFFFFE00, 0xFFFFFFFF, &SH2WriteByte);
-    //MapMemoryTableWriteWord(0xFFFFFE00, 0xFFFFFFFF, &SH2WriteWord);
-    //MapMemoryTableWriteLong(0xFFFFFE00, 0xFFFFFFFF, &SH2WriteLong);
-    //MapMemoryTableReadByte(0xFFFFFE00, 0xFFFFFFFF, &SH2ReadByte);
-    //MapMemoryTableReadWord(0xFFFFFE00, 0xFFFFFFFF, &SH2ReadWord);
-    //MapMemoryTableReadLong(0xFFFFFE00, 0xFFFFFFFF, &SH2ReadLong);
+u32 Memory::readStvProtection(const u32 addr, u32 data) const {
 
-    //// Cache addresses access
-    //MapMemoryTableWriteByte(0x60000000, 0x6FFFFFFF, &CacheAddressesWriteByte);
-    //MapMemoryTableWriteWord(0x60000000, 0x6FFFFFFF, &CacheAddressesWriteWord);
-    //MapMemoryTableWriteLong(0x60000000, 0x6FFFFFFF, &CacheAddressesWriteLong);
-    //MapMemoryTableReadByte(0x60000000, 0x6FFFFFFF, &CacheAddressesReadByte);
-    //MapMemoryTableReadWord(0x60000000, 0x6FFFFFFF, &CacheAddressesReadWord);
-    //MapMemoryTableReadLong(0x60000000, 0x6FFFFFFF, &CacheAddressesReadLong);
+    if (this->isStvProtectionEnabled()) {
+        switch (data) {
+            // Astra Superstars
+            case 0x01230000:
+                stv_protection_offset += 4;
+                data = rawRead<u32>(this->cart_, stv_protection_offset);
+                break;
+            // Final Fight Revenge
+            case 0x10da0000:
+                stv_protection_offset += 4;
+                data = rawRead<u32>(this->cart_, stv_protection_offset);
+                break;
+            case 0x10d70000:
+                stv_protection_offset += 4;
+                data = rawRead<u32>(this->cart_, stv_protection_offset);
+                break;
+            // Steep Slope Sliders
+            case 0x2c5b0000:
+            case 0x47F10000:
+            case 0xfcda0000:
+            case 0xb5e60000:
+            case 0x392c0000:
+            case 0x77c30000:
+            case 0x8a620000:
+                stv_protection_offset += 4;
+                data = rawRead<u32>(this->cart_, stv_protection_offset);
+                break;
+            // Radiant Silvergun
+            case 0x77770000:
+                data = 0;
+                break;
+            // Elan Doreé
+            case 0xff7f0000:
+            case 0xf9ff0000:
+            case 0xffbf0000:
+                data = 0x02002000;
+                break;
+        }
+        core::Log::debug("memory", "ST-V protection read index: {}, value: {}", stv_protection_offset, data);
+    }
+    else {
+        stv_protection_offset = 0;
+    }
 
-    //// Cache data access
-    //MapMemoryTableWriteByte(0xC0000000, 0xCFFFFFFF, &CacheDataWriteByte);
-    //MapMemoryTableWriteWord(0xC0000000, 0xCFFFFFFF, &CacheDataWriteWord);
-    //MapMemoryTableWriteLong(0xC0000000, 0xCFFFFFFF, &CacheDataWriteLong);
-    //MapMemoryTableReadByte(0xC0000000, 0xCFFFFFFF, &CacheDataReadByte);
-    //MapMemoryTableReadWord(0xC0000000, 0xCFFFFFFF, &CacheDataReadWord);
-    //MapMemoryTableReadLong(0xC0000000, 0xCFFFFFFF, &CacheDataReadLong);
+    return data;
+}
 
-    //MapMemoryTableWriteByte(0x80000000, 0x8FFFFFFF, &CacheDataWriteByte);
-    //MapMemoryTableWriteWord(0x80000000, 0x8FFFFFFF, &CacheDataWriteWord);
-    //MapMemoryTableWriteLong(0x80000000, 0x8FFFFFFF, &CacheDataWriteLong);
-    //MapMemoryTableReadByte(0x80000000, 0x8FFFFFFF, &CacheDataReadByte);
-    //MapMemoryTableReadWord(0x80000000, 0x8FFFFFFF, &CacheDataReadWord);
-    //MapMemoryTableReadLong(0x80000000, 0x8FFFFFFF, &CacheDataReadLong);
+void Memory::writeStvProtection(const u32 addr, u32 data){
+    u32 relative_addr = calculateRelativeCartAddress(stv_protection_register_address);
+    const u32 index = rawRead<u32>(this->cart_, relative_addr);
+    switch (index) {
+        // Astra Superstars
+        case 0x01230000:
+            this->stv_protection_offset_ = (0x0400000) - 4;
+            break;
+            // Final Fight Revenge
+        case 0x10d70000:
+        case 0x10da0000:
+            this->stv_protection_offset_ = (0x02B994) - 4;
+            break;
+            // Streep Slope Sliders
+        case 0x2c5b0000:
+            this->stv_protection_offset_ = (0x145ffac) - 4;
+            break;
+        case 0x47F10000:
+            this->stv_protection_offset_ = (0x145ffac + 0xbaf0) - 4;
+            break;
+        case 0xfcda0000:
+            this->stv_protection_offset_ = (0x145ffac + 0x12fd0) - 4;
+            break;
+        case 0xb5e60000:
+            this->stv_protection_offset_ = (0x145ffac + 0x1a4c4) - 4;
+            break;
+        case 0x392c0000:
+            this->stv_protection_offset_ = (0x145ffac + 0x219b0) - 4;
+            break;
+        case 0x77c30000:
+            this->stv_protection_offset_ = (0x145ffac + 0x28ea0) - 4;
+            break;
+        case 0x8a620000:
+            this->stv_protection_offset_ = (0x145ffac + 0x30380) - 4;
+            break;
+            // Radiant Silvergun
+        case 0x77770000:
+            break;
+    }
+    core::Log::debug("memory", fmt::format(core::tr("ST-V offset start: {}"), this->stv_protection_offset_));
+}
+
+bool Memory::isStvProtectionEnabled() const {
+    u32 relative_addr = calculateRelativeCartAddress(stv_protection_enabled);
+    return cart_[relative_addr] == 0x1;
 }
 
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const Rom_load rom_load) {
