@@ -28,8 +28,13 @@ namespace saturnin {
 namespace core {
 
 Emulator_context::Emulator_context() {
-    config_ = std::make_shared<Config>("saturnin.cfg");
-    memory_ = std::make_unique<Memory>(config_, this->hardware_mode_);
+    config_     = std::make_shared<Config>("saturnin.cfg");
+    master_sh2_ = std::make_shared<Sh2>(true);
+    slave_sh2_  = std::make_shared<Sh2>(false);
+    memory_     = std::make_unique<Memory>(config_, 
+                                           this->hardware_mode_, 
+                                           this->master_sh2_,
+                                           this->slave_sh2_);
 }
 
 bool Emulator_context::initialize() {

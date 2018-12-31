@@ -32,6 +32,7 @@
 #include "emulator_enums.h"
 #include "config.h"
 #include "memory.h"
+#include "sh2.h"
 #include "stv_definitions.h"
 
 namespace saturnin {
@@ -138,6 +139,8 @@ static std::string saturnin_version = "1.00";
     private:
         std::shared_ptr<Config> config_; ///< Configuration object
         std::unique_ptr<Memory> memory_; ///< Memory object
+        std::shared_ptr<Sh2> master_sh2_;///< Master SH2 object
+        std::shared_ptr<Sh2> slave_sh2_; ///< Slave SH2 object
 
         /// \name Command line variables
         ///

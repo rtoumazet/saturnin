@@ -33,6 +33,7 @@
 #include "emulator_defs.h"
 #include "emulator_enums.h"
 #include "config.h"
+#include "sh2.h"
 
 namespace saturnin {
 namespace core {
@@ -73,6 +74,7 @@ enum class Rom_load {
 };
 
 class Config; 
+class Sh2;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Memory
@@ -89,7 +91,13 @@ public:
     //@{
     // Constructors / Destructors
     Memory()                           = delete;
-    Memory(std::shared_ptr<Config> config, Hardware_mode hm) : config_(config), hardware_mode_(hm) {
+    Memory(std::shared_ptr<Config> config, 
+           Hardware_mode hm, 
+           std::shared_ptr<Sh2> m,
+           std::shared_ptr<Sh2> s) :    config_(config),
+                                        hardware_mode_(hm),
+                                        master_sh2_(m),
+                                        slave_sh2_(s) {
         initializeHandlers();
     };
     Memory(const Memory&)              = delete;
@@ -136,7 +144,7 @@ public:
     
     bool vdp2_cram_was_accessed_{ false }; ///< true when VDP2 color ram was accessed
 
-    bool master_sh2_is_operating_{ true }; ///< true when master SH2 is operating, false when it's slave SH2
+    Sh2_type sh2_in_operation_ { Sh2_type::unknown}; ///< Which SH2 is in operation
     bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
     bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
@@ -256,10 +264,15 @@ public:
         handler[addr >> 16](*this, addr, data);
     }
 
+    std::shared_ptr<Sh2> masterSh2() const { return master_sh2_; };
+    std::shared_ptr<Sh2> slaveSh2() const { return slave_sh2_; };
+
 private:
     void initializeHandlers();
     
-    std::shared_ptr<Config> config_;                    ///< Configuration object
+    std::shared_ptr<Config> config_;    ///< Configuration object
+    std::shared_ptr<Sh2> master_sh2_;   ///< Master SH2 object
+    std::shared_ptr<Sh2> slave_sh2_;    ///< Slave SH2 object
 
     /// \Memory handlers
     //@{
@@ -1268,8 +1281,8 @@ template<typename T>
 struct readSh2Registers {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SH2{:#0x}"), sizeof(u32) * 8, addr));
-            return 0;
+            if (m.sh2_in_operation_ == Sh2_type::master) return m.masterSh2()->read<T>(addr);
+            else return m.slaveSh2()->read<T>(addr);
         };
     }
 };
@@ -1277,7 +1290,7 @@ struct readSh2Registers {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct writeSh2Registers
 ///
-/// \brief SH2 regisers write handler.
+/// \brief SH2 registers write handler.
 ///
 /// \author Runik
 /// \date   29/12/2018
@@ -1289,7 +1302,7 @@ template<typename T>
 struct writeSh2Registers{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            core::Log::error("memory", fmt::format(core::tr("Write ({}) needs to be handled through SH2 {:#0x} : {:#x}"), sizeof(T) * 8, addr, data));
+            m.write<T>(addr, data);
         };
     }
 };
