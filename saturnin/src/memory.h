@@ -1281,7 +1281,7 @@ template<typename T>
 struct readSh2Registers {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (m.sh2_in_operation_ == Sh2_type::master) return m.masterSh2()->read<T>(addr);
+            if (isMasterSh2InOperation(m)) return m.masterSh2()->read<T>(addr);
             else return m.slaveSh2()->read<T>(addr);
         };
     }
@@ -1302,7 +1302,8 @@ template<typename T>
 struct writeSh2Registers{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            m.write<T>(addr, data);
+            if (isMasterSh2InOperation(m)) return m.masterSh2()->write<T>(addr, data);
+            else return m.slaveSh2()->write<T>(addr, data);
         };
     }
 };
@@ -1426,6 +1427,19 @@ struct writeCacheData{
         };
     }
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn inline bool isMasterSh2InOperation(const Memory& m);
+///
+/// \brief  Checks which SH2 is in operation.
+///
+/// \author Runik
+/// \date   01/01/2019
+///
+/// \return Returns true if master SH2 is in operation, false if slave SH2 is in operation.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline bool isMasterSh2InOperation(const Memory& m);
 
 }
 }

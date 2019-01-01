@@ -473,8 +473,9 @@ std::vector<std::string> listStvConfigurationFiles() {
     return files;
 }
 
-// Handlers
-
+inline bool isMasterSh2InOperation(const Memory& m) {
+    return (m.sh2_in_operation_ == Sh2_type::master);
+}
 
 }
 }

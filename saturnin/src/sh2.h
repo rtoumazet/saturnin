@@ -143,17 +143,38 @@ class Sh2 {
         // 32 bits specialization
         template<>
         u32 read<u32>(const u32 addr) const {
-            return read32(addr);
+            return read(addr);
         }
 
         template<typename T>
         void write(const u32 addr, const T data) {
-            rawWrite<T>(io_registers_, addr 0x1FF, data);
+            rawWrite<T>(io_registers_, addr & 0x1FF, data);
         }
+
+        template<>
+        void write<u8>(const u32 addr, const u8 data) {
+            write(addr, data);
+        }
+
+        template<>
+        void write<u16>(const u32 addr, const u16 data) {
+            write(addr, data);
+        }
+
+        template<>
+        void write<u32>(const u32 addr, const u32 data) {
+            write(addr, data);
+        }
+
     private:
-        std::array <u8, 0x200>  io_registers_; ///< I/O registers (512B).
+        std::array <u8, 0x200> io_registers_; ///< I/O registers (512B).
         bool is_master_;
-        u32 read32(const u32 addr) const;
+
+        u32 read(const u32 addr) const;
+
+        void write(u32 addr, u8 data);
+        void write(u32 addr, u16 data);
+        void write(u32 addr, u32 data);
 };
 
 
