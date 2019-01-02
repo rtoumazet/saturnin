@@ -170,6 +170,21 @@ class Sh2 {
         std::array <u8, 0x200> io_registers_; ///< I/O registers (512B).
         bool is_master_;
 
+        /// \name FRT (Free Running Timer)
+        //@{
+        s32	    frt_elapsed_cycles_;///< Elapsed FRT cycles. 
+        u8	    frt_clock_;	        ///< FRT clock. 
+        u8	    frt_mask_;	        ///< FRT mask. 
+        u16     frt_ocra_;	        ///< Output Compare Register A. 
+        u16     frt_ocrb_;	        ///< Output Compare Register B.
+        bool    frt_icie_;	        ///< Input Capture Interrupt Enable. 
+        bool    frt_ociae_;	        ///< Output Compare Interrupt A Enable. 
+        bool    frt_ocibe_;	        ///< Output Compare Interrupt B Enable.
+        bool    frt_ovie_;	        ///< Timer Overflow Interrupt Enable. 
+        bool    frt_current_ocr_;	///< Current Output Compare Register. 
+        //@}
+
+
         u32 read(const u32 addr) const;
 
         void write(u32 addr, u8 data);
