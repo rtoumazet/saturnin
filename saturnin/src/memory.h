@@ -267,6 +267,17 @@ public:
     std::shared_ptr<Sh2> masterSh2() const { return master_sh2_; };
     std::shared_ptr<Sh2> slaveSh2() const { return slave_sh2_; };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Memory::purgeSh2Cache();
+    ///
+    /// \brief  All the valid bits and LRU bits of the SH2 cache addresses are set to 0
+    ///
+    /// \author Runik
+    /// \date   02/01/2018
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void purgeSh2Cache();
+
 private:
     void initializeHandlers();
     

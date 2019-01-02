@@ -26,13 +26,13 @@ u32 Sh2::read(u32 addr) const {
     switch (addr) {
         case dvdnt:
         case dvdntl_shadow:
-            return rawRead<u32>(this->io_registers_, dvdntl & 0x1FF);
+            return rawRead<u32>(io_registers_, dvdntl & 0x1FF);
             break;
         case dvdnth_shadow:
-            return rawRead<u32>(this->io_registers_, dvdnth & 0x1FF);
+            return rawRead<u32>(io_registers_, dvdnth & 0x1FF);
             break;
         default:
-            return rawRead<u32>(this->io_registers_, addr & 0x1FF);
+            return rawRead<u32>(io_registers_, addr & 0x1FF);
     }
 }
 
@@ -40,47 +40,49 @@ void Sh2::write(u32 addr, u8 data) {
     switch (addr) {
         /* FRT */
         case tier:
-#ifdef _LOGS
-            if (isMaster) EmuState::pLog->Scu("TIER byte write (master): ", Data);
-            else EmuState::pLog->Scu("TIER byte write (slave): ", Data);
-#endif
+            if(is_master_) Log::debug("sh2", "TIER byte write (master SH2)");
+            else Log::debug("sh2", "TIER byte write (slave SH2)");
             break;
         case ocrbh:
             if (io_registers_[tocr & 0x1FF] & 0x10) {
-                frtOCRB &= 0xFF;
-                frtOCRB |= static_cast<uint16_t>(Data << 8);
+                //frt_ocrb_ &= 0xFF;
+                //frt_ocrb_ |= static_cast<uint16_t>(Data << 8);
+                frt_ocrb_ = (data << 8) | 0xFF;
             }
             else {
-                frtOCRA &= 0xFF;
-                frtOCRA |= static_cast<uint16_t>(Data << 8);
+                //frt_ocra_ &= 0xFF;
+                //frt_ocra_ |= static_cast<uint16_t>(Data << 8);
+                frt_ocra_ = (data << 8) | 0xFF;
             }
             break;
         case ocrbl:
             if (io_registers_[tocr & 0x1FF] & 0x10) {
-                frtOCRB &= 0xFF00;
-                frtOCRB |= static_cast<uint16_t>(Data);
+                //frt_ocrb_ &= 0xFF00;
+                //frt_ocrb_ |= static_cast<uint16_t>(Data);
+                frt_ocrb_ = (0xFF << 8) | data;
             }
             else {
-                frtOCRA &= 0xFF00;
-                frtOCRA |= static_cast<uint16_t>(Data);
+                //frt_ocra_ &= 0xFF00;
+                //frt_ocra_ |= static_cast<uint16_t>(Data);
+                frt_ocra_ = (0xFF << 8) | data;
             }
             break;
         case tcr:
             switch (io_registers_[tcr & 0x1FF] & 0x3) {
                 case 0x0:
-                    frtClock = 8;
-                    frtMask = 0x7;
+                    frt_clock_ = 8;
+                    frt_mask_ = 0x7;
                     break;
                 case 0x1:
-                    frtClock = 32;
-                    frtMask = 0x1F;
+                    frt_clock_ = 32;
+                    frt_mask_ = 0x1F;
                     break;
                 case 0x2:
-                    frtClock = 128;
-                    frtMask = 0x7F;
+                    frt_clock_ = 128;
+                    frt_mask_ = 0x7F;
                     break;
                 case 0x3:
-                    MessageBox(NULL, "External clock not implemented", "FRT", MB_OK);
+                    Log::warning("sh2", "FRT - External clock not implemented");
                     break;
             }
             break;
@@ -98,7 +100,8 @@ void Sh2::write(u32 addr, u8 data) {
         default:
             rawWrite<u8>(io_registers_, addr & 0x1FF, data);
     }
-    if (Addr >= 0xFFFFFE00)	IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>(Data);
+    
+    io_registers_[addr & 0x1FF] = data;
 
 }
 
