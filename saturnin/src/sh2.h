@@ -2,7 +2,7 @@
 // sh2.h
 // Saturnin
 //
-// Copyright (c) 2018 Renaud Toumazet
+// Copyright (c) 2018-2019 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -113,6 +113,8 @@ const u32 rtcnt         = 0xFFFFFFF4;
 const u32 rtcor         = 0xFFFFFFF8;
 //@}
 
+constexpr u8 ccr_cache_purge = 0b00010000;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Sh2
 ///
@@ -135,40 +137,215 @@ class Sh2 {
         ~Sh2()                       = default;
         //@}
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn template<typename T> T Sh2::readRegisters(const u32 addr) const
+        ///
+        /// \brief  Read interface for the registers area.
+        ///
+        /// \author Runik
+        /// \date   03/01/2019
+        ///
+        /// \tparam T   type of data to read (u8, u16 or u32).
+        /// \param  addr    Address to read data from.
+        ///
+        /// \return Data read.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         template<typename T>
-        T read(const u32 addr) const {
+        T readRegisters(const u32 addr) const {
             return rawRead<T>(this->io_registers_, addr & 0x1FF);
         }
 
         // 32 bits specialization
         template<>
-        u32 read<u32>(const u32 addr) const {
-            return read(addr);
+        u32 readRegisters<u32>(const u32 addr) const {
+            return readRegisters(addr);
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn template<typename T> void Sh2::writeRegisters(const u32 addr, const T data)
+        ///
+        /// \brief  Write interface for the registers area.
+        ///
+        /// \author Runik
+        /// \date   03/01/2019
+        ///
+        /// \tparam T       Type of data to write (u8, u16 or u32).
+        /// \param  addr    Address to write data to.
+        /// \param  data    Data to write.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         template<typename T>
-        void write(const u32 addr, const T data) {
+        void writeRegisters(const u32 addr, const T data) {
             rawWrite<T>(io_registers_, addr & 0x1FF, data);
         }
 
+        // 8 bits specialization
         template<>
-        void write<u8>(const u32 addr, const u8 data) {
-            write(addr, data);
+        void writeRegisters<u8>(const u32 addr, const u8 data) {
+            writeRegisters(addr, data);
         }
 
+        // 16 bits specialization
         template<>
-        void write<u16>(const u32 addr, const u16 data) {
-            write(addr, data);
+        void writeRegisters<u16>(const u32 addr, const u16 data) {
+            writeRegisters(addr, data);
         }
 
+        // 32 bits specialization
         template<>
-        void write<u32>(const u32 addr, const u32 data) {
-            write(addr, data);
+        void writeRegisters<u32>(const u32 addr, const u32 data) {
+            writeRegisters(addr, data);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn template<typename T> T Sh2::readCacheAddresses(const u32 addr) const
+        ///
+        /// \brief  Read interface for cache addresses.
+        ///
+        /// \author Runik
+        /// \date   03/01/2018
+        ///
+        /// \tparam T       Type of data to read (u8, u16 or u32).
+        /// \param  addr    Address to read data from.
+        ///
+        /// \return Data read.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        template<typename T>
+        T readCacheAddresses(const u32 addr) const {
+            return rawRead<T>(cache_addresses_, addr & 0x3FF);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn template<typename T> void Sh2::writeCacheAddresses(const u32 addr, const T data)
+        ///
+        /// \brief  Write  interface for cache addresses.
+        ///
+        /// \author Runik
+        /// \date   03/01/2019
+        ///
+        /// \tparam T       Type of data to write (u8, u16 or u32).
+        /// \param  addr    Address to write data to.
+        /// \param  data    Data to write.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        template<typename T>
+        void writeCacheAddresses(const u32 addr, const T data) {
+            rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn template<typename T> T Sh2::readCacheData(const u32 addr) const
+        ///
+        /// \brief  Read interface for cache data.
+        ///
+        /// \author Runik
+        /// \date   03/01/2018
+        ///
+        /// \tparam T       Type of data to read (u8, u16 or u32).
+        /// \param  addr    Address to read data from.
+        ///
+        /// \return Data read.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        template<typename T>
+        T readCacheData(const u32 addr) const {
+            return rawRead<T>(cache_data_, addr & 0xFFF);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn template<typename T> void Sh2::writeCacheData(const u32 addr, const T data)
+        ///
+        /// \brief  Write interface for cache data.
+        ///
+        /// \author Runik
+        /// \date   03/01/2019
+        ///
+        /// \tparam T       Type of data to write (u8, u16 or u32).
+        /// \param  addr    Address to write data to.
+        /// \param  data    Data to write.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        template<typename T>
+        void writeCacheData(const u32 addr, const T data) {
+            rawWrite<T>(cache_data_, addr & 0xFFF, data);
         }
 
     private:
-        std::array <u8, 0x200> io_registers_; ///< I/O registers (512B).
-        bool is_master_;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn u32 Sh2::readRegisters(const u32 addr) const;
+        ///
+        /// \brief  Reads from the registers area.
+        ///
+        /// \author Runik
+        /// \date   03/01/2019
+        ///
+        /// \param  addr    Address to read data from.
+        ///
+        /// \return Data read.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        u32 readRegisters(const u32 addr) const;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Sh2::writeRegisters(u32 addr, u8 data);
+        ///
+        /// \brief  Writes to the registers area.
+        ///
+        /// \author Runik
+        /// \date   03/01/2019
+        ///
+        /// \param  addr    Address to write data to.
+        /// \param  data    Data to write.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void writeRegisters(u32 addr, u8 data);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Sh2::writeRegisters(u32 addr, u16 data);
+        ///
+        /// \brief  Writes to the registers area.
+        ///
+        /// \author Runik
+        /// \date   03/01/2019
+        ///
+        /// \param  addr    Address to write data to.
+        /// \param  data    Data to write.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void writeRegisters(u32 addr, u16 data);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Sh2::writeRegisters(u32 addr, u32 data);
+        ///
+        /// \brief  Writes to the registers area.
+        ///
+        /// \author Runik
+        /// \date   03/01/2019
+        ///
+        /// \param  addr    Address to write data to.
+        /// \param  data    Data to write.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void writeRegisters(u32 addr, u32 data);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Sh2::purgeCache();
+        ///
+        /// \brief  cache purge : all the cache address valid bits and LRU information are initialized to 0 (in 2 ways and 4 ways mode)
+        ///
+        /// \author Runik
+        /// \date   02/01/2018
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void purgeCache();
+
+        std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
+        std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
+        std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).
+        bool is_master_;                            ///< True if the SH2 is configured as master, false if as slave.
 
         /// \name FRT (Free Running Timer)
         //@{
@@ -183,16 +360,7 @@ class Sh2 {
         bool    frt_ovie_;	        ///< Timer Overflow Interrupt Enable. 
         bool    frt_current_ocr_;	///< Current Output Compare Register. 
         //@}
-
-
-        u32 read(const u32 addr) const;
-
-        void write(u32 addr, u8 data);
-        void write(u32 addr, u16 data);
-        void write(u32 addr, u32 data);
 };
-
-
 
 }
 }

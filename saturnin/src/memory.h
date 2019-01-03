@@ -2,7 +2,7 @@
 // memory.h
 // Saturnin
 //
-// Copyright (c) 2018 Renaud Toumazet
+// Copyright (c) 2018-2019 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -137,8 +137,8 @@ public:
     std::array <u8, 0x100000>  sound_ram_;        ///< Sound RAM (1MB).
     std::array <u8, 0x100>     stv_io_;           ///< STV I/O (256B).
     std::array <u8, 0x3000000> cart_;             ///< Cart (50MB).
-    std::array <u8, 0x400>     cache_addresses_;  ///< Cache addresses (1KB).
-    std::array <u8, 0x1000>    cache_data_;       ///< Cache data (4KB).
+    //std::array <u8, 0x400>     cache_addresses_;  ///< Cache addresses (1KB).
+    //std::array <u8, 0x1000>    cache_data_;       ///< Cache data (4KB).
 
     Hardware_mode hardware_mode_{Hardware_mode::saturn}; ///< Current hardware mode
     
@@ -266,17 +266,6 @@ public:
 
     std::shared_ptr<Sh2> masterSh2() const { return master_sh2_; };
     std::shared_ptr<Sh2> slaveSh2() const { return slave_sh2_; };
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Memory::purgeSh2Cache();
-    ///
-    /// \brief  All the valid bits and LRU bits of the SH2 cache addresses are set to 0
-    ///
-    /// \author Runik
-    /// \date   02/01/2018
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void purgeSh2Cache();
 
 private:
     void initializeHandlers();
@@ -1292,8 +1281,8 @@ template<typename T>
 struct readSh2Registers {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) return m.masterSh2()->read<T>(addr);
-            else return m.slaveSh2()->read<T>(addr);
+            if (isMasterSh2InOperation(m)) return m.masterSh2()->readRegisters<T>(addr);
+            else return m.slaveSh2()->readRegisters<T>(addr);
         };
     }
 };
@@ -1313,8 +1302,8 @@ template<typename T>
 struct writeSh2Registers{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) return m.masterSh2()->write<T>(addr, data);
-            else return m.slaveSh2()->write<T>(addr, data);
+            if (isMasterSh2InOperation(m)) return m.masterSh2()->writeRegisters<T>(addr, data);
+            else return m.slaveSh2()->writeRegisters<T>(addr, data);
         };
     }
 };
@@ -1374,7 +1363,8 @@ template<typename T>
 struct readCacheAddresses {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.cache_addresses_, addr & 0x3FF);
+            if (isMasterSh2InOperation(m)) return m.masterSh2()->readCacheAddresses<T>(addr);
+            else return m.slaveSh2()->readCacheAddresses<T>(addr);
         };
     }
 };
@@ -1394,7 +1384,8 @@ template<typename T>
 struct writeCacheAddresses{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.cache_addresses_, addr & 0x3FF, data);
+            if (isMasterSh2InOperation(m)) return m.masterSh2()->writeCacheAddresses<T>(addr, data);
+            else return m.slaveSh2()->writeCacheAddresses<T>(addr, data);
         };
     }
 };
@@ -1414,7 +1405,8 @@ template<typename T>
 struct readCacheData{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.cache_data_, addr & 0xFFF);
+            if (isMasterSh2InOperation(m)) return m.masterSh2()->readCacheData<T>(addr);
+            else return m.slaveSh2()->readCacheData<T>(addr);
         };
     }
 };
@@ -1434,7 +1426,8 @@ template<typename T>
 struct writeCacheData{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.cache_data_, addr & 0xFFF, data);
+            if (isMasterSh2InOperation(m)) return m.masterSh2()->writeCacheData<T>(addr, data);
+            else return m.slaveSh2()->writeCacheData<T>(addr, data);
         };
     }
 };
