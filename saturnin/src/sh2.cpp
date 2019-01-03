@@ -22,7 +22,7 @@
 namespace saturnin {
 namespace core {
 
-u32 Sh2::read(u32 addr) const {
+u32 Sh2::readRegisters(u32 addr) const {
     switch (addr) {
         case dvdnt:
         case dvdntl_shadow:
@@ -36,7 +36,7 @@ u32 Sh2::read(u32 addr) const {
     }
 }
 
-void Sh2::write(u32 addr, u8 data) {
+void Sh2::writeRegisters(u32 addr, u8 data) {
     switch (addr) {
         /* FRT */
         case tier:
@@ -45,25 +45,17 @@ void Sh2::write(u32 addr, u8 data) {
             break;
         case ocrbh:
             if (io_registers_[tocr & 0x1FF] & 0x10) {
-                //frt_ocrb_ &= 0xFF;
-                //frt_ocrb_ |= static_cast<uint16_t>(Data << 8);
                 frt_ocrb_ = (data << 8) | 0xFF;
             }
             else {
-                //frt_ocra_ &= 0xFF;
-                //frt_ocra_ |= static_cast<uint16_t>(Data << 8);
                 frt_ocra_ = (data << 8) | 0xFF;
             }
             break;
         case ocrbl:
             if (io_registers_[tocr & 0x1FF] & 0x10) {
-                //frt_ocrb_ &= 0xFF00;
-                //frt_ocrb_ |= static_cast<uint16_t>(Data);
                 frt_ocrb_ = (0xFF << 8) | data;
             }
             else {
-                //frt_ocra_ &= 0xFF00;
-                //frt_ocra_ |= static_cast<uint16_t>(Data);
                 frt_ocra_ = (0xFF << 8) | data;
             }
             break;
@@ -87,13 +79,11 @@ void Sh2::write(u32 addr, u8 data) {
             }
             break;
         case ccr:
-            EmuState::pLog->MemoryWriteByte(Addr, static_cast<uint8_t>(Data), pc);
-            if (Data & 0x10) {
-                // cache purge : all the cache address valid bits and LRU information are initialized to 0 (in 2 ways and 4 ways mode)
-                EmuState::pMem->PurgeSh2Cache();
+            Log::debug("sh2", fmt::format("CCR byte write: {}", data));
+            if (data & ccr_cache_purge) {
+                purgeCache();
 
-                // cache purge bit is reverted to 0 after operation
-                Data &= 0xEF;
+                data &= 0xEF; // cache purge bit is reverted to 0 after operation
             }
 
             break;
@@ -105,12 +95,22 @@ void Sh2::write(u32 addr, u8 data) {
 
 }
 
-void Sh2::write(u32 addr, u16 data) {
+void Sh2::writeRegisters(u32 addr, u16 data) {
 
 }
 
-void Sh2::write(u32 addr, u32 data) {
+void Sh2::writeRegisters(u32 addr, u32 data) {
 
+}
+
+void Sh2::purgeCache() {
+    // All the valid bits and LRU bits are initialized to 0
+    for (u8 i = 0; i < 32; ++i) {
+        // :WARNING: the following code is untested
+        u32 data = rawRead<u32>(cache_addresses_, i);
+        data &= 0xFFFFFC0B;
+        rawWrite<u32>(cache_addresses_, i, data);
+    }
 }
 
 }

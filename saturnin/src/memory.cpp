@@ -448,16 +448,6 @@ bool Memory::isStvProtectionEnabled() const {
     return cart_[relative_addr] == 0x1;
 }
 
-void Memory::purgeSh2Cache() {
-    // All the valid bits and LRU bits are initialized to 0
-    for (u8 i = 0; i < 32; ++i) {
-        // :WARNING: the following code is untested
-        u32 data = rawRead<u32>(cache_addresses_, i);
-        data &= 0xFFFFFC0B;
-        rawWrite<u32>(cache_addresses_, i, data);
-    }
-}
-
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const Rom_load rom_load) {
     if (times_mirrored > 0) {
         u32 multiple{};
