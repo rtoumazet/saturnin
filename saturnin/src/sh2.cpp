@@ -18,6 +18,9 @@
 // 
 
 #include "sh2.h"
+#include "utilities.h" // toUnderlying
+
+namespace util = saturnin::utilities;
 
 namespace saturnin {
 namespace core {
@@ -44,7 +47,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             else Log::debug("sh2", "TIER byte write (slave SH2)");
             break;
         case ocrbh:
-            if (io_registers_[tocr & 0x1FF] & 0x10) {
+            if (io_registers_[tocr & 0x1FF] & util::toUnderlying(TocrOcrs::selects_ocrb)) {
                 frt_ocrb_ = (data << 8) | 0xFF;
             }
             else {
@@ -52,7 +55,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             }
             break;
         case ocrbl:
-            if (io_registers_[tocr & 0x1FF] & 0x10) {
+            if (io_registers_[tocr & 0x1FF] & util::toUnderlying(TocrOcrs::selects_ocrb)) {
                 frt_ocrb_ = (0xFF << 8) | data;
             }
             else {
@@ -60,32 +63,30 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             }
             break;
         case tcr:
-            switch (io_registers_[tcr & 0x1FF] & 0x3) {
-                case 0x0:
+            switch (io_registers_[tcr & 0x1FF] & util::toUnderlying(TcrMask::cksx)) {
+                case util::toUnderlying(TcrClock::internal_divided_by_8):
                     frt_clock_ = 8;
                     frt_mask_ = 0x7;
                     break;
-                case 0x1:
+                case util::toUnderlying(TcrClock::internal_divided_by_32):
                     frt_clock_ = 32;
                     frt_mask_ = 0x1F;
                     break;
-                case 0x2:
+                case util::toUnderlying(TcrClock::internal_divided_by_128):
                     frt_clock_ = 128;
                     frt_mask_ = 0x7F;
                     break;
-                case 0x3:
+                case util::toUnderlying(TcrClock::external):
                     Log::warning("sh2", "FRT - External clock not implemented");
                     break;
             }
             break;
         case ccr:
             Log::debug("sh2", fmt::format("CCR byte write: {}", data));
-            if (data & ccr_cache_purge) {
+            if (data & util::toUnderlying(CcrCp::cache_purge)) {
                 purgeCache();
-
-                data &= 0xEF; // cache purge bit is reverted to 0 after operation
+                data ^= util::toUnderlying(CcrMask::cp); // cache purge bit is cleared after operation
             }
-
             break;
         default:
             rawWrite<u8>(io_registers_, addr & 0x1FF, data);
@@ -96,6 +97,33 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
 }
 
 void Sh2::writeRegisters(u32 addr, u16 data) {
+    switch (addr) {
+        case tier:
+            if (is_master_) Log::debug("sh2", "TIER word write (master SH2)");
+            else Log::debug("sh2", "TIER word write (slave SH2)");
+            rawWrite<u16>(io_registers_, addr & 0x1FF, data);
+            break;
+        case icr:
+            if (IOReg[(Addr & 0x00000FFF) - 0xE00] != static_cast<uint8_t>((Data & 0xFF00) >> 8)) {
+                if (Data & 0x8000) {
+                    Log::error("sh2", "NMI interrupt not handled !");
+                    //EmuState::pMem->nmiToDo = true;
+                    //EmuState::pMem->nmiCount = 0x100;
+                }
+            }
+
+            rawWrite<u16>(io_registers_, addr & 0x1FF, data);
+            break;
+        case bcr1 + 2:
+            rawWrite<u16>(io_registers_, addr & 0x1FF, data & 0x00F7);
+            break;
+        case bcr2 + 2:
+            rawWrite<u16>(io_registers_, addr & 0x1FF, data & 0x00FC);
+            break;
+        default:
+            rawWrite<u16>(io_registers_, addr, data);
+            break;
+    }
 
 }
 
