@@ -132,9 +132,9 @@ static std::string saturnin_version = "1.00";
 
         std::unique_ptr<Memory>& memory(){return memory_;};
 
-        Hardware_mode    hardware_mode_{ Hardware_mode::saturn };     ///< Hardware mode
-        Emulation_status emulation_status_{ Emulation_status::stopped }; ///< Emulation status
-        Rendering_status rendering_status_{ Rendering_status::running }; ///< Rendering status.
+        HardwareMode    HardwareMode_{ HardwareMode::saturn };     ///< Hardware mode
+        EmulationStatus EmulationStatus_{ EmulationStatus::stopped }; ///< Emulation status
+        RenderingStatus RenderingStatus_{ RenderingStatus::running }; ///< Rendering status.
 
     private:
         std::shared_ptr<Config> config_; ///< Configuration object

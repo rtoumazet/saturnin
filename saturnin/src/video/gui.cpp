@@ -167,18 +167,18 @@ namespace gui {
             ImGui::Text(core::tr("Hardware mode").c_str());
             ImGui::SameLine(150);
             
-            std::string hardware_mode = state.config()->readValue(core::Access_keys::config_hardware_mode);
-            static int mode = util::toUnderlying(core::Config::hardware_mode[hardware_mode]);
+            std::string HardwareMode = state.config()->readValue(core::Access_keys::config_HardwareMode);
+            static int mode = util::toUnderlying(core::Config::HardwareMode[HardwareMode]);
 
-            if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::Hardware_mode::saturn))) {
-                core::Config::Map_hardware_mode::const_iterator it = util::getKeyFromValue(core::Config::hardware_mode, core::Hardware_mode::saturn);
-                if (it != core::Config::hardware_mode.end()) state.config()->writeValue(core::Access_keys::config_hardware_mode, it->first);
+            if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::HardwareMode::saturn))) {
+                core::Config::Map_HardwareMode::const_iterator it = util::getKeyFromValue(core::Config::HardwareMode, core::HardwareMode::saturn);
+                if (it != core::Config::HardwareMode.end()) state.config()->writeValue(core::Access_keys::config_HardwareMode, it->first);
                 else core::Log::warning("config", core::tr("Hardware mode unknown ..."));
             }
             ImGui::SameLine();
-            if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::Hardware_mode::stv))) {
-                core::Config::Map_hardware_mode::const_iterator it = util::getKeyFromValue(core::Config::hardware_mode, core::Hardware_mode::stv);
-                if (it != core::Config::hardware_mode.end()) state.config()->writeValue(core::Access_keys::config_hardware_mode, it->first);
+            if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::HardwareMode::stv))) {
+                core::Config::Map_HardwareMode::const_iterator it = util::getKeyFromValue(core::Config::HardwareMode, core::HardwareMode::stv);
+                if (it != core::Config::HardwareMode.end()) state.config()->writeValue(core::Access_keys::config_HardwareMode, it->first);
                 else core::Log::warning("config", core::tr("Hardware mode unknown ..."));
             }
 
@@ -308,7 +308,7 @@ namespace gui {
             counter = 5 * 60;
 
             if (reset_rendering) {
-                state.rendering_status_ = core::Rendering_status::reset;
+                state.RenderingStatus_ = core::RenderingStatus::reset;
                 reset_rendering = false;
             }
         }

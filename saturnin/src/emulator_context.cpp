@@ -32,7 +32,7 @@ Emulator_context::Emulator_context() {
     master_sh2_ = std::make_shared<Sh2>(true);
     slave_sh2_  = std::make_shared<Sh2>(false);
     memory_     = std::make_unique<Memory>(config_, 
-                                           this->hardware_mode_, 
+                                           this->HardwareMode_, 
                                            this->master_sh2_,
                                            this->slave_sh2_);
 }
@@ -52,7 +52,7 @@ bool Emulator_context::initialize() {
 }
 
 bool Emulator_context::run() {
-    this->memory()->loadBios(core::Hardware_mode::saturn);
+    this->memory()->loadBios(core::HardwareMode::saturn);
 
     // TESTING //
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
@@ -80,8 +80,8 @@ bool Emulator_context::run() {
     // TESTING //
 
     uint8_t status{};
-    while (this->rendering_status_ != Rendering_status::stopped) {
-        this->rendering_status_ = Rendering_status::running;
+    while (this->RenderingStatus_ != RenderingStatus::stopped) {
+        this->RenderingStatus_ = RenderingStatus::running;
         bool is_legacy_opengl = this->config()->readValue(core::Access_keys::config_legacy_opengl);
         status = (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
 

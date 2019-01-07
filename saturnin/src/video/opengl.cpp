@@ -394,7 +394,7 @@ int32_t runLegacyOpengl(core::Emulator_context& state) {
 
         gui::buildGui(state, opengl, fbo, display_w, display_h);
 
-        if (state.rendering_status_ == core::Rendering_status::reset) glfwSetWindowShouldClose(window, true);
+        if (state.RenderingStatus_ == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
 
         gui::show_test_window(show_test_window);
 
@@ -518,7 +518,7 @@ int32_t runModernOpengl(core::Emulator_context& state) {
 
         gui::buildGui(state, opengl, fbo, display_w, display_h);
 
-        if (state.rendering_status_ == core::Rendering_status::reset) glfwSetWindowShouldClose(window, true);
+        if (state.RenderingStatus_ == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -540,7 +540,7 @@ int32_t runModernOpengl(core::Emulator_context& state) {
 
 void windowCloseCallback(GLFWwindow* window) {
     core::Emulator_context *state = reinterpret_cast<core::Emulator_context*>(glfwGetWindowUserPointer(window));
-    state->rendering_status_ = core::Rendering_status::stopped;
+    state->RenderingStatus_ = core::RenderingStatus::stopped;
 }
 
 };
