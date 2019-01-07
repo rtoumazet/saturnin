@@ -121,11 +121,11 @@ bool Memory::loadRom(const std::string& zip_name,
     return true;
 }
 
-void Memory::loadBios(const Hardware_mode mode) {
+void Memory::loadBios(const HardwareMode mode) {
     std::string bios_path{};
     switch (mode) {
-        case Hardware_mode::saturn: bios_path = config_->readValue(Access_keys::config_bios_saturn).c_str(); break;
-        case Hardware_mode::stv:    bios_path = config_->readValue(Access_keys::config_bios_stv).c_str(); break;
+        case HardwareMode::saturn: bios_path = config_->readValue(Access_keys::config_bios_saturn).c_str(); break;
+        case HardwareMode::stv:    bios_path = config_->readValue(Access_keys::config_bios_stv).c_str(); break;
         default: {
             Log::error("config", tr("Unknown hardware mode"));
             Log::error("config", tr("Exiting ..."));
@@ -143,11 +143,11 @@ void Memory::loadBios(const Hardware_mode mode) {
         std::string str = buffer.str();
             
         switch (mode) {
-            case Hardware_mode::saturn: {
+            case HardwareMode::saturn: {
                 std::move(str.begin(), str.end(), this->rom_.data());
                 break;
             }
-            case Hardware_mode::stv: {
+            case HardwareMode::stv: {
                 // Needs byteswapping
                 for (size_t i = 0; i < str.size(); i += 4) {
                     this->rom_[i + 1] = str[i + 0];
@@ -474,7 +474,7 @@ std::vector<std::string> listStvConfigurationFiles() {
 }
 
 inline bool isMasterSh2InOperation(const Memory& m) {
-    return (m.sh2_in_operation_ == Sh2_type::master);
+    return (m.sh2_in_operation_ == Sh2Type::master);
 }
 
 }

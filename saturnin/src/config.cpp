@@ -34,7 +34,7 @@ namespace core {
     Config::Map_keys Config::single_keys = {
         { Access_keys::config_global,        "global"},
         { Access_keys::config_language,      "language"},
-        { Access_keys::config_hardware_mode, "hardware_mode" },
+        { Access_keys::config_HardwareMode, "HardwareMode" },
         { Access_keys::config_rendering,     "rendering"},
         { Access_keys::config_legacy_opengl, "legacy_opengl" },
         { Access_keys::config_paths,         "paths" },
@@ -52,7 +52,7 @@ namespace core {
     Config::Map_keys Config::full_keys = {
         { Access_keys::config_global,        "global"},
         { Access_keys::config_language,      "global.language"},
-        { Access_keys::config_hardware_mode, "global.hardware_mode" },
+        { Access_keys::config_HardwareMode, "global.HardwareMode" },
         { Access_keys::config_rendering,     "rendering" },
         { Access_keys::config_legacy_opengl, "rendering.legacy_opengl" },
         { Access_keys::config_paths,         "paths" },
@@ -91,9 +91,9 @@ namespace core {
         {"SPTI", cdrom::Cdrom_access_method::spti}
     };
 
-    Config::Map_hardware_mode Config::hardware_mode= {
-        {"SATURN", core::Hardware_mode::saturn},
-        {"STV", core::Hardware_mode::stv}
+    Config::Map_HardwareMode Config::HardwareMode= {
+        {"SATURN", core::HardwareMode::saturn},
+        {"STV", core::HardwareMode::stv}
     };
 
     void Config::writeFile() {
@@ -128,9 +128,9 @@ namespace core {
 
         libcfg::Setting& global = root.add(single_keys[Access_keys::config_global], libcfg::Setting::TypeGroup);
         this->writeValue(global, single_keys[Access_keys::config_language], "en");
-        core::Config::Map_hardware_mode::const_iterator it_hm = util::getKeyFromValue(core::Config::hardware_mode, core::Hardware_mode::saturn);
-        if (it_hm != core::Config::hardware_mode.end()) {
-            this->writeValue(global, single_keys[Access_keys::config_hardware_mode], it_hm->first);
+        core::Config::Map_HardwareMode::const_iterator it_hm = util::getKeyFromValue(core::Config::HardwareMode, core::HardwareMode::saturn);
+        if (it_hm != core::Config::HardwareMode.end()) {
+            this->writeValue(global, single_keys[Access_keys::config_HardwareMode], it_hm->first);
         }
 
         libcfg::Setting& rendering = root.add(single_keys[Access_keys::config_rendering], libcfg::Setting::TypeGroup);

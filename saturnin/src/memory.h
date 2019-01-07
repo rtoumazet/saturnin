@@ -92,10 +92,10 @@ public:
     // Constructors / Destructors
     Memory()                           = delete;
     Memory(std::shared_ptr<Config> config, 
-           Hardware_mode hm, 
+           HardwareMode hm, 
            std::shared_ptr<Sh2> m,
            std::shared_ptr<Sh2> s) :    config_(config),
-                                        hardware_mode_(hm),
+                                        HardwareMode_(hm),
                                         master_sh2_(m),
                                         slave_sh2_(s) {
         initializeHandlers();
@@ -140,16 +140,16 @@ public:
     //std::array <u8, 0x400>     cache_addresses_;  ///< Cache addresses (1KB).
     //std::array <u8, 0x1000>    cache_data_;       ///< Cache data (4KB).
 
-    Hardware_mode hardware_mode_{Hardware_mode::saturn}; ///< Current hardware mode
+    HardwareMode HardwareMode_{HardwareMode::saturn}; ///< Current hardware mode
     
     bool vdp2_cram_was_accessed_{ false }; ///< true when VDP2 color ram was accessed
 
-    Sh2_type sh2_in_operation_ { Sh2_type::unknown}; ///< Which SH2 is in operation
+    Sh2Type sh2_in_operation_ { Sh2Type::unknown}; ///< Which SH2 is in operation
     bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
     bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Memory::loadBios(const Hardware_mode mode);
+    /// \fn void Memory::loadBios(const HardwareMode mode);
     ///
     /// \brief  Loads the BIOS into memory.
     ///
@@ -159,7 +159,7 @@ public:
     /// \param  mode    Hardware mode of the bios to load (Saturn/ST-V).
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void loadBios(const saturnin::core::Hardware_mode mode);
+    void loadBios(const saturnin::core::HardwareMode mode);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn bool Memory::loadRom(   const std::string& zip_name, 
@@ -791,7 +791,7 @@ struct readCart<u32> {
             u32 data{ rawRead<u32>(m.cart_, relative_addr) };
 
             if ((addr & 0x0FFFFFFF) == stv_protection_register_address) {
-                if (m.hardware_mode_ == Hardware_mode::stv) {
+                if (m.HardwareMode_ == HardwareMode::stv) {
                     data = m.readStvProtection(addr, data);
                 }
             }
@@ -827,7 +827,7 @@ struct writeCart<u8> {
     operator Memory::WriteType<u8>() const {
         return [](Memory& m, const u32 addr, const u8 data) {
             
-            if (m.hardware_mode_ == Hardware_mode::stv) {
+            if (m.HardwareMode_ == HardwareMode::stv) {
                 if ((addr & 0x0FFFFFFF) == stv_protection_enabled) {
                     if (data == 0x1) { // Is the protection enabled ?
                         m.writeStvProtection(addr, data);

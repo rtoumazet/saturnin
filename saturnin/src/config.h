@@ -44,7 +44,7 @@ namespace core {
     enum class Access_keys {
         config_global,
         config_language,
-        config_hardware_mode,
+        config_HardwareMode,
         config_rendering,
         config_legacy_opengl,
         config_paths,
@@ -122,14 +122,14 @@ namespace core {
         static Map_cdrom_access cdrom_access;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<const std::string, const core::Hardware_mode>Map_hardware_mode
+        /// \typedef    std::map<const std::string, const core::HardwareMode>Map_HardwareMode
         ///
         /// \brief  Defines an alias representing the correspondance between the hardware mode string 
         ///         value defined in the config file and the hardware mode type.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<const std::string, const core::Hardware_mode>Map_hardware_mode;
-        static Map_hardware_mode hardware_mode;
+        typedef std::map<const std::string, const core::HardwareMode>Map_HardwareMode;
+        static Map_HardwareMode HardwareMode;
 
         //@{
         // Constructors / Destructors

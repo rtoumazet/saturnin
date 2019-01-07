@@ -65,16 +65,16 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case tcr:
             switch (io_registers_[tcr & 0x1FF] & util::toUnderlying(TcrMask::cksx)) {
                 case util::toUnderlying(TcrClock::internal_divided_by_8):
-                    frt_clock_ = 8;
-                    frt_mask_ = 0x7;
+                    frt_clock_  = 8;
+                    frt_mask_   = 0b00000111;
                     break;
                 case util::toUnderlying(TcrClock::internal_divided_by_32):
-                    frt_clock_ = 32;
-                    frt_mask_ = 0x1F;
+                    frt_clock_  = 32;
+                    frt_mask_   = 0b00011111;
                     break;
                 case util::toUnderlying(TcrClock::internal_divided_by_128):
-                    frt_clock_ = 128;
-                    frt_mask_ = 0x7F;
+                    frt_clock_  = 128;
+                    frt_mask_   = 0b01111111;
                     break;
                 case util::toUnderlying(TcrClock::external):
                     Log::warning("sh2", "FRT - External clock not implemented");
@@ -104,6 +104,8 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
             rawWrite<u16>(io_registers_, addr & 0x1FF, data);
             break;
         case icr:
+            u16 old_icr = rawRead<u16>(io_registers_, addr & 0x1FF);
+            if (old_icr & )
             if (IOReg[(Addr & 0x00000FFF) - 0xE00] != static_cast<uint8_t>((Data & 0xFF00) >> 8)) {
                 if (Data & 0x8000) {
                     Log::error("sh2", "NMI interrupt not handled !");
@@ -124,11 +126,114 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
             rawWrite<u16>(io_registers_, addr, data);
             break;
     }
-
 }
 
 void Sh2::writeRegisters(u32 addr, u32 data) {
-
+//    IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//    IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//    IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//    IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
+//
+//    switch (Addr & 0x1FF) {
+//        case LOCAL_TIER:
+//#ifdef _LOGS
+//            if (isMaster) EmuState::pLog->Scu("TIER write (master): ", Data);
+//            else EmuState::pLog->Scu("TIER write (slave): ", Data);
+//#endif
+//            break;
+//        case LOCAL_BCR1:
+//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] |= static_cast<uint8_t>((Data & 0x00001F00) >> 8);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] |= static_cast<uint8_t>(Data & 0x000000F7);
+//            break;
+//        case LOCAL_BCR2:
+//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000000) >> 8);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] |= static_cast<uint8_t>(Data & 0x000000FC);
+//            break;
+//            // Division Unit 
+//        case LOCAL_DVDNT:
+//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
+//
+//            division32Start = true;
+//
+//            // Mirroring ST-V
+//            IOReg[LOCAL_DVDNTL] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[LOCAL_DVDNTL + 1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[LOCAL_DVDNTL + 2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//            IOReg[LOCAL_DVDNTL + 3] = static_cast<uint8_t>(Data & 0x000000FF);
+//
+//            IOReg[LOCAL_DVDNTL_SHADOW] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[LOCAL_DVDNTL_SHADOW + 1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[LOCAL_DVDNTL_SHADOW + 2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//            IOReg[LOCAL_DVDNTL_SHADOW + 3] = static_cast<uint8_t>(Data & 0x000000FF);
+//            if (Data & 0x80000000) {
+//                IOReg[LOCAL_DVDNTH] = static_cast<uint8_t>(0xff);
+//                IOReg[LOCAL_DVDNTH + 1] = static_cast<uint8_t>(0xff);
+//                IOReg[LOCAL_DVDNTH + 2] = static_cast<uint8_t>(0xff);
+//                IOReg[LOCAL_DVDNTH + 3] = static_cast<uint8_t>(0xff);
+//            }
+//            else {
+//                IOReg[LOCAL_DVDNTH] = static_cast<uint8_t>(0x0);
+//                IOReg[LOCAL_DVDNTH + 1] = static_cast<uint8_t>(0x0);
+//                IOReg[LOCAL_DVDNTH + 2] = static_cast<uint8_t>(0x0);
+//                IOReg[LOCAL_DVDNTH + 3] = static_cast<uint8_t>(0x0);
+//            }
+//            break;
+//        case LOCAL_DVDNTL:
+//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
+//
+//            division64Start = true;
+//            IOReg[LOCAL_DVDNTL_SHADOW] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[LOCAL_DVDNTL_SHADOW + 1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[LOCAL_DVDNTL_SHADOW + 2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//            IOReg[LOCAL_DVDNTL_SHADOW + 3] = static_cast<uint8_t>(Data & 0x000000FF);
+//            break;
+//            // DMA
+//        case LOCAL_CHCR0:
+//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
+//
+//            if (Data & 0x1) if (IOReg[LOCAL_DMAOR + 3] & 0x1) ExecuteDma();
+//            break;
+//        case LOCAL_CHCR1:
+//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
+//
+//            if (Data & 0x1) if (IOReg[LOCAL_DMAOR + 3] & 0x1) ExecuteDma();
+//            break;
+//        case LOCAL_DMAOR:
+//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
+//
+//            if (IOReg[LOCAL_DMAOR + 3] & 0x1) ExecuteDma();
+//            break;
+//        default:
+//            if (Addr >= 0xFFFFFE00)
+//            {
+//                IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
+//                IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
+//                IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
+//                IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
+//            }
+//            break;
+//    }
+//
+//    if (division32Start || division64Start) ExecuteDivision();
 }
 
 void Sh2::purgeCache() {
