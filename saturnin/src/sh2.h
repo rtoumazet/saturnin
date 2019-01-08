@@ -144,7 +144,7 @@ enum class IcrNmil : u16 {
 
 enum class IcrNmie : u16 {
     detection_falling_edge  = 0b0000000000000000,   ///< Interrupt request detected on falling edge of NMI input (initial)
-    detection_rising_edge   = 0b1000000100000000    ///< Interrupt request detected on rising edge of NMI input
+    detection_rising_edge   = 0b0000000100000000    ///< Interrupt request detected on rising edge of NMI input
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
