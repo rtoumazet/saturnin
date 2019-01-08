@@ -105,15 +105,20 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
             break;
         case icr:
             u16 old_icr = rawRead<u16>(io_registers_, addr & 0x1FF);
-            if (old_icr & )
-            if (IOReg[(Addr & 0x00000FFF) - 0xE00] != static_cast<uint8_t>((Data & 0xFF00) >> 8)) {
-                if (Data & 0x8000) {
-                    Log::error("sh2", "NMI interrupt not handled !");
+            if (old_icr & util::toUnderlying(IcrNmie::detection_falling_edge)) {
+                if ( (old_icr & util::toUnderlying(IcrNmil::nmi_input_high)) && (data & util::toUnderlying(IcrNmil::nmi_input_low))) {
+                    Log::error("sh2", "Falling edge NMI !");
+                    //EmuState::pMem->nmiToDo = true;
+                    //EmuState::pMem->nmiCount = 0x100;
+                }
+            }else {
+                if ((old_icr & util::toUnderlying(IcrNmil::nmi_input_low)) && (data & util::toUnderlying(IcrNmil::nmi_input_high))) {
+                    Log::error("sh2", "Rising edge NMI !");
                     //EmuState::pMem->nmiToDo = true;
                     //EmuState::pMem->nmiCount = 0x100;
                 }
             }
-
+            
             rawWrite<u16>(io_registers_, addr & 0x1FF, data);
             break;
         case bcr1 + 2:
@@ -123,7 +128,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
             rawWrite<u16>(io_registers_, addr & 0x1FF, data & 0x00FC);
             break;
         default:
-            rawWrite<u16>(io_registers_, addr, data);
+            rawWrite<u16>(io_registers_, addr & 0x1FF, data);
             break;
     }
 }
