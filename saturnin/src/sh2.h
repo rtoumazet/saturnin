@@ -114,37 +114,37 @@ const u32 rtcor         = 0xFFFFFFF8;
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   IcrMask
+/// \enum   InterruptControlRegisterMask
 ///
 /// \brief  ICR (Interrupt Control Register) bit mask.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class IcrMask : u16 {
-    nmil    = 0b1000000000000000,   ///< NMI Input Level
-    nmie    = 0b0000000100000000,   ///< NMI Edge Select
-    vecmd   = 0b0000000000000001    ///< Interrupt Vcetor Mode Select
+enum class InterruptControlRegisterMask : u16 {
+    nmi_input_level                 = 0b1000000000000000,   ///< NMI Input Level (NMIL)
+    nmi_edge_select                 = 0b0000000100000000,   ///< NMI Edge Select (NMIE)
+    interrupt_vector_mode_select    = 0b0000000000000001    ///< Interrupt Vcetor Mode Select (VECMD)
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   IcrNmil
+/// \enum   NmiInputLevel
 ///
 /// \brief  ICR - NMIL bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class IcrNmil : u16 {
-    nmi_input_low   = 0b0000000000000000,   ///< NMI input level is low
-    nmi_input_high  = 0b1000000000000000    ///< NMI input level is high
+enum class NmiInputLevel : u16 {
+    low   = 0b0000000000000000,   ///< NMI input level is low
+    high  = 0b1000000000000000    ///< NMI input level is high
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   IcrNmie
+/// \enum   NmiEdgeDetection
 ///
 /// \brief  ICR - NMIE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class IcrNmie : u16 {
-    detection_falling_edge  = 0b0000000000000000,   ///< Interrupt request detected on falling edge of NMI input (initial)
-    detection_rising_edge   = 0b0000000100000000    ///< Interrupt request detected on rising edge of NMI input
+enum class NmiEdgeDetection : u16 {
+    falling = 0b0000000000000000,   ///< Interrupt request detected on falling edge of NMI input (initial)
+    rising  = 0b0000000100000000    ///< Interrupt request detected on rising edge of NMI input
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,104 +153,104 @@ enum class IcrNmie : u16 {
 /// \brief  ICR - VECMD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class IcrVecmd : u16 {
+enum class VectorMode : u16 {
     auto_vector     = 0b0000000000000000,   ///< Auto vector mode (initial)
     external_vector = 0b0000000000000001    ///< External vector mode
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CcrMask
+/// \enum   CacheControlRegisterMask
 ///
 /// \brief  CCR (Cache Control Register) bit mask.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CcrMask : u8 {
-    wx  = 0b11000000,   ///< Way Specification
-    cp  = 0b00010000,   ///< Cache Purge
-    tw  = 0b00001000,   ///< Two Way Mode
-    od  = 0b00000100,   ///< Data Replacement Disable
-    id  = 0b00000010,   ///< Instruction Replacement Disable
-    ce  = 0b00000001    ///< Cache Enable
+enum class CacheControlRegisterMask : u8 {
+    way_specification               = 0b11000000,   ///< Way Specification (wx)
+    cache_purge                     = 0b00010000,   ///< Cache Purge (CP)
+    two_way_mode                    = 0b00001000,   ///< Two Way Mode (Tw)
+    data_replacement_disable        = 0b00000100,   ///< Data Replacement Disable (OD)
+    instruction_replacement_disable = 0b00000010,   ///< Instruction Replacement Disable (ID)
+    cache_enable                    = 0b00000001    ///< Cache Enable (CE)
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CcrCp
+/// \enum   CachePurge
 ///
 /// \brief  CCR - CP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CcrCp : u8 {
+enum class CachePurge : u8 {
     normal_operation    = 0b00000000,   ///< Normal operation
     cache_purge         = 0b00010000    ///< Cache purge
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TocrMask
+/// \enum   TimerOutputCompareControlRegisterMask
 ///
 /// \brief  TOCR (Timer Output Compare Control Register) bit mask.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TocrMask : u8 {
-    ocrs    = 0b00010000,   ///< Output Compare Register Select
-    olvla   = 0b00000010,   ///< Output Level A
-    olvlb   = 0b00000001    ///< Output Level B
+enum class TimerOutputCompareControlRegisterMask : u8 {
+    output_compare_register_select  = 0b00010000,   ///< Output Compare Register Select (OCRS)
+    output_level_a                  = 0b00000010,   ///< Output Level A (OLVLA)
+    output_level_b                  = 0b00000001    ///< Output Level B (OLVLB)
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TocrOcrs
+/// \enum   OutputCompareRegisterSelect
 ///
 /// \brief  TOCR - OCRS bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TocrOcrs : u8 {
-    selects_ocra = 0b00000000,  ///< Selects register OCRA
-    selects_ocrb = 0b00010000   ///< Selects register OCRB
+enum class OutputCompareRegisterSelect : u8 {
+    ocra = 0b00000000,  ///< Selects register OCRA
+    ocrb = 0b00010000   ///< Selects register OCRB
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TocrOlvla
+/// \enum   OutputLevelA
 ///
 /// \brief  TOCR - OLVLA bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TocrOlvla : u8 {
+enum class OutputLevelA : u8 {
     outputs_0 = 0b00000000,  ///< Outputs 0 on compare match A
     outputs_1 = 0b00000010   ///< Outputs 1 on compare match A
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TocrOlvlb
+/// \enum   OutputLevelB
 ///
 /// \brief  TOCR - OLVLB bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TocrOlvlb : u8 {
+enum class OutputLevelB : u8 {
     outputs_0 = 0b00000000,  ///< Outputs 0 on compare match B
     outputs_1 = 0b00000001   ///< Outputs 1 on compare match B
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TcrMask
+/// \enum   TimerControlRegisterMask
 ///
 /// \brief  TCR (Timer Control Register) bit mask.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TcrMask : u8 {
-    iedg    = 0b10000000,   ///< Input Edge Select
-    cksx    = 0b00000011    ///< Clock Select
+enum class TimerControlRegisterMask : u8 {
+    input_edge_select   = 0b10000000,   ///< Input Edge Select (IEDG)
+    clock_select        = 0b00000011    ///< Clock Select (CKSX)
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TcrClock
+/// \enum   ClockSelect
 ///
 /// \brief  TCR - CKSx bits values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TcrClock : u8 {
-    internal_divided_by_8   = 0b00,
-    internal_divided_by_32  = 0b01,
-    internal_divided_by_128 = 0b10,
-    external                = 0b11
+enum class ClockSelect : u8 {
+    internal_divided_by_8   = 0b00, ///< Internal clock /8 (initial)
+    internal_divided_by_32  = 0b01, ///< Internal clock /32
+    internal_divided_by_128 = 0b10, ///< Internal clock /128
+    external                = 0b11  ///< External clock
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

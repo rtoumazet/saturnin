@@ -47,7 +47,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             else Log::debug("sh2", "TIER byte write (slave SH2)");
             break;
         case ocrbh:
-            if (io_registers_[tocr & 0x1FF] & util::toUnderlying(TocrOcrs::selects_ocrb)) {
+            if (io_registers_[tocr & 0x1FF] & util::toUnderlying(OutputCompareRegisterSelect::ocrb)) {
                 frt_ocrb_ = (data << 8) | 0xFF;
             }
             else {
@@ -55,7 +55,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             }
             break;
         case ocrbl:
-            if (io_registers_[tocr & 0x1FF] & util::toUnderlying(TocrOcrs::selects_ocrb)) {
+            if (io_registers_[tocr & 0x1FF] & util::toUnderlying(OutputCompareRegisterSelect::ocrb)) {
                 frt_ocrb_ = (0xFF << 8) | data;
             }
             else {
@@ -63,29 +63,29 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             }
             break;
         case tcr:
-            switch (io_registers_[tcr & 0x1FF] & util::toUnderlying(TcrMask::cksx)) {
-                case util::toUnderlying(TcrClock::internal_divided_by_8):
+            switch (io_registers_[tcr & 0x1FF] & util::toUnderlying(TimerControlRegisterMask::clock_select)) {
+                case util::toUnderlying(ClockSelect::internal_divided_by_8):
                     frt_clock_  = 8;
                     frt_mask_   = 0b00000111;
                     break;
-                case util::toUnderlying(TcrClock::internal_divided_by_32):
+                case util::toUnderlying(ClockSelect::internal_divided_by_32):
                     frt_clock_  = 32;
                     frt_mask_   = 0b00011111;
                     break;
-                case util::toUnderlying(TcrClock::internal_divided_by_128):
+                case util::toUnderlying(ClockSelect::internal_divided_by_128):
                     frt_clock_  = 128;
                     frt_mask_   = 0b01111111;
                     break;
-                case util::toUnderlying(TcrClock::external):
+                case util::toUnderlying(ClockSelect::external):
                     Log::warning("sh2", "FRT - External clock not implemented");
                     break;
             }
             break;
         case ccr:
             Log::debug("sh2", fmt::format("CCR byte write: {}", data));
-            if (data & util::toUnderlying(CcrCp::cache_purge)) {
+            if (data & util::toUnderlying(CachePurge::cache_purge)) {
                 purgeCache();
-                data ^= util::toUnderlying(CcrMask::cp); // cache purge bit is cleared after operation
+                data ^= util::toUnderlying(CachePurge::cache_purge); // cache purge bit is cleared after operation
             }
             break;
         default:
@@ -103,23 +103,25 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
             else Log::debug("sh2", "TIER word write (slave SH2)");
             rawWrite<u16>(io_registers_, addr & 0x1FF, data);
             break;
-        case icr:
+        case icr: {
             u16 old_icr = rawRead<u16>(io_registers_, addr & 0x1FF);
-            if (old_icr & util::toUnderlying(IcrNmie::detection_falling_edge)) {
-                if ( (old_icr & util::toUnderlying(IcrNmil::nmi_input_high)) && (data & util::toUnderlying(IcrNmil::nmi_input_low))) {
+            if (old_icr & util::toUnderlying(NmiEdgeDetection::falling)) {
+                if ((old_icr & util::toUnderlying(NmiInputLevel::high)) && (data & util::toUnderlying(NmiInputLevel::low))) {
                     Log::error("sh2", "Falling edge NMI !");
                     //EmuState::pMem->nmiToDo = true;
                     //EmuState::pMem->nmiCount = 0x100;
                 }
-            }else {
-                if ((old_icr & util::toUnderlying(IcrNmil::nmi_input_low)) && (data & util::toUnderlying(IcrNmil::nmi_input_high))) {
+            }
+            else {
+                if ((old_icr & util::toUnderlying(NmiInputLevel::low)) && (data & util::toUnderlying(NmiInputLevel::high))) {
                     Log::error("sh2", "Rising edge NMI !");
                     //EmuState::pMem->nmiToDo = true;
                     //EmuState::pMem->nmiCount = 0x100;
                 }
             }
-            
+
             rawWrite<u16>(io_registers_, addr & 0x1FF, data);
+        }
             break;
         case bcr1 + 2:
             rawWrite<u16>(io_registers_, addr & 0x1FF, data & 0x00F7);
