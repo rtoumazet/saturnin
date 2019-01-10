@@ -25,8 +25,23 @@ namespace util = saturnin::utilities;
 namespace saturnin {
 namespace core {
 
+Sh2::Sh2(bool is_master) : is_master_(is_master) {
+    initializeOnChipRegisters();
+}
+
 u32 Sh2::readRegisters(u32 addr) const {
     switch (addr) {
+        
+        case bcr1:
+        case bcr2:
+        case wcr:
+        case mcr:
+        case rtcsr:
+        case rtcnt:
+        case rtcor:
+            // Bus State Controler registers
+            return (rawRead<u32>(io_registers_, addr & 0x1FF) & 0x0000FFFF);
+            break;
         case dvdnt:
         case dvdntl_shadow:
             return rawRead<u32>(io_registers_, dvdntl & 0x1FF);
@@ -136,62 +151,35 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
 }
 
 void Sh2::writeRegisters(u32 addr, u32 data) {
-//    IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//    IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//    IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//    IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
-//
-//    switch (Addr & 0x1FF) {
-//        case LOCAL_TIER:
-//#ifdef _LOGS
-//            if (isMaster) EmuState::pLog->Scu("TIER write (master): ", Data);
-//            else EmuState::pLog->Scu("TIER write (slave): ", Data);
-//#endif
-//            break;
-//        case LOCAL_BCR1:
-//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] |= static_cast<uint8_t>((Data & 0x00001F00) >> 8);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] |= static_cast<uint8_t>(Data & 0x000000F7);
-//            break;
-//        case LOCAL_BCR2:
-//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000000) >> 8);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] |= static_cast<uint8_t>(Data & 0x000000FC);
-//            break;
-//            // Division Unit 
-//        case LOCAL_DVDNT:
-//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
-//
-//            division32Start = true;
-//
-//            // Mirroring ST-V
-//            IOReg[LOCAL_DVDNTL] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[LOCAL_DVDNTL + 1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[LOCAL_DVDNTL + 2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//            IOReg[LOCAL_DVDNTL + 3] = static_cast<uint8_t>(Data & 0x000000FF);
-//
-//            IOReg[LOCAL_DVDNTL_SHADOW] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[LOCAL_DVDNTL_SHADOW + 1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[LOCAL_DVDNTL_SHADOW + 2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//            IOReg[LOCAL_DVDNTL_SHADOW + 3] = static_cast<uint8_t>(Data & 0x000000FF);
-//            if (Data & 0x80000000) {
-//                IOReg[LOCAL_DVDNTH] = static_cast<uint8_t>(0xff);
-//                IOReg[LOCAL_DVDNTH + 1] = static_cast<uint8_t>(0xff);
-//                IOReg[LOCAL_DVDNTH + 2] = static_cast<uint8_t>(0xff);
-//                IOReg[LOCAL_DVDNTH + 3] = static_cast<uint8_t>(0xff);
-//            }
-//            else {
-//                IOReg[LOCAL_DVDNTH] = static_cast<uint8_t>(0x0);
-//                IOReg[LOCAL_DVDNTH + 1] = static_cast<uint8_t>(0x0);
-//                IOReg[LOCAL_DVDNTH + 2] = static_cast<uint8_t>(0x0);
-//                IOReg[LOCAL_DVDNTH + 3] = static_cast<uint8_t>(0x0);
-//            }
-//            break;
+    rawWrite<u32>(io_registers_, addr & 0x1FF, data);
+
+    switch (addr) {
+        case tier:
+            if (is_master_) Log::debug("sh2", "TIER long write (master SH2)");
+            else Log::debug("sh2", "TIER long write (slave SH2)");
+            break;
+        case bcr1:
+            if (rawRead<u16>(io_registers_, addr & 0x1FF) == 0xA55A) {
+                rawWrite<u16>(io_registers_, addr+2 & 0x1FF, data & util::toUnderlying(BusControlRegister1Mask::write_mask));
+            }
+            break;
+        case bcr2:
+            if (rawRead<u16>(io_registers_, addr & 0x1FF) == 0xA55A) {
+                rawWrite<u16>(io_registers_, addr + 2 & 0x1FF, data & util::toUnderlying(BusControlRegister2Mask::write_mask));
+            }
+            break;
+        case dvdnt:
+            rawWrite<u32>(io_registers_, addr & 0x1FF, data);
+
+            // ST-V needs some mirroring
+            rawWrite<u32>(io_registers_, dvdntl & 0x1FF, data);
+            rawWrite<u32>(io_registers_, dvdntl_shadow & 0x1FF, data);
+
+            // Sign extension for the upper 32 bits if needed
+            (data & 0x80000000) ? rawWrite<u32>(io_registers_, dvdnth & 0x1FF, 0xFFFFFFFF) : rawWrite<u32>(io_registers_, dvdnth & 0x1FF, 0x00000000);
+
+            execute32bitsDivision();
+            break;
 //        case LOCAL_DVDNTL:
 //            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
 //            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
@@ -238,8 +226,8 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
 //                IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
 //            }
 //            break;
-//    }
-//
+    }
+
 //    if (division32Start || division64Start) ExecuteDivision();
 }
 
@@ -251,6 +239,29 @@ void Sh2::purgeCache() {
         data &= 0xFFFFFC0B;
         rawWrite<u32>(cache_addresses_, i, data);
     }
+}
+
+void Sh2::initializeOnChipRegisters() {
+    // Bus State Controler registers
+    rawWrite<u32>(io_registers_, bcr1 & 0x1FF, 0x000003F0);
+    rawWrite<u32>(io_registers_, bcr2 & 0x1FF, 0x000000FC);
+    rawWrite<u32>(io_registers_, wcr & 0x1FF, 0x0000AAFF);
+    rawWrite<u32>(io_registers_, mcr & 0x1FF, 0x00000000);
+    rawWrite<u32>(io_registers_, rtcsr & 0x1FF, 0x00000000);
+    rawWrite<u32>(io_registers_, rtcnt & 0x1FF, 0x00000000);
+    rawWrite<u32>(io_registers_, rtcor & 0x1FF, 0x00000000);
+
+    // Division Unit
+    rawWrite<u32>(io_registers_, dvcr & 0x1FF, 0x00000000);
+    rawWrite<u32>(io_registers_, vcrdiv & 0x1FF, 0x00000000); // lower 16 bits are undefined
+}
+
+void Sh2::execute32bitsDivision() {
+
+}
+
+void Sh2::execute64bitsDivision() {
+
 }
 
 }
