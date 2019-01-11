@@ -178,29 +178,19 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             // Sign extension for the upper 32 bits if needed
             (data & 0x80000000) ? rawWrite<u32>(io_registers_, dvdnth & 0x1FF, 0xFFFFFFFF) : rawWrite<u32>(io_registers_, dvdnth & 0x1FF, 0x00000000);
 
-            execute32bitsDivision();
+            start32bitsDivision();
             break;
-//        case LOCAL_DVDNTL:
-//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
-//
-//            division64Start = true;
-//            IOReg[LOCAL_DVDNTL_SHADOW] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[LOCAL_DVDNTL_SHADOW + 1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[LOCAL_DVDNTL_SHADOW + 2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//            IOReg[LOCAL_DVDNTL_SHADOW + 3] = static_cast<uint8_t>(Data & 0x000000FF);
-//            break;
-//            // DMA
-//        case LOCAL_CHCR0:
-//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
-//
-//            if (Data & 0x1) if (IOReg[LOCAL_DMAOR + 3] & 0x1) ExecuteDma();
-//            break;
+        case dvdntl:
+            rawWrite<u32>(io_registers_, dvdntl & 0x1FF, data);
+            rawWrite<u32>(io_registers_, dvdntl_shadow & 0x1FF, data);
+
+            start64bitsDivision();
+            break;
+        case chcr0:
+            rawWrite<u32>(io_registers_, chcr0 & 0x1FF, data);
+
+            if (Data & 0x1) if (IOReg[LOCAL_DMAOR + 3] & 0x1) ExecuteDma();
+            break;
 //        case LOCAL_CHCR1:
 //            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
 //            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
@@ -251,16 +241,23 @@ void Sh2::initializeOnChipRegisters() {
     rawWrite<u32>(io_registers_, rtcnt & 0x1FF, 0x00000000);
     rawWrite<u32>(io_registers_, rtcor & 0x1FF, 0x00000000);
 
+    // Direct Memory Access Controler registers
+    rawWrite<u32>(io_registers_, chcr0 & 0x1FF, 0x00000000);
+    rawWrite<u8>(io_registers_, drcr0 & 0x1FF, 0x00);
+    rawWrite<u32>(io_registers_, chcr1 & 0x1FF, 0x00000000);
+    rawWrite<u8>(io_registers_, drcr1 & 0x1FF, 0x00);
+    rawWrite<u32>(io_registers_, dmaor & 0x1FF, 0x00000000);
+
     // Division Unit
     rawWrite<u32>(io_registers_, dvcr & 0x1FF, 0x00000000);
     rawWrite<u32>(io_registers_, vcrdiv & 0x1FF, 0x00000000); // lower 16 bits are undefined
 }
 
-void Sh2::execute32bitsDivision() {
+void Sh2::start32bitsDivision() {
 
 }
 
-void Sh2::execute64bitsDivision() {
+void Sh2::start64bitsDivision() {
 
 }
 
