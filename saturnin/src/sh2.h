@@ -220,8 +220,77 @@ enum class CachePurge : u8 {
 // 9. Direct Memory Access Controler (DMAC) //
 //////////////////////////////////////////////
 
-enum class DmaChannelControlRegisterMask : u32 {
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DmaChannelControlRegister0Mask
+///
+/// \brief  CHCR0 (DMA Channel Control Register 0) bit mask.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
+enum class DmaChannelControlRegister0Mask : u32 {
+    destination_address_mode    = 0b00000000000000001100000000000000,   ///< Destination Address Mode (DMx)
+    source_address_mode         = 0b00000000000000000011000000000000,   ///< Source Address Mode (SMx)
+    transfer_size               = 0b00000000000000000000110000000000,   ///< Transfer Size (TSx)
+    auto_request_mode           = 0b00000000000000000000001000000000,   ///< Auto Request Mode (AR)
+    acknowledge_mode            = 0b00000000000000000000000100000000,   ///< Acknowledge / Transfer Mode (AM)
+    acknowledge_level           = 0b00000000000000000000000010000000,   ///< Acknowledge Level (AL)
+    dreq_select                 = 0b00000000000000000000000001000000,   ///< DREQ Select (DS)
+    dreq_level                  = 0b00000000000000000000000000100000,   ///< DREQ Level (DL)
+    transfer_bus_mode           = 0b00000000000000000000000000010000,   ///< Transfer Bus Mode (TB)
+    transfer_address_mode       = 0b00000000000000000000000000001000,   ///< Transfer Address Mode (TA)
+    interrupt_enable            = 0b00000000000000000000000000000100,   ///< Interrupt Enable (IE)
+    transfer_end_flag           = 0b00000000000000000000000000000010,   ///< Transfer End Flag (TE)
+    dma_enable                  = 0b00000000000000000000000000000001    ///< DMA Enable (DE)
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   InterruptEnable
+///
+/// \brief  CHCR0 - IE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class InterruptEnable : u32 {
+    interrupt_disabled  = 0b00000000000000000000000000000000,
+    interrupt_enabled   = 0b00000000000000000000000000000001
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DmaChannelControlRegister1Mask
+///
+/// \brief  CHCR1 (DMA Channel Control Register 1) bit mask.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DmaChannelControlRegister1Mask : u32 {
+    destination_address_mode    = 0b00000000000000001100000000000000,   ///< Destination Address Mode (DMx)
+    source_address_mode         = 0b00000000000000000011000000000000,   ///< Source Address Mode (SMx)
+    transfer_size               = 0b00000000000000000000110000000000,   ///< Transfer Size (TSx)
+    auto_request_mode           = 0b00000000000000000000001000000000,   ///< Auto Request Mode (AR)
+    acknowledge_mode            = 0b00000000000000000000000100000000,   ///< Acknowledge / Transfer Mode (AM)
+    acknowledge_level           = 0b00000000000000000000000010000000,   ///< Acknowledge Level (AL)
+    dreq_select                 = 0b00000000000000000000000001000000,   ///< DREQ Select (DS)
+    dreq_level                  = 0b00000000000000000000000000100000,   ///< DREQ Level (DL)
+    transfer_bus_mode           = 0b00000000000000000000000000010000,   ///< Transfer Bus Mode (TB)
+    transfer_address_mode       = 0b00000000000000000000000000001000,   ///< Transfer Address Mode (TA)
+    interrupt_enable            = 0b00000000000000000000000000000100,   ///< Interrupt Enable (IE)
+    transfer_end_flag           = 0b00000000000000000000000000000010,   ///< Transfer End Flag (TE)
+    dma_enable                  = 0b00000000000000000000000000000001    ///< DMA Enable (DE)
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DmaOperationRegisterMask
+///
+/// \brief  DMAOR (DMA Operation Register) bit mask.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DmaOperationRegisterMask : u32 {
+    priority_mode       = 0b00000000000000000000000000001000,   ///< Priority Mode (PR)
+    address_error_flag  = 0b00000000000000000000000000000100,   ///< Address Error Flag (AE)
+    nmi_flag            = 0b00000000000000000000000000000010,   ///< NMI Flag (NMIF)
+    dma_master_enable   = 0b00000000000000000000000000000001,   ///< DMA Master Enable (DME)
+};
+
+enum class DmaMasterEnable : u8 {
+    disabled    = 0b000000000,  ///< DMA transfers disabled on all channels (initial)
+    enabled     = 0b000000001,  ///< DMA transfers enabled on all channels
 };
 
 //////////////////////////////////////////
@@ -557,6 +626,17 @@ class Sh2 {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         void start64bitsDivision();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Sh2::executeDma();
+        ///
+        /// \brief  Executes the BMA operation.
+        ///
+        /// \author Runik
+        /// \date   13/01/2019
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void executeDma();
 
         std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
         std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    

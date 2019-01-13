@@ -49,6 +49,9 @@ u32 Sh2::readRegisters(u32 addr) const {
         case dvdnth_shadow:
             return rawRead<u32>(io_registers_, dvdnth & 0x1FF);
             break;
+        case dmaor:
+            return (rawRead<u32>(io_registers_, addr & 0x1FF) & 0x0000000F);
+            break;
         default:
             return rawRead<u32>(io_registers_, addr & 0x1FF);
     }
@@ -151,29 +154,28 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
 }
 
 void Sh2::writeRegisters(u32 addr, u32 data) {
-    rawWrite<u32>(io_registers_, addr & 0x1FF, data);
-
     switch (addr) {
         case tier:
             if (is_master_) Log::debug("sh2", "TIER long write (master SH2)");
             else Log::debug("sh2", "TIER long write (slave SH2)");
+            rawWrite<u32>(io_registers_, addr & 0x1FF, data);
             break;
         case bcr1:
-            if (rawRead<u16>(io_registers_, addr & 0x1FF) == 0xA55A) {
+            if ((data & 0xFFFF0000) == 0xA55A0000) {
                 rawWrite<u16>(io_registers_, addr+2 & 0x1FF, data & util::toUnderlying(BusControlRegister1Mask::write_mask));
             }
             break;
         case bcr2:
-            if (rawRead<u16>(io_registers_, addr & 0x1FF) == 0xA55A) {
-                rawWrite<u16>(io_registers_, addr + 2 & 0x1FF, data & util::toUnderlying(BusControlRegister2Mask::write_mask));
+            if ((data & 0xFFFF0000) == 0xA55A0000) {
+                rawWrite<u16>(io_registers_, addr + 2   & 0x1FF, data & util::toUnderlying(BusControlRegister2Mask::write_mask));
             }
             break;
         case dvdnt:
             rawWrite<u32>(io_registers_, addr & 0x1FF, data);
 
             // ST-V needs some mirroring
-            rawWrite<u32>(io_registers_, dvdntl & 0x1FF, data);
-            rawWrite<u32>(io_registers_, dvdntl_shadow & 0x1FF, data);
+            rawWrite<u32>(io_registers_, dvdntl         & 0x1FF, data);
+            rawWrite<u32>(io_registers_, dvdntl_shadow  & 0x1FF, data);
 
             // Sign extension for the upper 32 bits if needed
             (data & 0x80000000) ? rawWrite<u32>(io_registers_, dvdnth & 0x1FF, 0xFFFFFFFF) : rawWrite<u32>(io_registers_, dvdnth & 0x1FF, 0x00000000);
@@ -181,44 +183,35 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             start32bitsDivision();
             break;
         case dvdntl:
-            rawWrite<u32>(io_registers_, dvdntl & 0x1FF, data);
-            rawWrite<u32>(io_registers_, dvdntl_shadow & 0x1FF, data);
+            rawWrite<u32>(io_registers_, dvdntl         & 0x1FF, data);
+            rawWrite<u32>(io_registers_, dvdntl_shadow  & 0x1FF, data);
 
             start64bitsDivision();
             break;
         case chcr0:
             rawWrite<u32>(io_registers_, chcr0 & 0x1FF, data);
 
-            if (Data & 0x1) if (IOReg[LOCAL_DMAOR + 3] & 0x1) ExecuteDma();
+            if (data & util::toUnderlying(InterruptEnable::interrupt_enabled)) {
+                if(rawRead<u8>(io_registers_, (dmaor + 3) & 0x1FF) & util::toUnderlying(DmaMasterEnable::enabled)) executeDma();
+            }
             break;
-//        case LOCAL_CHCR1:
-//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
-//
-//            if (Data & 0x1) if (IOReg[LOCAL_DMAOR + 3] & 0x1) ExecuteDma();
-//            break;
-//        case LOCAL_DMAOR:
-//            IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//            IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
-//
-//            if (IOReg[LOCAL_DMAOR + 3] & 0x1) ExecuteDma();
-//            break;
-//        default:
-//            if (Addr >= 0xFFFFFE00)
-//            {
-//                IOReg[(Addr & 0x00000FFF) - 0xE00] = static_cast<uint8_t>((Data & 0xFF000000) >> 24);
-//                IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x1] = static_cast<uint8_t>((Data & 0x00FF0000) >> 16);
-//                IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x2] = static_cast<uint8_t>((Data & 0x0000FF00) >> 8);
-//                IOReg[(Addr & 0x00000FFF) - 0xE00 + 0x3] = static_cast<uint8_t>(Data & 0x000000FF);
-//            }
-//            break;
+        case chcr1:
+            rawWrite<u32>(io_registers_, chcr1 & 0x1FF, data);
+
+            if (data & util::toUnderlying(InterruptEnable::interrupt_enabled)) {
+                if (rawRead<u8>(io_registers_, (dmaor + 3) & 0x1FF) & util::toUnderlying(DmaMasterEnable::enabled)) executeDma();
+            }
+            break;
+        case dmaor:
+            rawWrite<u32>(io_registers_, dmaor & 0x1FF, data);
+
+            if (rawRead<u8>(io_registers_, (dmaor + 3) & 0x1FF) & util::toUnderlying(DmaMasterEnable::enabled)) executeDma();
+            break;
+        default:
+            rawWrite<u32>(io_registers_, addr & 0x1FF, data);
+            break;
     }
 
-//    if (division32Start || division64Start) ExecuteDivision();
 }
 
 void Sh2::purgeCache() {
@@ -258,6 +251,10 @@ void Sh2::start32bitsDivision() {
 }
 
 void Sh2::start64bitsDivision() {
+
+}
+
+void executeDma() {
 
 }
 
