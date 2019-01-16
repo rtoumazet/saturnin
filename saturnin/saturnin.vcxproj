@@ -200,6 +200,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="src\emulator_context.h" />
     <ClInclude Include="src\emulator_defs.h" />
     <ClInclude Include="src\emulator_enums.h" />
+    <ClInclude Include="src\interrupt_controller.h" />
     <ClInclude Include="src\locale.h" />
     <ClInclude Include="src\log.h" />
     <ClInclude Include="src\memory.h" />
