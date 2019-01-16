@@ -254,7 +254,7 @@ void Sh2::start64bitsDivision() {
 
 }
 
-void executeDma() {
+void Sh2::executeDma() {
 
 }
 
