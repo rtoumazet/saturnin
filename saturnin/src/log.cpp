@@ -19,7 +19,6 @@
 
 #include <iostream>
 #include <filesystem>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include "log.h"
 
 namespace fs = std::filesystem;
