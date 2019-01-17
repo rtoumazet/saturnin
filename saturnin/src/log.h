@@ -28,8 +28,11 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/wincolor_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/tweakme.h>
+
 #include "locale.h" // tr
 
 namespace saturnin {
