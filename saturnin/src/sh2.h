@@ -638,11 +638,27 @@ class Sh2 {
 
         void executeDma();
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Sh2::reset();
+        ///
+        /// \brief  Resets the SH2 and enters in the reset state.
+        ///
+        /// \author Runik
+        /// \date   18/01/2019
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void reset();
+
         std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
         std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
         std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).
         bool is_master_;                            ///< True if the SH2 is configured as master, false if as slave.
 
+        /// \name DIVU (Division unit)
+        //@{
+        u8      divu_remaining_cycles_; ///< Remaining cycles to end current division
+        //@}
+                                                    
         /// \name FRT (Free Running Timer)
         //@{
         s32	    frt_elapsed_cycles_;///< Elapsed FRT cycles. 

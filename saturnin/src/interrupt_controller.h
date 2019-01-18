@@ -76,19 +76,19 @@ namespace InterruptSource                    {
     constexpr Interrupt external_interrupt_15{ 0x5F, 0x1 };
 
     // Following interrupts are dynamically set
-    Interrupt sh2_division_overflow{ 0, 0 };
-    Interrupt sh2_dma_0_transfer_end{ 0, 0 };
-    Interrupt sh2_dma_1_transfer_end{ 0, 0 };
-    Interrupt sh2_wdt_overflow{ 0, 0 };
-    Interrupt sh2_bsc_values_matched{ 0, 0 };
-    Interrupt sh2_sci_transmit_end{ 0, 0 };
-    Interrupt sh2_sci_receive_error{ 0, 0 };
-    Interrupt sh2_sci_receive_data_full{ 0, 0 };
-    Interrupt sh2_sci_transmit_data_empty{ 0, 0 };
-    Interrupt sh2_frt_input_capture_flag_set{ 0, 0 };
+    Interrupt sh2_division_overflow            { 0, 0 };
+    Interrupt sh2_dma_0_transfer_end           { 0, 0 };
+    Interrupt sh2_dma_1_transfer_end           { 0, 0 };
+    Interrupt sh2_wdt_overflow                 { 0, 0 };
+    Interrupt sh2_bsc_values_matched           { 0, 0 };
+    Interrupt sh2_sci_transmit_end             { 0, 0 };
+    Interrupt sh2_sci_receive_error            { 0, 0 };
+    Interrupt sh2_sci_receive_data_full        { 0, 0 };
+    Interrupt sh2_sci_transmit_data_empty      { 0, 0 };
+    Interrupt sh2_frt_input_capture_flag_set   { 0, 0 };
     Interrupt sh2_frt_output_compare_flag_a_set{ 0, 0 };
     Interrupt sh2_frt_output_compare_flag_b_set{ 0, 0 };
-    Interrupt sh2_frt_overflow_flag_set{ 0, 0 };
+    Interrupt sh2_frt_overflow_flag_set        { 0, 0 };
 }
 
 }

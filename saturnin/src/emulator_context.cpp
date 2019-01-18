@@ -77,6 +77,7 @@ bool Emulator_context::run() {
     //core::readDummy<32>(0x0);
 
     auto blah = this->memory()->read<uint8_t>(0);
+    
     // TESTING //
 
     uint8_t status{};

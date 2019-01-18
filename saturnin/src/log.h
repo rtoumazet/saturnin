@@ -28,11 +28,11 @@
 #include <memory>
 #include <string>
 #include <map>
+#define SPDLOG_FMT_EXTERNAL
+#define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/tweakme.h>
-
 #include "locale.h" // tr
 
 namespace saturnin {

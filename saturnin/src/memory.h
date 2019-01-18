@@ -536,7 +536,8 @@ template<>
 struct readSmpc<uint8_t> {
     operator Memory::ReadType<u8>() const {
         return [](const Memory& m, const u32 addr) -> u8 {
-            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
+            //core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
+            core::Log::error("memory", core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
             return 0;
         };
     }
@@ -567,7 +568,8 @@ template<>
 struct writeSmpc<uint8_t> {
     operator Memory::WriteType<u8>() const {
         return [](Memory& m, const u32 addr, const u8 data) {
-            core::Log::warning("memory", fmt::format(core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data));
+            //core::Log::warning("memory", fmt::format(core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data));
+            core::Log::warning("memory", core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data);
         };
     }
 };
@@ -1189,7 +1191,8 @@ template<>
 struct readScu<u32> {
     operator Memory::ReadType<u32>() const {
         return [](const Memory& m, const u32 addr) -> u32 {
-            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr));
+            //core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr));
+            core::Log::error("memory", core::tr("Read ({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr);
 
             return 0;
         };
@@ -1221,7 +1224,8 @@ template<>
 struct writeCart<u32> {
     operator Memory::WriteType<u32>() const {
         return [](Memory& m, const u32 addr, const u32 data) {
-            core::Log::error("memory", fmt::format(core::tr("Write({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr));
+            //core::Log::error("memory", fmt::format(core::tr("Write({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr));
+            core::Log::error("memory", core::tr("Write({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr);
         };
     }
 };
