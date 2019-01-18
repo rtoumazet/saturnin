@@ -100,7 +100,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             }
             break;
         case ccr:
-            Log::debug("sh2", fmt::format("CCR byte write: {}", data));
+            //Log::debug("sh2", fmt::format("CCR byte write: {}", data));
+            Log::debug("sh2", "CCR byte write: {}", data);
             if (data & util::toUnderlying(CachePurge::cache_purge)) {
                 purgeCache();
                 data ^= util::toUnderlying(CachePurge::cache_purge); // cache purge bit is cleared after operation
@@ -256,6 +257,10 @@ void Sh2::start64bitsDivision() {
 
 void Sh2::executeDma() {
 
+}
+
+void Sh2::reset() {
+    initializeOnChipRegisters();
 }
 
 }
