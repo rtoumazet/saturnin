@@ -27,6 +27,7 @@
 
 #include <array> // array 
 #include "emulator_defs.h"
+#include "interrupt_controller.h"
 #include "memory.h"
 
 namespace saturnin {
@@ -34,83 +35,83 @@ namespace core {
 
 /// \name Onboard i/o registers addresses
 //@{
-const u32 smr           = 0xFFFFFE00;
-const u32 brr           = 0xFFFFFE01;
-const u32 scr           = 0xFFFFFE02;
-const u32 tdr           = 0xFFFFFE03;
-const u32 ssr           = 0xFFFFFE04;
-const u32 rdr           = 0xFFFFFE05;
-const u32 tier          = 0xFFFFFE10;
-const u32 ftcsr         = 0xFFFFFE11;
-const u32 frc           = 0xFFFFFE12;
-const u32 frch          = 0xFFFFFE12;
-const u32 frcl          = 0xFFFFFE13;
-const u32 ocrab         = 0xFFFFFE14;
-const u32 ocrbh         = 0xFFFFFE14;
-const u32 ocrbl         = 0xFFFFFE15;
-const u32 ocrah         = 0xFFFFFE14;
-const u32 ocral         = 0xFFFFFE15;
-const u32 tcr           = 0xFFFFFE16;
-const u32 tocr          = 0xFFFFFE17;
-const u32 ficr          = 0xFFFFFE18;
-const u32 icrh          = 0xFFFFFE18;
-const u32 icrl          = 0xFFFFFE19;
-const u32 ipra          = 0xFFFFFEE2;
-const u32 iprb          = 0xFFFFFE60;
-const u32 vcra          = 0xFFFFFE62;
-const u32 vcrb          = 0xFFFFFE64;
-const u32 vcrc          = 0xFFFFFE66;
-const u32 vcrd          = 0xFFFFFE68;
-const u32 drcr0         = 0xFFFFFE71;
-const u32 drcr1         = 0xFFFFFE72;
-const u32 wtcsr         = 0xFFFFFE80;
-const u32 wtcnt         = 0xFFFFFE81;
-const u32 rstcsr        = 0xFFFFFE82;
-const u32 sbycr         = 0xFFFFFE91;
-const u32 ccr           = 0xFFFFFE92;
-const u32 icr           = 0xFFFFFEE0;
-const u32 vcrwdt        = 0xFFFFFEE4;
-const u32 dvsr          = 0xFFFFFF00;
-const u32 dvdnt         = 0xFFFFFF04;
-const u32 dvcr          = 0xFFFFFF08;
-const u32 vcrdiv        = 0xFFFFFF0C;
-const u32 dvdnth        = 0xFFFFFF10;
-const u32 dvdntl        = 0xFFFFFF14;
-const u32 dvdnth_shadow = 0xFFFFFF18;
-const u32 dvdntl_shadow = 0xFFFFFF1C;
-const u32 barah         = 0xFFFFFF40;
-const u32 baral         = 0xFFFFFF42;
-const u32 bamrah        = 0xFFFFFF44;
-const u32 bamral        = 0xFFFFFF46;
-const u32 bbra          = 0xFFFFFF48;
-const u32 barbh         = 0xFFFFFF60;
-const u32 barbl         = 0xFFFFFF62;
-const u32 bamrbh        = 0xFFFFFF64;
-const u32 bamrbl        = 0xFFFFFF66;
-const u32 bbrb          = 0xFFFFFF68;
-const u32 bdrbh         = 0xFFFFFF70;
-const u32 bdrbl         = 0xFFFFFF72;
-const u32 bdmrbh        = 0xFFFFFF74;
-const u32 bdmrbl        = 0xFFFFFF76;
-const u32 brcr          = 0xFFFFFF78;
-const u32 sar0          = 0xFFFFFF80;
-const u32 dar0          = 0xFFFFFF84;
-const u32 tcr0          = 0xFFFFFF88;
-const u32 chcr0         = 0xFFFFFF8C;
-const u32 sar1          = 0xFFFFFF90;
-const u32 dar1          = 0xFFFFFF94;
-const u32 tcr1          = 0xFFFFFF98;
-const u32 chcr1         = 0xFFFFFF9C;
-const u32 vcrdma0       = 0xFFFFFFA0;
-const u32 vcrdma1       = 0xFFFFFFA8;
-const u32 dmaor         = 0xFFFFFFB0;
-const u32 bcr1          = 0xFFFFFFE0;
-const u32 bcr2          = 0xFFFFFFE4;
-const u32 wcr           = 0xFFFFFFE8;
-const u32 mcr           = 0xFFFFFFEC;
-const u32 rtcsr         = 0xFFFFFFF0;
-const u32 rtcnt         = 0xFFFFFFF4;
-const u32 rtcor         = 0xFFFFFFF8;
+constexpr u32 smr           = 0xFFFFFE00;
+constexpr u32 brr           = 0xFFFFFE01;
+constexpr u32 scr           = 0xFFFFFE02;
+constexpr u32 tdr           = 0xFFFFFE03;
+constexpr u32 ssr           = 0xFFFFFE04;
+constexpr u32 rdr           = 0xFFFFFE05;
+constexpr u32 tier          = 0xFFFFFE10;
+constexpr u32 ftcsr         = 0xFFFFFE11;
+constexpr u32 frc           = 0xFFFFFE12;
+constexpr u32 frch          = 0xFFFFFE12;
+constexpr u32 frcl          = 0xFFFFFE13;
+constexpr u32 ocrab         = 0xFFFFFE14;
+constexpr u32 ocrbh         = 0xFFFFFE14;
+constexpr u32 ocrbl         = 0xFFFFFE15;
+constexpr u32 ocrah         = 0xFFFFFE14;
+constexpr u32 ocral         = 0xFFFFFE15;
+constexpr u32 tcr           = 0xFFFFFE16;
+constexpr u32 tocr          = 0xFFFFFE17;
+constexpr u32 ficr          = 0xFFFFFE18;
+constexpr u32 icrh          = 0xFFFFFE18;
+constexpr u32 icrl          = 0xFFFFFE19;
+constexpr u32 ipra          = 0xFFFFFEE2;
+constexpr u32 iprb          = 0xFFFFFE60;
+constexpr u32 vcra          = 0xFFFFFE62;
+constexpr u32 vcrb          = 0xFFFFFE64;
+constexpr u32 vcrc          = 0xFFFFFE66;
+constexpr u32 vcrd          = 0xFFFFFE68;
+constexpr u32 drcr0         = 0xFFFFFE71;
+constexpr u32 drcr1         = 0xFFFFFE72;
+constexpr u32 wtcsr         = 0xFFFFFE80;
+constexpr u32 wtcnt         = 0xFFFFFE81;
+constexpr u32 rstcsr        = 0xFFFFFE82;
+constexpr u32 sbycr         = 0xFFFFFE91;
+constexpr u32 ccr           = 0xFFFFFE92;
+constexpr u32 icr           = 0xFFFFFEE0;
+constexpr u32 vcrwdt        = 0xFFFFFEE4;
+constexpr u32 dvsr          = 0xFFFFFF00;
+constexpr u32 dvdnt         = 0xFFFFFF04;
+constexpr u32 dvcr          = 0xFFFFFF08;
+constexpr u32 vcrdiv        = 0xFFFFFF0C;
+constexpr u32 dvdnth        = 0xFFFFFF10;
+constexpr u32 dvdntl        = 0xFFFFFF14;
+constexpr u32 dvdnth_shadow = 0xFFFFFF18;
+constexpr u32 dvdntl_shadow = 0xFFFFFF1C;
+constexpr u32 barah         = 0xFFFFFF40;
+constexpr u32 baral         = 0xFFFFFF42;
+constexpr u32 bamrah        = 0xFFFFFF44;
+constexpr u32 bamral        = 0xFFFFFF46;
+constexpr u32 bbra          = 0xFFFFFF48;
+constexpr u32 barbh         = 0xFFFFFF60;
+constexpr u32 barbl         = 0xFFFFFF62;
+constexpr u32 bamrbh        = 0xFFFFFF64;
+constexpr u32 bamrbl        = 0xFFFFFF66;
+constexpr u32 bbrb          = 0xFFFFFF68;
+constexpr u32 bdrbh         = 0xFFFFFF70;
+constexpr u32 bdrbl         = 0xFFFFFF72;
+constexpr u32 bdmrbh        = 0xFFFFFF74;
+constexpr u32 bdmrbl        = 0xFFFFFF76;
+constexpr u32 brcr          = 0xFFFFFF78;
+constexpr u32 sar0          = 0xFFFFFF80;
+constexpr u32 dar0          = 0xFFFFFF84;
+constexpr u32 tcr0          = 0xFFFFFF88;
+constexpr u32 chcr0         = 0xFFFFFF8C;
+constexpr u32 sar1          = 0xFFFFFF90;
+constexpr u32 dar1          = 0xFFFFFF94;
+constexpr u32 tcr1          = 0xFFFFFF98;
+constexpr u32 chcr1         = 0xFFFFFF9C;
+constexpr u32 vcrdma0       = 0xFFFFFFA0;
+constexpr u32 vcrdma1       = 0xFFFFFFA8;
+constexpr u32 dmaor         = 0xFFFFFFB0;
+constexpr u32 bcr1          = 0xFFFFFFE0;
+constexpr u32 bcr2          = 0xFFFFFFE4;
+constexpr u32 wcr           = 0xFFFFFFE8;
+constexpr u32 mcr           = 0xFFFFFFEC;
+constexpr u32 rtcsr         = 0xFFFFFFF0;
+constexpr u32 rtcnt         = 0xFFFFFFF4;
+constexpr u32 rtcor         = 0xFFFFFFF8;
 //@}
 
 /////////////////////////////////////
@@ -366,7 +367,6 @@ enum class ClockSelect : u8 {
     external                = 0b11  ///< External clock
 };
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Sh2
 ///
@@ -524,6 +524,19 @@ class Sh2 {
             rawWrite<T>(cache_data_, addr & 0xFFF, data);
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Sh2::sendInterrupt(const Interrupt& i);
+        ///
+        /// \brief  Sends an interrupt to the sh2.
+        ///
+        /// \author Runik
+        /// \date   19/01/2019
+        ///
+        /// \param  i   Interrupt sent.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void sendInterrupt(const Interrupt& i);
+
     private:
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -649,10 +662,29 @@ class Sh2 {
 
         void reset();
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Sh2::runDivisionUnit(u8 cycles_to_run);
+        ///
+        /// \brief  Executes the division unit for the specified number of cycles.
+        ///
+        /// \author Runik
+        /// \date   18/01/2019
+        ///
+        /// \param  cycles_to_run   Number of cycles to run.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void runDivisionUnit(u8 cycles_to_run);
+
         std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
         std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
         std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).
         bool is_master_;                            ///< True if the SH2 is configured as master, false if as slave.
+
+        /// \name Interrupt management
+        //@{
+        std::list<Interrupt>    pending_interrupts_;///< List of pending interrupts.
+        bool                    is_interrupted_;    ///< True if this sh2 is interrupted.
+        //@}
 
         /// \name DIVU (Division unit)
         //@{

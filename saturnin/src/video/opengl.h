@@ -44,7 +44,7 @@ public:
     //@{
     // Constructors / Destructors
     Opengl()                           = delete;
-    Opengl(std::shared_ptr<core::Config> config);
+    Opengl(core::Config* config);
     Opengl(const Opengl&)              = delete;
     Opengl(Opengl&&)                   = delete;
     Opengl& operator=(const Opengl&) & = delete;
@@ -164,9 +164,9 @@ public:
 
 private:
     
-    uint32_t                      program_shader_;
-    uint32_t                      vao_;
-    std::shared_ptr<core::Config> config_;    ///< Configuration object
+    uint32_t      program_shader_;
+    uint32_t      vao_;
+    core::Config* config_;        ///< Configuration object
 };
 
 
@@ -185,7 +185,7 @@ private:
 bool isModernOpenglCapable();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn int32_t runLegacyOpengl(std::shared_ptr<core::Config>& config);
+/// \fn int32_t runLegacyOpengl(core::Emulator_context& config);
 ///
 /// \brief  Executes OpenGL code in legacy mode.
 ///
@@ -200,7 +200,7 @@ bool isModernOpenglCapable();
 int32_t runLegacyOpengl(core::Emulator_context& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn int32_t runModernOpengl(std::shared_ptr<core::Config>& config);
+/// \fn int32_t runModernOpengl(core::Emulator_context& config);
 ///
 /// \brief  Executes OpenGL code in modern mode (3.3+).
 ///
