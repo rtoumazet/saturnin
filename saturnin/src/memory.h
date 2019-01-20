@@ -91,13 +91,13 @@ public:
     //@{
     // Constructors / Destructors
     Memory()                           = delete;
-    Memory(std::shared_ptr<Config> config, 
+    Memory(Config* c, 
            HardwareMode hm, 
-           std::shared_ptr<Sh2> m,
-           std::shared_ptr<Sh2> s) :    config_(config),
-                                        HardwareMode_(hm),
-                                        master_sh2_(m),
-                                        slave_sh2_(s) {
+           Sh2* m,
+           Sh2* s) :    config_(c),
+                        HardwareMode_(hm),
+                        master_sh2_(m),
+                        slave_sh2_(s) {
         initializeHandlers();
     };
     Memory(const Memory&)              = delete;
@@ -264,15 +264,15 @@ public:
         handler[addr >> 16](*this, addr, data);
     }
 
-    std::shared_ptr<Sh2> masterSh2() const { return master_sh2_; };
-    std::shared_ptr<Sh2> slaveSh2() const { return slave_sh2_; };
+    Sh2* masterSh2() const { return master_sh2_; };
+    Sh2* slaveSh2() const { return slave_sh2_; };
 
 private:
     void initializeHandlers();
     
-    std::shared_ptr<Config> config_;    ///< Configuration object
-    std::shared_ptr<Sh2> master_sh2_;   ///< Master SH2 object
-    std::shared_ptr<Sh2> slave_sh2_;    ///< Slave SH2 object
+    Config* config_;    ///< Configuration object
+    Sh2* master_sh2_;   ///< Master SH2 object
+    Sh2* slave_sh2_;    ///< Slave SH2 object
 
     /// \Memory handlers
     //@{
@@ -855,7 +855,7 @@ template<typename T>
 struct readCdBlock{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T)*8, addr));
+            core::Log::error("memory", core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T)*8, addr);
             return 0;
         };
     }
@@ -876,7 +876,7 @@ template<typename T>
 struct writeCdBlock{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            core::Log::error("memory", fmt::format(core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"), sizeof(T)*8, addr, data));
+            core::Log::error("memory", core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"), sizeof(T)*8, addr, data);
         };
     }
 };
@@ -896,7 +896,7 @@ template<typename T>
 struct readScsp{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * 8, addr));
+            core::Log::error("memory", core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * 8, addr);
             return 0;
         };
     }
@@ -917,7 +917,7 @@ template<typename T>
 struct writeScsp{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            core::Log::error("memory", fmt::format(core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"), sizeof(T) * 8, addr, data));
+            core::Log::error("memory", core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
         };
     }
 };
@@ -1191,7 +1191,6 @@ template<>
 struct readScu<u32> {
     operator Memory::ReadType<u32>() const {
         return [](const Memory& m, const u32 addr) -> u32 {
-            //core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr));
             core::Log::error("memory", core::tr("Read ({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr);
 
             return 0;
@@ -1214,7 +1213,7 @@ template<typename T>
 struct writeScu{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.scu_, addr, data);
+            rawWrite<T>(m.scu_, addr & 0xFF, data);
         };
     }
 };
@@ -1224,7 +1223,6 @@ template<>
 struct writeCart<u32> {
     operator Memory::WriteType<u32>() const {
         return [](Memory& m, const u32 addr, const u32 data) {
-            //core::Log::error("memory", fmt::format(core::tr("Write({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr));
             core::Log::error("memory", core::tr("Write({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr);
         };
     }

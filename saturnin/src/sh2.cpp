@@ -18,6 +18,7 @@
 // 
 
 #include "sh2.h"
+#include "interrupt_sources.h"
 #include "utilities.h" // toUnderlying
 
 namespace util = saturnin::utilities;
@@ -26,7 +27,10 @@ namespace saturnin {
 namespace core {
 
 Sh2::Sh2(bool is_master) : is_master_(is_master) {
-    initializeOnChipRegisters();
+    is_interrupted_ = false;
+    pending_interrupts_.clear();
+    
+    reset();
 }
 
 u32 Sh2::readRegisters(u32 addr) const {
@@ -261,6 +265,12 @@ void Sh2::executeDma() {
 
 void Sh2::reset() {
     initializeOnChipRegisters();
+}
+
+void Sh2::sendInterrupt(const Interrupt& i) {
+    if (i.level != 0) {
+
+    }
 }
 
 }

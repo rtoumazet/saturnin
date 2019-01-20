@@ -28,13 +28,14 @@ namespace saturnin {
 namespace core {
 
 Emulator_context::Emulator_context() {
-    config_     = std::make_shared<Config>("saturnin.cfg");
-    master_sh2_ = std::make_shared<Sh2>(true);
-    slave_sh2_  = std::make_shared<Sh2>(false);
-    memory_     = std::make_unique<Memory>(config_, 
-                                           this->HardwareMode_, 
-                                           this->master_sh2_,
-                                           this->slave_sh2_);
+    config_     = std::make_unique<Config>("saturnin.cfg");
+    master_sh2_ = std::make_unique<Sh2>(true);
+    slave_sh2_  = std::make_unique<Sh2>(false);
+    memory_     = std::make_unique<Memory>(config_.get(), 
+                                           hardwareMode_, 
+                                           master_sh2_.get(),
+                                           slave_sh2_.get());
+    //scu_        = std::make_shared<Scu>(memory_);
 }
 
 bool Emulator_context::initialize() {
@@ -81,8 +82,8 @@ bool Emulator_context::run() {
     // TESTING //
 
     uint8_t status{};
-    while (this->RenderingStatus_ != RenderingStatus::stopped) {
-        this->RenderingStatus_ = RenderingStatus::running;
+    while (this->renderingStatus_ != RenderingStatus::stopped) {
+        this->renderingStatus_ = RenderingStatus::running;
         bool is_legacy_opengl = this->config()->readValue(core::Access_keys::config_legacy_opengl);
         status = (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
 

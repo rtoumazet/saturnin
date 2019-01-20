@@ -308,7 +308,7 @@ namespace gui {
             counter = 5 * 60;
 
             if (reset_rendering) {
-                state.RenderingStatus_ = core::RenderingStatus::reset;
+                state.renderingStatus_ = core::RenderingStatus::reset;
                 reset_rendering = false;
             }
         }

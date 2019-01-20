@@ -32,6 +32,7 @@
 #include "emulator_enums.h"
 #include "config.h"
 #include "memory.h"
+#include "scu.h"
 #include "sh2.h"
 #include "stv_definitions.h"
 
@@ -107,40 +108,41 @@ static std::string saturnin_version = "1.00";
         bool run();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn std::shared_ptr<Config>& Emulator_context::config()
+        /// \fn Config* Emulator_context::config()
         ///
-        /// \brief  Returns a reference to the shared config object.
-        ///
-        /// \author Runik
-        /// \date   05/07/2018
-        ///
-        /// \return A reference to a std::shared_ptr&lt;Config&gt;
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        std::shared_ptr<Config>& config() { return config_; };
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn std::unique_ptr<Memory>& Emulator_context::memory()
-        ///
-        /// \brief  Returns a reference to the memory object.
+        /// \brief  Returns a pointer to config object.
         ///
         /// \author Runik
         /// \date   05/07/2018
         ///
-        /// \return A reference to a std::unique_ptr&lt;Memory&gt;
+        /// \return A pointer to the config object
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        std::unique_ptr<Memory>& memory(){return memory_;};
+        Config* config() { return config_.get(); };
 
-        HardwareMode    HardwareMode_{ HardwareMode::saturn };     ///< Hardware mode
-        EmulationStatus EmulationStatus_{ EmulationStatus::stopped }; ///< Emulation status
-        RenderingStatus RenderingStatus_{ RenderingStatus::running }; ///< Rendering status.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn Memory* Emulator_context::memory()
+        ///
+        /// \brief  Returns a pointer to the memory object.
+        ///
+        /// \author Runik
+        /// \date   05/07/2018
+        ///
+        /// \return A pointer to the memory object.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Memory* memory() { return memory_.get(); };
+
+        HardwareMode    hardwareMode_{ HardwareMode::saturn };     ///< Hardware mode
+        EmulationStatus emulationStatus_{ EmulationStatus::stopped }; ///< Emulation status
+        RenderingStatus renderingStatus_{ RenderingStatus::running }; ///< Rendering status.
 
     private:
-        std::shared_ptr<Config> config_; ///< Configuration object
-        std::unique_ptr<Memory> memory_; ///< Memory object
-        std::shared_ptr<Sh2> master_sh2_;///< Master SH2 object
-        std::shared_ptr<Sh2> slave_sh2_; ///< Slave SH2 object
+        std::unique_ptr<Config> config_;          ///< Configuration object
+        std::unique_ptr<Memory> memory_;          ///< Memory object
+        std::unique_ptr<Sh2>    master_sh2_;      ///< Master SH2 object
+        std::unique_ptr<Sh2>    slave_sh2_;       ///< Slave SH2 object
+        std::shared_ptr<Scu>    scu_;             ///< SCU object
 
         /// \name Command line variables
         ///

@@ -180,6 +180,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory.cpp" />
+    <ClCompile Include="src\scu.cpp" />
     <ClCompile Include="src\sh2.cpp" />
     <ClCompile Include="src\utilities.cpp" />
     <ClCompile Include="src\video\gui.cpp" />
@@ -201,9 +202,11 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="src\emulator_defs.h" />
     <ClInclude Include="src\emulator_enums.h" />
     <ClInclude Include="src\interrupt_controller.h" />
+    <ClInclude Include="src\interrupt_sources.h" />
     <ClInclude Include="src\locale.h" />
     <ClInclude Include="src\log.h" />
     <ClInclude Include="src\memory.h" />
+    <ClInclude Include="src\scu.h" />
     <ClInclude Include="src\sh2.h" />
     <ClInclude Include="src\stv_definitions.h" />
     <ClInclude Include="src\utilities.h" />
