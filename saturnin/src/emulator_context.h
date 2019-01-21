@@ -142,7 +142,7 @@ static std::string saturnin_version = "1.00";
         std::unique_ptr<Memory> memory_;          ///< Memory object
         std::unique_ptr<Sh2>    master_sh2_;      ///< Master SH2 object
         std::unique_ptr<Sh2>    slave_sh2_;       ///< Slave SH2 object
-        std::shared_ptr<Scu>    scu_;             ///< SCU object
+        std::unique_ptr<Scu>    scu_;             ///< SCU object
 
         /// \name Command line variables
         ///

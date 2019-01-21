@@ -35,7 +35,7 @@ Emulator_context::Emulator_context() {
                                            hardwareMode_, 
                                            master_sh2_.get(),
                                            slave_sh2_.get());
-    //scu_        = std::make_shared<Scu>(memory_);
+    scu_        = std::make_unique<Scu>(memory_.get());
 }
 
 bool Emulator_context::initialize() {
