@@ -59,7 +59,7 @@ class Scu {
         //@{
         // Constructors / Destructors
         Scu()                        = delete;
-        Scu(Memory& m);
+        Scu(Memory* m);
         Scu(const Scu&)              = delete;
         Scu(Scu&&)                   = delete;
         Scu& operator=(const Scu&) & = delete;
@@ -70,7 +70,7 @@ class Scu {
     private:
         void initializeRegisters();
 
-        Memory& memory_;
+        Memory* memory_;
 };
 
 }

@@ -27,7 +27,6 @@
 
 #include <array> // array
 #include <filesystem> // filesystem
-#include <memory> // shared_pointer
 #include <vector> // vector
 
 #include "emulator_defs.h"
