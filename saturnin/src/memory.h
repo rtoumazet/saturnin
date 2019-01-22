@@ -33,6 +33,7 @@
 #include "emulator_enums.h"
 #include "config.h"
 #include "sh2.h"
+#include "scu.h"
 
 namespace saturnin {
 namespace core {
@@ -265,6 +266,7 @@ public:
 
     Sh2* masterSh2() const { return master_sh2_; };
     Sh2* slaveSh2() const { return slave_sh2_; };
+    Scu* scu() const { return scu_object_; };
 
 private:
     void initializeHandlers();
@@ -272,6 +274,7 @@ private:
     Config* config_;    ///< Configuration object
     Sh2* master_sh2_;   ///< Master SH2 object
     Sh2* slave_sh2_;    ///< Slave SH2 object
+    Scu* scu_object_;          ///< SCU object
 
     /// \Memory handlers
     //@{
@@ -1190,9 +1193,7 @@ template<>
 struct readScu<u32> {
     operator Memory::ReadType<u32>() const {
         return [](const Memory& m, const u32 addr) -> u32 {
-            core::Log::error("memory", core::tr("Read ({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr);
-
-            return 0;
+            return m.scu()->read32(addr);
         };
     }
 };
@@ -1222,7 +1223,7 @@ template<>
 struct writeCart<u32> {
     operator Memory::WriteType<u32>() const {
         return [](Memory& m, const u32 addr, const u32 data) {
-            core::Log::error("memory", core::tr("Write({}) needs to be handled through SCU {:#0x}"), sizeof(u32) * 8, addr);
+            return m.scu()->write32(addr, data);
         };
     }
 };
