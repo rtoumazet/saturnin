@@ -60,7 +60,7 @@ void Scu::write32(const u32 addr, const u32 data) {
 //    uint8_t index = 0;
 //    uint32_t temp = 0;
 //
-//    switch (addr) {
+    switch (addr) {
 //        case dsp_program_control_port:
 //            current_DSP_program_control_port_ = data;
 //            if (current_DSP_program_control_port_&DSP_T0) {
@@ -102,7 +102,7 @@ void Scu::write32(const u32 addr, const u32 data) {
 //            // DMA registers write
 //            dmaUpdate_ = true;
 //            break;
-//    }
+    }
 
     //if(address==0x25FE00A0) DebugBreak();
     rawWrite<u32>(memory_->scu_, addr & 0xFF, data);
