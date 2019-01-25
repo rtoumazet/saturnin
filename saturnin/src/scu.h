@@ -436,6 +436,8 @@ struct DmaConfiguration {
     u32 transfer_byte_number;
     u32 add_value;
     u32 enable;
+    bool is_enabled;
+
     u32 mode;
 };
 
