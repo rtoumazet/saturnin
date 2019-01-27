@@ -19,7 +19,6 @@
 
 #include "scu.h"
 #include "memory.h"
-#include "utilities.h" // toUnderlying
 
 namespace util = saturnin::utilities;
 
@@ -155,46 +154,50 @@ void Scu::initializeRegisters() {
     //dsta = 0;
 }
 
-DmaConfiguration Scu::configureDmaTransfer(DmaLevel dl) const {
+DmaConfiguration Scu::configureDmaTransfer(DmaLevel level) const {
     DmaConfiguration dc{};
-    switch (dl) {
+    switch (level) {
         case DmaLevel::level_0:
-            dc.read_address         = read32(level_0_dma_read_address);
-            dc.write_address        = read32(level_0_dma_write_address);
-            dc.transfer_byte_number = read32(level_0_dma_transfer_byte_number);
-            
-            u32 add_value_register = read32(level_0_dma_add_value_register);
-            auto read_add_value = static_cast<ReadAddressAddValue>(add_value_register & util::toUnderlying(DmaAddressAddValueMask::read_address_add_value));
-            //switch (add_value_register & util::toUnderlying(DmaAddressAddValueMask::read_address_add_value)) {
-            //    case ReadAddressAddValue::add_0:
+            dc.read_address         = rawRead<u32>(memory_->scu_, level_0_dma_read_address);
+            dc.write_address        = rawRead<u32>(memory_->scu_, level_0_dma_write_address);
+            dc.transfer_byte_number = rawRead<u32>(memory_->scu_, level_0_dma_transfer_byte_number);
+            auto add_value_register = DmaAddressAddValueRegister(rawRead<u32>(memory_->scu_, level_0_dma_add_value_register));
+            switch (add_value_register.readAddValue()) {
+                case ReadAddressAddValue::add_0: break;
+                case ReadAddressAddValue::add_4: break;
+            }
+            //switch (add_value_register.writeAddValue()) {
+            //    case WriteAddressAddValue::add_0: break;
+            //    case WriteAddressAddValue::add_2: break;
+            //    case WriteAddressAddValue::add_4: break;
+            //    case WriteAddressAddValue::add_8: break;
+            //    case WriteAddressAddValue::add_16: break;
+            //    case WriteAddressAddValue::add_32: break;
+            //    case WriteAddressAddValue::add_64: break;
+            //    case WriteAddressAddValue::add_128: break;
 
-            //        break;
-            //    case ReadAddressAddValue::add_4:
-
-            //        break;
             //}
-            //if(DmaAddressAddValueMask::read_address_add_value)
-            
-            dc.add_value            = level_0_dma_add_value_register;
+            //
+            //dc.add_value            = level_0_dma_add_value_register;
 
-            dc.enable               = level_0_dma_enable_register;
-            dc.mode                 = level_0_dma_mode_register;
+            //dc.enable               = level_0_dma_enable_register;
+            //dc.mode                 = level_0_dma_mode_register;
             break;
         case DmaLevel::level_1:
-            dc.read_address         = read32(level_1_dma_read_address);
-            dc.write_address        = read32(level_1_dma_write_address);
-            dc.transfer_byte_number = read32(level_1_dma_transfer_byte_number);
-            dc.add_value            = level_1_dma_add_value_register;
-            dc.enable               = level_1_dma_enable_register;
-            dc.mode                 = level_1_dma_mode_register;
+            //dc.read_address         = rawRead<u32>(memory_->scu_, level_1_dma_read_address);
+            //dc.write_address        = rawRead<u32>(memory_->scu_, level_1_dma_write_address);
+            //dc.transfer_byte_number = rawRead<u32>(memory_->scu_, level_1_dma_transfer_byte_number);
+            //dc.add_value            = level_1_dma_add_value_register;
+            //dc.enable               = level_1_dma_enable_register;
+            //dc.mode                 = level_1_dma_mode_register;
             break;
         case DmaLevel::level_2:
-            dc.read_address         = read32(level_2_dma_read_address);
-            dc.write_address        = read32(level_2_dma_write_address);
-            dc.transfer_byte_number = read32(level_2_dma_transfer_byte_number);
-            dc.add_value            = level_2_dma_add_value_register;
-            dc.enable               = level_2_dma_enable_register;
-            dc.mode                 = level_2_dma_mode_register;
+            //dc.read_address         = rawRead<u32>(memory_->scu_, level_2_dma_read_address);
+            //dc.write_address        = rawRead<u32>(memory_->scu_, level_2_dma_write_address);
+            //dc.transfer_byte_number = rawRead<u32>(memory_->scu_, level_2_dma_transfer_byte_number);
+            //dc.add_value            = level_2_dma_add_value_register;
+            //dc.enable               = level_2_dma_enable_register;
+            //dc.mode                 = level_2_dma_mode_register;
             break;
         default:
             break;

@@ -26,6 +26,7 @@
 #pragma once
 
 #include "emulator_defs.h"
+#include "utilities.h" // toUnderlying
 
 namespace saturnin {
 namespace core {
@@ -122,14 +123,18 @@ enum class DmaLevel2TransferByteNumberMask : u32 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaAddressAddValueMask
+/// \class  DmaAddressAddValueRegister
 ///
-/// \brief  DMA Address Add Value Register (D0AD, D1AD and D2AD) bit mask.
+/// \brief  DMA Address Add Value Register (D0AD, D1AD and D2AD).
+///
+/// \author Runik
+/// \date   25/01/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaAddressAddValueMask : u32 {
-    read_address_add_value  = 0b00000000000000000000000100000000,   ///< Read address add value (D0RA, D1RA and D2RA).
-    write_address_add_value = 0b00000000000000000000000000000111    ///< Write address add value (D0WA, D1WA and D2WA).
+class DmaAddressAddValueRegister : Register {
+    
+    auto readAddValue() { return static_cast<ReadAddressAddValue>(extract(8,8)); };   ///< Returns read address add value (D0RA, D1RA and D2RA).
+    auto writeAddValue() { return static_cast<WriteAddressAddValue>(extract(0,2)); }; ///< Returns write address add value mask (D0WA, D1WA and D2WA).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,9 +143,9 @@ enum class DmaAddressAddValueMask : u32 {
 /// \brief  Number of bytes added to the read address.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ReadAddressAddValue : u32 {
-    add_0 = 0b00000000000000000000000000000000, ///< Nothing is added.
-    add_4 = 0b00000000000000000000000100000000  ///< 4 bytes are added
+enum class ReadAddressAddValue : u8 {
+    add_0 = 0b0000'0000, ///< Nothing is added.
+    add_4 = 0b0000'0001  ///< 4 bytes are added
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,27 +154,35 @@ enum class ReadAddressAddValue : u32 {
 /// \brief  Number of bytes added to the write address.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class WriteAddressAddValue : u32 {
-    add_0   = 0b00000000000000000000000000000000, ///< Nothing is added.
-    add_2   = 0b00000000000000000000000000000001, ///< 2 bytes are added.
-    add_4   = 0b00000000000000000000000000000010, ///< 4 bytes are added.
-    add_8   = 0b00000000000000000000000000000011, ///< 8 bytes are added.
-    add_16  = 0b00000000000000000000000000000100, ///< 16 bytes are added.
-    add_32  = 0b00000000000000000000000000000101, ///< 32 bytes are added.
-    add_64  = 0b00000000000000000000000000000110, ///< 64 bytes are added.
-    add_128 = 0b00000000000000000000000000000111  ///< 128 bytes are added.
+enum class WriteAddressAddValue : u8 {
+    add_0   = 0b0000'0000, ///< Nothing is added.
+    add_2   = 0b0000'0001, ///< 2 bytes are added.
+    add_4   = 0b0000'0010, ///< 4 bytes are added.
+    add_8   = 0b0000'0011, ///< 8 bytes are added.
+    add_16  = 0b0000'0100, ///< 16 bytes are added.
+    add_32  = 0b0000'0101, ///< 32 bytes are added.
+    add_64  = 0b0000'0110, ///< 64 bytes are added.
+    add_128 = 0b0000'0111  ///< 128 bytes are added.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaEnableRegisterMask
+/// \class  DmaEnableRegister
 ///
 /// \brief  DMA Enable Register (DxEN).
+///
+/// \author Runik
+/// \date   27/01/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaEnableRegisterMask : u32 {
-    dma_enable   = 0b00000000000000000000000100000000,  ///< DMA Enable Bit (D0EN, D1EN, D2EN).
-    dma_starting = 0b00000000000000000000000000000001   ///< DMA Starting Bit (D0GO, D1GO, D2GO).
+class DmaEnableRegister : Register {
+    auto dmaEnable() { return static_cast<DmaEnable>((register_value & util::toUnderlying(enable_mask)) >> 8); };
+    auto dmaStarting() { return static_cast<DmaStarting>(register_value & util::toUnderlying(dma_starting_mask)); };
+
+    private:
+        const u32 enable_mask       = 0b0000'0000'0000'0000'0000'0001'0000'0000; ///< DMA Enable Bit (D0EN, D1EN, D2EN).
+        const u32 dma_starting_mask = 0b0000'0000'0000'0000'0000'0000'0000'0001; ///< DMA Starting Bit (D0GO, D1GO, D2GO).
 };
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   DmaEnable
@@ -177,9 +190,9 @@ enum class DmaEnableRegisterMask : u32 {
 /// \brief  DxEN bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaEnable :u32 {
-    disabled = 0b00000000000000000000000000000000,  ///< DMA is disabled.
-    enabled  = 0b00000000000000000000000100000000   ///< DMA is enabled.
+enum class DmaEnable :u8 {
+    disabled = 0b0000'0000,  ///< DMA is disabled.
+    enabled  = 0b0000'0001   ///< DMA is enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,9 +201,9 @@ enum class DmaEnable :u32 {
 /// \brief  DxGO bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaStarting : u32 {
-    not_started = 0b00000000000000000000000000000000,   ///< DMA isn't started.
-    started     = 0b00000000000000000000000000000001    ///< DMA starts execution. Only relevant when start factor is DMA.
+enum class DmaStarting : u8 {
+    not_started = 0b0000'0000,   ///< DMA isn't started.
+    started     = 0b0000'0001    ///< DMA starts execution. Only relevant when start factor is DMA.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,12 +212,23 @@ enum class DmaStarting : u32 {
 /// \brief  DMA Mode, Address Update, Start Factor Select Register (DxMD) bit mask
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaModeRegisterMask : u32 {
-    mode                 = 0b00000001000000000000000000000000,
-    read_address_update  = 0b00000000000000010000000000000000,
-    write_address_update = 0b00000000000000000000000100000000,
-    starting_factor      = 0b00000000000000000000000000000111,
-};
+//enum class DmaModeRegisterMask : u32 {
+//    mode                 = 0b00000001000000000000000000000000,
+//    read_address_update  = 0b00000000000000010000000000000000,
+//    write_address_update = 0b00000000000000000000000100000000,
+//    starting_factor      = 0b00000000000000000000000000000111,
+//};
+
+//class DmaModeRegister : Register {
+//    auto dmaMode() { return static_cast<DmaMode>((register_value & util::toUnderlying(enable_mask)) >> 8); };
+//
+//    private :
+//        const u32 mode_mask                 = 0b00000001000000000000000000000000;
+//        const u32 read_address_update_mask  = 0b00000000000000010000000000000000;
+//        const u32 write_address_update_mask = 0b00000000000000000000000100000000;
+//        const u32 starting_factor_mask      = 0b00000000000000000000000000000111;
+//
+//};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   DmaMode
@@ -430,15 +454,18 @@ enum class DspDmaOperation : u32 {
 /// \date   24/01/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct DmaConfiguration {
+struct DmaConfiguration  {
     u32 read_address;
     u32 write_address;
     u32 transfer_byte_number;
-    u32 add_value;
-    u32 enable;
-    bool is_enabled;
+    ReadAddressAddValue  read_add_value;
+    WriteAddressAddValue write_add_value;
+    DmaEnable            dma_enable;
+    DmaStarting          dma_starting;
+    bool is_in_direct_mode;
+    bool is_read_address_updated;
+    bool is_write_address_updated;
 
-    u32 mode;
 };
 
 enum class DmaLevel {
