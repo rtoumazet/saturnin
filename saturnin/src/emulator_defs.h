@@ -38,4 +38,34 @@ using s8    = std::int8_t;
 using s16   = std::int16_t;
 using s32   = std::int32_t;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Register
+///
+/// \brief  Base of any register used in the emulator. Will be specialized to return specific values depending on the register used.
+///
+/// \author Runik
+/// \date   27/01/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Register {
+    public:
+        /// \name Constructors/Destructors.
+        //@{
+        Register(const u32 v) : register_value(v) {};
+        Register()                             = delete;
+        Register(const Register&)              = delete;
+        Register(Register&&)                   = delete;
+        Register& operator=(const Register&) & = delete;
+        Register& operator=(Register&&) &      = delete;
+        ~Register()                            = default;
+        //@}
+    
+        inline auto extract(u8 first_bit_index, u8 last_bit_index) {
+            return (register_value >> first_bit_index) & ~( ~0 << (last_bit_index - first_bit_index + 1));
+        }
+
+    protected:
+        u32 register_value; ///< Internal register value.
+};
+
 };
