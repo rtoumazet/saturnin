@@ -73,23 +73,34 @@ constexpr u32 scu_version_register             = 0x25FE00C8;
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaReadAddressRegisterMask
+/// \class  DmaReadAddressRegister
 ///
-/// \brief  DMA Level 2-0 Read Address Register (D0R, D1R &amp; D2R) bit mask.
+/// \brief  DMA Level 2-0 Read Address Register (D0R, D1R &amp; D2R).
+///
+/// \author Runik
+/// \date   29/01/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaReadAddressRegisterMask : u32 {
-    data_mask = 0x07FFFFFF ///< Mask to access register data.
+class DmaReadAddressRegister : Register {
+    public:
+        using Register::Register;
+        auto readAddress() { return extract(0, 26); };   ///< Returns read address in bytes.
 };
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaWriteAddressRegisterMask
+/// \class  DmaWriteAddressRegister
 ///
-/// \brief  DMA Level 2-0 Write Address Register (D0W, D1W &amp; D2W) bit mask.
+/// \brief  DMA Level 2-0 Write Address Register (D0W, D1W &amp; D2W).
+///
+/// \author Runik
+/// \date   29/01/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaWriteAddressRegisterMask : u32 {
-    data_mask = 0x07FFFFFF ///< Mask to access register data.
+class DmaWriteAddressRegister : Register {
+    public:
+        using Register::Register;
+        auto writeAddress() { return extract(0, 26); };   ///< Returns write address in bytes.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,38 +114,48 @@ enum class DmaLevel0TransferByteNumberMask : u32 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaLevel1TransferByteNumberMask
+/// \class  DmaLevel0TransferByteNumberRegister
 ///
-/// \brief  DMA Level 1 Transfer Byte Number (D1C) bit mask.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class DmaLevel1TransferByteNumberMask : u32 {
-    data_mask = 0x00000FFF ///< Mask to access register data.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaLevel2TransferByteNumberMask
-///
-/// \brief  DMA Level 2 Transfer Byte Number (D2C) bit mask.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class DmaLevel2TransferByteNumberMask : u32 {
-    data_mask = 0x00000FFF ///< Mask to access register data.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaAddressAddValueRegister
-///
-/// \brief  DMA Address Add Value Register (D0AD, D1AD and D2AD).
+/// \brief  DMA Level 0 Transfer Byte Number (D0C).
 ///
 /// \author Runik
-/// \date   25/01/2019
+/// \date   29/01/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaAddressAddValueRegister : Register {
-    
-    auto readAddValue() { return static_cast<ReadAddressAddValue>(extract(8,8)); };   ///< Returns read address add value (D0RA, D1RA and D2RA).
-    auto writeAddValue() { return static_cast<WriteAddressAddValue>(extract(0,2)); }; ///< Returns write address add value mask (D0WA, D1WA and D2WA).
+class DmaLevel0TransferByteNumberRegister : Register {
+    public:
+        using Register::Register;
+        auto transferByteNumber() { return extract(0, 19); };   ///< Returns transfer byte number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DmaLevel1TransferByteNumberRegister
+///
+/// \brief  DMA Level 1 Transfer Byte Number (D1C).
+///
+/// \author Runik
+/// \date   29/01/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DmaLevel1TransferByteNumberRegister : Register {
+    public:
+    using Register::Register;
+    auto transferByteNumber() { return extract(0, 11); };   ///< Returns transfer byte number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DmaLevel2TransferByteNumberRegister
+///
+/// \brief  DMA Level 2 Transfer Byte Number (D2C).
+///
+/// \author Runik
+/// \date   29/01/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DmaLevel2TransferByteNumberRegister : Register {
+    public:
+    using Register::Register;
+    auto transferByteNumber() { return extract(0, 11); };   ///< Returns transfer byte number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,14 +176,52 @@ enum class ReadAddressAddValue : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class WriteAddressAddValue : u8 {
-    add_0   = 0b0000'0000, ///< Nothing is added.
-    add_2   = 0b0000'0001, ///< 2 bytes are added.
-    add_4   = 0b0000'0010, ///< 4 bytes are added.
-    add_8   = 0b0000'0011, ///< 8 bytes are added.
-    add_16  = 0b0000'0100, ///< 16 bytes are added.
-    add_32  = 0b0000'0101, ///< 32 bytes are added.
-    add_64  = 0b0000'0110, ///< 64 bytes are added.
+    add_0 = 0b0000'0000, ///< Nothing is added.
+    add_2 = 0b0000'0001, ///< 2 bytes are added.
+    add_4 = 0b0000'0010, ///< 4 bytes are added.
+    add_8 = 0b0000'0011, ///< 8 bytes are added.
+    add_16 = 0b0000'0100, ///< 16 bytes are added.
+    add_32 = 0b0000'0101, ///< 32 bytes are added.
+    add_64 = 0b0000'0110, ///< 64 bytes are added.
     add_128 = 0b0000'0111  ///< 128 bytes are added.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DmaAddressAddValueRegister
+///
+/// \brief  DMA Address Add Value Register (D0AD, D1AD and D2AD).
+///
+/// \author Runik
+/// \date   25/01/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DmaAddressAddValueRegister : Register {
+    public:
+        using Register::Register;
+        auto readAddValue() { return static_cast<ReadAddressAddValue>(extract(8,8)); };   ///< Returns read address add value (D0RA, D1RA and D2RA).
+        auto writeAddValue() { return static_cast<WriteAddressAddValue>(extract(0,2)); }; ///< Returns write address add value mask (D0WA, D1WA and D2WA).
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DmaEnable
+///
+/// \brief  DxEN bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DmaEnable :u8 {
+    disabled = 0b0000'0000,  ///< DMA is disabled.
+    enabled = 0b0000'0001   ///< DMA is enabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DmaStarting
+///
+/// \brief  DxGO bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DmaStarting : u8 {
+    not_started = 0b0000'0000,   ///< DMA isn't started.
+    started     = 0b0000'0001    ///< DMA starts execution. Only relevant when start factor is DMA.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,35 +234,10 @@ enum class WriteAddressAddValue : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class DmaEnableRegister : Register {
-    auto dmaEnable() { return static_cast<DmaEnable>((register_value & util::toUnderlying(enable_mask)) >> 8); };
-    auto dmaStarting() { return static_cast<DmaStarting>(register_value & util::toUnderlying(dma_starting_mask)); };
-
-    private:
-        const u32 enable_mask       = 0b0000'0000'0000'0000'0000'0001'0000'0000; ///< DMA Enable Bit (D0EN, D1EN, D2EN).
-        const u32 dma_starting_mask = 0b0000'0000'0000'0000'0000'0000'0000'0001; ///< DMA Starting Bit (D0GO, D1GO, D2GO).
-};
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaEnable
-///
-/// \brief  DxEN bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class DmaEnable :u8 {
-    disabled = 0b0000'0000,  ///< DMA is disabled.
-    enabled  = 0b0000'0001   ///< DMA is enabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaStarting
-///
-/// \brief  DxGO bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class DmaStarting : u8 {
-    not_started = 0b0000'0000,   ///< DMA isn't started.
-    started     = 0b0000'0001    ///< DMA starts execution. Only relevant when start factor is DMA.
+    public:
+        using Register::Register;
+        auto dmaEnable() { return static_cast<DmaEnable>(extract(8, 8));};     ///< Returns DMA Enable Bit (D0EN, D1EN, D2EN).
+        auto dmaStarting() { return static_cast<DmaStarting>(extract(0,0)); }; ///< Returns DMA Starting Bit (D0GO, D1GO, D2GO).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -455,16 +489,16 @@ enum class DspDmaOperation : u32 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct DmaConfiguration  {
-    u32 read_address;
-    u32 write_address;
-    u32 transfer_byte_number;
+    u32                  read_address;
+    u32                  write_address;
+    u32                  transfer_byte_number;
     ReadAddressAddValue  read_add_value;
     WriteAddressAddValue write_add_value;
     DmaEnable            dma_enable;
     DmaStarting          dma_starting;
-    bool is_in_direct_mode;
-    bool is_read_address_updated;
-    bool is_write_address_updated;
+    bool                 is_in_direct_mode;
+    bool                 is_read_address_updated;
+    bool                 is_write_address_updated;
 
 };
 
