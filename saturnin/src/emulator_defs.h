@@ -60,11 +60,12 @@ class Register {
         ~Register()                            = default;
         //@}
     
-        inline auto extract(u8 first_bit_index, u8 last_bit_index) {
-            return (register_value >> first_bit_index) & ~( ~0 << (last_bit_index - first_bit_index + 1));
-        }
 
     protected:
+        inline auto extract(u8 first_bit_index, u8 last_bit_index) {
+            return (register_value >> first_bit_index) & ~(~0 << (last_bit_index - first_bit_index + 1));
+        }
+
         u32 register_value; ///< Internal register value.
 };
 

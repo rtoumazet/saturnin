@@ -78,6 +78,9 @@ bool Emulator_context::run() {
     //core::readDummy<32>(0x0);
 
     auto blah = this->memory()->read<uint8_t>(0);
+
+    auto add_value_register = DmaAddressAddValueRegister(0x00000006);
+    auto w = add_value_register.writeAddValue();
     
     // TESTING //
 

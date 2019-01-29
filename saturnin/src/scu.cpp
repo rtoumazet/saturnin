@@ -157,31 +157,20 @@ void Scu::initializeRegisters() {
 DmaConfiguration Scu::configureDmaTransfer(DmaLevel level) const {
     DmaConfiguration dc{};
     switch (level) {
-        case DmaLevel::level_0:
+        case DmaLevel::level_0:{
             dc.read_address         = rawRead<u32>(memory_->scu_, level_0_dma_read_address);
             dc.write_address        = rawRead<u32>(memory_->scu_, level_0_dma_write_address);
-            dc.transfer_byte_number = rawRead<u32>(memory_->scu_, level_0_dma_transfer_byte_number);
+            //dc.transfer_byte_number = rawRead<u32>(memory_->scu_, level_0_dma_transfer_byte_number);
+            dc.transfer_byte_number = DmaLevel0TransferByteNumberRegister(rawRead<u32>(memory_->scu_, level_0_dma_transfer_byte_number)).transferByteNumber();
+
             auto add_value_register = DmaAddressAddValueRegister(rawRead<u32>(memory_->scu_, level_0_dma_add_value_register));
-            switch (add_value_register.readAddValue()) {
-                case ReadAddressAddValue::add_0: break;
-                case ReadAddressAddValue::add_4: break;
+            dc.read_add_value       = add_value_register.readAddValue();
+            dc.write_add_value      = add_value_register.writeAddValue();
+            
+            auto dma_enable_register  = DmaEnableRegister(rawRead<u32>(memory_->scu_, level_0_dma_enable_register));
+            dc.dma_enable             = dma_enable_register.dmaEnable();
+            dc.dma_starting           = dma_enable_register.dmaStarting();
             }
-            //switch (add_value_register.writeAddValue()) {
-            //    case WriteAddressAddValue::add_0: break;
-            //    case WriteAddressAddValue::add_2: break;
-            //    case WriteAddressAddValue::add_4: break;
-            //    case WriteAddressAddValue::add_8: break;
-            //    case WriteAddressAddValue::add_16: break;
-            //    case WriteAddressAddValue::add_32: break;
-            //    case WriteAddressAddValue::add_64: break;
-            //    case WriteAddressAddValue::add_128: break;
-
-            //}
-            //
-            //dc.add_value            = level_0_dma_add_value_register;
-
-            //dc.enable               = level_0_dma_enable_register;
-            //dc.mode                 = level_0_dma_mode_register;
             break;
         case DmaLevel::level_1:
             //dc.read_address         = rawRead<u32>(memory_->scu_, level_1_dma_read_address);
