@@ -158,18 +158,28 @@ DmaConfiguration Scu::configureDmaTransfer(DmaLevel level) const {
     DmaConfiguration dc{};
     switch (level) {
         case DmaLevel::level_0:{
-            dc.read_address         = rawRead<u32>(memory_->scu_, level_0_dma_read_address);
-            dc.write_address        = rawRead<u32>(memory_->scu_, level_0_dma_write_address);
-            //dc.transfer_byte_number = rawRead<u32>(memory_->scu_, level_0_dma_transfer_byte_number);
-            dc.transfer_byte_number = DmaLevel0TransferByteNumberRegister(rawRead<u32>(memory_->scu_, level_0_dma_transfer_byte_number)).transferByteNumber();
-
-            auto add_value_register = DmaAddressAddValueRegister(rawRead<u32>(memory_->scu_, level_0_dma_add_value_register));
-            dc.read_add_value       = add_value_register.readAddValue();
-            dc.write_add_value      = add_value_register.writeAddValue();
+            auto rar        = DmaReadAddressRegister(rawRead<u32>(memory_->scu_, level_0_dma_read_address));
+            dc.read_address = rar.readAddress();
             
-            auto dma_enable_register  = DmaEnableRegister(rawRead<u32>(memory_->scu_, level_0_dma_enable_register));
-            dc.dma_enable             = dma_enable_register.dmaEnable();
-            dc.dma_starting           = dma_enable_register.dmaStarting();
+            auto war         = DmaWriteAddressRegister(rawRead<u32>(memory_->scu_, level_0_dma_write_address));
+            dc.write_address = war.writeAddress();
+
+            auto tbnr               = DmaLevel0TransferByteNumberRegister(rawRead<u32>(memory_->scu_, level_0_dma_transfer_byte_number));
+            dc.transfer_byte_number = tbnr.transferByteNumber();
+
+            auto avr           = DmaAddressAddValueRegister(rawRead<u32>(memory_->scu_, level_0_dma_add_value_register));
+            dc.read_add_value  = avr.readAddValue();
+            dc.write_add_value = avr.writeAddValue();
+            
+            auto der           = DmaEnableRegister(rawRead<u32>(memory_->scu_, level_0_dma_enable_register));
+            dc.dma_enable      = der.dmaEnable();
+            dc.dma_starting    = der.dmaStarting();
+
+            auto dmr                  = DmaModeRegister(rawRead<u32>(memory_->scu_, level_0_dma_mode_register));
+            dc.dma_mode               = dmr.dmaMode();
+            dc.read_address_update    = dmr.readAddressUpdate();
+            dc.write_address_update   = dmr.writeAddressUpdate();
+            dc.starting_factor_select = dmr.startingFactorSelect();
             }
             break;
         case DmaLevel::level_1:
