@@ -299,28 +299,6 @@ class DmaModeRegister : Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaStatusRegisterMask
-///
-/// \brief  DMA Status Register (DSTA) bit mask.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//enum class DmaStatusRegisterMask : u32 {
-//    dsp_bus_access        = 0b00000000010000000000000000000000,    ///< DSP bus access.
-//    b_bus_access          = 0b00000000001000000000000000000000,    ///< B bus access.
-//    a_bus_access          = 0b00000000000100000000000000000000,    ///< A bus access.
-//    level_1_dma_interrupt = 0b00000000000000100000000000000000,    ///< Level 1 DMA interrupt.
-//    level_0_dma_interrupt = 0b00000000000000010000000000000000,    ///< Level 0 DMA interrupt.
-//    level_2_dma_stand_by  = 0b00000000000000000010000000000000,    ///< Level 2 DMA in stand by.
-//    level_2_dma_operation = 0b00000000000000000001000000000000,    ///< Level 2 DMA in operation.
-//    level_1_dma_stand_by  = 0b00000000000000000000001000000000,    ///< Level 1 DMA in stand by.
-//    level_1_dma_operation = 0b00000000000000000000000100000000,    ///< Level 1 DMA in operation.
-//    level_0_dma_stand_by  = 0b00000000000000000000000000100000,    ///< Level 0 DMA in stand by.
-//    level_0_dma_operation = 0b00000000000000000000000000010000,    ///< Level 0 DMA in operation.
-//    dsp_dma_stand_by      = 0b00000000000000000000000000000010,    ///< DSP DMA in stand by.
-//    dsp_dma_operation     = 0b00000000000000000000000000000001     ///< DSP DMA in operation.
-//};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   DspBusAccess
 ///
 /// \brief  DACSD bit values.
@@ -398,6 +376,72 @@ enum class Level2DmaOperation : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Level1DmaStandBy
+///
+/// \brief  D1WT bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Level1DmaStandBy : u8 {
+    not_on_standby = 0b0, ///< Level 1 DMA isn't on standby.
+    on_standby     = 0b1  ///< Level 1 DMA is on standby.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Level1DmaOperation
+///
+/// \brief  D1MV bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Level1DmaOperation : u8 {
+    not_in_operation = 0b0, ///< Level 1 DMA isn't in operation.
+    in_operation     = 0b1  ///< Level 1 DMA is in operation.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Level0DmaStandBy
+///
+/// \brief  D0WT bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Level0DmaStandBy : u8 {
+    not_on_standby = 0b0, ///< Level 0 DMA isn't on standby.
+    on_standby     = 0b1  ///< Level 0 DMA is on standby.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Level0DmaOperation
+///
+/// \brief  D0MV bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Level0DmaOperation : u8 {
+    not_in_operation = 0b0, ///< Level 0 DMA isn't in operation.
+    in_operation     = 0b1  ///< Level 0 DMA is in operation.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DspDmaStandBy
+///
+/// \brief  DDWT bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DspDmaStandBy : u8 {
+    not_on_standby = 0b0, ///< DSP DMA isn't on standby.
+    on_standby     = 0b1  ///< DSP DMA is on standby.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DspDmaOperation
+///
+/// \brief  DDMV bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DspDmaOperation : u8 {
+    not_in_operation = 0b0, ///< DSP DMA isn't in operation.
+    in_operation     = 0b1  ///< DSP DMA is in operation.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  DmaEnableRegister
 ///
 /// \brief  DMA Status Register (DSTA).
@@ -409,84 +453,19 @@ enum class Level2DmaOperation : u8 {
 class DmaStatusRegister : Register {
     public:
         using Register::Register;
-        auto dspBusAccess() { return static_cast<DspBusAccess>(extract(22, 22)); }; ///< returns DACSD bit. 
-        auto bBusAccess() { return static_cast<BBusAccess>(extract(21, 21)); };     ///< returns DACSB bit. 
-        auto aBusAccess() { return static_cast<ABusAccess>(extract(20, 20)); };     ///< returns DACSA bit. 
+        auto dspBusAccess() { return static_cast<DspBusAccess>(extract(22, 22)); };                 ///< returns DACSD bit. 
+        auto bBusAccess() { return static_cast<BBusAccess>(extract(21, 21)); };                     ///< returns DACSB bit. 
+        auto aBusAccess() { return static_cast<ABusAccess>(extract(20, 20)); };                     ///< returns DACSA bit. 
         auto level1DmaInterrupt() { return static_cast<Level1DmaInterrupt>(extract(17, 17)); };     ///< returns D1BK bit. 
         auto level0DmaInterrupt() { return static_cast<Level0DmaInterrupt>(extract(16, 16)); };     ///< returns D0BK bit. 
-        auto level2DmaStandBy() { return static_cast<Level2DmaStandBy>(extract(13, 13)); };     ///< returns D2WT bit. 
+        auto level2DmaStandBy() { return static_cast<Level2DmaStandBy>(extract(13, 13)); };         ///< returns D2WT bit. 
         auto level2DmaOperation() { return static_cast<Level2DmaOperation>(extract(12, 12)); };     ///< returns D2MV bit. 
-    
-};
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   Level2DmaStandBy
-///
-/// \brief  D1WT bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class Level1DmaStandBy : u32 {
-    not_on_standby = 0b00000000000000000000000000000000, ///< Level 1 DMA isn't on standby.
-    on_standby     = 0b00000000000000000000001000000000  ///< Level 1 DMA is on standby.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   Level1DmaOperation
-///
-/// \brief  D1MV bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class Level1DmaOperation : u32 {
-    not_in_operation = 0b00000000000000000000000000000000, ///< Level 1 DMA isn't in operation.
-    in_operation     = 0b00000000000000000000000100000000  ///< Level 1 DMA is in operation.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   Level0DmaStandBy
-///
-/// \brief  D0WT bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class Level0DmaStandBy : u32 {
-    not_on_standby = 0b00000000000000000000000000000000, ///< Level 0 DMA isn't on standby.
-    on_standby     = 0b00000000000000000000000000100000  ///< Level 0 DMA is on standby.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   Level0DmaOperation
-///
-/// \brief  D0MV bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class Level0DmaOperation : u32 {
-    not_in_operation = 0b00000000000000000000000000000000, ///< Level 0 DMA isn't in operation.
-    in_operation     = 0b00000000000000000000000000010000  ///< Level 0 DMA is in operation.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DspDmaStandBy
-///
-/// \brief  DDWT bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class DspDmaStandBy : u32 {
-    not_on_standby = 0b00000000000000000000000000000000, ///< DSP DMA isn't on standby.
-    on_standby     = 0b00000000000000000000000000000010  ///< DSP DMA is on standby.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DspDmaOperation
-///
-/// \brief  DDMV bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class DspDmaOperation : u32 {
-    not_in_operation = 0b00000000000000000000000000000000, ///< DSP DMA isn't in operation.
-    in_operation     = 0b00000000000000000000000000000001  ///< DSP DMA is in operation.
+        auto level1DmaStandBy() { return static_cast<Level1DmaStandBy>(extract(9, 9)); };           ///< returns D1WT bit. 
+        auto level1DmaOperation() { return static_cast<Level1DmaOperation>(extract(8, 8)); };       ///< returns D1MV bit. 
+        auto level0DmaStandBy() { return static_cast<Level0DmaStandBy>(extract(5, 5)); };           ///< returns D0WT bit. 
+        auto level0DmaOperation() { return static_cast<Level0DmaOperation>(extract(4, 4)); };       ///< returns D0MV bit. 
+        auto dspDmaStandBy() { return static_cast<DspDmaStandBy>(extract(1, 1)); };                 ///< returns DDWT bit. 
+        auto dspDmaOperation() { return static_cast<DspDmaOperation>(extract(0, 0)); };             ///< returns DDMV bit. 
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
