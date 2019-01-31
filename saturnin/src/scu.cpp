@@ -182,21 +182,55 @@ DmaConfiguration Scu::configureDmaTransfer(DmaLevel level) const {
             dc.starting_factor_select = dmr.startingFactorSelect();
             }
             break;
-        case DmaLevel::level_1:
-            //dc.read_address         = rawRead<u32>(memory_->scu_, level_1_dma_read_address);
-            //dc.write_address        = rawRead<u32>(memory_->scu_, level_1_dma_write_address);
-            //dc.transfer_byte_number = rawRead<u32>(memory_->scu_, level_1_dma_transfer_byte_number);
-            //dc.add_value            = level_1_dma_add_value_register;
-            //dc.enable               = level_1_dma_enable_register;
-            //dc.mode                 = level_1_dma_mode_register;
+        case DmaLevel::level_1: {
+            auto rar        = DmaReadAddressRegister(rawRead<u32>(memory_->scu_, level_1_dma_read_address));
+            dc.read_address = rar.readAddress();
+
+            auto war         = DmaWriteAddressRegister(rawRead<u32>(memory_->scu_, level_1_dma_write_address));
+            dc.write_address = war.writeAddress();
+
+            auto tbnr               = DmaLevel1TransferByteNumberRegister(rawRead<u32>(memory_->scu_, level_1_dma_transfer_byte_number));
+            dc.transfer_byte_number = tbnr.transferByteNumber();
+
+            auto avr           = DmaAddressAddValueRegister(rawRead<u32>(memory_->scu_, level_1_dma_add_value_register));
+            dc.read_add_value  = avr.readAddValue();
+            dc.write_add_value = avr.writeAddValue();
+
+            auto der        = DmaEnableRegister(rawRead<u32>(memory_->scu_, level_1_dma_enable_register));
+            dc.dma_enable   = der.dmaEnable();
+            dc.dma_starting = der.dmaStarting();
+
+            auto dmr                  = DmaModeRegister(rawRead<u32>(memory_->scu_, level_1_dma_mode_register));
+            dc.dma_mode               = dmr.dmaMode();
+            dc.read_address_update    = dmr.readAddressUpdate();
+            dc.write_address_update   = dmr.writeAddressUpdate();
+            dc.starting_factor_select = dmr.startingFactorSelect();
+            }
             break;
-        case DmaLevel::level_2:
-            //dc.read_address         = rawRead<u32>(memory_->scu_, level_2_dma_read_address);
-            //dc.write_address        = rawRead<u32>(memory_->scu_, level_2_dma_write_address);
-            //dc.transfer_byte_number = rawRead<u32>(memory_->scu_, level_2_dma_transfer_byte_number);
-            //dc.add_value            = level_2_dma_add_value_register;
-            //dc.enable               = level_2_dma_enable_register;
-            //dc.mode                 = level_2_dma_mode_register;
+        case DmaLevel::level_2: {
+            auto rar        = DmaReadAddressRegister(rawRead<u32>(memory_->scu_, level_2_dma_read_address));
+            dc.read_address = rar.readAddress();
+
+            auto war         = DmaWriteAddressRegister(rawRead<u32>(memory_->scu_, level_2_dma_write_address));
+            dc.write_address = war.writeAddress();
+
+            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(memory_->scu_, level_2_dma_transfer_byte_number));
+            dc.transfer_byte_number = tbnr.transferByteNumber();
+
+            auto avr           = DmaAddressAddValueRegister(rawRead<u32>(memory_->scu_, level_2_dma_add_value_register));
+            dc.read_add_value  = avr.readAddValue();
+            dc.write_add_value = avr.writeAddValue();
+
+            auto der        = DmaEnableRegister(rawRead<u32>(memory_->scu_, level_2_dma_enable_register));
+            dc.dma_enable   = der.dmaEnable();
+            dc.dma_starting = der.dmaStarting();
+
+            auto dmr                  = DmaModeRegister(rawRead<u32>(memory_->scu_, level_2_dma_mode_register));
+            dc.dma_mode               = dmr.dmaMode();
+            dc.read_address_update    = dmr.readAddressUpdate();
+            dc.write_address_update   = dmr.writeAddressUpdate();
+            dc.starting_factor_select = dmr.startingFactorSelect();
+            }
             break;
         default:
             break;
