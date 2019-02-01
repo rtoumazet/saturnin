@@ -189,7 +189,7 @@ class DmaAddressAddValueRegister : Register {
     public:
         using Register::Register;
         auto readAddValue() { return static_cast<ReadAddressAddValue>(extract(8,8)); };   ///< Returns read address add value (D0RA, D1RA and D2RA).
-        auto writeAddValue() { return static_cast<WriteAddressAddValue>(extract(0,2)); }; ///< Returns write address add value mask (D0WA, D1WA and D2WA).
+        auto writeAddValue() { return static_cast<WriteAddressAddValue>(extract(0,2)); }; ///< Returns write address add value (D0WA, D1WA and D2WA).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -569,6 +569,18 @@ class Scu {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         DmaConfiguration configureDmaTransfer(const DmaLevel dl) const;
+
+        void initializeDmaTransferByteNumber(DmaConfiguration& dc, const u32 register_address) const;
+        
+        void initializeDmaMode(DmaConfiguration& dc, const u32 register_address) const ;
+        
+        void initializeDmaEnable(DmaConfiguration& dc, const u32 register_address) const ;
+
+        void initializeDmaAddressAdd(DmaConfiguration& dc, const u32 register_address) const;
+        
+        void initializeDmaWriteAddress(DmaConfiguration& dc, const u32 register_address) const;
+        
+        void initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const;
 
         Memory* memory_;    ///< Memory object
 };
