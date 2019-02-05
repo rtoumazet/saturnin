@@ -32,12 +32,12 @@ namespace saturnin {
 namespace core {
 
 bool Memory::loadRom(const std::string& zip_name,
-                    const std::string&  file_name,
-                    u8*	   destination,
-                    const u32 size,
-                    const Rom_load rom_load,
-                    const u8  times_mirrored,
-                    const Rom_type rom_type) {
+                     const std::string&  file_name,
+                     u8*	   destination,
+                     const u32 size,
+                     const Rom_load rom_load,
+                     const u8  times_mirrored,
+                     const Rom_type rom_type) {
 
     std::string zip = zip_name + ".zip";
     fs::path rom_path{ config_->readValue(Access_keys::config_roms_stv).c_str() };
@@ -141,7 +141,7 @@ void Memory::loadBios(const HardwareMode mode) {
         input_file.close();
 
         std::string str = buffer.str();
-            
+
         switch (mode) {
             case HardwareMode::saturn: {
                 std::move(str.begin(), str.end(), this->rom_.data());
@@ -167,20 +167,20 @@ bool Memory::loadStvGame(const std::string& config_filename) {
     core::Config stv(full_path.string());
     stv.readFile();
 
-    const std::string game_name       = stv.readValue(core::Access_keys::stv_game_name);
-    const std::string zip_name        = stv.readValue(core::Access_keys::stv_zip_name);
-    const std::string parent_set      = stv.readValue(core::Access_keys::stv_parent_set);
-    const std::string version         = stv.readValue(core::Access_keys::stv_version);
-    const std::string release_date    = stv.readValue(core::Access_keys::stv_release_date);
-    const std::string region          = stv.readValue(core::Access_keys::stv_region);
-    const libconfig::Setting& files   = stv.readValue(core::Access_keys::stv_files);
-    for (u8 i=0; i < files.getLength(); ++i) {
-        const std::string rom_name      = files[i][0];
-        const u32    load_address  = files[i][1];
-        const u32    load_size     = files[i][2];
-        const auto        rom_load      = Config::rom_load[files[i][3]];
-        const u32    times_mirrored= files[i][4];
-        const auto        rom_type      = Config::rom_type[files[i][5]];
+    const std::string game_name = stv.readValue(core::Access_keys::stv_game_name);
+    const std::string zip_name = stv.readValue(core::Access_keys::stv_zip_name);
+    const std::string parent_set = stv.readValue(core::Access_keys::stv_parent_set);
+    const std::string version = stv.readValue(core::Access_keys::stv_version);
+    const std::string release_date = stv.readValue(core::Access_keys::stv_release_date);
+    const std::string region = stv.readValue(core::Access_keys::stv_region);
+    const libconfig::Setting& files = stv.readValue(core::Access_keys::stv_files);
+    for (u8 i = 0; i < files.getLength(); ++i) {
+        const std::string rom_name = files[i][0];
+        const u32    load_address = files[i][1];
+        const u32    load_size = files[i][2];
+        const auto        rom_load = Config::rom_load[files[i][3]];
+        const u32    times_mirrored = files[i][4];
+        const auto        rom_type = Config::rom_type[files[i][5]];
         if (!this->loadRom(zip_name,
                            rom_name,
                            &this->cart_[load_address],
@@ -240,7 +240,7 @@ void Memory::initializeHandlers() {
     // Low workram access
     initializeHandlers<readWorkramLow, u8, u16, u32>(0x00200000, 0x002FFFFF);
     initializeHandlers<readWorkramLow, u8, u16, u32>(0x20200000, 0x202FFFFF);
-    
+
     initializeHandlers<writeWorkramLow, u8, u16, u32>(0x00200000, 0x002FFFFF);
     initializeHandlers<writeWorkramLow, u8, u16, u32>(0x20200000, 0x202FFFFF);
 
@@ -254,10 +254,10 @@ void Memory::initializeHandlers() {
     // Cart access
     initializeHandlers<readCart, u8, u16, u32>(0x02000000, 0x04FFFFFF);
     initializeHandlers<readCart, u8, u16, u32>(0x22000000, 0x24FFFFFF);
-    
+
     initializeHandlers<writeCart, u8, u16, u32>(0x02000000, 0x04FFFFFF);
     initializeHandlers<writeCart, u8, u16, u32>(0x22000000, 0x24FFFFFF);
-    
+
     // CdBlock access
     initializeHandlers<readCdBlock, u8, u16, u32>(0x05800000, 0x058FFFFF);
     initializeHandlers<readCdBlock, u8, u16, u32>(0x25800000, 0x258FFFFF);
@@ -268,7 +268,7 @@ void Memory::initializeHandlers() {
     // SCSP access
     initializeHandlers<readScsp, u8, u16, u32>(0x05A00000, 0x05BFFFFF);
     initializeHandlers<readScsp, u8, u16, u32>(0x25A00000, 0x25BFFFFF);
-    
+
     initializeHandlers<writeScsp, u8, u16, u32>(0x05A00000, 0x05BFFFFF);
     initializeHandlers<writeScsp, u8, u16, u32>(0x25A00000, 0x25BFFFFF);
 
@@ -282,7 +282,7 @@ void Memory::initializeHandlers() {
     // VDP1 framebuffer access
     initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(0x05C80000, 0x05CFFFFF);
     initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(0x25C80000, 0x25CFFFFF);
-    
+
     initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(0x05C80000, 0x05CFFFFF);
     initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(0x25C80000, 0x25CFFFFF);
 
@@ -296,7 +296,7 @@ void Memory::initializeHandlers() {
     // VDP2 VRAM access
     initializeHandlers<readVdp2Vram, u8, u16, u32>(0x05E00000, 0x05EFFFFF);
     initializeHandlers<readVdp2Vram, u8, u16, u32>(0x25E00000, 0x25EFFFFF);
-    
+
     initializeHandlers<writeVdp2Vram, u8, u16, u32>(0x05E00000, 0x05EFFFFF);
     initializeHandlers<writeVdp2Vram, u8, u16, u32>(0x25E00000, 0x25EFFFFF);
 
@@ -310,7 +310,7 @@ void Memory::initializeHandlers() {
     // VDP2 Registers access
     initializeHandlers<readVdp2Registers, u8, u16, u32>(0x05F80000, 0x05FBFFFF);
     initializeHandlers<readVdp2Registers, u8, u16, u32>(0x25F80000, 0x25FBFFFF);
-    
+
     initializeHandlers<writeVdp2Registers, u8, u16, u32>(0x05F80000, 0x05FBFFFF);
     initializeHandlers<writeVdp2Registers, u8, u16, u32>(0x25F80000, 0x25FBFFFF);
 
@@ -361,7 +361,7 @@ u32 Memory::readStvProtection(const u32 addr, u32 data) const {
                 stv_protection_offset += 4;
                 data = rawRead<u32>(this->cart_, stv_protection_offset);
                 break;
-            // Final Fight Revenge
+                // Final Fight Revenge
             case 0x10da0000:
                 stv_protection_offset += 4;
                 data = rawRead<u32>(this->cart_, stv_protection_offset);
@@ -370,7 +370,7 @@ u32 Memory::readStvProtection(const u32 addr, u32 data) const {
                 stv_protection_offset += 4;
                 data = rawRead<u32>(this->cart_, stv_protection_offset);
                 break;
-            // Steep Slope Sliders
+                // Steep Slope Sliders
             case 0x2c5b0000:
             case 0x47F10000:
             case 0xfcda0000:
@@ -381,11 +381,11 @@ u32 Memory::readStvProtection(const u32 addr, u32 data) const {
                 stv_protection_offset += 4;
                 data = rawRead<u32>(this->cart_, stv_protection_offset);
                 break;
-            // Radiant Silvergun
+                // Radiant Silvergun
             case 0x77770000:
                 data = 0;
                 break;
-            // Elan Doreé
+                // Elan Doreé
             case 0xff7f0000:
             case 0xf9ff0000:
             case 0xffbf0000:
@@ -401,7 +401,7 @@ u32 Memory::readStvProtection(const u32 addr, u32 data) const {
     return data;
 }
 
-void Memory::writeStvProtection(const u32 addr, u32 data){
+void Memory::writeStvProtection(const u32 addr, u32 data) {
     u32 relative_addr = calculateRelativeCartAddress(stv_protection_register_address);
     const u32 index = rawRead<u32>(this->cart_, relative_addr);
     switch (index) {
@@ -466,8 +466,8 @@ std::vector<std::string> listStvConfigurationFiles() {
     auto full_path = fs::current_path() / "stv";
     std::vector<std::string> files;
     for (auto& p : fs::directory_iterator(full_path)) {
-        if ((p.path().extension() == ".cfg") && (p.path().filename() != "dummy.cfg")){
-              files.push_back(p.path().filename().string());
+        if ((p.path().extension() == ".cfg") && (p.path().filename() != "dummy.cfg")) {
+            files.push_back(p.path().filename().string());
         }
     }
     return files;
