@@ -35,83 +35,83 @@ namespace core {
 
 /// \name Onboard i/o registers addresses
 //@{
-constexpr u32 smr           = 0xFFFFFE00;
-constexpr u32 brr           = 0xFFFFFE01;
-constexpr u32 scr           = 0xFFFFFE02;
-constexpr u32 tdr           = 0xFFFFFE03;
-constexpr u32 ssr           = 0xFFFFFE04;
-constexpr u32 rdr           = 0xFFFFFE05;
-constexpr u32 tier          = 0xFFFFFE10;
-constexpr u32 ftcsr         = 0xFFFFFE11;
-constexpr u32 frc           = 0xFFFFFE12;
-constexpr u32 frch          = 0xFFFFFE12;
-constexpr u32 frcl          = 0xFFFFFE13;
-constexpr u32 ocrab         = 0xFFFFFE14;
-constexpr u32 ocrbh         = 0xFFFFFE14;
-constexpr u32 ocrbl         = 0xFFFFFE15;
-constexpr u32 ocrah         = 0xFFFFFE14;
-constexpr u32 ocral         = 0xFFFFFE15;
-constexpr u32 tcr           = 0xFFFFFE16;
-constexpr u32 tocr          = 0xFFFFFE17;
-constexpr u32 ficr          = 0xFFFFFE18;
-constexpr u32 icrh          = 0xFFFFFE18;
-constexpr u32 icrl          = 0xFFFFFE19;
-constexpr u32 ipra          = 0xFFFFFEE2;
-constexpr u32 iprb          = 0xFFFFFE60;
-constexpr u32 vcra          = 0xFFFFFE62;
-constexpr u32 vcrb          = 0xFFFFFE64;
-constexpr u32 vcrc          = 0xFFFFFE66;
-constexpr u32 vcrd          = 0xFFFFFE68;
-constexpr u32 drcr0         = 0xFFFFFE71;
-constexpr u32 drcr1         = 0xFFFFFE72;
-constexpr u32 wtcsr         = 0xFFFFFE80;
-constexpr u32 wtcnt         = 0xFFFFFE81;
-constexpr u32 rstcsr        = 0xFFFFFE82;
-constexpr u32 sbycr         = 0xFFFFFE91;
-constexpr u32 ccr           = 0xFFFFFE92;
-constexpr u32 icr           = 0xFFFFFEE0;
-constexpr u32 vcrwdt        = 0xFFFFFEE4;
-constexpr u32 dvsr          = 0xFFFFFF00;
-constexpr u32 dvdnt         = 0xFFFFFF04;
-constexpr u32 dvcr          = 0xFFFFFF08;
-constexpr u32 vcrdiv        = 0xFFFFFF0C;
-constexpr u32 dvdnth        = 0xFFFFFF10;
-constexpr u32 dvdntl        = 0xFFFFFF14;
-constexpr u32 dvdnth_shadow = 0xFFFFFF18;
-constexpr u32 dvdntl_shadow = 0xFFFFFF1C;
-constexpr u32 barah         = 0xFFFFFF40;
-constexpr u32 baral         = 0xFFFFFF42;
-constexpr u32 bamrah        = 0xFFFFFF44;
-constexpr u32 bamral        = 0xFFFFFF46;
-constexpr u32 bbra          = 0xFFFFFF48;
-constexpr u32 barbh         = 0xFFFFFF60;
-constexpr u32 barbl         = 0xFFFFFF62;
-constexpr u32 bamrbh        = 0xFFFFFF64;
-constexpr u32 bamrbl        = 0xFFFFFF66;
-constexpr u32 bbrb          = 0xFFFFFF68;
-constexpr u32 bdrbh         = 0xFFFFFF70;
-constexpr u32 bdrbl         = 0xFFFFFF72;
-constexpr u32 bdmrbh        = 0xFFFFFF74;
-constexpr u32 bdmrbl        = 0xFFFFFF76;
-constexpr u32 brcr          = 0xFFFFFF78;
-constexpr u32 sar0          = 0xFFFFFF80;
-constexpr u32 dar0          = 0xFFFFFF84;
-constexpr u32 tcr0          = 0xFFFFFF88;
-constexpr u32 chcr0         = 0xFFFFFF8C;
-constexpr u32 sar1          = 0xFFFFFF90;
-constexpr u32 dar1          = 0xFFFFFF94;
-constexpr u32 tcr1          = 0xFFFFFF98;
-constexpr u32 chcr1         = 0xFFFFFF9C;
-constexpr u32 vcrdma0       = 0xFFFFFFA0;
-constexpr u32 vcrdma1       = 0xFFFFFFA8;
-constexpr u32 dmaor         = 0xFFFFFFB0;
-constexpr u32 bcr1          = 0xFFFFFFE0;
-constexpr u32 bcr2          = 0xFFFFFFE4;
-constexpr u32 wcr           = 0xFFFFFFE8;
-constexpr u32 mcr           = 0xFFFFFFEC;
-constexpr u32 rtcsr         = 0xFFFFFFF0;
-constexpr u32 rtcnt         = 0xFFFFFFF4;
-constexpr u32 rtcor         = 0xFFFFFFF8;
+constexpr u32 serial_mode_register                              = 0xFFFFFE00;
+constexpr u32 bit_rate_register                                 = 0xFFFFFE01;
+constexpr u32 serial_control_register                           = 0xFFFFFE02;
+constexpr u32 transmit_data_register                            = 0xFFFFFE03;
+constexpr u32 serial_status_register                            = 0xFFFFFE04;
+constexpr u32 receive_data_register                             = 0xFFFFFE05;
+constexpr u32 timer_interrupt_enable_register                   = 0xFFFFFE10;
+constexpr u32 free_running_timer_control_status_register        = 0xFFFFFE11;
+constexpr u32 free_running_counter                              = 0xFFFFFE12;
+constexpr u32 free_running_counter_h                            = 0xFFFFFE12;
+constexpr u32 free_running_counter_l                            = 0xFFFFFE13;
+constexpr u32 output_compare_register                           = 0xFFFFFE14;
+constexpr u32 output_compare_register_b_h                       = 0xFFFFFE14;
+constexpr u32 output_compare_register_b_l                       = 0xFFFFFE15;
+constexpr u32 output_compare_register_a_h                       = 0xFFFFFE14;
+constexpr u32 output_compare_register_a_l                       = 0xFFFFFE15;
+constexpr u32 timer_control_register                            = 0xFFFFFE16;
+constexpr u32 timer_output_compare_control_register             = 0xFFFFFE17;
+constexpr u32 ficr                                              = 0xFFFFFE18;
+constexpr u32 input_capture_register_h                          = 0xFFFFFE18;
+constexpr u32 input_capture_register_l                          = 0xFFFFFE19;
+constexpr u32 interrupt_priority_level_setting_register_a       = 0xFFFFFEE2;
+constexpr u32 interrupt_priority_level_setting_register_b       = 0xFFFFFE60;
+constexpr u32 vector_number_setting_register_a                  = 0xFFFFFE62;
+constexpr u32 vector_number_setting_register_b                  = 0xFFFFFE64;
+constexpr u32 vector_number_setting_register_c                  = 0xFFFFFE66;
+constexpr u32 vector_number_setting_register_d                  = 0xFFFFFE68;
+constexpr u32 dma_request_response_selection_control_register_0 = 0xFFFFFE71;
+constexpr u32 dma_request_response_selection_control_register_1 = 0xFFFFFE72;
+constexpr u32 watchdog_timer_control_status_register            = 0xFFFFFE80;
+constexpr u32 watchdog_timer_counter                            = 0xFFFFFE81;
+constexpr u32 reset_control_status_register                     = 0xFFFFFE82;
+constexpr u32 standby_control_register                          = 0xFFFFFE91;
+constexpr u32 cache_control_register                            = 0xFFFFFE92;
+constexpr u32 interrupt_control_register                        = 0xFFFFFEE0;
+constexpr u32 vector_number_setting_register_wdt                = 0xFFFFFEE4;
+constexpr u32 divisor_register                                  = 0xFFFFFF00;
+constexpr u32 dividend_register_l_32_bits                       = 0xFFFFFF04;
+constexpr u32 division_control_register                         = 0xFFFFFF08;
+constexpr u32 vector_number_setting_register_div                = 0xFFFFFF0C;
+constexpr u32 dividend_register_h                               = 0xFFFFFF10;
+constexpr u32 dividend_register_l                               = 0xFFFFFF14;
+constexpr u32 dividend_register_h_shadow                        = 0xFFFFFF18;
+constexpr u32 dividend_register_l_shadow                        = 0xFFFFFF1C;
+constexpr u32 break_address_register_ah                         = 0xFFFFFF40;
+constexpr u32 break_address_register_al                         = 0xFFFFFF42;
+constexpr u32 break_address_mask_register_ah                    = 0xFFFFFF44;
+constexpr u32 break_address_mask_register_al                    = 0xFFFFFF46;
+constexpr u32 break_bus_cycle_register_a                        = 0xFFFFFF48;
+constexpr u32 break_address_register_bh                         = 0xFFFFFF60;
+constexpr u32 break_address_register_bl                         = 0xFFFFFF62;
+constexpr u32 break_address_mask_register_bh                    = 0xFFFFFF64;
+constexpr u32 break_address_mask_register_bl                    = 0xFFFFFF66;
+constexpr u32 break_bus_cycle_register_b                        = 0xFFFFFF68;
+constexpr u32 break_data_register_bh                            = 0xFFFFFF70;
+constexpr u32 break_data_register_bl                            = 0xFFFFFF72;
+constexpr u32 break_data_mask_register_bh                       = 0xFFFFFF74;
+constexpr u32 break_data_mask_register_bl                       = 0xFFFFFF76;
+constexpr u32 break_control_register                            = 0xFFFFFF78;
+constexpr u32 dma_source_address_register_0                     = 0xFFFFFF80;
+constexpr u32 dma_destination_address_register_0                = 0xFFFFFF84;
+constexpr u32 dma_tranfer_count_register_0                      = 0xFFFFFF88;
+constexpr u32 dma_channel_control_register_0                    = 0xFFFFFF8C;
+constexpr u32 dma_source_address_register_1                     = 0xFFFFFF90;
+constexpr u32 dma_destination_address_register_1                = 0xFFFFFF94;
+constexpr u32 dma_tranfer_count_register_1                      = 0xFFFFFF98;
+constexpr u32 dma_channel_control_register_1                    = 0xFFFFFF9C;
+constexpr u32 dma_vector_number_register_0                      = 0xFFFFFFA0;
+constexpr u32 dma_vector_number_register_1                      = 0xFFFFFFA8;
+constexpr u32 dma_operation_register                            = 0xFFFFFFB0;
+constexpr u32 bus_control_register1                             = 0xFFFFFFE0;
+constexpr u32 bus_control_register2                             = 0xFFFFFFE4;
+constexpr u32 wait_state_control_register                       = 0xFFFFFFE8;
+constexpr u32 individual_memory_control_register                = 0xFFFFFFEC;
+constexpr u32 refresh_timer_control_status_register             = 0xFFFFFFF0;
+constexpr u32 refresh_timer_counter                             = 0xFFFFFFF4;
+constexpr u32 refresh_time_constant_register                    = 0xFFFFFFF8;
 //@}
 
 /////////////////////////////////////
@@ -119,26 +119,14 @@ constexpr u32 rtcor         = 0xFFFFFFF8;
 /////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InterruptControlRegisterMask
-///
-/// \brief  ICR (Interrupt Control Register) bit mask.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class InterruptControlRegisterMask : u16 {
-    nmi_input_level                 = 0b1000000000000000,   ///< NMI Input Level (NMIL)
-    nmi_edge_select                 = 0b0000000100000000,   ///< NMI Edge Select (NMIE)
-    interrupt_vector_mode_select    = 0b0000000000000001    ///< Interrupt Vcetor Mode Select (VECMD)
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   NmiInputLevel
 ///
 /// \brief  ICR - NMIL bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class NmiInputLevel : u16 {
-    low   = 0b0000000000000000,   ///< NMI input level is low
-    high  = 0b1000000000000000    ///< NMI input level is high
+enum class NmiInputLevel : u8 {
+    low = 0b0, ///< NMI input level is low
+    high = 0b1  ///< NMI input level is high
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,44 +135,72 @@ enum class NmiInputLevel : u16 {
 /// \brief  ICR - NMIE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class NmiEdgeDetection : u16 {
-    falling = 0b0000000000000000,   ///< Interrupt request detected on falling edge of NMI input (initial)
-    rising  = 0b0000000100000000    ///< Interrupt request detected on rising edge of NMI input
+enum class NmiEdgeDetection : u8 {
+    falling = 0b0, ///< Interrupt request detected on falling edge of NMI input (initial)
+    rising = 0b1  ///< Interrupt request detected on rising edge of NMI input
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   IcrVecmd
+/// \enum   VectorMode
 ///
 /// \brief  ICR - VECMD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VectorMode : u16 {
-    auto_vector     = 0b0000000000000000,   ///< Auto vector mode (initial)
-    external_vector = 0b0000000000000001    ///< External vector mode
+enum class VectorMode : u8 {
+    auto_vector = 0b0,   ///< Auto vector mode (initial)
+    external_vector = 0b1    ///< External vector mode
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  InterruptControlRegister
+///
+/// \brief  Interrupt Control Register (ICR).
+///         
+/// \author Runik
+/// \date   02/02/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class InterruptControlRegister : Register {
+    public:
+    using Register::Register;
+    auto nmiInputLevel() { return static_cast<NmiInputLevel>(extract(15, 15)); };      ///< returns NMIL bit. 
+    auto nmiEdgeDetection() { return static_cast<NmiEdgeDetection>(extract(8, 8)); };  ///< returns NMIE bit. 
+    auto vectorMode() { return static_cast<VectorMode>(extract(0, 0)); };              ///< returns VECMD bit. 
+};
+
 
 //////////////////////////////////
 // 7. Bus State Controler (BSC) //
 //////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   BusControlRegister1Mask
+/// \class  BusControlRegister1
 ///
-/// \brief  BCR1 (Bus Control Register 1) bit mask.
+/// \brief  Bus Control Register 1 (BCR1).
+///
+/// \author Runik
+/// \date   02/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BusControlRegister1Mask : u16 {
-    write_mask = 0b0001111111110111
+class BusControlRegister1 : Register {
+    public:
+    using Register::Register;
+    static auto writeMask() { return 0b0001111111110111; } ///< returns write mask;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   BusControlRegister2Mask
+/// \class  BusControlRegister1
 ///
-/// \brief  BCR2 (Bus Control Register 2) bit mask.
+/// \brief  Bus Control Register 2 (BCR2).
+///
+/// \author Runik
+/// \date   02/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BusControlRegister2Mask : u16 {
-    write_mask = 0b0000000011111100
+class BusControlRegister2 : Register {
+    public:
+    using Register::Register;
+    static auto writeMask() { return 0b0000000011111100; } ///< returns write mask;
 };
 
 //////////////
@@ -192,18 +208,16 @@ enum class BusControlRegister2Mask : u16 {
 //////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CacheControlRegisterMask
+/// \enum   WaySpecification
 ///
-/// \brief  CCR (Cache Control Register) bit mask.
+/// \brief  CCR - Wx bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CacheControlRegisterMask : u8 {
-    way_specification               = 0b11000000,   ///< Way Specification (wx)
-    cache_purge                     = 0b00010000,   ///< Cache Purge (CP)
-    two_way_mode                    = 0b00001000,   ///< Two Way Mode (Tw)
-    data_replacement_disable        = 0b00000100,   ///< Data Replacement Disable (OD)
-    instruction_replacement_disable = 0b00000010,   ///< Instruction Replacement Disable (ID)
-    cache_enable                    = 0b00000001    ///< Cache Enable (CE)
+enum class WaySpecification : u8 {
+    way_0 = 0b00,  ///< Way 0 (initial value).
+    way_1 = 0b01,  ///< Way 1
+    way_2 = 0b10,  ///< Way 2
+    way_3 = 0b11   ///< Way 3
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,8 +227,72 @@ enum class CacheControlRegisterMask : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CachePurge : u8 {
-    normal_operation    = 0b00000000,   ///< Normal operation
-    cache_purge         = 0b00010000    ///< Cache purge
+    normal_operation = 0b0,   ///< Normal operation.
+    cache_purge = 0b1    ///< Cache purge.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TwoWayMode
+///
+/// \brief  CCR - CP bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TwoWayMode : u8 {
+    four_way = 0b0,   ///< Four way mode (initial).
+    two_way = 0b1    ///< Two way mode.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DataReplacementDisable
+///
+/// \brief  CCR - OD bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DataReplacementDisable : u8 {
+    normal_operation = 0b0,   ///< Normal operation (initial).
+    data_not_replaced = 0b1    ///< Data not replaced even when wache miss occurs in data access.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   InstructionReplacementDisable
+///
+/// \brief  CCR - ID bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class InstructionReplacementDisable : u8 {
+    normal_operation = 0b0, ///< Normal operation (initial).
+    data_not_replaced = 0b1  ///< Data not replaced even when wache miss occurs in instruction fetch.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CacheEnable
+///
+/// \brief  CCR - CE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CacheEnable : u8 {
+    cache_disabled = 0b0, ///< Cache disabled (initial).
+    cache_enabled = 0b1  ///< Cache enabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CacheControlRegister
+///
+/// \brief  Cache Control Register (CCR).
+///
+/// \author Runik
+/// \date   02/02/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CacheControlRegister : Register {
+    public:
+    using Register::Register;
+    auto waySpecification() { return static_cast<WaySpecification>(extract(6, 7)); }                          ///< returns Wx bits.
+    auto cachePurge() { return static_cast<CachePurge>(extract(4, 4)); }                                       ///< returns CP bit.
+    auto twoWayMode() { return static_cast<TwoWayMode>(extract(3, 3)); }                                       ///< returns TW bit.
+    auto dataReplacementDisable() { return static_cast<DataReplacementDisable>(extract(2, 2)); }               ///< returns OD bit.
+    auto instructionReplacementDisable() { return static_cast<InstructionReplacementDisable>(extract(1, 1)); } ///< returns ID bit.
+    auto cacheEnable() { return static_cast<CacheEnable>(extract(0, 0)); }                                     ///< returns CE bit.
 };
 
 //////////////////////////////////////////////
@@ -222,25 +300,119 @@ enum class CachePurge : u8 {
 //////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaChannelControlRegister0Mask
+/// \enum   InterruptEnable
 ///
-/// \brief  CHCR0 (DMA Channel Control Register 0) bit mask.
+/// \brief  CHCR0 - DMx bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaChannelControlRegister0Mask : u32 {
-    destination_address_mode    = 0b00000000000000001100000000000000,   ///< Destination Address Mode (DMx)
-    source_address_mode         = 0b00000000000000000011000000000000,   ///< Source Address Mode (SMx)
-    transfer_size               = 0b00000000000000000000110000000000,   ///< Transfer Size (TSx)
-    auto_request_mode           = 0b00000000000000000000001000000000,   ///< Auto Request Mode (AR)
-    acknowledge_mode            = 0b00000000000000000000000100000000,   ///< Acknowledge / Transfer Mode (AM)
-    acknowledge_level           = 0b00000000000000000000000010000000,   ///< Acknowledge Level (AL)
-    dreq_select                 = 0b00000000000000000000000001000000,   ///< DREQ Select (DS)
-    dreq_level                  = 0b00000000000000000000000000100000,   ///< DREQ Level (DL)
-    transfer_bus_mode           = 0b00000000000000000000000000010000,   ///< Transfer Bus Mode (TB)
-    transfer_address_mode       = 0b00000000000000000000000000001000,   ///< Transfer Address Mode (TA)
-    interrupt_enable            = 0b00000000000000000000000000000100,   ///< Interrupt Enable (IE)
-    transfer_end_flag           = 0b00000000000000000000000000000010,   ///< Transfer End Flag (TE)
-    dma_enable                  = 0b00000000000000000000000000000001    ///< DMA Enable (DE)
+enum class DestinationAddressMode : u8 {
+    fixed = 0b00, ///< Fixed destination address (initial).
+    incremented = 0b01, ///< Destination address is incremented.
+    decremented = 0b10, ///< Destination address is decremented.
+    reserved = 0b11  ///< Reserved.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SourceAddressMode
+///
+/// \brief  CHCR0 - SMx bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SourceAddressMode : u8 {
+    fixed = 0b00, ///< Fixed source address (initial).
+    incremented = 0b01, ///< Source address is incremented.
+    decremented = 0b10, ///< Source address is decremented.
+    reserved = 0b11  ///< Reserved.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransferSize
+///
+/// \brief  CHCR0 - TSx bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransferSize : u8 {
+    byte_unit = 0b00, ///< Byte unit (initial).
+    word_unit = 0b01, ///< Word unit.
+    long_unit = 0b10, ///< Long unit.
+    sixteen_byte_unit = 0b11  ///< 16-byte unit (4 longword transfers).
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   AutoRequestMode
+///
+/// \brief  CHCR0 - AR bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class AutoRequestMode : u8 {
+    module_request = 0b0, ///< Module request mode (initial).
+    auto_request = 0b1, ///< Auto request mode.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   AcknowledgeMode
+///
+/// \brief  CHCR0 - AM bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class AcknowledgeMode : u8 {
+    output_read = 0b0, ///< DACK output in read cycle/transfer from memory to device (initial).
+    output_write = 0b1, ///< DACK output in write cycle/transfer from device to memory.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   AcknowledgeLevel
+///
+/// \brief  CHCR0 - AL bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class AcknowledgeLevel : u8 {
+    active_low = 0b0, ///< DACK signal is active low (initial).
+    active_high = 0b1, ///< DACK signal is active high.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DreqSelect
+///
+/// \brief  CHCR0 - DS bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DreqSelect : u8 {
+    by_level = 0b0, ///< Detected by level (initial).
+    by_edge = 0b1, ///< Detected by edge.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DreqLevel
+///
+/// \brief  CHCR0 - DL bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DreqLevel : u8 {
+    low_level_or_fall = 0b0, ///< DREQ detected by low level if 0, by fall if 1 (initial).
+    high_level_or_rise = 0b1, ///< DREQ detected by high level if 0, by rise if 1.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransferBusMode
+///
+/// \brief  CHCR0 - TB bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransferBusMode : u8 {
+    cycle_steal = 0b0, ///< Cycle steal mode (initial).
+    burst = 0b1, ///< Burst mode.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransferAddressMode
+///
+/// \brief  CHCR0 - TA bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransferAddressMode : u8 {
+    dual_address = 0b0, ///< Dual address mode (initial).
+    single_address = 0b1, ///< Single address mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,49 +421,120 @@ enum class DmaChannelControlRegister0Mask : u32 {
 /// \brief  CHCR0 - IE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class InterruptEnable : u32 {
-    interrupt_disabled  = 0b00000000000000000000000000000000,
-    interrupt_enabled   = 0b00000000000000000000000000000001
+enum class InterruptEnable : u8 {
+    disabled = 0b0,   ///< Interrupt disabled.
+    enabled = 0b1    ///< Interrupt enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaChannelControlRegister1Mask
+/// \enum   TransferEndFlag
 ///
-/// \brief  CHCR1 (DMA Channel Control Register 1) bit mask.
+/// \brief  CHCR0 - TE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaChannelControlRegister1Mask : u32 {
-    destination_address_mode    = 0b00000000000000001100000000000000,   ///< Destination Address Mode (DMx)
-    source_address_mode         = 0b00000000000000000011000000000000,   ///< Source Address Mode (SMx)
-    transfer_size               = 0b00000000000000000000110000000000,   ///< Transfer Size (TSx)
-    auto_request_mode           = 0b00000000000000000000001000000000,   ///< Auto Request Mode (AR)
-    acknowledge_mode            = 0b00000000000000000000000100000000,   ///< Acknowledge / Transfer Mode (AM)
-    acknowledge_level           = 0b00000000000000000000000010000000,   ///< Acknowledge Level (AL)
-    dreq_select                 = 0b00000000000000000000000001000000,   ///< DREQ Select (DS)
-    dreq_level                  = 0b00000000000000000000000000100000,   ///< DREQ Level (DL)
-    transfer_bus_mode           = 0b00000000000000000000000000010000,   ///< Transfer Bus Mode (TB)
-    transfer_address_mode       = 0b00000000000000000000000000001000,   ///< Transfer Address Mode (TA)
-    interrupt_enable            = 0b00000000000000000000000000000100,   ///< Interrupt Enable (IE)
-    transfer_end_flag           = 0b00000000000000000000000000000010,   ///< Transfer End Flag (TE)
-    dma_enable                  = 0b00000000000000000000000000000001    ///< DMA Enable (DE)
+enum class TransferEndFlag : u8 {
+    dma_not_ended_or_aborted = 0b0, ///< DMA has not ended or was aborted (initial).
+    dma_ended_normally = 0b1  ///< DMA has ended normally.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaOperationRegisterMask
+/// \enum   DmaEnable
 ///
-/// \brief  DMAOR (DMA Operation Register) bit mask.
+/// \brief  CHCR0 - DE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaOperationRegisterMask : u32 {
-    priority_mode       = 0b00000000000000000000000000001000,   ///< Priority Mode (PR)
-    address_error_flag  = 0b00000000000000000000000000000100,   ///< Address Error Flag (AE)
-    nmi_flag            = 0b00000000000000000000000000000010,   ///< NMI Flag (NMIF)
-    dma_master_enable   = 0b00000000000000000000000000000001,   ///< DMA Master Enable (DME)
+enum class Sh2DmaEnable : u8 {
+    dma_transfer_disabled = 0b0, ///< DMA transfer disabled (initial).
+    dma_transfer_enabled = 0b1  ///< DMA transfer enabled.
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DmaChannelControlRegister0
+///
+/// \brief  DMA Channel Control Register 0 (CHCR0).
+///
+/// \author Runik
+/// \date   02/02/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DmaChannelControlRegister : Register {
+    public:
+    using Register::Register;
+    auto destinationAddressMode() { return static_cast<DestinationAddressMode>(extract(14, 15)); } ///< returns DMx  bits.
+    auto sourceAddressMode() { return static_cast<SourceAddressMode>(extract(12, 13)); } ///< returns SMx  bits.
+    auto transferSize() { return static_cast<TransferSize>(extract(10, 11)); } ///< returns TSx bits.
+    auto autoRequestMode() { return static_cast<AutoRequestMode>(extract(9, 9)); } ///< returns AR bit.
+    auto acknowledgeMode() { return static_cast<AcknowledgeMode>(extract(8, 8)); } ///< returns AM bit.
+    auto acknowledgeLevel() { return static_cast<AcknowledgeLevel>(extract(7, 7)); } ///< returns AL bit.
+    auto dreqSelect() { return static_cast<DreqSelect>(extract(6, 6)); } ///< returns DS bit.
+    auto dreqLevel() { return static_cast<DreqLevel>(extract(5, 5)); } ///< returns DL bit.
+    auto transferBusMode() { return static_cast<TransferBusMode>(extract(4, 4)); } ///< returns TB bit.
+    auto transferAddressMode() { return static_cast<TransferAddressMode>(extract(3, 3)); } ///< returns TA bit.
+    auto interruptEnable() { return static_cast<InterruptEnable>(extract(2, 2)); } ///< returns IE bit.
+    auto transferEndFlag() { return static_cast<TransferEndFlag>(extract(1, 1)); } ///< returns TE bit.
+    auto dmaEnable() { return static_cast<Sh2DmaEnable>(extract(0, 0)); } ///< returns DE bit.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PriorityMode
+///
+/// \brief  DMAOR - PR bit.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PriorityMode : u8 {
+    fixed = 0b0,  ///< Fixed priority (initial)
+    round_robin = 0b1,  ///< Round robin
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   AddressErrorFlag
+///
+/// \brief  DMAOR - AE bit.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class AddressErrorFlag : u8 {
+    no_dmac_address_error = 0b0,  ///< No DMAC address error (initial)
+    dmac_address_error = 0b1,  ///< Address error by DMAC
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   NmiFlag
+///
+/// \brief  DMAOR - NMIF bit.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class NmiFlag : u8 {
+    no_nmif_interrupt = 0b0,  ///< No NMIF interrupt (initial)
+    nmif_interrupt_occured = 0b1,  ///< NMIF has occurred
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DmaMasterEnable
+///
+/// \brief  DMAOR - DME bit.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DmaMasterEnable : u8 {
-    disabled    = 0b000000000,  ///< DMA transfers disabled on all channels (initial)
-    enabled     = 0b000000001,  ///< DMA transfers enabled on all channels
+    disabled = 0b0,  ///< DMA transfers disabled on all channels (initial)
+    enabled = 0b1,  ///< DMA transfers enabled on all channels
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DmaOperationRegister
+///
+/// \brief  DMA Operation Register (DMAOR).
+///
+/// \author Runik
+/// \date   03/02/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DmaOperationRegister : Register {
+    public:
+    using Register::Register;
+    auto priorityMode() { return static_cast<PriorityMode>(extract(3, 3)); }         ///< returns PR bit.
+    auto addressErrorFlag() { return static_cast<AddressErrorFlag>(extract(2, 2)); } ///< returns AE bit.
+    auto nmiFlag() { return static_cast<NmiFlag>(extract(1, 1)); }                   ///< returns NMIF bit.
+    auto dmaMasterEnable() { return static_cast<DmaMasterEnable>(extract(0, 0)); }   ///< returns DME bit.
 };
 
 //////////////////////////////////////////
@@ -299,59 +542,64 @@ enum class DmaMasterEnable : u8 {
 //////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TimerOutputCompareControlRegisterMask
-///
-/// \brief  TOCR (Timer Output Compare Control Register) bit mask.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TimerOutputCompareControlRegisterMask : u8 {
-    output_compare_register_select  = 0b00010000,   ///< Output Compare Register Select (OCRS)
-    output_level_a                  = 0b00000010,   ///< Output Level A (OLVLA)
-    output_level_b                  = 0b00000001    ///< Output Level B (OLVLB)
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   OutputCompareRegisterSelect
 ///
-/// \brief  TOCR - OCRS bit values.
+/// \brief  TOCR - OCRS bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareRegisterSelect : u8 {
-    ocra = 0b00000000,  ///< Selects register OCRA
-    ocrb = 0b00010000   ///< Selects register OCRB
+    ocra = 0b0,  ///< Selects register OCRA
+    ocrb = 0b1   ///< Selects register OCRB
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   OutputLevelA
 ///
-/// \brief  TOCR - OLVLA bit values.
+/// \brief  TOCR - OLVLA bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputLevelA : u8 {
-    outputs_0 = 0b00000000,  ///< Outputs 0 on compare match A
-    outputs_1 = 0b00000010   ///< Outputs 1 on compare match A
+    outputs_0 = 0b0,  ///< Outputs 0 on compare match A
+    outputs_1 = 0b1   ///< Outputs 1 on compare match A
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   OutputLevelB
 ///
-/// \brief  TOCR - OLVLB bit values.
+/// \brief  TOCR - OLVLB bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputLevelB : u8 {
-    outputs_0 = 0b00000000,  ///< Outputs 0 on compare match B
-    outputs_1 = 0b00000001   ///< Outputs 1 on compare match B
+    outputs_0 = 0b0,  ///< Outputs 0 on compare match B
+    outputs_1 = 0b1   ///< Outputs 1 on compare match B
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TimerControlRegisterMask
+/// \class  TimerOutputCompareControlRegister
 ///
-/// \brief  TCR (Timer Control Register) bit mask.
+/// \brief  Timer Output Compare Control Register (TOCR).
+///
+/// \author Runik
+/// \date   03/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TimerControlRegisterMask : u8 {
-    input_edge_select   = 0b10000000,   ///< Input Edge Select (IEDG)
-    clock_select        = 0b00000011    ///< Clock Select (CKSX)
+class TimerOutputCompareControlRegister : Register {
+    public:
+    using Register::Register;
+    auto outputCompareRegisterSelect() { return static_cast<OutputCompareRegisterSelect>(extract(4, 4)); } ///< returns OCRS bit.
+    auto outputLevelA() { return static_cast<OutputLevelA>(extract(1, 1)); }                               ///< returns OLVLA bit.
+    auto outputLevelB() { return static_cast<OutputLevelB>(extract(0, 0)); }                               ///< returns OLVLB bit.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   InputEdgeSelect
+///
+/// \brief  TCR - IEDG bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class InputEdgeSelect : u8 {
+    falling = 0b0,  ///< Input captured on falling edge (initial)
+    rising = 0b1   ///< Input captured on rising edge
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -361,10 +609,17 @@ enum class TimerControlRegisterMask : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ClockSelect : u8 {
-    internal_divided_by_8   = 0b00, ///< Internal clock /8 (initial)
-    internal_divided_by_32  = 0b01, ///< Internal clock /32
+    internal_divided_by_8 = 0b00, ///< Internal clock /8 (initial)
+    internal_divided_by_32 = 0b01, ///< Internal clock /32
     internal_divided_by_128 = 0b10, ///< Internal clock /128
-    external                = 0b11  ///< External clock
+    external = 0b11  ///< External clock
+};
+
+class TimerControlRegister : Register {
+    public:
+    using Register::Register;
+    auto inputEdgeSelect() { return static_cast<InputEdgeSelect>(extract(7, 7)); }  ///< returns IEDG bit.
+    auto clockSelect() { return static_cast<ClockSelect>(extract(0, 1)); }          ///< returns CKSx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -378,332 +633,332 @@ enum class ClockSelect : u8 {
 
 class Sh2 {
     public:
-        //@{
-        // Constructors / Destructors
-        Sh2()                        = delete;
-        Sh2(bool is_master);
-        Sh2(const Sh2&)              = delete;
-        Sh2(Sh2&&)                   = delete;
-        Sh2& operator=(const Sh2&) & = delete;
-        Sh2& operator=(Sh2&&) &      = delete;
-        ~Sh2()                       = default;
-        //@}
+    //@{
+    // Constructors / Destructors
+    Sh2() = delete;
+    Sh2(bool is_master);
+    Sh2(const Sh2&) = delete;
+    Sh2(Sh2&&) = delete;
+    Sh2& operator=(const Sh2&) & = delete;
+    Sh2& operator=(Sh2&&) & = delete;
+    ~Sh2() = default;
+    //@}
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template<typename T> T Sh2::readRegisters(const u32 addr) const
-        ///
-        /// \brief  Read interface for the registers area.
-        ///
-        /// \author Runik
-        /// \date   03/01/2019
-        ///
-        /// \tparam T   type of data to read (u8, u16 or u32).
-        /// \param  addr    Address to read data from.
-        ///
-        /// \return Data read.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> T Sh2::readRegisters(const u32 addr) const
+    ///
+    /// \brief  Read interface for the registers area.
+    ///
+    /// \author Runik
+    /// \date   03/01/2019
+    ///
+    /// \tparam T   type of data to read (u8, u16 or u32).
+    /// \param  addr    Address to read data from.
+    ///
+    /// \return Data read.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template<typename T>
-        T readRegisters(const u32 addr) const {
-            return rawRead<T>(this->io_registers_, addr & 0x1FF);
-        }
+    template<typename T>
+    T readRegisters(const u32 addr) const {
+        return rawRead<T>(this->io_registers_, addr & 0x1FF);
+    }
 
-        // 32 bits specialization
-        template<>
-        u32 readRegisters<u32>(const u32 addr) const {
-            return readRegisters(addr);
-        }
+    // 32 bits specialization
+    template<>
+    u32 readRegisters<u32>(const u32 addr) const {
+        return readRegisters(addr);
+    }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template<typename T> void Sh2::writeRegisters(const u32 addr, const T data)
-        ///
-        /// \brief  Write interface for the registers area.
-        ///
-        /// \author Runik
-        /// \date   03/01/2019
-        ///
-        /// \tparam T       Type of data to write (u8, u16 or u32).
-        /// \param  addr    Address to write data to.
-        /// \param  data    Data to write.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> void Sh2::writeRegisters(const u32 addr, const T data)
+    ///
+    /// \brief  Write interface for the registers area.
+    ///
+    /// \author Runik
+    /// \date   03/01/2019
+    ///
+    /// \tparam T       Type of data to write (u8, u16 or u32).
+    /// \param  addr    Address to write data to.
+    /// \param  data    Data to write.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template<typename T>
-        void writeRegisters(const u32 addr, const T data) {
-            rawWrite<T>(io_registers_, addr & 0x1FF, data);
-        }
+    template<typename T>
+    void writeRegisters(const u32 addr, const T data) {
+        rawWrite<T>(io_registers_, addr & 0x1FF, data);
+    }
 
-        // 8 bits specialization
-        template<>
-        void writeRegisters<u8>(const u32 addr, const u8 data) {
-            writeRegisters(addr, data);
-        }
+    // 8 bits specialization
+    template<>
+    void writeRegisters<u8>(const u32 addr, const u8 data) {
+        writeRegisters(addr, data);
+    }
 
-        // 16 bits specialization
-        template<>
-        void writeRegisters<u16>(const u32 addr, const u16 data) {
-            writeRegisters(addr, data);
-        }
+    // 16 bits specialization
+    template<>
+    void writeRegisters<u16>(const u32 addr, const u16 data) {
+        writeRegisters(addr, data);
+    }
 
-        // 32 bits specialization
-        template<>
-        void writeRegisters<u32>(const u32 addr, const u32 data) {
-            writeRegisters(addr, data);
-        }
+    // 32 bits specialization
+    template<>
+    void writeRegisters<u32>(const u32 addr, const u32 data) {
+        writeRegisters(addr, data);
+    }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template<typename T> T Sh2::readCacheAddresses(const u32 addr) const
-        ///
-        /// \brief  Read interface for cache addresses.
-        ///
-        /// \author Runik
-        /// \date   03/01/2018
-        ///
-        /// \tparam T       Type of data to read (u8, u16 or u32).
-        /// \param  addr    Address to read data from.
-        ///
-        /// \return Data read.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> T Sh2::readCacheAddresses(const u32 addr) const
+    ///
+    /// \brief  Read interface for cache addresses.
+    ///
+    /// \author Runik
+    /// \date   03/01/2018
+    ///
+    /// \tparam T       Type of data to read (u8, u16 or u32).
+    /// \param  addr    Address to read data from.
+    ///
+    /// \return Data read.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template<typename T>
-        T readCacheAddresses(const u32 addr) const {
-            return rawRead<T>(cache_addresses_, addr & 0x3FF);
-        }
+    template<typename T>
+    T readCacheAddresses(const u32 addr) const {
+        return rawRead<T>(cache_addresses_, addr & 0x3FF);
+    }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template<typename T> void Sh2::writeCacheAddresses(const u32 addr, const T data)
-        ///
-        /// \brief  Write  interface for cache addresses.
-        ///
-        /// \author Runik
-        /// \date   03/01/2019
-        ///
-        /// \tparam T       Type of data to write (u8, u16 or u32).
-        /// \param  addr    Address to write data to.
-        /// \param  data    Data to write.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> void Sh2::writeCacheAddresses(const u32 addr, const T data)
+    ///
+    /// \brief  Write  interface for cache addresses.
+    ///
+    /// \author Runik
+    /// \date   03/01/2019
+    ///
+    /// \tparam T       Type of data to write (u8, u16 or u32).
+    /// \param  addr    Address to write data to.
+    /// \param  data    Data to write.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template<typename T>
-        void writeCacheAddresses(const u32 addr, const T data) {
-            rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
-        }
+    template<typename T>
+    void writeCacheAddresses(const u32 addr, const T data) {
+        rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
+    }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template<typename T> T Sh2::readCacheData(const u32 addr) const
-        ///
-        /// \brief  Read interface for cache data.
-        ///
-        /// \author Runik
-        /// \date   03/01/2018
-        ///
-        /// \tparam T       Type of data to read (u8, u16 or u32).
-        /// \param  addr    Address to read data from.
-        ///
-        /// \return Data read.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> T Sh2::readCacheData(const u32 addr) const
+    ///
+    /// \brief  Read interface for cache data.
+    ///
+    /// \author Runik
+    /// \date   03/01/2018
+    ///
+    /// \tparam T       Type of data to read (u8, u16 or u32).
+    /// \param  addr    Address to read data from.
+    ///
+    /// \return Data read.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template<typename T>
-        T readCacheData(const u32 addr) const {
-            return rawRead<T>(cache_data_, addr & 0xFFF);
-        }
+    template<typename T>
+    T readCacheData(const u32 addr) const {
+        return rawRead<T>(cache_data_, addr & 0xFFF);
+    }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template<typename T> void Sh2::writeCacheData(const u32 addr, const T data)
-        ///
-        /// \brief  Write interface for cache data.
-        ///
-        /// \author Runik
-        /// \date   03/01/2019
-        ///
-        /// \tparam T       Type of data to write (u8, u16 or u32).
-        /// \param  addr    Address to write data to.
-        /// \param  data    Data to write.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> void Sh2::writeCacheData(const u32 addr, const T data)
+    ///
+    /// \brief  Write interface for cache data.
+    ///
+    /// \author Runik
+    /// \date   03/01/2019
+    ///
+    /// \tparam T       Type of data to write (u8, u16 or u32).
+    /// \param  addr    Address to write data to.
+    /// \param  data    Data to write.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template<typename T>
-        void writeCacheData(const u32 addr, const T data) {
-            rawWrite<T>(cache_data_, addr & 0xFFF, data);
-        }
+    template<typename T>
+    void writeCacheData(const u32 addr, const T data) {
+        rawWrite<T>(cache_data_, addr & 0xFFF, data);
+    }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::sendInterrupt(const Interrupt& i);
-        ///
-        /// \brief  Sends an interrupt to the sh2.
-        ///
-        /// \author Runik
-        /// \date   19/01/2019
-        ///
-        /// \param  i   Interrupt sent.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::sendInterrupt(const Interrupt& i);
+    ///
+    /// \brief  Sends an interrupt to the sh2.
+    ///
+    /// \author Runik
+    /// \date   19/01/2019
+    ///
+    /// \param  i   Interrupt sent.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void sendInterrupt(const Interrupt& i);
+    void sendInterrupt(const Interrupt& i);
 
     private:
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn u32 Sh2::readRegisters(const u32 addr) const;
-        ///
-        /// \brief  Reads from the registers area.
-        ///
-        /// \author Runik
-        /// \date   03/01/2019
-        ///
-        /// \param  addr    Address to read data from.
-        ///
-        /// \return Data read.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn u32 Sh2::readRegisters(const u32 addr) const;
+    ///
+    /// \brief  Reads from the registers area.
+    ///
+    /// \author Runik
+    /// \date   03/01/2019
+    ///
+    /// \param  addr    Address to read data from.
+    ///
+    /// \return Data read.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        u32 readRegisters(const u32 addr) const;
+    u32 readRegisters(const u32 addr) const;
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::writeRegisters(u32 addr, u8 data);
-        ///
-        /// \brief  Writes to the registers area.
-        ///
-        /// \author Runik
-        /// \date   03/01/2019
-        ///
-        /// \param  addr    Address to write data to.
-        /// \param  data    Data to write.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::writeRegisters(u32 addr, u8 data);
+    ///
+    /// \brief  Writes to the registers area.
+    ///
+    /// \author Runik
+    /// \date   03/01/2019
+    ///
+    /// \param  addr    Address to write data to.
+    /// \param  data    Data to write.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void writeRegisters(u32 addr, u8 data);
+    void writeRegisters(u32 addr, u8 data);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::writeRegisters(u32 addr, u16 data);
-        ///
-        /// \brief  Writes to the registers area.
-        ///
-        /// \author Runik
-        /// \date   03/01/2019
-        ///
-        /// \param  addr    Address to write data to.
-        /// \param  data    Data to write.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::writeRegisters(u32 addr, u16 data);
+    ///
+    /// \brief  Writes to the registers area.
+    ///
+    /// \author Runik
+    /// \date   03/01/2019
+    ///
+    /// \param  addr    Address to write data to.
+    /// \param  data    Data to write.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void writeRegisters(u32 addr, u16 data);
+    void writeRegisters(u32 addr, u16 data);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::writeRegisters(u32 addr, u32 data);
-        ///
-        /// \brief  Writes to the registers area.
-        ///
-        /// \author Runik
-        /// \date   03/01/2019
-        ///
-        /// \param  addr    Address to write data to.
-        /// \param  data    Data to write.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::writeRegisters(u32 addr, u32 data);
+    ///
+    /// \brief  Writes to the registers area.
+    ///
+    /// \author Runik
+    /// \date   03/01/2019
+    ///
+    /// \param  addr    Address to write data to.
+    /// \param  data    Data to write.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void writeRegisters(u32 addr, u32 data);
+    void writeRegisters(u32 addr, u32 data);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::purgeCache();
-        ///
-        /// \brief  cache purge : all the cache address valid bits and LRU information are initialized to 0 (in 2 ways and 4 ways mode)
-        ///
-        /// \author Runik
-        /// \date   02/01/2018
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::purgeCache();
+    ///
+    /// \brief  cache purge : all the cache address valid bits and LRU information are initialized to 0 (in 2 ways and 4 ways mode)
+    ///
+    /// \author Runik
+    /// \date   02/01/2018
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void purgeCache();
+    void purgeCache();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::initializeOnChipRegisters();
-        ///
-        /// \brief  Initializes the values of onchip registers.
-        ///
-        /// \author Runik
-        /// \date   10/01/2019
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::initializeOnChipRegisters();
+    ///
+    /// \brief  Initializes the values of onchip registers.
+    ///
+    /// \author Runik
+    /// \date   10/01/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void initializeOnChipRegisters();
+    void initializeOnChipRegisters();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::start32bitsDivision();
-        ///
-        /// \brief  Starts the execution of the 32 bits by 32bits division operation.
-        ///
-        /// \author Runik
-        /// \date   10/01/2019
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::start32bitsDivision();
+    ///
+    /// \brief  Starts the execution of the 32 bits by 32bits division operation.
+    ///
+    /// \author Runik
+    /// \date   10/01/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void start32bitsDivision();
+    void start32bitsDivision();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::start64bitsDivision();
-        ///
-        /// \brief  Starts the execution of the 64bits by 32 bits division operation.
-        ///
-        /// \author Runik
-        /// \date   10/01/2019
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::start64bitsDivision();
+    ///
+    /// \brief  Starts the execution of the 64bits by 32 bits division operation.
+    ///
+    /// \author Runik
+    /// \date   10/01/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void start64bitsDivision();
+    void start64bitsDivision();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::executeDma();
-        ///
-        /// \brief  Executes the BMA operation.
-        ///
-        /// \author Runik
-        /// \date   13/01/2019
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::executeDma();
+    ///
+    /// \brief  Executes the BMA operation.
+    ///
+    /// \author Runik
+    /// \date   13/01/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void executeDma();
+    void executeDma();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::reset();
-        ///
-        /// \brief  Resets the SH2 and enters in the reset state.
-        ///
-        /// \author Runik
-        /// \date   18/01/2019
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::reset();
+    ///
+    /// \brief  Resets the SH2 and enters in the reset state.
+    ///
+    /// \author Runik
+    /// \date   18/01/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void reset();
+    void reset();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Sh2::runDivisionUnit(u8 cycles_to_run);
-        ///
-        /// \brief  Executes the division unit for the specified number of cycles.
-        ///
-        /// \author Runik
-        /// \date   18/01/2019
-        ///
-        /// \param  cycles_to_run   Number of cycles to run.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::runDivisionUnit(u8 cycles_to_run);
+    ///
+    /// \brief  Executes the division unit for the specified number of cycles.
+    ///
+    /// \author Runik
+    /// \date   18/01/2019
+    ///
+    /// \param  cycles_to_run   Number of cycles to run.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void runDivisionUnit(u8 cycles_to_run);
+    void runDivisionUnit(u8 cycles_to_run);
 
-        std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
-        std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
-        std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).
-        bool is_master_;                            ///< True if the SH2 is configured as master, false if as slave.
+    std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
+    std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
+    std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).
+    bool is_master_;                            ///< True if the SH2 is configured as master, false if as slave.
 
-        /// \name Interrupt management
-        //@{
-        std::list<Interrupt>    pending_interrupts_;///< List of pending interrupts.
-        bool                    is_interrupted_;    ///< True if this sh2 is interrupted.
-        //@}
+    /// \name Interrupt management
+    //@{
+    std::list<Interrupt>    pending_interrupts_;///< List of pending interrupts.
+    bool                    is_interrupted_;    ///< True if this sh2 is interrupted.
+    //@}
 
-        /// \name DIVU (Division unit)
-        //@{
-        u8      divu_remaining_cycles_; ///< Remaining cycles to end current division
-        //@}
-                                                    
-        /// \name FRT (Free Running Timer)
-        //@{
-        s32	    frt_elapsed_cycles_;///< Elapsed FRT cycles. 
-        u8	    frt_clock_;	        ///< FRT clock. 
-        u8	    frt_mask_;	        ///< FRT mask. 
-        u16     frt_ocra_;	        ///< Output Compare Register A. 
-        u16     frt_ocrb_;	        ///< Output Compare Register B.
-        bool    frt_icie_;	        ///< Input Capture Interrupt Enable. 
-        bool    frt_ociae_;	        ///< Output Compare Interrupt A Enable. 
-        bool    frt_ocibe_;	        ///< Output Compare Interrupt B Enable.
-        bool    frt_ovie_;	        ///< Timer Overflow Interrupt Enable. 
-        bool    frt_current_ocr_;	///< Current Output Compare Register. 
-        //@}
+    /// \name DIVU (Division unit)
+    //@{
+    u8      divu_remaining_cycles_; ///< Remaining cycles to end current division
+    //@}
+
+    /// \name FRT (Free Running Timer)
+    //@{
+    s32	    frt_elapsed_cycles_;///< Elapsed FRT cycles. 
+    u8	    frt_clock_;	        ///< FRT clock. 
+    u8	    frt_mask_;	        ///< FRT mask. 
+    u16     frt_ocra_;	        ///< Output Compare Register A. 
+    u16     frt_ocrb_;	        ///< Output Compare Register B.
+    bool    frt_icie_;	        ///< Input Capture Interrupt Enable. 
+    bool    frt_ociae_;	        ///< Output Compare Interrupt A Enable. 
+    bool    frt_ocibe_;	        ///< Output Compare Interrupt B Enable.
+    bool    frt_ovie_;	        ///< Timer Overflow Interrupt Enable. 
+    bool    frt_current_ocr_;	///< Current Output Compare Register. 
+    //@}
 };
 
 }
