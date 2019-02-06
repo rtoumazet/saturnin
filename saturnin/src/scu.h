@@ -26,64 +26,32 @@
 #pragma once
 
 #include "emulator_defs.h"
-#include "utilities.h" // toUnderlying
 
 namespace saturnin {
 namespace core {
 
-// Forward declaration
+// Forward declarations
 class Memory;
+struct DmaConfiguration;
 
-/// \name SCU registers addresses
-//@{
-constexpr u32 level_0_dma_read_address = 0x25FE0000;
-constexpr u32 level_0_dma_write_address = 0x25FE0004;
-constexpr u32 level_0_dma_transfer_byte_number = 0x25FE0008;
-constexpr u32 level_0_dma_add_value_register = 0x25FE000C;
-constexpr u32 level_0_dma_enable_register = 0x25FE0010;
-constexpr u32 level_0_dma_mode_register = 0x25FE0014;
-constexpr u32 level_1_dma_read_address = 0x25FE0020;
-constexpr u32 level_1_dma_write_address = 0x25FE0024;
-constexpr u32 level_1_dma_transfer_byte_number = 0x25FE0028;
-constexpr u32 level_1_dma_add_value_register = 0x25FE002C;
-constexpr u32 level_1_dma_enable_register = 0x25FE0030;
-constexpr u32 level_1_dma_mode_register = 0x25FE0034;
-constexpr u32 level_2_dma_read_address = 0x25FE0040;
-constexpr u32 level_2_dma_write_address = 0x25FE0044;
-constexpr u32 level_2_dma_transfer_byte_number = 0x25FE0048;
-constexpr u32 level_2_dma_add_value_register = 0x25FE004C;
-constexpr u32 level_2_dma_enable_register = 0x25FE0050;
-constexpr u32 level_2_dma_mode_register = 0x25FE0054;
-constexpr u32 dma_forced_stop = 0x25FE0060; // not used anymore, according to SCU Final Specifications (No 14)
-constexpr u32 dma_status_register = 0x25FE0070;
-constexpr u32 dsp_program_control_port = 0x25FE0080;
-constexpr u32 dsp_program_ram_dataport = 0x25FE0084;
-constexpr u32 dsp_data_ram_address_port = 0x25FE0088;
-constexpr u32 dsp_data_ram_data_port = 0x25FE008C;
-constexpr u32 timer_0_compare_register = 0x25FE0090;
-constexpr u32 timer_1_set_data_register = 0x25FE0094;
-constexpr u32 timer_1_mode_register = 0x25FE0098;
-constexpr u32 interrupt_mask_register = 0x25FE00A0;
-constexpr u32 interrupt_status_register = 0x25FE00A4;
-constexpr u32 a_bus_interrupt_acknowledge = 0x25FE00A8;
-constexpr u32 a_bus_set_register = 0x25FE00B0;
-constexpr u32 a_bus_refresh_register = 0x25FE00B8;
-constexpr u32 scu_sdram_select_register = 0x25FE00C4;
-constexpr u32 scu_version_register = 0x25FE00C8;
-//@}
-
+enum class DmaLevel {
+    level_unknown,  ///< Unknown level.
+    level_0,        ///< Level 0 DMA.
+    level_1,        ///< Level 1 DMA.
+    level_2         ///< Level 2 DMA.
+};
 
 class Scu {
     public:
     //@{
     // Constructors / Destructors
-    Scu() = delete;
+    Scu()                        = delete;
     Scu(Memory* m);
-    Scu(const Scu&) = delete;
-    Scu(Scu&&) = delete;
+    Scu(const Scu&)              = delete;
+    Scu(Scu&&)                   = delete;
     Scu& operator=(const Scu&) & = delete;
-    Scu& operator=(Scu&&) & = delete;
-    ~Scu() = default;
+    Scu& operator=(Scu&&) &      = delete;
+    ~Scu()                       = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

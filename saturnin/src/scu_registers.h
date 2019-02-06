@@ -30,6 +30,44 @@
 namespace saturnin {
 namespace core {
 
+/// \name SCU registers addresses
+//@{
+constexpr u32 level_0_dma_read_address         = 0x25FE0000;
+constexpr u32 level_0_dma_write_address        = 0x25FE0004;
+constexpr u32 level_0_dma_transfer_byte_number = 0x25FE0008;
+constexpr u32 level_0_dma_add_value_register   = 0x25FE000C;
+constexpr u32 level_0_dma_enable_register      = 0x25FE0010;
+constexpr u32 level_0_dma_mode_register        = 0x25FE0014;
+constexpr u32 level_1_dma_read_address         = 0x25FE0020;
+constexpr u32 level_1_dma_write_address        = 0x25FE0024;
+constexpr u32 level_1_dma_transfer_byte_number = 0x25FE0028;
+constexpr u32 level_1_dma_add_value_register   = 0x25FE002C;
+constexpr u32 level_1_dma_enable_register      = 0x25FE0030;
+constexpr u32 level_1_dma_mode_register        = 0x25FE0034;
+constexpr u32 level_2_dma_read_address         = 0x25FE0040;
+constexpr u32 level_2_dma_write_address        = 0x25FE0044;
+constexpr u32 level_2_dma_transfer_byte_number = 0x25FE0048;
+constexpr u32 level_2_dma_add_value_register   = 0x25FE004C;
+constexpr u32 level_2_dma_enable_register      = 0x25FE0050;
+constexpr u32 level_2_dma_mode_register        = 0x25FE0054;
+constexpr u32 dma_forced_stop                  = 0x25FE0060; // not used anymore, according to SCU Final Specifications (No 14)
+constexpr u32 dma_status_register              = 0x25FE0070;
+constexpr u32 dsp_program_control_port         = 0x25FE0080;
+constexpr u32 dsp_program_ram_dataport         = 0x25FE0084;
+constexpr u32 dsp_data_ram_address_port        = 0x25FE0088;
+constexpr u32 dsp_data_ram_data_port           = 0x25FE008C;
+constexpr u32 timer_0_compare_register         = 0x25FE0090;
+constexpr u32 timer_1_set_data_register        = 0x25FE0094;
+constexpr u32 timer_1_mode_register            = 0x25FE0098;
+constexpr u32 interrupt_mask_register          = 0x25FE00A0;
+constexpr u32 interrupt_status_register        = 0x25FE00A4;
+constexpr u32 a_bus_interrupt_acknowledge      = 0x25FE00A8;
+constexpr u32 a_bus_set_register               = 0x25FE00B0;
+constexpr u32 a_bus_refresh_register           = 0x25FE00B8;
+constexpr u32 scu_sdram_select_register        = 0x25FE00C4;
+constexpr u32 scu_version_register             = 0x25FE00C8;
+//@}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  DmaReadAddressRegister
 ///
@@ -146,7 +184,7 @@ enum class WriteAddressAddValue : u8 {
 class DmaAddressAddValueRegister : Register {
     public:
     using Register::Register;
-    auto readAddValue() { return static_cast<ReadAddressAddValue>(extract(8, 8)); };  ///< Returns read address add value (D0RA, D1RA and D2RA).
+    auto readAddValue() { return static_cast<ReadAddressAddValue>(extract(8)); };      ///< Returns read address add value (D0RA, D1RA and D2RA).
     auto writeAddValue() { return static_cast<WriteAddressAddValue>(extract(0, 2)); }; ///< Returns write address add value (D0WA, D1WA and D2WA).
 };
 
@@ -184,8 +222,8 @@ enum class DmaStarting : u8 {
 class DmaEnableRegister : Register {
     public:
     using Register::Register;
-    auto dmaEnable() { return static_cast<DmaEnable>(extract(8, 8)); };   ///< Returns DMA Enable Bit (D0EN, D1EN, D2EN).
-    auto dmaStarting() { return static_cast<DmaStarting>(extract(0, 0)); }; ///< Returns DMA Starting Bit (D0GO, D1GO, D2GO).
+    auto dmaEnable() { return static_cast<DmaEnable>(extract(8)); };   ///< Returns DMA Enable Bit (D0EN, D1EN, D2EN).
+    auto dmaStarting() { return static_cast<DmaStarting>(extract(0)); }; ///< Returns DMA Starting Bit (D0GO, D1GO, D2GO).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -250,9 +288,9 @@ enum class StartingFactorSelect : u8 {
 class DmaModeRegister : Register {
     public:
     using Register::Register;
-    auto dmaMode() { return static_cast<DmaMode>(extract(24, 24)); };         ///< returns DxMOD bit. 
-    auto readAddressUpdate() { return static_cast<ReadAddressUpdate>(extract(16, 16)); } ///< Returns DxRUP bit.
-    auto writeAddressUpdate() { return static_cast<WriteAddressUpdate>(extract(8, 8)); }  ///< Returns DxWUP bit.
+    auto dmaMode() { return static_cast<DmaMode>(extract(24)); };         ///< returns DxMOD bit. 
+    auto readAddressUpdate() { return static_cast<ReadAddressUpdate>(extract(16)); } ///< Returns DxRUP bit.
+    auto writeAddressUpdate() { return static_cast<WriteAddressUpdate>(extract(8)); }  ///< Returns DxWUP bit.
     auto startingFactorSelect() { return static_cast<StartingFactorSelect>(extract(0, 2)); }///< Returns DxFTy bits.
 };
 
@@ -411,19 +449,19 @@ enum class DspDmaOperation : u8 {
 class DmaStatusRegister : Register {
     public:
     using Register::Register;
-    auto dspBusAccess() { return static_cast<DspBusAccess>(extract(22, 22)); };      ///< returns DACSD bit. 
-    auto bBusAccess() { return static_cast<BBusAccess>(extract(21, 21)); };        ///< returns DACSB bit. 
-    auto aBusAccess() { return static_cast<ABusAccess>(extract(20, 20)); };        ///< returns DACSA bit. 
-    auto level1DmaInterrupt() { return static_cast<Level1DmaInterrupt>(extract(17, 17)); };///< returns D1BK bit. 
-    auto level0DmaInterrupt() { return static_cast<Level0DmaInterrupt>(extract(16, 16)); };///< returns D0BK bit. 
-    auto level2DmaStandBy() { return static_cast<Level2DmaStandBy>(extract(13, 13)); };  ///< returns D2WT bit. 
-    auto level2DmaOperation() { return static_cast<Level2DmaOperation>(extract(12, 12)); };///< returns D2MV bit. 
-    auto level1DmaStandBy() { return static_cast<Level1DmaStandBy>(extract(9, 9)); };    ///< returns D1WT bit. 
-    auto level1DmaOperation() { return static_cast<Level1DmaOperation>(extract(8, 8)); };  ///< returns D1MV bit. 
-    auto level0DmaStandBy() { return static_cast<Level0DmaStandBy>(extract(5, 5)); };    ///< returns D0WT bit. 
-    auto level0DmaOperation() { return static_cast<Level0DmaOperation>(extract(4, 4)); };  ///< returns D0MV bit. 
-    auto dspDmaStandBy() { return static_cast<DspDmaStandBy>(extract(1, 1)); };       ///< returns DDWT bit. 
-    auto dspDmaOperation() { return static_cast<DspDmaOperation>(extract(0, 0)); };     ///< returns DDMV bit. 
+    auto dspBusAccess() { return static_cast<DspBusAccess>(extract(22)); };      ///< returns DACSD bit. 
+    auto bBusAccess() { return static_cast<BBusAccess>(extract(21)); };        ///< returns DACSB bit. 
+    auto aBusAccess() { return static_cast<ABusAccess>(extract(20)); };        ///< returns DACSA bit. 
+    auto level1DmaInterrupt() { return static_cast<Level1DmaInterrupt>(extract(17)); };///< returns D1BK bit. 
+    auto level0DmaInterrupt() { return static_cast<Level0DmaInterrupt>(extract(16)); };///< returns D0BK bit. 
+    auto level2DmaStandBy() { return static_cast<Level2DmaStandBy>(extract(13)); };  ///< returns D2WT bit. 
+    auto level2DmaOperation() { return static_cast<Level2DmaOperation>(extract(12)); };///< returns D2MV bit. 
+    auto level1DmaStandBy() { return static_cast<Level1DmaStandBy>(extract(9)); };    ///< returns D1WT bit. 
+    auto level1DmaOperation() { return static_cast<Level1DmaOperation>(extract(8)); };  ///< returns D1MV bit. 
+    auto level0DmaStandBy() { return static_cast<Level0DmaStandBy>(extract(5)); };    ///< returns D0WT bit. 
+    auto level0DmaOperation() { return static_cast<Level0DmaOperation>(extract(4)); };  ///< returns D0MV bit. 
+    auto dspDmaStandBy() { return static_cast<DspDmaStandBy>(extract(1)); };       ///< returns DDWT bit. 
+    auto dspDmaOperation() { return static_cast<DspDmaOperation>(extract(0)); };     ///< returns DDMV bit. 
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -449,12 +487,7 @@ struct DmaConfiguration {
     StartingFactorSelect starting_factor_select;
 };
 
-enum class DmaLevel {
-    level_unknown,  ///< Unknown level.
-    level_0,        ///< Level 0 DMA.
-    level_1,        ///< Level 1 DMA.
-    level_2         ///< Level 2 DMA.
-};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   InterruptMask
@@ -479,21 +512,21 @@ enum class InterruptMask {
 class InterruptMaskRegister : Register {
     public:
     using Register::Register;
-    auto aBusInterruptMask() { return static_cast<InterruptMask>(extract(15, 15)); }; ///< returns A-Bus interrupt mask bit. 
-    auto spriteDrawEndInterruptMask() { return static_cast<InterruptMask>(extract(13, 13)); }; ///< returns Sprite Draw End interrupt mask bit. 
-    auto dmaIllegalInterruptMask() { return static_cast<InterruptMask>(extract(12, 12)); }; ///< returns DMA Illegal interrupt mask bit. 
-    auto level0DmaInterruptMask() { return static_cast<InterruptMask>(extract(11, 11)); }; ///< returns Level 0 DMA interrupt mask bit. 
-    auto level1DmaInterruptMask() { return static_cast<InterruptMask>(extract(10, 10)); }; ///< returns Level 1 DMA interrupt mask bit. 
-    auto level2DmaInterruptMask() { return static_cast<InterruptMask>(extract(9, 9)); };   ///< returns Level 2 DMA interrupt mask bit. 
-    auto padInterruptMask() { return static_cast<InterruptMask>(extract(8, 8)); };   ///< returns PAD interrupt mask bit. 
-    auto systemManagerInterruptMask() { return static_cast<InterruptMask>(extract(7, 7)); };   ///< returns System Manager interrupt mask bit. 
-    auto soundRequestInterruptMask() { return static_cast<InterruptMask>(extract(6, 6)); };   ///< returns Sound Request interrupt mask bit. 
-    auto dspEndInterruptMask() { return static_cast<InterruptMask>(extract(5, 5)); };   ///< returns DSP End interrupt mask bit. 
-    auto timer1InterruptMask() { return static_cast<InterruptMask>(extract(4, 4)); };   ///< returns Timer 1 interrupt mask bit. 
-    auto timer0InterruptMask() { return static_cast<InterruptMask>(extract(3, 3)); };   ///< returns Timer 0 interrupt mask bit. 
-    auto hBlankInInterruptMask() { return static_cast<InterruptMask>(extract(2, 2)); };   ///< returns H-Blank-In interrupt mask bit. 
-    auto vBlankOutInterruptMask() { return static_cast<InterruptMask>(extract(1, 1)); };   ///< returns V-Blank-Out interrupt mask bit. 
-    auto vBlankInInterruptMask() { return static_cast<InterruptMask>(extract(0, 0)); };   ///< returns V-Blank-In interrupt mask bit. 
+    auto aBusInterruptMask() { return static_cast<InterruptMask>(extract(15)); }; ///< returns A-Bus interrupt mask bit. 
+    auto spriteDrawEndInterruptMask() { return static_cast<InterruptMask>(extract(13)); }; ///< returns Sprite Draw End interrupt mask bit. 
+    auto dmaIllegalInterruptMask() { return static_cast<InterruptMask>(extract(12)); }; ///< returns DMA Illegal interrupt mask bit. 
+    auto level0DmaInterruptMask() { return static_cast<InterruptMask>(extract(11)); }; ///< returns Level 0 DMA interrupt mask bit. 
+    auto level1DmaInterruptMask() { return static_cast<InterruptMask>(extract(10)); }; ///< returns Level 1 DMA interrupt mask bit. 
+    auto level2DmaInterruptMask() { return static_cast<InterruptMask>(extract(9)); };   ///< returns Level 2 DMA interrupt mask bit. 
+    auto padInterruptMask() { return static_cast<InterruptMask>(extract(8)); };   ///< returns PAD interrupt mask bit. 
+    auto systemManagerInterruptMask() { return static_cast<InterruptMask>(extract(7)); };   ///< returns System Manager interrupt mask bit. 
+    auto soundRequestInterruptMask() { return static_cast<InterruptMask>(extract(6)); };   ///< returns Sound Request interrupt mask bit. 
+    auto dspEndInterruptMask() { return static_cast<InterruptMask>(extract(5)); };   ///< returns DSP End interrupt mask bit. 
+    auto timer1InterruptMask() { return static_cast<InterruptMask>(extract(4)); };   ///< returns Timer 1 interrupt mask bit. 
+    auto timer0InterruptMask() { return static_cast<InterruptMask>(extract(3)); };   ///< returns Timer 0 interrupt mask bit. 
+    auto hBlankInInterruptMask() { return static_cast<InterruptMask>(extract(2)); };   ///< returns H-Blank-In interrupt mask bit. 
+    auto vBlankOutInterruptMask() { return static_cast<InterruptMask>(extract(1)); };   ///< returns V-Blank-Out interrupt mask bit. 
+    auto vBlankInInterruptMask() { return static_cast<InterruptMask>(extract(0)); };   ///< returns V-Blank-In interrupt mask bit. 
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -519,21 +552,22 @@ enum class InterruptEnable {
 class InterruptStatusRegister : Register {
     public:
     using Register::Register;
-    auto aBusInterruptStatus() { return static_cast<InterruptEnable>(extract(15, 15)); }; ///< returns A-Bus interrupt status. 
-    auto spriteDrawEndInterruptStatus() { return static_cast<InterruptEnable>(extract(13, 13)); }; ///< returns Sprite Draw End interrupt status. 
-    auto dmaIllegalInterruptStatus() { return static_cast<InterruptEnable>(extract(12, 12)); }; ///< returns DMA Illegal interrupt status. 
-    auto level0DmaInterruptStatus() { return static_cast<InterruptEnable>(extract(11, 11)); }; ///< returns Level 0 DMA interrupt status. 
-    auto level1DmaInterruptStatus() { return static_cast<InterruptEnable>(extract(10, 10)); }; ///< returns Level 1 DMA interrupt status. 
-    auto level2DmaInterruptStatus() { return static_cast<InterruptEnable>(extract(9, 9)); };   ///< returns Level 2 DMA interrupt status. 
-    auto padInterruptStatus() { return static_cast<InterruptEnable>(extract(8, 8)); };   ///< returns PAD interrupt status. 
-    auto systemManagerInterruptStatus() { return static_cast<InterruptEnable>(extract(7, 7)); };   ///< returns System Manager interrupt status. 
-    auto soundRequestInterruptStatus() { return static_cast<InterruptEnable>(extract(6, 6)); };   ///< returns Sound Request interrupt status. 
-    auto dspEndInterruptStatus() { return static_cast<InterruptEnable>(extract(5, 5)); };   ///< returns DSP End interrupt status. 
-    auto timer1InterruptStatus() { return static_cast<InterruptEnable>(extract(4, 4)); };   ///< returns Timer 1 interrupt status. 
-    auto timer0InterruptStatus() { return static_cast<InterruptEnable>(extract(3, 3)); };   ///< returns Timer 0 interrupt status. 
-    auto hBlankInInterruptStatus() { return static_cast<InterruptEnable>(extract(2, 2)); };   ///< returns H-Blank-In interrupt status. 
-    auto vBlankOutInterruptStatus() { return static_cast<InterruptEnable>(extract(1, 1)); };   ///< returns V-Blank-Out interrupt status. 
-    auto vBlankInInterruptStatus() { return static_cast<InterruptEnable>(extract(0, 0)); };   ///< returns V-Blank-In interrupt status. 
+    auto aBusInterruptStatus() { return static_cast<InterruptEnable>(extract(15)); }; ///< returns A-Bus interrupt status. 
+    auto spriteDrawEndInterruptStatus() { return static_cast<InterruptEnable>(extract(13)); }; ///< returns Sprite Draw End interrupt status. 
+    auto dmaIllegalInterruptStatus() { return static_cast<InterruptEnable>(extract(12)); }; ///< returns DMA Illegal interrupt status. 
+    auto level0DmaInterruptStatus() { return static_cast<InterruptEnable>(extract(11)); }; ///< returns Level 0 DMA interrupt status. 
+    auto level1DmaInterruptStatus() { return static_cast<InterruptEnable>(extract(10)); }; ///< returns Level 1 DMA interrupt status. 
+    auto level2DmaInterruptStatus() { return static_cast<InterruptEnable>(extract(9)); };   ///< returns Level 2 DMA interrupt status. 
+    auto padInterruptStatus() { return static_cast<InterruptEnable>(extract(8)); };   ///< returns PAD interrupt status. 
+    auto systemManagerInterruptStatus() { return static_cast<InterruptEnable>(extract(7)); };   ///< returns System Manager interrupt status. 
+    auto soundRequestInterruptStatus() { return static_cast<InterruptEnable>(extract(6)); };   ///< returns Sound Request interrupt status. 
+    auto dspEndInterruptStatus() { return static_cast<InterruptEnable>(extract(5)); };   ///< returns DSP End interrupt status. 
+    auto timer1InterruptStatus() { return static_cast<InterruptEnable>(extract(4)); };   ///< returns Timer 1 interrupt status. 
+    auto timer0InterruptStatus() { return static_cast<InterruptEnable>(extract(3)); };   ///< returns Timer 0 interrupt status. 
+    auto hBlankInInterruptStatus() { return static_cast<InterruptEnable>(extract(2)); };   ///< returns H-Blank-In interrupt status. 
+    auto vBlankOutInterruptStatus() { return static_cast<InterruptEnable>(extract(1)); };   ///< returns V-Blank-Out interrupt status. 
+    auto vBlankInInterruptStatus() { return static_cast<InterruptEnable>(extract(0)); };   ///< returns V-Blank-In interrupt status. 
+    auto test() { return get(0,3); };
 };
 
 }

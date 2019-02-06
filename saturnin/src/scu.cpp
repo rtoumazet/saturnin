@@ -18,10 +18,8 @@
 // 
 
 #include "scu.h"
+#include "scu_registers.h"
 #include "memory.h"
-
-namespace util = saturnin::utilities;
-namespace mem = saturnin::core::memory;
 
 namespace saturnin {
 namespace core {
