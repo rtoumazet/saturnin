@@ -18,6 +18,7 @@
 // 
 
 #include "sh2.h"
+#include "sh2_registers.h"
 #include "interrupt_sources.h"
 #include "utilities.h" // toUnderlying
 
@@ -102,7 +103,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case cache_control_register:
             //Log::debug("sh2", fmt::format("CCR byte write: {}", data));
             Log::debug("sh2", "CCR byte write: {}", data);
-            if (data & util::toUnderlying(CachePurge::cache_purge)) {
+            
+            if (CacheControlRegister(data).cachePurge() == CachePurge::cache_purge) {
                 purgeCache();
                 data ^= util::toUnderlying(CachePurge::cache_purge); // cache purge bit is cleared after operation
             }

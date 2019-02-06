@@ -167,6 +167,9 @@
     <ClInclude Include="src\scu_registers.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
+    <ClInclude Include="src\sh2_registers.h">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\icons.png.inc">

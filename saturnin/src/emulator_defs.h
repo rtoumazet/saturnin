@@ -27,6 +27,7 @@
 
 #pragma once
 
+#include <bitset>
 #include <cstdint>
 
 namespace saturnin {
@@ -51,7 +52,7 @@ class Register {
     public:
         /// \name Constructors/Destructors.
         //@{
-        Register(const u32 v) : register_value(v) {};
+    Register(const u32 v) : register_value(v) { val = register_value; };
         Register()                             = delete;
         Register(const Register&)              = delete;
         Register(Register&&)                   = delete;
@@ -62,11 +63,35 @@ class Register {
     
 
     protected:
-        inline auto extract(u8 first_bit_index, u8 last_bit_index) {
+        inline auto extract(u8 first_bit_index, u8 last_bit_index = 0) {
+            if (last_bit_index == 0) last_bit_index = first_bit_index;
             return (register_value >> first_bit_index) & ~(~0 << (last_bit_index - first_bit_index + 1));
         }
 
+        inline auto get(u8 bit_index) { return val[bit_index]; }
+        
+        // drop bits outside the range [R, L) == [R, L - 1]
+        std::bitset<32> get(u8 first_bit_index, u8 last_bit_index) {
+            val >>= first_bit_index;            // drop R rightmost bits
+            val <<= (32 - last_bit_index - 1);  // drop L leftmost bits
+            val >>= (32 - last_bit_index - 1);      // shift back into place
+            return val;
+        }
+
+
+        //inline auto get(u8 first_bit_index, u8 last_bit_index) {
+        //    u32 mask = 1;
+        //    u32 result = 0;
+        //    for (size_t i = first_bit_index; i < last_bit_index; ++i) {
+        //        if (val.test(i))
+        //            result |= mask;
+        //        mask <<= 1;
+        //    }
+        //    return result;
+        //}
+
         u32 register_value; ///< Internal register value.
+        std::bitset<32> val;
 };
 
 };

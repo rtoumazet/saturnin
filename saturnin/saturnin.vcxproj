@@ -209,6 +209,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="src\scu.h" />
     <ClInclude Include="src\scu_registers.h" />
     <ClInclude Include="src\sh2.h" />
+    <ClInclude Include="src\sh2_registers.h" />
     <ClInclude Include="src\stv_definitions.h" />
     <ClInclude Include="src\utilities.h" />
     <ClInclude Include="src\video\gui.h" />

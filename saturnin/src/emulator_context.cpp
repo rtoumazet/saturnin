@@ -20,6 +20,7 @@
 #include "emulator_context.h"
 #include "cdrom/scsi.h"
 #include "video/opengl.h"
+#include "scu_registers.h"
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
@@ -79,8 +80,8 @@ bool Emulator_context::run() {
 
     auto blah = this->memory()->read<uint8_t>(0);
 
-    auto add_value_register = DmaAddressAddValueRegister(0x00000006);
-    auto w = add_value_register.writeAddValue();
+    auto isr = InterruptStatusRegister(0x000000AB);
+    auto w = isr.test();
     
     // TESTING //
 
