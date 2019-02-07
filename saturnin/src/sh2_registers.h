@@ -157,12 +157,12 @@ enum class VectorMode : u8 {
 /// \date   02/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class InterruptControlRegister : Register {
+class InterruptControlRegister : public Register       {
     public:
-    using Register::Register;
-    auto nmiInputLevel() { return static_cast<NmiInputLevel>(extract(15)); };      ///< returns NMIL bit. 
-    auto nmiEdgeDetection() { return static_cast<NmiEdgeDetection>(extract(8)); };  ///< returns NMIE bit. 
-    auto vectorMode() { return static_cast<VectorMode>(extract(0)); };              ///< returns VECMD bit. 
+        using Register::Register;
+        inline static const BitRange<NmiInputLevel>    nmiInputLevel{ 15 };   ///< Defines NMIL  bit.
+        inline static const BitRange<NmiEdgeDetection> nmiEdgeDetection{ 8 }; ///< Defines NMIE  bit.
+        inline static const BitRange<VectorMode>       vectorMode{ 0 };       ///< Defines VECMD  bit.
 };
 
 
@@ -179,10 +179,10 @@ class InterruptControlRegister : Register {
 /// \date   02/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class BusControlRegister1 : Register {
+class BusControlRegister1 : public Register {
     public:
-    using Register::Register;
-    static auto writeMask() { return 0b0001111111110111; } ///< returns write mask;
+        using Register::Register;
+        static auto writeMask() { return 0b0001111111110111; } ///< returns write mask;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,10 +194,10 @@ class BusControlRegister1 : Register {
 /// \date   02/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class BusControlRegister2 : Register {
+class BusControlRegister2 : public Register {
     public:
-    using Register::Register;
-    static auto writeMask() { return 0b0000000011111100; } ///< returns write mask;
+        using Register::Register;
+        static auto writeMask() { return 0b0000000011111100; } ///< returns write mask;
 };
 
 //////////////
@@ -225,7 +225,7 @@ enum class WaySpecification : u8 {
 
 enum class CachePurge : u8 {
     normal_operation = 0b0,   ///< Normal operation.
-    cache_purge = 0b1    ///< Cache purge.
+    cache_purge      = 0b1    ///< Cache purge.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,7 +236,7 @@ enum class CachePurge : u8 {
 
 enum class TwoWayMode : u8 {
     four_way = 0b0,   ///< Four way mode (initial).
-    two_way = 0b1    ///< Two way mode.
+    two_way  = 0b1    ///< Two way mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,7 +246,7 @@ enum class TwoWayMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DataReplacementDisable : u8 {
-    normal_operation = 0b0,   ///< Normal operation (initial).
+    normal_operation  = 0b0,   ///< Normal operation (initial).
     data_not_replaced = 0b1    ///< Data not replaced even when wache miss occurs in data access.
 };
 
@@ -257,7 +257,7 @@ enum class DataReplacementDisable : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class InstructionReplacementDisable : u8 {
-    normal_operation = 0b0, ///< Normal operation (initial).
+    normal_operation  = 0b0, ///< Normal operation (initial).
     data_not_replaced = 0b1  ///< Data not replaced even when wache miss occurs in instruction fetch.
 };
 
@@ -269,7 +269,7 @@ enum class InstructionReplacementDisable : u8 {
 
 enum class CacheEnable : u8 {
     cache_disabled = 0b0, ///< Cache disabled (initial).
-    cache_enabled = 0b1  ///< Cache enabled.
+    cache_enabled  = 0b1  ///< Cache enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -281,15 +281,15 @@ enum class CacheEnable : u8 {
 /// \date   02/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CacheControlRegister : Register {
+class CacheControlRegister : public Register {
     public:
-    using Register::Register;
-    auto waySpecification() { return static_cast<WaySpecification>(extract(6, 7)); }                          ///< returns Wx bits.
-    auto cachePurge() { return static_cast<CachePurge>(extract(4)); }                                       ///< returns CP bit.
-    auto twoWayMode() { return static_cast<TwoWayMode>(extract(3)); }                                       ///< returns TW bit.
-    auto dataReplacementDisable() { return static_cast<DataReplacementDisable>(extract(2)); }               ///< returns OD bit.
-    auto instructionReplacementDisable() { return static_cast<InstructionReplacementDisable>(extract(1)); } ///< returns ID bit.
-    auto cacheEnable() { return static_cast<CacheEnable>(extract(0)); }                                     ///< returns CE bit.
+        using Register::Register;
+        inline static const BitRange<WaySpecification>              waySpecification             { 6, 7 };     ///< Defines Wx bits.
+        inline static const BitRange<CachePurge>                    cachePurge                   { 4 };        ///< Defines CP bit.
+        inline static const BitRange<TwoWayMode>                    twoWayMode                   { 3 };        ///< Defines TW bit.
+        inline static const BitRange<DataReplacementDisable>        dataReplacementDisable       { 2 };        ///< Defines OD bit.
+        inline static const BitRange<InstructionReplacementDisable> instructionReplacementDisable{ 1 };        ///< Defines ID bit.
+        inline static const BitRange<CacheEnable>                   cacheEnable                  { 1 };        ///< Defines CE bit.
 };
 
 //////////////////////////////////////////////
@@ -303,10 +303,10 @@ class CacheControlRegister : Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DestinationAddressMode : u8 {
-    fixed = 0b00, ///< Fixed destination address (initial).
+    fixed       = 0b00, ///< Fixed destination address (initial).
     incremented = 0b01, ///< Destination address is incremented.
     decremented = 0b10, ///< Destination address is decremented.
-    reserved = 0b11  ///< Reserved.
+    reserved    = 0b11  ///< Reserved.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -316,10 +316,10 @@ enum class DestinationAddressMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class SourceAddressMode : u8 {
-    fixed = 0b00, ///< Fixed source address (initial).
+    fixed       = 0b00, ///< Fixed source address (initial).
     incremented = 0b01, ///< Source address is incremented.
     decremented = 0b10, ///< Source address is decremented.
-    reserved = 0b11  ///< Reserved.
+    reserved    = 0b11  ///< Reserved.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -329,9 +329,9 @@ enum class SourceAddressMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransferSize : u8 {
-    byte_unit = 0b00, ///< Byte unit (initial).
-    word_unit = 0b01, ///< Word unit.
-    long_unit = 0b10, ///< Long unit.
+    byte_unit         = 0b00, ///< Byte unit (initial).
+    word_unit         = 0b01, ///< Word unit.
+    long_unit         = 0b10, ///< Long unit.
     sixteen_byte_unit = 0b11  ///< 16-byte unit (4 longword transfers).
 };
 
@@ -343,7 +343,7 @@ enum class TransferSize : u8 {
 
 enum class AutoRequestMode : u8 {
     module_request = 0b0, ///< Module request mode (initial).
-    auto_request = 0b1, ///< Auto request mode.
+    auto_request   = 0b1, ///< Auto request mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -353,7 +353,7 @@ enum class AutoRequestMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class AcknowledgeMode : u8 {
-    output_read = 0b0, ///< DACK output in read cycle/transfer from memory to device (initial).
+    output_read  = 0b0, ///< DACK output in read cycle/transfer from memory to device (initial).
     output_write = 0b1, ///< DACK output in write cycle/transfer from device to memory.
 };
 
@@ -364,7 +364,7 @@ enum class AcknowledgeMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class AcknowledgeLevel : u8 {
-    active_low = 0b0, ///< DACK signal is active low (initial).
+    active_low  = 0b0, ///< DACK signal is active low (initial).
     active_high = 0b1, ///< DACK signal is active high.
 };
 
@@ -376,7 +376,7 @@ enum class AcknowledgeLevel : u8 {
 
 enum class DreqSelect : u8 {
     by_level = 0b0, ///< Detected by level (initial).
-    by_edge = 0b1, ///< Detected by edge.
+    by_edge  = 0b1, ///< Detected by edge.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -386,7 +386,7 @@ enum class DreqSelect : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DreqLevel : u8 {
-    low_level_or_fall = 0b0, ///< DREQ detected by low level if 0, by fall if 1 (initial).
+    low_level_or_fall  = 0b0, ///< DREQ detected by low level if 0, by fall if 1 (initial).
     high_level_or_rise = 0b1, ///< DREQ detected by high level if 0, by rise if 1.
 };
 
@@ -398,7 +398,7 @@ enum class DreqLevel : u8 {
 
 enum class TransferBusMode : u8 {
     cycle_steal = 0b0, ///< Cycle steal mode (initial).
-    burst = 0b1, ///< Burst mode.
+    burst       = 0b1, ///< Burst mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -408,7 +408,7 @@ enum class TransferBusMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransferAddressMode : u8 {
-    dual_address = 0b0, ///< Dual address mode (initial).
+    dual_address   = 0b0, ///< Dual address mode (initial).
     single_address = 0b1, ///< Single address mode.
 };
 
@@ -420,7 +420,7 @@ enum class TransferAddressMode : u8 {
 
 enum class InterruptEnable : u8 {
     disabled = 0b0,   ///< Interrupt disabled.
-    enabled = 0b1    ///< Interrupt enabled.
+    enabled  = 0b1    ///< Interrupt enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +431,7 @@ enum class InterruptEnable : u8 {
 
 enum class TransferEndFlag : u8 {
     dma_not_ended_or_aborted = 0b0, ///< DMA has not ended or was aborted (initial).
-    dma_ended_normally = 0b1  ///< DMA has ended normally.
+    dma_ended_normally       = 0b1  ///< DMA has ended normally.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -442,7 +442,7 @@ enum class TransferEndFlag : u8 {
 
 enum class Sh2DmaEnable : u8 {
     dma_transfer_disabled = 0b0, ///< DMA transfer disabled (initial).
-    dma_transfer_enabled = 0b1  ///< DMA transfer enabled.
+    dma_transfer_enabled  = 0b1  ///< DMA transfer enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -454,22 +454,22 @@ enum class Sh2DmaEnable : u8 {
 /// \date   02/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaChannelControlRegister : Register {
+class DmaChannelControlRegister : public Register            {
     public:
-    using Register::Register;
-    auto destinationAddressMode() { return static_cast<DestinationAddressMode>(extract(14, 15)); } ///< returns DMx  bits.
-    auto sourceAddressMode() { return static_cast<SourceAddressMode>(extract(12, 13)); } ///< returns SMx  bits.
-    auto transferSize() { return static_cast<TransferSize>(extract(10, 11)); } ///< returns TSx bits.
-    auto autoRequestMode() { return static_cast<AutoRequestMode>(extract(9)); } ///< returns AR bit.
-    auto acknowledgeMode() { return static_cast<AcknowledgeMode>(extract(8)); } ///< returns AM bit.
-    auto acknowledgeLevel() { return static_cast<AcknowledgeLevel>(extract(7)); } ///< returns AL bit.
-    auto dreqSelect() { return static_cast<DreqSelect>(extract(6)); } ///< returns DS bit.
-    auto dreqLevel() { return static_cast<DreqLevel>(extract(5)); } ///< returns DL bit.
-    auto transferBusMode() { return static_cast<TransferBusMode>(extract(4)); } ///< returns TB bit.
-    auto transferAddressMode() { return static_cast<TransferAddressMode>(extract(3)); } ///< returns TA bit.
-    auto interruptEnable() { return static_cast<InterruptEnable>(extract(2)); } ///< returns IE bit.
-    auto transferEndFlag() { return static_cast<TransferEndFlag>(extract(1)); } ///< returns TE bit.
-    auto dmaEnable() { return static_cast<Sh2DmaEnable>(extract(0)); } ///< returns DE bit.
+        using Register::Register;
+        inline static const BitRange<DestinationAddressMode> destinationAddressMode{ 14, 15 };   ///< Defines DMx  bits.
+        inline static const BitRange<SourceAddressMode>      sourceAddressMode     { 12, 13 };   ///< Defines SMx  bits.
+        inline static const BitRange<TransferSize>           transferSize          { 10, 11 };   ///< Defines TSx  bits.
+        inline static const BitRange<AutoRequestMode>        autoRequestMode       { 9 };        ///< Defines AR  bit.
+        inline static const BitRange<AcknowledgeMode>        acknowledgeMode       { 8 };        ///< Defines AM  bit.
+        inline static const BitRange<AcknowledgeLevel>       acknowledgeLevel      { 7 };        ///< Defines AL  bit.
+        inline static const BitRange<DreqSelect>             dreqSelect            { 6 };        ///< Defines DS bit.
+        inline static const BitRange<DreqLevel>              dreqLevel             { 5 };        ///< Defines DL bit.
+        inline static const BitRange<TransferBusMode>        transferBusMode       { 4 };        ///< Defines TB bit.
+        inline static const BitRange<TransferAddressMode>    transferAddressMode   { 3 };        ///< Defines TA bit.
+        inline static const BitRange<InterruptEnable>        interruptEnable       { 2 };        ///< Defines IE bit.
+        inline static const BitRange<TransferEndFlag>        transferEndFlag       { 1 };        ///< Defines TE bit.
+        inline static const BitRange<Sh2DmaEnable>           dmaEnable             { 0 };        ///< Defines DE bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -479,7 +479,7 @@ class DmaChannelControlRegister : Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PriorityMode : u8 {
-    fixed = 0b0,  ///< Fixed priority (initial)
+    fixed       = 0b0,  ///< Fixed priority (initial)
     round_robin = 0b1,  ///< Round robin
 };
 
@@ -491,7 +491,7 @@ enum class PriorityMode : u8 {
 
 enum class AddressErrorFlag : u8 {
     no_dmac_address_error = 0b0,  ///< No DMAC address error (initial)
-    dmac_address_error = 0b1,  ///< Address error by DMAC
+    dmac_address_error    = 0b1,  ///< Address error by DMAC
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -501,7 +501,7 @@ enum class AddressErrorFlag : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class NmiFlag : u8 {
-    no_nmif_interrupt = 0b0,  ///< No NMIF interrupt (initial)
+    no_nmif_interrupt      = 0b0,  ///< No NMIF interrupt (initial)
     nmif_interrupt_occured = 0b1,  ///< NMIF has occurred
 };
 
@@ -513,7 +513,7 @@ enum class NmiFlag : u8 {
 
 enum class DmaMasterEnable : u8 {
     disabled = 0b0,  ///< DMA transfers disabled on all channels (initial)
-    enabled = 0b1,  ///< DMA transfers enabled on all channels
+    enabled  = 0b1,  ///< DMA transfers enabled on all channels
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -525,13 +525,13 @@ enum class DmaMasterEnable : u8 {
 /// \date   03/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaOperationRegister : Register {
+class DmaOperationRegister : public Register {
     public:
-    using Register::Register;
-    auto priorityMode() { return static_cast<PriorityMode>(extract(3)); }         ///< returns PR bit.
-    auto addressErrorFlag() { return static_cast<AddressErrorFlag>(extract(2)); } ///< returns AE bit.
-    auto nmiFlag() { return static_cast<NmiFlag>(extract(1)); }                   ///< returns NMIF bit.
-    auto dmaMasterEnable() { return static_cast<DmaMasterEnable>(extract(0)); }   ///< returns DME bit.
+        using Register::Register;
+        inline static const BitRange<PriorityMode>     priorityMode    { 3 };   ///< Defines PR bit.
+        inline static const BitRange<AddressErrorFlag> addressErrorFlag{ 2 };   ///< Defines AE bit.
+        inline static const BitRange<NmiFlag>          nmiFlag         { 1 };   ///< Defines NMIF bit.
+        inline static const BitRange<DmaMasterEnable>  dmaMasterEnable { 0 };   ///< Defines DME bit.
 };
 
 //////////////////////////////////////////
@@ -580,12 +580,12 @@ enum class OutputLevelB : u8 {
 /// \date   03/02/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TimerOutputCompareControlRegister : Register {
+class TimerOutputCompareControlRegister : public Register {
     public:
-    using Register::Register;
-    auto outputCompareRegisterSelect() { return static_cast<OutputCompareRegisterSelect>(extract(4)); } ///< returns OCRS bit.
-    auto outputLevelA() { return static_cast<OutputLevelA>(extract(1)); }                               ///< returns OLVLA bit.
-    auto outputLevelB() { return static_cast<OutputLevelB>(extract(0)); }                               ///< returns OLVLB bit.
+        using Register::Register;
+        inline static const BitRange<OutputCompareRegisterSelect> outputCompareRegisterSelect{ 4 };   ///< Defines OCRS bit.
+        inline static const BitRange<OutputLevelA> outputLevelA{ 1 };                                 ///< Defines OLVLA bit.
+        inline static const BitRange<OutputLevelB> outputLevelB{ 0 };                                 ///< Defines OLVLB bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -596,7 +596,7 @@ class TimerOutputCompareControlRegister : Register {
 
 enum class InputEdgeSelect : u8 {
     falling = 0b0,  ///< Input captured on falling edge (initial)
-    rising = 0b1   ///< Input captured on rising edge
+    rising  = 0b1   ///< Input captured on rising edge
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -606,18 +606,17 @@ enum class InputEdgeSelect : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ClockSelect : u8 {
-    internal_divided_by_8 = 0b00, ///< Internal clock /8 (initial)
-    internal_divided_by_32 = 0b01, ///< Internal clock /32
+    internal_divided_by_8   = 0b00, ///< Internal clock /8 (initial)
+    internal_divided_by_32  = 0b01, ///< Internal clock /32
     internal_divided_by_128 = 0b10, ///< Internal clock /128
-    external = 0b11  ///< External clock
+    external                = 0b11  ///< External clock
 };
 
-class TimerControlRegister : Register {
+class TimerControlRegister : public Register {
     public:
-    using Register::Register;
-    auto inputEdgeSelect() { return static_cast<InputEdgeSelect>(extract(7)); }  ///< returns IEDG bit.
-    auto clockSelect() { return static_cast<ClockSelect>(extract(0, 1)); }          ///< returns CKSx bits.
-    void clockSelect(ClockSelect) {}
+        using Register::Register;
+        inline static const BitRange<InputEdgeSelect> inputEdgeSelect{ 7 };   ///< Defines IEDG bit.
+        inline static const BitRange<ClockSelect>     clockSelect{ 0, 1 };    ///< Defines IEDG bit.
 };
 
 }
