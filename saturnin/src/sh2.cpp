@@ -69,20 +69,24 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             if (is_master_) Log::debug("sh2", "TIER byte write (master SH2)");
             else Log::debug("sh2", "TIER byte write (slave SH2)");
             break;
-        case output_compare_register_b_h:
-            switch (TimerOutputCompareControlRegister(io_registers_[timer_output_compare_control_register & 0x1FF]).outputCompareRegisterSelect()) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_ = (data << 8) | 0xFF; break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_ = (data << 8) | 0xFF; break;
+        case output_compare_register_b_h: {
+                auto tocr = TimerOutputCompareControlRegister(io_registers_[timer_output_compare_control_register & 0x1FF]);
+                switch (tocr.get(TimerOutputCompareControlRegister::outputCompareRegisterSelect)) {
+                    case OutputCompareRegisterSelect::ocra: frt_ocra_ = (data << 8) | 0xFF; break;
+                    case OutputCompareRegisterSelect::ocrb: frt_ocrb_ = (data << 8) | 0xFF; break;
+                }
             }
             break;
-        case output_compare_register_b_l:
-            switch (TimerOutputCompareControlRegister(io_registers_[timer_output_compare_control_register & 0x1FF]).outputCompareRegisterSelect()) {
+        case output_compare_register_b_l: {
+            auto tocr = TimerOutputCompareControlRegister(io_registers_[timer_output_compare_control_register & 0x1FF]);
+            switch (tocr.get(TimerOutputCompareControlRegister::outputCompareRegisterSelect)) {
                 case OutputCompareRegisterSelect::ocra: frt_ocra_ = (0xFF << 8) | data; break;
                 case OutputCompareRegisterSelect::ocrb: frt_ocrb_ = (0xFF << 8) | data; break;
             }
+        }
             break;
         case timer_control_register:
-            switch (TimerControlRegister(io_registers_[timer_control_register & 0x1FF]).clockSelect()) {
+            switch (TimerControlRegister(io_registers_[timer_control_register & 0x1FF]).get(TimerControlRegister::clockSelect)) {
                 case ClockSelect::internal_divided_by_8:
                     frt_clock_ = 8;
                     frt_mask_ = 0b00000111;
@@ -104,7 +108,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             //Log::debug("sh2", fmt::format("CCR byte write: {}", data));
             Log::debug("sh2", "CCR byte write: {}", data);
             
-            if (CacheControlRegister(data).cachePurge() == CachePurge::cache_purge) {
+            if (CacheControlRegister(data).get(CacheControlRegister::cachePurge) == CachePurge::cache_purge) {
                 purgeCache();
                 data ^= util::toUnderlying(CachePurge::cache_purge); // cache purge bit is cleared after operation
             }
@@ -127,14 +131,16 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
         case interrupt_control_register: {
             auto old_icr = InterruptControlRegister(rawRead<u16>(io_registers_, addr & 0x1FF));
             auto new_icr = InterruptControlRegister(data);
-            switch (old_icr.nmiEdgeDetection()) {
+            switch (old_icr.get(InterruptControlRegister::nmiEdgeDetection)) {
                 case NmiEdgeDetection::falling:
-                    if ((old_icr.nmiInputLevel() == NmiInputLevel::high) && (new_icr.nmiInputLevel() == NmiInputLevel::low)) {
+                    if ((old_icr.get(InterruptControlRegister::nmiInputLevel) == NmiInputLevel::high) && 
+                            (new_icr.get(InterruptControlRegister::nmiInputLevel) == NmiInputLevel::low)) {
                         Log::error("sh2", "Falling edge NMI !");
                     }
                     break;
                 case NmiEdgeDetection::rising:
-                    if ((old_icr.nmiInputLevel() == NmiInputLevel::low) && (new_icr.nmiInputLevel() == NmiInputLevel::high)) {
+                    if ((old_icr.get(InterruptControlRegister::nmiInputLevel) == NmiInputLevel::low) && 
+                            (new_icr.get(InterruptControlRegister::nmiInputLevel) == NmiInputLevel::high)) {
                         Log::error("sh2", "Rising edge NMI !");
                     }
                     break;
@@ -193,8 +199,9 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         case dma_channel_control_register_0:
             rawWrite<u32>(io_registers_, dma_channel_control_register_0 & 0x1FF, data);
 
-            if (DmaChannelControlRegister(data).interruptEnable() == InterruptEnable::enabled) {
-                if (DmaOperationRegister(rawRead<u32>(io_registers_, dma_operation_register & 0x1FF)).dmaMasterEnable() == DmaMasterEnable::enabled) {
+            if (DmaChannelControlRegister(data).get(DmaChannelControlRegister::interruptEnable) == InterruptEnable::enabled) {
+                auto dor = DmaOperationRegister(rawRead<u32>(io_registers_, dma_operation_register & 0x1FF));
+                if (dor.get(DmaOperationRegister::dmaMasterEnable) == DmaMasterEnable::enabled) {
                     executeDma();
                 }
             }
@@ -202,15 +209,16 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         case dma_channel_control_register_1:
             rawWrite<u32>(io_registers_, dma_channel_control_register_1 & 0x1FF, data);
 
-            if (DmaChannelControlRegister(data).interruptEnable() == InterruptEnable::enabled) {
-                if (DmaOperationRegister(rawRead<u32>(io_registers_, dma_operation_register & 0x1FF)).dmaMasterEnable() == DmaMasterEnable::enabled) {
+            if (DmaChannelControlRegister(data).get(DmaChannelControlRegister::interruptEnable) == InterruptEnable::enabled) {
+                auto dor = DmaOperationRegister(rawRead<u32>(io_registers_, dma_operation_register & 0x1FF));
+                if (dor.get(DmaOperationRegister::dmaMasterEnable) == DmaMasterEnable::enabled) {
                     executeDma();
                 }
             }
             break;
         case dma_operation_register:
             rawWrite<u32>(io_registers_, dma_operation_register & 0x1FF, data);
-            if (DmaOperationRegister(data).dmaMasterEnable() == DmaMasterEnable::enabled) {
+            if (DmaOperationRegister(data).get(DmaOperationRegister::dmaMasterEnable) == DmaMasterEnable::enabled) {
                 executeDma();
             }
             break;

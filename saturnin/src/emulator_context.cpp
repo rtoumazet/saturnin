@@ -81,7 +81,11 @@ bool Emulator_context::run() {
     auto blah = this->memory()->read<uint8_t>(0);
 
     auto isr = InterruptStatusRegister(0x000000AB);
-    auto w = isr.test();
+    //auto w = isr.test();
+    //auto y = isr.testRange();
+    //isr.get(InterruptStatusRegister::bBus);
+    //isr.set(InterruptStatusRegister::bBus, StartingFactorSelect::timer_1);
+    
     
     // TESTING //
 

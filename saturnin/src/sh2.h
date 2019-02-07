@@ -46,13 +46,13 @@ class Sh2 {
     public:
     //@{
     // Constructors / Destructors
-    Sh2() = delete;
+    Sh2()                        = delete;
     Sh2(bool is_master);
-    Sh2(const Sh2&) = delete;
-    Sh2(Sh2&&) = delete;
+    Sh2(const Sh2&)              = delete;
+    Sh2(Sh2&&)                   = delete;
     Sh2& operator=(const Sh2&) & = delete;
-    Sh2& operator=(Sh2&&) & = delete;
-    ~Sh2() = default;
+    Sh2& operator=(Sh2&&) &      = delete;
+    ~Sh2()                       = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

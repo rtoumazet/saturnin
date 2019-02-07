@@ -40,6 +40,26 @@ using s16   = std::int16_t;
 using s32   = std::int32_t;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct BitRange
+///
+/// \brief  A range of bits.
+///
+/// \author Runik
+/// \date   07/02/2019
+///
+/// \tparam T   Generic type parameter.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct BitRange {
+    u8 first_bit_pos_;
+    u8 last_bit_pos_;
+
+    BitRange(u8 pos) : first_bit_pos_{ pos }, last_bit_pos_{ pos } {};
+    BitRange(u8 first, u8 last) : first_bit_pos_{ first }, last_bit_pos_{ last } {};
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Register
 ///
 /// \brief  Base of any register used in the emulator. Will be specialized to return specific values depending on the register used.
@@ -52,7 +72,7 @@ class Register {
     public:
         /// \name Constructors/Destructors.
         //@{
-    Register(const u32 v) : register_value(v) { val = register_value; };
+        Register(const u32 v) : register_value(v) { val = register_value; };
         Register()                             = delete;
         Register(const Register&)              = delete;
         Register(Register&&)                   = delete;
@@ -61,34 +81,31 @@ class Register {
         ~Register()                            = default;
         //@}
     
+        template <typename T>
+        inline T get(const BitRange<T>& r) {
+            auto range = val;
+            range >>= r.first_bit_pos_;            // drops rightmost bits
+            range <<= (32 - r.last_bit_pos_ - 1);  // drops leftmost bits
+            range >>= (32 - r.last_bit_pos_ - 1);  // shifts back into place
+            return static_cast<T>(range.to_ulong());
+        }
+
+        template <typename T>
+        inline void set(BitRange<T> r, T value) {
+            std::bitset<32> new_val = static_cast<u32>(value);
+            new_val <<= r.first_bit_pos_;
+
+            for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {
+                val[i] = new_val[i];
+            }
+        }
+
 
     protected:
         inline auto extract(u8 first_bit_index, u8 last_bit_index = 0) {
             if (last_bit_index == 0) last_bit_index = first_bit_index;
             return (register_value >> first_bit_index) & ~(~0 << (last_bit_index - first_bit_index + 1));
         }
-
-        inline auto get(u8 bit_index) { return val[bit_index]; }
-        
-        // drop bits outside the range [R, L) == [R, L - 1]
-        std::bitset<32> get(u8 first_bit_index, u8 last_bit_index) {
-            val >>= first_bit_index;            // drop R rightmost bits
-            val <<= (32 - last_bit_index - 1);  // drop L leftmost bits
-            val >>= (32 - last_bit_index - 1);      // shift back into place
-            return val;
-        }
-
-
-        //inline auto get(u8 first_bit_index, u8 last_bit_index) {
-        //    u32 mask = 1;
-        //    u32 result = 0;
-        //    for (size_t i = first_bit_index; i < last_bit_index; ++i) {
-        //        if (val.test(i))
-        //            result |= mask;
-        //        mask <<= 1;
-        //    }
-        //    return result;
-        //}
 
         u32 register_value; ///< Internal register value.
         std::bitset<32> val;
