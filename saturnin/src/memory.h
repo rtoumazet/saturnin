@@ -38,6 +38,22 @@
 namespace saturnin {
 namespace core {
 
+constexpr u32 rom_memory_mask              = 0x7FFFF;
+constexpr u32 smpc_memory_mask             = 0x7F;
+constexpr u32 backup_ram_memory_mask       = 0xFFFF;
+constexpr u32 workram_low_memory_mask      = 0xFFFFF;
+constexpr u32 stv_io_memory_mask           = 0xFF;
+constexpr u32 cart_memory_mask             = 0x01FFFFFF;
+constexpr u32 vdp1_ram_memory_mask         = 0x7FFFF;
+constexpr u32 vdp1_framebuffer_memory_mask = 0x3FFFF;
+constexpr u32 vdp1_registers_memory_mask   = 0x1F;
+constexpr u32 vdp2_vram_memory_mask        = 0x7FFFF;
+constexpr u32 vdp2_cram_memory_mask        = 0xFFF;
+constexpr u32 vdp2_registers_memory_mask   = 0x1FF;
+constexpr u32 scu_memory_mask              = 0xFF;
+constexpr u32 workram_high_memory_mask     = 0xFFFFF;
+constexpr u32 sh2_memory_mask              = 0x1FF;
+
 static const u32 stv_io_port_a{ 0x400001 };
 static const u32 stv_io_port_b{ 0x400003 };
 static const u32 stv_io_port_c{ 0x400005 };
@@ -509,7 +525,7 @@ struct readDummy {
 template<typename T>
 struct readRom{
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.rom_, addr & 0x7FFFF);};
+        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.rom_, addr & rom_memory_mask);};
     }
 };
 
@@ -528,7 +544,7 @@ template<typename T>
 struct readSmpc{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T { 
-            return rawRead<T>(m.smpc_, addr & 0x7F); 
+            return rawRead<T>(m.smpc_, addr & smpc_memory_mask);
         };
     }
 };
@@ -560,7 +576,7 @@ template<typename T>
 struct writeSmpc {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.smpc_, addr & 0x7F, data);
+            rawWrite<T>(m.smpc_, addr & smpc_memory_mask, data);
         };
     }
 };
@@ -591,7 +607,7 @@ struct writeSmpc<uint8_t> {
  struct readBackupRam {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.backup_ram_, addr & 0xFFFF);
+            return rawRead<T>(m.backup_ram_, addr & backup_ram_memory_mask);
         };
     }
  };
@@ -611,7 +627,7 @@ struct writeSmpc<uint8_t> {
  struct writeBackupRam {
      operator Memory::WriteType<T>() const {
          return [](Memory& m, const u32 addr, const T data) {
-             rawWrite<T>(m.backup_ram_, addr & 0xFFFF, data);
+             rawWrite<T>(m.backup_ram_, addr & backup_ram_memory_mask, data);
          };
      }
  };
@@ -631,7 +647,7 @@ struct writeSmpc<uint8_t> {
  struct readWorkramLow {
      operator Memory::ReadType<T>() const {
          return [](const Memory& m, const u32 addr) -> T {
-             return rawRead<T>(m.workram_low_, addr & 0xFFFFF);
+             return rawRead<T>(m.workram_low_, addr & workram_low_memory_mask);
          };
      }
  };
@@ -651,7 +667,7 @@ struct writeSmpc<uint8_t> {
  struct writeWorkramLow {
      operator Memory::WriteType<T>() const {
          return [](Memory& m, const u32 addr, const T data) {
-             rawWrite<T>(m.workram_low_, addr & 0xFFFFF, data);
+             rawWrite<T>(m.workram_low_, addr & workram_low_memory_mask, data);
          };
      }
  };
@@ -671,7 +687,7 @@ struct writeSmpc<uint8_t> {
  struct readStvIo{
      operator Memory::ReadType<T>() const {
          return [](const Memory& m, const u32 addr) -> T {
-             return rawRead<T>(m.stv_io_, addr & 0xFF);
+             return rawRead<T>(m.stv_io_, addr & stv_io_memory_mask);
          };
      }
  };
@@ -715,11 +731,11 @@ struct readStvIo<u8> {
                      //if (GetAsyncKeyState(VK_8)&0x8000) data|=0x80;
                      break;
                  case stv_io_port_d:
-                     data = rawRead<u8>(m.stv_io_, addr & 0xFF);
+                     data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
                      data |= 0x3;
                      break;
                  default:
-                     data = rawRead<u8>(m.stv_io_, addr & 0xFF);
+                     data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
              }
              data = ~data;
              return data;
@@ -742,7 +758,7 @@ template<typename T>
 struct writeStvIo{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.stv_io_, addr & 0xFF, data);
+            rawWrite<T>(m.stv_io_, addr & stv_io_memory_mask, data);
         };
     }
 };
@@ -762,7 +778,7 @@ struct writeStvIo{
 
 inline u32 calculateRelativeCartAddress(const u32 addr) {
     u32 temp{ (addr >> 1) & 0x02000000 };
-    return (addr & 0x01FFFFFF) | temp;
+    return (addr & cart_memory_mask) | temp;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -939,7 +955,7 @@ template<typename T>
 struct readVdp1Ram{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.vdp1_vram_, addr & 0x7FFFF);
+            return rawRead<T>(m.vdp1_vram_, addr & vdp1_ram_memory_mask);
         };
     }
 };
@@ -959,7 +975,7 @@ template<typename T>
 struct writeVdp1Ram{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp1_vram_, addr & 0x7FFFF, data);
+            rawWrite<T>(m.vdp1_vram_, addr & vdp1_ram_memory_mask, data);
             // :TODO: Handle character address cache
         };
     }
@@ -980,7 +996,7 @@ template<typename T>
 struct readVdp1Framebuffer{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.vdp1_framebuffer_, addr & 0x3FFFF);
+            return rawRead<T>(m.vdp1_framebuffer_, addr & vdp1_framebuffer_memory_mask);
         };
     }
 };
@@ -1000,7 +1016,7 @@ template<typename T>
 struct writeVdp1Framebuffer{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp1_framebuffer_, addr & 0x3FFFF, data);
+            rawWrite<T>(m.vdp1_framebuffer_, addr & vdp1_framebuffer_memory_mask, data);
         };
     }
 };
@@ -1020,7 +1036,7 @@ template<typename T>
 struct readVdp1Registers{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.vdp1_registers_, addr & 0x1F);
+            return rawRead<T>(m.vdp1_registers_, addr & vdp1_registers_memory_mask);
         };
     }
 };
@@ -1040,7 +1056,7 @@ template<typename T>
 struct writeVdp1Registers{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp1_registers_, addr & 0x1F, data);
+            rawWrite<T>(m.vdp1_registers_, addr & vdp1_registers_memory_mask, data);
         };
     }
 };
@@ -1060,7 +1076,7 @@ template<typename T>
 struct readVdp2Vram{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.vdp2_vram_, addr & 0x7FFFF);
+            return rawRead<T>(m.vdp2_vram_, addr & vdp2_vram_memory_mask);
         };
     }
 };
@@ -1080,7 +1096,7 @@ template<typename T>
 struct writeVdp2Vram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp2_vram_, addr & 0x7FFFF, data);
+            rawWrite<T>(m.vdp2_vram_, addr & vdp2_vram_memory_mask, data);
             // :TODO: handle VDP2 page cache
         };
     }
@@ -1101,7 +1117,7 @@ template<typename T>
 struct readVdp2Cram {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.vdp2_cram_, addr & 0xFFF);
+            return rawRead<T>(m.vdp2_cram_, addr & vdp2_cram_memory_mask);
         };
     }
 };
@@ -1121,7 +1137,7 @@ template<typename T>
 struct writeVdp2Cram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp2_cram_, addr & 0xFFF, data);
+            rawWrite<T>(m.vdp2_cram_, addr & vdp2_cram_memory_mask, data);
             m.vdp2_cram_was_accessed_ = true;
         };
     }
@@ -1142,7 +1158,7 @@ template<typename T>
 struct readVdp2Registers {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.vdp2_registers_, addr & 0x1FF);
+            return rawRead<T>(m.vdp2_registers_, addr & vdp2_registers_memory_mask);
         };
     }
 };
@@ -1162,7 +1178,7 @@ template<typename T>
 struct writeVdp2Registers {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp2_registers_, addr & 0x1FF, data);
+            rawWrite<T>(m.vdp2_registers_, addr & vdp2_registers_memory_mask, data);
             // :TODO: handle bitmap update
         };
     }
@@ -1183,7 +1199,7 @@ template<typename T>
 struct readScu {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.scu_, addr & 0xFF);
+            return rawRead<T>(m.scu_, addr & scu_memory_mask);
         };
     }
 };
@@ -1213,7 +1229,7 @@ template<typename T>
 struct writeScu{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.scu_, addr & 0xFF, data);
+            rawWrite<T>(m.scu_, addr & scu_memory_mask, data);
         };
     }
 };
@@ -1243,7 +1259,7 @@ template<typename T>
 struct readWorkramHigh{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.workram_high_, addr & 0xFFFFF);
+            return rawRead<T>(m.workram_high_, addr & workram_high_memory_mask);
         };
     }
 };
@@ -1263,7 +1279,7 @@ template<typename T>
 struct writeWorkramHigh{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.workram_high_, addr & 0xFFFFF, data);
+            rawWrite<T>(m.workram_high_, addr & workram_high_memory_mask, data);
         };
     }
 };

@@ -72,7 +72,7 @@ class Register {
     public:
         /// \name Constructors/Destructors.
         //@{
-        Register(const u32 v) : register_value(v) { val = register_value; };
+        Register(const u32 v) : register_value(v) {};
         Register()                             = delete;
         Register(const Register&)              = delete;
         Register(Register&&)                   = delete;
@@ -81,9 +81,10 @@ class Register {
         ~Register()                            = default;
         //@}
     
+
         template <typename T>
         inline T get(const BitRange<T>& r) {
-            auto range = val;
+            auto range = register_value;
             range >>= r.first_bit_pos_;            // drops rightmost bits
             range <<= (32 - r.last_bit_pos_ - 1);  // drops leftmost bits
             range >>= (32 - r.last_bit_pos_ - 1);  // shifts back into place
@@ -91,24 +92,33 @@ class Register {
         }
 
         template <typename T>
-        inline void set(BitRange<T> r, T value) {
-            std::bitset<32> new_val = static_cast<u32>(value);
-            new_val <<= r.first_bit_pos_;
+        inline void update(const BitRange<T>& r, T new_value) {
+            std::bitset<32> nv = static_cast<u32>(new_value);
+            nv <<= r.first_bit_pos_;
 
             for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {
-                val[i] = new_val[i];
+                val[i] = nv[i];
             }
         }
 
-
-    protected:
-        inline auto extract(u8 first_bit_index, u8 last_bit_index = 0) {
-            if (last_bit_index == 0) last_bit_index = first_bit_index;
-            return (register_value >> first_bit_index) & ~(~0 << (last_bit_index - first_bit_index + 1));
+        template <typename T>
+        inline void set(const BitRange<T>& r) {
+            for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {
+                register_value.set(i);
+            }
         }
 
-        u32 register_value; ///< Internal register value.
-        std::bitset<32> val;
+        template <typename T>
+        inline void reset(const BitRange<T>& r) {
+            for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {
+                register_value.reset(i);
+            }
+        }
+
+        inline u32 toUlong() { return register_value.to_ulong(); };
+
+    protected:
+        std::bitset<32> register_value; ///< Internal register value.
 };
 
 };

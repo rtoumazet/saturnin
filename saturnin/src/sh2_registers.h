@@ -418,7 +418,7 @@ enum class TransferAddressMode : u8 {
 /// \brief  CHCR0 - IE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class InterruptEnable : u8 {
+enum class Sh2DmaInterruptEnable : u8 {
     disabled = 0b0,   ///< Interrupt disabled.
     enabled  = 0b1    ///< Interrupt enabled.
 };
@@ -467,7 +467,7 @@ class DmaChannelControlRegister : public Register            {
         inline static const BitRange<DreqLevel>              dreqLevel             { 5 };        ///< Defines DL bit.
         inline static const BitRange<TransferBusMode>        transferBusMode       { 4 };        ///< Defines TB bit.
         inline static const BitRange<TransferAddressMode>    transferAddressMode   { 3 };        ///< Defines TA bit.
-        inline static const BitRange<InterruptEnable>        interruptEnable       { 2 };        ///< Defines IE bit.
+        inline static const BitRange<Sh2DmaInterruptEnable>  interruptEnable       { 2 };        ///< Defines IE bit.
         inline static const BitRange<TransferEndFlag>        transferEndFlag       { 1 };        ///< Defines TE bit.
         inline static const BitRange<Sh2DmaEnable>           dmaEnable             { 0 };        ///< Defines DE bit.
 };
