@@ -33,6 +33,9 @@
 namespace saturnin {
 namespace core {
 
+// Forward declarations
+class Emulator_context;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Sh2
 ///
@@ -47,7 +50,7 @@ class Sh2 {
     //@{
     // Constructors / Destructors
     Sh2()                        = delete;
-    Sh2(bool is_master);
+    Sh2(bool is_master, Emulator_context* ec);
     Sh2(const Sh2&)              = delete;
     Sh2(Sh2&&)                   = delete;
     Sh2& operator=(const Sh2&) & = delete;
@@ -341,6 +344,8 @@ class Sh2 {
 
     void runDivisionUnit(u8 cycles_to_run);
 
+    Emulator_context* emulator_context_;
+    
     std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
     std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
     std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).

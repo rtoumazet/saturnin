@@ -30,8 +30,8 @@ namespace core {
 
 Emulator_context::Emulator_context() {
     config_     = std::make_unique<Config>("saturnin.cfg");
-    master_sh2_ = std::make_unique<Sh2>(true);
-    slave_sh2_  = std::make_unique<Sh2>(false);
+    master_sh2_ = std::make_unique<Sh2>(true, this);
+    slave_sh2_  = std::make_unique<Sh2>(false, this);
     memory_     = std::make_unique<Memory>(config_.get(), 
                                            hardwareMode_, 
                                            master_sh2_.get(),
@@ -80,10 +80,11 @@ bool Emulator_context::run() {
 
     auto blah = this->memory()->read<uint8_t>(0);
 
-    auto isr = InterruptStatusRegister(0x000000AB);
+    auto dmr = DmaModeRegister(0x000000AA);
     //auto w = isr.test();
     //auto y = isr.testRange();
-    //isr.get(InterruptStatusRegister::bBus);
+    dmr.set(DmaModeRegister::startingFactorSelect);
+    dmr.reset(DmaModeRegister::startingFactorSelect);
     //isr.set(InterruptStatusRegister::bBus, StartingFactorSelect::timer_1);
     
     
