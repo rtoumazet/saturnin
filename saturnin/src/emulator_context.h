@@ -133,6 +133,45 @@ static std::string saturnin_version = "1.00";
 
         Memory* memory() { return memory_.get(); };
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn Sh2* Emulator_context::masterSh2()
+        ///
+        /// \brief  Returns a pointer to the master SH2 objet.
+        ///
+        /// \author Runik
+        /// \date   09/02/2019
+        ///
+        /// \return A pointer to the master SH2 object.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Sh2* masterSh2() { return master_sh2_.get(); };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn Sh2* Emulator_context::slaveSh2()
+        ///
+        /// \brief  Returns a pointer to the slave SH2 objet.
+        ///
+        /// \author Runik
+        /// \date   09/02/2019
+        ///
+        /// \return A pointer to the slave SH2 object.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Sh2* slaveSh2() { return slave_sh2_.get(); };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn Scu* Emulator_context::scu()
+        ///
+        /// \brief  Returns a pointer to the SCU objet.
+        ///
+        /// \author Runik
+        /// \date   09/02/2019
+        ///
+        /// \return A pointer to the SCU objet.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Scu* scu() { return scu_.get(); };
+
         HardwareMode    hardwareMode_{ HardwareMode::saturn };     ///< Hardware mode
         EmulationStatus emulationStatus_{ EmulationStatus::stopped }; ///< Emulation status
         RenderingStatus renderingStatus_{ RenderingStatus::running }; ///< Rendering status.

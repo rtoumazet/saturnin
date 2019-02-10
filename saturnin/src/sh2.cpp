@@ -20,7 +20,6 @@
 #include "sh2.h"
 #include "sh2_registers.h"
 #include "emulator_context.h"
-#include "interrupt_sources.h"
 #include "scu_registers.h"
 
 namespace saturnin {
@@ -278,13 +277,23 @@ void Sh2::reset() {
     initializeOnChipRegisters();
 }
 
+auto Sh2::scuMemory() const {
+    return emulator_context_->memory()->scu_;
+}
+
+auto Sh2::scu() const {
+    return emulator_context_->scu();
+}
+
 void Sh2::sendInterrupt(const Interrupt& i) {
     if (i.level != 0) {
-        //emulator_context_->memory()->scu_ 
-        //InterruptStatusRegister(rawRead<u32>(emulator_context_->memory()->scu_, interrupt_status_register & scu_memory_mask))
-        //InterruptStatusRegister::
+        
+        scu()->setInterruptStatusRegister(i);
+        
+
     }
 }
+
 
 }
 }
