@@ -28,11 +28,11 @@
 #include <array> // array
 #include <filesystem> // filesystem
 #include <vector> // vector
+#include <Windows.h> // VK constants
 
 #include "emulator_defs.h"
 #include "emulator_enums.h"
-#include "config.h"
-#include "sh2.h"
+#include "log.h"
 #include "scu.h"
 
 namespace saturnin {
@@ -89,8 +89,11 @@ enum class Rom_load {
     even_interleaved ///< Data loaded on even bytes.
 };
 
-class Config; 
+// Forward declarations
 class Sh2;
+class Emulator_context;
+class Config;
+class Scu;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Memory
@@ -107,13 +110,7 @@ public:
     //@{
     // Constructors / Destructors
     Memory()                           = delete;
-    Memory(Config* c, 
-           HardwareMode hm, 
-           Sh2* m,
-           Sh2* s) :    config_(c),
-                        HardwareMode_(hm),
-                        master_sh2_(m),
-                        slave_sh2_(s) {
+    Memory(Emulator_context* ec) : emulator_context_(ec) {
         initializeHandlers();
     };
     Memory(const Memory&)              = delete;
@@ -280,30 +277,26 @@ public:
         handler[addr >> 16](*this, addr, data);
     }
 
-    Sh2* masterSh2() const { return master_sh2_; };
-    Sh2* slaveSh2() const { return slave_sh2_; };
-    Scu* scu() const { return scu_object_; };
+    /// \name Context objects accessors
+    //@{
+    Sh2*    masterSh2() const;
+    Sh2*    slaveSh2() const;
+    Scu*    scu() const;
+    Config* config() const;
+    //@}
 
 private:
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Memory::initializeHandlers();
+    ///
+    /// \brief  Initializes all the memory handlers of the memory map.
+    ///
+    /// \author Runik
+    /// \date   09/02/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void initializeHandlers();
-    
-    Config* config_;    ///< Configuration object
-    Sh2* master_sh2_;   ///< Master SH2 object
-    Sh2* slave_sh2_;    ///< Slave SH2 object
-    Scu* scu_object_;          ///< SCU object
-
-    /// \Memory handlers
-    //@{
-    ReadHandler<u8>   read_8_handler_;
-    ReadHandler<u16>  read_16_handler_;
-    ReadHandler<u32>  read_32_handler_;
-    WriteHandler<u8>  write_8_handler_;
-    WriteHandler<u16> write_16_handler_;
-    WriteHandler<u32> write_32_handler_;
-    //@}
-    
-    u32 stv_protection_offset_{};
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::initializeHandler(u32 begin, u32 end, ReadType<T> func);
@@ -380,6 +373,20 @@ private:
         (initializeHandler<T>(begin, end, OpType<T>{}), ...);
     }
 
+    Emulator_context* emulator_context_; ///< Emulator context object.
+
+    /// \Memory handlers
+    //@{
+    ReadHandler<u8>   read_8_handler_;
+    ReadHandler<u16>  read_16_handler_;
+    ReadHandler<u32>  read_32_handler_;
+    WriteHandler<u8>  write_8_handler_;
+    WriteHandler<u16> write_16_handler_;
+    WriteHandler<u32> write_32_handler_;
+    //@}
+
+    u32 stv_protection_offset_{};
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -419,6 +426,7 @@ std::vector<std::string> listStvConfigurationFiles();
 ///
 /// \brief  Reads a value from an array. 
 ///         Usage : auto val = read<u32>(memory, 0);
+///         Don't forget to use the related mask against the address value not to be off bounds ...
 ///
 /// \author Runik
 /// \date   07/06/2018
@@ -446,7 +454,8 @@ T rawRead(const std::array<U, N>& arr, const u32 addr) {
 /// \fn template<typename T, typename U, size_t N> void rawWrite(std::array<U, N>& arr, const u32 addr, const T value)
 ///
 /// \brief  Writes a value to an array. Maps 8, 16 and 32 to u8, uint16_t and u32, respectively.
-///         Usage : write&lt;32&gt;(memory, 0, 0x12345678);
+///         Usage : writ<u32>(memory, 0, 0x12345678);
+///         Don't forget to use the related mask against the address value not to be off bounds ...
 ///
 /// \author Runik
 /// \date   07/06/2018
@@ -1236,7 +1245,7 @@ struct writeScu{
 
 // Specialization for 32 bits data.
 template<>
-struct writeCart<u32> {
+struct writeScu<u32> {
     operator Memory::WriteType<u32>() const {
         return [](Memory& m, const u32 addr, const u32 data) {
             return m.scu()->write32(addr, data);

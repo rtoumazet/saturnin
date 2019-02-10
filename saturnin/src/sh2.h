@@ -27,8 +27,8 @@
 
 #include <array> // array 
 #include "emulator_defs.h"
-#include "interrupt_controller.h"
 #include "memory.h"
+#include "interrupt_sources.h"
 
 namespace saturnin {
 namespace core {
@@ -206,7 +206,7 @@ class Sh2 {
 
     void sendInterrupt(const Interrupt& i);
 
-    private:
+private:
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn u32 Sh2::readRegisters(const u32 addr) const;
@@ -312,7 +312,7 @@ class Sh2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::executeDma();
     ///
-    /// \brief  Executes the BMA operation.
+    /// \brief  Executes the DMA operation.
     ///
     /// \author Runik
     /// \date   13/01/2019
@@ -344,7 +344,33 @@ class Sh2 {
 
     void runDivisionUnit(u8 cycles_to_run);
 
-    Emulator_context* emulator_context_;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Sh2::scu_memory() const;
+    ///
+    /// \brief  Returns SCU memory array.
+    ///
+    /// \author Runik
+    /// \date   09/02/2019
+    ///
+    /// \return SCU memory array.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto scuMemory() const;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Sh2::scu() const;
+    ///
+    /// \brief  Returns the SCU object.
+    ///
+    /// \author Runik
+    /// \date   10/02/2019
+    ///
+    /// \return The SCU object.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto scu() const;
+
+    Emulator_context* emulator_context_;    ///< Context of the emulator
     
     std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
     std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    

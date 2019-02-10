@@ -33,6 +33,8 @@ namespace core {
 struct Interrupt {
     u8  vector;
     u8  level;
+
+    operator int() const { return vector; } ///< Internal conversion operator.
 };
 
 }

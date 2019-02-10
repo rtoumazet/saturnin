@@ -26,12 +26,14 @@
 #pragma once
 
 #include "emulator_defs.h"
+#include "interrupt_sources.h"
 
 namespace saturnin {
 namespace core {
 
 // Forward declarations
 class Memory;
+class Emulator_context;
 struct DmaConfiguration;
 
 enum class DmaLevel {
@@ -42,11 +44,11 @@ enum class DmaLevel {
 };
 
 class Scu {
-    public:
+public:
     //@{
     // Constructors / Destructors
     Scu()                        = delete;
-    Scu(Memory* m);
+    Scu(Emulator_context*);
     Scu(const Scu&)              = delete;
     Scu(Scu&&)                   = delete;
     Scu& operator=(const Scu&) & = delete;
@@ -96,7 +98,62 @@ class Scu {
 
     void executeDma(const DmaConfiguration& dc);
 
-    private:
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Scu::setInterruptStatusRegister(const Interrupt& i);
+    ///
+    /// \brief  Sets the interrupt in the Interrupt Status Register.
+    ///
+    /// \author Runik
+    /// \date   10/02/2019
+    ///
+    /// \param  i   The interrupt to set.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void setInterruptStatusRegister(const Interrupt& i);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Scu::resetInterruptStatusRegister(const Interrupt& i);
+    ///
+    /// \brief  Resets the interrupt in the Interrupt Status Register.
+    ///
+    /// \author Runik
+    /// \date   10/02/2019
+    ///
+    /// \param  i   The interrupt to reset.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void resetInterruptStatusRegister(const Interrupt& i);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn bool Scu::isInterruptMasked(const Interrupt& i, bool sentFromMasterSh2);
+    ///
+    /// \brief  Checks if the interrupt is masked in the SCU.
+    ///
+    /// \author Runik
+    /// \date   10/02/2019
+    ///
+    /// \param  i                   Interrupt to check.
+    /// \param  sentFromMasterSh2   True if the check is done from the master SH2, false if from slave SH2.
+    ///
+    /// \return True if interrupt is masked.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool isInterruptMasked(const Interrupt& i, bool sentFromMasterSh2) const;
+
+private:
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Scu::scu_memory() const;
+    ///
+    /// \brief  Returns SCU memory array.
+    ///
+    /// \author Runik
+    /// \date   08/02/2019
+    ///
+    /// \return SCU memory array.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto scuMemory() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::initializeRegisters();
@@ -208,7 +265,9 @@ class Scu {
 
     void initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const;
 
-    Memory* memory_;    ///< Memory object
+    Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
+
+
 };
 
 }

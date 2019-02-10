@@ -20,10 +20,8 @@
 #include <sstream> // stringstream
 #include <fstream> // ifstream
 #include "../lib/libzippp/libzippp.h"
-#include "config.h"
 #include "locale.h"
-#include "log.h"
-#include "memory.h"
+#include "emulator_context.h"
 
 namespace lzpp = libzippp;
 namespace fs = std::filesystem;
@@ -40,7 +38,7 @@ bool Memory::loadRom(const std::string& zip_name,
                      const Rom_type rom_type) {
 
     std::string zip = zip_name + ".zip";
-    fs::path rom_path{ config_->readValue(Access_keys::config_roms_stv).c_str() };
+    fs::path rom_path{ config()->readValue(Access_keys::config_roms_stv).c_str() };
     rom_path /= zip;
     //rom_path += "\\" + zip_name + ".zip";
 
@@ -124,8 +122,8 @@ bool Memory::loadRom(const std::string& zip_name,
 void Memory::loadBios(const HardwareMode mode) {
     std::string bios_path{};
     switch (mode) {
-        case HardwareMode::saturn: bios_path = config_->readValue(Access_keys::config_bios_saturn).c_str(); break;
-        case HardwareMode::stv:    bios_path = config_->readValue(Access_keys::config_bios_stv).c_str(); break;
+        case HardwareMode::saturn: bios_path = config()->readValue(Access_keys::config_bios_saturn).c_str(); break;
+        case HardwareMode::stv:    bios_path = config()->readValue(Access_keys::config_bios_stv).c_str(); break;
         default: {
             Log::error("config", tr("Unknown hardware mode"));
             Log::error("config", tr("Exiting ..."));
@@ -447,6 +445,22 @@ bool Memory::isStvProtectionEnabled() const {
     u32 relative_addr = calculateRelativeCartAddress(stv_protection_enabled);
     return cart_[relative_addr] == 0x1;
 }
+
+Config* Memory::config() const { 
+    return emulator_context_->config(); 
+};
+
+Sh2* Memory::masterSh2() const {
+    return emulator_context_->masterSh2();
+};
+
+Sh2* Memory::slaveSh2() const {
+    return emulator_context_->slaveSh2();
+};
+
+Scu* Memory::scu() const {
+    return emulator_context_->scu();
+};
 
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const Rom_load rom_load) {
     if (times_mirrored > 0) {
