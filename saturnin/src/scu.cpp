@@ -227,7 +227,8 @@ bool Scu::isInterruptMasked(const Interrupt& i, bool sentFromMasterSh2) const {
                 return true;
                 break;
             default:
-                //imr.get()
+                break;
+                
         }
 
     }
