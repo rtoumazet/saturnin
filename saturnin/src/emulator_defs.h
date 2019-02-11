@@ -92,7 +92,7 @@ class Register {
         }
 
         template <typename T>
-        inline void update(const BitRange<T>& r, T new_value) {
+        inline void set(const BitRange<T>& r, T new_value) {
             std::bitset<32> nv = static_cast<u32>(new_value);
             nv <<= r.first_bit_pos_;
 

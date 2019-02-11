@@ -17,6 +17,8 @@
 // limitations under the License.
 //
 
+#include <chrono>
+#include <iostream>
 #include "emulator_context.h"
 #include "cdrom/scsi.h"
 #include "video/opengl.h"
@@ -70,10 +72,6 @@ bool Emulator_context::run() {
     core::rawWrite<uint32_t>(this->memory()->workram_low_, 0, 0x12345678);
     auto val = core::rawRead<uint16_t>(this->memory()->workram_low_, 2);
     core::rawWrite<uint32_t>(this->memory()->rom_, 0, 0x12345678);
-    //core::writeDummy<8>(0x12345678, 0x0);
-    //core::writeDummy<32>(0x12345678, 0x0);
-    //core::readDummy<16>(0x0);
-    //core::readDummy<32>(0x0);
 
     auto blah = this->memory()->read<uint8_t>(0);
 
@@ -83,7 +81,13 @@ bool Emulator_context::run() {
     dmr.set(DmaModeRegister::startingFactorSelect);
     dmr.reset(DmaModeRegister::startingFactorSelect);
     //isr.set(InterruptStatusRegister::bBus, StartingFactorSelect::timer_1);
-    
+    core::rawWrite<uint32_t>(this->memory()->scu_, 0, 0x00112233);
+    auto start = std::chrono::steady_clock::now();
+    auto dmr = DmaModeRegister(0x000000AA);
+
+    auto end = std::chrono::steady_clock::now();
+    auto diff = end - start;
+    std::cout << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
     
     // TESTING //
 
