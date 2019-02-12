@@ -26,13 +26,16 @@
 #pragma once
 
 #include "emulator_defs.h"
+#include "scu_registers.h"
 
 namespace saturnin {
 namespace core {
 
-struct Interrupt {
-    u8  vector;
-    u8  level;
+constexpr struct Interrupt {
+    u8                        vector;
+    u8                        level;
+    BitRange<InterruptMask>   mask;
+    BitRange<InterruptEnable> status;
 
     operator int() const { return vector; } ///< Internal conversion operator.
 };

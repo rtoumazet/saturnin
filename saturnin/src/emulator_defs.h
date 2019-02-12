@@ -93,12 +93,18 @@ class Register {
 
         template <typename T>
         inline void set(const BitRange<T>& r, T new_value) {
-            std::bitset<32> nv = static_cast<u32>(new_value);
-            nv <<= r.first_bit_pos_;
-
+            //std::bitset<32> nv = static_cast<u32>(new_value);
+            //nv <<= r.first_bit_pos_;
+            //for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {
+            //    register_value[i] = nv[i];
+            //}
+            uint32_t nv = static_cast<u32>(new_value);
+            uint8_t j = 0;
             for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {
-                val[i] = nv[i];
+                register_value[i] = (nv & 1<<j) ? true : false;
+                ++j;
             }
+
         }
 
         template <typename T>
