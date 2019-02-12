@@ -513,37 +513,39 @@ class InterruptMaskRegister : public Register {
     public:
         using Register::Register;
     
-        inline static const BitRange<InterruptMask> externalInterrupt15Mask   { 31 }; ///< Defines External interrupt 15 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt14Mask   { 30 }; ///< Defines External interrupt 14 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt13Mask   { 29 }; ///< Defines External interrupt 13 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt12Mask   { 28 }; ///< Defines External interrupt 12 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt11Mask   { 27 }; ///< Defines External interrupt 11 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt10Mask   { 26 }; ///< Defines External interrupt 10 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt09Mask   { 25 }; ///< Defines External interrupt 09 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt08Mask   { 24 }; ///< Defines External interrupt 08 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt07Mask   { 23 }; ///< Defines External interrupt 07 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt06Mask   { 22 }; ///< Defines External interrupt 06 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt05Mask   { 21 }; ///< Defines External interrupt 05 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt04Mask   { 20 }; ///< Defines External interrupt 04 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt03Mask   { 19 }; ///< Defines External interrupt 03 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt02Mask   { 18 }; ///< Defines External interrupt 02 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt01Mask   { 17 }; ///< Defines External interrupt 01 mask bit.
-        inline static const BitRange<InterruptMask> externalInterrupt00Mask   { 16 }; ///< Defines External interrupt 00 mask bit.
-        inline static const BitRange<InterruptMask> aBusInterruptMask         { 15 }; ///< Defines A-Bus interrupt mask bit.
-        inline static const BitRange<InterruptMask> spriteDrawEndInterruptMask{ 13 }; ///< Defines Sprite Draw End interrupt mask bit.
-        inline static const BitRange<InterruptMask> dmaIllegalInterruptMask   { 12 }; ///< Defines DMA Illegal interrupt mask bit.
-        inline static const BitRange<InterruptMask> level0DmaInterruptMask    { 11 }; ///< Defines Level 0 DMA interrupt mask bit.
-        inline static const BitRange<InterruptMask> level1DmaInterruptMask    { 10 }; ///< Defines Level 1 DMA interrupt mask bit.
-        inline static const BitRange<InterruptMask> level2DmaInterruptMask    { 9 };  ///< Defines Level 2 DMA interrupt mask bit.
-        inline static const BitRange<InterruptMask> padInterruptMask          { 8 };  ///< Defines PAD interrupt mask bit.
-        inline static const BitRange<InterruptMask> systemManagerInterruptMask{ 7 };  ///< Defines System Manager interrupt mask bit.
-        inline static const BitRange<InterruptMask> soundRequestInterruptMask { 6 };  ///< Defines Sound Request interrupt mask bit.
-        inline static const BitRange<InterruptMask> dspEndInterruptMask       { 5 };  ///< Defines DSP End interrupt mask bit.
-        inline static const BitRange<InterruptMask> timer1InterruptMask       { 4 };  ///< Defines Timer 1 interrupt mask bit.
-        inline static const BitRange<InterruptMask> timer0InterruptMask       { 3 };  ///< Defines Timer 0 interrupt mask bit.
-        inline static const BitRange<InterruptMask> hBlankInInterruptMask     { 2 };  ///< Defines H-Blank-In interrupt mask bit.
-        inline static const BitRange<InterruptMask> vBlankOutInterruptMask    { 1 };  ///< Defines V-Blank-Out interrupt mask bit. 
-        inline static const BitRange<InterruptMask> vBlankInInterruptMask     { 0 };  ///< Defines V-Blank-In interrupt mask bit.
+        inline static const BitRange<InterruptMask> external15   { 31 }; ///< Defines External interrupt 15 mask bit.
+        inline static const BitRange<InterruptMask> external14   { 30 }; ///< Defines External interrupt 14 mask bit.
+        inline static const BitRange<InterruptMask> external13   { 29 }; ///< Defines External interrupt 13 mask bit.
+        inline static const BitRange<InterruptMask> external12   { 28 }; ///< Defines External interrupt 12 mask bit.
+        inline static const BitRange<InterruptMask> external11   { 27 }; ///< Defines External interrupt 11 mask bit.
+        inline static const BitRange<InterruptMask> external10   { 26 }; ///< Defines External interrupt 10 mask bit.
+        inline static const BitRange<InterruptMask> external09   { 25 }; ///< Defines External interrupt 09 mask bit.
+        inline static const BitRange<InterruptMask> external08   { 24 }; ///< Defines External interrupt 08 mask bit.
+        inline static const BitRange<InterruptMask> external07   { 23 }; ///< Defines External interrupt 07 mask bit.
+        inline static const BitRange<InterruptMask> external06   { 22 }; ///< Defines External interrupt 06 mask bit.
+        inline static const BitRange<InterruptMask> external05   { 21 }; ///< Defines External interrupt 05 mask bit.
+        inline static const BitRange<InterruptMask> external04   { 20 }; ///< Defines External interrupt 04 mask bit.
+        inline static const BitRange<InterruptMask> external03   { 19 }; ///< Defines External interrupt 03 mask bit.
+        inline static const BitRange<InterruptMask> external02   { 18 }; ///< Defines External interrupt 02 mask bit.
+        inline static const BitRange<InterruptMask> external01   { 17 }; ///< Defines External interrupt 01 mask bit.
+        inline static const BitRange<InterruptMask> external00   { 16 }; ///< Defines External interrupt 00 mask bit.
+        inline static const BitRange<InterruptMask> aBus         { 15 }; ///< Defines A-Bus interrupt mask bit.
+        inline static const BitRange<InterruptMask> spriteDrawEnd{ 13 }; ///< Defines Sprite Draw End interrupt mask bit.
+        inline static const BitRange<InterruptMask> dmaIllegal   { 12 }; ///< Defines DMA Illegal interrupt mask bit.
+        inline static const BitRange<InterruptMask> level0Dma    { 11 }; ///< Defines Level 0 DMA interrupt mask bit.
+        inline static const BitRange<InterruptMask> level1Dma    { 10 }; ///< Defines Level 1 DMA interrupt mask bit.
+        inline static const BitRange<InterruptMask> level2Dma    { 9 };  ///< Defines Level 2 DMA interrupt mask bit.
+        inline static const BitRange<InterruptMask> pad          { 8 };  ///< Defines PAD interrupt mask bit.
+        inline static const BitRange<InterruptMask> systemManager{ 7 };  ///< Defines System Manager interrupt mask bit.
+        inline static const BitRange<InterruptMask> soundRequest { 6 };  ///< Defines Sound Request interrupt mask bit.
+        inline static const BitRange<InterruptMask> dspEnd       { 5 };  ///< Defines DSP End interrupt mask bit.
+        inline static const BitRange<InterruptMask> timer1       { 4 };  ///< Defines Timer 1 interrupt mask bit.
+        inline static const BitRange<InterruptMask> timer0       { 3 };  ///< Defines Timer 0 interrupt mask bit.
+        inline static const BitRange<InterruptMask> hBlankIn     { 2 };  ///< Defines H-Blank-In interrupt mask bit.
+        inline static const BitRange<InterruptMask> vBlankOut    { 1 };  ///< Defines V-Blank-Out interrupt mask bit. 
+        inline static const BitRange<InterruptMask> vBlankIn     { 0 };  ///< Defines V-Blank-In interrupt mask bit.
+        inline static const BitRange<InterruptMask> undefined    { 0 }; ///< Undefined value.
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -570,37 +572,39 @@ class InterruptStatusRegister : public Register {
     public:
         using Register::Register;
 
-        inline static const BitRange<InterruptEnable> externalInterrupt15Status   { 31 }; ///< Defines External interrupt 15 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt14Status   { 30 }; ///< Defines External interrupt 14 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt13Status   { 29 }; ///< Defines External interrupt 13 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt12Status   { 28 }; ///< Defines External interrupt 12 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt11Status   { 27 }; ///< Defines External interrupt 11 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt10Status   { 26 }; ///< Defines External interrupt 10 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt09Status   { 25 }; ///< Defines External interrupt 09 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt08Status   { 24 }; ///< Defines External interrupt 08 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt07Status   { 23 }; ///< Defines External interrupt 07 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt06Status   { 22 }; ///< Defines External interrupt 06 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt05Status   { 21 }; ///< Defines External interrupt 05 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt04Status   { 20 }; ///< Defines External interrupt 04 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt03Status   { 19 }; ///< Defines External interrupt 03 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt02Status   { 18 }; ///< Defines External interrupt 02 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt01Status   { 17 }; ///< Defines External interrupt 01 status.
-        inline static const BitRange<InterruptEnable> externalInterrupt00Status   { 16 }; ///< Defines External interrupt 00 status.
-        inline static const BitRange<InterruptEnable> aBusInterruptStatus         { 15 }; ///< Defines A-Bus interrupt status. 
-        inline static const BitRange<InterruptEnable> spriteDrawEndInterruptStatus{ 13 }; ///< Defines Sprite Draw End interrupt status. 
-        inline static const BitRange<InterruptEnable> dmaIllegalInterruptStatus   { 12 }; ///< Defines DMA Illegal interrupt status. 
-        inline static const BitRange<InterruptEnable> level0DmaInterruptStatus    { 11};  ///< Defines Level 0 DMA interrupt status. 
-        inline static const BitRange<InterruptEnable> level1DmaInterruptStatus    { 10 }; ///< Defines Level 1 DMA interrupt status. 
-        inline static const BitRange<InterruptEnable> level2DmaInterruptStatus    { 9 };  ///< Defines Level 2 DMA interrupt status. 
-        inline static const BitRange<InterruptEnable> padInterruptStatus          { 8 };  ///< Defines PAD interrupt status. 
-        inline static const BitRange<InterruptEnable> systemManagerInterruptStatus{ 7 };  ///< Defines System Manager interrupt status. 
-        inline static const BitRange<InterruptEnable> soundRequestInterruptStatus { 6 };  ///< Defines Sound Request interrupt status. 
-        inline static const BitRange<InterruptEnable> dspEndInterruptStatus       { 5 };  ///< Defines DSP End interrupt status. 
-        inline static const BitRange<InterruptEnable> timer1InterruptStatus       { 4 };  ///< Defines Timer 1 interrupt status. 
-        inline static const BitRange<InterruptEnable> timer0InterruptStatus       { 3 };  ///< Defines Timer 0 interrupt status.  
-        inline static const BitRange<InterruptEnable> hBlankInInterruptStatus     { 2 };  ///< Defines H-Blank-In interrupt status. 
-        inline static const BitRange<InterruptEnable> vBlankOutInterruptStatus    { 1 };  ///< Defines V-Blank-Out interrupt status. 
-        inline static const BitRange<InterruptEnable> vBlankInInterruptStatus     { 0 };  ///< Defines V-Blank-In interrupt status. 
+        inline static const BitRange<InterruptEnable> external15   { 31 }; ///< Defines External interrupt 15 status.
+        inline static const BitRange<InterruptEnable> external14   { 30 }; ///< Defines External interrupt 14 status.
+        inline static const BitRange<InterruptEnable> external13   { 29 }; ///< Defines External interrupt 13 status.
+        inline static const BitRange<InterruptEnable> external12   { 28 }; ///< Defines External interrupt 12 status.
+        inline static const BitRange<InterruptEnable> external11   { 27 }; ///< Defines External interrupt 11 status.
+        inline static const BitRange<InterruptEnable> external10   { 26 }; ///< Defines External interrupt 10 status.
+        inline static const BitRange<InterruptEnable> external09   { 25 }; ///< Defines External interrupt 09 status.
+        inline static const BitRange<InterruptEnable> external08   { 24 }; ///< Defines External interrupt 08 status.
+        inline static const BitRange<InterruptEnable> external07   { 23 }; ///< Defines External interrupt 07 status.
+        inline static const BitRange<InterruptEnable> external06   { 22 }; ///< Defines External interrupt 06 status.
+        inline static const BitRange<InterruptEnable> external05   { 21 }; ///< Defines External interrupt 05 status.
+        inline static const BitRange<InterruptEnable> external04   { 20 }; ///< Defines External interrupt 04 status.
+        inline static const BitRange<InterruptEnable> external03   { 19 }; ///< Defines External interrupt 03 status.
+        inline static const BitRange<InterruptEnable> external02   { 18 }; ///< Defines External interrupt 02 status.
+        inline static const BitRange<InterruptEnable> external01   { 17 }; ///< Defines External interrupt 01 status.
+        inline static const BitRange<InterruptEnable> external00   { 16 }; ///< Defines External interrupt 00 status.
+        inline static const BitRange<InterruptEnable> aBus         { 15 }; ///< Defines A-Bus interrupt status. 
+        inline static const BitRange<InterruptEnable> spriteDrawEnd{ 13 }; ///< Defines Sprite Draw End interrupt status. 
+        inline static const BitRange<InterruptEnable> dmaIllegal   { 12 }; ///< Defines DMA Illegal interrupt status. 
+        inline static const BitRange<InterruptEnable> level0Dma    { 11};  ///< Defines Level 0 DMA interrupt status. 
+        inline static const BitRange<InterruptEnable> level1Dma    { 10 }; ///< Defines Level 1 DMA interrupt status. 
+        inline static const BitRange<InterruptEnable> level2Dma    { 9 };  ///< Defines Level 2 DMA interrupt status. 
+        inline static const BitRange<InterruptEnable> pad          { 8 };  ///< Defines PAD interrupt status. 
+        inline static const BitRange<InterruptEnable> systemManager{ 7 };  ///< Defines System Manager interrupt status. 
+        inline static const BitRange<InterruptEnable> soundRequest { 6 };  ///< Defines Sound Request interrupt status. 
+        inline static const BitRange<InterruptEnable> dspEnd       { 5 };  ///< Defines DSP End interrupt status. 
+        inline static const BitRange<InterruptEnable> timer1       { 4 };  ///< Defines Timer 1 interrupt status. 
+        inline static const BitRange<InterruptEnable> timer0       { 3 };  ///< Defines Timer 0 interrupt status.  
+        inline static const BitRange<InterruptEnable> hBlankIn     { 2 };  ///< Defines H-Blank-In interrupt status. 
+        inline static const BitRange<InterruptEnable> vBlankOut    { 1 };  ///< Defines V-Blank-Out interrupt status. 
+        inline static const BitRange<InterruptEnable> vBlankIn     { 0 };  ///< Defines V-Blank-In interrupt status. 
+        inline static const BitRange<InterruptEnable> undefined    { 0 }; ///< Undefined value.
+
 };
 
 }

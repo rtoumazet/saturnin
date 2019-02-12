@@ -81,14 +81,47 @@ bool Emulator_context::run() {
     dmr.set(DmaModeRegister::startingFactorSelect);
     dmr.reset(DmaModeRegister::startingFactorSelect);
     //isr.set(InterruptStatusRegister::bBus, StartingFactorSelect::timer_1);
-    core::rawWrite<uint32_t>(this->memory()->scu_, 0, 0x00112233);
-    auto start = std::chrono::steady_clock::now();
-    auto dmr = DmaModeRegister(0x000000AA);
-
-    auto end = std::chrono::steady_clock::now();
-    auto diff = end - start;
-    std::cout << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
     
+    {
+        core::rawWrite<uint32_t>(this->memory()->scu_, 0, 0x00112233);
+        auto start = std::chrono::steady_clock::now();
+
+        for (uint32_t i = 0; i < 1000000; ++i) {
+            auto dmr = DmaModeRegister(core::rawRead<uint32_t>(this->memory()->scu_, 0));
+            auto t = dmr.get(DmaModeRegister::startingFactorSelect);
+            //dmr.set(DmaModeRegister::startingFactorSelect, StartingFactorSelect::h_blank_in);
+            //core::rawWrite<uint32_t>(this->memory()->scu_, 0, dmr.toUlong());
+            
+            //auto dmr2 = DmaModeRegister(core::rawRead<uint32_t>(this->memory()->scu_, 0));
+            //dmr.reset(DmaModeRegister::startingFactorSelect);
+            //core::rawWrite<uint32_t>(this->memory()->scu_, 0, dmr.toUlong());
+        }
+        auto end = std::chrono::steady_clock::now();
+        auto diff = end - start;
+        std::cout << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
+    }
+
+    {
+        core::rawWrite<uint32_t>(this->memory()->scu_, 0, 0x00112233);
+        auto start = std::chrono::steady_clock::now();
+
+        for (uint32_t i = 0; i < 1000000; ++i) {
+            uint32_t dmr = core::rawRead<uint32_t>(this->memory()->scu_, 0);
+
+            auto t = static_cast<StartingFactorSelect>(dmr & 0x7);
+            //dmr &= 0xFFFFFFF8;
+            //dmr |= static_cast<uint32_t>(StartingFactorSelect::h_blank_in);
+            //core::rawWrite<uint32_t>(this->memory()->scu_, 0, dmr);
+
+            //uint32_t dmr2 = core::rawRead<uint32_t>(this->memory()->scu_, 0);
+            //dmr &= 0xFFFFFFF8;
+            //core::rawWrite<uint32_t>(this->memory()->scu_, 0, dmr);
+        }
+        auto end = std::chrono::steady_clock::now();
+        auto diff = end - start;
+        std::cout << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
+    }
+
     // TESTING //
 
     uint8_t status{};
