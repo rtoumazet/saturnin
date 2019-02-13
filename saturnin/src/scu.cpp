@@ -222,28 +222,33 @@ void Scu::resetInterruptStatusRegister(const Interrupt& i) {
 bool Scu::isInterruptMasked(const Interrupt& i, bool sentFromMasterSh2) const {
     auto imr = InterruptMaskRegister(rawRead<u32>(scuMemory(), interrupt_mask_register & scu_memory_mask));
     if (sentFromMasterSh2) {
+        imr.get(i.mask);
+        
         switch (i) {
-            case is::nmi.vector:
+            case is::vector_nmi:
             
                 return true;
                 break;
             default:
+                if(i.mask == InterruptMaskRegister::undefined)
+                //i.mask
                 break;
                 
         }
 
     }
     else {
-        //switch (i) {
-        //    case is::nmi.vector:
-        //    case is::v_blank_in.vector:
-        //    case is::h_blank_in.vector:
-        //    case is::frt_input_capture_interrupt.vector:
-        //        return true;
-        //        break;
-        //    default:
-        //        return false;
-        //}
+        // Slave SH2
+        switch (i) {
+            case is::vector_nmi:
+            case is::vector_v_blank_in:
+            case is::vector_h_blank_in:
+            case is::vector_frt_input_capture:
+                return true;
+                break;
+            default:
+                return false;
+        }
     }
 
     
