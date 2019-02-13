@@ -32,6 +32,7 @@
 
 #include "emulator_defs.h"
 #include "emulator_enums.h"
+#include "interrupt_sources.h"
 #include "log.h"
 #include "scu.h"
 
@@ -158,8 +159,8 @@ public:
     bool vdp2_cram_was_accessed_{ false }; ///< true when VDP2 color ram was accessed
 
     Sh2Type sh2_in_operation_ { Sh2Type::unknown}; ///< Which SH2 is in operation
-    bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
-    bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
+    //bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
+    //bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::loadBios(const HardwareMode mode);
@@ -1350,7 +1351,18 @@ template<typename T>
 struct writeMasterSh2Frt {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            m.interrupt_signal_is_sent_from_master_sh2_ = true;
+            //m.interrupt_signal_is_sent_from_master_sh2_ = true;
+            core::Log::warning("memory", core::tr("{}bits write to the master SH2 FRT memory area !"), sizeof(T) * 8);
+        };
+    }
+};
+
+// Specialization for 16 bits data.
+template<>
+struct writeMasterSh2Frt<u16> {
+    operator Memory::WriteType<u16>() const {
+        return [](Memory& m, const u32 addr, const u16 data) {
+            m.masterSh2()->sendInterrupt(interrupt_source::frt_input_capture);
         };
     }
 };
@@ -1370,7 +1382,18 @@ template<typename T>
 struct writeSlaveSh2Frt{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            m.interrupt_signal_is_sent_from_slave_sh2_ = true;
+            //m.interrupt_signal_is_sent_from_slave_sh2_ = true;
+            core::Log::warning("memory", core::tr("{}bits write to the slave SH2 FRT memory area !"), sizeof(T) * 8);
+        };
+    }
+};
+
+// Specialization for 16 bits data.
+template<>
+struct writeSlaveSh2Frt<u16> {
+    operator Memory::WriteType<u16>() const {
+        return [](Memory& m, const u32 addr, const u16 data) {
+            m.slaveSh2()->sendInterrupt(interrupt_source::frt_input_capture);
         };
     }
 };

@@ -31,7 +31,7 @@
 namespace saturnin {
 namespace core {
 
-constexpr struct Interrupt {
+struct Interrupt {
     u8                        vector;
     u8                        level;
     BitRange<InterruptMask>   mask;
