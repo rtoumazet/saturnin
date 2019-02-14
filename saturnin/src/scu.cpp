@@ -230,7 +230,7 @@ bool Scu::isInterruptMasked(const Interrupt& i, bool sentFromMasterSh2) const {
                 return true;
                 break;
             default:
-                if(i.mask == InterruptMaskRegister::undefined)
+                //if(i.mask == InterruptMaskRegister::undefined)
                 //i.mask
                 break;
                 

@@ -446,6 +446,13 @@ bool Memory::isStvProtectionEnabled() const {
     return cart_[relative_addr] == 0x1;
 }
 
+void Memory::sendFrtInterrupt(Sh2Type t) const {
+    switch (t) {
+        case Sh2Type::master: masterSh2()->sendInterrupt(interrupt_source::frt_input_capture); break;
+        case Sh2Type::slave:  slaveSh2()->sendInterrupt(interrupt_source::frt_input_capture);  break;
+    }
+}
+
 Config* Memory::config() const { 
     return emulator_context_->config(); 
 };
