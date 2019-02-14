@@ -35,6 +35,7 @@
 #include "interrupt_sources.h"
 #include "log.h"
 #include "scu.h"
+//#include "sh2.h"
 
 namespace saturnin {
 namespace core {
@@ -277,6 +278,19 @@ public:
         auto& handler = std::get < WriteHandler<T>& >(std::tie(write_8_handler_, write_16_handler_, write_32_handler_));
         handler[addr >> 16](*this, addr, data);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Memory::sendFrtInterrupt(Sh2Type) const;
+    ///
+    /// \brief  Sends a FRT interrupt.
+    ///
+    /// \author Runik
+    /// \date   14/02/2019
+    ///
+    /// \param  parameter1  Type of SH2 sending the interrupt.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void sendFrtInterrupt(Sh2Type) const;
 
     /// \name Context objects accessors
     //@{
@@ -1362,7 +1376,7 @@ template<>
 struct writeMasterSh2Frt<u16> {
     operator Memory::WriteType<u16>() const {
         return [](Memory& m, const u32 addr, const u16 data) {
-            m.masterSh2()->sendInterrupt(interrupt_source::frt_input_capture);
+            m.sendFrtInterrupt(Sh2Type::master);
         };
     }
 };
@@ -1393,7 +1407,7 @@ template<>
 struct writeSlaveSh2Frt<u16> {
     operator Memory::WriteType<u16>() const {
         return [](Memory& m, const u32 addr, const u16 data) {
-            m.slaveSh2()->sendInterrupt(interrupt_source::frt_input_capture);
+            m.sendFrtInterrupt(Sh2Type::slave);
         };
     }
 };
