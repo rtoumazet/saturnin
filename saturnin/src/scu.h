@@ -26,6 +26,7 @@
 #pragma once
 
 #include "emulator_defs.h"
+#include "emulator_enums.h"
 #include "interrupt_sources.h"
 
 namespace saturnin {
@@ -125,20 +126,20 @@ public:
     void resetInterruptStatusRegister(const Interrupt& i);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Scu::isInterruptMasked(const Interrupt& i, bool sentFromMasterSh2);
+    /// \fn bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t ) const;
     ///
     /// \brief  Checks if the interrupt is masked in the SCU.
     ///
     /// \author Runik
     /// \date   10/02/2019
     ///
-    /// \param  i                   Interrupt to check.
-    /// \param  sentFromMasterSh2   True if the check is done from the master SH2, false if from slave SH2.
+    /// \param  i   Interrupt to check.
+    /// \param  t   Type of SH2 to check.
     ///
     /// \return True if interrupt is masked.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool isInterruptMasked(const Interrupt& i, bool sentFromMasterSh2) const;
+    bool isInterruptMasked(const Interrupt& i, Sh2Type t) const;
 
 private:
 

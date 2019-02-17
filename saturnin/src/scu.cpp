@@ -141,117 +141,80 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 
 void Scu::setInterruptStatusRegister(const Interrupt& i) {
     auto isr = InterruptStatusRegister(rawRead<u32>(scuMemory(), interrupt_status_register & scu_memory_mask));
-
-    //switch (i) {
-    //    case is::v_blank_in.vector:            isr.set(InterruptStatusRegister::vBlankInInterruptStatus);      break;
-    //    case is::v_blank_out.vector:           isr.set(InterruptStatusRegister::vBlankOutInterruptStatus);     break;
-    //    case is::h_blank_in.vector:            isr.set(InterruptStatusRegister::hBlankInInterruptStatus);      break;
-    //    case is::timer_0.vector:               isr.set(InterruptStatusRegister::timer0InterruptStatus);        break;
-    //    case is::timer_1.vector:               isr.set(InterruptStatusRegister::timer1InterruptStatus);        break;
-    //    case is::dsp_end.vector:               isr.set(InterruptStatusRegister::dspEndInterruptStatus);        break;
-    //    case is::sound_request.vector:         isr.set(InterruptStatusRegister::soundRequestInterruptStatus);  break;
-    //    case is::system_manager.vector:        isr.set(InterruptStatusRegister::systemManagerInterruptStatus); break;
-    //    case is::pad_interrupt.vector:         isr.set(InterruptStatusRegister::padInterruptStatus);           break;
-    //    case is::level_2_dma_end.vector:       isr.set(InterruptStatusRegister::level2DmaInterruptStatus);     break;
-    //    case is::level_1_dma_end.vector:       isr.set(InterruptStatusRegister::level1DmaInterruptStatus);     break;
-    //    case is::level_0_dma_end.vector:       isr.set(InterruptStatusRegister::level0DmaInterruptStatus);     break;
-    //    case is::dma_illegal.vector:           isr.set(InterruptStatusRegister::dmaIllegalInterruptStatus);    break;
-    //    case is::sprite_draw_end.vector:       isr.set(InterruptStatusRegister::spriteDrawEndInterruptStatus); break;
-    //    case is::external_interrupt_00.vector: isr.set(InterruptStatusRegister::externalInterrupt00Status);    break;
-    //    case is::external_interrupt_01.vector: isr.set(InterruptStatusRegister::externalInterrupt01Status);    break;
-    //    case is::external_interrupt_02.vector: isr.set(InterruptStatusRegister::externalInterrupt02Status);    break;
-    //    case is::external_interrupt_03.vector: isr.set(InterruptStatusRegister::externalInterrupt03Status);    break;
-    //    case is::external_interrupt_04.vector: isr.set(InterruptStatusRegister::externalInterrupt04Status);    break;
-    //    case is::external_interrupt_05.vector: isr.set(InterruptStatusRegister::externalInterrupt05Status);    break;
-    //    case is::external_interrupt_06.vector: isr.set(InterruptStatusRegister::externalInterrupt06Status);    break;
-    //    case is::external_interrupt_07.vector: isr.set(InterruptStatusRegister::externalInterrupt07Status);    break;
-    //    case is::external_interrupt_08.vector: isr.set(InterruptStatusRegister::externalInterrupt08Status);    break;
-    //    case is::external_interrupt_09.vector: isr.set(InterruptStatusRegister::externalInterrupt09Status);    break;
-    //    case is::external_interrupt_10.vector: isr.set(InterruptStatusRegister::externalInterrupt10Status);    break;
-    //    case is::external_interrupt_11.vector: isr.set(InterruptStatusRegister::externalInterrupt11Status);    break;
-    //    case is::external_interrupt_12.vector: isr.set(InterruptStatusRegister::externalInterrupt12Status);    break;
-    //    case is::external_interrupt_13.vector: isr.set(InterruptStatusRegister::externalInterrupt13Status);    break;
-    //    case is::external_interrupt_14.vector: isr.set(InterruptStatusRegister::externalInterrupt14Status);    break;
-    //    case is::external_interrupt_15.vector: isr.set(InterruptStatusRegister::externalInterrupt15Status);    break;
-    //    default: break;
-    //}
-
+    isr.set(i.status);
     rawWrite<u32>(scuMemory(), interrupt_status_register & scu_memory_mask, isr.toUlong());
 };
 
 void Scu::resetInterruptStatusRegister(const Interrupt& i) {
     auto isr = InterruptStatusRegister(rawRead<u32>(scuMemory(), interrupt_status_register & scu_memory_mask));
-
-    //switch (i) {
-    //    case is::v_blank_in.vector:            isr.reset(InterruptStatusRegister::vBlankInInterruptStatus);      break;
-    //    case is::v_blank_out.vector:           isr.reset(InterruptStatusRegister::vBlankOutInterruptStatus);     break;
-    //    case is::h_blank_in.vector:            isr.reset(InterruptStatusRegister::hBlankInInterruptStatus);      break;
-    //    case is::timer_0.vector:               isr.reset(InterruptStatusRegister::timer0InterruptStatus);        break;
-    //    case is::timer_1.vector:               isr.reset(InterruptStatusRegister::timer1InterruptStatus);        break;
-    //    case is::dsp_end.vector:               isr.reset(InterruptStatusRegister::dspEndInterruptStatus);        break;
-    //    case is::sound_request.vector:         isr.reset(InterruptStatusRegister::soundRequestInterruptStatus);  break;
-    //    case is::system_manager.vector:        isr.reset(InterruptStatusRegister::systemManagerInterruptStatus); break;
-    //    case is::pad_interrupt.vector:         isr.reset(InterruptStatusRegister::padInterruptStatus);           break;
-    //    case is::level_2_dma_end.vector:       isr.reset(InterruptStatusRegister::level2DmaInterruptStatus);     break;
-    //    case is::level_1_dma_end.vector:       isr.reset(InterruptStatusRegister::level1DmaInterruptStatus);     break;
-    //    case is::level_0_dma_end.vector:       isr.reset(InterruptStatusRegister::level0DmaInterruptStatus);     break;
-    //    case is::dma_illegal.vector:           isr.reset(InterruptStatusRegister::dmaIllegalInterruptStatus);    break;
-    //    case is::sprite_draw_end.vector:       isr.reset(InterruptStatusRegister::spriteDrawEndInterruptStatus); break;
-    //    case is::external_interrupt_00.vector: isr.reset(InterruptStatusRegister::externalInterrupt00Status);    break;
-    //    case is::external_interrupt_01.vector: isr.reset(InterruptStatusRegister::externalInterrupt01Status);    break;
-    //    case is::external_interrupt_02.vector: isr.reset(InterruptStatusRegister::externalInterrupt02Status);    break;
-    //    case is::external_interrupt_03.vector: isr.reset(InterruptStatusRegister::externalInterrupt03Status);    break;
-    //    case is::external_interrupt_04.vector: isr.reset(InterruptStatusRegister::externalInterrupt04Status);    break;
-    //    case is::external_interrupt_05.vector: isr.reset(InterruptStatusRegister::externalInterrupt05Status);    break;
-    //    case is::external_interrupt_06.vector: isr.reset(InterruptStatusRegister::externalInterrupt06Status);    break;
-    //    case is::external_interrupt_07.vector: isr.reset(InterruptStatusRegister::externalInterrupt07Status);    break;
-    //    case is::external_interrupt_08.vector: isr.reset(InterruptStatusRegister::externalInterrupt08Status);    break;
-    //    case is::external_interrupt_09.vector: isr.reset(InterruptStatusRegister::externalInterrupt09Status);    break;
-    //    case is::external_interrupt_10.vector: isr.reset(InterruptStatusRegister::externalInterrupt10Status);    break;
-    //    case is::external_interrupt_11.vector: isr.reset(InterruptStatusRegister::externalInterrupt11Status);    break;
-    //    case is::external_interrupt_12.vector: isr.reset(InterruptStatusRegister::externalInterrupt12Status);    break;
-    //    case is::external_interrupt_13.vector: isr.reset(InterruptStatusRegister::externalInterrupt13Status);    break;
-    //    case is::external_interrupt_14.vector: isr.reset(InterruptStatusRegister::externalInterrupt14Status);    break;
-    //    case is::external_interrupt_15.vector: isr.reset(InterruptStatusRegister::externalInterrupt15Status);    break;
-    //    default: break;
-    //}
-
+    isr.reset(i.status);
     rawWrite<u32>(scuMemory(), interrupt_status_register & scu_memory_mask, isr.toUlong());
 };
 
-bool Scu::isInterruptMasked(const Interrupt& i, bool sentFromMasterSh2) const {
+bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t) const {
     auto imr = InterruptMaskRegister(rawRead<u32>(scuMemory(), interrupt_mask_register & scu_memory_mask));
-    if (sentFromMasterSh2) {
-        imr.get(i.mask);
-        
-        switch (i) {
-            case is::vector_nmi:
-            
-                return true;
-                break;
-            default:
-                //if(i.mask == InterruptMaskRegister::undefined)
-                //i.mask
-                break;
-                
-        }
-
-    }
-    else {
-        // Slave SH2
-        switch (i) {
-            case is::vector_nmi:
-            case is::vector_v_blank_in:
-            case is::vector_h_blank_in:
-            case is::vector_frt_input_capture:
-                return true;
-                break;
-            default:
-                return false;
-        }
-    }
-
-    
+    switch(t) {
+        case Sh2Type::master:
+            switch (i) {
+                case is::vector_nmi: 
+                    // NMI interrupt is always accepted
+                    return true; 
+                    break;
+                case is::vector_system_manager:
+                    if (emulator_context_->hardwareMode_ == HardwareMode::stv) return true;
+                    else return (imr.get(i.mask) == InterruptMask::masked);
+                    break;
+                case is::vector_v_blank_in:
+                case is::vector_v_blank_out:
+                case is::vector_h_blank_in:
+                case is::vector_timer_0:
+                case is::vector_timer_1:
+                case is::vector_dsp_end:
+                case is::vector_sound_request:
+                case is::vector_pad_interrupt:
+                case is::vector_level_2_dma_end:
+                case is::vector_level_1_dma_end:
+                case is::vector_level_0_dma_end:
+                case is::vector_dma_illegal:
+                case is::vector_sprite_draw_end:
+                case is::vector_external_00:
+                case is::vector_external_01:
+                case is::vector_external_02:
+                case is::vector_external_03:
+                case is::vector_external_04:
+                case is::vector_external_05:
+                case is::vector_external_06:
+                case is::vector_external_07:
+                case is::vector_external_08:
+                case is::vector_external_09:
+                case is::vector_external_10:
+                case is::vector_external_11:
+                case is::vector_external_12:
+                case is::vector_external_13:
+                case is::vector_external_14:
+                case is::vector_external_15:
+                case is::vector_frt_input_capture:
+                    return (imr.get(i.mask) == InterruptMask::masked);
+                    break;
+                default: 
+                    return false;
+                    break;
+            }
+            break;
+        case Sh2Type::slave:
+            switch (i) {
+                case is::vector_nmi:
+                case is::vector_v_blank_in:
+                case is::vector_h_blank_in:
+                case is::vector_frt_input_capture:
+                    return true;
+                    break;
+                default:
+                    return false;
+            }
+            break;
+    } 
+    return false;
 }
 
 void Scu::initializeRegisters() {

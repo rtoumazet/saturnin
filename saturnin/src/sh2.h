@@ -36,6 +36,8 @@ namespace core {
 // Forward declarations
 class Emulator_context;
 
+constexpr u8 max_interrupt_number = 10;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Sh2
 ///
@@ -50,7 +52,7 @@ class Sh2 {
     //@{
     // Constructors / Destructors
     Sh2()                        = delete;
-    Sh2(bool is_master, Emulator_context* ec);
+    Sh2(Sh2Type st, Emulator_context* ec);
     Sh2(const Sh2&)              = delete;
     Sh2(Sh2&&)                   = delete;
     Sh2& operator=(const Sh2&) & = delete;
@@ -375,7 +377,7 @@ private:
     std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
     std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
     std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).
-    bool is_master_;                            ///< True if the SH2 is configured as master, false if as slave.
+    Sh2Type sh2_type_;                          ///< Type of the SH2.
 
     /// \name Interrupt management
     //@{

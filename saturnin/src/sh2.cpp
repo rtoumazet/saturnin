@@ -25,7 +25,7 @@
 namespace saturnin {
 namespace core {
 
-Sh2::Sh2(bool is_master, Emulator_context* ec) : is_master_(is_master), emulator_context_(ec) {
+Sh2::Sh2(Sh2Type st, Emulator_context* ec) : sh2_type_(st), emulator_context_(ec) {
     is_interrupted_ = false;
     pending_interrupts_.clear();
 
@@ -64,7 +64,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
     switch (addr) {
         /* FRT */
         case timer_interrupt_enable_register:
-            if (is_master_) Log::debug("sh2", "TIER byte write (master SH2)");
+            if (sh2_type_ == Sh2Type::master) Log::debug("sh2", "TIER byte write (master SH2)");
             else Log::debug("sh2", "TIER byte write (slave SH2)");
             break;
         case output_compare_register_b_h: {
@@ -124,7 +124,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
 void Sh2::writeRegisters(u32 addr, u16 data) {
     switch (addr) {
         case timer_interrupt_enable_register:
-            if (is_master_) Log::debug("sh2", "TIER word write (master SH2)");
+            if (sh2_type_ == Sh2Type::master) Log::debug("sh2", "TIER word write (master SH2)");
             else Log::debug("sh2", "TIER word write (slave SH2)");
             rawWrite<u16>(io_registers_, addr & 0x1FF, data);
             break;
@@ -163,7 +163,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
 void Sh2::writeRegisters(u32 addr, u32 data) {
     switch (addr) {
         case timer_interrupt_enable_register:
-            if (is_master_) Log::debug("sh2", "TIER long write (master SH2)");
+            if (sh2_type_ == Sh2Type::master) Log::debug("sh2", "TIER long write (master SH2)");
             else Log::debug("sh2", "TIER long write (slave SH2)");
             rawWrite<u32>(io_registers_, addr & sh2_memory_mask, data);
             break;
@@ -287,10 +287,21 @@ auto Sh2::scu() const {
 
 void Sh2::sendInterrupt(const Interrupt& i) {
     if (i.level != 0) {
-        
         scu()->setInterruptStatusRegister(i);
-        
+        if (!scu()->isInterruptMasked(i, sh2_type_)) {
+            if (pending_interrupts_.size() <= max_interrupt_number) {
+                // WIP
+            }
+            else {
+                // Max number of pending interrupts reached, nothing is added
+                
+                // When the interrupt is NMI, the lower priority interrupt is removed
+                pending_interrupts_.pop_back();
+                //pending_interrupts_.push_front(is::)
 
+            }
+
+        }
     }
 }
 
