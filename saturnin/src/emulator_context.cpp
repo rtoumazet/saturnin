@@ -32,8 +32,8 @@ namespace core {
 
 Emulator_context::Emulator_context() {
     config_     = std::make_unique<Config>("saturnin.cfg");
-    master_sh2_ = std::make_unique<Sh2>(true, this);
-    slave_sh2_  = std::make_unique<Sh2>(false, this);
+    master_sh2_ = std::make_unique<Sh2>(Sh2Type::master, this);
+    slave_sh2_  = std::make_unique<Sh2>(Sh2Type::slave, this);
     memory_     = std::make_unique<Memory>(this);
     scu_        = std::make_unique<Scu>(this);
 }
