@@ -37,6 +37,7 @@ namespace core {
 class Emulator_context;
 
 constexpr u8 max_interrupt_number = 10;
+constexpr u8 max_interrupt_level  = 10;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Sh2
@@ -381,27 +382,28 @@ private:
 
     /// \name Interrupt management
     //@{
-    std::list<Interrupt>    pending_interrupts_;///< List of pending interrupts.
-    bool                    is_interrupted_;    ///< True if this sh2 is interrupted.
+    std::list<Interrupt>                    pending_interrupts_{};    ///< List of pending interrupts.
+    bool                                    is_interrupted_{};        ///< True if this sh2 is interrupted.
+    std::array<bool, max_interrupt_level>   is_level_interrupted_{};///< Determines if any given level is already interrupted.
     //@}
 
     /// \name DIVU (Division unit)
     //@{
-    u8      divu_remaining_cycles_; ///< Remaining cycles to end current division
+    u8      divu_remaining_cycles_{}; ///< Remaining cycles to end current division
     //@}
 
     /// \name FRT (Free Running Timer)
     //@{
-    s32	    frt_elapsed_cycles_;///< Elapsed FRT cycles. 
-    u8	    frt_clock_;	        ///< FRT clock. 
-    u8	    frt_mask_;	        ///< FRT mask. 
-    u16     frt_ocra_;	        ///< Output Compare Register A. 
-    u16     frt_ocrb_;	        ///< Output Compare Register B.
-    bool    frt_icie_;	        ///< Input Capture Interrupt Enable. 
-    bool    frt_ociae_;	        ///< Output Compare Interrupt A Enable. 
-    bool    frt_ocibe_;	        ///< Output Compare Interrupt B Enable.
-    bool    frt_ovie_;	        ///< Timer Overflow Interrupt Enable. 
-    bool    frt_current_ocr_;	///< Current Output Compare Register. 
+    s32	    frt_elapsed_cycles_{};///< Elapsed FRT cycles. 
+    u8	    frt_clock_{};	        ///< FRT clock. 
+    u8	    frt_mask_{};	        ///< FRT mask. 
+    u16     frt_ocra_{};	        ///< Output Compare Register A. 
+    u16     frt_ocrb_{};	        ///< Output Compare Register B.
+    bool    frt_icie_{};	        ///< Input Capture Interrupt Enable. 
+    bool    frt_ociae_{};	        ///< Output Compare Interrupt A Enable. 
+    bool    frt_ocibe_{};	        ///< Output Compare Interrupt B Enable.
+    bool    frt_ovie_{};	        ///< Timer Overflow Interrupt Enable. 
+    bool    frt_current_ocr_{};	///< Current Output Compare Register. 
     //@}
 };
 

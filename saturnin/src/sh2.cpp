@@ -22,13 +22,12 @@
 #include "emulator_context.h"
 #include "scu_registers.h"
 
+namespace is = saturnin::core::interrupt_source;
+
 namespace saturnin {
 namespace core {
 
 Sh2::Sh2(Sh2Type st, Emulator_context* ec) : sh2_type_(st), emulator_context_(ec) {
-    is_interrupted_ = false;
-    pending_interrupts_.clear();
-
     reset();
 }
 
@@ -290,17 +289,34 @@ void Sh2::sendInterrupt(const Interrupt& i) {
         scu()->setInterruptStatusRegister(i);
         if (!scu()->isInterruptMasked(i, sh2_type_)) {
             if (pending_interrupts_.size() <= max_interrupt_number) {
-                // WIP
+                if (!is_level_interrupted_[i.level]) {
+                    is_level_interrupted_[i.level] = true;
+                    pending_interrupts_.push_front(i);
+                    
+                    // Sorting (greatest priority first)
+                    pending_interrupts_.sort();
+                    pending_interrupts_.reverse();
+
+                    Log::debug("sh2", "{} SH2 interrupt pending : {:#0x}", (sh2_type_== Sh2Type::master) ? "Master" : "Slave", i.vector);
+                }
             }
             else {
                 // Max number of pending interrupts reached, nothing is added
+                Log::debug("sh2", "Maximum number of pending interrupts reached");
                 
                 // When the interrupt is NMI, the lower priority interrupt is removed
-                pending_interrupts_.pop_back();
-                //pending_interrupts_.push_front(is::)
+                if (i.vector == is::vector_nmi) {
+                    pending_interrupts_.pop_back();
+                    pending_interrupts_.push_front(is::nmi);
 
+                    // Sorting (greatest priority first)
+                    pending_interrupts_.sort();
+                    pending_interrupts_.reverse();
+
+                    Log::debug("sh2", "NMI interrupt forced");
+
+                }
             }
-
         }
     }
 }
