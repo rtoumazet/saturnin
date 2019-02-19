@@ -465,31 +465,6 @@ class DmaStatusRegister : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct DmaConfiguration
-///
-/// \brief  Will hold configuration data for level 0-2 DMA transfers.
-///
-/// \author Runik
-/// \date   24/01/2019
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct DmaConfiguration {
-    u32                  read_address;
-    u32                  write_address;
-    u32                  transfer_byte_number;
-    ReadAddressAddValue  read_add_value;
-    WriteAddressAddValue write_add_value;
-    DmaEnable            dma_enable;
-    DmaStarting          dma_starting;
-    DmaMode              dma_mode;
-    ReadAddressUpdate    read_address_update;
-    WriteAddressUpdate   write_address_update;
-    StartingFactorSelect starting_factor_select;
-};
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   InterruptMask
 ///
 /// \brief  Values that represent interrupt masks.

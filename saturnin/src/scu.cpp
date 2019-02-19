@@ -136,6 +136,18 @@ void Scu::write32(const u32 addr, const u32 data) {
 };
 
 void Scu::executeDma(const DmaConfiguration& dc) {
+    switch (dc.dma_mode) {
+        case DmaMode::direct:
+            //DmaStarting::started
+            break;
+        case DmaMode::indirect:
+
+            break;
+        default:
+            Log::warning("scu", "Unknown DMA mode !");
+    }
+
+    
 //    switch (GetBitValue(static_cast<uint32_t>(d0md), 24)) { // DMA Mode 
 //        case 0x0:
 //            // Direct mode
@@ -677,6 +689,7 @@ DmaConfiguration Scu::configureDmaTransfer(DmaLevel level) const {
         default:
             break;
     }
+    dc.dma_level = level;
     return dc;
 }
 
