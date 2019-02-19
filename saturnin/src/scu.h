@@ -35,7 +35,6 @@ namespace core {
 // Forward declarations
 class Memory;
 class Emulator_context;
-struct DmaConfiguration;
 
 enum class DmaLevel {
     level_unknown,  ///< Unknown level.
@@ -43,6 +42,31 @@ enum class DmaLevel {
     level_1,        ///< Level 1 DMA.
     level_2         ///< Level 2 DMA.
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct DmaConfiguration
+///
+/// \brief  Will hold configuration data for level 0-2 DMA transfers.
+///
+/// \author Runik
+/// \date   24/01/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct DmaConfiguration {
+    DmaLevel             dma_level;
+    u32                  read_address;
+    u32                  write_address;
+    u32                  transfer_byte_number;
+    ReadAddressAddValue  read_add_value;
+    WriteAddressAddValue write_add_value;
+    DmaEnable            dma_enable;
+    DmaStarting          dma_starting;
+    DmaMode              dma_mode;
+    ReadAddressUpdate    read_address_update;
+    WriteAddressUpdate   write_address_update;
+    StartingFactorSelect starting_factor_select;
+};
+
 
 class Scu {
 public:
