@@ -273,7 +273,8 @@ enum class StartingFactorSelect : u8 {
     timer_1          = 0b100,  ///< Timer 1 signal receive and enable bit setting.
     sound_req        = 0b101,  ///< Sound Req signal receive and enable bit setting.
     sprite_draw_end  = 0b110,  ///< Sprite draw end signal receive and enable bit setting.
-    dma_start_factor = 0b111   ///< DMA starting factor setting and enable bit setting.
+    dma_start_factor = 0b111,  ///< DMA starting factor setting and enable bit setting.
+    none             = 0b11111111
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
