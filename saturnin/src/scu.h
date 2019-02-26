@@ -292,6 +292,7 @@ private:
 
     Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
 
+    StartingFactorSelect dam_start_trigger_ = { StartingFactorSelect::none };
 
 };
 
