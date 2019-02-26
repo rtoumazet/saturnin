@@ -382,8 +382,8 @@ private:
 
     /// \name Interrupt management
     //@{
-    std::list<Interrupt>                    pending_interrupts_{};    ///< List of pending interrupts.
-    bool                                    is_interrupted_{};        ///< True if this sh2 is interrupted.
+    std::list<Interrupt>                    pending_interrupts_ = {};    ///< List of pending interrupts.
+    bool                                    is_interrupted_ = false;        ///< True if this sh2 is interrupted.
     std::array<bool, max_interrupt_level>   is_level_interrupted_{};///< Determines if any given level is already interrupted.
     //@}
 
