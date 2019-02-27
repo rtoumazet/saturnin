@@ -28,6 +28,14 @@ namespace is = saturnin::core::interrupt_source;
 namespace saturnin {
 namespace core {
 
+// SCU DMA accesses
+// Write to A-Bus prohibited
+// Read from VDP2 area prohibited (B-Bus)
+// Write to VP1 registers (B-Bus) must use 2 bytes
+// Access to Workram L not possible
+// During DMA operation A -> B or B -> A, no CPU access to A-Bus
+
+
 Scu::Scu(Emulator_context* ec) : emulator_context_(ec) {
     initializeRegisters();
 };
