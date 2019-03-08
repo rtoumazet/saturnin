@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <vector>
 #include "emulator_defs.h"
 #include "emulator_enums.h"
 #include "interrupt_sources.h"
@@ -43,6 +44,13 @@ enum class DmaLevel {
     level_2         ///< Level 2 DMA.
 };
 
+enum class DmaStatus : uint8_t {
+    finished                = 0,
+    waiting_start_factor    = 1,
+    queued                  = 2,
+    active                  = 3
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct DmaConfiguration
 ///
@@ -54,6 +62,7 @@ enum class DmaLevel {
 
 struct DmaConfiguration {
     DmaLevel             dma_level;
+    DmaStatus            dma_status;
     u32                  read_address;
     u32                  write_address;
     u32                  transfer_byte_number;
@@ -290,10 +299,13 @@ private:
 
     void initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const;
 
+    void addDmaToQueue(const DmaConfiguration& dc);
+
+    void sortDma();
+
     Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
-
-    StartingFactorSelect dam_start_trigger_ = { StartingFactorSelect::none };
-
+    
+    std::vector<DmaConfiguration> dma_queue_;
 };
 
 }
