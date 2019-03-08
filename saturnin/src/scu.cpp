@@ -104,21 +104,24 @@ void Scu::write32(const u32 addr, const u32 data) {
         case level_0_dma_enable_register: {
             if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
                 auto dma_0_config = configureDmaTransfer(DmaLevel::level_0);
-                executeDma(dma_0_config);
+                //executeDma(dma_0_config);
+                addDmaToQueue(dma_0_config);
             }
             break;
         }
         case level_1_dma_enable_register: {
             if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
                 auto dma_1_config = configureDmaTransfer(DmaLevel::level_1);
-                executeDma(dma_1_config);
+                //executeDma(dma_1_config);
+                addDmaToQueue(dma_1_config);
             }
             break;
         }
         case level_2_dma_enable_register: {
             if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
                 auto dma_2_config = configureDmaTransfer(DmaLevel::level_2);
-                executeDma(dma_2_config);
+                //executeDma(dma_2_config);
+                addDmaToQueue(dma_2_config);
             }
             break;
         }
@@ -147,7 +150,8 @@ void Scu::executeDma(const DmaConfiguration& dc) {
             Log::warning("scu", "Unknown DMA mode !");
     }
 
-    
+    // If DMA enable bit is set and start factor occurs, DMA transfer is added to the queue
+
 //    switch (GetBitValue(static_cast<uint32_t>(d0md), 24)) { // DMA Mode 
 //        case 0x0:
 //            // Direct mode
@@ -743,6 +747,26 @@ void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, const u32 register_add
 void Scu::initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const {
     auto rar        = DmaReadAddressRegister(rawRead<u32>(scuMemory(), register_address & scu_memory_mask));
     dc.read_address = rar.get(DmaReadAddressRegister::readAddress);
+}
+
+void Scu::addDmaToQueue(const DmaConfiguration& dc) {
+    switch (dc.starting_factor_select) {
+        case StartingFactorSelect::dma_start_factor:
+            dc.dma_status == DmaStatus::queued;
+            break;
+        default:
+            dc.dma_status == DmaStatus::waiting_start_factor;
+    }
+    
+    dma_queue_.push_back(dc);
+}
+
+void Scu::sortDma() {
+    std::sort(dma_queue_.begin(), dma_queue_.end(), [](const DmaConfiguration& a, const DmaConfiguration& b) {
+        if (a.dma_status > b.dma_status) return true;
+        if (a.dma_status < b.dma_status) return false;
+
+    })
 }
 
 }
