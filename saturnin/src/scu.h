@@ -299,7 +299,7 @@ private:
 
     void initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const;
 
-    void addDmaToQueue(const DmaConfiguration& dc);
+    void addDmaToQueue(DmaConfiguration& dc);
 
     void sortDma();
 

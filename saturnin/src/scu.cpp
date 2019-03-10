@@ -757,13 +757,13 @@ void Scu::initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_addr
     dc.read_address = rar.get(DmaReadAddressRegister::readAddress);
 }
 
-void Scu::addDmaToQueue(const DmaConfiguration& dc) {
+void Scu::addDmaToQueue(DmaConfiguration& dc) {
     switch (dc.starting_factor_select) {
         case StartingFactorSelect::dma_start_factor:
-            dc.dma_status == DmaStatus::queued;
+            dc.dma_status = DmaStatus::queued;
             break;
         default:
-            dc.dma_status == DmaStatus::waiting_start_factor;
+            dc.dma_status = DmaStatus::waiting_start_factor;
     }
     
     dma_queue_.push_back(dc);
@@ -774,7 +774,7 @@ void Scu::sortDma() {
         if (a.dma_status > b.dma_status) return true;
         if (a.dma_status < b.dma_status) return false;
 
-    })
+    });
 }
 
 }
