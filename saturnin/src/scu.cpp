@@ -771,9 +771,7 @@ void Scu::addDmaToQueue(DmaConfiguration& dc) {
 
 void Scu::sortDma() {
     std::sort(dma_queue_.begin(), dma_queue_.end(), [](const DmaConfiguration& a, const DmaConfiguration& b) {
-        if (a.dma_status > b.dma_status) return true;
-        if (a.dma_status < b.dma_status) return false;
-
+        return (a.dma_status > b.dma_status);
     });
 }
 
