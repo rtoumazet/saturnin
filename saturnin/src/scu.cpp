@@ -767,12 +767,19 @@ void Scu::addDmaToQueue(DmaConfiguration& dc) {
     }
     
     dma_queue_.push_back(dc);
+
 }
 
 void Scu::sortDma() {
     std::sort(dma_queue_.begin(), dma_queue_.end(), [](const DmaConfiguration& a, const DmaConfiguration& b) {
         return (a.dma_status > b.dma_status);
     });
+}
+
+void Scu::activateDma() {
+    sortDma();
+
+    dma_queue_.
 }
 
 }

@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include <vector>
+#include <queue> // priority_queue
+#include <vector> // vector
 #include "emulator_defs.h"
 #include "emulator_enums.h"
 #include "interrupt_sources.h"
@@ -302,6 +303,17 @@ private:
     void addDmaToQueue(DmaConfiguration& dc);
 
     void sortDma();
+
+    auto compare = [](const DmaConfiguration& dc1, const DmaConfiguration& dc2)
+    { return dc1.dma_status  > dc2.dma_status; };
+
+    typedef std::vector<DmaConfiguration> DmaConfigurations;
+    typedef std::priority_queue<DmaConfiguration, DmaConfigurations, decltype(compare)> StatePrioQ;
+
+
+    StatePrioQ	pq(compare);
+
+    void activateDma();
 
     Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
     
