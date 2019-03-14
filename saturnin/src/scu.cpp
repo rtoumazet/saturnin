@@ -766,20 +766,35 @@ void Scu::addDmaToQueue(DmaConfiguration& dc) {
             dc.dma_status = DmaStatus::waiting_start_factor;
     }
     
-    dma_queue_.push_back(dc);
+    dma_queue_.push(dc);
 
 }
 
 void Scu::sortDma() {
-    std::sort(dma_queue_.begin(), dma_queue_.end(), [](const DmaConfiguration& a, const DmaConfiguration& b) {
-        return (a.dma_status > b.dma_status);
-    });
+    //std::sort(dma_queue_.begin(), dma_queue_.end(), [](const DmaConfiguration& a, const DmaConfiguration& b) {
+    //    return (a.dma_status > b.dma_status);
+    //});
 }
 
 void Scu::activateDma() {
     sortDma();
 
-    dma_queue_.
+    //dma_queue_.
+}
+
+void Scu::dmaTest() {
+    DmaConfiguration dc;
+    dc.dma_status = DmaStatus::finished;
+    dma_queue_.push(dc);
+    dc.dma_status = DmaStatus::queued;
+    dma_queue_.push(dc);
+    dc.dma_status = DmaStatus::waiting_start_factor;
+    dma_queue_.push(dc);
+
+    while (!dma_queue_.empty()) {
+        std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
+        dma_queue_.pop();
+    }
 }
 
 }
