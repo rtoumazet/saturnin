@@ -122,6 +122,11 @@ bool Emulator_context::run() {
         std::cout << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
     }
 
+    scu_->dmaTest();
+
+
+  
+
     // TESTING //
 
     uint8_t status{};

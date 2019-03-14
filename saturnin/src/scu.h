@@ -175,6 +175,8 @@ public:
 
     bool isInterruptMasked(const Interrupt& i, Sh2Type t) const;
 
+    void dmaTest();
+
 private:
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,21 +306,27 @@ private:
 
     void sortDma();
 
-    auto compare = [](const DmaConfiguration& dc1, const DmaConfiguration& dc2)
-    { return dc1.dma_status  > dc2.dma_status; };
-
+    struct DmaCompare
+    {
+        bool operator()(const DmaConfiguration &dc1, const DmaConfiguration &dc2) const
+        {
+            return dc1.dma_status < dc2.dma_status;
+        }
+    };
+    
     typedef std::vector<DmaConfiguration> DmaConfigurations;
-    typedef std::priority_queue<DmaConfiguration, DmaConfigurations, decltype(compare)> StatePrioQ;
-
-
-    StatePrioQ	pq(compare);
-
+    std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare> dma_queue_;
+    
     void activateDma();
 
     Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
     
-    std::vector<DmaConfiguration> dma_queue_;
 };
+
+//inline
+//bool operator<(const DmaConfiguration& lhs, const DmaConfiguration& rhs) {
+//    return lhs.dma_status < rhs.dma_status;
+//}
 
 }
 }
