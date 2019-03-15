@@ -158,6 +158,8 @@ void Scu::executeDma(const DmaConfiguration& dc) {
             Log::warning("scu", "Unknown DMA mode !");
     }
 
+    
+
     // If DMA enable bit is set and start factor occurs, DMA transfer is added to the queue
 
 //    switch (GetBitValue(static_cast<uint32_t>(d0md), 24)) { // DMA Mode 
@@ -770,16 +772,31 @@ void Scu::addDmaToQueue(DmaConfiguration& dc) {
 
 }
 
-void Scu::sortDma() {
-    //std::sort(dma_queue_.begin(), dma_queue_.end(), [](const DmaConfiguration& a, const DmaConfiguration& b) {
-    //    return (a.dma_status > b.dma_status);
-    //});
-}
-
 void Scu::activateDma() {
-    sortDma();
+    // Timing is not handled for now, DMA transfer is immediate
 
-    //dma_queue_.
+    switch (dma_queue_.top().dma_status) {
+        case DmaStatus::active:
+
+            break;
+        case DmaStatus::queued:
+            executeDma(dma_queue_.top());
+            auto dc{ dma_queue_.top() };
+            dc.dma_status = DmaStatus::finished;
+            dma_queue_.pop();
+            dma_queue_.push(dc);
+            break;
+        case DmaStatus::waiting_start_factor:
+
+            break;
+        case DmaStatus::finished:
+
+            break;
+        default:
+            ;
+    }
+
+    //if(dma_queue_.top().dma_status ==)
 }
 
 void Scu::dmaTest() {
@@ -790,6 +807,8 @@ void Scu::dmaTest() {
     dma_queue_.push(dc);
     dc.dma_status = DmaStatus::waiting_start_factor;
     dma_queue_.push(dc);
+
+    activateDma();
 
     while (!dma_queue_.empty()) {
         std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
