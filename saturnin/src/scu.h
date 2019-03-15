@@ -304,12 +304,8 @@ private:
 
     void addDmaToQueue(DmaConfiguration& dc);
 
-    void sortDma();
-
-    struct DmaCompare
-    {
-        bool operator()(const DmaConfiguration &dc1, const DmaConfiguration &dc2) const
-        {
+    struct DmaCompare {
+        bool operator()(const DmaConfiguration &dc1, const DmaConfiguration &dc2) const {
             return dc1.dma_status < dc2.dma_status;
         }
     };
@@ -322,11 +318,6 @@ private:
     Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
     
 };
-
-//inline
-//bool operator<(const DmaConfiguration& lhs, const DmaConfiguration& rhs) {
-//    return lhs.dma_status < rhs.dma_status;
-//}
 
 }
 }
