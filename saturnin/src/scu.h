@@ -175,6 +175,19 @@ public:
 
     bool isInterruptMasked(const Interrupt& i, Sh2Type t) const;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn bool Scu::sendStartFactor(const StartingFactorSelect sfs);
+    ///
+    /// \brief  Notifies the SCU that a DMA start factor has occured.
+    ///
+    /// \author Runik
+    /// \date   22/03/2019
+    ///
+    /// \param  sfs   Start factor sent.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void sendStartFactor(const StartingFactorSelect sfs);
+    
     void dmaTest();
 
 private:
@@ -302,7 +315,18 @@ private:
 
     void initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const;
 
-    void addDmaToQueue(DmaConfiguration& dc);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Scu::addDmaToQueue(const DmaConfiguration& dc);
+    ///
+    /// \brief  Adds the DMA to the queue.
+    ///
+    /// \author Runik
+    /// \date   22/03/2019
+    ///
+    /// \param [in,out] dc                  DMA configuration.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void addDmaToQueue(const DmaConfiguration& dc);
 
     struct DmaCompare {
         bool operator()(const DmaConfiguration &dc1, const DmaConfiguration &dc2) const {
@@ -310,8 +334,9 @@ private:
         }
     };
     
-    typedef std::vector<DmaConfiguration> DmaConfigurations;
-    std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare> dma_queue_;
+    using DmaConfigurations = std::vector<DmaConfiguration>;
+    using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
+    DmaQueue dma_queue_;
     
     void activateDma();
 
