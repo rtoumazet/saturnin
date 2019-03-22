@@ -631,6 +631,24 @@ bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t) const {
     return false;
 }
 
+void Scu::sendStartFactor(const StartingFactorSelect sfs) {
+    DmaQueue new_queue;
+    
+    while (!dma_queue_.empty()) {
+        auto dc{ dma_queue_.top() };
+        dma_queue_.pop();
+
+        if (dc.dma_status == DmaStatus::waiting_start_factor) {
+            if (dc.starting_factor_select == sfs) dc.dma_status = DmaStatus::queued;
+        }
+        new_queue.push(dc);
+    }
+    
+    new_queue.swap(dma_queue_);
+
+    activateDma();
+}
+
 void Scu::initializeRegisters() {
     // DMA
     rawWrite<u32>(scuMemory(), level_0_dma_add_value_register & scu_memory_mask, 0x00000101);
@@ -759,44 +777,32 @@ void Scu::initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_addr
     dc.read_address = rar.get(DmaReadAddressRegister::readAddress);
 }
 
-void Scu::addDmaToQueue(DmaConfiguration& dc) {
-    switch (dc.starting_factor_select) {
+void Scu::addDmaToQueue(const DmaConfiguration& dc) {
+    auto config{ dc };
+
+    switch (config.starting_factor_select) {
         case StartingFactorSelect::dma_start_factor:
-            dc.dma_status = DmaStatus::queued;
+            config.dma_status = DmaStatus::queued;
             break;
         default:
-            dc.dma_status = DmaStatus::waiting_start_factor;
+            config.dma_status = DmaStatus::waiting_start_factor;
     }
-    
-    dma_queue_.push(dc);
-
+    dma_queue_.push(config);
 }
 
 void Scu::activateDma() {
     // Timing is not handled for now, DMA transfer is immediate
 
-    switch (dma_queue_.top().dma_status) {
-        case DmaStatus::active:
+    // This case should only happend when timing is handled
+    if( dma_queue_.top().dma_status == DmaStatus::active) return;
 
-            break;
-        case DmaStatus::queued:
-            executeDma(dma_queue_.top());
-            auto dc{ dma_queue_.top() };
-            dc.dma_status = DmaStatus::finished;
-            dma_queue_.pop();
-            dma_queue_.push(dc);
-            break;
-        case DmaStatus::waiting_start_factor:
-
-            break;
-        case DmaStatus::finished:
-
-            break;
-        default:
-            ;
+    while (dma_queue_.top().dma_status == DmaStatus::queued) {
+        executeDma(dma_queue_.top());
+        auto dc{ dma_queue_.top() };
+        dc.dma_status = DmaStatus::finished;
+        dma_queue_.pop();
+        dma_queue_.push(dc);
     }
-
-    //if(dma_queue_.top().dma_status ==)
 }
 
 void Scu::dmaTest() {
@@ -805,10 +811,17 @@ void Scu::dmaTest() {
     dma_queue_.push(dc);
     dc.dma_status = DmaStatus::queued;
     dma_queue_.push(dc);
+    dc.starting_factor_select = StartingFactorSelect::h_blank_in;
     dc.dma_status = DmaStatus::waiting_start_factor;
     dma_queue_.push(dc);
+    dc.starting_factor_select = StartingFactorSelect::h_blank_in;
+    dma_queue_.push(dc);
+    dc.starting_factor_select = StartingFactorSelect::v_blank_out;
+    dma_queue_.push(dc);
 
-    activateDma();
+    sendStartFactor(StartingFactorSelect::h_blank_in);
+
+    //activateDma();
 
     while (!dma_queue_.empty()) {
         std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
