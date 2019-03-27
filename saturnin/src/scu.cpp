@@ -149,8 +149,23 @@ void Scu::write32(const u32 addr, const u32 data) {
 void Scu::executeDma(const DmaConfiguration& dc) {
     switch (dc.dma_mode) {
         case DmaMode::direct:
-            //DmaStarting::started
+            u32 count = (dc.transfer_byte_number == 0) ? 0x100000 : dc.transfer_byte_number;
+            u8  read_address_add = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
+            u8  write_address_add = 0;
+            switch (dc.write_add_value) {
+                case WriteAddressAddValue::add_0: write_address_add   = 0;
+                case WriteAddressAddValue::add_2: write_address_add   = 2;
+                case WriteAddressAddValue::add_4: write_address_add   = 4;
+                case WriteAddressAddValue::add_8: write_address_add   = 8;
+                case WriteAddressAddValue::add_16: write_address_add  = 16;
+                case WriteAddressAddValue::add_32: write_address_add  = 32;
+                case WriteAddressAddValue::add_64: write_address_add  = 64;
+                case WriteAddressAddValue::add_128: write_address_add = 128;
+            }
             break;
+
+
+
         case DmaMode::indirect:
 
             break;
