@@ -173,7 +173,21 @@ void Scu::executeDma(const DmaConfiguration& dc) {
             Log::warning("scu", "Unknown DMA mode !");
     }
 
-    
+    // SCU <-> B-Bus : 32 bits
+    // B-Bus <-> CPU : 16 bits
+
+    // CPU-BUS -> A-BUS
+    // CPU-BUS <- A-BUS
+    // CPU-BUS -> B-BUS
+    // CPU-BUS <- B-BUS
+    // A-BUS -> B-BUS
+    // A-BUS <- B-BUS
+    // DSP-BUS -> A-BUS
+    // DSP-BUS <- A-BUS
+    // DSP-BUS -> B-BUS
+    // DSP-BUS <- B-BUS
+    // DSP-BUS -> CPU-BUS
+    // DSP-BUS <- CPU-BUS
 
     // If DMA enable bit is set and start factor occurs, DMA transfer is added to the queue
 
