@@ -62,8 +62,12 @@
 //#include <glew.h>
 //#include <glext.h>
 //#include <glad/glad.h>
-#include <epoxy/gl.h>
-#include <epoxy/wgl.h> 
+//#include <epoxy/gl.h>
+//#include <epoxy/wgl.h> 
+#define GLFW_INCLUDE_NONE
+#include <glbinding/gl/gl.h>
+#include <glbinding/glbinding.h>
+using namespace gl;
 
 // OpenGL Data
 static char         g_GlslVersionString[32] = "";
@@ -270,7 +274,8 @@ void ImGui_ImplOpenGL3_DestroyFontsTexture()
 // If you get an error please report on github. You may try different GL context version or GLSL version.
 static bool CheckShader(GLuint handle, const char* desc)
 {
-    GLint status = 0, log_length = 0;
+	GLboolean status = 0;
+	GLint log_length = 0;
     glGetShaderiv(handle, GL_COMPILE_STATUS, &status);
     glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &log_length);
     if (status == GL_FALSE)
@@ -288,7 +293,8 @@ static bool CheckShader(GLuint handle, const char* desc)
 // If you get an error please report on github. You may try different GL context version or GLSL version.
 static bool CheckProgram(GLuint handle, const char* desc)
 {
-    GLint status = 0, log_length = 0;
+	GLboolean status = 0;
+	GLint log_length = 0;
     glGetProgramiv(handle, GL_LINK_STATUS, &status);
     glGetProgramiv(handle, GL_INFO_LOG_LENGTH, &log_length);
     if (status == GL_FALSE)

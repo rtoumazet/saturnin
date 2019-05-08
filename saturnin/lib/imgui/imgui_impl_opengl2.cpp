@@ -44,7 +44,11 @@
 #include <OpenGL/gl.h>
 #else
 //#include <GL/gl.h>
-#include <epoxy/gl.h>
+//#include <epoxy/gl.h>
+#define GLFW_INCLUDE_NONE
+#include <glbinding/gl/gl.h>
+#include <glbinding/glbinding.h>
+using namespace gl;
 #endif
 
 // OpenGL Data
