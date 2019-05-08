@@ -1,8 +1,8 @@
 boost-locale
+glbinding
 glfw3
 imgui
 libconfig
-libepoxy
 libzip
 lodepng
 spdlog
