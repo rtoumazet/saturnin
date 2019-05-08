@@ -27,6 +27,7 @@
 #include "../../lib/imgui/imgui_impl_opengl2.h"
 #include "../../lib/imgui/imgui_impl_opengl3.h"
 
+
 #include "../../res/icons.png.inc"
 
 using namespace gl;
@@ -344,6 +345,8 @@ int32_t runLegacyOpengl(core::Emulator_context& state) {
                             //
                             //if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
                             //    cout << "GL_EXT_framebuffer_object not found !" << endl;
+                            
+	glbinding::initialize(glfwGetProcAddress);
 
     Opengl opengl(state.config());
     uint32_t fbo = opengl.createFramebuffer();
@@ -452,6 +455,8 @@ int32_t runModernOpengl(core::Emulator_context& state) {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
+
+	glbinding::initialize(glfwGetProcAddress);
 
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
