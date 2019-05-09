@@ -30,6 +30,7 @@
 
 #include "imgui.h"
 #include "imgui_impl_opengl2.h"
+#include "imgui_loader.h"
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
 #include <stddef.h>     // intptr_t
 #else
@@ -47,7 +48,7 @@
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl.h>
 #else
-#include <GL/gl.h>
+//#include <GL/gl.h>
 #endif
 
 // OpenGL Data
