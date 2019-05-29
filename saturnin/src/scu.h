@@ -52,9 +52,21 @@ enum class DmaStatus : uint8_t {
     active                  = 3
 };
 
-//enum class DmaTransfer {
-//
-//};
+enum class DmaTransferDirection {
+	cpu_to_a,
+	cpu_to_b,
+	cpu_to_dsp,
+	a_to_b,
+	a_to_cpu,
+	a_to_dsp,
+	b_to_a,
+	b_to_cpu,
+	b_to_dsp,
+	dsp_to_a,
+	dsp_to_b,
+	dsp_to_cpu
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct DmaConfiguration
 ///
