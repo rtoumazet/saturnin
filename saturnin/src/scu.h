@@ -348,6 +348,8 @@ private:
             return dc1.dma_status < dc2.dma_status;
         }
     };
+
+	DmaTransferDirection getDmaTransferDirection(const u32 read_address, const u32 write_address);
     
     using DmaConfigurations = std::vector<DmaConfiguration>;
     using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;

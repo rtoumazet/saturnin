@@ -832,6 +832,21 @@ void Scu::activateDma() {
     }
 }
 
+DmaTransferDirection Scu::getDmaTransferDirection(const u32 read_address, const u32 write_address) {
+	u32 ra = read_address & 0x0FFFFFFF;
+	u32 wa = write_address & 0x0FFFFFFF;
+
+	if ((wa >= 0x05A00000) && (wa < 0x6000000)) {
+		// B-Bus write
+	} 
+	else if ((wa >= 0x02000000) && (wa < 0x5900000)) {
+		// A-Bus write
+	}
+	else {
+		// CPU or DSP write
+	}
+}
+
 void Scu::dmaTest() {
     DmaConfiguration dc;
     dc.dma_status = DmaStatus::finished;
