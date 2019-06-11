@@ -52,19 +52,12 @@ enum class DmaStatus : uint8_t {
     active                  = 3
 };
 
-enum class DmaTransferDirection {
-	cpu_to_a,
-	cpu_to_b,
-	cpu_to_dsp,
-	a_to_b,
-	a_to_cpu,
-	a_to_dsp,
-	b_to_a,
-	b_to_cpu,
-	b_to_dsp,
-	dsp_to_a,
-	dsp_to_b,
-	dsp_to_cpu
+enum class DmaBus {
+	a_bus,
+	b_bus,
+	cpu_bus,
+	dsp_bus,
+	unknown_bus
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -349,7 +342,7 @@ private:
         }
     };
 
-	DmaTransferDirection getDmaTransferDirection(const u32 read_address, const u32 write_address);
+	DmaBus getDmaBus(const u32 address);
     
     using DmaConfigurations = std::vector<DmaConfiguration>;
     using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
