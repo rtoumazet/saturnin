@@ -153,14 +153,24 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 		u8  read_address_add = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
 		u8  write_address_add = 0;
 		switch (dc.write_add_value) {
-		case WriteAddressAddValue::add_0: write_address_add = 0;
-		case WriteAddressAddValue::add_2: write_address_add = 2;
-		case WriteAddressAddValue::add_4: write_address_add = 4;
-		case WriteAddressAddValue::add_8: write_address_add = 8;
-		case WriteAddressAddValue::add_16: write_address_add = 16;
-		case WriteAddressAddValue::add_32: write_address_add = 32;
-		case WriteAddressAddValue::add_64: write_address_add = 64;
-		case WriteAddressAddValue::add_128: write_address_add = 128;
+			case WriteAddressAddValue::add_0: write_address_add = 0;
+			case WriteAddressAddValue::add_2: write_address_add = 2;
+			case WriteAddressAddValue::add_4: write_address_add = 4;
+			case WriteAddressAddValue::add_8: write_address_add = 8;
+			case WriteAddressAddValue::add_16: write_address_add = 16;
+			case WriteAddressAddValue::add_32: write_address_add = 32;
+			case WriteAddressAddValue::add_64: write_address_add = 64;
+			case WriteAddressAddValue::add_128: write_address_add = 128;
+		}
+
+		auto write_bus = DmaBus(dc.write_address);
+		switch(write_bus){
+			case DmaBus::a_bus:
+
+				break;
+			case DmaBus::b_bus:
+
+				break;
 		}
 		break;
 	}
@@ -843,6 +853,7 @@ DmaBus Scu::getDmaBus(const u32 address) {
 	}
 	else {
 		// CPU or DSP write
+		Log::warning("scu", "DMA - Bus access not implemented {}", address);
 	}
 
 	return DmaBus::unknown_bus;
