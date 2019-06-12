@@ -28,8 +28,7 @@
 #include <windows.h> // removes C4005 warning
 #include <cstdint>
 #include <vector>
-#include <epoxy/gl.h>
-#include <epoxy/wgl.h>
+#include "../../lib/imgui/imgui_loader.h"
 #include <GLFW/glfw3.h>
 
 #include "../config.h"

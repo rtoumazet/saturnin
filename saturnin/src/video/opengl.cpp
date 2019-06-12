@@ -27,8 +27,10 @@
 #include "../../lib/imgui/imgui_impl_opengl2.h"
 #include "../../lib/imgui/imgui_impl_opengl3.h"
 
+
 #include "../../res/icons.png.inc"
 
+using namespace gl;
 
 namespace saturnin {
 namespace video {
@@ -48,17 +50,17 @@ uint32_t Opengl::createFramebuffer()
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     // create a color attachment texture
     uint32_t textureColorbuffer;
-    glGenTextures(1, &textureColorbuffer);
+    gl::glGenTextures(1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 320, 200, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureColorbuffer, 0);
-    GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    gl::GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
     // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -160,7 +162,7 @@ void Opengl::setupTriangle()
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GLenum::GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
@@ -242,8 +244,8 @@ static void error_callback(int error, const char* description)
 
 void Opengl::preRendering(uint32_t& fbo) {
     glBindFramebuffer(GL_FRAMEBUFFER,  fbo);
-    glViewport(0, 0, 320, 200);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    gl::glViewport(0, 0, 320, 200);
+    gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -343,6 +345,8 @@ int32_t runLegacyOpengl(core::Emulator_context& state) {
                             //
                             //if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
                             //    cout << "GL_EXT_framebuffer_object not found !" << endl;
+                            
+	glbinding::initialize(glfwGetProcAddress);
 
     Opengl opengl(state.config());
     uint32_t fbo = opengl.createFramebuffer();
@@ -451,6 +455,8 @@ int32_t runModernOpengl(core::Emulator_context& state) {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
+
+	glbinding::initialize(glfwGetProcAddress);
 
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
