@@ -54,9 +54,6 @@
     <ClCompile Include="lib\imgui\imgui_impl_glfw.cpp">
       <Filter>Fichiers sources\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClCompile>
     <ClCompile Include="lib\libzippp\libzippp.cpp">
       <Filter>Fichiers sources\libzippp</Filter>
     </ClCompile>
@@ -86,6 +83,9 @@
     </ClCompile>
     <ClCompile Include="src\scu.cpp">
       <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Fichiers sources\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -120,9 +120,6 @@
       <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
     <ClInclude Include="lib\imgui\imgui_impl_opengl2.h">
-      <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\imgui_impl_opengl3.h">
       <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
     <ClInclude Include="lib\libzippp\libzippp.h">
@@ -169,6 +166,12 @@
     </ClInclude>
     <ClInclude Include="src\sh2_registers.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_impl_opengl3.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_loader.h">
+      <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

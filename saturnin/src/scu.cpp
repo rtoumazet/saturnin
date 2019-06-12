@@ -28,6 +28,14 @@ namespace is = saturnin::core::interrupt_source;
 namespace saturnin {
 namespace core {
 
+// SCU DMA accesses
+// Write to A-Bus prohibited
+// Read from VDP2 area prohibited (B-Bus)
+// Write to VP1 registers (B-Bus) must use 2 bytes
+// Access to Workram L not possible
+// During DMA operation A -> B or B -> A, no CPU access to A-Bus
+
+
 Scu::Scu(Emulator_context* ec) : emulator_context_(ec) {
     initializeRegisters();
 };
@@ -104,21 +112,24 @@ void Scu::write32(const u32 addr, const u32 data) {
         case level_0_dma_enable_register: {
             if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
                 auto dma_0_config = configureDmaTransfer(DmaLevel::level_0);
-                executeDma(dma_0_config);
+                //executeDma(dma_0_config);
+                addDmaToQueue(dma_0_config);
             }
             break;
         }
         case level_1_dma_enable_register: {
             if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
                 auto dma_1_config = configureDmaTransfer(DmaLevel::level_1);
-                executeDma(dma_1_config);
+                //executeDma(dma_1_config);
+                addDmaToQueue(dma_1_config);
             }
             break;
         }
         case level_2_dma_enable_register: {
             if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
                 auto dma_2_config = configureDmaTransfer(DmaLevel::level_2);
-                executeDma(dma_2_config);
+                //executeDma(dma_2_config);
+                addDmaToQueue(dma_2_config);
             }
             break;
         }
@@ -137,17 +148,47 @@ void Scu::write32(const u32 addr, const u32 data) {
 
 void Scu::executeDma(const DmaConfiguration& dc) {
     switch (dc.dma_mode) {
-        case DmaMode::direct:
-            //DmaStarting::started
-            break;
-        case DmaMode::indirect:
+	case DmaMode::direct: {
+		u32 count = (dc.transfer_byte_number == 0) ? 0x100000 : dc.transfer_byte_number;
+		u8  read_address_add = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
+		u8  write_address_add = 0;
+		switch (dc.write_add_value) {
+		case WriteAddressAddValue::add_0: write_address_add = 0;
+		case WriteAddressAddValue::add_2: write_address_add = 2;
+		case WriteAddressAddValue::add_4: write_address_add = 4;
+		case WriteAddressAddValue::add_8: write_address_add = 8;
+		case WriteAddressAddValue::add_16: write_address_add = 16;
+		case WriteAddressAddValue::add_32: write_address_add = 32;
+		case WriteAddressAddValue::add_64: write_address_add = 64;
+		case WriteAddressAddValue::add_128: write_address_add = 128;
+		}
+		break;
+	}
+    case DmaMode::indirect:
 
-            break;
-        default:
-            Log::warning("scu", "Unknown DMA mode !");
+        break;
+    default:
+        Log::warning("scu", "Unknown DMA mode !");
     }
 
-    
+    // SCU <-> B-Bus : 32 bits
+    // B-Bus <-> CPU : 16 bits
+
+    // CPU-BUS -> A-BUS
+    // CPU-BUS <- A-BUS
+    // CPU-BUS -> B-BUS
+    // CPU-BUS <- B-BUS
+    // A-BUS -> B-BUS
+    // A-BUS <- B-BUS
+    // DSP-BUS -> A-BUS
+    // DSP-BUS <- A-BUS
+    // DSP-BUS -> B-BUS
+    // DSP-BUS <- B-BUS
+    // DSP-BUS -> CPU-BUS
+    // DSP-BUS <- CPU-BUS
+
+    // If DMA enable bit is set and start factor occurs, DMA transfer is added to the queue
+
 //    switch (GetBitValue(static_cast<uint32_t>(d0md), 24)) { // DMA Mode 
 //        case 0x0:
 //            // Direct mode
@@ -617,6 +658,24 @@ bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t) const {
     return false;
 }
 
+void Scu::sendStartFactor(const StartingFactorSelect sfs) {
+    DmaQueue new_queue;
+    
+    while (!dma_queue_.empty()) {
+        auto dc{ dma_queue_.top() };
+        dma_queue_.pop();
+
+        if (dc.dma_status == DmaStatus::waiting_start_factor) {
+            if (dc.starting_factor_select == sfs) dc.dma_status = DmaStatus::queued;
+        }
+        new_queue.push(dc);
+    }
+    
+    new_queue.swap(dma_queue_);
+
+    activateDma();
+}
+
 void Scu::initializeRegisters() {
     // DMA
     rawWrite<u32>(scuMemory(), level_0_dma_add_value_register & scu_memory_mask, 0x00000101);
@@ -743,6 +802,74 @@ void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, const u32 register_add
 void Scu::initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const {
     auto rar        = DmaReadAddressRegister(rawRead<u32>(scuMemory(), register_address & scu_memory_mask));
     dc.read_address = rar.get(DmaReadAddressRegister::readAddress);
+}
+
+void Scu::addDmaToQueue(const DmaConfiguration& dc) {
+    auto config{ dc };
+
+    switch (config.starting_factor_select) {
+        case StartingFactorSelect::dma_start_factor:
+            config.dma_status = DmaStatus::queued;
+            break;
+        default:
+            config.dma_status = DmaStatus::waiting_start_factor;
+    }
+    dma_queue_.push(config);
+}
+
+void Scu::activateDma() {
+    // Timing is not handled for now, DMA transfer is immediate
+
+    // This case should only happend when timing is handled
+    if( dma_queue_.top().dma_status == DmaStatus::active) return;
+
+    while (dma_queue_.top().dma_status == DmaStatus::queued) {
+        executeDma(dma_queue_.top());
+        auto dc{ dma_queue_.top() };
+        dc.dma_status = DmaStatus::finished;
+        dma_queue_.pop();
+        dma_queue_.push(dc);
+    }
+}
+
+DmaBus Scu::getDmaBus(const u32 address) {
+	u32 a = address & 0x0FFFFFFF;
+
+	if ((a >= 0x05A00000) && (a < 0x6000000)) {
+		return DmaBus::b_bus;
+	} 
+	else if ((a >= 0x02000000) && (a < 0x5900000)) {
+		return DmaBus::a_bus;
+	}
+	else {
+		// CPU or DSP write
+	}
+
+	return DmaBus::unknown_bus;
+}
+
+void Scu::dmaTest() {
+    DmaConfiguration dc;
+    dc.dma_status = DmaStatus::finished;
+    dma_queue_.push(dc);
+    dc.dma_status = DmaStatus::queued;
+    dma_queue_.push(dc);
+    dc.starting_factor_select = StartingFactorSelect::h_blank_in;
+    dc.dma_status = DmaStatus::waiting_start_factor;
+    dma_queue_.push(dc);
+    dc.starting_factor_select = StartingFactorSelect::h_blank_in;
+    dma_queue_.push(dc);
+    dc.starting_factor_select = StartingFactorSelect::v_blank_out;
+    dma_queue_.push(dc);
+
+    sendStartFactor(StartingFactorSelect::h_blank_in);
+
+    //activateDma();
+
+    while (!dma_queue_.empty()) {
+        std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
+        dma_queue_.pop();
+    }
 }
 
 }

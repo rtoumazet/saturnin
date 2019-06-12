@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <queue> // priority_queue
+#include <vector> // vector
 #include "emulator_defs.h"
 #include "emulator_enums.h"
 #include "interrupt_sources.h"
@@ -43,6 +45,21 @@ enum class DmaLevel {
     level_2         ///< Level 2 DMA.
 };
 
+enum class DmaStatus : uint8_t {
+    finished                = 0,
+    waiting_start_factor    = 1,
+    queued                  = 2,
+    active                  = 3
+};
+
+enum class DmaBus {
+	a_bus,
+	b_bus,
+	cpu_bus,
+	dsp_bus,
+	unknown_bus
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct DmaConfiguration
 ///
@@ -54,6 +71,7 @@ enum class DmaLevel {
 
 struct DmaConfiguration {
     DmaLevel             dma_level;
+    DmaStatus            dma_status;
     u32                  read_address;
     u32                  write_address;
     u32                  transfer_byte_number;
@@ -164,6 +182,21 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     bool isInterruptMasked(const Interrupt& i, Sh2Type t) const;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn bool Scu::sendStartFactor(const StartingFactorSelect sfs);
+    ///
+    /// \brief  Notifies the SCU that a DMA start factor has occured.
+    ///
+    /// \author Runik
+    /// \date   22/03/2019
+    ///
+    /// \param  sfs   Start factor sent.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void sendStartFactor(const StartingFactorSelect sfs);
+    
+    void dmaTest();
 
 private:
 
@@ -290,10 +323,35 @@ private:
 
     void initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Scu::addDmaToQueue(const DmaConfiguration& dc);
+    ///
+    /// \brief  Adds the DMA to the queue.
+    ///
+    /// \author Runik
+    /// \date   22/03/2019
+    ///
+    /// \param [in,out] dc                  DMA configuration.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void addDmaToQueue(const DmaConfiguration& dc);
+
+    struct DmaCompare {
+        bool operator()(const DmaConfiguration &dc1, const DmaConfiguration &dc2) const {
+            return dc1.dma_status < dc2.dma_status;
+        }
+    };
+
+	DmaBus getDmaBus(const u32 address);
+    
+    using DmaConfigurations = std::vector<DmaConfiguration>;
+    using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
+    DmaQueue dma_queue_;
+    
+    void activateDma();
+
     Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
-
-    StartingFactorSelect dam_start_trigger_ = { StartingFactorSelect::none };
-
+    
 };
 
 }
