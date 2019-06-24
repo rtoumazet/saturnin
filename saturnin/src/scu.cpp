@@ -163,12 +163,15 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 			case WriteAddressAddValue::add_128: write_address_add = 128;
 		}
 
-		auto write_bus = DmaBus(dc.write_address);
+		auto write_bus = getDmaBus(dc.write_address);
 		switch(write_bus){
 			case DmaBus::a_bus:
 
 				break;
 			case DmaBus::b_bus:
+				// B-Bus write
+				// 32 bits splitted into 2*16 bits
+				Log::debug("scu", "B-Bus transfer");
 
 				break;
 		}
