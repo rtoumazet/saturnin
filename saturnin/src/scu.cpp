@@ -22,6 +22,7 @@
 #include "emulator_context.h"
 #include "memory.h"
 #include "interrupt_sources.h"
+#include "utilities.h"
 
 namespace is = saturnin::core::interrupt_source;
 
@@ -149,6 +150,7 @@ void Scu::write32(const u32 addr, const u32 data) {
 void Scu::executeDma(const DmaConfiguration& dc) {
     switch (dc.dma_mode) {
 	case DmaMode::direct: {
+		Log::debug("scu", "Direct Mode DMA - Level {}", utilities::toUnderlying< DmaLevel>( dc.dma_level));
 		u32 count = (dc.transfer_byte_number == 0) ? 0x100000 : dc.transfer_byte_number;
 		u8  read_address_add = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
 		u8  write_address_add = 0;
@@ -173,6 +175,18 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 				// 32 bits splitted into 2*16 bits
 				Log::debug("scu", "B-Bus transfer");
 
+				switch (getScuRegion(dc.read_address)) {
+					case ScuRegion::unknown: {
+						Log::warning("scu", "Unknown SCU region : {}", dc.read_address);
+						break;
+					}
+					case ScuRegion::a_bus_cs2: {
+						break;
+					}
+					default:
+						read_address_add = 4;
+				}
+				
 				break;
 		}
 		break;
@@ -860,6 +874,31 @@ DmaBus Scu::getDmaBus(const u32 address) {
 	}
 
 	return DmaBus::unknown_bus;
+}
+
+ScuRegion Scu::getScuRegion(const u32 address) {
+	u32 a = address & 0x0FFFFFFF;
+
+	if ((a >= 0x0) && (a < 0x80000))  return ScuRegion::rom;
+	else if ((a >= 0x100000) && (a < 0x100080)) return ScuRegion::smpc;
+	else if ((a >= 0x180000) && (a < 0x190000)) return ScuRegion::backup_ram;
+	else if ((a >= 0x200000) && (a < 0x300000)) return ScuRegion::work_ram_l;
+	else if ((a >= 0x1000000) && (a < 0x1000004)) return ScuRegion::minit;
+	else if ((a >= 0x1800000) && (a < 0x1800004)) return ScuRegion::sinit;
+	else if ((a >= 0x2000000) && (a < 0x4000000)) return ScuRegion::a_bus_cs0;
+	else if ((a >= 0x4000000) && (a < 0x5000000)) return ScuRegion::a_bus_cs1;
+	else if ((a >= 0x5000000) && (a < 0x5800000)) return ScuRegion::a_bus_dummy;
+	else if ((a >= 0x5800000) && (a < 0x5900000)) return ScuRegion::a_bus_cs2;
+	else if ((a >= 0x5A00000) && (a < 0x5B00EE4)) return ScuRegion::sound;
+	else if ((a >= 0x5C00000) && (a < 0x5CC0000)) return ScuRegion::vdp1;
+	else if ((a >= 0x5D00000) && (a < 0x5D00018)) return ScuRegion::vdp1;
+	else if ((a >= 0x5E00000) && (a < 0x5E80000)) return ScuRegion::vdp2;
+	else if ((a >= 0x5F00000) && (a < 0x5F01000)) return ScuRegion::vdp2;
+	else if ((a >= 0x5F80000) && (a < 0x5F80120)) return ScuRegion::vdp2;
+	else if ((a >= 0x5FE0000) && (a < 0x5FE00D0)) return ScuRegion::scu_register;
+	else if ((a >= 0x6000000) && (a < 0x6100000)) return ScuRegion::work_ram_h;
+
+	return ScuRegion::unknown;
 }
 
 void Scu::dmaTest() {
