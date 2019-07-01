@@ -187,6 +187,17 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 						read_address_add = 4;
 				}
 				
+				u32 count{};
+				u32 data{};
+				u32 read_offset{};
+				u32 write_offset{};
+				while(count < dc.transfer_byte_number){
+					//u32 adr = (dc.read_address & 0x7FFFFFFF) + read_offset + 
+					//data = 
+
+					++count;
+				}
+
 				break;
 		}
 		break;
