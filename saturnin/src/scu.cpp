@@ -187,15 +187,29 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 						read_address_add = 4;
 				}
 				
-				u32 count{};
+				u32 byte_counter{};
+				u32 word_counter{};
+				u32 long_counter{};
 				u32 data{};
 				u32 read_offset{};
 				u32 write_offset{};
-				while(count < dc.transfer_byte_number){
-					//u32 adr = (dc.read_address & 0x7FFFFFFF) + read_offset + 
-					//data = 
+				while(byte_counter < dc.transfer_byte_number){
+					data = emulator_context_->memory()->read<u8>((dc.read_address & 0x7FFFFFFF) + read_offset + long_counter * read_address_add);
+					emulator_context_->memory()->write<u8>(dc.write_address + write_offset + word_counter * write_address_add, data);
 
-					++count;
+					++read_offset;
+					++write_offset;
+					
+					if (read_offset == 4) {
+						read_offset = 0;
+						++long_counter;
+					}
+					if (write_offset == 2) {
+						write_offset = 0;
+						++word_counter;
+					}
+
+					++byte_counter;
 				}
 
 				break;
