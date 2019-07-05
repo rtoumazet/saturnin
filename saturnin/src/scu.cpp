@@ -165,11 +165,55 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 			case WriteAddressAddValue::add_128: write_address_add = 128;
 		}
 
+		
+		u32 byte_counter{};
+		u32 word_counter{};
+		u32 long_counter{};
+		u32 data{};
+		u32 read_offset{};
+		u32 write_offset{};
+
 		auto write_bus = getDmaBus(dc.write_address);
 		switch(write_bus){
 			case DmaBus::a_bus:
+				Log::debug("scu", "A-Bus transfer");
+				
+				switch (getScuRegion(dc.read_address)) {
+				case ScuRegion::unknown: {
+					Log::warning("scu", "Unknown SCU region : {}", dc.read_address);
+					break;
+				}
+				case ScuRegion::a_bus_cs2: {
+					break;
+				}
+				default:
+					read_address_add = 4;
+				}
+
+				switch (getScuRegion(dc.write_address)) {
+					case ScuRegion::rom:
+					case ScuRegion::smpc:
+					case ScuRegion::backup_ram:
+					case ScuRegion::work_ram_l:
+					case ScuRegion::minit:
+					case ScuRegion::sinit:
+					case ScuRegion::a_bus_cs0:
+					case ScuRegion::a_bus_cs1:
+					case ScuRegion::a_bus_dummy:
+						write_address_add = 4;
+						break;
+
+					default:
+						if (write_address_add) write_address_add = 4;
+						break;
+				}
+
+				while (byte_counter < dc.transfer_byte_number) {
+
+				}
 
 				break;
+
 			case DmaBus::b_bus:
 				// B-Bus write
 				// 32 bits splitted into 2*16 bits
@@ -187,15 +231,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 						read_address_add = 4;
 				}
 				
-				u32 byte_counter{};
-				u32 word_counter{};
-				u32 long_counter{};
-				u32 data{};
-				u32 read_offset{};
-				u32 write_offset{};
 				while(byte_counter < dc.transfer_byte_number){
-					data = emulator_context_->memory()->read<u8>((dc.read_address & 0x7FFFFFFF) + read_offset + long_counter * read_address_add);
-					emulator_context_->memory()->write<u8>(dc.write_address + write_offset + word_counter * write_address_add, data);
+					data = memory()->read<u8>((dc.read_address & 0x7FFFFFFF) + read_offset + long_counter * read_address_add);
+					memory()->write<u8>(dc.write_address + write_offset + word_counter * write_address_add, data);
 
 					++read_offset;
 					++write_offset;
@@ -208,9 +246,10 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 						write_offset = 0;
 						++word_counter;
 					}
-
 					++byte_counter;
 				}
+				break;
+			default:
 
 				break;
 		}
@@ -949,6 +988,10 @@ void Scu::dmaTest() {
         dma_queue_.pop();
     }
 }
+
+Memory* Scu::memory() const {
+	return emulator_context_->memory();
+};
 
 }
 }
