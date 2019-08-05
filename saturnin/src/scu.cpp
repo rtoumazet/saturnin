@@ -289,29 +289,27 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 		if (dc.write_address_update == WriteAddressUpdate::update)
 			write_address += word_counter * write_address_add;
 
-		u32 dma_enable_data{};
-		switch (dc.dma_level) {
-		case DmaLevel::level_0:
-			memory()->masterSh2()->sendInterrupt(interrupt_source::level_0_dma_end);
-			dma_enable_data = memory()->read<u32>(level_0_dma_enable_register);
-			break;
-		case DmaLevel::level_1:
-			memory()->masterSh2()->sendInterrupt(interrupt_source::level_1_dma_end);
-			dma_enable_data = memory()->read<u32>(level_1_dma_enable_register);
-			break;
-		case DmaLevel::level_2:
-			memory()->masterSh2()->sendInterrupt(interrupt_source::level_2_dma_end);
-			dma_enable_data = memory()->read<u32>(level_2_dma_enable_register);
-			break;
-		}
+		sendDmaEndInterrupt(dc.dma_level);
 
 		if (dc.dma_enable == DmaEnable::enabled) {
 			if (dc.starting_factor_select == StartingFactorSelect::dma_start_factor) {
+				u32 dma_enable_data{};
 				dma_enable_data &= 0xFFFFFFFE;
 				switch (dc.dma_level) {
-				case DmaLevel::level_0: memory()->write(level_0_dma_enable_register, dma_enable_data); break;
-				case DmaLevel::level_1: memory()->write(level_1_dma_enable_register, dma_enable_data); break;
-				case DmaLevel::level_2: memory()->write(level_2_dma_enable_register, dma_enable_data); break;
+				case DmaLevel::level_0: 
+					dma_enable_data = memory()->read<u32>(level_0_dma_enable_register);
+					memory()->write(level_0_dma_enable_register, dma_enable_data); 
+					break;
+
+				case DmaLevel::level_1: 
+					dma_enable_data = memory()->read<u32>(level_1_dma_enable_register);
+					memory()->write(level_1_dma_enable_register, dma_enable_data); 
+					break;
+
+				case DmaLevel::level_2: 
+					dma_enable_data = memory()->read<u32>(level_2_dma_enable_register);
+					memory()->write(level_2_dma_enable_register, dma_enable_data); 
+					break;
 				}
 			}
 		}
@@ -1057,6 +1055,45 @@ void Scu::dmaTest() {
 Memory* Scu::memory() const {
 	return emulator_context_->memory();
 };
+
+void Scu::sendDmaEndInterrupt(const DmaLevel l) {
+	switch (l) {
+	case DmaLevel::level_0:
+		memory()->masterSh2()->sendInterrupt(interrupt_source::level_0_dma_end);
+		break;
+	case DmaLevel::level_1:
+		memory()->masterSh2()->sendInterrupt(interrupt_source::level_1_dma_end);
+		break;
+	case DmaLevel::level_2:
+		memory()->masterSh2()->sendInterrupt(interrupt_source::level_2_dma_end);
+		break;
+	}
+}
+
+void Scu::resetDmaEnable(const DmaConfiguration& dc) {
+	if (dc.dma_enable == DmaEnable::enabled) {
+		if (dc.starting_factor_select == StartingFactorSelect::dma_start_factor) {
+			u32 dma_enable_data{};
+			dma_enable_data &= 0xFFFFFFFE;
+			switch (dc.dma_level) {
+			case DmaLevel::level_0:
+				dma_enable_data = memory()->read<u32>(level_0_dma_enable_register);
+				memory()->write(level_0_dma_enable_register, dma_enable_data);
+				break;
+
+			case DmaLevel::level_1:
+				dma_enable_data = memory()->read<u32>(level_1_dma_enable_register);
+				memory()->write(level_1_dma_enable_register, dma_enable_data);
+				break;
+
+			case DmaLevel::level_2:
+				dma_enable_data = memory()->read<u32>(level_2_dma_enable_register);
+				memory()->write(level_2_dma_enable_register, dma_enable_data);
+				break;
+			}
+		}
+	}
+}
 
 }
 }

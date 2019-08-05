@@ -365,7 +365,7 @@ private:
     /// \author Runik
     /// \date   02/02/2019
     ///
-    /// \param [in,out] dc                  DMA configuration.
+    /// \param [ins] dc                  DMA configuration.
     /// \param          register_address    Register address to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -379,7 +379,7 @@ private:
     /// \author Runik
     /// \date   22/03/2019
     ///
-    /// \param [in,out] dc                  DMA configuration.
+    /// \param [in] dc                  DMA configuration.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void addDmaToQueue(const DmaConfiguration& dc);
@@ -403,7 +403,7 @@ private:
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	DmaBus		getDmaBus(const u32 address);
-	
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// \fn ScuRegion Scu::getScuRegion(cconst u32 address);
 	///
@@ -417,7 +417,33 @@ private:
 
 	ScuRegion	getScuRegion(const u32 address);
     
-    using DmaConfigurations = std::vector<DmaConfiguration>;
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// \fn void Scu::sendDmaEndInterrupt(const DmaLevel l);
+	///
+	/// \brief  Sends dma end interrupt of the current dma level.
+	///
+	/// \author Runik
+	/// \date   05/08/2019
+	///
+	/// \param l        DMA level to send interrupt for.
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void sendDmaEndInterrupt(const DmaLevel l);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// \fn void Scu::resetDmaEnable(const DmaConfiguration& dc);
+	///
+	/// \brief  Reset dma enable value for the current dma level.
+	///
+	/// \author Runik
+	/// \date   05/08/2019
+	///
+	/// \param [in] dc                  DMA configuration.
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void resetDmaEnable(const DmaConfiguration& dc);
+	
+	using DmaConfigurations = std::vector<DmaConfiguration>;
     using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
     DmaQueue dma_queue_;
     
@@ -426,6 +452,7 @@ private:
     Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
     
 };
+
 
 }
 }
