@@ -291,30 +291,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 
 		sendDmaEndInterrupt(dc.dma_level);
 
-		if (dc.dma_enable == DmaEnable::enabled) {
-			if (dc.starting_factor_select == StartingFactorSelect::dma_start_factor) {
-				u32 dma_enable_data{};
-				dma_enable_data &= 0xFFFFFFFE;
-				switch (dc.dma_level) {
-				case DmaLevel::level_0: 
-					dma_enable_data = memory()->read<u32>(level_0_dma_enable_register);
-					memory()->write(level_0_dma_enable_register, dma_enable_data); 
-					break;
+		resetDmaEnable(dc);
 
-				case DmaLevel::level_1: 
-					dma_enable_data = memory()->read<u32>(level_1_dma_enable_register);
-					memory()->write(level_1_dma_enable_register, dma_enable_data); 
-					break;
-
-				case DmaLevel::level_2: 
-					dma_enable_data = memory()->read<u32>(level_2_dma_enable_register);
-					memory()->write(level_2_dma_enable_register, dma_enable_data); 
-					break;
-				}
-			}
-		}
-
-		Log::debug("scu", "Level {} DMA completed", utilities::toUnderlying< DmaLevel>(dc.dma_level));
+        Log::debug("scu", "Level {} DMA completed", utilities::toUnderlying< DmaLevel>(dc.dma_level));
 
 		break;
 	}
@@ -1074,22 +1053,21 @@ void Scu::resetDmaEnable(const DmaConfiguration& dc) {
 	if (dc.dma_enable == DmaEnable::enabled) {
 		if (dc.starting_factor_select == StartingFactorSelect::dma_start_factor) {
 			u32 dma_enable_data{};
-			dma_enable_data &= 0xFFFFFFFE;
 			switch (dc.dma_level) {
-			case DmaLevel::level_0:
-				dma_enable_data = memory()->read<u32>(level_0_dma_enable_register);
-				memory()->write(level_0_dma_enable_register, dma_enable_data);
-				break;
+                case DmaLevel::level_0:
+                    dma_enable_data = memory()->read<u32>(level_0_dma_enable_register) & 0xFFFFFFFE;
+				    memory()->write(level_0_dma_enable_register, dma_enable_data);
+				    break;
 
-			case DmaLevel::level_1:
-				dma_enable_data = memory()->read<u32>(level_1_dma_enable_register);
-				memory()->write(level_1_dma_enable_register, dma_enable_data);
-				break;
+			    case DmaLevel::level_1:
+				    dma_enable_data = memory()->read<u32>(level_1_dma_enable_register) & 0xFFFFFFFE;
+				    memory()->write(level_1_dma_enable_register, dma_enable_data);
+				    break;
 
-			case DmaLevel::level_2:
-				dma_enable_data = memory()->read<u32>(level_2_dma_enable_register);
-				memory()->write(level_2_dma_enable_register, dma_enable_data);
-				break;
+			    case DmaLevel::level_2:
+				    dma_enable_data = memory()->read<u32>(level_2_dma_enable_register) & 0xFFFFFFFE;
+				    memory()->write(level_2_dma_enable_register, dma_enable_data);
+				    break;
 			}
 		}
 	}
