@@ -290,14 +290,38 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 			write_address += word_counter * write_address_add;
 
 		sendDmaEndInterrupt(dc.dma_level);
-
 		resetDmaEnable(dc);
-
-        Log::debug("scu", "Level {} DMA completed", utilities::toUnderlying< DmaLevel>(dc.dma_level));
+        Log::debug("scu", "Level {} direct DMA completed", utilities::toUnderlying< DmaLevel>(dc.dma_level));
 
 		break;
 	}
     case DmaMode::indirect:
+        Log::debug("scu", "Indirect Mode DMA - Level {}", utilities::toUnderlying< DmaLevel>(dc.dma_level));
+
+        u8  read_address_add = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
+        u8  write_address_add = 0;
+        switch (dc.write_add_value)
+        {
+            case WriteAddressAddValue::add_0: write_address_add = 0;
+            case WriteAddressAddValue::add_2: write_address_add = 2;
+            case WriteAddressAddValue::add_4: write_address_add = 4;
+            case WriteAddressAddValue::add_8: write_address_add = 8;
+            case WriteAddressAddValue::add_16: write_address_add = 16;
+            case WriteAddressAddValue::add_32: write_address_add = 32;
+            case WriteAddressAddValue::add_64: write_address_add = 64;
+            case WriteAddressAddValue::add_128: write_address_add = 128;
+        }
+
+        bool isTransferDone = false;
+        while (!isTransferDone) {
+
+
+            //indirect_dma_end_code
+        }
+
+        sendDmaEndInterrupt(dc.dma_level);
+        resetDmaEnable(dc);
+        Log::debug("scu", "Level {} indirect DMA completed", utilities::toUnderlying< DmaLevel>(dc.dma_level));
 
         break;
     default:
