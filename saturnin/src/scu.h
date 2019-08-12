@@ -445,7 +445,21 @@ private:
 
 	void resetDmaEnable(const DmaConfiguration& dc);
 	
-	using DmaConfigurations = std::vector<DmaConfiguration>;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Scu::dmaUpdateWriteAddress(const DmaLevel l);
+    ///
+    /// \brief  Updates write address of the current dma level.
+    ///
+    /// \author Runik
+    /// \date   12/08/2019
+    ///
+    /// \param l        DMA level.
+    /// \param data     Data to write
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void dmaUpdateWriteAddress(const DmaLevel l, const u32 data);
+    
+    using DmaConfigurations = std::vector<DmaConfiguration>;
     using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
     DmaQueue dma_queue_;
     
