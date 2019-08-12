@@ -148,22 +148,29 @@ void Scu::write32(const u32 addr, const u32 data) {
 };
 
 void Scu::executeDma(const DmaConfiguration& dc) {
+    
     switch (dc.dma_mode) {
 	case DmaMode::direct: {
 		Log::debug("scu", "Direct Mode DMA - Level {}", utilities::toUnderlying< DmaLevel>( dc.dma_level));
-		u32 read_address	= dc.read_address;
-		u32 write_address	= dc.write_address;
-		u32 count			= (dc.transfer_byte_number == 0) ? 0x100000 : dc.transfer_byte_number;
-		u8  read_address_add = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
+        u32 write_address     = dc.write_address;
+        u32 read_address      = dc.read_address;
+        u32 count			  = (dc.transfer_byte_number == 0) ? 0x100000 : dc.transfer_byte_number;
+		u8  read_address_add  = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
 		u8  write_address_add = 0;
+
+        Log::debug("scu", "Read address : ", read_address);
+        Log::debug("scu", "Write address : ", write_address);
+        Log::debug("scu", "Size : ", count);
+        Log::debug("scu", "Address add : ", read_address_add);
+
 		switch (dc.write_add_value) {
-			case WriteAddressAddValue::add_0: write_address_add = 0;
-			case WriteAddressAddValue::add_2: write_address_add = 2;
-			case WriteAddressAddValue::add_4: write_address_add = 4;
-			case WriteAddressAddValue::add_8: write_address_add = 8;
-			case WriteAddressAddValue::add_16: write_address_add = 16;
-			case WriteAddressAddValue::add_32: write_address_add = 32;
-			case WriteAddressAddValue::add_64: write_address_add = 64;
+			case WriteAddressAddValue::add_0: write_address_add   = 0;
+			case WriteAddressAddValue::add_2: write_address_add   = 2;
+			case WriteAddressAddValue::add_4: write_address_add   = 4;
+			case WriteAddressAddValue::add_8: write_address_add   = 8;
+			case WriteAddressAddValue::add_16: write_address_add  = 16;
+			case WriteAddressAddValue::add_32: write_address_add  = 32;
+			case WriteAddressAddValue::add_64: write_address_add  = 64;
 			case WriteAddressAddValue::add_128: write_address_add = 128;
 		}
 
@@ -298,6 +305,8 @@ void Scu::executeDma(const DmaConfiguration& dc) {
     case DmaMode::indirect:
         Log::debug("scu", "Indirect Mode DMA - Level {}", utilities::toUnderlying< DmaLevel>(dc.dma_level));
 
+        u32 execute_address_storage_buffer = dc.write_address;
+
         u8  read_address_add = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
         u8  write_address_add = 0;
         switch (dc.write_add_value)
@@ -312,12 +321,142 @@ void Scu::executeDma(const DmaConfiguration& dc) {
             case WriteAddressAddValue::add_128: write_address_add = 128;
         }
 
-        bool isTransferDone = false;
-        while (!isTransferDone) {
+        u32 write_address{};
+        u32 read_address{};
+        u32 count{}; 
+        //= (dc.transfer_byte_number == 0) ? 0x100000 : dc.transfer_byte_number;
+        
+        bool is_transfer_done = false;
+        while (!is_transfer_done) {
+            write_address = memory()->read<u32>(execute_address_storage_buffer + 8);
+            read_address  = memory()->read<u32>(execute_address_storage_buffer + 4);
+            count         = memory()->read<u32>(execute_address_storage_buffer);
+            if (count == 0) count = 0x100000;
+
+            Log::debug("scu", "Read address : ", read_address);
+            Log::debug("scu", "Write address : ", write_address);
+            Log::debug("scu", "Size : ", count);
+            
+
+            auto write_bus = getDmaBus(dc.write_address);
+            switch (write_bus) {
+                case DmaBus::a_bus:
+                    Log::debug("scu", "A-Bus transfer");
+
+                    //switch (getScuRegion(read_address)) {
+                    //    case ScuRegion::unknown:	Log::warning("scu", "Unknown SCU region : {}", read_address); break;
+                    //    case ScuRegion::a_bus_cs2:	break;
+                    //    default:					read_address_add = 4;
+                    //}
+
+                    //switch (getScuRegion(write_address)) {
+                    //    case ScuRegion::rom:
+                    //    case ScuRegion::smpc:
+                    //    case ScuRegion::backup_ram:
+                    //    case ScuRegion::work_ram_l:
+                    //    case ScuRegion::minit:
+                    //    case ScuRegion::sinit:
+                    //    case ScuRegion::a_bus_cs0:
+                    //    case ScuRegion::a_bus_cs1:
+                    //    case ScuRegion::a_bus_dummy:
+                    //        write_address_add = 4;
+                    //        break;
+
+                    //    default:
+                    //        if (write_address_add) write_address_add = 4;
+                    //        break;
+                    //}
+
+                    //while (byte_counter < dc.transfer_byte_number) {
+                    //    data = memory()->read<u8>((read_address & 0x7FFFFFFF) + read_offset + long_counter * read_address_add);
+                    //    memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
+
+                    //    ++read_offset;
+
+                    //    if (read_offset == 4) {
+                    //        read_offset = 0;
+                    //        ++long_counter;
+                    //    }
+                    //    ++byte_counter;
+                    //}
+                    break;
+
+                case DmaBus::b_bus:
+                {
 
 
+                    // B-Bus write
+                    // 32 bits splitted into 2*16 bits
+                    Log::debug("scu", "B-Bus transfer");
+
+                    switch (getScuRegion(read_address)) {
+                        case ScuRegion::unknown:	Log::warning("scu", "Unknown SCU region : {}", read_address); break;
+                        case ScuRegion::a_bus_cs2:	break;
+                        default:					read_address_add = 4;
+                    }
+
+                    //u32 write_offset{};
+
+                    //while (byte_counter < dc.transfer_byte_number) {
+                    //    data = memory()->read<u8>((read_address & 0x7FFFFFFF) + read_offset + long_counter * read_address_add);
+                    //    memory()->write<u8>(write_address + write_offset + word_counter * write_address_add, data);
+
+                    //    ++read_offset;
+                    //    ++write_offset;
+
+                    //    if (read_offset == 4) {
+                    //        read_offset = 0;
+                    //        ++long_counter;
+                    //    }
+                    //    if (write_offset == 2) {
+                    //        write_offset = 0;
+                    //        ++word_counter;
+                    //    }
+                    //    ++byte_counter;
+                    //}
+                    break;
+                }
+                case DmaBus::cpu_bus:
+                case DmaBus::dsp_bus:
+                    Log::debug("scu", "CPU-Bus or DSP-Bus transfer");
+
+                    //switch (getScuRegion(read_address)) {
+                    //    case ScuRegion::unknown:	Log::warning("scu", "Unknown SCU region : {}", read_address); break;
+                    //    case ScuRegion::a_bus_cs2:	break;
+                    //    default:					read_address_add = 4;
+                    //}
+                    //write_address_add = 4;
+
+                    //while (byte_counter < dc.transfer_byte_number) {
+                    //    data = memory()->read<u8>((read_address & 0x7FFFFFFF) + read_offset + long_counter * read_address_add);
+                    //    memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
+
+                    //    ++read_offset;
+
+                    //    if (read_offset == 4) {
+                    //        read_offset = 0;
+                    //        ++long_counter;
+                    //    }
+
+                    //    ++byte_counter;
+                    //}
+
+
+
+                default:
+
+                    break;
+            }
+
+
+
+            
             //indirect_dma_end_code
+            execute_address_storage_buffer += 0xc;
         }
+
+        if (dc.write_address_update == WriteAddressUpdate::update)
+            dmaUpdateWriteAddress(dc.dma_level, execute_address_storage_buffer);
 
         sendDmaEndInterrupt(dc.dma_level);
         resetDmaEnable(dc);
@@ -1095,6 +1234,14 @@ void Scu::resetDmaEnable(const DmaConfiguration& dc) {
 			}
 		}
 	}
+}
+
+void Scu::dmaUpdateWriteAddress(const DmaLevel l, const u32 data) {
+    switch (l) {
+        case DmaLevel::level_0: memory()->write<u32>(level_0_dma_write_address, data); break;
+        case DmaLevel::level_1: memory()->write<u32>(level_1_dma_write_address, data); break;
+        case DmaLevel::level_2: memory()->write<u32>(level_2_dma_write_address, data); break;
+    }
 }
 
 }
