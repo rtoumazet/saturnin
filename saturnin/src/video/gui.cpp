@@ -66,12 +66,16 @@ namespace gui {
         }
     }
 
-    void show_core_window(const uint32_t tex) {
+    //void showCoreWindow(const uint32_t tex) {
+    void showCoreWindow() {
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
         window_flags |= ImGuiWindowFlags_NoResize;
         window_flags |= ImGuiWindowFlags_NoScrollbar;
 
+        std::vector<uint8_t> icons;
+        video::loadIcons(icons);
+        
         ImGui::SetNextWindowPos(ImVec2(400, 0), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(150, 20));
 
@@ -337,13 +341,12 @@ namespace gui {
         }
         ImGui::EndMainMenuBar();
 
-        //ImGui::BeginChild()
+        showCoreWindow();
         
         showRenderingWindow(opengl, fbo, width, height);
 
         if (show_options)   showOptionsWindow(state, &show_options);
         if (show_load_stv)  showStvWindow(&show_load_stv);
-        //if (show_load_binary)  showStvWindow(&show_load_binary);
     }
 
     void renderToTexture(int32_t texture, const uint32_t width, const uint32_t height) {

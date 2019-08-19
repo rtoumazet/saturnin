@@ -215,28 +215,6 @@ uint32_t Opengl::createProgramShader(const uint32_t vertex_shader, const uint32_
 //    return VAO;
 //}
 
-bool Opengl::load_png_image(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) {
-    // Load file and decode image.
-    uint32_t width {};
-    uint32_t height {};
-    uint32_t error = lodepng::decode(image, width, height, source_data, LCT_RGBA);
-
-    // If there's an error, display it.
-    if (error != 0)
-    {
-        std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-bool Opengl::load_icons(std::vector<uint8_t>& image) {
-    //Opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
-    std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
-    return load_png_image(icons_vector, image);
-}
-
 static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error %d: %s\n", error, description);
@@ -547,6 +525,27 @@ int32_t runModernOpengl(core::Emulator_context& state) {
 void windowCloseCallback(GLFWwindow* window) {
     core::Emulator_context *state = reinterpret_cast<core::Emulator_context*>(glfwGetWindowUserPointer(window));
     state->renderingStatus_ = core::RenderingStatus::stopped;
+}
+
+bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) {
+    // Load file and decode image.
+    uint32_t width{};
+    uint32_t height{};
+    uint32_t error = lodepng::decode(image, width, height, source_data, LCT_RGBA);
+
+    // If there's an error, display it.
+    if (error != 0) {
+        std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool loadIcons(std::vector<uint8_t>& image) {
+    //Opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
+    std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
+    return loadPngImage(icons_vector, image);
 }
 
 };

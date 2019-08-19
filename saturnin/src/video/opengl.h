@@ -156,9 +156,6 @@ public:
 
     void drawTriangle();
 
-    bool load_png_image(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
-    bool load_icons(std::vector<uint8_t>& image);
-
     std::function<int32_t(void)> calculateRendering;    ///< function pointer to the rendering function
 
 private:
@@ -225,6 +222,10 @@ int32_t runModernOpengl(core::Emulator_context& state);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void windowCloseCallback(GLFWwindow* window);
+
+bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
+
+bool loadIcons(std::vector<uint8_t>& image);
 
 };
 };
