@@ -2,10 +2,9 @@ Saturnin is a Sega Saturn emulator
 
 ### How do I get set up? ###
 
-* Summary of set up
 * Configuration
 	
-	Before doing anything, remove template extensions from properties files in the **./props** directory.
+	Before doing anything after cloning the repository, remove template extensions from properties files in the **./props** directory.
 
     After that, you must update user macros from properties sheets inside VS2017 to set up your directories. To do so, open the Property Manager first 
     ( **View** | **Property Manager** ), then update the following sheets macros according to your setup : **dll**, **solution**.
