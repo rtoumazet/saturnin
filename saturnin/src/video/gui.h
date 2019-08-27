@@ -37,7 +37,7 @@ namespace gui {
 
     void show_test_window(bool& show_test_window);
     //void showCoreWindow(const uint32_t tex);
-    void showCoreWindow();
+    void showCoreWindow(video::Opengl& opengl);
     void showRenderingWindow(video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height);
     void showStvWindow(bool *opened);
     void showOptionsWindow(core::Emulator_context&, bool *opened);

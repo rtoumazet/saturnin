@@ -267,6 +267,32 @@ void Opengl::postRendering() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+bool Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) {
+    // Load file and decode image.
+    uint32_t width{};
+    uint32_t height{};
+    uint32_t error = lodepng::decode(image, width, height, source_data, LCT_RGBA);
+
+    // If there's an error, display it.
+    if (error != 0) {
+        std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
+        return false;
+    }
+
+    glGenTextures(1, &iconsTextureId);
+    glBindTexture(GL_TEXTURE_2D, iconsTextureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, source_data.data());
+    glObjectLabel(GL_TEXTURE, iconsTextureId, -1, "Example Texture");
+
+    return true;
+}
+
+bool Opengl::loadIcons(std::vector<uint8_t>& image) {
+    //Opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
+    std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
+    return loadPngImage(icons_vector, image);
+}
+
 bool isModernOpenglCapable()
 {
     if (!glfwInit()) return false;
@@ -527,26 +553,7 @@ void windowCloseCallback(GLFWwindow* window) {
     state->renderingStatus_ = core::RenderingStatus::stopped;
 }
 
-bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) {
-    // Load file and decode image.
-    uint32_t width{};
-    uint32_t height{};
-    uint32_t error = lodepng::decode(image, width, height, source_data, LCT_RGBA);
 
-    // If there's an error, display it.
-    if (error != 0) {
-        std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-bool loadIcons(std::vector<uint8_t>& image) {
-    //Opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
-    std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
-    return loadPngImage(icons_vector, image);
-}
 
 };
 };
