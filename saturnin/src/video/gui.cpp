@@ -67,14 +67,15 @@ namespace gui {
     }
 
     //void showCoreWindow(const uint32_t tex) {
-    void showCoreWindow() {
+    void showCoreWindow(video::Opengl& opengl) {
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
         window_flags |= ImGuiWindowFlags_NoResize;
         window_flags |= ImGuiWindowFlags_NoScrollbar;
 
+        
         std::vector<uint8_t> icons;
-        video::loadIcons(icons);
+        opengl.loadIcons(icons);
         
         ImGui::SetNextWindowPos(ImVec2(400, 0), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(150, 20));
@@ -341,7 +342,7 @@ namespace gui {
         }
         ImGui::EndMainMenuBar();
 
-        showCoreWindow();
+        showCoreWindow(opengl);
         
         showRenderingWindow(opengl, fbo, width, height);
 

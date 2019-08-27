@@ -158,11 +158,17 @@ public:
 
     std::function<int32_t(void)> calculateRendering;    ///< function pointer to the rendering function
 
+    bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
+
+    bool loadIcons(std::vector<uint8_t>& image);
+
 private:
     
     uint32_t      program_shader_;
     uint32_t      vao_;
     core::Config* config_;        ///< Configuration object
+
+    uint32_t     iconsTextureId;    ///< Texture id storing data for UI icons
 };
 
 
@@ -222,10 +228,6 @@ int32_t runModernOpengl(core::Emulator_context& state);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void windowCloseCallback(GLFWwindow* window);
-
-bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
-
-bool loadIcons(std::vector<uint8_t>& image);
 
 };
 };
