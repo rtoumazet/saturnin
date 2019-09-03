@@ -62,7 +62,7 @@ namespace gui {
         if (show_test_window)
         {
             ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
-            ImGui::ShowTestWindow();
+            ImGui::ShowDemoWindow();
         }
     }
 
@@ -75,7 +75,7 @@ namespace gui {
 
         
         std::vector<uint8_t> icons;
-        opengl.loadIcons(icons);
+        uint32_t tex = opengl.loadIcons(icons);
         
         ImGui::SetNextWindowPos(ImVec2(400, 0), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(150, 20));
@@ -84,14 +84,17 @@ namespace gui {
         bool show_window;
         ImGui::Begin("Core", &show_window, window_flags);
         //if (ImGui::Button("Play")) show_test_window ^= 1;
-        if (ImGui::Button("Play")) {
-            ImGui::OpenPopup("testpopup");
-        }
 
-        if (ImGui::BeginPopup("testpopup")) {
-            ImGui::Text("TEST");
-            ImGui::EndPopup();
-        }
+        ImGui::ImageButton((ImTextureID)tex, ImVec2(8, 8));
+
+        //if (ImGui::Button("Play")) {
+        //    ImGui::OpenPopup("testpopup");
+        //}
+
+        //if (ImGui::BeginPopup("testpopup")) {
+        //    ImGui::Text("TEST");
+        //    ImGui::EndPopup();
+        //}
 
         //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.1000), ImVec2(0.2333, 0.2333), 0);
         ImGui::SameLine();
