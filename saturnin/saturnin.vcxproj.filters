@@ -19,9 +19,6 @@
     <Filter Include="Fichiers sources\imgui">
       <UniqueIdentifier>{7f2b5416-e7d3-4805-8d14-ce890d999203}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fichiers sources\libzippp">
-      <UniqueIdentifier>{eab4e7a3-3fcc-4d37-8175-062fb0fff3a2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Fichiers sources\cdrom">
       <UniqueIdentifier>{dfa6a1f7-eaf2-4ef2-bc54-392bf38d9642}</UniqueIdentifier>
     </Filter>
@@ -53,9 +50,6 @@
     </ClCompile>
     <ClCompile Include="lib\imgui\imgui_impl_glfw.cpp">
       <Filter>Fichiers sources\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\libzippp\libzippp.cpp">
-      <Filter>Fichiers sources\libzippp</Filter>
     </ClCompile>
     <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp">
       <Filter>Fichiers sources\imgui</Filter>
@@ -121,9 +115,6 @@
     </ClInclude>
     <ClInclude Include="lib\imgui\imgui_impl_opengl2.h">
       <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\libzippp\libzippp.h">
-      <Filter>Fichiers sources\libzippp</Filter>
     </ClInclude>
     <ClInclude Include="src\video\imgui_wrapper.h">
       <Filter>Fichiers sources\imgui</Filter>

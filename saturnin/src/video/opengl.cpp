@@ -282,7 +282,7 @@ bool Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<u
     glGenTextures(1, &iconsTextureId);
     glBindTexture(GL_TEXTURE_2D, iconsTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, source_data.data());
-    glObjectLabel(GL_TEXTURE, iconsTextureId, -1, "Example Texture");
+    //glObjectLabel(GL_TEXTURE, iconsTextureId, -1, "Example Texture");
 
     return true;
 }

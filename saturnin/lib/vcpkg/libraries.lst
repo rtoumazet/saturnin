@@ -4,5 +4,6 @@ glfw3
 imgui
 libconfig
 libzip
+libzippp
 lodepng
 spdlog

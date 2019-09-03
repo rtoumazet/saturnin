@@ -4,3 +4,4 @@
 .vs/saturnin/v15/Browse.VC.db
 .vs/saturnin/v15/Browse.VC.opendb
 *.ipch
+saturnin/lib/vcpkg/vcpkg.cfg
