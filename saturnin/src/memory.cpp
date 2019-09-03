@@ -19,7 +19,7 @@
 
 #include <sstream> // stringstream
 #include <fstream> // ifstream
-#include "../lib/libzippp/libzippp.h"
+#include <libzippp/libzippp.h>
 #include "locale.h"
 #include "emulator_context.h"
 

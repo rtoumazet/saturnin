@@ -170,7 +170,6 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClCompile Include="lib\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp" />
     <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="lib\libzippp\libzippp.cpp" />
     <ClCompile Include="src\cdrom\aspi.cpp" />
     <ClCompile Include="src\cdrom\cdrom.cpp" />
     <ClCompile Include="src\cdrom\scsi.cpp" />
@@ -193,7 +192,6 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="lib\imgui\imgui_impl_opengl2.h" />
     <ClInclude Include="lib\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="lib\imgui\imgui_loader.h" />
-    <ClInclude Include="lib\libzippp\libzippp.h" />
     <ClInclude Include="src\cdrom\aspi.h" />
     <ClInclude Include="src\cdrom\cdrom.h" />
     <ClInclude Include="src\cdrom\iso9660.h" />
