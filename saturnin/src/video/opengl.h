@@ -160,7 +160,9 @@ public:
 
     bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
 
-    bool loadIcons(std::vector<uint8_t>& image);
+    uint32_t loadIcons(std::vector<uint8_t>& image);
+
+    void generateIconsTexture();
 
 private:
     
