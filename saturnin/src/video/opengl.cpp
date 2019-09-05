@@ -41,6 +41,7 @@ Opengl::Opengl(core::Config* config) {
     if (is_legacy)  calculateRendering = std::bind(&Opengl::calculateLegacyRendering, this);
     else            calculateRendering = std::bind(&Opengl::calculateModernRendering, this);
     
+    iconsTextureId = generateIconsTexture();
 }
 
 uint32_t Opengl::createFramebuffer()
@@ -331,8 +332,27 @@ uint32_t Opengl::loadIcons(std::vector<uint8_t>& image) {
     return iconsTextureId;
 }
 
-void Opengl::generateIconsTexture() {
+uint32_t Opengl::generateIconsTexture() {
+    uint32_t width{};
+    uint32_t height{};
+    std::vector<uint8_t> icons_raw_data(icons_png, icons_png + sizeof(icons_png));
+    std::vector<uint8_t> icons_decoded;
 
+    uint32_t error = lodepng::decode(icons_decoded, width, height, icons_raw_data);
+    if (error != 0) {
+        std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
+        //return false;
+    }
+
+    glEnable(GL_TEXTURE_2D);
+    uint32_t texId;
+    glGenTextures(1, &texId);
+    glBindTexture(GL_TEXTURE_2D, texId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &icons_decoded[0]);
+
+    return texId;
 }
 
 bool isModernOpenglCapable()

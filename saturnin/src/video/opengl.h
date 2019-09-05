@@ -162,7 +162,9 @@ public:
 
     uint32_t loadIcons(std::vector<uint8_t>& image);
 
-    void generateIconsTexture();
+    uint32_t generateIconsTexture();
+
+    uint32_t     iconsTextureId;    ///< Texture id storing data for UI icons
 
 private:
     
@@ -170,7 +172,7 @@ private:
     uint32_t      vao_;
     core::Config* config_;        ///< Configuration object
 
-    uint32_t     iconsTextureId;    ///< Texture id storing data for UI icons
+    
 };
 
 
