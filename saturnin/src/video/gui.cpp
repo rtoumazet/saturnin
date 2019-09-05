@@ -74,8 +74,8 @@ namespace gui {
         window_flags |= ImGuiWindowFlags_NoScrollbar;
 
         
-        std::vector<uint8_t> icons;
-        uint32_t tex = opengl.loadIcons(icons);
+        //std::vector<uint8_t> icons;
+        //uint32_t tex = opengl.loadIcons(icons);
         
         ImGui::SetNextWindowPos(ImVec2(400, 0), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(150, 20));
@@ -85,7 +85,10 @@ namespace gui {
         ImGui::Begin("Core", &show_window, window_flags);
         //if (ImGui::Button("Play")) show_test_window ^= 1;
 
-        ImGui::ImageButton((ImTextureID)tex, ImVec2(8, 8));
+        //ImGui::ImageButton((ImTextureID)tex, ImVec2(0x10, 0x10), ImVec2(0,0), ImVec2(0.3333F, 0.3333F));
+        float uv0 = static_cast<float>(21) / 230;
+        float uv1 = static_cast<float>(57) / 230;
+        ImGui::ImageButton((ImTextureID)opengl.iconsTextureId, ImVec2(0x10, 0x10), ImVec2(uv0, uv0), ImVec2(uv1, uv1));
 
         //if (ImGui::Button("Play")) {
         //    ImGui::OpenPopup("testpopup");
