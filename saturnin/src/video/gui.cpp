@@ -32,6 +32,18 @@ namespace cdrom = saturnin::cdrom;
 namespace saturnin {
 namespace gui {
 
+    static const float icon_map_height{ 1139 };
+    static const float icon_height{ 104 };
+
+    static const ImVec2 icon_play_uv0(0, icon_height * 0 / icon_map_height);
+    static const ImVec2 icon_play_uv1(1, icon_height * 1 / icon_map_height);
+
+    static const ImVec2 icon_pause_uv0(0, icon_height * 1 / icon_map_height);
+    static const ImVec2 icon_pause_uv1(1, icon_height * 2 / icon_map_height);
+
+    static const ImVec2 icon_stop_uv0(0, icon_height * 2 / icon_map_height);
+    static const ImVec2 icon_stop_uv1(1, icon_height * 3 / icon_map_height);
+
     //void show_simple_window(bool& show_test_window, bool& show_another_window) {
     //    // 1. Show a simple window
     //    // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
@@ -78,17 +90,16 @@ namespace gui {
         //uint32_t tex = opengl.loadIcons(icons);
         
         ImGui::SetNextWindowPos(ImVec2(400, 0), ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2(150, 20));
+        ImGui::SetNextWindowSize(ImVec2(300, 40));
 
         
         bool show_window;
         ImGui::Begin("Core", &show_window, window_flags);
         //if (ImGui::Button("Play")) show_test_window ^= 1;
 
-        //ImGui::ImageButton((ImTextureID)tex, ImVec2(0x10, 0x10), ImVec2(0,0), ImVec2(0.3333F, 0.3333F));
-        float uv0 = static_cast<float>(21) / 230;
-        float uv1 = static_cast<float>(57) / 230;
-        ImGui::ImageButton((ImTextureID)opengl.iconsTextureId, ImVec2(0x10, 0x10), ImVec2(uv0, uv0), ImVec2(uv1, uv1));
+        if (ImGui::ImageButton((ImTextureID)opengl.iconsTextureId, ImVec2(20, 20), icon_play_uv0, icon_play_uv1)) {
+
+        }
 
         //if (ImGui::Button("Play")) {
         //    ImGui::OpenPopup("testpopup");
@@ -101,10 +112,10 @@ namespace gui {
 
         //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.1000), ImVec2(0.2333, 0.2333), 0);
         ImGui::SameLine();
-        ImGui::Button("Pause");
+        ImGui::ImageButton((ImTextureID)opengl.iconsTextureId, ImVec2(20, 20), icon_pause_uv0, icon_pause_uv1);
         //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.5000), ImVec2(0.2333, 0.5000), 0);
         ImGui::SameLine();
-        ImGui::Button("Stop");
+        ImGui::ImageButton((ImTextureID)opengl.iconsTextureId, ImVec2(20, 20), icon_stop_uv0, icon_stop_uv1);
         //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.5000, 0.1000), ImVec2(0.5333, 0.2333), 0);
         ImGui::SameLine();
 
