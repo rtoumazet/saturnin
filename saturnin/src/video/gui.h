@@ -25,7 +25,6 @@
 
 #pragma once
 
-//#include "imgui/imgui.h"
 #include <vector>
 #include "opengl.h"
 #include "../emulator_context.h"
