@@ -240,7 +240,12 @@ void Sh2::purgeCache() {
 
 void Sh2::initializeOnChipRegisters() {
     // Bus State Controler registers
-    rawWrite<u32>(io_registers_, bus_control_register1                 & sh2_memory_mask, 0x000003F0);
+    switch (sh2_type_) {
+        case Sh2Type::master: rawWrite<u32>(io_registers_, bus_control_register1 & sh2_memory_mask, 0x000003F0); break;
+        case Sh2Type::slave:  rawWrite<u32>(io_registers_, bus_control_register1 & sh2_memory_mask, 0x000083F0); break;
+        default: Log::error("sh2", "Unknown SH2 type");
+    }
+   
     rawWrite<u32>(io_registers_, bus_control_register2                 & sh2_memory_mask, 0x000000FC);
     rawWrite<u32>(io_registers_, wait_state_control_register           & sh2_memory_mask, 0x0000AAFF);
     rawWrite<u32>(io_registers_, individual_memory_control_register    & sh2_memory_mask, 0x00000000);
@@ -258,10 +263,121 @@ void Sh2::initializeOnChipRegisters() {
     // Division Unit
     rawWrite<u32>(io_registers_, division_control_register          & sh2_memory_mask, 0x00000000);
     rawWrite<u32>(io_registers_, vector_number_setting_register_div & sh2_memory_mask, 0x00000000); // lower 16 bits are undefined
+
+    // Serial Communication Interface
+    rawWrite<u8>(io_registers_, serial_mode_register    & sh2_memory_mask, 0x00);
+    rawWrite<u8>(io_registers_, bit_rate_register       & sh2_memory_mask, 0xFF);
+    rawWrite<u8>(io_registers_, serial_control_register & sh2_memory_mask, 0x00);
+    rawWrite<u8>(io_registers_, transmit_data_register  & sh2_memory_mask, 0xFF);
+    rawWrite<u8>(io_registers_, serial_status_register  & sh2_memory_mask, 0x84);
+    rawWrite<u8>(io_registers_, receive_data_register   & sh2_memory_mask, 0x00);
+
+    // Free Running timer
+    rawWrite<u8>(io_registers_, timer_interrupt_enable_register            & sh2_memory_mask, 0x01);
+    rawWrite<u8>(io_registers_, free_running_timer_control_status_register & sh2_memory_mask, 0x00);
+    rawWrite<u8>(io_registers_, free_running_counter_h                     & sh2_memory_mask, 0x00);
+    rawWrite<u8>(io_registers_, free_running_counter_l                     & sh2_memory_mask, 0x00);
+    rawWrite<u8>(io_registers_, output_compare_register_a_h                & sh2_memory_mask, 0xff);
+    rawWrite<u8>(io_registers_, output_compare_register_a_l                & sh2_memory_mask, 0xff);
+    rawWrite<u8>(io_registers_, output_compare_register_b_h                & sh2_memory_mask, 0xff);
+    rawWrite<u8>(io_registers_, output_compare_register_b_l                & sh2_memory_mask, 0xff);
+    rawWrite<u8>(io_registers_, timer_control_register                     & sh2_memory_mask, 0x00);
+    rawWrite<u8>(io_registers_, timer_output_compare_control_register      & sh2_memory_mask, 0xe0);
+    rawWrite<u8>(io_registers_, input_capture_register_h                   & sh2_memory_mask, 0x00);
+    rawWrite<u8>(io_registers_, input_capture_register_l                   & sh2_memory_mask, 0x00);
+
+    // Watch Dog Timer
+    rawWrite<u8>(io_registers_, watchdog_timer_control_status_register     & sh2_memory_mask, 0x18);
+    rawWrite<u8>(io_registers_, watchdog_timer_counter                     & sh2_memory_mask, 0x00);
+    rawWrite<u8>(io_registers_, reset_control_status_register              & sh2_memory_mask, 0x1F);
 }
 
 void Sh2::start32bitsDivision() {
+    // 32/32 division
+    Log::debug("sh2", "32/32 division");
 
+    // DVDNT is copied in DVDNTL and DVDNTH
+    int32_t dvdnt = rawRead<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask);
+    rawWrite<u32>(io_registers_, dividend_register_l & sh2_memory_mask, dvdnt);
+
+    if (dvdnt < 0) rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0xffffffff);
+    else rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0x00000000);
+
+    int32_t dvsr = rawRead<u32>(io_registers_, divisor_register & sh2_memory_mask);
+
+    Log::debug("sh2", "Dividend : {}, divisor : {}", dvdnt, dvsr);
+
+    if (dvsr != 0) {
+        // 39 cycles
+        auto result = ldiv(dvdnt, dvsr);
+        // Copy in DVDNTL and DVDNTH + ST-V mirroring
+        rawWrite<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask, result.quot);
+        rawWrite<u32>(io_registers_, dividend_register_l         & sh2_memory_mask, result.quot);
+        rawWrite<u32>(io_registers_, dividend_register_l_shadow  & sh2_memory_mask, result.quot);
+        
+        rawWrite<u32>(io_registers_, dividend_register_h         & sh2_memory_mask, result.rem);
+        rawWrite<u32>(io_registers_, dividend_register_h_shadow  & sh2_memory_mask, result.rem);
+
+
+    } else {
+        // Zero divide, flag update + send interrupt
+        // 6 cycles after detection
+        Log::debug("sh2", "Zero divide !");
+
+        int32_t dvcr = rawRead<u32>(io_registers_, division_control_register & sh2_memory_mask);
+        if (!(dvcr && 1)) {
+            Log::debug("sh2", "DIVU flag update");
+            ++dvcr;
+            rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr);
+        }
+        if( dvcr & 2 ){
+            Log::debug("sh2", "Sending division overflow interrupt");
+            is::sh2_division_overflow.vector = rawRead<u8>(io_registers_, vector_number_setting_register_div & sh2_memory_mask);
+            is::sh2_division_overflow.level  = rawRead<u8>(io_registers_, interrupt_priority_level_setting_register_a & sh2_memory_mask) >> 4;
+            sendInterrupt(is::sh2_division_overflow);
+        }
+    }
+
+    // Overflow check
+
+
+    //    // Division is executed
+    //    if (dvsr != 0) {
+
+    //    } else {
+    //        // Zero divide, flag update and interrupt sent if needed
+    //        // 6 cycles after detection
+    //        dvcr = IOReg[LOCAL_DVCR] << 24 | IOReg[LOCAL_DVCR + 1] << 16 | IOReg[LOCAL_DVCR + 2] << 8 | IOReg[LOCAL_DVCR + 3];
+    //        if (!(dvcr && 0x1)) {
+    //            dvcr++;
+    //            IOReg[LOCAL_DVCR] = static_cast<uint8_t>((dvcr & 0xFF000000) >> 24);
+    //            IOReg[LOCAL_DVCR + 1] = static_cast<uint8_t>((dvcr & 0x00FF0000) >> 16);
+    //            IOReg[LOCAL_DVCR + 2] = static_cast<uint8_t>((dvcr & 0x0000FF00) >> 8);
+    //            IOReg[LOCAL_DVCR + 3] = static_cast<uint8_t>(dvcr & 0x000000FF);
+    //        }
+    //        if (dvcr & 0x2) {
+    //            EmuState::gInt->AddInterruptMaster(IOReg[LOCAL_VCRDIV], ((IOReg[LOCAL_IPRA] & 0xF0) >> 4));
+    //        }
+    //    }
+
+    //    // Checking overflow
+    //    if ((dvdnt & 0x80000000) && (dvsr & 0x80000000)) {
+    //        if ((div_result.quot == 0x7FFFFFFF) && (div_result.rem & 0x80000000)) {
+    //            // Overflow detected, flag update + sending interrupt
+    //            dvcr = IOReg[LOCAL_DVCR] << 24 | IOReg[LOCAL_DVCR + 1] << 16 | IOReg[LOCAL_DVCR + 2] << 8 | IOReg[LOCAL_DVCR + 3];
+    //            if (!(dvcr && 0x1)) {
+    //                dvcr++;
+    //                IOReg[LOCAL_DVCR] = static_cast<uint8_t>((dvcr & 0xFF000000) >> 24);
+    //                IOReg[LOCAL_DVCR + 1] = static_cast<uint8_t>((dvcr & 0x00FF0000) >> 16);
+    //                IOReg[LOCAL_DVCR + 2] = static_cast<uint8_t>((dvcr & 0x0000FF00) >> 8);
+    //                IOReg[LOCAL_DVCR + 3] = static_cast<uint8_t>(dvcr & 0x000000FF);
+    //            }
+    //            if (dvcr & 0x2) {
+    //                EmuState::gInt->AddInterruptMaster(IOReg[LOCAL_VCRDIV], ((IOReg[LOCAL_IPRA] & 0xF0) >> 4));
+    //            }
+    //        }
+    //    }
+    //}
 }
 
 void Sh2::start64bitsDivision() {
