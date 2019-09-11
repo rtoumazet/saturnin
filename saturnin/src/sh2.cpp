@@ -320,22 +320,31 @@ void Sh2::start32bitsDivision() {
 
 
     } else {
-        // Zero divide, flag update + send interrupt
+        // Zero divide, flag update + interrupt send
         // 6 cycles after detection
         Log::debug("sh2", "Zero divide !");
 
-        int32_t dvcr = rawRead<u32>(io_registers_, division_control_register & sh2_memory_mask);
-        if (!(dvcr && 1)) {
-            Log::debug("sh2", "DIVU flag update");
-            ++dvcr;
-            rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr);
-        }
-        if( dvcr & 2 ){
-            Log::debug("sh2", "Sending division overflow interrupt");
-            is::sh2_division_overflow.vector = rawRead<u8>(io_registers_, vector_number_setting_register_div & sh2_memory_mask);
-            is::sh2_division_overflow.level  = rawRead<u8>(io_registers_, interrupt_priority_level_setting_register_a & sh2_memory_mask) >> 4;
-            sendInterrupt(is::sh2_division_overflow);
-        }
+        auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
+        
+        //switch (tocr.get(TimerOutputCompareControlRegister::outputCompareRegisterSelect)) {
+        //    case OutputCompareRegisterSelect::ocra: frt_ocra_ = (0xFF << 8) | data; break;
+        //    case OutputCompareRegisterSelect::ocrb: frt_ocrb_ = (0xFF << 8) | data; break;
+        //}
+
+
+
+        ////int32_t dvcr = rawRead<u32>(io_registers_, division_control_register & sh2_memory_mask);
+        //if (dvcr.overflowFlag == OverflowFlag::overflow!(dvcr && 1)) {
+        //    Log::debug("sh2", "DIVU flag update");
+        //    ++dvcr;
+        //    rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr);
+        //}
+        //if( dvcr & 2 ){
+        //    Log::debug("sh2", "Sending division overflow interrupt");
+        //    is::sh2_division_overflow.vector = rawRead<u8>(io_registers_, vector_number_setting_register_div & sh2_memory_mask);
+        //    is::sh2_division_overflow.level  = rawRead<u8>(io_registers_, interrupt_priority_level_setting_register_a & sh2_memory_mask) >> 4;
+        //    sendInterrupt(is::sh2_division_overflow);
+        //}
     }
 
     // Overflow check
