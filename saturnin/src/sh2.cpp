@@ -325,7 +325,9 @@ void Sh2::start32bitsDivision() {
         Log::debug("sh2", "Zero divide !");
 
         auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
-        
+        dvcr.set(DivisionControlRegister::overflowFlag);
+        rawWrite<u32>(io_registers_, division_control_register  & sh2_memory_mask, dvcr.toUlong());
+
         //switch (tocr.get(TimerOutputCompareControlRegister::outputCompareRegisterSelect)) {
         //    case OutputCompareRegisterSelect::ocra: frt_ocra_ = (0xFF << 8) | data; break;
         //    case OutputCompareRegisterSelect::ocrb: frt_ocrb_ = (0xFF << 8) | data; break;
