@@ -304,12 +304,15 @@ void Sh2::start32bitsDivision() {
     else rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0x00000000);
 
     int32_t dvsr = rawRead<u32>(io_registers_, divisor_register & sh2_memory_mask);
-
+    
+    auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
+    
     Log::debug("sh2", "Dividend : {}, divisor : {}", dvdnt, dvsr);
-
+    
+    ldiv_t result{};
     if (dvsr != 0) {
         // 39 cycles
-        auto result = ldiv(dvdnt, dvsr);
+        result = ldiv(dvdnt, dvsr);
         // Copy in DVDNTL and DVDNTH + ST-V mirroring
         rawWrite<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask, result.quot);
         rawWrite<u32>(io_registers_, dividend_register_l         & sh2_memory_mask, result.quot);
@@ -318,81 +321,44 @@ void Sh2::start32bitsDivision() {
         rawWrite<u32>(io_registers_, dividend_register_h         & sh2_memory_mask, result.rem);
         rawWrite<u32>(io_registers_, dividend_register_h_shadow  & sh2_memory_mask, result.rem);
 
-
     } else {
-        // Zero divide, flag update + interrupt send
-        // 6 cycles after detection
-        Log::debug("sh2", "Zero divide !");
-
-        auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
+        // Zero divide check
+        Log::debug("sh2", "DIVU - Zero divide detected !");
         dvcr.set(DivisionControlRegister::overflowFlag);
-        rawWrite<u32>(io_registers_, division_control_register  & sh2_memory_mask, dvcr.toUlong());
-
-        //switch (tocr.get(TimerOutputCompareControlRegister::outputCompareRegisterSelect)) {
-        //    case OutputCompareRegisterSelect::ocra: frt_ocra_ = (0xFF << 8) | data; break;
-        //    case OutputCompareRegisterSelect::ocrb: frt_ocrb_ = (0xFF << 8) | data; break;
-        //}
-
-
-
-        ////int32_t dvcr = rawRead<u32>(io_registers_, division_control_register & sh2_memory_mask);
-        //if (dvcr.overflowFlag == OverflowFlag::overflow!(dvcr && 1)) {
-        //    Log::debug("sh2", "DIVU flag update");
-        //    ++dvcr;
-        //    rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr);
-        //}
-        //if( dvcr & 2 ){
-        //    Log::debug("sh2", "Sending division overflow interrupt");
-        //    is::sh2_division_overflow.vector = rawRead<u8>(io_registers_, vector_number_setting_register_div & sh2_memory_mask);
-        //    is::sh2_division_overflow.level  = rawRead<u8>(io_registers_, interrupt_priority_level_setting_register_a & sh2_memory_mask) >> 4;
-        //    sendInterrupt(is::sh2_division_overflow);
-        //}
     }
 
     // Overflow check
+    if ((dvdnt & 0x80000000) && (dvsr & 0x80000000)) {
+        if ((result.quot == 0x7FFFFFFF) && (result.rem & 0x80000000)) dvcr.set(DivisionControlRegister::overflowFlag);
+    }
 
+    // 39 cycles for regular division, 6 cycles when overflow is detected
+    divu_remaining_cycles_ = (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) ? 6 : 39;
+    divu_quot_             = result.quot;
+    divu_rem_              = result.rem;
 
-    //    // Division is executed
-    //    if (dvsr != 0) {
-
-    //    } else {
-    //        // Zero divide, flag update and interrupt sent if needed
-    //        // 6 cycles after detection
-    //        dvcr = IOReg[LOCAL_DVCR] << 24 | IOReg[LOCAL_DVCR + 1] << 16 | IOReg[LOCAL_DVCR + 2] << 8 | IOReg[LOCAL_DVCR + 3];
-    //        if (!(dvcr && 0x1)) {
-    //            dvcr++;
-    //            IOReg[LOCAL_DVCR] = static_cast<uint8_t>((dvcr & 0xFF000000) >> 24);
-    //            IOReg[LOCAL_DVCR + 1] = static_cast<uint8_t>((dvcr & 0x00FF0000) >> 16);
-    //            IOReg[LOCAL_DVCR + 2] = static_cast<uint8_t>((dvcr & 0x0000FF00) >> 8);
-    //            IOReg[LOCAL_DVCR + 3] = static_cast<uint8_t>(dvcr & 0x000000FF);
-    //        }
-    //        if (dvcr & 0x2) {
-    //            EmuState::gInt->AddInterruptMaster(IOReg[LOCAL_VCRDIV], ((IOReg[LOCAL_IPRA] & 0xF0) >> 4));
-    //        }
-    //    }
-
-    //    // Checking overflow
-    //    if ((dvdnt & 0x80000000) && (dvsr & 0x80000000)) {
-    //        if ((div_result.quot == 0x7FFFFFFF) && (div_result.rem & 0x80000000)) {
-    //            // Overflow detected, flag update + sending interrupt
-    //            dvcr = IOReg[LOCAL_DVCR] << 24 | IOReg[LOCAL_DVCR + 1] << 16 | IOReg[LOCAL_DVCR + 2] << 8 | IOReg[LOCAL_DVCR + 3];
-    //            if (!(dvcr && 0x1)) {
-    //                dvcr++;
-    //                IOReg[LOCAL_DVCR] = static_cast<uint8_t>((dvcr & 0xFF000000) >> 24);
-    //                IOReg[LOCAL_DVCR + 1] = static_cast<uint8_t>((dvcr & 0x00FF0000) >> 16);
-    //                IOReg[LOCAL_DVCR + 2] = static_cast<uint8_t>((dvcr & 0x0000FF00) >> 8);
-    //                IOReg[LOCAL_DVCR + 3] = static_cast<uint8_t>(dvcr & 0x000000FF);
-    //            }
-    //            if (dvcr & 0x2) {
-    //                EmuState::gInt->AddInterruptMaster(IOReg[LOCAL_VCRDIV], ((IOReg[LOCAL_IPRA] & 0xF0) >> 4));
-    //            }
-    //        }
-    //    }
-    //}
+    if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
+        rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toUlong()); // Updating the register
+    }
 }
 
 void Sh2::start64bitsDivision() {
 
+}
+
+void Sh2::runDivisionUnit(const u8 cycles_to_run) {
+    divu_remaining_cycles_ -= cycles_to_run;
+    if (divu_remaining_cycles_ == 0) {
+        auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
+        if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
+            if (dvcr.get(DivisionControlRegister::interruptEnable) == InterruptEnable::enabled) {
+                Log::debug("sh2", "DIVU - Sending division overflow interrupt");
+                is::sh2_division_overflow.vector = rawRead<u8>(io_registers_, vector_number_setting_register_div & sh2_memory_mask);
+                is::sh2_division_overflow.level  = rawRead<u8>(io_registers_, interrupt_priority_level_setting_register_a & sh2_memory_mask) >> 4;
+                sendInterrupt(is::sh2_division_overflow);
+            }
+        }
+    }
 }
 
 void Sh2::executeDma() {
