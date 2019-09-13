@@ -77,7 +77,7 @@ class Sh2 {
 
     template<typename T>
     T readRegisters(const u32 addr) const {
-        return rawRead<T>(this->io_registers_, addr & 0x1FF);
+        return rawRead<T>(this->io_registers_, addr & sh2_memory_mask);
     }
 
     // 32 bits specialization
@@ -101,7 +101,7 @@ class Sh2 {
 
     template<typename T>
     void writeRegisters(const u32 addr, const T data) {
-        rawWrite<T>(io_registers_, addr & 0x1FF, data);
+        rawWrite<T>(io_registers_, addr & sh2_memory_mask, data);
     }
 
     // 8 bits specialization
@@ -195,7 +195,7 @@ class Sh2 {
     void writeCacheData(const u32 addr, const T data) {
         rawWrite<T>(cache_data_, addr & 0xFFF, data);
     }
-
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::sendInterrupt(const Interrupt& i);
     ///
@@ -335,7 +335,7 @@ private:
     void reset();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Sh2::runDivisionUnit(u8 cycles_to_run);
+    /// \fn void Sh2::runDivisionUnit(const u8 cycles_to_run);
     ///
     /// \brief  Executes the division unit for the specified number of cycles.
     ///
@@ -345,7 +345,7 @@ private:
     /// \param  cycles_to_run   Number of cycles to run.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void runDivisionUnit(u8 cycles_to_run);
+    void runDivisionUnit(const u8 cycles_to_run);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Sh2::scu_memory() const;
@@ -390,6 +390,8 @@ private:
     /// \name DIVU (Division unit)
     //@{
     u8      divu_remaining_cycles_{}; ///< Remaining cycles to end current division
+    s32     divu_quot_{};             ///< Quotient of the division
+    s32     divu_rem_{};              ///< Remainder of the division
     //@}
 
     /// \name FRT (Free Running Timer)
