@@ -298,35 +298,21 @@ void Sh2::start32bitsDivision() {
 
     // DVDNT is copied in DVDNTL and DVDNTH
     int32_t dvdnt = rawRead<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask);
+
     rawWrite<u32>(io_registers_, dividend_register_l & sh2_memory_mask, dvdnt);
 
     if (dvdnt < 0) rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0xffffffff);
-    else rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0x00000000);
+    else           rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0x00000000);
 
     int32_t dvsr = rawRead<u32>(io_registers_, divisor_register & sh2_memory_mask);
     
-    auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
-    
     Log::debug("sh2", "Dividend : {}, divisor : {}", dvdnt, dvsr);
     
+    auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
     ldiv_t result{};
-    if (dvsr != 0) {
-        // 39 cycles
-        result = ldiv(dvdnt, dvsr);
-        // Copy in DVDNTL and DVDNTH + ST-V mirroring
-        rawWrite<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask, result.quot);
-        rawWrite<u32>(io_registers_, dividend_register_l         & sh2_memory_mask, result.quot);
-        rawWrite<u32>(io_registers_, dividend_register_l_shadow  & sh2_memory_mask, result.quot);
-        
-        rawWrite<u32>(io_registers_, dividend_register_h         & sh2_memory_mask, result.rem);
-        rawWrite<u32>(io_registers_, dividend_register_h_shadow  & sh2_memory_mask, result.rem);
-
-    } else {
-        // Zero divide check
-        Log::debug("sh2", "DIVU - Zero divide detected !");
-        dvcr.set(DivisionControlRegister::overflowFlag);
-    }
-
+    if (dvsr != 0) result = ldiv(dvdnt, dvsr);
+    else           dvcr.set(DivisionControlRegister::overflowFlag);
+    
     // Overflow check
     if ((dvdnt & 0x80000000) && (dvsr & 0x80000000)) {
         if ((result.quot == 0x7FFFFFFF) && (result.rem & 0x80000000)) dvcr.set(DivisionControlRegister::overflowFlag);
@@ -357,6 +343,14 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
                 is::sh2_division_overflow.level  = rawRead<u8>(io_registers_, interrupt_priority_level_setting_register_a & sh2_memory_mask) >> 4;
                 sendInterrupt(is::sh2_division_overflow);
             }
+        } else {
+            // Copy in DVDNTL and DVDNTH + ST-V mirroring
+            rawWrite<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask, divu_quot_);
+            rawWrite<u32>(io_registers_, dividend_register_l         & sh2_memory_mask, divu_quot_);
+            rawWrite<u32>(io_registers_, dividend_register_l_shadow  & sh2_memory_mask, divu_quot_);
+
+            rawWrite<u32>(io_registers_, dividend_register_h         & sh2_memory_mask, divu_rem_);
+            rawWrite<u32>(io_registers_, dividend_register_h_shadow  & sh2_memory_mask, divu_rem_);
         }
     }
 }

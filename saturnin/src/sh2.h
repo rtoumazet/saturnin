@@ -383,29 +383,30 @@ private:
     /// \name Interrupt management
     //@{
     std::list<Interrupt>                    pending_interrupts_ = {};       ///< List of pending interrupts.
-    bool                                    is_interrupted_ = false;        ///< True if this sh2 is interrupted.
+    bool                                    is_interrupted_{};        ///< True if this sh2 is interrupted.
     std::array<bool, max_interrupt_level>   is_level_interrupted_{};        ///< Determines if any given level is already interrupted.
     //@}
 
     /// \name DIVU (Division unit)
     //@{
+    bool    divu_is_running_{ false };///< True when division unit is in operation
     u8      divu_remaining_cycles_{}; ///< Remaining cycles to end current division
     s32     divu_quot_{};             ///< Quotient of the division
     s32     divu_rem_{};              ///< Remainder of the division
     //@}
 
     /// \name FRT (Free Running Timer)
-    //@{
-    u32	    frt_elapsed_cycles_ = 0;                ///< Elapsed FRT cycles. 
-    u8	    frt_clock_          = 0;	            ///< FRT clock. 
-    u8	    frt_mask_           = 0;	            ///< FRT mask. 
-    u16     frt_ocra_           = 0;	            ///< Output Compare Register A. 
-    u16     frt_ocrb_           = 0;	            ///< Output Compare Register B.
-    bool    frt_icie_           = false;	        ///< Input Capture Interrupt Enable. 
-    bool    frt_ociae_          = false;	        ///< Output Compare Interrupt A Enable. 
-    bool    frt_ocibe_          = false;	        ///< Output Compare Interrupt B Enable.
-    bool    frt_ovie_           = false;	        ///< Timer Overflow Interrupt Enable. 
-    bool    frt_current_ocr_    = false;	        ///< Current Output Compare Register. 
+    //@                         {
+    u32	    frt_elapsed_cycles_ {}; ///< Elapsed FRT cycles. 
+    u8	    frt_clock_          {}; ///< FRT clock. 
+    u8	    frt_mask_           {}; ///< FRT mask. 
+    u16     frt_ocra_           {}; ///< Output Compare Register A. 
+    u16     frt_ocrb_           {}; ///< Output Compare Register B.
+    bool    frt_icie_           {}; ///< Input Capture Interrupt Enable. 
+    bool    frt_ociae_          {}; ///< Output Compare Interrupt A Enable. 
+    bool    frt_ocibe_          {}; ///< Output Compare Interrupt B Enable.
+    bool    frt_ovie_           {}; ///< Timer Overflow Interrupt Enable. 
+    bool    frt_current_ocr_    {}; ///< Current Output Compare Register. 
     //@}
 };
 
