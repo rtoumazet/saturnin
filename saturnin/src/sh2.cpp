@@ -297,14 +297,14 @@ void Sh2::start32bitsDivision() {
     Log::debug("sh2", "32/32 division");
 
     // DVDNT is copied in DVDNTL and DVDNTH
-    int32_t dvdnt = rawRead<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask);
+    s32 dvdnt = rawRead<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask);
 
     rawWrite<u32>(io_registers_, dividend_register_l & sh2_memory_mask, dvdnt);
 
     if (dvdnt < 0) rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0xffffffff);
     else           rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0x00000000);
 
-    int32_t dvsr = rawRead<u32>(io_registers_, divisor_register & sh2_memory_mask);
+    s32 dvsr = rawRead<u32>(io_registers_, divisor_register & sh2_memory_mask);
     
     Log::debug("sh2", "Dividend : {}, divisor : {}", dvdnt, dvsr);
     
@@ -326,10 +326,20 @@ void Sh2::start32bitsDivision() {
     if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
         rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toUlong()); // Updating the register
     }
+
+    divu_is_running_ = true;
 }
 
 void Sh2::start64bitsDivision() {
+    Log::debug("sh2", "64/32 division");
 
+    s32 dvdntl = rawRead<u32>(io_registers_, dividend_register_l & sh2_memory_mask);
+    s32 dvdnth = rawRead<u32>(io_registers_, dividend_register_h & sh2_memory_mask);
+    s32 dvsr   = rawRead<u32>(io_registers_, divisor_register & sh2_memory_mask);
+    
+    s64 dividend = (static_cast<s64>(dvdnth) << 32) | dvdntl;
+
+    divu_is_running_ = true;
 }
 
 void Sh2::runDivisionUnit(const u8 cycles_to_run) {

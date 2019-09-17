@@ -124,7 +124,9 @@ bool Emulator_context::run() {
 
     scu_->dmaTest();
 
-
+    s32 a = 0x01234567;
+    s32 b = 0x89abcdef;
+    s64 dividend = static_cast<s64>((static_cast<s64>(a) << 32) | static_cast<s64>(b));
   
 
     // TESTING //
