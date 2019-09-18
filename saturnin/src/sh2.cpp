@@ -337,7 +337,32 @@ void Sh2::start64bitsDivision() {
     s32 dvdnth = rawRead<u32>(io_registers_, dividend_register_h & sh2_memory_mask);
     s32 dvsr   = rawRead<u32>(io_registers_, divisor_register & sh2_memory_mask);
     
-    s64 dividend = (static_cast<s64>(dvdnth) << 32) | dvdntl;
+    s64 dividend = (static_cast<s64>(dvdnth) << 32) | (dvdntl & 0xffffffff);
+
+    Log::debug("sh2", "Dividend : {}, divisor : {}", dividend, dvsr);
+
+    auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
+    s64 quotient{};
+    s64 remainder{};
+    if (dvsr != 0) {
+        quotient  = dividend / dvsr;
+        remainder = dividend % dvsr;
+    } else 
+        dvcr.set(DivisionControlRegister::overflowFlag);
+
+    // Overflow check
+    if ((dvdntl & 0x80000000) && (dvsr & 0x80000000)) {
+        if ((quotient == 0x7FFFFFFF) && (remainder & 0x80000000)) dvcr.set(DivisionControlRegister::overflowFlag);
+    }
+
+    // 39 cycles for regular division, 6 cycles when overflow is detected
+    divu_remaining_cycles_ = (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) ? 6 : 39;
+    divu_quot_             = quotient;
+    divu_rem_              = remainder;
+
+    if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
+        rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toUlong()); // Updating the register
+    }
 
     divu_is_running_ = true;
 }
