@@ -29,6 +29,7 @@
 #include "emulator_defs.h"
 #include "memory.h"
 #include "interrupt_sources.h"
+#include "sh2_intructions.h"
 
 namespace saturnin {
 namespace core {
@@ -373,6 +374,8 @@ private:
 
     auto scu() const;
 
+    friend void add(Sh2*);
+
     Emulator_context* emulator_context_;    ///< Context of the emulator
     
     std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
@@ -380,6 +383,18 @@ private:
     std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).
     Sh2Type sh2_type_;                          ///< Type of the SH2.
 
+    /// \name Processor registers
+    //@{
+    u32 pc_;    ///< Progream Counter
+    u32 pr_;    ///< Procedure Register
+    u32 macl_;  ///< Multiply and ACummulate register Low (0x48)
+    u32 mach_;  ///< Multiply and ACummulate register High (0x4C)
+    u32 vbr_;   ///< Vector Base Register (0x50)
+    u32 gbr_;   ///< Global Base Register (0x54)
+    u32 sr_;    ///< Status Register (0x58)
+    u32 r_[16]; ///< General registers, last one is the stack pointer (SP) (0x5C)
+    //@}
+                                                
     /// \name Interrupt management
     //@{
     std::list<Interrupt>                    pending_interrupts_ = {};       ///< List of pending interrupts.

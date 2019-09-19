@@ -351,14 +351,14 @@ void Sh2::start64bitsDivision() {
         dvcr.set(DivisionControlRegister::overflowFlag);
 
     // Overflow check
-    if ((dvdntl & 0x80000000) && (dvsr & 0x80000000)) {
+    if ((dvdnth & 0x80000000) && (dvsr & 0x80000000)) {
         if ((quotient == 0x7FFFFFFF) && (remainder & 0x80000000)) dvcr.set(DivisionControlRegister::overflowFlag);
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
     divu_remaining_cycles_ = (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) ? 6 : 39;
-    divu_quot_             = quotient;
-    divu_rem_              = remainder;
+    divu_quot_             = static_cast<s32>(quotient);
+    divu_rem_              = static_cast<s32>(remainder);
 
     if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
         rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toUlong()); // Updating the register
@@ -387,6 +387,7 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
             rawWrite<u32>(io_registers_, dividend_register_h         & sh2_memory_mask, divu_rem_);
             rawWrite<u32>(io_registers_, dividend_register_h_shadow  & sh2_memory_mask, divu_rem_);
         }
+        divu_is_running_ = false;
     }
 }
 
@@ -442,7 +443,6 @@ void Sh2::sendInterrupt(const Interrupt& i) {
         }
     }
 }
-
 
 }
 }
