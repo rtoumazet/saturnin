@@ -81,6 +81,9 @@
     <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp">
       <Filter>Fichiers sources\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="src\sh2_instructions.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\video\opengl.h">
@@ -163,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="lib\imgui\imgui_loader.h">
       <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2_intructions.h">
+      <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
