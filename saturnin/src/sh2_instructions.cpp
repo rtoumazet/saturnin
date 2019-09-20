@@ -17,11 +17,17 @@
 // limitations under the License.
 // 
 
+#include "sh2_intructions.h"
 #include "sh2.h"
 
 namespace saturnin {
 namespace core {
 
+u16 xn00(Sh2& s) { return (s.current_opcode_ & 0x0f00) >> 8; }
+u16 x0n0(Sh2& s) { return (s.current_opcode_ & 0x00f0) >> 4; }
+u16 x00n(Sh2& s) { return s.current_opcode_ & 0x000f; }
+u16 xnnn(Sh2& s) { return s.current_opcode_ & 0x0fff; }
+u16 x0nn(Sh2& s) { return s.current_opcode_ & 0x00ff; }
 
 void add(Sh2& s) {
 
