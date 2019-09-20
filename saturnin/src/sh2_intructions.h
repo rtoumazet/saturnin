@@ -33,6 +33,13 @@ namespace core {
 // Forward declarations
 class Sh2;
 
+
+inline u16 xn00( Sh2& );
+inline u16 x0n0( Sh2& );
+inline u16 x00n( Sh2& );
+inline u16 xnnn( Sh2& );
+inline u16 x0nn( Sh2& );
+
 /// \name SH2 instructions
 //@{
 void add(Sh2& s);

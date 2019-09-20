@@ -374,7 +374,13 @@ private:
 
     auto scu() const;
 
-    friend void add(Sh2*);
+    friend u16 xn00(Sh2&);
+    friend u16 x0n0(Sh2&);
+    friend u16 x00n(Sh2&);
+    friend u16 xnnn(Sh2&);
+    friend u16 x0nn(Sh2&);
+
+    friend void add(Sh2&);
 
     Emulator_context* emulator_context_;    ///< Context of the emulator
     
@@ -394,6 +400,8 @@ private:
     u32 sr_;    ///< Status Register (0x58)
     u32 r_[16]; ///< General registers, last one is the stack pointer (SP) (0x5C)
     //@}
+
+    u16 current_opcode_; ///< Opcode to be executed.
                                                 
     /// \name Interrupt management
     //@{
