@@ -111,6 +111,36 @@ constexpr u32 refresh_timer_counter                             = 0xFFFFFFF4;
 constexpr u32 refresh_time_constant_register                    = 0xFFFFFFF8;
 //@}
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   BitValue
+///
+/// \brief  Bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class BitValue : u8 {
+    clear = 0, ///< Value when cleared
+    set   = 1  ///< Value when set
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  StatusRegister
+///
+/// \brief  Status Register (SR).
+///         
+/// \author Runik
+/// \date   21/09/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class StatusRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  m{ 9 };       ///< Defines M bit.
+    inline static const BitRange<u8>  q{ 8 };       ///< Defines Q bit.
+    inline static const BitRange<u8>  i{ 4,7 };     ///< Defines interrupt mask bits (I0-I3).
+    inline static const BitRange<u8>  s{ 1 };       ///< Defines S bit.
+    inline static const BitRange<u8>  t{ 0 };       ///< Defines T bit.
+};
+
 /////////////////////////////////////
 // 5. Interrupt Controller (INTC)  //
 /////////////////////////////////////

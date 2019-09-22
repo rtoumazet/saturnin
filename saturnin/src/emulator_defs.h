@@ -123,6 +123,12 @@ class Register {
             }
         }
 
+        inline void reset() {
+            for (u8 i = 0; i < 32; ++i) {
+                register_value.reset(i);
+            }
+        }
+
         inline u32 toUlong() { return register_value.to_ulong(); };
 
     protected:

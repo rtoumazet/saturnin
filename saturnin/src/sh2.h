@@ -30,6 +30,7 @@
 #include "memory.h"
 #include "interrupt_sources.h"
 #include "sh2_intructions.h"
+#include "sh2_registers.h"
 
 namespace saturnin {
 namespace core {
@@ -292,6 +293,17 @@ private:
     void initializeOnChipRegisters();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::powerOnReset();
+    ///
+    /// \brief  Initializes the values of general registers.
+    ///
+    /// \author Runik
+    /// \date   21/09/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void powerOnReset();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::start32bitsDivision();
     ///
     /// \brief  Starts the execution of the 32 bits by 32bits division operation.
@@ -349,9 +361,9 @@ private:
     void runDivisionUnit(const u8 cycles_to_run);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::scu_memory() const;
+    /// \fn auto Sh2::memory() const;
     ///
-    /// \brief  Returns SCU memory array.
+    /// \brief  Returns the memory object.
     ///
     /// \author Runik
     /// \date   09/02/2019
@@ -359,7 +371,7 @@ private:
     /// \return SCU memory array.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto scuMemory() const;
+    Memory* memory() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Sh2::scu() const;
@@ -381,6 +393,148 @@ private:
     friend u16 x0nn(Sh2&);
 
     friend void add(Sh2&);
+    friend void addi(Sh2& s);
+    friend void addc(Sh2& s);
+    friend void addv(Sh2& s);
+    friend void and(Sh2& s);
+    friend void andi(Sh2& s);
+    friend void andm(Sh2& s);
+    friend void bf(Sh2& s);
+    friend void bfs(Sh2& s);
+    friend void bra(Sh2& s);
+    friend void braf(Sh2& s);
+    friend void bsr(Sh2& s);
+    friend void bsrf(Sh2& s);
+    friend void bt(Sh2& s);
+    friend void bts(Sh2& s);
+    friend void clrmac(Sh2& s);
+    friend void clrt(Sh2& s);
+    friend void cmpeq(Sh2& s);
+    friend void cmpge(Sh2& s);
+    friend void cmpgt(Sh2& s);
+    friend void cmphi(Sh2& s);
+    friend void cmphs(Sh2& s);
+    friend void cmppl(Sh2& s);
+    friend void cmppz(Sh2& s);
+    friend void cmpstr(Sh2& s);
+    friend void cmpim(Sh2& s);
+    friend void div0s(Sh2& s);
+    friend void div0u(Sh2& s);
+    friend void div1(Sh2& s);
+    friend void dmuls(Sh2& s);
+    friend void dmulu(Sh2& s);
+    friend void dt(Sh2& s);
+    friend void extsb(Sh2& s);
+    friend void extsw(Sh2& s);
+    friend void extub(Sh2& s);
+    friend void extuw(Sh2& s);
+    friend void jmp(Sh2& s);
+    friend void jsr(Sh2& s);
+    friend void ldcsr(Sh2& s);
+    friend void ldcgbr(Sh2& s);
+    friend void ldcvbr(Sh2& s);
+    friend void ldcmsr(Sh2& s);
+    friend void ldcmgbr(Sh2& s);
+    friend void ldcmvbr(Sh2& s);
+    friend void ldsmach(Sh2& s);
+    friend void ldsmacl(Sh2& s);
+    friend void ldspr(Sh2& s);
+    friend void ldsmmach(Sh2& s);
+    friend void ldsmmacl(Sh2& s);
+    friend void ldsmpr(Sh2& s);
+    friend void mac(Sh2& s);
+    friend void macw(Sh2& s);
+    friend void mov(Sh2& s);
+    friend void movbs(Sh2& s);
+    friend void movws(Sh2& s);
+    friend void movls(Sh2& s);
+    friend void movbl(Sh2& s);
+    friend void movwl(Sh2& s);
+    friend void movll(Sh2& s);
+    friend void movbm(Sh2& s);
+    friend void movwm(Sh2& s);
+    friend void movlm(Sh2& s);
+    friend void movbp(Sh2& s);
+    friend void movwp(Sh2& s);
+    friend void movlp(Sh2& s);
+    friend void movbs0(Sh2& s);
+    friend void movws0(Sh2& s);
+    friend void movls0(Sh2& s);
+    friend void movbl0(Sh2& s);
+    friend void movwl0(Sh2& s);
+    friend void movll0(Sh2& s);
+    friend void movi(Sh2& s);
+    friend void movwi(Sh2& s);
+    friend void movli(Sh2& s);
+    friend void movblg(Sh2& s);
+    friend void movwlg(Sh2& s);
+    friend void movllg(Sh2& s);
+    friend void movbsg(Sh2& s);
+    friend void movwsg(Sh2& s);
+    friend void movlsg(Sh2& s);
+    friend void movbs4(Sh2& s);
+    friend void movws4(Sh2& s);
+    friend void movls4(Sh2& s);
+    friend void movbl4(Sh2& s);
+    friend void movwl4(Sh2& s);
+    friend void movll4(Sh2& s);
+    friend void mova(Sh2& s);
+    friend void movt(Sh2& s);
+    friend void mull(Sh2& s);
+    friend void muls(Sh2& s);
+    friend void mulu(Sh2& s);
+    friend void neg(Sh2& s);
+    friend void negc(Sh2& s);
+    friend void nop(Sh2& s);
+    friend void not(Sh2& s);
+    friend void or (Sh2& s);
+    friend void ori(Sh2& s);
+    friend void orm(Sh2& s);
+    friend void rotcl(Sh2& s);
+    friend void rotcr(Sh2& s);
+    friend void rotl(Sh2& s);
+    friend void rotr(Sh2& s);
+    friend void rte(Sh2& s);
+    friend void rts(Sh2& s);
+    friend void sett(Sh2& s);
+    friend void shal(Sh2& s);
+    friend void shar(Sh2& s);
+    friend void shll(Sh2& s);
+    friend void shll2(Sh2& s);
+    friend void shll8(Sh2& s);
+    friend void shll16(Sh2& s);
+    friend void shlr(Sh2& s);
+    friend void shlr2(Sh2& s);
+    friend void shlr8(Sh2& s);
+    friend void shlr16(Sh2& s);
+    friend void sleep(Sh2& s);
+    friend void stcsr(Sh2& s);
+    friend void stcgbr(Sh2& s);
+    friend void stcvbr(Sh2& s);
+    friend void stmsr(Sh2& s);
+    friend void stmgbr(Sh2& s);
+    friend void stmvbr(Sh2& s);
+    friend void stsmach(Sh2& s);
+    friend void stsmacl(Sh2& s);
+    friend void stspr(Sh2& s);
+    friend void stsmmach(Sh2& s);
+    friend void stsmmacl(Sh2& s);
+    friend void stsmpr(Sh2& s);
+    friend void sub(Sh2& s);
+    friend void subc(Sh2& s);
+    friend void subv(Sh2& s);
+    friend void swapb(Sh2& s);
+    friend void swapw(Sh2& s);
+    friend void tas(Sh2& s);
+    friend void trapa(Sh2& s);
+    friend void tst(Sh2& s);
+    friend void tsti(Sh2& s);
+    friend void tstm(Sh2& s);
+    friend void xor(Sh2& s);
+    friend void xori(Sh2& s);
+    friend void xorm(Sh2& s);
+    friend void xtrct(Sh2& s);
+    friend void delaySlot(Sh2& s, u32 addr);
 
     Emulator_context* emulator_context_;    ///< Context of the emulator
     
@@ -397,10 +551,11 @@ private:
     u32 mach_;  ///< Multiply and ACummulate register High (0x4C)
     u32 vbr_;   ///< Vector Base Register (0x50)
     u32 gbr_;   ///< Global Base Register (0x54)
-    u32 sr_;    ///< Status Register (0x58)
+    StatusRegister sr_{0};    ///< Status Register (0x58)
     u32 r_[16]; ///< General registers, last one is the stack pointer (SP) (0x5C)
     //@}
 
+    u8  cycles_elapsed_; ///< CPU cycles used by the last instruction.
     u16 current_opcode_; ///< Opcode to be executed.
                                                 
     /// \name Interrupt management
