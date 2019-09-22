@@ -86,9 +86,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\video\opengl.h">
-      <Filter>Fichiers sources\video</Filter>
-    </ClInclude>
     <ClInclude Include="src\config.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
@@ -168,6 +165,9 @@
       <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
     <ClInclude Include="src\sh2_intructions.h">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>

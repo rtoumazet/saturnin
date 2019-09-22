@@ -41,10 +41,6 @@ Scu::Scu(Emulator_context* ec) : emulator_context_(ec) {
     initializeRegisters();
 };
 
-auto Scu::scuMemory() const {
-    return emulator_context_->memory()->scu_;
-}
-
 u32 Scu::read32(const u32 addr) const {
     switch (addr) {
         case dsp_program_control_port:
@@ -64,10 +60,10 @@ u32 Scu::read32(const u32 addr) const {
             //data = current_DSP_data_ram_dataport_;
             break;
         default:
-            return rawRead<u32>(scuMemory(), addr & scu_memory_mask);
+            return rawRead<u32>(memory()->scu_, addr & scu_memory_mask);
     }
 
-    return rawRead<u32>(scuMemory(), addr & scu_memory_mask);
+    return rawRead<u32>(memory()->scu_, addr & scu_memory_mask);
 
 };
 
@@ -144,7 +140,7 @@ void Scu::write32(const u32 addr, const u32 data) {
     }
 
     //if(address==0x25FE00A0) DebugBreak();
-    rawWrite<u32>(scuMemory(), addr & scu_memory_mask, data);
+    rawWrite<u32>(memory()->scu_, addr & scu_memory_mask, data);
 };
 
 void Scu::executeDma(const DmaConfiguration& dc) {
@@ -873,19 +869,20 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 }
 
 void Scu::setInterruptStatusRegister(const Interrupt& i) {
-    auto isr = InterruptStatusRegister(rawRead<u32>(scuMemory(), interrupt_status_register & scu_memory_mask));
+    //auto isr = InterruptStatusRegister(rawRead<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask));
+    auto isr = InterruptStatusRegister(rawRead<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask));
     isr.set(i.status);
-    rawWrite<u32>(scuMemory(), interrupt_status_register & scu_memory_mask, isr.toUlong());
+    rawWrite<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask, isr.toUlong());
 };
 
 void Scu::resetInterruptStatusRegister(const Interrupt& i) {
-    auto isr = InterruptStatusRegister(rawRead<u32>(scuMemory(), interrupt_status_register & scu_memory_mask));
+    auto isr = InterruptStatusRegister(rawRead<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask));
     isr.reset(i.status);
-    rawWrite<u32>(scuMemory(), interrupt_status_register & scu_memory_mask, isr.toUlong());
+    rawWrite<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask, isr.toUlong());
 };
 
 bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t) const {
-    auto imr = InterruptMaskRegister(rawRead<u32>(scuMemory(), interrupt_mask_register & scu_memory_mask));
+    auto imr = InterruptMaskRegister(rawRead<u32>(memory()->scu_, interrupt_mask_register & scu_memory_mask));
     switch(t) {
         case Sh2Type::master:
             switch (i) {
@@ -970,39 +967,39 @@ void Scu::sendStartFactor(const StartingFactorSelect sfs) {
 
 void Scu::initializeRegisters() {
     // DMA
-    rawWrite<u32>(scuMemory(), level_0_dma_add_value_register & scu_memory_mask, 0x00000101);
-    rawWrite<u32>(scuMemory(), level_0_dma_enable_register    & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), level_0_dma_mode_register      & scu_memory_mask, 0x00000007);
-    rawWrite<u32>(scuMemory(), level_1_dma_add_value_register & scu_memory_mask, 0x00000101);
-    rawWrite<u32>(scuMemory(), level_1_dma_enable_register    & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), level_1_dma_mode_register      & scu_memory_mask, 0x00000007);
-    rawWrite<u32>(scuMemory(), level_2_dma_add_value_register & scu_memory_mask, 0x00000101);
-    rawWrite<u32>(scuMemory(), level_2_dma_enable_register    & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), level_2_dma_mode_register      & scu_memory_mask, 0x00000007);
-    rawWrite<u32>(scuMemory(), dma_forced_stop                & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), (dma_status_register + 0x0C)   & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, level_0_dma_add_value_register & scu_memory_mask, 0x00000101);
+    rawWrite<u32>(memory()->scu_, level_0_dma_enable_register    & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, level_0_dma_mode_register      & scu_memory_mask, 0x00000007);
+    rawWrite<u32>(memory()->scu_, level_1_dma_add_value_register & scu_memory_mask, 0x00000101);
+    rawWrite<u32>(memory()->scu_, level_1_dma_enable_register    & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, level_1_dma_mode_register      & scu_memory_mask, 0x00000007);
+    rawWrite<u32>(memory()->scu_, level_2_dma_add_value_register & scu_memory_mask, 0x00000101);
+    rawWrite<u32>(memory()->scu_, level_2_dma_enable_register    & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, level_2_dma_mode_register      & scu_memory_mask, 0x00000007);
+    rawWrite<u32>(memory()->scu_, dma_forced_stop                & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, (dma_status_register + 0x0C)   & scu_memory_mask, 0x00000000);
 
     // DSP
-    rawWrite<u32>(scuMemory(), dsp_program_control_port  & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), dsp_data_ram_address_port & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), dsp_data_ram_data_port    & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, dsp_program_control_port  & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, dsp_data_ram_address_port & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, dsp_data_ram_data_port    & scu_memory_mask, 0x00000000);
 
     // Timer
-    rawWrite<u32>(scuMemory(), timer_1_mode_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, timer_1_mode_register & scu_memory_mask, 0x00000000);
 
     // Interrupt control
-    rawWrite<u32>(scuMemory(), interrupt_mask_register   & scu_memory_mask, 0x0000BFFF);
-    rawWrite<u32>(scuMemory(), interrupt_status_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, interrupt_mask_register   & scu_memory_mask, 0x0000BFFF);
+    rawWrite<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask, 0x00000000);
 
     // A-BUS control
-    rawWrite<u32>(scuMemory(), a_bus_interrupt_acknowledge & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), a_bus_set_register          & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), (a_bus_set_register + 4)    & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), a_bus_refresh_register      & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, a_bus_interrupt_acknowledge & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, a_bus_set_register          & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, (a_bus_set_register + 4)    & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, a_bus_refresh_register      & scu_memory_mask, 0x00000000);
 
     // SCU control
-    rawWrite<u32>(scuMemory(), scu_sdram_select_register & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(scuMemory(), scu_version_register      & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, scu_sdram_select_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, scu_version_register      & scu_memory_mask, 0x00000000);
 
     //d0en = 0;
     //d1en = 0;
@@ -1045,7 +1042,7 @@ DmaConfiguration Scu::configureDmaTransfer(DmaLevel level) const {
 }
 
 void Scu::initializeDmaMode(DmaConfiguration& dc, const u32 register_address) const {
-    auto dmr                  = DmaModeRegister(rawRead<u32>(scuMemory(), register_address & scu_memory_mask));
+    auto dmr                  = DmaModeRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
     dc.dma_mode               = dmr.get(DmaModeRegister::dmaMode);
     dc.read_address_update    = dmr.get(DmaModeRegister::readAddressUpdate);
     dc.write_address_update   = dmr.get(DmaModeRegister::writeAddressUpdate);
@@ -1053,13 +1050,13 @@ void Scu::initializeDmaMode(DmaConfiguration& dc, const u32 register_address) co
 }
 
 void Scu::initializeDmaEnable(DmaConfiguration& dc, const u32 register_address) const {
-    auto der        = DmaEnableRegister(rawRead<u32>(scuMemory(), register_address & scu_memory_mask));
+    auto der        = DmaEnableRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
     dc.dma_enable   = der.get(DmaEnableRegister::dmaEnable);
     dc.dma_starting = der.get(DmaEnableRegister::dmaStarting);
 }
 
 void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, const u32 register_address) const {
-    auto avr           = DmaAddressAddValueRegister(rawRead<u32>(scuMemory(), register_address & scu_memory_mask));
+    auto avr           = DmaAddressAddValueRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
     dc.read_add_value  = avr.get(DmaAddressAddValueRegister::readAddValue);
     dc.write_add_value = avr.get(DmaAddressAddValueRegister::writeAddValue);
 }
@@ -1067,17 +1064,17 @@ void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, const u32 register_addre
 void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc, const u32 register_address) const {
     switch (register_address & scu_memory_mask) {
         case (level_0_dma_transfer_byte_number & 0xFF): {
-            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(scuMemory(), level_0_dma_transfer_byte_number & scu_memory_mask));
+            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(memory()->scu_, level_0_dma_transfer_byte_number & scu_memory_mask));
             dc.transfer_byte_number = tbnr.get(DmaLevel2TransferByteNumberRegister::transferByteNumber);
             break;
         }
         case (level_1_dma_transfer_byte_number & 0xFF): {
-            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(scuMemory(), level_1_dma_transfer_byte_number & scu_memory_mask));
+            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(memory()->scu_, level_1_dma_transfer_byte_number & scu_memory_mask));
             dc.transfer_byte_number = tbnr.get(DmaLevel2TransferByteNumberRegister::transferByteNumber);
             break;
         }
         case (level_2_dma_transfer_byte_number & 0xFF): {
-            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(scuMemory(), level_2_dma_transfer_byte_number & scu_memory_mask));
+            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(memory()->scu_, level_2_dma_transfer_byte_number & scu_memory_mask));
             dc.transfer_byte_number = tbnr.get(DmaLevel2TransferByteNumberRegister::transferByteNumber);
             break;
         }
@@ -1087,12 +1084,12 @@ void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc, const u32 regist
     }
 }
 void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, const u32 register_address) const {
-    auto war         = DmaWriteAddressRegister(rawRead<u32>(scuMemory(), register_address & scu_memory_mask));
+    auto war         = DmaWriteAddressRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
     dc.write_address = war.get(DmaWriteAddressRegister::writeAddress);
 }
 
 void Scu::initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const {
-    auto rar        = DmaReadAddressRegister(rawRead<u32>(scuMemory(), register_address & scu_memory_mask));
+    auto rar        = DmaReadAddressRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
     dc.read_address = rar.get(DmaReadAddressRegister::readAddress);
 }
 

@@ -23,6 +23,8 @@
 #include "cdrom/scsi.h"
 #include "video/opengl.h"
 #include "scu_registers.h"
+#include "sh2_registers.h"
+
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
@@ -74,6 +76,12 @@ bool Emulator_context::run() {
     core::rawWrite<uint32_t>(this->memory()->rom_, 0, 0x12345678);
 
     auto blah = this->memory()->read<uint8_t>(0);
+
+    StatusRegister sr{ 0 };
+    sr.set(StatusRegister::i);
+    u8 i = sr.get(StatusRegister::i);
+    sr.set(StatusRegister::i, static_cast<u8>(0x8));
+    i = sr.get(StatusRegister::i);
 
     auto dmr = DmaModeRegister(0x000000AA);
     //auto w = isr.test();

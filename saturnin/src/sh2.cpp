@@ -18,7 +18,6 @@
 // 
 
 #include "sh2.h"
-#include "sh2_registers.h"
 #include "emulator_context.h"
 #include "scu_registers.h"
 
@@ -29,6 +28,14 @@ namespace core {
 
 Sh2::Sh2(Sh2Type st, Emulator_context* ec) : sh2_type_(st), emulator_context_(ec) {
     reset();
+}
+
+Memory* Sh2::memory() const {
+    return emulator_context_->memory();
+}
+
+auto Sh2::scu() const {
+    return emulator_context_->scu();
 }
 
 u32 Sh2::readRegisters(u32 addr) const {
@@ -292,6 +299,20 @@ void Sh2::initializeOnChipRegisters() {
     rawWrite<u8>(io_registers_, reset_control_status_register              & sh2_memory_mask, 0x1F);
 }
 
+void Sh2::powerOnReset() {
+    pc_ = memory()->read<u32>(0x00000008);
+    r_[15] = memory()->read<u32>(0x0000000c);
+    vbr_ = 0;
+    sr_.reset();
+    gbr_ = 0;
+    mach_ = 0;
+    macl_ = 0;
+    pr_ = 0;
+    for (u8 i = 0; i < 15; ++i) r_[i] = 0;
+
+    initializeOnChipRegisters();
+}
+
 void Sh2::start32bitsDivision() {
     // 32/32 division
     Log::debug("sh2", "32/32 division");
@@ -397,14 +418,6 @@ void Sh2::executeDma() {
 
 void Sh2::reset() {
     initializeOnChipRegisters();
-}
-
-auto Sh2::scuMemory() const {
-    return emulator_context_->memory()->scu_;
-}
-
-auto Sh2::scu() const {
-    return emulator_context_->scu();
 }
 
 void Sh2::sendInterrupt(const Interrupt& i) {
