@@ -361,7 +361,7 @@ private:
     void runDivisionUnit(const u8 cycles_to_run);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::memory() const;
+    /// \fn Memory* Sh2::memory() const;
     ///
     /// \brief  Returns the memory object.
     ///
@@ -385,6 +385,19 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto scu() const;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn  Emulator_context* Sh2::emultaorContext() const;
+    ///
+    /// \brief  Returns the emulator_context object.
+    ///
+    /// \author Runik
+    /// \date   23/09/2019
+    ///
+    /// \return The Emulator_context object.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    Emulator_context* emulatorContext();
 
     friend u16 xn00(Sh2&);
     friend u16 x0n0(Sh2&);
@@ -535,6 +548,7 @@ private:
     friend void xorm(Sh2& s);
     friend void xtrct(Sh2& s);
     friend void delaySlot(Sh2& s, u32 addr);
+    friend void badOpcode(Sh2& s);
 
     Emulator_context* emulator_context_;    ///< Context of the emulator
     

@@ -77,6 +77,8 @@ bool Emulator_context::run() {
 
     auto blah = this->memory()->read<uint8_t>(0);
 
+    Log::error("sh2", "Unexpected opcode({} SH2)\nOpcode: {:#06x}\nPC: {:#010x}", "Master", 0x4e73, 0x20000200);
+
     StatusRegister sr{ 0 };
     sr.set(StatusRegister::i);
     u8 i = sr.get(StatusRegister::i);

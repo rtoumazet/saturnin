@@ -25,14 +25,13 @@
 
 #pragma once
 
-//#include "emulator_defs.h"
-#include "sh2.h"
+#include "emulator_defs.h"
 
 namespace saturnin {
 namespace core {
 
 // Forward declarations
-//class Sh2;
+class Sh2;
 
 /// \name Instruction split functions.
 //@{
@@ -56,6 +55,8 @@ inline u16 x0nn(Sh2& s);
 /// \name SH2 instructions
 //@{
 inline void delaySlot(Sh2& s, u32 addr);
+inline bool isInstructionIllegal(const u16 inst);
+inline void badOpcode(Sh2& s);
 inline void add(Sh2& s);
 inline void addi(Sh2& s);
 inline void addc(Sh2& s);

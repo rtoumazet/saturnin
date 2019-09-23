@@ -38,6 +38,10 @@ auto Sh2::scu() const {
     return emulator_context_->scu();
 }
 
+Emulator_context* Sh2::emulatorContext(){
+    return emulator_context_;
+}
+
 u32 Sh2::readRegisters(u32 addr) const {
     switch (addr) {
 
