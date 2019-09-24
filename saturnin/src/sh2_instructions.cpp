@@ -18,6 +18,7 @@
 // 
 
 #include "sh2_intructions.h"
+#include"sh2_opcodes.h"
 //#include "sh2.h"
 #include "emulator_context.h"
 
@@ -44,8 +45,10 @@ void delaySlot(Sh2& s, const u32 addr) {
 
         s.current_opcode_ = s.memory()->read<u16>(addr);
 
-        if (isInstructionIllegal(s.current_opcode_)) Log::error("sh2", "Illegal instruction slot");
-        else {
+        if (isInstructionIllegal(s.current_opcode_)) {
+            Log::error("sh2", "Illegal instruction slot");
+            s.emulatorContext()->emulationStatus_ = EmulationStatus::stopped;
+        } else {
         //    if (sh2->GetExecuteInstruction()) {
         //        sh2->SetDelaySlotInstruction(true);
         //        while (sh2->GetDelaySlotInstruction()) {
@@ -188,6 +191,12 @@ void andi(Sh2& s) {
 }
 
 
+
+void nop(Sh2& s) {
+    // Mo operation
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
 
 }
 }

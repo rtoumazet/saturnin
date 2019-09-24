@@ -524,6 +524,9 @@ private:
     friend void stcsr(Sh2& s);
     friend void stcgbr(Sh2& s);
     friend void stcvbr(Sh2& s);
+    friend void stcmsr(Sh2& s);
+    friend void stcmgbr(Sh2& s);
+    friend void stcmvbr(Sh2& s);
     friend void stmsr(Sh2& s);
     friend void stmgbr(Sh2& s);
     friend void stmvbr(Sh2& s);
