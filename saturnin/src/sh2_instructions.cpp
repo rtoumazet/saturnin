@@ -17,9 +17,8 @@
 // limitations under the License.
 // 
 
-#include "sh2_intructions.h"
-#include"sh2_opcodes.h"
-//#include "sh2.h"
+
+#include "sh2_instructions.h"
 #include "emulator_context.h"
 
 namespace saturnin {
@@ -49,13 +48,6 @@ void delaySlot(Sh2& s, const u32 addr) {
             Log::error("sh2", "Illegal instruction slot");
             s.emulatorContext()->emulationStatus_ = EmulationStatus::stopped;
         } else {
-        //    if (sh2->GetExecuteInstruction()) {
-        //        sh2->SetDelaySlotInstruction(true);
-        //        while (sh2->GetDelaySlotInstruction()) {
-        //            Sleep(1); // Waiting until the delay slot is done
-        //        }
-        //        SendMessage(sh2->GetWindowHandle(), WM_UPDATE, Addr, 0);
-        //    }
 
         //    // Delay slot instruction execution
         //    sh2->Execute(sh2->currentOpcode);
@@ -196,6 +188,22 @@ void nop(Sh2& s) {
     // Mo operation
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
+}
+
+void initializeSh2OpcodesLut() {
+    u32 counter{};
+    while (counter < 0x10000) {
+        for (u32 i = 0; i < instructions_number; ++i) {
+            if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
+//                nextInstructionLut[counter] = OpcodeInfoTable[i].goNext;
+                opcodes_lut[counter] = opcodes_table[i].execute;
+                break;
+            }
+//            nextInstructionLut[counter] = false;
+            opcodes_lut[counter] = &badOpcode;
+        }
+        ++counter;
+    }
 }
 
 }
