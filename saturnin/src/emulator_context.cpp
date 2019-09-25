@@ -57,6 +57,8 @@ bool Emulator_context::initialize() {
 bool Emulator_context::run() {
     this->memory()->loadBios(core::HardwareMode::saturn);
 
+    initializeSh2OpcodesLut();
+
     // TESTING //
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable

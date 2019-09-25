@@ -164,13 +164,10 @@
     <ClInclude Include="lib\imgui\imgui_loader.h">
       <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="src\sh2_intructions.h">
-      <Filter>Fichiers sources</Filter>
-    </ClInclude>
     <ClInclude Include="src\video\opengl.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
-    <ClInclude Include="src\sh2_opcodes.h">
+    <ClInclude Include="src\sh2_instructions.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>

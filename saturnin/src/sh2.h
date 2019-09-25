@@ -29,7 +29,7 @@
 #include "emulator_defs.h"
 #include "memory.h"
 #include "interrupt_sources.h"
-#include "sh2_intructions.h"
+#include "sh2_instructions.h"
 #include "sh2_registers.h"
 
 namespace saturnin {
