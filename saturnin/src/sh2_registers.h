@@ -27,8 +27,10 @@
 
 #include "emulator_defs.h"
 
+namespace core = saturnin::core;
+
 namespace saturnin {
-namespace core {
+namespace sh2 {
 
 /// \name Onboard i/o registers addresses
 //@{
@@ -602,7 +604,7 @@ enum class OverflowFlag : u8 {
 class DivisionControlRegister : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<InterruptEnable> interruptEnable{ 1 }; ///< Defines OVFIE bit.
+    inline static const BitRange<core::InterruptEnable> interruptEnable{ 1 }; ///< Defines OVFIE bit.
     inline static const BitRange<OverflowFlag> overflowFlag{ 0 };       ///< Defines OVF bit.
 };
 

@@ -32,14 +32,32 @@
 #include "sh2_instructions.h"
 #include "sh2_registers.h"
 
+namespace core = saturnin::core;
+
 namespace saturnin {
-namespace core {
+namespace sh2 {
 
 // Forward declarations
-class Emulator_context;
+namespace saturnin::core{
+    class Emulator_context;
+};
 
 constexpr u8 max_interrupt_number = 10;
 constexpr u8 max_interrupt_level  = 10;
+
+constexpr u32 sh2_memory_mask = 0x1FF;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Sh2Type
+///
+/// \brief  Type of SH2 CPU.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Sh2Type {
+    unknown,
+    master,
+    slave
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Sh2
@@ -55,7 +73,7 @@ class Sh2 {
     //@{
     // Constructors / Destructors
     Sh2()                        = delete;
-    Sh2(Sh2Type st, Emulator_context* ec);
+    Sh2(Sh2Type st, core::Emulator_context* ec);
     Sh2(const Sh2&)              = delete;
     Sh2(Sh2&&)                   = delete;
     Sh2& operator=(const Sh2&) & = delete;
@@ -209,7 +227,7 @@ class Sh2 {
     /// \param  i   Interrupt sent.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void sendInterrupt(const Interrupt& i);
+    void sendInterrupt(const core::Interrupt& i);
 
 private:
 
@@ -371,7 +389,7 @@ private:
     /// \return SCU memory array.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Memory* memory() const;
+    core::Memory* memory() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Sh2::scu() const;
@@ -397,7 +415,7 @@ private:
     /// \return The Emulator_context object.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Emulator_context* emulatorContext();
+    core::Emulator_context* emulatorContext();
 
     friend u16 xn00(Sh2&);
     friend u16 x0n0(Sh2&);
@@ -552,8 +570,9 @@ private:
     friend void xtrct(Sh2& s);
     friend void delaySlot(Sh2& s, u32 addr);
     friend void badOpcode(Sh2& s);
+    friend void execute(Sh2& s);
 
-    Emulator_context* emulator_context_;    ///< Context of the emulator
+    core::Emulator_context* emulator_context_;    ///< Context of the emulator
     
     std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
     std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
@@ -577,7 +596,7 @@ private:
                                                 
     /// \name Interrupt management
     //@{
-    std::list<Interrupt>                    pending_interrupts_ = {};       ///< List of pending interrupts.
+    std::list<core::Interrupt>              pending_interrupts_ = {};       ///< List of pending interrupts.
     bool                                    is_interrupted_{};        ///< True if this sh2 is interrupted.
     std::array<bool, max_interrupt_level>   is_level_interrupted_{};        ///< Determines if any given level is already interrupted.
     //@}

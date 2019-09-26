@@ -29,15 +29,10 @@
 #include "emulator_defs.h"
 
 namespace saturnin {
-namespace core {
+namespace sh2 {
 
 // Forward declarations
 class Sh2;
-
-
-
-
-
 
 /// \name Instruction split functions.
 //@{
@@ -229,7 +224,8 @@ struct Sh2Instruction {
     ExecuteType execute;///< Link to the corresponding function.
 };
 
-static std::array<ExecuteType, 0x10000> opcodes_lut;
+
+static std::array<ExecuteType, 0x10000> opcodes_lut;    ///< The opcodes LUT, used for instruction fast fetching
 
 static std::array<Sh2Instruction, instructions_number> const opcodes_table
 { {
@@ -377,7 +373,9 @@ static std::array<Sh2Instruction, instructions_number> const opcodes_table
     //{ 0xF00F, 0x200D, true,  &xtrct}
 } };
 
-void initializeSh2OpcodesLut();
+void initializeOpcodesLut();
+
+void execute(Sh2& s);
 
 }
 }

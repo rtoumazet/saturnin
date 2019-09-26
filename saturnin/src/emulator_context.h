@@ -36,6 +36,8 @@
 #include "sh2.h"
 #include "stv_definitions.h"
 
+namespace sh2 = saturnin::sh2;
+
 namespace saturnin {
 namespace core {
 
@@ -144,7 +146,7 @@ static const std::string saturnin_version{ "1.00" };
         /// \return A pointer to the master SH2 object.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        Sh2* masterSh2() { return master_sh2_.get(); };
+        sh2::Sh2* masterSh2() { return master_sh2_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn Sh2* Emulator_context::slaveSh2()
@@ -157,7 +159,7 @@ static const std::string saturnin_version{ "1.00" };
         /// \return A pointer to the slave SH2 object.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        Sh2* slaveSh2() { return slave_sh2_.get(); };
+        sh2::Sh2* slaveSh2() { return slave_sh2_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn Scu* Emulator_context::scu()
@@ -177,11 +179,11 @@ static const std::string saturnin_version{ "1.00" };
         RenderingStatus renderingStatus_{ RenderingStatus::running }; ///< Rendering status.
 
     private:
-        std::unique_ptr<Config> config_;          ///< Configuration object
-        std::unique_ptr<Memory> memory_;          ///< Memory object
-        std::unique_ptr<Sh2>    master_sh2_;      ///< Master SH2 object
-        std::unique_ptr<Sh2>    slave_sh2_;       ///< Slave SH2 object
-        std::unique_ptr<Scu>    scu_;             ///< SCU object
+        std::unique_ptr<Config>   config_;          ///< Configuration object
+        std::unique_ptr<Memory>   memory_;          ///< Memory object
+        std::unique_ptr<sh2::Sh2> master_sh2_;      ///< Master SH2 object
+        std::unique_ptr<sh2::Sh2> slave_sh2_;       ///< Slave SH2 object
+        std::unique_ptr<Scu>      scu_;             ///< SCU object
 
         /// \name Command line variables
         ///

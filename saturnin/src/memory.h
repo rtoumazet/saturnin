@@ -35,7 +35,9 @@
 #include "interrupt_sources.h"
 #include "log.h"
 #include "scu.h"
-//#include "sh2.h"
+#include "sh2.h"
+
+namespace sh2 = saturnin::sh2;
 
 namespace saturnin {
 namespace core {
@@ -54,7 +56,6 @@ constexpr u32 vdp2_cram_memory_mask        = 0xFFF;
 constexpr u32 vdp2_registers_memory_mask   = 0x1FF;
 constexpr u32 scu_memory_mask              = 0xFF;
 constexpr u32 workram_high_memory_mask     = 0xFFFFF;
-constexpr u32 sh2_memory_mask              = 0x1FF;
 
 static const u32 stv_io_port_a{ 0x400001 };
 static const u32 stv_io_port_b{ 0x400003 };
@@ -159,7 +160,7 @@ public:
     
     bool vdp2_cram_was_accessed_{ false }; ///< true when VDP2 color ram was accessed
 
-    Sh2Type sh2_in_operation_ { Sh2Type::unknown}; ///< Which SH2 is in operation
+    sh2::Sh2Type sh2_in_operation_ { sh2::Sh2Type::unknown}; ///< Which SH2 is in operation
     //bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
     //bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
@@ -290,14 +291,14 @@ public:
     /// \param  parameter1  Type of SH2 sending the interrupt.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void sendFrtInterrupt(Sh2Type) const;
+    void sendFrtInterrupt(sh2::Sh2Type) const;
 
     /// \name Context objects accessors
     //@{
-    Sh2*    masterSh2() const;
-    Sh2*    slaveSh2() const;
-    Scu*    scu() const;
-    Config* config() const;
+    sh2::Sh2* masterSh2() const;
+    sh2::Sh2* slaveSh2() const;
+    Scu*      scu() const;
+    Config*   config() const;
     //@}
 
 private:
@@ -1376,7 +1377,7 @@ template<>
 struct writeMasterSh2Frt<u16> {
     operator Memory::WriteType<u16>() const {
         return [](Memory& m, const u32 addr, const u16 data) {
-            m.sendFrtInterrupt(Sh2Type::master);
+            m.sendFrtInterrupt(sh2::Sh2Type::master);
         };
     }
 };
@@ -1407,7 +1408,7 @@ template<>
 struct writeSlaveSh2Frt<u16> {
     operator Memory::WriteType<u16>() const {
         return [](Memory& m, const u32 addr, const u16 data) {
-            m.sendFrtInterrupt(Sh2Type::slave);
+            m.sendFrtInterrupt(sh2::Sh2Type::slave);
         };
     }
 };
