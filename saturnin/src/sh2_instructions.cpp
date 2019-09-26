@@ -22,7 +22,7 @@
 #include "emulator_context.h"
 
 namespace saturnin {
-namespace core {
+namespace sh2 {
 
 u16 xn00(Sh2& s) { return (s.current_opcode_ & 0x0f00) >> 8; }
 u16 x0n0(Sh2& s) { return (s.current_opcode_ & 0x00f0) >> 4; }
@@ -45,12 +45,12 @@ void delaySlot(Sh2& s, const u32 addr) {
         s.current_opcode_ = s.memory()->read<u16>(addr);
 
         if (isInstructionIllegal(s.current_opcode_)) {
-            Log::error("sh2", "Illegal instruction slot");
-            s.emulatorContext()->emulationStatus_ = EmulationStatus::stopped;
+            core::Log::error("sh2", "Illegal instruction slot");
+            s.emulatorContext()->emulationStatus_ = core::EmulationStatus::stopped;
         } else {
 
         //    // Delay slot instruction execution
-        //    sh2->Execute(sh2->currentOpcode);
+            execute(s);
 
             s.cycles_elapsed_ += current_inst_cycles;
         }
@@ -111,9 +111,9 @@ bool isInstructionIllegal(const u16 inst) {
 
 void badOpcode(Sh2& s) {
     std::string type = (s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave";
-    Log::error("Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
+    core::Log::error("Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
 
-    s.emulatorContext()->emulationStatus_ = EmulationStatus::stopped;
+    s.emulatorContext()->emulationStatus_ = core::EmulationStatus::stopped;
 }
 
 void add(Sh2& s) {
@@ -190,7 +190,7 @@ void nop(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void initializeSh2OpcodesLut() {
+void initializeOpcodesLut() {
     u32 counter{};
     while (counter < 0x10000) {
         for (u32 i = 0; i < instructions_number; ++i) {
@@ -204,6 +204,10 @@ void initializeSh2OpcodesLut() {
         }
         ++counter;
     }
+}
+
+void execute(Sh2& s) {
+    opcodes_lut[s.current_opcode_](s);
 }
 
 }

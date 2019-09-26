@@ -25,6 +25,7 @@
 
 namespace lzpp = libzippp;
 namespace fs = std::filesystem;
+namespace sh2 = saturnin::sh2;
 
 namespace saturnin {
 namespace core {
@@ -446,10 +447,10 @@ bool Memory::isStvProtectionEnabled() const {
     return cart_[relative_addr] == 0x1;
 }
 
-void Memory::sendFrtInterrupt(Sh2Type t) const {
+void Memory::sendFrtInterrupt(sh2::Sh2Type t) const {
     switch (t) {
-        case Sh2Type::master: masterSh2()->sendInterrupt(interrupt_source::frt_input_capture); break;
-        case Sh2Type::slave:  slaveSh2()->sendInterrupt(interrupt_source::frt_input_capture);  break;
+        case sh2::Sh2Type::master: masterSh2()->sendInterrupt(interrupt_source::frt_input_capture); break;
+        case sh2::Sh2Type::slave:  slaveSh2()->sendInterrupt(interrupt_source::frt_input_capture);  break;
     }
 }
 
@@ -457,11 +458,11 @@ Config* Memory::config() const {
     return emulator_context_->config(); 
 };
 
-Sh2* Memory::masterSh2() const {
+sh2::Sh2* Memory::masterSh2() const {
     return emulator_context_->masterSh2();
 };
 
-Sh2* Memory::slaveSh2() const {
+sh2::Sh2* Memory::slaveSh2() const {
     return emulator_context_->slaveSh2();
 };
 
@@ -495,7 +496,7 @@ std::vector<std::string> listStvConfigurationFiles() {
 }
 
 inline bool isMasterSh2InOperation(const Memory& m) {
-    return (m.sh2_in_operation_ == Sh2Type::master);
+    return (m.sh2_in_operation_ == sh2::Sh2Type::master);
 }
 
 }

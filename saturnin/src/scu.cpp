@@ -24,8 +24,6 @@
 #include "interrupt_sources.h"
 #include "utilities.h"
 
-namespace is = saturnin::core::interrupt_source;
-
 namespace saturnin {
 namespace core {
 
@@ -881,10 +879,10 @@ void Scu::resetInterruptStatusRegister(const Interrupt& i) {
     rawWrite<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask, isr.toUlong());
 };
 
-bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t) const {
+bool Scu::isInterruptMasked(const Interrupt& i, sh2::Sh2Type t) const {
     auto imr = InterruptMaskRegister(rawRead<u32>(memory()->scu_, interrupt_mask_register & scu_memory_mask));
     switch(t) {
-        case Sh2Type::master:
+        case sh2::Sh2Type::master:
             switch (i) {
                 case is::vector_nmi: 
                     // NMI interrupt is always accepted
@@ -931,7 +929,7 @@ bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t) const {
                     break;
             }
             break;
-        case Sh2Type::slave:
+        case sh2::Sh2Type::slave:
             switch (i) {
                 case is::vector_nmi:
                 case is::vector_v_blank_in:

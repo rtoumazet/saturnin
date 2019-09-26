@@ -28,14 +28,15 @@
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
+namespace sh2 = saturnin::sh2;
 
 namespace saturnin {
 namespace core {
 
 Emulator_context::Emulator_context() {
     config_     = std::make_unique<Config>("saturnin.cfg");
-    master_sh2_ = std::make_unique<Sh2>(Sh2Type::master, this);
-    slave_sh2_  = std::make_unique<Sh2>(Sh2Type::slave, this);
+    master_sh2_ = std::make_unique<sh2::Sh2>(sh2::Sh2Type::master, this);
+    slave_sh2_  = std::make_unique<sh2::Sh2>(sh2::Sh2Type::slave, this);
     memory_     = std::make_unique<Memory>(this);
     scu_        = std::make_unique<Scu>(this);
 }
@@ -57,7 +58,7 @@ bool Emulator_context::initialize() {
 bool Emulator_context::run() {
     this->memory()->loadBios(core::HardwareMode::saturn);
 
-    initializeSh2OpcodesLut();
+    sh2::initializeOpcodesLut();
 
     // TESTING //
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
@@ -81,11 +82,11 @@ bool Emulator_context::run() {
 
     Log::error("sh2", "Unexpected opcode({} SH2)\nOpcode: {:#06x}\nPC: {:#010x}", "Master", 0x4e73, 0x20000200);
 
-    StatusRegister sr{ 0 };
-    sr.set(StatusRegister::i);
-    u8 i = sr.get(StatusRegister::i);
-    sr.set(StatusRegister::i, static_cast<u8>(0x8));
-    i = sr.get(StatusRegister::i);
+    sh2::StatusRegister sr{ 0 };
+    sr.set(sh2::StatusRegister::i);
+    u8 i = sr.get(sh2::StatusRegister::i);
+    sr.set(sh2::StatusRegister::i, static_cast<u8>(0x8));
+    i = sr.get(sh2::StatusRegister::i);
 
     auto dmr = DmaModeRegister(0x000000AA);
     //auto w = isr.test();

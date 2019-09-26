@@ -30,6 +30,10 @@
 #include "emulator_defs.h"
 #include "emulator_enums.h"
 #include "interrupt_sources.h"
+#include "sh2.h"
+
+namespace is = saturnin::core::interrupt_source;
+namespace sh2 = saturnin::sh2;
 
 namespace saturnin {
 namespace core {
@@ -226,7 +230,7 @@ public:
     /// \return True if interrupt is masked.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool isInterruptMasked(const Interrupt& i, Sh2Type t) const;
+    bool isInterruptMasked(const Interrupt& i, sh2::Sh2Type t) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn bool Scu::sendStartFactor(const StartingFactorSelect sfs);
