@@ -286,17 +286,26 @@ public:
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Memory::sendFrtInterrupt(Sh2Type) const;
+    /// \fn void Memory::sendFrtInterruptToMaster() const;
     ///
-    /// \brief  Sends a FRT interrupt.
+    /// \brief  Sends a FRT interrupt to the master SH2.
     ///
     /// \author Runik
     /// \date   14/02/2019
-    ///
-    /// \param  parameter1  Type of SH2 sending the interrupt.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void sendFrtInterrupt(sh2::Sh2Type) const;
+    void sendFrtInterruptToMaster() const;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Memory::sendFrtInterruptToSlave() const;
+    ///
+    /// \brief  Sends a FRT interrupt to the slave SH2.
+    ///
+    /// \author Runik
+    /// \date   14/02/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void sendFrtInterruptToSlave() const;
 
     /// \name Context objects accessors
     //@{
@@ -1393,7 +1402,7 @@ template<>
 struct writeMasterSh2Frt<u16> {
     operator Memory::WriteType<u16>() const {
         return [](Memory& m, const u32 addr, const u16 data) {
-            m.sendFrtInterrupt(sh2::Sh2Type::master);
+            m.sendFrtInterruptToMaster();
         };
     }
 };
@@ -1424,7 +1433,7 @@ template<>
 struct writeSlaveSh2Frt<u16> {
     operator Memory::WriteType<u16>() const {
         return [](Memory& m, const u32 addr, const u16 data) {
-            m.sendFrtInterrupt(sh2::Sh2Type::slave);
+            m.sendFrtInterruptToSlave();
         };
     }
 };

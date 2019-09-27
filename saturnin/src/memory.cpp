@@ -448,11 +448,12 @@ bool Memory::isStvProtectionEnabled() const {
     return cart_[relative_addr] == 0x1;
 }
 
-void Memory::sendFrtInterrupt(sh2::Sh2Type t) const {
-    switch (t) {
-        case sh2::Sh2Type::master: masterSh2()->sendInterrupt(interrupt_source::frt_input_capture); break;
-        case sh2::Sh2Type::slave:  slaveSh2()->sendInterrupt(interrupt_source::frt_input_capture);  break;
-    }
+void Memory::sendFrtInterruptToMaster() const {
+    masterSh2()->sendInterrupt(interrupt_source::frt_input_capture);
+}
+
+void Memory::sendFrtInterruptToSlave() const {
+    slaveSh2()->sendInterrupt(interrupt_source::frt_input_capture);
 }
 
 Config* Memory::config() const { 
