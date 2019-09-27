@@ -35,12 +35,23 @@
 #include "interrupt_sources.h"
 #include "log.h"
 #include "scu.h"
-#include "sh2.h"
 
+// Forward declarations
+namespace saturnin::sh2 {
+    class Sh2;
+    enum class Sh2Type;
+}
 namespace sh2 = saturnin::sh2;
 
 namespace saturnin {
 namespace core {
+
+// Forward declarations
+class Emulator_context;
+class Config;
+class Scu;
+using saturnin::sh2::Sh2;
+using saturnin::sh2::Sh2Type;
 
 constexpr u32 rom_memory_mask              = 0x7FFFF;
 constexpr u32 smpc_memory_mask             = 0x7F;
@@ -92,12 +103,6 @@ enum class Rom_load {
     even_interleaved ///< Data loaded on even bytes.
 };
 
-// Forward declarations
-class Sh2;
-class Emulator_context;
-class Config;
-class Scu;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Memory
 ///
@@ -114,7 +119,7 @@ public:
     // Constructors / Destructors
     Memory()                           = delete;
     Memory(Emulator_context* ec) : emulator_context_(ec) {
-        initializeHandlers();
+        initialize();
     };
     Memory(const Memory&)              = delete;
     Memory(Memory&&)                   = delete;
@@ -160,7 +165,7 @@ public:
     
     bool vdp2_cram_was_accessed_{ false }; ///< true when VDP2 color ram was accessed
 
-    sh2::Sh2Type sh2_in_operation_ { sh2::Sh2Type::unknown}; ///< Which SH2 is in operation
+    sh2::Sh2Type sh2_in_operation_ ; ///< Which SH2 is in operation
     //bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
     //bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
@@ -295,13 +300,24 @@ public:
 
     /// \name Context objects accessors
     //@{
-    sh2::Sh2* masterSh2() const;
-    sh2::Sh2* slaveSh2() const;
+    Sh2* masterSh2() const;
+    Sh2* slaveSh2() const;
     Scu*      scu() const;
     Config*   config() const;
     //@}
 
 private:
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Memory::initialize();
+    ///
+    /// \brief  Initializes the Memory object.
+    ///
+    /// \author Runik
+    /// \date   27/09/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initialize();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::initializeHandlers();

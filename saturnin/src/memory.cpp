@@ -22,6 +22,7 @@
 #include <libzippp/libzippp.h>
 #include "locale.h"
 #include "emulator_context.h"
+#include "sh2.h"
 
 namespace lzpp = libzippp;
 namespace fs = std::filesystem;
@@ -497,6 +498,12 @@ std::vector<std::string> listStvConfigurationFiles() {
 
 inline bool isMasterSh2InOperation(const Memory& m) {
     return (m.sh2_in_operation_ == sh2::Sh2Type::master);
+}
+
+void Memory::initialize() {
+    sh2_in_operation_ = sh2::Sh2Type::unknown;
+
+    initializeHandlers();
 }
 
 }
