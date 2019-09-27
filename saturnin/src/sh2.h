@@ -39,7 +39,6 @@ namespace saturnin::core {
     class Emulator_context; 
 }
 
-
 namespace saturnin {
 namespace sh2 {
 
@@ -101,7 +100,7 @@ class Sh2 {
 
     template<typename T>
     T readRegisters(const u32 addr) const {
-        return rawRead<T>(this->io_registers_, addr & sh2_memory_mask);
+        return core::rawRead<T>(this->io_registers_, addr & sh2_memory_mask);
     }
 
     // 32 bits specialization
@@ -125,7 +124,7 @@ class Sh2 {
 
     template<typename T>
     void writeRegisters(const u32 addr, const T data) {
-        rawWrite<T>(io_registers_, addr & sh2_memory_mask, data);
+        core::rawWrite<T>(io_registers_, addr & sh2_memory_mask, data);
     }
 
     // 8 bits specialization
@@ -162,7 +161,7 @@ class Sh2 {
 
     template<typename T>
     T readCacheAddresses(const u32 addr) const {
-        return rawRead<T>(cache_addresses_, addr & 0x3FF);
+        return core::rawRead<T>(cache_addresses_, addr & 0x3FF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +179,7 @@ class Sh2 {
 
     template<typename T>
     void writeCacheAddresses(const u32 addr, const T data) {
-        rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
+        core::rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,7 +198,7 @@ class Sh2 {
 
     template<typename T>
     T readCacheData(const u32 addr) const {
-        return rawRead<T>(cache_data_, addr & 0xFFF);
+        return core::rawRead<T>(cache_data_, addr & 0xFFF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +216,7 @@ class Sh2 {
 
     template<typename T>
     void writeCacheData(const u32 addr, const T data) {
-        rawWrite<T>(cache_data_, addr & 0xFFF, data);
+        core::rawWrite<T>(cache_data_, addr & 0xFFF, data);
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
