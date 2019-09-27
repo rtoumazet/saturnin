@@ -27,20 +27,24 @@
 
 #include <array> // array 
 #include "emulator_defs.h"
-#include "memory.h"
 #include "interrupt_sources.h"
+#include "memory.h"
 #include "sh2_instructions.h"
 #include "sh2_registers.h"
 
 namespace core = saturnin::core;
 
+// Forward declarations
+namespace saturnin::core { 
+    class Emulator_context; 
+}
+
+
 namespace saturnin {
 namespace sh2 {
 
-// Forward declarations
-namespace saturnin::core{
-    class Emulator_context;
-};
+using saturnin::core::Emulator_context;
+using saturnin::core::Memory;
 
 constexpr u8 max_interrupt_number = 10;
 constexpr u8 max_interrupt_level  = 10;
@@ -73,7 +77,7 @@ class Sh2 {
     //@{
     // Constructors / Destructors
     Sh2()                        = delete;
-    Sh2(Sh2Type st, core::Emulator_context* ec);
+    Sh2(Sh2Type st, Emulator_context* ec);
     Sh2(const Sh2&)              = delete;
     Sh2(Sh2&&)                   = delete;
     Sh2& operator=(const Sh2&) & = delete;
@@ -389,7 +393,7 @@ private:
     /// \return SCU memory array.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    core::Memory* memory() const;
+    Memory* memory() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Sh2::scu() const;
@@ -415,7 +419,7 @@ private:
     /// \return The Emulator_context object.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    core::Emulator_context* emulatorContext();
+    Emulator_context* emulatorContext();
 
     friend u16 xn00(Sh2&);
     friend u16 x0n0(Sh2&);
@@ -572,7 +576,7 @@ private:
     friend void badOpcode(Sh2& s);
     friend void execute(Sh2& s);
 
-    core::Emulator_context* emulator_context_;    ///< Context of the emulator
+    Emulator_context* emulator_context_;    ///< Context of the emulator
     
     std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
     std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
