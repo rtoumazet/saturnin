@@ -65,8 +65,8 @@ inline void addv(Sh2& s);
 inline void and(Sh2& s);
 inline void andi(Sh2& s);
 inline void andm(Sh2& s);
-//inline void bf(Sh2& s);
-//inline void bfs(Sh2& s);
+inline void bf(Sh2& s);
+inline void bfs(Sh2& s);
 //inline void bra(Sh2& s);
 //inline void braf(Sh2& s);
 //inline void bsr(Sh2& s);
@@ -236,9 +236,9 @@ static std::array<Sh2Instruction, instructions_number> const opcodes_table
     { 0xF00F, 0x300F, true,  &addv},
     { 0xF00F, 0x2009, true,  &and},
     { 0xFF00, 0xC900, true,  &andi},
-    { 0xFF00, 0xCD00, false, &andm} // R0GBR
-    //{ 0xFF00, 0x8B00, false, &bf},
-    //{ 0xFF00, 0x8F00, false, &bfs},
+    { 0xFF00, 0xCD00, false, &andm}, // R0GBR
+    { 0xFF00, 0x8B00, false, &bf},
+    { 0xFF00, 0x8F00, false, &bfs}
     //{ 0xFF00, 0x8900, false, &bt},
     //{ 0xFF00, 0x8D00, false, &bts},
     //{ 0xFFFF, 0x0028, true,  &clrmac},

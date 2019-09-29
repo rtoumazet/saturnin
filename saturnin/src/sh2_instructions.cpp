@@ -194,6 +194,42 @@ void andm(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
+void bf(Sh2& s) {
+    // If T = 0, disp*2 + PC -> PC
+    // Si T = 1, nop
+
+    s32 disp{};
+
+    if ((static_cast<s32>(x0nn(s)) & 0x80) == 0) disp = (0x000000FF & static_cast<s32>(x0nn(s)));
+    else disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
+    if (s.sr_.get(StatusRegister::t) == 0) {
+        s.pc_ = s.pc_ + (disp << 1) + 4;
+        s.cycles_elapsed_ = 3;
+    } else {
+        s.pc_ += 2;
+        s.cycles_elapsed_ = 1;
+    }
+}
+
+void bfs(Sh2& s) {
+    // If T=0, disp*2 + PC -> PC
+    // If T=1, nop
+    // Modified using SH4 manual
+
+    s32 disp{};
+    if ((x0nn(s) & 0x80) == 0) disp = (0x000000FF & static_cast<s32>(x0nn(s)));
+    else disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
+    if (s.sr_.get(StatusRegister::t) == 0) {
+        u32 saved_pc = s.pc_;
+        delaySlot(s, s.pc_ + 2);
+        s.pc_ = saved_pc + (disp << 1) + 4;
+        s.cycles_elapsed_ = 2;
+    } else {
+        s.pc_ += 2;
+        s.cycles_elapsed_ = 1;
+    }
+}
+
 void nop(Sh2& s) {
     // Mo operation
     s.pc_ += 2;
