@@ -22,6 +22,7 @@
 #include <libzippp/libzippp.h>
 #include "locale.h"
 #include "emulator_context.h"
+#include "config.h"
 #include "sh2.h"
 
 namespace lzpp = libzippp;
@@ -30,6 +31,8 @@ namespace sh2 = saturnin::sh2;
 
 namespace saturnin {
 namespace core {
+
+using core::Log;
 
 bool Memory::loadRom(const std::string& zip_name,
                      const std::string&  file_name,
@@ -392,7 +395,7 @@ u32 Memory::readStvProtection(const u32 addr, u32 data) const {
                 data = 0x02002000;
                 break;
         }
-        core::Log::debug("memory", "ST-V protection read index: {}, value: {}", stv_protection_offset, data);
+        Log::debug("memory", "ST-V protection read index: {}, value: {}", stv_protection_offset, data);
     }
     else {
         stv_protection_offset = 0;
@@ -440,7 +443,7 @@ void Memory::writeStvProtection(const u32 addr, u32 data) {
         case 0x77770000:
             break;
     }
-    core::Log::debug("memory", fmt::format(core::tr("ST-V offset start: {}"), this->stv_protection_offset_));
+    Log::debug("memory", fmt::format(core::tr("ST-V offset start: {}"), this->stv_protection_offset_));
 }
 
 bool Memory::isStvProtectionEnabled() const {

@@ -27,7 +27,7 @@
 
 #include "emulator_defs.h"
 
-namespace core = saturnin::core;
+//namespace core = saturnin::core;
 
 namespace saturnin {
 namespace sh2 {

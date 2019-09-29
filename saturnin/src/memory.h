@@ -32,7 +32,7 @@
 
 #include "emulator_defs.h"
 #include "emulator_enums.h"
-#include "interrupt_sources.h"
+//#include "interrupt_sources.h"
 #include "log.h"
 #include "scu.h"
 
@@ -50,6 +50,7 @@ namespace core {
 class Emulator_context;
 class Config;
 class Scu;
+
 using saturnin::sh2::Sh2;
 using saturnin::sh2::Sh2Type;
 
@@ -535,7 +536,7 @@ template<typename T>
 struct writeDummy {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            core::Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
+            Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
         };
     }
 };
@@ -555,7 +556,7 @@ template<typename T>
 struct readDummy {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            core::Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
+            Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
             return T{};
         };
     }
@@ -604,8 +605,8 @@ template<>
 struct readSmpc<uint8_t> {
     operator Memory::ReadType<u8>() const {
         return [](const Memory& m, const u32 addr) -> u8 {
-            //core::Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
-            core::Log::error("memory", core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
+            //Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
+            Log::error("memory", core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
             return 0;
         };
     }
@@ -636,8 +637,8 @@ template<>
 struct writeSmpc<uint8_t> {
     operator Memory::WriteType<u8>() const {
         return [](Memory& m, const u32 addr, const u8 data) {
-            //core::Log::warning("memory", fmt::format(core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data));
-            core::Log::warning("memory", core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data);
+            //Log::warning("memory", fmt::format(core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data));
+            Log::warning("memory", core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data);
         };
     }
 };
@@ -923,7 +924,7 @@ template<typename T>
 struct readCdBlock{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            core::Log::error("memory", core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T)*8, addr);
+            Log::error("memory", core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T)*8, addr);
             return 0;
         };
     }
@@ -944,7 +945,7 @@ template<typename T>
 struct writeCdBlock{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            core::Log::error("memory", core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"), sizeof(T)*8, addr, data);
+            Log::error("memory", core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"), sizeof(T)*8, addr, data);
         };
     }
 };
@@ -964,7 +965,7 @@ template<typename T>
 struct readScsp{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            core::Log::error("memory", core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * 8, addr);
+            Log::error("memory", core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * 8, addr);
             return 0;
         };
     }
@@ -985,7 +986,7 @@ template<typename T>
 struct writeScsp{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            core::Log::error("memory", core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
+            Log::error("memory", core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
         };
     }
 };
@@ -1392,7 +1393,7 @@ struct writeMasterSh2Frt {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             //m.interrupt_signal_is_sent_from_master_sh2_ = true;
-            core::Log::warning("memory", core::tr("{}bits write to the master SH2 FRT memory area !"), sizeof(T) * 8);
+            Log::warning("memory", core::tr("{}bits write to the master SH2 FRT memory area !"), sizeof(T) * 8);
         };
     }
 };
@@ -1423,7 +1424,7 @@ struct writeSlaveSh2Frt{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             //m.interrupt_signal_is_sent_from_slave_sh2_ = true;
-            core::Log::warning("memory", core::tr("{}bits write to the slave SH2 FRT memory area !"), sizeof(T) * 8);
+            Log::warning("memory", core::tr("{}bits write to the slave SH2 FRT memory area !"), sizeof(T) * 8);
         };
     }
 };

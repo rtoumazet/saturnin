@@ -17,12 +17,15 @@
 // limitations under the License.
 // 
 
+#include <iostream> // cout
 #include "scu.h"
 #include "scu_registers.h"
 #include "emulator_context.h"
 #include "memory.h"
 #include "interrupt_sources.h"
+#include "sh2.h"
 #include "utilities.h"
+
 
 namespace saturnin {
 namespace core {
