@@ -17,12 +17,15 @@
 // limitations under the License.
 // 
 
-
+#include "sh2.h"
 #include "sh2_instructions.h"
 #include "emulator_context.h"
+#include "memory.h"
 
 namespace saturnin {
 namespace sh2 {
+
+using core::Log;
 
 u16 xn00(Sh2& s) { return (s.current_opcode_ & 0x0f00) >> 8; }
 u16 x0n0(Sh2& s) { return (s.current_opcode_ & 0x00f0) >> 4; }
@@ -45,13 +48,12 @@ void delaySlot(Sh2& s, const u32 addr) {
         s.current_opcode_ = s.memory()->read<u16>(addr);
 
         if (isInstructionIllegal(s.current_opcode_)) {
-            core::Log::error("sh2", "Illegal instruction slot");
+            Log::error("sh2", "Illegal instruction slot");
             s.emulatorContext()->emulationStatus_ = core::EmulationStatus::stopped;
         } else {
 
-        //    // Delay slot instruction execution
+            // Delay slot instruction execution
             execute(s);
-
             s.cycles_elapsed_ += current_inst_cycles;
         }
     }
@@ -111,7 +113,7 @@ bool isInstructionIllegal(const u16 inst) {
 
 void badOpcode(Sh2& s) {
     std::string type = (s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave";
-    core::Log::error("Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
+    Log::error("Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
 
     s.emulatorContext()->emulationStatus_ = core::EmulationStatus::stopped;
 }
@@ -182,7 +184,15 @@ void andi(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
+void andm(Sh2& s) {
+    //(R0 + GBR) & imm -> (R0 + GBR)
 
+    s32 temp = s.memory()->read<u8>(s.gbr_ + s.r_[0]);
+    temp &= (0x000000FF & static_cast<s32>(x0nn(s)));
+    s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
 
 void nop(Sh2& s) {
     // Mo operation

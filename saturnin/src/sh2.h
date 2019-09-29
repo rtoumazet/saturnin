@@ -27,16 +27,17 @@
 
 #include <array> // array 
 #include "emulator_defs.h"
-#include "interrupt_sources.h"
+//#include "interrupt_controller.h"
 #include "memory.h"
-#include "sh2_instructions.h"
+//#include "sh2_instructions.h"
 #include "sh2_registers.h"
 
-namespace core = saturnin::core;
+//namespace core = saturnin::core;
 
 // Forward declarations
 namespace saturnin::core { 
     class Emulator_context; 
+    struct Interrupt;
 }
 
 namespace saturnin {
@@ -44,6 +45,10 @@ namespace sh2 {
 
 using saturnin::core::Emulator_context;
 using saturnin::core::Memory;
+using saturnin::core::Interrupt;
+
+using saturnin::core::rawRead;
+using saturnin::core::rawWrite;
 
 constexpr u8 max_interrupt_number = 10;
 constexpr u8 max_interrupt_level  = 10;
@@ -100,7 +105,7 @@ class Sh2 {
 
     template<typename T>
     T readRegisters(const u32 addr) const {
-        return core::rawRead<T>(this->io_registers_, addr & sh2_memory_mask);
+        return rawRead<T>(this->io_registers_, addr & sh2_memory_mask);
     }
 
     // 32 bits specialization
@@ -124,7 +129,7 @@ class Sh2 {
 
     template<typename T>
     void writeRegisters(const u32 addr, const T data) {
-        core::rawWrite<T>(io_registers_, addr & sh2_memory_mask, data);
+        trrawWrite<T>(io_registers_, addr & sh2_memory_mask, data);
     }
 
     // 8 bits specialization
@@ -161,7 +166,7 @@ class Sh2 {
 
     template<typename T>
     T readCacheAddresses(const u32 addr) const {
-        return core::rawRead<T>(cache_addresses_, addr & 0x3FF);
+        return rawRead<T>(cache_addresses_, addr & 0x3FF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,7 +184,7 @@ class Sh2 {
 
     template<typename T>
     void writeCacheAddresses(const u32 addr, const T data) {
-        core::rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
+        rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -198,7 +203,7 @@ class Sh2 {
 
     template<typename T>
     T readCacheData(const u32 addr) const {
-        return core::rawRead<T>(cache_data_, addr & 0xFFF);
+        return rawRead<T>(cache_data_, addr & 0xFFF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -216,7 +221,7 @@ class Sh2 {
 
     template<typename T>
     void writeCacheData(const u32 addr, const T data) {
-        core::rawWrite<T>(cache_data_, addr & 0xFFF, data);
+        rawWrite<T>(cache_data_, addr & 0xFFF, data);
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -599,7 +604,7 @@ private:
                                                 
     /// \name Interrupt management
     //@{
-    std::list<core::Interrupt>              pending_interrupts_ = {};       ///< List of pending interrupts.
+    std::list<Interrupt>                    pending_interrupts_ = {};       ///< List of pending interrupts.
     bool                                    is_interrupted_{};        ///< True if this sh2 is interrupted.
     std::array<bool, max_interrupt_level>   is_level_interrupted_{};        ///< Determines if any given level is already interrupted.
     //@}

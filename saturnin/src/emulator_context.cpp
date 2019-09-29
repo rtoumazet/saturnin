@@ -19,30 +19,40 @@
 
 #include <chrono>
 #include <iostream>
-#include "emulator_context.h"
 #include "cdrom/scsi.h"
 #include "video/opengl.h"
+#include "config.h"
+#include "emulator_context.h"
+#include "log.h"
 #include "scu_registers.h"
+#include "sh2_instructions.h"
 #include "sh2_registers.h"
+#include "sh2.h"
 
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
-namespace sh2 = saturnin::sh2;
+namespace sh2   = saturnin::sh2;
 
 namespace saturnin {
 namespace core {
 
+using sh2::Sh2;
+using sh2::Sh2Type;
+using sh2::StatusRegister;
+
 Emulator_context::Emulator_context() {
     config_     = std::make_unique<Config>("saturnin.cfg");
-    master_sh2_ = std::make_unique<sh2::Sh2>(sh2::Sh2Type::master, this);
-    slave_sh2_  = std::make_unique<sh2::Sh2>(sh2::Sh2Type::slave, this);
+    master_sh2_ = std::make_unique<Sh2>(Sh2Type::master, this);
+    slave_sh2_  = std::make_unique<Sh2>(Sh2Type::slave, this);
     memory_     = std::make_unique<Memory>(this);
     scu_        = std::make_unique<Scu>(this);
 }
 
+Config* Emulator_context::config() { return config_.get(); };
+
 bool Emulator_context::initialize() {
-    core::Log::initialize();
+    Log::initialize();
 
     if (!this->config()->initialize(video::isModernOpenglCapable())) return false;
 
@@ -82,11 +92,11 @@ bool Emulator_context::run() {
 
     Log::error("sh2", "Unexpected opcode({} SH2)\nOpcode: {:#06x}\nPC: {:#010x}", "Master", 0x4e73, 0x20000200);
 
-    sh2::StatusRegister sr{ 0 };
-    sr.set(sh2::StatusRegister::i);
-    u8 i = sr.get(sh2::StatusRegister::i);
-    sr.set(sh2::StatusRegister::i, static_cast<u8>(0x8));
-    i = sr.get(sh2::StatusRegister::i);
+    StatusRegister sr{ 0 };
+    sr.set(StatusRegister::i);
+    u8 i = sr.get(StatusRegister::i);
+    sr.set(StatusRegister::i, static_cast<u8>(0x8));
+    i = sr.get(StatusRegister::i);
 
     auto dmr = DmaModeRegister(0x000000AA);
     //auto w = isr.test();

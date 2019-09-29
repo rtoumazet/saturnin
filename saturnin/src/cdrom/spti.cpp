@@ -34,12 +34,15 @@ namespace util = saturnin::utilities;
 namespace saturnin {
 namespace cdrom {
 
+using core::Log;
+using core::tr;
+
 /* static */
 bool Spti::initialize() {
     Cdrom::di_list.clear();
     Cdrom::di_list = Spti::scanBus();
     std::wstring full_drive_name{};
-    //Cdrom::scsi_drives_list.push_back(core::tr("Not selected"));
+    //Cdrom::scsi_drives_list.push_back(tr("Not selected"));
     
     for (auto &di : Cdrom::di_list) {
         full_drive_name = di.letter;
@@ -133,7 +136,7 @@ std::string Spti::readOneSector(const uint32_t& fad) {
                          reinterpret_cast<LPDWORD>(&dummy),
                          NULL)) {
 
-        core::Log::warning("cdrom", core::tr("Drive isn't accessible"));
+        Log::warning("cdrom", tr("Drive isn't accessible"));
 
     }
     else {
@@ -147,7 +150,7 @@ std::string Spti::readOneSector(const uint32_t& fad) {
                              reinterpret_cast<LPDWORD>(&dummy),
                              NULL)) {
 
-            core::Log::warning("cdrom", util::getLastErrorMessage());
+            Log::warning("cdrom", util::getLastErrorMessage());
         }
     }
 
@@ -196,7 +199,7 @@ void Spti::inquiry(const HANDLE& drive_handle, ScsiDriveInfo& di) {
                          reinterpret_cast<LPDWORD>(&dummy),
                          NULL)) {
         
-        core::Log::warning("cdrom", util::getLastErrorMessage());
+        Log::warning("cdrom", util::getLastErrorMessage());
 
     }
     else {

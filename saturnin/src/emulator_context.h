@@ -36,10 +36,10 @@
 #include "sh2.h"
 #include "stv_definitions.h"
 
-namespace sh2 = saturnin::sh2;
-
 namespace saturnin {
 namespace core {
+
+using sh2::Sh2;
 
 static const std::string saturnin_version{ "1.00" };
 
@@ -120,7 +120,7 @@ static const std::string saturnin_version{ "1.00" };
         /// \return A pointer to the config object
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        Config* config() { return config_.get(); };
+        Config* config();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn Memory* Emulator_context::memory()
@@ -181,8 +181,8 @@ static const std::string saturnin_version{ "1.00" };
     private:
         std::unique_ptr<Config>   config_;          ///< Configuration object
         std::unique_ptr<Memory>   memory_;          ///< Memory object
-        std::unique_ptr<sh2::Sh2> master_sh2_;      ///< Master SH2 object
-        std::unique_ptr<sh2::Sh2> slave_sh2_;       ///< Slave SH2 object
+        std::unique_ptr<Sh2> master_sh2_;      ///< Master SH2 object
+        std::unique_ptr<Sh2> slave_sh2_;       ///< Slave SH2 object
         std::unique_ptr<Scu>      scu_;             ///< SCU object
 
         /// \name Command line variables

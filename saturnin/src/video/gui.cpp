@@ -25,12 +25,15 @@
 #include "../cdrom/cdrom.h" // Cdrom
 
 
-namespace core  = saturnin::core;
+//namespace core  = saturnin::core;
 namespace util  = saturnin::utilities;
 namespace cdrom = saturnin::cdrom;
 
 namespace saturnin {
 namespace gui {
+
+    using core::Log;
+    using core::tr;
 
     static const float icon_map_height{ 1139 };
     static const float icon_height{ 104 };
@@ -185,8 +188,8 @@ namespace gui {
 
         
         // General header
-        if (ImGui::CollapsingHeader(core::tr("General").c_str())) {
-            ImGui::Text(core::tr("Hardware mode").c_str());
+        if (ImGui::CollapsingHeader(tr("General").c_str())) {
+            ImGui::Text(tr("Hardware mode").c_str());
             ImGui::SameLine(150);
             
             std::string HardwareMode = state.config()->readValue(core::Access_keys::config_HardwareMode);
@@ -195,16 +198,16 @@ namespace gui {
             if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::HardwareMode::saturn))) {
                 core::Config::Map_HardwareMode::const_iterator it = util::getKeyFromValue(core::Config::HardwareMode, core::HardwareMode::saturn);
                 if (it != core::Config::HardwareMode.end()) state.config()->writeValue(core::Access_keys::config_HardwareMode, it->first);
-                else core::Log::warning("config", core::tr("Hardware mode unknown ..."));
+                else Log::warning("config", tr("Hardware mode unknown ..."));
             }
             ImGui::SameLine();
             if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::HardwareMode::stv))) {
                 core::Config::Map_HardwareMode::const_iterator it = util::getKeyFromValue(core::Config::HardwareMode, core::HardwareMode::stv);
                 if (it != core::Config::HardwareMode.end()) state.config()->writeValue(core::Access_keys::config_HardwareMode, it->first);
-                else core::Log::warning("config", core::tr("Hardware mode unknown ..."));
+                else Log::warning("config", tr("Hardware mode unknown ..."));
             }
 
-            ImGui::Text(core::tr("Language").c_str());
+            ImGui::Text(tr("Language").c_str());
             ImGui::SameLine(150);
 
             static auto locales = state.config()->listAvailableLanguages();
@@ -219,8 +222,8 @@ namespace gui {
         }
 
         // Rendering header
-        if (ImGui::CollapsingHeader(core::tr("Rendering").c_str())) {
-            ImGui::Text(core::tr("Legacy OpenGL").c_str());
+        if (ImGui::CollapsingHeader(tr("Rendering").c_str())) {
+            ImGui::Text(tr("Legacy OpenGL").c_str());
             ImGui::SameLine(150);
 
             static bool is_legacy = state.config()->readValue(core::Access_keys::config_legacy_opengl);
@@ -232,9 +235,9 @@ namespace gui {
         }
 
         // Paths header
-        if (ImGui::CollapsingHeader(core::tr("Paths").c_str())) {
+        if (ImGui::CollapsingHeader(tr("Paths").c_str())) {
             
-            ImGui::Text(core::tr("Saturn bios").c_str());
+            ImGui::Text(tr("Saturn bios").c_str());
             ImGui::SameLine(150);
 
             auto bios_saturn = util::stringToVector(state.config()->readValue(core::Access_keys::config_bios_saturn), 255);
@@ -242,14 +245,14 @@ namespace gui {
                 state.config()->writeValue(core::Access_keys::config_bios_saturn, bios_saturn.data());
             }
 
-            ImGui::Text(core::tr("ST-V bios").c_str());
+            ImGui::Text(tr("ST-V bios").c_str());
             ImGui::SameLine(150);
             auto bios_stv = util::stringToVector(state.config()->readValue(core::Access_keys::config_bios_stv), 255);
             if (ImGui::InputText("##bios_stv", bios_stv.data(), bios_stv.capacity())) {
                 state.config()->writeValue(core::Access_keys::config_bios_stv, bios_stv.data());
             }
 
-            ImGui::Text(core::tr("ST-V roms").c_str());
+            ImGui::Text(tr("ST-V roms").c_str());
             ImGui::SameLine(150);
             auto roms_stv = util::stringToVector(state.config()->readValue(core::Access_keys::config_roms_stv), 255);
             if (ImGui::InputText("##roms_stv", roms_stv.data(), roms_stv.capacity())) {
@@ -260,9 +263,9 @@ namespace gui {
         }
 
         // CD-ROM header
-        if (ImGui::CollapsingHeader(core::tr("CD-Rom").c_str())) {
+        if (ImGui::CollapsingHeader(tr("CD-Rom").c_str())) {
             // Drive
-            ImGui::Text(core::tr("Drive").c_str());
+            ImGui::Text(tr("Drive").c_str());
             ImGui::SameLine(150);
 
             std::string drive = state.config()->readValue(core::Access_keys::config_drive);
@@ -283,7 +286,7 @@ namespace gui {
             
             // Access method
             // For now ASPI isn't supported, SPTI is used in every case
-            ImGui::Text(core::tr("Access method").c_str());
+            ImGui::Text(tr("Access method").c_str());
             ImGui::SameLine(150);
 
             std::string access_method = state.config()->readValue(core::Access_keys::config_access_method);
@@ -294,7 +297,7 @@ namespace gui {
                     state.config()->writeValue(core::Access_keys::config_access_method, it->first);
                 }
                 else {
-                    core::Log::warning("config", core::tr("Drive access method unknown ..."));
+                    Log::warning("config", tr("Drive access method unknown ..."));
                 }
             }
             ImGui::SameLine();
@@ -304,7 +307,7 @@ namespace gui {
                     state.config()->writeValue(core::Access_keys::config_access_method, it->first);
                 }
                 else {
-                    core::Log::warning("config", core::tr("Drive access method unknown ..."));
+                    Log::warning("config", tr("Drive access method unknown ..."));
                 }
             }
 
@@ -312,8 +315,8 @@ namespace gui {
         }
 
         // Sound header
-        if (ImGui::CollapsingHeader(core::tr("Sound").c_str())) {
-            ImGui::Text(core::tr("Sound disabled").c_str());
+        if (ImGui::CollapsingHeader(tr("Sound").c_str())) {
+            ImGui::Text(tr("Sound disabled").c_str());
             ImGui::SameLine(150);
 
             static bool disabled = state.config()->readValue(core::Access_keys::config_sound_disabled);
@@ -326,7 +329,7 @@ namespace gui {
         static std::string status_message{};
         if (ImGui::Button("Save")) {
             state.config()->writeFile();
-            status_message = core::tr("Configuration saved.");
+            status_message = tr("Configuration saved.");
             counter = 5 * 60;
 
             if (reset_rendering) {
@@ -349,13 +352,13 @@ namespace gui {
         static bool show_load_binary = false;
 
         if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu(core::tr("File").c_str())) {
-                ImGui::MenuItem(core::tr("Load ST-V rom").c_str(), NULL, &show_load_stv);
-                ImGui::MenuItem(core::tr("Load binary file").c_str(), NULL, &show_load_binary);
+            if (ImGui::BeginMenu(tr("File").c_str())) {
+                ImGui::MenuItem(tr("Load ST-V rom").c_str(), NULL, &show_load_stv);
+                ImGui::MenuItem(tr("Load binary file").c_str(), NULL, &show_load_binary);
                 ImGui::EndMenu();
             }
 
-            ImGui::MenuItem(core::tr("Options").c_str(), NULL, &show_options);
+            ImGui::MenuItem(tr("Options").c_str(), NULL, &show_options);
         }
         ImGui::EndMainMenuBar();
 
