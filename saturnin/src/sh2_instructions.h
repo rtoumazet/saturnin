@@ -67,9 +67,9 @@ inline void andi(Sh2& s);
 inline void andm(Sh2& s);
 inline void bf(Sh2& s);
 inline void bfs(Sh2& s);
-//inline void bra(Sh2& s);
-//inline void braf(Sh2& s);
-//inline void bsr(Sh2& s);
+inline void bra(Sh2& s);
+inline void braf(Sh2& s);
+inline void bsr(Sh2& s);
 //inline void bsrf(Sh2& s);
 //inline void bt(Sh2& s);
 //inline void bts(Sh2& s);
@@ -238,7 +238,7 @@ static std::array<Sh2Instruction, instructions_number> const opcodes_table
     { 0xFF00, 0xC900, true,  &andi},
     { 0xFF00, 0xCD00, false, &andm}, // R0GBR
     { 0xFF00, 0x8B00, false, &bf},
-    { 0xFF00, 0x8F00, false, &bfs}
+    { 0xFF00, 0x8F00, false, &bfs},
     //{ 0xFF00, 0x8900, false, &bt},
     //{ 0xFF00, 0x8D00, false, &bts},
     //{ 0xFFFF, 0x0028, true,  &clrmac},
@@ -264,9 +264,9 @@ static std::array<Sh2Instruction, instructions_number> const opcodes_table
     //{ 0xF00F, 0x600C, true,  &extub},
     //{ 0xF00F, 0x600D, true,  &extuw},
     //{ 0xFFFF, 0x001B, true,  &sleep},
-    //{ 0xF000, 0xA000, false, &bra},
-    //{ 0xF0FF, 0x0023, false, &braf},
-    //{ 0xF000, 0xB000, false, &bsr},
+    { 0xF000, 0xA000, false, &bra},
+    { 0xF0FF, 0x0023, false, &braf},
+    { 0xF000, 0xB000, false, &bsr}
     //{ 0xF0FF, 0x0003, false, &bsrf},
     //{ 0xF0FF, 0x402B, false, &jmp},
     //{ 0xF0FF, 0x400B, false, &jsr},
