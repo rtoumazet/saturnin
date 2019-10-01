@@ -141,6 +141,7 @@ public:
     inline static const BitRange<u8>  i{ 4,7 };     ///< Defines interrupt mask bits (I0-I3).
     inline static const BitRange<u8>  s{ 1 };       ///< Defines S bit.
     inline static const BitRange<u8>  t{ 0 };       ///< Defines T bit.
+    inline static const BitRange<u16> all_bits{ 0, 9 };   ///< Defines the range of all the bits of the register.
 };
 
 /////////////////////////////////////

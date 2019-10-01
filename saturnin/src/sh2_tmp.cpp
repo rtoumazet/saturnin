@@ -18,7 +18,7 @@ void CSH2::Initialize()
 	MACL = 0x0;
 	PR = 0x0;
 	SR = 0xF0;
-	for (boost::int32_t i = 0; i<15; i++){
+	for (s32 i = 0; i<15; i++){
 		R[i] = 0x0;
 	}
 }
@@ -28,10 +28,10 @@ inline void CSH2::ADDI(Sh2& s)
 	// Rn + imm -> Rn 
 	if (( x0nn(s)&0x80)==0)
 		// #imm positive, 32bits sign extension
-		s.r_[xn00(s)] += (0x000000FF & (boost::int32_t)x0nn(s)); // positive
+		s.r_[xn00(s)] += (0x000000FF & (s32)x0nn(s)); // positive
 	else
 		// #imm negative, 32bits sign extension
-		s.r_[xn00(s)] += (0xFFFFFF00 | (boost::int32_t)x0nn(s));
+		s.r_[xn00(s)] += (0xFFFFFF00 | (s32)x0nn(s));
 
 
 	s.pc_ +=2;
@@ -43,13 +43,13 @@ inline void CSH2::ADDC(Sh2& s)
 {
 	// Rn + Rm + T -> Rn, carry -> T
 
-	boost::int32_t tmp0,tmp1;
+	s32 tmp0,tmp1;
 
 	tmp1 = s.r_[xn00(s)]+s.r_[x0n0(s)];
 	tmp0 = s.r_[xn00(s)];
 	s.r_[xn00(s)] = tmp1 + s.sr_.get(StatusRegister::t);
 	
-	boost::int32_t test = (tmp0>=tmp1);
+	s32 test = (tmp0>=tmp1);
 	if ((tmp0>tmp1))
 		Set_T(sh2);
 	else
@@ -81,7 +81,7 @@ inline void CSH2::Clear_T(Sh2& s)
 	sh2->SR &= 0xFFFE;
 }
 
-boost::int32_t CSH2::DisplayR(uint8_t n)
+s32 CSH2::DisplayR(uint8_t n)
 {
 	// Returns R register value
 	return R[n];
@@ -90,7 +90,7 @@ boost::int32_t CSH2::DisplayR(uint8_t n)
 inline void CSH2::ADDV(Sh2& s)
 {
 	// Rn + Rm -> Rn, overflow -> T
-	boost::int32_t dest,src,ans;
+	s32 dest,src,ans;
 
 	if (s.r_[xn00(s)]>=0) dest = 0;
 	else dest = 1;
@@ -176,10 +176,10 @@ inline void CSH2::ANDM(Sh2& s)
 {
 	//(R0 + GBR) & imm -> (R0 + GBR)
 
-	boost::int32_t temp;
+	s32 temp;
 
 	temp = EmuState::pMem->ReadByte(sh2->GBR+s.r_[0]);
-	temp &= (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	temp &= (0x000000FF & static_cast<s32>(x0nn(s)));
 	EmuState::pMem->WriteByte(sh2->GBR+s.r_[0],static_cast<uint8_t>(temp));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 3;
@@ -191,10 +191,10 @@ inline void CSH2::BF(Sh2& s)
 	// Si T = 0, disp*2 + PC -> PC
 	// Si T = 1, nop
 
-	boost::int32_t disp;
+	s32 disp;
 
-	if ((static_cast<boost::int32_t>(x0nn(s)) & 0x80)==0) disp=(0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
-	else disp=(0xFFFFFF00 | static_cast<boost::int32_t>(x0nn(s)));
+	if ((static_cast<s32>(x0nn(s)) & 0x80)==0) disp=(0x000000FF & static_cast<s32>(x0nn(s)));
+	else disp=(0xFFFFFF00 | static_cast<s32>(x0nn(s)));
 	if (s.sr_.get(StatusRegister::t)==0x0){
 		s.pc_=s.pc_+(disp<<1)+4;
 		s.cycles_elapsed_ = 3;
@@ -213,12 +213,12 @@ inline void CSH2::BFS(Sh2& s)
 	// If T=1, nop
 	// Modified using SH4 manual
 
-	boost::int32_t disp;
+	s32 disp;
 	// Registers save for the delay slot
 	sh2->delaySlotRegisterSave_[0] = s.pc_;
 
-	if ((x0nn(s)&0x80)==0) disp=(0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
-	else disp=(0xFFFFFF00 | static_cast<boost::int32_t>(x0nn(s)));
+	if ((x0nn(s)&0x80)==0) disp=(0x000000FF & static_cast<s32>(x0nn(s)));
+	else disp=(0xFFFFFF00 | static_cast<s32>(x0nn(s)));
 	if (s.sr_.get(StatusRegister::t)==0x0) {
 		sh2->Delay_Slot(sh2,s.pc_+2);
 		s.pc_=sh2->delaySlotRegisterSave_[0] + (disp<<1) + 4;
@@ -235,7 +235,7 @@ inline void CSH2::BRA(Sh2& s)
 	// disp*2 + PC -> PC
 	// Modified using SH4 manual
 
-	boost::int32_t disp;
+	s32 disp;
 	// PC save ofr the delay slot
 	sh2->delaySlotRegisterSave_[0] = s.pc_;
 
@@ -266,7 +266,7 @@ inline void CSH2::BSR(Sh2& s)
 	// PC -> PR, disp*2 + PC -> PC
 	// Modified using SH4 manual + correction
 
-	boost::int32_t disp;
+	s32 disp;
 	// Registers save for the delay slot
 	sh2->delaySlotRegisterSave_[0] = s.pc_;
 
@@ -298,10 +298,10 @@ inline void CSH2::BT(Sh2& s)
 {
 	// If T=1, disp*2 + PC -> PC;
 	// If T=0=, nop
-	boost::int32_t disp;
+	s32 disp;
 
-	if ((x0nn(s) & 0x80)==0) disp=(0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
-	else disp = (0xFFFFFF00 | static_cast<boost::int32_t>(x0nn(s)));
+	if ((x0nn(s) & 0x80)==0) disp=(0x000000FF & static_cast<s32>(x0nn(s)));
+	else disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
 	if (s.sr_.get(StatusRegister::t)==0x1){
 		s.pc_ = s.pc_ + (disp<<1) + 4;
 		s.cycles_elapsed_ = 3;
@@ -318,12 +318,12 @@ inline void CSH2::BTS(Sh2& s)
 	// If T=1, disp*2 + PC -> PC
 	// If T=0, nop
 	// Modified using SH4 manual
-	boost::int32_t disp;
+	s32 disp;
 	// Registers save for the delay slot
 	sh2->delaySlotRegisterSave_[0] = s.pc_;
 
-	if ((x0nn(s) & 0x80)==0) disp=(0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
-	else disp = (0xFFFFFF00 | static_cast<boost::int32_t>(x0nn(s)));
+	if ((x0nn(s) & 0x80)==0) disp=(0x000000FF & static_cast<s32>(x0nn(s)));
+	else disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
 	if (s.sr_.get(StatusRegister::t)==0x1) {
 		sh2->Delay_Slot(sh2,s.pc_+2);
 		s.pc_ = sh2->delaySlotRegisterSave_[0] + (disp<<1) +4;
@@ -368,7 +368,7 @@ inline void CSH2::CMPEQ(Sh2& s)
 inline void CSH2::CMPGE(Sh2& s)
 {
 	// If Rn >= Rm with sign, T=1
-	if (static_cast<boost::int32_t>(s.r_[xn00(s)]) >= static_cast<boost::int32_t>(s.r_[x0n0(s)])) Set_T(sh2);
+	if (static_cast<s32>(s.r_[xn00(s)]) >= static_cast<s32>(s.r_[x0n0(s)])) Set_T(sh2);
 	else Clear_T(sh2);
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -377,7 +377,7 @@ inline void CSH2::CMPGE(Sh2& s)
 inline void CSH2::CMPGT(Sh2& s)
 {
 	// If Rn > Rm with sign, T=1
-	if (static_cast<boost::int32_t>(s.r_[xn00(s)]) > static_cast<boost::int32_t>(s.r_[x0n0(s)])) Set_T(sh2);
+	if (static_cast<s32>(s.r_[xn00(s)]) > static_cast<s32>(s.r_[x0n0(s)])) Set_T(sh2);
 	else Clear_T(sh2);
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -404,7 +404,7 @@ inline void CSH2::CMPHS(Sh2& s)
 inline void CSH2::CMPPL(Sh2& s)
 {
 	//If Rn > 0, T=1
-	if (static_cast<boost::int32_t>(s.r_[xn00(s)]) > 0) Set_T(sh2);
+	if (static_cast<s32>(s.r_[xn00(s)]) > 0) Set_T(sh2);
 	else Clear_T(sh2);
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -413,7 +413,7 @@ inline void CSH2::CMPPL(Sh2& s)
 inline void CSH2::CMPPZ(Sh2& s)
 {
 	//If Rn >= 0, T=1
-	if (static_cast<boost::int32_t>(s.r_[xn00(s)]) >= 0) Set_T(sh2);
+	if (static_cast<s32>(s.r_[xn00(s)]) >= 0) Set_T(sh2);
 	else Clear_T(sh2);
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -423,7 +423,7 @@ inline void CSH2::CMPSTR(Sh2& s)
 {
 	//If one byte of Rn = one byte of Rm then T=1
 	uint32_t temp;
-	boost::int32_t HH,HL,LH,LL;
+	s32 HH,HL,LH,LL;
 
 	temp = s.r_[xn00(s)]^s.r_[x0n0(s)];
 	HH = (temp>>12) & 0x000000FF;
@@ -440,10 +440,10 @@ inline void CSH2::CMPSTR(Sh2& s)
 inline void CSH2::CMPIM(Sh2& s)
 {
 	//If R0 = imm, T=1
-	boost::int32_t imm;
+	s32 imm;
 
-	if ((static_cast<boost::int32_t>(x0nn(s)) & 0x80)==0) imm = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
-	else imm = (0xFFFFFF00 | static_cast<boost::int32_t>(x0nn(s)));
+	if ((static_cast<s32>(x0nn(s)) & 0x80)==0) imm = (0x000000FF & static_cast<s32>(x0nn(s)));
+	else imm = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
 	if (s.r_[0]==imm) Set_T(sh2);
 	else Clear_T(sh2);
 	s.pc_ += 2;
@@ -471,10 +471,10 @@ inline void CSH2::Set_M(Sh2& s)
 inline uint8_t CSH2::Q_Val(Sh2& s)
 {
 	// Returns Q bit of SR
-	boost::int32_t temp;
+	s32 temp;
 	
 	temp = sh2->SR & 0x100;
-	if (static_cast<boost::int32_t>(temp) == 0x100) return 1;
+	if (static_cast<s32>(temp) == 0x100) return 1;
 	else return 0;
 }
 
@@ -596,49 +596,49 @@ inline void CSH2::DMULS(Sh2& s)
 	// Arranged using SH4 manual
 	__int64 result;
 	result = static_cast<__int64>(s.r_[x0n0(s)]) * static_cast<__int64>(s.r_[xn00(s)]);
-	sh2->MACH = static_cast<boost::int32_t>(result>>32);
+	sh2->MACH = static_cast<s32>(result>>32);
 	sh2->MACL = static_cast<uint32_t>(result&0x00000000FFFFFFFF);
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 2;
 }
 
-boost::int32_t CSH2::DisplayMACH()
+s32 CSH2::DisplayMACH()
 {
 	//Returns MACH value
 	return MACH;
 }
 
-boost::int32_t CSH2::DisplayMACL()
+s32 CSH2::DisplayMACL()
 {
 	//Returns MACL value
 	return MACL;
 }
 
-boost::int32_t CSH2::DisplayPC()
+s32 CSH2::DisplayPC()
 {
 	//Returns PC value
 	return PC;
 }
 
-boost::int32_t CSH2::DisplayPR()
+s32 CSH2::DisplayPR()
 {
 	//Returns PR value
 	return PR;
 }
 
-boost::int32_t CSH2::DisplayGBR()
+s32 CSH2::DisplayGBR()
 {
 	//Returns GBR value
 	return GBR;
 }
 
-boost::int32_t CSH2::DisplayVBR()
+s32 CSH2::DisplayVBR()
 {
 	//Returns VBR value
 	return VBR;
 }
 
-boost::int32_t CSH2::DisplaySR()
+s32 CSH2::DisplaySR()
 {
 	//Returns SR value
 	return SR;
@@ -845,9 +845,9 @@ inline void CSH2::MAC(Sh2& s)
 	__int64 src_m,src_n;
 	__int64 mul,mac;
 
-	src_n = static_cast<__int64>(static_cast<boost::int32_t>(EmuState::pMem->ReadLong(s.r_[xn00(s)])));
+	src_n = static_cast<__int64>(static_cast<s32>(EmuState::pMem->ReadLong(s.r_[xn00(s)])));
 	s.r_[xn00(s)]+=4;
-	src_m = static_cast<__int64>(static_cast<boost::int32_t>(EmuState::pMem->ReadLong(s.r_[x0n0(s)])));
+	src_m = static_cast<__int64>(static_cast<s32>(EmuState::pMem->ReadLong(s.r_[x0n0(s)])));
 	s.r_[x0n0(s)]+=4;
 
 	mul=src_m*src_n;
@@ -871,10 +871,10 @@ inline void CSH2::MAC(Sh2& s)
 inline uint8_t CSH2::S_Val(Sh2& s)
 {
 	// Returns S bit of SR
-	boost::int32_t temp;
+	s32 temp;
 	
 	temp = sh2->SR & 0x2;
-	if (static_cast<boost::int32_t>(temp) == 0x2) return 1;
+	if (static_cast<s32>(temp) == 0x2) return 1;
 	else return 0;
 }
 
@@ -886,9 +886,9 @@ inline void CSH2::MACW(Sh2& s)
 	__int64 src_m,src_n;
 	__int64 mul,mac;
 
-	src_n=static_cast<__int64>(static_cast<boost::int32_t>(EmuState::pMem->ReadWord(s.r_[xn00(s)])));
+	src_n=static_cast<__int64>(static_cast<s32>(EmuState::pMem->ReadWord(s.r_[xn00(s)])));
 	s.r_[xn00(s)]+=2;
-	src_m=static_cast<__int64>(static_cast<boost::int32_t>(EmuState::pMem->ReadWord(s.r_[x0n0(s)])));
+	src_m=static_cast<__int64>(static_cast<s32>(EmuState::pMem->ReadWord(s.r_[x0n0(s)])));
 	s.r_[x0n0(s)]+=2;
 
 	mul= src_m*src_n;
@@ -950,7 +950,7 @@ inline void CSH2::MOVLS(Sh2& s)
 inline void CSH2::MOVBL(Sh2& s)
 {
 	// (Rm) -> sign extension -> Rn
-	s.r_[xn00(s)] = static_cast<boost::int32_t>(EmuState::pMem->ReadByte(s.r_[x0n0(s)]));
+	s.r_[xn00(s)] = static_cast<s32>(EmuState::pMem->ReadByte(s.r_[x0n0(s)]));
 	if ((s.r_[xn00(s)] & 0x80) == 0) s.r_[xn00(s)] &= 0x000000FF;
 	else s.r_[xn00(s)] |= 0xFFFFFF00;
 	s.pc_ += 2;
@@ -960,7 +960,7 @@ inline void CSH2::MOVBL(Sh2& s)
 inline void CSH2::MOVWL(Sh2& s)
 {
 	// (Rm) -> sign extension -> Rn
-	s.r_[xn00(s)] = static_cast<boost::int32_t>(EmuState::pMem->ReadWord(s.r_[x0n0(s)]));
+	s.r_[xn00(s)] = static_cast<s32>(EmuState::pMem->ReadWord(s.r_[x0n0(s)]));
 	if ((s.r_[xn00(s)] & 0x8000)==0) s.r_[xn00(s)] &= 0x0000FFFF;
 	else s.r_[xn00(s)] |= 0xFFFF0000;
 	s.pc_ += 2;
@@ -1005,7 +1005,7 @@ inline void CSH2::MOVLM(Sh2& s)
 inline void CSH2::MOVBP(Sh2& s)
 {
 	// (Rm) -> sign extension -> Rn, Rm + 1 -> Rm
-	s.r_[xn00(s)] = static_cast<boost::int32_t>(EmuState::pMem->ReadByte(s.r_[x0n0(s)]));
+	s.r_[xn00(s)] = static_cast<s32>(EmuState::pMem->ReadByte(s.r_[x0n0(s)]));
 	if ((s.r_[xn00(s)] & 0x80)==0) s.r_[xn00(s)] &= 0x000000FF;
 	else s.r_[xn00(s)] |= 0xFFFFFF00;
 	if (xn00(s)!=x0n0(s)) s.r_[x0n0(s)] += 1;
@@ -1016,7 +1016,7 @@ inline void CSH2::MOVBP(Sh2& s)
 inline void CSH2::MOVWP(Sh2& s)
 {
 	// (Rm) -> sign extension -> Rn, Rm + 2 -> Rm
-	s.r_[xn00(s)] = static_cast<boost::int32_t>(EmuState::pMem->ReadWord(s.r_[x0n0(s)]));
+	s.r_[xn00(s)] = static_cast<s32>(EmuState::pMem->ReadWord(s.r_[x0n0(s)]));
 	if ((s.r_[xn00(s)] & 0x8000)==0) s.r_[xn00(s)] &= 0x0000FFFF;
 	else s.r_[xn00(s)] |= 0xFFFF0000;
 	if (xn00(s)!=x0n0(s)) s.r_[x0n0(s)] += 2;
@@ -1060,7 +1060,7 @@ inline void CSH2::MOVLS0(Sh2& s)
 inline void CSH2::MOVBL0(Sh2& s)
 {
 	// (R0 + Rm) -> sign extension -> Rn
-	s.r_[xn00(s)] = static_cast<boost::int32_t>(EmuState::pMem->ReadByte(s.r_[x0n0(s)] + s.r_[0]));
+	s.r_[xn00(s)] = static_cast<s32>(EmuState::pMem->ReadByte(s.r_[x0n0(s)] + s.r_[0]));
 	if ((s.r_[xn00(s)] & 0x80)==0) s.r_[xn00(s)] &= 0x000000FF;
 	else s.r_[xn00(s)] |= 0xFFFFFF00;
 	s.pc_ += 2;
@@ -1070,7 +1070,7 @@ inline void CSH2::MOVBL0(Sh2& s)
 inline void CSH2::MOVWL0(Sh2& s)
 {
 	// (R0 + Rm) -> sign extension -> Rn
-	s.r_[xn00(s)] = static_cast<boost::int32_t>(EmuState::pMem->ReadWord(s.r_[x0n0(s)]+s.r_[0]));
+	s.r_[xn00(s)] = static_cast<s32>(EmuState::pMem->ReadWord(s.r_[x0n0(s)]+s.r_[0]));
 	if ((s.r_[xn00(s)] & 0x8000)==0) s.r_[xn00(s)] &=0x0000FFFF;
 	else s.r_[xn00(s)] |= 0xFFFF0000;
 	s.pc_ += 2;
@@ -1088,8 +1088,8 @@ inline void CSH2::MOVLL0(Sh2& s)
 inline void CSH2::MOVI(Sh2& s)
 {
 	// imm -> sign extension -> Rn
-	if ((x0nn(s) & 0x80)==0) s.r_[xn00(s)] = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
-	else s.r_[xn00(s)] = (0xFFFFFF00 | static_cast<boost::int32_t>(x0nn(s)));
+	if ((x0nn(s) & 0x80)==0) s.r_[xn00(s)] = (0x000000FF & static_cast<s32>(x0nn(s)));
+	else s.r_[xn00(s)] = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
 }
@@ -1097,9 +1097,9 @@ inline void CSH2::MOVI(Sh2& s)
 inline void CSH2::MOVWI(Sh2& s)
 {
 	//(disp * 2 + PC) -> sign extension -> Rn
-	boost::int32_t disp;
-	disp = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
-	s.r_[xn00(s)] = static_cast<boost::int32_t>(EmuState::pMem->ReadWord(s.pc_ + (disp<<1) + 4)); // + 4 added
+	s32 disp;
+	disp = (0x000000FF & static_cast<s32>(x0nn(s)));
+	s.r_[xn00(s)] = static_cast<s32>(EmuState::pMem->ReadWord(s.pc_ + (disp<<1) + 4)); // + 4 added
 	if ((s.r_[xn00(s)] & 0x8000)==0) s.r_[xn00(s)] &= 0x0000FFFF;
 	else s.r_[xn00(s)] |= 0xFFFF0000;
 	s.pc_ += 2;
@@ -1109,9 +1109,9 @@ inline void CSH2::MOVWI(Sh2& s)
 inline void CSH2::MOVLI(Sh2& s)
 {
 	//(disp * 4 + PC) -> Rn
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	disp = (0x000000FF & static_cast<s32>(x0nn(s)));
 	s.r_[xn00(s)] = EmuState::pMem->ReadLong((s.pc_ & 0xFFFFFFFC) + (disp<<2) + 4); // + 4 added
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1120,10 +1120,10 @@ inline void CSH2::MOVLI(Sh2& s)
 inline void CSH2::MOVBLG(Sh2& s)
 {
 	//(disp + GBR) -> sign extension -> R0
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
-	s.r_[0] = (boost::int32_t)EmuState::pMem->ReadByte(sh2->GBR + disp);
+	disp = (0x000000FF & static_cast<s32>(x0nn(s)));
+	s.r_[0] = (s32)EmuState::pMem->ReadByte(sh2->GBR + disp);
 	if ((s.r_[0] & 0x80)==0) s.r_[0] &= 0x000000FF;
 	else s.r_[0] |= 0xFFFFFF00;
 	s.pc_ += 2;
@@ -1133,10 +1133,10 @@ inline void CSH2::MOVBLG(Sh2& s)
 inline void CSH2::MOVWLG(Sh2& s)
 {
 	// (disp *2 + BGR) -> sign extension -> R0
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
-	s.r_[0] = static_cast<boost::int32_t>(EmuState::pMem->ReadWord(sh2->GBR + (disp<<1)));
+	disp = (0x000000FF & static_cast<s32>(x0nn(s)));
+	s.r_[0] = static_cast<s32>(EmuState::pMem->ReadWord(sh2->GBR + (disp<<1)));
 	if ((s.r_[0] & 0x8000)==0) s.r_[0] &= 0x0000FFFF;
 	else s.r_[0] |= 0xFFFF0000;
 	s.pc_ += 2;
@@ -1146,9 +1146,9 @@ inline void CSH2::MOVWLG(Sh2& s)
 inline void CSH2::MOVLLG(Sh2& s)
 {
 	// (disp *4 + GBR) -> R0
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	disp = (0x000000FF & static_cast<s32>(x0nn(s)));
 	s.r_[0] = EmuState::pMem->ReadLong(sh2->GBR + (disp<<2));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1157,9 +1157,9 @@ inline void CSH2::MOVLLG(Sh2& s)
 inline void CSH2::MOVBSG(Sh2& s)
 {
 	// R0 -> (disp + GBR)
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	disp = (0x000000FF & static_cast<s32>(x0nn(s)));
 	EmuState::pMem->WriteByte(sh2->GBR + disp,static_cast<uint8_t>(s.r_[0]));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1168,9 +1168,9 @@ inline void CSH2::MOVBSG(Sh2& s)
 inline void CSH2::MOVWSG(Sh2& s)
 {
 	// R0 -> (disp *2 + GBR)
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	disp = (0x000000FF & static_cast<s32>(x0nn(s)));
 	EmuState::pMem->WriteWord(sh2->GBR + (disp<<1),static_cast<uint16_t>(s.r_[0]));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1179,9 +1179,9 @@ inline void CSH2::MOVWSG(Sh2& s)
 inline void CSH2::MOVLSG(Sh2& s)
 {
 	// R0 -> (disp *4 + GBR)
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	disp = (0x000000FF & static_cast<s32>(x0nn(s)));
 	EmuState::pMem->WriteLong(sh2->GBR + (disp<<2),s.r_[0]);
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1190,9 +1190,9 @@ inline void CSH2::MOVLSG(Sh2& s)
 inline void CSH2::MOVBS4(Sh2& s)
 {
 	// R0 -> (disp + Rn)
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x0000000F & static_cast<boost::int32_t>(x00n(s)));
+	disp = (0x0000000F & static_cast<s32>(x00n(s)));
 	EmuState::pMem->WriteByte(s.r_[x0n0(s)] + disp,static_cast<uint8_t>(s.r_[0]));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1201,9 +1201,9 @@ inline void CSH2::MOVBS4(Sh2& s)
 inline void CSH2::MOVWS4(Sh2& s)
 {
 	// R0 -> (disp *2 + Rn)
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x0000000F & static_cast<boost::int32_t>(x00n(s)));
+	disp = (0x0000000F & static_cast<s32>(x00n(s)));
 	EmuState::pMem->WriteWord(s.r_[x0n0(s)] + (disp<<1),static_cast<uint16_t>(s.r_[0]));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1212,9 +1212,9 @@ inline void CSH2::MOVWS4(Sh2& s)
 inline void CSH2::MOVLS4(Sh2& s)
 {
 	// Rm -> (disp *4 + Rn)
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x0000000F & static_cast<boost::int32_t>(x00n(s)));
+	disp = (0x0000000F & static_cast<s32>(x00n(s)));
 	EmuState::pMem->WriteLong(s.r_[xn00(s)] + (disp<<2),s.r_[x0n0(s)]);
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1223,9 +1223,9 @@ inline void CSH2::MOVLS4(Sh2& s)
 inline void CSH2::MOVBL4(Sh2& s)
 {
 	// (disp + Rm)-> sign extension ->R0
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x0000000F & static_cast<boost::int32_t>(x00n(s)));
+	disp = (0x0000000F & static_cast<s32>(x00n(s)));
 	s.r_[0] = EmuState::pMem->ReadByte(s.r_[x0n0(s)]+disp);
 	if ((s.r_[0] & 0x80)==0) s.r_[0] &= 0x000000FF;
 	else s.r_[0] |= 0xFFFFFF00;
@@ -1236,9 +1236,9 @@ inline void CSH2::MOVBL4(Sh2& s)
 inline void CSH2::MOVWL4(Sh2& s)
 {
 	// (disp *2 + Rm)-> sign extension ->R0
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x0000000F & static_cast<boost::int32_t>(x00n(s)));
+	disp = (0x0000000F & static_cast<s32>(x00n(s)));
 	s.r_[0] = EmuState::pMem->ReadWord(s.r_[x0n0(s)]+(disp<<1));
 	if ((s.r_[0] & 0x8000)==0) s.r_[0] &= 0x0000FFFF;
 	else s.r_[0] |= 0xFFFF0000;
@@ -1249,9 +1249,9 @@ inline void CSH2::MOVWL4(Sh2& s)
 inline void CSH2::MOVLL4(Sh2& s)
 {
 	// (disp *4 +Rm) -> Rn
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x0000000F & static_cast<boost::int32_t>(x00n(s)));
+	disp = (0x0000000F & static_cast<s32>(x00n(s)));
 	s.r_[xn00(s)] = EmuState::pMem->ReadLong(s.r_[x0n0(s)] + (disp<<2));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1260,9 +1260,9 @@ inline void CSH2::MOVLL4(Sh2& s)
 inline void CSH2::MOVA(Sh2& s)
 {
 	// disp *4 + PC -> R0
-	boost::int32_t disp;
+	s32 disp;
 
-	disp = (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	disp = (0x000000FF & static_cast<s32>(x0nn(s)));
 	s.r_[0] = (s.pc_ & 0xFFFFFFFC) + (disp<<2) + 4; // + 4 added
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
@@ -1287,7 +1287,7 @@ inline void CSH2::MULL(Sh2& s)
 inline void CSH2::MULS(Sh2& s)
 {
 	// signed operation, Rn*Rm -> MACL
-	sh2->MACL = (static_cast<boost::int32_t>(static_cast<int16_t>(s.r_[xn00(s)])) * static_cast<boost::int32_t>(static_cast<int16_t>(s.r_[x0n0(s)])));
+	sh2->MACL = (static_cast<s32>(static_cast<int16_t>(s.r_[xn00(s)])) * static_cast<s32>(static_cast<int16_t>(s.r_[x0n0(s)])));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1; // 1 to 3
 }
@@ -1347,7 +1347,7 @@ inline void CSH2::OR(Sh2& s)
 inline void CSH2::ORI(Sh2& s)
 {
 	// R0 | imm -> R0
-	s.r_[0] |= (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	s.r_[0] |= (0x000000FF & static_cast<s32>(x0nn(s)));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
 }
@@ -1355,10 +1355,10 @@ inline void CSH2::ORI(Sh2& s)
 inline void CSH2::ORM(Sh2& s)
 {
 	// (R0 + GBR) | imm -> (R0 + GBR)
-	boost::int32_t temp;
+	s32 temp;
 
-	temp = static_cast<boost::int32_t>(EmuState::pMem->ReadByte(sh2->GBR + s.r_[0]));
-	temp |= (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	temp = static_cast<s32>(EmuState::pMem->ReadByte(sh2->GBR + s.r_[0]));
+	temp |= (0x000000FF & static_cast<s32>(x0nn(s)));
 	EmuState::pMem->WriteByte(sh2->GBR + s.r_[0], static_cast<uint8_t>(temp));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 3;
@@ -1367,7 +1367,7 @@ inline void CSH2::ORM(Sh2& s)
 inline void CSH2::ROTCL(Sh2& s)
 {
 	// T <- Rn <- T
-	boost::int32_t temp;
+	s32 temp;
 
 	if ((s.r_[xn00(s)] & 0x80000000)==0) temp = 0;
 	else temp = 1;
@@ -1383,7 +1383,7 @@ inline void CSH2::ROTCL(Sh2& s)
 inline void CSH2::ROTCR(Sh2& s)
 {
 	// T -> Rn -> T
-	boost::int32_t temp;
+	s32 temp;
 
 	if ((s.r_[xn00(s)] & 0x00000001)==0) temp=0;
 	else temp = 1;
@@ -1541,7 +1541,7 @@ inline void CSH2::SHAL(Sh2& s)
 inline void CSH2::SHAR(Sh2& s)
 {
 	// MSB -> Rn -> T
-	boost::int32_t temp;
+	s32 temp;
 
 	if ((s.r_[xn00(s)] & 0x0000001)==0) Clear_T(sh2);
 	else Set_T(sh2);
@@ -1764,15 +1764,15 @@ inline void CSH2::SUBC(Sh2& s)
 inline void CSH2::SUBV(Sh2& s)
 {
 	// Rn - Rm -> Rn, underflow -> T
-	boost::int32_t dest, src, ans;
+	s32 dest, src, ans;
 
-	if (static_cast<boost::int32_t>(s.r_[xn00(s)])>=0) dest = 0;
+	if (static_cast<s32>(s.r_[xn00(s)])>=0) dest = 0;
 	else dest = 1;
-	if (static_cast<boost::int32_t>(s.r_[x0n0(s)])>=0) src = 0;
+	if (static_cast<s32>(s.r_[x0n0(s)])>=0) src = 0;
 	else src = 1;
 	src += dest;
 	s.r_[xn00(s)] -= s.r_[x0n0(s)];
-	if (static_cast<boost::int32_t>(s.r_[xn00(s)])>=0) ans = 0;
+	if (static_cast<s32>(s.r_[xn00(s)])>=0) ans = 0;
 	else ans = 1;
 	ans += dest;
 	if (src==1){
@@ -1812,9 +1812,9 @@ inline void CSH2::SWAPW(Sh2& s)
 inline void CSH2::TAS(Sh2& s)
 {
 	// If (Rn) = 0, 1 -> T, 1 -> MSB of (Rn)
-	boost::int32_t temp;
+	s32 temp;
 
-	temp =static_cast<boost::int32_t>(EmuState::pMem->ReadByte(s.r_[xn00(s)]));
+	temp =static_cast<s32>(EmuState::pMem->ReadByte(s.r_[xn00(s)]));
 	if (temp==0) Set_T(sh2);
 	else Clear_T(sh2);
 	temp |= 0x00000080;
@@ -1826,7 +1826,7 @@ inline void CSH2::TAS(Sh2& s)
 inline void CSH2::TRAPA(Sh2& s)
 {
 	// PC/SR -> stack, (imm*4 + VBR) -> PC
-	boost::int32_t imm;
+	s32 imm;
 
 	imm = (0x000000FF & x0nn(s));
 	s.r_[15] -= 4;
@@ -1850,9 +1850,9 @@ inline void CSH2::TST(Sh2& s)
 inline void CSH2::TSTI(Sh2& s)
 {
 	// R0 & imm, if result is 0, 1 -> T
-	boost::int32_t temp;
+	s32 temp;
 
-	temp = s.r_[0] & (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	temp = s.r_[0] & (0x000000FF & static_cast<s32>(x0nn(s)));
 	if (temp==0) Set_T(sh2);
 	else Clear_T(sh2);
 	s.pc_ += 2;
@@ -1862,10 +1862,10 @@ inline void CSH2::TSTI(Sh2& s)
 inline void CSH2::TSTM(Sh2& s)
 {
 	// (R0 + GBR) & imm, if result is 0, 1 -> T
-	boost::int32_t temp;
+	s32 temp;
 
-	temp = static_cast<boost::int32_t>(EmuState::pMem->ReadByte(sh2->GBR + s.r_[0]));
-	temp &= (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	temp = static_cast<s32>(EmuState::pMem->ReadByte(sh2->GBR + s.r_[0]));
+	temp &= (0x000000FF & static_cast<s32>(x0nn(s)));
 	if (temp==0) Set_T(sh2);
 	else Clear_T(sh2);
 	s.pc_ += 2;
@@ -1883,7 +1883,7 @@ inline void CSH2::XOR(Sh2& s)
 inline void CSH2::XORI(Sh2& s)
 {
 	// R0 ^imm -> R0
-	s.r_[0] ^= (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	s.r_[0] ^= (0x000000FF & static_cast<s32>(x0nn(s)));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 1;
 }
@@ -1891,10 +1891,10 @@ inline void CSH2::XORI(Sh2& s)
 inline void CSH2::XORM(Sh2& s)
 {
 	// (R0 + GBR)^imm -> (R0 + GBR)
-	boost::int32_t temp;
+	s32 temp;
 
-	temp = static_cast<boost::int32_t>(EmuState::pMem->ReadByte(sh2->GBR + s.r_[0]));
-	temp ^= (0x000000FF & static_cast<boost::int32_t>(x0nn(s)));
+	temp = static_cast<s32>(EmuState::pMem->ReadByte(sh2->GBR + s.r_[0]));
+	temp ^= (0x000000FF & static_cast<s32>(x0nn(s)));
 	EmuState::pMem->WriteByte(sh2->GBR + s.r_[0], static_cast<uint8_t>(temp));
 	s.pc_ += 2;
 	s.cycles_elapsed_ = 3;
