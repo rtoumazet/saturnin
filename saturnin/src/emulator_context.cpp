@@ -98,6 +98,21 @@ bool Emulator_context::run() {
     sr.set(StatusRegister::i, static_cast<u8>(0x8));
     i = sr.get(StatusRegister::i);
 
+    u32 mach = 0x89abcdef;
+    u32 macl = 0x01234567;
+
+    s64 mac{ static_cast<u32>(mach) };
+    mac <<= 32;
+    mac |= static_cast<u32>(macl);
+
+    s64 mac1{ mach };
+    mac1 <<= 32;
+    mac1 |= macl;
+
+    std::array<u8, 10> r;
+    r[0] = 10;
+    --r[0];
+
     auto dmr = DmaModeRegister(0x000000AA);
     //auto w = isr.test();
     //auto y = isr.testRange();
