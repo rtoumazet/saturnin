@@ -1259,12 +1259,11 @@ void rte(Sh2& s) {
     s.r_[0xF] += 4;
     s.cycles_elapsed_ = 4;
 
-    if (s.sh2_type_ == Sh2Type::master) {
-        if (s.is_interrupted_) {
-            // Interrupt being executed, we get back
+    if (s.is_interrupted_) {
+        // Interrupt being executed, we get back
+        if (s.sh2_type_ == Sh2Type::master) {
             EmuState::pScu->ClearISTFlag(EmuState::gInt->lastMasterInterruptVector);
             // Log write
-//#ifdef _LOGS
             Log::debug("sh2", "*** Back from interrupt ***");
             switch (EmuState::gInt->lastMasterInterruptVector) {
                 case is::vector_v_blank_in:      Log::debug("sh2", "VBlank-In interrupt routine finished"); break;
@@ -1288,23 +1287,64 @@ void rte(Sh2& s) {
             output % static_cast<uint32_t>(EmuState::gInt->lastMasterInterruptLevel);
             EmuState::pLog->ScuWrite(str(output).c_str());
             EmuState::pLog->InterruptWrite(str(output).c_str());
-//#endif
-
-            s.is_interrupted_ = false;
-            EmuState::gInt->lastMasterInterruptVector = 0;
-            EmuState::gInt->IRQM[EmuState::gInt->lastMasterInterruptLevel] = false;
-            EmuState::gInt->lastMasterInterruptLevel = 0;
 
         }
-    } else {
-        if (EmuState::gInt->GetCurrentIntSlave()) {
-            // Interrupt being executed, we get back
-            EmuState::gInt->SetCurrentIntSlave(false);
-            EmuState::gInt->lastSlaveInterruptVector = 0;
-            EmuState::gInt->IRQS[EmuState::gInt->lastSlaveInterruptLevel] = false;
-            EmuState::gInt->lastSlaveInterruptLevel = 0;
-        }
+
+        s.is_interrupted_ = false;
+        EmuState::gInt->lastMasterInterruptVector = 0;
+        EmuState::gInt->IRQM[EmuState::gInt->lastMasterInterruptLevel] = false;
+        EmuState::gInt->lastMasterInterruptLevel = 0;
     }
+
+
+
+
+//    if (s.sh2_type_ == Sh2Type::master) {
+//        if (s.is_interrupted_) {
+//            // Interrupt being executed, we get back
+//            EmuState::pScu->ClearISTFlag(EmuState::gInt->lastMasterInterruptVector);
+//            // Log write
+////#ifdef _LOGS
+//            Log::debug("sh2", "*** Back from interrupt ***");
+//            switch (EmuState::gInt->lastMasterInterruptVector) {
+//                case is::vector_v_blank_in:      Log::debug("sh2", "VBlank-In interrupt routine finished"); break;
+//                case is::vector_v_blank_out:     Log::debug("sh2", "VBlank-Out interrupt routine finished"); break;
+//                case is::vector_h_blank_in:      Log::debug("sh2", "HBlank-In interrupt routine finished"); break;
+//                case is::vector_timer_0:         Log::debug("sh2", "Timer 0 interrupt routine finished"); break;
+//                case is::vector_timer_1:         Log::debug("sh2", "Timer 1 interrupt routine finished"); break;
+//                case is::vector_dsp_end:         Log::debug("sh2", "DSP End interrupt routine finished"); break;
+//                case is::vector_sound_request:   Log::debug("sh2", "Sound Request interrupt routine finished"); break;
+//                case is::vector_system_manager:  Log::debug("sh2", "System Manager interrupt routine finished"); break;
+//                case is::vector_pad_interrupt:   Log::debug("sh2", "Pad interrupt routine finished"); break;
+//                case is::vector_level_2_dma_end: Log::debug("sh2", "Level 2 DMA End interrupt routine finished"); break;
+//                case is::vector_level_1_dma_end: Log::debug("sh2", "Level 1 DMA End interrupt routine finished"); break;
+//                case is::vector_level_0_dma_end: Log::debug("sh2", "Level 0 DMA End interrupt routine finished"); break;
+//                case is::vector_dma_illegal:     Log::debug("sh2", "DMA Illegal interrupt routine finished"); break;
+//                case is::vector_sprite_draw_end: Log::debug("sh2", "Sprite Draw End interrupt routine finished"); break;
+//            }
+//
+//            //Log::debug("sh2", "Level:{:#0x}", )
+//            format output("Level:0x%X");
+//            output % static_cast<uint32_t>(EmuState::gInt->lastMasterInterruptLevel);
+//            EmuState::pLog->ScuWrite(str(output).c_str());
+//            EmuState::pLog->InterruptWrite(str(output).c_str());
+////#endif
+//
+//            s.is_interrupted_ = false;
+//            EmuState::gInt->lastMasterInterruptVector = 0;
+//            EmuState::gInt->IRQM[EmuState::gInt->lastMasterInterruptLevel] = false;
+//            EmuState::gInt->lastMasterInterruptLevel = 0;
+//
+//        }
+//    } else {
+//        if (EmuState::gInt->GetCurrentIntSlave()) {
+//            // Interrupt being executed, we get back
+//            EmuState::gInt->SetCurrentIntSlave(false);
+//            EmuState::gInt->lastSlaveInterruptVector = 0;
+//            EmuState::gInt->IRQS[EmuState::gInt->lastSlaveInterruptLevel] = false;
+//            EmuState::gInt->lastSlaveInterruptLevel = 0;
+//        }
+//    }
 }
 
 void rts(Sh2& s) {
@@ -1587,96 +1627,88 @@ void swapw(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-inline void CSH2::TAS(Sh2& s) {
+void tas(Sh2& s) {
     // If (Rn) = 0, 1 -> T, 1 -> MSB of (Rn)
-    s32 temp;
-
-    temp = static_cast<s32>(EmuState::pMem->ReadByte(s.r_[xn00(s)]));
-    if (temp == 0) Set_T(sh2);
-    else Clear_T(sh2);
+    s32 temp { static_cast<s32>(s.memory()->read<u8>(s.r_[xn00(s)])) };
+    (temp == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
     temp |= 0x00000080;
-    s.memory()->write<u8>(s.r_[xn00(s)], static_cast<uint8_t>(temp));
+    s.memory()->write<u8>(s.r_[xn00(s)], static_cast<u8>(temp));
+
     s.pc_ += 2;
     s.cycles_elapsed_ = 4;
 }
 
-inline void CSH2::TRAPA(Sh2& s) {
+void trapa(Sh2& s) {
     // PC/SR -> stack, (imm*4 + VBR) -> PC
-    s32 imm;
-
-    imm = (0x000000FF & x0nn(s));
+    s32 imm { (0x000000FF & x0nn(s)) };
     s.r_[15] -= 4;
-    s.memory()->write<u32>(s.r_[15], sh2->SR);
+    s.memory()->write<u32>(s.r_[15], s.sr_.get(StatusRegister::all_bits));
     s.r_[15] -= 4;
     s.memory()->write<u32>(s.r_[15], s.pc_ + 2);
-    s.pc_ = s.memory()->read<u32>(sh2->VBR + (imm << 2));
+
+    s.pc_ = s.memory()->read<u32>(s.vbr_ + (imm << 2));
     s.cycles_elapsed_ = 8;
 }
 
-inline void CSH2::TST(Sh2& s) {
+void tst(Sh2& s) {
     // Rn & Rm, if result = 0, 1 -> T
-    if ((s.r_[xn00(s)] & s.r_[x0n0(s)]) == 0) Set_T(sh2);
-    else Clear_T(sh2);
+    ((s.r_[xn00(s)] & s.r_[x0n0(s)]) == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
-inline void CSH2::TSTI(Sh2& s) {
+void tsti(Sh2& s) {
     // R0 & imm, if result is 0, 1 -> T
-    s32 temp;
+    s32 temp { s.r_[0] & (0x000000FF & static_cast<s32>(x0nn(s))) };
+    (temp == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
-    temp = s.r_[0] & (0x000000FF & static_cast<s32>(x0nn(s)));
-    if (temp == 0) Set_T(sh2);
-    else Clear_T(sh2);
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
-inline void CSH2::TSTM(Sh2& s) {
+void tstm(Sh2& s) {
     // (R0 + GBR) & imm, if result is 0, 1 -> T
-    s32 temp;
-
-    temp = static_cast<s32>(EmuState::pMem->ReadByte(s.gbr_ + s.r_[0]));
+    s32 temp { static_cast<s32>(s.memory()->read<u8>(s.gbr_ + s.r_[0])) };
     temp &= (0x000000FF & static_cast<s32>(x0nn(s)));
-    if (temp == 0) Set_T(sh2);
-    else Clear_T(sh2);
-    s.pc_ += 2;
+    (temp == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
+    
+     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
 }
 
-inline void CSH2::XOR(Sh2& s) {
+void xor(Sh2& s) {
     // Rn^Rm -> Rn
     s.r_[xn00(s)] ^= s.r_[x0n0(s)];
+
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
-inline void CSH2::XORI(Sh2& s) {
+void xori(Sh2& s) {
     // R0 ^imm -> R0
     s.r_[0] ^= (0x000000FF & static_cast<s32>(x0nn(s)));
+    
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
-inline void CSH2::XORM(Sh2& s) {
+void xorm(Sh2& s) {
     // (R0 + GBR)^imm -> (R0 + GBR)
-    s32 temp;
-
-    temp = static_cast<s32>(EmuState::pMem->ReadByte(s.gbr_ + s.r_[0]));
+    s32 temp { static_cast<s32>(s.memory()->read<u8>(s.gbr_ + s.r_[0])) };
     temp ^= (0x000000FF & static_cast<s32>(x0nn(s)));
-    s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<uint8_t>(temp));
+    s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
+
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
 }
 
-inline void CSH2::XTRCT(Sh2& s) {
+void xtrct(Sh2& s) {
     // Middle 32 bits of Rm and Rn -> Rn
-    uint32_t temp;
-
-    temp = (s.r_[x0n0(s)] << 16) & 0xFFFF0000;
+    u32 temp = (s.r_[x0n0(s)] << 16) & 0xFFFF0000;
     s.r_[xn00(s)] = (s.r_[xn00(s)] >> 16) & 0x0000FFFF;
     s.r_[xn00(s)] |= temp;
+
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
