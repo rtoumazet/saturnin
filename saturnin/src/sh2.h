@@ -606,7 +606,8 @@ private:
     //@{
     std::list<Interrupt>                    pending_interrupts_ = {};       ///< List of pending interrupts.
     bool                                    is_interrupted_{};        ///< True if this sh2 is interrupted.
-    std::array<bool, max_interrupt_level>   is_level_interrupted_{};        ///< Determines if any given level is already interrupted.
+    std::array<bool, max_interrupt_level>   is_level_interrupted_{};            ///< Determines if any given level is already interrupted.
+    Interrupt                               current_interrupt_{ is::undefined };///< Interrupt in execution
     //@}
 
     /// \name DIVU (Division unit)
