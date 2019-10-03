@@ -1260,12 +1260,12 @@ void rte(Sh2& s) {
     s.cycles_elapsed_ = 4;
 
     if (s.is_interrupted_) {
-        // Interrupt being executed, we get back
+        // Current sh2 is interrupted, we get back to regular flow
         if (s.sh2_type_ == Sh2Type::master) {
             EmuState::pScu->ClearISTFlag(EmuState::gInt->lastMasterInterruptVector);
             // Log write
             Log::debug("sh2", "*** Back from interrupt ***");
-            switch (EmuState::gInt->lastMasterInterruptVector) {
+            switch (s.current_interrupt_.vector) {
                 case is::vector_v_blank_in:      Log::debug("sh2", "VBlank-In interrupt routine finished"); break;
                 case is::vector_v_blank_out:     Log::debug("sh2", "VBlank-Out interrupt routine finished"); break;
                 case is::vector_h_blank_in:      Log::debug("sh2", "HBlank-In interrupt routine finished"); break;
@@ -1282,18 +1282,12 @@ void rte(Sh2& s) {
                 case is::vector_sprite_draw_end: Log::debug("sh2", "Sprite Draw End interrupt routine finished"); break;
             }
 
-            //Log::debug("sh2", "Level:{:#0x}", )
-            format output("Level:0x%X");
-            output % static_cast<uint32_t>(EmuState::gInt->lastMasterInterruptLevel);
-            EmuState::pLog->ScuWrite(str(output).c_str());
-            EmuState::pLog->InterruptWrite(str(output).c_str());
-
+            Log::debug("sh2", "Level:{:#0x}", s.current_interrupt_.level);
         }
 
         s.is_interrupted_ = false;
-        EmuState::gInt->lastMasterInterruptVector = 0;
+        s.current_interrupt_ = is::undefined;
         EmuState::gInt->IRQM[EmuState::gInt->lastMasterInterruptLevel] = false;
-        EmuState::gInt->lastMasterInterruptLevel = 0;
     }
 
 
