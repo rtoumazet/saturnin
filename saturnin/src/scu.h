@@ -252,6 +252,19 @@ public:
 
     void sendStartFactor(const StartingFactorSelect sfs);
     
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn bool Scu::clearInterruptFlag(const Interrupt& i);
+    ///
+    /// \brief  Clears the interrupt flag in the Interrupt Status Register.
+    ///
+    /// \author Runik
+    /// \date   04/10/2019
+    ///
+    /// \param  i   Interrupt to clear.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void clearInterruptFlag(const Interrupt&);
+    
     void dmaTest();
 
 	/// \name Context objects accessors
@@ -464,6 +477,8 @@ private:
     void activateDma();
 
     Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
+
+    InterruptStatusRegister interrupt_status_register_{0}; ///< Interrupt Status Register
     
 };
 
