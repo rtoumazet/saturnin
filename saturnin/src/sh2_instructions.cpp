@@ -22,6 +22,7 @@
 #include "emulator_context.h"
 #include "interrupt_sources.h"
 #include "memory.h"
+#include "scu.h"
 
 namespace is = saturnin::core::interrupt_source;
 
@@ -1255,14 +1256,15 @@ void rte(Sh2& s) {
     delaySlot(s, s.pc_ + 2);
     s.pc_ = s.memory()->read<u32>(s.r_[0xF]);
     s.r_[0xF] += 4;
-    s.sr_.set(StatusRegister::all_bits, s.memory()->read<u32>(s.r_[0xF]) & 0x000003F3);
+    s.sr_.set(StatusRegister::all_bits, static_cast<u32>(s.memory()->read<u32>(s.r_[0xF]) & 0x000003F3) );
     s.r_[0xF] += 4;
     s.cycles_elapsed_ = 4;
 
     if (s.is_interrupted_) {
         // Current sh2 is interrupted, we get back to regular flow
         if (s.sh2_type_ == Sh2Type::master) {
-            EmuState::pScu->ClearISTFlag(EmuState::gInt->lastMasterInterruptVector);
+            s.scu()->clearInterruptFlag(s.current_interrupt_);
+            //EmuState::pScu->ClearISTFlag(EmuState::gInt->lastMasterInterruptVector);
             // Log write
             Log::debug("sh2", "*** Back from interrupt ***");
             switch (s.current_interrupt_.vector) {
@@ -1287,7 +1289,7 @@ void rte(Sh2& s) {
 
         s.is_interrupted_ = false;
         s.current_interrupt_ = is::undefined;
-        EmuState::gInt->IRQM[EmuState::gInt->lastMasterInterruptLevel] = false;
+        //EmuState::gInt->IRQM[EmuState::gInt->lastMasterInterruptLevel] = false;
     }
 
 
