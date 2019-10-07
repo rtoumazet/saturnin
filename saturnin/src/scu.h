@@ -224,7 +224,7 @@ public:
     void resetInterruptStatusRegister(const Interrupt& i);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t ) const;
+    /// \fn bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t );
     ///
     /// \brief  Checks if the interrupt is masked in the SCU.
     ///
@@ -237,7 +237,7 @@ public:
     /// \return True if interrupt is masked.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool isInterruptMasked(const Interrupt& i, Sh2Type t) const;
+    bool isInterruptMasked(const Interrupt& i, Sh2Type t);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn bool Scu::sendStartFactor(const StartingFactorSelect sfs);
@@ -269,7 +269,8 @@ public:
 
 	/// \name Context objects accessors
 	//@{
-	Memory*    memory() const;
+    Emulator_context* emulatorContext() const;
+    Memory*           memory() const;
 	//@}
 
 private:
@@ -286,7 +287,7 @@ private:
     void initializeRegisters();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn DmaConfiguration Scu::configureDmaTransfer(DmaLevel dl) const;
+    /// \fn DmaConfiguration Scu::configureDmaTransfer(DmaLevel dl);
     ///
     /// \brief  Configures the DMA transfer.
     ///
@@ -298,10 +299,10 @@ private:
     /// \return A DmaConfiguration struct.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    DmaConfiguration configureDmaTransfer(const DmaLevel dl) const;
+    DmaConfiguration configureDmaTransfer(const DmaLevel dl);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc, const u32 register_address) const;
+    /// \fn void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc);
     ///
     /// \brief  Initializes the DMA transfer byte number part of DMA configuration.
     ///
@@ -309,80 +310,79 @@ private:
     /// \date   02/02/2019
     ///
     /// \param [in,out] dc                  DMA configuration.
-    /// \param          register_address    Register address to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaTransferByteNumber(DmaConfiguration& dc, const u32 register_address) const;
+    void initializeDmaTransferByteNumber(DmaConfiguration& dc);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaMode(DmaConfiguration& dc, const u32 register_address) const;
+    /// \fn void Scu::initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg);
     ///
     /// \brief  Initializes the DMA mode part of DMA configuration.
     ///
     /// \author Runik
     /// \date   02/02/2019
     ///
-    /// \param [in,out] dc                  DMA configuration.
-    /// \param          register_address    Register address to read data from.
+    /// \param [in,out] dc      DMA configuration.
+    /// \param          reg     Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaMode(DmaConfiguration& dc, const u32 register_address) const;
+    void initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaEnable(DmaConfiguration& dc, const u32 register_address) const;
+    /// \fn void Scu::initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg);
     ///
     /// \brief  Initializes the DMA enable part of DMA configuration.
     ///
     /// \author Runik
     /// \date   02/02/2019
     ///
-    /// \param [in,out] dc                  DMA configuration.
-    /// \param          register_address    Register address to read data from.
+    /// \param [in,out] dc     DMA configuration.
+    /// \param          reg    Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaEnable(DmaConfiguration& dc, const u32 register_address) const;
+    void initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, const u32 register_address) const;
+    /// \fn void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg);
     ///
     /// \brief  Initializes the DMA address add part of DMA configuration.
     ///
     /// \author Runik
     /// \date   02/02/2019
     ///
-    /// \param [in,out] dc                  DMA configuration.
-    /// \param          register_address    Register address to read data from.
+    /// \param [in,out] dc     DMA configuration.
+    /// \param          reg    Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaAddressAdd(DmaConfiguration& dc, const u32 register_address) const;
+    void initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, const u32 register_address) const;
+    /// \fn void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg);
     ///
     /// \brief  Initializes the DMA write address part of DMA configuration.
     ///
     /// \author Runik
     /// \date   02/02/2019
     ///
-    /// \param [in,out] dc                  DMA configuration.
-    /// \param          register_address    Register address to read data from.
+    /// \param [in,out] dc     DMA configuration.
+    /// \param          reg    Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaWriteAddress(DmaConfiguration& dc, const u32 register_address) const;
+    void initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const;
+    /// \fn void Scu::initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg);
     ///
     /// \brief  Initializes the DMA read address part of DMA configuration.
     ///
     /// \author Runik
     /// \date   02/02/2019
     ///
-    /// \param [ins] dc                  DMA configuration.
-    /// \param          register_address    Register address to read data from.
+    /// \param [ins] dc     DMA configuration.
+    /// \param       reg    Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const;
+    void initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::addDmaToQueue(const DmaConfiguration& dc);
@@ -478,8 +478,29 @@ private:
 
     Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
 
-    InterruptStatusRegister interrupt_status_register_{0}; ///< Interrupt Status Register
-    
+    //{@
+    // Scu memory registers
+    DmaEnableRegister          level_0_dma_enable_register_;
+    DmaEnableRegister          level_1_dma_enable_register_;
+    DmaEnableRegister          level_2_dma_enable_register_;
+    DmaAddressAddValueRegister level_0_dma_add_value_register_;
+    DmaAddressAddValueRegister level_1_dma_add_value_register_;
+    DmaAddressAddValueRegister level_2_dma_add_value_register_;
+    DmaReadAddressRegister     level_0_dma_read_address_register_;
+    DmaReadAddressRegister     level_1_dma_read_address_register_;
+    DmaReadAddressRegister     level_2_dma_read_address_register_;
+    DmaWriteAddressRegister    level_0_dma_write_address_register_;
+    DmaWriteAddressRegister    level_1_dma_write_address_register_;
+    DmaWriteAddressRegister    level_2_dma_write_address_register_;
+    DmaModeRegister            level_0_dma_mode_register_;
+    DmaModeRegister            level_1_dma_mode_register_;
+    DmaModeRegister            level_2_dma_mode_register_;
+    DmaLevel0TransferByteNumberRegister level_0_dma_transfer_byte_number_register_;
+    DmaLevel1TransferByteNumberRegister level_1_dma_transfer_byte_number_register_;
+    DmaLevel2TransferByteNumberRegister level_2_dma_transfer_byte_number_register_;
+    InterruptStatusRegister    interrupt_status_register_;
+    InterruptMaskRegister      interrupt_mask_register_;
+    //@}
 };
 
 

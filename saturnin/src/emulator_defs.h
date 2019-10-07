@@ -75,7 +75,7 @@ class Register {
         /// \name Constructors/Destructors.
         //@{
         Register(const u32 v) : register_value(v) {};
-        Register()                             = delete;
+        Register()                             = default;
         Register(const Register&)              = delete;
         Register(Register&&)                   = delete;
         Register& operator=(const Register&) & = delete;
@@ -129,7 +129,7 @@ class Register {
             }
         }
 
-        inline u32 toUlong() { return register_value.to_ulong(); };
+        inline u32 toUlong() const { return register_value.to_ulong(); };
 
     protected:
         std::bitset<32> register_value; ///< Internal register value.

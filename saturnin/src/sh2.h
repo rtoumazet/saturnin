@@ -27,9 +27,7 @@
 
 #include <array> // array 
 #include "emulator_defs.h"
-//#include "interrupt_controller.h"
 #include "memory.h"
-//#include "sh2_instructions.h"
 #include "sh2_registers.h"
 
 //namespace core = saturnin::core;
@@ -37,6 +35,7 @@
 // Forward declarations
 namespace saturnin::core { 
     class Emulator_context; 
+    class Scu;
     struct Interrupt;
 }
 
@@ -45,6 +44,7 @@ namespace sh2 {
 
 using saturnin::core::Emulator_context;
 using saturnin::core::Memory;
+using saturnin::core::Scu;
 using saturnin::core::Interrupt;
 
 using saturnin::core::rawRead;
@@ -400,7 +400,7 @@ private:
     Memory* memory() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::scu() const;
+    /// \fn Scu* Sh2::scu() const;
     ///
     /// \brief  Returns the SCU object.
     ///
@@ -410,7 +410,7 @@ private:
     /// \return The SCU object.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto scu() const;
+    Scu* scu() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn  Emulator_context* Sh2::emultaorContext() const;

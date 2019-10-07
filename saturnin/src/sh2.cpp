@@ -20,6 +20,7 @@
 #include "sh2.h"
 #include "emulator_context.h"
 #include "scu_registers.h"
+#include "scu.h"
 
 namespace is = saturnin::core::interrupt_source;
 
@@ -36,7 +37,7 @@ core::Memory* Sh2::memory() const {
     return emulator_context_->memory();
 }
 
-auto Sh2::scu() const {
+Scu* Sh2::scu() const {
     return emulator_context_->scu();
 }
 

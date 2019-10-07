@@ -81,6 +81,7 @@ class DmaReadAddressRegister : public Register {
     public:
         using Register::Register;
         inline static const BitRange<u32> readAddress{ 0, 26 };   ///< Defines read address in bytes.
+        inline static const BitRange<u32> allBits{ 0, 31 };  ///< Defines the whole register bits
 };
 
 
@@ -97,6 +98,7 @@ class DmaWriteAddressRegister : public Register {
     public:
         using Register::Register;
         inline static const BitRange<u32> writeAddress{ 0, 26 };   ///< Defines write address in bytes.
+        inline static const BitRange<u32> allBits{ 0, 31 };  ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +114,7 @@ class DmaLevel0TransferByteNumberRegister : public Register {
     public:
         using Register::Register;
         inline static const BitRange<u32> transferByteNumber{ 0, 19 };   ///< Defines transfer byte number.
+        inline static const BitRange<u32> allBits{ 0, 31 };  ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,6 +130,7 @@ class DmaLevel1TransferByteNumberRegister : public Register {
     public:
         using Register::Register;
         inline static const BitRange<u32> transferByteNumber{ 0, 11 };   ///< Defines transfer byte number.
+        inline static const BitRange<u32> allBits{ 0, 31 };  ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,6 +146,7 @@ class DmaLevel2TransferByteNumberRegister : public Register {
     public:
         using Register::Register;
         inline static const BitRange<u32> transferByteNumber{ 0, 11 };   ///< Defines transfer byte number.
+        inline static const BitRange<u32> allBits{ 0, 31 };  ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,6 +191,7 @@ class DmaAddressAddValueRegister : public Register {
         using Register::Register;
         inline static const BitRange<ReadAddressAddValue>  readAddValue { 8 };    ///< Defines read address add value (D0RA, D1RA and D2RA).
         inline static const BitRange<WriteAddressAddValue> writeAddValue{ 0, 2 }; ///< Defines write address add value (D0WA, D1WA and D2WA).
+        inline static const BitRange<u32> allBits{ 0, 31 };  ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,6 +230,7 @@ class DmaEnableRegister : public Register {
         using Register::Register;
         inline static const BitRange<DmaEnable>   dmaEnable{ 8 };   ///< Defines DMA Enable Bit (D0EN, D1EN, D2EN)
         inline static const BitRange<DmaStarting> dmaStarting{ 0 }; ///< Defines DMA Starting Bit (D0GO, D1GO, D2GO).
+        inline static const BitRange<u32> allBits{ 0, 31 };  ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,6 +300,7 @@ class DmaModeRegister : public Register {
         inline static const BitRange<ReadAddressUpdate>    readAddressUpdate   { 16 };   ///< Defines DxRUP bit.
         inline static const BitRange<WriteAddressUpdate>   writeAddressUpdate  { 8 };    ///< Defines DxWUP bit.
         inline static const BitRange<StartingFactorSelect> startingFactorSelect{ 0, 2 }; ///< Defines DxFTy bits.
+        inline static const BitRange<u32> allBits{ 0, 31 };  ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -463,6 +471,7 @@ class DmaStatusRegister : public Register {
         inline static const BitRange<Level0DmaOperation> level0DmaOperation{ 4 };  ///< Defines D0MV bit. 
         inline static const BitRange<DspDmaStandBy>      dspDmaStandBy     { 1 };  ///< Defines DDWT bit. 
         inline static const BitRange<DspDmaOperation>    dspDmaOperation   { 0 };  ///< Defines DDMV bit. 
+        inline static const BitRange<u32> allBits{ 0, 31 };  ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -521,6 +530,7 @@ class InterruptMaskRegister : public Register {
         inline static const BitRange<InterruptMask> vBlankOut    { 1 };  ///< Defines V-Blank-Out interrupt mask bit. 
         inline static const BitRange<InterruptMask> vBlankIn     { 0 };  ///< Defines V-Blank-In interrupt mask bit.
         inline static const BitRange<InterruptMask> undefined    { 0 }; ///< Undefined value.
+        inline static const BitRange<u32>             allBits{ 0, 31 };  ///< Defines the whole register bits
 
 };
 
@@ -579,8 +589,8 @@ class InterruptStatusRegister : public Register {
         inline static const BitRange<InterruptEnable> hBlankIn     { 2 };  ///< Defines H-Blank-In interrupt status. 
         inline static const BitRange<InterruptEnable> vBlankOut    { 1 };  ///< Defines V-Blank-Out interrupt status. 
         inline static const BitRange<InterruptEnable> vBlankIn     { 0 };  ///< Defines V-Blank-In interrupt status. 
-        inline static const BitRange<InterruptEnable> undefined    { 0 }; ///< Undefined value.
-
+        inline static const BitRange<InterruptEnable> undefined    { 0 };  ///< Undefined value.
+        inline static const BitRange<u32>             allBits  { 0, 31 };  ///< Defines the whole register bits.
 };
 
 }

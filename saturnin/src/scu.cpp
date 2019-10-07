@@ -60,12 +60,29 @@ u32 Scu::read32(const u32 addr) const {
             Log::debug("scu", "DSP - Data RAM Dataport read");
             //data = current_DSP_data_ram_dataport_;
             break;
-        default:
-            return rawRead<u32>(memory()->scu_, addr & scu_memory_mask);
+        case level_0_dma_enable_register:    return level_0_dma_enable_register_.toUlong();
+        case level_1_dma_enable_register:    return level_1_dma_enable_register_.toUlong();
+        case level_2_dma_enable_register:    return level_2_dma_enable_register_.toUlong();
+        case level_0_dma_add_value_register: return level_0_dma_add_value_register_.toUlong();
+        case level_1_dma_add_value_register: return level_1_dma_add_value_register_.toUlong();
+        case level_2_dma_add_value_register: return level_2_dma_add_value_register_.toUlong();
+        case level_0_dma_read_address:       return level_0_dma_read_address_register_.toUlong();
+        case level_1_dma_read_address:       return level_1_dma_read_address_register_.toUlong();
+        case level_2_dma_read_address:       return level_2_dma_read_address_register_.toUlong();
+        case level_0_dma_write_address:      return level_0_dma_write_address_register_.toUlong();
+        case level_1_dma_write_address:      return level_1_dma_write_address_register_.toUlong();
+        case level_2_dma_write_address:      return level_2_dma_write_address_register_.toUlong();
+        case level_0_dma_mode_register:      return level_0_dma_mode_register_.toUlong();
+        case level_1_dma_mode_register:      return level_1_dma_mode_register_.toUlong();
+        case level_2_dma_mode_register:      return level_2_dma_mode_register_.toUlong();
+        case level_0_dma_transfer_byte_number: return level_0_dma_transfer_byte_number_register_.toUlong();
+        case level_1_dma_transfer_byte_number: return level_1_dma_transfer_byte_number_register_.toUlong();
+        case level_2_dma_transfer_byte_number: return level_2_dma_transfer_byte_number_register_.toUlong();
+        case interrupt_status_register:      return interrupt_status_register_.toUlong();
+        case interrupt_mask_register:        return interrupt_mask_register_.toUlong();
+        default:                             return rawRead<u32>(memory()->scu_, addr & scu_memory_mask);
     }
-
     return rawRead<u32>(memory()->scu_, addr & scu_memory_mask);
-
 };
 
 void Scu::write32(const u32 addr, const u32 data) {
@@ -108,33 +125,60 @@ void Scu::write32(const u32 addr, const u32 data) {
         //            current_DSP_data_ram_dataport_ = data;
         //            break;
         case level_0_dma_enable_register: {
-            if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
+            level_0_dma_enable_register_.set(DmaEnableRegister::allBits, data);
+            if (level_0_dma_enable_register_.get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
                 auto dma_0_config = configureDmaTransfer(DmaLevel::level_0);
                 //executeDma(dma_0_config);
                 addDmaToQueue(dma_0_config);
             }
-            break;
+            return;
+
+            //if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
+            //    auto dma_0_config = configureDmaTransfer(DmaLevel::level_0);
+            //    //executeDma(dma_0_config);
+            //    addDmaToQueue(dma_0_config);
+            //}
+            //break;
         }
         case level_1_dma_enable_register: {
-            if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
+            level_1_dma_enable_register_.set(DmaEnableRegister::allBits, data);
+            if (level_1_dma_enable_register_.get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
                 auto dma_1_config = configureDmaTransfer(DmaLevel::level_1);
                 //executeDma(dma_1_config);
                 addDmaToQueue(dma_1_config);
             }
-            break;
+            return;
         }
         case level_2_dma_enable_register: {
-            if (DmaEnableRegister(data).get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
+            level_2_dma_enable_register_.set(DmaEnableRegister::allBits, data);
+            if (level_2_dma_enable_register_.get(DmaEnableRegister::dmaEnable) == DmaEnable::enabled) {
                 auto dma_2_config = configureDmaTransfer(DmaLevel::level_2);
-                //executeDma(dma_2_config);
+                //executeDma(dma_1_config);
                 addDmaToQueue(dma_2_config);
             }
-            break;
+            return;
         }
-                                          //        case dma_status_register + 0x0C:
-                                          //            // DMA registers write
-                                          //            dmaUpdate_ = true;
-                                          //            break;
+        case level_0_dma_add_value_register: level_0_dma_add_value_register_.set(DmaAddressAddValueRegister::allBits, data); return;
+        case level_1_dma_add_value_register: level_1_dma_add_value_register_.set(DmaAddressAddValueRegister::allBits, data); return;
+        case level_2_dma_add_value_register: level_2_dma_add_value_register_.set(DmaAddressAddValueRegister::allBits, data); return;
+        case level_0_dma_read_address:       level_0_dma_read_address_register_.set(DmaReadAddressRegister::allBits, data); return;
+        case level_1_dma_read_address:       level_1_dma_read_address_register_.set(DmaReadAddressRegister::allBits, data); return;
+        case level_2_dma_read_address:       level_2_dma_read_address_register_.set(DmaReadAddressRegister::allBits, data); return;
+        case level_0_dma_write_address:      level_0_dma_write_address_register_.set(DmaWriteAddressRegister::allBits, data); return;
+        case level_1_dma_write_address:      level_1_dma_write_address_register_.set(DmaWriteAddressRegister::allBits, data); return;
+        case level_2_dma_write_address:      level_2_dma_write_address_register_.set(DmaWriteAddressRegister::allBits, data); return;
+        case level_0_dma_mode_register:      level_0_dma_mode_register_.set(DmaModeRegister::allBits, data); return;
+        case level_1_dma_mode_register:      level_1_dma_mode_register_.set(DmaModeRegister::allBits, data); return;
+        case level_2_dma_mode_register:      level_2_dma_mode_register_.set(DmaModeRegister::allBits, data); return;
+        case level_0_dma_transfer_byte_number: level_0_dma_transfer_byte_number_register_.set(DmaLevel0TransferByteNumberRegister::allBits, data); return;
+        case level_1_dma_transfer_byte_number: level_1_dma_transfer_byte_number_register_.set(DmaLevel1TransferByteNumberRegister::allBits, data); return;
+        case level_2_dma_transfer_byte_number: level_2_dma_transfer_byte_number_register_.set(DmaLevel2TransferByteNumberRegister::allBits, data); return;
+        case interrupt_status_register:      interrupt_status_register_.set(InterruptStatusRegister::allBits, data); return;
+        case interrupt_mask_register:        interrupt_mask_register_.set(InterruptMaskRegister::allBits, data); return;
+//        case dma_status_register + 0x0C:
+//            // DMA registers write
+//            dmaUpdate_ = true;
+//            break;
         default:
 
             break;
@@ -480,20 +524,14 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 }
 
 void Scu::setInterruptStatusRegister(const Interrupt& i) {
-    //auto isr = InterruptStatusRegister(rawRead<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask));
-    auto isr = InterruptStatusRegister(rawRead<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask));
-    isr.set(i.status);
-    rawWrite<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask, isr.toUlong());
+    interrupt_status_register_.set(i.status);
 };
 
 void Scu::resetInterruptStatusRegister(const Interrupt& i) {
-    auto isr = InterruptStatusRegister(rawRead<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask));
-    isr.reset(i.status);
-    rawWrite<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask, isr.toUlong());
+    interrupt_status_register_.reset(i.status);
 };
 
-bool Scu::isInterruptMasked(const Interrupt& i, sh2::Sh2Type t) const {
-    auto imr = InterruptMaskRegister(rawRead<u32>(memory()->scu_, interrupt_mask_register & scu_memory_mask));
+bool Scu::isInterruptMasked(const Interrupt& i, sh2::Sh2Type t){
     switch(t) {
         case sh2::Sh2Type::master:
             switch (i) {
@@ -502,8 +540,8 @@ bool Scu::isInterruptMasked(const Interrupt& i, sh2::Sh2Type t) const {
                     return true; 
                     break;
                 case is::vector_system_manager:
-                    if (emulator_context_->hardwareMode_ == HardwareMode::stv) return true;
-                    else return (imr.get(i.mask) == InterruptMask::masked);
+                    if (emulatorContext()->hardwareMode_ == HardwareMode::stv) return true;
+                    else return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
                     break;
                 case is::vector_v_blank_in:
                 case is::vector_v_blank_out:
@@ -535,7 +573,7 @@ bool Scu::isInterruptMasked(const Interrupt& i, sh2::Sh2Type t) const {
                 case is::vector_external_14:
                 case is::vector_external_15:
                 case is::vector_frt_input_capture:
-                    return (imr.get(i.mask) == InterruptMask::masked);
+                    return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
                     break;
                 default: 
                     return false;
@@ -582,15 +620,15 @@ void Scu::clearInterruptFlag(const Interrupt& i) {
 
 void Scu::initializeRegisters() {
     // DMA
-    rawWrite<u32>(memory()->scu_, level_0_dma_add_value_register & scu_memory_mask, 0x00000101);
-    rawWrite<u32>(memory()->scu_, level_0_dma_enable_register    & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, level_0_dma_mode_register      & scu_memory_mask, 0x00000007);
-    rawWrite<u32>(memory()->scu_, level_1_dma_add_value_register & scu_memory_mask, 0x00000101);
-    rawWrite<u32>(memory()->scu_, level_1_dma_enable_register    & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, level_1_dma_mode_register      & scu_memory_mask, 0x00000007);
-    rawWrite<u32>(memory()->scu_, level_2_dma_add_value_register & scu_memory_mask, 0x00000101);
-    rawWrite<u32>(memory()->scu_, level_2_dma_enable_register    & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, level_2_dma_mode_register      & scu_memory_mask, 0x00000007);
+    level_0_dma_add_value_register_.set(DmaAddressAddValueRegister::allBits, 0x00000101u);
+    level_1_dma_add_value_register_.set(DmaAddressAddValueRegister::allBits, 0x00000101u);
+    level_2_dma_add_value_register_.set(DmaAddressAddValueRegister::allBits, 0x00000101u);
+    level_0_dma_enable_register_.set(DmaEnableRegister::allBits, 0x00000000u);
+    level_1_dma_enable_register_.set(DmaEnableRegister::allBits, 0x00000000u);
+    level_2_dma_enable_register_.set(DmaEnableRegister::allBits, 0x00000000u);
+    level_0_dma_mode_register_.set(DmaModeRegister::allBits, 0x00000007u);
+    level_1_dma_mode_register_.set(DmaModeRegister::allBits, 0x00000007u);
+    level_2_dma_mode_register_.set(DmaModeRegister::allBits, 0x00000007u);
     rawWrite<u32>(memory()->scu_, dma_forced_stop                & scu_memory_mask, 0x00000000);
     rawWrite<u32>(memory()->scu_, (dma_status_register + 0x0C)   & scu_memory_mask, 0x00000000);
 
@@ -603,8 +641,8 @@ void Scu::initializeRegisters() {
     rawWrite<u32>(memory()->scu_, timer_1_mode_register & scu_memory_mask, 0x00000000);
 
     // Interrupt control
-    rawWrite<u32>(memory()->scu_, interrupt_mask_register   & scu_memory_mask, 0x0000BFFF);
-    rawWrite<u32>(memory()->scu_, interrupt_status_register & scu_memory_mask, 0x00000000);
+    interrupt_mask_register_.set(InterruptMaskRegister::allBits, 0x0000BFFFu);
+    interrupt_status_register_.set(InterruptStatusRegister::allBits, 0x00000000u);
 
     // A-BUS control
     rawWrite<u32>(memory()->scu_, a_bus_interrupt_acknowledge & scu_memory_mask, 0x00000000);
@@ -622,90 +660,79 @@ void Scu::initializeRegisters() {
     //dsta = 0;
 }
 
-DmaConfiguration Scu::configureDmaTransfer(DmaLevel level) const {
+DmaConfiguration Scu::configureDmaTransfer(const DmaLevel level) {
     DmaConfiguration dc{};
+    dc.dma_level = level;
     switch (level) {
         case DmaLevel::level_0:
-            initializeDmaReadAddress(dc, level_0_dma_read_address);
-            initializeDmaWriteAddress(dc, level_0_dma_write_address);
-            initializeDmaTransferByteNumber(dc, level_0_dma_transfer_byte_number);
-            initializeDmaAddressAdd(dc, level_0_dma_add_value_register);
-            initializeDmaEnable(dc, level_0_dma_enable_register);
-            initializeDmaMode(dc, level_0_dma_mode_register);
+            initializeDmaReadAddress(dc, level_0_dma_read_address_register_);
+            initializeDmaWriteAddress(dc, level_0_dma_write_address_register_);
+            initializeDmaTransferByteNumber(dc);
+            initializeDmaAddressAdd(dc, level_0_dma_add_value_register_);
+            initializeDmaEnable(dc, level_0_dma_enable_register_);
+            initializeDmaMode(dc, level_0_dma_mode_register_);
             break;
         case DmaLevel::level_1:
-            initializeDmaReadAddress(dc, level_1_dma_read_address);
-            initializeDmaWriteAddress(dc, level_1_dma_write_address);
-            initializeDmaTransferByteNumber(dc, level_1_dma_transfer_byte_number);
-            initializeDmaAddressAdd(dc, level_1_dma_add_value_register);
-            initializeDmaEnable(dc, level_1_dma_enable_register);
-            initializeDmaMode(dc, level_1_dma_mode_register);
+            initializeDmaReadAddress(dc, level_1_dma_read_address_register_);
+            initializeDmaWriteAddress(dc, level_1_dma_write_address_register_);
+            initializeDmaTransferByteNumber(dc);
+            initializeDmaAddressAdd(dc, level_1_dma_add_value_register_);
+            initializeDmaEnable(dc, level_1_dma_enable_register_);
+            initializeDmaMode(dc, level_1_dma_mode_register_);
             break;
         case DmaLevel::level_2:
-            initializeDmaReadAddress(dc, level_2_dma_read_address);
-            initializeDmaWriteAddress(dc, level_2_dma_write_address);
-            initializeDmaTransferByteNumber(dc, level_2_dma_transfer_byte_number);
-            initializeDmaAddressAdd(dc, level_2_dma_add_value_register);
-            initializeDmaEnable(dc, level_2_dma_enable_register);
-            initializeDmaMode(dc, level_2_dma_mode_register);
+            initializeDmaReadAddress(dc, level_2_dma_read_address_register_);
+            initializeDmaWriteAddress(dc, level_2_dma_write_address_register_);
+            initializeDmaTransferByteNumber(dc);
+            initializeDmaAddressAdd(dc, level_2_dma_add_value_register_);
+            initializeDmaEnable(dc, level_2_dma_enable_register_);
+            initializeDmaMode(dc, level_2_dma_mode_register_);
             break;
         default:
             break;
     }
-    dc.dma_level = level;
     return dc;
 }
 
-void Scu::initializeDmaMode(DmaConfiguration& dc, const u32 register_address) const {
-    auto dmr                  = DmaModeRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
-    dc.dma_mode               = dmr.get(DmaModeRegister::dmaMode);
-    dc.read_address_update    = dmr.get(DmaModeRegister::readAddressUpdate);
-    dc.write_address_update   = dmr.get(DmaModeRegister::writeAddressUpdate);
-    dc.starting_factor_select = dmr.get(DmaModeRegister::startingFactorSelect);
+void Scu::initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg) {
+    dc.dma_mode               = reg.get(DmaModeRegister::dmaMode);
+    dc.read_address_update    = reg.get(DmaModeRegister::readAddressUpdate);
+    dc.write_address_update   = reg.get(DmaModeRegister::writeAddressUpdate);
+    dc.starting_factor_select = reg.get(DmaModeRegister::startingFactorSelect);
 }
 
-void Scu::initializeDmaEnable(DmaConfiguration& dc, const u32 register_address) const {
-    auto der        = DmaEnableRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
-    dc.dma_enable   = der.get(DmaEnableRegister::dmaEnable);
-    dc.dma_starting = der.get(DmaEnableRegister::dmaStarting);
+void Scu::initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg) {
+    dc.dma_enable   = reg.get(DmaEnableRegister::dmaEnable);
+    dc.dma_starting = reg.get(DmaEnableRegister::dmaStarting);
 }
 
-void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, const u32 register_address) const {
-    auto avr           = DmaAddressAddValueRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
-    dc.read_add_value  = avr.get(DmaAddressAddValueRegister::readAddValue);
-    dc.write_add_value = avr.get(DmaAddressAddValueRegister::writeAddValue);
+void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg) {
+    dc.read_add_value  = reg.get(DmaAddressAddValueRegister::readAddValue);
+    dc.write_add_value = reg.get(DmaAddressAddValueRegister::writeAddValue);
 }
 
-void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc, const u32 register_address) const {
-    switch (register_address & scu_memory_mask) {
-        case (level_0_dma_transfer_byte_number & 0xFF): {
-            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(memory()->scu_, level_0_dma_transfer_byte_number & scu_memory_mask));
-            dc.transfer_byte_number = tbnr.get(DmaLevel2TransferByteNumberRegister::transferByteNumber);
+void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc) {
+    switch (dc.dma_level) {
+        case DmaLevel::level_0:
+            dc.transfer_byte_number = level_0_dma_transfer_byte_number_register_.get(DmaLevel0TransferByteNumberRegister::transferByteNumber);
             break;
-        }
-        case (level_1_dma_transfer_byte_number & 0xFF): {
-            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(memory()->scu_, level_1_dma_transfer_byte_number & scu_memory_mask));
-            dc.transfer_byte_number = tbnr.get(DmaLevel2TransferByteNumberRegister::transferByteNumber);
+        case DmaLevel::level_1:
+            dc.transfer_byte_number = level_1_dma_transfer_byte_number_register_.get(DmaLevel1TransferByteNumberRegister::transferByteNumber);
             break;
-        }
-        case (level_2_dma_transfer_byte_number & 0xFF): {
-            auto tbnr               = DmaLevel2TransferByteNumberRegister(rawRead<u32>(memory()->scu_, level_2_dma_transfer_byte_number & scu_memory_mask));
-            dc.transfer_byte_number = tbnr.get(DmaLevel2TransferByteNumberRegister::transferByteNumber);
+        case DmaLevel::level_2:
+            dc.transfer_byte_number = level_2_dma_transfer_byte_number_register_.get(DmaLevel2TransferByteNumberRegister::transferByteNumber);
             break;
-        }
         default:
-            Log::error("scu", "Unknown DMA Transfer Byte Number register address ! {}", register_address);
+            Log::error("scu", "Unknown DMA level !");
             break;
     }
 }
-void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, const u32 register_address) const {
-    auto war         = DmaWriteAddressRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
-    dc.write_address = war.get(DmaWriteAddressRegister::writeAddress);
+void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg){
+    dc.write_address = reg.get(DmaWriteAddressRegister::writeAddress);
 }
 
-void Scu::initializeDmaReadAddress(DmaConfiguration& dc, const u32 register_address) const {
-    auto rar        = DmaReadAddressRegister(rawRead<u32>(memory()->scu_, register_address & scu_memory_mask));
-    dc.read_address = rar.get(DmaReadAddressRegister::readAddress);
+void Scu::initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg)  {
+    dc.read_address = reg.get(DmaReadAddressRegister::readAddress);
 }
 
 void Scu::addDmaToQueue(const DmaConfiguration& dc) {
@@ -802,21 +829,19 @@ void Scu::dmaTest() {
     }
 }
 
+Emulator_context* Scu::emulatorContext() const {
+    return emulator_context_;
+}
+
 Memory* Scu::memory() const {
 	return emulator_context_->memory();
 };
 
 void Scu::sendDmaEndInterrupt(const DmaLevel l) {
 	switch (l) {
-	case DmaLevel::level_0:
-		memory()->masterSh2()->sendInterrupt(interrupt_source::level_0_dma_end);
-		break;
-	case DmaLevel::level_1:
-		memory()->masterSh2()->sendInterrupt(interrupt_source::level_1_dma_end);
-		break;
-	case DmaLevel::level_2:
-		memory()->masterSh2()->sendInterrupt(interrupt_source::level_2_dma_end);
-		break;
+	    case DmaLevel::level_0: memory()->masterSh2()->sendInterrupt(interrupt_source::level_0_dma_end); break;
+	    case DmaLevel::level_1: memory()->masterSh2()->sendInterrupt(interrupt_source::level_1_dma_end); break;
+	    case DmaLevel::level_2: memory()->masterSh2()->sendInterrupt(interrupt_source::level_2_dma_end); break;
 	}
 }
 
@@ -825,20 +850,9 @@ void Scu::resetDmaEnable(const DmaConfiguration& dc) {
 		if (dc.starting_factor_select == StartingFactorSelect::dma_start_factor) {
 			u32 dma_enable_data{};
 			switch (dc.dma_level) {
-                case DmaLevel::level_0:
-                    dma_enable_data = memory()->read<u32>(level_0_dma_enable_register) & 0xFFFFFFFE;
-				    memory()->write(level_0_dma_enable_register, dma_enable_data);
-				    break;
-
-			    case DmaLevel::level_1:
-				    dma_enable_data = memory()->read<u32>(level_1_dma_enable_register) & 0xFFFFFFFE;
-				    memory()->write(level_1_dma_enable_register, dma_enable_data);
-				    break;
-
-			    case DmaLevel::level_2:
-				    dma_enable_data = memory()->read<u32>(level_2_dma_enable_register) & 0xFFFFFFFE;
-				    memory()->write(level_2_dma_enable_register, dma_enable_data);
-				    break;
+                case DmaLevel::level_0: level_0_dma_enable_register_.reset(DmaEnableRegister::dmaEnable); break;
+                case DmaLevel::level_1: level_1_dma_enable_register_.reset(DmaEnableRegister::dmaEnable); break;
+                case DmaLevel::level_2: level_2_dma_enable_register_.reset(DmaEnableRegister::dmaEnable); break;
 			}
 		}
 	}
@@ -846,9 +860,9 @@ void Scu::resetDmaEnable(const DmaConfiguration& dc) {
 
 void Scu::dmaUpdateWriteAddress(const DmaLevel l, const u32 data) {
     switch (l) {
-        case DmaLevel::level_0: memory()->write<u32>(level_0_dma_write_address, data); break;
-        case DmaLevel::level_1: memory()->write<u32>(level_1_dma_write_address, data); break;
-        case DmaLevel::level_2: memory()->write<u32>(level_2_dma_write_address, data); break;
+        case DmaLevel::level_0: level_0_dma_write_address_register_.set(DmaWriteAddressRegister::allBits, data); break;
+        case DmaLevel::level_1: level_1_dma_write_address_register_.set(DmaWriteAddressRegister::allBits, data); break;
+        case DmaLevel::level_2: level_2_dma_write_address_register_.set(DmaWriteAddressRegister::allBits, data); break;
     }
 }
 

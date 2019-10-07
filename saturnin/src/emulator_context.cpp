@@ -120,6 +120,19 @@ bool Emulator_context::run() {
     dmr.reset(DmaModeRegister::startingFactorSelect);
     //isr.set(InterruptStatusRegister::bBus, StartingFactorSelect::timer_1);
     
+    DmaEnableRegister r0;
+    DmaEnableRegister r1;
+    DmaEnableRegister r2;
+
+    u8 level = 1;
+
+    DmaEnableRegister* reg = nullptr;
+    switch (level) {
+        case 0: reg = &r0; break;
+        case 1: reg = &r1; break;
+        case 2: reg = &r2; break;
+    }
+
     {
         core::rawWrite<uint32_t>(this->memory()->scu_, 0, 0x00112233);
         auto start = std::chrono::steady_clock::now();
