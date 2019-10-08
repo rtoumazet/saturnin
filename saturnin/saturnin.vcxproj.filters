@@ -84,6 +84,9 @@
     <ClCompile Include="src\sh2_instructions.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_custom_controls.cpp">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -164,11 +167,14 @@
     <ClInclude Include="lib\imgui\imgui_loader.h">
       <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="src\video\opengl.h">
-      <Filter>Fichiers sources</Filter>
-    </ClInclude>
     <ClInclude Include="src\sh2_instructions.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_custom_controls.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl.h">
+      <Filter>Fichiers sources\video</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
