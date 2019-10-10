@@ -243,7 +243,9 @@ int32_t Opengl::calculateLegacyRendering() {
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 0.0f);
     glRotatef(i, 0.0f, 0.0f, 1.0f);
-    
+
+    //glBindFramebufferEXT();
+
     glBegin(GL_TRIANGLES);
     glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
     glVertex3f(-0.5f, -0.5f, 0.0f);
@@ -251,10 +253,86 @@ int32_t Opengl::calculateLegacyRendering() {
     glVertex3f(0.0f, 0.5f, 0.0f);
     glEnd();
 
+    //glDisable(GL_TEXTURE_2D);
+    //glBindTexture(GL_TEXTURE_2D, 0);
+
     glPopMatrix();
     ++i;
 
     return this->bindTextureToFramebuffer();
+    //return tex;
+}
+
+s32 Opengl::calculateLegacyRenderingFbo() {
+    //RGBA8 2D texture, 24 bit depth texture, 256x256
+    u32 color_tex{};
+    u32 fb{};
+    glGenTextures(1, &color_tex);
+    glBindTexture(GL_TEXTURE_2D, color_tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //NULL means reserve texture memory, but texels are undefined
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+    //-------------------------
+    glGenFramebuffersEXT(1, &fb);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+    //Attach 2D texture to this FBO
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, color_tex, 0);
+    ////-------------------------
+    //glGenRenderbuffersEXT(1, &depth_rb);
+    //glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
+    //glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, 256, 256);
+    ////-------------------------
+    ////Attach depth buffer to FBO
+    //glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depth_rb);
+    //-------------------------
+    //Does the GPU support current FBO configuration?
+    GLenum status;
+    status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    //switch (status) {
+    //    case GL_FRAMEBUFFER_COMPLETE_EXT:
+    //        
+    //        //cout << "good";
+    //    default:
+    //        //HANDLE_THE_ERROR;
+    //}
+    //-------------------------
+    //and now you can render to GL_TEXTURE_2D
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClearDepth(1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //-------------------------
+    glViewport(0, 0, 256, 256);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0, 256.0, 0.0, 256.0, -1.0, 1.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    //-------------------------
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    //-------------------------
+    //**************************
+    glBegin(GL_TRIANGLES);
+    glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
+    glVertex3f(-0.5f, -0.5f, 0.0f);
+    glVertex3f(0.5f, -0.5f, 0.0f);
+    glVertex3f(0.0f, 0.5f, 0.0f);
+    glEnd();
+    //-------------------------
+    GLubyte pixels[4 * 4 * 4];
+    glReadPixels(0, 0, 4, 4, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+    //pixels 0, 1, 2 should be white
+    //pixel 4 should be black
+    //----------------
+    //Bind 0, which means render to back buffer
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+    return color_tex;
 }
 
 int32_t Opengl::calculateModernRendering() {
@@ -461,7 +539,6 @@ int32_t runLegacyOpengl(core::Emulator_context& state) {
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
-        //glUseProgram(0); // You may want this if using this code in an Opengl 3+ context where shaders may be bound
 
         gui::buildGui(state, opengl, fbo, display_w, display_h);
 

@@ -153,14 +153,73 @@ namespace gui {
         ImGui::Begin("Video rendering", NULL, flags);
         //ImGui::BeginChild("Video rendering");
 
-        opengl.preRendering(fbo);
+        //opengl.preRendering(fbo);
 
-        int32_t texture = opengl.calculateRendering();
-        if (texture != 0) {
-            gui::renderToTexture(texture, width, height);
+        //int32_t texture = opengl.calculateRendering();
+        //if (texture != 0) {
+        //    gui::renderToTexture(texture, width, height);
+        //}
+
+        //opengl.postRendering();
+
+        GLuint textureId;
+        glGenTextures(1, &textureId);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        // create a renderbuffer object to store depth info
+        GLuint rboId;
+        glGenRenderbuffersEXT(1, &rboId);
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rboId);
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, width, height);
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+
+        u32 fbo1{};
+        glGenFramebuffersEXT(1, &fbo1); // Create a framebuffer object
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo1); // Bind the framebuffer object
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, textureId, 0); // Attach a texture to the FBO
+        
+        // attach the renderbuffer to depth attachment point
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,      // 1. fbo target: GL_FRAMEBUFFER
+            GL_DEPTH_ATTACHMENT_EXT, // 2                         . attachment point
+            GL_RENDERBUFFER_EXT,     // 3                         . rbo target: GL_RENDERBUFFER
+            rboId);              // 4                             . rbo ID
+
+        GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+        if (status != GL_FRAMEBUFFER_COMPLETE_EXT) ;
+
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo1);
+
+        // clear buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+       //opengl.calculateRendering();
+        
+        //glPushMatrix();
+        //glTranslatef(0.0f, 0.0f, 0.0f);
+        //glRotatef(i, 0.0f, 0.0f, 1.0f);
+        
+        glBegin(GL_TRIANGLES);
+        glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
+        glVertex3f(-0.5f, -0.5f, 0.0f);
+        glVertex3f(0.5f, -0.5f, 0.0f);
+        glVertex3f(0.0f, 0.5f, 0.0f);
+        glEnd();
+        
+
+        //glPopMatrix();
+
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // Unbind the FBO (and renderbuffer if necessary). 
+
+
+        if (textureId != 0) {
+            gui::renderToTexture(textureId, width, height);
         }
-
-        opengl.postRendering();
 
         ImGui::End();
         ImGui::PopStyleVar();
