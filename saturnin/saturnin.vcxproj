@@ -188,6 +188,8 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClCompile Include="src\video\gui.cpp" />
     <ClCompile Include="src\video\imgui_wrapper.cpp" />
     <ClCompile Include="src\video\opengl.cpp" />
+    <ClCompile Include="src\video\opengl_legacy.cpp" />
+    <ClCompile Include="src\video\opengl_modern.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imgui_custom_controls.h" />
@@ -219,6 +221,8 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="src\video\gui.h" />
     <ClInclude Include="src\video\imgui_wrapper.h" />
     <ClInclude Include="src\video\opengl.h" />
+    <ClInclude Include="src\video\opengl_legacy.h" />
+    <ClInclude Include="src\video\opengl_modern.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\icons.png.inc" />

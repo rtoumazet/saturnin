@@ -26,16 +26,23 @@
 #pragma once
 
 #include <windows.h> // removes C4005 warning
-#include <cstdint>
+//#include <functional> // function
+//#include <cstdint>
 #include <vector>
-#include "../../lib/imgui/imgui_loader.h"
-#include <GLFW/glfw3.h>
+#include"../emulator_defs.h"
+//#include "../../lib/imgui/imgui_loader.h"
 
-#include "../config.h"
-#include "../emulator_context.h"
+// Forward declarations
+namespace saturnin::core {
+    class Config;
+}
+struct GLFWwindow;
 
 namespace saturnin {
 namespace video {
+
+using saturnin::core::Config;
+
 
 class Opengl {
 
@@ -52,19 +59,6 @@ public:
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn uint32_t Opengl::createFramebuffer();
-    ///
-    /// \brief  Creates the framebuffer used to display the Saturn data.
-    ///
-    /// \author Runik
-    /// \date   09/10/2018
-    ///
-    /// \return The new framebuffer.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	uint32_t createFramebuffer();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::preRendering(uint32_t& fbo);
     ///
     /// \brief  Pre rendering functions.
@@ -75,7 +69,7 @@ public:
     /// \param [in,out] fbo The framebuffer used for rendering.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void preRendering(uint32_t& fbo);
+    //void preRendering(uint32_t& fbo);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::postRendering();
@@ -86,20 +80,7 @@ public:
     /// \date   09/10/2018
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void postRendering();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn int32_t Opengl::bindTextureToFramebuffer();
-    ///
-    /// \brief  Binds a texture to the current framebuffer.
-    ///
-    /// \author Runik
-    /// \date   09/10/2018
-    ///
-    /// \return The texture id.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    int32_t bindTextureToFramebuffer();
+    //void postRendering();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn int32_t Opengl::calculateLegacyRendering();
@@ -112,10 +93,8 @@ public:
     /// \return The id of the calculated texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int32_t calculateLegacyRendering();
+    //int32_t calculateLegacyRendering();
     
-    int32_t calculateLegacyRenderingFbo();
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn int32_t Opengl::calculateModernRendering();
@@ -128,38 +107,13 @@ public:
     /// \return The id of the calculated texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int32_t calculateModernRendering();
+    //int32_t calculateModernRendering();
 
-    uint32_t createVertexShader();
-    uint32_t createFragmentShader();
-    //uint32_t create_vertex_buffer_object(const float vertices[]);
-    uint32_t createProgramShader(const uint32_t vertex_shader, const uint32_t fragment_shader);
-    //uint32_t createVertexArrayObject(const uint32_t vertex_buffer_object, const float vertices[]);
-    void deleteShaders(std::vector<uint32_t> shaders);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::setupTriangle();
-    ///
-    /// \brief  Sets up the triangle using shaders using modern OpenGL.
-    ///
-    /// \author Runik
-    /// \date   09/10/2018
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void setupTriangle();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::drawTriangle();
-    ///
-    /// \brief  Draws a triangle using modern OpenGL.
-    ///
-    /// \author Runik
-    /// \date   09/10/2018
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void drawTriangle();
-
-    std::function<int32_t(void)> calculateRendering;    ///< function pointer to the rendering function
+   // std::function<int32_t(void)> calculateRendering;    ///< function pointer to the rendering function
+   
+    virtual void preRender() abstract;
+    virtual s32 render() abstract;
+    virtual void postRender() abstract;
 
     bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
 
@@ -169,10 +123,25 @@ public:
 
     uint32_t     iconsTextureId;    ///< Texture id storing data for UI icons
 
+protected:
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn Config* Opengl::config() const;
+    ///
+    /// \brief  Returns the Configobject.
+    ///
+    /// \author Runik
+    /// \date   12/10/2019
+    ///
+    /// \return The Config object.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    Config* config() const;
+
+
 private:
     
-    uint32_t      program_shader_;
-    uint32_t      vao_;
+    //uint32_t      program_shader_;
+    //uint32_t      vao_;
     core::Config* config_;        ///< Configuration object
 
     
@@ -192,36 +161,6 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool isModernOpenglCapable();
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn int32_t runLegacyOpengl(core::Emulator_context& config);
-///
-/// \brief  Executes OpenGL code in legacy mode.
-///
-/// \author Runik
-/// \date   03/04/2018
-///
-/// \param [in,out] config  A reference to the configuration object.
-///
-/// \return An int32_t.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int32_t runLegacyOpengl(core::Emulator_context& state);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn int32_t runModernOpengl(core::Emulator_context& config);
-///
-/// \brief  Executes OpenGL code in modern mode (3.3+).
-///
-/// \author Runik
-/// \date   03/04/2018
-///
-/// \param [in,out] config  A reference to the configuration object.
-///
-/// \return An int32_t.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int32_t runModernOpengl(core::Emulator_context& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void windowCloseCallback(GLFWwindow* window);
