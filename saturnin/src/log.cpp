@@ -31,14 +31,15 @@ namespace core {
     bool Log::initialize() {
         createConsole();
         auto sink = createFileSink("logs/saturnin.log");
+        createLogger("cdrom", sink);
+        createLogger("config", sink);
         createLogger("main", sink);
         createLogger("memory", sink);
-        createLogger("vdp1", sink);
-        createLogger("vdp2", sink);
-        createLogger("config", sink);
-        createLogger("cdrom", sink);
         createLogger("sh2", sink);
         createLogger("scu", sink);
+        createLogger("vdp1", sink);
+        createLogger("vdp2", sink);
+        createLogger("video", sink);
 
         return true;
     }

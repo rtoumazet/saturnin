@@ -1,0 +1,196 @@
+// 
+// opengl_legacy.cpp
+// Saturnin
+//
+// Copyright (c) 2019 Renaud Toumazet
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+#define GLFW_INCLUDE_NONE
+#include <windows.h> // removes C4005 warning
+#include <glbinding/gl21/gl.h>
+#include <glbinding/gl21ext/gl.h>
+#include <glbinding/glbinding.h>
+#include <GLFW/glfw3.h>
+#include <imgui.h>
+
+#include "gui.h"
+#include "opengl.h"
+#include "opengl_legacy.h"
+#include "../../lib/imgui/imgui_impl_glfw.h"
+#include "../../lib/imgui/imgui_impl_opengl2.h"
+#include "../emulator_context.h"
+#include "../log.h"
+
+using namespace gl21;
+using namespace gl21ext;
+
+namespace saturnin {
+namespace video {
+
+using core::Log;
+
+void OpenglLegacy::preRender() {
+
+};
+
+s32 OpenglLegacy::render() {
+    static float i = 0;
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, 0.0f);
+    glRotatef(i, 0.0f, 0.0f, 1.0f);
+
+    //glBindFramebufferEXT();
+
+    glBegin(GL_TRIANGLES);
+    glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
+    glVertex3f(-0.5f, -0.5f, 0.0f);
+    glVertex3f(0.5f, -0.5f, 0.0f);
+    glVertex3f(0.0f, 0.5f, 0.0f);
+    glEnd();
+
+    //glDisable(GL_TEXTURE_2D);
+    //glBindTexture(GL_TEXTURE_2D, 0);
+
+    glPopMatrix();
+    ++i;
+
+    //return this->bindTextureToFramebuffer();
+    //return tex;
+    return 0;
+};
+
+void OpenglLegacy::postRender() {
+
+};
+
+static void error_callback(int error, const char* description) {
+    Log::error("video", "Error {}: {}", error, description);
+}
+    
+
+s32 runLegacyOpengl(core::Emulator_context& state) {
+    // Setup window
+    glfwSetErrorCallback(error_callback);
+    if (!glfwInit())
+        return EXIT_FAILURE;
+
+    std::string window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
+    auto window = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
+    if (window == NULL)
+        return EXIT_FAILURE;
+
+    glfwSetWindowCloseCallback(window, windowCloseCallback);
+    glfwSetWindowUserPointer(window, (void*)&state);
+
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1); // Enable vsync
+
+                            //cout << epoxy_gl_version() << endl;
+
+                            //epoxy_handle_external_wglMakeCurrent();
+                            //if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pbuffer"))
+                            //    cout << "WGL_ARB_pbuffer not found !" << endl;
+
+                            //if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pixel_format"))
+                            //    cout << "WGL_ARB_pixel_format not found !" << endl;
+
+                            //if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_render_texture"))
+                            //    cout << "WGL_ARB_render_texture not found !" << endl;
+                            //
+                            //if (!epoxy_has_gl_extension("GL_ARB_framebuffer_object"))
+                            //    cout << "GL_ARB_framebuffer_object not found !" << endl;
+                            //
+                            //if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
+                            //    cout << "GL_EXT_framebuffer_object not found !" << endl;
+                            
+	glbinding::initialize(glfwGetProcAddress);
+
+    OpenglLegacy opengl(state.config());
+    //uint32_t fbo = opengl.createFramebuffer();
+    
+
+
+    // Setup Dear ImGui binding
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    // 
+
+    // Setup style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL2_Init();
+
+    // Load Fonts
+    // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
+    //ImGuiIO& io = ImGui::GetIO();
+    //io.Fonts->AddFontDefault();
+    //io.Fonts->AddFontFromFileTTF("../../extra_fonts/Cousine-Regular.ttf", 15.0f);
+    //io.Fonts->AddFontFromFileTTF("../../extra_fonts/DroidSans.ttf", 16.0f);
+    //io.Fonts->AddFontFromFileTTF("../../extra_fonts/Roboto-Medium.ttf", 16.0f);
+    //io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
+    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+
+    bool show_test_window = true;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    // Main loop
+    while (!glfwWindowShouldClose(window))
+    {
+        glfwPollEvents();
+        ImGui_ImplOpenGL2_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // Rendering
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        //gui::buildGui(state, opengl, fbo, display_w, display_h);
+
+        if (state.renderingStatus_ == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
+
+        gui::show_test_window(show_test_window);
+
+
+        ImGui::Render();
+            
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+
+        glfwMakeContextCurrent(window);
+        glfwSwapBuffers(window);
+    }
+
+    // Cleanup
+    ImGui_ImplOpenGL2_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+
+    return EXIT_SUCCESS;
+}
+
+
+};
+};

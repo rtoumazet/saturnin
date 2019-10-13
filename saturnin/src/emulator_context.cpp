@@ -21,6 +21,8 @@
 #include <iostream>
 #include "cdrom/scsi.h"
 #include "video/opengl.h"
+#include "video/opengl_legacy.h"
+#include "video/opengl_modern.h"
 #include "config.h"
 #include "emulator_context.h"
 #include "log.h"
