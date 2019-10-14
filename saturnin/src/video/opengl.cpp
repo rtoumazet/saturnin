@@ -24,6 +24,9 @@
 #include <imgui.h>
 #include <GLFW/glfw3.h>
 #include "../config.h"
+#include <glbinding/Binding.h>
+#include <glbinding/Version.h>
+#include <glbinding-aux/ContextInfo.h>
 
 #include "../../res/icons.png.inc"
 
@@ -186,16 +189,21 @@ bool isModernOpenglCapable()
 {
     if (!glfwInit()) return false;
     else {
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         GLFWwindow* window = glfwCreateWindow(1280, 720, "Test", NULL, NULL);
         if (window == nullptr) return false;
         else {
-            uint32_t major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
-            uint32_t minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
+            glfwMakeContextCurrent(window);
+            glbinding::Binding::initialize(glfwGetProcAddress);
+            const glbinding::Version version = glbinding::aux::ContextInfo::version();
 
-            if (major == 3) {
-                if (minor < 3) return false;
-            }
-            else if (major < 3) return false;
+            //uint32_t major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
+            //uint32_t minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
+
+            //if (major == 3) {
+            //    if (minor < 3) return false;
+            //}
+            //else if (major < 3) return false;
 
             glfwDestroyWindow(window);
         }
