@@ -46,7 +46,7 @@ class OpenglLegacy : public Opengl {
     public:
         //@{
         // Constructors / Destructors
-        OpenglLegacy(core::Config* config) : Opengl(config) {};
+        OpenglLegacy(core::Config* config) : Opengl(config){};
         //@}
         
         void preRender();

@@ -39,7 +39,7 @@ namespace core {
         createLogger("scu", sink);
         createLogger("vdp1", sink);
         createLogger("vdp2", sink);
-        createLogger("video", sink);
+        createLogger("opengl", sink);
 
         return true;
     }

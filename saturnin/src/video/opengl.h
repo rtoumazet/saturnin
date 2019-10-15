@@ -58,59 +58,7 @@ public:
     ~Opengl()                          = default;
     //@}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::preRendering(uint32_t& fbo);
-    ///
-    /// \brief  Pre rendering functions.
-    ///
-    /// \author Runik
-    /// \date   09/10/2018
-    ///
-    /// \param [in,out] fbo The framebuffer used for rendering.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //void preRendering(uint32_t& fbo);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::postRendering();
-    ///
-    /// \brief  Post rendering functions.
-    ///
-    /// \author Runik
-    /// \date   09/10/2018
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //void postRendering();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn int32_t Opengl::calculateLegacyRendering();
-    ///
-    /// \brief  Calculates the OpenGL rendering in legacy mode.
-    ///
-    /// \author Runik
-    /// \date   09/10/2018
-    ///
-    /// \return The id of the calculated texture.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //int32_t calculateLegacyRendering();
-    
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn int32_t Opengl::calculateModernRendering();
-    ///
-    /// \brief  Calculates the OpenGL rendering in modern modern.
-    ///
-    /// \author Runik
-    /// \date   09/10/2018
-    ///
-    /// \return The id of the calculated texture.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //int32_t calculateModernRendering();
-
-   // std::function<int32_t(void)> calculateRendering;    ///< function pointer to the rendering function
-   
+    virtual void initialize(){};
     virtual void preRender() abstract;
     virtual s32 render() abstract;
     virtual void postRender() abstract;
@@ -136,7 +84,9 @@ protected:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     Config* config() const;
-
+    
+    u32 fbo_{};     ///< Framebuffer Object used for rendering to texture.
+    u32 texture_{}; ///< Destination texture for render to texture.
 
 private:
     
