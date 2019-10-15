@@ -155,10 +155,10 @@ namespace gui {
 
         //opengl.preRendering(fbo);
 
-        //int32_t texture = opengl.calculateRendering();
-        //if (texture != 0) {
-        //    gui::renderToTexture(texture, width, height);
-        //}
+        u32 texture = opengl.render();
+        if (texture != 0) {
+            gui::renderToTexture(texture, width, height);
+        }
 
         //opengl.postRendering();
 
