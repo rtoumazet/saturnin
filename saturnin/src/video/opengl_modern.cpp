@@ -37,6 +37,14 @@ using namespace gl;
 namespace saturnin {
 namespace video {
 
+void OpenglModern::initialize() {
+
+}
+
+void OpenglModern::shutdown() {
+
+}
+    
 u32 OpenglModern::createFramebuffer()
 {
     u32 framebuffer{};
@@ -198,11 +206,9 @@ void OpenglModern::preRender() {
     glClear(GL_COLOR_BUFFER_BIT);
 };
 
-s32 OpenglModern::render() {
+void OpenglModern::render() {
     this->setupTriangle();
     this->drawTriangle();
-
-    return this->bindTextureToFramebuffer();
 };
 
 void OpenglModern::postRender() {
@@ -315,7 +321,7 @@ int32_t runModernOpengl(core::Emulator_context& state) {
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        gui::buildGui(state, opengl, fbo, display_w, display_h);
+        gui::buildGui(state, opengl, display_w, display_h);
 
         if (state.renderingStatus_ == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
 

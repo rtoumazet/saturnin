@@ -58,10 +58,16 @@ public:
     ~Opengl()                          = default;
     //@}
 
-    virtual void initialize(){};
+    //@{
+    // Abstract functions
+    virtual void initialize() abstract;
+    virtual void shutdown() abstract;
     virtual void preRender() abstract;
-    virtual s32 render() abstract;
+    virtual void render() abstract;
     virtual void postRender() abstract;
+    //@}
+
+    u32 texture() const { return this->texture_; };
 
     bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
 
