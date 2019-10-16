@@ -43,17 +43,38 @@ using saturnin::core::Emulator_context;
 
 class OpenglLegacy : public Opengl {
 
-    public:
-        //@{
-        // Constructors / Destructors
-        OpenglLegacy(core::Config* config) : Opengl(config){};
-        //@}
+public:
+    //@{
+    // Constructors / Destructors
+    OpenglLegacy(core::Config* config) : Opengl(config) { initialize();  };
+    ~OpenglLegacy() { shutdown(); };
+    //@}
         
-        void preRender();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void initialize() override;
+    ///
+    /// \brief  Initializes the object.
+    ///
+    /// \author Runik
+    /// \date   16/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    void initialize() override;
 
-        s32 render();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void shutdown() override;
+    ///
+    /// \brief  Clean up code.
+    ///
+    /// \author Runik
+    /// \date   16/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    void shutdown() override;
+        
+    void preRender() override;
 
-        void postRender();
+    void render() override;
+
+    void postRender() override;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

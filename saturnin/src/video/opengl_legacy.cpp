@@ -41,31 +41,38 @@ namespace video {
 
 using core::Log;
 
-void OpenglLegacy::preRender() {
+void OpenglLegacy::initialize() {
+    glGenFramebuffersEXT(1, &fbo_);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-};
-
-s32 OpenglLegacy::render() {
-    u32 fbo;
-    glGenFramebuffersEXT(1, &fbo);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-
-    u32 tex{};
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    glGenTextures(1, &texture_);
+    glBindTexture(GL_TEXTURE_2D, texture_);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex, 0);
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture_, 0);
 
     auto status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 
+}
+
+void OpenglLegacy::shutdown() {
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    glDeleteFramebuffersEXT(1, &fbo_);
+    glDeleteTextures(1, &texture_);
+}
+
+void OpenglLegacy::preRender() {
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+    glBindTexture(GL_TEXTURE_2D, texture_);
+    glClear(GL_COLOR_BUFFER_BIT);
+};
+
+void OpenglLegacy::render() {
     static float i = 0;
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 0.0f);
     glRotatef(i, 0.0f, 0.0f, 1.0f);
-
-    //glBindFramebufferEXT();
 
     glBegin(GL_TRIANGLES);
     glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
@@ -74,19 +81,13 @@ s32 OpenglLegacy::render() {
     glVertex3f(0.0f, 0.5f, 0.0f);
     glEnd();
 
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     glPopMatrix();
     ++i;
-
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    glDeleteFramebuffersEXT(1, &tex);
-
-    return tex;
 };
 
 void OpenglLegacy::postRender() {
-
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 };
 
 static void error_callback(int error, const char* description) {
@@ -179,8 +180,7 @@ s32 runLegacyOpengl(core::Emulator_context& state) {
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        u32 fbo{};
-        gui::buildGui(state, opengl, fbo, display_w, display_h);
+        gui::buildGui(state, opengl, display_w, display_h);
 
         if (state.renderingStatus_ == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
 

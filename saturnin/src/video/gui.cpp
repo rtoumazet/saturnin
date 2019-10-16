@@ -134,7 +134,7 @@ namespace gui {
         ImGui::End();
     }
 
-    void showRenderingWindow(video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height) {
+    void showRenderingWindow(video::Opengl& opengl, u32 width, u32 height) {
         ImGui::SetNextWindowPos(ImVec2(0, 0 + 20), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(static_cast<float>(width), static_cast<float>(height + 20))); // + 20 
 
@@ -153,14 +153,14 @@ namespace gui {
         ImGui::Begin("Video rendering", NULL, flags);
         //ImGui::BeginChild("Video rendering");
 
-        //opengl.preRendering(fbo);
+        opengl.preRender();
 
-        u32 texture = opengl.render();
-        if (texture != 0) {
-            gui::renderToTexture(texture, width, height);
+        opengl.render();
+        if (opengl.texture() != 0) {
+            gui::renderToTexture(opengl.texture(), width, height);
         }
 
-        //opengl.postRendering();
+        opengl.postRender();
 
         ImGui::End();
         ImGui::PopStyleVar();
@@ -346,7 +346,7 @@ namespace gui {
         ImGui::End();
     }
 
-    void buildGui(core::Emulator_context& state, video::Opengl& opengl, uint32_t fbo, uint32_t width, uint32_t height) {
+    void buildGui(core::Emulator_context& state, video::Opengl& opengl, u32 width, u32 height) {
         static bool show_options     = false;
         static bool show_load_stv    = false;
         static bool show_load_binary = false;
@@ -364,7 +364,7 @@ namespace gui {
 
         showCoreWindow(opengl);
         
-        showRenderingWindow(opengl, fbo, width, height);
+        showRenderingWindow(opengl, width, height);
 
         if (show_options)   showOptionsWindow(state, &show_options);
         if (show_load_stv)  showStvWindow(&show_load_stv);
