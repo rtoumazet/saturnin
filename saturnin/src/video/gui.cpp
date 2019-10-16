@@ -371,11 +371,16 @@ namespace gui {
     }
 
     void renderToTexture(int32_t texture, const uint32_t width, const uint32_t height) {
+        //ImGui::GetWindowDrawList()->AddImage(
+        //    (ImTextureID)(intptr_t)texture,
+        //    ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
+        //    ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
+        //    ImVec2(0, 1), ImVec2(1, 0));
         ImGui::GetWindowDrawList()->AddImage(
             (ImTextureID)(intptr_t)texture,
             ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
             ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
-            ImVec2(0, 1), ImVec2(1, 0));
+            ImVec2(0, 0), ImVec2(1, 1));
     }
 }
 }
