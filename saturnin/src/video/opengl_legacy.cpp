@@ -45,12 +45,19 @@ void OpenglLegacy::initialize() {
     glGenFramebuffersEXT(1, &fbo_);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-    glGenTextures(1, &texture_);
-    glBindTexture(GL_TEXTURE_2D, texture_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture_, 0);
+    GLFWwindow* window = glfwGetCurrentContext();
+    s32 display_w{};
+    s32 display_h{};
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    this->texture_ = generateEmptyTexture(display_w, display_h);
+    setTextureDimension(display_w, display_h);
+    
+    //glGenTextures(1, &texture_);
+    //glBindTexture(GL_TEXTURE_2D, texture_);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1280, 720, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->texture_, 0);
 
     auto status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 
@@ -64,7 +71,7 @@ void OpenglLegacy::shutdown() {
 
 void OpenglLegacy::preRender() {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-    glBindTexture(GL_TEXTURE_2D, texture_);
+
     glClear(GL_COLOR_BUFFER_BIT);
 };
 
@@ -87,8 +94,18 @@ void OpenglLegacy::render() {
 
 void OpenglLegacy::postRender() {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 };
+
+u32 OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const {
+    u32 texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    return texture;
+}
 
 static void error_callback(int error, const char* description) {
     Log::error("opengl", "Error {}: {}", error, description);
@@ -133,9 +150,6 @@ s32 runLegacyOpengl(core::Emulator_context& state) {
 	glbinding::initialize(glfwGetProcAddress);
 
     OpenglLegacy opengl(state.config());
-    //uint32_t fbo = opengl.createFramebuffer();
-    
-
 
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
@@ -172,6 +186,7 @@ s32 runLegacyOpengl(core::Emulator_context& state) {
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        //glfwSetFramebufferSizeCallback(window, opengl.framebufferSizeCallback );
 
         // Rendering
         int display_w, display_h;

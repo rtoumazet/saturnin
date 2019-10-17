@@ -33,8 +33,6 @@
 
 #include "../../res/icons.png.inc"
 
-//using namespace gl;
-
 namespace saturnin {
 namespace video {
 
@@ -52,6 +50,16 @@ Opengl::Opengl(core::Config* config) {
 Config* Opengl::config() const {
     return config_;
 }
+
+bool Opengl::isWindowResized() const {
+    //Imgui::
+}
+
+void Opengl::setTextureDimension(const u32 width, const u32 height) {
+    current_texture_width_ = width;
+    current_texture_height_= height;
+
+};
 
 static void error_callback(int error, const char* description)
 {

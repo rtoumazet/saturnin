@@ -128,6 +128,23 @@ public:
     void postRender();
 
 private:
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const override;
+    ///
+    /// \brief  Generates an empty texture.
+    ///
+    /// \author Runik
+    /// \date   17/10/2019
+    ///
+    /// \param  width   Width of the generated texture.
+    /// \param  height  Height of the generated texture.
+    ///
+    /// \return The empty texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    u32 generateEmptyTexture(const u32 width, const u32 height) const override;
+
     u32 program_shader_;
     u32 vao_;
 };

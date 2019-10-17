@@ -65,9 +65,12 @@ public:
     virtual void preRender() abstract;
     virtual void render() abstract;
     virtual void postRender() abstract;
+    virtual u32  generateEmptyTexture(const u32 width, const u32 height) const abstract;
     //@}
 
     u32 texture() const { return this->texture_; };
+
+    bool isWindowResized() const;
 
     bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
 
@@ -90,9 +93,14 @@ protected:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     Config* config() const;
+
+    void setTextureDimension(const u32 width, const u32 height);
     
     u32 fbo_{};     ///< Framebuffer Object used for rendering to texture.
     u32 texture_{}; ///< Destination texture for render to texture.
+
+    u32 current_texture_width_{}; ///< Width of the texture
+    u32 current_texture_height_{}; ///< Height of the texture
 
 private:
     
