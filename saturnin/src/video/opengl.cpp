@@ -20,7 +20,6 @@
 #include <windows.h> // removes C4005 warning
 #include <iostream> // cout
 #include <lodepng.h>
-#include <imgui.h>
 #include <GLFW/glfw3.h>
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
@@ -51,8 +50,18 @@ Config* Opengl::config() const {
     return config_;
 }
 
-bool Opengl::isWindowResized() const {
-    //Imgui::
+bool Opengl::isWindowResized(const u32 new_width, const u32 new_height) const {
+    return (new_width != current_texture_width_ || new_height != current_texture_height_);
+}
+
+void Opengl::initializeTexture(const u32 width, const u32 height) {
+    //if (texture_ != 0) glDeleteTextures(1, &texture_);
+    deleteTexture();
+    this->texture_ = generateEmptyTexture(width, height);
+    setTextureDimension(width, height);
+
+    // New texture is attached to the fbo
+    bindTextureToFbo();
 }
 
 void Opengl::setTextureDimension(const u32 width, const u32 height) {

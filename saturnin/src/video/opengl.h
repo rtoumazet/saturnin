@@ -55,7 +55,7 @@ public:
     Opengl(Opengl&&)                   = delete;
     Opengl& operator=(const Opengl&) & = delete;
     Opengl& operator=(Opengl&&) &      = delete;
-    ~Opengl()                          = default;
+    virtual ~Opengl()                  = default;
     //@}
 
     //@{
@@ -66,11 +66,39 @@ public:
     virtual void render() abstract;
     virtual void postRender() abstract;
     virtual u32  generateEmptyTexture(const u32 width, const u32 height) const abstract;
+    virtual void deleteTexture() const abstract;
+    
     //@}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn u32 OpenglLegacy::bindTextureToFbo() const abstract;
+    ///
+    /// \brief  Binds the internal texture to the internal fbo.
+    ///
+    /// \author Runik
+    /// \date   18/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    virtual void bindTextureToFbo() const abstract;
+
 
     u32 texture() const { return this->texture_; };
 
-    bool isWindowResized() const;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn bool Opengl::isWindowResized(const u32 new_width, const u32 new_height) const;
+    ///
+    /// \brief  Checks if the window size has changed.
+    ///
+    /// \author Runik
+    /// \date   18/10/2019
+    ///
+    /// \return True if the window has been resized.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool isWindowResized(const u32 new_width, const u32 new_height) const;
+
+    
+    void initializeTexture(const u32 width, const u32 height);
 
     bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
 
