@@ -145,6 +145,18 @@ private:
 
     u32 generateEmptyTexture(const u32 width, const u32 height) const override;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn u32 OpenglLegacy::bindTextureToFbo() const override;
+    ///
+    /// \brief  Binds the internal texture to the internal fbo.
+    ///
+    /// \author Runik
+    /// \date   18/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    void bindTextureToFbo() const override;
+
+    void deleteTexture() const override;
+
     u32 program_shader_;
     u32 vao_;
 };

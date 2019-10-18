@@ -45,6 +45,19 @@ void OpenglModern::shutdown() {
 
 }
     
+u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const {
+    return 0;
+}
+
+void OpenglModern::bindTextureToFbo() const {
+    //glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+    //glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture_, 0);
+}
+
+void OpenglModern::deleteTexture() const {
+    if (texture_ != 0) glDeleteTextures(1, &texture_);
+}
+
 u32 OpenglModern::createFramebuffer()
 {
     u32 framebuffer{};

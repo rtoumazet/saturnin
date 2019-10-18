@@ -42,25 +42,18 @@ namespace video {
 using core::Log;
 
 void OpenglLegacy::initialize() {
-    glGenFramebuffersEXT(1, &fbo_);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
     GLFWwindow* window = glfwGetCurrentContext();
     s32 display_w{};
     s32 display_h{};
     glfwGetFramebufferSize(window, &display_w, &display_h);
-    this->texture_ = generateEmptyTexture(display_w, display_h);
-    setTextureDimension(display_w, display_h);
-    
-    //glGenTextures(1, &texture_);
-    //glBindTexture(GL_TEXTURE_2D, texture_);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1280, 720, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->texture_, 0);
+    initializeTexture(display_w, display_h);
 
+    glGenFramebuffersEXT(1, &fbo_);
+    bindTextureToFbo();
     auto status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-
+    if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
+        Log::error("opengl", "Could not initialize framebuffer object !");
+    }
 }
 
 void OpenglLegacy::shutdown() {
@@ -68,6 +61,15 @@ void OpenglLegacy::shutdown() {
     glDeleteFramebuffersEXT(1, &fbo_);
     glDeleteTextures(1, &texture_);
 }
+
+//void OpenglLegacy::initializeTexture(const u32 width, const u32 height) {
+//    if (texture_ != 0) glDeleteTextures(1, &texture_);
+//    this->texture_ = generateEmptyTexture(width, height);
+//    setTextureDimension(width, height);
+//
+//    // New texture is attached to the fbo
+//    bindTextureToFbo();
+//}
 
 void OpenglLegacy::preRender() {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
@@ -97,7 +99,7 @@ void OpenglLegacy::postRender() {
 };
 
 u32 OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const {
-    u32 texture;
+    u32 texture{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -105,6 +107,15 @@ u32 OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
     return texture;
+}
+
+void OpenglLegacy::bindTextureToFbo() const {
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture_, 0);
+}
+
+void OpenglLegacy::deleteTexture() const {
+    if (texture_ != 0) glDeleteTextures(1, &texture_);
 }
 
 static void error_callback(int error, const char* description) {
