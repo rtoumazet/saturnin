@@ -24,6 +24,7 @@ Saturnin is a Sega Saturn emulator
     * boost-locale (locale)
     * glbinding (opengl functions management)
     * glfw3 (opengl context)
+    * glm (opengl mathematics)
     * dear imgui (gui)
     * libconfig (configuration)
     * libzip (zip handling)
