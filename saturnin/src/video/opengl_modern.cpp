@@ -22,6 +22,9 @@
 #include <glbinding/gl/gl.h>
 #include <glbinding/glbinding.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 
 #include "gui.h"
@@ -37,8 +40,21 @@ using namespace gl;
 namespace saturnin {
 namespace video {
 
-void OpenglModern::initialize() {
+using core::Log;
 
+void OpenglModern::initialize() {
+    GLFWwindow* window = glfwGetCurrentContext();
+    s32 display_w{};
+    s32 display_h{};
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    initializeTexture(display_w, display_h);
+
+    glGenFramebuffers(1, &fbo_);
+    bindTextureToFbo();
+    auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
+        Log::error("opengl", "Could not initialize framebuffer object !");
+    }
 }
 
 void OpenglModern::shutdown() {
@@ -46,57 +62,46 @@ void OpenglModern::shutdown() {
 }
     
 u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const {
-    return 0;
+    u32 texture{};
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    gl::GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+
+    return texture;
 }
 
 void OpenglModern::bindTextureToFbo() const {
-    //glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-    //glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture_, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_, 0);
 }
 
 void OpenglModern::deleteTexture() const {
     if (texture_ != 0) glDeleteTextures(1, &texture_);
 }
 
-u32 OpenglModern::createFramebuffer()
-{
-    u32 framebuffer{};
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    // create a color attachment texture
-    u32 textureColorbuffer;
-    gl::glGenTextures(1, &textureColorbuffer);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 320, 200, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureColorbuffer, 0);
-    gl::GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
-    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        
-    return framebuffer;
-}
-            
 u32 OpenglModern::createVertexShader()
 {
+ 
     u32 vertex_shader;
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-        
+
     const char* vertex_shader_source = R"(
         #version 330 core
         layout(location = 0) in vec3 aPos;
+
+        uniform mat4 trans;
         
         void main()
         {
-        	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        	//gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        	gl_Position.xyz = aPos.xyz;
+            gl_Position.w = 1.0;
         }
     )";
         
@@ -113,18 +118,19 @@ u32 OpenglModern::createVertexShader()
         glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
     }
-        
+
     return vertex_shader;
 }
 u32 OpenglModern::createFragmentShader()
 {
     const char* fragment_shader_source = R"(
         #version 330 core
-        out vec4 FragColor;
+        out vec4 color;
         
         void main()
         {
-            FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+            //color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+            color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
         } 
     )";
         
@@ -137,8 +143,7 @@ u32 OpenglModern::createFragmentShader()
 }
             
 u32 OpenglModern::createProgramShader(const u32 vertex_shader, const u32 fragment_shader) {
-    u32 shader_program;
-    shader_program = glCreateProgram();
+    u32 shader_program = glCreateProgram();
 
     glAttachShader(shader_program, vertex_shader);
     glAttachShader(shader_program, fragment_shader);
@@ -169,23 +174,23 @@ void OpenglModern::setupTriangle() {
         0.0f,  0.5f, 0.0f
     };
 
-    //uint32_t vbo                          = createVertexBufferObject(vertices);
     uint32_t vertex_shader = createVertexShader();
     uint32_t fragment_shader = createFragmentShader();
     program_shader_ = createProgramShader(vertex_shader, fragment_shader);
     std::vector<uint32_t> shaders_to_delete = { vertex_shader, fragment_shader };
     deleteShaders(shaders_to_delete);
 
-    unsigned int vbo;
+    
     glGenVertexArrays(1, &vao_);
-    glGenBuffers(1, &vbo);
+    u32 vertex_buffer{};
+    glGenBuffers(1, &vertex_buffer);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(vao_);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GLenum::GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GLenum::GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
@@ -202,30 +207,53 @@ void OpenglModern::drawTriangle() {
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-s32 OpenglModern::bindTextureToFramebuffer() {
-    GLint ret{};
-    int32_t texture{};
-    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &ret);
-    if (ret != GL_NONE) {
-        glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
-    }
-    return texture;
-}
-
 void OpenglModern::preRender() {
     //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    gl::glViewport(0, 0, 320, 200);
+    //gl::glViewport(0, 0, 320, 200);
     gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 };
 
 void OpenglModern::render() {
-    this->setupTriangle();
-    this->drawTriangle();
+    //this->setupTriangle();
+    //this->drawTriangle();
+    
+    GLuint VertexArrayID;
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+
+    static const GLfloat g_vertex_buffer_data[] = {
+   -1.0f, -1.0f, 0.0f,
+   1.0f, -1.0f, 0.0f,
+   0.0f,  1.0f, 0.0f,
+    };
+
+    GLuint vertexbuffer;
+    // Generate 1 buffer, put the resulting identifier in vertexbuffer
+    glGenBuffers(1, &vertexbuffer);
+    // The following commands will talk about our 'vertexbuffer' buffer
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    // Give our vertices to OpenGL.
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glVertexAttribPointer(
+        0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+        3,                  // size
+        GL_FLOAT,           // type
+        GL_FALSE,           // normalized?
+        0,                  // stride
+        (void*)0            // array buffer offset
+    );
+    // Draw the triangle !
+    glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
+    glDisableVertexAttribArray(0);
 };
 
 void OpenglModern::postRender() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteProgram(program_shader_);
 };
 
 static void error_callback(int error, const char* description)
@@ -252,8 +280,8 @@ int32_t runModernOpengl(core::Emulator_context& state) {
     // GL 3.0 + GLSL 130
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
     std::string window_title = fmt::format(core::tr("Saturnin {0} - Modern rendering"), core::saturnin_version);
@@ -300,19 +328,7 @@ int32_t runModernOpengl(core::Emulator_context& state) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     OpenglModern opengl(state.config());
-    u32 fbo = opengl.createFramebuffer();
-    //opengl.setup_triangle();
-
-    //std::vector<uint8_t> image;
-    //opengl.load_icons(image);
-    //GLuint tex;
-    //glEnable(GL_TEXTURE_2D);
-    //glGenTextures(1, &tex);
-    //glBindTexture(GL_TEXTURE_2D, tex);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    //glTexImage2D(GL_TEXTURE_2D, 0, 4, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
-
+    
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -330,7 +346,7 @@ int32_t runModernOpengl(core::Emulator_context& state) {
         int display_w, display_h;
         glfwMakeContextCurrent(window);
         glfwGetFramebufferSize(window, &display_w, &display_h);
-        glViewport(0, 0, display_w, display_h);
+        //glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 

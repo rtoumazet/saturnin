@@ -1,6 +1,7 @@
 boost-locale
 glbinding
 glfw3
+glm
 imgui
 libconfig
 libzip
