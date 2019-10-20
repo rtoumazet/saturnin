@@ -45,21 +45,9 @@ class OpenglModern : public Opengl {
 public:
     //@{
     // Constructors / Destructors
-    OpenglModern(core::Config* config) : Opengl(config) {};
+    OpenglModern(core::Config* config) : Opengl(config) { initialize(); };
+    ~OpenglModern() { shutdown(); };
     //@}
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 OpenglModern::createFramebuffer();
-    ///
-    /// \brief  Creates the framebuffer used to display the Saturn data.
-    ///
-    /// \author Runik
-    /// \date   12/10/2019
-    ///
-    /// \return The new framebuffer.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    u32 createFramebuffer();
 
     u32 createVertexShader();
     u32 createFragmentShader();
@@ -87,19 +75,6 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void drawTriangle();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn s32 Opengl::bindTextureToFramebuffer();
-    ///
-    /// \brief  Binds a texture to the current framebuffer.
-    ///
-    /// \author Runik
-    /// \date   12/10/2019
-    ///
-    /// \return The texture id.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    s32 bindTextureToFramebuffer();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void initialize() override;

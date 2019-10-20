@@ -106,7 +106,7 @@ public:
 
     uint32_t generateIconsTexture();
 
-    uint32_t     iconsTextureId;    ///< Texture id storing data for UI icons
+    uptr     iconsTextureId;    ///< Texture id storing data for UI icons
 
 protected:
     ////////////////////////////////////////////////////////////////////////////////////////////////////

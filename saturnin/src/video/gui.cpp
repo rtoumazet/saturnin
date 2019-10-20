@@ -100,7 +100,7 @@ namespace gui {
         ImGui::Begin("Core", &show_window, window_flags);
         //if (ImGui::Button("Play")) show_test_window ^= 1;
 
-        if (ImGui::ImageButton((ImTextureID)opengl.iconsTextureId, ImVec2(20, 20), icon_play_uv0, icon_play_uv1)) {
+        if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(opengl.iconsTextureId), ImVec2(20, 20), icon_play_uv0, icon_play_uv1)) {
 
         }
 
@@ -115,10 +115,10 @@ namespace gui {
 
         //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.1000), ImVec2(0.2333, 0.2333), 0);
         ImGui::SameLine();
-        ImGui::ImageButton((ImTextureID)opengl.iconsTextureId, ImVec2(20, 20), icon_pause_uv0, icon_pause_uv1);
+        ImGui::ImageButton(reinterpret_cast<ImTextureID>(opengl.iconsTextureId), ImVec2(20, 20), icon_pause_uv0, icon_pause_uv1);
         //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.5000), ImVec2(0.2333, 0.5000), 0);
         ImGui::SameLine();
-        ImGui::ImageButton((ImTextureID)opengl.iconsTextureId, ImVec2(20, 20), icon_stop_uv0, icon_stop_uv1);
+        ImGui::ImageButton(reinterpret_cast<ImTextureID>(opengl.iconsTextureId), ImVec2(20, 20), icon_stop_uv0, icon_stop_uv1);
         //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.5000, 0.1000), ImVec2(0.5333, 0.2333), 0);
         ImGui::SameLine();
 
@@ -375,11 +375,15 @@ namespace gui {
     }
 
     void renderToTexture(int32_t texture, const uint32_t width, const uint32_t height) {
+        //ImGui::GetWindowDrawList()->AddImage(
+        //    (ImTextureID)(intptr_t)texture,
+        //    ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y), 
+        //    ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
+        //    ImVec2(0, 0), ImVec2(1, 1));
         ImGui::GetWindowDrawList()->AddImage(
             (ImTextureID)(intptr_t)texture,
             ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y), 
-            ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
-            ImVec2(0, 0), ImVec2(1, 1));
+            ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height));
     }
 }
 }
