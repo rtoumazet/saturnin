@@ -55,13 +55,21 @@ void OpenglModern::initialize() {
     if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
         Log::error("opengl", "Could not initialize framebuffer object !");
     }
+
+    u32 vertex_shader   = createVertexShader();
+    u32 fragment_shader = createFragmentShader();
+    program_shader_     = createProgramShader(vertex_shader, fragment_shader);
+    std::vector<uint32_t> shaders_to_delete = { vertex_shader, fragment_shader };
+    deleteShaders(shaders_to_delete);
 }
 
 void OpenglModern::shutdown() {
-
+    glDeleteProgram(program_shader_);
 }
     
 u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const {
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+
     u32 texture{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -85,39 +93,36 @@ void OpenglModern::deleteTexture() const {
     if (texture_ != 0) glDeleteTextures(1, &texture_);
 }
 
-u32 OpenglModern::createVertexShader()
-{
- 
-    u32 vertex_shader;
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-
+u32 OpenglModern::createVertexShader() {
     const char* vertex_shader_source = R"(
         #version 330 core
-        layout(location = 0) in vec3 aPos;
 
-        uniform mat4 trans;
+        in vec2 position;        
+        uniform mat4 rotate;
+        //in vec3 color;
+        //in vec2 texcoord;
+
+        //out vec3 Color;
+        //out vec2 Texcoord;
         
         void main()
         {
-        	//gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-        	gl_Position.xyz = aPos.xyz;
-            gl_Position.w = 1.0;
+        	//Color = color;
+            //Texcoord = texcoord;
+            gl_Position = rotate * vec4(position, 0.0, 1.0);
+            //gl_Position = vec4(position, 0.0, 1.0);
+            
+            //gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        	//gl_Position.xyz = aPos.xyz;
+            //gl_Position.w = 1.0;
         }
     )";
         
-    glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
+    u32 vertex_shader{};
+    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
     glCompileShader(vertex_shader);
-        
-    int32_t  success;
-                
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
-        
-    if (!success)
-    {
-        char info_log[512];
-        glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
-    }
+    checkShaderCompilation(vertex_shader);
 
     return vertex_shader;
 }
@@ -125,6 +130,7 @@ u32 OpenglModern::createFragmentShader()
 {
     const char* fragment_shader_source = R"(
         #version 330 core
+        
         out vec4 color;
         
         void main()
@@ -134,10 +140,12 @@ u32 OpenglModern::createFragmentShader()
         } 
     )";
         
-    u32 fragment_shader;
+    u32 fragment_shader {};
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
     glCompileShader(fragment_shader);
+
+    checkShaderCompilation(fragment_shader);
         
     return fragment_shader;
 }
@@ -148,14 +156,7 @@ u32 OpenglModern::createProgramShader(const u32 vertex_shader, const u32 fragmen
     glAttachShader(shader_program, vertex_shader);
     glAttachShader(shader_program, fragment_shader);
     glLinkProgram(shader_program);
-
-    GLint success = 0;
-    glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-    if (!success) {
-        char info_log[256];
-        glGetProgramInfoLog(shader_program, 512, NULL, info_log);
-        std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << info_log << std::endl;
-    }
+    checkProgramCompilation(shader_program);
 
     return shader_program;
 }
@@ -174,13 +175,6 @@ void OpenglModern::setupTriangle() {
         0.0f,  0.5f, 0.0f
     };
 
-    uint32_t vertex_shader = createVertexShader();
-    uint32_t fragment_shader = createFragmentShader();
-    program_shader_ = createProgramShader(vertex_shader, fragment_shader);
-    std::vector<uint32_t> shaders_to_delete = { vertex_shader, fragment_shader };
-    deleteShaders(shaders_to_delete);
-
-    
     glGenVertexArrays(1, &vao_);
     u32 vertex_buffer{};
     glGenBuffers(1, &vertex_buffer);
@@ -204,56 +198,28 @@ void OpenglModern::setupTriangle() {
 void OpenglModern::drawTriangle() {
     glUseProgram(program_shader_);
     glBindVertexArray(vao_); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+
+    glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    GLint uni_rotate = glGetUniformLocation(program_shader_, "rotate");
+    glUniformMatrix4fv(uni_rotate, 1, GL_FALSE, glm::value_ptr(rotate));
+
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void OpenglModern::preRender() {
-    //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    //gl::glViewport(0, 0, 320, 200);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
     gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 };
 
 void OpenglModern::render() {
-    //this->setupTriangle();
-    //this->drawTriangle();
-    
-    GLuint VertexArrayID;
-    glGenVertexArrays(1, &VertexArrayID);
-    glBindVertexArray(VertexArrayID);
-
-    static const GLfloat g_vertex_buffer_data[] = {
-   -1.0f, -1.0f, 0.0f,
-   1.0f, -1.0f, 0.0f,
-   0.0f,  1.0f, 0.0f,
-    };
-
-    GLuint vertexbuffer;
-    // Generate 1 buffer, put the resulting identifier in vertexbuffer
-    glGenBuffers(1, &vertexbuffer);
-    // The following commands will talk about our 'vertexbuffer' buffer
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    // Give our vertices to OpenGL.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glVertexAttribPointer(
-        0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-        3,                  // size
-        GL_FLOAT,           // type
-        GL_FALSE,           // normalized?
-        0,                  // stride
-        (void*)0            // array buffer offset
-    );
-    // Draw the triangle !
-    glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-    glDisableVertexAttribArray(0);
+    this->setupTriangle();
+    this->drawTriangle();
 };
 
 void OpenglModern::postRender() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDeleteProgram(program_shader_);
 };
 
 static void error_callback(int error, const char* description)
@@ -351,7 +317,7 @@ int32_t runModernOpengl(core::Emulator_context& state) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         gui::buildGui(state, opengl, display_w, display_h);
-
+ 
         if (state.renderingStatus_ == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
 
         ImGui::Render();
@@ -370,6 +336,43 @@ int32_t runModernOpengl(core::Emulator_context& state) {
     glfwTerminate();
 
     return EXIT_SUCCESS;
+}
+
+void checkShaderCompilation(const u32 shader) {
+    s32 success{};
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    s32 length{};
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+    if (!success) {
+        std::vector<char> v(length);
+        glGetShaderInfoLog(shader, length, nullptr, v.data());
+        std::string info(v.begin(), v.end());
+
+        GLenum type{};
+        std::string shader_type{};
+        glGetShaderiv(shader, GL_SHADER_TYPE, &type);
+        switch (type) {
+            case GL_VERTEX_SHADER:   shader_type = "Vertex shader"; break;
+            case GL_FRAGMENT_SHADER: shader_type = "Fragment shader"; break;
+            default: shader_type = "Unknown shader"; break;
+        }
+        Log::error("opengl", "{} compilation failed : {}", shader_type, info);
+    }
+}
+
+void checkProgramCompilation(const u32 program) {
+    s32 success{};
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    s32 length{};
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+
+    if (!success) {
+        std::vector<char> v(length);
+        glGetProgramInfoLog(program, length, nullptr, v.data());
+        std::string info(v.begin(), v.end());
+        
+        Log::error("opengl", "Shader program link failed : {}", info);
+    }
 }
 
 };

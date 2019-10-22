@@ -55,7 +55,7 @@ bool Opengl::isWindowResized(const u32 new_width, const u32 new_height) const {
 }
 
 void Opengl::initializeTexture(const u32 width, const u32 height) {
-    deleteTexture();
+    //deleteTexture();
     this->texture_ = generateEmptyTexture(width, height);
     setTextureDimension(width, height);
 
