@@ -78,6 +78,8 @@ public:
 
     void postRender() override;
 
+    void updateTextureSize(const u32 width, const u32 height) override;
+
 private:
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

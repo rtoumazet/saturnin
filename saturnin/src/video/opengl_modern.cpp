@@ -84,6 +84,29 @@ u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const 
     return texture;
 }
 
+void OpenglModern::updateTextureSize( const u32 width, const u32 height) {
+    //deleteTexture();
+
+    //glGenTextures(1, &texture_);
+    //glBindTexture(GL_TEXTURE_2D, texture_);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    //gl::GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    //glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+
+    setTextureDimension(width, height);
+
+    //// New texture is attached to the fbo
+    //bindTextureToFbo();
+
+    
+    //glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+    //glViewport(0, 0, width, height);
+}
+
 void OpenglModern::bindTextureToFbo() const {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_, 0);
@@ -209,6 +232,7 @@ void OpenglModern::drawTriangle() {
 
 void OpenglModern::preRender() {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+    glViewport(0, 0, current_texture_width_, current_texture_height_);
     gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 };

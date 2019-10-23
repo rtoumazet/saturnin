@@ -98,6 +98,10 @@ void OpenglLegacy::postRender() {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 };
 
+void OpenglLegacy::updateTextureSize(const u32 width, const u32 height){
+    initializeTexture(width, height);
+}
+
 u32 OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const {
     u32 texture{};
     glGenTextures(1, &texture);
