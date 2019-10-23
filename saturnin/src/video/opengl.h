@@ -66,6 +66,7 @@ public:
     virtual void render() abstract;
     virtual void postRender() abstract;
     virtual u32  generateEmptyTexture(const u32 width, const u32 height) const abstract;
+    virtual void updateTextureSize(const u32 width, const u32 height) abstract;
     virtual void deleteTexture() const abstract;
     
     //@}
@@ -99,6 +100,8 @@ public:
 
     
     void initializeTexture(const u32 width, const u32 height);
+
+    
 
     bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
 

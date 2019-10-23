@@ -154,7 +154,8 @@ namespace gui {
         //ImGui::BeginChild("Video rendering");
 
         if (opengl.isWindowResized(width, height)) {
-            opengl.initializeTexture(width, height);
+            //opengl.initializeTexture(width, height);
+            opengl.updateTextureSize(width, height);
         }
         
         opengl.preRender();
