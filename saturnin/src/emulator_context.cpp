@@ -68,6 +68,10 @@ bool Emulator_context::initialize() {
 }
 
 bool Emulator_context::run() {
+    return true;
+}
+
+bool Emulator_context::startInterface() {
     this->memory()->loadBios(core::HardwareMode::saturn);
 
     sh2::initializeOpcodesLut();

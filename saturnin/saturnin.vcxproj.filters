@@ -189,9 +189,4 @@
       <Filter>Fichiers sources\video</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="res\icons.png.inc">
-      <Filter>Fichiers de ressources</Filter>
-    </None>
-  </ItemGroup>
 </Project>

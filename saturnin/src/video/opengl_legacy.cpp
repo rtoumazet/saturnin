@@ -73,6 +73,7 @@ void OpenglLegacy::shutdown() {
 
 void OpenglLegacy::preRender() {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+    glViewport(0, 0, current_texture_width_, current_texture_height_);
 
     glClear(GL_COLOR_BUFFER_BIT);
 };
@@ -100,6 +101,7 @@ void OpenglLegacy::postRender() {
 
 void OpenglLegacy::updateTextureSize(const u32 width, const u32 height){
     initializeTexture(width, height);
+    //setTextureDimension(width, height);
 }
 
 u32 OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const {
@@ -139,7 +141,8 @@ s32 runLegacyOpengl(core::Emulator_context& state) {
         return EXIT_FAILURE;
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
-    glfwSetWindowUserPointer(window, (void*)&state);
+    //glfwSetWindowUserPointer(window, (void*)&state);
+    glfwSetWindowUserPointer(window, static_cast<void*>(&state));
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
@@ -191,7 +194,6 @@ s32 runLegacyOpengl(core::Emulator_context& state) {
     //io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
-    bool show_test_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -213,9 +215,6 @@ s32 runLegacyOpengl(core::Emulator_context& state) {
         gui::buildGui(state, opengl, display_w, display_h);
 
         if (state.renderingStatus_ == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
-
-        gui::show_test_window(show_test_window);
-
 
         ImGui::Render();
             
