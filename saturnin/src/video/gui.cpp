@@ -19,6 +19,7 @@
 
 #include <imgui.h>
 #include <filesystem> // filesystem
+#include <fstream> // ifstream
 #include "gui.h"
 #include "../locale.h" // tr
 #include "../utilities.h" // stringToVector
@@ -28,51 +29,21 @@
 //namespace core  = saturnin::core;
 namespace util  = saturnin::utilities;
 namespace cdrom = saturnin::cdrom;
+namespace fs    = std::filesystem;
 
 namespace saturnin {
 namespace gui {
 
+    static bool show_options     = false;
+    static bool show_load_stv    = false;
+    static bool show_load_binary = false;
+    static bool show_demo        = true;
+    static bool show_log         = true;
+
     using core::Log;
     using core::tr;
 
-    static const float icon_map_height{ 1139 };
-    static const float icon_height{ 104 };
-
-    static const ImVec2 icon_play_uv0(0, icon_height * 0 / icon_map_height);
-    static const ImVec2 icon_play_uv1(1, icon_height * 1 / icon_map_height);
-
-    static const ImVec2 icon_pause_uv0(0, icon_height * 1 / icon_map_height);
-    static const ImVec2 icon_pause_uv1(1, icon_height * 2 / icon_map_height);
-
-    static const ImVec2 icon_stop_uv0(0, icon_height * 2 / icon_map_height);
-    static const ImVec2 icon_stop_uv1(1, icon_height * 3 / icon_map_height);
-
-    //void show_simple_window(bool& show_test_window, bool& show_another_window) {
-    //    // 1. Show a simple window
-    //    // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
-    //    {
-    //        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    //        static float f = 0.0f;
-    //        ImGui::Text("Hello, world!");
-    //        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-    //        ImGui::ColorEdit3("clear color", (float*)&clear_color);
-    //        if (ImGui::Button("Test Window")) show_test_window ^= 1;
-    //        if (ImGui::Button("Another Window")) show_another_window ^= 1;
-    //        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    //    }
-    //}
-
-    //void show_another_window(bool& show_another_window) {
-    //    // 2. Show another simple window, this time using an explicit Begin/End pair
-    //    if (show_another_window)
-    //    {
-    //        ImGui::Begin("Another Window", &show_another_window);
-    //        ImGui::Text("Hello from another window!");
-    //        ImGui::End();
-    //    }
-    //}
-
-    void show_test_window(bool& show_test_window) {
+    void showImguiDemoWindow(const bool show_test_window) {
         // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
         if (show_test_window)
         {
@@ -82,7 +53,7 @@ namespace gui {
     }
 
     //void showCoreWindow(const uint32_t tex) {
-    void showCoreWindow(video::Opengl& opengl) {
+    void showCoreWindow(core::Emulator_context& state, const video::Opengl& opengl) {
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
         window_flags |= ImGuiWindowFlags_NoResize;
@@ -100,27 +71,11 @@ namespace gui {
         ImGui::Begin("Core", &show_window, window_flags);
         //if (ImGui::Button("Play")) show_test_window ^= 1;
 
-        if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(opengl.iconsTextureId), ImVec2(20, 20), icon_play_uv0, icon_play_uv1)) {
-
-        }
-
-        //if (ImGui::Button("Play")) {
-        //    ImGui::OpenPopup("testpopup");
-        //}
-
-        //if (ImGui::BeginPopup("testpopup")) {
-        //    ImGui::Text("TEST");
-        //    ImGui::EndPopup();
-        //}
-
-        //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.1000), ImVec2(0.2333, 0.2333), 0);
+        if (ImGui::Button("Play")) state.run();
         ImGui::SameLine();
-        ImGui::ImageButton(reinterpret_cast<ImTextureID>(opengl.iconsTextureId), ImVec2(20, 20), icon_pause_uv0, icon_pause_uv1);
-        //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.1000, 0.5000), ImVec2(0.2333, 0.5000), 0);
+        ImGui::Button("Pause");
         ImGui::SameLine();
-        ImGui::ImageButton(reinterpret_cast<ImTextureID>(opengl.iconsTextureId), ImVec2(20, 20), icon_stop_uv0, icon_stop_uv1);
-        //ImGui::ImageButton((ImTextureID)tex, ImVec2(20, 20), ImVec2(0.5000, 0.1000), ImVec2(0.5333, 0.2333), 0);
-        ImGui::SameLine();
+        ImGui::Button("Stop");
 
         //ImGui::SameLine();
         //ImGui::PushID(0);
@@ -134,24 +89,21 @@ namespace gui {
         ImGui::End();
     }
 
-    void showRenderingWindow(video::Opengl& opengl, u32 width, u32 height) {
+    void showRenderingWindow(video::Opengl& opengl, const u32 width, const u32 height) {
         ImGui::SetNextWindowPos(ImVec2(0, 0 + 20), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(static_cast<float>(width), static_cast<float>(height + 20))); // + 20 
-
 
         //ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar;
-        flags |= ImGuiWindowFlags_NoResize;
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize;
         flags |= ImGuiWindowFlags_NoScrollbar;
-        flags |= ImGuiWindowFlags_NoInputs;
+        flags |= ImGuiWindowFlags_NoCollapse;
         flags |= ImGuiWindowFlags_NoSavedSettings;
         flags |= ImGuiWindowFlags_NoFocusOnAppearing;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-        ImGui::Begin("Video rendering", NULL, flags);
-        //ImGui::BeginChild("Video rendering");
+        ImGui::Begin("Video rendering", nullptr, flags);
 
         if (opengl.isWindowResized(width, height)) {
             //opengl.initializeTexture(width, height);
@@ -162,7 +114,7 @@ namespace gui {
 
         opengl.render();
         if (opengl.texture() != 0) {
-            gui::renderToTexture(opengl.texture(), width, height);
+            gui::addTextureToDrawList(opengl.texture(), width, height);
         }
 
         opengl.postRender();
@@ -173,7 +125,7 @@ namespace gui {
         //ImGui::PopStyleVar();
     }
 
-    void showStvWindow(bool *opened) {
+    void showStvWindow(bool* opened) {
         auto files = core::listStvConfigurationFiles();
 
         static int listbox_item_current = 1;
@@ -351,11 +303,33 @@ namespace gui {
         ImGui::End();
     }
 
-    void buildGui(core::Emulator_context& state, video::Opengl& opengl, u32 width, u32 height) {
-        static bool show_options     = false;
-        static bool show_load_stv    = false;
-        static bool show_load_binary = false;
+    void showLogWindow(bool* opened) {
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
+        window_flags |= ImGuiWindowFlags_NoResize;
+        
 
+        ImGui::SetNextWindowPos(ImVec2(0, 400), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(600, 150));
+
+
+        ImGui::Begin("Log", opened, window_flags);
+        
+        std::string bios_path{};
+        auto log_path = fs::current_path() / "logs" / "saturnin.log";
+        std::ifstream input_file(log_path.native(), std::ios::in);
+        if (input_file) {
+            std::stringstream buffer;
+            buffer << input_file.rdbuf();
+            input_file.close();
+
+            std::string str = buffer.str();
+            ImGui::TextUnformatted(str.c_str());
+        }
+        
+        ImGui::End();
+    }
+
+    void buildGui(core::Emulator_context& state, video::Opengl& opengl, const u32 width, const u32 height) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu(tr("File").c_str())) {
                 ImGui::MenuItem(tr("Load ST-V rom").c_str(), NULL, &show_load_stv);
@@ -367,20 +341,18 @@ namespace gui {
         }
         ImGui::EndMainMenuBar();
 
-        showCoreWindow(opengl);
+        showCoreWindow(state, opengl);
         
-        showRenderingWindow(opengl, width, height);
+        //showRenderingWindow(opengl, width, height);
+        showRenderingWindow(opengl, 320, 240);
 
         if (show_options)   showOptionsWindow(state, &show_options);
         if (show_load_stv)  showStvWindow(&show_load_stv);
+        if (show_demo)      showImguiDemoWindow(&show_demo);
+        if (show_log)       showLogWindow(&show_log);
     }
 
-    void renderToTexture(int32_t texture, const uint32_t width, const uint32_t height) {
-        //ImGui::GetWindowDrawList()->AddImage(
-        //    (ImTextureID)(intptr_t)texture,
-        //    ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y), 
-        //    ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
-        //    ImVec2(0, 0), ImVec2(1, 1));
+    void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t height) {
         ImGui::GetWindowDrawList()->AddImage(
             (ImTextureID)(intptr_t)texture,
             ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y), 

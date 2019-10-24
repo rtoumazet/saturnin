@@ -85,26 +85,7 @@ u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const 
 }
 
 void OpenglModern::updateTextureSize( const u32 width, const u32 height) {
-    //deleteTexture();
-
-    //glGenTextures(1, &texture_);
-    //glBindTexture(GL_TEXTURE_2D, texture_);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    //gl::GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    //glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
-
-    setTextureDimension(width, height);
-
-    //// New texture is attached to the fbo
-    //bindTextureToFbo();
-
-    
-    //glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-    //glViewport(0, 0, width, height);
+    initializeTexture(width, height);
 }
 
 void OpenglModern::bindTextureToFbo() const {
@@ -281,7 +262,8 @@ int32_t runModernOpengl(core::Emulator_context& state) {
     }
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
-    glfwSetWindowUserPointer(window, (void*)&state);
+    //glfwSetWindowUserPointer(window, (void*)&state);
+    glfwSetWindowUserPointer(window, static_cast<void*>(&state));
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
@@ -312,9 +294,6 @@ int32_t runModernOpengl(core::Emulator_context& state) {
     //io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
-    bool show_test_window = true;
-    bool show_another_window = false;
-    bool show_video = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     OpenglModern opengl(state.config());
@@ -328,9 +307,6 @@ int32_t runModernOpengl(core::Emulator_context& state) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
-            
-        gui::show_test_window(show_test_window);
 
         // Rendering
         int display_w, display_h;

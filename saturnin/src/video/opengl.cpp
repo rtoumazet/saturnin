@@ -30,8 +30,6 @@
 #include "../config.h"
 #include "../log.h"
 
-#include "../../res/icons.png.inc"
-
 namespace saturnin {
 namespace video {
 
@@ -55,7 +53,7 @@ bool Opengl::isWindowResized(const u32 new_width, const u32 new_height) const {
 }
 
 void Opengl::initializeTexture(const u32 width, const u32 height) {
-    //deleteTexture();
+    deleteTexture();
     this->texture_ = generateEmptyTexture(width, height);
     setTextureDimension(width, height);
 
@@ -73,49 +71,6 @@ static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
-
-//void Opengl::preRendering(uint32_t& fbo) {
-//    glBindFramebuffer(GL_FRAMEBUFFER,  fbo);
-//    gl::glViewport(0, 0, 320, 200);
-//    gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-//    glClear(GL_COLOR_BUFFER_BIT);
-//}
-
-//int32_t Opengl::calculateLegacyRendering() {
-//    static float i = 0;
-//    glPushMatrix();
-//    glTranslatef(0.0f, 0.0f, 0.0f);
-//    glRotatef(i, 0.0f, 0.0f, 1.0f);
-//
-//    //glBindFramebufferEXT();
-//
-//    glBegin(GL_TRIANGLES);
-//    glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
-//    glVertex3f(-0.5f, -0.5f, 0.0f);
-//    glVertex3f(0.5f, -0.5f, 0.0f);
-//    glVertex3f(0.0f, 0.5f, 0.0f);
-//    glEnd();
-//
-//    //glDisable(GL_TEXTURE_2D);
-//    //glBindTexture(GL_TEXTURE_2D, 0);
-//
-//    glPopMatrix();
-//    ++i;
-//
-//    return this->bindTextureToFramebuffer();
-//    //return tex;
-//}
-
-//int32_t Opengl::calculateModernRendering() {
-//    this->setupTriangle();
-//    this->drawTriangle();
-//
-//    return this->bindTextureToFramebuffer();
-//}
-
-//void Opengl::postRendering() {
-//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//}
 
 bool Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) {
     // Load file and decode image.

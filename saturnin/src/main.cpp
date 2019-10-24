@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
         std::exit(EXIT_FAILURE);
     }
 
-    if (!state.run()) {
+    if (!state.startInterface()) {
         std::exit(EXIT_SUCCESS);
     }
 };

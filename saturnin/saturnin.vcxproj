@@ -224,9 +224,6 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="src\video\opengl_legacy.h" />
     <ClInclude Include="src\video\opengl_modern.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="res\icons.png.inc" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
