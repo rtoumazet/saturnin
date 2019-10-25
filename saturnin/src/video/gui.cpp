@@ -316,14 +316,21 @@ namespace gui {
         
         std::string bios_path{};
         auto log_path = fs::current_path() / "logs" / "saturnin.log";
-        std::ifstream input_file(log_path.native(), std::ios::in);
-        if (input_file) {
-            std::stringstream buffer;
-            buffer << input_file.rdbuf();
-            input_file.close();
+        ImGui::TextUnformatted(log_path.string().c_str());
+        std::ifstream input_file(log_path.string().c_str(), std::ios::in);
+        
+        if (input_file.is_open()) {
+            std::string str;
+            while (std::getline(input_file, str)) {
+                ImGui::TextUnformatted(str.c_str());
+            }
+            if(input_file.bad()) ImGui::TextUnformatted("error");
+            //std::stringstream buffer;
+            //buffer << input_file.rdbuf();
+            //input_file.close();
 
-            std::string str = buffer.str();
-            ImGui::TextUnformatted(str.c_str());
+            //std::string str = buffer.str();
+            //ImGui::TextUnformatted(str.c_str());
         }
         
         ImGui::End();

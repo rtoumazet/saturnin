@@ -41,6 +41,8 @@ namespace core {
         createLogger("vdp2", sink);
         createLogger("opengl", sink);
 
+        //loggers_.at("console")->
+
         return true;
     }
 
