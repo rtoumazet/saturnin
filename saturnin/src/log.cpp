@@ -17,8 +17,8 @@
 // limitations under the License.
 //
 
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 #include "log.h"
 
 namespace fs = std::filesystem;
@@ -41,7 +41,10 @@ namespace core {
         createLogger("vdp2", sink);
         createLogger("opengl", sink);
 
-        //loggers_.at("console")->
+        // :TODO: replace by spdlog::enable_backtrace() when version 1.4.X is ported to vcpkg
+        spdlog::flush_every(std::chrono::seconds(5));
+
+        auto log_file = fs::current_path() / "logs" / "saturnin.log";
 
         return true;
     }

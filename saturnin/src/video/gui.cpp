@@ -20,7 +20,9 @@
 #include <imgui.h>
 #include <filesystem> // filesystem
 #include <fstream> // ifstream
+#include <thread> // thread
 #include "gui.h"
+#include "../emulator_enums.h" // EmulationStatus
 #include "../locale.h" // tr
 #include "../utilities.h" // stringToVector
 #include "../cdrom/cdrom.h" // Cdrom
@@ -52,7 +54,6 @@ namespace gui {
         }
     }
 
-    //void showCoreWindow(const uint32_t tex) {
     void showCoreWindow(core::Emulator_context& state, const video::Opengl& opengl) {
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
@@ -70,12 +71,20 @@ namespace gui {
         bool show_window;
         ImGui::Begin("Core", &show_window, window_flags);
         //if (ImGui::Button("Play")) show_test_window ^= 1;
-
-        if (ImGui::Button("Play")) state.run();
+        static std::thread emu_thread;
+        if (ImGui::Button("Play")) {
+            std::thread local_thread(&core::Emulator_context::run, &state);
+            emu_thread = move(local_thread);
+            
+        }
         ImGui::SameLine();
         ImGui::Button("Pause");
         ImGui::SameLine();
-        ImGui::Button("Stop");
+        if (ImGui::Button("Stop")) { 
+            state.emulationStatus_ = core::EmulationStatus::stopped;
+            if(emu_thread.joinable()) emu_thread.join();
+            Log::info("main", tr("Main emulation thread finished"));
+        };
 
         //ImGui::SameLine();
         //ImGui::PushID(0);
@@ -313,26 +322,23 @@ namespace gui {
 
 
         ImGui::Begin("Log", opened, window_flags);
-        
-        std::string bios_path{};
-        auto log_path = fs::current_path() / "logs" / "saturnin.log";
-        ImGui::TextUnformatted(log_path.string().c_str());
-        std::ifstream input_file(log_path.string().c_str(), std::ios::in);
-        
-        if (input_file.is_open()) {
-            std::string str;
-            while (std::getline(input_file, str)) {
-                ImGui::TextUnformatted(str.c_str());
-            }
-            if(input_file.bad()) ImGui::TextUnformatted("error");
-            //std::stringstream buffer;
-            //buffer << input_file.rdbuf();
-            //input_file.close();
 
-            //std::string str = buffer.str();
-            //ImGui::TextUnformatted(str.c_str());
+        static std::filesystem::file_time_type log_time;
+        auto log_file = fs::current_path() / "logs" / "saturnin.log";
+
+        static std::string value_displayed{};
+        if(log_time != fs::last_write_time(log_file)){
+            std::ifstream input_file(log_file.c_str(), std::ios::in);
+            if (input_file.is_open()) {
+                std::stringstream buffer;
+                buffer << input_file.rdbuf();
+                input_file.close();
+
+                value_displayed = buffer.str();
+            }
+            log_time = fs::last_write_time(log_file);
         }
-        
+        ImGui::TextUnformatted(value_displayed.c_str());
         ImGui::End();
     }
 
