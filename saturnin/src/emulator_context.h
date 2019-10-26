@@ -97,30 +97,26 @@ static const std::string saturnin_version{ "1.00" };
         bool initialize();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void initialize()
+        /// \fn void Emulator_context::run();
         ///
-        /// \brief  Runs the emulation
+        /// \brief  Runs the emulation.
         ///
         /// \author Runik
         /// \date   26/09/2018
-        ///
-        /// \return True if the program ran without errors.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        bool run();
+        void run();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn bool Emulator_context::startInterface();
+        /// \fn void Emulator_context::startInterface();
         ///
         /// \brief  Starts the emulator GUI.
         ///
         /// \author Runik
         /// \date   24/10/2019
-        ///
-        /// \return True if it succeeds.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        bool startInterface();
+        void startInterface();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn Config* Emulator_context::config()

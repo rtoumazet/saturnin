@@ -67,11 +67,10 @@ bool Emulator_context::initialize() {
     return true;
 }
 
-bool Emulator_context::run() {
-    return true;
-}
+void Emulator_context::run() {
+    Log::info("main", "Main emulation thread started");
+    this->emulationStatus_ = EmulationStatus::running;
 
-bool Emulator_context::startInterface() {
     this->memory()->loadBios(core::HardwareMode::saturn);
 
     sh2::initializeOpcodesLut();
@@ -89,113 +88,20 @@ bool Emulator_context::startInterface() {
     //    std::cout << "Version:  " << plugin->version() << std::endl;
     //    plugin->log("test");
 
-    std::cout << core::tr("Hello world.") << std::endl;
-    core::rawWrite<uint32_t>(this->memory()->workram_low_, 0, 0x12345678);
-    auto val = core::rawRead<uint16_t>(this->memory()->workram_low_, 2);
-    core::rawWrite<uint32_t>(this->memory()->rom_, 0, 0x12345678);
-
-    auto blah = this->memory()->read<uint8_t>(0);
-
     Log::error("sh2", "Unexpected opcode({} SH2)\nOpcode: {:#06x}\nPC: {:#010x}", "Master", 0x4e73, 0x20000200);
-
-    StatusRegister sr{ 0 };
-    sr.set(StatusRegister::i);
-    u8 i = sr.get(StatusRegister::i);
-    sr.set(StatusRegister::i, static_cast<u8>(0x8));
-    i = sr.get(StatusRegister::i);
-
-    u32 mach = 0x89abcdef;
-    u32 macl = 0x01234567;
-
-    s64 mac{ static_cast<u32>(mach) };
-    mac <<= 32;
-    mac |= static_cast<u32>(macl);
-
-    s64 mac1{ mach };
-    mac1 <<= 32;
-    mac1 |= macl;
-
-    std::array<u8, 10> r;
-    r[0] = 10;
-    --r[0];
-
-    auto dmr = DmaModeRegister(0x000000AA);
-    //auto w = isr.test();
-    //auto y = isr.testRange();
-    dmr.set(DmaModeRegister::startingFactorSelect);
-    dmr.reset(DmaModeRegister::startingFactorSelect);
-    //isr.set(InterruptStatusRegister::bBus, StartingFactorSelect::timer_1);
-    
-    DmaEnableRegister r0;
-    DmaEnableRegister r1;
-    DmaEnableRegister r2;
-
-    u8 level = 1;
-
-    DmaEnableRegister* reg = nullptr;
-    switch (level) {
-        case 0: reg = &r0; break;
-        case 1: reg = &r1; break;
-        case 2: reg = &r2; break;
-    }
-
-    {
-        core::rawWrite<uint32_t>(this->memory()->scu_, 0, 0x00112233);
-        auto start = std::chrono::steady_clock::now();
-
-        for (uint32_t i = 0; i < 1000000; ++i) {
-            auto dmr = DmaModeRegister(core::rawRead<uint32_t>(this->memory()->scu_, 0));
-            auto t = dmr.get(DmaModeRegister::startingFactorSelect);
-            //dmr.set(DmaModeRegister::startingFactorSelect, StartingFactorSelect::h_blank_in);
-            //core::rawWrite<uint32_t>(this->memory()->scu_, 0, dmr.toUlong());
-            
-            //auto dmr2 = DmaModeRegister(core::rawRead<uint32_t>(this->memory()->scu_, 0));
-            //dmr.reset(DmaModeRegister::startingFactorSelect);
-            //core::rawWrite<uint32_t>(this->memory()->scu_, 0, dmr.toUlong());
-        }
-        auto end = std::chrono::steady_clock::now();
-        auto diff = end - start;
-        std::cout << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
-    }
-
-    {
-        core::rawWrite<uint32_t>(this->memory()->scu_, 0, 0x00112233);
-        auto start = std::chrono::steady_clock::now();
-
-        for (uint32_t i = 0; i < 1000000; ++i) {
-            uint32_t dmr = core::rawRead<uint32_t>(this->memory()->scu_, 0);
-
-            auto t = static_cast<StartingFactorSelect>(dmr & 0x7);
-            //dmr &= 0xFFFFFFF8;
-            //dmr |= static_cast<uint32_t>(StartingFactorSelect::h_blank_in);
-            //core::rawWrite<uint32_t>(this->memory()->scu_, 0, dmr);
-
-            //uint32_t dmr2 = core::rawRead<uint32_t>(this->memory()->scu_, 0);
-            //dmr &= 0xFFFFFFF8;
-            //core::rawWrite<uint32_t>(this->memory()->scu_, 0, dmr);
-        }
-        auto end = std::chrono::steady_clock::now();
-        auto diff = end - start;
-        std::cout << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
-    }
 
     scu_->dmaTest();
 
-    s32 a = 0x01234567;
-    s32 b = 0x89abcdef;
-    //s64 dividend = static_cast<u64>((static_cast<u64>(a) << 32) | static_cast<u64>(b));
-    s64 dividend = (static_cast<s64>(a) << 32) | (b & 0xffffffff);
-  
     // TESTING //
-
-    uint8_t status{};
-    while (this->renderingStatus_ != RenderingStatus::stopped) {
-        this->renderingStatus_ = RenderingStatus::running;
-        bool is_legacy_opengl = this->config()->readValue(core::Access_keys::config_legacy_opengl);
-        status = (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
+    
+    while (this->emulationStatus_ == EmulationStatus::running) {
 
     }
-    return status;
+}
+
+void Emulator_context::startInterface() {
+    bool is_legacy_opengl = this->config()->readValue(core::Access_keys::config_legacy_opengl);
+    uint8_t status = (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
 }
 
 }
