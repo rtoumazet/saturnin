@@ -54,20 +54,17 @@ u32 Sh2::readRegisters(u32 addr) const {
         case individual_memory_control_register:
         case refresh_timer_control_status_register:
         case refresh_timer_counter:
-        case refresh_time_constant_register:
-            // Bus State Controler registers
+        case refresh_time_constant_register: 
             return (core::rawRead<u32>(io_registers_, addr & sh2_memory_mask) & 0x0000FFFF);
-            break;
         case dividend_register_l_32_bits:
         case dividend_register_l_shadow:
             return core::rawRead<u32>(io_registers_, dividend_register_l & sh2_memory_mask);
-            break;
-        case dividend_register_h_shadow:
+        case dividend_register_h_shadow:     
             return core::rawRead<u32>(io_registers_, dividend_register_h & sh2_memory_mask);
-            break;
-        case dma_operation_register:
+        case dma_operation_register:         
             return (core::rawRead<u32>(io_registers_, addr & sh2_memory_mask) & 0x0000000F);
-            break;
+        case timer_interrupt_enable_register:
+            return timer_interrupt_enable_register_.toU32();
         default:
             return core::rawRead<u32>(io_registers_, addr & sh2_memory_mask);
     }
@@ -77,8 +74,9 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
     switch (addr) {
         /* FRT */
         case timer_interrupt_enable_register:
-            if (sh2_type_ == Sh2Type::master) Log::debug("sh2", "TIER byte write (master SH2)");
-            else Log::debug("sh2", "TIER byte write (slave SH2)");
+            timer_interrupt_enable_register_.set(TimerInterruptEnableRegister::allBits, data);
+            (sh2_type_ == Sh2Type::master) ? 
+                Log::debug("sh2", "TIER byte write (master SH2)") : Log::debug("sh2", "TIER byte write (slave SH2)");
             break;
         case output_compare_register_b_h: {
                 auto tocr = TimerOutputCompareControlRegister(io_registers_[timer_output_compare_control_register & sh2_memory_mask]);
@@ -124,7 +122,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
 
                     // cache purge bit is cleared after operation
                     ccr.reset(CacheControlRegister::cachePurge);
-                    data = ccr.toUlong();
+                    data = ccr.toU32();
                 }
             }
             break;
@@ -137,9 +135,9 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
 void Sh2::writeRegisters(u32 addr, u16 data) {
     switch (addr) {
         case timer_interrupt_enable_register:
-            if (sh2_type_ == Sh2Type::master) Log::debug("sh2", "TIER word write (master SH2)");
-            else Log::debug("sh2", "TIER word write (slave SH2)");
-            core::rawWrite<u16>(io_registers_, addr & 0x1FF, data);
+            (sh2_type_ == Sh2Type::master) ?
+                Log::warning("sh2", "TIER word write (master SH2)") : Log::warning("sh2", "TIER word write (slave SH2)");
+            //core::rawWrite<u16>(io_registers_, addr & 0x1FF, data);
             break;
         case interrupt_control_register: {
             auto old_icr = InterruptControlRegister(core::rawRead<u16>(io_registers_, addr & sh2_memory_mask));
@@ -176,9 +174,9 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
 void Sh2::writeRegisters(u32 addr, u32 data) {
     switch (addr) {
         case timer_interrupt_enable_register:
-            if (sh2_type_ == Sh2Type::master) Log::debug("sh2", "TIER long write (master SH2)");
-            else Log::debug("sh2", "TIER long write (slave SH2)");
-            core::rawWrite<u32>(io_registers_, addr & sh2_memory_mask, data);
+            (sh2_type_ == Sh2Type::master) ?
+                Log::warning("sh2", "TIER long write (master SH2)") : Log::warning("sh2", "TIER long write (slave SH2)");
+            //core::rawWrite<u32>(io_registers_, addr & sh2_memory_mask, data);
             break;
         case bus_control_register1:
             if ((data & 0xFFFF0000) == 0xA55A0000) {
@@ -287,7 +285,7 @@ void Sh2::initializeOnChipRegisters() {
     core::rawWrite<u8>(io_registers_, receive_data_register   & sh2_memory_mask, 0x00);
 
     // Free Running timer
-    core::rawWrite<u8>(io_registers_, timer_interrupt_enable_register            & sh2_memory_mask, 0x01);
+    timer_interrupt_enable_register_.set(TimerInterruptEnableRegister::allBits, static_cast<u8>(0x01));
     core::rawWrite<u8>(io_registers_, free_running_timer_control_status_register & sh2_memory_mask, 0x00);
     core::rawWrite<u8>(io_registers_, free_running_counter_h                     & sh2_memory_mask, 0x00);
     core::rawWrite<u8>(io_registers_, free_running_counter_l                     & sh2_memory_mask, 0x00);
@@ -352,7 +350,7 @@ void Sh2::start32bitsDivision() {
     divu_rem_              = result.rem;
 
     if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
-        core::rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toUlong()); // Updating the register
+        core::rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toU32()); // Updating the register
     }
 
     divu_is_running_ = true;
@@ -389,7 +387,7 @@ void Sh2::start64bitsDivision() {
     divu_rem_              = static_cast<s32>(remainder);
 
     if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
-        core::rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toUlong()); // Updating the register
+        core::rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toU32()); // Updating the register
     }
 
     divu_is_running_ = true;
