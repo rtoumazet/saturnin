@@ -60,26 +60,26 @@ u32 Scu::read32(const u32 addr) const {
             Log::debug("scu", "DSP - Data RAM Dataport read");
             //data = current_DSP_data_ram_dataport_;
             break;
-        case level_0_dma_enable_register:    return level_0_dma_enable_register_.toUlong();
-        case level_1_dma_enable_register:    return level_1_dma_enable_register_.toUlong();
-        case level_2_dma_enable_register:    return level_2_dma_enable_register_.toUlong();
-        case level_0_dma_add_value_register: return level_0_dma_add_value_register_.toUlong();
-        case level_1_dma_add_value_register: return level_1_dma_add_value_register_.toUlong();
-        case level_2_dma_add_value_register: return level_2_dma_add_value_register_.toUlong();
-        case level_0_dma_read_address:       return level_0_dma_read_address_register_.toUlong();
-        case level_1_dma_read_address:       return level_1_dma_read_address_register_.toUlong();
-        case level_2_dma_read_address:       return level_2_dma_read_address_register_.toUlong();
-        case level_0_dma_write_address:      return level_0_dma_write_address_register_.toUlong();
-        case level_1_dma_write_address:      return level_1_dma_write_address_register_.toUlong();
-        case level_2_dma_write_address:      return level_2_dma_write_address_register_.toUlong();
-        case level_0_dma_mode_register:      return level_0_dma_mode_register_.toUlong();
-        case level_1_dma_mode_register:      return level_1_dma_mode_register_.toUlong();
-        case level_2_dma_mode_register:      return level_2_dma_mode_register_.toUlong();
-        case level_0_dma_transfer_byte_number: return level_0_dma_transfer_byte_number_register_.toUlong();
-        case level_1_dma_transfer_byte_number: return level_1_dma_transfer_byte_number_register_.toUlong();
-        case level_2_dma_transfer_byte_number: return level_2_dma_transfer_byte_number_register_.toUlong();
-        case interrupt_status_register:      return interrupt_status_register_.toUlong();
-        case interrupt_mask_register:        return interrupt_mask_register_.toUlong();
+        case level_0_dma_enable_register:    return level_0_dma_enable_register_.toU32();
+        case level_1_dma_enable_register:    return level_1_dma_enable_register_.toU32();
+        case level_2_dma_enable_register:    return level_2_dma_enable_register_.toU32();
+        case level_0_dma_add_value_register: return level_0_dma_add_value_register_.toU32();
+        case level_1_dma_add_value_register: return level_1_dma_add_value_register_.toU32();
+        case level_2_dma_add_value_register: return level_2_dma_add_value_register_.toU32();
+        case level_0_dma_read_address:       return level_0_dma_read_address_register_.toU32();
+        case level_1_dma_read_address:       return level_1_dma_read_address_register_.toU32();
+        case level_2_dma_read_address:       return level_2_dma_read_address_register_.toU32();
+        case level_0_dma_write_address:      return level_0_dma_write_address_register_.toU32();
+        case level_1_dma_write_address:      return level_1_dma_write_address_register_.toU32();
+        case level_2_dma_write_address:      return level_2_dma_write_address_register_.toU32();
+        case level_0_dma_mode_register:      return level_0_dma_mode_register_.toU32();
+        case level_1_dma_mode_register:      return level_1_dma_mode_register_.toU32();
+        case level_2_dma_mode_register:      return level_2_dma_mode_register_.toU32();
+        case level_0_dma_transfer_byte_number: return level_0_dma_transfer_byte_number_register_.toU32();
+        case level_1_dma_transfer_byte_number: return level_1_dma_transfer_byte_number_register_.toU32();
+        case level_2_dma_transfer_byte_number: return level_2_dma_transfer_byte_number_register_.toU32();
+        case interrupt_status_register:      return interrupt_status_register_.toU32();
+        case interrupt_mask_register:        return interrupt_mask_register_.toU32();
         default:                             return rawRead<u32>(memory()->scu_, addr & scu_memory_mask);
     }
     return rawRead<u32>(memory()->scu_, addr & scu_memory_mask);
@@ -540,7 +540,7 @@ bool Scu::isInterruptMasked(const Interrupt& i, sh2::Sh2Type t){
                     return true; 
                     break;
                 case is::vector_system_manager:
-                    if (emulatorContext()->hardwareMode_ == HardwareMode::stv) return true;
+                    if (emulatorContext()->hardwareMode() == HardwareMode::stv) return true;
                     else return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
                     break;
                 case is::vector_v_blank_in:

@@ -67,13 +67,21 @@ bool Emulator_context::initialize() {
     return true;
 }
 
-void Emulator_context::run() {
-    Log::info("main", "Main emulation thread started");
-    this->emulationStatus_ = EmulationStatus::running;
+void Emulator_context::startEmulation() {
+    if (emulation_status_ == EmulationStatus::running) return;
 
-    this->memory()->loadBios(core::HardwareMode::saturn);
+    emulation_status_ = EmulationStatus::running;
+
+    memory()->loadBios(hardware_mode_);
 
     sh2::initializeOpcodesLut();
+
+    emulation_main_thread_ = std::thread (&Emulator_context::emulationMainThread, this);
+
+    //static std::thread emu_thread;
+    //if (ImGui::Button("Play")) {
+    //    std::thread local_thread(&core::Emulator_context::startEmulation, &state);
+    //    emu_thread = move(local_thread);
 
     // TESTING //
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
@@ -88,20 +96,30 @@ void Emulator_context::run() {
     //    std::cout << "Version:  " << plugin->version() << std::endl;
     //    plugin->log("test");
 
-    Log::error("sh2", "Unexpected opcode({} SH2)\nOpcode: {:#06x}\nPC: {:#010x}", "Master", 0x4e73, 0x20000200);
+    //Log::error("sh2", "Unexpected opcode({} SH2)\nOpcode: {:#06x}\nPC: {:#010x}", "Master", 0x4e73, 0x20000200);
 
-    scu_->dmaTest();
+    //scu_->dmaTest();
 
     // TESTING //
     
-    while (this->emulationStatus_ == EmulationStatus::running) {
+}
+
+void Emulator_context::stopEmulation() {
+    emulation_status_ = core::EmulationStatus::stopped;
+    if (emulation_main_thread_.joinable()) emulation_main_thread_.join();
+}
+
+void Emulator_context::emulationMainThread() {
+    Log::info("main", tr("Emulation main thread started"));
+    while (this->emulation_status_ == EmulationStatus::running) {
 
     }
+    Log::info("main", tr("Emulation main thread finished"));
 }
 
 void Emulator_context::startInterface() {
     bool is_legacy_opengl = this->config()->readValue(core::Access_keys::config_legacy_opengl);
-    uint8_t status = (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
+    (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
 }
 
 }

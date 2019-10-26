@@ -187,7 +187,7 @@ bool isModernOpenglCapable()
 
 void windowCloseCallback(GLFWwindow* window) {
     core::Emulator_context *state = reinterpret_cast<core::Emulator_context*>(glfwGetWindowUserPointer(window));
-    state->renderingStatus_ = core::RenderingStatus::stopped;
+    state->renderingStatus( core::RenderingStatus::stopped );
 }
 
 

@@ -452,6 +452,7 @@ bool Memory::isStvProtectionEnabled() const {
 }
 
 void Memory::sendFrtInterruptToMaster() const {
+    
     masterSh2()->sendInterrupt(interrupt_source::frt_input_capture);
 }
 

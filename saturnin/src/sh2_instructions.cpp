@@ -53,7 +53,7 @@ void delaySlot(Sh2& s, const u32 addr) {
 
         if (isInstructionIllegal(s.current_opcode_)) {
             Log::error("sh2", "Illegal instruction slot");
-            s.emulatorContext()->emulationStatus_ = core::EmulationStatus::stopped;
+            s.emulatorContext()->emulationStatus(core::EmulationStatus::stopped);
         } else {
 
             // Delay slot instruction execution
@@ -119,7 +119,7 @@ void badOpcode(Sh2& s) {
     std::string type = (s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave";
     Log::error("Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
 
-    s.emulatorContext()->emulationStatus_ = core::EmulationStatus::stopped;
+    s.emulatorContext()->emulationStatus(core::EmulationStatus::stopped);
 }
 
 void add(Sh2& s) {

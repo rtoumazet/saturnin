@@ -29,6 +29,7 @@
 
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
+#include <thread> // thread
 #include "emulator_enums.h"
 #include "config.h"
 #include "memory.h"
@@ -97,15 +98,26 @@ static const std::string saturnin_version{ "1.00" };
         bool initialize();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Emulator_context::run();
+        /// \fn void Emulator_context::startEmulation();
         ///
-        /// \brief  Runs the emulation.
+        /// \brief  Starts the emulation.
         ///
         /// \author Runik
         /// \date   26/09/2018
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void run();
+        void startEmulation();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Emulator_context::stopEmulation();
+        ///
+        /// \brief  Stops the emulation.
+        ///
+        /// \author Runik
+        /// \date   26/10/2019
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void stopEmulation();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn void Emulator_context::startInterface();
@@ -183,17 +195,80 @@ static const std::string saturnin_version{ "1.00" };
 
         Scu* scu() { return scu_.get(); };
 
-        HardwareMode    hardwareMode_{ HardwareMode::saturn };     ///< Hardware mode
-        EmulationStatus emulationStatus_{ EmulationStatus::stopped }; ///< Emulation status
-        RenderingStatus renderingStatus_{ RenderingStatus::running }; ///< Rendering status.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn HardwareMode Emulator_context::hardwareMode() const
+        ///
+        /// \brief  Current hardware mode of the emulator.
+        ///
+        /// \author Runik
+        /// \date   26/10/2019
+        ///
+        /// \return A HardwareMode.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        HardwareMode hardwareMode() const { return hardware_mode_; };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Emulator_context::emulationStatus(const EmulationStatus status) const
+        ///
+        /// \brief  Sets the emulation status of the emulator.
+        ///
+        /// \author Runik
+        /// \date   26/10/2019
+        ///
+        /// \param  status  The new status.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void emulationStatus(const EmulationStatus status) { emulation_status_ = status; };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Emulator_context::renderingStatus(const RenderingStatus status)
+        ///
+        /// \brief  Sets the rendering status of the emulator.
+        ///
+        /// \author Runik
+        /// \date   26/10/2019
+        ///
+        /// \param  status  The new status.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void renderingStatus(const RenderingStatus status) { rendering_status_ = status; };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn RenderingStatus Emulator_context::renderingStatus()
+        ///
+        /// \brief  Gets the current rendering status.
+        ///
+        /// \author Runik
+        /// \date   26/10/2019
+        ///
+        /// \return The RenderingStatus.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        RenderingStatus renderingStatus() { return rendering_status_; };
     private:
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn void Emulator_context::emulationMainThread();
+        ///
+        /// \brief  Emulation main thread.
+        ///
+        /// \author Runik
+        /// \date   26/10/2019
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        void emulationMainThread();
+
         std::unique_ptr<Config>   config_;          ///< Configuration object
         std::unique_ptr<Memory>   memory_;          ///< Memory object
         std::unique_ptr<Sh2> master_sh2_;      ///< Master SH2 object
         std::unique_ptr<Sh2> slave_sh2_;       ///< Slave SH2 object
         std::unique_ptr<Scu>      scu_;             ///< SCU object
 
+        HardwareMode    hardware_mode_{ HardwareMode::saturn };     ///< Hardware mode
+        EmulationStatus emulation_status_{ EmulationStatus::stopped }; ///< Emulation status
+        RenderingStatus rendering_status_{ RenderingStatus::running }; ///< Rendering status.
+
+                                                    
         /// \name Command line variables
         ///
         //@{
@@ -202,7 +277,9 @@ static const std::string saturnin_version{ "1.00" };
         uint32_t    binary_address_{ 0 };      ///< The PC will be set to this address after loading the binary.
         //@}
 
-        Rom_stv stv_rom_{ Rom_stv::none }; ///< Current ST-V ROM loaded
+        Rom_stv stv_rom_{ Rom_stv::none }; ///< Current ST-V ROM loaded.
+
+        std::thread emulation_main_thread_; ///< The emulation main thread.
 
     };
 }

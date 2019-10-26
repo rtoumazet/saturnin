@@ -70,21 +70,12 @@ namespace gui {
         
         bool show_window;
         ImGui::Begin("Core", &show_window, window_flags);
-        //if (ImGui::Button("Play")) show_test_window ^= 1;
-        static std::thread emu_thread;
-        if (ImGui::Button("Play")) {
-            std::thread local_thread(&core::Emulator_context::run, &state);
-            emu_thread = move(local_thread);
-            
-        }
+
+        if (ImGui::Button("Play")) state.startEmulation();
         ImGui::SameLine();
         ImGui::Button("Pause");
         ImGui::SameLine();
-        if (ImGui::Button("Stop")) { 
-            state.emulationStatus_ = core::EmulationStatus::stopped;
-            if(emu_thread.joinable()) emu_thread.join();
-            Log::info("main", tr("Main emulation thread finished"));
-        };
+        if (ImGui::Button("Stop")) state.stopEmulation();
 
         //ImGui::SameLine();
         //ImGui::PushID(0);
@@ -299,7 +290,7 @@ namespace gui {
             counter = 5 * 60;
 
             if (reset_rendering) {
-                state.renderingStatus_ = core::RenderingStatus::reset;
+                state.renderingStatus(core::RenderingStatus::reset);
                 reset_rendering = false;
             }
         }

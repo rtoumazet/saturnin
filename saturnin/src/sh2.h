@@ -630,8 +630,12 @@ private:
     bool    frt_ocibe_{};          ///< Output Compare Interrupt B Enable.
     bool    frt_ovie_{};           ///< Timer Overflow Interrupt Enable. 
     bool    frt_current_ocr_{};    ///< Current Output Compare Register. 
+    
+    TimerInterruptEnableRegister timer_interrupt_enable_register_;
     //@}
-};
+    
+};  
+
 
 }
 }

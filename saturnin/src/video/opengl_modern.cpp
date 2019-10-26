@@ -318,7 +318,7 @@ int32_t runModernOpengl(core::Emulator_context& state) {
 
         gui::buildGui(state, opengl, display_w, display_h);
  
-        if (state.renderingStatus_ == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
+        if (state.renderingStatus() == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
