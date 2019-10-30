@@ -46,6 +46,7 @@ using saturnin::core::Emulator_context;
 using saturnin::core::Memory;
 using saturnin::core::Scu;
 using saturnin::core::Interrupt;
+using saturnin::core::Log;
 
 using saturnin::core::rawRead;
 using saturnin::core::rawWrite;
@@ -107,7 +108,16 @@ class Sh2 {
     T readRegisters(const u32 addr) const {
         return rawRead<T>(this->io_registers_, addr & sh2_memory_mask);
     }
-
+    // 8 bits specialization
+    template<>
+    u8 readRegisters<u8>(const u32 addr) const {
+        return readRegisters(addr);
+    }
+    // 16 bits specialization
+    template<>
+    u16 readRegisters<u16>(const u32 addr) const {
+        return readRegisters(addr);
+    }
     // 32 bits specialization
     template<>
     u32 readRegisters<u32>(const u32 addr) const {
@@ -129,7 +139,7 @@ class Sh2 {
 
     template<typename T>
     void writeRegisters(const u32 addr, const T data) {
-        trrawWrite<T>(io_registers_, addr & sh2_memory_mask, data);
+        rawWrite<T>(io_registers_, addr & sh2_memory_mask, data);
     }
 
     // 8 bits specialization
@@ -236,6 +246,15 @@ class Sh2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void sendInterrupt(const core::Interrupt& i);
+
+    template<typename T>
+    void accessSizeError(const u32 addr, const T data) const {
+        Log::warning("sh2", "Wrong size write access : address :{:#0x} data:{:#0x}", addr, data);
+    }
+
+    void accessSizeError(const u32 addr) const {
+        Log::warning("sh2", "Wrong size read access : address :{:#0x}", addr);
+    }
 
 private:
 
@@ -610,6 +629,13 @@ private:
     Interrupt                               current_interrupt_{ is::undefined };///< Interrupt in execution
     //@}
 
+    /// \name INTC (Interrupt Controller)
+    //@{
+    InterruptPriorityLevelSettingRegisterA ipra_;
+    InterruptPriorityLevelSettingRegisterB iprb_;
+
+    //@}
+
     /// \name DIVU (Division unit)
     //@{
     bool    divu_is_running_{};       ///< True when division unit is in operation
@@ -623,15 +649,18 @@ private:
     u32	    frt_elapsed_cycles_{}; ///< Elapsed FRT cycles. 
     u8	    frt_clock_{};          ///< FRT clock. 
     u8	    frt_mask_{};           ///< FRT mask. 
-    u16     frt_ocra_{};           ///< Output Compare Register A. 
-    u16     frt_ocrb_{};           ///< Output Compare Register B.
+    //u16     frt_ocra_{};           ///< Output Compare Register A. 
+    //u16     frt_ocrb_{};           ///< Output Compare Register B.
     bool    frt_icie_{};           ///< Input Capture Interrupt Enable. 
     bool    frt_ociae_{};          ///< Output Compare Interrupt A Enable. 
     bool    frt_ocibe_{};          ///< Output Compare Interrupt B Enable.
     bool    frt_ovie_{};           ///< Timer Overflow Interrupt Enable. 
     bool    frt_current_ocr_{};    ///< Current Output Compare Register. 
     
-    TimerInterruptEnableRegister timer_interrupt_enable_register_;
+    OutputCompareRegisterA frt_ocra_;
+    OutputCompareRegisterB frt_ocrb_;
+    TimerInterruptEnableRegister frt_tier_;
+    TimerOutputCompareControlRegister frt_tocr_;
     //@}
     
 };  
