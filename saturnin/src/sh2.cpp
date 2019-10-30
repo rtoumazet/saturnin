@@ -46,20 +46,16 @@ core::Emulator_context* Sh2::emulatorContext(){
     return emulator_context_;
 }
 
-template<>
 u8 Sh2::readRegisters(const u32 addr) const {
     switch (addr) {
-
+        default: return 0;
     }
-    return 0;
 }
 
-template<>
 u16 Sh2::readRegisters(const u32 addr) const {
     switch (addr) {
-
+        default: return 0;
     }
-    return 0;
 }
 
 u32 Sh2::readRegisters(const u32 addr) const {
@@ -75,12 +71,12 @@ u32 Sh2::readRegisters(const u32 addr) const {
         /////////////
         // 11. FRT //
         /////////////
-        case output_compare_register:
-            switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: return frt_ocra_.get(OutputCompareRegisterA::upper_8_bits); break;
-                case OutputCompareRegisterSelect::ocrb: return frt_ocrb_.get(OutputCompareRegisterB::upper_8_bits); break;
-            }
-            break;
+        //case output_compare_register:
+        //    switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
+        //        case OutputCompareRegisterSelect::ocra: return frt_ocra_.get(OutputCompareRegisterA::upper_8_bits); break;
+        //        case OutputCompareRegisterSelect::ocrb: return frt_ocrb_.get(OutputCompareRegisterB::upper_8_bits); break;
+        //    }
+        //    break;
 
         ///////////////
         case bus_control_register1:
