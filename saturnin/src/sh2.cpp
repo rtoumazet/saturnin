@@ -19,6 +19,7 @@
 
 #include "sh2.h"
 #include "emulator_context.h"
+#include "interrupt_sources.h"
 #include "scu_registers.h"
 #include "scu.h"
 
@@ -45,9 +46,43 @@ core::Emulator_context* Sh2::emulatorContext(){
     return emulator_context_;
 }
 
-u32 Sh2::readRegisters(u32 addr) const {
+template<>
+u8 Sh2::readRegisters(const u32 addr) const {
     switch (addr) {
 
+    }
+    return 0;
+}
+
+template<>
+u16 Sh2::readRegisters(const u32 addr) const {
+    switch (addr) {
+
+    }
+    return 0;
+}
+
+u32 Sh2::readRegisters(const u32 addr) const {
+    switch (addr) {
+        /////////////
+        // 5. INTC //
+        /////////////
+        case interrupt_priority_level_setting_register_a: 
+            return ipra_.toU32();
+        case interrupt_priority_level_setting_register_b:
+            return iprb_.toU32();
+        
+        /////////////
+        // 11. FRT //
+        /////////////
+        case output_compare_register:
+            switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
+                case OutputCompareRegisterSelect::ocra: return frt_ocra_.get(OutputCompareRegisterA::upper_8_bits); break;
+                case OutputCompareRegisterSelect::ocrb: return frt_ocrb_.get(OutputCompareRegisterB::upper_8_bits); break;
+            }
+            break;
+
+        ///////////////
         case bus_control_register1:
         case bus_control_register2:
         case wait_state_control_register:
@@ -64,38 +99,52 @@ u32 Sh2::readRegisters(u32 addr) const {
         case dma_operation_register:         
             return (core::rawRead<u32>(io_registers_, addr & sh2_memory_mask) & 0x0000000F);
         case timer_interrupt_enable_register:
-            return timer_interrupt_enable_register_.toU32();
+            return frt_tier_.toU32();
         default:
+            accessSizeError(addr);
             return core::rawRead<u32>(io_registers_, addr & sh2_memory_mask);
     }
 }
 
 void Sh2::writeRegisters(u32 addr, u8 data) {
     switch (addr) {
-        /* FRT */
+        /////////////
+        // 5. INTC //
+        /////////////
+        case interrupt_priority_level_setting_register_a: 
+            ipra_.set(InterruptPriorityLevelSettingRegisterA::upper_8_bits, data); 
+            break;
+        case interrupt_priority_level_setting_register_a + 1:
+            ipra_.set(InterruptPriorityLevelSettingRegisterA::lower_8_bits, data);
+            break;
+        case interrupt_priority_level_setting_register_b:
+            iprb_.set(InterruptPriorityLevelSettingRegisterB::upper_8_bits, data);
+            break;
+
+        /////////////
+        // 11. FRT //
+        /////////////
         case timer_interrupt_enable_register:
-            timer_interrupt_enable_register_.set(TimerInterruptEnableRegister::allBits, data);
+            frt_tier_.set(TimerInterruptEnableRegister::all_bits, data);
+            //is::frt_input_capture.vector = EmuState::pSh2m->IOReg[LOCAL_VCRC] & 0x7F 0x066;
+            is::frt_input_capture.level = iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
             (sh2_type_ == Sh2Type::master) ? 
                 Log::debug("sh2", "TIER byte write (master SH2)") : Log::debug("sh2", "TIER byte write (slave SH2)");
             break;
-        case output_compare_register_b_h: {
-                auto tocr = TimerOutputCompareControlRegister(io_registers_[timer_output_compare_control_register & sh2_memory_mask]);
-                switch (tocr.get(TimerOutputCompareControlRegister::outputCompareRegisterSelect)) {
-                    case OutputCompareRegisterSelect::ocra: frt_ocra_ = (data << 8) | 0xFF; break;
-                    case OutputCompareRegisterSelect::ocrb: frt_ocrb_ = (data << 8) | 0xFF; break;
-                }
+        case output_compare_register: 
+            switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegisterA::upper_8_bits, data); break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegisterB::upper_8_bits, data); break;
             }
             break;
-        case output_compare_register_b_l: {
-            auto tocr = TimerOutputCompareControlRegister(io_registers_[timer_output_compare_control_register & sh2_memory_mask]);
-            switch (tocr.get(TimerOutputCompareControlRegister::outputCompareRegisterSelect)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_ = (0xFF << 8) | data; break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_ = (0xFF << 8) | data; break;
+        case output_compare_register + 1: 
+            switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegisterA::lower_8_bits, data); break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegisterB::lower_8_bits, data); break;
             }
-        }
             break;
         case timer_control_register:
-            switch (TimerControlRegister(io_registers_[timer_control_register & 0x1FF]).get(TimerControlRegister::clockSelect)) {
+            switch (TimerControlRegister(io_registers_[timer_control_register & 0x1FF]).get(TimerControlRegister::clock_select)) {
                 case ClockSelect::internal_divided_by_8:
                     frt_clock_ = 8;
                     frt_mask_ = 0b00000111;
@@ -117,11 +166,11 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             Log::debug("sh2", "CCR byte write: {}", data);
 
                 auto ccr = CacheControlRegister(data);
-                if (ccr.get(CacheControlRegister::cachePurge) == CachePurge::cache_purge) {
+                if (ccr.get(CacheControlRegister::cache_purge) == CachePurge::cache_purge) {
                     purgeCache();
 
                     // cache purge bit is cleared after operation
-                    ccr.reset(CacheControlRegister::cachePurge);
+                    ccr.reset(CacheControlRegister::cache_purge);
                     data = ccr.toU32();
                 }
             }
@@ -134,31 +183,45 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
 
 void Sh2::writeRegisters(u32 addr, u16 data) {
     switch (addr) {
-        case timer_interrupt_enable_register:
-            (sh2_type_ == Sh2Type::master) ?
-                Log::warning("sh2", "TIER word write (master SH2)") : Log::warning("sh2", "TIER word write (slave SH2)");
-            //core::rawWrite<u16>(io_registers_, addr & 0x1FF, data);
+        /////////////
+        // 5. INTC //
+        /////////////
+        case interrupt_priority_level_setting_register_a:
+            ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, data);
+            break;
+        case interrupt_priority_level_setting_register_b:
+            iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, data);
             break;
         case interrupt_control_register: {
             auto old_icr = InterruptControlRegister(core::rawRead<u16>(io_registers_, addr & sh2_memory_mask));
             auto new_icr = InterruptControlRegister(data);
-            switch (old_icr.get(InterruptControlRegister::nmiEdgeDetection)) {
+            switch (old_icr.get(InterruptControlRegister::nmi_edge_detection)) {
                 case NmiEdgeDetection::falling:
-                    if ((old_icr.get(InterruptControlRegister::nmiInputLevel) == NmiInputLevel::high) && 
-                            (new_icr.get(InterruptControlRegister::nmiInputLevel) == NmiInputLevel::low)) {
+                    if ((old_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high) && 
+                            (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low)) {
                         Log::error("sh2", "Falling edge NMI !");
                     }
                     break;
                 case NmiEdgeDetection::rising:
-                    if ((old_icr.get(InterruptControlRegister::nmiInputLevel) == NmiInputLevel::low) && 
-                            (new_icr.get(InterruptControlRegister::nmiInputLevel) == NmiInputLevel::high)) {
+                    if ((old_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low) &&
+                            (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high)) {
                         Log::error("sh2", "Rising edge NMI !");
                     }
                     break;
             }
             core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data);
         }
-                                         break;
+            break;
+        /////////////
+        // 11. FRT //
+        /////////////
+        case output_compare_register:
+            switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegisterA::all_bits, data); break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegisterB::all_bits, data); break;
+            }
+            break;
+
         case bus_control_register1 + 2:
             core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data & 0x00F7);
             break;
@@ -166,18 +229,14 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
             core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data & 0x00FC);
             break;
         default:
-            core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data);
+            //core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data);
+            accessSizeError(addr, data);
             break;
     }
 }
 
 void Sh2::writeRegisters(u32 addr, u32 data) {
     switch (addr) {
-        case timer_interrupt_enable_register:
-            (sh2_type_ == Sh2Type::master) ?
-                Log::warning("sh2", "TIER long write (master SH2)") : Log::warning("sh2", "TIER long write (slave SH2)");
-            //core::rawWrite<u32>(io_registers_, addr & sh2_memory_mask, data);
-            break;
         case bus_control_register1:
             if ((data & 0xFFFF0000) == 0xA55A0000) {
                 core::rawWrite<u16>(io_registers_, addr + 2 & sh2_memory_mask, data & BusControlRegister1::writeMask());
@@ -210,9 +269,9 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         case dma_channel_control_register_0:
             core::rawWrite<u32>(io_registers_, dma_channel_control_register_0 & sh2_memory_mask, data);
 
-            if (DmaChannelControlRegister(data).get(DmaChannelControlRegister::interruptEnable) == Sh2DmaInterruptEnable::enabled) {
+            if (DmaChannelControlRegister(data).get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
                 auto dor = DmaOperationRegister(core::rawRead<u32>(io_registers_, dma_operation_register & sh2_memory_mask));
-                if (dor.get(DmaOperationRegister::dmaMasterEnable) == DmaMasterEnable::enabled) {
+                if (dor.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
                     executeDma();
                 }
             }
@@ -220,21 +279,22 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         case dma_channel_control_register_1:
             core::rawWrite<u32>(io_registers_, dma_channel_control_register_1 & 0x1FF, data);
 
-            if (DmaChannelControlRegister(data).get(DmaChannelControlRegister::interruptEnable) == Sh2DmaInterruptEnable::enabled) {
+            if (DmaChannelControlRegister(data).get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
                 auto dor = DmaOperationRegister(core::rawRead<u32>(io_registers_, dma_operation_register & sh2_memory_mask));
-                if (dor.get(DmaOperationRegister::dmaMasterEnable) == DmaMasterEnable::enabled) {
+                if (dor.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
                     executeDma();
                 }
             }
             break;
         case dma_operation_register:
             core::rawWrite<u32>(io_registers_, dma_operation_register & sh2_memory_mask, data);
-            if (DmaOperationRegister(data).get(DmaOperationRegister::dmaMasterEnable) == DmaMasterEnable::enabled) {
+            if (DmaOperationRegister(data).get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
                 executeDma();
             }
             break;
         default:
-            core::rawWrite<u32>(io_registers_, addr & sh2_memory_mask, data);
+            //core::rawWrite<u32>(io_registers_, addr & sh2_memory_mask, data);
+            accessSizeError(addr, data);
             break;
     }
 
@@ -251,6 +311,10 @@ void Sh2::purgeCache() {
 }
 
 void Sh2::initializeOnChipRegisters() {
+    // Interrupt Control
+    ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, static_cast<u16>(0x0000));
+    iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, static_cast<u16>(0x0000));
+    
     // Bus State Controler registers
     switch (sh2_type_) {
         case Sh2Type::master: core::rawWrite<u32>(io_registers_, bus_control_register1 & sh2_memory_mask, 0x000003F0); break;
@@ -285,14 +349,12 @@ void Sh2::initializeOnChipRegisters() {
     core::rawWrite<u8>(io_registers_, receive_data_register   & sh2_memory_mask, 0x00);
 
     // Free Running timer
-    timer_interrupt_enable_register_.set(TimerInterruptEnableRegister::allBits, static_cast<u8>(0x01));
+    frt_ocra_.set(OutputCompareRegisterA::all_bits, static_cast<u16>(0xFFFF));
+    frt_ocrb_.set(OutputCompareRegisterB::all_bits, static_cast<u16>(0xFFFF));
+    frt_tier_.set(TimerInterruptEnableRegister::all_bits, static_cast<u8>(0x01));
     core::rawWrite<u8>(io_registers_, free_running_timer_control_status_register & sh2_memory_mask, 0x00);
     core::rawWrite<u8>(io_registers_, free_running_counter_h                     & sh2_memory_mask, 0x00);
     core::rawWrite<u8>(io_registers_, free_running_counter_l                     & sh2_memory_mask, 0x00);
-    core::rawWrite<u8>(io_registers_, output_compare_register_a_h                & sh2_memory_mask, 0xff);
-    core::rawWrite<u8>(io_registers_, output_compare_register_a_l                & sh2_memory_mask, 0xff);
-    core::rawWrite<u8>(io_registers_, output_compare_register_b_h                & sh2_memory_mask, 0xff);
-    core::rawWrite<u8>(io_registers_, output_compare_register_b_l                & sh2_memory_mask, 0xff);
     core::rawWrite<u8>(io_registers_, timer_control_register                     & sh2_memory_mask, 0x00);
     core::rawWrite<u8>(io_registers_, timer_output_compare_control_register      & sh2_memory_mask, 0xe0);
     core::rawWrite<u8>(io_registers_, input_capture_register_h                   & sh2_memory_mask, 0x00);
@@ -337,19 +399,19 @@ void Sh2::start32bitsDivision() {
     auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
     ldiv_t result{};
     if (dvsr != 0) result = ldiv(dvdnt, dvsr);
-    else           dvcr.set(DivisionControlRegister::overflowFlag);
+    else           dvcr.set(DivisionControlRegister::overflow_flag);
     
     // Overflow check
     if ((dvdnt & 0x80000000) && (dvsr & 0x80000000)) {
-        if ((result.quot == 0x7FFFFFFF) && (result.rem & 0x80000000)) dvcr.set(DivisionControlRegister::overflowFlag);
+        if ((result.quot == 0x7FFFFFFF) && (result.rem & 0x80000000)) dvcr.set(DivisionControlRegister::overflow_flag);
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
-    divu_remaining_cycles_ = (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) ? 6 : 39;
+    divu_remaining_cycles_ = (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
     divu_quot_             = result.quot;
     divu_rem_              = result.rem;
 
-    if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
+    if (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) {
         core::rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toU32()); // Updating the register
     }
 
@@ -374,19 +436,19 @@ void Sh2::start64bitsDivision() {
         quotient  = dividend / dvsr;
         remainder = dividend % dvsr;
     } else 
-        dvcr.set(DivisionControlRegister::overflowFlag);
+        dvcr.set(DivisionControlRegister::overflow_flag);
 
     // Overflow check
     if ((dvdnth & 0x80000000) && (dvsr & 0x80000000)) {
-        if ((quotient == 0x7FFFFFFF) && (remainder & 0x80000000)) dvcr.set(DivisionControlRegister::overflowFlag);
+        if ((quotient == 0x7FFFFFFF) && (remainder & 0x80000000)) dvcr.set(DivisionControlRegister::overflow_flag);
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
-    divu_remaining_cycles_ = (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) ? 6 : 39;
+    divu_remaining_cycles_ = (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
     divu_quot_             = static_cast<s32>(quotient);
     divu_rem_              = static_cast<s32>(remainder);
 
-    if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
+    if (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) {
         core::rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toU32()); // Updating the register
     }
 
@@ -397,8 +459,8 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
     divu_remaining_cycles_ -= cycles_to_run;
     if (divu_remaining_cycles_ == 0) {
         auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
-        if (dvcr.get(DivisionControlRegister::overflowFlag) == OverflowFlag::overflow) {
-            if (dvcr.get(DivisionControlRegister::interruptEnable) == core::InterruptEnable::enabled) {
+        if (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) {
+            if (dvcr.get(DivisionControlRegister::interrupt_enable) == core::InterruptEnable::enabled) {
                 Log::debug("sh2", "DIVU - Sending division overflow interrupt");
                 is::sh2_division_overflow.vector = core::rawRead<u8>(io_registers_, vector_number_setting_register_div & sh2_memory_mask);
                 is::sh2_division_overflow.level  = core::rawRead<u8>(io_registers_, interrupt_priority_level_setting_register_a & sh2_memory_mask) >> 4;

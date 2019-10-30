@@ -480,24 +480,24 @@ private:
 
     //{@
     // Scu memory registers
-    DmaEnableRegister          level_0_dma_enable_register_;
-    DmaEnableRegister          level_1_dma_enable_register_;
-    DmaEnableRegister          level_2_dma_enable_register_;
-    DmaAddressAddValueRegister level_0_dma_add_value_register_;
-    DmaAddressAddValueRegister level_1_dma_add_value_register_;
-    DmaAddressAddValueRegister level_2_dma_add_value_register_;
-    DmaReadAddressRegister     level_0_dma_read_address_register_;
-    DmaReadAddressRegister     level_1_dma_read_address_register_;
-    DmaReadAddressRegister     level_2_dma_read_address_register_;
-    DmaWriteAddressRegister    level_0_dma_write_address_register_;
-    DmaWriteAddressRegister    level_1_dma_write_address_register_;
-    DmaWriteAddressRegister    level_2_dma_write_address_register_;
-    DmaModeRegister            level_0_dma_mode_register_;
-    DmaModeRegister            level_1_dma_mode_register_;
-    DmaModeRegister            level_2_dma_mode_register_;
-    DmaLevel0TransferByteNumberRegister level_0_dma_transfer_byte_number_register_;
-    DmaLevel1TransferByteNumberRegister level_1_dma_transfer_byte_number_register_;
-    DmaLevel2TransferByteNumberRegister level_2_dma_transfer_byte_number_register_;
+    DmaEnableRegister          d0en_;
+    DmaEnableRegister          d1en_;
+    DmaEnableRegister          d2en_;
+    DmaAddressAddValueRegister d0ad_;
+    DmaAddressAddValueRegister d1ad_;
+    DmaAddressAddValueRegister d2ad_;
+    DmaReadAddressRegister     d0r_;
+    DmaReadAddressRegister     d1r_;
+    DmaReadAddressRegister     d2r_;
+    DmaWriteAddressRegister    d0w_;
+    DmaWriteAddressRegister    d1w_;
+    DmaWriteAddressRegister    d2w_;
+    DmaModeRegister            d0md_;
+    DmaModeRegister            d1md_;
+    DmaModeRegister            d2md_;
+    DmaLevel0TransferByteNumberRegister d0c_;
+    DmaLevel1TransferByteNumberRegister d1c_;
+    DmaLevel2TransferByteNumberRegister d2c_;
     InterruptStatusRegister    interrupt_status_register_;
     InterruptMaskRegister      interrupt_mask_register_;
     //@}

@@ -627,7 +627,7 @@ void jsr(Sh2& s) {
 
 void ldcsr(Sh2& s) {
     // Rm -> SR
-    s.sr_.set(StatusRegister::allBits, static_cast<u16>(s.r_[xn00(s)] & 0x000003F3));
+    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.r_[xn00(s)] & 0x000003F3));
     
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -651,7 +651,7 @@ void ldcvbr(Sh2& s) {
 
 void ldcmsr(Sh2& s) {
     // (Rm) -> SR, Rm + 4 -> Rm
-    s.sr_.set(StatusRegister::allBits, static_cast<u16>(s.memory()->read<u32>(s.r_[xn00(s)]) & 0x000003F3));
+    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.memory()->read<u32>(s.r_[xn00(s)]) & 0x000003F3));
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -1256,7 +1256,7 @@ void rte(Sh2& s) {
     delaySlot(s, s.pc_ + 2);
     s.pc_ = s.memory()->read<u32>(s.r_[0xF]);
     s.r_[0xF] += 4;
-    s.sr_.set(StatusRegister::allBits, static_cast<u16>(s.memory()->read<u16>(s.r_[0xF] + 2) & 0x03F3));
+    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.memory()->read<u16>(s.r_[0xF] + 2) & 0x03F3));
     s.r_[0xF] += 4;
     s.cycles_elapsed_ = 4;
 
@@ -1410,7 +1410,7 @@ void sleep(Sh2& s) {
 
 void stcsr(Sh2& s) {
     // SR -> Rn
-    s.r_[xn00(s)] = s.sr_.get(StatusRegister::allBits);
+    s.r_[xn00(s)] = s.sr_.get(StatusRegister::all_bits);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1435,7 +1435,7 @@ void stcvbr(Sh2& s) {
 void stcmsr(Sh2& s) {
     // Rn-4 -> Rn, SR -> (Rn)
     s.r_[xn00(s)] -= 4;
-    s.memory()->write<u32>(s.r_[xn00(s)], s.sr_.get(StatusRegister::allBits));
+    s.memory()->write<u32>(s.r_[xn00(s)], s.sr_.get(StatusRegister::all_bits));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -1584,7 +1584,7 @@ void trapa(Sh2& s) {
     // PC/SR -> stack, (imm*4 + VBR) -> PC
     s32 imm { (0x000000FF & x0nn(s)) };
     s.r_[15] -= 4;
-    s.memory()->write<u32>(s.r_[15], s.sr_.get(StatusRegister::allBits));
+    s.memory()->write<u32>(s.r_[15], s.sr_.get(StatusRegister::all_bits));
     s.r_[15] -= 4;
     s.memory()->write<u32>(s.r_[15], s.pc_ + 2);
 

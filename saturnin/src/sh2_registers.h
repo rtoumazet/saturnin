@@ -46,10 +46,6 @@ constexpr u32 free_running_counter                              = 0xFFFFFE12;
 constexpr u32 free_running_counter_h                            = 0xFFFFFE12;
 constexpr u32 free_running_counter_l                            = 0xFFFFFE13;
 constexpr u32 output_compare_register                           = 0xFFFFFE14;
-constexpr u32 output_compare_register_b_h                       = 0xFFFFFE14;
-constexpr u32 output_compare_register_b_l                       = 0xFFFFFE15;
-constexpr u32 output_compare_register_a_h                       = 0xFFFFFE14;
-constexpr u32 output_compare_register_a_l                       = 0xFFFFFE15;
 constexpr u32 timer_control_register                            = 0xFFFFFE16;
 constexpr u32 timer_output_compare_control_register             = 0xFFFFFE17;
 constexpr u32 ficr                                              = 0xFFFFFE18;
@@ -141,12 +137,51 @@ public:
     inline static const BitRange<u8>  i{ 4,7 };     ///< Defines interrupt mask bits (I0-I3).
     inline static const BitRange<u8>  s{ 1 };       ///< Defines S bit.
     inline static const BitRange<u8>  t{ 0 };       ///< Defines T bit.
-    inline static const BitRange<u16> allBits{ 0, 9 };   ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u16> all_bits{ 0, 9 };   ///< Defines the range of all the bits of the register.
 };
 
 /////////////////////////////////////
 // 5. Interrupt Controller (INTC)  //
 /////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  InterruptPriorityLevelSettingRegisterA
+///
+/// \brief  Interrupt Priority Level Setting Register A (IPRA).
+///         
+/// \author Runik
+/// \date   28/10/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class InterruptPriorityLevelSettingRegisterA : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  divu_level{ 12,15 }; ///< Defines DIVU priority level.    
+    inline static const BitRange<u8>  dmac_level{ 8,11 };  ///< Defines DMAC0/DMAC1 priority level.    
+    inline static const BitRange<u8>  wdt_level{ 4,7 };    ///< Defines WDT/DRAM refresh priority level.    
+    inline static const BitRange<u16> all_bits{ 0, 15 };   ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };   ///< Defines the range of the lower 8 bits of the register.
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  InterruptPriorityLevelSettingRegisterB
+///
+/// \brief  Interrupt Priority Level Setting Register B (IPRB).
+///         
+/// \author Runik
+/// \date   29/10/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class InterruptPriorityLevelSettingRegisterB : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  sci_level{ 12,15 }; ///< Defines SCI priority level.    
+    inline static const BitRange<u8>  frt_level{ 8,11 };  ///< Defines FRT priority level.    
+    inline static const BitRange<u16> all_bits{ 0, 15 };   ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   NmiInputLevel
@@ -193,9 +228,9 @@ enum class VectorMode : u8 {
 class InterruptControlRegister : public Register       {
     public:
         using Register::Register;
-        inline static const BitRange<NmiInputLevel>    nmiInputLevel{ 15 };   ///< Defines NMIL  bit.
-        inline static const BitRange<NmiEdgeDetection> nmiEdgeDetection{ 8 }; ///< Defines NMIE  bit.
-        inline static const BitRange<VectorMode>       vectorMode{ 0 };       ///< Defines VECMD  bit.
+        inline static const BitRange<NmiInputLevel>    nmi_input_level{ 15 };   ///< Defines NMIL  bit.
+        inline static const BitRange<NmiEdgeDetection> nmi_edge_detection{ 8 }; ///< Defines NMIE  bit.
+        inline static const BitRange<VectorMode>       vector_mode{ 0 };       ///< Defines VECMD  bit.
 };
 
 
@@ -317,12 +352,12 @@ enum class CacheEnable : u8 {
 class CacheControlRegister : public Register {
     public:
         using Register::Register;
-        inline static const BitRange<WaySpecification>              waySpecification             { 6, 7 };     ///< Defines Wx bits.
-        inline static const BitRange<CachePurge>                    cachePurge                   { 4 };        ///< Defines CP bit.
-        inline static const BitRange<TwoWayMode>                    twoWayMode                   { 3 };        ///< Defines TW bit.
-        inline static const BitRange<DataReplacementDisable>        dataReplacementDisable       { 2 };        ///< Defines OD bit.
-        inline static const BitRange<InstructionReplacementDisable> instructionReplacementDisable{ 1 };        ///< Defines ID bit.
-        inline static const BitRange<CacheEnable>                   cacheEnable                  { 1 };        ///< Defines CE bit.
+        inline static const BitRange<WaySpecification>              way_specification             { 6, 7 };     ///< Defines Wx bits.
+        inline static const BitRange<CachePurge>                    cache_purge                   { 4 };        ///< Defines CP bit.
+        inline static const BitRange<TwoWayMode>                    two_way_mode                   { 3 };        ///< Defines TW bit.
+        inline static const BitRange<DataReplacementDisable>        data_replacement_disable       { 2 };        ///< Defines OD bit.
+        inline static const BitRange<InstructionReplacementDisable> instruction_replacement_disable{ 1 };        ///< Defines ID bit.
+        inline static const BitRange<CacheEnable>                   cache_enable                  { 1 };        ///< Defines CE bit.
 };
 
 //////////////////////////////////////////////
@@ -490,19 +525,19 @@ enum class Sh2DmaEnable : u8 {
 class DmaChannelControlRegister : public Register            {
     public:
         using Register::Register;
-        inline static const BitRange<DestinationAddressMode> destinationAddressMode{ 14, 15 };   ///< Defines DMx  bits.
-        inline static const BitRange<SourceAddressMode>      sourceAddressMode     { 12, 13 };   ///< Defines SMx  bits.
-        inline static const BitRange<TransferSize>           transferSize          { 10, 11 };   ///< Defines TSx  bits.
-        inline static const BitRange<AutoRequestMode>        autoRequestMode       { 9 };        ///< Defines AR  bit.
-        inline static const BitRange<AcknowledgeMode>        acknowledgeMode       { 8 };        ///< Defines AM  bit.
-        inline static const BitRange<AcknowledgeLevel>       acknowledgeLevel      { 7 };        ///< Defines AL  bit.
-        inline static const BitRange<DreqSelect>             dreqSelect            { 6 };        ///< Defines DS bit.
-        inline static const BitRange<DreqLevel>              dreqLevel             { 5 };        ///< Defines DL bit.
-        inline static const BitRange<TransferBusMode>        transferBusMode       { 4 };        ///< Defines TB bit.
-        inline static const BitRange<TransferAddressMode>    transferAddressMode   { 3 };        ///< Defines TA bit.
-        inline static const BitRange<Sh2DmaInterruptEnable>  interruptEnable       { 2 };        ///< Defines IE bit.
-        inline static const BitRange<TransferEndFlag>        transferEndFlag       { 1 };        ///< Defines TE bit.
-        inline static const BitRange<Sh2DmaEnable>           dmaEnable             { 0 };        ///< Defines DE bit.
+        inline static const BitRange<DestinationAddressMode> destination_address_mode{ 14, 15 };   ///< Defines DMx  bits.
+        inline static const BitRange<SourceAddressMode>      source_address_mode     { 12, 13 };   ///< Defines SMx  bits.
+        inline static const BitRange<TransferSize>           transfer_size          { 10, 11 };   ///< Defines TSx  bits.
+        inline static const BitRange<AutoRequestMode>        auto_request_mode       { 9 };        ///< Defines AR  bit.
+        inline static const BitRange<AcknowledgeMode>        acknowledge_mode       { 8 };        ///< Defines AM  bit.
+        inline static const BitRange<AcknowledgeLevel>       acknowledge_level      { 7 };        ///< Defines AL  bit.
+        inline static const BitRange<DreqSelect>             dreq_select            { 6 };        ///< Defines DS bit.
+        inline static const BitRange<DreqLevel>              dreq_level             { 5 };        ///< Defines DL bit.
+        inline static const BitRange<TransferBusMode>        transfer_busMode       { 4 };        ///< Defines TB bit.
+        inline static const BitRange<TransferAddressMode>    transfer_address_mode   { 3 };        ///< Defines TA bit.
+        inline static const BitRange<Sh2DmaInterruptEnable>  interrupt_enable       { 2 };        ///< Defines IE bit.
+        inline static const BitRange<TransferEndFlag>        transfer_end_flag       { 1 };        ///< Defines TE bit.
+        inline static const BitRange<Sh2DmaEnable>           dma_enable             { 0 };        ///< Defines DE bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -561,10 +596,10 @@ enum class DmaMasterEnable : u8 {
 class DmaOperationRegister : public Register {
     public:
         using Register::Register;
-        inline static const BitRange<PriorityMode>     priorityMode    { 3 };   ///< Defines PR bit.
-        inline static const BitRange<AddressErrorFlag> addressErrorFlag{ 2 };   ///< Defines AE bit.
-        inline static const BitRange<NmiFlag>          nmiFlag         { 1 };   ///< Defines NMIF bit.
-        inline static const BitRange<DmaMasterEnable>  dmaMasterEnable { 0 };   ///< Defines DME bit.
+        inline static const BitRange<PriorityMode>     priority_mode    { 3 };   ///< Defines PR bit.
+        inline static const BitRange<AddressErrorFlag> address_error_flag{ 2 };   ///< Defines AE bit.
+        inline static const BitRange<NmiFlag>          nmi_flag         { 1 };   ///< Defines NMIF bit.
+        inline static const BitRange<DmaMasterEnable>  dma_master_enable { 0 };   ///< Defines DME bit.
 };
 
 //////////////////////////////
@@ -605,13 +640,47 @@ enum class OverflowFlag : u8 {
 class DivisionControlRegister : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<core::InterruptEnable> interruptEnable{ 1 }; ///< Defines OVFIE bit.
-    inline static const BitRange<OverflowFlag> overflowFlag{ 0 };       ///< Defines OVF bit.
+    inline static const BitRange<core::InterruptEnable> interrupt_enable{ 1 }; ///< Defines OVFIE bit.
+    inline static const BitRange<OverflowFlag> overflow_flag{ 0 };       ///< Defines OVF bit.
 };
 
 //////////////////////////////////////////
 // 11. 16 Bits Free Running Timer (FRT) //
 //////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  OutputCompareRegisterA
+///
+/// \brief  Output Compare Register A (OCRA).
+///
+/// \author Runik
+/// \date   30/10/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class OutputCompareRegisterA : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };   ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u16> all_bits{ 0, 15 };   ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  OutputCompareRegisterB
+///
+/// \brief  Output Compare Register B (OCRB).
+///
+/// \author Runik
+/// \date   30/10/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class OutputCompareRegisterB : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };   ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u16> all_bits{ 0, 15 };   ///< Defines the whole register bits
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   OutputCompareRegisterSelect
@@ -658,9 +727,9 @@ enum class OutputLevelB : u8 {
 class TimerOutputCompareControlRegister : public Register {
     public:
         using Register::Register;
-        inline static const BitRange<OutputCompareRegisterSelect> outputCompareRegisterSelect{ 4 };   ///< Defines OCRS bit.
-        inline static const BitRange<OutputLevelA> outputLevelA{ 1 };                                 ///< Defines OLVLA bit.
-        inline static const BitRange<OutputLevelB> outputLevelB{ 0 };                                 ///< Defines OLVLB bit.
+        inline static const BitRange<OutputCompareRegisterSelect> output_compare_register_select{ 4 };   ///< Defines OCRS bit.
+        inline static const BitRange<OutputLevelA> output_level_a{ 1 };                                 ///< Defines OLVLA bit.
+        inline static const BitRange<OutputLevelB> output_level_b{ 0 };                                 ///< Defines OLVLB bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -699,8 +768,8 @@ enum class ClockSelect : u8 {
 class TimerControlRegister : public Register {
     public:
         using Register::Register;
-        inline static const BitRange<InputEdgeSelect> inputEdgeSelect{ 7 };   ///< Defines IEDG bit.
-        inline static const BitRange<ClockSelect>     clockSelect{ 0, 1 };    ///< Defines IEDG bit.
+        inline static const BitRange<InputEdgeSelect> input_edge_select{ 7 };   ///< Defines IEDG bit.
+        inline static const BitRange<ClockSelect>     clock_select{ 0, 1 };    ///< Defines IEDG bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -759,11 +828,11 @@ enum class TimerOverflowInterruptEnable : u8 {
 class TimerInterruptEnableRegister : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<InterruptCaptureInterruptEnable> interruptCaptureInterruptEnable{ 7 }; ///< Defines ICIE bit.
-    inline static const BitRange<OutputCompareInterruptAEnable>   outputCompareInterruptAEnable{ 3 };   ///< Defines OCIAE bit.
-    inline static const BitRange<OutputCompareInterruptBEnable>   outputCompareInterruptBEnable{ 2 };   ///< Defines OCIBE bit.
-    inline static const BitRange<TimerOverflowInterruptEnable>    timerOverflowInterruptEnable{ 1 };    ///< Defines OVIE bit.
-    inline static const BitRange<u8> allBits{ 0, 7 };  ///< Defines the whole register bits
+    inline static const BitRange<InterruptCaptureInterruptEnable> interrupt_capture_interrupt_enable{ 7 }; ///< Defines ICIE bit.
+    inline static const BitRange<OutputCompareInterruptAEnable>   output_compare_interrupt_a_enable{ 3 };   ///< Defines OCIAE bit.
+    inline static const BitRange<OutputCompareInterruptBEnable>   output_compare_interrupt_b_enable{ 2 };   ///< Defines OCIBE bit.
+    inline static const BitRange<TimerOverflowInterruptEnable>    timer_overflow_interrupt_enable{ 1 };    ///< Defines OVIE bit.
+    inline static const BitRange<u8> all_bits{ 0, 7 };  ///< Defines the whole register bits
 };
 
 }
