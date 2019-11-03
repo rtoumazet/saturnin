@@ -111,17 +111,17 @@ class Sh2 {
     // 8 bits specialization
     template<>
     u8 readRegisters<u8>(const u32 addr) const {
-        return readRegisters(addr);
+        return read8Registers(addr);
     }
     // 16 bits specialization
     template<>
     u16 readRegisters<u16>(const u32 addr) const {
-        return readRegisters(addr);
+        return read16Registers(addr);
     }
     // 32 bits specialization
     template<>
     u32 readRegisters<u32>(const u32 addr) const {
-        return readRegisters(addr);
+        return read32Registers(addr);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -257,8 +257,9 @@ class Sh2 {
     }
 
 private:
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u8 Sh2::readRegisters(const u32 addr) const;
+    /// \fn u8 Sh2::read8Registers(const u32 addr) const;
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -270,10 +271,10 @@ private:
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u8 readRegisters(const u32 addr) const;
+    u8 read8Registers(const u32 addr) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u16 Sh2::readRegisters(const u32 addr) const;
+    /// \fn u16 Sh2::read16Registers(const u32 addr) const;
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -285,10 +286,10 @@ private:
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u16 readRegisters(const u32 addr) const;
+    u16 read16Registers(const u32 addr) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 Sh2::readRegisters(const u32 addr) const;
+    /// \fn u32 Sh2::read32Registers(const u32 addr) const;
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -300,7 +301,7 @@ private:
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32 readRegisters(const u32 addr) const;
+    u32 read32Registers(const u32 addr) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::writeRegisters(u32 addr, u8 data);

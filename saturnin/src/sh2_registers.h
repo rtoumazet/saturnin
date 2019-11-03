@@ -181,6 +181,7 @@ public:
     inline static const BitRange<u8>  frt_level{ 8,11 };  ///< Defines FRT priority level.    
     inline static const BitRange<u16> all_bits{ 0, 15 };   ///< Defines the range of all the bits of the register.
     inline static const BitRange<u8>  upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };   ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
