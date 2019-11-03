@@ -46,19 +46,30 @@ core::Emulator_context* Sh2::emulatorContext(){
     return emulator_context_;
 }
 
-u8 Sh2::readRegisters(const u32 addr) const {
+u8 Sh2::read8Registers(const u32 addr) const {
     switch (addr) {
+        /////////////
+        // 5. INTC //
+        /////////////
+        case interrupt_priority_level_setting_register_a: return ipra_.get(InterruptPriorityLevelSettingRegisterA::upper_8_bits);
+        case interrupt_priority_level_setting_register_b: return iprb_.get(InterruptPriorityLevelSettingRegisterB::upper_8_bits);
+        default: 
+            accessSizeError(addr);
+            return 0;
+    }
+}
+
+u16 Sh2::read16Registers(const u32 addr) const {
+    switch (addr) {
+        /////////////
+        // 5. INTC //
+        /////////////
+        /// 
         default: return 0;
     }
 }
 
-u16 Sh2::readRegisters(const u32 addr) const {
-    switch (addr) {
-        default: return 0;
-    }
-}
-
-u32 Sh2::readRegisters(const u32 addr) const {
+u32 Sh2::read32Registers(const u32 addr) const {
     switch (addr) {
         /////////////
         // 5. INTC //
