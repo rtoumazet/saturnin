@@ -650,37 +650,216 @@ public:
 //////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  OutputCompareRegisterA
+/// \enum   InterruptCaptureInterruptEnable
 ///
-/// \brief  Output Compare Register A (OCRA).
-///
-/// \author Runik
-/// \date   30/10/2019
+/// \brief  TIER - ICIE values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class OutputCompareRegisterA : public Register {
-public:
-    using Register::Register;
-    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };   ///< Defines the range of the lower 8 bits of the register.
-    inline static const BitRange<u16> all_bits{ 0, 15 };   ///< Defines the whole register bits
+enum class InterruptCaptureInterruptEnable : u8 {
+    interrupt_request_disabled = 0b00000000, ///< Interrupt request (ICI) caused by ICF disabled (initial)
+    interrupt_request_enabled = 0b10000000  ///< Interrupt request (ICI) caused by ICF enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  OutputCompareRegisterB
+/// \enum   OutputCompareInterruptAEnable
 ///
-/// \brief  Output Compare Register B (OCRB).
+/// \brief  TIER - OCIAE values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class OutputCompareInterruptAEnable : u8 {
+    interrupt_request_disabled = 0b00000000, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
+    interrupt_request_enabled = 0b00001000  ///< Interrupt request (ICIA) caused by OCFA enabled
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   OutputCompareInterruptBEnable
+///
+/// \brief  TIER - OCIBE values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class OutputCompareInterruptBEnable : u8 {
+    interrupt_request_disabled = 0b00000000, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
+    interrupt_request_enabled = 0b00000100  ///< Interrupt request (ICIB) caused by OCFB enabled
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TimerOverflowInterruptEnable
+///
+/// \brief  TIER - OVIE values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TimerOverflowInterruptEnable : u8 {
+    interrupt_request_disabled = 0b00000000, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
+    interrupt_request_enabled = 0b00000010  ///< Interrupt request (FOVI) caused by OVF enabled
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  TimerInterruptEnableRegister
+///
+/// \brief  Timer Interrupt Enable Register (TIER).
+///
+/// \author Runik
+/// \date   26/10/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class TimerInterruptEnableRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<InterruptCaptureInterruptEnable> interrupt_capture_interrupt_enable{ 7 }; ///< Defines ICIE bit.
+    inline static const BitRange<OutputCompareInterruptAEnable>   output_compare_interrupt_a_enable{ 3 };   ///< Defines OCIAE bit.
+    inline static const BitRange<OutputCompareInterruptBEnable>   output_compare_interrupt_b_enable{ 2 };   ///< Defines OCIBE bit.
+    inline static const BitRange<TimerOverflowInterruptEnable>    timer_overflow_interrupt_enable{ 1 };    ///< Defines OVIE bit.
+    inline static const BitRange<u8> all_bits{ 0, 7 };  ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   InputCaptureFlag
+///
+/// \brief  FTCSR - ICF values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class InputCaptureFlag : u8 {
+    clear = 0b00000000,   ///< Clear conditions: 0 is written when 1 is read
+    set   = 0b10000000    ///< Set conditions: when the FRC value is sent to ICR by the input capture signal
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   OutputCompareFlagA
+///
+/// \brief  FTCSR - OCFA values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class OutputCompareFlagA : u8 {
+    clear = 0b00000000,   ///< Clear conditions: 0 is written when 1 is read
+    set   = 0b00001000    ///< Set conditions: when the FRC value becomes equal to OCRA
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   OutputCompareFlagB
+///
+/// \brief  FTCSR - OCFB values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class OutputCompareFlagB : u8 {
+    clear = 0b00000000,   ///< Clear conditions: 0 is written when 1 is read
+    set   = 0b00000100    ///< Set conditions: when the FRC value becomes equal to OCRB
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TimerOverflowFlag
+///
+/// \brief  FTCSR - OVF values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TimerOverflowFlag : u8 {
+    clear = 0b00000000,   ///< Clear conditions: 0 is written when 1 is read
+    set   = 0b00000010    ///< Set conditions: when the FRC value changes from 0xFFFF to 0x0000
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CounterClearA
+///
+/// \brief  FTCSR - CCLRA values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CounterClearA : u8 {
+    clear_disabled   = 0b00000000,   ///< FRC clear disabled (initial)
+    clear_on_compare = 0b00000001    ///< FRC cleared on compare match A
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  FreeRunningTimerControlStatusRegister
+///
+/// \brief  Free Running Timer Control/Status register (FTCSR).
+///
+/// \author Runik
+/// \date   05/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class FreeRunningTimerControlStatusRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<InputCaptureFlag>   input_capture_flag { 7 };   ///< Defines ICF bit.
+    inline static const BitRange<OutputCompareFlagA> output_compare_flag_a{ 3 }; ///< Defines OCFA bit.
+    inline static const BitRange<OutputCompareFlagB> output_compare_flag_b{ 2 }; ///< Defines OCFB bit.
+    inline static const BitRange<TimerOverflowFlag>  timer_overflow_flag{ 1 };   ///< Defines OVF bit.
+    inline static const BitRange<CounterClearA>      counter_clear_a{ 0 };       ///< Defines CCLRA bit.
+    inline static const BitRange<u8>                 all_bits{ 0, 7 };           ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  FreeRunningCounter
+///
+/// \brief  Free Running Counter (FRC).
+///
+/// \author Runik
+/// \date   05/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class FreeRunningCounter : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 }; ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };  ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u16> all_bits{ 0, 15 };      ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  OutputCompareRegister
+///
+/// \brief  Output Compare Register (OCRA / OCRB).
 ///
 /// \author Runik
 /// \date   30/10/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class OutputCompareRegisterB : public Register {
+class OutputCompareRegister : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };   ///< Defines the range of the lower 8 bits of the register.
-    inline static const BitRange<u16> all_bits{ 0, 15 };   ///< Defines the whole register bits
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 }; ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };  ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u16> all_bits{ 0, 15 };     ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   InputEdgeSelect
+///
+/// \brief  TCR - IEDG bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class InputEdgeSelect : u8 {
+    falling = 0b0,  ///< Input captured on falling edge (initial)
+    rising = 0b1   ///< Input captured on rising edge
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ClockSelect
+///
+/// \brief  TCR - CKSx bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ClockSelect : u8 {
+    internal_divided_by_8 = 0b00, ///< Internal clock /8 (initial)
+    internal_divided_by_32 = 0b01, ///< Internal clock /32
+    internal_divided_by_128 = 0b10, ///< Internal clock /128
+    external = 0b11  ///< External clock
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  TimerControlRegister
+///
+/// \brief  Timer Control Register (TCR).
+///
+/// \author Runik
+/// \date   26/10/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class TimerControlRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<InputEdgeSelect> input_edge_select{ 7 };  ///< Defines IEDG bit.
+    inline static const BitRange<ClockSelect>     clock_select{ 0, 1 };    ///< Defines IEDG bit.
+    inline static const BitRange<u8>              all_bits{ 0, 7 };        ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -733,106 +912,23 @@ class TimerOutputCompareControlRegister : public Register {
         inline static const BitRange<OutputLevelB> output_level_b{ 0 };                                 ///< Defines OLVLB bit.
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InputEdgeSelect
-///
-/// \brief  TCR - IEDG bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class InputEdgeSelect : u8 {
-    falling = 0b0,  ///< Input captured on falling edge (initial)
-    rising  = 0b1   ///< Input captured on rising edge
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ClockSelect
-///
-/// \brief  TCR - CKSx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ClockSelect : u8 {
-    internal_divided_by_8   = 0b00, ///< Internal clock /8 (initial)
-    internal_divided_by_32  = 0b01, ///< Internal clock /32
-    internal_divided_by_128 = 0b10, ///< Internal clock /128
-    external                = 0b11  ///< External clock
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  TimerControlRegister
-///
-/// \brief  Timer Control Register (TCR).
-///
-/// \author Runik
-/// \date   26/10/2019
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class TimerControlRegister : public Register {
-    public:
-        using Register::Register;
-        inline static const BitRange<InputEdgeSelect> input_edge_select{ 7 };   ///< Defines IEDG bit.
-        inline static const BitRange<ClockSelect>     clock_select{ 0, 1 };    ///< Defines IEDG bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InterruptCaptureInterruptEnable
-///
-/// \brief  TIER - ICIE values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class InterruptCaptureInterruptEnable : u8 {
-    interrupt_request_disabled = 0b00000000, ///< Interrupt request (ICI) caused by ICF disabled (initial)
-    interrupt_request_enabled  = 0b10000000  ///< Interrupt request (ICI) caused by ICF enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputCompareInterruptAEnable
-///
-/// \brief  TIER - OCIAE values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OutputCompareInterruptAEnable : u8 {
-    interrupt_request_disabled = 0b00000000, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
-    interrupt_request_enabled  = 0b00001000  ///< Interrupt request (ICIA) caused by OCFA enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputCompareInterruptBEnable
-///
-/// \brief  TIER - OCIBE values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OutputCompareInterruptBEnable : u8 {
-    interrupt_request_disabled = 0b00000000, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
-    interrupt_request_enabled  = 0b00000100  ///< Interrupt request (ICIB) caused by OCFB enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TimerOverflowInterruptEnable
-///
-/// \brief  TIER - OVIE values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TimerOverflowInterruptEnable : u8 {
-    interrupt_request_disabled = 0b00000000, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
-    interrupt_request_enabled  = 0b00000010  ///< Interrupt request (FOVI) caused by OVF enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  TimerInterruptEnableRegister
-///
-/// \brief  Timer Interrupt Enable Register (TIER).
-///
-/// \author Runik
-/// \date   26/10/2019
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class TimerInterruptEnableRegister : public Register {
+class InputCaptureRegisterH : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<InterruptCaptureInterruptEnable> interrupt_capture_interrupt_enable{ 7 }; ///< Defines ICIE bit.
-    inline static const BitRange<OutputCompareInterruptAEnable>   output_compare_interrupt_a_enable{ 3 };   ///< Defines OCIAE bit.
-    inline static const BitRange<OutputCompareInterruptBEnable>   output_compare_interrupt_b_enable{ 2 };   ///< Defines OCIBE bit.
-    inline static const BitRange<TimerOverflowInterruptEnable>    timer_overflow_interrupt_enable{ 1 };    ///< Defines OVIE bit.
+    //inline static const BitRange<InterruptCaptureInterruptEnable> interrupt_capture_interrupt_enable{ 7 }; ///< Defines ICIE bit.
+    //inline static const BitRange<OutputCompareInterruptAEnable>   output_compare_interrupt_a_enable{ 3 };   ///< Defines OCIAE bit.
+    //inline static const BitRange<OutputCompareInterruptBEnable>   output_compare_interrupt_b_enable{ 2 };   ///< Defines OCIBE bit.
+    //inline static const BitRange<TimerOverflowInterruptEnable>    timer_overflow_interrupt_enable{ 1 };    ///< Defines OVIE bit.
+    inline static const BitRange<u8> all_bits{ 0, 7 };  ///< Defines the whole register bits
+};
+
+class InputCaptureRegisterL : public Register {
+public:
+    using Register::Register;
+    //inline static const BitRange<InterruptCaptureInterruptEnable> interrupt_capture_interrupt_enable{ 7 }; ///< Defines ICIE bit.
+    //inline static const BitRange<OutputCompareInterruptAEnable>   output_compare_interrupt_a_enable{ 3 };   ///< Defines OCIAE bit.
+    //inline static const BitRange<OutputCompareInterruptBEnable>   output_compare_interrupt_b_enable{ 2 };   ///< Defines OCIBE bit.
+    //inline static const BitRange<TimerOverflowInterruptEnable>    timer_overflow_interrupt_enable{ 1 };    ///< Defines OVIE bit.
     inline static const BitRange<u8> all_bits{ 0, 7 };  ///< Defines the whole register bits
 };
 

@@ -46,38 +46,120 @@ core::Emulator_context* Sh2::emulatorContext(){
     return emulator_context_;
 }
 
-u8 Sh2::read8Registers(const u32 addr) const {
+u8 Sh2::readRegisters8(const u32 addr) {
     switch (addr) {
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a: return ipra_.get(InterruptPriorityLevelSettingRegisterA::upper_8_bits);
-        case interrupt_priority_level_setting_register_b: return iprb_.get(InterruptPriorityLevelSettingRegisterB::upper_8_bits);
+        case interrupt_priority_level_setting_register_a:     return intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::upper_8_bits);
+        case interrupt_priority_level_setting_register_a + 1: return intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::lower_8_bits);
+        case interrupt_priority_level_setting_register_b:     return intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::upper_8_bits);
+        case interrupt_priority_level_setting_register_b + 1: return intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::lower_8_bits);
+
+        /////////////
+        // 7. BSC //
+        /////////////
+
+        //////////////
+        // 8. Cache //
+        //////////////
+        
+        /////////////
+        // 9. DMAC //
+        /////////////
+        
+        //////////////
+        // 10. DIVU //
+        ////////////// 
+        
+        
+        /////////////
+        // 11. FRT //
+        /////////////
+        case timer_interrupt_enable_register:            return frt_tier_.get(TimerInterruptEnableRegister::all_bits);
+        case free_running_timer_control_status_register: return frt_ftcsr_.get(FreeRunningTimerControlStatusRegister::all_bits);
+        case free_running_counter:                       return frt_frc_.get(FreeRunningCounter::upper_8_bits);
+        case free_running_counter + 1:                   return frt_frc_.get(FreeRunningCounter::lower_8_bits);
+        case timer_control_register:                     return frt_tcr_.get(TimerControlRegister::all_bits);
+
+        /////////////
+        // 12. WDT //
+        /////////////
+
+        /////////////
+        // 13. SCI //
+        /////////////
+
         default: 
-            accessSizeError(addr);
+            unmappedAccess(addr);
             return 0;
     }
 }
 
-u16 Sh2::read16Registers(const u32 addr) const {
+u16 Sh2::readRegisters16(const u32 addr) {
     switch (addr) {
         /////////////
         // 5. INTC //
         /////////////
-        /// 
-        default: return 0;
+        case interrupt_priority_level_setting_register_a: return intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::all_bits);
+        case interrupt_priority_level_setting_register_b: return intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::all_bits);
+
+        /////////////
+        // 7. BSC //
+        /////////////
+
+        //////////////
+        // 8. Cache //
+        //////////////
+
+        /////////////
+        // 9. DMAC //
+        /////////////
+
+        //////////////
+        // 10. DIVU //
+        ////////////// 
+
+        /////////////
+        // 11. FRT //
+        /////////////
+        case free_running_counter: return frt_frc_.get(FreeRunningCounter::all_bits);
+
+        /////////////
+        // 12. WDT //
+        /////////////
+
+        /////////////
+        // 13. SCI //
+        /////////////
+        
+        default: 
+            unmappedAccess(addr);
+            return 0;
     }
 }
 
-u32 Sh2::read32Registers(const u32 addr) const {
+u32 Sh2::readRegisters32(const u32 addr) {
     switch (addr) {
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a: 
-            return ipra_.toU32();
-        case interrupt_priority_level_setting_register_b:
-            return iprb_.toU32();
+
+        /////////////
+        // 7. BSC //
+        /////////////
+
+        //////////////
+        // 8. Cache //
+        //////////////
+
+        /////////////
+        // 9. DMAC //
+        /////////////
+
+        //////////////
+        // 10. DIVU //
+        ////////////// 
         
         /////////////
         // 11. FRT //
@@ -88,6 +170,17 @@ u32 Sh2::read32Registers(const u32 addr) const {
         //        case OutputCompareRegisterSelect::ocrb: return frt_ocrb_.get(OutputCompareRegisterB::upper_8_bits); break;
         //    }
         //    break;
+
+        /////////////
+        // 12. WDT //
+        /////////////
+
+        /////////////
+        // 13. SCI //
+        /////////////
+
+
+
 
         ///////////////
         case bus_control_register1:
@@ -105,11 +198,9 @@ u32 Sh2::read32Registers(const u32 addr) const {
             return core::rawRead<u32>(io_registers_, dividend_register_h & sh2_memory_mask);
         case dma_operation_register:         
             return (core::rawRead<u32>(io_registers_, addr & sh2_memory_mask) & 0x0000000F);
-        case timer_interrupt_enable_register:
-            return frt_tier_.toU32();
         default:
-            accessSizeError(addr);
-            return core::rawRead<u32>(io_registers_, addr & sh2_memory_mask);
+            unmappedAccess(addr);
+            return 0;
     }
 }
 
@@ -119,14 +210,30 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         // 5. INTC //
         /////////////
         case interrupt_priority_level_setting_register_a: 
-            ipra_.set(InterruptPriorityLevelSettingRegisterA::upper_8_bits, data); 
+            intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::upper_8_bits, data);
             break;
         case interrupt_priority_level_setting_register_a + 1:
-            ipra_.set(InterruptPriorityLevelSettingRegisterA::lower_8_bits, data);
+            intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::lower_8_bits, data);
             break;
         case interrupt_priority_level_setting_register_b:
-            iprb_.set(InterruptPriorityLevelSettingRegisterB::upper_8_bits, data);
+            intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::upper_8_bits, data);
             break;
+
+        /////////////
+        // 7. BSC //
+        /////////////
+
+        //////////////
+        // 8. Cache //
+        //////////////
+
+        /////////////
+        // 9. DMAC //
+        /////////////
+
+        //////////////
+        // 10. DIVU //
+        ////////////// 
 
         /////////////
         // 11. FRT //
@@ -134,34 +241,43 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case timer_interrupt_enable_register:
             frt_tier_.set(TimerInterruptEnableRegister::all_bits, data);
             //is::frt_input_capture.vector = EmuState::pSh2m->IOReg[LOCAL_VCRC] & 0x7F 0x066;
-            is::frt_input_capture.level = iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+            is::frt_input_capture.level = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
             (sh2_type_ == Sh2Type::master) ? 
                 Log::debug("sh2", "TIER byte write (master SH2)") : Log::debug("sh2", "TIER byte write (slave SH2)");
             break;
+        case free_running_timer_control_status_register:
+            frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::all_bits, data);
+            break;
+        case free_running_counter:
+            frt_frc_.set(FreeRunningCounter::upper_8_bits, data);
+            break;
+        case free_running_counter + 1:
+            frt_frc_.set(FreeRunningCounter::lower_8_bits, data);
+            break;
         case output_compare_register: 
             switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegisterA::upper_8_bits, data); break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegisterB::upper_8_bits, data); break;
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegister::upper_8_bits, data); break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegister::upper_8_bits, data); break;
             }
             break;
         case output_compare_register + 1: 
             switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegisterA::lower_8_bits, data); break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegisterB::lower_8_bits, data); break;
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegister::lower_8_bits, data); break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegister::lower_8_bits, data); break;
             }
             break;
         case timer_control_register:
-            switch (TimerControlRegister(io_registers_[timer_control_register & 0x1FF]).get(TimerControlRegister::clock_select)) {
+            switch (frt_tcr_.get(TimerControlRegister::clock_select)) {
                 case ClockSelect::internal_divided_by_8:
-                    frt_clock_ = 8;
+                    frt_clock_divisor_ = 8;
                     frt_mask_ = 0b00000111;
                     break;
                 case ClockSelect::internal_divided_by_32:
-                    frt_clock_ = 32;
+                    frt_clock_divisor_ = 32;
                     frt_mask_ = 0b00011111;
                     break;
                 case ClockSelect::internal_divided_by_128:
-                    frt_clock_ = 128;
+                    frt_clock_divisor_ = 128;
                     frt_mask_ = 0b01111111;
                     break;
                 case ClockSelect::external:
@@ -194,10 +310,10 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
         // 5. INTC //
         /////////////
         case interrupt_priority_level_setting_register_a:
-            ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, data);
+            intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, data);
             break;
         case interrupt_priority_level_setting_register_b:
-            iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, data);
+            intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, data);
             break;
         case interrupt_control_register: {
             auto old_icr = InterruptControlRegister(core::rawRead<u16>(io_registers_, addr & sh2_memory_mask));
@@ -219,13 +335,33 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
             core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data);
         }
             break;
+
+        /////////////
+        // 7. BSC //
+        /////////////
+
+        //////////////
+        // 8. Cache //
+        //////////////
+
+        /////////////
+        // 9. DMAC //
+        /////////////
+
+        //////////////
+        // 10. DIVU //
+        ////////////// 
+
         /////////////
         // 11. FRT //
         /////////////
+        case free_running_counter:
+            frt_frc_.set(FreeRunningCounter::all_bits, data);
+            break;
         case output_compare_register:
             switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegisterA::all_bits, data); break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegisterB::all_bits, data); break;
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegister::all_bits, data); break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegister::all_bits, data); break;
             }
             break;
 
@@ -237,7 +373,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
             break;
         default:
             //core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data);
-            accessSizeError(addr, data);
+            unmappedAccess(addr, data);
             break;
     }
 }
@@ -301,7 +437,7 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             break;
         default:
             //core::rawWrite<u32>(io_registers_, addr & sh2_memory_mask, data);
-            accessSizeError(addr, data);
+            unmappedAccess(addr, data);
             break;
     }
 
@@ -319,8 +455,8 @@ void Sh2::purgeCache() {
 
 void Sh2::initializeOnChipRegisters() {
     // Interrupt Control
-    ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, static_cast<u16>(0x0000));
-    iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, static_cast<u16>(0x0000));
+    intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, static_cast<u16>(0x0000));
+    intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, static_cast<u16>(0x0000));
     
     // Bus State Controler registers
     switch (sh2_type_) {
@@ -356,13 +492,13 @@ void Sh2::initializeOnChipRegisters() {
     core::rawWrite<u8>(io_registers_, receive_data_register   & sh2_memory_mask, 0x00);
 
     // Free Running timer
-    frt_ocra_.set(OutputCompareRegisterA::all_bits, static_cast<u16>(0xFFFF));
-    frt_ocrb_.set(OutputCompareRegisterB::all_bits, static_cast<u16>(0xFFFF));
     frt_tier_.set(TimerInterruptEnableRegister::all_bits, static_cast<u8>(0x01));
-    core::rawWrite<u8>(io_registers_, free_running_timer_control_status_register & sh2_memory_mask, 0x00);
-    core::rawWrite<u8>(io_registers_, free_running_counter_h                     & sh2_memory_mask, 0x00);
-    core::rawWrite<u8>(io_registers_, free_running_counter_l                     & sh2_memory_mask, 0x00);
-    core::rawWrite<u8>(io_registers_, timer_control_register                     & sh2_memory_mask, 0x00);
+    frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::all_bits, static_cast<u8>(0x00));
+    frt_frc_.set(FreeRunningCounter::all_bits, static_cast<u16>(0x0000));
+    frt_ocra_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));
+    frt_ocrb_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));
+    frt_tcr_.set(TimerControlRegister::all_bits, static_cast<u8>(0x00));
+
     core::rawWrite<u8>(io_registers_, timer_output_compare_control_register      & sh2_memory_mask, 0xe0);
     core::rawWrite<u8>(io_registers_, input_capture_register_h                   & sh2_memory_mask, 0x00);
     core::rawWrite<u8>(io_registers_, input_capture_register_l                   & sh2_memory_mask, 0x00);

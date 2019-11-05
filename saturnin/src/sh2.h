@@ -105,23 +105,23 @@ class Sh2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    T readRegisters(const u32 addr) const {
+    T readRegisters(const u32 addr) {
         return rawRead<T>(this->io_registers_, addr & sh2_memory_mask);
     }
     // 8 bits specialization
     template<>
-    u8 readRegisters<u8>(const u32 addr) const {
-        return read8Registers(addr);
+    u8 readRegisters<u8>(const u32 addr) {
+        return readRegisters8(addr);
     }
     // 16 bits specialization
     template<>
-    u16 readRegisters<u16>(const u32 addr) const {
-        return read16Registers(addr);
+    u16 readRegisters<u16>(const u32 addr) {
+        return readRegisters16(addr);
     }
     // 32 bits specialization
     template<>
-    u32 readRegisters<u32>(const u32 addr) const {
-        return read32Registers(addr);
+    u32 readRegisters<u32>(const u32 addr) {
+        return readRegisters32(addr);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -248,18 +248,18 @@ class Sh2 {
     void sendInterrupt(const core::Interrupt& i);
 
     template<typename T>
-    void accessSizeError(const u32 addr, const T data) const {
-        Log::warning("sh2", "Wrong size write access : address :{:#0x} data:{:#0x}", addr, data);
+    void unmappedAccess(const u32 addr, const T data) const {
+        Log::warning("sh2", "Unmapped write access : address :{:#0x} data:{:#0x}", addr, data);
     }
 
-    void accessSizeError(const u32 addr) const {
-        Log::warning("sh2", "Wrong size read access : address :{:#0x}", addr);
+    void unmappedAccess(const u32 addr) const {
+        Log::warning("sh2", "Unmapped read access : address :{:#0x}", addr);
     }
 
 private:
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u8 Sh2::read8Registers(const u32 addr) const;
+    /// \fn u8 Sh2::readRegisters8(const u32 addr);
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -271,10 +271,10 @@ private:
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u8 read8Registers(const u32 addr) const;
+    u8 readRegisters8(const u32 addr);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u16 Sh2::read16Registers(const u32 addr) const;
+    /// \fn u16 Sh2::readRegisters16(const u32 addr);
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -286,10 +286,10 @@ private:
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u16 read16Registers(const u32 addr) const;
+    u16 readRegisters16(const u32 addr);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 Sh2::read32Registers(const u32 addr) const;
+    /// \fn u32 Sh2::readRegisters32(const u32 addr);
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -301,7 +301,7 @@ private:
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32 read32Registers(const u32 addr) const;
+    u32 readRegisters32(const u32 addr);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::writeRegisters(u32 addr, u8 data);
@@ -661,8 +661,8 @@ private:
 
     /// \name INTC (Interrupt Controller)
     //@{
-    InterruptPriorityLevelSettingRegisterA ipra_;
-    InterruptPriorityLevelSettingRegisterB iprb_;
+    InterruptPriorityLevelSettingRegisterA intc_ipra_;
+    InterruptPriorityLevelSettingRegisterB intc_iprb_;
 
     //@}
 
@@ -677,20 +677,21 @@ private:
     /// \name FRT (Free Running Timer)
     //@                         {
     u32	    frt_elapsed_cycles_{}; ///< Elapsed FRT cycles. 
-    u8	    frt_clock_{};          ///< FRT clock. 
+    u8	    frt_clock_divisor_{};  ///< FRT clock divisor. 
     u8	    frt_mask_{};           ///< FRT mask. 
-    //u16     frt_ocra_{};           ///< Output Compare Register A. 
-    //u16     frt_ocrb_{};           ///< Output Compare Register B.
     bool    frt_icie_{};           ///< Input Capture Interrupt Enable. 
     bool    frt_ociae_{};          ///< Output Compare Interrupt A Enable. 
     bool    frt_ocibe_{};          ///< Output Compare Interrupt B Enable.
     bool    frt_ovie_{};           ///< Timer Overflow Interrupt Enable. 
     bool    frt_current_ocr_{};    ///< Current Output Compare Register. 
     
-    OutputCompareRegisterA frt_ocra_;
-    OutputCompareRegisterB frt_ocrb_;
-    TimerInterruptEnableRegister frt_tier_;
-    TimerOutputCompareControlRegister frt_tocr_;
+    TimerInterruptEnableRegister          frt_tier_;
+    FreeRunningTimerControlStatusRegister frt_ftcsr_;
+    FreeRunningCounter                    frt_frc_;
+    OutputCompareRegister                 frt_ocra_;
+    OutputCompareRegister                 frt_ocrb_;
+    TimerControlRegister                  frt_tcr_;
+    TimerOutputCompareControlRegister     frt_tocr_;
     //@}
     
 };  
