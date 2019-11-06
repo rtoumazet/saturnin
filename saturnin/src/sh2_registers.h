@@ -48,9 +48,8 @@ constexpr u32 free_running_counter_l                            = 0xFFFFFE13;
 constexpr u32 output_compare_register                           = 0xFFFFFE14;
 constexpr u32 timer_control_register                            = 0xFFFFFE16;
 constexpr u32 timer_output_compare_control_register             = 0xFFFFFE17;
-constexpr u32 ficr                                              = 0xFFFFFE18;
-constexpr u32 input_capture_register_h                          = 0xFFFFFE18;
-constexpr u32 input_capture_register_l                          = 0xFFFFFE19;
+//constexpr u32 ficr                                              = 0xFFFFFE18;
+constexpr u32 input_capture_register                            = 0xFFFFFE18;
 constexpr u32 interrupt_priority_level_setting_register_a       = 0xFFFFFEE2;
 constexpr u32 interrupt_priority_level_setting_register_b       = 0xFFFFFE60;
 constexpr u32 vector_number_setting_register_a                  = 0xFFFFFE62;
@@ -908,28 +907,18 @@ class TimerOutputCompareControlRegister : public Register {
     public:
         using Register::Register;
         inline static const BitRange<OutputCompareRegisterSelect> output_compare_register_select{ 4 };   ///< Defines OCRS bit.
-        inline static const BitRange<OutputLevelA> output_level_a{ 1 };                                 ///< Defines OLVLA bit.
-        inline static const BitRange<OutputLevelB> output_level_b{ 0 };                                 ///< Defines OLVLB bit.
+        inline static const BitRange<OutputLevelA> output_level_a{ 1 };                                  ///< Defines OLVLA bit.
+        inline static const BitRange<OutputLevelB> output_level_b{ 0 };                                  ///< Defines OLVLB bit.
+        inline static const BitRange<u8> all_bits{ 0, 7 };                                               ///< Defines the whole register bits
+        inline static const u8 accessMask() { return 0b00010011; }                                       ///< Returns access mask;
 };
 
-class InputCaptureRegisterH : public Register {
+class InputCaptureRegister : public Register {
 public:
     using Register::Register;
-    //inline static const BitRange<InterruptCaptureInterruptEnable> interrupt_capture_interrupt_enable{ 7 }; ///< Defines ICIE bit.
-    //inline static const BitRange<OutputCompareInterruptAEnable>   output_compare_interrupt_a_enable{ 3 };   ///< Defines OCIAE bit.
-    //inline static const BitRange<OutputCompareInterruptBEnable>   output_compare_interrupt_b_enable{ 2 };   ///< Defines OCIBE bit.
-    //inline static const BitRange<TimerOverflowInterruptEnable>    timer_overflow_interrupt_enable{ 1 };    ///< Defines OVIE bit.
-    inline static const BitRange<u8> all_bits{ 0, 7 };  ///< Defines the whole register bits
-};
-
-class InputCaptureRegisterL : public Register {
-public:
-    using Register::Register;
-    //inline static const BitRange<InterruptCaptureInterruptEnable> interrupt_capture_interrupt_enable{ 7 }; ///< Defines ICIE bit.
-    //inline static const BitRange<OutputCompareInterruptAEnable>   output_compare_interrupt_a_enable{ 3 };   ///< Defines OCIAE bit.
-    //inline static const BitRange<OutputCompareInterruptBEnable>   output_compare_interrupt_b_enable{ 2 };   ///< Defines OCIBE bit.
-    //inline static const BitRange<TimerOverflowInterruptEnable>    timer_overflow_interrupt_enable{ 1 };    ///< Defines OVIE bit.
-    inline static const BitRange<u8> all_bits{ 0, 7 };  ///< Defines the whole register bits
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 }; ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };  ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u16> all_bits{ 0, 15 };  ///< Defines the whole register bits
 };
 
 }
