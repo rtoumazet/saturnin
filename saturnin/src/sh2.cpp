@@ -81,6 +81,9 @@ u8 Sh2::readRegisters8(const u32 addr) {
         case free_running_counter:                       return frt_frc_.get(FreeRunningCounter::upper_8_bits);
         case free_running_counter + 1:                   return frt_frc_.get(FreeRunningCounter::lower_8_bits);
         case timer_control_register:                     return frt_tcr_.get(TimerControlRegister::all_bits);
+        case timer_output_compare_control_register:      return frt_tocr_.get(TimerOutputCompareControlRegister::all_bits);
+        case input_capture_register:                     return frt_icr_.get(InputCaptureRegister::upper_8_bits);
+        case input_capture_register + 1:                 return frt_icr_.get(InputCaptureRegister::lower_8_bits);
 
         /////////////
         // 12. WDT //
@@ -123,7 +126,8 @@ u16 Sh2::readRegisters16(const u32 addr) {
         /////////////
         // 11. FRT //
         /////////////
-        case free_running_counter: return frt_frc_.get(FreeRunningCounter::all_bits);
+        case free_running_counter:   return frt_frc_.get(FreeRunningCounter::all_bits);
+        case input_capture_register: return frt_icr_.get(InputCaptureRegister::all_bits);
 
         /////////////
         // 12. WDT //
@@ -267,6 +271,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             }
             break;
         case timer_control_register:
+            frt_tcr_.set(TimerControlRegister::all_bits, data);
             switch (frt_tcr_.get(TimerControlRegister::clock_select)) {
                 case ClockSelect::internal_divided_by_8:
                     frt_clock_divisor_ = 8;
@@ -285,6 +290,18 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
                     break;
             }
             break;
+        case timer_output_compare_control_register:
+            frt_tocr_.set(TimerOutputCompareControlRegister::all_bits, static_cast<u8>(data & TimerOutputCompareControlRegister::accessMask())); 
+            break;
+        case input_capture_register:
+            frt_icr_.set(InputCaptureRegister::upper_8_bits, data);
+            break;
+        case input_capture_register + 1:
+            frt_icr_.set(InputCaptureRegister::lower_8_bits, data);
+            break;
+
+
+
         case cache_control_register: {
             Log::debug("sh2", "CCR byte write: {}", data);
 
@@ -364,6 +381,14 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
                 case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegister::all_bits, data); break;
             }
             break;
+        case input_capture_register:
+            frt_icr_.set(InputCaptureRegister::all_bits, data);
+            break;
+
+
+
+
+
 
         case bus_control_register1 + 2:
             core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data & 0x00F7);
@@ -498,10 +523,8 @@ void Sh2::initializeOnChipRegisters() {
     frt_ocra_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));
     frt_ocrb_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));
     frt_tcr_.set(TimerControlRegister::all_bits, static_cast<u8>(0x00));
-
-    core::rawWrite<u8>(io_registers_, timer_output_compare_control_register      & sh2_memory_mask, 0xe0);
-    core::rawWrite<u8>(io_registers_, input_capture_register_h                   & sh2_memory_mask, 0x00);
-    core::rawWrite<u8>(io_registers_, input_capture_register_l                   & sh2_memory_mask, 0x00);
+    frt_tocr_.set(TimerOutputCompareControlRegister::all_bits, static_cast<u8>(0xe0));
+    frt_tcr_.set(TimerControlRegister::all_bits, static_cast<u8>(0x0000));
 
     // Watch Dog Timer
     core::rawWrite<u8>(io_registers_, watchdog_timer_control_status_register     & sh2_memory_mask, 0x18);

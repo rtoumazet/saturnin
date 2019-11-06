@@ -692,6 +692,7 @@ private:
     OutputCompareRegister                 frt_ocrb_;
     TimerControlRegister                  frt_tcr_;
     TimerOutputCompareControlRegister     frt_tocr_;
+    InputCaptureRegister                  frt_icr_;
     //@}
     
 };  
