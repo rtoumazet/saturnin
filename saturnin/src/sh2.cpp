@@ -122,6 +122,10 @@ u16 Sh2::readRegisters16(const u32 addr) {
         //////////////
         // 10. DIVU //
         ////////////// 
+        case division_control_register:              return divu_dvcr_.get(DivisionControlRegister::upper_16_bits);
+        case division_control_register + 2:          return divu_dvcr_.get(DivisionControlRegister::lower_16_bits);
+        case vector_number_setting_register_div:     return divu_vcrdiv_.get(VectorNumberSettingRegisterDiv::upper_16_bits);
+        case vector_number_setting_register_div + 2: return divu_vcrdiv_.get(VectorNumberSettingRegisterDiv::lower_16_bits);
 
         /////////////
         // 11. FRT //
@@ -164,7 +168,15 @@ u32 Sh2::readRegisters32(const u32 addr) {
         //////////////
         // 10. DIVU //
         ////////////// 
-        
+        case divisor_register:                   return divu_dvsr_.toU32();
+        case dividend_register_l_32_bits:
+        case dividend_register_l_shadow:         return divu_dvdnt_.toU32();
+        case division_control_register:          return divu_dvcr_.toU32();
+        case vector_number_setting_register_div: return divu_vcrdiv_.toU32();
+        case dividend_register_l:                return divu_dvdntl_.toU32();
+        case dividend_register_h:                return divu_dvdnth_.toU32();
+
+
         /////////////
         // 11. FRT //
         /////////////
@@ -195,9 +207,9 @@ u32 Sh2::readRegisters32(const u32 addr) {
         case refresh_timer_counter:
         case refresh_time_constant_register: 
             return (core::rawRead<u32>(io_registers_, addr & sh2_memory_mask) & 0x0000FFFF);
-        case dividend_register_l_32_bits:
-        case dividend_register_l_shadow:
-            return core::rawRead<u32>(io_registers_, dividend_register_l & sh2_memory_mask);
+        //case dividend_register_l_32_bits:
+        //case dividend_register_l_shadow:
+        //    return core::rawRead<u32>(io_registers_, dividend_register_l & sh2_memory_mask);
         case dividend_register_h_shadow:     
             return core::rawRead<u32>(io_registers_, dividend_register_h & sh2_memory_mask);
         case dma_operation_register:         
@@ -368,7 +380,13 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
         //////////////
         // 10. DIVU //
         ////////////// 
-
+        case division_control_register: break;// Read only access
+        case division_control_register + 2:          
+            divu_dvcr_.set(DivisionControlRegister::lower_16_bits, static_cast<u16>(data & DivisionControlRegister::accessMask()));
+            break;
+        case vector_number_setting_register_div: break; // Read only access
+        case vector_number_setting_register_div + 2: 
+            divu_vcrdiv_.set(VectorNumberSettingRegisterDiv::lower_16_bits, static_cast<u16>(data & DivisionControlRegister::accessMask()));
         /////////////
         // 11. FRT //
         /////////////
@@ -405,6 +423,71 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
 
 void Sh2::writeRegisters(u32 addr, u32 data) {
     switch (addr) {
+        /////////////
+        // 5. INTC //
+        /////////////
+
+        /////////////
+        // 7. BSC //
+        /////////////
+
+        //////////////
+        // 8. Cache //
+        //////////////
+
+        /////////////
+        // 9. DMAC //
+        /////////////
+
+        //////////////
+        // 10. DIVU //
+        ////////////// 
+        case divisor_register: 
+            divu_dvsr_.set(DivisorRegister::all_bits, data);
+            break;
+        case dividend_register_l_32_bits:
+            divu_dvdnt_.set(DividendRegister32Bits::all_bits, data);
+            
+            // ST-V needs some mirroring
+            divu_dvdntl_.set(DividendRegisterL::all_bits, data);
+            divu_dvdntl_shadow_.set(DividendRegisterL::all_bits, data);
+
+            // Sign extension for the upper 32 bits if needed
+            (data & 0x80000000) ? divu_dvdnth_.set(DividendRegisterH::all_bits, 0xFFFFFFFFu)
+                : divu_dvdnth_.set(DividendRegisterH::all_bits, 0x00000000u);
+
+            start32bitsDivision();
+            break;
+        case division_control_register:          
+            divu_dvcr_.set(DivisionControlRegister::all_bits, data);
+            break;
+        case vector_number_setting_register_div: 
+            divu_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, data);
+            break;
+        case dividend_register_l:
+            divu_dvdntl_.set(DividendRegisterL::all_bits, data);
+            divu_dvdntl_shadow_.set(DividendRegisterL::all_bits, data);
+
+            start64bitsDivision();
+            break;
+        case dividend_register_h:               
+            divu_dvdnth_.set(DividendRegisterH::all_bits, data);
+            break;
+        /////////////
+        // 11. FRT //
+        /////////////
+
+        /////////////
+        // 12. WDT //
+        /////////////
+
+        /////////////
+        // 13. SCI //
+        /////////////
+
+
+
+
         case bus_control_register1:
             if ((data & 0xFFFF0000) == 0xA55A0000) {
                 core::rawWrite<u16>(io_registers_, addr + 2 & sh2_memory_mask, data & BusControlRegister1::writeMask());
@@ -414,25 +497,6 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             if ((data & 0xFFFF0000) == 0xA55A0000) {
                 core::rawWrite<u16>(io_registers_, addr + 2 & sh2_memory_mask, data & BusControlRegister2::writeMask());
             }
-            break;
-        case dividend_register_l_32_bits:
-            core::rawWrite<u32>(io_registers_, addr & sh2_memory_mask, data);
-
-            // ST-V needs some mirroring
-            core::rawWrite<u32>(io_registers_, dividend_register_l & sh2_memory_mask, data);
-            core::rawWrite<u32>(io_registers_, dividend_register_l_shadow & sh2_memory_mask, data);
-
-            // Sign extension for the upper 32 bits if needed
-            (data & 0x80000000) ? core::rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0xFFFFFFFF)
-                : core::rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0x00000000);
-
-            start32bitsDivision();
-            break;
-        case dividend_register_l:
-            core::rawWrite<u32>(io_registers_, dividend_register_l & sh2_memory_mask, data);
-            core::rawWrite<u32>(io_registers_, dividend_register_l_shadow & sh2_memory_mask, data);
-
-            start64bitsDivision();
             break;
         case dma_channel_control_register_0:
             core::rawWrite<u32>(io_registers_, dma_channel_control_register_0 & sh2_memory_mask, data);
@@ -505,8 +569,8 @@ void Sh2::initializeOnChipRegisters() {
     core::rawWrite<u32>(io_registers_, dma_operation_register                           & sh2_memory_mask, 0x00000000);
 
     // Division Unit
-    core::rawWrite<u32>(io_registers_, division_control_register          & sh2_memory_mask, 0x00000000);
-    core::rawWrite<u32>(io_registers_, vector_number_setting_register_div & sh2_memory_mask, 0x00000000); // lower 16 bits are undefined
+    divu_dvcr_.set(DivisionControlRegister::all_bits, 0x00000000u);
+    divu_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, 0x00000000u); // lower 16 bits are undefined
 
     // Serial Communication Interface
     core::rawWrite<u8>(io_registers_, serial_mode_register    & sh2_memory_mask, 0x00);

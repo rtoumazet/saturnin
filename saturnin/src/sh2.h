@@ -672,6 +672,14 @@ private:
     u8      divu_remaining_cycles_{}; ///< Remaining cycles to end current division
     s32     divu_quot_{};             ///< Quotient of the division
     s32     divu_rem_{};              ///< Remainder of the division
+    
+    DivisorRegister                divu_dvsr_;
+    DividendRegister32Bits         divu_dvdnt_;
+    DivisionControlRegister        divu_dvcr_;
+    VectorNumberSettingRegisterDiv divu_vcrdiv_;
+    DividendRegisterH              divu_dvdnth_;
+    DividendRegisterL              divu_dvdntl_;
+    DividendRegisterL              divu_dvdntl_shadow_;
     //@}
 
     /// \name FRT (Free Running Timer)

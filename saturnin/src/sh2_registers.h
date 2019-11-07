@@ -607,15 +607,34 @@ class DmaOperationRegister : public Register {
 //////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputLevelA
+/// \class  DivisorRegister
 ///
-/// \brief  DVCR - OVF bit value.
+/// \brief  Divisor Register (DVSR).
+///
+/// \author Runik
+/// \date   11/09/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//enum class InterruptEnable : u8 {
-//    disabled = 0b0,  ///< Interrupt request (OVFI) caused by OVF disabled (initial)
-//    enabled  = 0b1   ///< Interrupt request (OVFI) caused by OVF enabled
-//};
+class DivisorRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u32> all_bits{ 0, 31 }; ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DividendRegister32Bits
+///
+/// \brief  Dividend Register L for 32 bits Division (DVDNT).
+///
+/// \author Runik
+/// \date   07/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DividendRegister32Bits : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u32> all_bits{ 0, 31 }; ///< Defines the whole register bits
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   OverflowFlag
@@ -642,6 +661,58 @@ public:
     using Register::Register;
     inline static const BitRange<core::InterruptEnable> interrupt_enable{ 1 }; ///< Defines OVFIE bit.
     inline static const BitRange<OverflowFlag> overflow_flag{ 0 };       ///< Defines OVF bit.
+    inline static const BitRange<u16>  upper_16_bits{ 16, 31 }; ///< Defines the range of the upper 16 bits of the register.
+    inline static const BitRange<u16>  lower_16_bits{ 0, 15 };  ///< Defines the range of the lower 16 bits of the register.
+    inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits
+    inline static const u32 accessMask() { return 0b11; }   ///< Returns access mask;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  VectorNumberSettingRegisterDiv
+///
+/// \brief  Vector Number Setting Register Div (VCRDIV).
+///
+/// \author Runik
+/// \date   07/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class VectorNumberSettingRegisterDiv : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u16>  upper_16_bits{ 16, 31 }; ///< Defines the range of the upper 16 bits of the register.
+    inline static const BitRange<u16>  lower_16_bits{ 0, 15 };  ///< Defines the range of the lower 16 bits of the register.
+    inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits
+    inline static const u32 accessMask() { return 0b111111; }   ///< Returns access mask;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DividendRegisterH
+///
+/// \brief  Dividend Register H (DVDNTH).
+///
+/// \author Runik
+/// \date   07/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DividendRegisterH: public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u32> all_bits{ 0, 31 }; ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DividendRegisterL
+///
+/// \brief  Dividend Register L.
+///
+/// \author Runik
+/// \date   07/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DividendRegisterL : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u32> all_bits{ 0, 31 }; ///< Defines the whole register bits
 };
 
 //////////////////////////////////////////
