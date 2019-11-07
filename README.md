@@ -16,7 +16,7 @@ Saturnin is a Sega Saturn emulator
     Follow these steps:
     
     1. remove **template** extension from **vcpkg.cfg.template**
-    1. update **vcpkg_full_path** in **vcpkg.cfg** according to your vcpkg install.
+    1. update **vcpkg_full_path** in **vcpkg.cfg** according to your vcpkg install
     1. run **install_libraries.bat dynamic** for building and installing dynamic libraries or **install_libraries.bat static** for building and installing static ones.
     
     List of used libraries for reference:
