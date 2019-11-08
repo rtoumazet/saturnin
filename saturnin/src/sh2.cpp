@@ -615,35 +615,29 @@ void Sh2::start32bitsDivision() {
     Log::debug("sh2", "32/32 division");
 
     // DVDNT is copied in DVDNTL and DVDNTH
-    s32 dvdnt = core::rawRead<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask);
+    divu_dvdntl_.set(DividendRegisterL::all_bits, divu_dvdnt_.toU32());
 
-    core::rawWrite<u32>(io_registers_, dividend_register_l & sh2_memory_mask, dvdnt);
+    s32 dvdnt = divu_dvdnt_.toU32();
+    if (dvdnt < 0) divu_dvdnth_.set();
+    else           divu_dvdnth_.reset();
 
-    if (dvdnt < 0) core::rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0xffffffff);
-    else           core::rawWrite<u32>(io_registers_, dividend_register_h & sh2_memory_mask, 0x00000000);
-
-    s32 dvsr = core::rawRead<u32>(io_registers_, divisor_register & sh2_memory_mask);
+    s32 dvsr = divu_dvsr_.toU32();
     
     Log::debug("sh2", "Dividend : {}, divisor : {}", dvdnt, dvsr);
     
-    auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
     ldiv_t result{};
-    if (dvsr != 0) result = ldiv(dvdnt, dvsr);
-    else           dvcr.set(DivisionControlRegister::overflow_flag);
+    if (divu_dvsr_.any()) result = ldiv(dvdnt, dvsr);
+    else divu_dvcr_.set(DivisionControlRegister::overflow_flag);
     
     // Overflow check
     if ((dvdnt & 0x80000000) && (dvsr & 0x80000000)) {
-        if ((result.quot == 0x7FFFFFFF) && (result.rem & 0x80000000)) dvcr.set(DivisionControlRegister::overflow_flag);
+        if ((result.quot == 0x7FFFFFFF) && (result.rem & 0x80000000)) divu_dvcr_.set(DivisionControlRegister::overflow_flag);
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
-    divu_remaining_cycles_ = (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
+    divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
     divu_quot_             = result.quot;
     divu_rem_              = result.rem;
-
-    if (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) {
-        core::rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toU32()); // Updating the register
-    }
 
     divu_is_running_ = true;
 }
@@ -651,36 +645,32 @@ void Sh2::start32bitsDivision() {
 void Sh2::start64bitsDivision() {
     Log::debug("sh2", "64/32 division");
 
-    s32 dvdntl = core::rawRead<u32>(io_registers_, dividend_register_l & sh2_memory_mask);
-    s32 dvdnth = core::rawRead<u32>(io_registers_, dividend_register_h & sh2_memory_mask);
-    s32 dvsr   = core::rawRead<u32>(io_registers_, divisor_register & sh2_memory_mask);
+    s32 dvdntl = divu_dvdntl_.toU32();
+    s32 dvdnth = divu_dvdnth_.toU32();
+    s32 dvsr   = divu_dvsr_.toU32();
     
     s64 dividend = (static_cast<s64>(dvdnth) << 32) | (dvdntl & 0xffffffff);
 
     Log::debug("sh2", "Dividend : {}, divisor : {}", dividend, dvsr);
 
-    auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
+    //auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
     s64 quotient{};
     s64 remainder{};
-    if (dvsr != 0) {
+    if (divu_dvsr_.any()) {
         quotient  = dividend / dvsr;
         remainder = dividend % dvsr;
     } else 
-        dvcr.set(DivisionControlRegister::overflow_flag);
+        divu_dvcr_.set(DivisionControlRegister::overflow_flag);
 
     // Overflow check
     if ((dvdnth & 0x80000000) && (dvsr & 0x80000000)) {
-        if ((quotient == 0x7FFFFFFF) && (remainder & 0x80000000)) dvcr.set(DivisionControlRegister::overflow_flag);
+        if ((quotient == 0x7FFFFFFF) && (remainder & 0x80000000)) divu_dvcr_.set(DivisionControlRegister::overflow_flag);
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
-    divu_remaining_cycles_ = (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
+    divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
     divu_quot_             = static_cast<s32>(quotient);
     divu_rem_              = static_cast<s32>(remainder);
-
-    if (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) {
-        core::rawWrite<u32>(io_registers_, division_control_register & sh2_memory_mask, dvcr.toU32()); // Updating the register
-    }
 
     divu_is_running_ = true;
 }

@@ -172,7 +172,7 @@ namespace gui {
             auto it = std::find_if(locales.begin(), locales.end(), [&l](std::string& str) {
                 return l == str;
             });
-            static int index = it - locales.begin();
+            static s32 index = static_cast<s32>(it - locales.begin());
             if (ImGui::Combo("##language", &index, locales)) {
                 state.config()->writeValue(core::Access_keys::config_language, locales[index]);
             }

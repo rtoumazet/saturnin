@@ -113,6 +113,10 @@ class Register {
             }
         }
 
+        inline void set() {
+            register_value.set();
+        }
+
         template <typename T>
         inline void reset(const BitRange<T>& r) {
             for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {
@@ -121,10 +125,12 @@ class Register {
         }
 
         inline void reset() {
-            for (u8 i = 0; i < 32; ++i) {
-                register_value.reset(i);
-            }
+            register_value.reset();
         }
+
+        inline bool none() const { return register_value.none(); }
+        inline bool any() const { return register_value.any(); }
+        inline bool all() const { return register_value.all(); }
 
         inline u32 toU32() const { return register_value.to_ulong(); };
 
