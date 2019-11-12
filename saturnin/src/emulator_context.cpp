@@ -112,7 +112,8 @@ void Emulator_context::stopEmulation() {
 void Emulator_context::emulationMainThread() {
     Log::info("main", tr("Emulation main thread started"));
     while (this->emulation_status_ == EmulationStatus::running) {
-
+        master_sh2_->run();
+        slave_sh2_->run();
     }
     Log::info("main", tr("Emulation main thread finished"));
 }

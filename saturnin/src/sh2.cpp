@@ -55,7 +55,18 @@ u8 Sh2::readRegisters8(const u32 addr) {
         case interrupt_priority_level_setting_register_a + 1: return intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::lower_8_bits);
         case interrupt_priority_level_setting_register_b:     return intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::upper_8_bits);
         case interrupt_priority_level_setting_register_b + 1: return intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::lower_8_bits);
-
+        case vector_number_setting_register_a:                return intc_vcra_.get(VectorNumberSettingRegisterA::upper_8_bits);
+        case vector_number_setting_register_a + 1:            return intc_vcra_.get(VectorNumberSettingRegisterA::lower_8_bits);
+        case vector_number_setting_register_b:                return intc_vcrb_.get(VectorNumberSettingRegisterB::upper_8_bits);
+        case vector_number_setting_register_b + 1:            return intc_vcrb_.get(VectorNumberSettingRegisterB::lower_8_bits);
+        case vector_number_setting_register_c:                return intc_vcrc_.get(VectorNumberSettingRegisterC::upper_8_bits);
+        case vector_number_setting_register_c + 1:            return intc_vcrc_.get(VectorNumberSettingRegisterC::lower_8_bits);
+        case vector_number_setting_register_d:                return intc_vcrd_.get(VectorNumberSettingRegisterD::upper_8_bits);
+        case vector_number_setting_register_d + 1:            return intc_vcrd_.get(VectorNumberSettingRegisterD::lower_8_bits);
+        case vector_number_setting_register_wdt:              return intc_vcrwdt_.get(VectorNumberSettingRegisterWdt::upper_8_bits);
+        case vector_number_setting_register_wdt + 1:          return intc_vcrwdt_.get(VectorNumberSettingRegisterWdt::lower_8_bits);
+        case interrupt_control_register:                      return intc_icr_.get(InterruptControlRegister::upper_8_bits);
+        case interrupt_control_register + 1:                  return intc_icr_.get(InterruptControlRegister::lower_8_bits);
         /////////////
         // 7. BSC //
         /////////////
@@ -106,6 +117,14 @@ u16 Sh2::readRegisters16(const u32 addr) {
         /////////////
         case interrupt_priority_level_setting_register_a: return intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::all_bits);
         case interrupt_priority_level_setting_register_b: return intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::all_bits);
+        case vector_number_setting_register_a:            return intc_vcra_.get(VectorNumberSettingRegisterA::all_bits);
+        case vector_number_setting_register_b:            return intc_vcrb_.get(VectorNumberSettingRegisterB::all_bits);
+        case vector_number_setting_register_c:            return intc_vcrc_.get(VectorNumberSettingRegisterC::all_bits);
+        case vector_number_setting_register_d:            return intc_vcrd_.get(VectorNumberSettingRegisterD::all_bits);
+        case vector_number_setting_register_wdt:          return intc_vcrwdt_.get(VectorNumberSettingRegisterWdt::all_bits);
+        case interrupt_control_register:                  return intc_icr_.get(InterruptControlRegister::all_bits);
+        case vector_number_setting_register_div:          return intc_vcrdiv_.get(VectorNumberSettingRegisterDiv::upper_16_bits);
+        case vector_number_setting_register_div + 2:      return intc_vcrdiv_.get(VectorNumberSettingRegisterDiv::lower_16_bits);
 
         /////////////
         // 7. BSC //
@@ -124,14 +143,12 @@ u16 Sh2::readRegisters16(const u32 addr) {
         ////////////// 
         case division_control_register:              return divu_dvcr_.get(DivisionControlRegister::upper_16_bits);
         case division_control_register + 2:          return divu_dvcr_.get(DivisionControlRegister::lower_16_bits);
-        case vector_number_setting_register_div:     return divu_vcrdiv_.get(VectorNumberSettingRegisterDiv::upper_16_bits);
-        case vector_number_setting_register_div + 2: return divu_vcrdiv_.get(VectorNumberSettingRegisterDiv::lower_16_bits);
 
         /////////////
         // 11. FRT //
         /////////////
-        case free_running_counter:   return frt_frc_.get(FreeRunningCounter::all_bits);
-        case input_capture_register: return frt_icr_.get(InputCaptureRegister::all_bits);
+        //case free_running_counter:   return frt_frc_.get(FreeRunningCounter::all_bits);
+        //case input_capture_register: return frt_icr_.get(InputCaptureRegister::all_bits);
 
         /////////////
         // 12. WDT //
@@ -152,6 +169,9 @@ u32 Sh2::readRegisters32(const u32 addr) {
         /////////////
         // 5. INTC //
         /////////////
+        case vector_number_setting_register_div: return intc_vcrdiv_.toU32();
+        case dma_vector_number_register_0: return intc_vcrdma0_.toU32();
+        case dma_vector_number_register_1: return intc_vcrdma1_.toU32();
 
         /////////////
         // 7. BSC //
@@ -169,12 +189,12 @@ u32 Sh2::readRegisters32(const u32 addr) {
         // 10. DIVU //
         ////////////// 
         case divisor_register:                   return divu_dvsr_.toU32();
-        case dividend_register_l_32_bits:
-        case dividend_register_l_shadow:         return divu_dvdnt_.toU32();
+        case dividend_register_l_32_bits:        return divu_dvdnt_.toU32();
         case division_control_register:          return divu_dvcr_.toU32();
-        case vector_number_setting_register_div: return divu_vcrdiv_.toU32();
-        case dividend_register_l:                return divu_dvdntl_.toU32();
-        case dividend_register_h:                return divu_dvdnth_.toU32();
+        case dividend_register_l:                
+        case dividend_register_l_shadow:         return divu_dvdntl_.toU32();
+        case dividend_register_h:                
+        case dividend_register_h_shadow:         return divu_dvdnth_.toU32();
 
 
         /////////////
@@ -207,11 +227,6 @@ u32 Sh2::readRegisters32(const u32 addr) {
         case refresh_timer_counter:
         case refresh_time_constant_register: 
             return (core::rawRead<u32>(io_registers_, addr & sh2_memory_mask) & 0x0000FFFF);
-        //case dividend_register_l_32_bits:
-        //case dividend_register_l_shadow:
-        //    return core::rawRead<u32>(io_registers_, dividend_register_l & sh2_memory_mask);
-        case dividend_register_h_shadow:     
-            return core::rawRead<u32>(io_registers_, dividend_register_h & sh2_memory_mask);
         case dma_operation_register:         
             return (core::rawRead<u32>(io_registers_, addr & sh2_memory_mask) & 0x0000000F);
         default:
@@ -234,9 +249,42 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case interrupt_priority_level_setting_register_b:
             intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::upper_8_bits, data);
             break;
-
+        case vector_number_setting_register_a:
+            intc_vcra_.set(VectorNumberSettingRegisterA::upper_8_bits, data);
+            break;
+        case vector_number_setting_register_a + 1:
+            intc_vcra_.set(VectorNumberSettingRegisterA::lower_8_bits, data);
+            break;
+        case vector_number_setting_register_b:
+            intc_vcrb_.set(VectorNumberSettingRegisterB::upper_8_bits, data);
+            break;
+        case vector_number_setting_register_b + 1:
+            intc_vcrb_.set(VectorNumberSettingRegisterB::lower_8_bits, data);
+            break;
+        case vector_number_setting_register_c:
+            intc_vcrc_.set(VectorNumberSettingRegisterC::upper_8_bits, data);
+            break;
+        case vector_number_setting_register_c + 1:
+            intc_vcrc_.set(VectorNumberSettingRegisterC::lower_8_bits, data);
+            break;
+        case vector_number_setting_register_d:
+            intc_vcrd_.set(VectorNumberSettingRegisterD::upper_8_bits, data);
+            break;
+        case vector_number_setting_register_d + 1: break;// Read only
+        case vector_number_setting_register_wdt:
+            intc_vcrwdt_.set(VectorNumberSettingRegisterWdt::upper_8_bits, data);
+            break;
+        case vector_number_setting_register_wdt + 1:
+            intc_vcrwdt_.set(VectorNumberSettingRegisterWdt::lower_8_bits, data);
+            break;
+        case interrupt_control_register:
+            intc_icr_.set(InterruptControlRegister::upper_8_bits, data);
+            break;
+        case interrupt_control_register + 1:
+            intc_icr_.set(InterruptControlRegister::lower_8_bits, data);
+            break;
         /////////////
-        // 7. BSC //
+        // 7. BSC  //
         /////////////
 
         //////////////
@@ -257,7 +305,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case timer_interrupt_enable_register:
             frt_tier_.set(TimerInterruptEnableRegister::all_bits, data);
             //is::frt_input_capture.vector = EmuState::pSh2m->IOReg[LOCAL_VCRC] & 0x7F 0x066;
-            is::frt_input_capture.level = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+            //is::frt_input_capture.vector = EmuState::pSh2m->IOReg[LOCAL_VCRC] & 0x7F 0x066;
+            is::frt_input_capture.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
             (sh2_type_ == Sh2Type::master) ? 
                 Log::debug("sh2", "TIER byte write (master SH2)") : Log::debug("sh2", "TIER byte write (slave SH2)");
             break;
@@ -328,9 +377,10 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             }
             break;
         default:
+            unmappedAccess(addr, data);
             break;
     }
-    core::rawWrite<u8>(io_registers_, addr & sh2_memory_mask, data);
+    //core::rawWrite<u8>(io_registers_, addr & sh2_memory_mask, data);
 }
 
 void Sh2::writeRegisters(u32 addr, u16 data) {
@@ -344,24 +394,41 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
         case interrupt_priority_level_setting_register_b:
             intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, data);
             break;
+        case vector_number_setting_register_a:
+            intc_vcra_.set(VectorNumberSettingRegisterA::all_bits, data);
+            break;
+        case vector_number_setting_register_b:
+            intc_vcrb_.set(VectorNumberSettingRegisterB::all_bits, data);
+            break;
+        case vector_number_setting_register_c:
+            intc_vcrc_.set(VectorNumberSettingRegisterC::all_bits, data);
+            break;
+        case vector_number_setting_register_d:
+            intc_vcrd_.set(VectorNumberSettingRegisterD::all_bits, data);
+            break;
+        case vector_number_setting_register_wdt:
+            intc_vcrwdt_.set(VectorNumberSettingRegisterWdt::all_bits, data);
+            break;
+        case vector_number_setting_register_div: break; // Read only access
+        case vector_number_setting_register_div + 2:
+            intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::lower_16_bits, static_cast<u16>(data & DivisionControlRegister::accessMask()));
         case interrupt_control_register: {
-            auto old_icr = InterruptControlRegister(core::rawRead<u16>(io_registers_, addr & sh2_memory_mask));
             auto new_icr = InterruptControlRegister(data);
-            switch (old_icr.get(InterruptControlRegister::nmi_edge_detection)) {
+            switch (intc_icr_.get(InterruptControlRegister::nmi_edge_detection)) {
                 case NmiEdgeDetection::falling:
-                    if ((old_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high) && 
+                    if ((intc_icr_.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high) &&
                             (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low)) {
-                        Log::error("sh2", "Falling edge NMI !");
+                        Log::error("sh2", "Falling edge NMI, not implemented !");
                     }
                     break;
                 case NmiEdgeDetection::rising:
-                    if ((old_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low) &&
+                    if ((intc_icr_.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low) &&
                             (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high)) {
-                        Log::error("sh2", "Rising edge NMI !");
+                        Log::error("sh2", "Rising edge NMI, not implemented !");
                     }
                     break;
             }
-            core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data);
+            intc_icr_.set(InterruptControlRegister::all_bits, data);
         }
             break;
 
@@ -384,9 +451,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
         case division_control_register + 2:          
             divu_dvcr_.set(DivisionControlRegister::lower_16_bits, static_cast<u16>(data & DivisionControlRegister::accessMask()));
             break;
-        case vector_number_setting_register_div: break; // Read only access
-        case vector_number_setting_register_div + 2: 
-            divu_vcrdiv_.set(VectorNumberSettingRegisterDiv::lower_16_bits, static_cast<u16>(data & DivisionControlRegister::accessMask()));
+
         /////////////
         // 11. FRT //
         /////////////
@@ -426,6 +491,13 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         /////////////
         // 5. INTC //
         /////////////
+        case vector_number_setting_register_div:
+            intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, data);
+            break;
+            // :TODO:
+        //case dma_vector_number_register_0:
+        //    intc_vcrdma0_.set(DmaV::all_bits, data);
+        //    break;
 
         /////////////
         // 7. BSC //
@@ -460,9 +532,6 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             break;
         case division_control_register:          
             divu_dvcr_.set(DivisionControlRegister::all_bits, data);
-            break;
-        case vector_number_setting_register_div: 
-            divu_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, data);
             break;
         case dividend_register_l:
             divu_dvdntl_.set(DividendRegisterL::all_bits, data);
@@ -546,7 +615,8 @@ void Sh2::initializeOnChipRegisters() {
     // Interrupt Control
     intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, static_cast<u16>(0x0000));
     intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, static_cast<u16>(0x0000));
-    
+    intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, 0x00000000u); // lower 16 bits are undefined
+
     // Bus State Controler registers
     switch (sh2_type_) {
         case Sh2Type::master: core::rawWrite<u32>(io_registers_, bus_control_register1 & sh2_memory_mask, 0x000003F0); break;
@@ -570,7 +640,6 @@ void Sh2::initializeOnChipRegisters() {
 
     // Division Unit
     divu_dvcr_.set(DivisionControlRegister::all_bits, 0x00000000u);
-    divu_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, 0x00000000u); // lower 16 bits are undefined
 
     // Serial Communication Interface
     core::rawWrite<u8>(io_registers_, serial_mode_register    & sh2_memory_mask, 0x00);
@@ -678,22 +747,22 @@ void Sh2::start64bitsDivision() {
 void Sh2::runDivisionUnit(const u8 cycles_to_run) {
     divu_remaining_cycles_ -= cycles_to_run;
     if (divu_remaining_cycles_ == 0) {
-        auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
-        if (dvcr.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) {
-            if (dvcr.get(DivisionControlRegister::interrupt_enable) == core::InterruptEnable::enabled) {
+        //auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
+        if (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) {
+            if (divu_dvcr_.get(DivisionControlRegister::interrupt_enable) == core::InterruptEnable::enabled) {
                 Log::debug("sh2", "DIVU - Sending division overflow interrupt");
-                is::sh2_division_overflow.vector = core::rawRead<u8>(io_registers_, vector_number_setting_register_div & sh2_memory_mask);
-                is::sh2_division_overflow.level  = core::rawRead<u8>(io_registers_, interrupt_priority_level_setting_register_a & sh2_memory_mask) >> 4;
+                is::sh2_division_overflow.vector = intc_vcrdiv_.get(VectorNumberSettingRegisterDiv::divu_interrupt_vector);
+                is::sh2_division_overflow.level  = intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::divu_level);
                 sendInterrupt(is::sh2_division_overflow);
             }
         } else {
             // Copy in DVDNTL and DVDNTH + ST-V mirroring
-            core::rawWrite<u32>(io_registers_, dividend_register_l_32_bits & sh2_memory_mask, divu_quot_);
-            core::rawWrite<u32>(io_registers_, dividend_register_l         & sh2_memory_mask, divu_quot_);
-            core::rawWrite<u32>(io_registers_, dividend_register_l_shadow  & sh2_memory_mask, divu_quot_);
+            divu_dvdnt_.set(DividendRegister32Bits::all_bits, static_cast<u32>(divu_quot_));
+            divu_dvdntl_.set(DividendRegisterL::all_bits, static_cast<u32>(divu_quot_));
+            divu_dvdntl_shadow_.set(DividendRegisterL::all_bits, static_cast<u32>(divu_quot_));
 
-            core::rawWrite<u32>(io_registers_, dividend_register_h         & sh2_memory_mask, divu_rem_);
-            core::rawWrite<u32>(io_registers_, dividend_register_h_shadow  & sh2_memory_mask, divu_rem_);
+            divu_dvdnth_.set(DividendRegisterH::all_bits, static_cast<u32>(divu_rem_));
+            divu_dvdnth_shadow_.set(DividendRegisterH::all_bits, static_cast<u32>(divu_rem_));
         }
         divu_is_running_ = false;
     }
@@ -742,6 +811,13 @@ void Sh2::sendInterrupt(const core::Interrupt& i) {
             }
         }
     }
+}
+
+u8 Sh2::run() {
+    u8 cycles_to_run = 1; // Will have to be changed when instructions execution is plugged in
+    runDivisionUnit(cycles_to_run);
+
+    return cycles_to_run;
 }
 
 }

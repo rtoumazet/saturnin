@@ -131,11 +131,11 @@ enum class BitValue : u8 {
 class StatusRegister : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<u8>  m{ 9 };       ///< Defines M bit.
-    inline static const BitRange<u8>  q{ 8 };       ///< Defines Q bit.
-    inline static const BitRange<u8>  i{ 4,7 };     ///< Defines interrupt mask bits (I0-I3).
-    inline static const BitRange<u8>  s{ 1 };       ///< Defines S bit.
-    inline static const BitRange<u8>  t{ 0 };       ///< Defines T bit.
+    inline static const BitRange<u8>  m{ 9 };             ///< Defines M bit.
+    inline static const BitRange<u8>  q{ 8 };             ///< Defines Q bit.
+    inline static const BitRange<u8>  i{ 4,7 };           ///< Defines interrupt mask bits (I0-I3).
+    inline static const BitRange<u8>  s{ 1 };             ///< Defines S bit.
+    inline static const BitRange<u8>  t{ 0 };             ///< Defines T bit.
     inline static const BitRange<u16> all_bits{ 0, 9 };   ///< Defines the range of all the bits of the register.
 };
 
@@ -155,12 +155,12 @@ public:
 class InterruptPriorityLevelSettingRegisterA : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<u8>  divu_level{ 12,15 }; ///< Defines DIVU priority level.    
-    inline static const BitRange<u8>  dmac_level{ 8,11 };  ///< Defines DMAC0/DMAC1 priority level.    
-    inline static const BitRange<u8>  wdt_level{ 4,7 };    ///< Defines WDT/DRAM refresh priority level.    
-    inline static const BitRange<u16> all_bits{ 0, 15 };   ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8>  divu_level{ 12,15 };     ///< Defines DIVU priority level.    
+    inline static const BitRange<u8>  dmac_level{ 8,11 };      ///< Defines DMAC0/DMAC1 priority level.    
+    inline static const BitRange<u8>  wdt_level{ 4,7 };        ///< Defines WDT/DRAM refresh priority level.    
+    inline static const BitRange<u16> all_bits{ 0, 15 };       ///< Defines the range of all the bits of the register.
     inline static const BitRange<u8>  upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };   ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };    ///< Defines the range of the lower 8 bits of the register.
 
 };
 
@@ -176,11 +176,141 @@ public:
 class InterruptPriorityLevelSettingRegisterB : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<u8>  sci_level{ 12,15 }; ///< Defines SCI priority level.    
-    inline static const BitRange<u8>  frt_level{ 8,11 };  ///< Defines FRT priority level.    
-    inline static const BitRange<u16> all_bits{ 0, 15 };   ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8>  sci_level{ 12,15 };      ///< Defines SCI priority level.    
+    inline static const BitRange<u8>  frt_level{ 8,11 };       ///< Defines FRT priority level.    
+    inline static const BitRange<u16> all_bits{ 0, 15 };       ///< Defines the range of all the bits of the register.
     inline static const BitRange<u8>  upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };   ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };    ///< Defines the range of the lower 8 bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  VectorNumberSettingRegisterA
+///
+/// \brief  Vector Number Setting Register A (VCRA).
+///
+/// \author Runik
+/// \date   12/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class VectorNumberSettingRegisterA : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  sci_receive_error_vector{ 8, 14 };    ///< Defines SCI receive error interrupt vector number.    
+    inline static const BitRange<u8>  sci_receive_data_full_vector{ 0, 6 }; ///< Defines SCI receive data full interrupt vector number.    
+    inline static const BitRange<u16> all_bits{ 0, 15 };                    ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };                ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };                 ///< Defines the range of the lower 8 bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  VectorNumberSettingRegisterB
+///
+/// \brief  Vector Number Setting Register B (VCRB).
+///
+/// \author Runik
+/// \date   12/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class VectorNumberSettingRegisterB : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  sci_transmit_data_empty_vector{ 8, 14 }; ///< Defines SCI transmit data empty interrupt vector number.    
+    inline static const BitRange<u8>  sci_transmit_end_vector{ 0, 6 };         ///< Defines SCI transmit end interrupt vector number.    
+    inline static const BitRange<u16> all_bits{ 0, 15 };                       ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };                   ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };                    ///< Defines the range of the lower 8 bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  VectorNumberSettingRegisterC
+///
+/// \brief  Vector Number Setting Register C (VCRC).
+///
+/// \author Runik
+/// \date   12/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class VectorNumberSettingRegisterC : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  frt_input_capture_vector{ 8, 14 }; ///< Defines FRT input capture interrupt vector number.    
+    inline static const BitRange<u8>  frt_output_compare_vector{ 0, 6 }; ///< Defines FRT output compare interrupt vector number.    
+    inline static const BitRange<u16> all_bits{ 0, 15 };                 ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };             ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };              ///< Defines the range of the lower 8 bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  VectorNumberSettingRegisterD
+///
+/// \brief  Vector Number Setting Register D (VCRD).
+///
+/// \author Runik
+/// \date   12/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class VectorNumberSettingRegisterD : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  frt_overflow_vector{ 8, 14 }; ///< Defines FRT overflow interrupt vector number.    
+    inline static const BitRange<u16> all_bits{ 0, 15 };            ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };        ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };         ///< Defines the range of the lower 8 bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  VectorNumberSettingRegisterWDT
+///
+/// \brief  Vector Number Setting Register WDT (VCRWDT).
+///
+/// \author Runik
+/// \date   12/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class VectorNumberSettingRegisterWdt : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  wdt_interval_vector{ 8, 14 };     ///< Defines WDT interval interrupt vector number.    
+    inline static const BitRange<u8>  wdt_compare_match_vector{ 0, 6 }; ///< Defines WDT compare match interrupt vector number.    
+    inline static const BitRange<u16> all_bits{ 0, 15 };                ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8>  upper_8_bits{ 8, 15 };            ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8>  lower_8_bits{ 0, 7 };             ///< Defines the range of the lower 8 bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  VectorNumberSettingRegisterDiv
+///
+/// \brief  Vector Number Setting Register Div (VCRDIV).
+///
+/// \author Runik
+/// \date   07/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class VectorNumberSettingRegisterDiv : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  divu_interrupt_vector{ 0,6 }; ///< Defines DIVU vector number.    
+    inline static const BitRange<u16>  upper_16_bits{ 16, 31 };     ///< Defines the range of the upper 16 bits of the register.
+    inline static const BitRange<u16>  lower_16_bits{ 0, 15 };      ///< Defines the range of the lower 16 bits of the register.
+    inline static const BitRange<u32> all_bits{ 0, 31 };            ///< Defines the whole register bits
+    inline static const u32 accessMask() { return 0b1111111; }      ///< Returns access mask;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  VectorNumberSettingRegisterDma
+///
+/// \brief  Vector Number Setting Register DMA (VCRDMAx).
+///
+/// \author Runik
+/// \date   12/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class VectorNumberSettingRegisterDma : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8>  dma_transfert_end_vector{ 0, 7 }; ///< Defines DMACx vector number.    
+    inline static const BitRange<u32> all_bits{ 0, 31 };                ///< Defines the whole register bits
+    inline static const u32 writeMask() { return 0x00000000FF; }        ///< Returns write mask;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,7 +360,10 @@ class InterruptControlRegister : public Register       {
         using Register::Register;
         inline static const BitRange<NmiInputLevel>    nmi_input_level{ 15 };   ///< Defines NMIL  bit.
         inline static const BitRange<NmiEdgeDetection> nmi_edge_detection{ 8 }; ///< Defines NMIE  bit.
-        inline static const BitRange<VectorMode>       vector_mode{ 0 };       ///< Defines VECMD  bit.
+        inline static const BitRange<VectorMode>       vector_mode{ 0 };        ///< Defines VECMD  bit.
+        inline static const BitRange<u8>               upper_8_bits{ 8, 15 };   ///< Defines the range of the upper 8 bits of the register.
+        inline static const BitRange<u8>               lower_8_bits{ 0, 7 };    ///< Defines the range of the lower 8 bits of the register.
+        inline static const BitRange<u16>              all_bits{ 0, 15 };       ///< Defines the whole register bits
 };
 
 
@@ -665,24 +798,6 @@ public:
     inline static const BitRange<u16>  lower_16_bits{ 0, 15 };  ///< Defines the range of the lower 16 bits of the register.
     inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits
     inline static const u32 accessMask() { return 0b11; }   ///< Returns access mask;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VectorNumberSettingRegisterDiv
-///
-/// \brief  Vector Number Setting Register Div (VCRDIV).
-///
-/// \author Runik
-/// \date   07/11/2019
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class VectorNumberSettingRegisterDiv : public Register {
-public:
-    using Register::Register;
-    inline static const BitRange<u16>  upper_16_bits{ 16, 31 }; ///< Defines the range of the upper 16 bits of the register.
-    inline static const BitRange<u16>  lower_16_bits{ 0, 15 };  ///< Defines the range of the lower 16 bits of the register.
-    inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits
-    inline static const u32 accessMask() { return 0b111111; }   ///< Returns access mask;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

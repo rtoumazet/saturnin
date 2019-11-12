@@ -247,6 +247,19 @@ class Sh2 {
 
     void sendInterrupt(const core::Interrupt& i);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn u8 Sh2::run();
+    ///
+    /// \brief  Runs the SH2.
+    ///
+    /// \author Runik
+    /// \date   10/11/2019
+    ///
+    /// \return Elapsed cycles.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    u8 run();
+
     template<typename T>
     void unmappedAccess(const u32 addr, const T data) const {
         Log::warning("sh2", "Unmapped write access : address :{:#0x} data:{:#0x}", addr, data);
@@ -638,14 +651,14 @@ private:
 
     /// \name Processor registers
     //@{
-    u32 pc_;    ///< Progream Counter
-    u32 pr_;    ///< Procedure Register
-    u32 macl_;  ///< Multiply and ACummulate register Low (0x48)
-    u32 mach_;  ///< Multiply and ACummulate register High (0x4C)
-    u32 vbr_;   ///< Vector Base Register (0x50)
-    u32 gbr_;   ///< Global Base Register (0x54)
+    u32 pc_;                  ///< Progream Counter
+    u32 pr_;                  ///< Procedure Register
+    u32 macl_;                ///< Multiply and ACummulate register Low (0x48)
+    u32 mach_;                ///< Multiply and ACummulate register High (0x4C)
+    u32 vbr_;                 ///< Vector Base Register (0x50)
+    u32 gbr_;                 ///< Global Base Register (0x54)
     StatusRegister sr_{0};    ///< Status Register (0x58)
-    u32 r_[16]; ///< General registers, last one is the stack pointer (SP) (0x5C)
+    u32 r_[16];               ///< General registers, last one is the stack pointer (SP) (0x5C)
     //@}
 
     u8  cycles_elapsed_; ///< CPU cycles used by the last instruction.
@@ -659,11 +672,19 @@ private:
     Interrupt                               current_interrupt_{ is::undefined };///< Interrupt in execution
     //@}
 
-    /// \name INTC (Interrupt Controller)
+    ///  \name INTC (Interrupt Controller)
     //@{
     InterruptPriorityLevelSettingRegisterA intc_ipra_;
     InterruptPriorityLevelSettingRegisterB intc_iprb_;
-
+    VectorNumberSettingRegisterA           intc_vcra_;
+    VectorNumberSettingRegisterB           intc_vcrb_;
+    VectorNumberSettingRegisterC           intc_vcrc_;
+    VectorNumberSettingRegisterD           intc_vcrd_;
+    VectorNumberSettingRegisterWdt         intc_vcrwdt_;
+    VectorNumberSettingRegisterDiv         intc_vcrdiv_;
+    VectorNumberSettingRegisterDma         intc_vcrdma0_;
+    VectorNumberSettingRegisterDma         intc_vcrdma1_;
+    InterruptControlRegister               intc_icr_;
     //@}
 
     /// \name DIVU (Division unit)
@@ -673,25 +694,25 @@ private:
     s32     divu_quot_{};             ///< Quotient of the division
     s32     divu_rem_{};              ///< Remainder of the division
     
-    DivisorRegister                divu_dvsr_;
-    DividendRegister32Bits         divu_dvdnt_;
-    DivisionControlRegister        divu_dvcr_;
-    VectorNumberSettingRegisterDiv divu_vcrdiv_;
-    DividendRegisterH              divu_dvdnth_;
-    DividendRegisterL              divu_dvdntl_;
-    DividendRegisterL              divu_dvdntl_shadow_;
+    DivisorRegister         divu_dvsr_;
+    DividendRegister32Bits  divu_dvdnt_;
+    DivisionControlRegister divu_dvcr_;
+    DividendRegisterH       divu_dvdnth_;
+    DividendRegisterH       divu_dvdnth_shadow_;
+    DividendRegisterL       divu_dvdntl_;
+    DividendRegisterL       divu_dvdntl_shadow_;
     //@}
 
     /// \name FRT (Free Running Timer)
-    //@                         {
-    u32	    frt_elapsed_cycles_{}; ///< Elapsed FRT cycles. 
-    u8	    frt_clock_divisor_{};  ///< FRT clock divisor. 
-    u8	    frt_mask_{};           ///< FRT mask. 
-    bool    frt_icie_{};           ///< Input Capture Interrupt Enable. 
-    bool    frt_ociae_{};          ///< Output Compare Interrupt A Enable. 
-    bool    frt_ocibe_{};          ///< Output Compare Interrupt B Enable.
-    bool    frt_ovie_{};           ///< Timer Overflow Interrupt Enable. 
-    bool    frt_current_ocr_{};    ///< Current Output Compare Register. 
+    //@{
+    u32	 frt_elapsed_cycles_{}; ///< Elapsed FRT cycles. 
+    u8	 frt_clock_divisor_{};  ///< FRT clock divisor. 
+    u8	 frt_mask_{};           ///< FRT mask. 
+    bool frt_icie_{};           ///< Input Capture Interrupt Enable. 
+    bool frt_ociae_{};          ///< Output Compare Interrupt A Enable. 
+    bool frt_ocibe_{};          ///< Output Compare Interrupt B Enable.
+    bool frt_ovie_{};           ///< Timer Overflow Interrupt Enable. 
+    bool frt_current_ocr_{};    ///< Current Output Compare Register. 
     
     TimerInterruptEnableRegister          frt_tier_;
     FreeRunningTimerControlStatusRegister frt_ftcsr_;
