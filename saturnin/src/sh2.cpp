@@ -305,7 +305,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case timer_interrupt_enable_register:
             frt_tier_.set(TimerInterruptEnableRegister::all_bits, data);
             //is::frt_input_capture.vector = EmuState::pSh2m->IOReg[LOCAL_VCRC] & 0x7F 0x066;
-            //is::frt_input_capture.vector = EmuState::pSh2m->IOReg[LOCAL_VCRC] & 0x7F 0x066;
+            is::frt_input_capture.vector = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_input_capture_vector);
             is::frt_input_capture.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
             (sh2_type_ == Sh2Type::master) ? 
                 Log::debug("sh2", "TIER byte write (master SH2)") : Log::debug("sh2", "TIER byte write (slave SH2)");
@@ -494,11 +494,12 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         case vector_number_setting_register_div:
             intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, data);
             break;
-            // :TODO:
-        //case dma_vector_number_register_0:
-        //    intc_vcrdma0_.set(DmaV::all_bits, data);
-        //    break;
-
+        case dma_vector_number_register_0:
+            intc_vcrdma0_.set(VectorNumberSettingRegisterDma::all_bits, data);
+            break;
+        case dma_vector_number_register_1:
+            intc_vcrdma1_.set(VectorNumberSettingRegisterDma::all_bits, data);
+            break;
         /////////////
         // 7. BSC //
         /////////////
@@ -615,7 +616,15 @@ void Sh2::initializeOnChipRegisters() {
     // Interrupt Control
     intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, static_cast<u16>(0x0000));
     intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, static_cast<u16>(0x0000));
+    intc_vcra_.set(VectorNumberSettingRegisterA::all_bits, static_cast<u16>(0x0000));
+    intc_vcrb_.set(VectorNumberSettingRegisterB::all_bits, static_cast<u16>(0x0000));
+    intc_vcrc_.set(VectorNumberSettingRegisterC::all_bits, static_cast<u16>(0x0000));
+    intc_vcrd_.set(VectorNumberSettingRegisterD::all_bits, static_cast<u16>(0x0000));
+    intc_vcrwdt_.set(VectorNumberSettingRegisterWdt::all_bits, static_cast<u16>(0x0000));
     intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, 0x00000000u); // lower 16 bits are undefined
+    intc_vcrdma0_.set(VectorNumberSettingRegisterDma::all_bits, 0x00000000u); // lower 8 bits are undefined
+    intc_vcrdma1_.set(VectorNumberSettingRegisterDma::all_bits, 0x00000000u); // lower 8 bits are undefined
+    intc_icr_.set(InterruptControlRegister::all_bits, static_cast<u16>(0x0000));
 
     // Bus State Controler registers
     switch (sh2_type_) {
