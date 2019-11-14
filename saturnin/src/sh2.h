@@ -449,6 +449,19 @@ private:
     void runDivisionUnit(const u8 cycles_to_run);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::runFreeRunningTimer(const u8 cycles_to_run);
+    ///
+    /// \brief  Executes the free running timer for the specified number of cycles.
+    ///
+    /// \author Runik
+    /// \date   13/11/2019
+    ///
+    /// \param  cycles_to_run   Number of cycles to run.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void runFreeRunningTimer(const u8 cycles_to_run);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn Memory* Sh2::memory() const;
     ///
     /// \brief  Returns the memory object.
@@ -708,10 +721,10 @@ private:
     u32	 frt_elapsed_cycles_{}; ///< Elapsed FRT cycles. 
     u8	 frt_clock_divisor_{};  ///< FRT clock divisor. 
     u8	 frt_mask_{};           ///< FRT mask. 
-    bool frt_icie_{};           ///< Input Capture Interrupt Enable. 
-    bool frt_ociae_{};          ///< Output Compare Interrupt A Enable. 
-    bool frt_ocibe_{};          ///< Output Compare Interrupt B Enable.
-    bool frt_ovie_{};           ///< Timer Overflow Interrupt Enable. 
+    //bool frt_icie_{};           ///< Input Capture Interrupt Enable. 
+    //bool frt_ociae_{};          ///< Output Compare Interrupt A Enable. 
+    //bool frt_ocibe_{};          ///< Output Compare Interrupt B Enable.
+    //bool frt_ovie_{};           ///< Timer Overflow Interrupt Enable. 
     bool frt_current_ocr_{};    ///< Current Output Compare Register. 
     
     TimerInterruptEnableRegister          frt_tier_;

@@ -304,11 +304,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         /////////////
         case timer_interrupt_enable_register:
             frt_tier_.set(TimerInterruptEnableRegister::all_bits, data);
-            //is::frt_input_capture.vector = EmuState::pSh2m->IOReg[LOCAL_VCRC] & 0x7F 0x066;
-            is::frt_input_capture.vector = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_input_capture_vector);
-            is::frt_input_capture.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
-            (sh2_type_ == Sh2Type::master) ? 
-                Log::debug("sh2", "TIER byte write (master SH2)") : Log::debug("sh2", "TIER byte write (slave SH2)");
+            //is::frt_input_capture.vector = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_input_capture_vector);
+            //is::frt_input_capture.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
             break;
         case free_running_timer_control_status_register:
             frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::all_bits, data);
@@ -703,19 +700,20 @@ void Sh2::start32bitsDivision() {
     
     Log::debug("sh2", "Dividend : {}, divisor : {}", dvdnt, dvsr);
     
-    ldiv_t result{};
-    if (divu_dvsr_.any()) result = ldiv(dvdnt, dvsr);
-    else divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+    divu_quot_ = 0;
+    divu_rem_  = 0;
+    if (divu_dvsr_.any()) {
+        divu_quot_ = dvdnt / dvsr;
+        divu_rem_  = dvdnt % dvsr;
+    } else divu_dvcr_.set(DivisionControlRegister::overflow_flag);
     
     // Overflow check
     if ((dvdnt & 0x80000000) && (dvsr & 0x80000000)) {
-        if ((result.quot == 0x7FFFFFFF) && (result.rem & 0x80000000)) divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+        if ((divu_quot_ == 0x7FFFFFFF) && (divu_rem_ & 0x80000000)) divu_dvcr_.set(DivisionControlRegister::overflow_flag);
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
     divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
-    divu_quot_             = result.quot;
-    divu_rem_              = result.rem;
 
     divu_is_running_ = true;
 }
@@ -777,12 +775,53 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
     }
 }
 
+void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
+
+    u32 elapsed_cycles{ frt_elapsed_cycles_ + cycles_to_run };
+    u32 counter_increment { elapsed_cycles / frt_clock_divisor_ };
+    u32 cycles_remainder  { elapsed_cycles % frt_clock_divisor_ };
+
+    if (counter_increment) {
+        u32 old_frc{ frt_frc_.get(FreeRunningCounter::all_bits) };
+        u32 current_frc{ old_frc + counter_increment };
+        frt_frc_.set(FreeRunningCounter::all_bits, static_cast<u16>(current_frc));
+
+        frt_elapsed_cycles_ = elapsed_cycles & frt_mask_;
+
+        // Checking overflow
+        if (current_frc > 0xFFFF) {
+            frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::timer_overflow_flag);
+            if (frt_tier_.get(TimerInterruptEnableRegister::timer_overflow_interrupt_enable) == TimerOverflowInterruptEnable::interrupt_request_enabled) {
+                Log::debug("sh2", "FRT - Sending overflow interrupt");
+                is::sh2_frt_overflow_flag_set.vector = intc_vcrd_.get(VectorNumberSettingRegisterD::frt_overflow_vector);
+                is::sh2_frt_overflow_flag_set.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+                sendInterrupt(is::sh2_frt_overflow_flag_set);
+            }
+        }
+
+        // Checking comparison OCRA
+        u32 ocra = frt_ocra_.toU32();
+        if ( (old_frc <= ocra) && (current_frc > ocra) ) {
+
+        }
+        
+
+    } else {
+        frt_elapsed_cycles_ += cycles_to_run;
+    }
+}
+
 void Sh2::executeDma() {
 
 }
 
 void Sh2::reset() {
     initializeOnChipRegisters();
+
+    frt_elapsed_cycles_ = 0;
+    frt_clock_divisor_  = 8;
+    frt_mask_           = 0b00000111;
+
 }
 
 void Sh2::sendInterrupt(const core::Interrupt& i) {
