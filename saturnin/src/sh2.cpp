@@ -147,8 +147,6 @@ u16 Sh2::readRegisters16(const u32 addr) {
         /////////////
         // 11. FRT //
         /////////////
-        //case free_running_counter:   return frt_frc_.get(FreeRunningCounter::all_bits);
-        //case input_capture_register: return frt_icr_.get(InputCaptureRegister::all_bits);
 
         /////////////
         // 12. WDT //
@@ -200,12 +198,6 @@ u32 Sh2::readRegisters32(const u32 addr) {
         /////////////
         // 11. FRT //
         /////////////
-        //case output_compare_register:
-        //    switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
-        //        case OutputCompareRegisterSelect::ocra: return frt_ocra_.get(OutputCompareRegisterA::upper_8_bits); break;
-        //        case OutputCompareRegisterSelect::ocrb: return frt_ocrb_.get(OutputCompareRegisterB::upper_8_bits); break;
-        //    }
-        //    break;
 
         /////////////
         // 12. WDT //
@@ -304,8 +296,6 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         /////////////
         case timer_interrupt_enable_register:
             frt_tier_.set(TimerInterruptEnableRegister::all_bits, data);
-            //is::frt_input_capture.vector = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_input_capture_vector);
-            //is::frt_input_capture.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
             break;
         case free_running_timer_control_status_register:
             frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::all_bits, data);
@@ -799,12 +789,32 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
             }
         }
 
-        // Checking comparison OCRA
+        // Checking comparison for OCRA
         u32 ocra = frt_ocra_.toU32();
         if ( (old_frc <= ocra) && (current_frc > ocra) ) {
-
+            frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::output_compare_flag_a);
+            if(frt_tier_.get(TimerInterruptEnableRegister::output_compare_interrupt_a_enable) == OutputCompareInterruptAEnable::interrupt_request_enabled) {
+                Log::debug("sh2", "FRT - OCRA match");
+                is::sh2_frt_output_compare_flag_a_set.vector = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_output_compare_vector);
+                is::sh2_frt_output_compare_flag_a_set.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+                sendInterrupt(is::sh2_frt_output_compare_flag_a_set);
+            }
+            if (frt_ftcsr_.get(FreeRunningTimerControlStatusRegister::counter_clear_a) == CounterClearA::clear_on_compare) {
+                frt_frc_.reset();
+            }
         }
-        
+
+        // Checking comparison for OCRB
+        u32 ocrb = frt_ocrb_.toU32();
+        if ((old_frc <= ocrb) && (current_frc > ocrb)) {
+            frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::output_compare_flag_b);
+            if (frt_tier_.get(TimerInterruptEnableRegister::output_compare_interrupt_b_enable) == OutputCompareInterruptBEnable::interrupt_request_enabled) {
+                Log::debug("sh2", "FRT - OCRB match");
+                is::sh2_frt_output_compare_flag_b_set.vector = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_output_compare_vector);
+                is::sh2_frt_output_compare_flag_b_set.level = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+                sendInterrupt(is::sh2_frt_output_compare_flag_b_set);
+            }
+        }
 
     } else {
         frt_elapsed_cycles_ += cycles_to_run;
@@ -862,9 +872,9 @@ void Sh2::sendInterrupt(const core::Interrupt& i) {
 }
 
 u8 Sh2::run() {
-    u8 cycles_to_run = 1; // Will have to be changed when instructions execution is plugged in
+    u8 cycles_to_run = 1; // Will have to be changed when instruction execution is plugged in
     runDivisionUnit(cycles_to_run);
-
+    runFreeRunningTimer(cycles_to_run);
     return cycles_to_run;
 }
 
