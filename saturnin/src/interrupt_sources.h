@@ -105,7 +105,6 @@ static const Interrupt external_12       { vector_external_12,       0x1 , Inter
 static const Interrupt external_13       { vector_external_13,       0x1 , InterruptMaskRegister::external_13, InterruptStatusRegister::external_13 };
 static const Interrupt external_14       { vector_external_14,       0x1 , InterruptMaskRegister::external_14, InterruptStatusRegister::external_14 };
 static const Interrupt external_15       { vector_external_15,       0x1 , InterruptMaskRegister::external_15, InterruptStatusRegister::external_15 };
-static Interrupt frt_input_capture       { vector_frt_input_capture, 0x1 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 //constexpr Interrupt frt_input_capture_signal  { 0x65, 0xF }; // Vector                 0x65 was registered in previous version of Saturnin, can't remind its purpose
 
 // Following interrupts are dynamically set
@@ -118,6 +117,7 @@ static Interrupt sh2_sci_transmit_end             { 0, 0 , InterruptMaskRegister
 static Interrupt sh2_sci_receive_error            { 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 static Interrupt sh2_sci_receive_data_full        { 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 static Interrupt sh2_sci_transmit_data_empty      { 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
+static Interrupt sh2_frt_input_capture            { vector_frt_input_capture, 0x1 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 static Interrupt sh2_frt_input_capture_flag_set   { 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 static Interrupt sh2_frt_output_compare_flag_a_set{ 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 static Interrupt sh2_frt_output_compare_flag_b_set{ 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };

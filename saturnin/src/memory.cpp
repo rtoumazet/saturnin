@@ -332,12 +332,12 @@ void Memory::initializeHandlers() {
     initializeHandlers<writeWorkramHigh, u8, u16, u32>(0x26000000, 0x27FFFFFF);
 
     // Master FRT access
-    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(0x01000000, 0x017FFFFF);
-    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(0x21000000, 0x217FFFFF);
+    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(0x01800000, 0x01FFFFFF);
+    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(0x21800000, 0x21FFFFFF);
 
     // Slave FRT access
-    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(0x01800000, 0x01FFFFFF);
-    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(0x21800000, 0x21FFFFFF);
+    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(0x01000000, 0x017FFFFF);
+    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(0x21000000, 0x217FFFFF);
 
     // SH2 register access
     initializeHandlers<readSh2Registers, u8, u16, u32>(0xFFFFFE00, 0xFFFFFFFF);
@@ -453,11 +453,11 @@ bool Memory::isStvProtectionEnabled() const {
 
 void Memory::sendFrtInterruptToMaster() const {
     
-    masterSh2()->sendInterrupt(interrupt_source::frt_input_capture);
+    masterSh2()->sendInterrupt(interrupt_source::sh2_frt_input_capture);
 }
 
 void Memory::sendFrtInterruptToSlave() const {
-    slaveSh2()->sendInterrupt(interrupt_source::frt_input_capture);
+    slaveSh2()->sendInterrupt(interrupt_source::sh2_frt_input_capture);
 }
 
 Config* Memory::config() const { 
