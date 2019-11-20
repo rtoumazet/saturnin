@@ -224,6 +224,20 @@ public:
     void resetInterruptStatusRegister(const Interrupt& i);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Scu::generateInterrupt(const Interrupt& i, const sh2::Sh2Type t);
+    ///
+    /// \brief  Generates an interrupt and sends it to the SH2 if conditions are set.
+    ///
+    /// \author Runik
+    /// \date   10/02/2019
+    ///
+    /// \param  i   Interrupt to generate.
+    /// \param  t   Type of SH2 cpu to generate the interrupt for.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void generateInterrupt(const Interrupt& i, const sh2::Sh2Type t);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t );
     ///
     /// \brief  Checks if the interrupt is masked in the SCU.

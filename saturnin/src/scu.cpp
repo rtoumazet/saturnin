@@ -531,6 +531,19 @@ void Scu::resetInterruptStatusRegister(const Interrupt& i) {
     interrupt_status_register_.reset(i.status);
 };
 
+void Scu::generateInterrupt(const Interrupt& i, const sh2::Sh2Type t) {
+    if (i.level != 0) {
+        if (!isInterruptMasked(i)) {
+
+        }
+        
+        //scu()->setInterruptStatusRegister(i);
+        //if (!scu()->isInterruptMasked(i, sh2_type_)) {
+    }
+
+    //case DmaLevel::level_0: memory()->masterSh2()->sendInterrupt(interrupt_source::level_0_dma_end); break;
+};
+
 bool Scu::isInterruptMasked(const Interrupt& i, sh2::Sh2Type t){
     switch(t) {
         case sh2::Sh2Type::master:
