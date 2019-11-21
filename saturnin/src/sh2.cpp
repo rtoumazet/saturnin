@@ -836,36 +836,32 @@ void Sh2::reset() {
 
 void Sh2::sendInterrupt(const core::Interrupt& i) {
     if (i.level != 0) {
-        scu()->setInterruptStatusRegister(i);
-        if (!scu()->isInterruptMasked(i, sh2_type_)) {
-            if (pending_interrupts_.size() <= max_interrupt_number) {
-                if (!is_level_interrupted_[i.level]) {
-                    is_level_interrupted_[i.level] = true;
-                    pending_interrupts_.push_front(i);
+        if (pending_interrupts_.size() <= max_interrupt_number) {
+            if (!is_level_interrupted_[i.level]) {
+                is_level_interrupted_[i.level] = true;
+                pending_interrupts_.push_front(i);
                     
-                    // Sorting (greatest priority first)
-                    pending_interrupts_.sort();
-                    pending_interrupts_.reverse();
+                // Sorting (greatest priority first)
+                pending_interrupts_.sort();
+                pending_interrupts_.reverse();
 
-                    Log::debug("sh2", "{} SH2 interrupt pending : {:#0x}", (sh2_type_== Sh2Type::master) ? "Master" : "Slave", i.vector);
-                }
+                Log::debug("sh2", "{} SH2 interrupt pending : {:#0x}", (sh2_type_== Sh2Type::master) ? "Master" : "Slave", i.vector);
             }
-            else {
-                // Max number of pending interrupts reached, nothing is added
-                Log::debug("sh2", "Maximum number of pending interrupts reached");
+        }
+        else {
+            // Max number of pending interrupts reached, nothing is added
+            Log::debug("sh2", "Maximum number of pending interrupts reached");
                 
-                // When the interrupt is NMI, the lower priority interrupt is removed
-                if (i.vector == is::vector_nmi) {
-                    pending_interrupts_.pop_back();
-                    pending_interrupts_.push_front(is::nmi);
+            // When the interrupt is NMI, the lower priority interrupt is removed
+            if (i.vector == is::vector_nmi) {
+                pending_interrupts_.pop_back();
+                pending_interrupts_.push_front(is::nmi);
 
-                    // Sorting (greatest priority first)
-                    pending_interrupts_.sort();
-                    pending_interrupts_.reverse();
+                // Sorting (greatest priority first)
+                pending_interrupts_.sort();
+                pending_interrupts_.reverse();
 
-                    Log::debug("sh2", "NMI interrupt forced");
-
-                }
+                Log::debug("sh2", "NMI interrupt forced");
             }
         }
     }

@@ -531,82 +531,59 @@ void Scu::resetInterruptStatusRegister(const Interrupt& i) {
     interrupt_status_register_.reset(i.status);
 };
 
-void Scu::generateInterrupt(const Interrupt& i, const sh2::Sh2Type t) {
+void Scu::generateInterrupt(const Interrupt& i) {
     if (i.level != 0) {
         if (!isInterruptMasked(i)) {
-
+            if (!isInterruptExecuting(i)) {
+                setInterruptStatusRegister(i);
+                memory()->masterSh2()->sendInterrupt(i);
+            }
         }
-        
-        //scu()->setInterruptStatusRegister(i);
-        //if (!scu()->isInterruptMasked(i, sh2_type_)) {
     }
-
-    //case DmaLevel::level_0: memory()->masterSh2()->sendInterrupt(interrupt_source::level_0_dma_end); break;
 };
 
-bool Scu::isInterruptMasked(const Interrupt& i, sh2::Sh2Type t){
-    switch(t) {
-        case sh2::Sh2Type::master:
-            switch (i) {
-                case is::vector_nmi: 
-                    // NMI interrupt is always accepted
-                    return true; 
-                    break;
-                case is::vector_system_manager:
-                    if (emulatorContext()->hardwareMode() == HardwareMode::stv) return true;
-                    else return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
-                    break;
-                case is::vector_v_blank_in:
-                case is::vector_v_blank_out:
-                case is::vector_h_blank_in:
-                case is::vector_timer_0:
-                case is::vector_timer_1:
-                case is::vector_dsp_end:
-                case is::vector_sound_request:
-                case is::vector_pad_interrupt:
-                case is::vector_level_2_dma_end:
-                case is::vector_level_1_dma_end:
-                case is::vector_level_0_dma_end:
-                case is::vector_dma_illegal:
-                case is::vector_sprite_draw_end:
-                case is::vector_external_00:
-                case is::vector_external_01:
-                case is::vector_external_02:
-                case is::vector_external_03:
-                case is::vector_external_04:
-                case is::vector_external_05:
-                case is::vector_external_06:
-                case is::vector_external_07:
-                case is::vector_external_08:
-                case is::vector_external_09:
-                case is::vector_external_10:
-                case is::vector_external_11:
-                case is::vector_external_12:
-                case is::vector_external_13:
-                case is::vector_external_14:
-                case is::vector_external_15:
-                case is::vector_frt_input_capture:
-                    return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
-                    break;
-                default: 
-                    return false;
-                    break;
-            }
-            break;
-        case sh2::Sh2Type::slave:
-            switch (i) {
-                case is::vector_nmi:
-                case is::vector_v_blank_in:
-                case is::vector_h_blank_in:
-                case is::vector_frt_input_capture:
-                    return true;
-                    break;
-                default:
-                    return false;
-            }
-            break;
-    } 
+bool Scu::isInterruptMasked(const Interrupt& i){
+    switch (i) {
+        case is::vector_nmi: return true; // NMI interrupt is always accepted
+        case is::vector_system_manager:
+            if (emulatorContext()->hardwareMode() == HardwareMode::stv) return true;
+            else return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
+        case is::vector_v_blank_in:
+        case is::vector_v_blank_out:
+        case is::vector_h_blank_in:
+        case is::vector_timer_0:
+        case is::vector_timer_1:
+        case is::vector_dsp_end:
+        case is::vector_sound_request:
+        case is::vector_pad_interrupt:
+        case is::vector_level_2_dma_end:
+        case is::vector_level_1_dma_end:
+        case is::vector_level_0_dma_end:
+        case is::vector_dma_illegal:
+        case is::vector_sprite_draw_end:
+        case is::vector_external_00:
+        case is::vector_external_01:
+        case is::vector_external_02:
+        case is::vector_external_03:
+        case is::vector_external_04:
+        case is::vector_external_05:
+        case is::vector_external_06:
+        case is::vector_external_07:
+        case is::vector_external_08:
+        case is::vector_external_09:
+        case is::vector_external_10:
+        case is::vector_external_11:
+        case is::vector_external_12:
+        case is::vector_external_13:
+        case is::vector_external_14:
+        case is::vector_external_15:
+            return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
+    }
     return false;
+}
+
+bool Scu::isInterruptExecuting(const Interrupt& i) {
+    return (interrupt_status_register_.get(i.status) == InterruptEnable::enabled);
 }
 
 void Scu::sendStartFactor(const StartingFactorSelect sfs) {
@@ -852,9 +829,9 @@ Memory* Scu::memory() const {
 
 void Scu::sendDmaEndInterrupt(const DmaLevel l) {
 	switch (l) {
-	    case DmaLevel::level_0: memory()->masterSh2()->sendInterrupt(interrupt_source::level_0_dma_end); break;
-	    case DmaLevel::level_1: memory()->masterSh2()->sendInterrupt(interrupt_source::level_1_dma_end); break;
-	    case DmaLevel::level_2: memory()->masterSh2()->sendInterrupt(interrupt_source::level_2_dma_end); break;
+	    case DmaLevel::level_0: generateInterrupt(interrupt_source::level_0_dma_end); break;
+	    case DmaLevel::level_1: generateInterrupt(interrupt_source::level_1_dma_end); break;
+	    case DmaLevel::level_2: generateInterrupt(interrupt_source::level_2_dma_end); break;
 	}
 }
 

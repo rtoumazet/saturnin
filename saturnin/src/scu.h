@@ -224,21 +224,20 @@ public:
     void resetInterruptStatusRegister(const Interrupt& i);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::generateInterrupt(const Interrupt& i, const sh2::Sh2Type t);
+    /// \fn void Scu::generateInterrupt(const Interrupt& i);
     ///
-    /// \brief  Generates an interrupt and sends it to the SH2 if conditions are set.
+    /// \brief  Generates an interrupt and sends it to the master SH2 if conditions are set.
     ///
     /// \author Runik
     /// \date   10/02/2019
     ///
     /// \param  i   Interrupt to generate.
-    /// \param  t   Type of SH2 cpu to generate the interrupt for.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void generateInterrupt(const Interrupt& i, const sh2::Sh2Type t);
+    void generateInterrupt(const Interrupt& i);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Scu::isInterruptMasked(const Interrupt& i, Sh2Type t );
+    /// \fn bool Scu::isInterruptMasked(const Interrupt& i);
     ///
     /// \brief  Checks if the interrupt is masked in the SCU.
     ///
@@ -246,12 +245,26 @@ public:
     /// \date   10/02/2019
     ///
     /// \param  i   Interrupt to check.
-    /// \param  t   Type of SH2 to check.
     ///
     /// \return True if interrupt is masked.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool isInterruptMasked(const Interrupt& i, Sh2Type t);
+    bool isInterruptMasked(const Interrupt& i);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn bool Scu::isInterruptExecuting(const Interrupt& i);
+    ///
+    /// \brief  Checks if the interrupt is currently executing.
+    ///
+    /// \author Runik
+    /// \date   21/11/2019
+    ///
+    /// \param  i   Interrupt to check.
+    ///
+    /// \return True if interrupt is executing.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool isInterruptExecuting(const Interrupt& i);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn bool Scu::sendStartFactor(const StartingFactorSelect sfs);
