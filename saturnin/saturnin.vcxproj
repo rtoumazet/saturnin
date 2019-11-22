@@ -179,6 +179,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClCompile Include="src\cdrom\spti.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\emulator_context.cpp" />
+    <ClCompile Include="src\interrupt_controller.cpp" />
     <ClCompile Include="src\locale.cpp" />
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\main.cpp" />

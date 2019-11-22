@@ -35,6 +35,7 @@
 #include "memory.h"
 #include "scu.h"
 #include "sh2.h"
+#include "interrupt_controller.h"
 #include "stv_definitions.h"
 
 namespace saturnin {
@@ -196,6 +197,19 @@ static const std::string saturnin_version{ "1.00" };
         Scu* scu() { return scu_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn Interrupt_controller* Emulator_context::intc()
+        ///
+        /// \brief  Returns a pointer to the interrupt controller objet.
+        ///
+        /// \author Runik
+        /// \date   22/11/2019
+        ///
+        /// \return A pointer to the interrupt controller objet.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Interrupt_controller* intc() { return intc_.get(); };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn HardwareMode Emulator_context::hardwareMode() const
         ///
         /// \brief  Current hardware mode of the emulator.
@@ -258,11 +272,12 @@ static const std::string saturnin_version{ "1.00" };
 
         void emulationMainThread();
 
-        std::unique_ptr<Config>   config_;          ///< Configuration object
-        std::unique_ptr<Memory>   memory_;          ///< Memory object
-        std::unique_ptr<Sh2> master_sh2_;      ///< Master SH2 object
-        std::unique_ptr<Sh2> slave_sh2_;       ///< Slave SH2 object
-        std::unique_ptr<Scu>      scu_;             ///< SCU object
+        std::unique_ptr<Config>               config_;     ///< Configuration object
+        std::unique_ptr<Memory>               memory_;     ///< Memory object
+        std::unique_ptr<Sh2>                  master_sh2_; ///< Master SH2 object
+        std::unique_ptr<Sh2>                  slave_sh2_;  ///< Slave SH2 object
+        std::unique_ptr<Scu>                  scu_;        ///< SCU object
+        std::unique_ptr<Interrupt_controller> intc_;       ///< Interrupt controller object
 
         HardwareMode    hardware_mode_{ HardwareMode::saturn };     ///< Hardware mode
         EmulationStatus emulation_status_{ EmulationStatus::stopped }; ///< Emulation status

@@ -93,6 +93,9 @@
     <ClCompile Include="src\video\opengl.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
+    <ClCompile Include="src\interrupt_controller.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
