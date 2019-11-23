@@ -452,12 +452,11 @@ bool Memory::isStvProtectionEnabled() const {
 }
 
 void Memory::sendFrtInterruptToMaster() const {
-    
-    masterSh2()->sendInterrupt(interrupt_source::sh2_frt_input_capture);
+    masterSh2()->sendInterruptCaptureSignal();
 }
 
 void Memory::sendFrtInterruptToSlave() const {
-    slaveSh2()->sendInterrupt(interrupt_source::sh2_frt_input_capture);
+    slaveSh2()->sendInterruptCaptureSignal();
 }
 
 Config* Memory::config() const { 

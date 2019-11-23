@@ -867,6 +867,17 @@ void Sh2::sendInterrupt(const core::Interrupt& i) {
     }
 }
 
+void Sh2::sendInterruptCaptureSignal() {
+    if (frt_tier_.get(TimerInterruptEnableRegister::interrupt_capture_interrupt_enable) == InterruptCaptureInterruptEnable::interrupt_request_enabled) {
+        is::sh2_frt_input_capture.vector = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_input_capture_vector);
+        is::sh2_frt_input_capture.level = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+        sendInterrupt(is::sh2_frt_input_capture);
+    }
+
+    frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::input_capture_flag);
+    frt_icr_.set(InputCaptureRegister::all_bits, frt_frc_.get(FreeRunningCounter::all_bits));
+}
+
 u8 Sh2::run() {
     u8 cycles_to_run = 1; // Will have to be changed when instruction execution is plugged in
     runDivisionUnit(cycles_to_run);
