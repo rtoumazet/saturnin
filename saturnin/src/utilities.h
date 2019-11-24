@@ -81,7 +81,7 @@ constexpr auto toUnderlying(E e) noexcept {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template <typename M, typename V> const auto getKeyFromValue(const M& map, const V find_value)
 ///
-/// \brief  Gets the key from it's value in a 1<->1 map.
+/// \brief  Gets the key from its value in a 1<->1 map.
 ///
 /// \author Runik
 /// \date   02/10/2018

@@ -22,6 +22,7 @@
 #include "interrupt_sources.h"
 #include "scu_registers.h"
 #include "scu.h"
+#include "utilities.h"
 
 namespace is = saturnin::core::interrupt_source;
 
@@ -29,6 +30,11 @@ namespace saturnin {
 namespace sh2 {
 
 using core::Log;
+
+Sh2::Sh2TypeMapping Sh2::sh2_type_mapping_= {
+    {"Master", Sh2Type::master},
+    {"Slave", Sh2Type::slave}
+};
 
 Sh2::Sh2(Sh2Type st, core::Emulator_context* ec) : sh2_type_(st), emulator_context_(ec) {
     reset();
@@ -741,6 +747,37 @@ void Sh2::start64bitsDivision() {
     divu_is_running_ = true;
 }
 
+void Sh2::runInterruptController() {
+    if (!is_interrupted_) {
+        if (!pending_interrupts_.empty()) {
+            u8 interrupt_mask = sr_.get(StatusRegister::i);
+            auto interrupt = pending_interrupts_.front();
+            if (interrupt.level > interrupt_mask) {
+                Log::debug("sh2", "Interrupt request ({}) {:#0x} {:#0x}, PC={:#0x}", utilities::getKeyFromValue(sh2_type_mapping_, sh2_type_), interrupt.vector, interrupt.level, pc_);
+
+                is_level_interrupted_[interrupt.level] = false;
+                
+                // SR and PC are saved to the stack.
+                memory()->write(r_[0xf] - 4, sr_.toU32());
+                memory()->write(r_[0xf] - 8, pc_);
+
+                r_[0xf] = r_[0xf] - 8; // Stack pointer is updated.
+
+                sr_.set(StatusRegister::i, interrupt.level);
+
+                if (interrupt != is::nmi) {
+                    is_interrupted_ = true; // Entering interrupt mode.
+                    current_interrupt_ = interrupt;
+                    Log::debug("sh2", "{} interrupt routine started, pc={:#0x}", interrupt.name, pc_);
+                }
+                pc_ = memory()->read<u32>(interrupt.vector * 4 + vbr_);
+
+                
+            }
+        }
+    }
+}
+
 void Sh2::runDivisionUnit(const u8 cycles_to_run) {
     divu_remaining_cycles_ -= cycles_to_run;
     if (divu_remaining_cycles_ == 0) {
@@ -879,7 +916,9 @@ void Sh2::sendInterruptCaptureSignal() {
 }
 
 u8 Sh2::run() {
+    runInterruptController();
     u8 cycles_to_run = 1; // Will have to be changed when instruction execution is plugged in
+    
     runDivisionUnit(cycles_to_run);
     runFreeRunningTimer(cycles_to_run);
     return cycles_to_run;

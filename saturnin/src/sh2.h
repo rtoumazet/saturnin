@@ -68,6 +68,7 @@ enum class Sh2Type {
     slave
 };
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Sh2
 ///
@@ -89,6 +90,16 @@ class Sh2 {
     Sh2& operator=(Sh2&&) &      = delete;
     ~Sh2()                       = default;
     //@}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \typedef    std::map<const std::string, const sh2::Sh2Type>Sh2TypeMapping
+    ///
+    /// \brief  Defines an alias representing the correspondance between the hardware mode string
+    ///         value defined in the config file and the hardware mode type.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    typedef std::map<const std::string, const sh2::Sh2Type>Sh2TypeMapping;
+    static Sh2TypeMapping sh2_type_mapping_;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> T Sh2::readRegisters(const u32 addr) const
@@ -447,6 +458,17 @@ private:
     void reset();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::runInterruptController();
+    ///
+    /// \brief  Runs the interrupt controller.
+    ///
+    /// \author Runik
+    /// \date   23/11/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void runInterruptController();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::runDivisionUnit(const u8 cycles_to_run);
     ///
     /// \brief  Executes the division unit for the specified number of cycles.
@@ -732,10 +754,6 @@ private:
     u32	 frt_elapsed_cycles_{}; ///< Elapsed FRT cycles. 
     u8	 frt_clock_divisor_{};  ///< FRT clock divisor. 
     u8	 frt_mask_{};           ///< FRT mask. 
-    //bool frt_icie_{};           ///< Input Capture Interrupt Enable. 
-    //bool frt_ociae_{};          ///< Output Compare Interrupt A Enable. 
-    //bool frt_ocibe_{};          ///< Output Compare Interrupt B Enable.
-    //bool frt_ovie_{};           ///< Timer Overflow Interrupt Enable. 
     bool frt_current_ocr_{};    ///< Current Output Compare Register. 
     
     TimerInterruptEnableRegister          frt_tier_;

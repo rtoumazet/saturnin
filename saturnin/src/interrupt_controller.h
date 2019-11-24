@@ -26,55 +26,22 @@
 #pragma once
 
 #include "emulator_defs.h"
-#include "scu_registers.h"
+#include "scu_registers.h" // InterruptMask, InterruptEnable
 
 namespace saturnin {
 namespace core {
 
-// Forward declarations
-class Emulator_context;
-    
+   
 struct Interrupt {
     u8                        vector;
     u8                        level;
     BitRange<InterruptMask>   mask;
     BitRange<InterruptEnable> status;
+    std::string               name;
 
     operator int() const { return vector; } ///< Internal conversion operator.
 };
 
-class Interrupt_controller {
-public:
-    //@{
-    // Constructors / Destructors
-    Interrupt_controller() = delete;
-    Interrupt_controller(Emulator_context* ec) : emulator_context_(ec) {};
-    Interrupt_controller(const Interrupt_controller&) = delete;
-    Interrupt_controller(Interrupt_controller&&) = delete;
-    Interrupt_controller& operator=(const Interrupt_controller&) & = delete;
-    Interrupt_controller& operator=(Interrupt_controller&&) & = delete;
-    ~Interrupt_controller() = default;
-    //@}
-
-    /// \name Context objects accessors
-    //@{
-    Emulator_context* emulatorContext() const;
-    //@}
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Interrupt_controller::run();
-    ///
-    /// \brief  Runs the interrupt controller.
-    ///
-    /// \author Runik
-    /// \date   22/11/2019
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void run();
-
-private:
-    Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
-};
 
 }
 }
