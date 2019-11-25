@@ -92,16 +92,6 @@ class Sh2 {
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \typedef    std::map<const std::string, const sh2::Sh2Type>Sh2TypeMapping
-    ///
-    /// \brief  Defines an alias representing the correspondance between the hardware mode string
-    ///         value defined in the config file and the hardware mode type.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    typedef std::map<const std::string, const sh2::Sh2Type>Sh2TypeMapping;
-    static Sh2TypeMapping sh2_type_mapping_;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> T Sh2::readRegisters(const u32 addr) const
     ///
     /// \brief  Read interface for the registers area.
@@ -694,6 +684,7 @@ private:
     std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
     std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).
     Sh2Type sh2_type_;                          ///< Type of the SH2.
+    std::map<const Sh2Type, const char*> sh2_type_name_ = { {Sh2Type::master, "Master"},{Sh2Type::slave, "Slave"} }; ///< Name of the SH2 type, used for logging.
 
     /// \name Processor registers
     //@{

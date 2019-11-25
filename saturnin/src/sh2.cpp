@@ -31,11 +31,6 @@ namespace sh2 {
 
 using core::Log;
 
-Sh2::Sh2TypeMapping Sh2::sh2_type_mapping_= {
-    {"Master", Sh2Type::master},
-    {"Slave", Sh2Type::slave}
-};
-
 Sh2::Sh2(Sh2Type st, core::Emulator_context* ec) : sh2_type_(st), emulator_context_(ec) {
     reset();
 }
@@ -753,7 +748,7 @@ void Sh2::runInterruptController() {
             u8 interrupt_mask = sr_.get(StatusRegister::i);
             auto interrupt = pending_interrupts_.front();
             if (interrupt.level > interrupt_mask) {
-                Log::debug("sh2", "Interrupt request ({}) {:#0x} {:#0x}, PC={:#0x}", utilities::getKeyFromValue(sh2_type_mapping_, sh2_type_), interrupt.vector, interrupt.level, pc_);
+                Log::debug("sh2", "{} SH2 interrupt request {:#0x} {:#0x}, PC={:#0x}", sh2_type_name_.at(sh2_type_), interrupt.vector, interrupt.level, pc_);
 
                 is_level_interrupted_[interrupt.level] = false;
                 
@@ -768,11 +763,11 @@ void Sh2::runInterruptController() {
                 if (interrupt != is::nmi) {
                     is_interrupted_ = true; // Entering interrupt mode.
                     current_interrupt_ = interrupt;
-                    Log::debug("sh2", "{} interrupt routine started, pc={:#0x}", interrupt.name, pc_);
+                    Log::debug("sh2", "{} SH2 {} interrupt routine started, pc={:#0x}", sh2_type_name_.at(sh2_type_), interrupt.name, pc_);
                 }
                 pc_ = memory()->read<u32>(interrupt.vector * 4 + vbr_);
 
-                
+                pending_interrupts_.pop_front(); // Interrupt is removed from the list.
             }
         }
     }
@@ -882,7 +877,7 @@ void Sh2::sendInterrupt(const core::Interrupt& i) {
                 pending_interrupts_.sort();
                 pending_interrupts_.reverse();
 
-                Log::debug("sh2", "{} SH2 interrupt pending : {:#0x}", (sh2_type_== Sh2Type::master) ? "Master" : "Slave", i.vector);
+                Log::debug("sh2", "{} SH2 interrupt pending : {:#0x}", sh2_type_name_.at(sh2_type_), i.vector);
             }
         }
         else {
