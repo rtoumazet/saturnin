@@ -724,6 +724,14 @@ private:
     InterruptControlRegister               intc_icr_;
     //@}
 
+    /// \name BSC (Bus State Controller)
+    //@{
+    BusControlRegister1 bsc_bcr1_;
+    BusControlRegister2 bsc_bcr2_;
+    WaitControlRegister bsc_wcr_;
+    IndividualMemoryControlRegister bsc_mcr_;
+    //@}
+    
     /// \name DIVU (Division unit)
     //@{
     bool    divu_is_running_{};       ///< True when division unit is in operation

@@ -130,6 +130,10 @@ u16 Sh2::readRegisters16(const u32 addr) {
         /////////////
         // 7. BSC //
         /////////////
+        case bus_control_register1 + 2:              return bsc_bcr1_.get(BusControlRegister1::lower_16_bits);
+        case bus_control_register2 + 2:              return bsc_bcr2_.get(BusControlRegister2::lower_16_bits);
+        case wait_state_control_register + 2:        return bsc_wcr_.get(WaitControlRegister::lower_16_bits);
+        case individual_memory_control_register + 2: return bsc_mcr_.get(IndividualMemoryControlRegister::lower_16_bits);
 
         //////////////
         // 8. Cache //
@@ -175,6 +179,11 @@ u32 Sh2::readRegisters32(const u32 addr) {
         /////////////
         // 7. BSC //
         /////////////
+        // Upper 16 bits are 0x0000, but as they're initialized and never written to after that, no need to mask the return value.
+        case bus_control_register1:              return bsc_bcr1_.toU32();
+        case bus_control_register2:              return bsc_bcr2_.toU32();
+        case wait_state_control_register:        return bsc_wcr_.toU32(); 
+        case individual_memory_control_register: return bsc_mcr_.toU32(); 
 
         //////////////
         // 8. Cache //
@@ -187,13 +196,13 @@ u32 Sh2::readRegisters32(const u32 addr) {
         //////////////
         // 10. DIVU //
         ////////////// 
-        case divisor_register:                   return divu_dvsr_.toU32();
-        case dividend_register_l_32_bits:        return divu_dvdnt_.toU32();
-        case division_control_register:          return divu_dvcr_.toU32();
+        case divisor_register:            return divu_dvsr_.toU32();
+        case dividend_register_l_32_bits: return divu_dvdnt_.toU32();
+        case division_control_register:   return divu_dvcr_.toU32();
         case dividend_register_l:                
-        case dividend_register_l_shadow:         return divu_dvdntl_.toU32();
+        case dividend_register_l_shadow:  return divu_dvdntl_.toU32();
         case dividend_register_h:                
-        case dividend_register_h_shadow:         return divu_dvdnth_.toU32();
+        case dividend_register_h_shadow:  return divu_dvdnth_.toU32();
 
 
         /////////////
@@ -212,10 +221,6 @@ u32 Sh2::readRegisters32(const u32 addr) {
 
 
         ///////////////
-        case bus_control_register1:
-        case bus_control_register2:
-        case wait_state_control_register:
-        case individual_memory_control_register:
         case refresh_timer_control_status_register:
         case refresh_timer_counter:
         case refresh_time_constant_register: 
@@ -400,6 +405,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
         case vector_number_setting_register_div: break; // Read only access
         case vector_number_setting_register_div + 2:
             intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::lower_16_bits, static_cast<u16>(data & DivisionControlRegister::accessMask()));
+            break;
         case interrupt_control_register: {
             auto new_icr = InterruptControlRegister(data);
             switch (intc_icr_.get(InterruptControlRegister::nmi_edge_detection)) {
@@ -423,6 +429,18 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
         /////////////
         // 7. BSC //
         /////////////
+        case bus_control_register1 + 2: 
+            bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::writeMask()));
+            break;
+        case bus_control_register2 + 2: 
+            bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::writeMask()));
+            break;
+        case wait_state_control_register + 2:
+            bsc_wcr_.set(WaitControlRegister::lower_16_bits, data);
+            break;
+        case individual_memory_control_register + 2:
+            bsc_mcr_.set(IndividualMemoryControlRegister::lower_16_bits, data);
+            break;
 
         //////////////
         // 8. Cache //
@@ -460,13 +478,6 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
 
 
 
-
-        case bus_control_register1 + 2:
-            core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data & 0x00F7);
-            break;
-        case bus_control_register2 + 2:
-            core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data & 0x00FC);
-            break;
         default:
             //core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data);
             unmappedAccess(addr, data);
@@ -491,7 +502,26 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         /////////////
         // 7. BSC //
         /////////////
-
+        case bus_control_register1:
+            if ((data & 0xFFFF0000) == 0xA55A0000) {
+                bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::writeMask()));
+            }
+            break;
+        case bus_control_register2:
+            if ((data & 0xFFFF0000) == 0xA55A0000) {
+                bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::writeMask()));
+            }
+            break;
+        case wait_state_control_register:
+            if ((data & 0xFFFF0000) == 0xA55A0000) {
+                bsc_wcr_.set(WaitControlRegister::lower_16_bits, static_cast<u16>(data));
+            }
+            break;
+        case individual_memory_control_register:
+            if ((data & 0xFFFF0000) == 0xA55A0000) {
+                bsc_mcr_.set(IndividualMemoryControlRegister::lower_16_bits, static_cast<u16>(data));
+            }
+            break;
         //////////////
         // 8. Cache //
         //////////////
@@ -546,16 +576,6 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
 
 
 
-        case bus_control_register1:
-            if ((data & 0xFFFF0000) == 0xA55A0000) {
-                core::rawWrite<u16>(io_registers_, addr + 2 & sh2_memory_mask, data & BusControlRegister1::writeMask());
-            }
-            break;
-        case bus_control_register2:
-            if ((data & 0xFFFF0000) == 0xA55A0000) {
-                core::rawWrite<u16>(io_registers_, addr + 2 & sh2_memory_mask, data & BusControlRegister2::writeMask());
-            }
-            break;
         case dma_channel_control_register_0:
             core::rawWrite<u32>(io_registers_, dma_channel_control_register_0 & sh2_memory_mask, data);
 
@@ -615,15 +635,12 @@ void Sh2::initializeOnChipRegisters() {
     intc_icr_.set(InterruptControlRegister::all_bits, static_cast<u16>(0x0000));
 
     // Bus State Controler registers
-    switch (sh2_type_) {
-        case Sh2Type::master: core::rawWrite<u32>(io_registers_, bus_control_register1 & sh2_memory_mask, 0x000003F0); break;
-        case Sh2Type::slave:  core::rawWrite<u32>(io_registers_, bus_control_register1 & sh2_memory_mask, 0x000083F0); break;
-        default: Log::error("sh2", "Unknown SH2 type");
-    }
-   
-    core::rawWrite<u32>(io_registers_, bus_control_register2                 & sh2_memory_mask, 0x000000FC);
-    core::rawWrite<u32>(io_registers_, wait_state_control_register           & sh2_memory_mask, 0x0000AAFF);
-    core::rawWrite<u32>(io_registers_, individual_memory_control_register    & sh2_memory_mask, 0x00000000);
+    u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? 0x000003F0 : 0x000083F0;
+    bsc_bcr1_.set(BusControlRegister1::all_bits, default_bcr1);
+    bsc_bcr2_.set(BusControlRegister2::all_bits, 0x000000FCu);
+    bsc_wcr_.set(WaitControlRegister::all_bits, 0x0000AAFFu);
+    bsc_mcr_.set(IndividualMemoryControlRegister::all_bits, 0x00000000u);
+
     core::rawWrite<u32>(io_registers_, refresh_timer_control_status_register & sh2_memory_mask, 0x00000000);
     core::rawWrite<u32>(io_registers_, refresh_timer_counter                 & sh2_memory_mask, 0x00000000);
     core::rawWrite<u32>(io_registers_, refresh_time_constant_register        & sh2_memory_mask, 0x00000000);

@@ -383,7 +383,9 @@ class InterruptControlRegister : public Register       {
 class BusControlRegister1 : public Register {
     public:
         using Register::Register;
-        static auto writeMask() { return 0b0001111111110111; } ///< returns write mask;
+        inline static const BitRange<u16> lower_16_bits{ 0, 15 }; ///< Defines the whole register bits
+        inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits
+        static auto writeMask() { return 0b0001111111110111; }    ///< returns write mask.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -398,7 +400,41 @@ class BusControlRegister1 : public Register {
 class BusControlRegister2 : public Register {
     public:
         using Register::Register;
-        static auto writeMask() { return 0b0000000011111100; } ///< returns write mask;
+        inline static const BitRange<u16> lower_16_bits{ 0, 15 }; ///< Defines the whole register bits
+        inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits
+        static auto writeMask() { return 0b0000000011111100; }    ///< returns write mask;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  WaitControlRegister
+///
+/// \brief  Wait Control Register (WCR
+///
+/// \author Runik
+/// \date   26/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class WaitControlRegister : public Register {
+    public:
+        using Register::Register;
+        inline static const BitRange<u16> lower_16_bits{ 0, 15 }; ///< Defines the lower 16 bits of the register.
+        inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  IndividualMemoryControlRegister
+///
+/// \brief  Individual Memory Control Register.
+///
+/// \author Runik
+/// \date   26/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class IndividualMemoryControlRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u16> lower_16_bits{ 0, 15 }; ///< Defines the lower 16 bits of the register.
+    inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits.
 };
 
 //////////////
