@@ -408,7 +408,7 @@ class BusControlRegister2 : public Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  WaitControlRegister
 ///
-/// \brief  Wait Control Register (WCR
+/// \brief  Wait Control Register (WCR).
 ///
 /// \author Runik
 /// \date   26/11/2019
@@ -424,7 +424,7 @@ class WaitControlRegister : public Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  IndividualMemoryControlRegister
 ///
-/// \brief  Individual Memory Control Register.
+/// \brief  Individual Memory Control Register (MCR).
 ///
 /// \author Runik
 /// \date   26/11/2019
@@ -435,6 +435,40 @@ public:
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{ 0, 15 }; ///< Defines the lower 16 bits of the register.
     inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  RefreshTimeControlStatusRegister
+///
+/// \brief  Refresh Time Control/Status Register (RTCSR).
+///
+/// \author Runik
+/// \date   27/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class RefreshTimeControlStatusRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u16> lower_16_bits{ 0, 15 }; ///< Defines the lower 16 bits of the register.
+    inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits.
+    static auto writeMask() { return 0b0000000011111000; }    ///< returns write mask;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  RefreshTimerCounter
+///
+/// \brief  Refresh Timer Counter (RTCNT).
+///
+/// \author Runik
+/// \date   27/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class RefreshTimerCounter: public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u16> lower_16_bits{ 0, 15 }; ///< Defines the lower 16 bits of the register.
+    inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits.
+    static auto writeMask() { return 0b0000000011111111; }    ///< returns write mask;
 };
 
 //////////////

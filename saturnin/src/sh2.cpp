@@ -130,10 +130,12 @@ u16 Sh2::readRegisters16(const u32 addr) {
         /////////////
         // 7. BSC //
         /////////////
-        case bus_control_register1 + 2:              return bsc_bcr1_.get(BusControlRegister1::lower_16_bits);
-        case bus_control_register2 + 2:              return bsc_bcr2_.get(BusControlRegister2::lower_16_bits);
-        case wait_state_control_register + 2:        return bsc_wcr_.get(WaitControlRegister::lower_16_bits);
-        case individual_memory_control_register + 2: return bsc_mcr_.get(IndividualMemoryControlRegister::lower_16_bits);
+        case bus_control_register1 + 2:                 return bsc_bcr1_.get(BusControlRegister1::lower_16_bits);
+        case bus_control_register2 + 2:                 return bsc_bcr2_.get(BusControlRegister2::lower_16_bits);
+        case wait_state_control_register + 2:           return bsc_wcr_.get(WaitControlRegister::lower_16_bits);
+        case individual_memory_control_register + 2:    return bsc_mcr_.get(IndividualMemoryControlRegister::lower_16_bits);
+        case refresh_timer_control_status_register + 2: return bsc_rtcsr_.get(RefreshTimeControlStatusRegister::lower_16_bits);
+        case refresh_timer_counter + 2:                 return bsc_rtcnt_.get(RefreshTimerCounter::lower_16_bits);
 
         //////////////
         // 8. Cache //
@@ -173,17 +175,19 @@ u32 Sh2::readRegisters32(const u32 addr) {
         // 5. INTC //
         /////////////
         case vector_number_setting_register_div: return intc_vcrdiv_.toU32();
-        case dma_vector_number_register_0: return intc_vcrdma0_.toU32();
-        case dma_vector_number_register_1: return intc_vcrdma1_.toU32();
+        case dma_vector_number_register_0:       return intc_vcrdma0_.toU32();
+        case dma_vector_number_register_1:       return intc_vcrdma1_.toU32();
 
         /////////////
         // 7. BSC //
         /////////////
         // Upper 16 bits are 0x0000, but as they're initialized and never written to after that, no need to mask the return value.
-        case bus_control_register1:              return bsc_bcr1_.toU32();
-        case bus_control_register2:              return bsc_bcr2_.toU32();
-        case wait_state_control_register:        return bsc_wcr_.toU32(); 
-        case individual_memory_control_register: return bsc_mcr_.toU32(); 
+        case bus_control_register1:                 return bsc_bcr1_.toU32();
+        case bus_control_register2:                 return bsc_bcr2_.toU32();
+        case wait_state_control_register:           return bsc_wcr_.toU32(); 
+        case individual_memory_control_register:    return bsc_mcr_.toU32(); 
+        case refresh_timer_control_status_register: return bsc_rtcsr_.toU32();
+        case refresh_timer_counter:                 return bsc_rtcnt_.toU32();
 
         //////////////
         // 8. Cache //
@@ -221,8 +225,6 @@ u32 Sh2::readRegisters32(const u32 addr) {
 
 
         ///////////////
-        case refresh_timer_control_status_register:
-        case refresh_timer_counter:
         case refresh_time_constant_register: 
             return (core::rawRead<u32>(io_registers_, addr & sh2_memory_mask) & 0x0000FFFF);
         case dma_operation_register:         
@@ -441,6 +443,12 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
         case individual_memory_control_register + 2:
             bsc_mcr_.set(IndividualMemoryControlRegister::lower_16_bits, data);
             break;
+        case refresh_timer_control_status_register + 2:
+            bsc_rtcsr_.set(RefreshTimeControlStatusRegister::lower_16_bits, static_cast<u16>(data & BusControlRegister2::writeMask()));
+            break;
+        case refresh_timer_counter + 2:
+            bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & BusControlRegister2::writeMask()));
+            break;
 
         //////////////
         // 8. Cache //
@@ -522,6 +530,17 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
                 bsc_mcr_.set(IndividualMemoryControlRegister::lower_16_bits, static_cast<u16>(data));
             }
             break;
+        case refresh_timer_control_status_register:
+            if ((data & 0xFFFF0000) == 0xA55A0000) {
+                bsc_rtcsr_.set(RefreshTimeControlStatusRegister::lower_16_bits, static_cast<u16>(data & RefreshTimeControlStatusRegister::writeMask()));
+            }
+            break;
+        case refresh_timer_counter:
+            if ((data & 0xFFFF0000) == 0xA55A0000) {
+                bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & RefreshTimerCounter::writeMask()));
+            }
+            break;
+
         //////////////
         // 8. Cache //
         //////////////
@@ -640,9 +659,9 @@ void Sh2::initializeOnChipRegisters() {
     bsc_bcr2_.set(BusControlRegister2::all_bits, 0x000000FCu);
     bsc_wcr_.set(WaitControlRegister::all_bits, 0x0000AAFFu);
     bsc_mcr_.set(IndividualMemoryControlRegister::all_bits, 0x00000000u);
+    bsc_rtcsr_.set(RefreshTimeControlStatusRegister::all_bits, 0x00000000u);
+    bsc_rtcnt_.set(RefreshTimerCounter::all_bits, 0x00000000u);
 
-    core::rawWrite<u32>(io_registers_, refresh_timer_control_status_register & sh2_memory_mask, 0x00000000);
-    core::rawWrite<u32>(io_registers_, refresh_timer_counter                 & sh2_memory_mask, 0x00000000);
     core::rawWrite<u32>(io_registers_, refresh_time_constant_register        & sh2_memory_mask, 0x00000000);
 
     // Direct Memory Access Controler registers

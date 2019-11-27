@@ -730,6 +730,8 @@ private:
     BusControlRegister2 bsc_bcr2_;
     WaitControlRegister bsc_wcr_;
     IndividualMemoryControlRegister bsc_mcr_;
+    RefreshTimeControlStatusRegister bsc_rtcsr_;
+    RefreshTimerCounter bsc_rtcnt_;
     //@}
     
     /// \name DIVU (Division unit)
