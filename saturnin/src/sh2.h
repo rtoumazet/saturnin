@@ -735,6 +735,26 @@ private:
     RefreshTimerConstantRegister bsc_rtcor_;
     //@}
     
+    /// \name Cache
+    //@{
+    CacheControlRegister cache_ccr_;
+    //@}
+    
+    /// \name DMAC (Direct Memory Access Controller)
+    //@{
+    DmaSourceAddressRegister dmac_sar0_;
+    DmaSourceAddressRegister dmac_sar1_;
+    DmaDestinationAddressRegister dmac_dar0_;
+    DmaDestinationAddressRegister dmac_dar1_;
+    DmaTransferCountRegister dmac_tcr0_;
+    DmaTransferCountRegister dmac_tcr1_;
+    DmaChannelControlRegister dmac_chcr0_;
+    DmaChannelControlRegister dmac_chcr1_;
+    DmaRequestResponseSelectionControlRegister dmac_drcr0_;
+    DmaRequestResponseSelectionControlRegister dmac_drcr1_;
+    DmaOperationRegister dmac_dmaor_;
+    //@}
+
     /// \name DIVU (Division unit)
     //@{
     bool    divu_is_running_{};       ///< True when division unit is in operation

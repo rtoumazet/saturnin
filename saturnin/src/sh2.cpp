@@ -79,7 +79,8 @@ u8 Sh2::readRegisters8(const u32 addr) {
         /////////////
         // 9. DMAC //
         /////////////
-        
+        case dma_request_response_selection_control_register_0: return dmac_drcr0_.get(DmaRequestResponseSelectionControlRegister::all_bits);
+        case dma_request_response_selection_control_register_1: return dmac_drcr1_.get(DmaRequestResponseSelectionControlRegister::all_bits);
         //////////////
         // 10. DIVU //
         ////////////// 
@@ -141,6 +142,7 @@ u16 Sh2::readRegisters16(const u32 addr) {
         //////////////
         // 8. Cache //
         //////////////
+        case cache_control_register: return cache_ccr_.get(CacheControlRegister::all_bits);
 
         /////////////
         // 9. DMAC //
@@ -149,8 +151,8 @@ u16 Sh2::readRegisters16(const u32 addr) {
         //////////////
         // 10. DIVU //
         ////////////// 
-        case division_control_register:              return divu_dvcr_.get(DivisionControlRegister::upper_16_bits);
-        case division_control_register + 2:          return divu_dvcr_.get(DivisionControlRegister::lower_16_bits);
+        case division_control_register:     return divu_dvcr_.get(DivisionControlRegister::upper_16_bits);
+        case division_control_register + 2: return divu_dvcr_.get(DivisionControlRegister::lower_16_bits);
 
         /////////////
         // 11. FRT //
@@ -198,6 +200,16 @@ u32 Sh2::readRegisters32(const u32 addr) {
         /////////////
         // 9. DMAC //
         /////////////
+        case dma_source_address_register_0: return dmac_sar0_.toU32();
+        case dma_source_address_register_1: return dmac_sar1_.toU32();
+        case dma_destination_address_register_0: return dmac_dar0_.toU32();
+        case dma_destination_address_register_1: return dmac_dar1_.toU32();
+        case dma_tranfer_count_register_0: return dmac_tcr0_.toU32();
+        case dma_tranfer_count_register_1: return dmac_tcr1_.toU32();
+        case dma_channel_control_register_0: return dmac_chcr0_.toU32();
+        case dma_channel_control_register_1: return dmac_chcr1_.toU32();
+
+        case dma_operation_register: return dmac_dmaor_.toU32();
 
         //////////////
         // 10. DIVU //
@@ -223,12 +235,6 @@ u32 Sh2::readRegisters32(const u32 addr) {
         // 13. SCI //
         /////////////
 
-
-
-
-        ///////////////
-        case dma_operation_register:         
-            return (core::rawRead<u32>(io_registers_, addr & sh2_memory_mask) & 0x0000000F);
         default:
             unmappedAccess(addr);
             return 0;
@@ -290,11 +296,27 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         //////////////
         // 8. Cache //
         //////////////
+        case cache_control_register:
+            Log::debug("sh2", "CCR byte write: {}", data);
+
+            cache_ccr_.set(CacheControlRegister::all_bits, data);
+            if (cache_ccr_.get(CacheControlRegister::cache_purge) == CachePurge::cache_purge) {
+                purgeCache();
+
+                // cache purge bit is cleared after operation
+                cache_ccr_.reset(CacheControlRegister::cache_purge);
+            }
+        break;
 
         /////////////
         // 9. DMAC //
         /////////////
-
+        case dma_request_response_selection_control_register_0:
+            dmac_drcr0_.set(DmaRequestResponseSelectionControlRegister::all_bits, data);
+            break;
+        case dma_request_response_selection_control_register_1:
+            dmac_drcr1_.set(DmaRequestResponseSelectionControlRegister::all_bits, data);
+            break;
         //////////////
         // 10. DIVU //
         ////////////// 
@@ -356,21 +378,6 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             frt_icr_.set(InputCaptureRegister::lower_8_bits, data);
             break;
 
-
-
-        case cache_control_register: {
-            Log::debug("sh2", "CCR byte write: {}", data);
-
-                auto ccr = CacheControlRegister(data);
-                if (ccr.get(CacheControlRegister::cache_purge) == CachePurge::cache_purge) {
-                    purgeCache();
-
-                    // cache purge bit is cleared after operation
-                    ccr.reset(CacheControlRegister::cache_purge);
-                    data = ccr.toU32();
-                }
-            }
-            break;
         default:
             unmappedAccess(addr, data);
             break;
@@ -460,7 +467,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
         /////////////
         // 9. DMAC //
         /////////////
-
+        
         //////////////
         // 10. DIVU //
         ////////////// 
@@ -553,6 +560,42 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         /////////////
         // 9. DMAC //
         /////////////
+        case dma_source_address_register_0: 
+            dmac_sar0_.set(DmaSourceAddressRegister::all_bits, data);
+            break;
+        case dma_source_address_register_1:
+            dmac_sar1_.set(DmaSourceAddressRegister::all_bits, data);
+            break;
+        case dma_destination_address_register_0:
+            dmac_dar0_.set(DmaDestinationAddressRegister::all_bits, data);
+            break;
+        case dma_destination_address_register_1:
+            dmac_dar1_.set(DmaDestinationAddressRegister::all_bits, data);
+            break;
+        case dma_tranfer_count_register_0:
+            dmac_tcr0_.set(DmaTransferCountRegister::all_bits, data & DmaTransferCountRegister::writeMask());
+            break;
+        case dma_tranfer_count_register_1:
+            dmac_tcr1_.set(DmaTransferCountRegister::all_bits, data & DmaTransferCountRegister::writeMask());
+            break;
+        case dma_channel_control_register_0:
+            dmac_chcr0_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::writeMask());
+
+            if (dmac_chcr0_.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
+                if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
+                    executeDma();
+                }
+            }
+            break;
+        case dma_channel_control_register_1:
+            dmac_chcr1_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::writeMask());
+
+            if (dmac_chcr1_.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
+                if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
+                    executeDma();
+                }
+            }
+            break;
 
         //////////////
         // 10. DIVU //
@@ -600,26 +643,8 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
 
 
 
-        case dma_channel_control_register_0:
-            core::rawWrite<u32>(io_registers_, dma_channel_control_register_0 & sh2_memory_mask, data);
 
-            if (DmaChannelControlRegister(data).get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
-                auto dor = DmaOperationRegister(core::rawRead<u32>(io_registers_, dma_operation_register & sh2_memory_mask));
-                if (dor.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
-                    executeDma();
-                }
-            }
-            break;
-        case dma_channel_control_register_1:
-            core::rawWrite<u32>(io_registers_, dma_channel_control_register_1 & 0x1FF, data);
 
-            if (DmaChannelControlRegister(data).get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
-                auto dor = DmaOperationRegister(core::rawRead<u32>(io_registers_, dma_operation_register & sh2_memory_mask));
-                if (dor.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
-                    executeDma();
-                }
-            }
-            break;
         case dma_operation_register:
             core::rawWrite<u32>(io_registers_, dma_operation_register & sh2_memory_mask, data);
             if (DmaOperationRegister(data).get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
@@ -646,37 +671,42 @@ void Sh2::purgeCache() {
 
 void Sh2::initializeOnChipRegisters() {
     // Interrupt Control
-    intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, static_cast<u16>(0x0000));
-    intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, static_cast<u16>(0x0000));
-    intc_vcra_.set(VectorNumberSettingRegisterA::all_bits, static_cast<u16>(0x0000));
-    intc_vcrb_.set(VectorNumberSettingRegisterB::all_bits, static_cast<u16>(0x0000));
-    intc_vcrc_.set(VectorNumberSettingRegisterC::all_bits, static_cast<u16>(0x0000));
-    intc_vcrd_.set(VectorNumberSettingRegisterD::all_bits, static_cast<u16>(0x0000));
-    intc_vcrwdt_.set(VectorNumberSettingRegisterWdt::all_bits, static_cast<u16>(0x0000));
-    intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, 0x00000000u); // lower 16 bits are undefined
-    intc_vcrdma0_.set(VectorNumberSettingRegisterDma::all_bits, 0x00000000u); // lower 8 bits are undefined
-    intc_vcrdma1_.set(VectorNumberSettingRegisterDma::all_bits, 0x00000000u); // lower 8 bits are undefined
-    intc_icr_.set(InterruptControlRegister::all_bits, static_cast<u16>(0x0000));
+    intc_ipra_.reset();
+    intc_iprb_.reset();
+    intc_vcra_.reset();
+    intc_vcrb_.reset();
+    intc_vcrc_.reset();
+    intc_vcrd_.reset();
+    intc_vcrwdt_.reset();
+    intc_vcrdiv_.reset(); // lower 16 bits are undefined
+    intc_vcrdma0_.reset(); // lower 8 bits are undefined
+    intc_vcrdma1_.reset(); // lower 8 bits are undefined
+    intc_icr_.reset();
 
     // Bus State Controler registers
     u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? 0x000003F0 : 0x000083F0;
     bsc_bcr1_.set(BusControlRegister1::all_bits, default_bcr1);
     bsc_bcr2_.set(BusControlRegister2::all_bits, 0x000000FCu);
     bsc_wcr_.set(WaitControlRegister::all_bits, 0x0000AAFFu);
-    bsc_mcr_.set(IndividualMemoryControlRegister::all_bits, 0x00000000u);
-    bsc_rtcsr_.set(RefreshTimeControlStatusRegister::all_bits, 0x00000000u);
-    bsc_rtcnt_.set(RefreshTimerCounter::all_bits, 0x00000000u);
-    bsc_rtcor_.set(RefreshTimerConstantRegister::all_bits, 0x00000000u);
+    bsc_mcr_.reset();
+    bsc_rtcsr_.reset();
+    bsc_rtcnt_.reset();
+    bsc_rtcor_.reset();
+
+    // Cache registers
+    cache_ccr_.reset();
 
     // Direct Memory Access Controler registers
-    core::rawWrite<u32>(io_registers_, dma_channel_control_register_0                   & sh2_memory_mask, 0x00000000);
-    core::rawWrite<u8>(io_registers_, dma_request_response_selection_control_register_0 & sh2_memory_mask, 0x00);
-    core::rawWrite<u32>(io_registers_, dma_channel_control_register_1                   & sh2_memory_mask, 0x00000000);
-    core::rawWrite<u8>(io_registers_, dma_request_response_selection_control_register_1 & sh2_memory_mask, 0x00);
-    core::rawWrite<u32>(io_registers_, dma_operation_register                           & sh2_memory_mask, 0x00000000);
+    dmac_tcr0_.reset(); // lower 24 bits are undefined
+    dmac_tcr1_.reset(); // lower 24 bits are undefined
+    dmac_chcr0_.reset();
+    dmac_chcr1_.reset();
+    dmac_drcr0_.reset();
+    dmac_drcr1_.reset();
+    dmac_dmaor_.reset();
 
     // Division Unit
-    divu_dvcr_.set(DivisionControlRegister::all_bits, 0x00000000u);
+    divu_dvcr_.reset();
 
     // Serial Communication Interface
     core::rawWrite<u8>(io_registers_, serial_mode_register    & sh2_memory_mask, 0x00);
@@ -688,13 +718,13 @@ void Sh2::initializeOnChipRegisters() {
 
     // Free Running timer
     frt_tier_.set(TimerInterruptEnableRegister::all_bits, static_cast<u8>(0x01));
-    frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::all_bits, static_cast<u8>(0x00));
-    frt_frc_.set(FreeRunningCounter::all_bits, static_cast<u16>(0x0000));
+    frt_ftcsr_.reset();
+    frt_frc_.reset();
     frt_ocra_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));
     frt_ocrb_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));
-    frt_tcr_.set(TimerControlRegister::all_bits, static_cast<u8>(0x00));
+    frt_tcr_.reset();
     frt_tocr_.set(TimerOutputCompareControlRegister::all_bits, static_cast<u8>(0xe0));
-    frt_tcr_.set(TimerControlRegister::all_bits, static_cast<u8>(0x0000));
+    frt_tcr_.reset();
 
     // Watch Dog Timer
     core::rawWrite<u8>(io_registers_, watchdog_timer_control_status_register     & sh2_memory_mask, 0x18);

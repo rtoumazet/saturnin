@@ -100,6 +100,11 @@ void Emulator_context::startEmulation() {
 
     //scu_->dmaTest();
 
+    //sh2::TimerInterruptEnableRegister r(0b100);
+    //if (r.get(sh2::TimerInterruptEnableRegister::output_compare_interrupt_b_enable) == sh2::OutputCompareInterruptBEnable::interrupt_request_enabled) {
+    //    Log::info("main", "enabled");
+    //}
+
     // TESTING //
     
 }

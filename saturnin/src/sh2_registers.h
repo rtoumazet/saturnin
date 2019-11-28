@@ -320,7 +320,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class NmiInputLevel : u8 {
-    low = 0b0, ///< NMI input level is low
+    low  = 0b0, ///< NMI input level is low
     high = 0b1  ///< NMI input level is high
 };
 
@@ -332,7 +332,7 @@ enum class NmiInputLevel : u8 {
 
 enum class NmiEdgeDetection : u8 {
     falling = 0b0, ///< Interrupt request detected on falling edge of NMI input (initial)
-    rising = 0b1  ///< Interrupt request detected on rising edge of NMI input
+    rising  = 0b1  ///< Interrupt request detected on rising edge of NMI input
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -342,7 +342,7 @@ enum class NmiEdgeDetection : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class VectorMode : u8 {
-    auto_vector = 0b0,   ///< Auto vector mode (initial)
+    auto_vector     = 0b0,   ///< Auto vector mode (initial)
     external_vector = 0b1    ///< External vector mode
 };
 
@@ -572,12 +572,14 @@ enum class CacheEnable : u8 {
 class CacheControlRegister : public Register {
     public:
         using Register::Register;
-        inline static const BitRange<WaySpecification>              way_specification             { 6, 7 };     ///< Defines Wx bits.
-        inline static const BitRange<CachePurge>                    cache_purge                   { 4 };        ///< Defines CP bit.
-        inline static const BitRange<TwoWayMode>                    two_way_mode                   { 3 };        ///< Defines TW bit.
-        inline static const BitRange<DataReplacementDisable>        data_replacement_disable       { 2 };        ///< Defines OD bit.
-        inline static const BitRange<InstructionReplacementDisable> instruction_replacement_disable{ 1 };        ///< Defines ID bit.
-        inline static const BitRange<CacheEnable>                   cache_enable                  { 1 };        ///< Defines CE bit.
+        inline static const BitRange<WaySpecification>              way_specification              { 6, 7 }; ///< Defines Wx bits.
+        inline static const BitRange<CachePurge>                    cache_purge                    { 4 };    ///< Defines CP bit.
+        inline static const BitRange<TwoWayMode>                    two_way_mode                   { 3 };    ///< Defines TW bit.
+        inline static const BitRange<DataReplacementDisable>        data_replacement_disable       { 2 };    ///< Defines OD bit.
+        inline static const BitRange<InstructionReplacementDisable> instruction_replacement_disable{ 1 };    ///< Defines ID bit.
+        inline static const BitRange<CacheEnable>                   cache_enable                   { 0 };    ///< Defines CE bit.
+        inline static const BitRange<u8>                            all_bits{ 0, 7 };                        ///< Defines the whole register bits.
+        static auto writeMask() { return 0b11011111; }    ///< returns write mask;
 };
 
 //////////////////////////////////////////////
@@ -585,7 +587,54 @@ class CacheControlRegister : public Register {
 //////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InterruptEnable
+/// \class  DmaSourceAddressRegister
+///
+/// \brief  Dma Source Address Register (SAR0,SAR1).
+///
+/// \author Runik
+/// \date   28/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DmaSourceAddressRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u32> all_bits{ 0, 31 }; ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DmaDestinationAddressRegister
+///
+/// \brief  Dma Destination Address Register (DAR0/DAR1).
+///
+/// \author Runik
+/// \date   28/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DmaDestinationAddressRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u32> all_bits{ 0, 31 }; ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DmaTransferCountRegister
+///
+/// \brief  Dma Transfer Count Register (TCR0 / TCR1).
+///
+/// \author Runik
+/// \date   28/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DmaTransferCountRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u32> all_bits{ 0, 31 };   ///< Defines the whole register bits
+    static auto writeMask() { return 0b0000111111111111; } ///< returns write mask;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DestinationAddressMode
 ///
 /// \brief  CHCR0 - DMx bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -758,6 +807,32 @@ class DmaChannelControlRegister : public Register            {
         inline static const BitRange<Sh2DmaInterruptEnable>  interrupt_enable       { 2 };        ///< Defines IE bit.
         inline static const BitRange<TransferEndFlag>        transfer_end_flag       { 1 };        ///< Defines TE bit.
         inline static const BitRange<Sh2DmaEnable>           dma_enable             { 0 };        ///< Defines DE bit.
+        inline static const BitRange<u32> all_bits{ 0, 31 };                                      ///< Defines the whole register bits
+        static auto writeMask() { return 0x000000FF; }                                            ///< returns write mask;
+};
+
+enum class ResourceSelect : u8 {
+    dreq     = 0b00,    ///< DREQ (external request) (initial).
+    rxi      = 0b01,    ///< RXI (on chip SCI receive data full interrupt transfer request).
+    txi      = 0b10,    ///< TXI (on chip SCI transmit data empty interrupt transfer request).
+    reserved = 0b11     ///< Reserved (setting prohibited)
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DmaRequestResponseSelectionControlRegister
+///
+/// \brief  Dma Request/Response Selection Control Register (DRCR0 / DRCR1).
+///
+/// \author Runik
+/// \date   28/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DmaRequestResponseSelectionControlRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<ResourceSelect> resource_select{ 0,1 }; ///< Defines RSx bits.
+    inline static const BitRange<u8>             all_bits{ 0, 7 };       ///< Defines the whole register bits
+    static auto writeMask() { return 0b00000011; }                       ///< returns write mask;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -816,10 +891,11 @@ enum class DmaMasterEnable : u8 {
 class DmaOperationRegister : public Register {
     public:
         using Register::Register;
-        inline static const BitRange<PriorityMode>     priority_mode    { 3 };   ///< Defines PR bit.
+        inline static const BitRange<PriorityMode>     priority_mode     { 3 };   ///< Defines PR bit.
         inline static const BitRange<AddressErrorFlag> address_error_flag{ 2 };   ///< Defines AE bit.
-        inline static const BitRange<NmiFlag>          nmi_flag         { 1 };   ///< Defines NMIF bit.
+        inline static const BitRange<NmiFlag>          nmi_flag          { 1 };   ///< Defines NMIF bit.
         inline static const BitRange<DmaMasterEnable>  dma_master_enable { 0 };   ///< Defines DME bit.
+        static auto writeMask() { return 0x0000000F; }                            ///< returns write mask;
 };
 
 //////////////////////////////
@@ -928,8 +1004,8 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class InterruptCaptureInterruptEnable : u8 {
-    interrupt_request_disabled = 0b00000000, ///< Interrupt request (ICI) caused by ICF disabled (initial)
-    interrupt_request_enabled = 0b10000000  ///< Interrupt request (ICI) caused by ICF enabled
+    interrupt_request_disabled = 0b0, ///< Interrupt request (ICI) caused by ICF disabled (initial)
+    interrupt_request_enabled  = 0b1  ///< Interrupt request (ICI) caused by ICF enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -939,8 +1015,8 @@ enum class InterruptCaptureInterruptEnable : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareInterruptAEnable : u8 {
-    interrupt_request_disabled = 0b00000000, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
-    interrupt_request_enabled = 0b00001000  ///< Interrupt request (ICIA) caused by OCFA enabled
+    interrupt_request_disabled = 0b0, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
+    interrupt_request_enabled  = 0b1  ///< Interrupt request (ICIA) caused by OCFA enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -950,8 +1026,8 @@ enum class OutputCompareInterruptAEnable : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareInterruptBEnable : u8 {
-    interrupt_request_disabled = 0b00000000, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
-    interrupt_request_enabled = 0b00000100  ///< Interrupt request (ICIB) caused by OCFB enabled
+    interrupt_request_disabled = 0b0, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
+    interrupt_request_enabled  = 0b1  ///< Interrupt request (ICIB) caused by OCFB enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -961,8 +1037,8 @@ enum class OutputCompareInterruptBEnable : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TimerOverflowInterruptEnable : u8 {
-    interrupt_request_disabled = 0b00000000, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
-    interrupt_request_enabled = 0b00000010  ///< Interrupt request (FOVI) caused by OVF enabled
+    interrupt_request_disabled = 0b0, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
+    interrupt_request_enabled  = 0b1  ///< Interrupt request (FOVI) caused by OVF enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -991,8 +1067,8 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class InputCaptureFlag : u8 {
-    clear = 0b00000000,   ///< Clear conditions: 0 is written when 1 is read
-    set   = 0b10000000    ///< Set conditions: when the FRC value is sent to ICR by the input capture signal
+    clear = 0b0,   ///< Clear conditions: 0 is written when 1 is read
+    set   = 0b1    ///< Set conditions: when the FRC value is sent to ICR by the input capture signal
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1002,8 +1078,8 @@ enum class InputCaptureFlag : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareFlagA : u8 {
-    clear = 0b00000000,   ///< Clear conditions: 0 is written when 1 is read
-    set   = 0b00001000    ///< Set conditions: when the FRC value becomes equal to OCRA
+    clear = 0b0,   ///< Clear conditions: 0 is written when 1 is read
+    set   = 0b1    ///< Set conditions: when the FRC value becomes equal to OCRA
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1013,8 +1089,8 @@ enum class OutputCompareFlagA : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareFlagB : u8 {
-    clear = 0b00000000,   ///< Clear conditions: 0 is written when 1 is read
-    set   = 0b00000100    ///< Set conditions: when the FRC value becomes equal to OCRB
+    clear = 0b0,   ///< Clear conditions: 0 is written when 1 is read
+    set   = 0b1    ///< Set conditions: when the FRC value becomes equal to OCRB
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1024,8 +1100,8 @@ enum class OutputCompareFlagB : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TimerOverflowFlag : u8 {
-    clear = 0b00000000,   ///< Clear conditions: 0 is written when 1 is read
-    set   = 0b00000010    ///< Set conditions: when the FRC value changes from 0xFFFF to 0x0000
+    clear = 0b0,   ///< Clear conditions: 0 is written when 1 is read
+    set   = 0b1    ///< Set conditions: when the FRC value changes from 0xFFFF to 0x0000
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1035,8 +1111,8 @@ enum class TimerOverflowFlag : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CounterClearA : u8 {
-    clear_disabled   = 0b00000000,   ///< FRC clear disabled (initial)
-    clear_on_compare = 0b00000001    ///< FRC cleared on compare match A
+    clear_disabled   = 0b0,   ///< FRC clear disabled (initial)
+    clear_on_compare = 0b1    ///< FRC cleared on compare match A
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1101,7 +1177,7 @@ public:
 
 enum class InputEdgeSelect : u8 {
     falling = 0b0,  ///< Input captured on falling edge (initial)
-    rising = 0b1   ///< Input captured on rising edge
+    rising  = 0b1   ///< Input captured on rising edge
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1111,10 +1187,10 @@ enum class InputEdgeSelect : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ClockSelect : u8 {
-    internal_divided_by_8 = 0b00, ///< Internal clock /8 (initial)
-    internal_divided_by_32 = 0b01, ///< Internal clock /32
+    internal_divided_by_8   = 0b00, ///< Internal clock /8 (initial)
+    internal_divided_by_32  = 0b01, ///< Internal clock /32
     internal_divided_by_128 = 0b10, ///< Internal clock /128
-    external = 0b11  ///< External clock
+    external                = 0b11  ///< External clock
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
