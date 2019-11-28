@@ -732,6 +732,7 @@ private:
     IndividualMemoryControlRegister bsc_mcr_;
     RefreshTimeControlStatusRegister bsc_rtcsr_;
     RefreshTimerCounter bsc_rtcnt_;
+    RefreshTimerConstantRegister bsc_rtcor_;
     //@}
     
     /// \name DIVU (Division unit)

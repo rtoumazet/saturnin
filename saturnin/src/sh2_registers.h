@@ -471,6 +471,23 @@ public:
     static auto writeMask() { return 0b0000000011111111; }    ///< returns write mask;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  RefreshTimerConstantRegister
+///
+/// \brief  Refresh Timer Constant Register (RTCOR).
+///
+/// \author Runik
+/// \date   28/11/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class RefreshTimerConstantRegister: public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u16> lower_16_bits{ 0, 15 }; ///< Defines the lower 16 bits of the register.
+    inline static const BitRange<u32> all_bits{ 0, 31 };      ///< Defines the whole register bits.
+    static auto writeMask() { return 0b0000000011111111; }    ///< returns write mask;
+};
+
 //////////////
 // 8. Cache //
 //////////////
