@@ -208,7 +208,6 @@ u32 Sh2::readRegisters32(const u32 addr) {
         case dma_tranfer_count_register_1: return dmac_tcr1_.toU32();
         case dma_channel_control_register_0: return dmac_chcr0_.toU32();
         case dma_channel_control_register_1: return dmac_chcr1_.toU32();
-
         case dma_operation_register: return dmac_dmaor_.toU32();
 
         //////////////
@@ -580,21 +579,15 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             break;
         case dma_channel_control_register_0:
             dmac_chcr0_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::writeMask());
-
-            if (dmac_chcr0_.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
-                if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
-                    executeDma();
-                }
-            }
+            executeDma();
             break;
         case dma_channel_control_register_1:
             dmac_chcr1_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::writeMask());
-
-            if (dmac_chcr1_.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
-                if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
-                    executeDma();
-                }
-            }
+            executeDma();
+            break;
+        case dma_operation_register:
+            dmac_dmaor_.set(DmaOperationRegister::all_bits, data & DmaOperationRegister::writeMask());
+            executeDma();
             break;
 
         //////////////
@@ -645,12 +638,6 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
 
 
 
-        case dma_operation_register:
-            core::rawWrite<u32>(io_registers_, dma_operation_register & sh2_memory_mask, data);
-            if (DmaOperationRegister(data).get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::enabled) {
-                executeDma();
-            }
-            break;
         default:
             //core::rawWrite<u32>(io_registers_, addr & sh2_memory_mask, data);
             unmappedAccess(addr, data);
@@ -924,7 +911,144 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
 }
 
 void Sh2::executeDma() {
+    
+    
+    if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::disabled) return;
+    
+    if (dmaStartConditionsAreSatisfied(DmaChannel::channel_0)) {
+        if (dmac_chcr0_.get(DmaChannelControlRegister::auto_request_mode) == AutoRequestMode::module_request) {
+            Log::warning("sh2", "DMAC - Channel 0 module request not implemented !");
+        }
 
+
+    };
+    
+    if (dmaStartConditionsAreSatisfied(DmaChannel::channel_1)) {
+        if (dmac_chcr1_.get(DmaChannelControlRegister::auto_request_mode) == AutoRequestMode::module_request) {
+            Log::warning("sh2", "DMAC - Channel 1 module request not implemented !");
+        }
+    };
+
+
+    
+
+    
+//    // Channel 0
+//    if ((chcr0 & 0x3) == 1) // DMA Channel 0 enabled
+//    {
+//        counter = static_cast<uint32_t>(IOReg[LOCAL_TCR0] << 24 | IOReg[LOCAL_TCR0 + 1] << 16 | IOReg[LOCAL_TCR0 + 2] << 8 | IOReg[LOCAL_TCR0 + 3]);
+//        counter &= 0x00FFFFFF;
+//        // Getting source and destination data
+//        source0 = static_cast<uint32_t>(IOReg[LOCAL_SAR0] << 24 | IOReg[LOCAL_SAR0 + 1] << 16 | IOReg[LOCAL_SAR0 + 2] << 8 | IOReg[LOCAL_SAR0 + 3]);
+//        destination0 = static_cast<uint32_t>(IOReg[LOCAL_DAR0] << 24 | IOReg[LOCAL_DAR0 + 1] << 16 | IOReg[LOCAL_DAR0 + 2] << 8 | IOReg[LOCAL_DAR0 + 3]);
+//
+//#ifdef _LOGS
+//        if (counter) LogDma(0, source0, destination0, counter);
+//#endif
+//
+//
+//        while (counter > 0) {
+//            // Data transfer
+//            switch (::GetBitValue(chcr0, 10, 11)) {
+//                case 0x0: // Byte transfer
+//                    EmuState::pMem->WriteByte(destination0, EmuState::pMem->ReadByte(source0));
+//                    transferSize0 = 0x1;
+//                    counter--;
+//                    break;
+//                case 0x1: // Word transfer
+//                    EmuState::pMem->WriteWord(destination0, EmuState::pMem->ReadWord(source0));
+//                    transferSize0 = 0x2;
+//                    counter--;
+//                    break;
+//                case 0x2: // Long transfer
+//                    EmuState::pMem->WriteLong(destination0, EmuState::pMem->ReadLong(source0));
+//                    transferSize0 = 0x4;
+//                    counter--;
+//                    break;
+//                case 0x3: // 4*boost::int32_t transfer
+//                    EmuState::pMem->WriteLong(destination0, EmuState::pMem->ReadLong(source0));
+//                    EmuState::pMem->WriteLong(destination0 + 4, EmuState::pMem->ReadLong(source0 + 4));
+//                    EmuState::pMem->WriteLong(destination0 + 8, EmuState::pMem->ReadLong(source0 + 8));
+//                    EmuState::pMem->WriteLong(destination0 + 12, EmuState::pMem->ReadLong(source0 + 12));
+//                    transferSize0 = 0x10;
+//                    counter -= 4;
+//                    break;
+//            }
+//            // Source and destination adresses update
+//            // source
+//            switch (::GetBitValue(chcr0, 12, 13)) {
+//                case 0x0:
+//                    // No change
+//                    break;
+//                case 0x1:
+//                    source0 += transferSize0;
+//                    break;
+//                case 0x2:
+//                    source0 -= transferSize0;
+//                    break;
+//            }
+//            // destination
+//            switch (::GetBitValue(chcr0, 14, 15)) {
+//                case 0x0:
+//                    // No change
+//                    break;
+//                case 0x1:
+//                    destination0 += transferSize0;
+//                    break;
+//                case 0x2:
+//                    destination0 -= transferSize0;
+//                    break;
+//            }
+//        }
+//
+//
+//        // Counter register update
+//        counter = 0;
+//        IOReg[LOCAL_TCR0] = static_cast<uint8_t>((counter & 0xFF000000) >> 24);
+//        IOReg[LOCAL_TCR0 + 1] = static_cast<uint8_t>((counter & 0x00FF0000) >> 16);
+//        IOReg[LOCAL_TCR0 + 2] = static_cast<uint8_t>((counter & 0x0000FF00) >> 8);
+//        IOReg[LOCAL_TCR0 + 3] = static_cast<uint8_t>(counter & 0x000000FF);
+//
+//        // Register adresses update
+//        IOReg[LOCAL_SAR0] = static_cast<uint8_t>((source0 & 0xFF000000) >> 24);
+//        IOReg[LOCAL_SAR0 + 1] = static_cast<uint8_t>((source0 & 0x00FF0000) >> 16);
+//        IOReg[LOCAL_SAR0 + 2] = static_cast<uint8_t>((source0 & 0x0000FF00) >> 8);
+//        IOReg[LOCAL_SAR0 + 3] = static_cast<uint8_t>(source0 & 0x000000FF);
+//
+//        IOReg[LOCAL_DAR0] = static_cast<uint8_t>((destination0 & 0xFF000000) >> 24);
+//        IOReg[LOCAL_DAR0 + 1] = static_cast<uint8_t>((destination0 & 0x00FF0000) >> 16);
+//        IOReg[LOCAL_DAR0 + 2] = static_cast<uint8_t>((destination0 & 0x0000FF00) >> 8);
+//        IOReg[LOCAL_DAR0 + 3] = static_cast<uint8_t>(destination0 & 0x000000FF);
+//
+//        // DMA 0 end flag update
+//        IOReg[LOCAL_CHCR0 + 3] |= 2;
+//        // Interrupt check
+//        if (IOReg[LOCAL_CHCR0 + 3] & 0x4) {
+//            if (isMaster) EmuState::gInt->AddInterruptMaster(IOReg[LOCAL_VCRDMA0 + 3], IOReg[LOCAL_IPRA] & 0xF);
+//            else EmuState::gInt->AddInterruptSlave(IOReg[LOCAL_VCRDMA0 + 3], IOReg[LOCAL_IPRA] & 0xF);
+//        }
+//    }
+}
+
+bool Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) {
+    // DE=1 TE=0 NMIF=0 AE=0
+    switch (dc) {
+        case DmaChannel::channel_0: { 
+            bool channel_0_is_set  = dmac_chcr0_.get(DmaChannelControlRegister::dma_enable) == Sh2DmaEnable::dma_transfer_enabled;
+            channel_0_is_set      &= dmac_chcr0_.get(DmaChannelControlRegister::transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
+            channel_0_is_set      &= dmac_dmaor_.get(DmaOperationRegister::nmi_flag) == NmiFlag::no_nmif_interrupt;
+            channel_0_is_set      &= dmac_dmaor_.get(DmaOperationRegister::address_error_flag) == AddressErrorFlag::no_dmac_address_error;
+            return channel_0_is_set;
+        }
+        case DmaChannel::channel_1: {
+            bool channel_1_is_set  = dmac_chcr1_.get(DmaChannelControlRegister::dma_enable) == Sh2DmaEnable::dma_transfer_enabled;
+            channel_1_is_set      &= dmac_chcr1_.get(DmaChannelControlRegister::transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
+            channel_1_is_set      &= dmac_dmaor_.get(DmaOperationRegister::nmi_flag) == NmiFlag::no_nmif_interrupt;
+            channel_1_is_set      &= dmac_dmaor_.get(DmaOperationRegister::address_error_flag) == AddressErrorFlag::no_dmac_address_error;
+            return channel_1_is_set;
+        }
+    }
+    return false;
 }
 
 void Sh2::reset() {

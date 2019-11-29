@@ -613,9 +613,9 @@ void Scu::initializeRegisters() {
     d0ad_.set(DmaAddressAddValueRegister::all_bits, 0x00000101u);
     d1ad_.set(DmaAddressAddValueRegister::all_bits, 0x00000101u);
     d2ad_.set(DmaAddressAddValueRegister::all_bits, 0x00000101u);
-    d0en_.set(DmaEnableRegister::all_bits, 0x00000000u);
-    d1en_.set(DmaEnableRegister::all_bits, 0x00000000u);
-    d2en_.set(DmaEnableRegister::all_bits, 0x00000000u);
+    d0en_.reset();
+    d1en_.reset();
+    d2en_.reset();
     d0md_.set(DmaModeRegister::all_bits, 0x00000007u);
     d1md_.set(DmaModeRegister::all_bits, 0x00000007u);
     d2md_.set(DmaModeRegister::all_bits, 0x00000007u);
@@ -632,7 +632,7 @@ void Scu::initializeRegisters() {
 
     // Interrupt control
     interrupt_mask_register_.set(InterruptMaskRegister::all_bits, 0x0000BFFFu);
-    interrupt_status_register_.set(InterruptStatusRegister::all_bits, 0x00000000u);
+    interrupt_status_register_.reset();
 
     // A-BUS control
     rawWrite<u32>(memory()->scu_, a_bus_interrupt_acknowledge & scu_memory_mask, 0x00000000);

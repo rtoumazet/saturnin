@@ -628,8 +628,8 @@ public:
 class DmaTransferCountRegister : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<u32> all_bits{ 0, 31 };   ///< Defines the whole register bits
-    static auto writeMask() { return 0b0000111111111111; } ///< returns write mask;
+    inline static const BitRange<u32> all_bits{ 0, 31 }; ///< Defines the whole register bits
+    static auto writeMask() { return 0x00FFFFFF; }       ///< returns write mask;
 };
 
 
@@ -666,9 +666,9 @@ enum class SourceAddressMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransferSize : u8 {
-    byte_unit         = 0b00, ///< Byte unit (initial).
-    word_unit         = 0b01, ///< Word unit.
-    long_unit         = 0b10, ///< Long unit.
+    one_byte_unit     = 0b00, ///< Byte unit (initial).
+    two_byte_unit     = 0b01, ///< Word unit.
+    four_byte_unit    = 0b10, ///< Long unit.
     sixteen_byte_unit = 0b11  ///< 16-byte unit (4 longword transfers).
 };
 
@@ -783,9 +783,9 @@ enum class Sh2DmaEnable : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaChannelControlRegister0
+/// \class  DmaChannelControlRegister
 ///
-/// \brief  DMA Channel Control Register 0 (CHCR0).
+/// \brief  DMA Channel Control Register (CHCR0/CHCR1).
 ///
 /// \author Runik
 /// \date   02/02/2019
@@ -895,6 +895,7 @@ class DmaOperationRegister : public Register {
         inline static const BitRange<AddressErrorFlag> address_error_flag{ 2 };   ///< Defines AE bit.
         inline static const BitRange<NmiFlag>          nmi_flag          { 1 };   ///< Defines NMIF bit.
         inline static const BitRange<DmaMasterEnable>  dma_master_enable { 0 };   ///< Defines DME bit.
+        inline static const BitRange<u32>              all_bits      { 0, 31 };   ///< Defines the whole register bits
         static auto writeMask() { return 0x0000000F; }                            ///< returns write mask;
 };
 
