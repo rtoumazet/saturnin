@@ -81,6 +81,35 @@ enum class DmaChannel {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DmaNextTransferPriority
+///
+/// \brief  Indicates the priority order for the next DMA transfer.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DmaNextTransferPriority {
+    channel_0_first,    ///< Channel 0 will come first, then channel 1.
+    channel_1_first     ///< Channel 1 will come first, then channel 0.
+    
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct Sh2DmaConfiguration
+///
+/// \brief  SH2 DMA Configuration.
+///
+/// \author Runik
+/// \date   01/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct Sh2DmaConfiguration {
+    DmaChannel channel;
+    u32 counter;
+    u32 source;
+    u32 destination;
+    DmaChannelControlRegister chcr;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Sh2
 ///
 /// \brief  Encapsulates Sh2 processor and related methods.
@@ -461,6 +490,21 @@ private:
     bool dmaStartConditionsAreSatisfied(const DmaChannel dc);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn Sh2DmaConfiguration Sh2::configureDmaTransfer(const DmaChannel dc);
+    ///
+    /// \brief  Returns a struct configured for the DMA channel passed as parameter.
+    ///
+    /// \author Runik
+    /// \date   01/12/2019
+    ///
+    /// \param  dc  The DMA channel to configure.
+    ///
+    /// \return A Sh2DmaConfiguration.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    Sh2DmaConfiguration configureDmaTransfer(const DmaChannel dc);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::reset();
     ///
     /// \brief  Resets the SH2 and enters in the reset state.
@@ -750,13 +794,13 @@ private:
 
     /// \name BSC (Bus State Controller)
     //@{
-    BusControlRegister1 bsc_bcr1_;
-    BusControlRegister2 bsc_bcr2_;
-    WaitControlRegister bsc_wcr_;
-    IndividualMemoryControlRegister bsc_mcr_;
+    BusControlRegister1              bsc_bcr1_;
+    BusControlRegister2              bsc_bcr2_;
+    WaitControlRegister              bsc_wcr_;
+    IndividualMemoryControlRegister  bsc_mcr_;
     RefreshTimeControlStatusRegister bsc_rtcsr_;
-    RefreshTimerCounter bsc_rtcnt_;
-    RefreshTimerConstantRegister bsc_rtcor_;
+    RefreshTimerCounter              bsc_rtcnt_;
+    RefreshTimerConstantRegister     bsc_rtcor_;
     //@}
     
     /// \name Cache
@@ -766,17 +810,19 @@ private:
     
     /// \name DMAC (Direct Memory Access Controller)
     //@{
-    DmaSourceAddressRegister dmac_sar0_;
-    DmaSourceAddressRegister dmac_sar1_;
-    DmaDestinationAddressRegister dmac_dar0_;
-    DmaDestinationAddressRegister dmac_dar1_;
-    DmaTransferCountRegister dmac_tcr0_;
-    DmaTransferCountRegister dmac_tcr1_;
-    DmaChannelControlRegister dmac_chcr0_;
-    DmaChannelControlRegister dmac_chcr1_;
+    DmaNextTransferPriority                    dmac_next_transfer_priority_{ DmaNextTransferPriority::channel_0_first };
+
+    DmaSourceAddressRegister                   dmac_sar0_;
+    DmaSourceAddressRegister                   dmac_sar1_;
+    DmaDestinationAddressRegister              dmac_dar0_;
+    DmaDestinationAddressRegister              dmac_dar1_;
+    DmaTransferCountRegister                   dmac_tcr0_;
+    DmaTransferCountRegister                   dmac_tcr1_;
+    DmaChannelControlRegister                  dmac_chcr0_;
+    DmaChannelControlRegister                  dmac_chcr1_;
     DmaRequestResponseSelectionControlRegister dmac_drcr0_;
     DmaRequestResponseSelectionControlRegister dmac_drcr1_;
-    DmaOperationRegister dmac_dmaor_;
+    DmaOperationRegister                       dmac_dmaor_;
     //@}
 
     /// \name DIVU (Division unit)

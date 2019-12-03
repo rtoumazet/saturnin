@@ -78,10 +78,10 @@ class Register {
         //@{
         Register(const u32 v) : register_value(v) {};
         Register()                             = default;
-        Register(const Register&)              = delete;
-        Register(Register&&)                   = delete;
-        Register& operator=(const Register&) & = delete;
-        Register& operator=(Register&&) &      = delete;
+        Register(const Register&)              = default;
+        Register(Register&&)                   = default;
+        Register& operator=(const Register&) & = default;
+        Register& operator=(Register&&) &      = default;
         ~Register()                            = default;
         //@}
     
