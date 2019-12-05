@@ -713,7 +713,7 @@ void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc) {
             dc.transfer_byte_number = d2c_.get(DmaLevel2TransferByteNumberRegister::transfer_byte_number);
             break;
         default:
-            Log::error("scu", "Unknown DMA level !");
+            Log::warning("scu", "Unknown DMA level !");
             break;
     }
 }

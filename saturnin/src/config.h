@@ -299,17 +299,13 @@ namespace core {
                 std::string s = e.getPath();
                 auto errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
                 Log::error("config", errorString);
-                Log::error("config", tr("Exiting ..."));
-
-                std::exit(EXIT_FAILURE);
+                throw std::runtime_error("Config error !");
             }
             catch (const libconfig::SettingTypeException& e) {
 
                 auto errorString = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
                 Log::error("config", errorString);
-                Log::error("config", tr("Exiting ..."));
-
-                std::exit(EXIT_FAILURE);
+                throw std::runtime_error("Config error !");
             }
         }
 

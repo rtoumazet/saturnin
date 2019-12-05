@@ -131,8 +131,7 @@ void Memory::loadBios(const HardwareMode mode) {
         case HardwareMode::stv:    bios_path = config()->readValue(Access_keys::config_bios_stv).c_str(); break;
         default: {
             Log::error("config", tr("Unknown hardware mode"));
-            Log::error("config", tr("Exiting ..."));
-            exit(EXIT_FAILURE);
+            throw std::runtime_error("Config error !");
             break;
         }
     }

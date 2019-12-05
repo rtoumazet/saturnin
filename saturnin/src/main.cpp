@@ -27,11 +27,24 @@ using core::Emulator_context;
 using core::tr;
 
 int main(int argc, char *argv[]) {
-    Emulator_context state;
-    if (!state.initialize()) {
-        Log::error("main", tr("Could not initialize the program ..."));
-        std::exit(EXIT_FAILURE);
-    }
+    
+    try {
+        Emulator_context state;
+        if (!state.initialize()) {
+            Log::error("main", tr("Could not initialize the program ..."));
+            throw std::runtime_error("Main error !");
+        }
 
-    state.startInterface();
+        state.startInterface();
+        std::exit(EXIT_SUCCESS);
+    }
+    catch (const std::runtime_error& e) {
+        Log::error("exception", e.what());
+    }
+    catch (const std::exception& e) {
+        Log::error("exception", e.what());
+    }
+    catch (...) {
+        Log::error("exception", tr("Uncaught exception !"));
+    }
 };

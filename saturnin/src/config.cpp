@@ -113,7 +113,7 @@ bool Config::readFile(){
         auto errorString = fmt::format(tr("Could not read file {0} : {1}"), filename_, fioex.what());
         //cout << fmt::format(tr("Could not read file {0} "), filename) << fioex.what() << endl;
         Log::error("config", errorString);
-        return false;
+        throw std::runtime_error("Config error !");
     }
 }
 
@@ -182,9 +182,7 @@ libcfg::Setting& Config::readValue(const Access_keys& value) {
             
         auto errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
         Log::error("config", errorString);
-        Log::error("config", tr("Exiting ..."));
-
-        std::exit(EXIT_FAILURE);
+        throw std::runtime_error("Config error !");
     }
 }
 

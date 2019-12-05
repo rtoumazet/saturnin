@@ -43,6 +43,8 @@ using sh2::Sh2;
 using sh2::Sh2Type;
 using sh2::StatusRegister;
 
+static std::exception_ptr exp_ptr = nullptr;
+
 Emulator_context::Emulator_context() {
     config_     = std::make_unique<Config>("saturnin.cfg");
     master_sh2_ = std::make_unique<Sh2>(Sh2Type::master, this);
@@ -77,7 +79,12 @@ void Emulator_context::startEmulation() {
     sh2::initializeOpcodesLut();
 
     emulation_main_thread_ = std::thread (&Emulator_context::emulationMainThread, this);
+    //emulation_main_thread_.join();
 
+    // Getting the exception from the thread (if any), and propagating it to the main exception handler.
+    if (exp_ptr) { std::rethrow_exception(exp_ptr); }
+    
+    
     //static std::thread emu_thread;
     //if (ImGui::Button("Play")) {
     //    std::thread local_thread(&core::Emulator_context::startEmulation, &state);
@@ -115,12 +122,18 @@ void Emulator_context::stopEmulation() {
 }
 
 void Emulator_context::emulationMainThread() {
-    Log::info("main", tr("Emulation main thread started"));
-    while (this->emulation_status_ == EmulationStatus::running) {
-        master_sh2_->run();
-        slave_sh2_->run();
+    try {
+        Log::info("main", tr("Emulation main thread started"));
+        throw std::runtime_error(tr("Exception during main emulation thread !"));
+        while (this->emulation_status_ == EmulationStatus::running) {
+            master_sh2_->run();
+            slave_sh2_->run();
+        }
+        Log::info("main", tr("Emulation main thread finished"));
     }
-    Log::info("main", tr("Emulation main thread finished"));
+    catch (...) {
+        exp_ptr = std::current_exception();
+    }
 }
 
 void Emulator_context::startInterface() {

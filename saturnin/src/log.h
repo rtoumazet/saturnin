@@ -254,6 +254,17 @@ class Log {
 
         static void removeFile(const std::string& path);
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn static void Log::flush();
+        ///
+        /// \brief  Flushes the log.
+        ///
+        /// \author Runik
+        /// \date   04/12/2019
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        static void flush();
+
     private:
         static std::map<std::string, std::shared_ptr<spdlog::logger>> loggers_; ///< Map containing all the loggers used in the program
 };

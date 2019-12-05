@@ -420,13 +420,13 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
                 case NmiEdgeDetection::falling:
                     if ((intc_icr_.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high) &&
                             (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low)) {
-                        Log::error("sh2", "Falling edge NMI, not implemented !");
+                        Log::warning("sh2", "Falling edge NMI, not implemented !");
                     }
                     break;
                 case NmiEdgeDetection::rising:
                     if ((intc_icr_.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low) &&
                             (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high)) {
-                        Log::error("sh2", "Rising edge NMI, not implemented !");
+                        Log::warning("sh2", "Rising edge NMI, not implemented !");
                     }
                     break;
             }
@@ -1043,7 +1043,7 @@ Sh2DmaConfiguration Sh2::configureDmaTransfer(const DmaChannel dc) {
             conf.chcr              = dmac_chcr1_;
             break;
         default:
-            Log::error("sh2", "DMAC - Unknown DMA channel");
+            Log::warning("sh2", "DMAC - Unknown DMA channel");
     }
     return conf;
 }

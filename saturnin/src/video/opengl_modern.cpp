@@ -54,6 +54,7 @@ void OpenglModern::initialize() {
     auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
         Log::error("opengl", "Could not initialize framebuffer object !");
+        throw std::runtime_error("Opengl error !");
     }
 
     u32 vertex_shader   = createVertexShader();
@@ -357,6 +358,7 @@ void checkShaderCompilation(const u32 shader) {
             default: shader_type = "Unknown shader"; break;
         }
         Log::error("opengl", "{} compilation failed : {}", shader_type, info);
+        throw std::runtime_error("Opengl error !");
     }
 }
 
@@ -372,6 +374,7 @@ void checkProgramCompilation(const u32 program) {
         std::string info(v.begin(), v.end());
         
         Log::error("opengl", "Shader program link failed : {}", info);
+        throw std::runtime_error("Opengl error !");
     }
 }
 

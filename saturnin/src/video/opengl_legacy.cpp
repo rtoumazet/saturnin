@@ -53,6 +53,7 @@ void OpenglLegacy::initialize() {
     auto status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
     if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
         Log::error("opengl", "Could not initialize framebuffer object !");
+        throw std::runtime_error("Opengl error !");
     }
 }
 
@@ -126,6 +127,7 @@ void OpenglLegacy::deleteTexture() const {
 
 static void error_callback(int error, const char* description) {
     Log::error("opengl", "Error {}: {}", error, description);
+    throw std::runtime_error("Opengl error !");
 }
     
 

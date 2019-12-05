@@ -606,7 +606,7 @@ struct readSmpc<uint8_t> {
     operator Memory::ReadType<u8>() const {
         return [](const Memory& m, const u32 addr) -> u8 {
             //Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
-            Log::error("memory", core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
+            Log::warning("memory", core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
             return 0;
         };
     }
@@ -924,7 +924,7 @@ template<typename T>
 struct readCdBlock{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::error("memory", core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T)*8, addr);
+            Log::warning("memory", core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T)*8, addr);
             return 0;
         };
     }
@@ -945,7 +945,7 @@ template<typename T>
 struct writeCdBlock{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            Log::error("memory", core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"), sizeof(T)*8, addr, data);
+            Log::warning("memory", core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"), sizeof(T)*8, addr, data);
         };
     }
 };
@@ -965,7 +965,7 @@ template<typename T>
 struct readScsp{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::error("memory", core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * 8, addr);
+            Log::warning("memory", core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * 8, addr);
             return 0;
         };
     }
@@ -986,7 +986,7 @@ template<typename T>
 struct writeScsp{
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            Log::error("memory", core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
+            Log::warning("memory", core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
         };
     }
 };

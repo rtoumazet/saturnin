@@ -40,6 +40,7 @@ namespace core {
         createLogger("vdp1", sink);
         createLogger("vdp2", sink);
         createLogger("opengl", sink);
+        createLogger("exception", sink);
 
         // :TODO: replace by spdlog::enable_backtrace() when version 1.4.X is ported to vcpkg
         spdlog::flush_every(std::chrono::seconds(5));
@@ -88,6 +89,13 @@ namespace core {
         full_path.make_preferred();
         fs::create_directories(full_path.parent_path());
         fs::remove(full_path);
+    }
+
+    /* static */
+    void Log::flush() {
+        for (auto const &l : loggers_) {
+            l.second->flush();
+        }
     }
 }
 }
