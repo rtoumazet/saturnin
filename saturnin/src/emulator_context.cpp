@@ -19,6 +19,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <future>
 #include "cdrom/scsi.h"
 #include "video/opengl.h"
 #include "video/opengl_legacy.h"
@@ -78,11 +79,41 @@ void Emulator_context::startEmulation() {
 
     sh2::initializeOpcodesLut();
 
-    emulation_main_thread_ = std::thread (&Emulator_context::emulationMainThread, this);
+    //emulation_main_thread_ = std::thread (&Emulator_context::emulationMainThread, this);
+    
+    std::promise<int> p;
+    std::future<int> f = p.get_future();
+
+    std::thread t([&p, this] {
+        try {
+            // code that may throw
+            //throw std::runtime_error("Example");
+            emulationMainThread();
+        }
+        catch (...) {
+            try {
+                // store anything thrown in the promise
+                p.set_exception(std::current_exception());
+            }
+            catch (...) {} // set_exception() may throw too
+        }
+        });
+
+    try {
+        //std::cout << f.get();
+        f.wait();
+    }
+    catch (const std::exception& e) {
+        std::cout << "Exception from the thread: " << e.what() << '\n';
+
+    }
+    t.join();
+
+
     //emulation_main_thread_.join();
 
     // Getting the exception from the thread (if any), and propagating it to the main exception handler.
-    if (exp_ptr) { std::rethrow_exception(exp_ptr); }
+    //if (exp_ptr) { std::rethrow_exception(exp_ptr); }
     
     
     //static std::thread emu_thread;
@@ -124,7 +155,7 @@ void Emulator_context::stopEmulation() {
 void Emulator_context::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
-        throw std::runtime_error(tr("Exception during main emulation thread !"));
+        //throw std::runtime_error(tr("Exception during main emulation thread !"));
         while (this->emulation_status_ == EmulationStatus::running) {
             master_sh2_->run();
             slave_sh2_->run();
