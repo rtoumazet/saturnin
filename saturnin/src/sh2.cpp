@@ -101,6 +101,9 @@ u8 Sh2::readRegisters8(const u32 addr) {
         /////////////
         // 12. WDT //
         /////////////
+        case watchdog_timer_control_status_register: return wdt_wtcsr_.get(WatchdogTimerControlStatusRegister::all_bits);
+        case watchdog_timer_counter:                 return wdt_wtcnt_.get(WatchdogTimerCounter::all_bits);
+        case reset_control_status_register + 1:      return wdt_rstcsr_.get(ResetControlStatusRegister::all_bits);
 
         /////////////
         // 13. SCI //
@@ -350,19 +353,19 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case timer_control_register:
             frt_tcr_.set(TimerControlRegister::all_bits, data);
             switch (frt_tcr_.get(TimerControlRegister::clock_select)) {
-                case ClockSelect::internal_divided_by_8:
+                case FrtClockSelect::internal_divided_by_8:
                     frt_clock_divisor_ = 8;
                     frt_mask_ = 0b00000111;
                     break;
-                case ClockSelect::internal_divided_by_32:
+                case FrtClockSelect::internal_divided_by_32:
                     frt_clock_divisor_ = 32;
                     frt_mask_ = 0b00011111;
                     break;
-                case ClockSelect::internal_divided_by_128:
+                case FrtClockSelect::internal_divided_by_128:
                     frt_clock_divisor_ = 128;
                     frt_mask_ = 0b01111111;
                     break;
-                case ClockSelect::external:
+                case FrtClockSelect::external:
                     Log::warning("sh2", "FRT - External clock not implemented");
                     break;
             }
@@ -491,6 +494,21 @@ void Sh2::writeRegisters(u32 addr, u16 data) {
             frt_icr_.set(InputCaptureRegister::all_bits, data);
             break;
 
+        /////////////
+        // 12. WDT //
+        /////////////
+        case watchdog_timer_control_status_register:
+            wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, static_cast<u8>(data >> 8));
+            wdt_wtcnt_.set(WatchdogTimerCounter::all_bits, static_cast<u8>(data & 0xFF));
+            break;
+        case reset_control_status_register:
+            wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, static_cast<u8>(data >> 8));
+            break;
+
+        /////////////
+        // 13. SCI //
+        /////////////
+
         default:
             //core::rawWrite<u16>(io_registers_, addr & sh2_memory_mask, data);
             unmappedAccess(addr, data);
@@ -585,9 +603,15 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             dmac_chcr1_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::writeMask());
             executeDma();
             break;
-        case dma_operation_register:
-            dmac_dmaor_.set(DmaOperationRegister::all_bits, data & DmaOperationRegister::writeMask());
-            executeDma();
+        case dma_operation_register: {
+                auto new_dmaor = DmaOperationRegister(data & DmaOperationRegister::writeMask());
+                if (dmac_dmaor_.get(DmaOperationRegister::priority_mode) != new_dmaor.get(DmaOperationRegister::priority_mode)) {
+                    dmac_next_transfer_priority_ = (new_dmaor.get(DmaOperationRegister::priority_mode) == PriorityMode::fixed) ?
+                        DmaNextTransferPriority::channel_0_first : DmaNextTransferPriority::channel_1_first;
+                }
+                dmac_dmaor_ = new_dmaor;
+                executeDma();
+            }
             break;
 
         //////////////
@@ -649,7 +673,7 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
 void Sh2::purgeCache() {
     // All the valid bits and LRU bits are initialized to 0
     for (u8 i = 0; i < 32; ++i) {
-        // :WARNING: the following code is untested
+        // :WARNING: following code is untested
         u32 data = core::rawRead<u32>(cache_addresses_, i);
         data &= 0xFFFFFC0B;
         core::rawWrite<u32>(cache_addresses_, i, data);
@@ -695,14 +719,6 @@ void Sh2::initializeOnChipRegisters() {
     // Division Unit
     divu_dvcr_.reset();
 
-    // Serial Communication Interface
-    core::rawWrite<u8>(io_registers_, serial_mode_register    & sh2_memory_mask, 0x00);
-    core::rawWrite<u8>(io_registers_, bit_rate_register       & sh2_memory_mask, 0xFF);
-    core::rawWrite<u8>(io_registers_, serial_control_register & sh2_memory_mask, 0x00);
-    core::rawWrite<u8>(io_registers_, transmit_data_register  & sh2_memory_mask, 0xFF);
-    core::rawWrite<u8>(io_registers_, serial_status_register  & sh2_memory_mask, 0x84);
-    core::rawWrite<u8>(io_registers_, receive_data_register   & sh2_memory_mask, 0x00);
-
     // Free Running timer
     frt_tier_.set(TimerInterruptEnableRegister::all_bits, static_cast<u8>(0x01));
     frt_ftcsr_.reset();
@@ -714,9 +730,17 @@ void Sh2::initializeOnChipRegisters() {
     frt_tcr_.reset();
 
     // Watch Dog Timer
-    core::rawWrite<u8>(io_registers_, watchdog_timer_control_status_register     & sh2_memory_mask, 0x18);
-    core::rawWrite<u8>(io_registers_, watchdog_timer_counter                     & sh2_memory_mask, 0x00);
-    core::rawWrite<u8>(io_registers_, reset_control_status_register              & sh2_memory_mask, 0x1F);
+    wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, static_cast<u8>(0x18));
+    wdt_wtcnt_.reset();
+    wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, static_cast<u8>(0x1F));
+
+    // Serial Communication Interface
+    core::rawWrite<u8>(io_registers_, serial_mode_register    & sh2_memory_mask, 0x00);
+    core::rawWrite<u8>(io_registers_, bit_rate_register       & sh2_memory_mask, 0xFF);
+    core::rawWrite<u8>(io_registers_, serial_control_register & sh2_memory_mask, 0x00);
+    core::rawWrite<u8>(io_registers_, transmit_data_register  & sh2_memory_mask, 0xFF);
+    core::rawWrite<u8>(io_registers_, serial_status_register  & sh2_memory_mask, 0x84);
+    core::rawWrite<u8>(io_registers_, receive_data_register   & sh2_memory_mask, 0x00);
 }
 
 void Sh2::powerOnReset() {
@@ -912,96 +936,28 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
 
 void Sh2::executeDma() {
 
-
     if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::disabled) return;
+    
+    auto conf_channel_0 { configureDmaTransfer(DmaChannel::channel_0) };
+    auto conf_channel_1 { configureDmaTransfer(DmaChannel::channel_1) };
 
-    if (dmac_dmaor_.get(DmaOperationRegister::priority_mode) == PriorityMode::round_robin) {
-        Log::warning("sh2", "DMAC - Round robin priority mode not implemented !");
-        return;
+    switch (dmac_next_transfer_priority_) {
+        case DmaNextTransferPriority::channel_0_first: 
+            executeDmaOnChannel(conf_channel_0);
+            executeDmaOnChannel(conf_channel_1);
+            break;
+        case DmaNextTransferPriority::channel_1_first: 
+            executeDmaOnChannel(conf_channel_1);
+            executeDmaOnChannel(conf_channel_0);
+            break;
     }
 
-    
-    auto channel_0_conf = configureDmaTransfer(DmaChannel::channel_0);
-    auto channel_1_conf = configureDmaTransfer(DmaChannel::channel_1);
-
-    if (dmaStartConditionsAreSatisfied(DmaChannel::channel_0)) {
-        if (channel_0_conf.chcr.get(DmaChannelControlRegister::auto_request_mode) == AutoRequestMode::module_request) {
-            Log::warning("sh2", "DMAC - Channel 0 module request not implemented !");
-        } else {
-
-
-            u32 counter{ dmac_tcr0_.toU32() & 0x00FFFFFF };
-            u32 source{ dmac_sar0_.toU32() };
-            u32 destination{ dmac_dar0_.toU32() };
-            Log::debug("sh2", "DMAC - Channel 0 transfer");
-            Log::debug("sh2", "PC={:#0x}", pc_);
-            Log::debug("sh2", "Source:{:#0x}", source);
-            Log::debug("sh2", "Destination:{:#0x}", destination);
-            Log::debug("sh2", "Count:{:#0x}", counter);
-
-            while (counter > 0) {
-                u8 transfer_size{};
-                switch (dmac_chcr0_.get(DmaChannelControlRegister::transfer_size)) {
-                    case TransferSize::one_byte_unit:
-                        memory()->write<u8>(destination, memory()->read<u8>(source));
-                        transfer_size = 0x1;
-                        --counter;
-                        break;
-                    case TransferSize::two_byte_unit:
-                        memory()->write<u16>(destination, memory()->read<u16>(source));
-                        transfer_size = 0x2;
-                        --counter;
-                        break;
-                    case TransferSize::four_byte_unit:
-                        memory()->write<u32>(destination, memory()->read<u32>(source));
-                        transfer_size = 0x4;
-                        --counter;
-                        break;
-                    case TransferSize::sixteen_byte_unit:
-                        memory()->write<u32>(destination, memory()->read<u32>(source));
-                        memory()->write<u32>(destination + 4, memory()->read<u32>(source + 4));
-                        memory()->write<u32>(destination + 8, memory()->read<u32>(source + 8));
-                        memory()->write<u32>(destination + 12, memory()->read<u32>(source + 12));
-                        transfer_size = 0x10;
-                        counter -= 4;
-                        break;
-                }
-
-                switch (dmac_chcr0_.get(DmaChannelControlRegister::source_address_mode)) {
-                    case SourceAddressMode::fixed: break;
-                    case SourceAddressMode::incremented: source += transfer_size; break;
-                    case SourceAddressMode::decremented: source -= transfer_size; break;
-                }
-
-                switch (dmac_chcr0_.get(DmaChannelControlRegister::destination_address_mode)) {
-                    case DestinationAddressMode::fixed: break;
-                    case DestinationAddressMode::incremented: destination += transfer_size; break;
-                    case DestinationAddressMode::decremented: destination -= transfer_size; break;
-                }
-            }
-
-            dmac_tcr0_.set(DmaTransferCountRegister::all_bits, counter);
-            dmac_sar0_.set(DmaSourceAddressRegister::all_bits, source);
-            dmac_dar0_.set(DmaDestinationAddressRegister::all_bits, destination);
-
-            dmac_chcr0_.set(DmaChannelControlRegister::transfer_end_flag);
-            if (dmac_chcr0_.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled){
-                Log::debug("sh2", "DMAC - Sending DMA channel 0 transfer end interrupt.");
-                is::sh2_dma_0_transfer_end.vector = intc_vcrc_.get(VectorNumberSettingRegisterDma::dma_transfert_end_vector);
-                is::sh2_dma_0_transfer_end.level = intc_iprb_.get(InterruptPriorityLevelSettingRegisterA::dmac_level);
-                sendInterrupt(is::sh2_dma_0_transfer_end);
-            }
+    if (dmac_dmaor_.get(DmaOperationRegister::priority_mode) == PriorityMode::round_robin) {
+        switch (dmac_next_transfer_priority_) {
+            case DmaNextTransferPriority::channel_0_first: dmac_next_transfer_priority_ = DmaNextTransferPriority::channel_1_first; break;
+            case DmaNextTransferPriority::channel_1_first: dmac_next_transfer_priority_ = DmaNextTransferPriority::channel_0_first; break;
         }
-    };
-    
-    if (dmaStartConditionsAreSatisfied(DmaChannel::channel_1)) {
-        if (dmac_chcr1_.get(DmaChannelControlRegister::auto_request_mode) == AutoRequestMode::module_request) {
-            Log::warning("sh2", "DMAC - Channel 1 module request not implemented !");
-        } else {
-            
-
-        }
-    };
+    }
 }
 
 bool Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) {
@@ -1034,6 +990,7 @@ Sh2DmaConfiguration Sh2::configureDmaTransfer(const DmaChannel dc) {
             conf.source            = dmac_sar0_.toU32();
             conf.destination       = dmac_dar0_.toU32();
             conf.chcr              = dmac_chcr0_;
+            conf.interrupt         = is::sh2_dma_0_transfer_end;
             break;
         case DmaChannel::channel_1:
             conf.channel           = DmaChannel::channel_1;
@@ -1041,11 +998,94 @@ Sh2DmaConfiguration Sh2::configureDmaTransfer(const DmaChannel dc) {
             conf.source            = dmac_sar1_.toU32();
             conf.destination       = dmac_dar1_.toU32();
             conf.chcr              = dmac_chcr1_;
+            conf.interrupt         = is::sh2_dma_1_transfer_end;
             break;
         default:
             Log::warning("sh2", "DMAC - Unknown DMA channel");
     }
     return conf;
+}
+
+void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
+    if (dmaStartConditionsAreSatisfied(conf.channel)) {
+        u8 channel_number = (conf.channel == DmaChannel::channel_0) ? 0 : 1;
+        if (conf.chcr.get(DmaChannelControlRegister::auto_request_mode) == AutoRequestMode::module_request) {
+            Log::warning("sh2", "DMAC - Channel {} module request not implemented !", channel_number);
+        } else {
+
+            u32 counter{ conf.counter };
+            u32 source{ conf.source };
+            u32 destination{ conf.destination };
+            Log::debug("sh2", "DMAC - Channel {} transfer", channel_number);
+            Log::debug("sh2", "PC={:#0x}", pc_);
+            Log::debug("sh2", "Source:{:#0x}", source);
+            Log::debug("sh2", "Destination:{:#0x}", destination);
+            Log::debug("sh2", "Count:{:#0x}", counter);
+
+            while (counter > 0) {
+                u8 transfer_size{};
+                switch (conf.chcr.get(DmaChannelControlRegister::transfer_size)) {
+                    case TransferSize::one_byte_unit:
+                        memory()->write<u8>(destination, memory()->read<u8>(source));
+                        transfer_size = 0x1;
+                        --counter;
+                        break;
+                    case TransferSize::two_byte_unit:
+                        memory()->write<u16>(destination, memory()->read<u16>(source));
+                        transfer_size = 0x2;
+                        --counter;
+                        break;
+                    case TransferSize::four_byte_unit:
+                        memory()->write<u32>(destination, memory()->read<u32>(source));
+                        transfer_size = 0x4;
+                        --counter;
+                        break;
+                    case TransferSize::sixteen_byte_unit:
+                        memory()->write<u32>(destination, memory()->read<u32>(source));
+                        memory()->write<u32>(destination + 4, memory()->read<u32>(source + 4));
+                        memory()->write<u32>(destination + 8, memory()->read<u32>(source + 8));
+                        memory()->write<u32>(destination + 12, memory()->read<u32>(source + 12));
+                        transfer_size = 0x10;
+                        counter -= 4;
+                        break;
+                }
+
+                switch (conf.chcr.get(DmaChannelControlRegister::source_address_mode)) {
+                    case SourceAddressMode::fixed: break;
+                    case SourceAddressMode::incremented: source += transfer_size; break;
+                    case SourceAddressMode::decremented: source -= transfer_size; break;
+                }
+
+                switch (conf.chcr.get(DmaChannelControlRegister::destination_address_mode)) {
+                    case DestinationAddressMode::fixed: break;
+                    case DestinationAddressMode::incremented: destination += transfer_size; break;
+                    case DestinationAddressMode::decremented: destination -= transfer_size; break;
+                }
+            }
+
+            switch(conf.channel) {
+                case DmaChannel::channel_0:
+                    dmac_tcr0_.set(DmaTransferCountRegister::all_bits, counter);
+                    dmac_sar0_.set(DmaSourceAddressRegister::all_bits, source);
+                    dmac_dar0_.set(DmaDestinationAddressRegister::all_bits, destination);
+                    dmac_chcr0_.set(DmaChannelControlRegister::transfer_end_flag);
+                    break;
+                case DmaChannel::channel_1:
+                    dmac_tcr1_.set(DmaTransferCountRegister::all_bits, counter);
+                    dmac_sar1_.set(DmaSourceAddressRegister::all_bits, source);
+                    dmac_dar1_.set(DmaDestinationAddressRegister::all_bits, destination);
+                    dmac_chcr1_.set(DmaChannelControlRegister::transfer_end_flag);
+                    break;
+            }
+
+            if (conf.chcr.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
+                Log::debug("sh2", "DMAC - Sending DMA channel {} transfer end interrupt.", channel_number);
+                conf.interrupt.vector = intc_vcrc_.get(VectorNumberSettingRegisterDma::dma_transfert_end_vector);
+                conf.interrupt.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterA::dmac_level);
+                sendInterrupt(conf.interrupt);
+            }
+        }
+    };
 }
 
 void Sh2::reset() {

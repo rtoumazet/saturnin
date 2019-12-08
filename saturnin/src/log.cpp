@@ -43,7 +43,7 @@ namespace core {
         createLogger("exception", sink);
 
         // :TODO: replace by spdlog::enable_backtrace() when version 1.4.X is ported to vcpkg
-        spdlog::flush_every(std::chrono::seconds(5));
+        spdlog::flush_every(std::chrono::seconds(3));
 
         auto log_file = fs::current_path() / "logs" / "saturnin.log";
 

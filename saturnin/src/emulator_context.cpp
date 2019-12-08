@@ -20,6 +20,7 @@
 #include <chrono>
 #include <iostream>
 #include <future>
+#include <chrono>
 #include "cdrom/scsi.h"
 #include "video/opengl.h"
 #include "video/opengl_legacy.h"
@@ -43,8 +44,6 @@ namespace core {
 using sh2::Sh2;
 using sh2::Sh2Type;
 using sh2::StatusRegister;
-
-static std::exception_ptr exp_ptr = nullptr;
 
 Emulator_context::Emulator_context() {
     config_     = std::make_unique<Config>("saturnin.cfg");
@@ -79,42 +78,9 @@ void Emulator_context::startEmulation() {
 
     sh2::initializeOpcodesLut();
 
-    //emulation_main_thread_ = std::thread (&Emulator_context::emulationMainThread, this);
-    
-    std::promise<int> p;
-    std::future<int> f = p.get_future();
+    emulation_main_thread_ = std::thread (&Emulator_context::emulationMainThread, this);
+    if (emulation_main_thread_.joinable()) emulation_main_thread_.detach();
 
-    std::thread t([&p, this] {
-        try {
-            // code that may throw
-            //throw std::runtime_error("Example");
-            emulationMainThread();
-        }
-        catch (...) {
-            try {
-                // store anything thrown in the promise
-                p.set_exception(std::current_exception());
-            }
-            catch (...) {} // set_exception() may throw too
-        }
-        });
-
-    try {
-        //std::cout << f.get();
-        f.wait();
-    }
-    catch (const std::exception& e) {
-        std::cout << "Exception from the thread: " << e.what() << '\n';
-
-    }
-    t.join();
-
-
-    //emulation_main_thread_.join();
-
-    // Getting the exception from the thread (if any), and propagating it to the main exception handler.
-    //if (exp_ptr) { std::rethrow_exception(exp_ptr); }
-    
     
     //static std::thread emu_thread;
     //if (ImGui::Button("Play")) {
@@ -155,15 +121,19 @@ void Emulator_context::stopEmulation() {
 void Emulator_context::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
-        //throw std::runtime_error(tr("Exception during main emulation thread !"));
+        
         while (this->emulation_status_ == EmulationStatus::running) {
             master_sh2_->run();
             slave_sh2_->run();
+            throw std::runtime_error(tr("Exception during main emulation thread !"));
         }
         Log::info("main", tr("Emulation main thread finished"));
     }
+    catch (const std::exception& e) {
+        Log::error("exception", e.what());
+    }
     catch (...) {
-        exp_ptr = std::current_exception();
+        Log::error("exception", tr("Uncaught exception !"));
     }
 }
 

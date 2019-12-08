@@ -107,6 +107,7 @@ struct Sh2DmaConfiguration {
     u32 source;
     u32 destination;
     DmaChannelControlRegister chcr;
+    Interrupt interrupt { is::undefined };
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -505,6 +506,19 @@ private:
     Sh2DmaConfiguration configureDmaTransfer(const DmaChannel dc);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf);
+    ///
+    /// \brief  Executes the DMA on the channel specified by the configuration.
+    ///
+    /// \author Runik
+    /// \date   07/12/2019
+    ///
+    /// \param [in,out] conf    The DMA configuration.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void executeDmaOnChannel(Sh2DmaConfiguration& conf);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::reset();
     ///
     /// \brief  Resets the SH2 and enters in the reset state.
@@ -857,7 +871,13 @@ private:
     TimerOutputCompareControlRegister     frt_tocr_;
     InputCaptureRegister                  frt_icr_;
     //@}
-    
+
+    /// \name FRT (Free Running Timer)
+    //@{
+    WatchdogTimerControlStatusRegister wdt_wtcsr_;
+    WatchdogTimerCounter               wdt_wtcnt_;
+    ResetControlStatusRegister         wdt_rstcsr_;
+    //@}
 };  
 
 

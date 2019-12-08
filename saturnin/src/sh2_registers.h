@@ -1182,12 +1182,12 @@ enum class InputEdgeSelect : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ClockSelect
+/// \enum   FrtClockSelect
 ///
 /// \brief  TCR - CKSx bits values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ClockSelect : u8 {
+enum class FrtClockSelect : u8 {
     internal_divided_by_8   = 0b00, ///< Internal clock /8 (initial)
     internal_divided_by_32  = 0b01, ///< Internal clock /32
     internal_divided_by_128 = 0b10, ///< Internal clock /128
@@ -1207,7 +1207,7 @@ class TimerControlRegister : public Register {
 public:
     using Register::Register;
     inline static const BitRange<InputEdgeSelect> input_edge_select{ 7 };  ///< Defines IEDG bit.
-    inline static const BitRange<ClockSelect>     clock_select{ 0, 1 };    ///< Defines IEDG bit.
+    inline static const BitRange<FrtClockSelect>     clock_select{ 0, 1 };    ///< Defines IEDG bit.
     inline static const BitRange<u8>              all_bits{ 0, 7 };        ///< Defines the whole register bits
 };
 
@@ -1263,6 +1263,15 @@ class TimerOutputCompareControlRegister : public Register {
         inline static const u8 accessMask() { return 0b00010011; }                                       ///< Returns access mask;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  InputCaptureRegister
+///
+/// \brief  Input Capture Register (ICR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class InputCaptureRegister : public Register {
 public:
     using Register::Register;
@@ -1271,5 +1280,357 @@ public:
     inline static const BitRange<u16> all_bits{ 0, 15 };  ///< Defines the whole register bits
 };
 
+///////////////////////////////
+// 12. Watch Dog Timer (WDT) //
+///////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  WatchdogTimerCounter
+///
+/// \brief  Watchdog Timer Counter (WTCNT).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class WatchdogTimerCounter : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 7 };     ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   WdtOverflowFlag
+///
+/// \brief  WTCSR - OVF value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class WdtOverflowFlag : u8 {
+    no_overflow = 0,    ///< No overflow of WTCNT in interval timer mode (initial)
+    overflow    = 1     ///< WTCNT overflow in interval timer mode
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TimerModeSelect
+///
+/// \brief WTCSR - (WT /IT) value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TimerModeSelect : u8 {
+    interval_timer_mode = 0,   
+    watchdog_timer_mode = 1
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TimerEnable
+///
+/// \brief  WTCSR - TME value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TimerEnable : u8 {
+    timer_disabled = 0, ///< Timer disabled : WTCNT is initialized to 0x00 and count up stops. (initial)
+    timer_enabled  = 1, ///< Timer enabled : WTCNT starts counting. 
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   WdtClockSelect
+///
+/// \brief  WTCSR - CKSx values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class WdtClockSelect : u8 {
+    divided_by_2    = 0b000,  ///< System clock divided by 2 (initial)
+    divided_by_64   = 0b001,  ///< System clock divided by 64
+    divided_by_128  = 0b010,  ///< System clock divided by 128
+    divided_by_256  = 0b011,  ///< System clock divided by 256
+    divided_by_512  = 0b100,  ///< System clock divided by 512
+    divided_by_1024 = 0b101,  ///< System clock divided by 1024
+    divided_by_4096 = 0b110,  ///< System clock divided by 4096
+    divided_by_8192 = 0b111,  ///< System clock divided by 8192
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  WatchdogTimerControlStatusRegister
+///
+/// \brief  Watchdog Timer Control/Status Register (WTCSR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class WatchdogTimerControlStatusRegister: public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<WdtOverflowFlag> overflow_flag{ 7 };     ///< Defines OVF bit.
+    inline static const BitRange<TimerModeSelect> timer_mode_select{ 6 }; ///< Defines WT/IT bit.
+    inline static const BitRange<TimerEnable>     timer_enable{ 5 };      ///< Defines TME bit.
+    inline static const BitRange<WdtClockSelect>  clock_select{ 0, 2 };   ///< Defines CKSx bits.
+    inline static const BitRange<u8>              all_bits{ 0, 7 };       ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   WatchdogTimerOverflowFlag
+///
+/// \brief  RSTCSR - WOVF bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class WatchdogTimerOverflowFlag : u8 {
+    no_overflow = 0,   ///< No WTCNT overflow in watchdof timer mode (initial).
+    overflow    = 1    ///< Set by WTCNT overflow in watchdog mode.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ResetEnable
+///
+/// \brief  RSTCSR - RSTE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ResetEnable : u8 {
+    not_reset_when_overflow = 0,    ///< Not reset when WTCNT overflows (initial).
+    reset_when_overflow     = 1,    ///< Reset when WTCNT overflows.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ResetSelect
+///
+/// \brief  RSTCSR - RSTS bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ResetSelect : u8 {
+    power_on_reset = 0, ///< Power-on reset (initial)
+    manual_reset   = 1  ///< Manual reset
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  ResetControlStatusRegister
+///
+/// \brief  Reset Control Status Register (RSTCSR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class ResetControlStatusRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<WatchdogTimerOverflowFlag> watchdog_timer_overflow_flag { 7 };   ///< Defines WOVF bit.
+    inline static const BitRange<ResetEnable>               reset_enable{ 6 };                    ///< Defines RSTE bit.
+    inline static const BitRange<ResetSelect>               reset_select{ 5 };                    ///< Defines RSTS bit.
+    inline static const BitRange<u8>                        all_bits{ 0, 7 };                     ///< Defines the whole register bits
+};
+
+/////////////////////////////////////////////
+// 13.Serial Communication Interface (SCI) //
+/////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CommunicationMode
+///
+/// \brief  SMR - C/A bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CommunicationMode : u8 {
+    asynchronous        = 0,   ///< Asynchronous mode (initial).
+    clocked_synchronous = 1,   ///< Clocked synchronous mode.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CharacterLength
+///
+/// \brief  SMR - CHR bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CharacterLength : u8 {
+    eight_bit_data = 0,   ///< 8-bit data (initial).
+    seven_bit_data = 1,   ///< 7-bit data.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ParityMode
+///
+/// \brief  SMR - O/E bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ParityEnable: u8 {
+    parity_bit_not_added = 0,   ///< Parity bit not added or checked (initial).
+    parity_bit_added     = 1,   ///< Parity bit added and checked.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ParityMode
+///
+/// \brief  SMR - O/E bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ParityMode : u8 {
+    even_parity = 0,   ///< Even parity (initial).
+    odd_parity  = 1,   ///< Odd parity.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   StopBitLength
+///
+/// \brief  SMR - STOP bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class StopBitLength : u8 {
+    one_stop_bit  = 0,   ///< One stop bit (initial).
+    two_stop_bits = 1,   ///< Two stop bits.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   MultiprocessorMode
+///
+/// \brief  SMR - MP bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class MultiprocessorMode : u8 {
+    multiprocessor_function_disabled = 0,   ///< Multiprocessor mode enabled (initial).
+    multiprocessor_function_enabled  = 1,   ///< Multiprocessor mode disabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SciClockSelect
+///
+/// \brief  SMR - CKSx bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SciClockSelect : u8 {
+    divided_by_4   = 0b00,   ///< Clock divided by 4 (initial).
+    divided_by_16  = 0b01,   ///< Clock divided by 16.
+    divided_by_64  = 0b10,   ///< Clock divided by 64.
+    divided_by_256 = 0b11,   ///< Clock divided by 256.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  SerialModeRegister
+///
+/// \brief  Serial Mode Register (SMR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class SerialModeRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<CommunicationMode>  communication_mode{ 7 };  ///< Defines C/A bit.
+    inline static const BitRange<CharacterLength>    character_length{ 6 };    ///< Defines CHR bit.
+    inline static const BitRange<ParityEnable>       parity_enable{ 5 };       ///< Defines PE bit.
+    inline static const BitRange<ParityMode>         parity_mode{ 4 };         ///< Defines O/E bit.
+    inline static const BitRange<StopBitLength>      stop_bit_length{ 3 };     ///< Defines STOP bit.
+    inline static const BitRange<MultiprocessorMode> multiprocessor_mode{ 2 }; ///< Defines MP bit.
+    inline static const BitRange<SciClockSelect>     clock_select{ 0,1 };      ///< Defines CKSx bit.
+    inline static const BitRange<u8>                 all_bits{ 0, 7 };         ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  BitRateRegister
+///
+/// \brief  Bit Rate Register (BRR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class BitRateRegister : public Register {
+public:
+    using Register::Register;
+
+    inline static const BitRange<u8>                        all_bits{ 0, 7 };                     ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  SerialControlRegister
+///
+/// \brief  Serial Control Register (SCR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class SerialControlRegister : public Register {
+public:
+    using Register::Register;
+
+    inline static const BitRange<u8>                        all_bits{ 0, 7 };                     ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  TransmitDataRegister
+///
+/// \brief  Transmit Data Register (TDR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class TransmitDataRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 7 }; ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  TransmitShiftRegister
+///
+/// \brief  Transmit Shift Register (TSR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class TransmitShiftRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 7 }; ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  SerialStatusRegister
+///
+/// \brief  Serial Status Register (SSR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class SerialStatusRegister : public Register {
+public:
+    using Register::Register;
+
+    inline static const BitRange<u8>                        all_bits{ 0, 7 };                     ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  ReceiveDataRegister
+///
+/// \brief  Receive Data Register (RDR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class ReceiveDataRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 7 }; ///< Defines the whole register bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  ReceiveShiftRegister
+///
+/// \brief  Receive Shift Register (RSR).
+///
+/// \author Runik
+/// \date   07/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class ReceiveShiftRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 7 }; ///< Defines the whole register bits
+};
 }
 }
