@@ -1542,19 +1542,104 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransmitInterruptEnable
+///
+/// \brief  SCR - TIE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransmitInterruptEnable : u8 {
+    interrupt_disabled = 0,   ///< TXI request is disabled (initial).
+    interrupt_enabled = 1     ///< TXI request is enabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ReceiveInterruptEnable
+///
+/// \brief  SCR - REI bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ReceiveInterruptEnable : u8 {
+    interrupts_disabled = 0,   ///< RXI and ERI requests are disabled (initial).
+    interrupts_enabled = 1    ///< RXI and ERI requests are enabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransmitEnable
+///
+/// \brief  SCR - TE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransmitEnable : u8 {
+    transmitter_disabled = 0,   ///< Transmitter disabled (initial).
+    transmitter_enabled = 1    ///< Transmitter enabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ReceiveEnable
+///
+/// \brief  SCR - RE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ReceiveEnable : u8 {
+    receiver_disabled = 0,   ///< Receiver disabled (initial).
+    receiver_enabled = 1    ///< Receiver enabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   MultiprocessorInterruptEnable
+///
+/// \brief  SCR - MPIE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class MultiprocessorInterruptEnable : u8 {
+    interrupt_disabled = 0,   ///< Multiprocessor interrupts are disabled (initial).
+    interrupt_enabled = 1    ///< Multiprocessor interrupts are enabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransmitEndInterruptEnable
+///
+/// \brief  SCR - TEIE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransmitEndInterruptEnable : u8 {
+    interrupt_disabled = 0,   ///< Transmit end interrupt (TEI) requests are disabled (initial).
+    interrupt_enabled = 1    ///< Transmit end interrupt (TEI) requests are enabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CommunicationMode
+///
+/// \brief  SCR - CKEx bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ClockEnable : u8 {
+    value_00 = 0b00,   ///< Value 0b00 (initial).
+    value_01 = 0b01,   ///< Value 0b01.
+    value_10 = 0b10,   ///< Value 0b10.
+    value_11 = 0b11    ///< Value 0b11.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  SerialControlRegister
 ///
 /// \brief  Serial Control Register (SCR).
 ///
 /// \author Runik
-/// \date   07/12/2019
+/// \date   10/12/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class SerialControlRegister : public Register {
 public:
     using Register::Register;
-
-    inline static const BitRange<u8>                        all_bits{ 0, 7 };                     ///< Defines the whole register bits
+    inline static const BitRange<TransmitInterruptEnable>       transmit_interrupt_enable{ 7 };       ///< Defines TIE bit.
+    inline static const BitRange<ReceiveInterruptEnable>        receive_interrupts_enable{ 6 };       ///< Defines RIE bit.
+    inline static const BitRange<TransmitEnable>                transmit_enable{ 5 };                 ///< Defines TE bit.
+    inline static const BitRange<ReceiveEnable>                 receive_enable{ 4 };                  ///< Defines ORE bit.
+    inline static const BitRange<MultiprocessorInterruptEnable> multiprocessor_interrupt_enable{ 3 }; ///< Defines MPIE bit.
+    inline static const BitRange<TransmitEndInterruptEnable>    transmit_end_interrupt_enable{ 2 };   ///< Defines TEIE bit.
+    inline static const BitRange<ClockEnable>                   clock_enable{ 0,1 };                  ///< Defines CKEx bit.
+    inline static const BitRange<u8>                            all_bits{ 0, 7 };                     ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1588,6 +1673,94 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransmitDataRegisterEmpty
+///
+/// \brief  SSR - TDRE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransmitDataRegisterEmpty : u8 {
+    contains_valid_data = 0,   ///< TDR contains valid transmit data (initial).
+    does_not_contain_valid_data = 1    ///< TDR does not contain valid transmit data.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ReceiveDataRegisterFull
+///
+/// \brief  SSR - RDRF bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ReceiveDataRegisterFull : u8 {
+    no_valid_data_received = 0,   ///< RDR does not contain valid received data (initial).
+    valid_data_received    = 1    ///< RDR contains valid received data.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   OverrunError
+///
+/// \brief  SSR - ORER bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class OverrunError : u8 {
+    in_progress_or_ended_normally = 0,   ///< Receiving is in progress or has ended normally (initial).
+    error_occurred                = 1    ///< A receive overrun error occurred.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   FramingError
+///
+/// \brief  SSR - FER bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class FramingError : u8 {
+    in_progress_or_ended_normally = 0,   ///< Receiving is in progress or has ended normally (initial).
+    error_occurred                = 1    ///< A receive framing error occurred.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ParityError
+///
+/// \brief  SSR - PER bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ParityError : u8 {
+    in_progress_or_ended_normally = 0,   ///< Receiving is in progress or has ended normally (initial).
+    error_occurred                = 1    ///< A receive parity error occurred.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransmitEnd
+///
+/// \brief  SSR - TEND bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransmitEnd : u8 {
+    transmission_in_progress = 0,   ///< Transmission is in progress.
+    end_of_transmission      = 1    ///< End of transmission (initial).
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   MultiprocessorBit
+///
+/// \brief  SSR - MPB bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class MultiprocessorBit : u8 {
+    bit_value_0 = 0,   ///< Multiprocessor bit value in receive data is 0 (initial).
+    bit_value_1 = 1    ///< Multiprocessor bit value in receive data is 1.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   MultiprocessorBitTransfer
+///
+/// \brief  SSR - MPBT bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class MultiprocessorBitTransfer : u8 {
+    bit_value_0 = 0,   ///< Multiprocessor bit value in transmit data is 0 (initial).
+    bit_value_1 = 1    ///< Multiprocessor bit value in transmit data is 1.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  SerialStatusRegister
 ///
 /// \brief  Serial Status Register (SSR).
@@ -1599,7 +1772,14 @@ public:
 class SerialStatusRegister : public Register {
 public:
     using Register::Register;
-
+    inline static const BitRange<TransmitDataRegisterEmpty> transmit_data_register_empty{ 7 };    ///< Defines TDRE bit.
+    inline static const BitRange<ReceiveDataRegisterFull>   receive_data_register_full{ 6 };      ///< Defines RDRF bit.
+    inline static const BitRange<OverrunError>              overrun_error{ 5 };                   ///< Defines ORER bit.
+    inline static const BitRange<FramingError>              framing_error{ 4 };                   ///< Defines FER bit.
+    inline static const BitRange<ParityError>               parity_error{ 3 };                    ///< Defines PER bit.
+    inline static const BitRange<TransmitEnd>               transmit_end{ 2 };                    ///< Defines TEND bit.
+    inline static const BitRange<MultiprocessorBit>         multiprocessor_bit{ 1 };              ///< Defines MPB bit.
+    inline static const BitRange<MultiprocessorBitTransfer> multiprocessor_bit_transfer{ 0 };     ///< Defines MPBT bit.
     inline static const BitRange<u8>                        all_bits{ 0, 7 };                     ///< Defines the whole register bits
 };
 
