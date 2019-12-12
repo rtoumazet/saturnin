@@ -51,6 +51,7 @@ Emulator_context::Emulator_context() {
     slave_sh2_  = std::make_unique<Sh2>(Sh2Type::slave, this);
     memory_     = std::make_unique<Memory>(this);
     scu_        = std::make_unique<Scu>(this);
+    smpc_       = std::make_unique<Smpc>(this);
 }
 
 Config* Emulator_context::config() { return config_.get(); };

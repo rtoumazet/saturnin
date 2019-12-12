@@ -35,6 +35,7 @@
 #include "memory.h"
 #include "scu.h"
 #include "sh2.h"
+#include "smpc.h"
 #include "stv_definitions.h"
 
 namespace saturnin {
@@ -159,7 +160,7 @@ static const std::string saturnin_version{ "1.00" };
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn Sh2* Emulator_context::masterSh2()
         ///
-        /// \brief  Returns a pointer to the master SH2 objet.
+        /// \brief  Returns a pointer to the master SH2 object.
         ///
         /// \author Runik
         /// \date   09/02/2019
@@ -172,7 +173,7 @@ static const std::string saturnin_version{ "1.00" };
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn Sh2* Emulator_context::slaveSh2()
         ///
-        /// \brief  Returns a pointer to the slave SH2 objet.
+        /// \brief  Returns a pointer to the slave SH2 object.
         ///
         /// \author Runik
         /// \date   09/02/2019
@@ -185,15 +186,28 @@ static const std::string saturnin_version{ "1.00" };
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn Scu* Emulator_context::scu()
         ///
-        /// \brief  Returns a pointer to the SCU objet.
+        /// \brief  Returns a pointer to the SCU object.
         ///
         /// \author Runik
         /// \date   09/02/2019
         ///
-        /// \return A pointer to the SCU objet.
+        /// \return A pointer to the SCU objetc.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         Scu* scu() { return scu_.get(); };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn Smpc* Emulator_context::smpc()
+        ///
+        /// \brief  Returns a pointer to the SMPC object.
+        ///
+        /// \author Runik
+        /// \date   12/12/2019
+        ///
+        /// \return A pointer to the SMPC object.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Smpc* smpc() { return smpc_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn HardwareMode Emulator_context::hardwareMode() const
@@ -258,11 +272,12 @@ static const std::string saturnin_version{ "1.00" };
 
         void emulationMainThread();
 
-        std::unique_ptr<Config>               config_;     ///< Configuration object
-        std::unique_ptr<Memory>               memory_;     ///< Memory object
-        std::unique_ptr<Sh2>                  master_sh2_; ///< Master SH2 object
-        std::unique_ptr<Sh2>                  slave_sh2_;  ///< Slave SH2 object
-        std::unique_ptr<Scu>                  scu_;        ///< SCU object
+        std::unique_ptr<Config> config_;     ///< Configuration object
+        std::unique_ptr<Memory> memory_;     ///< Memory object
+        std::unique_ptr<Sh2>    master_sh2_; ///< Master SH2 object
+        std::unique_ptr<Sh2>    slave_sh2_;  ///< Slave SH2 object
+        std::unique_ptr<Scu>    scu_;        ///< SCU object
+        std::unique_ptr<Smpc>   smpc_;       ///< SMPC object
 
         HardwareMode    hardware_mode_{ HardwareMode::saturn };     ///< Hardware mode
         EmulationStatus emulation_status_{ EmulationStatus::stopped }; ///< Emulation status

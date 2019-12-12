@@ -872,11 +872,23 @@ private:
     InputCaptureRegister                  frt_icr_;
     //@}
 
-    /// \name FRT (Free Running Timer)
+    /// \name WDT (Watchdog Timer)
     //@{
     WatchdogTimerControlStatusRegister wdt_wtcsr_;
     WatchdogTimerCounter               wdt_wtcnt_;
     ResetControlStatusRegister         wdt_rstcsr_;
+    //@}
+
+    /// \name SCI (Serial Communication Interface)
+    //@{
+    ReceiveShiftRegister  sci_rsr_;
+    ReceiveDataRegister   sci_rdr_;
+    TransmitShiftRegister sci_tsr_;
+    TransmitDataRegister  sci_tdr_;
+    SerialModeRegister    sci_smr_;
+    SerialControlRegister sci_scr_;
+    SerialStatusRegister  sci_ssr_;
+    BitRateRegister       sci_brr_;
     //@}
 };  
 

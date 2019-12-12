@@ -1537,8 +1537,7 @@ public:
 class BitRateRegister : public Register {
 public:
     using Register::Register;
-
-    inline static const BitRange<u8>                        all_bits{ 0, 7 };                     ///< Defines the whole register bits
+    inline static const BitRange<u8> all_bits{ 0, 7 };                     ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
