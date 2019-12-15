@@ -35,6 +35,7 @@
 //#include "interrupt_sources.h"
 #include "log.h"
 #include "scu.h"
+#include "smpc.h"
 
 // Forward declarations
 namespace saturnin::sh2 {
@@ -50,6 +51,7 @@ namespace core {
 class Emulator_context;
 class Config;
 class Scu;
+class Smpc;
 
 using saturnin::sh2::Sh2;
 using saturnin::sh2::Sh2Type;
@@ -314,6 +316,7 @@ public:
     Sh2* slaveSh2() const;
     Scu*      scu() const;
     Config*   config() const;
+    Smpc* smpc() const;
     //@}
 
 private:
@@ -595,6 +598,7 @@ template<typename T>
 struct readSmpc{
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T { 
+            Log::warning("memory", core::tr("SMPC read ({}) access {:#0x}"), sizeof(T) * 8, addr);
             return rawRead<T>(m.smpc_, addr & smpc_memory_mask);
         };
     }
@@ -605,9 +609,9 @@ template<>
 struct readSmpc<uint8_t> {
     operator Memory::ReadType<u8>() const {
         return [](const Memory& m, const u32 addr) -> u8 {
-            //Log::error("memory", fmt::format(core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr));
-            Log::warning("memory", core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
-            return 0;
+            //Log::warning("memory", core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
+            //return 0;
+            return m.smpc()->read(addr);
         };
     }
 };
@@ -627,7 +631,8 @@ template<typename T>
 struct writeSmpc {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.smpc_, addr & smpc_memory_mask, data);
+            Log::warning("memory", core::tr("SMPC write ({}) access {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
+            //rawWrite<T>(m.smpc_, addr & smpc_memory_mask, data);
         };
     }
 };
@@ -637,8 +642,7 @@ template<>
 struct writeSmpc<uint8_t> {
     operator Memory::WriteType<u8>() const {
         return [](Memory& m, const u32 addr, const u8 data) {
-            //Log::warning("memory", fmt::format(core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data));
-            Log::warning("memory", core::tr("Write ({}) needs to be handled through SMPC {:#0x} : {:#x}"), 8, addr, data);
+            m.smpc()->write(addr, data);
         };
     }
 };

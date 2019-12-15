@@ -43,7 +43,6 @@ namespace core {
 
 using sh2::Sh2;
 using sh2::Sh2Type;
-using sh2::StatusRegister;
 
 Emulator_context::Emulator_context() {
     config_     = std::make_unique<Config>("saturnin.cfg");

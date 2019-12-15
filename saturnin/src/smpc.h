@@ -25,6 +25,13 @@
 
 #pragma once
 
+#include "smpc_registers.h"
+
+// Forward declarations
+namespace saturnin::core {
+    class Emulator_context;
+}
+
 namespace saturnin {
 namespace core {
 
@@ -58,24 +65,157 @@ enum class SmpcCommand : u8 {
     time_setting = 0x16         ///< SETTIME command
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SystemClock
+///
+/// \brief  System clock values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SystemClock : u32 {
+    not_set  = 0,
+    ntsc_320 = 26874100,
+    ntsc_352 = 28636400,
+    pal_320  = 26687500,
+    pal_352  = 28437500
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct SaturnDigitalPad
+///
+/// \brief  Mapping between the Saturn Digital Pad and the host.
+///
+/// \author Runik
+/// \date   15/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct SaturnDigitalPad {
+    u8 direction_left;
+    u8 direction_right;
+    u8 direction_up;
+    u8 direction_down;
+    u8 button_shoulder_left;
+    u8 button_shoulder_right;
+    u8 button_a;
+    u8 button_b;
+    u8 button_c;
+    u8 button_x;
+    u8 button_y;
+    u8 button_z;
+    u8 button_start;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct SaturnPeripheralMapping
+///
+/// \brief  Peripheral mapping for the Saturn.
+///
+/// \author Runik
+/// \date   15/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct SaturnPeripheralMapping {
+    SaturnDigitalPad player_1;
+    SaturnDigitalPad player_2;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct StvPlayerControls
+///
+/// \brief  Mapping between the ST-V player I/O and the host.
+///
+/// \author Runik
+/// \date   15/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct StvPlayerControls {
+    u8 direction_left;
+    u8 direction_right;
+    u8 direction_up;
+    u8 direction_down;
+    u8 button_1;
+    u8 button_2;
+    u8 button_3;
+    u8 button_4;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct StvBoardControls
+///
+/// \brief  ST-V board controls.
+///
+/// \author Runik
+/// \date   15/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct StvBoardControls {
+    u8 service_switch;
+    u8 test_switch;
+    u8 p1_coin_switch;
+    u8 p2_coin_switch;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct StvPeripheralMapping
+///
+/// \brief  Peripheral mapping for the ST-V.
+///
+/// \author Runik
+/// \date   15/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct StvPeripheralMapping {
+    StvBoardControls board_controls;
+    StvPlayerControls player_1;
+    StvPlayerControls player_2;
+};
+
 class Smpc {
 public:
     //@{
     // Constructors / Destructors
     Smpc() = delete;
-    Smpc(Emulator_context* ec) : emulator_context_(ec) {};
+    Smpc(Emulator_context* ec) : emulator_context_(ec) { reset();  };
     Smpc(const Smpc&) = delete;
     Smpc(Smpc&&) = delete;
     Smpc& operator=(const Smpc&) & = delete;
     Smpc& operator=(Smpc&&) & = delete;
     ~Smpc() = default;
     //@}
+    
+    u8 read(const u32 addr);
+    void write(const u32 addr, const u8 data);
 
 private:
-    
-    
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::reset();
+    ///
+    /// \brief  Resets the SMPC.
+    ///
+    /// \author Runik
+    /// \date   14/12/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void reset();
+
     Emulator_context* emulator_context_;    ///< Context of the emulator
 
+    //@{
+    // Internal registers
+    CommandRegister       comreg_;
+    StatusRegister        sr_;
+    StatusFlag            sf_;
+    InputRegister         ireg_[7];
+    OutputRegister        oreg_[32];
+    PortDataRegister      pdr1_;
+    PortDataRegister      pdr2_;
+    DataDirectionRegister ddr1_;
+    DataDirectionRegister ddr2_;
+    IOSelect              iosel_;
+    ExternalLatchEnable   exle_;
+    //@}
+    
+    SystemClock clock_{ SystemClock::not_set }; 
 };
 
 }

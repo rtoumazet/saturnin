@@ -474,6 +474,10 @@ Scu* Memory::scu() const {
     return emulator_context_->scu();
 };
 
+Smpc* Memory::smpc() const {
+    return emulator_context_->smpc();
+};
+
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const Rom_load rom_load) {
     if (times_mirrored > 0) {
         u32 multiple{};

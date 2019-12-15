@@ -149,19 +149,19 @@ namespace gui {
             ImGui::Text(tr("Hardware mode").c_str());
             ImGui::SameLine(150);
             
-            std::string HardwareMode = state.config()->readValue(core::Access_keys::config_HardwareMode);
-            static int mode = util::toUnderlying(core::Config::HardwareMode[HardwareMode]);
+            std::string HardwareMode = state.config()->readValue(core::Access_keys::config_hardware_mode);
+            static int mode = util::toUnderlying(core::Config::hardware_mode[HardwareMode]);
 
             if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::HardwareMode::saturn))) {
-                core::Config::Map_HardwareMode::const_iterator it = util::getKeyFromValue(core::Config::HardwareMode, core::HardwareMode::saturn);
-                if (it != core::Config::HardwareMode.end()) state.config()->writeValue(core::Access_keys::config_HardwareMode, it->first);
-                else Log::warning("config", tr("Hardware mode unknown ..."));
+                core::Config::Map_HardwareMode::const_iterator it = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::saturn);
+                if (it != core::Config::hardware_mode.end()) state.config()->writeValue(core::Access_keys::config_hardware_mode, it->first);
+                else Log::warning("config", tr("Unknown hardware mode ..."));
             }
             ImGui::SameLine();
             if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::HardwareMode::stv))) {
-                core::Config::Map_HardwareMode::const_iterator it = util::getKeyFromValue(core::Config::HardwareMode, core::HardwareMode::stv);
-                if (it != core::Config::HardwareMode.end()) state.config()->writeValue(core::Access_keys::config_HardwareMode, it->first);
-                else Log::warning("config", tr("Hardware mode unknown ..."));
+                core::Config::Map_HardwareMode::const_iterator it = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::stv);
+                if (it != core::Config::hardware_mode.end()) state.config()->writeValue(core::Access_keys::config_hardware_mode, it->first);
+                else Log::warning("config", tr("Unknown hardware mode ..."));
             }
 
             ImGui::Text(tr("Language").c_str());
@@ -254,7 +254,7 @@ namespace gui {
                     state.config()->writeValue(core::Access_keys::config_access_method, it->first);
                 }
                 else {
-                    Log::warning("config", tr("Drive access method unknown ..."));
+                    Log::warning("config", tr("Unknown drive access method ..."));
                 }
             }
             ImGui::SameLine();
@@ -264,7 +264,7 @@ namespace gui {
                     state.config()->writeValue(core::Access_keys::config_access_method, it->first);
                 }
                 else {
-                    Log::warning("config", tr("Drive access method unknown ..."));
+                    Log::warning("config", tr("Unknown drive access method ..."));
                 }
             }
 
@@ -280,6 +280,31 @@ namespace gui {
             if (ImGui::Checkbox("", &disabled)) {
                 state.config()->writeValue(core::Access_keys::config_sound_disabled, disabled);
             }
+        }
+
+        // Peripheral header
+        if (ImGui::CollapsingHeader(tr("Peripherals").c_str())) {
+            ImGui::Text(tr("Left").c_str());
+            ImGui::SameLine(150);
+            ImGui::PushItemWidth(20);
+
+            //auto bios_saturn = util::stringToVector(state.config()->readValue(core::Access_keys::config_bios_saturn), 255);
+            //if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
+            //    state.config()->writeValue(core::Access_keys::config_bios_saturn, bios_saturn.data());
+            //}
+            auto key = util::stringToVector("K", 1);
+            if (ImGui::InputText("##saturn_left", key.data(), key.capacity())) {
+
+            }
+            ImGui::Text(tr("Right").c_str());
+            ImGui::SameLine(150);
+            key.clear();
+            key = util::stringToVector("I", 1);
+            if (ImGui::InputText("##saturn_left", key.data(), key.capacity())) {
+
+            }
+
+            ImGui::PopItemWidth();
         }
 
         static uint16_t counter{};

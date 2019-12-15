@@ -187,6 +187,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClCompile Include="src\scu.cpp" />
     <ClCompile Include="src\sh2.cpp" />
     <ClCompile Include="src\sh2_instructions.cpp" />
+    <ClCompile Include="src\smpc.cpp" />
     <ClCompile Include="src\utilities.cpp" />
     <ClCompile Include="src\video\gui.cpp" />
     <ClCompile Include="src\video\imgui_wrapper.cpp" />

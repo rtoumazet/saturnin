@@ -167,7 +167,9 @@ s32 runLegacyOpengl(core::Emulator_context& state) {
                             //if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
                             //    cout << "GL_EXT_framebuffer_object not found !" << endl;
                             
-	glbinding::initialize(glfwGetProcAddress);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+    
+    glbinding::initialize(glfwGetProcAddress);
 
     OpenglLegacy opengl(state.config());
 

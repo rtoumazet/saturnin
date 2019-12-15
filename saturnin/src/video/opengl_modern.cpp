@@ -266,6 +266,8 @@ int32_t runModernOpengl(core::Emulator_context& state) {
     //glfwSetWindowUserPointer(window, (void*)&state);
     glfwSetWindowUserPointer(window, static_cast<void*>(&state));
 
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 

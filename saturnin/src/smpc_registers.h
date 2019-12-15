@@ -83,23 +83,166 @@ constexpr u32 external_latch_register   = 0x2010007D;
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CommandRegister
+///
+/// \brief  Command Register (COMREG).
+///
+/// \author Runik
+/// \date   14/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CommandRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 7 };   ///< Defines the range of all the bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  StatusRegister
 ///
-/// \brief  Status Register (SR).
-///         
+/// \brief  Status Register (SR). 
+///
 /// \author Runik
-/// \date   21/09/2019
+/// \date   14/12/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class StatusRegister : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<u8>  m{ 9 };             ///< Defines M bit.
-    inline static const BitRange<u8>  q{ 8 };             ///< Defines Q bit.
-    inline static const BitRange<u8>  i{ 4,7 };           ///< Defines interrupt mask bits (I0-I3).
-    inline static const BitRange<u8>  s{ 1 };             ///< Defines S bit.
-    inline static const BitRange<u8>  t{ 0 };             ///< Defines T bit.
-    inline static const BitRange<u16> all_bits{ 0, 9 };   ///< Defines the range of all the bits of the register.
+    inline static const BitRange<u8> all_bits{ 0, 7 };   ///< Defines the range of all the bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  StatusFlag
+///
+/// \brief  Status Flag (SF).
+///
+/// \author Runik
+/// \date   14/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class StatusFlag : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> sf{ 0 };  ///< SF value.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  InputRegister
+///
+/// \brief  Input Register (IREGx).
+///
+/// \author Runik
+/// \date   14/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class InputRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 7 };   ///< Defines the range of all the bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  OutputRegister
+///
+/// \brief  Output Register (OREGx).
+///
+/// \author Runik
+/// \date   14/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class OutputRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 7 };   ///< Defines the range of all the bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  DataDirectionRegister
+///
+/// \brief  Data Direction Register (DDRx).
+///
+/// \author Runik
+/// \date   14/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DataDirectionRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 6 };         ///< Defines the range of all the bits of the register.
+    inline static const u32 accessMask() { return 0b1111111; } ///< Returns access mask;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PortDataRegister
+///
+/// \brief  Port Data Register (PDRx).
+///
+/// \author Runik
+/// \date   14/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PortDataRegister : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<u8> all_bits{ 0, 6 };         ///< Defines the range of all the bits of the register.
+    inline static const u32 accessMask() { return 0b1111111; } ///< Returns access mask;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PeripheralPortMode
+///
+/// \brief  IOSEL values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PeripheralPortMode : u8 {
+    smpc_control_mode = 0, ///< SMPC control mode. (initial)
+    sh2_direct_mode   = 1, ///< SH2 direct mode 
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  IOSelect
+///
+/// \brief  I/O Select (IOSEL).
+///
+/// \author Runik
+/// \date   14/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class IOSelect : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<PeripheralPortMode> peripheral_port_2_mode { 1 }; ///< IOSEL2 bit.
+    inline static const BitRange<PeripheralPortMode> peripheral_port_1_mode { 0 }; ///< IOSEL1 bit.
+    inline static const BitRange<u8> all_bits{ 0, 1 };                             ///< Defines the range of all the bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ExternalLatch
+///
+/// \brief  EXLE values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ExternalLatch : u8 {
+    disabled = 0, ///< Disabled. (initial)
+    enabled = 1, ///< Enabled 
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  ExternalLatchEnable
+///
+/// \brief  External Latch Enable (EXLE).
+///
+/// \author Runik
+/// \date   14/12/2019
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class ExternalLatchEnable : public Register {
+public:
+    using Register::Register;
+    inline static const BitRange<ExternalLatch> external_latch_2_enable { 1 }; ///< EXLE2 bit.
+    inline static const BitRange<ExternalLatch> external_latch_1_enable { 0 }; ///< EXLE1 bit.
+    inline static const BitRange<u8> all_bits{ 0, 1 };                         ///< Defines the range of all the bits of the register.
 };
 
 }

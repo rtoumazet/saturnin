@@ -44,7 +44,7 @@ namespace core {
     enum class Access_keys {
         config_global,
         config_language,
-        config_HardwareMode,
+        config_hardware_mode,
         config_rendering,
         config_legacy_opengl,
         config_paths,
@@ -129,7 +129,7 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         typedef std::map<const std::string, const core::HardwareMode>Map_HardwareMode;
-        static Map_HardwareMode HardwareMode;
+        static Map_HardwareMode hardware_mode;
 
         //@{
         // Constructors / Destructors
