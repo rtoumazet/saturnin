@@ -37,6 +37,7 @@
 #include "cdrom/cdrom.h" // Cdrom_access_method
 
 namespace cdrom = saturnin::cdrom;
+namespace libcfg = libconfig;
 
 namespace saturnin {
 namespace core {
@@ -57,6 +58,7 @@ namespace core {
         config_sound,
         config_soundcard,
         config_sound_disabled,
+        config_controls,
         stv_game_name,
         stv_zip_name,
         stv_parent_set,
@@ -337,6 +339,39 @@ namespace core {
 
        std::vector<std::string> listAvailableLanguages();
 
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+       /// \fn  template<class T> void Config::add(const std::string key, T default)
+       ///
+       /// \brief   Creates a configuration key with subgroups if needed, and adds the default value to the last token of the key.
+       ///
+       /// \author  Runik
+       /// \date    17/12/2019
+       ///
+       /// \tparam  T   Type of the default value
+       /// \param   key     The key.
+       /// \param   default Default value to add.
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+       template<class T>
+       void add(const std::string key, T default) {
+           auto tokens{ util::explode(key, '.') };
+           std::string parent_path = "";
+           for (const auto& t : tokens) {
+               if (parent_path == "") {
+                   libcfg::Setting& root = cfg_.getRoot();
+                   parent_path = addGroup(root, t);
+               } else {
+                   if (&t != &tokens.back()) {
+                       libcfg::Setting& root = cfg_.lookup(parent_path);
+                       parent_path = addGroup(root, t);
+                   } else {
+                       libcfg::Setting& root = cfg_.lookup(parent_path);
+                       this->writeValue<T>(root, t, default);
+                   }
+               }
+           }
+       }
+
     private:
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -352,10 +387,28 @@ namespace core {
 
         void generateConfigurationTree(const bool isModernOpenglCapable);
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn std::string Config::addGroup(libcfg::Setting& root, const std::string& group_name);
+        ///
+        /// \brief  Adds a group to a root setting.
+        ///
+        /// \author Runik
+        /// \date   17/12/2019
+        ///
+        /// \param [in,out] root        Root setting to add the group to.
+        /// \param          group_name  Group name to add.
+        ///
+        /// \return A std::string.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        std::string addGroup(libcfg::Setting& root, const std::string& group_name);
+
         std::string filename_;  ///< Name of the configuration file used
         
         libconfig::Config cfg_; ///< Internal configuration object
 
     };
+
+
 };
 };

@@ -113,7 +113,8 @@ bool Config::readFile(){
         auto errorString = fmt::format(tr("Could not read file {0} : {1}"), filename_, fioex.what());
         //cout << fmt::format(tr("Could not read file {0} "), filename) << fioex.what() << endl;
         Log::error("config", errorString);
-        throw std::runtime_error("Config error !");
+        //throw std::runtime_error("Config error !");
+        return false;
     }
 }
 
@@ -127,40 +128,48 @@ bool Config::initialize(const bool isModernOpenGlCapable) {
 }
 
 void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
-    libcfg::Setting& root = cfg_.getRoot();
 
-    libcfg::Setting& global = root.add(single_keys[Access_keys::config_global], libcfg::Setting::TypeGroup);
-    this->writeValue(global, single_keys[Access_keys::config_language], "en");
+
+    add("global.language", "en");
+    
     core::Config::Map_HardwareMode::const_iterator it_hm = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::saturn);
-    if (it_hm != core::Config::hardware_mode.end()) {
-        this->writeValue(global, single_keys[Access_keys::config_hardware_mode], it_hm->first);
-    }
+    if (it_hm != core::Config::hardware_mode.end()) add("global.hardware_mode", it_hm->first.c_str());
+    else Log::warning("config", core::tr("Unknown harware mode ..."));
+  
+    add("rendering.legacy_opengl", !isModernOpenglCapable);
+    add("paths.roms_stv", "");
+    add("paths.bios_stv", "");
+    add("paths.bios_saturn", "");
+    add("cdrom.drive", "-1:-1:-1");
 
-    libcfg::Setting& rendering = root.add(single_keys[Access_keys::config_rendering], libcfg::Setting::TypeGroup);
-    this->writeValue(rendering, single_keys[Access_keys::config_legacy_opengl], !isModernOpenglCapable);
-
-    libcfg::Setting& paths = root.add(single_keys[Access_keys::config_paths], libcfg::Setting::TypeGroup);
-    this->writeValue(paths, single_keys[Access_keys::config_roms_stv], "");
-    this->writeValue(paths, single_keys[Access_keys::config_bios_stv], "");
-    this->writeValue(paths, single_keys[Access_keys::config_bios_saturn], "");
-
-    libcfg::Setting& cdrom = root.add(single_keys[Access_keys::config_cdrom], libcfg::Setting::TypeGroup);
-    this->writeValue(cdrom, single_keys[Access_keys::config_drive], "-1:-1:-1");
     core::Config::Map_cdrom_access::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::spti);
-    if (it != core::Config::cdrom_access.end()) {
-        this->writeValue(cdrom, single_keys[Access_keys::config_access_method], it->first);
-    }
-    else {
-        Log::warning("config", core::tr("Drive access method unknown ..."));
-    }
+    if (it != core::Config::cdrom_access.end()) add("cdrom.access_method", it->first.c_str());
+    else Log::warning("config", core::tr("Unknown drive access method ..."));
 
-    libcfg::Setting& sound = root.add(single_keys[Access_keys::config_sound], libcfg::Setting::TypeGroup);
-    this->writeValue(sound, single_keys[Access_keys::config_sound_disabled], false);
+    add("sound.disabled", false);
+    
+    add("controls.saturn.player_1", "");
+    //add("controls.saturn.player_2", "");
+    //add("controls.stv.board", "");
+    //add("controls.stv.player_1", "");
+    //add("controls.stv.player_2", "");
+
 }
 
 libcfg::Setting& Config::getGroup(libcfg::Setting& root, const std::string& group_name) {
     if (!root.exists(group_name.c_str())) root.add(group_name.c_str(), libcfg::Setting::TypeGroup);
     return root[group_name.c_str()];
+}
+
+std::string Config::addGroup(libcfg::Setting& root, const std::string& group_name) {
+    // libcfg::Setting doesn't have a copy constructor, so it has to be declared twice
+    if (!root.exists(group_name)) {
+        libcfg::Setting& new_setting = root.add(group_name, libcfg::Setting::TypeGroup);
+        return new_setting.getPath();
+    } else {
+        libcfg::Setting& new_setting = root.lookup(group_name);
+        return new_setting.getPath();
+    }
 }
 
 void Config::test() {
