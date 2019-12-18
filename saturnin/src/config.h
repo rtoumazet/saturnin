@@ -278,7 +278,7 @@ namespace core {
                 s = value;
             }
         }
-
+        
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn void Config::writeValue(const std::string& key, const T& value)
         ///
@@ -372,6 +372,29 @@ namespace core {
            }
        }
 
+       template<class T>
+       void add(const std::string key, std::vector<T> elements) {
+           auto tokens{ util::explode(key, '.') };
+           std::string parent_path = "";
+           for (const auto& t : tokens) {
+               if (parent_path == "") {
+                   libcfg::Setting& root = cfg_.getRoot();
+                   parent_path = addGroup(root, t);
+               } else {
+                   if (&t != &tokens.back()) {
+                       libcfg::Setting& root = cfg_.lookup(parent_path);
+                       parent_path = addGroup(root, t);
+                   } else {
+                       libcfg::Setting& root = cfg_.lookup(parent_path);
+                       libcfg::Setting& arr  = root.add(libcfg::Setting::TypeArray);
+                       for (const auto& e : elements) {
+                           this->writeValue<decltype(e)>(arr, t, e);
+                       }
+                   }
+               }
+           }
+       }
+
     private:
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,7 +413,7 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn std::string Config::addGroup(libcfg::Setting& root, const std::string& group_name);
         ///
-        /// \brief  Adds a group to a root setting.
+        /// \brief  Adds a group to a setting.
         ///
         /// \author Runik
         /// \date   17/12/2019

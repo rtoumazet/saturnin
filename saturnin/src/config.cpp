@@ -148,7 +148,9 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
 
     add("sound.disabled", false);
     
-    add("controls.saturn.player_1", "");
+    std::vector<char> v = { 'X', 'Y', 'Z' };
+    add("controls.saturn.player_1", v);
+    
     //add("controls.saturn.player_2", "");
     //add("controls.stv.board", "");
     //add("controls.stv.player_1", "");
