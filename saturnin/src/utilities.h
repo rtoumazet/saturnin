@@ -79,6 +79,24 @@ constexpr auto toUnderlying(E e) noexcept {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct remove_cvref
+///
+/// \brief  If the type T is a reference type, provides the member typedef type which is the type 
+///         referred to by T with its topmost cv-qualifiers removed. Otherwise type is T with its topmost cv-qualifiers removed.
+///         Will be added in C++20.
+///
+/// \author Runik
+/// \date   19/12/2019
+///
+/// \tparam T   Generic type parameter.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template< class T >
+struct remove_cvref {
+    typedef std::remove_cv_t<std::remove_reference_t<T>> type;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template <typename M, typename V> const auto getKeyFromValue(const M& map, const V find_value)
 ///
 /// \brief  Gets the key from its value in a 1<->1 map.

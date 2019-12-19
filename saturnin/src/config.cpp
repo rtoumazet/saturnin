@@ -18,6 +18,7 @@
 //
 
 #include <iostream> // cout
+#include <vector> // vector
 #include "config.h"
 #include "cdrom/cdrom.h"
 #include "locale.h"
@@ -148,14 +149,26 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
 
     add("sound.disabled", false);
     
-    std::vector<char> v = { 'X', 'Y', 'Z' };
+    // DL,DR,DU,DD,BSL,BSR,BA,BB,BC,BX,BY,BZ,BS
+    std::vector<std::string> v = { "X", "Y", "Z" };
     add("controls.saturn.player_1", v);
-    
+
     //add("controls.saturn.player_2", "");
     //add("controls.stv.board", "");
     //add("controls.stv.player_1", "");
     //add("controls.stv.player_2", "");
 
+}
+
+std::vector<std::string> Config::generateControllerMapping(const HardwareMode& hm) {
+    switch (hm) {
+        case HardwareMode::saturn:
+            return std::vector<std::string> {"A"};
+            break;
+        case HardwareMode::stv:
+
+            break;
+    }
 }
 
 libcfg::Setting& Config::getGroup(libcfg::Setting& root, const std::string& group_name) {

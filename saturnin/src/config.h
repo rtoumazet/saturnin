@@ -32,6 +32,7 @@
 #include <map>
 #include <sstream>
 #include <string> // string
+#include <vector> // vector
 #include "log.h"
 #include "memory.h" // Rom_load, Rom_type
 #include "cdrom/cdrom.h" // Cdrom_access_method
@@ -201,7 +202,6 @@ namespace core {
 
         void test();
 
-
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn void Config::writeValue(libconfig::Setting& root, const std::string& key, const T& value)
         ///
@@ -216,17 +216,29 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         template <class T> struct ToMySetting;
-        template <> struct ToMySetting<bool>        { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
-        template <> struct ToMySetting<uint32_t>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
-        template <> struct ToMySetting<int32_t>     { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
-        template <> struct ToMySetting<uint64_t>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
-        template <> struct ToMySetting<int64_t>     { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
-        template <> struct ToMySetting<float>       { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeFloat; };
-        template <> struct ToMySetting<const char*> { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
+        template <> struct ToMySetting<bool>               { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
+        template <> struct ToMySetting<const bool&>         { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
+        template <> struct ToMySetting<uint32_t>           { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
+        template <> struct ToMySetting<const uint32_t&>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
+        template <> struct ToMySetting<int32_t>            { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
+        template <> struct ToMySetting<const int32_t&>     { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
+        template <> struct ToMySetting<uint64_t>           { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
+        template <> struct ToMySetting<const uint64_t&>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
+        template <> struct ToMySetting<int64_t>            { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
+        template <> struct ToMySetting<const int64_t&>     { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
+        template <> struct ToMySetting<float>              { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeFloat; };
+        template <> struct ToMySetting<const float&>       { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeFloat; };
+        template <> struct ToMySetting<const char*>        { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
+        template <> struct ToMySetting<const char&>        { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
+        template <> struct ToMySetting<const std::string&> { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
 
         template<class T>
-        void writeValue(libconfig::Setting& root, const std::string& key, const T& value)
-        {
+        void writeValue(libconfig::Setting& root, const std::string& key, const T& value) {
+            if (key.empty()) {
+                root.add(ToMySetting<T>::index) = value; 
+                return;
+            }
+                    
             if (!root.exists(key.c_str())) root.add(key.c_str(), ToMySetting<T>::index) = value;
             else {
                 libconfig::Setting& s = root[key.c_str()];
@@ -386,9 +398,9 @@ namespace core {
                        parent_path = addGroup(root, t);
                    } else {
                        libcfg::Setting& root = cfg_.lookup(parent_path);
-                       libcfg::Setting& arr  = root.add(libcfg::Setting::TypeArray);
-                       for (const auto& e : elements) {
-                           this->writeValue<decltype(e)>(arr, t, e);
+                       libcfg::Setting& arr  = root.add(t, libcfg::Setting::TypeArray);
+                       for (const T& e : elements) {
+                           this->writeValue<const T&>(arr, "", e);
                        }
                    }
                }
@@ -409,6 +421,21 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         void generateConfigurationTree(const bool isModernOpenglCapable);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn std::vector Config::generateControllerMapping(const HardwareMode& hm);
+        ///
+        /// \brief  Generates the controller mapping for the specified hardware mode.
+        ///
+        /// \author Runik
+        /// \date   19/12/2019
+        ///
+        /// \param  hm  The hardware mode.
+        ///
+        /// \return The controller mapping.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        std::vector<std::string> generateControllerMapping(const HardwareMode& hm);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn std::string Config::addGroup(libcfg::Setting& root, const std::string& group_name);
