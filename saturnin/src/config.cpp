@@ -17,6 +17,8 @@
 // limitations under the License.
 //
 
+#include <windows.h> // removes C4005 warning
+#include <GLFW/glfw3.h> // GLFW_KEYS
 #include <iostream> // cout
 #include <vector> // vector
 #include "config.h"
@@ -149,26 +151,47 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
 
     add("sound.disabled", false);
     
-    // DL,DR,DU,DD,BSL,BSR,BA,BB,BC,BX,BY,BZ,BS
-    std::vector<std::string> v = { "X", "Y", "Z" };
-    add("controls.saturn.player_1", v);
+    SaturnDigitalPad pad;
+    pad.mapDefaultLayout();
+    add("controls.saturn.player_1", pad.toConfig());
+    add("controls.saturn.player_2", std::vector<u16>());
 
-    //add("controls.saturn.player_2", "");
-    //add("controls.stv.board", "");
-    //add("controls.stv.player_1", "");
-    //add("controls.stv.player_2", "");
+    StvBoardControls controls;
+    controls.mapDefaultLayout();
+    add("controls.stv.board", controls.toConfig());
+    
+    StvPlayerControls stv_player;
+    stv_player.mapDefaultLayout();
+    add("controls.stv.player_1", stv_player.toConfig());
+    add("controls.stv.player_2", std::vector<u16>());
 
 }
 
-std::vector<std::string> Config::generateControllerMapping(const HardwareMode& hm) {
+std::vector<u16> Config::generateControllerMapping(const HardwareMode& hm) {
     switch (hm) {
         case HardwareMode::saturn:
-            return std::vector<std::string> {"A"};
-            break;
+            SaturnDigitalPad pad;
+            pad.direction_left        = GLFW_KEY_LEFT;
+            pad.direction_right       = GLFW_KEY_RIGHT;
+            pad.direction_up          = GLFW_KEY_UP;
+            pad.direction_down        = GLFW_KEY_DOWN;
+            pad.button_shoulder_left  = GLFW_KEY_Z;
+            pad.button_shoulder_right = GLFW_KEY_E;
+            pad.button_a              = GLFW_KEY_S;
+            pad.button_b              = GLFW_KEY_D;
+            pad.button_c              = GLFW_KEY_F;
+            pad.button_x              = GLFW_KEY_X;
+            pad.button_y              = GLFW_KEY_C;
+            pad.button_z              = GLFW_KEY_V;
+            pad.button_start          = GLFW_KEY_ENTER;
+            return pad.toConfig();
         case HardwareMode::stv:
-
+            StvBoardControls board;
+            StvPlayerControls player;
             break;
     }
+
+    return std::vector<u16>();
 }
 
 libcfg::Setting& Config::getGroup(libcfg::Setting& root, const std::string& group_name) {

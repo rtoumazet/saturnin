@@ -217,7 +217,9 @@ namespace core {
 
         template <class T> struct ToMySetting;
         template <> struct ToMySetting<bool>               { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
-        template <> struct ToMySetting<const bool&>         { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
+        template <> struct ToMySetting<const bool&>        { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
+        template <> struct ToMySetting<uint16_t>           { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
+        template <> struct ToMySetting<const uint16_t&>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
         template <> struct ToMySetting<uint32_t>           { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
         template <> struct ToMySetting<const uint32_t&>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
         template <> struct ToMySetting<int32_t>            { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
@@ -384,6 +386,7 @@ namespace core {
            }
        }
 
+       // Specialization for vector
        template<class T>
        void add(const std::string key, std::vector<T> elements) {
            auto tokens{ util::explode(key, '.') };
@@ -435,7 +438,7 @@ namespace core {
         /// \return The controller mapping.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        std::vector<std::string> generateControllerMapping(const HardwareMode& hm);
+        std::vector<u16> generateControllerMapping(const HardwareMode& hm);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn std::string Config::addGroup(libcfg::Setting& root, const std::string& group_name);

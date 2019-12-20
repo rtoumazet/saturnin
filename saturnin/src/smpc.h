@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <vector> // vector
 #include "smpc_registers.h"
 
 // Forward declarations
@@ -80,6 +81,18 @@ enum class SystemClock : u32 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PeripheralLayout
+///
+/// \brief  Peripheral layout values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PeripheralLayout {
+    empty,   ///< Empty layout, nothing is mapped
+    default, ///< Default layout
+    current  ///< Currently mapped layout
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct SaturnDigitalPad
 ///
 /// \brief  Mapping between the Saturn Digital Pad and the host.
@@ -89,19 +102,21 @@ enum class SystemClock : u32 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct SaturnDigitalPad {
-    u8 direction_left;
-    u8 direction_right;
-    u8 direction_up;
-    u8 direction_down;
-    u8 button_shoulder_left;
-    u8 button_shoulder_right;
-    u8 button_a;
-    u8 button_b;
-    u8 button_c;
-    u8 button_x;
-    u8 button_y;
-    u8 button_z;
-    u8 button_start;
+    u16 direction_left;
+    u16 direction_right;
+    u16 direction_up;
+    u16 direction_down;
+    u16 button_shoulder_left;
+    u16 button_shoulder_right;
+    u16 button_a;
+    u16 button_b;
+    u16 button_c;
+    u16 button_x;
+    u16 button_y;
+    u16 button_z;
+    u16 button_start;
+
+    std::vector<u16> toConfig(const PeripheralLayout);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,14 +143,16 @@ struct SaturnPeripheralMapping {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct StvPlayerControls {
-    u8 direction_left;
-    u8 direction_right;
-    u8 direction_up;
-    u8 direction_down;
-    u8 button_1;
-    u8 button_2;
-    u8 button_3;
-    u8 button_4;
+    u16 direction_left;
+    u16 direction_right;
+    u16 direction_up;
+    u16 direction_down;
+    u16 button_1;
+    u16 button_2;
+    u16 button_3;
+    u16 button_4;
+
+    std::vector<u16> toConfig(const PeripheralLayout);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,10 +165,12 @@ struct StvPlayerControls {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct StvBoardControls {
-    u8 service_switch;
-    u8 test_switch;
-    u8 p1_coin_switch;
-    u8 p2_coin_switch;
+    u16 service_switch;
+    u16 test_switch;
+    u16 p1_coin_switch;
+    u16 p2_coin_switch;
+
+    std::vector<u16> toConfig(const PeripheralLayout);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
