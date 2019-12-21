@@ -1,5 +1,5 @@
 // 
-// emulator_context.cpp
+// EmulatorContext.cpp
 // Saturnin
 //
 // Copyright (c) 2018 Renaud Toumazet
@@ -44,7 +44,7 @@ namespace core {
 using sh2::Sh2;
 using sh2::Sh2Type;
 
-Emulator_context::Emulator_context() {
+EmulatorContext::EmulatorContext() {
     config_     = std::make_unique<Config>("saturnin.cfg");
     master_sh2_ = std::make_unique<Sh2>(Sh2Type::master, this);
     slave_sh2_  = std::make_unique<Sh2>(Sh2Type::slave, this);
@@ -53,14 +53,14 @@ Emulator_context::Emulator_context() {
     smpc_       = std::make_unique<Smpc>(this);
 }
 
-Config* Emulator_context::config() { return config_.get(); };
+Config* EmulatorContext::config() { return config_.get(); };
 
-bool Emulator_context::initialize() {
+bool EmulatorContext::initialize() {
     Log::initialize();
 
     if (!this->config()->initialize(video::isModernOpenglCapable())) return false;
 
-    std::string country = this->config()->readValue(core::Access_keys::config_language);
+    std::string country = this->config()->readValue(core::AccessKeys::cfg_global_language);
     if (!core::Locale::initialize(country)) return false;
 
     cdrom::Scsi::settingUpSptiFunctions();
@@ -69,7 +69,7 @@ bool Emulator_context::initialize() {
     return true;
 }
 
-void Emulator_context::startEmulation() {
+void EmulatorContext::startEmulation() {
     if (emulation_status_ == EmulationStatus::running) return;
 
     emulation_status_ = EmulationStatus::running;
@@ -78,13 +78,13 @@ void Emulator_context::startEmulation() {
 
     sh2::initializeOpcodesLut();
 
-    emulation_main_thread_ = std::thread (&Emulator_context::emulationMainThread, this);
+    emulation_main_thread_ = std::thread (&EmulatorContext::emulationMainThread, this);
     if (emulation_main_thread_.joinable()) emulation_main_thread_.detach();
 
     
     //static std::thread emu_thread;
     //if (ImGui::Button("Play")) {
-    //    std::thread local_thread(&core::Emulator_context::startEmulation, &state);
+    //    std::thread local_thread(&core::EmulatorContext::startEmulation, &state);
     //    emu_thread = move(local_thread);
 
     // TESTING //
@@ -113,12 +113,12 @@ void Emulator_context::startEmulation() {
     
 }
 
-void Emulator_context::stopEmulation() {
+void EmulatorContext::stopEmulation() {
     emulation_status_ = core::EmulationStatus::stopped;
     if (emulation_main_thread_.joinable()) emulation_main_thread_.join();
 }
 
-void Emulator_context::emulationMainThread() {
+void EmulatorContext::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
         
@@ -137,8 +137,8 @@ void Emulator_context::emulationMainThread() {
     }
 }
 
-void Emulator_context::startInterface() {
-    bool is_legacy_opengl = this->config()->readValue(core::Access_keys::config_legacy_opengl);
+void EmulatorContext::startInterface() {
+    bool is_legacy_opengl = this->config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
     (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
 }
 

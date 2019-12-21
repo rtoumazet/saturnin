@@ -131,7 +131,7 @@ static void error_callback(int error, const char* description) {
 }
     
 
-s32 runLegacyOpengl(core::Emulator_context& state) {
+s32 runLegacyOpengl(core::EmulatorContext& state) {
     // Setup window
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())

@@ -31,7 +31,7 @@ namespace sh2 {
 
 using core::Log;
 
-Sh2::Sh2(Sh2Type st, core::Emulator_context* ec) : sh2_type_(st), emulator_context_(ec) {
+Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : sh2_type_(st), emulator_context_(ec) {
     reset();
 }
 
@@ -43,7 +43,7 @@ Scu* Sh2::scu() const {
     return emulator_context_->scu();
 }
 
-core::Emulator_context* Sh2::emulatorContext(){
+core::EmulatorContext* Sh2::emulatorContext(){
     return emulator_context_;
 }
 

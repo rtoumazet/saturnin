@@ -1,5 +1,5 @@
 // 
-// emulator_context.h
+// EmulatorContext.h
 // Saturnin
 //
 // Copyright (c) 2018-2019 Renaud Toumazet
@@ -18,7 +18,7 @@
 // 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \file	emulator_context.h
+/// \file	EmulatorContext.h
 ///
 /// \brief	Emulator context struct. 
 ///
@@ -64,7 +64,7 @@ static const std::string saturnin_version{ "1.00" };
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \class  Emulator_context
+    /// \class  EmulatorContext
     ///
     /// \brief  Regroups everything related to the emulator state.
     ///
@@ -72,16 +72,16 @@ static const std::string saturnin_version{ "1.00" };
     /// \date   12/06/2018
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    class Emulator_context {
+    class EmulatorContext {
     public:
         //@{
         // Constructors / Destructors
-        Emulator_context();
-        Emulator_context(const Emulator_context&)              = delete;
-        Emulator_context(Emulator_context&&)                   = delete;
-        Emulator_context& operator=(const Emulator_context&) & = delete;
-        Emulator_context& operator=(Emulator_context&&) &      = delete;
-        ~Emulator_context()                                    = default;
+        EmulatorContext();
+        EmulatorContext(const EmulatorContext&)              = delete;
+        EmulatorContext(EmulatorContext&&)                   = delete;
+        EmulatorContext& operator=(const EmulatorContext&) & = delete;
+        EmulatorContext& operator=(EmulatorContext&&) &      = delete;
+        ~EmulatorContext()                                    = default;
         //@}
         // 
 
@@ -99,7 +99,7 @@ static const std::string saturnin_version{ "1.00" };
         bool initialize();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Emulator_context::startEmulation();
+        /// \fn void EmulatorContext::startEmulation();
         ///
         /// \brief  Starts the emulation.
         ///
@@ -110,7 +110,7 @@ static const std::string saturnin_version{ "1.00" };
         void startEmulation();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Emulator_context::stopEmulation();
+        /// \fn void EmulatorContext::stopEmulation();
         ///
         /// \brief  Stops the emulation.
         ///
@@ -121,7 +121,7 @@ static const std::string saturnin_version{ "1.00" };
         void stopEmulation();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Emulator_context::startInterface();
+        /// \fn void EmulatorContext::startInterface();
         ///
         /// \brief  Starts the emulator GUI.
         ///
@@ -132,7 +132,7 @@ static const std::string saturnin_version{ "1.00" };
         void startInterface();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Config* Emulator_context::config()
+        /// \fn Config* EmulatorContext::config()
         ///
         /// \brief  Returns a pointer to config object.
         ///
@@ -145,7 +145,7 @@ static const std::string saturnin_version{ "1.00" };
         Config* config();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Memory* Emulator_context::memory()
+        /// \fn Memory* EmulatorContext::memory()
         ///
         /// \brief  Returns a pointer to the memory object.
         ///
@@ -158,7 +158,7 @@ static const std::string saturnin_version{ "1.00" };
         Memory* memory() { return memory_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Sh2* Emulator_context::masterSh2()
+        /// \fn Sh2* EmulatorContext::masterSh2()
         ///
         /// \brief  Returns a pointer to the master SH2 object.
         ///
@@ -171,7 +171,7 @@ static const std::string saturnin_version{ "1.00" };
         sh2::Sh2* masterSh2() { return master_sh2_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Sh2* Emulator_context::slaveSh2()
+        /// \fn Sh2* EmulatorContext::slaveSh2()
         ///
         /// \brief  Returns a pointer to the slave SH2 object.
         ///
@@ -184,7 +184,7 @@ static const std::string saturnin_version{ "1.00" };
         sh2::Sh2* slaveSh2() { return slave_sh2_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Scu* Emulator_context::scu()
+        /// \fn Scu* EmulatorContext::scu()
         ///
         /// \brief  Returns a pointer to the SCU object.
         ///
@@ -197,7 +197,7 @@ static const std::string saturnin_version{ "1.00" };
         Scu* scu() { return scu_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Smpc* Emulator_context::smpc()
+        /// \fn Smpc* EmulatorContext::smpc()
         ///
         /// \brief  Returns a pointer to the SMPC object.
         ///
@@ -210,7 +210,7 @@ static const std::string saturnin_version{ "1.00" };
         Smpc* smpc() { return smpc_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn HardwareMode Emulator_context::hardwareMode() const
+        /// \fn HardwareMode EmulatorContext::hardwareMode() const
         ///
         /// \brief  Current hardware mode of the emulator.
         ///
@@ -223,7 +223,7 @@ static const std::string saturnin_version{ "1.00" };
         HardwareMode hardwareMode() const { return hardware_mode_; };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Emulator_context::emulationStatus(const EmulationStatus status) const
+        /// \fn void EmulatorContext::emulationStatus(const EmulationStatus status) const
         ///
         /// \brief  Sets the emulation status of the emulator.
         ///
@@ -236,7 +236,7 @@ static const std::string saturnin_version{ "1.00" };
         void emulationStatus(const EmulationStatus status) { emulation_status_ = status; };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Emulator_context::renderingStatus(const RenderingStatus status)
+        /// \fn void EmulatorContext::renderingStatus(const RenderingStatus status)
         ///
         /// \brief  Sets the rendering status of the emulator.
         ///
@@ -249,7 +249,7 @@ static const std::string saturnin_version{ "1.00" };
         void renderingStatus(const RenderingStatus status) { rendering_status_ = status; };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn RenderingStatus Emulator_context::renderingStatus()
+        /// \fn RenderingStatus EmulatorContext::renderingStatus()
         ///
         /// \brief  Gets the current rendering status.
         ///
@@ -262,7 +262,7 @@ static const std::string saturnin_version{ "1.00" };
         RenderingStatus renderingStatus() { return rendering_status_; };
     private:
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void Emulator_context::emulationMainThread();
+        /// \fn void EmulatorContext::emulationMainThread();
         ///
         /// \brief  Emulation main thread.
         ///

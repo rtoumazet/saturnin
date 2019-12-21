@@ -234,7 +234,7 @@ static void error_callback(int error, const char* description)
 }
 
 
-int32_t runModernOpengl(core::Emulator_context& state) {
+int32_t runModernOpengl(core::EmulatorContext& state) {
     // Setup window
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())

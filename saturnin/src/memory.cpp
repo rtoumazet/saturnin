@@ -38,12 +38,12 @@ bool Memory::loadRom(const std::string& zip_name,
                      const std::string&  file_name,
                      u8*	   destination,
                      const u32 size,
-                     const Rom_load rom_load,
+                     const RomLoad RomLoad,
                      const u8  times_mirrored,
-                     const Rom_type rom_type) {
+                     const RomType RomType) {
 
     std::string zip = zip_name + ".zip";
-    fs::path rom_path{ config()->readValue(Access_keys::config_roms_stv).c_str() };
+    fs::path rom_path{ config()->readValue(AccessKeys::cfg_paths_roms_stv).c_str() };
     rom_path /= zip;
     //rom_path += "\\" + zip_name + ".zip";
 
@@ -53,8 +53,8 @@ bool Memory::loadRom(const std::string& zip_name,
             lzpp::ZipEntry entry = zf.getEntry(file_name, false, false);
             std::unique_ptr<u8[]> data(static_cast<u8*>(entry.readAsBinary()));
 
-            switch (rom_type) {
-                case Rom_type::bios: {
+            switch (RomType) {
+                case RomType::bios: {
                     u32 counter = size / 4;
                     // Needs byteswapping
                     for (u32 i = 0; i < counter; ++i) {
@@ -65,19 +65,19 @@ bool Memory::loadRom(const std::string& zip_name,
                     }
                     break;
                 }
-                case Rom_type::program:
-                case Rom_type::graphic: {
+                case RomType::program:
+                case RomType::graphic: {
                     const u32 stv_bios_region_address = 0x808;
                     u32 region_cart_address{};
-                    switch (rom_load) {
-                        case Rom_load::not_interleaved: {
+                    switch (RomLoad) {
+                        case RomLoad::not_interleaved: {
                             const auto &src_begin = data.get();
                             std::move(src_begin, std::next(src_begin, size), destination);
 
                             region_cart_address = 0x40;
                             break;
                         }
-                        case Rom_load::odd_interleaved: {  // Data is loaded on odd bytes only
+                        case RomLoad::odd_interleaved: {  // Data is loaded on odd bytes only
                             for (u32 i = 0; i < size; ++i) {
                                 destination[(i * 2 + 1)] = data[i];
                             }
@@ -85,7 +85,7 @@ bool Memory::loadRom(const std::string& zip_name,
                             region_cart_address = 0x81;
                             break;
                         }
-                        case Rom_load::even_interleaved: { // Data is loaded on even bytes only
+                        case RomLoad::even_interleaved: { // Data is loaded on even bytes only
                             for (u32 i = 0; i < size; ++i) {
                                 destination[i * 2] = data[i];
                             }
@@ -96,9 +96,9 @@ bool Memory::loadRom(const std::string& zip_name,
                     }
 
                     // bios region is forced for program roms
-                    if (rom_type == Rom_type::program) this->cart_[region_cart_address] = this->rom_[stv_bios_region_address];
+                    if (RomType == RomType::program) this->cart_[region_cart_address] = this->rom_[stv_bios_region_address];
 
-                    mirrorData(destination, size, times_mirrored, rom_load);
+                    mirrorData(destination, size, times_mirrored, RomLoad);
                     break;
                 }
                 default: {
@@ -127,8 +127,8 @@ bool Memory::loadRom(const std::string& zip_name,
 void Memory::loadBios(const HardwareMode mode) {
     std::string bios_path{};
     switch (mode) {
-        case HardwareMode::saturn: bios_path = config()->readValue(Access_keys::config_bios_saturn).c_str(); break;
-        case HardwareMode::stv:    bios_path = config()->readValue(Access_keys::config_bios_stv).c_str(); break;
+        case HardwareMode::saturn: bios_path = config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
+        case HardwareMode::stv:    bios_path = config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
         default: {
             Log::error("config", tr("Unknown hardware mode"));
             throw std::runtime_error("Config error !");
@@ -169,27 +169,27 @@ bool Memory::loadStvGame(const std::string& config_filename) {
     core::Config stv(full_path.string());
     stv.readFile();
 
-    const std::string game_name = stv.readValue(core::Access_keys::stv_game_name);
-    const std::string zip_name = stv.readValue(core::Access_keys::stv_zip_name);
-    const std::string parent_set = stv.readValue(core::Access_keys::stv_parent_set);
-    const std::string version = stv.readValue(core::Access_keys::stv_version);
-    const std::string release_date = stv.readValue(core::Access_keys::stv_release_date);
-    const std::string region = stv.readValue(core::Access_keys::stv_region);
-    const libconfig::Setting& files = stv.readValue(core::Access_keys::stv_files);
+    const std::string game_name = stv.readValue(core::AccessKeys::stv_game_name);
+    const std::string zip_name = stv.readValue(core::AccessKeys::stv_zip_name);
+    const std::string parent_set = stv.readValue(core::AccessKeys::stv_parent_set);
+    const std::string version = stv.readValue(core::AccessKeys::stv_version);
+    const std::string release_date = stv.readValue(core::AccessKeys::stv_release_date);
+    const std::string region = stv.readValue(core::AccessKeys::stv_region);
+    const libconfig::Setting& files = stv.readValue(core::AccessKeys::stv_files);
     for (u8 i = 0; i < files.getLength(); ++i) {
         const std::string rom_name = files[i][0];
         const u32    load_address = files[i][1];
         const u32    load_size = files[i][2];
-        const auto        rom_load = Config::rom_load[files[i][3]];
+        const auto        RomLoad = Config::RomLoad[files[i][3]];
         const u32    times_mirrored = files[i][4];
-        const auto        rom_type = Config::rom_type[files[i][5]];
+        const auto        RomType = Config::RomType[files[i][5]];
         if (!this->loadRom(zip_name,
                            rom_name,
                            &this->cart_[load_address],
                            load_size,
-                           rom_load,
+                           RomLoad,
                            times_mirrored,
-                           rom_type)) {
+                           RomType)) {
             return false;
         }
     }
@@ -478,13 +478,13 @@ Smpc* Memory::smpc() const {
     return emulator_context_->smpc();
 };
 
-void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const Rom_load rom_load) {
+void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad RomLoad) {
     if (times_mirrored > 0) {
         u32 multiple{};
-        switch (rom_load) {
-            case Rom_load::not_interleaved: multiple = 1; break;
-            case Rom_load::even_interleaved:multiple = 2; break;
-            case Rom_load::odd_interleaved: multiple = 2; break;
+        switch (RomLoad) {
+            case RomLoad::not_interleaved: multiple = 1; break;
+            case RomLoad::even_interleaved:multiple = 2; break;
+            case RomLoad::odd_interleaved: multiple = 2; break;
         }
         for (u8 i = 1; i <= times_mirrored; ++i) {
             std::copy(data, data + size * multiple - 1, data + (i*size*multiple));

@@ -31,14 +31,14 @@
 // Forward declarations
 namespace saturnin::core {
     class Config;
-    class Emulator_context;
+    class EmulatorContext;
 }
 
 namespace saturnin {
 namespace video {
 
 using saturnin::core::Config;
-using saturnin::core::Emulator_context;
+using saturnin::core::EmulatorContext;
 
 class OpenglModern : public Opengl {
 
@@ -139,7 +139,7 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn s32 runModernOpengl(core::Emulator_context& config);
+/// \fn s32 runModernOpengl(core::EmulatorContext& config);
 ///
 /// \brief  Executes OpenGL code in modern mode (3.3+).
 ///
@@ -151,7 +151,7 @@ private:
 /// \return An int32_t.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-s32 runModernOpengl(Emulator_context& state);
+s32 runModernOpengl(EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void checkShaderCompilation(const u32 shader);

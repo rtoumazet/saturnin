@@ -34,7 +34,7 @@
 
 // Forward declarations
 namespace saturnin::core { 
-    class Emulator_context; 
+    class EmulatorContext; 
     class Scu;
     struct Interrupt;
 }
@@ -42,7 +42,7 @@ namespace saturnin::core {
 namespace saturnin {
 namespace sh2 {
 
-using saturnin::core::Emulator_context;
+using saturnin::core::EmulatorContext;
 using saturnin::core::Memory;
 using saturnin::core::Scu;
 using saturnin::core::Interrupt;
@@ -124,7 +124,7 @@ class Sh2 {
     //@{
     // Constructors / Destructors
     Sh2()                        = delete;
-    Sh2(Sh2Type st, Emulator_context* ec);
+    Sh2(Sh2Type st, EmulatorContext* ec);
     Sh2(const Sh2&)              = delete;
     Sh2(Sh2&&)                   = delete;
     Sh2& operator=(const Sh2&) & = delete;
@@ -593,17 +593,17 @@ private:
     Scu* scu() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  Emulator_context* Sh2::emultaorContext() const;
+    /// \fn  EmulatorContext* Sh2::emultaorContext() const;
     ///
-    /// \brief  Returns the emulator_context object.
+    /// \brief  Returns the EmulatorContext object.
     ///
     /// \author Runik
     /// \date   23/09/2019
     ///
-    /// \return The Emulator_context object.
+    /// \return The EmulatorContext object.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Emulator_context* emulatorContext();
+    EmulatorContext* emulatorContext();
 
     friend u16 xn00(Sh2&);
     friend u16 x0n0(Sh2&);
@@ -760,7 +760,7 @@ private:
     friend void badOpcode(Sh2& s);
     friend void execute(Sh2& s);
 
-    Emulator_context* emulator_context_;    ///< Context of the emulator
+    EmulatorContext* emulator_context_;    ///< Context of the emulator
     
     std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
     std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    

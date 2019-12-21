@@ -38,7 +38,7 @@ namespace core {
 // During DMA operation A -> B or B -> A, no CPU access to A-Bus
 
 
-Scu::Scu(Emulator_context* ec) : emulator_context_(ec) {
+Scu::Scu(EmulatorContext* ec) : emulator_context_(ec) {
     initializeRegisters();
 };
 
@@ -819,7 +819,7 @@ void Scu::dmaTest() {
     }
 }
 
-Emulator_context* Scu::emulatorContext() const {
+EmulatorContext* Scu::emulatorContext() const {
     return emulator_context_;
 }
 

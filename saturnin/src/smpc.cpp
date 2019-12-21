@@ -17,108 +17,104 @@
 // limitations under the License.
 // 
 
-#include <Windows.h> // Removes C4005 warning
-#include <GLFW/glfw3.h> // Keyboard handling
 #include "smpc.h"
 #include "emulator_context.h"
 
 namespace saturnin {
 namespace core {
 
-std::vector<u16> SaturnDigitalPad::toConfig(const PeripheralLayout layout) {
+std::vector<PeripheralKey> SaturnDigitalPad::toConfig(const PeripheralLayout layout) {
     switch (layout) {
-        case PeripheralLayout::empty: return std::vector<u16>();
-        case PeripheralLayout::default: {
-            direction_left = GLFW_KEY_LEFT;
-            direction_right = GLFW_KEY_RIGHT;
-            direction_up = GLFW_KEY_UP;
-            direction_down = GLFW_KEY_DOWN;
-            button_shoulder_left = GLFW_KEY_Z;
-            button_shoulder_right = GLFW_KEY_E;
-            button_a = GLFW_KEY_S;
-            button_b = GLFW_KEY_D;
-            button_c = GLFW_KEY_F;
-            button_x = GLFW_KEY_X;
-            button_y = GLFW_KEY_C;
-            button_z = GLFW_KEY_V;
-            button_start = GLFW_KEY_ENTER;
-        }
-        //case PeripheralLayout::current:
-
+        case PeripheralLayout::empty: return std::vector<PeripheralKey>();
+        case PeripheralLayout::current:
+            return std::vector<PeripheralKey> {
+                direction_left, direction_right, direction_up, direction_down,
+                button_shoulder_left, button_shoulder_right,
+                button_a, button_b, button_c,
+                button_x, button_y, button_z,
+                button_start
+            };
+        default:
+            return std::vector<PeripheralKey> {
+                PeripheralKey::key_left, PeripheralKey::key_right, PeripheralKey::key_up, PeripheralKey::key_down,
+                PeripheralKey::key_z, PeripheralKey::key_e,
+                PeripheralKey::key_s, PeripheralKey::key_d, PeripheralKey::key_f,
+                PeripheralKey::key_x, PeripheralKey::key_c, PeripheralKey::key_v,
+                PeripheralKey::key_enter
+            };
     }
-    
-    return std::vector<u16> {
-        direction_left,
-        direction_right,
-        direction_up,
-        direction_down,
-        button_shoulder_left,
-        button_shoulder_right,
-        button_a,
-        button_b,
-        button_c,
-        button_x,
-        button_y,
-        button_z,
-        button_start
-    };
+}
+void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
+    if (config.size() != 13) {
+        Log::error("smpc", tr("Incorrect Saturn pad data"));
+        throw std::runtime_error(tr("Incorrect Saturn pad data"));
+    }
+    direction_left        = config[0];
+    direction_right       = config[1];
+    direction_up          = config[2];
+    direction_down        = config[3];
+    button_shoulder_left  = config[4]; 
+    button_shoulder_right = config[5];
+    button_a              = config[6];
+    button_b              = config[7]; 
+    button_c              = config[8];
+    button_x              = config[9]; 
+    button_y              = config[10]; 
+    button_z              = config[11];
+    button_start          = config[12];
+
+    //auto key = glfwGetKeyName(direction_left, NULL);
 }
 
-void SaturnDigitalPad::mapDefaultLayout() {
-    direction_left        = GLFW_KEY_LEFT;
-    direction_right       = GLFW_KEY_RIGHT;
-    direction_up          = GLFW_KEY_UP;
-    direction_down        = GLFW_KEY_DOWN;
-    button_shoulder_left  = GLFW_KEY_Z;
-    button_shoulder_right = GLFW_KEY_E;
-    button_a              = GLFW_KEY_S;
-    button_b              = GLFW_KEY_D;
-    button_c              = GLFW_KEY_F;
-    button_x              = GLFW_KEY_X;
-    button_y              = GLFW_KEY_C;
-    button_z              = GLFW_KEY_V;
-    button_start          = GLFW_KEY_ENTER;
+std::vector<PeripheralKey> StvPlayerControls::toConfig(const PeripheralLayout layout) {
+    switch (layout) {
+        case PeripheralLayout::empty: return std::vector<PeripheralKey>();
+        case PeripheralLayout::current:
+            return std::vector<PeripheralKey> {
+                direction_left, direction_right, direction_up, direction_down,
+                button_1, button_2, button_3, button_4 
+            };
+        default:
+            return std::vector<PeripheralKey> {
+                PeripheralKey::key_left, PeripheralKey::key_right, PeripheralKey::key_up, PeripheralKey::key_down,
+                PeripheralKey::key_s, PeripheralKey::key_d, PeripheralKey::key_f, PeripheralKey::key_g
+            };
+    }
 }
 
-std::vector<u16> StvPlayerControls::toConfig() {
-    return std::vector<u16> {
-        direction_left,
-        direction_right,
-        direction_up,
-        direction_down,
-        button_1,
-        button_2,
-        button_3,
-        button_4
-    };
+void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
+    if (config.size() != 8) {
+        Log::error("smpc", tr("Incorrect ST-V player control data"));
+        throw std::runtime_error(tr("Incorrect ST-V player control data"));
+    }
+    direction_left  = config[0];
+    direction_right = config[1];
+    direction_up    = config[2];
+    direction_down  = config[3];
+    button_1        = config[4];
+    button_2        = config[5];
+    button_3        = config[6];
+    button_4        = config[7];
 }
 
-void StvPlayerControls::mapDefaultLayout() {
-    direction_left  = GLFW_KEY_LEFT;
-    direction_right = GLFW_KEY_RIGHT;
-    direction_up    = GLFW_KEY_UP;
-    direction_down  = GLFW_KEY_DOWN;
-    button_1        = GLFW_KEY_S;
-    button_2        = GLFW_KEY_D;
-    button_3        = GLFW_KEY_F;
-    button_4        = GLFW_KEY_G;
+std::vector<PeripheralKey> StvBoardControls::toConfig(const PeripheralLayout layout) {
+    switch (layout) {
+        case PeripheralLayout::empty:   return std::vector<PeripheralKey>();
+        case PeripheralLayout::current: return std::vector<PeripheralKey> { service_switch, test_switch, p1_coin_switch, p2_coin_switch };
+        default:                        
+            return std::vector<PeripheralKey> { PeripheralKey::key_1, PeripheralKey::key_2, PeripheralKey::key_5, PeripheralKey::key_6 };
+    }
 }
 
-
-std::vector<u16> StvBoardControls::toConfig() {
-    return std::vector<u16> {
-        service_switch,
-        test_switch,
-        p1_coin_switch,
-        p2_coin_switch
-    };
-}
-
-void StvBoardControls::mapDefaultLayout() {
-    service_switch = GLFW_KEY_1;
-    test_switch    = GLFW_KEY_2;
-    p1_coin_switch = GLFW_KEY_5;
-    p2_coin_switch = GLFW_KEY_6;
+void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
+    if (config.size() != 4) {
+        Log::error("smpc", tr("Incorrect ST-V board control data"));
+        throw std::runtime_error(tr("Incorrect ST-V board control data"));
+    }
+    service_switch = config[0];
+    test_switch    = config[1];
+    p1_coin_switch = config[2];
+    p2_coin_switch = config[3];
 }
 
 void Smpc::reset(){

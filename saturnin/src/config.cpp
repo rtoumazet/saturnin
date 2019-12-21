@@ -25,79 +25,60 @@
 #include "cdrom/cdrom.h"
 #include "locale.h"
 #include "log.h"
-#include "utilities.h" // toUnderlying
+
 
 namespace libcfg    = libconfig;
 namespace fs        = std::filesystem;
 namespace cdrom     = saturnin::cdrom;
-namespace util      = saturnin::utilities;
 
 namespace saturnin {
 namespace core {
 
 using core::Log;
 
-Config::Map_keys Config::single_keys = {
-    { Access_keys::config_global,        "global"},
-    { Access_keys::config_language,      "language"},
-    { Access_keys::config_hardware_mode, "hardware_mode" },
-    { Access_keys::config_rendering,     "rendering"},
-    { Access_keys::config_legacy_opengl, "legacy_opengl" },
-    { Access_keys::config_paths,         "paths" },
-    { Access_keys::config_roms_stv,      "roms_stv" },
-    { Access_keys::config_bios_stv,      "bios_stv" },
-    { Access_keys::config_bios_saturn,   "bios_saturn" },
-    { Access_keys::config_cdrom,         "cdrom" },
-    { Access_keys::config_drive,         "drive" },
-    { Access_keys::config_access_method, "access_method" },
-    { Access_keys::config_sound,         "sound" },
-    { Access_keys::config_soundcard,     "soundcard" },
-    { Access_keys::config_sound_disabled,"disabled" },
+Config::MapKeys Config::full_keys = {
+    { AccessKeys::cfg_global_language,         "global.language"},
+    { AccessKeys::cfg_global_hardware_mode,    "global.hardware_mode" },
+    { AccessKeys::cfg_rendering_legacy_opengl, "rendering.legacy_opengl" },
+    { AccessKeys::cfg_paths_roms_stv,          "paths.roms_stv" },
+    { AccessKeys::cfg_paths_bios_stv,          "paths.bios_stv" },
+    { AccessKeys::cfg_paths_bios_saturn,       "paths.bios_saturn" },
+    { AccessKeys::cfg_cdrom_drive,             "cdrom.drive" },
+    { AccessKeys::cfg_cdrom_access_method,     "cdrom.access_method" },
+    { AccessKeys::cfg_sound_soundcard,         "sound.soundcard" },
+    { AccessKeys::cfg_sound_disabled,          "sound.disabled" },
+    { AccessKeys::cfg_controls_saturn_player_1,"controls.saturn.player_1" },
+    { AccessKeys::cfg_controls_saturn_player_2,"controls.saturn.player_2" },
+    { AccessKeys::cfg_controls_stv_board,      "controls.stv.board" },
+    { AccessKeys::cfg_controls_stv_player_1,   "controls.stv.player_1" },
+    { AccessKeys::cfg_controls_stv_player_2,   "controls.stv.player_2" },
+    { AccessKeys::stv_game_name,               "game_name" },
+    { AccessKeys::stv_zip_name,                "zip_name" },
+    { AccessKeys::stv_parent_set,              "parent_set" },
+    { AccessKeys::stv_version,                 "version" },
+    { AccessKeys::stv_release_date,            "release_date" },
+    { AccessKeys::stv_region,                  "region" },
+    { AccessKeys::stv_files,                   "files" }
 };
 
-Config::Map_keys Config::full_keys = {
-    { Access_keys::config_global,        "global"},
-    { Access_keys::config_language,      "global.language"},
-    { Access_keys::config_hardware_mode, "global.hardware_mode" },
-    { Access_keys::config_rendering,     "rendering" },
-    { Access_keys::config_legacy_opengl, "rendering.legacy_opengl" },
-    { Access_keys::config_paths,         "paths" },
-    { Access_keys::config_roms_stv,      "paths.roms_stv" },
-    { Access_keys::config_bios_stv,      "paths.bios_stv" },
-    { Access_keys::config_bios_saturn,   "paths.bios_saturn" },
-    { Access_keys::config_cdrom,         "cdrom" },
-    { Access_keys::config_drive,         "cdrom.drive" },
-    { Access_keys::config_access_method, "cdrom.access_method" },
-    { Access_keys::config_sound,         "sound" },
-    { Access_keys::config_soundcard,     "sound.soundcard" },
-    { Access_keys::config_sound_disabled,"sound.disabled" },
-    { Access_keys::stv_game_name,        "game_name" },
-    { Access_keys::stv_zip_name,         "zip_name" },
-    { Access_keys::stv_parent_set,       "parent_set" },
-    { Access_keys::stv_version,          "version" },
-    { Access_keys::stv_release_date,     "release_date" },
-    { Access_keys::stv_region,           "region" },
-    { Access_keys::stv_files,            "files" }
+Config::MapRomLoad Config::RomLoad = {
+    {"NOT_INTERLEAVED", RomLoad::not_interleaved},
+    {"ODD_INTERLEAVED", RomLoad::odd_interleaved},
+    {"EVEN_INTERLEAVED", RomLoad::even_interleaved}
 };
 
-Config::Map_rom_load Config::rom_load = {
-    {"NOT_INTERLEAVED", Rom_load::not_interleaved},
-    {"ODD_INTERLEAVED", Rom_load::odd_interleaved},
-    {"EVEN_INTERLEAVED", Rom_load::even_interleaved}
+Config::MapRomType Config::RomType = {
+    {"PROGRAM", RomType::program},
+    {"GRAPHIC", RomType::graphic},
+    {"BIOS",    RomType::bios}
 };
 
-Config::Map_rom_type Config::rom_type = {
-    {"PROGRAM", Rom_type::program},
-    {"GRAPHIC", Rom_type::graphic},
-    {"BIOS",    Rom_type::bios}
-};
-
-Config::Map_cdrom_access Config::cdrom_access = {
+Config::MapCdromAccess Config::cdrom_access = {
     {"ASPI", cdrom::Cdrom_access_method::aspi},
     {"SPTI", cdrom::Cdrom_access_method::spti}
 };
 
-Config::Map_HardwareMode Config::hardware_mode= {
+Config::MapHardwareMode Config::hardware_mode= {
     {"SATURN", core::HardwareMode::saturn},
     {"STV", core::HardwareMode::stv}
 };
@@ -132,66 +113,32 @@ bool Config::initialize(const bool isModernOpenGlCapable) {
 
 void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
 
-
-    add("global.language", "en");
+    add(full_keys[AccessKeys::cfg_global_language], "en");
     
-    core::Config::Map_HardwareMode::const_iterator it_hm = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::saturn);
-    if (it_hm != core::Config::hardware_mode.end()) add("global.hardware_mode", it_hm->first.c_str());
+    core::Config::MapHardwareMode::const_iterator it_hm = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::saturn);
+    if (it_hm != core::Config::hardware_mode.end()) add(full_keys[AccessKeys::cfg_global_hardware_mode], it_hm->first.c_str());
     else Log::warning("config", core::tr("Unknown harware mode ..."));
   
-    add("rendering.legacy_opengl", !isModernOpenglCapable);
-    add("paths.roms_stv", "");
-    add("paths.bios_stv", "");
-    add("paths.bios_saturn", "");
-    add("cdrom.drive", "-1:-1:-1");
+    add(full_keys[AccessKeys::cfg_rendering_legacy_opengl], !isModernOpenglCapable);
+    add(full_keys[AccessKeys::cfg_paths_roms_stv], "");
+    add(full_keys[AccessKeys::cfg_paths_bios_stv], "");
+    add(full_keys[AccessKeys::cfg_paths_bios_saturn], "");
+    add(full_keys[AccessKeys::cfg_cdrom_drive], "-1:-1:-1");
 
-    core::Config::Map_cdrom_access::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::spti);
-    if (it != core::Config::cdrom_access.end()) add("cdrom.access_method", it->first.c_str());
+    core::Config::MapCdromAccess::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::spti);
+    if (it != core::Config::cdrom_access.end()) add(full_keys[AccessKeys::cfg_cdrom_access_method], it->first.c_str());
     else Log::warning("config", core::tr("Unknown drive access method ..."));
 
-    add("sound.disabled", false);
+    add(full_keys[AccessKeys::cfg_sound_disabled], false);
     
-    SaturnDigitalPad pad;
-    pad.mapDefaultLayout();
-    add("controls.saturn.player_1", pad.toConfig());
-    add("controls.saturn.player_2", std::vector<u16>());
+    add(full_keys[AccessKeys::cfg_controls_saturn_player_1], SaturnDigitalPad().toConfig(PeripheralLayout::default));
+    add(full_keys[AccessKeys::cfg_controls_saturn_player_2], SaturnDigitalPad().toConfig(PeripheralLayout::empty));
 
-    StvBoardControls controls;
-    controls.mapDefaultLayout();
-    add("controls.stv.board", controls.toConfig());
+    add(full_keys[AccessKeys::cfg_controls_stv_board], StvBoardControls().toConfig(PeripheralLayout::default));
     
-    StvPlayerControls stv_player;
-    stv_player.mapDefaultLayout();
-    add("controls.stv.player_1", stv_player.toConfig());
-    add("controls.stv.player_2", std::vector<u16>());
+    add(full_keys[AccessKeys::cfg_controls_stv_player_1], StvPlayerControls().toConfig(PeripheralLayout::default));
+    add(full_keys[AccessKeys::cfg_controls_stv_player_2], StvPlayerControls().toConfig(PeripheralLayout::empty));
 
-}
-
-std::vector<u16> Config::generateControllerMapping(const HardwareMode& hm) {
-    switch (hm) {
-        case HardwareMode::saturn:
-            SaturnDigitalPad pad;
-            pad.direction_left        = GLFW_KEY_LEFT;
-            pad.direction_right       = GLFW_KEY_RIGHT;
-            pad.direction_up          = GLFW_KEY_UP;
-            pad.direction_down        = GLFW_KEY_DOWN;
-            pad.button_shoulder_left  = GLFW_KEY_Z;
-            pad.button_shoulder_right = GLFW_KEY_E;
-            pad.button_a              = GLFW_KEY_S;
-            pad.button_b              = GLFW_KEY_D;
-            pad.button_c              = GLFW_KEY_F;
-            pad.button_x              = GLFW_KEY_X;
-            pad.button_y              = GLFW_KEY_C;
-            pad.button_z              = GLFW_KEY_V;
-            pad.button_start          = GLFW_KEY_ENTER;
-            return pad.toConfig();
-        case HardwareMode::stv:
-            StvBoardControls board;
-            StvPlayerControls player;
-            break;
-    }
-
-    return std::vector<u16>();
 }
 
 libcfg::Setting& Config::getGroup(libcfg::Setting& root, const std::string& group_name) {
@@ -221,7 +168,7 @@ void Config::test() {
     this->writeFile();
 }
 
-libcfg::Setting& Config::readValue(const Access_keys& value) {
+libcfg::Setting& Config::readValue(const AccessKeys& value) {
     try {
         return cfg_.lookup(Config::full_keys[value]);
     }

@@ -48,7 +48,7 @@ namespace gui {
     void showImguiDemoWindow(const bool show_demo_window);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void showCoreWindow(core::Emulator_context& context, const video::Opengl& opengl);
+    /// \fn void showCoreWindow(core::EmulatorContext& context, const video::Opengl& opengl);
     ///
     /// \brief  Displays the core window.
     ///
@@ -59,7 +59,7 @@ namespace gui {
     /// \param          opengl  The opengl object.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void showCoreWindow(core::Emulator_context& context, const video::Opengl& opengl);
+    void showCoreWindow(core::EmulatorContext& context, const video::Opengl& opengl);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void showRenderingWindow(const video::Opengl& opengl, const u32 width, const u32 height);
@@ -90,7 +90,7 @@ namespace gui {
     void showStvWindow(bool *opened);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void showOptionsWindow(core::Emulator_context& context, bool* opened);
+    /// \fn void showOptionsWindow(core::EmulatorContext& context, bool* opened);
     ///
     /// \brief  Displays the options window.
     ///
@@ -101,7 +101,7 @@ namespace gui {
     /// \param [in,out] opened  True to display the window.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void showOptionsWindow(core::Emulator_context& context, bool* opened);
+    void showOptionsWindow(core::EmulatorContext& context, bool* opened);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void showLogWindow(bool* opened);
@@ -117,7 +117,7 @@ namespace gui {
     void showLogWindow(bool* opened);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void buildGui(const core::Emulator_context& context, const video::Opengl& opengl, const u32 width, const u32 height);
+    /// \fn void buildGui(const core::EmulatorContext& context, const video::Opengl& opengl, const u32 width, const u32 height);
     ///
     /// \brief  Builds a graphical user interface.
     ///
@@ -130,7 +130,7 @@ namespace gui {
     /// \param  height  Height of the rendering window.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void buildGui(core::Emulator_context& context, video::Opengl& opengl, const u32 width, const u32 height);
+    void buildGui(core::EmulatorContext& context, video::Opengl& opengl, const u32 width, const u32 height);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t height);

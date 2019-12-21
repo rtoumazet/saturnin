@@ -48,7 +48,7 @@ namespace saturnin {
 namespace core {
 
 // Forward declarations
-class Emulator_context;
+class EmulatorContext;
 class Config;
 class Scu;
 class Smpc;
@@ -83,24 +83,24 @@ static       u32 stv_protection_offset{};
 static const u32 memory_handler_size{ 0x10000 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum	Rom_type
+/// \enum	RomType
 ///
 /// \brief	ROM type. 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Rom_type {
+enum class RomType {
     program, ///< Program ROM.
     graphic, ///< Graphic ROM.
     bios	 ///< Bios.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum	Rom_load
+/// \enum	RomLoad
 ///
 /// \brief	Way ROM data is loaded. 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Rom_load {
+enum class RomLoad {
     not_interleaved, ///< Data loaded sequentially. 
     odd_interleaved, ///< Data loaded on odd bytes. 
     even_interleaved ///< Data loaded on even bytes.
@@ -121,7 +121,7 @@ public:
     //@{
     // Constructors / Destructors
     Memory()                           = delete;
-    Memory(Emulator_context* ec) : emulator_context_(ec) {
+    Memory(EmulatorContext* ec) : emulator_context_(ec) {
         initialize();
     };
     Memory(const Memory&)              = delete;
@@ -190,9 +190,9 @@ public:
     ///                             const std::string& file_name, 
     ///                             u8* destination, 
     ///                             const u32 size, 
-    ///                             const Rom_load rom_load, 
+    ///                             const RomLoad RomLoad, 
     ///                             const u8 times_mirrored, 
-    ///                             const Rom_type rom_type);
+    ///                             const RomType RomType);
     ///
     /// \brief  Loads a ST-V rom from a zip file in memory (cart area).
     ///
@@ -203,9 +203,9 @@ public:
     /// \param          file_name       Filename inside the zip to load.
     /// \param [in,out] destination     If non-null, destination of the file content.
     /// \param          size            Size of data to load.
-    /// \param          rom_load        Type of loading used (non interleaved, odd interleaved or even interleaved).
+    /// \param          RomLoad        Type of loading used (non interleaved, odd interleaved or even interleaved).
     /// \param          times_mirrored  Number of times the data has to be mirrored after the initial loading.
-    /// \param          rom_type        Rom type (bios, program or graphic).
+    /// \param          RomType        Rom type (bios, program or graphic).
     ///
     /// \return True if it succeeds.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,9 +214,9 @@ public:
                     const std::string&  file_name,
                     u8*	                destination,
                     const u32           size,
-                    const Rom_load      rom_load,
+                    const RomLoad      RomLoad,
                     const u8            times_mirrored,
-                    const Rom_type      rom_type);
+                    const RomType      RomType);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn bool Memory::loadStvGame(const std::string& file_name);
@@ -418,7 +418,7 @@ private:
         (initializeHandler<T>(begin, end, OpType<T>{}), ...);
     }
 
-    Emulator_context* emulator_context_; ///< Emulator context object.
+    EmulatorContext* emulator_context_; ///< Emulator context object.
 
     /// \Memory handlers
     //@{
@@ -438,7 +438,7 @@ private:
 /// \fn void mirrorData( u8* data, 
 ///                             const u32 size, 
 ///                             const u8 times_mirrored, 
-///                             const Rom_load rom_load);
+///                             const RomLoad RomLoad);
 ///
 /// \brief  Mirrors data in memory. Data between 0 and size-1 will mirrored times_mirrored times
 ///
@@ -448,10 +448,10 @@ private:
 /// \param [in,out] data            If non-null, the array containing the data to be mirrored.
 /// \param          size            Size of the data to mirror.
 /// \param          times_mirrored  Number of times the data has to be mirrored.
-/// \param          rom_load        Type of loading used (non interleaved, odd interleaved or even interleaved).
+/// \param          RomLoad        Type of loading used (non interleaved, odd interleaved or even interleaved).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const Rom_load rom_load);
+void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad RomLoad);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn std::vector<std::filesystem::path> listStvConfigurationFiles();

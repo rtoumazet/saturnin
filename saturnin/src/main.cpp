@@ -23,13 +23,13 @@
 namespace core  = saturnin::core;
 
 using core::Log;
-using core::Emulator_context;
+using core::EmulatorContext;
 using core::tr;
 
 int main(int argc, char *argv[]) {
     
     try {
-        Emulator_context state;
+        EmulatorContext state;
         if (!state.initialize()) {
             Log::error("main", tr("Could not initialize the program ..."));
             throw std::runtime_error("Main error !");

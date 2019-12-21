@@ -45,7 +45,7 @@ namespace core {
 
 // Forward declarations
 class Memory;
-class Emulator_context;
+class EmulatorContext;
 using saturnin::sh2::Sh2;
 using saturnin::sh2::Sh2Type;
 
@@ -147,7 +147,7 @@ public:
     //@{
     // Constructors / Destructors
     Scu()                        = delete;
-    Scu(Emulator_context*);
+    Scu(EmulatorContext*);
     Scu(const Scu&)              = delete;
     Scu(Scu&&)                   = delete;
     Scu& operator=(const Scu&) & = delete;
@@ -296,7 +296,7 @@ public:
 
 	/// \name Context objects accessors
 	//@{
-    Emulator_context* emulatorContext() const;
+    EmulatorContext* emulatorContext() const;
     Memory*           memory() const;
 	//@}
 
@@ -503,7 +503,7 @@ private:
     
     void activateDma();
 
-    Emulator_context* emulator_context_; ///< Pointer to the emulator context object.
+    EmulatorContext* emulator_context_; ///< Pointer to the emulator context object.
 
     //{@
     // Scu memory registers

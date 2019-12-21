@@ -37,7 +37,7 @@ using core::Log;
     
 Opengl::Opengl(core::Config* config) {
     config_ = config;
-    bool is_legacy = config->readValue(core::Access_keys::config_legacy_opengl);
+    bool is_legacy = config->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
     //if (is_legacy)  calculateRendering = std::bind(&Opengl::calculateLegacyRendering, this);
     //else            calculateRendering = std::bind(&Opengl::calculateModernRendering, this);
     
@@ -186,7 +186,7 @@ bool isModernOpenglCapable()
 }
 
 void windowCloseCallback(GLFWwindow* window) {
-    core::Emulator_context *state = reinterpret_cast<core::Emulator_context*>(glfwGetWindowUserPointer(window));
+    core::EmulatorContext *state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
     state->renderingStatus( core::RenderingStatus::stopped );
 }
 

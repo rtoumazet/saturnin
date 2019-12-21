@@ -25,8 +25,6 @@
 #pragma once
 
 #pragma warning(disable:4275) // libconfig specific warning disable
-//#define LIBCONFIG_STATIC
-//#include <Shlwapi.h>
 #include <libconfig.h++>
 #include <iostream>
 #include <map>
@@ -34,32 +32,39 @@
 #include <string> // string
 #include <vector> // vector
 #include "log.h"
-#include "memory.h" // Rom_load, Rom_type
+#include "memory.h" // RomLoad, RomType
+#include "utilities.h" // toUnderlying
 #include "cdrom/cdrom.h" // Cdrom_access_method
 
 namespace cdrom = saturnin::cdrom;
 namespace libcfg = libconfig;
+namespace util = saturnin::utilities;
 
 namespace saturnin {
 namespace core {
 
-    enum class Access_keys {
-        config_global,
-        config_language,
-        config_hardware_mode,
-        config_rendering,
-        config_legacy_opengl,
-        config_paths,
-        config_roms_stv,
-        config_bios_stv,
-        config_bios_saturn,
-        config_cdrom,
-        config_drive,
-        config_access_method,
-        config_sound,
-        config_soundcard,
-        config_sound_disabled,
-        config_controls,
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   AccessKeys
+    ///
+    /// \brief  Keys used for accessing configuration data.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class AccessKeys {
+        cfg_global_language,
+        cfg_global_hardware_mode,
+        cfg_rendering_legacy_opengl,
+        cfg_paths_roms_stv,
+        cfg_paths_bios_stv,
+        cfg_paths_bios_saturn,
+        cfg_cdrom_drive,
+        cfg_cdrom_access_method,
+        cfg_sound_soundcard,
+        cfg_sound_disabled,
+        cfg_controls_saturn_player_1,
+        cfg_controls_saturn_player_2,
+        cfg_controls_stv_board,
+        cfg_controls_stv_player_1,
+        cfg_controls_stv_player_2,
         stv_game_name,
         stv_zip_name,
         stv_parent_set,
@@ -69,8 +74,8 @@ namespace core {
         stv_files
     };
 
-    enum class Rom_load;
-    enum class Rom_type;
+    enum class RomLoad;
+    enum class RomType;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \class  Config
@@ -85,54 +90,53 @@ namespace core {
     public:
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<Access_keys, const char *> Map_keys
+        /// \typedef    std::map<AccessKeys, const char *> MapKeys
         ///
         /// \brief  Defines an alias representing the link between enumerators and keys.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<Access_keys, const char *>Map_keys;
-        static Map_keys single_keys; ///< Contains the keys alone (without their path).
-        static Map_keys full_keys;  ///< Contains the keys with their full path.
+        typedef std::map<AccessKeys, const char *>MapKeys;
+        static MapKeys full_keys;  ///< Contains the keys with their full path.
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<const std::string, const uint8_t>Map_rom_load
+        /// \typedef    std::map<const std::string, const uint8_t>MapRomLoad
         ///
         /// \brief  Defines an alias representing the correspondance between the rom load string value
         ///         defined in the config file and the rom load type.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<const std::string, const Rom_load>Map_rom_load;
-        static Map_rom_load rom_load;
+        typedef std::map<const std::string, const RomLoad>MapRomLoad;
+        static MapRomLoad RomLoad;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<const std::string, const Rom_type>Map_rom_type
+        /// \typedef    std::map<const std::string, const RomType>MapRomType
         ///
         /// \brief  Defines an alias representing the correspondance between the rom type string value
         ///         defined in the config file and the rom type type.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<const std::string, const Rom_type>Map_rom_type;
-        static Map_rom_type rom_type;
+        typedef std::map<const std::string, const RomType>MapRomType;
+        static MapRomType RomType;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<const std::string, const cdrom::Cdrom_access_method>Map_cdrom_access
+        /// \typedef    std::map<const std::string, const cdrom::Cdrom_access_method>MapCdromAccess
         ///
         /// \brief  Defines an alias representing the correspondance between the cdrom access method string 
         ///         value defined in the config file and the cdrom access method type.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<const std::string, const cdrom::Cdrom_access_method>Map_cdrom_access;
-        static Map_cdrom_access cdrom_access;
+        typedef std::map<const std::string, const cdrom::Cdrom_access_method>MapCdromAccess;
+        static MapCdromAccess cdrom_access;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<const std::string, const core::HardwareMode>Map_HardwareMode
+        /// \typedef    std::map<const std::string, const core::HardwareMode>MapHardwareMode
         ///
         /// \brief  Defines an alias representing the correspondance between the hardware mode string 
         ///         value defined in the config file and the hardware mode type.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<const std::string, const core::HardwareMode>Map_HardwareMode;
-        static Map_HardwareMode hardware_mode;
+        typedef std::map<const std::string, const core::HardwareMode>MapHardwareMode;
+        static MapHardwareMode hardware_mode;
 
         //@{
         // Constructors / Destructors
@@ -261,12 +265,20 @@ namespace core {
         /// \param          value   Value to write.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void writeValue(libconfig::Setting& root, const std::string& key, const std::string& value)
-        {
+        void writeValue(libconfig::Setting& root, const std::string& key, const std::string& value) {
             if (!root.exists(key.c_str())) root.add(key.c_str(), libconfig::Setting::TypeString) = value.c_str();
             else {
                 libconfig::Setting& s = root[key.c_str()];
                 s = value.c_str();
+            }
+        }
+
+        template<>
+        void writeValue<const PeripheralKey&>(libconfig::Setting& root, const std::string& key, const PeripheralKey& value) {
+            if (!root.exists(key.c_str())) root.add(key.c_str(), libconfig::Setting::TypeInt) = util::toUnderlying(value);
+            else {
+                libconfig::Setting& s = root[key.c_str()];
+                s = util::toUnderlying(value);
             }
         }
 
@@ -292,6 +304,8 @@ namespace core {
                 s = value;
             }
         }
+
+
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn void Config::writeValue(const std::string& key, const T& value)
@@ -306,7 +320,7 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         template<class T>
-        void writeValue(const Access_keys& key, const T& value) {
+        void writeValue(const AccessKeys& key, const T& value) {
             try {
                 libconfig::Setting &setting = cfg_.lookup(Config::full_keys[key]);
                 setting = value;
@@ -326,7 +340,7 @@ namespace core {
         }
 
        ////////////////////////////////////////////////////////////////////////////////////////////////////
-       /// \fn  libconfig::Setting& Config::readValue(const Access_keys& value);
+       /// \fn  libconfig::Setting& Config::readValue(const AccessKeys& value);
        ///
        /// \brief   Reads a value from the specified root setting.
        ///
@@ -338,7 +352,7 @@ namespace core {
        /// \return  Read value.
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-       libconfig::Setting& readValue(const Access_keys& value);
+       libconfig::Setting& readValue(const AccessKeys& value);
 
        ////////////////////////////////////////////////////////////////////////////////////////////////////
        /// \fn  std::vector<std::string> Config::listAvailableLanguages();
@@ -424,21 +438,6 @@ namespace core {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         void generateConfigurationTree(const bool isModernOpenglCapable);
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn std::vector Config::generateControllerMapping(const HardwareMode& hm);
-        ///
-        /// \brief  Generates the controller mapping for the specified hardware mode.
-        ///
-        /// \author Runik
-        /// \date   19/12/2019
-        ///
-        /// \param  hm  The hardware mode.
-        ///
-        /// \return The controller mapping.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        std::vector<u16> generateControllerMapping(const HardwareMode& hm);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn std::string Config::addGroup(libcfg::Setting& root, const std::string& group_name);
