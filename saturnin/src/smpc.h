@@ -27,7 +27,6 @@
 
 #include <Windows.h> // Removes C4005 warning
 #include <GLFW/glfw3.h> // Keyboard handling
-#include <map> // map
 #include <vector> // vector
 #include "smpc_registers.h"
 
@@ -209,17 +208,17 @@ enum class PeripheralKey : u16 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //using MapKeyboardLayout = std::map<PeripheralKey, const std::string&>;
-typedef std::map<PeripheralKey, const std::string&> MapKeyboardLayout;
-static MapKeyboardLayout keyboard_layout = {  ///< Contains the keys with their full path.
-    { PeripheralKey::key_space, " "},
-    { PeripheralKey::key_apostrophe, "'"},
-    { PeripheralKey::key_comma, ","},
-    { PeripheralKey::key_minus, "-",
-    { PeripheralKey::key_period, "."},
-    { PeripheralKey::key_slash, "/"},
-    { PeripheralKey::key_0, "0" },
-    { PeripheralKey::key_1, "1" }
-};
+//static MapKeyboardLayout keyboard_layout;
+//= {  ///< Contains the keys with their full path.
+//    { PeripheralKey::key_space, " "},
+//    { PeripheralKey::key_apostrophe, "'"},
+//    { PeripheralKey::key_comma, ","},
+//    { PeripheralKey::key_minus, "-",
+//    { PeripheralKey::key_period, "."},
+//    { PeripheralKey::key_slash, "/"},
+//    { PeripheralKey::key_0, "0" },
+//    { PeripheralKey::key_1, "1" }
+//};
 //key_2 = GLFW_KEY_2,
     //key_3 = GLFW_KEY_3,
     //key_4 = GLFW_KEY_4,

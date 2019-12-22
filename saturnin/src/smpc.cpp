@@ -17,12 +17,24 @@
 // limitations under the License.
 // 
 
+#include <map> // map
+#include <string> // string
 #include "smpc.h"
 #include "emulator_context.h"
 
 namespace saturnin {
 namespace core {
 
+using MapKeyboardLayout = std::map<PeripheralKey, const char *>;
+MapKeyboardLayout keyboard_layout = { { PeripheralKey::key_space, " "}, { PeripheralKey::key_apostrophe, "'"} };
+//    { PeripheralKey::key_comma, ","},
+//    { PeripheralKey::key_minus, "-",
+//    { PeripheralKey::key_period, "."},
+//    { PeripheralKey::key_slash, "/"},
+//    { PeripheralKey::key_0, "0" },
+//    { PeripheralKey::key_1, "1" }
+//};
+    
 std::vector<PeripheralKey> SaturnDigitalPad::toConfig(const PeripheralLayout layout) {
     switch (layout) {
         case PeripheralLayout::empty: return std::vector<PeripheralKey>();
