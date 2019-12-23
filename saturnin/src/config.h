@@ -90,12 +90,12 @@ namespace core {
     public:
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<AccessKeys, const char *> MapKeys
+        /// \typedef    std::map<AccessKeys, const std::string> MapKeys
         ///
         /// \brief  Defines an alias representing the link between enumerators and keys.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<AccessKeys, const char *>MapKeys;
+        using MapKeys = std::map<AccessKeys, const std::string>;
         static MapKeys full_keys;  ///< Contains the keys with their full path.
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,8 +105,8 @@ namespace core {
         ///         defined in the config file and the rom load type.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<const std::string, const RomLoad>MapRomLoad;
-        static MapRomLoad RomLoad;
+        using MapRomLoad = std::map<const std::string, const RomLoad>;
+        static MapRomLoad rom_load;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \typedef    std::map<const std::string, const RomType>MapRomType
@@ -115,8 +115,8 @@ namespace core {
         ///         defined in the config file and the rom type type.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<const std::string, const RomType>MapRomType;
-        static MapRomType RomType;
+        using MapRomType = std::map<const std::string, const RomType>;
+        static MapRomType rom_type;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \typedef    std::map<const std::string, const cdrom::Cdrom_access_method>MapCdromAccess
@@ -125,7 +125,7 @@ namespace core {
         ///         value defined in the config file and the cdrom access method type.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<const std::string, const cdrom::Cdrom_access_method>MapCdromAccess;
+        using MapCdromAccess = std::map<const std::string, const cdrom::Cdrom_access_method>;
         static MapCdromAccess cdrom_access;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +135,7 @@ namespace core {
         ///         value defined in the config file and the hardware mode type.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        typedef std::map<const std::string, const core::HardwareMode>MapHardwareMode;
+        using MapHardwareMode = std::map<const std::string, const core::HardwareMode>;
         static MapHardwareMode hardware_mode;
 
         //@{

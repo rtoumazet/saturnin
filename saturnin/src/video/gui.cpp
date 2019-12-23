@@ -152,8 +152,8 @@ namespace gui {
             ImGui::Text(tr("Hardware mode").c_str());
             ImGui::SameLine(150);
             
-            std::string HardwareMode = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
-            static int mode = util::toUnderlying(core::Config::hardware_mode[HardwareMode]);
+            std::string hm = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
+            static int mode = util::toUnderlying(core::Config::hardware_mode[hm]);
 
             if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::HardwareMode::saturn))) {
                 core::Config::MapHardwareMode::const_iterator it = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::saturn);

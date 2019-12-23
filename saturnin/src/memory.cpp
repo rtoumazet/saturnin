@@ -180,16 +180,16 @@ bool Memory::loadStvGame(const std::string& config_filename) {
         const std::string rom_name = files[i][0];
         const u32    load_address = files[i][1];
         const u32    load_size = files[i][2];
-        const auto        RomLoad = Config::RomLoad[files[i][3]];
+        const auto   rom_load = Config::rom_load[files[i][3]];
         const u32    times_mirrored = files[i][4];
-        const auto        RomType = Config::RomType[files[i][5]];
+        const auto   rom_type = Config::rom_type[files[i][5]];
         if (!this->loadRom(zip_name,
                            rom_name,
                            &this->cart_[load_address],
                            load_size,
-                           RomLoad,
+                           rom_load,
                            times_mirrored,
-                           RomType)) {
+                           rom_type)) {
             return false;
         }
     }

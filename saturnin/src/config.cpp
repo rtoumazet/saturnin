@@ -36,6 +36,31 @@ namespace core {
 
 using core::Log;
 
+//Config::MapKeys Config::full_keys = {
+//    { AccessKeys::cfg_global_language,         "global.language"},
+//    { AccessKeys::cfg_global_hardware_mode,    "global.hardware_mode" },
+//    { AccessKeys::cfg_rendering_legacy_opengl, "rendering.legacy_opengl" },
+//    { AccessKeys::cfg_paths_roms_stv,          "paths.roms_stv" },
+//    { AccessKeys::cfg_paths_bios_stv,          "paths.bios_stv" },
+//    { AccessKeys::cfg_paths_bios_saturn,       "paths.bios_saturn" },
+//    { AccessKeys::cfg_cdrom_drive,             "cdrom.drive" },
+//    { AccessKeys::cfg_cdrom_access_method,     "cdrom.access_method" },
+//    { AccessKeys::cfg_sound_soundcard,         "sound.soundcard" },
+//    { AccessKeys::cfg_sound_disabled,          "sound.disabled" },
+//    { AccessKeys::cfg_controls_saturn_player_1,"controls.saturn.player_1" },
+//    { AccessKeys::cfg_controls_saturn_player_2,"controls.saturn.player_2" },
+//    { AccessKeys::cfg_controls_stv_board,      "controls.stv.board" },
+//    { AccessKeys::cfg_controls_stv_player_1,   "controls.stv.player_1" },
+//    { AccessKeys::cfg_controls_stv_player_2,   "controls.stv.player_2" },
+//    { AccessKeys::stv_game_name,               "game_name" },
+//    { AccessKeys::stv_zip_name,                "zip_name" },
+//    { AccessKeys::stv_parent_set,              "parent_set" },
+//    { AccessKeys::stv_version,                 "version" },
+//    { AccessKeys::stv_release_date,            "release_date" },
+//    { AccessKeys::stv_region,                  "region" },
+//    { AccessKeys::stv_files,                   "files" }
+//};
+
 Config::MapKeys Config::full_keys = {
     { AccessKeys::cfg_global_language,         "global.language"},
     { AccessKeys::cfg_global_hardware_mode,    "global.hardware_mode" },
@@ -61,13 +86,13 @@ Config::MapKeys Config::full_keys = {
     { AccessKeys::stv_files,                   "files" }
 };
 
-Config::MapRomLoad Config::RomLoad = {
+Config::MapRomLoad Config::rom_load = {
     {"NOT_INTERLEAVED", RomLoad::not_interleaved},
     {"ODD_INTERLEAVED", RomLoad::odd_interleaved},
     {"EVEN_INTERLEAVED", RomLoad::even_interleaved}
 };
 
-Config::MapRomType Config::RomType = {
+Config::MapRomType Config::rom_type = {
     {"PROGRAM", RomType::program},
     {"GRAPHIC", RomType::graphic},
     {"BIOS",    RomType::bios}
