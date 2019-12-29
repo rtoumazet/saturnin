@@ -251,8 +251,8 @@ namespace gui {
 
             std::string access_method = state.config()->readValue(core::AccessKeys::cfg_cdrom_access_method);
             static int method = util::toUnderlying(core::Config::cdrom_access[access_method]);
-            if (ImGui::RadioButton("SPTI", &method, util::toUnderlying(cdrom::Cdrom_access_method::spti))) {
-                core::Config::MapCdromAccess::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::spti);
+            if (ImGui::RadioButton("SPTI", &method, util::toUnderlying(cdrom::CdromAccessMethod::spti))) {
+                core::Config::MapCdromAccess::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::CdromAccessMethod::spti);
                 if (it != core::Config::cdrom_access.end()) {
                     state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, it->first);
                 }
@@ -261,8 +261,8 @@ namespace gui {
                 }
             }
             ImGui::SameLine();
-            if (ImGui::RadioButton("ASPI", &method, util::toUnderlying(cdrom::Cdrom_access_method::aspi))) {
-                core::Config::MapCdromAccess::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::Cdrom_access_method::aspi);
+            if (ImGui::RadioButton("ASPI", &method, util::toUnderlying(cdrom::CdromAccessMethod::aspi))) {
+                core::Config::MapCdromAccess::const_iterator it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::CdromAccessMethod::aspi);
                 if (it != core::Config::cdrom_access.end()) {
                     state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, it->first);
                 }
@@ -307,6 +307,15 @@ namespace gui {
 
             static SaturnDigitalPad pad;
             pad.fromConfig(pad_values);
+            
+            static auto keys{ state.smpc()->listAvailableKeys() };
+            int index = 0;
+            if (ImGui::Combo("##keys", &index, keys)) {
+                //state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
+            }
+            
+            //std::string left {pad.direction_left}
+
             
             ImGui::Text(tr("Left").c_str());
             ImGui::SameLine(150);

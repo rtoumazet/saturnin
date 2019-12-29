@@ -2,7 +2,7 @@
 // cdrom.h
 // Saturnin
 //
-// Copyright (c) 2003-2018 Renaud Toumazet
+// Copyright (c) 2003 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -241,7 +241,7 @@ struct DirFileInfos
 /// \brief	Values that represent CdromAccessMethod. 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Cdrom_access_method {
+enum class CdromAccessMethod {
     aspi = 0,	///< Aspi mode access. 
     spti = 1	///< SPTI mode access. 
 };
@@ -258,7 +258,7 @@ enum class Cdrom_access_method {
 class Cdrom
 {
     public:
-    static Cdrom_access_method      access_method; ///< Current CD-ROM access method.
+    static CdromAccessMethod      access_method; ///< Current CD-ROM access method.
 
     /// \name SCSI variables
     //@{

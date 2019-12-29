@@ -2,7 +2,7 @@
 // smpc.h
 // Saturnin
 //
-// Copyright (c) 2018-2019 Renaud Toumazet
+// Copyright (c) 2019 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -447,6 +447,8 @@ public:
     
     u8 read(const u32 addr);
     void write(const u32 addr, const u8 data);
+
+    std::vector<std::string> listAvailableKeys();
 
 private:
 

@@ -2,7 +2,7 @@
 // cdrom.cpp
 // Saturnin
 //
-// Copyright (c) 2003-2018 Renaud Toumazet
+// Copyright (c) 2003 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ namespace saturnin {
 namespace cdrom {
 
 // Static variables initialization
-Cdrom_access_method	Cdrom::access_method = Cdrom_access_method::spti;
+CdromAccessMethod	Cdrom::access_method = CdromAccessMethod::spti;
 
 //ScsiDriveInfo	    Cdrom::di_list[scsi_max_drives];
 std::vector<ScsiDriveInfo>  Cdrom::di_list;

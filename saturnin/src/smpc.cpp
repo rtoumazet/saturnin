@@ -2,7 +2,7 @@
 // smpc.cpp
 // Saturnin
 //
-// Copyright (c) 2018-2019 Renaud Toumazet
+// Copyright (c) 2019 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 namespace saturnin {
 namespace core {
 
-using MapKeyboardLayout = std::map<PeripheralKey, const std::string&>;
+using MapKeyboardLayout = std::map<PeripheralKey, const std::string>;
 MapKeyboardLayout keyboard_layout = { 
     { PeripheralKey::key_space, " "}, 
     { PeripheralKey::key_apostrophe, "'"},
@@ -76,7 +76,7 @@ MapKeyboardLayout keyboard_layout = {
     { PeripheralKey::key_right_bracket, "]"},
     { PeripheralKey::key_grave_accent, "`"},
 
-    ///* Function keys */
+    /* Function keys */
     { PeripheralKey::key_escape, "esc"},
     { PeripheralKey::key_enter, "enter"},
     { PeripheralKey::key_tab, "tab"},
@@ -307,6 +307,15 @@ u8 Smpc::read(const u32 addr) {
 
 void Smpc::write(const u32 addr, const u8 data) {
 
+}
+
+std::vector<std::string> Smpc::listAvailableKeys() {
+    std::vector<std::string> v {};
+    for (std::pair<PeripheralKey, const std::string&> key : keyboard_layout) {
+        v.push_back(key.second);
+        //std::cout << element.first << " :: " << element.second << std::endl;
+    }
+    return v;
 }
 
 }

@@ -2,7 +2,7 @@
 // spti.h
 // Saturnin
 //
-// Copyright (c) 2003-2016 Renaud Toumazet
+// Copyright (c) 2003 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

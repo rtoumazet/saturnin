@@ -63,6 +63,8 @@ bool EmulatorContext::initialize() {
     std::string country = this->config()->readValue(core::AccessKeys::cfg_global_language);
     if (!core::Locale::initialize(country)) return false;
 
+    
+
     cdrom::Scsi::settingUpSptiFunctions();
     if (!cdrom::Scsi::initialize()) return false;
 

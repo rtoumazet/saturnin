@@ -26,15 +26,17 @@
 
 #pragma warning(disable:4275) // libconfig specific warning disable
 #include <libconfig.h++>
+#include <any>
 #include <iostream>
 #include <map>
+#include <optional>
 #include <sstream>
 #include <string> // string
 #include <vector> // vector
 #include "log.h"
 #include "memory.h" // RomLoad, RomType
 #include "utilities.h" // toUnderlying
-#include "cdrom/cdrom.h" // Cdrom_access_method
+#include "cdrom/cdrom.h" // CdromAccessMethod
 
 namespace cdrom = saturnin::cdrom;
 namespace libcfg = libconfig;
@@ -89,54 +91,23 @@ namespace core {
     class Config {
     public:
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<AccessKeys, const std::string> MapKeys
-        ///
-        /// \brief  Defines an alias representing the link between enumerators and keys.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        using MapKeys = std::map<const AccessKeys, const std::string>;  ///< MapKeys alias definition.
+        static MapKeys full_keys;  ///< Link between access keys enumerators and string keys.
 
-        using MapKeys = std::map<AccessKeys, const std::string>;
-        static MapKeys full_keys;  ///< Contains the keys with their full path.
+        using MapKeysDefault = std::map<const AccessKeys, const std::any>;  ///< MapKeysDefault alias definition.
+        static MapKeysDefault default_keys; ///< Link between access keys enumerators and default values.
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<const std::string, const uint8_t>MapRomLoad
-        ///
-        /// \brief  Defines an alias representing the correspondance between the rom load string value
-        ///         defined in the config file and the rom load type.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        using MapRomLoad = std::map<const std::string, const RomLoad>;  ///< MapRomLoad alias definition.
+        static MapRomLoad rom_load; ///< Link between the rom load string value defined in the config file and the RomLoad type.
 
-        using MapRomLoad = std::map<const std::string, const RomLoad>;
-        static MapRomLoad rom_load;
+        using MapRomType = std::map<const std::string, const RomType>;  ///< MapRomType alias definition.
+        static MapRomType rom_type; ///< Link between the rom type string value defined in the config file and the RomType type.
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<const std::string, const RomType>MapRomType
-        ///
-        /// \brief  Defines an alias representing the correspondance between the rom type string value
-        ///         defined in the config file and the rom type type.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        using MapCdromAccess = std::map<const std::string, const cdrom::CdromAccessMethod>;   ///< MapCdromAccess alias definition.
+        static MapCdromAccess cdrom_access;///< Link between the cdrom access method string value defined in the config file and the CdromAccessMethod type.
 
-        using MapRomType = std::map<const std::string, const RomType>;
-        static MapRomType rom_type;
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<const std::string, const cdrom::Cdrom_access_method>MapCdromAccess
-        ///
-        /// \brief  Defines an alias representing the correspondance between the cdrom access method string 
-        ///         value defined in the config file and the cdrom access method type.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        using MapCdromAccess = std::map<const std::string, const cdrom::Cdrom_access_method>;
-        static MapCdromAccess cdrom_access;
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \typedef    std::map<const std::string, const core::HardwareMode>MapHardwareMode
-        ///
-        /// \brief  Defines an alias representing the correspondance between the hardware mode string 
-        ///         value defined in the config file and the hardware mode type.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        using MapHardwareMode = std::map<const std::string, const core::HardwareMode>;
-        static MapHardwareMode hardware_mode;
+        using MapHardwareMode = std::map<const std::string, const core::HardwareMode>;  ///< MapHardwareMode alias definition.
+        static MapHardwareMode hardware_mode;   ///< Link between the hardware mode string value defined in the config file and the HardwareMode type.
 
         //@{
         // Constructors / Destructors
@@ -221,31 +192,23 @@ namespace core {
 
         template <class T> struct ToMySetting;
         template <> struct ToMySetting<bool>               { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
-        template <> struct ToMySetting<const bool&>        { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeBoolean; };
         template <> struct ToMySetting<uint16_t>           { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
-        template <> struct ToMySetting<const uint16_t&>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
         template <> struct ToMySetting<uint32_t>           { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
-        template <> struct ToMySetting<const uint32_t&>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
         template <> struct ToMySetting<int32_t>            { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
-        template <> struct ToMySetting<const int32_t&>     { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt; };
         template <> struct ToMySetting<uint64_t>           { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
-        template <> struct ToMySetting<const uint64_t&>    { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
         template <> struct ToMySetting<int64_t>            { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
-        template <> struct ToMySetting<const int64_t&>     { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeInt64; };
         template <> struct ToMySetting<float>              { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeFloat; };
-        template <> struct ToMySetting<const float&>       { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeFloat; };
         template <> struct ToMySetting<const char*>        { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
-        template <> struct ToMySetting<const char&>        { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
-        template <> struct ToMySetting<const std::string&> { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
+        template <> struct ToMySetting<std::string> { static constexpr libconfig::Setting::Type index = libconfig::Setting::TypeString; };
 
         template<class T>
         void writeValue(libconfig::Setting& root, const std::string& key, const T& value) {
             if (key.empty()) {
-                root.add(ToMySetting<T>::index) = value; 
+                root.add(ToMySetting<std::decay_t<T>>::index) = value; 
                 return;
             }
                     
-            if (!root.exists(key.c_str())) root.add(key.c_str(), ToMySetting<T>::index) = value;
+            if (!root.exists(key.c_str())) root.add(key.c_str(), ToMySetting<std::decay_t<T>>::index) = value;
             else {
                 libconfig::Setting& s = root[key.c_str()];
                 s = value;
@@ -304,8 +267,6 @@ namespace core {
                 s = value;
             }
         }
-
-
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn void Config::writeValue(const std::string& key, const T& value)
@@ -353,6 +314,21 @@ namespace core {
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
        libconfig::Setting& readValue(const AccessKeys& value);
+
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+       /// \fn  bool Config::existsValue(const AccessKeys& key);
+       ///
+       /// \brief   Checks if the key exists in the configuration file.
+       ///
+       /// \author  Runik
+       /// \date    28/12/2019
+       ///
+       /// \param   key The key to check.
+       ///
+       /// \return  True if the key exists.
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+       bool existsValue(const AccessKeys& key);
 
        ////////////////////////////////////////////////////////////////////////////////////////////////////
        /// \fn  std::vector<std::string> Config::listAvailableLanguages();
@@ -423,6 +399,19 @@ namespace core {
                }
            }
        }
+
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+       /// \fn  void Config::createDefault(const AccessKeys& key);
+       ///
+       /// \brief   Creates a default entry for the specified key.
+       ///
+       /// \author  Runik
+       /// \date    28/12/2019
+       ///
+       /// \param   key The key to create.
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+       void createDefault(const AccessKeys& key);
 
     private:
 
