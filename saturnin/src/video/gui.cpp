@@ -309,33 +309,52 @@ namespace gui {
             pad.fromConfig(pad_values);
             
             static auto keys{ state.smpc()->listAvailableKeys() };
-            int index = 0;
-            if (ImGui::Combo("##keys", &index, keys)) {
-                //state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
-            }
-            
-            //std::string left {pad.direction_left}
 
             
+            //std::string left {pad.direction_left}
             ImGui::Text(tr("Left").c_str());
             ImGui::SameLine(150);
-            ImGui::PushItemWidth(20);
+            //ImGui::PushItemWidth(20);
+
+            //static const char* current_item = nullptr;
+
+            if (ImGui::BeginCombo("##combo", nullptr)) // The second parameter is the label previewed before opening the combo.
+            {
+                //for (auto key : keys) {
+                //    ImGui::Selectable(core::keyboard_layout[key].c_str(), false);
+                //}
+
+                //for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
+                //    bool is_selected = (current_item == items[n]); // You can store your selection however you want, outside or inside your objects
+                //    if (ImGui::Selectable(items[n], is_selected))
+                //        current_item = items[n];
+                //        if (is_selected)
+                //            ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                //}
+                ImGui::EndCombo();
+            }
+
+            //int index = 0;
+            //if (ImGui::Combo("##combo_direction_left", &index, keys)) {
+                //state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
+            //}
 
             //auto bios_saturn = util::stringToVector(state.config()->readValue(core::AccessKeys::config_bios_saturn), 255);
             //if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
             //    state.config()->writeValue(core::AccessKeys::config_bios_saturn, bios_saturn.data());
             //}
-            auto key = util::stringToVector("K", 1);
-            if (ImGui::InputText("##saturn_left", key.data(), key.capacity())) {
 
-            }
-            ImGui::Text(tr("Right").c_str());
-            ImGui::SameLine(150);
-            key.clear();
-            key = util::stringToVector("I", 1);
-            if (ImGui::InputText("##saturn_left", key.data(), key.capacity())) {
+            //auto key = util::stringToVector("K", 1);
+            //if (ImGui::InputText("##saturn_left", key.data(), key.capacity())) {
 
-            }
+            //}
+            //ImGui::Text(tr("Right").c_str());
+            //ImGui::SameLine(150);
+            //key.clear();
+            //key = util::stringToVector("I", 1);
+            //if (ImGui::InputText("##saturn_left", key.data(), key.capacity())) {
+
+            //}
 
             ImGui::PopItemWidth();
         }
