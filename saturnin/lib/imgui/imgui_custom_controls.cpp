@@ -17,9 +17,15 @@
 // limitations under the License.
 //
 
+#include <string>
+#include <vector>
 #include "imgui_custom_controls.h"
 
+
 namespace ImGui {
+
+using saturnin::core::PeripheralKey;
+using saturnin::core::getKeyName;
 
 bool ImageButtonWithText(ImTextureID texId, const char* label, const ImVec2& imageSize, const ImVec2 &uv0, const ImVec2 &uv1, int frame_padding, const ImVec4 &bg_col, const ImVec4 &tint_col) {
     //ImGuiWindow* window = GetCurrentWindow();
@@ -66,6 +72,21 @@ bool ImageButtonWithText(ImTextureID texId, const char* label, const ImVec2& ima
     //if (textSize.x > 0) ImGui::RenderText(start, label);
     //return pressed;
     return true;
+}
+
+void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& default_key, const std::string& combo_name) {
+    const std::string default_key_name { getKeyName(default_key) };
+    std::string combo{ "##combo_" + combo_name };
+    if (ImGui::BeginCombo(combo.c_str(), default_key_name.c_str())) {
+        for (auto key : keys) {
+            bool is_selected = (default_key_name.c_str() == getKeyName(key).c_str());
+            if (ImGui::Selectable(getKeyName(key).c_str(), is_selected)) {
+                default_key = key;
+                if (is_selected) ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
 }
 
 }

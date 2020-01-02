@@ -26,6 +26,8 @@
 
 #include <imgui.h>
 
+#include "../../src/smpc.h" // PeripheralKey
+
 namespace ImGui {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,5 +53,20 @@ namespace ImGui {
 
     bool ImageButtonWithText(ImTextureID texId, const char* label, const ImVec2& imageSize = ImVec2(0, 0), const ImVec2& uv0 = ImVec2(0, 0),
         const ImVec2& uv1 = ImVec2(1, 1), int frame_padding = -1, const ImVec4& bg_col = ImVec4(0, 0, 0, 0), const ImVec4& tint_col = ImVec4(1, 1, 1, 1));
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void peripheralKeyCombo(const std::vector<saturnin::core::PeripheralKey>& keys, saturnin::core::PeripheralKey& default_key, const std::string& combo_name);
+    ///
+    /// \brief  Peripheral key combo.
+    ///
+    /// \author Runik
+    /// \date   01/01/2020
+    ///
+    /// \param          keys        List of available PeripheralKeys.
+    /// \param [in,out] default_key The default key, will be updated by combo selection.
+    /// \param          combo_name  Name of the combo used to display the keys.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void peripheralKeyCombo(const std::vector<saturnin::core::PeripheralKey>& keys, saturnin::core::PeripheralKey& default_key, const std::string& combo_name);
     
 }

@@ -22,6 +22,7 @@
 #include <fstream> // ifstream
 #include <thread> // thread
 #include "gui.h"
+#include "../../lib/imgui/imgui_custom_controls.h" // peripheralKeyCombo
 #include "../emulator_enums.h" // EmulationStatus
 #include "../locale.h" // tr
 #include "../smpc.h" // SaturnDigitalPad, PeripheralKey
@@ -47,6 +48,7 @@ namespace gui {
     using core::tr;
     using core::SaturnDigitalPad;
     using core::PeripheralKey;
+    using core::PeripheralLayout;
 
     void showImguiDemoWindow(const bool show_test_window) {
         // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
@@ -287,18 +289,6 @@ namespace gui {
 
         // Peripheral header
         if (ImGui::CollapsingHeader(tr("Peripherals").c_str())) {
-            
-            //static auto locales = state.config()->listAvailableLanguages();
-            //std::string l = state.config()->readValue(core::AccessKeys::cfg_global_language);
-            //auto it = std::find_if(locales.begin(), locales.end(), [&l](std::string& str) {
-            //    return l == str;
-            //    });
-            //static s32 index = static_cast<s32>(it - locales.begin());
-            //if (ImGui::Combo("##language", &index, locales)) {
-            //    state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
-            //}
-            
-            
             std::vector<PeripheralKey> pad_values;
             const auto& pad_setting = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1);
             for (int i = 0; i < pad_setting.getLength(); ++i) {
@@ -308,58 +298,59 @@ namespace gui {
             static SaturnDigitalPad pad;
             pad.fromConfig(pad_values);
             
-            static auto keys{ state.smpc()->listAvailableKeys() };
+            static const auto keys{ state.smpc()->listAvailableKeys() };
 
-            
-            //std::string left {pad.direction_left}
             ImGui::Text(tr("Left").c_str());
             ImGui::SameLine(150);
-            //ImGui::PushItemWidth(20);
+            ImGui::peripheralKeyCombo(keys, pad.direction_left, "direction_left");
 
-            //static const char* current_item = nullptr;
+            ImGui::Text(tr("Right").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.direction_right, "direction_right");
 
-            if (ImGui::BeginCombo("##combo", nullptr)) // The second parameter is the label previewed before opening the combo.
-            {
-                //for (auto key : keys) {
-                //    ImGui::Selectable(core::keyboard_layout[key].c_str(), false);
-                //}
+            ImGui::Text(tr("Up").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.direction_up, "direction_up");
 
-                //for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
-                //    bool is_selected = (current_item == items[n]); // You can store your selection however you want, outside or inside your objects
-                //    if (ImGui::Selectable(items[n], is_selected))
-                //        current_item = items[n];
-                //        if (is_selected)
-                //            ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-                //}
-                ImGui::EndCombo();
-            }
+            ImGui::Text(tr("Down").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.direction_down, "direction_down");
 
-            //int index = 0;
-            //if (ImGui::Combo("##combo_direction_left", &index, keys)) {
-                //state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
-            //}
+            ImGui::Text(tr("Button A").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.button_a, "button_a");
 
-            //auto bios_saturn = util::stringToVector(state.config()->readValue(core::AccessKeys::config_bios_saturn), 255);
-            //if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
-            //    state.config()->writeValue(core::AccessKeys::config_bios_saturn, bios_saturn.data());
-            //}
+            ImGui::Text(tr("Button B").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.button_b, "button_b");
 
-            //auto key = util::stringToVector("K", 1);
-            //if (ImGui::InputText("##saturn_left", key.data(), key.capacity())) {
+            ImGui::Text(tr("Button C").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.button_c, "button_c");
 
-            //}
-            //ImGui::Text(tr("Right").c_str());
-            //ImGui::SameLine(150);
-            //key.clear();
-            //key = util::stringToVector("I", 1);
-            //if (ImGui::InputText("##saturn_left", key.data(), key.capacity())) {
+            ImGui::Text(tr("Button X").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.button_x, "button_x");
 
-            //}
+            ImGui::Text(tr("Button Y").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.button_y, "button_y");
+
+            ImGui::Text(tr("Button Z").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.button_z, "button_z");
+
+            ImGui::Text(tr("Button Start").c_str());
+            ImGui::SameLine(150);
+            ImGui::peripheralKeyCombo(keys, pad.button_start, "button_start");
+
+            state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1, pad.toConfig(PeripheralLayout::current));
 
             ImGui::PopItemWidth();
         }
 
-        static uint16_t counter{};
+
+        static u16 counter{};
         static std::string status_message{};
         if (ImGui::Button("Save")) {
             state.config()->writeFile();
