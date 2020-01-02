@@ -68,5 +68,18 @@ namespace ImGui {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void peripheralKeyCombo(const std::vector<saturnin::core::PeripheralKey>& keys, saturnin::core::PeripheralKey& default_key, const std::string& combo_name);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void CenteredText(const std::string& text);
+    ///
+    /// \brief  Centers the text, wrapper for ImGui::Text().
+    ///
+    /// \author Runik
+    /// \date   02/01/2020
+    ///
+    /// \param  text    Text to display.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void CenteredText(const std::string& text);
     
 }

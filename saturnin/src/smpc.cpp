@@ -138,7 +138,14 @@ MapKeyboardLayout keyboard_layout = {
     
 std::vector<PeripheralKey> SaturnDigitalPad::toConfig(const PeripheralLayout layout) {
     switch (layout) {
-        case PeripheralLayout::empty: return std::vector<PeripheralKey>();
+        case PeripheralLayout::empty:
+            return std::vector<PeripheralKey>{
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown,
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown,
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown,
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown,
+                PeripheralKey::key_unknown
+            };
         case PeripheralLayout::current:
             return std::vector<PeripheralKey> {
                 direction_left, direction_right, direction_up, direction_down,
@@ -159,9 +166,14 @@ std::vector<PeripheralKey> SaturnDigitalPad::toConfig(const PeripheralLayout lay
 }
 void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
     if (config.size() != 13) {
-        Log::error("smpc", tr("Incorrect Saturn pad data"));
-        throw std::runtime_error(tr("Incorrect Saturn pad data"));
+        Log::warning("smpc", tr("Incorrect Saturn pad data"));
+        auto v = SaturnDigitalPad().toConfig(PeripheralLayout::empty);
+        SaturnDigitalPad pad;
+        pad.fromConfig(v);
+        *this = pad;
+        return;
     }
+
     direction_left        = config[0];
     direction_right       = config[1];
     direction_up          = config[2];
@@ -175,13 +187,15 @@ void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
     button_y              = config[10]; 
     button_z              = config[11];
     button_start          = config[12];
-
-    //auto key = glfwGetKeyName(direction_left, NULL);
 }
 
 std::vector<PeripheralKey> StvPlayerControls::toConfig(const PeripheralLayout layout) {
     switch (layout) {
-        case PeripheralLayout::empty: return std::vector<PeripheralKey>();
+        case PeripheralLayout::empty: 
+            return std::vector<PeripheralKey> {
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown,
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown
+            };
         case PeripheralLayout::current:
             return std::vector<PeripheralKey> {
                 direction_left, direction_right, direction_up, direction_down,
@@ -197,8 +211,12 @@ std::vector<PeripheralKey> StvPlayerControls::toConfig(const PeripheralLayout la
 
 void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
     if (config.size() != 8) {
-        Log::error("smpc", tr("Incorrect ST-V player control data"));
-        throw std::runtime_error(tr("Incorrect ST-V player control data"));
+        Log::warning("smpc", tr("Incorrect ST-V player control data"));
+        auto v = StvPlayerControls().toConfig(PeripheralLayout::empty);
+        StvPlayerControls control;
+        control.fromConfig(v);
+        *this = control;
+        return;
     }
     direction_left  = config[0];
     direction_right = config[1];
@@ -212,7 +230,10 @@ void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
 
 std::vector<PeripheralKey> StvBoardControls::toConfig(const PeripheralLayout layout) {
     switch (layout) {
-        case PeripheralLayout::empty:   return std::vector<PeripheralKey>();
+        case PeripheralLayout::empty:   
+            return std::vector<PeripheralKey> { 
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown
+            };
         case PeripheralLayout::current: return std::vector<PeripheralKey> { service_switch, test_switch, p1_coin_switch, p2_coin_switch };
         default:                        
             return std::vector<PeripheralKey> { PeripheralKey::key_1, PeripheralKey::key_2, PeripheralKey::key_5, PeripheralKey::key_6 };
@@ -221,8 +242,12 @@ std::vector<PeripheralKey> StvBoardControls::toConfig(const PeripheralLayout lay
 
 void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
     if (config.size() != 4) {
-        Log::error("smpc", tr("Incorrect ST-V board control data"));
-        throw std::runtime_error(tr("Incorrect ST-V board control data"));
+        Log::warning("smpc", tr("Incorrect ST-V board control data"));
+        auto v = StvBoardControls().toConfig(PeripheralLayout::empty);
+        StvBoardControls control;
+        control.fromConfig(v);
+        *this = control;
+        return;
     }
     service_switch = config[0];
     test_switch    = config[1];

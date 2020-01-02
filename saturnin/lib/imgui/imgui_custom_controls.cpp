@@ -89,4 +89,10 @@ void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& d
     }
 }
 
+void CenteredText(const std::string& text) {
+    auto size = ImGui::CalcTextSize(text.c_str());
+    ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * 0.5f - size.x / 2);
+    ImGui::Text(text.c_str());
+}
+
 }

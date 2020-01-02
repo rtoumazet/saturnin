@@ -47,6 +47,8 @@ namespace gui {
     using core::Log;
     using core::tr;
     using core::SaturnDigitalPad;
+    using core::StvBoardControls;
+    using core::StvPlayerControls;
     using core::PeripheralKey;
     using core::PeripheralLayout;
 
@@ -143,7 +145,7 @@ namespace gui {
     void showOptionsWindow(core::EmulatorContext& state, bool *opened) {
 
         static bool reset_rendering{}; // used to check if rendering has to be reset after changing the option
-        ImGui::SetNextWindowSize(ImVec2(600, 300));
+        //ImGui::SetNextWindowSize(ImVec2(600, 300));
         ImGui::Begin("Options", opened);
         ImGui::PushItemWidth(-10);
         ImGui::Spacing();
@@ -289,63 +291,203 @@ namespace gui {
 
         // Peripheral header
         if (ImGui::CollapsingHeader(tr("Peripherals").c_str())) {
-            std::vector<PeripheralKey> pad_values;
-            const auto& pad_setting = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1);
-            for (int i = 0; i < pad_setting.getLength(); ++i) {
-                pad_values.push_back(static_cast<PeripheralKey>(static_cast<int>(pad_setting[i])));
-            }
 
-            static SaturnDigitalPad pad;
-            pad.fromConfig(pad_values);
-            
             static const auto keys{ state.smpc()->listAvailableKeys() };
 
-            ImGui::Text(tr("Left").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.direction_left, "direction_left");
+            ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+            if (ImGui::BeginTabBar("PeripheralTabBar", tab_bar_flags)) {
+                ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
+                ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+                if (ImGui::BeginTabItem("Saturn")) {
+                    {
+                        std::vector<PeripheralKey> pad_values;
+                        const auto& pad_setting = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1);
+                        for (int i = 0; i < pad_setting.getLength(); ++i) {
+                            pad_values.push_back(static_cast<PeripheralKey>(static_cast<int>(pad_setting[i])));
+                        }
 
-            ImGui::Text(tr("Right").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.direction_right, "direction_right");
+                        static SaturnDigitalPad pad;
+                        pad.fromConfig(pad_values);
+                        
+                        ImGui::BeginChild("ChildSaturnPlayer1", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 280), true, window_flags);
+                        
+                        ImGui::CenteredText(tr("Player 1"));
 
-            ImGui::Text(tr("Up").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.direction_up, "direction_up");
+                        ImGui::Text(tr("Left").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.direction_left, "direction_left");
 
-            ImGui::Text(tr("Down").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.direction_down, "direction_down");
+                        ImGui::Text(tr("Right").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.direction_right, "direction_right");
 
-            ImGui::Text(tr("Button A").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.button_a, "button_a");
+                        ImGui::Text(tr("Up").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.direction_up, "direction_up");
 
-            ImGui::Text(tr("Button B").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.button_b, "button_b");
+                        ImGui::Text(tr("Down").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.direction_down, "direction_down");
 
-            ImGui::Text(tr("Button C").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.button_c, "button_c");
+                        ImGui::Text(tr("Left shoulder").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.button_shoulder_left, "button_left_shoulder");
 
-            ImGui::Text(tr("Button X").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.button_x, "button_x");
+                        ImGui::Text(tr("Right shoulder").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.button_shoulder_right, "button_right_shoulder");
 
-            ImGui::Text(tr("Button Y").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.button_y, "button_y");
+                        ImGui::Text(tr("Button A").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.button_a, "button_a");
 
-            ImGui::Text(tr("Button Z").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.button_z, "button_z");
+                        ImGui::Text(tr("Button B").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.button_b, "button_b");
 
-            ImGui::Text(tr("Button Start").c_str());
-            ImGui::SameLine(150);
-            ImGui::peripheralKeyCombo(keys, pad.button_start, "button_start");
+                        ImGui::Text(tr("Button C").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.button_c, "button_c");
 
-            state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1, pad.toConfig(PeripheralLayout::current));
+                        ImGui::Text(tr("Button X").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.button_x, "button_x");
 
+                        ImGui::Text(tr("Button Y").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.button_y, "button_y");
+
+                        ImGui::Text(tr("Button Z").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.button_z, "button_z");
+
+                        ImGui::Text(tr("Button Start").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad.button_start, "button_start");
+
+                        state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1, pad.toConfig(PeripheralLayout::current));
+
+                        ImGui::EndChild();
+                    }
+                    ImGui::SameLine();
+                    {
+                        std::vector<PeripheralKey> pad_values;
+                        const auto& pad_setting = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2);
+                        for (int i = 0; i < pad_setting.getLength(); ++i) {
+                            pad_values.push_back(static_cast<PeripheralKey>(static_cast<int>(pad_setting[i])));
+                        }
+
+                        static SaturnDigitalPad pad_p2;
+                        pad_p2.fromConfig(pad_values);
+
+                        ImGui::BeginChild("ChildSaturnPlayer2", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 280), true, window_flags);
+                        
+                        ImGui::CenteredText(tr("Player 2"));
+
+                        ImGui::Text(tr("Left").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.direction_left, "direction_left");
+
+                        ImGui::Text(tr("Right").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.direction_right, "direction_right");
+
+                        ImGui::Text(tr("Up").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.direction_up, "direction_up");
+
+                        ImGui::Text(tr("Down").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.direction_down, "direction_down");
+
+                        ImGui::Text(tr("Left shoulder").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.button_shoulder_left, "button_left_shoulder");
+
+                        ImGui::Text(tr("Right shoulder").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.button_shoulder_right, "button_right_shoulder");
+
+                        ImGui::Text(tr("Button A").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.button_a, "button_a");
+
+                        ImGui::Text(tr("Button B").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.button_b, "button_b");
+
+                        ImGui::Text(tr("Button C").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.button_c, "button_c");
+
+                        ImGui::Text(tr("Button X").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.button_x, "button_x");
+
+                        ImGui::Text(tr("Button Y").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.button_y, "button_y");
+
+                        ImGui::Text(tr("Button Z").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.button_z, "button_z");
+
+                        ImGui::Text(tr("Button Start").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, pad_p2.button_start, "button_start");
+
+                        state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_2, pad_p2.toConfig(PeripheralLayout::current));
+
+                        ImGui::EndChild();
+                    }
+                    ImGui::EndTabItem();
+                }
+                if (ImGui::BeginTabItem("ST-V")) {
+                    {
+                        std::vector<PeripheralKey> board_values;
+                        const auto& board_setting = state.config()->readValue(core::AccessKeys::cfg_controls_stv_board);
+                        for (int i = 0; i < board_setting.getLength(); ++i) {
+                            board_values.push_back(static_cast<PeripheralKey>(static_cast<int>(board_setting[i])));
+                        }
+
+                        static StvBoardControls board;
+                        board.fromConfig(board_values);
+
+                        ImGui::BeginChild("ChildStvBoard", ImVec2(0, 120), true, window_flags);
+                        
+                        ImGui::CenteredText(tr("Board"));
+
+                        ImGui::Text(tr("Service switch").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, board.service_switch, "service_switch");
+
+                        ImGui::Text(tr("Test switch").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, board.test_switch, "test_switch");
+
+                        ImGui::Text(tr("Player 1 coin switch").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, board.p1_coin_switch, "p1_coin_switch");
+
+                        ImGui::Text(tr("Player 2 coin switch").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, board.p2_coin_switch, "p2_coin_switch");
+
+                        state.config()->writeValue(core::AccessKeys::cfg_controls_stv_board, board.toConfig(PeripheralLayout::current));
+
+                        ImGui::EndChild();
+                    }
+
+
+
+
+
+
+                    ImGui::EndTabItem();
+                }
+                ImGui::EndTabBar();
+                ImGui::PopStyleVar();
+            }
             ImGui::PopItemWidth();
         }
 
