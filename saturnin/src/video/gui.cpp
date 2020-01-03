@@ -300,17 +300,14 @@ namespace gui {
                 ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
                 if (ImGui::BeginTabItem("Saturn")) {
                     {
-                        std::vector<PeripheralKey> pad_values;
-                        const auto& pad_setting = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1);
-                        for (int i = 0; i < pad_setting.getLength(); ++i) {
-                            pad_values.push_back(static_cast<PeripheralKey>(static_cast<int>(pad_setting[i])));
-                        }
-
+                        //**** Saturn Player 1 ****//
                         static SaturnDigitalPad pad;
-                        pad.fromConfig(pad_values);
+                        pad.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_1));
                         
                         ImGui::BeginChild("ChildSaturnPlayer1", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 280), true, window_flags);
-                        
+
+                        ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - 150);
+
                         ImGui::CenteredText(tr("Player 1"));
 
                         ImGui::Text(tr("Left").c_str());
@@ -371,17 +368,13 @@ namespace gui {
                     }
                     ImGui::SameLine();
                     {
-                        std::vector<PeripheralKey> pad_values;
-                        const auto& pad_setting = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2);
-                        for (int i = 0; i < pad_setting.getLength(); ++i) {
-                            pad_values.push_back(static_cast<PeripheralKey>(static_cast<int>(pad_setting[i])));
-                        }
-
+                        //**** Saturn Player 2 ****//
                         static SaturnDigitalPad pad_p2;
-                        pad_p2.fromConfig(pad_values);
+                        pad_p2.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_2));
 
                         ImGui::BeginChild("ChildSaturnPlayer2", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 280), true, window_flags);
-                        
+                        ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - 150);
+
                         ImGui::CenteredText(tr("Player 2"));
 
                         ImGui::Text(tr("Left").c_str());
@@ -444,14 +437,9 @@ namespace gui {
                 }
                 if (ImGui::BeginTabItem("ST-V")) {
                     {
-                        std::vector<PeripheralKey> board_values;
-                        const auto& board_setting = state.config()->readValue(core::AccessKeys::cfg_controls_stv_board);
-                        for (int i = 0; i < board_setting.getLength(); ++i) {
-                            board_values.push_back(static_cast<PeripheralKey>(static_cast<int>(board_setting[i])));
-                        }
-
+                        //**** ST-V Board ****//
                         static StvBoardControls board;
-                        board.fromConfig(board_values);
+                        board.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_board));
 
                         ImGui::BeginChild("ChildStvBoard", ImVec2(0, 120), true, window_flags);
                         
@@ -478,10 +466,103 @@ namespace gui {
                         ImGui::EndChild();
                     }
 
+                    {
+                        //**** ST-V Player 1 ****//
+                        static StvPlayerControls controls;
+                        controls.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
+
+                        ImGui::BeginChild("ChildStvPlayer1", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 220), true, window_flags);
+
+                        ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - 150);
+
+                        ImGui::CenteredText(tr("Player 1"));
+
+                        ImGui::Text(tr("Left").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
+
+                        ImGui::Text(tr("Right").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
+
+                        ImGui::Text(tr("Up").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
+
+                        ImGui::Text(tr("Down").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
 
 
+                        ImGui::Text(tr("Button 1").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
+
+                        ImGui::Text(tr("Button 2").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
+
+                        ImGui::Text(tr("Button 3").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
+
+                        ImGui::Text(tr("Button 4").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
+
+                        state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_1, controls.toConfig(PeripheralLayout::current));
+
+                        ImGui::EndChild();
+                    }
+                    ImGui::SameLine();
+                    {
+                        //**** ST-V Player 2 ****//
+                        static StvPlayerControls controls;
+                        controls.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
+
+                        ImGui::BeginChild("ChildStvPlayer2", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 220), true, window_flags);
+
+                        ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - 150);
+
+                        ImGui::CenteredText(tr("Player 2"));
+
+                        ImGui::Text(tr("Left").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
+
+                        ImGui::Text(tr("Right").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
+
+                        ImGui::Text(tr("Up").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
+
+                        ImGui::Text(tr("Down").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
 
 
+                        ImGui::Text(tr("Button 1").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
+
+                        ImGui::Text(tr("Button 2").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
+
+                        ImGui::Text(tr("Button 3").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
+
+                        ImGui::Text(tr("Button 4").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
+
+                        state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_2, controls.toConfig(PeripheralLayout::current));
+
+                        ImGui::EndChild();
+                    }
 
                     ImGui::EndTabItem();
                 }

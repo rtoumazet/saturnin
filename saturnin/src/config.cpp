@@ -245,6 +245,14 @@ void Config::createDefault(const AccessKeys& value) {
     }
     writeFile();
 }
+std::vector<PeripheralKey> Config::readPeripheralConfiguration(const AccessKeys& key) {
+    std::vector<PeripheralKey> pad_values;
+    const auto& pad_setting = readValue(key);
+    for (int i = 0; i < pad_setting.getLength(); ++i) {
+        pad_values.push_back(static_cast<PeripheralKey>(static_cast<int>(pad_setting[i])));
+    }
+    return pad_values;
+}
 
 std::vector<std::string> Config::listAvailableLanguages() {
     auto full_path = fs::current_path() / "lang";

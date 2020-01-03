@@ -442,6 +442,8 @@ namespace core {
 
        void createDefault(const AccessKeys& key);
 
+       std::vector<PeripheralKey> readPeripheralConfiguration(const AccessKeys& key);
+
     private:
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
