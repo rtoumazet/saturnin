@@ -197,5 +197,8 @@
     <ClInclude Include="src\smpc_registers.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
+    <ClInclude Include="src\video\vdp2.h">
+      <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

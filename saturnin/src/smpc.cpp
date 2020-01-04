@@ -25,6 +25,8 @@
 namespace saturnin {
 namespace core {
 
+namespace util = saturnin::utilities;
+
 using MapKeyboardLayout = std::map<PeripheralKey, const std::string>;
 MapKeyboardLayout keyboard_layout = { 
     { PeripheralKey::key_space, "space"}, 
@@ -232,16 +234,23 @@ std::vector<PeripheralKey> StvBoardControls::toConfig(const PeripheralLayout lay
     switch (layout) {
         case PeripheralLayout::empty:   
             return std::vector<PeripheralKey> { 
-                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown, 
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown
             };
-        case PeripheralLayout::current: return std::vector<PeripheralKey> { service_switch, test_switch, p1_coin_switch, p2_coin_switch };
+        case PeripheralLayout::current: 
+            return std::vector<PeripheralKey> { 
+                service_switch, test_switch, p1_coin_switch, 
+                p2_coin_switch, p1_start, p2_start 
+            };
         default:                        
-            return std::vector<PeripheralKey> { PeripheralKey::key_1, PeripheralKey::key_2, PeripheralKey::key_5, PeripheralKey::key_6 };
+            return std::vector<PeripheralKey> { 
+                PeripheralKey::key_1, PeripheralKey::key_2, PeripheralKey::key_5, 
+                PeripheralKey::key_6, PeripheralKey::key_7, PeripheralKey::key_8 };
     }
 }
 
 void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
-    if (config.size() != 4) {
+    if (config.size() != 6) {
         Log::warning("smpc", tr("Incorrect ST-V board control data"));
         auto v = StvBoardControls().toConfig(PeripheralLayout::empty);
         StvBoardControls control;
@@ -253,6 +262,8 @@ void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
     test_switch    = config[1];
     p1_coin_switch = config[2];
     p2_coin_switch = config[3];
+    p1_start       = config[4];
+    p2_start       = config[5];
 }
 
 void Smpc::reset(){
@@ -317,12 +328,12 @@ u8 Smpc::read(const u32 addr) {
             if (emulator_context_->hardwareMode() == HardwareMode::stv) return 0xFF;
             return pdr1_.get(PortDataRegister::all_bits);
         case port_data_register_2: 
-            if (emulator_context_->hardwareMode() == HardwareMode::stv) {
-                pdr2_.reset();
-                if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_F1) == GLFW_PRESS) {
+            //if (emulator_context_->hardwareMode() == HardwareMode::stv) {
+            //    pdr2_.reset();
+            //    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(stv_mapping_.board_controls.test_switch)) == GLFW_PRESS) {
 
-                }
-            }
+            //    }
+            //}
             return pdr2_.get(PortDataRegister::all_bits);
 
         default:
@@ -331,7 +342,47 @@ u8 Smpc::read(const u32 addr) {
 }
 
 void Smpc::write(const u32 addr, const u8 data) {
+    switch (addr) {
+        case command_register:
+            comreg_.set(CommandRegister::all_bits, data);
+            // SetExecutionTime();
+            break;
+        case status_flag: sf_.set(StatusFlag::sf, data); break;
+        case input_register_0:
 
+            break;
+        case input_register_1: ireg_[1].set(InputRegister::all_bits, data); break;
+        case input_register_2: ireg_[2].set(InputRegister::all_bits, data); break;
+        case input_register_3: ireg_[3].set(InputRegister::all_bits, data); break;
+        case input_register_4: ireg_[4].set(InputRegister::all_bits, data); break;
+        case input_register_5: ireg_[5].set(InputRegister::all_bits, data); break;
+        case input_register_6: ireg_[6].set(InputRegister::all_bits, data); break;
+        case port_data_register_1: pdr1_.set(PortDataRegister::all_bits, data); break;
+        case port_data_register_2: 
+            if (emulator_context_->hardwareMode() == HardwareMode::stv) {
+                if (data & 0x10) {
+                    Log::debug("smpc", tr("-= Sound OFF =-"));
+
+                    Log::warning("smpc", "SCSP not linked !!!");
+                    //EmuState::pScsp->Reset();
+                    //EmuState::pScsp->SetSound(false);
+                } else {
+                    Log::debug("smpc", tr("-= Sound ON =-"));
+
+                    Log::warning("smpc", "SCSP not linked !!!");
+                    //soundStatus = 0x1;
+                    //EmuState::pScsp->SetSound(true);
+                }
+            }
+            pdr2_.set(PortDataRegister::all_bits, data); 
+            break;
+        case data_direction_register_1: ddr1_.set(DataDirectionRegister::all_bits, data); break;
+        case data_direction_register_2: ddr2_.set(DataDirectionRegister::all_bits, data); break;
+        case io_select_register: iosel_.set(IOSelect::all_bits, data); break;
+        case external_latch_register: exle_.set(ExternalLatchEnable::all_bits, data); break;
+        default:
+            break;
+    }
 }
 
 std::vector<PeripheralKey> Smpc::listAvailableKeys() {
@@ -340,6 +391,22 @@ std::vector<PeripheralKey> Smpc::listAvailableKeys() {
         v.push_back(key.first);
     }
     return v;
+}
+
+void Smpc::initializePeripheralMappings() {
+    saturn_mapping_.player_1.fromConfig(emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_1));
+    saturn_mapping_.player_2.fromConfig(emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_2));
+    stv_mapping_.board_controls.fromConfig(emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_board));
+    stv_mapping_.player_1.fromConfig(emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
+    stv_mapping_.player_2.fromConfig(emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
+}
+
+SaturnPeripheralMapping Smpc::getSaturnPeripheralMapping() {
+    return saturn_mapping_;
+}
+
+StvPeripheralMapping Smpc::getStvPeripheralMapping() {
+    return stv_mapping_;
 }
 
 std::string getKeyName(const PeripheralKey pk) {

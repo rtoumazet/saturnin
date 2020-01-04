@@ -41,6 +41,7 @@ namespace core {
         createLogger("vdp2", sink);
         createLogger("opengl", sink);
         createLogger("exception", sink);
+        createLogger("smpc", sink);
 
         // :TODO: replace by spdlog::enable_backtrace() when version 1.4.X is ported to vcpkg
         spdlog::flush_every(std::chrono::seconds(3));

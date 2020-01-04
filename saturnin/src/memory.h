@@ -32,10 +32,11 @@
 
 #include "emulator_defs.h"
 #include "emulator_enums.h"
-//#include "interrupt_sources.h"
 #include "log.h"
 #include "scu.h"
 #include "smpc.h"
+#include "utilities.h" // to‹nderlying
+
 
 // Forward declarations
 namespace saturnin::sh2 {
@@ -43,6 +44,7 @@ namespace saturnin::sh2 {
     enum class Sh2Type;
 }
 namespace sh2 = saturnin::sh2;
+namespace util = saturnin::utilities;
 
 namespace saturnin {
 namespace core {
@@ -756,34 +758,35 @@ struct readStvIo<u8> {
              u8 data{};
              switch (addr & 0x00FFFFFF) {
                  case stv_io_port_a:
-                     if (GetAsyncKeyState('X') & 0x8000) data |= 0x01; //p1 A
-                     if (GetAsyncKeyState('F') & 0x8000) data |= 0x02; //p1 B
-                     if (GetAsyncKeyState('D') & 0x8000) data |= 0x04; //p1 C
-                     if (GetAsyncKeyState('S') & 0x8000) data |= 0x08; //p1 D
-                     if (GetAsyncKeyState(VK_DOWN) & 0x8000) data |= 0x10; //p1 DOWN
-                     if (GetAsyncKeyState(VK_UP) & 0x8000) data |= 0x20; //p1 UP
-                     if (GetAsyncKeyState(VK_LEFT) & 0x8000) data |= 0x80; //p1 LEFT
-                     if (GetAsyncKeyState(VK_RIGHT) & 0x8000) data |= 0x40; //p1 RIGHT
+                     auto p1 = m.smpc()->getStvPeripheralMapping().player_1;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_1))          == GLFW_PRESS) data |= 0x01;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_2))          == GLFW_PRESS) data |= 0x02;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_3))          == GLFW_PRESS) data |= 0x04;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_4))          == GLFW_PRESS) data |= 0x08;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_down))    == GLFW_PRESS) data |= 0x10;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_up))      == GLFW_PRESS) data |= 0x20;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_right))   == GLFW_PRESS) data |= 0x40;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_left))    == GLFW_PRESS) data |= 0x80;
                      break;
                  case stv_io_port_b:
-                     //if (GetAsyncKeyState(VK_X)&0x8000) data|=0x01; //p2 A
-                     //if (GetAsyncKeyState(VK_F)&0x8000) data|=0x02; //p2 B
-                     //if (GetAsyncKeyState(VK_D)&0x8000) data|=0x04; //p2 C
-                     //if (GetAsyncKeyState(VK_S)&0x8000) data|=0x08; //p2 D
-                     //if (GetAsyncKeyState(VK_DOWN)&0x8000) data|=0x10; //p2 DOWN
-                     //if (GetAsyncKeyState(VK_UP)&0x8000) data|=0x20; //p2 UP
-                     //if (GetAsyncKeyState(VK_LEFT)&0x8000) data|=0x80; //p2 LEFT
-                     //if (GetAsyncKeyState(VK_RIGHT)&0x8000) data|=0x40; //p2 RIGHT
+                     auto p2 = m.smpc()->getStvPeripheralMapping().player_2;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_1))          == GLFW_PRESS) data |= 0x01;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_2))          == GLFW_PRESS) data |= 0x02;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_3))          == GLFW_PRESS) data |= 0x04;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_4))          == GLFW_PRESS) data |= 0x08;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_down))    == GLFW_PRESS) data |= 0x10;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_up))      == GLFW_PRESS) data |= 0x20;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_right))   == GLFW_PRESS) data |= 0x40;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_left))    == GLFW_PRESS) data |= 0x80;
                      break;
                  case stv_io_port_c:
-                     if (GetAsyncKeyState(VK_F3) & 0x8000) data |= 0x01; // P1 Coin 
-                     //if (GetAsyncKeyState(VK_4)&0x8000) data|=0x02; // P2 Coin
-                     //if (GetAsyncKeyState(VK_F1)&0x8000) data|=0x04; // Test
-                     //if (GetAsyncKeyState(VK_F2)&0x8000) data|=0x08; // Service
-                     if (GetAsyncKeyState(VK_F4) & 0x8000) data |= 0x10; // P1 Start
-                     //if (GetAsyncKeyState(VK_2)&0x8000) data|=0x20; // P2 Start
-                     //if (GetAsyncKeyState(VK_7)&0x8000) data|=0x40;
-                     //if (GetAsyncKeyState(VK_8)&0x8000) data|=0x80;
+                     auto board = m.smpc()->getStvPeripheralMapping().board_controls;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_coin_switch)) == GLFW_PRESS) data |= 0x01;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_coin_switch)) == GLFW_PRESS) data |= 0x02;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.test_switch))    == GLFW_PRESS) data |= 0x04;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.service_switch)) == GLFW_PRESS) data |= 0x08;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_start))       == GLFW_PRESS) data |= 0x10;
+                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_start))       == GLFW_PRESS) data |= 0x20;
                      break;
                  case stv_io_port_d:
                      data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);

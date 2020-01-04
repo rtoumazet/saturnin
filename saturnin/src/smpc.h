@@ -201,123 +201,6 @@ enum class PeripheralKey : u16 {
     key_menu          = GLFW_KEY_MENU
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \typedef    std::map<PeripheralKey, const char *> MapKeyboardLayout
-///
-/// \brief  Defines an alias representing the link between enumerators and peripheral keys.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//using MapKeyboardLayout = std::map<PeripheralKey, const std::string>;
-//inline MapKeyboardLayout keyboard_layout = {
-//    { PeripheralKey::key_space, "space"},
-//    { PeripheralKey::key_apostrophe, "'"},
-//    { PeripheralKey::key_comma, ","},
-//    { PeripheralKey::key_minus, "-"},
-//    { PeripheralKey::key_period, "."},
-//    { PeripheralKey::key_slash, "/"},
-//    { PeripheralKey::key_semicolon, ";"},
-//    { PeripheralKey::key_equal, "="},
-//    { PeripheralKey::key_0, "0" },
-//    { PeripheralKey::key_1, "1" },
-//    { PeripheralKey::key_2, "2" },
-//    { PeripheralKey::key_3, "3"},
-//    { PeripheralKey::key_4, "4"},
-//    { PeripheralKey::key_5, "5"},
-//    { PeripheralKey::key_6, "6"},
-//    { PeripheralKey::key_7, "7"},
-//    { PeripheralKey::key_8, "8"},
-//    { PeripheralKey::key_9, "9"},
-//    { PeripheralKey::key_a, "a"},
-//    { PeripheralKey::key_b, "b"},
-//    { PeripheralKey::key_c, "c"},
-//    { PeripheralKey::key_d, "d"},
-//    { PeripheralKey::key_e, "e"},
-//    { PeripheralKey::key_f, "f"},
-//    { PeripheralKey::key_g, "g"},
-//    { PeripheralKey::key_h, "h"},
-//    { PeripheralKey::key_i, "i"},
-//    { PeripheralKey::key_j, "j"},
-//    { PeripheralKey::key_k, "k"},
-//    { PeripheralKey::key_l, "l"},
-//    { PeripheralKey::key_m, "m"},
-//    { PeripheralKey::key_n, "n"},
-//    { PeripheralKey::key_o, "o"},
-//    { PeripheralKey::key_p, "p"},
-//    { PeripheralKey::key_q, "q"},
-//    { PeripheralKey::key_r, "r"},
-//    { PeripheralKey::key_s, "s"},
-//    { PeripheralKey::key_t, "t"},
-//    { PeripheralKey::key_u, "u"},
-//    { PeripheralKey::key_v, "v"},
-//    { PeripheralKey::key_w, "w"},
-//    { PeripheralKey::key_x, "x"},
-//    { PeripheralKey::key_y, "y"},
-//    { PeripheralKey::key_z, "z"},
-//    { PeripheralKey::key_left_bracket, "["},
-//    { PeripheralKey::key_backslash, "\\"},
-//    { PeripheralKey::key_right_bracket, "]"},
-//    { PeripheralKey::key_grave_accent, "`"},
-//
-//    /* Function keys */
-//    { PeripheralKey::key_escape, "esc"},
-//    { PeripheralKey::key_enter, "enter"},
-//    { PeripheralKey::key_tab, "tab"},
-//    { PeripheralKey::key_backspace, "backspace"},
-//    { PeripheralKey::key_insert, "insert"},
-//    { PeripheralKey::key_delete, "del"},
-//    { PeripheralKey::key_right, "right"},
-//    { PeripheralKey::key_left, "left"},
-//    { PeripheralKey::key_down, "down"},
-//    { PeripheralKey::key_up, "up"},
-//    { PeripheralKey::key_page_up, "page up"},
-//    { PeripheralKey::key_page_down, "page down"},
-//    { PeripheralKey::key_home, "home"},
-//    { PeripheralKey::key_end, "end"},
-//    { PeripheralKey::key_caps_lock, "caps lock"},
-//    { PeripheralKey::key_scroll_lock, "scroll lock"},
-//    { PeripheralKey::key_num_lock, "num lock"},
-//    { PeripheralKey::key_print_screen, "print screen"},
-//    { PeripheralKey::key_pause, "pause"},
-//    { PeripheralKey::key_f1, "f1"},
-//    { PeripheralKey::key_f2, "f2"},
-//    { PeripheralKey::key_f3, "f3"},
-//    { PeripheralKey::key_f4, "f4"},
-//    { PeripheralKey::key_f5, "f5"},
-//    { PeripheralKey::key_f6, "f6"},
-//    { PeripheralKey::key_f7, "f7"},
-//    { PeripheralKey::key_f8, "f8"},
-//    { PeripheralKey::key_f9, "f9"},
-//    { PeripheralKey::key_f10, "f10"},
-//    { PeripheralKey::key_f11, "f11"},
-//    { PeripheralKey::key_f12, "f12"},
-//    { PeripheralKey::key_kp_0, "keypad 0"},
-//    { PeripheralKey::key_kp_1, "keypad 1"},
-//    { PeripheralKey::key_kp_2, "keypad 2"},
-//    { PeripheralKey::key_kp_3, "keypad 3"},
-//    { PeripheralKey::key_kp_4, "keypad 4"},
-//    { PeripheralKey::key_kp_5, "keypad 5"},
-//    { PeripheralKey::key_kp_6, "keypad 6"},
-//    { PeripheralKey::key_kp_7, "keypad 7"},
-//    { PeripheralKey::key_kp_8, "keypad 8"},
-//    { PeripheralKey::key_kp_9, "keypad 9"},
-//    { PeripheralKey::key_kp_decimal, "keypad ."},
-//    { PeripheralKey::key_kp_divide, "keypad /"},
-//    { PeripheralKey::key_kp_multiply, "keypad *"},
-//    { PeripheralKey::key_kp_substract, "keypad -"},
-//    { PeripheralKey::key_kp_add, "keypad +"},
-//    { PeripheralKey::key_kp_enter, "keypad enter"},
-//    { PeripheralKey::key_kp_equal, "keypad ="},
-//    { PeripheralKey::key_left_shift, "left shift"},
-//    { PeripheralKey::key_left_control, "left control"},
-//    { PeripheralKey::key_left_alt, "left alt"},
-//    { PeripheralKey::key_left_super, "left super"},
-//    { PeripheralKey::key_right_shift, "right shift"},
-//    { PeripheralKey::key_right_control, "right control"},
-//    { PeripheralKey::key_right_alt, "right alt"},
-//    { PeripheralKey::key_right_super, "right super"},
-//    { PeripheralKey::key_menu, "menu"}
-//};
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralLayout
@@ -410,6 +293,8 @@ struct StvBoardControls {
     PeripheralKey test_switch;
     PeripheralKey p1_coin_switch;
     PeripheralKey p2_coin_switch;
+    PeripheralKey p1_start;
+    PeripheralKey p2_start;
 
     std::vector<PeripheralKey> toConfig(const PeripheralLayout);
     void fromConfig(std::vector<PeripheralKey>);
@@ -446,8 +331,56 @@ public:
     u8 read(const u32 addr);
     void write(const u32 addr, const u8 data);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn std::vector<PeripheralKey> Smpc::listAvailableKeys();
+    ///
+    /// \brief  Returns the keyboard keys available.
+    ///
+    /// \author Runik
+    /// \date   03/01/2020
+    ///
+    /// \return A std::vector&lt;PeripheralKey&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     std::vector<PeripheralKey> listAvailableKeys();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::initializePeripheralMappings();
+    ///
+    /// \brief  Initializes the peripheral mappings for both Saturn and ST-V.
+    ///
+    /// \author Runik
+    /// \date   03/01/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initializePeripheralMappings();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn SaturnPeripheralMapping Smpc::getSaturnPeripheralMapping();
+    ///
+    /// \brief  Returns the current Saturn peripheral mapping.
+    ///
+    /// \author Runik
+    /// \date   03/01/2020
+    ///
+    /// \return The saturn peripheral mapping.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    SaturnPeripheralMapping getSaturnPeripheralMapping();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn StvPeripheralMapping Smpc::getStvPeripheralMapping();
+    ///
+    /// \brief  Returns the current ST-V peripheral mapping.
+    ///
+    /// \author Runik
+    /// \date   03/01/2020
+    ///
+    /// \return The stv peripheral mapping.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    StvPeripheralMapping getStvPeripheralMapping();
+    
 private:
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -479,6 +412,9 @@ private:
     //@}
     
     SystemClock clock_{ SystemClock::not_set }; 
+
+    SaturnPeripheralMapping saturn_mapping_;    ///< Saturn paripheral mapping
+    StvPeripheralMapping    stv_mapping_;   ///< ST-V peripehral mapping
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

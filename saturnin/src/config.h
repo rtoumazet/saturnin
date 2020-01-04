@@ -37,10 +37,12 @@
 #include "memory.h" // RomLoad, RomType
 #include "utilities.h" // toUnderlying
 #include "cdrom/cdrom.h" // CdromAccessMethod
+#include "video/vdp2.h" // TvStandard
 
 namespace cdrom = saturnin::cdrom;
 namespace libcfg = libconfig;
 namespace util = saturnin::utilities;
+namespace video = saturnin::video;
 
 namespace saturnin {
 namespace core {
@@ -54,6 +56,7 @@ namespace core {
     enum class AccessKeys {
         cfg_global_language,
         cfg_global_hardware_mode,
+        cfg_rendering_tv_standard,
         cfg_rendering_legacy_opengl,
         cfg_paths_roms_stv,
         cfg_paths_bios_stv,
@@ -106,8 +109,11 @@ namespace core {
         using MapCdromAccess = std::map<const std::string, const cdrom::CdromAccessMethod>;   ///< MapCdromAccess alias definition.
         static MapCdromAccess cdrom_access;///< Link between the cdrom access method string value defined in the config file and the CdromAccessMethod type.
 
-        using MapHardwareMode = std::map<const std::string, const core::HardwareMode>;  ///< MapHardwareMode alias definition.
+        using MapHardwareMode = std::map<const std::string, const HardwareMode>;  ///< MapHardwareMode alias definition.
         static MapHardwareMode hardware_mode;   ///< Link between the hardware mode string value defined in the config file and the HardwareMode type.
+
+        using MapTvStandard = std::map<const std::string, const video::TvStandard>;  ///< MapHardwareMode alias definition.
+        static MapTvStandard tv_standard;   ///< Link between the tv standard string value defined in the config file and the TvStandard type.
 
         //@{
         // Constructors / Destructors

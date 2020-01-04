@@ -36,47 +36,11 @@ namespace core {
 
 using core::Log;
 
-//Config::MapKeys Config::full_keys = {
-//    { AccessKeys::cfg_global_language,         "global.language"},
-//    { AccessKeys::cfg_global_hardware_mode,    "global.hardware_mode" },
-//    { AccessKeys::cfg_rendering_legacy_opengl, "rendering.legacy_opengl" },
-//    { AccessKeys::cfg_paths_roms_stv,          "paths.roms_stv" },
-//    { AccessKeys::cfg_paths_bios_stv,          "paths.bios_stv" },
-//    { AccessKeys::cfg_paths_bios_saturn,       "paths.bios_saturn" },
-//    { AccessKeys::cfg_cdrom_drive,             "cdrom.drive" },
-//    { AccessKeys::cfg_cdrom_access_method,     "cdrom.access_method" },
-//    { AccessKeys::cfg_sound_soundcard,         "sound.soundcard" },
-//    { AccessKeys::cfg_sound_disabled,          "sound.disabled" },
-//    { AccessKeys::cfg_controls_saturn_player_1,"controls.saturn.player_1" },
-//    { AccessKeys::cfg_controls_saturn_player_2,"controls.saturn.player_2" },
-//    { AccessKeys::cfg_controls_stv_board,      "controls.stv.board" },
-//    { AccessKeys::cfg_controls_stv_player_1,   "controls.stv.player_1" },
-//    { AccessKeys::cfg_controls_stv_player_2,   "controls.stv.player_2" },
-//    { AccessKeys::stv_game_name,               "game_name" },
-//    { AccessKeys::stv_zip_name,                "zip_name" },
-//    { AccessKeys::stv_parent_set,              "parent_set" },
-//    { AccessKeys::stv_version,                 "version" },
-//    { AccessKeys::stv_release_date,            "release_date" },
-//    { AccessKeys::stv_region,                  "region" },
-//    { AccessKeys::stv_files,                   "files" }
-//};
-
-//MapKeysDefault default_keys = {
-//{ AccessKeys::cfg_global_language,     "en" },
-//{ AccessKeys::cfg_global_hardware_mode,"SATURN" },
-//{ AccessKeys::cfg_paths_roms_stv,      "" },
-//{ AccessKeys::cfg_paths_bios_stv,      "" },
-//{ AccessKeys::cfg_paths_bios_saturn,   "" },
-//{ AccessKeys::cfg_cdrom_drive,         "-1:-1:-1" },
-//{ AccessKeys::cfg_cdrom_access_method, "SPTI" },
-//{ AccessKeys::cfg_sound_soundcard,     "" },
-//{ AccessKeys::cfg_sound_disabled,      false }
-//};
-
 Config::MapKeys Config::full_keys = { 
     { AccessKeys::cfg_global_language,         "global.language" }, 
     { AccessKeys::cfg_global_hardware_mode,    "global.hardware_mode" },
     { AccessKeys::cfg_rendering_legacy_opengl, "rendering.legacy_opengl" },
+    { AccessKeys::cfg_rendering_tv_standard,   "rendering.tv_standard" },
     { AccessKeys::cfg_paths_roms_stv,          "paths.roms_stv" },
     { AccessKeys::cfg_paths_bios_stv,          "paths.bios_stv" },
     { AccessKeys::cfg_paths_bios_saturn,       "paths.bios_saturn" },
@@ -101,6 +65,7 @@ Config::MapKeys Config::full_keys = {
 Config::MapKeysDefault Config::default_keys = {
     { AccessKeys::cfg_global_language,         std::string("en") },
     { AccessKeys::cfg_global_hardware_mode,    std::string("SATURN") },
+    { AccessKeys::cfg_rendering_tv_standard,   std::string("PAL") },
     { AccessKeys::cfg_rendering_legacy_opengl, false },
     { AccessKeys::cfg_paths_roms_stv,          std::string("") },
     { AccessKeys::cfg_paths_bios_stv,          std::string("") },
@@ -129,8 +94,13 @@ Config::MapCdromAccess Config::cdrom_access = {
 };
 
 Config::MapHardwareMode Config::hardware_mode= {
-    {"SATURN", core::HardwareMode::saturn},
-    {"STV", core::HardwareMode::stv}
+    {"SATURN", HardwareMode::saturn},
+    {"STV",    HardwareMode::stv}
+};
+
+Config::MapTvStandard Config::tv_standard = {
+    {"PAL",  video::TvStandard::pal},
+    {"NTSC", video::TvStandard::ntsc}
 };
 
 void Config::writeFile() {
@@ -165,6 +135,7 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
 
     add(full_keys[AccessKeys::cfg_global_language],          std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_global_language]));
     add(full_keys[AccessKeys::cfg_global_hardware_mode],     std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_global_hardware_mode]));
+    add(full_keys[AccessKeys::cfg_rendering_tv_standard],    std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_rendering_tv_standard]));
     add(full_keys[AccessKeys::cfg_rendering_legacy_opengl],  !isModernOpenglCapable);
     add(full_keys[AccessKeys::cfg_paths_roms_stv],           std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_paths_roms_stv]));
     add(full_keys[AccessKeys::cfg_paths_bios_stv],           std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_paths_bios_stv]));
@@ -225,7 +196,8 @@ bool Config::existsValue(const AccessKeys& value) {
 void Config::createDefault(const AccessKeys& value) {
     switch (value) {
         case AccessKeys::cfg_global_language: 
-        case AccessKeys::cfg_global_hardware_mode : 
+        case AccessKeys::cfg_global_hardware_mode: 
+        case AccessKeys::cfg_rendering_tv_standard: 
         case AccessKeys::cfg_paths_roms_stv:
         case AccessKeys::cfg_paths_bios_stv:
         case AccessKeys::cfg_paths_bios_saturn:

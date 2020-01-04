@@ -79,7 +79,7 @@ constexpr u32 data_direction_register_2 = 0x2010007B;
 constexpr u32 port_data_register_1      = 0x20100075;
 constexpr u32 port_data_register_2      = 0x20100077;
 constexpr u32 io_select_register        = 0x2010007D;
-constexpr u32 external_latch_register   = 0x2010007D;
+constexpr u32 external_latch_register   = 0x2010007F;
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

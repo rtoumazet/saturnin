@@ -187,6 +187,24 @@ namespace gui {
 
         // Rendering header
         if (ImGui::CollapsingHeader(tr("Rendering").c_str())) {
+            ImGui::Text(tr("TV standard").c_str());
+            ImGui::SameLine(150);
+
+            std::string ts = state.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+            static int standard = util::toUnderlying(core::Config::tv_standard[ts]);
+
+            if (ImGui::RadioButton("PAL", &standard, util::toUnderlying(video::TvStandard::pal))) {
+                core::Config::MapTvStandard::const_iterator it = util::getKeyFromValue(core::Config::tv_standard, video::TvStandard::pal);
+                if (it != core::Config::tv_standard.end()) state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, it->first);
+                else Log::warning("config", tr("Unknown TV standard ..."));
+            }
+            ImGui::SameLine();
+            if (ImGui::RadioButton("NTSC", &standard, util::toUnderlying(video::TvStandard::ntsc))) {
+                core::Config::MapTvStandard::const_iterator it = util::getKeyFromValue(core::Config::tv_standard, video::TvStandard::ntsc);
+                if (it != core::Config::tv_standard.end()) state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, it->first);
+                else Log::warning("config", tr("Unknown TV standard ..."));
+            }
+
             ImGui::Text(tr("Legacy OpenGL").c_str());
             ImGui::SameLine(150);
 
@@ -441,7 +459,7 @@ namespace gui {
                         static StvBoardControls board;
                         board.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_board));
 
-                        ImGui::BeginChild("ChildStvBoard", ImVec2(0, 120), true, window_flags);
+                        ImGui::BeginChild("ChildStvBoard", ImVec2(0, 160), true, window_flags);
                         
                         ImGui::CenteredText(tr("Board"));
 
@@ -460,6 +478,14 @@ namespace gui {
                         ImGui::Text(tr("Player 2 coin switch").c_str());
                         ImGui::SameLine(150);
                         ImGui::peripheralKeyCombo(keys, board.p2_coin_switch, "p2_coin_switch");
+
+                        ImGui::Text(tr("Player 1 start").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, board.p1_start, "p1_start");
+
+                        ImGui::Text(tr("Player 2 start").c_str());
+                        ImGui::SameLine(150);
+                        ImGui::peripheralKeyCombo(keys, board.p2_start, "p2_start");
 
                         state.config()->writeValue(core::AccessKeys::cfg_controls_stv_board, board.toConfig(PeripheralLayout::current));
 
@@ -577,6 +603,7 @@ namespace gui {
         static std::string status_message{};
         if (ImGui::Button("Save")) {
             state.config()->writeFile();
+            state.smpc()->initializePeripheralMappings();
             status_message = tr("Configuration saved.");
             counter = 5 * 60;
 
