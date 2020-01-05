@@ -90,6 +90,17 @@ void EmulatorContext::startEmulation() {
     //    emu_thread = move(local_thread);
 
     // TESTING //
+    const u32 sh2_freq_hz{ 28636400 };
+    //const double cycle_duration{ (double)1 / (double)sh2_freq_hz };
+    //const std::chrono::seconds cycle_duration{ (double)1 / (double)sh2_freq_hz };
+    using seconds = std::chrono::duration<double>;
+    const seconds cycle_duration{ ((double)1 / (double)sh2_freq_hz) };
+    //const std::chrono::seconds test{ cycle_duration };
+    using micro = std::chrono::duration<double, std::micro>;
+    auto val = micro(30) / cycle_duration;
+    auto val2 = static_cast<u32>(val);
+     
+    
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
     //std::cout << "loading the plugin" << std::endl;
@@ -127,7 +138,7 @@ void EmulatorContext::emulationMainThread() {
         while (this->emulation_status_ == EmulationStatus::running) {
             master_sh2_->run();
             slave_sh2_->run();
-            throw std::runtime_error(tr("Exception during main emulation thread !"));
+            //throw std::runtime_error(tr("Exception during main emulation thread !"));
         }
         Log::info("main", tr("Emulation main thread finished"));
     }

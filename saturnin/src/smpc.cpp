@@ -286,6 +286,26 @@ void Smpc::reset(){
     clock_ = SystemClock::pal_320; // System clock is 320 at reset. PAL fixed for now.
 }
 
+void Smpc::setCommandDuration() {
+    using seconds = std::chrono::duration<double>;
+    const seconds cycle_duration{ (static_cast<double>(1) / static_cast<double>(util::toUnderlying(clock_))) };
+    ////const std::chrono::seconds test{ cycle_duration };
+    using micro = std::chrono::duration<double, std::micro>;
+    //auto val = micro(30) / cycle_duration;
+    //auto val2 = static_cast<u32>(val);
+
+    //const u32 sh2_freq_hz{ util::toUnderlying(clock_) };
+    //const std::chrono::seconds cycle_duration{ 1 / sh2_freq_hz };
+    switch (comreg_.get(CommandRegister::smpc_command)) {
+        case SmpcCommand::master_sh2_on:
+            intback_remaining_cycles_ = static_cast<u16>(micro(30) / cycle_duration);
+            break;
+        default:
+
+            break;
+    }
+}
+
 u8 Smpc::read(const u32 addr) {
     switch (addr) {
         case status_register:
@@ -345,7 +365,7 @@ void Smpc::write(const u32 addr, const u8 data) {
     switch (addr) {
         case command_register:
             comreg_.set(CommandRegister::all_bits, data);
-            // SetExecutionTime();
+            setCommandDuration();
             break;
         case status_flag: sf_.set(StatusFlag::sf, data); break;
         case input_register_0:
