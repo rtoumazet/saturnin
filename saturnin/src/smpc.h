@@ -28,6 +28,7 @@
 #include <Windows.h> // Removes C4005 warning
 #include <GLFW/glfw3.h> // Keyboard handling
 #include <vector> // vector
+#include <chrono> // duration
 #include "smpc_registers.h"
 
 // Forward declarations
@@ -396,7 +397,20 @@ private:
 
     void setCommandDuration();
 
-    //u16 calculateIntbackRemainingCycles()
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn u32 Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d);
+    ///
+    /// \brief  Calculates the number of cycles needed for the duration.
+    ///
+    /// \author Runik
+    /// \date   06/01/2020
+    ///
+    /// \param  d   duration.
+    ///
+    /// \return The number of cycles needed for the duration.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    u32 calculateCyclesNumber(const std::chrono::duration<double>& d);
 
     EmulatorContext* emulator_context_;    ///< Context of the emulator
 

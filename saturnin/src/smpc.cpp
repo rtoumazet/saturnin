@@ -286,19 +286,44 @@ void Smpc::reset(){
     clock_ = SystemClock::pal_320; // System clock is 320 at reset. PAL fixed for now.
 }
 
-void Smpc::setCommandDuration() {
+u32 Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) {
     using seconds = std::chrono::duration<double>;
     const seconds cycle_duration{ (static_cast<double>(1) / static_cast<double>(util::toUnderlying(clock_))) };
-    ////const std::chrono::seconds test{ cycle_duration };
-    using micro = std::chrono::duration<double, std::micro>;
-    //auto val = micro(30) / cycle_duration;
-    //auto val2 = static_cast<u32>(val);
+    //using micro = std::chrono::duration<double, std::micro>;
 
-    //const u32 sh2_freq_hz{ util::toUnderlying(clock_) };
-    //const std::chrono::seconds cycle_duration{ 1 / sh2_freq_hz };
+    return static_cast<u32>(d / cycle_duration);
+}
+
+void Smpc::setCommandDuration() {
+    using micro = std::chrono::duration<double, std::micro>;
+    using milli = std::chrono::duration<double, std::milli>;
     switch (comreg_.get(CommandRegister::smpc_command)) {
-        case SmpcCommand::master_sh2_on:
-            intback_remaining_cycles_ = static_cast<u16>(micro(30) / cycle_duration);
+        case SmpcCommand::master_sh2_on: 
+        case SmpcCommand::slave_sh2_on: 
+        case SmpcCommand::slave_sh2_off: 
+        case SmpcCommand::sound_on: 
+        case SmpcCommand::sound_off: 
+        case SmpcCommand::nmi_request: 
+        case SmpcCommand::reset_enable: 
+        case SmpcCommand::reset_disable: 
+            intback_remaining_cycles_ = calculateCyclesNumber(micro(30)); 
+            break;
+        case SmpcCommand::cd_on:
+        case SmpcCommand::cd_off:
+        case SmpcCommand::smpc_memory_setting:
+            intback_remaining_cycles_ = calculateCyclesNumber(micro(40));
+            break;
+        case SmpcCommand::reset_entire_system:
+        case SmpcCommand::clock_change_320:
+        case SmpcCommand::clock_change_352:
+            // Alpha is fixed to 0
+            intback_remaining_cycles_ = calculateCyclesNumber(milli(100));
+            break;
+        case SmpcCommand::time_setting:
+            intback_remaining_cycles_ = calculateCyclesNumber(micro(70));
+            break;
+        case SmpcCommand::interrupt_back:
+
             break;
         default:
 
