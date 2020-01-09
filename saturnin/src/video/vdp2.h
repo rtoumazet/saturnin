@@ -28,6 +28,18 @@
 namespace saturnin {
 namespace video {
 
+// Saturn video resolution
+//  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
+//  Vertical resolution :
+//  - PAL   
+//     - 312.5 lines non interlaced (50Hz / frame), 625 lines interlaced  (25Hz / frame)  
+//     - 288 active lines (non interlaced), 576 active lines (interlaced)  
+//     - 24.5 blanking lines (non interlaced), 49 blanking lines (interlaced)
+//  - NTSC :
+//     - 262.5 lines non interlaced (60Hz / frame), 525 lines interlaced (30Hz / frame)  
+//     - 240 active lines (non interlaced), 480 active lines (interlaced)  
+//     - 22.5 blanking lines (non interlaced), 45 blanking lines (interlaced)
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   TvStandard
@@ -35,9 +47,10 @@ namespace video {
 /// \brief  Tv standard used.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TvStandard {
-    pal  = 0, ///< PAL.
-    ntsc = 1  ///< NTSC.
+enum class TvStandard : s8 {
+    unknown = -1,   ///< Unknown.
+    pal  = 0,       ///< PAL.
+    ntsc = 1        ///< NTSC.
 };
 
 }

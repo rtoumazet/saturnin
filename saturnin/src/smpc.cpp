@@ -283,14 +283,22 @@ void Smpc::reset(){
     iosel_.reset();
     exle_.reset();
 
-    clock_ = SystemClock::pal_320; // System clock is 320 at reset. PAL fixed for now.
+    // System clock is 320 at reset.
+    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    switch (Config::tv_standard[ts]) {
+        case video::TvStandard::pal:  clock_ = SystemClock::pal_320; break;
+        case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
+        default:                      
+            Log::warning("smpc", "Could not set system clock !");
+            clock_ = SystemClock::not_set;
+    }
+
+    
 }
 
 u32 Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) {
     using seconds = std::chrono::duration<double>;
     const seconds cycle_duration{ (static_cast<double>(1) / static_cast<double>(util::toUnderlying(clock_))) };
-    //using micro = std::chrono::duration<double, std::micro>;
-
     return static_cast<u32>(d / cycle_duration);
 }
 

@@ -405,6 +405,11 @@ private:
     StvPeripheralMapping    stv_mapping_;   ///< ST-V peripehral mapping
 
     u16 intback_remaining_cycles_ {}; ///< The intback remaining cycles
+
+    u32 total_display_duration_in_cycles_{};    ///< Number of cycles needed to display a full frame.
+    u32 visible_display_duration_in_cycles_{};  ///< Number of cycles needed to display the visible part of a frame (total - vblank).
+    u32 vblank_duration_in_cycles_{};           ///< Number of cycles needed to display the vblank part of a frame (total - visible).
+    
     
 };
 
