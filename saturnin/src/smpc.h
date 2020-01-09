@@ -39,36 +39,6 @@ namespace saturnin::core {
 namespace saturnin {
 namespace core {
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-///// \enum   SmpcCommand
-/////
-///// \brief  SMPC commands definition.
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//enum class SmpcCommand : u8 {
-//    // Resetable commands
-//    master_sh2_on = 0x00,       ///< MSHON command
-//    slave_sh2_on = 0x02,        ///< SSHON command
-//    slave_sh2_off = 0x03,       ///< SSHOFF command
-//    sound_on = 0x06,            ///< SNDON command
-//    sound_off = 0x07,           ///< SNDOFF command
-//    cd_on = 0x08,               ///< CDDN command
-//    cd_off = 0x09,              ///< CDOFF command
-//    reset_entire_system = 0x0d, ///< SYSRES command
-//    clock_change_352 = 0x0e,    ///< CKCHG352 command
-//    clock_change_320 = 0x0f,    ///< CKCHG320 command
-//    nmi_request = 0x18,         ///< NMIREQ command
-//    reset_enable = 0x19,        ///< RESENAB command
-//    reset_disable = 0x1a,       ///< RESDISA command
-//
-//    // Non resetable commands
-//    interrupt_back = 0x10,      ///< INTBACK command
-//    smpc_memory_setting = 0x17, ///< SETSMEM command
-//
-//    // RTC command
-//    time_setting = 0x16         ///< SETTIME command
-//};
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   SystemClock
 ///
