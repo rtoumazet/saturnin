@@ -365,7 +365,27 @@ private:
 
     void reset();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::setCommandDuration();
+    ///
+    /// \brief  Sets the SMPC command duration.
+    ///
+    /// \author Runik
+    /// \date   11/01/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void setCommandDuration();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::executeCommand();
+    ///
+    /// \brief  Executes the current SMPC command.
+    ///
+    /// \author Runik
+    /// \date   11/01/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void executeCommand();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn u32 Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d);
@@ -409,6 +429,10 @@ private:
     u32 total_display_duration_in_cycles_{};    ///< Number of cycles needed to display a full frame.
     u32 visible_display_duration_in_cycles_{};  ///< Number of cycles needed to display the visible part of a frame (total - vblank).
     u32 vblank_duration_in_cycles_{};           ///< Number of cycles needed to display the vblank part of a frame (total - visible).
+
+    bool is_master_sh2_on_{ false }; ///< Master SH2 status
+    bool is_slave_sh2_on_{ false }; ///< Slave SH2 status
+    bool is_sound_on_{ false }; ///< Sound status
     
     
 };

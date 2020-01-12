@@ -33,6 +33,7 @@
 #include "emulator_enums.h"
 #include "config.h"
 #include "memory.h"
+#include "sound/scsp.h"
 #include "scu.h"
 #include "sh2.h"
 #include "smpc.h"
@@ -42,6 +43,7 @@ namespace saturnin {
 namespace core {
 
 using sh2::Sh2;
+using sound::Scsp;
 
 static const std::string saturnin_version{ "1.00" };
 
@@ -210,6 +212,19 @@ static const std::string saturnin_version{ "1.00" };
         Smpc* smpc() { return smpc_.get(); };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \fn Scsp* EmulatorContext::scsp()
+        ///
+        /// \brief  Returns a pointer to the SCSP object.
+        ///
+        /// \author Runik
+        /// \date   11/01/2020
+        ///
+        /// \return A pointer to the SCSP object.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Scsp* scsp() { return scsp_.get(); };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn HardwareMode EmulatorContext::hardwareMode() const
         ///
         /// \brief  Current hardware mode of the emulator.
@@ -278,6 +293,7 @@ static const std::string saturnin_version{ "1.00" };
         std::unique_ptr<Sh2>    slave_sh2_;  ///< Slave SH2 object
         std::unique_ptr<Scu>    scu_;        ///< SCU object
         std::unique_ptr<Smpc>   smpc_;       ///< SMPC object
+        std::unique_ptr<Scsp>   scsp_;       ///< SCSP object
 
         HardwareMode    hardware_mode_{ HardwareMode::saturn };     ///< Hardware mode
         EmulationStatus emulation_status_{ EmulationStatus::stopped }; ///< Emulation status

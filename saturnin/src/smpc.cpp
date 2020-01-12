@@ -289,7 +289,7 @@ void Smpc::reset(){
         case video::TvStandard::pal:  clock_ = SystemClock::pal_320; break;
         case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
         default:                      
-            Log::warning("smpc", "Could not set system clock !");
+            Log::warning("smpc", tr("Could not set system clock !"));
             clock_ = SystemClock::not_set;
     }
 
@@ -335,6 +335,61 @@ void Smpc::setCommandDuration() {
             break;
         default:
 
+            break;
+    }
+}
+
+void Smpc::executeCommand() {
+    auto command{ comreg_.get(CommandRegister::smpc_command) };
+    switch (command) {
+        case SmpcCommand::master_sh2_on:
+            is_master_sh2_on_ = true;
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=Master SH2 ON=- command executed"));
+            break;
+        case SmpcCommand::slave_sh2_on:
+            is_slave_sh2_on_ = true;
+            emulator_context_->slaveSh2()->powerOnReset();
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=Slave SH2 ON=- command executed"));
+            break;
+        case SmpcCommand::slave_sh2_off:
+            is_slave_sh2_on_ = false;
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=Slave SH2 OFF=- command executed"));
+            break;
+        case SmpcCommand::sound_on:
+            is_sound_on_ = true;
+            emulator_context_->scsp()->reset();
+            emulator_context_->scsp()->setSound(true);
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=Sound ON=- command executed"));
+            break;
+        case SmpcCommand::sound_off:
+            is_sound_on_ = false;
+            emulator_context_->scsp()->setSound(false);
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=Sound OFF=- command executed"));
+            break;
+        case SmpcCommand::reset_entire_system:
+            emulator_context_->masterSh2()->powerOnReset();
+            emulator_context_->slaveSh2()->powerOnReset();
+            emulator_context_->scsp()->reset();
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=Reset Entire System=- command executed"));
+            break;
+        case SmpcCommand::clock_change_320:
+        case SmpcCommand::clock_change_352:
+        case SmpcCommand::nmi_request:
+            break;
+        case SmpcCommand::reset_enable:
+        case SmpcCommand::reset_disable:
             break;
     }
 }
@@ -414,13 +469,13 @@ void Smpc::write(const u32 addr, const u8 data) {
         case port_data_register_2: 
             if (emulator_context_->hardwareMode() == HardwareMode::stv) {
                 if (data & 0x10) {
-                    Log::debug("smpc", tr("-= Sound OFF =-"));
+                    Log::debug("smpc", tr("-=Sound OFF=-"));
 
                     Log::warning("smpc", "SCSP not linked !!!");
                     //EmuState::pScsp->Reset();
                     //EmuState::pScsp->SetSound(false);
                 } else {
-                    Log::debug("smpc", tr("-= Sound ON =-"));
+                    Log::debug("smpc", tr("-=Sound ON=-"));
 
                     Log::warning("smpc", "SCSP not linked !!!");
                     //soundStatus = 0x1;

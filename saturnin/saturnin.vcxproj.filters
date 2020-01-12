@@ -22,6 +22,9 @@
     <Filter Include="Fichiers sources\cdrom">
       <UniqueIdentifier>{dfa6a1f7-eaf2-4ef2-bc54-392bf38d9642}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\sound">
+      <UniqueIdentifier>{21d89d54-af4d-4724-80f3-db85910ca877}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\config.cpp">
@@ -199,6 +202,9 @@
     </ClInclude>
     <ClInclude Include="src\video\vdp2.h">
       <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sound\scsp.h">
+      <Filter>Fichiers sources\sound</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
