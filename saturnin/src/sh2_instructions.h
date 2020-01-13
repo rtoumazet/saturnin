@@ -27,12 +27,13 @@
 
 #include <array> // array
 #include "emulator_defs.h"
+#include "sh2.h"
 
 namespace saturnin {
 namespace sh2 {
 
 // Forward declarations
-class Sh2;
+//class Sh2;
 
 /// \name Instruction split functions.
 //@{

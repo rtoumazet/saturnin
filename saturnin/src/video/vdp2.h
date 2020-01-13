@@ -53,5 +53,13 @@ enum class TvStandard : s8 {
     ntsc = 1        ///< NTSC.
 };
 
+
+class Vdp2 {
+public:
+
+private:
+
+};
+
 }
 }

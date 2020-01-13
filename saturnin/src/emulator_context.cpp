@@ -22,6 +22,7 @@
 #include <future>
 #include <chrono>
 #include "cdrom/scsi.h"
+#include "sound/scsp.h"
 #include "video/opengl.h"
 #include "video/opengl_legacy.h"
 #include "video/opengl_modern.h"
@@ -43,6 +44,7 @@ namespace core {
 
 using sh2::Sh2;
 using sh2::Sh2Type;
+//using sound::Scsp;
 
 EmulatorContext::EmulatorContext() {
     config_     = std::make_unique<Config>("saturnin.cfg");
@@ -51,9 +53,11 @@ EmulatorContext::EmulatorContext() {
     memory_     = std::make_unique<Memory>(this);
     scu_        = std::make_unique<Scu>(this);
     smpc_       = std::make_unique<Smpc>(this);
+    scsp_       = std::make_unique<Scsp>(this);
 }
 
 Config* EmulatorContext::config() { return config_.get(); };
+Scsp* EmulatorContext::scsp() { return scsp_.get(); };
 
 bool EmulatorContext::initialize() {
     Log::initialize();

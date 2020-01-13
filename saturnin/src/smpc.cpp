@@ -19,13 +19,17 @@
 
 #include <map> // map
 #include <string> // string
+#include "sound/scsp.h"
 #include "smpc.h"
+#include "sh2.h"
 #include "emulator_context.h"
 
 namespace saturnin {
 namespace core {
 
 namespace util = saturnin::utilities;
+
+//using sound::Scsp;
 
 using MapKeyboardLayout = std::map<PeripheralKey, const std::string>;
 MapKeyboardLayout keyboard_layout = { 
@@ -340,6 +344,7 @@ void Smpc::setCommandDuration() {
 }
 
 void Smpc::executeCommand() {
+    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     auto command{ comreg_.get(CommandRegister::smpc_command) };
     switch (command) {
         case SmpcCommand::master_sh2_on:
@@ -385,6 +390,28 @@ void Smpc::executeCommand() {
             Log::debug("smpc", tr("-=Reset Entire System=- command executed"));
             break;
         case SmpcCommand::clock_change_320:
+            // -> VDP1, VDP2, SCU, SCSP : default power on value
+            // -> Master SH2 : unknown
+            // -> Slave SH2 : OFF
+            // -> CD block kept
+            // -> Work RAM kept
+            // -> VRAM emptied
+            switch (Config::tv_standard[ts]) {
+                case video::TvStandard::pal:  clock_ = SystemClock::pal_320; break;
+                case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
+                default:
+                    Log::warning("smpc", tr("Could not set system clock !"));
+                    clock_ = SystemClock::not_set;
+            }
+            is_slave_sh2_on_ = false;
+            emulator_context_->slaveSh2()->powerOnReset();
+
+            //emulator_context_->
+
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=Clock Change 320 Mode=- command executed"));
+            break;
         case SmpcCommand::clock_change_352:
         case SmpcCommand::nmi_request:
             break;

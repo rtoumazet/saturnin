@@ -33,7 +33,7 @@
 #include "emulator_enums.h"
 #include "config.h"
 #include "memory.h"
-#include "sound/scsp.h"
+//#include "sound/scsp.h"
 #include "scu.h"
 #include "sh2.h"
 #include "smpc.h"
@@ -42,8 +42,10 @@
 namespace saturnin {
 namespace core {
 
-using sh2::Sh2;
-using sound::Scsp;
+class Scsp;
+    
+    using sh2::Sh2;
+//using sound::Scsp;
 
 static const std::string saturnin_version{ "1.00" };
 
@@ -222,7 +224,8 @@ static const std::string saturnin_version{ "1.00" };
         /// \return A pointer to the SCSP object.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        Scsp* scsp() { return scsp_.get(); };
+        //Scsp* scsp() { return scsp_.get(); };
+        Scsp* scsp();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn HardwareMode EmulatorContext::hardwareMode() const
