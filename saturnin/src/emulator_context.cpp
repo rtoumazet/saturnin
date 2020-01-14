@@ -21,6 +21,7 @@
 #include <iostream>
 #include <future>
 #include <chrono>
+#include "cdrom/cdrom.h"
 #include "cdrom/scsi.h"
 #include "sound/scsp.h"
 #include "video/opengl.h"
@@ -29,10 +30,13 @@
 #include "config.h"
 #include "emulator_context.h"
 #include "log.h"
+#include "memory.h"
 #include "scu_registers.h"
+#include "scu.h"
 #include "sh2_instructions.h"
 #include "sh2_registers.h"
 #include "sh2.h"
+#include "smpc.h"
 
 
 namespace cdrom = saturnin::cdrom;
@@ -44,7 +48,8 @@ namespace core {
 
 using sh2::Sh2;
 using sh2::Sh2Type;
-//using sound::Scsp;
+using sound::Scsp;
+using cdrom::Cdrom;
 
 EmulatorContext::EmulatorContext() {
     config_     = std::make_unique<Config>("saturnin.cfg");
@@ -54,10 +59,19 @@ EmulatorContext::EmulatorContext() {
     scu_        = std::make_unique<Scu>(this);
     smpc_       = std::make_unique<Smpc>(this);
     scsp_       = std::make_unique<Scsp>(this);
+    cdrom_      = std::make_unique<Cdrom>(this);
 }
 
+EmulatorContext::~EmulatorContext() = default;
+
 Config* EmulatorContext::config() { return config_.get(); };
-Scsp* EmulatorContext::scsp() { return scsp_.get(); };
+Memory* EmulatorContext::memory() { return memory_.get(); };
+Sh2*    EmulatorContext::masterSh2() { return master_sh2_.get(); };
+Sh2*    EmulatorContext::slaveSh2() { return slave_sh2_.get(); };
+Scu*    EmulatorContext::scu() { return scu_.get(); };
+Smpc*   EmulatorContext::smpc() { return smpc_.get(); };
+Scsp*   EmulatorContext::scsp() { return scsp_.get(); };
+Cdrom*  EmulatorContext::cdrom() { return cdrom_.get(); };
 
 bool EmulatorContext::initialize() {
     Log::initialize();

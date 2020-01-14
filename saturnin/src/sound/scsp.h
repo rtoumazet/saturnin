@@ -43,7 +43,7 @@ public:
     //@{
     // Constructors / Destructors
     Scsp()            = delete;
-    Scsp(EmulatorContext* ec);
+    Scsp(EmulatorContext* ec) {};
     Scsp(const Scsp&) = delete;
     Scsp(Scsp&&)      = delete;
     Scsp& operator=(const Scsp&) & = delete;

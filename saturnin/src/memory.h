@@ -55,8 +55,8 @@ class Config;
 class Scu;
 class Smpc;
 
-using saturnin::sh2::Sh2;
-using saturnin::sh2::Sh2Type;
+//using saturnin::sh2::Sh2;
+//using saturnin::sh2::Sh2Type;
 
 constexpr u32 rom_memory_mask              = 0x7FFFF;
 constexpr u32 smpc_memory_mask             = 0x7F;
@@ -314,8 +314,8 @@ public:
 
     /// \name Context objects accessors
     //@{
-    Sh2* masterSh2() const;
-    Sh2* slaveSh2() const;
+    sh2::Sh2* masterSh2() const;
+    sh2::Sh2* slaveSh2() const;
     Scu*      scu() const;
     Config*   config() const;
     Smpc* smpc() const;

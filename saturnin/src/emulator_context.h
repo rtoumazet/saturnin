@@ -31,40 +31,33 @@
 #include <string> // string
 #include <thread> // thread
 #include "emulator_enums.h"
-#include "config.h"
-#include "memory.h"
-//#include "sound/scsp.h"
-#include "scu.h"
-#include "sh2.h"
-#include "smpc.h"
 #include "stv_definitions.h"
+
+// Forward declarations
+namespace saturnin::sh2 {
+    class Sh2;
+}
+namespace saturnin::sound {
+    class Scsp;
+}
+namespace saturnin::cdrom {
+    class Cdrom;
+}
 
 namespace saturnin {
 namespace core {
-
-class Scsp;
-    
-    using sh2::Sh2;
-//using sound::Scsp;
-
-static const std::string saturnin_version{ "1.00" };
 
     /// \name Class declarations.
     /// Used to speed up build time as the .h files are included in the .cpp
     ///
     //@{
-    //class CSH2;
-    //class Memory;
-    //class COGL;
-    //class InterruptHandler;
-    //class Log;
-    //class CCdRom;
-    //class SMPC;
-    //class SCU;
-    //class Vdp1;
-    //class Vdp2;
-    //class SCSP;
-    //@}
+    class Config;
+    class Memory;
+    class Scu;
+    class Smpc;
+    //@}    
+
+    static const std::string saturnin_version{ "1.00" };
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,9 +78,8 @@ static const std::string saturnin_version{ "1.00" };
         EmulatorContext(EmulatorContext&&)                   = delete;
         EmulatorContext& operator=(const EmulatorContext&) & = delete;
         EmulatorContext& operator=(EmulatorContext&&) &      = delete;
-        ~EmulatorContext()                                    = default;
+        ~EmulatorContext();
         //@}
-        // 
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn void initialize()
@@ -135,97 +127,17 @@ static const std::string saturnin_version{ "1.00" };
 
         void startInterface();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Config* EmulatorContext::config()
-        ///
-        /// \brief  Returns a pointer to config object.
-        ///
-        /// \author Runik
-        /// \date   05/07/2018
-        ///
-        /// \return A pointer to the config object
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        Config* config();
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Memory* EmulatorContext::memory()
-        ///
-        /// \brief  Returns a pointer to the memory object.
-        ///
-        /// \author Runik
-        /// \date   05/07/2018
-        ///
-        /// \return A pointer to the memory object.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        Memory* memory() { return memory_.get(); };
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Sh2* EmulatorContext::masterSh2()
-        ///
-        /// \brief  Returns a pointer to the master SH2 object.
-        ///
-        /// \author Runik
-        /// \date   09/02/2019
-        ///
-        /// \return A pointer to the master SH2 object.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        sh2::Sh2* masterSh2() { return master_sh2_.get(); };
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Sh2* EmulatorContext::slaveSh2()
-        ///
-        /// \brief  Returns a pointer to the slave SH2 object.
-        ///
-        /// \author Runik
-        /// \date   09/02/2019
-        ///
-        /// \return A pointer to the slave SH2 object.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        sh2::Sh2* slaveSh2() { return slave_sh2_.get(); };
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Scu* EmulatorContext::scu()
-        ///
-        /// \brief  Returns a pointer to the SCU object.
-        ///
-        /// \author Runik
-        /// \date   09/02/2019
-        ///
-        /// \return A pointer to the SCU objetc.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        Scu* scu() { return scu_.get(); };
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Smpc* EmulatorContext::smpc()
-        ///
-        /// \brief  Returns a pointer to the SMPC object.
-        ///
-        /// \author Runik
-        /// \date   12/12/2019
-        ///
-        /// \return A pointer to the SMPC object.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        Smpc* smpc() { return smpc_.get(); };
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn Scsp* EmulatorContext::scsp()
-        ///
-        /// \brief  Returns a pointer to the SCSP object.
-        ///
-        /// \author Runik
-        /// \date   11/01/2020
-        ///
-        /// \return A pointer to the SCSP object.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        //Scsp* scsp() { return scsp_.get(); };
-        Scsp* scsp();
+        //@{
+        // Functions returning pointers to the various systems of the emulator
+        Config*       config();
+        Memory*       memory();
+        sh2::Sh2*     masterSh2();
+        sh2::Sh2*     slaveSh2();
+        Scu*          scu();
+        Smpc*         smpc();
+        sound::Scsp*  scsp();
+        cdrom::Cdrom* cdrom();
+        //@}
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \fn HardwareMode EmulatorContext::hardwareMode() const
@@ -290,13 +202,14 @@ static const std::string saturnin_version{ "1.00" };
 
         void emulationMainThread();
 
-        std::unique_ptr<Config> config_;     ///< Configuration object
-        std::unique_ptr<Memory> memory_;     ///< Memory object
-        std::unique_ptr<Sh2>    master_sh2_; ///< Master SH2 object
-        std::unique_ptr<Sh2>    slave_sh2_;  ///< Slave SH2 object
-        std::unique_ptr<Scu>    scu_;        ///< SCU object
-        std::unique_ptr<Smpc>   smpc_;       ///< SMPC object
-        std::unique_ptr<Scsp>   scsp_;       ///< SCSP object
+        std::unique_ptr<Config>        config_;    ///< Configuration object
+        std::unique_ptr<Memory>        memory_;    ///< Memory object
+        std::unique_ptr<sh2::Sh2>      master_sh2_;///< Master SH2 object
+        std::unique_ptr<sh2::Sh2>      slave_sh2_; ///< Slave SH2 object
+        std::unique_ptr<Scu>           scu_;       ///< SCU object
+        std::unique_ptr<Smpc>          smpc_;      ///< SMPC object
+        std::unique_ptr<sound::Scsp>   scsp_;      ///< SCSP object
+        std::unique_ptr<cdrom::Cdrom>  cdrom_;     ///< CDROM object
 
         HardwareMode    hardware_mode_{ HardwareMode::saturn };     ///< Hardware mode
         EmulationStatus emulation_status_{ EmulationStatus::stopped }; ///< Emulation status

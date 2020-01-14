@@ -210,8 +210,23 @@ void Config::createDefault(const AccessKeys& value) {
         case AccessKeys::cfg_sound_disabled:
             add(full_keys[value], std::any_cast<const bool>(default_keys[value]));
             break;
+        case AccessKeys::cfg_controls_saturn_player_1:
+            add(full_keys[value], SaturnDigitalPad().toConfig(PeripheralLayout::default));
+            break;
+        case AccessKeys::cfg_controls_saturn_player_2:
+            add(full_keys[value], SaturnDigitalPad().toConfig(PeripheralLayout::empty));
+            break;
+        case AccessKeys::cfg_controls_stv_board:
+            add(full_keys[value], StvBoardControls().toConfig(PeripheralLayout::default));
+            break;
+        case AccessKeys::cfg_controls_stv_player_1:
+            add(full_keys[value], StvPlayerControls().toConfig(PeripheralLayout::default));
+            break;
+        case AccessKeys::cfg_controls_stv_player_2:
+            add(full_keys[value], StvPlayerControls().toConfig(PeripheralLayout::empty));
+            break;
         default : {
-            Log::error("config", tr("Undefined default value !"));
+            Log::error("config", tr("Undefined default value '{}'!"), full_keys[value]);
             throw std::runtime_error("Config error !");
         }
     }

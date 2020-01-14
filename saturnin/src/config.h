@@ -244,6 +244,11 @@ namespace core {
 
         template<>
         void writeValue<const PeripheralKey&>(libconfig::Setting& root, const std::string& key, const PeripheralKey& value) {
+            if (key.empty()) {
+                root.add(libconfig::Setting::TypeInt) = util::toUnderlying(value);
+                return;
+            }
+
             if (!root.exists(key.c_str())) root.add(key.c_str(), libconfig::Setting::TypeInt) = util::toUnderlying(value);
             else {
                 libconfig::Setting& s = root[key.c_str()];

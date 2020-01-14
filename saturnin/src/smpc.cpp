@@ -19,10 +19,12 @@
 
 #include <map> // map
 #include <string> // string
-#include "sound/scsp.h"
+//#include "sound/scsp.h"
 #include "smpc.h"
-#include "sh2.h"
+#include "config.h"
 #include "emulator_context.h"
+#include "sh2.h"
+
 
 namespace saturnin {
 namespace core {
@@ -368,15 +370,15 @@ void Smpc::executeCommand() {
             break;
         case SmpcCommand::sound_on:
             is_sound_on_ = true;
-            emulator_context_->scsp()->reset();
-            emulator_context_->scsp()->setSound(true);
+            //emulator_context_->scsp()->reset();
+            //emulator_context_->scsp()->setSound(true);
             oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             Log::debug("smpc", tr("-=Sound ON=- command executed"));
             break;
         case SmpcCommand::sound_off:
             is_sound_on_ = false;
-            emulator_context_->scsp()->setSound(false);
+            //emulator_context_->scsp()->setSound(false);
             oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             Log::debug("smpc", tr("-=Sound OFF=- command executed"));
@@ -384,7 +386,7 @@ void Smpc::executeCommand() {
         case SmpcCommand::reset_entire_system:
             emulator_context_->masterSh2()->powerOnReset();
             emulator_context_->slaveSh2()->powerOnReset();
-            emulator_context_->scsp()->reset();
+            //emulator_context_->scsp()->reset();
             oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             Log::debug("smpc", tr("-=Reset Entire System=- command executed"));

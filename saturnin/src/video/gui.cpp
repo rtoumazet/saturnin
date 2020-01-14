@@ -24,6 +24,7 @@
 #include "gui.h"
 #include "../../lib/imgui/imgui_custom_controls.h" // peripheralKeyCombo
 #include "../emulator_enums.h" // EmulationStatus
+#include "../config.h"
 #include "../locale.h" // tr
 #include "../smpc.h" // SaturnDigitalPad, PeripheralKey
 #include "../utilities.h" // stringToVector
