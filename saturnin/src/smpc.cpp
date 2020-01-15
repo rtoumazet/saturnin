@@ -392,6 +392,7 @@ void Smpc::executeCommand() {
             Log::debug("smpc", tr("-=Reset Entire System=- command executed"));
             break;
         case SmpcCommand::clock_change_320:
+        case SmpcCommand::clock_change_352:
             // -> VDP1, VDP2, SCU, SCSP : default power on value
             // -> Master SH2 : unknown
             // -> Slave SH2 : OFF
@@ -399,27 +400,51 @@ void Smpc::executeCommand() {
             // -> Work RAM kept
             // -> VRAM emptied
             switch (Config::tv_standard[ts]) {
-                case video::TvStandard::pal:  clock_ = SystemClock::pal_320; break;
-                case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
+                case video::TvStandard::pal:  
+                    clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::pal_320 : SystemClock::pal_352;
+                    break;
+                case video::TvStandard::ntsc: 
+                    clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::ntsc_320 : SystemClock::ntsc_352;
                 default:
                     Log::warning("smpc", tr("Could not set system clock !"));
                     clock_ = SystemClock::not_set;
             }
             is_slave_sh2_on_ = false;
             emulator_context_->slaveSh2()->powerOnReset();
-
-            //emulator_context_->
-
+            emulator_context_->cdrom()->refreshPeriod();
             oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
-            Log::debug("smpc", tr("-=Clock Change 320 Mode=- command executed"));
+            if (command == SmpcCommand::clock_change_320) Log::debug("smpc", tr("-=Clock Change 320 Mode=- command executed"));
+            if (command == SmpcCommand::clock_change_352) Log::debug("smpc", tr("-=Clock Change 352 Mode=- command executed"));
             break;
-        case SmpcCommand::clock_change_352:
         case SmpcCommand::nmi_request:
+            emulator_context_->scu()->generateInterrupt(interrupt_source::nmi);
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=NMI Request=- command executed"));
             break;
         case SmpcCommand::reset_enable:
-        case SmpcCommand::reset_disable:
+            is_soft_reset_allowed_ = true;
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=Reset Enable=- command executed"));
             break;
+        case SmpcCommand::reset_disable:
+            is_soft_reset_allowed_ = false;
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
+            Log::debug("smpc", tr("-=Reset Disable=- command executed"));
+            break;
+        case SmpcCommand::interrupt_back:
+            // WIP //
+            break;
+        case SmpcCommand::smpc_memory_setting:
+
+            break;
+        case SmpcCommand::time_setting:
+            break;
+        default:
+            Log::warning("smpc", tr("Unknown SMPC command '{}'"), util::toUnderlying(command));
     }
 }
 

@@ -433,6 +433,7 @@ private:
     bool is_master_sh2_on_{ false }; ///< Master SH2 status
     bool is_slave_sh2_on_{ false }; ///< Slave SH2 status
     bool is_sound_on_{ false }; ///< Sound status
+    bool is_soft_reset_allowed_{ false }; ///< NMI generation from reset button status
     
     
 };
