@@ -289,6 +289,10 @@ void Smpc::reset(){
     iosel_.reset();
     exle_.reset();
 
+    for (u8 i = 0; i < 4; ++i) {
+        smem_[i] = 0;
+    }
+    
     // System clock is 320 at reset.
     std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (Config::tv_standard[ts]) {
@@ -351,44 +355,32 @@ void Smpc::executeCommand() {
     switch (command) {
         case SmpcCommand::master_sh2_on:
             is_master_sh2_on_ = true;
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             Log::debug("smpc", tr("-=Master SH2 ON=- command executed"));
             break;
         case SmpcCommand::slave_sh2_on:
             is_slave_sh2_on_ = true;
             emulator_context_->slaveSh2()->powerOnReset();
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             Log::debug("smpc", tr("-=Slave SH2 ON=- command executed"));
             break;
         case SmpcCommand::slave_sh2_off:
             is_slave_sh2_on_ = false;
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             Log::debug("smpc", tr("-=Slave SH2 OFF=- command executed"));
             break;
         case SmpcCommand::sound_on:
             is_sound_on_ = true;
             //emulator_context_->scsp()->reset();
             //emulator_context_->scsp()->setSound(true);
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             Log::debug("smpc", tr("-=Sound ON=- command executed"));
             break;
         case SmpcCommand::sound_off:
             is_sound_on_ = false;
             //emulator_context_->scsp()->setSound(false);
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             Log::debug("smpc", tr("-=Sound OFF=- command executed"));
             break;
         case SmpcCommand::reset_entire_system:
             emulator_context_->masterSh2()->powerOnReset();
             emulator_context_->slaveSh2()->powerOnReset();
             //emulator_context_->scsp()->reset();
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             Log::debug("smpc", tr("-=Reset Entire System=- command executed"));
             break;
         case SmpcCommand::clock_change_320:
@@ -412,40 +404,40 @@ void Smpc::executeCommand() {
             is_slave_sh2_on_ = false;
             emulator_context_->slaveSh2()->powerOnReset();
             emulator_context_->cdrom()->refreshPeriod();
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             if (command == SmpcCommand::clock_change_320) Log::debug("smpc", tr("-=Clock Change 320 Mode=- command executed"));
             if (command == SmpcCommand::clock_change_352) Log::debug("smpc", tr("-=Clock Change 352 Mode=- command executed"));
             break;
         case SmpcCommand::nmi_request:
             emulator_context_->scu()->generateInterrupt(interrupt_source::nmi);
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             Log::debug("smpc", tr("-=NMI Request=- command executed"));
             break;
         case SmpcCommand::reset_enable:
             is_soft_reset_allowed_ = true;
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             Log::debug("smpc", tr("-=Reset Enable=- command executed"));
             break;
         case SmpcCommand::reset_disable:
             is_soft_reset_allowed_ = false;
-            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-            sf_.reset();
             Log::debug("smpc", tr("-=Reset Disable=- command executed"));
             break;
         case SmpcCommand::interrupt_back:
             // WIP //
             break;
         case SmpcCommand::smpc_memory_setting:
-
+            for (u8 i = 0; i < 4; ++i) {
+                smem_[i] = ireg_[i].get(InputRegister::all_bits);
+            }
+            Log::debug("smpc", tr("-=SMPC Memory Setting=- command executed"));
             break;
         case SmpcCommand::time_setting:
+            
+            Log::debug("smpc", tr("-=Time Setting=- command executed"));
             break;
         default:
             Log::warning("smpc", tr("Unknown SMPC command '{}'"), util::toUnderlying(command));
     }
+    oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+    sf_.reset();
+
 }
 
 u8 Smpc::read(const u32 addr) {
