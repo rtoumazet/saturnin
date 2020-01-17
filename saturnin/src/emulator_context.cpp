@@ -38,6 +38,8 @@
 #include "sh2.h"
 #include "smpc.h"
 
+//#include <date/date.h>
+
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
@@ -118,6 +120,29 @@ void EmulatorContext::startEmulation() {
     auto val = micro(30) / cycle_duration;
     auto val2 = static_cast<u32>(val);
      
+
+    struct DateTime {              // hold date/time (interpreted as UTC), to be converted to time_point
+        int year;
+        int month;
+        int day;
+        int hour = 0;
+        int min = 0;
+        int sec = 0;
+    };
+
+    DateTime datetime{ 1993, 12, 31, 23, 59, 59};
+
+    using namespace std::chrono;
+
+
+    std::chrono::seconds current(1);
+
+    system_clock::time_point today = system_clock::now();
+    //system_clock::time_point tomorrow = today + one_day;
+
+    std::time_t tt = system_clock::to_time_t(today);
+    
+    
     
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable

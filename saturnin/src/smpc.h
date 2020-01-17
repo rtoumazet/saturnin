@@ -29,6 +29,7 @@
 #include <GLFW/glfw3.h> // Keyboard handling
 #include <vector> // vector
 #include <chrono> // duration
+#include <array> // array
 #include "smpc_registers.h"
 
 // Forward declarations
