@@ -135,5 +135,20 @@ const auto getKeyFromValue(const M& map, const V find_value) {
 
 std::vector<std::string> explode(std::string const & s, char delim);
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn uint32_t dec2bcd(uint16_t dec)
+///
+/// \brief  Converts a number to BCD.
+///
+/// \author Runik
+/// \date   19/01/2020
+///
+/// \param  dec The number to convert to bcd.
+///
+/// \return The number in bcd representation.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+uint32_t dec2bcd(uint16_t dec);
+
 }
 }

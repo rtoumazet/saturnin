@@ -17,6 +17,8 @@
 // limitations under the License.
 // 
 
+#include <chrono>
+#include <date/date.h>
 #include <map> // map
 #include <string> // string
 //#include "sound/scsp.h"
@@ -24,6 +26,8 @@
 #include "config.h"
 #include "emulator_context.h"
 #include "sh2.h"
+
+
 
 
 namespace saturnin {
@@ -440,6 +444,18 @@ void Smpc::executeCommand() {
 
 }
 
+void Smpc::executeIntback() {
+
+};
+
+void Smpc::getStatus() {
+
+};
+
+void Smpc::getPeripheralData() {
+
+}
+
 u8 Smpc::read(const u32 addr) {
     switch (addr) {
         case status_register:
@@ -567,5 +583,48 @@ std::string getKeyName(const PeripheralKey pk) {
     return keyboard_layout[pk];
 }
 
+RtcTime getRtcTime() {
+    using namespace date;
+    using namespace std::chrono;
+
+    auto tp      = system_clock::now();
+    auto dp      = floor<days>(tp); // Day part of time_point
+    auto time    = make_time(tp - dp); // Time part of time_point
+    auto today   = year_month_day(dp);
+    auto weekday = year_month_weekday(dp);
+
+    RtcTime rtc;
+    u16 year          = static_cast<int>(today.year());
+    auto year_bcd     = util::dec2bcd(year);
+    rtc.year_1000_bcd = std::bitset<4>((year_bcd >> 12) & 0xF);
+    rtc.year_100_bcd  = std::bitset<4>((year_bcd >> 8) & 0xF);
+    rtc.year_10_bcd   = std::bitset<4>((year_bcd >> 4) & 0xF);
+    rtc.year_1_bcd    = std::bitset<4>(year_bcd & 0xF);
+
+    rtc.month_hex     = static_cast<unsigned>(today.month());
+    rtc.day_hex       = weekday.weekday().c_encoding();
+
+    u16 month         = static_cast<unsigned>(today.month());
+    auto month_bcd    = util::dec2bcd(month);
+    rtc.day_10_bcd    = std::bitset<4>((month_bcd >> 4) & 0xF);
+    rtc.day_1_bcd     = std::bitset<4>(month_bcd & 0xF);
+
+    u16 hour          = time.hours().count();
+    auto hour_bcd     = util::dec2bcd(hour);
+    rtc.hour_10_bcd   = std::bitset<4>((hour_bcd >> 4) & 0xF);
+    rtc.hour_1_bcd    = std::bitset<4>(hour_bcd & 0xF);
+
+    u16 minute        = time.minutes().count();
+    auto minute_bcd   = util::dec2bcd(minute);
+    rtc.minute_10_bcd = std::bitset<4>((minute_bcd >> 4) & 0xF);
+    rtc.minute_1_bcd  = std::bitset<4>(minute_bcd & 0xF);
+
+    u16 second          = static_cast<u16>(time.seconds().count());
+    auto second_bcd     = util::dec2bcd(second);
+    rtc.second_10_bcd   = 0;
+    rtc.second_1_bcd    = 0;
+    
+    return rtc;
+}
 }
 }

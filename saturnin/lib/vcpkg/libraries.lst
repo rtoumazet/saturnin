@@ -1,4 +1,5 @@
 boost-locale
+date
 glbinding
 glfw3
 glm

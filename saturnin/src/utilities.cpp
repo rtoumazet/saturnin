@@ -68,5 +68,17 @@ std::vector<std::string> explode(std::string const & s, char delim)
     return result;
 }
 
+uint32_t dec2bcd(uint16_t dec) {
+    uint32_t result = 0;
+    int shift = 0;
+
+    while (dec) {
+        result += (dec % 10) << shift;
+        dec = dec / 10;
+        shift += 4;
+    }
+    return result;
+}
+
 }
 }

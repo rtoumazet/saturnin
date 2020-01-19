@@ -16,8 +16,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
-#include <chrono>
+//#define NOMINMAX
+//#include <chrono>
 #include <iostream>
 #include <future>
 #include <chrono>
@@ -37,8 +37,6 @@
 #include "sh2_registers.h"
 #include "sh2.h"
 #include "smpc.h"
-
-//#include <date/date.h>
 
 
 namespace cdrom = saturnin::cdrom;
@@ -119,31 +117,9 @@ void EmulatorContext::startEmulation() {
     using micro = std::chrono::duration<double, std::micro>;
     auto val = micro(30) / cycle_duration;
     auto val2 = static_cast<u32>(val);
+
+    auto rtc = getRtcTime();
      
-
-    struct DateTime {              // hold date/time (interpreted as UTC), to be converted to time_point
-        int year;
-        int month;
-        int day;
-        int hour = 0;
-        int min = 0;
-        int sec = 0;
-    };
-
-    DateTime datetime{ 1993, 12, 31, 23, 59, 59};
-
-    using namespace std::chrono;
-
-
-    std::chrono::seconds current(1);
-
-    system_clock::time_point today = system_clock::now();
-    //system_clock::time_point tomorrow = today + one_day;
-
-    std::time_t tt = system_clock::to_time_t(today);
-    
-    
-    
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
     //std::cout << "loading the plugin" << std::endl;

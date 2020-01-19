@@ -159,6 +159,41 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   AcquisitionTimeOptimization
+///
+/// \brief  Acquisition time optimizations values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class AcquisitionTimeOptimization : u8 {
+    optimized     = 0,
+    not_optimized = 1
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PeripheralDataEnable
+///
+/// \brief  Peripheral data enable values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PeripheralDataEnable : u8 {
+    peripheral_data_not_returned = 0,
+    peripheral_data_returned     = 1
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PortMode
+///
+/// \brief  Port mode values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PortMode : u8 {
+    mode_15_byte  = 0b00, ///< 15-byte mode.
+    mode_255_byte = 0b01, ///< 255-byte mode.
+    mode_reserved = 0b10, ///< Sega reserved.
+    mode_0_byte   = 0b11  ///< 0-byte mode.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  InputRegister
 ///
 /// \brief  Input Register (IREGx).
@@ -170,7 +205,11 @@ public:
 class InputRegister : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<u8> all_bits{ 0, 7 };   ///< Defines the range of all the bits of the register.
+    inline static const BitRange<AcquisitionTimeOptimization> acquisition_time_optimization{ 2 }; ///< Defines if peripheral acquisition time is optimized.
+    inline static const BitRange<PeripheralDataEnable> peripheral_data_enable{ 3 }; ///< Defines if peripheral data is enabled.
+    inline static const BitRange<PortMode> port_1_mode{ 4, 5 }; ///< Defines port 1 mode.
+    inline static const BitRange<PortMode> port_2_mode{ 6, 7 }; ///< Defines port 2 mode.
+    inline static const BitRange<u8> all_bits{ 0, 7 };          ///< Defines the range of all the bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

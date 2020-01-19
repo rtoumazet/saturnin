@@ -287,6 +287,32 @@ struct StvPeripheralMapping {
     StvPlayerControls player_2;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct RtcTime
+///
+/// \brief  RTC time struct.
+///
+/// \author Runik
+/// \date   17/01/2020
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct RtcTime {
+    std::bitset<4> year_1000_bcd;
+    std::bitset<4> year_100_bcd;
+    std::bitset<4> year_10_bcd;
+    std::bitset<4> year_1_bcd;
+    std::bitset<4> day_hex; // (Hex) 0:Sun, 1:Mon, 2:Tue, 3:Wed, 4:Thur, 5:Fri, 6:Sat
+    std::bitset<4> month_hex; // (Hex) 1:Jan, 2:Feb, 3:Mar, 4:Apr, 5:May, 6:Jun, 7:July, 8:Aug, 9:Sep, A:Oct, B:Nov, C:Dec
+    std::bitset<4> day_10_bcd;
+    std::bitset<4> day_1_bcd;
+    std::bitset<4> hour_10_bcd;
+    std::bitset<4> hour_1_bcd;
+    std::bitset<4> minute_10_bcd;
+    std::bitset<4> minute_1_bcd;
+    std::bitset<4> second_10_bcd;
+    std::bitset<4> second_1_bcd;
+};
+
 class Smpc {
 public:
     //@{
@@ -403,6 +429,39 @@ private:
 
     u32 calculateCyclesNumber(const std::chrono::duration<double>& d);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::getStatus();
+    ///
+    /// \brief  Gets the SMPC status.
+    ///
+    /// \author Runik
+    /// \date   19/01/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void getStatus();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::getPeripheralData();
+    ///
+    /// \brief  Gets peripheral data.
+    ///
+    /// \author Runik
+    /// \date   19/01/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void getPeripheralData();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::executeIntback();
+    ///
+    /// \brief  Executes Intback command.
+    ///
+    /// \author Runik
+    /// \date   19/01/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void executeIntback();
+    
     EmulatorContext* emulator_context_;    ///< Context of the emulator
 
     //@{
@@ -437,9 +496,7 @@ private:
     bool is_soft_reset_allowed_{ false }; ///< NMI generation from reset button status
 
     std::array <u8, 0x4> smem_;   ///< SMPC battery backupable memory (4B).
-    
-    
-};
+    };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn std::string getKeyName(const PeripheralKey pk);
@@ -455,6 +512,19 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::string getKeyName(const PeripheralKey pk);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn RtcTime getRtcTime();
+///
+/// \brief  Returns current time in SMPC RTC format (BCD).
+///
+/// \author Runik
+/// \date   18/01/2020
+///
+/// \return The RTC time.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RtcTime getRtcTime();
 
 }
 }
