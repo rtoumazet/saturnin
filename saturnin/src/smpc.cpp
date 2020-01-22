@@ -451,11 +451,11 @@ void Smpc::executeIntback() {
 void Smpc::getStatus() {
     sr_[7] = 0;
     sr_[6] = 1;
-    sr_[sr_.peripheral_data_enable] = PeripheralDataEnable::no_remaining_peripheral_data;
+    //sr_[sr_.peripheral_data_enable] = PeripheralDataEnable::no_remaining_peripheral_data;
 };
 
 void Smpc::getPeripheralData() {
-
+    Log::debug("smpc", tr("Returning peripheral data"));
 }
 
 u8 Smpc::read(const u32 addr) {

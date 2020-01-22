@@ -113,6 +113,10 @@ class Register {
             }
         }
 
+        std::bitset<32>::reference inline operator[](const u8 index) {
+            return register_value[index];
+        }
+        
         inline void set() {
             register_value.set();
         }
