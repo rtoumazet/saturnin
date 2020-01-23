@@ -119,7 +119,8 @@ void EmulatorContext::startEmulation() {
     auto val2 = static_cast<u32>(val);
 
     auto rtc = getRtcTime();
-     
+
+   
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library
     //boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
     //std::cout << "loading the plugin" << std::endl;

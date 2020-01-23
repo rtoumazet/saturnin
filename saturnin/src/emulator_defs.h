@@ -117,6 +117,10 @@ class Register {
             register_value.set();
         }
 
+        inline std::bitset<32>::reference operator[] (const u8 index) {
+            return register_value[index];
+        }
+
         template <typename T>
         inline void reset(const BitRange<T>& r) {
             for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {

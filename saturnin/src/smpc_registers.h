@@ -128,6 +128,16 @@ public:
     inline static const BitRange<u8> all_bits{ 0, 7 };   ///< Defines the range of all the bits of the register.
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ResetButtonStatus
+///
+/// \brief  Rest button status values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ResetButtonStatus : u8 {
+    button_off = 0, ///< Reset button off.
+    button_on  = 1  ///< Reset buton on.
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralDataRemaining
@@ -152,6 +162,7 @@ enum class PeripheralDataRemaining : u8 {
 class StatusRegister : public Register {
 public:
     using Register::Register;
+    inline static const BitRange<ResetButtonStatus> reset_button_status{ 4 }; ///< Defines RESB bit.
     inline static const BitRange<PeripheralDataRemaining> peripheral_data_remaining{ 5 }; ///< Defines PDE bit.
     inline static const BitRange<u8> all_bits{ 0, 7 };   ///< Defines the range of all the bits of the register.
 };

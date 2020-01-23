@@ -451,7 +451,17 @@ void Smpc::executeIntback() {
 void Smpc::getStatus() {
     sr_[7] = 0;
     sr_[6] = 1;
-    sr_[sr_.peripheral_data_enable] = PeripheralDataEnable::no_remaining_peripheral_data;
+
+    bool is_status_returned = ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned;
+    bool is_peripheral_data_returned = ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned;
+    if (is_status_returned && !is_peripheral_data_returned) {
+        sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
+    } else {
+        sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::remaining_peripheral_data);
+    }
+    
+
+    
 };
 
 void Smpc::getPeripheralData() {
