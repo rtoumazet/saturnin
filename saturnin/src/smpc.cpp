@@ -1,4 +1,4 @@
-// 
+//
 // smpc.cpp
 // Saturnin
 //
@@ -15,7 +15,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 #include <chrono>
 #include <date/date.h>
@@ -38,8 +38,8 @@ namespace util = saturnin::utilities;
 //using sound::Scsp;
 
 using MapKeyboardLayout = std::map<PeripheralKey, const std::string>;
-MapKeyboardLayout keyboard_layout = { 
-    { PeripheralKey::key_space, "space"}, 
+MapKeyboardLayout keyboard_layout = {
+    { PeripheralKey::key_space, "space"},
     { PeripheralKey::key_apostrophe, "'"},
     { PeripheralKey::key_comma, ","},
     { PeripheralKey::key_minus, "-"},
@@ -147,7 +147,7 @@ MapKeyboardLayout keyboard_layout = {
     { PeripheralKey::key_right_super, "right super"},
     { PeripheralKey::key_menu, "menu"}
 };
-    
+
 std::vector<PeripheralKey> SaturnDigitalPad::toConfig(const PeripheralLayout layout) {
     switch (layout) {
         case PeripheralLayout::empty:
@@ -190,20 +190,20 @@ void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
     direction_right       = config[1];
     direction_up          = config[2];
     direction_down        = config[3];
-    button_shoulder_left  = config[4]; 
+    button_shoulder_left  = config[4];
     button_shoulder_right = config[5];
     button_a              = config[6];
-    button_b              = config[7]; 
+    button_b              = config[7];
     button_c              = config[8];
-    button_x              = config[9]; 
-    button_y              = config[10]; 
+    button_x              = config[9];
+    button_y              = config[10];
     button_z              = config[11];
     button_start          = config[12];
 }
 
 std::vector<PeripheralKey> StvPlayerControls::toConfig(const PeripheralLayout layout) {
     switch (layout) {
-        case PeripheralLayout::empty: 
+        case PeripheralLayout::empty:
             return std::vector<PeripheralKey> {
                 PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown,
                 PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown
@@ -211,7 +211,7 @@ std::vector<PeripheralKey> StvPlayerControls::toConfig(const PeripheralLayout la
         case PeripheralLayout::current:
             return std::vector<PeripheralKey> {
                 direction_left, direction_right, direction_up, direction_down,
-                button_1, button_2, button_3, button_4 
+                button_1, button_2, button_3, button_4
             };
         default:
             return std::vector<PeripheralKey> {
@@ -242,19 +242,19 @@ void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
 
 std::vector<PeripheralKey> StvBoardControls::toConfig(const PeripheralLayout layout) {
     switch (layout) {
-        case PeripheralLayout::empty:   
-            return std::vector<PeripheralKey> { 
-                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown, 
+        case PeripheralLayout::empty:
+            return std::vector<PeripheralKey> {
+                PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown,
                 PeripheralKey::key_unknown, PeripheralKey::key_unknown, PeripheralKey::key_unknown
             };
-        case PeripheralLayout::current: 
-            return std::vector<PeripheralKey> { 
-                service_switch, test_switch, p1_coin_switch, 
-                p2_coin_switch, p1_start, p2_start 
+        case PeripheralLayout::current:
+            return std::vector<PeripheralKey> {
+                service_switch, test_switch, p1_coin_switch,
+                p2_coin_switch, p1_start, p2_start
             };
-        default:                        
-            return std::vector<PeripheralKey> { 
-                PeripheralKey::key_1, PeripheralKey::key_2, PeripheralKey::key_5, 
+        default:
+            return std::vector<PeripheralKey> {
+                PeripheralKey::key_1, PeripheralKey::key_2, PeripheralKey::key_5,
                 PeripheralKey::key_6, PeripheralKey::key_7, PeripheralKey::key_8 };
     }
 }
@@ -296,18 +296,18 @@ void Smpc::reset(){
     for (u8 i = 0; i < 4; ++i) {
         smem_[i] = 0;
     }
-    
+
     // System clock is 320 at reset.
     std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (Config::tv_standard[ts]) {
         case video::TvStandard::pal:  clock_ = SystemClock::pal_320; break;
         case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
-        default:                      
+        default:
             Log::warning("smpc", tr("Could not set system clock !"));
             clock_ = SystemClock::not_set;
     }
 
-    
+
 }
 
 u32 Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) {
@@ -320,15 +320,15 @@ void Smpc::setCommandDuration() {
     using micro = std::chrono::duration<double, std::micro>;
     using milli = std::chrono::duration<double, std::milli>;
     switch (comreg_.get(CommandRegister::smpc_command)) {
-        case SmpcCommand::master_sh2_on: 
-        case SmpcCommand::slave_sh2_on: 
-        case SmpcCommand::slave_sh2_off: 
-        case SmpcCommand::sound_on: 
-        case SmpcCommand::sound_off: 
-        case SmpcCommand::nmi_request: 
-        case SmpcCommand::reset_enable: 
-        case SmpcCommand::reset_disable: 
-            intback_remaining_cycles_ = calculateCyclesNumber(micro(30)); 
+        case SmpcCommand::master_sh2_on:
+        case SmpcCommand::slave_sh2_on:
+        case SmpcCommand::slave_sh2_off:
+        case SmpcCommand::sound_on:
+        case SmpcCommand::sound_off:
+        case SmpcCommand::nmi_request:
+        case SmpcCommand::reset_enable:
+        case SmpcCommand::reset_disable:
+            intback_remaining_cycles_ = calculateCyclesNumber(micro(30));
             break;
         case SmpcCommand::cd_on:
         case SmpcCommand::cd_off:
@@ -396,10 +396,10 @@ void Smpc::executeCommand() {
             // -> Work RAM kept
             // -> VRAM emptied
             switch (Config::tv_standard[ts]) {
-                case video::TvStandard::pal:  
+                case video::TvStandard::pal:
                     clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::pal_320 : SystemClock::pal_352;
                     break;
-                case video::TvStandard::ntsc: 
+                case video::TvStandard::ntsc:
                     clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::ntsc_320 : SystemClock::ntsc_352;
                 default:
                     Log::warning("smpc", tr("Could not set system clock !"));
@@ -433,7 +433,7 @@ void Smpc::executeCommand() {
             Log::debug("smpc", tr("-=SMPC Memory Setting=- command executed"));
             break;
         case SmpcCommand::time_setting:
-            
+
             Log::debug("smpc", tr("-=Time Setting=- command executed"));
             break;
         default:
@@ -451,7 +451,6 @@ void Smpc::executeIntback() {
 void Smpc::getStatus() {
     sr_[7] = 0;
     sr_[6] = 1;
-
     bool is_status_returned = ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned;
     bool is_peripheral_data_returned = ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned;
     if (is_status_returned && !is_peripheral_data_returned) {
@@ -459,13 +458,10 @@ void Smpc::getStatus() {
     } else {
         sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::remaining_peripheral_data);
     }
-    
-
-    
 };
 
 void Smpc::getPeripheralData() {
-
+    Log::debug("smpc", tr("Returning peripheral data"));
 }
 
 u8 Smpc::read(const u32 addr) {
@@ -506,10 +502,10 @@ u8 Smpc::read(const u32 addr) {
         case output_register_29: return oreg_[29].get(OutputRegister::all_bits);
         case output_register_30: return oreg_[30].get(OutputRegister::all_bits);
         case output_register_31: return oreg_[31].get(OutputRegister::all_bits);
-        case port_data_register_1: 
+        case port_data_register_1:
             if (emulator_context_->hardwareMode() == HardwareMode::stv) return 0xFF;
             return pdr1_.get(PortDataRegister::all_bits);
-        case port_data_register_2: 
+        case port_data_register_2:
             //if (emulator_context_->hardwareMode() == HardwareMode::stv) {
             //    pdr2_.reset();
             //    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(stv_mapping_.board_controls.test_switch)) == GLFW_PRESS) {
@@ -540,7 +536,7 @@ void Smpc::write(const u32 addr, const u8 data) {
         case input_register_5: ireg_[5].set(InputRegister::all_bits, data); break;
         case input_register_6: ireg_[6].set(InputRegister::all_bits, data); break;
         case port_data_register_1: pdr1_.set(PortDataRegister::all_bits, data); break;
-        case port_data_register_2: 
+        case port_data_register_2:
             if (emulator_context_->hardwareMode() == HardwareMode::stv) {
                 if (data & 0x10) {
                     Log::debug("smpc", tr("-=Sound OFF=-"));
@@ -556,7 +552,7 @@ void Smpc::write(const u32 addr, const u8 data) {
                     //EmuState::pScsp->SetSound(true);
                 }
             }
-            pdr2_.set(PortDataRegister::all_bits, data); 
+            pdr2_.set(PortDataRegister::all_bits, data);
             break;
         case data_direction_register_1: ddr1_.set(DataDirectionRegister::all_bits, data); break;
         case data_direction_register_2: ddr2_.set(DataDirectionRegister::all_bits, data); break;
@@ -635,7 +631,7 @@ RtcTime getRtcTime() {
     auto second_bcd     = util::dec2bcd(second);
     rtc.second_10_bcd   = 0;
     rtc.second_1_bcd    = 0;
-    
+
     return rtc;
 }
 }
