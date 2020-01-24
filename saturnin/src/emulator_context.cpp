@@ -119,6 +119,7 @@ void EmulatorContext::startEmulation() {
     auto val2 = static_cast<u32>(val);
 
     auto rtc = getRtcTime();
+    auto year = rtc.getUpperYear();
 
    
     //boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with our plugin library

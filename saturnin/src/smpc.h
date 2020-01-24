@@ -311,6 +311,24 @@ struct RtcTime {
     std::bitset<4> minute_1_bcd;
     std::bitset<4> second_10_bcd;
     std::bitset<4> second_1_bcd;
+
+    u8 getUpperYear(){
+        return concat(year_1000_bcd, year_100_bcd);
+    }
+
+    u8 getLowerYear() {
+        return concat(year_10_bcd, year_1_bcd);
+    }
+
+
+private:
+    u8 concat(std::bitset<4> upper, std::bitset<4> lower) {
+        std::bitset<8> left = upper.to_ulong();
+        left <<= 4;
+        std::bitset<8> right = lower.to_ulong();
+        left |= right;
+        return static_cast<u8>(left.to_ulong());
+    }
 };
 
 class Smpc {

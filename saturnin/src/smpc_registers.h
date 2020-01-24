@@ -249,6 +249,28 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ResetStatus
+///
+/// \brief  Defines OREG0 - RESD bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ResetStatus : u8 {
+    enabled  = 0, ///< Reset enabled.
+    disabled = 1  ///< Reset disabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SetTime
+///
+/// \brief  Defines OREG0 - STE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SetTime : u8 {
+    not_set_time = 0, ///< Not SETTIME after SMPC cold reset.
+    set_time     = 1  ///< SETTIME is done after SMPC cold reset.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  OutputRegister
 ///
 /// \brief  Output Register (OREGx).
@@ -260,7 +282,9 @@ public:
 class OutputRegister : public Register {
 public:
     using Register::Register;
-    inline static const BitRange<u8> all_bits{ 0, 7 };   ///< Defines the range of all the bits of the register.
+    inline static const BitRange<ResetStatus> oreg0_reset_status { 6 }; ///< Defines RESD bit (OREG0).
+    inline static const BitRange<SetTime>     oreg0_set_time{ 7 };      ///< Defines STE bit (OREG0).
+    inline static const BitRange<u8>          all_bits{ 0, 7 };         ///< Defines the range of all the bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -449,7 +449,7 @@ void Smpc::executeIntback() {
 };
 
 void Smpc::getStatus() {
-    sr_[7] = 0;
+    sr_.reset();
     sr_[6] = 1;
     bool is_status_returned = ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned;
     bool is_peripheral_data_returned = ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned;
@@ -458,6 +458,17 @@ void Smpc::getStatus() {
     } else {
         sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::remaining_peripheral_data);
     }
+
+    oreg_[0].reset();
+    if (is_soft_reset_allowed_) oreg_[0].set(OutputRegister::oreg0_reset_status, ResetStatus::enabled);
+    else oreg_[0].set(OutputRegister::oreg0_reset_status, ResetStatus::disabled);
+
+    oreg_[0].set(OutputRegister::oreg0_set_time, SetTime::set_time);
+
+    auto rtc = getRtcTime();
+
+    //oreg_[1].set(OutputRegister::all_bits, u8(rtc.year_1000_bcd. << 4 | rtc.year_100_bcd));
+    
 };
 
 void Smpc::getPeripheralData() {
