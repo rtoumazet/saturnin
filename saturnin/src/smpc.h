@@ -40,6 +40,18 @@ namespace saturnin::core {
 namespace saturnin {
 namespace core {
 
+
+enum class AreaCode : u8 {
+    japan                      = 0x1, ///< Japan
+    asia_ntsc                  = 0x2, ///< Taiwan, Philippines
+    north_america              = 0x4, ///< USA, Canada, Mexico
+    central_south_america_ntsc = 0x5, ///< Brazil
+    korea                      = 0x6, ///< South Korea
+    asia_pal                   = 0xA, ///< East Asia, China, Middle East
+    europe_pal                 = 0xC, ///< Europe, Australia, South Africa
+    central_south_america_pal  = 0xD
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   SystemClock
 ///
@@ -312,14 +324,13 @@ struct RtcTime {
     std::bitset<4> second_10_bcd;
     std::bitset<4> second_1_bcd;
 
-    u8 getUpperYear(){
-        return concat(year_1000_bcd, year_100_bcd);
-    }
-
-    u8 getLowerYear() {
-        return concat(year_10_bcd, year_1_bcd);
-    }
-
+    u8 getUpperYear(){ return concat(year_1000_bcd, year_100_bcd); }
+    u8 getLowerYear(){ return concat(year_10_bcd, year_1_bcd); }
+    u8 getDayMonth() { return concat(day_hex, month_hex); }
+    u8 getDays()     { return concat(day_10_bcd, day_1_bcd); }
+    u8 getHours()    { return concat(hour_10_bcd, hour_1_bcd); }
+    u8 getMinutes()  { return concat(minute_10_bcd, minute_1_bcd); }
+    u8 getSeconds()  { return concat(second_10_bcd, second_1_bcd); }
 
 private:
     u8 concat(std::bitset<4> upper, std::bitset<4> lower) {
@@ -512,6 +523,8 @@ private:
     bool is_slave_sh2_on_{ false }; ///< Slave SH2 status
     bool is_sound_on_{ false }; ///< Sound status
     bool is_soft_reset_allowed_{ false }; ///< NMI generation from reset button status
+    bool is_horizontal_res_352{ false }; ///< Horizontal resolution (320/352)
+    bool is_cd_on{ false }; ///< CD status
 
     std::array <u8, 0x4> smem_;   ///< SMPC battery backupable memory (4B).
     };

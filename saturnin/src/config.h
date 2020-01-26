@@ -56,6 +56,7 @@ namespace core {
     enum class AccessKeys {
         cfg_global_language,
         cfg_global_hardware_mode,
+        cfg_global_area_code,
         cfg_rendering_tv_standard,
         cfg_rendering_legacy_opengl,
         cfg_paths_roms_stv,
@@ -114,6 +115,9 @@ namespace core {
 
         using MapTvStandard = std::map<const std::string, const video::TvStandard>;  ///< MapHardwareMode alias definition.
         static MapTvStandard tv_standard;   ///< Link between the tv standard string value defined in the config file and the TvStandard type.
+
+        using MapAreaCode = std::map<const std::string, const AreaCode>;  ///< MapAreaCode alias definition.
+        static MapAreaCode area_code;   ///< Link between the area code string value defined in the config file and the AreaCode type.
 
         //@{
         // Constructors / Destructors
@@ -382,6 +386,19 @@ namespace core {
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
        std::vector<std::string> listAvailableLanguages();
+
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+       /// \fn  std::vector<std::string> Config::listAreaCodes();
+       ///
+       /// \brief   Returns a vector populated with area codes.
+       ///
+       /// \author  Runik
+       /// \date    26/01/2020
+       ///
+       /// \return  A std::vector<std::string>
+       ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+       std::vector<std::string> listAreaCodes();
 
        ////////////////////////////////////////////////////////////////////////////////////////////////////
        /// \fn  template<class T> void Config::add(const std::string key, T default)

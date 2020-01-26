@@ -39,6 +39,7 @@ using core::Log;
 Config::MapKeys Config::full_keys = { 
     { AccessKeys::cfg_global_language,         "global.language" }, 
     { AccessKeys::cfg_global_hardware_mode,    "global.hardware_mode" },
+    { AccessKeys::cfg_global_area_code,        "global.area_code" },
     { AccessKeys::cfg_rendering_legacy_opengl, "rendering.legacy_opengl" },
     { AccessKeys::cfg_rendering_tv_standard,   "rendering.tv_standard" },
     { AccessKeys::cfg_paths_roms_stv,          "paths.roms_stv" },
@@ -65,6 +66,7 @@ Config::MapKeys Config::full_keys = {
 Config::MapKeysDefault Config::default_keys = {
     { AccessKeys::cfg_global_language,         std::string("en") },
     { AccessKeys::cfg_global_hardware_mode,    std::string("SATURN") },
+    { AccessKeys::cfg_global_area_code,        std::string("EUROPE_PAL") },
     { AccessKeys::cfg_rendering_tv_standard,   std::string("PAL") },
     { AccessKeys::cfg_rendering_legacy_opengl, false },
     { AccessKeys::cfg_paths_roms_stv,          std::string("") },
@@ -103,6 +105,17 @@ Config::MapTvStandard Config::tv_standard = {
     {"NTSC", video::TvStandard::ntsc}
 };
 
+Config::MapAreaCode Config::area_code = {
+    {"JAPAN",                      AreaCode::japan},
+    {"ASIA_NTSC",                  AreaCode::asia_ntsc},
+    {"NORTH_AMERICA",              AreaCode::north_america},
+    {"CENTRAL_SOUTH_AMERICA_NTSC", AreaCode::central_south_america_ntsc},
+    {"KOREA",                      AreaCode::korea},
+    {"ASIA_PAL",                   AreaCode::asia_pal},
+    {"EUROPE_PAL",                 AreaCode::europe_pal},
+    {"CENTRAL_SOUTH_AMERICA_PAL",  AreaCode::central_south_america_pal}
+};
+
 void Config::writeFile() {
     cfg_.writeFile(this->filename_.c_str());
 }
@@ -135,6 +148,7 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
 
     add(full_keys[AccessKeys::cfg_global_language],          std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_global_language]));
     add(full_keys[AccessKeys::cfg_global_hardware_mode],     std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_global_hardware_mode]));
+    add(full_keys[AccessKeys::cfg_global_area_code],         std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_global_area_code]));
     add(full_keys[AccessKeys::cfg_rendering_tv_standard],    std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_rendering_tv_standard]));
     add(full_keys[AccessKeys::cfg_rendering_legacy_opengl],  !isModernOpenglCapable);
     add(full_keys[AccessKeys::cfg_paths_roms_stv],           std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_paths_roms_stv]));
@@ -197,6 +211,7 @@ void Config::createDefault(const AccessKeys& value) {
     switch (value) {
         case AccessKeys::cfg_global_language: 
         case AccessKeys::cfg_global_hardware_mode: 
+        case AccessKeys::cfg_global_area_code: 
         case AccessKeys::cfg_rendering_tv_standard: 
         case AccessKeys::cfg_paths_roms_stv:
         case AccessKeys::cfg_paths_bios_stv:
@@ -250,6 +265,14 @@ std::vector<std::string> Config::listAvailableLanguages() {
         }
     }
     return files;
+}
+
+std::vector<std::string> Config::listAreaCodes() {
+    std::vector<std::string> codes;
+    for (const auto& code : area_code) {
+        codes.push_back(code.first);
+    }
+    return codes;
 }
 
 };

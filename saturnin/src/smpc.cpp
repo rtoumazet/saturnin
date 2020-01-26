@@ -381,6 +381,14 @@ void Smpc::executeCommand() {
             //emulator_context_->scsp()->setSound(false);
             Log::debug("smpc", tr("-=Sound OFF=- command executed"));
             break;
+        case SmpcCommand::cd_on:
+            is_cd_on = true;
+            Log::debug("smpc", tr("-=CD ON=- command executed"));
+            break;
+        case SmpcCommand::cd_off:
+            is_cd_on = false;
+            Log::debug("smpc", tr("-=CD OFF=- command executed"));
+            break;
         case SmpcCommand::reset_entire_system:
             emulator_context_->masterSh2()->powerOnReset();
             emulator_context_->slaveSh2()->powerOnReset();
@@ -408,8 +416,14 @@ void Smpc::executeCommand() {
             is_slave_sh2_on_ = false;
             emulator_context_->slaveSh2()->powerOnReset();
             emulator_context_->cdrom()->refreshPeriod();
-            if (command == SmpcCommand::clock_change_320) Log::debug("smpc", tr("-=Clock Change 320 Mode=- command executed"));
-            if (command == SmpcCommand::clock_change_352) Log::debug("smpc", tr("-=Clock Change 352 Mode=- command executed"));
+            if (command == SmpcCommand::clock_change_320) {
+                is_horizontal_res_352 = false;
+                Log::debug("smpc", tr("-=Clock Change 320 Mode=- command executed"));
+            }
+            if (command == SmpcCommand::clock_change_352) {
+                is_horizontal_res_352 = true;
+                Log::debug("smpc", tr("-=Clock Change 352 Mode=- command executed"));
+            }
             break;
         case SmpcCommand::nmi_request:
             emulator_context_->scu()->generateInterrupt(interrupt_source::nmi);
@@ -451,7 +465,7 @@ void Smpc::executeIntback() {
 void Smpc::getStatus() {
     sr_.reset();
     sr_[6] = 1;
-    bool is_status_returned = ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned;
+    bool is_status_returned          = ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned;
     bool is_peripheral_data_returned = ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned;
     if (is_status_returned && !is_peripheral_data_returned) {
         sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
@@ -466,9 +480,36 @@ void Smpc::getStatus() {
     oreg_[0].set(OutputRegister::oreg0_set_time, SetTime::set_time);
 
     auto rtc = getRtcTime();
+    oreg_[1].set(OutputRegister::all_bits, rtc.getUpperYear());
+    oreg_[2].set(OutputRegister::all_bits, rtc.getLowerYear());
+    oreg_[3].set(OutputRegister::all_bits, rtc.getDayMonth());
+    oreg_[4].set(OutputRegister::all_bits, rtc.getDays());
+    oreg_[5].set(OutputRegister::all_bits, rtc.getHours());
+    oreg_[6].set(OutputRegister::all_bits, rtc.getMinutes());
+    oreg_[7].set(OutputRegister::all_bits, rtc.getSeconds());
+    oreg_[8].reset(); // No cartridge code handling for now
 
-    //oreg_[1].set(OutputRegister::all_bits, u8(rtc.year_1000_bcd. << 4 | rtc.year_100_bcd));
-    
+    std::string ac = emulator_context_->config()->readValue(core::AccessKeys::cfg_global_area_code);
+    oreg_[9].set(OutputRegister::all_bits, util::toUnderlying(core::Config::area_code[ac]));
+
+    oreg_[10][7] = 0;
+    oreg_[10][6] = is_horizontal_res_352;
+    oreg_[10][5] = 1;
+    oreg_[10][4] = 1;
+    oreg_[10][3] = is_soft_reset_allowed_;
+    oreg_[10][2] = 1;
+    oreg_[10][1] = 0; //SYSRES is never triggered by software
+    oreg_[10][0] = is_sound_on_;
+
+    oreg_[11].reset();
+    oreg_[11][6] = is_cd_on;
+
+    oreg_[12].set(OutputRegister::all_bits, smem_[0]);
+    oreg_[13].set(OutputRegister::all_bits, smem_[1]);
+    oreg_[14].set(OutputRegister::all_bits, smem_[2]);
+    oreg_[15].set(OutputRegister::all_bits, smem_[3]);
+
+    oreg_[31].reset();
 };
 
 void Smpc::getPeripheralData() {

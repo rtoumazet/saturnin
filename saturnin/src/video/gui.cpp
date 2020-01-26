@@ -154,6 +154,7 @@ namespace gui {
         
         // General header
         if (ImGui::CollapsingHeader(tr("General").c_str())) {
+            // Hardware mode
             ImGui::Text(tr("Hardware mode").c_str());
             ImGui::SameLine(150);
             
@@ -172,6 +173,7 @@ namespace gui {
                 else Log::warning("config", tr("Unknown hardware mode ..."));
             }
 
+            // Language
             ImGui::Text(tr("Language").c_str());
             ImGui::SameLine(150);
 
@@ -184,10 +186,25 @@ namespace gui {
             if (ImGui::Combo("##language", &index, locales)) {
                 state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
             }
+
+            // Area code
+            ImGui::Text(tr("Area code").c_str());
+            ImGui::SameLine(150);
+
+            static auto codes = state.config()->listAreaCodes();
+            std::string c = state.config()->readValue(core::AccessKeys::cfg_global_area_code);
+            auto it_code = std::find_if(codes.begin(), codes.end(), [&c](std::string& str) {
+                return c == str;
+                });
+            static s32 index_code = static_cast<s32>(it_code - codes.begin());
+            if (ImGui::Combo("##area_code", &index_code, codes)) {
+                state.config()->writeValue(core::AccessKeys::cfg_global_area_code, codes[index_code]);
+            }
         }
 
         // Rendering header
         if (ImGui::CollapsingHeader(tr("Rendering").c_str())) {
+            // TV standard
             ImGui::Text(tr("TV standard").c_str());
             ImGui::SameLine(150);
 
@@ -206,6 +223,7 @@ namespace gui {
                 else Log::warning("config", tr("Unknown TV standard ..."));
             }
 
+            // Legacy opengl
             ImGui::Text(tr("Legacy OpenGL").c_str());
             ImGui::SameLine(150);
 
@@ -220,6 +238,7 @@ namespace gui {
         // Paths header
         if (ImGui::CollapsingHeader(tr("Paths").c_str())) {
             
+            // Saturn bios
             ImGui::Text(tr("Saturn bios").c_str());
             ImGui::SameLine(150);
 
@@ -228,6 +247,7 @@ namespace gui {
                 state.config()->writeValue(core::AccessKeys::cfg_paths_bios_saturn, bios_saturn.data());
             }
 
+            // ST-V bios
             ImGui::Text(tr("ST-V bios").c_str());
             ImGui::SameLine(150);
             auto bios_stv = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_bios_stv), 255);
@@ -235,6 +255,7 @@ namespace gui {
                 state.config()->writeValue(core::AccessKeys::cfg_paths_bios_stv, bios_stv.data());
             }
 
+            // ST-V roms
             ImGui::Text(tr("ST-V roms").c_str());
             ImGui::SameLine(150);
             auto roms_stv = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_roms_stv), 255);
@@ -299,6 +320,7 @@ namespace gui {
 
         // Sound header
         if (ImGui::CollapsingHeader(tr("Sound").c_str())) {
+            // Sound disabled
             ImGui::Text(tr("Sound disabled").c_str());
             ImGui::SameLine(150);
 
