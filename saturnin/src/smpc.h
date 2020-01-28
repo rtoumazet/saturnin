@@ -511,7 +511,7 @@ private:
     SystemClock clock_{ SystemClock::not_set }; 
 
     SaturnPeripheralMapping saturn_mapping_;    ///< Saturn paripheral mapping
-    StvPeripheralMapping    stv_mapping_;   ///< ST-V peripehral mapping
+    StvPeripheralMapping    stv_mapping_;   ///< ST-V peripheral mapping
 
     u16 intback_remaining_cycles_ {}; ///< The intback remaining cycles
 
@@ -525,6 +525,9 @@ private:
     bool is_soft_reset_allowed_{ false }; ///< NMI generation from reset button status
     bool is_horizontal_res_352{ false }; ///< Horizontal resolution (320/352)
     bool is_cd_on{ false }; ///< CD status
+
+    bool is_intback_processing_{ false }; ///< Intback status
+    bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
 
     std::array <u8, 0x4> smem_;   ///< SMPC battery backupable memory (4B).
     };

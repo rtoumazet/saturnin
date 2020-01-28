@@ -183,6 +183,28 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   IntbackContinueRequest
+///
+/// \brief  Intback Continue Request values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class IntbackContinueRequest : u8 {
+    not_requested = 0,
+    requested     = 1
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   IntbackBreakRequest
+///
+/// \brief  Intback Break Request values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class IntbackBreakRequest : u8 {
+    not_requested = 0,
+    requested     = 1
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   SmpcStatusAcquisition
 ///
 /// \brief  Acquisition time optimizations values.
@@ -240,6 +262,8 @@ enum class PortMode : u8 {
 class InputRegister : public Register {
 public:
     using Register::Register;
+    inline static const BitRange<IntbackContinueRequest> ireg0_continue_request { 7 }; ///< Defines Intback continue request (IREG0).
+    inline static const BitRange<IntbackBreakRequest> ireg0_break_request { 6 }; ///< Defines Intback break request (IREG0).
     inline static const BitRange<SmpcStatusAcquisition> ireg0_status_acquisition { 0 }; ///< Defines SMPC status acquisition (IREG0).
     inline static const BitRange<AcquisitionTimeOptimization> ireg1_acquisition_time_optimization{ 2 }; ///< Defines if peripheral acquisition time is optimized (IREG1).
     inline static const BitRange<PeripheralDataEnable> ireg1_peripheral_data_enable{ 3 }; ///< Defines if peripheral data is enabled (IREG1).

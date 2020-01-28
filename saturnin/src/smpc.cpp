@@ -21,13 +21,11 @@
 #include <date/date.h>
 #include <map> // map
 #include <string> // string
-//#include "sound/scsp.h"
+#include "sound/scsp.h"
 #include "smpc.h"
 #include "config.h"
 #include "emulator_context.h"
 #include "sh2.h"
-
-
 
 
 namespace saturnin {
@@ -372,8 +370,8 @@ void Smpc::executeCommand() {
             break;
         case SmpcCommand::sound_on:
             is_sound_on_ = true;
-            //emulator_context_->scsp()->reset();
-            //emulator_context_->scsp()->setSound(true);
+            emulator_context_->scsp()->reset();
+            emulator_context_->scsp()->setSound(true);
             Log::debug("smpc", tr("-=Sound ON=- command executed"));
             break;
         case SmpcCommand::sound_off:
@@ -459,6 +457,13 @@ void Smpc::executeCommand() {
 }
 
 void Smpc::executeIntback() {
+    Log::debug("smpc", tr("Starting INTBACK"));
+
+    oreg_[31].reset();
+    bool is_intback_break_requested{    ireg_[0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested };
+    bool is_intback_continue_requested{ ireg_[0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested };
+    bool is_status_returned {           ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned };
+    bool is_peripheral_data_returned {  ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned};
 
 };
 
@@ -514,6 +519,9 @@ void Smpc::getStatus() {
 
 void Smpc::getPeripheralData() {
     Log::debug("smpc", tr("Returning peripheral data"));
+    
+    sr_.reset();
+
 }
 
 u8 Smpc::read(const u32 addr) {
@@ -593,15 +601,14 @@ void Smpc::write(const u32 addr, const u8 data) {
                 if (data & 0x10) {
                     Log::debug("smpc", tr("-=Sound OFF=-"));
 
-                    Log::warning("smpc", "SCSP not linked !!!");
-                    //EmuState::pScsp->Reset();
-                    //EmuState::pScsp->SetSound(false);
+                    is_sound_on_ = false;
+                    emulator_context_->scsp()->setSound(false);
                 } else {
                     Log::debug("smpc", tr("-=Sound ON=-"));
 
-                    Log::warning("smpc", "SCSP not linked !!!");
-                    //soundStatus = 0x1;
-                    //EmuState::pScsp->SetSound(true);
+                    is_sound_on_ = true;
+                    emulator_context_->scsp()->reset();
+                    emulator_context_->scsp()->setSound(true);
                 }
             }
             pdr2_.set(PortDataRegister::all_bits, data);
