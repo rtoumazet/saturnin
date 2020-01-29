@@ -460,10 +460,18 @@ void Smpc::executeIntback() {
     Log::debug("smpc", tr("Starting INTBACK"));
 
     oreg_[31].reset();
-    bool is_intback_break_requested{    ireg_[0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested };
-    bool is_intback_continue_requested{ ireg_[0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested };
+    bool is_break_requested{    ireg_[0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested };
+    bool is_continue_requested{ ireg_[0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested };
+
+
     bool is_status_returned {           ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned };
     bool is_peripheral_data_returned {  ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned};
+    if (is_status_returned) {
+        getStatus();
+        if (is_peripheral_data_returned) getPeripheralData();
+    } else {
+        getPeripheralData();
+    }
 
 };
 
