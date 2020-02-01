@@ -544,6 +544,35 @@ void Smpc::getPeripheralData() {
     
     sr_.reset();
 
+    // SMPC Peripheral result :
+    // [SR]
+    // [Port 1 Data] (1)
+    // [Port 2 Data] (1)
+
+    // (1) Port x Data structure :
+    // [Port x Status] (2)
+    // [Peripheral 1 Data] (3)
+    // [Peripheral 2 Data] (3)
+    // ...
+    // [Peripheral m Data] (3)
+    // 0 < m < 15
+    
+    // (2) Port x Status structure :
+    // [Multitap ID | Num. of connectors]
+
+    // (3) Peripheral x Data structure
+    // [Saturn Peripheral ID] (4)
+    // [Extension Data Size]
+    // [Peripheral x 1st Data]
+    // [Peripheral x 2nd Data]
+    // ...
+    // [Peripheral x nth Data]
+    // n max is 255
+
+    // (4) Saturn Peripheral ID structure :
+    // [Saturn Peripheral Type | Data Size]
+    
+
 }
 
 u8 Smpc::read(const u32 addr) {
