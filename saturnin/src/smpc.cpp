@@ -457,13 +457,27 @@ void Smpc::executeCommand() {
 }
 
 void Smpc::executeIntback() {
-    Log::debug("smpc", tr("Starting INTBACK"));
+    
 
-    oreg_[31].reset();
+    
     bool is_break_requested{    ireg_[0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested };
+    if (is_break_requested) {
+        Log::debug("smpc", tr("INTBACK break request"));
+        return;
+    }
+
     bool is_continue_requested{ ireg_[0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested };
+    if (is_continue_requested) {
+        Log::debug("smpc", tr("INTBACK continue request"));
 
 
+        Log::debug("smpc", tr("Interrupt request"));
+        emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
+        return;
+    }
+
+    Log::debug("smpc", tr("INTBACK started"));
+    oreg_[31].reset();
     bool is_status_returned {           ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned };
     bool is_peripheral_data_returned {  ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned};
     if (is_status_returned) {
