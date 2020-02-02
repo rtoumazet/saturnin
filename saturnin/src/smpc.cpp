@@ -358,40 +358,56 @@ void Smpc::executeCommand() {
         case SmpcCommand::master_sh2_on:
             is_master_sh2_on_ = true;
             Log::debug("smpc", tr("-=Master SH2 ON=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::slave_sh2_on:
             is_slave_sh2_on_ = true;
             emulator_context_->slaveSh2()->powerOnReset();
             Log::debug("smpc", tr("-=Slave SH2 ON=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::slave_sh2_off:
             is_slave_sh2_on_ = false;
             Log::debug("smpc", tr("-=Slave SH2 OFF=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::sound_on:
             is_sound_on_ = true;
             emulator_context_->scsp()->reset();
             emulator_context_->scsp()->setSound(true);
             Log::debug("smpc", tr("-=Sound ON=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::sound_off:
             is_sound_on_ = false;
             //emulator_context_->scsp()->setSound(false);
             Log::debug("smpc", tr("-=Sound OFF=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::cd_on:
             is_cd_on = true;
             Log::debug("smpc", tr("-=CD ON=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::cd_off:
             is_cd_on = false;
             Log::debug("smpc", tr("-=CD OFF=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::reset_entire_system:
             emulator_context_->masterSh2()->powerOnReset();
             emulator_context_->slaveSh2()->powerOnReset();
             //emulator_context_->scsp()->reset();
             Log::debug("smpc", tr("-=Reset Entire System=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::clock_change_320:
         case SmpcCommand::clock_change_352:
@@ -422,18 +438,26 @@ void Smpc::executeCommand() {
                 is_horizontal_res_352 = true;
                 Log::debug("smpc", tr("-=Clock Change 352 Mode=- command executed"));
             }
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::nmi_request:
             emulator_context_->scu()->generateInterrupt(interrupt_source::nmi);
             Log::debug("smpc", tr("-=NMI Request=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::reset_enable:
             is_soft_reset_allowed_ = true;
             Log::debug("smpc", tr("-=Reset Enable=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::reset_disable:
             is_soft_reset_allowed_ = false;
             Log::debug("smpc", tr("-=Reset Disable=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::interrupt_back:
             // WIP //
@@ -443,61 +467,60 @@ void Smpc::executeCommand() {
                 smem_[i] = ireg_[i].get(InputRegister::all_bits);
             }
             Log::debug("smpc", tr("-=SMPC Memory Setting=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         case SmpcCommand::time_setting:
-
             Log::debug("smpc", tr("-=Time Setting=- command executed"));
+            oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
+            sf_.reset();
             break;
         default:
             Log::warning("smpc", tr("Unknown SMPC command '{}'"), util::toUnderlying(command));
     }
-    oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
-    sf_.reset();
 
 }
 
 void Smpc::executeIntback() {
     
-
-    
     bool is_break_requested{    ireg_[0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested };
     if (is_break_requested) {
         Log::debug("smpc", tr("INTBACK break request"));
+        sf_.reset();
         return;
     }
 
     bool is_continue_requested{ ireg_[0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested };
     if (is_continue_requested) {
         Log::debug("smpc", tr("INTBACK continue request"));
-
-
-        Log::debug("smpc", tr("Interrupt request"));
-        emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
+        getPeripheralData(PeripheralDataLocation::second_or_above_peripheral_data);
         return;
     }
 
     Log::debug("smpc", tr("INTBACK started"));
     oreg_[31].reset();
-    bool is_status_returned {           ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned };
-    bool is_peripheral_data_returned {  ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned};
+    bool is_status_returned { ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned };
     if (is_status_returned) {
         getStatus();
-        if (is_peripheral_data_returned) getPeripheralData();
+        bool is_peripheral_data_returned{ ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned };
+        is_peripheral_data_returned ? sf_.set() : sf_.reset();
     } else {
-        getPeripheralData();
+        getPeripheralData(PeripheralDataLocation::first_peripheral_data);
+        sf_.set();
     }
 
 };
 
 void Smpc::getStatus() {
+    Log::debug("smpc", tr("INTBACK returning status data"));
     sr_.reset();
+    sr_[7] = 0;
     sr_[6] = 1;
-    bool is_status_returned          = ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned;
     bool is_peripheral_data_returned = ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned;
-    if (is_status_returned && !is_peripheral_data_returned) {
-        sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
-    } else {
+    if (is_peripheral_data_returned) {
         sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::remaining_peripheral_data);
+    } else {
+        sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
     }
 
     oreg_[0].reset();
@@ -537,12 +560,19 @@ void Smpc::getStatus() {
     oreg_[15].set(OutputRegister::all_bits, smem_[3]);
 
     oreg_[31].reset();
+
+    Log::debug("smpc", tr("Interrupt request"));
+    emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
 };
 
-void Smpc::getPeripheralData() {
-    Log::debug("smpc", tr("Returning peripheral data"));
+void Smpc::getPeripheralData(const bool first_return) {
+    Log::debug("smpc", tr("INTBACK returning peripheral data"));
     
+    // SR page 66
     sr_.reset();
+    sr_[7] = 1;
+    sr_[7] = first_return;
+
 
     // SMPC Peripheral result :
     // [SR]
@@ -572,7 +602,8 @@ void Smpc::getPeripheralData() {
     // (4) Saturn Peripheral ID structure :
     // [Saturn Peripheral Type | Data Size]
     
-
+    Log::debug("smpc", tr("Interrupt request"));
+    emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
 }
 
 u8 Smpc::read(const u32 addr) {

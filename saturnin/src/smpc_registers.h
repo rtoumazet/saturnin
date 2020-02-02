@@ -131,7 +131,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ResetButtonStatus
 ///
-/// \brief  Rest button status values.
+/// \brief  Reset button status values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ResetButtonStatus : u8 {
@@ -151,6 +151,17 @@ enum class PeripheralDataRemaining : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PeripheralDataLocation
+///
+/// \brief  SR - PDL bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PeripheralDataLocation: u8 {
+    second_or_above_peripheral_data = 0,
+    first_peripheral_data = 1
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  StatusRegister
 ///
 /// \brief  Status Register (SR). 
@@ -164,6 +175,7 @@ public:
     using Register::Register;
     inline static const BitRange<ResetButtonStatus> reset_button_status{ 4 }; ///< Defines RESB bit.
     inline static const BitRange<PeripheralDataRemaining> peripheral_data_remaining{ 5 }; ///< Defines PDE bit.
+    inline static const BitRange<PeripheralDataLocation> peripheral_data_location{ 6 }; ///< Defines PDL bit.
     inline static const BitRange<u8> all_bits{ 0, 7 };   ///< Defines the range of all the bits of the register.
 };
 
@@ -265,7 +277,7 @@ public:
     inline static const BitRange<IntbackContinueRequest> ireg0_continue_request { 7 }; ///< Defines Intback continue request (IREG0).
     inline static const BitRange<IntbackBreakRequest> ireg0_break_request { 6 }; ///< Defines Intback break request (IREG0).
     inline static const BitRange<SmpcStatusAcquisition> ireg0_status_acquisition { 0, 7 }; ///< Defines SMPC status acquisition (IREG0).
-    inline static const BitRange<AcquisitionTimeOptimization> ireg1_acquisition_time_optimization{ 2 }; ///< Defines if peripheral acquisition time is optimized (IREG1).
+    inline static const BitRange<AcquisitionTimeOptimization> ireg1_acquisition_time_optimization{ 1 }; ///< Defines if peripheral acquisition time is optimized (IREG1).
     inline static const BitRange<PeripheralDataEnable> ireg1_peripheral_data_enable{ 3 }; ///< Defines if peripheral data is enabled (IREG1).
     inline static const BitRange<PortMode> ireg1_port_1_mode{ 4, 5 }; ///< Defines port 1 mode (IREG1).
     inline static const BitRange<PortMode> ireg1_port_2_mode{ 6, 7 }; ///< Defines port 2 mode (IREG1).

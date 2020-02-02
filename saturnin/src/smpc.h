@@ -185,7 +185,6 @@ enum class PeripheralKey : u16 {
     key_menu          = GLFW_KEY_MENU
 };
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralLayout
 ///
@@ -470,15 +469,17 @@ private:
     void getStatus();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Smpc::getPeripheralData();
+    /// \fn void Smpc::getPeripheralData(const PeripheralDataLocation pdl);
     ///
     /// \brief  Gets peripheral data.
     ///
     /// \author Runik
     /// \date   19/01/2020
+    ///
+    /// \param  pdl Peripheral Data Location value (initial INTBACK or continue).
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void getPeripheralData();
+    void getPeripheralData(const PeripheralDataLocation pdl);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::executeIntback();
@@ -527,7 +528,7 @@ private:
     bool is_cd_on{ false }; ///< CD status
 
     bool is_intback_processing_{ false }; ///< Intback status
-    bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
+    //bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
 
     std::array <u8, 0x4> smem_;   ///< SMPC battery backupable memory (4B).
     };
