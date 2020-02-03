@@ -493,22 +493,28 @@ void Smpc::executeIntback() {
     bool is_continue_requested{ ireg_[0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested };
     if (is_continue_requested) {
         Log::debug("smpc", tr("INTBACK continue request"));
-        getPeripheralData(PeripheralDataLocation::second_or_above_peripheral_data);
+        next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
+        getPeripheralData();
         return;
     }
 
     Log::debug("smpc", tr("INTBACK started"));
     oreg_[31].reset();
+    next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
     bool is_status_returned { ireg_[0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned };
     if (is_status_returned) {
         getStatus();
         bool is_peripheral_data_returned{ ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned };
-        is_peripheral_data_returned ? sf_.set() : sf_.reset();
+        if(is_peripheral_data_returned){
+            next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
+            sf_.set();
+        }else{
+            sf_.reset();
+        }  
     } else {
-        getPeripheralData(PeripheralDataLocation::first_peripheral_data);
+        getPeripheralData();
         sf_.set();
     }
-
 };
 
 void Smpc::getStatus() {
@@ -565,7 +571,7 @@ void Smpc::getStatus() {
     emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
 };
 
-void Smpc::getPeripheralData(const bool first_return) {
+void Smpc::getPeripheralData() {
     Log::debug("smpc", tr("INTBACK returning peripheral data"));
     
     // SR page 66

@@ -469,17 +469,15 @@ private:
     void getStatus();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Smpc::getPeripheralData(const PeripheralDataLocation pdl);
+    /// \fn void Smpc::getPeripheralData();
     ///
     /// \brief  Gets peripheral data.
     ///
     /// \author Runik
     /// \date   19/01/2020
-    ///
-    /// \param  pdl Peripheral Data Location value (initial INTBACK or continue).
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void getPeripheralData(const PeripheralDataLocation pdl);
+    void getPeripheralData();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::executeIntback();
@@ -529,6 +527,7 @@ private:
 
     bool is_intback_processing_{ false }; ///< Intback status
     //bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
+    PeripheralDataLocation next_peripheral_return_;
 
     std::array <u8, 0x4> smem_;   ///< SMPC battery backupable memory (4B).
     };

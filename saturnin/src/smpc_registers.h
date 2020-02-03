@@ -223,8 +223,8 @@ enum class IntbackBreakRequest : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class SmpcStatusAcquisition : u8 {
-    status_not_returned = 0b00000000,
-    status_returned     = 0b00000001
+    status_not_returned = 0x00,
+    status_returned     = 0x01
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -271,17 +271,17 @@ enum class PortMode : u8 {
 /// \date   14/12/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class InputRegister : public Register {
+class InputRegister : public Register                         {
 public:
     using Register::Register;
-    inline static const BitRange<IntbackContinueRequest> ireg0_continue_request { 7 }; ///< Defines Intback continue request (IREG0).
-    inline static const BitRange<IntbackBreakRequest> ireg0_break_request { 6 }; ///< Defines Intback break request (IREG0).
-    inline static const BitRange<SmpcStatusAcquisition> ireg0_status_acquisition { 0, 7 }; ///< Defines SMPC status acquisition (IREG0).
+    inline static const BitRange<IntbackContinueRequest>      ireg0_continue_request { 7 }; ///< Defines Intback continue request (IREG0).
+    inline static const BitRange<IntbackBreakRequest>         ireg0_break_request { 6 }; ///< Defines Intback break request (IREG0).
+    inline static const BitRange<SmpcStatusAcquisition>       ireg0_status_acquisition { 0, 7 }; ///< Defines SMPC status acquisition (IREG0).
     inline static const BitRange<AcquisitionTimeOptimization> ireg1_acquisition_time_optimization{ 1 }; ///< Defines if peripheral acquisition time is optimized (IREG1).
-    inline static const BitRange<PeripheralDataEnable> ireg1_peripheral_data_enable{ 3 }; ///< Defines if peripheral data is enabled (IREG1).
-    inline static const BitRange<PortMode> ireg1_port_1_mode{ 4, 5 }; ///< Defines port 1 mode (IREG1).
-    inline static const BitRange<PortMode> ireg1_port_2_mode{ 6, 7 }; ///< Defines port 2 mode (IREG1).
-    inline static const BitRange<u8> all_bits{ 0, 7 };          ///< Defines the range of all the bits of the register.
+    inline static const BitRange<PeripheralDataEnable>        ireg1_peripheral_data_enable{ 3 }; ///< Defines if peripheral data is enabled (IREG1).
+    inline static const BitRange<PortMode>                    ireg1_port_1_mode{ 4, 5 }; ///< Defines port 1 mode (IREG1).
+    inline static const BitRange<PortMode>                    ireg1_port_2_mode{ 6, 7 }; ///< Defines port 2 mode (IREG1).
+    inline static const BitRange<u8>                          all_bits{ 0, 7 };          ///< Defines the range of all the bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
