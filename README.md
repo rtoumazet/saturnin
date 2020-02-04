@@ -21,7 +21,6 @@ Saturnin is a Sega Saturn emulator
     
     List of used libraries for reference:
     
-    * boost-locale (locale)
     * date (rtc handling)
     * glbinding (opengl functions management)
     * glfw3 (opengl context)
@@ -32,6 +31,7 @@ Saturnin is a Sega Saturn emulator
     * libzippp (zip wrapper)
     * lodepng (png format handling)
     * spdlog (logging + string formatting)
+    * spirit-po (translations)
 
 ### Contribution guidelines ###
 
