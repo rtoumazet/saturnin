@@ -1,0 +1,79 @@
+# French translations for Saturnin package.
+# Copyright (C) 2018 Renaud TOUMAZET
+# This file is distributed under the same license as the Saturnin package.
+# <EMAIL@ADDRESS>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Saturnin\n"
+"Report-Msgid-Bugs-To: saturnin@runik.info\n"
+"POT-Creation-Date: 2020-02-03 22:49+0100\n"
+"PO-Revision-Date: 2018-08-24 11:41+0200\n"
+"Last-Translator: <EMAIL@ADDRESS>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: config.cpp:71 config.cpp:130
+msgid "Could not read file {0} : {1}"
+msgstr "Impossible de lire le fichier {0} : {1}"
+
+#: config.cpp:80 config.cpp:140
+msgid "Creating configuration file."
+msgstr "Création du fichier de configuration."
+
+#: config.cpp:122 config.cpp:200 config.h:306 config.h:335
+msgid "Setting '{0}' not found !"
+msgstr "Paramètre '{0}' non trouvé !"
+
+#: config.cpp:124 memory.cpp:132
+msgid "Exiting ..."
+msgstr "Sortie ..."
+
+#: config.cpp:244
+msgid "Undefined default value '{}'!"
+msgstr ""
+
+#: config.h:312 config.h:341
+#, fuzzy
+msgid "Setting '{0}' using the wrong type !"
+msgstr "Paramètre '{0}' non trouvé !"
+
+#: log.h:183 log.h:186
+msgid "Log '{0}' is not defined !"
+msgstr "Log '{0}' non défini !"
+
+#: main.cpp:34
+msgid "Could not initialize the program ..."
+msgstr ""
+
+#: main.cpp:41
+msgid "Hello world."
+msgstr "Bonjour le monde."
+
+#: main.cpp:48
+msgid "Uncaught exception !"
+msgstr ""
+
+#: memory.cpp:103 memory.cpp:105
+msgid "Unknown rom type while loading {0}.zip"
+msgstr "Type de ROM inconnu lors du chargement du fichier {0}.zip"
+
+#: memory.cpp:111 memory.cpp:113
+msgid "File '{0}' not found in zip file !"
+msgstr "Fichier '{0}' non trouvé dans le fichier zip !"
+
+#: memory.cpp:118 memory.cpp:120
+msgid "Zip file '{0}' not found !"
+msgstr "Fichier zip '{0}' non trouvé !"
+
+#: memory.cpp:131 memory.cpp:133
+msgid "Unknown hardware mode"
+msgstr "Mode matériel inconnu"
+
+#: memory.cpp:445
+msgid "ST-V offset start: {}"
+msgstr ""

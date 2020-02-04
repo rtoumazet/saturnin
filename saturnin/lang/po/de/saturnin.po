@@ -1,21 +1,21 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Renaud TOUMAZET
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# German translations for Saturnin package.
+# Copyright (C) 2020 Renaud TOUMAZET
+# This file is distributed under the same license as the Saturnin package.
+# <EMAIL@ADDRESS>, 2020.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Saturnin\n"
 "Report-Msgid-Bugs-To: saturnin@runik.info\n"
-"POT-Creation-Date: 2020-02-04 17:01+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2020-02-04 14:50+0100\n"
+"PO-Revision-Date: 2020-02-04 14:50+0100\n"
+"Last-Translator: <EMAIL@ADDRESS>\n"
+"Language-Team: German\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ..\src\cdrom\spti.cpp:73
 msgid "Not selected"
@@ -214,28 +214,27 @@ msgstr ""
 msgid "INTBACK continue request"
 msgstr ""
 
-#: ..\src\smpc.cpp:500 ..\src\smpc.cpp:501
+#: ..\src\smpc.cpp:500
 msgid "INTBACK started"
 msgstr ""
 
-#: ..\src\smpc.cpp:515 ..\src\smpc.cpp:521
+#: ..\src\smpc.cpp:515
 msgid "INTBACK returning status data"
 msgstr ""
 
-#: ..\src\smpc.cpp:564 ..\src\smpc.cpp:570 ..\src\smpc.cpp:605
-#: ..\src\smpc.cpp:611
+#: ..\src\smpc.cpp:564 ..\src\smpc.cpp:605
 msgid "Interrupt request"
 msgstr ""
 
-#: ..\src\smpc.cpp:569 ..\src\smpc.cpp:575
+#: ..\src\smpc.cpp:569
 msgid "INTBACK returning peripheral data"
 msgstr ""
 
-#: ..\src\smpc.cpp:684 ..\src\smpc.cpp:690
+#: ..\src\smpc.cpp:684
 msgid "-=Sound OFF=-"
 msgstr ""
 
-#: ..\src\smpc.cpp:689 ..\src\smpc.cpp:695
+#: ..\src\smpc.cpp:689
 msgid "-=Sound ON=-"
 msgstr ""
 

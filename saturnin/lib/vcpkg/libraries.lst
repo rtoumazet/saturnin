@@ -1,4 +1,3 @@
-boost-locale
 date
 glbinding
 glfw3
@@ -9,3 +8,4 @@ libzip
 libzippp
 lodepng
 spdlog
+spirit-po

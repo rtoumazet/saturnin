@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <spirit_po/spirit_po.hpp>
+
 namespace saturnin {
 namespace core {
 
@@ -61,6 +63,9 @@ class Locale {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         static bool initialize(const std::string& country);
+
+    private:
+        static std::unique_ptr<spirit_po::catalog<>> cat_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

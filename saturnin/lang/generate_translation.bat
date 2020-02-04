@@ -1,10 +1,9 @@
-@echo off
+rem @echo off
 set /p country_code="Enter country code: "
 mkdir .\po\%country_code%
 
 echo Extracting strings ...
-@set dirs=..\src;..\src\video\
-findstr /m /p /d:%dirs% tr( * > filelist_tmp.txt
+findstr /smpil /c:"tr(" ..\src\*.* > filelist.txt
 
 rem Creating / updating POT template
 for /f "delims=" %%x in (config.txt) do (set "%%x")
@@ -29,14 +28,20 @@ if exist .\po\%country_code%\saturnin.po (
     %xgettext_path%\msginit.exe --input=po/saturnin.pot --locale=%country_code% --output=po/%country_code%/saturnin.po
 )
 
-set /p build_mo="Do you want to build saturnin.mo ? (y/n): "
-if /i "%build_mo%"=="y" (
+rem set /p build_mo="Do you want to build saturnin.mo ? (y/n): "
+rem if /i "%build_mo%"=="y" (
     rem Building MO file
-    echo Building saturnin.mo for '%country_code%' country
-    %xgettext_path%\msgfmt.exe --output-file=po/%country_code%/saturnin.mo po/%country_code%/saturnin.po
+rem     echo Building saturnin.mo for '%country_code%' country
+rem     %xgettext_path%\msgfmt.exe --output-file=po/%country_code%/saturnin.mo po/%country_code%/saturnin.po
 
     rem Directory generation
-    mkdir .\exe\%country_code%\LC_MESSAGES
-    xcopy .\po\%country_code%\saturnin.mo .\exe\%country_code%\LC_MESSAGES\saturnin.mo /Y
-)
+rem     mkdir .\exe\%country_code%\LC_MESSAGES
+rem     xcopy .\po\%country_code%\saturnin.mo .\exe\%country_code%\LC_MESSAGES\saturnin.mo /Y
+rem )
+
+rem Copying po file to the exe directory
+echo Moving PO file for '%country_code%' country
+mkdir .\exe\%country_code%
+xcopy .\po\%country_code%\saturnin.po .\exe\%country_code%\ /Y
+
 echo Done

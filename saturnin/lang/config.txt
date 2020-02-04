@@ -1,0 +1,3 @@
+xgettext_path=D:\Dev\Libraries\gettext-tools-static-0.18.1.1
+src_path=D:\Dev\Sources\github\saturnin\saturnin\src
+lang_path=D:\Dev\Sources\github\saturnin\saturnin\lang

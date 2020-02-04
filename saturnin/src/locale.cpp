@@ -18,29 +18,31 @@
 //
 
 #include <iostream>                // cout
-#include <boost/locale.hpp>        // generator
+#include <fstream>
+#include <string>
 #include "locale.h"
 
-namespace locale = boost::locale;
+namespace fs = std::filesystem;
 
 namespace saturnin {
 namespace core {
 
+spirit_po::catalog<> Locale::cat_ = std::make_unique<spirit_po::catalog<>>();
+    
 /* static */
 bool Locale::initialize(const std::string& country = "" ) {
-        locale::generator gen;
-        // Specify location of dictionaries
-        gen.add_messages_path("./lang");
-        gen.add_messages_domain("saturnin");
-        // Generate locales and imbue them to iostream
-        std::locale::global(gen(country));
-        std::cout.imbue(std::locale());
+    std::ifstream ifs("./lang/" + country + "/saturnin.po");
+    std::string po_file{ std::istreambuf_iterator<char>{ifs}, std::istreambuf_iterator<char>() };
 
-        return true;
-    }
+    //spirit_po::catalog<> cat{ spirit_po::catalog<>::from_range(po_file) };
+    cat_ = spirit_po::catalog<>::from_range(po_file);
+
+    return true;
+}
 
     std::string tr(const std::string& str) {
-        return locale::translate(str);
+        //return locale::translate(str);
+        return "";
     }
 
 };

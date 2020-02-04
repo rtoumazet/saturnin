@@ -577,7 +577,7 @@ void Smpc::getPeripheralData() {
     // SR page 66
     sr_.reset();
     sr_[7] = 1;
-    sr_[7] = first_return;
+    //sr_[7] = first_return;
 
 
     // SMPC Peripheral result :
