@@ -1,4 +1,4 @@
-// 
+//
 // sh2.h
 // Saturnin
 //
@@ -15,38 +15,38 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	sh2.h
 ///
-/// \brief	Declares the sh2 class. 
+/// \brief	Declares the sh2 class.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include <array> // array 
+#include <array> // array
 #include "emulator_defs.h"
 #include "memory.h"
 #include "sh2_registers.h"
 
-//namespace core = saturnin::core;
+// namespace core = saturnin::core;
 
 // Forward declarations
-namespace saturnin::core { 
-    class EmulatorContext; 
-    class Scu;
-    struct Interrupt;
-}
+namespace saturnin::core {
+class EmulatorContext;
+class Scu;
+struct Interrupt;
+} // namespace saturnin::core
 
 namespace saturnin {
 namespace sh2 {
 
 using saturnin::core::EmulatorContext;
-using saturnin::core::Memory;
-using saturnin::core::Scu;
 using saturnin::core::Interrupt;
 using saturnin::core::Log;
+using saturnin::core::Memory;
+using saturnin::core::Scu;
 
 using saturnin::core::rawRead;
 using saturnin::core::rawWrite;
@@ -63,9 +63,9 @@ constexpr u32 sh2_memory_mask = 0x1FF;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Sh2Type {
-    unknown,
-    master,
-    slave
+    unknown, ///< Unknown SH2 type.
+    master,  ///< Master SH2.
+    slave    ///< Slave SH2.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,9 +87,9 @@ enum class DmaChannel {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DmaNextTransferPriority {
-    channel_0_first,    ///< Channel 0 will come first, then channel 1.
-    channel_1_first     ///< Channel 1 will come first, then channel 0.
-    
+    channel_0_first, ///< Channel 0 will come first, then channel 1.
+    channel_1_first  ///< Channel 1 will come first, then channel 0.
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,12 +102,12 @@ enum class DmaNextTransferPriority {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Sh2DmaConfiguration {
-    DmaChannel channel;
-    u32 counter;
-    u32 source;
-    u32 destination;
+    DmaChannel                channel;
+    u32                       counter;
+    u32                       source;
+    u32                       destination;
     DmaChannelControlRegister chcr;
-    Interrupt interrupt { is::undefined };
+    Interrupt                 interrupt{is::undefined};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,16 +120,16 @@ struct Sh2DmaConfiguration {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Sh2 {
-    public:
+  public:
     //@{
     // Constructors / Destructors
-    Sh2()                        = delete;
+    Sh2() = delete;
     Sh2(Sh2Type st, EmulatorContext* ec);
-    Sh2(const Sh2&)              = delete;
-    Sh2(Sh2&&)                   = delete;
+    Sh2(const Sh2&) = delete;
+    Sh2(Sh2&&)      = delete;
     Sh2& operator=(const Sh2&) & = delete;
-    Sh2& operator=(Sh2&&) &      = delete;
-    ~Sh2()                       = default;
+    Sh2& operator=(Sh2&&) & = delete;
+    ~Sh2()                  = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +275,7 @@ class Sh2 {
     void writeCacheData(const u32 addr, const T data) {
         rawWrite<T>(cache_data_, addr & 0xFFF, data);
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::sendInterrupt(const Interrupt& i);
     ///
@@ -329,12 +329,9 @@ class Sh2 {
         Log::warning("sh2", "Unmapped write access : address :{:#0x} data:{:#0x}", addr, data);
     }
 
-    void unmappedAccess(const u32 addr) const {
-        Log::warning("sh2", "Unmapped read access : address :{:#0x}", addr);
-    }
+    void unmappedAccess(const u32 addr) const { Log::warning("sh2", "Unmapped read access : address :{:#0x}", addr); }
 
-private:
-
+  private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn u8 Sh2::readRegisters8(const u32 addr);
     ///
@@ -425,7 +422,8 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::purgeCache();
     ///
-    /// \brief  cache purge : all the cache address valid bits and LRU information are initialized to 0 (in 2 ways and 4 ways mode)
+    /// \brief  cache purge : all the cache address valid bits and LRU information are initialized to 0 (in 2 ways and 4 ways
+    /// mode)
     ///
     /// \author Runik
     /// \date   02/01/2018
@@ -705,8 +703,8 @@ private:
     friend void neg(Sh2& s);
     friend void negc(Sh2& s);
     friend void nop(Sh2& s);
-    friend void not(Sh2& s);
-    friend void or (Sh2& s);
+    friend void not(Sh2 & s);
+    friend void or (Sh2 & s);
     friend void ori(Sh2& s);
     friend void orm(Sh2& s);
     friend void rotcl(Sh2& s);
@@ -733,9 +731,9 @@ private:
     friend void stcmsr(Sh2& s);
     friend void stcmgbr(Sh2& s);
     friend void stcmvbr(Sh2& s);
-    //friend void stmsr(Sh2& s);
-    //friend void stmgbr(Sh2& s);
-    //friend void stmvbr(Sh2& s);
+    // friend void stmsr(Sh2& s);
+    // friend void stmgbr(Sh2& s);
+    // friend void stmvbr(Sh2& s);
     friend void stsmach(Sh2& s);
     friend void stsmacl(Sh2& s);
     friend void stspr(Sh2& s);
@@ -752,7 +750,7 @@ private:
     friend void tst(Sh2& s);
     friend void tsti(Sh2& s);
     friend void tstm(Sh2& s);
-    friend void xor(Sh2& s);
+    friend void xor (Sh2 & s);
     friend void xori(Sh2& s);
     friend void xorm(Sh2& s);
     friend void xtrct(Sh2& s);
@@ -760,35 +758,36 @@ private:
     friend void badOpcode(Sh2& s);
     friend void execute(Sh2& s);
 
-    EmulatorContext* emulator_context_;    ///< Context of the emulator
-    
-    std::array <u8, 0x400>  cache_addresses_;   ///< Cache addresses (1KB).
-    std::array <u8, 0x1000> cache_data_;        ///< Cache data (4KB).    
-    std::array <u8, 0x200>  io_registers_;      ///< I/O registers (512B).
-    Sh2Type sh2_type_;                          ///< Type of the SH2.
-    std::map<const Sh2Type, const char*> sh2_type_name_ = { {Sh2Type::master, "Master"},{Sh2Type::slave, "Slave"} }; ///< Name of the SH2 type, used for logging.
+    EmulatorContext* emulator_context_; ///< Context of the emulator
+
+    std::array<u8, 0x400>                cache_addresses_; ///< Cache addresses (1KB).
+    std::array<u8, 0x1000>               cache_data_;      ///< Cache data (4KB).
+    std::array<u8, 0x200>                io_registers_;    ///< I/O registers (512B).
+    Sh2Type                              sh2_type_;        ///< Type of the SH2.
+    std::map<const Sh2Type, const char*> sh2_type_name_
+        = {{Sh2Type::master, "Master"}, {Sh2Type::slave, "Slave"}}; ///< Name of the SH2 type, used for logging.
 
     /// \name Processor registers
     //@{
-    u32 pc_;                  ///< Progream Counter
-    u32 pr_;                  ///< Procedure Register
-    u32 macl_;                ///< Multiply and ACummulate register Low (0x48)
-    u32 mach_;                ///< Multiply and ACummulate register High (0x4C)
-    u32 vbr_;                 ///< Vector Base Register (0x50)
-    u32 gbr_;                 ///< Global Base Register (0x54)
-    StatusRegister sr_{0};    ///< Status Register (0x58)
-    u32 r_[16];               ///< General registers, last one is the stack pointer (SP) (0x5C)
+    u32            pc_;    ///< Progream Counter
+    u32            pr_;    ///< Procedure Register
+    u32            macl_;  ///< Multiply and ACummulate register Low (0x48)
+    u32            mach_;  ///< Multiply and ACummulate register High (0x4C)
+    u32            vbr_;   ///< Vector Base Register (0x50)
+    u32            gbr_;   ///< Global Base Register (0x54)
+    StatusRegister sr_{0}; ///< Status Register (0x58)
+    u32            r_[16]; ///< General registers, last one is the stack pointer (SP) (0x5C)
     //@}
 
     u8  cycles_elapsed_; ///< CPU cycles used by the last instruction.
     u16 current_opcode_; ///< Opcode to be executed.
-                                                
+
     /// \name Interrupt management
     //@{
-    std::list<Interrupt>                    pending_interrupts_ = {};       ///< List of pending interrupts.
-    bool                                    is_interrupted_{};        ///< True if this sh2 is interrupted.
-    std::array<bool, max_interrupt_level>   is_level_interrupted_{};            ///< Determines if any given level is already interrupted.
-    Interrupt                               current_interrupt_{ is::undefined };///< Interrupt in execution
+    std::list<Interrupt>                  pending_interrupts_ = {}; ///< List of pending interrupts.
+    bool                                  is_interrupted_{};        ///< True if this sh2 is interrupted.
+    std::array<bool, max_interrupt_level> is_level_interrupted_{};  ///< Determines if any given level is already interrupted.
+    Interrupt                             current_interrupt_{is::undefined}; ///< Interrupt in execution
     //@}
 
     ///  \name INTC (Interrupt Controller)
@@ -816,15 +815,15 @@ private:
     RefreshTimerCounter              bsc_rtcnt_;
     RefreshTimerConstantRegister     bsc_rtcor_;
     //@}
-    
+
     /// \name Cache
     //@{
     CacheControlRegister cache_ccr_;
     //@}
-    
+
     /// \name DMAC (Direct Memory Access Controller)
     //@{
-    DmaNextTransferPriority                    dmac_next_transfer_priority_{ DmaNextTransferPriority::channel_0_first };
+    DmaNextTransferPriority dmac_next_transfer_priority_{DmaNextTransferPriority::channel_0_first};
 
     DmaSourceAddressRegister                   dmac_sar0_;
     DmaSourceAddressRegister                   dmac_sar1_;
@@ -841,11 +840,11 @@ private:
 
     /// \name DIVU (Division unit)
     //@{
-    bool    divu_is_running_{};       ///< True when division unit is in operation
-    u8      divu_remaining_cycles_{}; ///< Remaining cycles to end current division
-    s32     divu_quot_{};             ///< Quotient of the division
-    s32     divu_rem_{};              ///< Remainder of the division
-    
+    bool divu_is_running_{};       ///< True when division unit is in operation
+    u8   divu_remaining_cycles_{}; ///< Remaining cycles to end current division
+    s32  divu_quot_{};             ///< Quotient of the division
+    s32  divu_rem_{};              ///< Remainder of the division
+
     DivisorRegister         divu_dvsr_;
     DividendRegister32Bits  divu_dvdnt_;
     DivisionControlRegister divu_dvcr_;
@@ -857,11 +856,11 @@ private:
 
     /// \name FRT (Free Running Timer)
     //@{
-    u32	 frt_elapsed_cycles_{}; ///< Elapsed FRT cycles. 
-    u8	 frt_clock_divisor_{};  ///< FRT clock divisor. 
-    u8	 frt_mask_{};           ///< FRT mask. 
-    bool frt_current_ocr_{};    ///< Current Output Compare Register. 
-    
+    u32  frt_elapsed_cycles_{}; ///< Elapsed FRT cycles.
+    u8   frt_clock_divisor_{};  ///< FRT clock divisor.
+    u8   frt_mask_{};           ///< FRT mask.
+    bool frt_current_ocr_{};    ///< Current Output Compare Register.
+
     TimerInterruptEnableRegister          frt_tier_;
     FreeRunningTimerControlStatusRegister frt_ftcsr_;
     FreeRunningCounter                    frt_frc_;
@@ -890,8 +889,7 @@ private:
     SerialStatusRegister  sci_ssr_;
     BitRateRegister       sci_brr_;
     //@}
-};  
+};
 
-
-}
-}
+} // namespace sh2
+} // namespace saturnin

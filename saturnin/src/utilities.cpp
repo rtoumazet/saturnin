@@ -1,4 +1,4 @@
-// 
+//
 // utilities.cpp
 // Saturnin
 //
@@ -20,7 +20,6 @@
 #include <sstream> // istringstream
 #include "utilities.h"
 
-
 namespace saturnin {
 namespace utilities {
 
@@ -34,17 +33,15 @@ std::string getLastErrorMessage() {
     DWORD error = GetLastError();
     if (error) {
         LPVOID buffer;
-        DWORD buf_len = FormatMessage(
-            FORMAT_MESSAGE_ALLOCATE_BUFFER |
-            FORMAT_MESSAGE_FROM_SYSTEM |
-            FORMAT_MESSAGE_IGNORE_INSERTS,
-            NULL,
-            error,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            (LPTSTR)&buffer,
-            0, NULL);
+        DWORD buf_len = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                      NULL,
+                                      error,
+                                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                      (LPTSTR)&buffer,
+                                      0,
+                                      NULL);
         if (buf_len) {
-            LPCSTR str = (LPCSTR)buffer;
+            LPCSTR      str = (LPCSTR)buffer;
             std::string result(str, str + buf_len);
 
             LocalFree(buffer);
@@ -55,13 +52,11 @@ std::string getLastErrorMessage() {
     return std::string();
 }
 
-std::vector<std::string> explode(std::string const & s, char delim)
-{
+std::vector<std::string> explode(std::string const& s, char delim) {
     std::vector<std::string> result;
-    std::istringstream iss(s);
+    std::istringstream       iss(s);
 
-    for (std::string token; std::getline(iss, token, delim); )
-    {
+    for (std::string token; std::getline(iss, token, delim);) {
         result.push_back(std::move(token));
     }
 
@@ -70,7 +65,7 @@ std::vector<std::string> explode(std::string const & s, char delim)
 
 uint32_t dec2bcd(uint16_t dec) {
     uint32_t result = 0;
-    int shift = 0;
+    int      shift  = 0;
 
     while (dec) {
         result += (dec % 10) << shift;
@@ -80,5 +75,5 @@ uint32_t dec2bcd(uint16_t dec) {
     return result;
 }
 
-}
-}
+} // namespace utilities
+} // namespace saturnin

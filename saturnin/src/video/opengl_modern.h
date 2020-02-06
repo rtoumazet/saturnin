@@ -1,4 +1,4 @@
-// 
+//
 // opengl_modern.h
 // Saturnin
 //
@@ -30,9 +30,9 @@
 
 // Forward declarations
 namespace saturnin::core {
-    class Config;
-    class EmulatorContext;
-}
+class Config;
+class EmulatorContext;
+} // namespace saturnin::core
 
 namespace saturnin {
 namespace video {
@@ -41,17 +41,16 @@ using saturnin::core::Config;
 using saturnin::core::EmulatorContext;
 
 class OpenglModern : public Opengl {
-
-public:
+  public:
     //@{
     // Constructors / Destructors
     OpenglModern(core::Config* config) : Opengl(config) { initialize(); };
     ~OpenglModern() { shutdown(); };
     //@}
 
-    u32 createVertexShader();
-    u32 createFragmentShader();
-    u32 createProgramShader(const u32 vertex_shader, const u32 fragment_shader);
+    u32  createVertexShader();
+    u32  createFragmentShader();
+    u32  createProgramShader(const u32 vertex_shader, const u32 fragment_shader);
     void deleteShaders(std::vector<u32> shaders);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +94,7 @@ public:
     /// \date   16/10/2019
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     void shutdown() override;
-    
+
     void preRender();
 
     void render();
@@ -104,8 +103,7 @@ public:
 
     void updateTextureSize(const u32 width, const u32 height) override;
 
-private:
-
+  private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const override;
     ///
@@ -179,5 +177,5 @@ void checkShaderCompilation(const u32 shader);
 
 void checkProgramCompilation(const u32 program);
 
-};
-};
+}; // namespace video
+}; // namespace saturnin

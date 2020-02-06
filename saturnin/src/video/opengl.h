@@ -1,4 +1,4 @@
-// 
+//
 // opengl.h
 // Saturnin
 //
@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	opengl.h
 ///
-/// \brief	Declares the OpenGl class and related functions. 
+/// \brief	Declares the OpenGl class and related functions.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -29,12 +29,12 @@
 //#include <functional> // function
 //#include <cstdint>
 #include <vector>
-#include"../emulator_defs.h"
+#include "../emulator_defs.h"
 //#include "../../lib/imgui/imgui_loader.h"
 
 // Forward declarations
 namespace saturnin::core {
-    class Config;
+class Config;
 }
 struct GLFWwindow;
 
@@ -43,19 +43,17 @@ namespace video {
 
 using saturnin::core::Config;
 
-
 class Opengl {
-
-public:
+  public:
     //@{
     // Constructors / Destructors
-    Opengl()                           = delete;
+    Opengl() = delete;
     Opengl(core::Config* config);
-    Opengl(const Opengl&)              = delete;
-    Opengl(Opengl&&)                   = delete;
+    Opengl(const Opengl&) = delete;
+    Opengl(Opengl&&)      = delete;
     Opengl& operator=(const Opengl&) & = delete;
-    Opengl& operator=(Opengl&&) &      = delete;
-    virtual ~Opengl()                  = default;
+    Opengl& operator=(Opengl&&) & = delete;
+    virtual ~Opengl()             = default;
     //@}
 
     //@{
@@ -68,7 +66,7 @@ public:
     virtual u32  generateEmptyTexture(const u32 width, const u32 height) const abstract;
     virtual void updateTextureSize(const u32 width, const u32 height) abstract;
     virtual void deleteTexture() const abstract;
-    
+
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +79,6 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     virtual void bindTextureToFbo() const abstract;
-
 
     u32 texture() const { return this->texture_; };
 
@@ -98,10 +95,7 @@ public:
 
     bool isWindowResized(const u32 new_width, const u32 new_height) const;
 
-    
     void initializeTexture(const u32 width, const u32 height);
-
-    
 
     bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
 
@@ -109,9 +103,9 @@ public:
 
     uint32_t generateIconsTexture();
 
-    uptr     iconsTextureId;    ///< Texture id storing data for UI icons
+    uptr iconsTextureId; ///< Texture id storing data for UI icons
 
-protected:
+  protected:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn Config* Opengl::config() const;
     ///
@@ -126,22 +120,18 @@ protected:
     Config* config() const;
 
     void setTextureDimension(const u32 width, const u32 height);
-    
+
     u32 fbo_{};     ///< Framebuffer Object used for rendering to texture.
     u32 texture_{}; ///< Destination texture for render to texture.
 
-    u32 current_texture_width_{}; ///< Width of the texture
+    u32 current_texture_width_{};  ///< Width of the texture
     u32 current_texture_height_{}; ///< Height of the texture
 
-private:
-    
-    //uint32_t      program_shader_;
-    //uint32_t      vao_;
-    core::Config* config_;        ///< Configuration object
-
-    
+  private:
+    // uint32_t      program_shader_;
+    // uint32_t      vao_;
+    core::Config* config_; ///< Configuration object
 };
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn bool OpenGl::is_modern_opengl_capable();
@@ -170,5 +160,5 @@ bool isModernOpenglCapable();
 
 void windowCloseCallback(GLFWwindow* window);
 
-};
-};
+}; // namespace video
+}; // namespace saturnin

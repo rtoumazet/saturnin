@@ -1,4 +1,4 @@
-// 
+//
 // smpc.h
 // Saturnin
 //
@@ -15,7 +15,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	smpc.h
@@ -25,21 +25,20 @@
 
 #pragma once
 
-#include <Windows.h> // Removes C4005 warning
+#include <Windows.h>    // Removes C4005 warning
 #include <GLFW/glfw3.h> // Keyboard handling
-#include <vector> // vector
-#include <chrono> // duration
-#include <array> // array
+#include <vector>       // vector
+#include <chrono>       // duration
+#include <array>        // array
 #include "smpc_registers.h"
 
 // Forward declarations
 namespace saturnin::core {
-    class EmulatorContext;
+class EmulatorContext;
 }
 
 namespace saturnin {
 namespace core {
-
 
 enum class AreaCode : u8 {
     japan                      = 0x1, ///< Japan
@@ -59,11 +58,11 @@ enum class AreaCode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class SystemClock : u32 {
-    not_set  = 0,
-    ntsc_320 = 26874100,
-    ntsc_352 = 28636400,
-    pal_320  = 26687500,
-    pal_352  = 28437500
+    not_set  = 0,        ///< not set
+    ntsc_320 = 26874100, ///< NTSC 320 horizontal dot
+    ntsc_352 = 28636400, ///< NTSC 352 horizontal dot
+    pal_320  = 26687500, ///< PAL 320 horizontal dot
+    pal_352  = 28437500  ///< PAL 352 horizontal dot
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +72,7 @@ enum class SystemClock : u32 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PeripheralKey : u16 {
-    key_unknown       = 0,
+    key_unknown = 0,
 
     /* Printable keys */
     key_space         = GLFW_KEY_SPACE,
@@ -222,7 +221,7 @@ struct SaturnDigitalPad {
     PeripheralKey button_start;
 
     std::vector<PeripheralKey> toConfig(const PeripheralLayout);
-    void fromConfig(std::vector<PeripheralKey>);
+    void                       fromConfig(std::vector<PeripheralKey>);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,7 +258,7 @@ struct StvPlayerControls {
     PeripheralKey button_4;
 
     std::vector<PeripheralKey> toConfig(const PeripheralLayout);
-    void fromConfig(std::vector<PeripheralKey>);
+    void                       fromConfig(std::vector<PeripheralKey>);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,7 +279,7 @@ struct StvBoardControls {
     PeripheralKey p2_start;
 
     std::vector<PeripheralKey> toConfig(const PeripheralLayout);
-    void fromConfig(std::vector<PeripheralKey>);
+    void                       fromConfig(std::vector<PeripheralKey>);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +292,7 @@ struct StvBoardControls {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct StvPeripheralMapping {
-    StvBoardControls board_controls;
+    StvBoardControls  board_controls;
     StvPlayerControls player_1;
     StvPlayerControls player_2;
 };
@@ -312,7 +311,7 @@ struct RtcTime {
     std::bitset<4> year_100_bcd;
     std::bitset<4> year_10_bcd;
     std::bitset<4> year_1_bcd;
-    std::bitset<4> day_hex; // (Hex) 0:Sun, 1:Mon, 2:Tue, 3:Wed, 4:Thur, 5:Fri, 6:Sat
+    std::bitset<4> day_hex;   // (Hex) 0:Sun, 1:Mon, 2:Tue, 3:Wed, 4:Thur, 5:Fri, 6:Sat
     std::bitset<4> month_hex; // (Hex) 1:Jan, 2:Feb, 3:Mar, 4:Apr, 5:May, 6:Jun, 7:July, 8:Aug, 9:Sep, A:Oct, B:Nov, C:Dec
     std::bitset<4> day_10_bcd;
     std::bitset<4> day_1_bcd;
@@ -323,15 +322,15 @@ struct RtcTime {
     std::bitset<4> second_10_bcd;
     std::bitset<4> second_1_bcd;
 
-    u8 getUpperYear(){ return concat(year_1000_bcd, year_100_bcd); }
-    u8 getLowerYear(){ return concat(year_10_bcd, year_1_bcd); }
+    u8 getUpperYear() { return concat(year_1000_bcd, year_100_bcd); }
+    u8 getLowerYear() { return concat(year_10_bcd, year_1_bcd); }
     u8 getDayMonth() { return concat(day_hex, month_hex); }
-    u8 getDays()     { return concat(day_10_bcd, day_1_bcd); }
-    u8 getHours()    { return concat(hour_10_bcd, hour_1_bcd); }
-    u8 getMinutes()  { return concat(minute_10_bcd, minute_1_bcd); }
-    u8 getSeconds()  { return concat(second_10_bcd, second_1_bcd); }
+    u8 getDays() { return concat(day_10_bcd, day_1_bcd); }
+    u8 getHours() { return concat(hour_10_bcd, hour_1_bcd); }
+    u8 getMinutes() { return concat(minute_10_bcd, minute_1_bcd); }
+    u8 getSeconds() { return concat(second_10_bcd, second_1_bcd); }
 
-private:
+  private:
     u8 concat(std::bitset<4> upper, std::bitset<4> lower) {
         std::bitset<8> left = upper.to_ulong();
         left <<= 4;
@@ -342,19 +341,19 @@ private:
 };
 
 class Smpc {
-public:
+  public:
     //@{
     // Constructors / Destructors
     Smpc() = delete;
-    Smpc(EmulatorContext* ec) : emulator_context_(ec) { reset();  };
+    Smpc(EmulatorContext* ec) : emulator_context_(ec) { reset(); };
     Smpc(const Smpc&) = delete;
-    Smpc(Smpc&&) = delete;
+    Smpc(Smpc&&)      = delete;
     Smpc& operator=(const Smpc&) & = delete;
     Smpc& operator=(Smpc&&) & = delete;
-    ~Smpc() = default;
+    ~Smpc()                   = default;
     //@}
-    
-    u8 read(const u32 addr);
+
+    u8   read(const u32 addr);
     void write(const u32 addr, const u8 data);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -406,9 +405,8 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     StvPeripheralMapping getStvPeripheralMapping();
-    
-private:
 
+  private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::reset();
     ///
@@ -489,8 +487,8 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void executeIntback();
-    
-    EmulatorContext* emulator_context_;    ///< Context of the emulator
+
+    EmulatorContext* emulator_context_; ///< Context of the emulator
 
     //@{
     // Internal registers
@@ -506,31 +504,32 @@ private:
     IOSelect              iosel_;
     ExternalLatchEnable   exle_;
     //@}
-    
-    SystemClock clock_{ SystemClock::not_set }; 
 
-    SaturnPeripheralMapping saturn_mapping_;    ///< Saturn paripheral mapping
-    StvPeripheralMapping    stv_mapping_;   ///< ST-V peripheral mapping
+    SystemClock clock_{SystemClock::not_set};
 
-    u16 intback_remaining_cycles_ {}; ///< The intback remaining cycles
+    SaturnPeripheralMapping saturn_mapping_; ///< Saturn paripheral mapping
+    StvPeripheralMapping    stv_mapping_;    ///< ST-V peripheral mapping
 
-    u32 total_display_duration_in_cycles_{};    ///< Number of cycles needed to display a full frame.
-    u32 visible_display_duration_in_cycles_{};  ///< Number of cycles needed to display the visible part of a frame (total - vblank).
-    u32 vblank_duration_in_cycles_{};           ///< Number of cycles needed to display the vblank part of a frame (total - visible).
+    u16 intback_remaining_cycles_{}; ///< The intback remaining cycles
 
-    bool is_master_sh2_on_{ false }; ///< Master SH2 status
-    bool is_slave_sh2_on_{ false }; ///< Slave SH2 status
-    bool is_sound_on_{ false }; ///< Sound status
-    bool is_soft_reset_allowed_{ false }; ///< NMI generation from reset button status
-    bool is_horizontal_res_352{ false }; ///< Horizontal resolution (320/352)
-    bool is_cd_on{ false }; ///< CD status
+    u32 total_display_duration_in_cycles_{};   ///< Number of cycles needed to display a full frame.
+    u32 visible_display_duration_in_cycles_{}; ///< Number of cycles needed to display the visible part of a frame (total -
+                                               ///< vblank).
+    u32 vblank_duration_in_cycles_{}; ///< Number of cycles needed to display the vblank part of a frame (total - visible).
 
-    bool is_intback_processing_{ false }; ///< Intback status
-    //bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
+    bool is_master_sh2_on_{false};      ///< Master SH2 status
+    bool is_slave_sh2_on_{false};       ///< Slave SH2 status
+    bool is_sound_on_{false};           ///< Sound status
+    bool is_soft_reset_allowed_{false}; ///< NMI generation from reset button status
+    bool is_horizontal_res_352{false};  ///< Horizontal resolution (320/352)
+    bool is_cd_on{false};               ///< CD status
+
+    bool is_intback_processing_{false}; ///< Intback status
+    // bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
     PeripheralDataLocation next_peripheral_return_;
 
-    std::array <u8, 0x4> smem_;   ///< SMPC battery backupable memory (4B).
-    };
+    std::array<u8, 0x4> smem_; ///< SMPC battery backupable memory (4B).
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn std::string getKeyName(const PeripheralKey pk);
@@ -560,5 +559,5 @@ std::string getKeyName(const PeripheralKey pk);
 
 RtcTime getRtcTime();
 
-}
-}
+} // namespace core
+} // namespace saturnin

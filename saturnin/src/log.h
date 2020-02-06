@@ -1,4 +1,4 @@
-// 
+//
 // log.h
 // Saturnin
 //
@@ -19,7 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	log.h
 ///
-/// \brief	Declares the static Log class. 
+/// \brief	Declares the static Log class.
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,226 +48,232 @@ namespace core {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Log {
-    public:
-        //@{
-        // Constructors / Destructors
-        Log()                        = delete;
-        Log(const Log&)              = delete;
-        Log(Log&&)                   = delete;
-        Log& operator=(const Log&) & = delete;
-        Log& operator=(Log&&) &      = delete;
-        ~Log()                       = delete;
-        //@}
+  public:
+    //@{
+    // Constructors / Destructors
+    Log()           = delete;
+    Log(const Log&) = delete;
+    Log(Log&&)      = delete;
+    Log& operator=(const Log&) & = delete;
+    Log& operator=(Log&&) & = delete;
+    ~Log()                  = delete;
+    //@}
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static bool Log::initialize();
-        ///
-        /// \brief  Initializes various logs used in Saturnin.
-        ///
-        /// \author Runik
-        /// \date   08/02/2018
-        ///
-        /// \return True if it succeeds, false if it fails.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static bool Log::initialize();
+    ///
+    /// \brief  Initializes various logs used in Saturnin.
+    ///
+    /// \author Runik
+    /// \date   08/02/2018
+    ///
+    /// \return True if it succeeds, false if it fails.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static bool initialize();
+    static bool initialize();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template <typename... Args> static inline void Log::error(const std::string& logger_name, const std::string& value, const Args&... args)
-        ///
-        /// \brief  writes an error message to the specified logger.
-        ///
-        /// \author Runik
-        /// \date   08/02/2018
-        ///
-        /// \tparam Args    Template arguments.
-        /// \param  logger_name Name of the logger.
-        /// \param  value       Text to write.
-        /// \param  args        Variable arguments for formatting.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template <typename... Args> static inline void Log::error(const std::string& logger_name, const std::string& value,
+    /// const Args&... args)
+    ///
+    /// \brief  writes an error message to the specified logger.
+    ///
+    /// \author Runik
+    /// \date   08/02/2018
+    ///
+    /// \tparam Args    Template arguments.
+    /// \param  logger_name Name of the logger.
+    /// \param  value       Text to write.
+    /// \param  args        Variable arguments for formatting.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template <typename... Args>
-        static inline void error(const std::string& logger_name, const std::string& value, const Args&... args) {
-            try {
-                if (loggerExists(logger_name)) {
-                    loggers_.at(logger_name)->error(value.c_str(), args...);
-                    // errors are also logged to console, using original logger name
-                    auto message{ "[{}] " + value };
-                    loggers_.at("console")->error(message.c_str(), logger_name, args...);
-                }
+    template<typename... Args>
+    static inline void error(const std::string& logger_name, const std::string& value, const Args&... args) {
+        try {
+            if (loggerExists(logger_name)) {
+                loggers_.at(logger_name)->error(value.c_str(), args...);
+                // errors are also logged to console, using original logger name
+                auto message{"[{}] " + value};
+                loggers_.at("console")->error(message.c_str(), logger_name, args...);
             }
-            catch (const std::runtime_error& e) {
-                loggers_.at("console")->warn(e.what());
+        } catch (const std::runtime_error& e) {
+            loggers_.at("console")->warn(e.what());
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template <typename... Args> static inline void Log::warning(const std::string& logger_name, const std::string& value,
+    /// const Args&... args)
+    ///
+    /// \brief  Writes a warning message to the specified logger.
+    ///
+    /// \author Runik
+    /// \date   08/02/2018
+    ///
+    /// \tparam Args    Template arguments.
+    /// \param  logger_name Name of the logger.
+    /// \param  value       Text to write.
+    /// \param  args        Variable arguments for formatting.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<typename... Args>
+    static inline void warning(const std::string& logger_name, const std::string& value, const Args&... args) {
+        try {
+            if (loggerExists(logger_name)) {
+                loggers_.at(logger_name)->warn(value.c_str(), args...);
+                // warnings are also logged to console, using original logger name
+                auto message{"[{}] " + value};
+                loggers_.at("console")->warn(message.c_str(), logger_name, args...);
             }
+        } catch (const std::runtime_error& e) {
+            loggers_.at("console")->warn(e.what());
         }
+    }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template <typename... Args> static inline void Log::warning(const std::string& logger_name, const std::string& value, const Args&... args)
-        ///
-        /// \brief  Writes a warning message to the specified logger.
-        ///
-        /// \author Runik
-        /// \date   08/02/2018
-        ///
-        /// \tparam Args    Template arguments.
-        /// \param  logger_name Name of the logger.
-        /// \param  value       Text to write.
-        /// \param  args        Variable arguments for formatting.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template <typename... Args> static inline void Log::info(const std::string& logger_name, const std::string& value,
+    /// const Args&... args)
+    ///
+    /// \brief  Writes an info message to the specified logger.
+    ///
+    /// \author Runik
+    /// \date   08/02/2018
+    ///
+    /// \tparam Args    Template arguments.
+    /// \param  logger_name Name of the logger.
+    /// \param  value       Text to write.
+    /// \param  args        Variable arguments for formatting.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template <typename... Args>
-        static inline void warning(const std::string& logger_name, const std::string& value, const Args&... args) {
-            try {
-                if (loggerExists(logger_name)) {
-                    loggers_.at(logger_name)->warn(value.c_str(), args...);
-                    // warnings are also logged to console, using original logger name
-                    auto message{ "[{}] " + value };
-                    loggers_.at("console")->warn(message.c_str(), logger_name, args...);
-                }
-            }
-            catch (const std::runtime_error& e) {
-                loggers_.at("console")->warn(e.what());
-            }
+    template<typename... Args>
+    static inline void info(const std::string& logger_name, const std::string& value, const Args&... args) {
+        if (loggerExists(logger_name))
+            loggers_.at(logger_name)->info(value.c_str(), args...);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template <typename... Args> static inline void Log::debug(const std::string& logger_name, const std::string& value,
+    /// const Args&... args)
+    ///
+    /// \brief  Writes a debug message to the specified logger.
+    ///
+    /// \author Runik
+    /// \date   08/02/2018
+    ///
+    /// \tparam Args    Template arguments.
+    /// \param  logger_name Name of the logger.
+    /// \param  value       Text to write.
+    /// \param  args        Variable arguments for formatting.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<typename... Args>
+    static inline void debug(const std::string& logger_name, const std::string& value, const Args&... args) {
+        if (loggerExists(logger_name))
+            loggers_.at(logger_name)->debug(value.c_str(), args...);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static inline bool Log::loggerExists(const std::string& logger_name);
+    ///
+    /// \brief  Queries if a given logger exists.
+    ///
+    /// \author Runik
+    /// \date   08/02/2018
+    ///
+    /// \param  logger_name Name of the logger.
+    ///
+    /// \return True if the logger exists.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static inline bool loggerExists(const std::string& logger_name) {
+        if (loggers_.count(logger_name) == 0) {
+            throw std::runtime_error(fmt::format(tr("Log '{0}' is not defined !"), logger_name));
         }
+        return true;
+    }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template <typename... Args> static inline void Log::info(const std::string& logger_name, const std::string& value, const Args&... args)
-        ///
-        /// \brief  Writes an info message to the specified logger.
-        ///
-        /// \author Runik
-        /// \date   08/02/2018
-        ///
-        /// \tparam Args    Template arguments.
-        /// \param  logger_name Name of the logger.
-        /// \param  value       Text to write.
-        /// \param  args        Variable arguments for formatting.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createFileSink(const std::string& logger_path);
+    ///
+    /// \brief  Creates a file sink.
+    ///
+    /// \author Runik
+    /// \date   08/02/2018
+    ///
+    /// \param  logger_path Full pathname of the logger file.
+    ///
+    /// \return Sink linked to the logger file.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template <typename... Args>
-        static inline void info(const std::string& logger_name, const std::string& value, const Args&... args) {
-            if (loggerExists(logger_name)) loggers_.at(logger_name)->info(value.c_str(), args...);
-        }
+    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> createFileSink(const std::string& logger_path);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn template <typename... Args> static inline void Log::debug(const std::string& logger_name, const std::string& value, const Args&... args)
-        ///
-        /// \brief  Writes a debug message to the specified logger.
-        ///
-        /// \author Runik
-        /// \date   08/02/2018
-        ///
-        /// \tparam Args    Template arguments.
-        /// \param  logger_name Name of the logger.
-        /// \param  value       Text to write.
-        /// \param  args        Variable arguments for formatting.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> Log::createConsoleSink();
+    ///
+    /// \brief  Creates a color console sink.
+    ///
+    /// \author Runik
+    /// \date   30/06/2018
+    ///
+    /// \return Sink linked to the color console.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        template <typename... Args>
-        static inline void debug(const std::string& logger_name, const std::string& value, const Args&... args) {
-            if (loggerExists(logger_name)) loggers_.at(logger_name)->debug(value.c_str(), args...);
-        }
+    static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> createConsoleSink();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static inline bool Log::loggerExists(const std::string& logger_name);
-        ///
-        /// \brief  Queries if a given logger exists.
-        ///
-        /// \author Runik
-        /// \date   08/02/2018
-        ///
-        /// \param  logger_name Name of the logger.
-        ///
-        /// \return True if the logger exists.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Log::createLogger(const std::string& logger_name, const
+    /// std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
+    ///
+    /// \brief  Creates a logger.
+    ///
+    /// \author Runik
+    /// \date   08/02/2018
+    ///
+    /// \param  logger_name Name of the logger.
+    /// \param  sink        The sink.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static inline bool loggerExists(const std::string& logger_name){
-            if (loggers_.count(logger_name) == 0) {
-                throw std::runtime_error( fmt::format(tr("Log '{0}' is not defined !"), logger_name));
-            }
-            return true;
-        }
+    static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createFileSink(const std::string& logger_path);
-        ///
-        /// \brief  Creates a file sink.
-        ///
-        /// \author Runik
-        /// \date   08/02/2018
-        ///
-        /// \param  logger_path Full pathname of the logger file.
-        ///
-        /// \return Sink linked to the logger file.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Log::createConsole();
+    ///
+    /// \brief  Creates the console logger. Will be accessible using "console" name.
+    ///
+    /// \author Runik
+    /// \date   23/06/2018
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> createFileSink(const std::string& logger_path);
+    static void createConsole();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> Log::createConsoleSink();
-        ///
-        /// \brief  Creates a color console sink.
-        ///
-        /// \author Runik
-        /// \date   30/06/2018
-        ///
-        /// \return Sink linked to the color console.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Log::removeFile(const std::string& path);
+    ///
+    /// \brief  Removes the file if it exists, creates the the directory if it doesn't exist.
+    ///
+    /// \author Runik
+    /// \date   08/02/2018
+    ///
+    /// \param  path    Full pathname of the file.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> createConsoleSink();
+    static void removeFile(const std::string& path);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static void Log::createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
-        ///
-        /// \brief  Creates a logger.
-        ///
-        /// \author Runik
-        /// \date   08/02/2018
-        ///
-        /// \param  logger_name Name of the logger.
-        /// \param  sink        The sink.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Log::flush();
+    ///
+    /// \brief  Flushes the log.
+    ///
+    /// \author Runik
+    /// \date   04/12/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink);
+    static void flush();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static void Log::createConsole();
-        ///
-        /// \brief  Creates the console logger. Will be accessible using "console" name.
-        ///
-        /// \author Runik
-        /// \date   23/06/2018
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        static void createConsole();
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static void Log::removeFile(const std::string& path);
-        ///
-        /// \brief  Removes the file if it exists, creates the the directory if it doesn't exist.
-        ///
-        /// \author Runik
-        /// \date   08/02/2018
-        ///
-        /// \param  path    Full pathname of the file.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        static void removeFile(const std::string& path);
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static void Log::flush();
-        ///
-        /// \brief  Flushes the log.
-        ///
-        /// \author Runik
-        /// \date   04/12/2019
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        static void flush();
-
-    private:
-        static std::map<std::string, std::shared_ptr<spdlog::logger>> loggers_; ///< Map containing all the loggers used in the program
+  private:
+    static std::map<std::string, std::shared_ptr<spdlog::logger>>
+        loggers_; ///< Map containing all the loggers used in the program
 };
 
-};
-};
+}; // namespace core
+}; // namespace saturnin

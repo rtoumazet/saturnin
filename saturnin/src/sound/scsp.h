@@ -1,4 +1,4 @@
-// 
+//
 // scsp.h
 // Saturnin
 //
@@ -15,12 +15,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	scsp.h
 ///
-/// \brief	Declares the SCSP class. 
+/// \brief	Declares the SCSP class.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -29,7 +29,7 @@
 
 // Forward declarations
 namespace saturnin::core {
-    class EmulatorContext;
+class EmulatorContext;
 }
 
 namespace saturnin {
@@ -39,21 +39,21 @@ using saturnin::core::EmulatorContext;
 using saturnin::core::Log;
 
 class Scsp {
-public:
+  public:
     //@{
     // Constructors / Destructors
-    Scsp()            = delete;
-    Scsp(EmulatorContext* ec) {};
+    Scsp() = delete;
+    Scsp(EmulatorContext* ec){};
     Scsp(const Scsp&) = delete;
     Scsp(Scsp&&)      = delete;
     Scsp& operator=(const Scsp&) & = delete;
     Scsp& operator=(Scsp&&) & = delete;
-    ~Scsp()           = default;
+    ~Scsp()                   = default;
     //@}
-    
+
     void reset() { Log::error("scsp", "reset() not implemented"); };
-    void setSound(bool){ Log::error("scsp", "setSound() not implemented"); };
+    void setSound(bool) { Log::error("scsp", "setSound() not implemented"); };
 };
 
-}
-}
+} // namespace sound
+} // namespace saturnin

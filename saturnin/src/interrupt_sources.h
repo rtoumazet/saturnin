@@ -1,4 +1,4 @@
-// 
+//
 // interrupt_sources.h
 // Saturnin
 //
@@ -15,12 +15,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	interrupt_sources.h
 ///
-/// \brief	Lists the various interrupt sources used in the system. 
+/// \brief	Lists the various interrupt sources used in the system.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -37,7 +37,7 @@ namespace core {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace interrupt_source {
-
+// clang-format off
 static constexpr u8 vector_nmi              { 0xB };
 static constexpr u8 vector_user_break       { 0xC };
 static constexpr u8 vector_v_blank_in       { 0x40 };
@@ -122,6 +122,6 @@ static Interrupt sh2_frt_output_compare_flag_a_set{ 0, 0 , InterruptMaskRegister
 static Interrupt sh2_frt_output_compare_flag_b_set{ 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 static Interrupt sh2_frt_overflow_flag_set        { 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 }
-
-}
-}
+// clang-format on
+} // namespace core
+} // namespace saturnin

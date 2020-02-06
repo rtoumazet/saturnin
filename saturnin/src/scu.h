@@ -1,4 +1,4 @@
-// 
+//
 // scu.h
 // Saturnin
 //
@@ -15,17 +15,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	scu.h
 ///
-/// \brief	Declares everything related to the System Control Unit (SCU). 
+/// \brief	Declares everything related to the System Control Unit (SCU).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include <queue> // priority_queue
+#include <queue>  // priority_queue
 #include <vector> // vector
 #include "emulator_defs.h"
 #include "emulator_enums.h"
@@ -36,9 +36,9 @@ namespace is = saturnin::core::interrupt_source;
 
 // Forward declarations
 namespace saturnin::sh2 {
-    class Sh2;
-    enum class Sh2Type;
-}
+class Sh2;
+enum class Sh2Type;
+} // namespace saturnin::sh2
 
 namespace saturnin {
 namespace core {
@@ -46,8 +46,8 @@ namespace core {
 // Forward declarations
 class Memory;
 class EmulatorContext;
-//using saturnin::sh2::Sh2;
-//using saturnin::sh2::Sh2Type;
+// using saturnin::sh2::Sh2;
+// using saturnin::sh2::Sh2Type;
 
 constexpr u32 indirect_dma_end_code = 0x80000000;
 
@@ -58,10 +58,10 @@ constexpr u32 indirect_dma_end_code = 0x80000000;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DmaLevel : uint8_t {
-    level_0			= 0,	///< Level 0 DMA.
-    level_1			= 1,	///< Level 1 DMA.
-    level_2			= 2,	///< Level 2 DMA.
-	level_unknown	= 255	///< Unknown level.
+    level_0       = 0,  ///< Level 0 DMA.
+    level_1       = 1,  ///< Level 1 DMA.
+    level_2       = 2,  ///< Level 2 DMA.
+    level_unknown = 255 ///< Unknown level.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,12 +70,7 @@ enum class DmaLevel : uint8_t {
 /// \brief  DMA status.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaStatus : uint8_t {
-    finished                = 0,
-    waiting_start_factor    = 1,
-    queued                  = 2,
-    active                  = 3
-};
+enum class DmaStatus : uint8_t { finished = 0, waiting_start_factor = 1, queued = 2, active = 3 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   DmaBus
@@ -83,13 +78,7 @@ enum class DmaStatus : uint8_t {
 /// \brief  DMA bus.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaBus {
-	a_bus,
-	b_bus,
-	cpu_bus,
-	dsp_bus,
-	unknown_bus
-};
+enum class DmaBus { a_bus, b_bus, cpu_bus, dsp_bus, unknown_bus };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ScuRegion
@@ -98,22 +87,22 @@ enum class DmaBus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ScuRegion {
-	unknown,
-	rom,
-	smpc,
-	backup_ram,
-	work_ram_l,
-	minit,
-	sinit,
-	a_bus_cs0,
-	a_bus_cs1,
-	a_bus_dummy,
-	a_bus_cs2,
-	sound,
-	vdp1,
-	vdp2,
-	scu_register,
-	work_ram_h
+    unknown,
+    rom,
+    smpc,
+    backup_ram,
+    work_ram_l,
+    minit,
+    sinit,
+    a_bus_cs0,
+    a_bus_cs1,
+    a_bus_dummy,
+    a_bus_cs2,
+    sound,
+    vdp1,
+    vdp2,
+    scu_register,
+    work_ram_h
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,18 +130,17 @@ struct DmaConfiguration {
     StartingFactorSelect starting_factor_select;
 };
 
-
 class Scu {
-public:
+  public:
     //@{
     // Constructors / Destructors
-    Scu()                        = delete;
+    Scu() = delete;
     Scu(EmulatorContext*);
-    Scu(const Scu&)              = delete;
-    Scu(Scu&&)                   = delete;
+    Scu(const Scu&) = delete;
+    Scu(Scu&&)      = delete;
     Scu& operator=(const Scu&) & = delete;
-    Scu& operator=(Scu&&) &      = delete;
-    ~Scu()                       = default;
+    Scu& operator=(Scu&&) & = delete;
+    ~Scu()                  = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,7 +266,7 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void sendStartFactor(const StartingFactorSelect sfs);
-    
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn bool Scu::clearInterruptFlag(const Interrupt& i);
     ///
@@ -291,17 +279,16 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void clearInterruptFlag(const Interrupt&);
-    
+
     void dmaTest();
 
-	/// \name Context objects accessors
-	//@{
+    /// \name Context objects accessors
+    //@{
     EmulatorContext* emulatorContext() const;
-    Memory*           memory() const;
-	//@}
+    Memory*          memory() const;
+    //@}
 
-private:
-
+  private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::initializeRegisters();
     ///
@@ -425,64 +412,63 @@ private:
     void addDmaToQueue(const DmaConfiguration& dc);
 
     struct DmaCompare {
-        bool operator()(const DmaConfiguration &dc1, const DmaConfiguration &dc2) const {
+        bool operator()(const DmaConfiguration& dc1, const DmaConfiguration& dc2) const {
             return dc1.dma_status < dc2.dma_status;
         }
     };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn DmaBus Scu::getDmaBus(const u32 address);
+    ///
+    /// \brief  Returns the DMA bus of the specified address.
+    ///
+    /// \author Runik
+    /// \date   26/06/2019
+    ///
+    /// \param address        Memory map address.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// \fn DmaBus Scu::getDmaBus(const u32 address);
-	///
-	/// \brief  Returns the DMA bus of the specified address.
-	///
-	/// \author Runik
-	/// \date   26/06/2019
-	///
-	/// \param address        Memory map address.
-	////////////////////////////////////////////////////////////////////////////////////////////////////
+    DmaBus getDmaBus(const u32 address);
 
-	DmaBus		getDmaBus(const u32 address);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn ScuRegion Scu::getScuRegion(cconst u32 address);
+    ///
+    /// \brief  Returns the SCU region of the specified address.
+    ///
+    /// \author Runik
+    /// \date   26/06/2019
+    ///
+    /// \param address        Memory map address.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// \fn ScuRegion Scu::getScuRegion(cconst u32 address);
-	///
-	/// \brief  Returns the SCU region of the specified address.
-	///
-	/// \author Runik
-	/// \date   26/06/2019
-	///
-	/// \param address        Memory map address.
-	////////////////////////////////////////////////////////////////////////////////////////////////////
+    ScuRegion getScuRegion(const u32 address);
 
-	ScuRegion	getScuRegion(const u32 address);
-    
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// \fn void Scu::sendDmaEndInterrupt(const DmaLevel l);
-	///
-	/// \brief  Sends dma end interrupt of the current dma level.
-	///
-	/// \author Runik
-	/// \date   05/08/2019
-	///
-	/// \param l        DMA level to send interrupt for.
-	////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Scu::sendDmaEndInterrupt(const DmaLevel l);
+    ///
+    /// \brief  Sends dma end interrupt of the current dma level.
+    ///
+    /// \author Runik
+    /// \date   05/08/2019
+    ///
+    /// \param l        DMA level to send interrupt for.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void sendDmaEndInterrupt(const DmaLevel l);
+    void sendDmaEndInterrupt(const DmaLevel l);
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// \fn void Scu::resetDmaEnable(const DmaConfiguration& dc);
-	///
-	/// \brief  Reset dma enable value for the current dma level.
-	///
-	/// \author Runik
-	/// \date   05/08/2019
-	///
-	/// \param [in] dc                  DMA configuration.
-	////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Scu::resetDmaEnable(const DmaConfiguration& dc);
+    ///
+    /// \brief  Reset dma enable value for the current dma level.
+    ///
+    /// \author Runik
+    /// \date   05/08/2019
+    ///
+    /// \param [in] dc                  DMA configuration.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void resetDmaEnable(const DmaConfiguration& dc);
-	
+    void resetDmaEnable(const DmaConfiguration& dc);
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::dmaUpdateWriteAddress(const DmaLevel l);
     ///
@@ -496,40 +482,39 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void dmaUpdateWriteAddress(const DmaLevel l, const u32 data);
-    
+
     using DmaConfigurations = std::vector<DmaConfiguration>;
     using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
     DmaQueue dma_queue_;
-    
+
     void activateDma();
 
     EmulatorContext* emulator_context_; ///< Pointer to the emulator context object.
 
     //{@
     // Scu memory registers
-    DmaEnableRegister          d0en_;
-    DmaEnableRegister          d1en_;
-    DmaEnableRegister          d2en_;
-    DmaAddressAddValueRegister d0ad_;
-    DmaAddressAddValueRegister d1ad_;
-    DmaAddressAddValueRegister d2ad_;
-    DmaReadAddressRegister     d0r_;
-    DmaReadAddressRegister     d1r_;
-    DmaReadAddressRegister     d2r_;
-    DmaWriteAddressRegister    d0w_;
-    DmaWriteAddressRegister    d1w_;
-    DmaWriteAddressRegister    d2w_;
-    DmaModeRegister            d0md_;
-    DmaModeRegister            d1md_;
-    DmaModeRegister            d2md_;
+    DmaEnableRegister                   d0en_;
+    DmaEnableRegister                   d1en_;
+    DmaEnableRegister                   d2en_;
+    DmaAddressAddValueRegister          d0ad_;
+    DmaAddressAddValueRegister          d1ad_;
+    DmaAddressAddValueRegister          d2ad_;
+    DmaReadAddressRegister              d0r_;
+    DmaReadAddressRegister              d1r_;
+    DmaReadAddressRegister              d2r_;
+    DmaWriteAddressRegister             d0w_;
+    DmaWriteAddressRegister             d1w_;
+    DmaWriteAddressRegister             d2w_;
+    DmaModeRegister                     d0md_;
+    DmaModeRegister                     d1md_;
+    DmaModeRegister                     d2md_;
     DmaLevel0TransferByteNumberRegister d0c_;
     DmaLevel1TransferByteNumberRegister d1c_;
     DmaLevel2TransferByteNumberRegister d2c_;
-    InterruptStatusRegister    interrupt_status_register_;
-    InterruptMaskRegister      interrupt_mask_register_;
+    InterruptStatusRegister             interrupt_status_register_;
+    InterruptMaskRegister               interrupt_mask_register_;
     //@}
 };
 
-
-}
-}
+} // namespace core
+} // namespace saturnin

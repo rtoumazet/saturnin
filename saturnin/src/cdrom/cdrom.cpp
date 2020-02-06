@@ -1,4 +1,4 @@
-// 
+//
 // cdrom.cpp
 // Saturnin
 //
@@ -19,7 +19,7 @@
 // SYSTEM INCLUDES
 #include <windows.h>
 //#include <wnaspi32.h>
-#include <array>    // std::array
+#include <array> // std::array
 
 //#include "../emustate.h"
 #include "cdrom.h"
@@ -33,32 +33,31 @@ namespace saturnin {
 namespace cdrom {
 
 // Static variables initialization
-CdromAccessMethod	Cdrom::access_method = CdromAccessMethod::spti;
+CdromAccessMethod Cdrom::access_method = CdromAccessMethod::spti;
 
-//ScsiDriveInfo	    Cdrom::di_list[scsi_max_drives];
-std::vector<ScsiDriveInfo>  Cdrom::di_list;
-int8_t		    	        Cdrom::scsi_path = -1;
-int8_t			            Cdrom::scsi_target = -1;
-int8_t			            Cdrom::scsi_lun = -1;
-wchar_t			            Cdrom::scsi_letter = 0;
+// ScsiDriveInfo	    Cdrom::di_list[scsi_max_drives];
+std::vector<ScsiDriveInfo> Cdrom::di_list;
+int8_t                     Cdrom::scsi_path   = -1;
+int8_t                     Cdrom::scsi_target = -1;
+int8_t                     Cdrom::scsi_lun    = -1;
+wchar_t                    Cdrom::scsi_letter = 0;
 
-ScsiToc 		            Cdrom::toc_data;
+ScsiToc Cdrom::toc_data;
 
-std::vector<std::string>    Cdrom::scsi_drives_list = {};
+std::vector<std::string> Cdrom::scsi_drives_list = {};
 
 /* static */
 uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8_t lun) {
-
-    auto it = std::find_if(di_list.begin(),
-                           di_list.end(),
-                            [path, target, lun](const ScsiDriveInfo& di) { return (di.path == path) && (di.target == target) && (di.lun == lun); });
+    auto it = std::find_if(di_list.begin(), di_list.end(), [path, target, lun](const ScsiDriveInfo& di) {
+        return (di.path == path) && (di.target == target) && (di.lun == lun);
+    });
     return it - di_list.begin(); // returns the indice
 }
 
-//CCdRom::CCdRom()
+// CCdRom::CCdRom()
 //{
 //	EmuState::pMem->countryCode = 0xC; // Europe by default
-//	
+//
 //	Scsi::initialize();
 //
 //	// CD-BLOCK registers initialization
@@ -112,7 +111,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	posOfSectorsToDelete=0;
 //
 //	// sectors initialisation
-//	for (int32_t i=0;i<MAX_SECTORS;i++) 
+//	for (int32_t i=0;i<MAX_SECTORS;i++)
 //	{
 //		memset(sectorsBuffer[i].data,0,SECTOR_SIZE);
 //		sectorsBuffer[i].size=0;
@@ -141,28 +140,28 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //
 //		// buffer partitions
 //		for (int32_t j=0;j<MAX_SECTORS;j++) bufferPartitions[i].sectors[j]=0;
-//		bufferPartitions[i].size=0;		
+//		bufferPartitions[i].size=0;
 //	}
 //
 //	cyclesPerMs = 28571;
 //	UpdatePeriod();
-//	
+//
 //	if(EmuState::currentHardwareMode == SATURN) InsertCd(); // CD is inserted only in saturn mode
 //
 //	executedCommands = 0;
 //}
 //
-//CCdRom::CCdRom(bool blank)
+// CCdRom::CCdRom(bool blank)
 //{
 //	Scsi::initialize();
 //}
 //
-//CCdRom::~CCdRom()
+// CCdRom::~CCdRom()
 //{
 //	Scsi::deInitialize();
 //}
 //
-//void CCdRom::ExecuteCdBlockCommand(uint16_t value)
+// void CCdRom::ExecuteCdBlockCommand(uint16_t value)
 //{
 //	// logs desactivation
 //	#ifdef _LOGS
@@ -294,13 +293,13 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			{
 //				EmuState::pLog->CdBlockWrite("change initialization flag");
 //				(CR1&0x1) ? EmuState::pLog->CdBlockWrite("software reset"):EmuState::pLog->CdBlockWrite("no software reset");
-//				(CR1&0x2) ? EmuState::pLog->CdBlockWrite("decode subcode RW"):EmuState::pLog->CdBlockWrite("no decode subcode RW");
-//				(CR1&0x4) ? EmuState::pLog->CdBlockWrite("no recognize mode 2 subheader"):EmuState::pLog->CdBlockWrite("recognize mode 2 subheader");
-//				(CR1&0x8) ? EmuState::pLog->CdBlockWrite("retry form 2 read"):EmuState::pLog->CdBlockWrite("no retry form 2 read");
+//				(CR1&0x2) ? EmuState::pLog->CdBlockWrite("decode subcode RW"):EmuState::pLog->CdBlockWrite("no decode subcode
+//RW"); 				(CR1&0x4) ? EmuState::pLog->CdBlockWrite("no recognize mode 2 subheader"):EmuState::pLog->CdBlockWrite("recognize mode 2
+//subheader"); 				(CR1&0x8) ? EmuState::pLog->CdBlockWrite("retry form 2 read"):EmuState::pLog->CdBlockWrite("no retry form 2 read");
 //				(CR1&0x80) ? EmuState::pLog->CdBlockWrite("no change"):EmuState::pLog->CdBlockWrite("change");
 //			}else EmuState::pLog->CdBlockWrite("don't change initialization flag");
 //			#endif
-//			
+//
 //			switch(CR1 & 0x3)
 //			{
 //			case 0:
@@ -389,7 +388,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				else {
 //					retryFreq=CR4&0xF;
 //					#ifdef _LOGS
-//					EmuState::pLog->CdBlockWrite("No data output with new retry value when error"); 
+//					EmuState::pLog->CdBlockWrite("No data output with new retry value when error");
 //					#endif
 //				}
 //			}
@@ -410,7 +409,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				else {
 //					retryFreq=CR4&0xF;
 //					#ifdef _LOGS
-//					EmuState::pLog->CdBlockWrite("Data output with new retry value when error : ", retryFreq); 
+//					EmuState::pLog->CdBlockWrite("Data output with new retry value when error : ", retryFreq);
 //					#endif
 //				}
 //			}
@@ -472,7 +471,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //
 //				for (int32_t i=posOfSectorsToDelete;i<(posOfSectorsToDelete+numberOfSectorsToDelete);i++)
 //				{
-//					if (i>MAX_SECTORS) 
+//					if (i>MAX_SECTORS)
 //					{
 //						#ifdef _LOGS
 //						EmuState::pLog->CdBlockWrite("End of buffer partition reached");
@@ -486,7 +485,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //						#endif
 //						bufferPartitions[fetchedBuffer].sectors[i]->size=0;
 //						bufferPartitions[fetchedBuffer].sectors[i]=NULL;
-//						bufferPartitions[fetchedBuffer].size--;									
+//						bufferPartitions[fetchedBuffer].size--;
 //					}
 //					else break;
 //				}
@@ -502,7 +501,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //					int32_t holeStart=0;
 //					for (;holeStart<MAX_SECTORS;holeStart++)
 //					{
-//						if (!bufferPartitions[fetchedBuffer].sectors[holeStart]) break;									
+//						if (!bufferPartitions[fetchedBuffer].sectors[holeStart]) break;
 //					}
 //					// holeStart contains the position of the hole
 //					// let's check if the hole is positioned before the end of used sectors
@@ -513,7 +512,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //						int32_t holeEnd=holeStart;
 //						for (;holeEnd<MAX_SECTORS;holeEnd++)
 //						{
-//							if (bufferPartitions[fetchedBuffer].sectors[holeEnd]) break;									
+//							if (bufferPartitions[fetchedBuffer].sectors[holeEnd]) break;
 //						}
 //						// we shift the sectors
 //						int32_t i=0;
@@ -521,7 +520,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //						for (i=0;(i+holeEnd)<(holeEnd+bufferPartitions[fetchedBuffer].size);i++)
 //						{
 //							if ((i+holeEnd)>MAX_SECTORS) break;
-//							bufferPartitions[fetchedBuffer].sectors[holeStart+i]=bufferPartitions[fetchedBuffer].sectors[holeEnd+i];		
+//							bufferPartitions[fetchedBuffer].sectors[holeStart+i]=bufferPartitions[fetchedBuffer].sectors[holeEnd+i];
 //							#ifdef _LOGS
 //							EmuState::pLog->CdBlockWrite("Sector n°",holeEnd+i);
 //							EmuState::pLog->CdBlockWrite("shifted to sector n°",holeStart+i);
@@ -529,7 +528,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //						}
 //						for (;i<MAX_SECTORS;i++)
 //						{
-//							bufferPartitions[fetchedBuffer].sectors[i]=NULL;				
+//							bufferPartitions[fetchedBuffer].sectors[i]=NULL;
 //						}
 //					}
 //				}
@@ -539,7 +538,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				/*bufferPartitions[fetchedBuffer].size=0;
 //				for (int32_t i=0;i<MAX_SECTORS;i++)
 //				{
-//					if (bufferPartitions[fetchedBuffer].sectors[i]) bufferPartitions[fetchedBuffer].size++;									
+//					if (bufferPartitions[fetchedBuffer].sectors[i]) bufferPartitions[fetchedBuffer].size++;
 //					else break;
 //				}*/
 //
@@ -704,7 +703,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				}
 //				else FAD=newFad;
 //				// stop current transfert if any
-//				if (remainingFADs) 
+//				if (remainingFADs)
 //				{
 //					#ifdef _LOGS
 //					EmuState::pLog->CdBlockWrite("cancel current play!");
@@ -755,7 +754,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				}
 //				else FAD=newFad;
 //				// stop current transfert if any
-//				if (remainingFADs) 
+//				if (remainingFADs)
 //				{
 //					#ifdef _LOGS
 //					EmuState::pLog->CdBlockWrite("cancel current play!");
@@ -853,7 +852,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			#ifdef _LOGS
 //			EmuState::pLog->CdBlockWrite("-=Set Filter Subheader Conditions=- executed");
 //			#endif
-//			
+//
 //			filterNum=CR3>>8;
 //
 //			filters[filterNum].fileNumber=CR3&0xFF;
@@ -959,7 +958,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				EmuState::pLog->CdBlockWrite("Clearing buffer partition data of buffer n°",buffPart);
 //				#endif
 //
-//				for (int32_t j=0;j<MAX_SECTORS;j++) 
+//				for (int32_t j=0;j<MAX_SECTORS;j++)
 //				{
 //					if (bufferPartitions[buffPart].sectors[j])
 //					{
@@ -986,7 +985,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				EmuState::pLog->CdBlockWrite("Buffer partition number is ignored");
 //				#endif
 //
-//				if (resetFlag&0x4) 
+//				if (resetFlag&0x4)
 //				{
 //					#ifdef _LOGS
 //					EmuState::pLog->CdBlockWrite("Initialize data of all buffer partitions");
@@ -994,9 +993,9 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //					for (int32_t i=0;i<MAX_SELECTORS;i++)
 //					{
 //						for (int32_t j=0;j<MAX_SECTORS;j++) bufferPartitions[i].sectors[j]=NULL;
-//						bufferPartitions[i].size=0;	
+//						bufferPartitions[i].size=0;
 //					}
-//					for (int32_t j=0;j<MAX_SECTORS;j++) 
+//					for (int32_t j=0;j<MAX_SECTORS;j++)
 //					{
 //						memset(sectorsBuffer[j].data,0,SECTOR_SIZE);
 //						sectorsBuffer[j].size=0;
@@ -1006,8 +1005,8 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //						sectorsBuffer[j].codingInfo=0;
 //					}
 //				}
-//				if (resetFlag&0x8) EmuState::pLog->CdBlockWrite("Initialize data of all buffer partitions output connectors (unsupported)");// ??
-//				if (resetFlag&0x10) 
+//				if (resetFlag&0x8) EmuState::pLog->CdBlockWrite("Initialize data of all buffer partitions output connectors
+//(unsupported)");// ?? 				if (resetFlag&0x10)
 //				{
 //					#ifdef _LOGS
 //					EmuState::pLog->CdBlockWrite("Initialize all filter conditions");
@@ -1027,14 +1026,14 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				#ifdef _LOGS
 //				if (resetFlag&0x20) EmuState::pLog->CdBlockWrite("Initialize all filter input connectors (unsupported)");// ??
 //				#endif
-//				if (resetFlag&0x40) 
+//				if (resetFlag&0x40)
 //				{
 //					#ifdef _LOGS
 //					EmuState::pLog->CdBlockWrite("Initialize true output connectors of all filters");
 //					#endif
 //					for (int32_t i=0;i<MAX_SELECTORS;i++) filters[i].trueOutput=i;
 //				}
-//				if (resetFlag&0x80) 
+//				if (resetFlag&0x80)
 //				{
 //					#ifdef _LOGS
 //					EmuState::pLog->CdBlockWrite("Initialize false output connectors of all filters");
@@ -1042,7 +1041,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //					for (int32_t i=0;i<MAX_SELECTORS;i++) filters[i].falseOutput=FILTER_NOT_CONNECTED;
 //				}
 //			}
-//			
+//
 //			HIRQREQ|=CMOK|ESEL;
 //			SendStatus();
 //			break;
@@ -1090,15 +1089,16 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			buffer=CR3>>8;
 //			numberOfSectors=CR4;
 //
-//			if (sectorPosInBuffer==0xFFFF) MessageBox(NULL,L"CalculateActualSize: sectorPosInBuffer==0xFFFF",L"unimplemented",MB_ICONWARNING);
-//			if (numberOfSectors==0xFFFF) MessageBox(NULL,L"CalculateActualSize: numberOfSectors==0xFFFF",L"unimplemented",MB_ICONWARNING);
+//			if (sectorPosInBuffer==0xFFFF) MessageBox(NULL,L"CalculateActualSize:
+//sectorPosInBuffer==0xFFFF",L"unimplemented",MB_ICONWARNING); 			if (numberOfSectors==0xFFFF) MessageBox(NULL,L"CalculateActualSize:
+//numberOfSectors==0xFFFF",L"unimplemented",MB_ICONWARNING);
 //
 //			actualSize=0;
 //			/*for (int32_t i=sectorPosInBuffer;i<(sectorPosInBuffer+numberOfSectors);i++)
 //			{
 //				if (bufferPartitions[buffer].sectors[i]) actualSize+=bufferPartitions[buffer].sectors[i]->size;
 //			}*/
-//			
+//
 //			// Is the range included in one partition
 //			int32_t i;
 //			if((sectorPosInBuffer+numberOfSectors) <= bufferPartitions[buffer].size){
@@ -1146,12 +1146,13 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			sectorNum = CR2 & 0xFF;
 //			uint8_t bufferNum;
 //			bufferNum = CR3>>8;
-//			
+//
 //			CR1=cdDriveStatus<<8;
 //			CR1|=bufferPartitions[bufferNum].sectors[sectorNum]->FAD>>16;
 //			CR2=(uint16_t)(bufferPartitions[bufferNum].sectors[sectorNum]->FAD & 0xFFFF);
-//			CR3=bufferPartitions[bufferNum].sectors[sectorNum]->fileNumber << 8 | bufferPartitions[bufferNum].sectors[sectorNum]->channelNumber;
-//			CR4=bufferPartitions[bufferNum].sectors[sectorNum]->subMode << 8 | bufferPartitions[bufferNum].sectors[sectorNum]->codingInfo;
+//			CR3=bufferPartitions[bufferNum].sectors[sectorNum]->fileNumber << 8 |
+//bufferPartitions[bufferNum].sectors[sectorNum]->channelNumber; 			CR4=bufferPartitions[bufferNum].sectors[sectorNum]->subMode << 8
+//| bufferPartitions[bufferNum].sectors[sectorNum]->codingInfo;
 //
 //			HIRQREQ|=CMOK|ESEL;
 //			#ifdef _LOGS
@@ -1278,7 +1279,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //
 //			for (int32_t j=posOfSectorsToDelete; j<(posOfSectorsToDelete+numberOfSectorsToDelete); j++)
 //			{
-//				if (j>MAX_SECTORS) 
+//				if (j>MAX_SECTORS)
 //				{
 //					#ifdef _LOGS
 //					EmuState::pLog->CdBlockWrite("end of buffer partition reached");
@@ -1292,7 +1293,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //					#endif
 //					bufferPartitions[fetchedBuffer].sectors[j]->size=0;
 //					bufferPartitions[fetchedBuffer].sectors[j]=NULL;
-//					bufferPartitions[fetchedBuffer].size--;									
+//					bufferPartitions[fetchedBuffer].size--;
 //				}
 //				else break;
 //			}
@@ -1306,7 +1307,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				int32_t holeStart=0;
 //				for (;holeStart<MAX_SECTORS;holeStart++)
 //				{
-//					if (!bufferPartitions[fetchedBuffer].sectors[holeStart]) break;									
+//					if (!bufferPartitions[fetchedBuffer].sectors[holeStart]) break;
 //				}
 //				// holeStart contains the position of the hole
 //				// let's check if the hole is positioned before the end of used sectors
@@ -1317,7 +1318,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //					int32_t holeEnd=holeStart;
 //					for (;holeEnd<MAX_SECTORS;holeEnd++)
 //					{
-//						if (bufferPartitions[fetchedBuffer].sectors[holeEnd]) break;									
+//						if (bufferPartitions[fetchedBuffer].sectors[holeEnd]) break;
 //					}
 //					// we shift the sectors
 //					int32_t k=0;
@@ -1347,7 +1348,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			#ifdef _LOGS
 //			EmuState::pLog->CdBlockWrite("-=Get Then Delete Sector Data=- executed");
 //			#endif
-//			
+//
 //			sectorNumInBuffer=CR2;
 //			sectorNumber=CR4;
 //			fetchedBuffer=CR3>>8;
@@ -1415,8 +1416,8 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //					SendStatus();
 //					break;
 //				default:
-//					MessageBox(NULL,L"ChangeDirectory: change to another directory than root directory",L"warning",MB_ICONWARNING);
-//					break;
+//					MessageBox(NULL,L"ChangeDirectory: change to another directory than root
+//directory",L"warning",MB_ICONWARNING); 					break;
 //			}
 //
 //			HIRQREQ|=CMOK|EFLS;
@@ -1461,7 +1462,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			bytesTransfered=0;
 //			posInDataBuffer=0;
 //			dataBuffer=filesInfos;
-//			
+//
 //			cdDriveStatus|=STAT_TRNS;
 //			CR1=cdDriveStatus<<8;
 //			CR2=6;
@@ -1537,7 +1538,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			CR4=0x0001;
 //
 //			HIRQREQ|=CMOK|0x0800;// mpeg enabled?
-//			
+//
 //			#ifdef _LOGS
 //			EmuState::pLog->CdBlockWrite("-=0x93=- executed");
 //			#endif
@@ -1565,30 +1566,30 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //}
 //
 //
-//void CCdRom::SetCdDriveStatus(uint8_t value)
+// void CCdRom::SetCdDriveStatus(uint8_t value)
 //{
 //	cdDriveStatus = value;
 //}
 //
-//uint8_t CCdRom::GetCdDriveStatus()
+// uint8_t CCdRom::GetCdDriveStatus()
 //{
 //	return cdDriveStatus;
 //}
 //
-//bool CCdRom::CdInserted()
+// bool CCdRom::CdInserted()
 //{
-//	// verified by trying to read the TOC 
+//	// verified by trying to read the TOC
 //	bool bReturn = Scsi::readToc(TOCData);
 //	//AspiTOC=(Aspi_TOC*)&TOCData;
 //	AspiTOC=reinterpret_cast<Aspi_TOC*>(&TOCData);
 //	return bReturn;
 //}
 //
-//void CCdRom::InsertCd()	
+// void CCdRom::InsertCd()
 //{
 //	// if a CD is present we notify the host and display the CD infos
 //	if (!CdInserted()) return;
-//	
+//
 //	string strGameHeader = "";
 //	// first sector is read
 //	strGameHeader = Scsi::readSector(150,1);
@@ -1625,7 +1626,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	HIRQREQ|=DCHG;
 //}
 //
-//void CCdRom::BuildSaturnTOC()
+// void CCdRom::BuildSaturnTOC()
 //{
 //	int32_t i;
 //	// tracks
@@ -1667,10 +1668,10 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	saturnTOC[4*101+3]=static_cast<uint8_t>(fad);
 //}
 //
-//void CCdRom::BuildFileSystemTree()
+// void CCdRom::BuildFileSystemTree()
 //{
 //	string strBuff;
-//    	
+//
 //	// first clean directory tree
 //	filesOnCD.clear();
 //
@@ -1692,8 +1693,8 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	//ulFileTableLength = length.val32;
 //	std::array <int8_t,4> length = {strBuff[166],strBuff[166+1],strBuff[166+2],strBuff[166+3]};
 //    ulFileTableLength = swap_endian<uint32_t>(RawRead32(length, 0));
-// 
-//	
+//
+//
 //    // file list
 //	int32_t sectors_number = ulFileTableLength/2048;
 //	strBuff = Scsi::readSector(150+ulFileTableFAD,sectors_number);
@@ -1724,11 +1725,13 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //            infos.LSN = swap_endian<uint32_t>(RawRead32(loc, 0)) + 150;
 //
 //			//dataLength=*(uint32_t *)strBuff.substr(iCurrent+10,4).c_str();
-//			//Packed32 data_length = { strBuff[iCurrent + 10], strBuff[iCurrent + 11], strBuff[iCurrent + 12], strBuff[iCurrent + 13]};
+//			//Packed32 data_length = { strBuff[iCurrent + 10], strBuff[iCurrent + 11], strBuff[iCurrent + 12], strBuff[iCurrent +
+//13]};
 //			//infos.dataLength = data_length.val32;
-//			std::array <int8_t,4> data_length = { strBuff[iCurrent + 10], strBuff[iCurrent + 11], strBuff[iCurrent + 12], strBuff[iCurrent + 13]};
+//			std::array <int8_t,4> data_length = { strBuff[iCurrent + 10], strBuff[iCurrent + 11], strBuff[iCurrent + 12],
+//strBuff[iCurrent + 13]};
 //            infos.dataLength = swap_endian<uint32_t>(RawRead32(data_length, 0));
-//			
+//
 //
 //			infos.flags=strBuff[iCurrent+25];
 //
@@ -1751,7 +1754,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //}
 //
 //
-//void CCdRom::SendStatus()
+// void CCdRom::SendStatus()
 //{
 //	CR1 = cdDriveStatus<<8; // CR1-H
 //	switch(cdDriveStatus)
@@ -1773,7 +1776,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	}
 //}
 //
-//void CCdRom::CdBlockReadSectors(int32_t num)
+// void CCdRom::CdBlockReadSectors(int32_t num)
 //{
 //	if (FindFreeSector()==NO_FREE_SECTOR)
 //	{
@@ -1781,7 +1784,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //		#ifdef _LOGS
 //		EmuState::pLog->CdBlockWrite("*CD block buffer is full!*");
 //		#endif
-//		
+//
 //		cdDriveStatus=STAT_PAUSE|STAT_TRNS;
 //		HIRQREQ|=BFUL;
 //		HIRQREQ|=EHST;
@@ -1800,7 +1803,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			{
 //				// read one sector data
 //				strBuff = Scsi::readSector(FAD,1);
-//				memcpy_s(sectorsBuffer[freeSector].data,2352,strBuff.c_str(),2048); 
+//				memcpy_s(sectorsBuffer[freeSector].data,2352,strBuff.c_str(),2048);
 //				sectorsBuffer[freeSector].size=2048;
 //
 //				// we bind the sector with the current buffer partition connected with the current filter
@@ -1861,7 +1864,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	}
 //}
 //
-//int32_t CCdRom::FindCurrentTrack()
+// int32_t CCdRom::FindCurrentTrack()
 //{
 //	uint32_t realFAD=FAD-150;
 //
@@ -1875,7 +1878,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	return 0xFF;
 //}
 //
-//int32_t CCdRom::FindFreeSector()
+// int32_t CCdRom::FindFreeSector()
 //{
 //	for (int32_t i=0;i<MAX_SECTORS;i++)
 //	{
@@ -1885,7 +1888,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //}
 //
 //
-//uint8_t CCdRom::ReadByte(uint32_t address)
+// uint8_t CCdRom::ReadByte(uint32_t address)
 //{
 //	address&=0xFFFFF;
 //
@@ -1921,7 +1924,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	}
 //}
 //
-//uint16_t CCdRom::ReadWord(uint32_t address)
+// uint16_t CCdRom::ReadWord(uint32_t address)
 //{
 //	address&=0xFFFFF;
 //
@@ -1954,7 +1957,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				if ((uint32_t)posInDataBuffer<dataBufferSize)
 //				{
 //					data=dataBuffer[posInDataBuffer*2]<<8|dataBuffer[posInDataBuffer*2+1];
-//				} 
+//				}
 //				posInDataBuffer++;
 //				bytesTransfered+=2;
 //				return data;
@@ -1969,10 +1972,10 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	}
 //}
 //
-//uint32_t CCdRom::ReadLong(uint32_t address)
+// uint32_t CCdRom::ReadLong(uint32_t address)
 //{
 //	address&=0xFFFFF;
-//  
+//
 //	switch (address)
 //	{
 //		case LOCAL_FETCH_DATA_PTR:
@@ -2008,10 +2011,10 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	}
 //}
 //
-//void CCdRom::WriteByte(uint32_t address,uint8_t data)
+// void CCdRom::WriteByte(uint32_t address,uint8_t data)
 //{
 //	address&=0xFFFFF;
-//  
+//
 //	switch (address)
 //	{
 //		case 0:
@@ -2022,7 +2025,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			break;
 //	}
 //}
-//void CCdRom::WriteWord(uint32_t address,uint16_t data)
+// void CCdRom::WriteWord(uint32_t address,uint16_t data)
 //{
 //	address&=0xFFFFF;
 //
@@ -2058,7 +2061,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			break;
 //	}
 //}
-//void CCdRom::WriteLong(uint32_t address,uint32_t data)
+// void CCdRom::WriteLong(uint32_t address,uint32_t data)
 //{
 //	address&=0xFFFFF;
 //
@@ -2076,7 +2079,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //					if ((freeSector==NO_FREE_SECTOR))//&&(sectorNumInBufferPut<numOfSectorToPut))
 //					{
 //						// full!
-//						
+//
 //						status=STAT_PAUSE|STAT_TRNS;
 //						HIRQREQ|=BFUL|DRDY;
 //						HIRQREQ&=~EFLS;
@@ -2122,7 +2125,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	}
 //}
 //
-//void CCdRom::RunCdBlock(int32_t cycles)
+// void CCdRom::RunCdBlock(int32_t cycles)
 //{
 //	// we must not issue periodic response before initialisation string is read in CR registers
 //	if (firstReading) return;
@@ -2147,14 +2150,14 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //		if((cdDriveStatus & STAT_PLAY) == STAT_PLAY){
 //			if(currentPlayMode == PLAY_MODE_FAD){
 //				// Sector reading
-//				#ifdef _LOGS	
+//				#ifdef _LOGS
 //				EmuState::pLog->CdBlockWrite("#read one sector");
 //				#endif
 //
 //				CdBlockReadSectors(1);
 //
 //			}else if(currentPlayMode == PLAY_MODE_TRACK){
-//				//EmuState::pLog->CdBlockWrite("PLAY MODE TRACK (NOT IMPLEMENTED)");	
+//				//EmuState::pLog->CdBlockWrite("PLAY MODE TRACK (NOT IMPLEMENTED)");
 //			}
 //		}else if((cdDriveStatus & STAT_PAUSE) == STAT_PAUSE){
 //			if(FindFreeSector()==NO_FREE_SECTOR){
@@ -2187,7 +2190,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //		// periodic response timing is the same as SCDQ update timing
 //		HIRQREQ|=SCDQ;
 //		if (FindFreeSector()==NO_FREE_SECTOR){
-//			
+//
 //				// buffer is full
 //				//HIRQREQ|=BFUL|DRDY;
 //				HIRQREQ|=BFUL;
@@ -2199,7 +2202,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	}
 //}
 //
-//void CCdRom::UpdatePeriod()
+// void CCdRom::UpdatePeriod()
 //{
 //	cyclesPerMs = EmuState::pSmpc->GetPllClock() / 1000;
 //	switch (driveSpeed)
@@ -2219,7 +2222,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	}
 //}
 //
-//int32_t CCdRom::FreeNumOfSectorsInBuffer()
+// int32_t CCdRom::FreeNumOfSectorsInBuffer()
 //{
 //	int32_t num=0;
 //	for (int32_t i=0;i<MAX_SECTORS;i++)
@@ -2231,7 +2234,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	else return num;
 //}
 //
-//void CCdRom::BuildFileInfos(uint32_t fileId)
+// void CCdRom::BuildFileInfos(uint32_t fileId)
 //{
 //	filesInfos[0]=static_cast<uint8_t>(filesOnCD[fileId].LSN>>24);
 //	filesInfos[1]=static_cast<uint8_t>(filesOnCD[fileId].LSN>>16);
@@ -2247,8 +2250,8 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //	filesInfos[11]=0;
 //}
 //
-//void CCdRom::RefreshPeriod(){
+// void CCdRom::RefreshPeriod(){
 //	UpdatePeriod();
 //}
-}
-}
+} // namespace cdrom
+} // namespace saturnin

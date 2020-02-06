@@ -1,4 +1,4 @@
-// 
+//
 // EmulatorContext.h
 // Saturnin
 //
@@ -15,12 +15,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	EmulatorContext.h
 ///
-/// \brief	Emulator context struct. 
+/// \brief	Emulator context struct.
 ///
 /// Class used to handle the emulator state
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,199 +35,197 @@
 
 // Forward declarations
 namespace saturnin::sh2 {
-    class Sh2;
+class Sh2;
 }
 namespace saturnin::sound {
-    class Scsp;
+class Scsp;
 }
 namespace saturnin::cdrom {
-    class Cdrom;
+class Cdrom;
 }
 
 namespace saturnin {
 namespace core {
 
-    /// \name Class declarations.
-    /// Used to speed up build time as the .h files are included in the .cpp
-    ///
+/// \name Class declarations.
+/// Used to speed up build time as the .h files are included in the .cpp
+///
+//@{
+class Config;
+class Memory;
+class Scu;
+class Smpc;
+//@}
+
+static const std::string saturnin_version{"1.00"};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  EmulatorContext
+///
+/// \brief  Regroups everything related to the emulator state.
+///
+/// \author Runik
+/// \date   12/06/2018
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class EmulatorContext {
+  public:
     //@{
-    class Config;
-    class Memory;
-    class Scu;
-    class Smpc;
-    //@}    
-
-    static const std::string saturnin_version{ "1.00" };
-
+    // Constructors / Destructors
+    EmulatorContext();
+    EmulatorContext(const EmulatorContext&) = delete;
+    EmulatorContext(EmulatorContext&&)      = delete;
+    EmulatorContext& operator=(const EmulatorContext&) & = delete;
+    EmulatorContext& operator=(EmulatorContext&&) & = delete;
+    ~EmulatorContext();
+    //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \class  EmulatorContext
+    /// \fn void initialize()
     ///
-    /// \brief  Regroups everything related to the emulator state.
+    /// \brief  Initializes the emulator
     ///
     /// \author Runik
-    /// \date   12/06/2018
+    /// \date   26/09/2018
+    ///
+    /// \return True if the initialization went well.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    class EmulatorContext {
-    public:
-        //@{
-        // Constructors / Destructors
-        EmulatorContext();
-        EmulatorContext(const EmulatorContext&)              = delete;
-        EmulatorContext(EmulatorContext&&)                   = delete;
-        EmulatorContext& operator=(const EmulatorContext&) & = delete;
-        EmulatorContext& operator=(EmulatorContext&&) &      = delete;
-        ~EmulatorContext();
-        //@}
+    bool initialize();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void initialize()
-        ///
-        /// \brief  Initializes the emulator
-        ///
-        /// \author Runik
-        /// \date   26/09/2018
-        ///
-        /// \return True if the initialization went well.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::startEmulation();
+    ///
+    /// \brief  Starts the emulation.
+    ///
+    /// \author Runik
+    /// \date   26/09/2018
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        bool initialize();
+    void startEmulation();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void EmulatorContext::startEmulation();
-        ///
-        /// \brief  Starts the emulation.
-        ///
-        /// \author Runik
-        /// \date   26/09/2018
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::stopEmulation();
+    ///
+    /// \brief  Stops the emulation.
+    ///
+    /// \author Runik
+    /// \date   26/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void startEmulation();
+    void stopEmulation();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void EmulatorContext::stopEmulation();
-        ///
-        /// \brief  Stops the emulation.
-        ///
-        /// \author Runik
-        /// \date   26/10/2019
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::startInterface();
+    ///
+    /// \brief  Starts the emulator GUI.
+    ///
+    /// \author Runik
+    /// \date   24/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void stopEmulation();
+    void startInterface();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void EmulatorContext::startInterface();
-        ///
-        /// \brief  Starts the emulator GUI.
-        ///
-        /// \author Runik
-        /// \date   24/10/2019
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //@{
+    // Functions returning pointers to the various systems of the emulator
+    Config*       config();
+    Memory*       memory();
+    sh2::Sh2*     masterSh2();
+    sh2::Sh2*     slaveSh2();
+    Scu*          scu();
+    Smpc*         smpc();
+    sound::Scsp*  scsp();
+    cdrom::Cdrom* cdrom();
+    //@}
 
-        void startInterface();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn HardwareMode EmulatorContext::hardwareMode() const
+    ///
+    /// \brief  Current hardware mode of the emulator.
+    ///
+    /// \author Runik
+    /// \date   26/10/2019
+    ///
+    /// \return A HardwareMode.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        //@{
-        // Functions returning pointers to the various systems of the emulator
-        Config*       config();
-        Memory*       memory();
-        sh2::Sh2*     masterSh2();
-        sh2::Sh2*     slaveSh2();
-        Scu*          scu();
-        Smpc*         smpc();
-        sound::Scsp*  scsp();
-        cdrom::Cdrom* cdrom();
-        //@}
+    HardwareMode hardwareMode() const { return hardware_mode_; };
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn HardwareMode EmulatorContext::hardwareMode() const
-        ///
-        /// \brief  Current hardware mode of the emulator.
-        ///
-        /// \author Runik
-        /// \date   26/10/2019
-        ///
-        /// \return A HardwareMode.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::emulationStatus(const EmulationStatus status) const
+    ///
+    /// \brief  Sets the emulation status of the emulator.
+    ///
+    /// \author Runik
+    /// \date   26/10/2019
+    ///
+    /// \param  status  The new status.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        HardwareMode hardwareMode() const { return hardware_mode_; };
+    void emulationStatus(const EmulationStatus status) { emulation_status_ = status; };
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void EmulatorContext::emulationStatus(const EmulationStatus status) const
-        ///
-        /// \brief  Sets the emulation status of the emulator.
-        ///
-        /// \author Runik
-        /// \date   26/10/2019
-        ///
-        /// \param  status  The new status.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::renderingStatus(const RenderingStatus status)
+    ///
+    /// \brief  Sets the rendering status of the emulator.
+    ///
+    /// \author Runik
+    /// \date   26/10/2019
+    ///
+    /// \param  status  The new status.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void emulationStatus(const EmulationStatus status) { emulation_status_ = status; };
+    void renderingStatus(const RenderingStatus status) { rendering_status_ = status; };
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void EmulatorContext::renderingStatus(const RenderingStatus status)
-        ///
-        /// \brief  Sets the rendering status of the emulator.
-        ///
-        /// \author Runik
-        /// \date   26/10/2019
-        ///
-        /// \param  status  The new status.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn RenderingStatus EmulatorContext::renderingStatus()
+    ///
+    /// \brief  Gets the current rendering status.
+    ///
+    /// \author Runik
+    /// \date   26/10/2019
+    ///
+    /// \return The RenderingStatus.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void renderingStatus(const RenderingStatus status) { rendering_status_ = status; };
+    RenderingStatus renderingStatus() { return rendering_status_; };
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn RenderingStatus EmulatorContext::renderingStatus()
-        ///
-        /// \brief  Gets the current rendering status.
-        ///
-        /// \author Runik
-        /// \date   26/10/2019
-        ///
-        /// \return The RenderingStatus.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+  private:
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::emulationMainThread();
+    ///
+    /// \brief  Emulation main thread.
+    ///
+    /// \author Runik
+    /// \date   26/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        RenderingStatus renderingStatus() { return rendering_status_; };
-    private:
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn void EmulatorContext::emulationMainThread();
-        ///
-        /// \brief  Emulation main thread.
-        ///
-        /// \author Runik
-        /// \date   26/10/2019
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    void emulationMainThread();
 
-        void emulationMainThread();
+    std::unique_ptr<Config>       config_;     ///< Configuration object
+    std::unique_ptr<Memory>       memory_;     ///< Memory object
+    std::unique_ptr<sh2::Sh2>     master_sh2_; ///< Master SH2 object
+    std::unique_ptr<sh2::Sh2>     slave_sh2_;  ///< Slave SH2 object
+    std::unique_ptr<Scu>          scu_;        ///< SCU object
+    std::unique_ptr<Smpc>         smpc_;       ///< SMPC object
+    std::unique_ptr<sound::Scsp>  scsp_;       ///< SCSP object
+    std::unique_ptr<cdrom::Cdrom> cdrom_;      ///< CDROM object
 
-        std::unique_ptr<Config>        config_;    ///< Configuration object
-        std::unique_ptr<Memory>        memory_;    ///< Memory object
-        std::unique_ptr<sh2::Sh2>      master_sh2_;///< Master SH2 object
-        std::unique_ptr<sh2::Sh2>      slave_sh2_; ///< Slave SH2 object
-        std::unique_ptr<Scu>           scu_;       ///< SCU object
-        std::unique_ptr<Smpc>          smpc_;      ///< SMPC object
-        std::unique_ptr<sound::Scsp>   scsp_;      ///< SCSP object
-        std::unique_ptr<cdrom::Cdrom>  cdrom_;     ///< CDROM object
+    HardwareMode    hardware_mode_{HardwareMode::saturn};        ///< Hardware mode
+    EmulationStatus emulation_status_{EmulationStatus::stopped}; ///< Emulation status
+    RenderingStatus rendering_status_{RenderingStatus::running}; ///< Rendering status.
 
-        HardwareMode    hardware_mode_{ HardwareMode::saturn };     ///< Hardware mode
-        EmulationStatus emulation_status_{ EmulationStatus::stopped }; ///< Emulation status
-        RenderingStatus rendering_status_{ RenderingStatus::running }; ///< Rendering status.
+    /// \name Command line variables
+    ///
+    //@{
+    std::string command_line_{""};       ///< Command line content
+    bool        binary_autoload_{false}; ///< True when the binary has to be automatically loaded.
+    uint32_t    binary_address_{0};      ///< The PC will be set to this address after loading the binary.
+    //@}
 
-                                                    
-        /// \name Command line variables
-        ///
-        //@{
-        std::string command_line_{ "" };       ///< Command line content
-        bool        binary_autoload_{ false }; ///< True when the binary has to be automatically loaded.
-        uint32_t    binary_address_{ 0 };      ///< The PC will be set to this address after loading the binary.
-        //@}
+    Rom_stv stv_rom_{Rom_stv::none}; ///< Current ST-V ROM loaded.
 
-        Rom_stv stv_rom_{ Rom_stv::none }; ///< Current ST-V ROM loaded.
-
-        std::thread emulation_main_thread_; ///< The emulation main thread.
-
-    };
-}
-}
+    std::thread emulation_main_thread_; ///< The emulation main thread.
+};
+} // namespace core
+} // namespace saturnin

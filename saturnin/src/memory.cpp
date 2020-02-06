@@ -1,4 +1,4 @@
-// 
+//
 // memory.cpp
 // Saturnin
 //
@@ -15,7 +15,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 #include <sstream> // stringstream
 #include <fstream> // ifstream
@@ -26,8 +26,8 @@
 #include "sh2.h"
 
 namespace lzpp = libzippp;
-namespace fs = std::filesystem;
-namespace sh2 = saturnin::sh2;
+namespace fs   = std::filesystem;
+namespace sh2  = saturnin::sh2;
 
 namespace saturnin {
 namespace core {
@@ -35,22 +35,21 @@ namespace core {
 using core::Log;
 
 bool Memory::loadRom(const std::string& zip_name,
-                     const std::string&  file_name,
-                     u8*	   destination,
-                     const u32 size,
-                     const RomLoad RomLoad,
-                     const u8  times_mirrored,
-                     const RomType RomType) {
-
+                     const std::string& file_name,
+                     u8*                destination,
+                     const u32          size,
+                     const RomLoad      RomLoad,
+                     const u8           times_mirrored,
+                     const RomType      RomType) {
     std::string zip = zip_name + ".zip";
-    fs::path rom_path{ config()->readValue(AccessKeys::cfg_paths_roms_stv).c_str() };
+    fs::path    rom_path{config()->readValue(AccessKeys::cfg_paths_roms_stv).c_str()};
     rom_path /= zip;
-    //rom_path += "\\" + zip_name + ".zip";
+    // rom_path += "\\" + zip_name + ".zip";
 
     lzpp::ZipArchive zf(rom_path.string());
     if (zf.open(lzpp::ZipArchive::READ_ONLY)) {
         if (zf.hasEntry(file_name, false, false)) {
-            lzpp::ZipEntry entry = zf.getEntry(file_name, false, false);
+            lzpp::ZipEntry        entry = zf.getEntry(file_name, false, false);
             std::unique_ptr<u8[]> data(static_cast<u8*>(entry.readAsBinary()));
 
             switch (RomType) {
@@ -68,16 +67,16 @@ bool Memory::loadRom(const std::string& zip_name,
                 case RomType::program:
                 case RomType::graphic: {
                     const u32 stv_bios_region_address = 0x808;
-                    u32 region_cart_address{};
+                    u32       region_cart_address{};
                     switch (RomLoad) {
                         case RomLoad::not_interleaved: {
-                            const auto &src_begin = data.get();
+                            const auto& src_begin = data.get();
                             std::move(src_begin, std::next(src_begin, size), destination);
 
                             region_cart_address = 0x40;
                             break;
                         }
-                        case RomLoad::odd_interleaved: {  // Data is loaded on odd bytes only
+                        case RomLoad::odd_interleaved: { // Data is loaded on odd bytes only
                             for (u32 i = 0; i < size; ++i) {
                                 destination[(i * 2 + 1)] = data[i];
                             }
@@ -96,7 +95,8 @@ bool Memory::loadRom(const std::string& zip_name,
                     }
 
                     // bios region is forced for program roms
-                    if (RomType == RomType::program) this->cart_[region_cart_address] = this->rom_[stv_bios_region_address];
+                    if (RomType == RomType::program)
+                        this->cart_[region_cart_address] = this->rom_[stv_bios_region_address];
 
                     mirrorData(destination, size, times_mirrored, RomLoad);
                     break;
@@ -107,16 +107,14 @@ bool Memory::loadRom(const std::string& zip_name,
                     break;
                 }
             }
-        }
-        else {
+        } else {
             zf.close();
             std::string str = fmt::format(tr("File '{0}' not found in zip file !"), file_name);
             Log::warning("memory", str);
             return false;
         }
         zf.close();
-    }
-    else {
+    } else {
         std::string str = fmt::format(tr("Zip file '{0}' not found !"), rom_path.string());
         Log::warning("memory", str);
         return false;
@@ -128,7 +126,7 @@ void Memory::loadBios(const HardwareMode mode) {
     std::string bios_path{};
     switch (mode) {
         case HardwareMode::saturn: bios_path = config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
-        case HardwareMode::stv:    bios_path = config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
+        case HardwareMode::stv: bios_path = config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
         default: {
             Log::error("config", tr("Unknown hardware mode"));
             throw std::runtime_error("Config error !");
@@ -169,27 +167,21 @@ bool Memory::loadStvGame(const std::string& config_filename) {
     core::Config stv(full_path.string());
     stv.readFile();
 
-    const std::string game_name = stv.readValue(core::AccessKeys::stv_game_name);
-    const std::string zip_name = stv.readValue(core::AccessKeys::stv_zip_name);
-    const std::string parent_set = stv.readValue(core::AccessKeys::stv_parent_set);
-    const std::string version = stv.readValue(core::AccessKeys::stv_version);
-    const std::string release_date = stv.readValue(core::AccessKeys::stv_release_date);
-    const std::string region = stv.readValue(core::AccessKeys::stv_region);
-    const libconfig::Setting& files = stv.readValue(core::AccessKeys::stv_files);
+    const std::string         game_name    = stv.readValue(core::AccessKeys::stv_game_name);
+    const std::string         zip_name     = stv.readValue(core::AccessKeys::stv_zip_name);
+    const std::string         parent_set   = stv.readValue(core::AccessKeys::stv_parent_set);
+    const std::string         version      = stv.readValue(core::AccessKeys::stv_version);
+    const std::string         release_date = stv.readValue(core::AccessKeys::stv_release_date);
+    const std::string         region       = stv.readValue(core::AccessKeys::stv_region);
+    const libconfig::Setting& files        = stv.readValue(core::AccessKeys::stv_files);
     for (u8 i = 0; i < files.getLength(); ++i) {
-        const std::string rom_name = files[i][0];
-        const u32    load_address = files[i][1];
-        const u32    load_size = files[i][2];
-        const auto   rom_load = Config::rom_load[files[i][3]];
-        const u32    times_mirrored = files[i][4];
-        const auto   rom_type = Config::rom_type[files[i][5]];
-        if (!this->loadRom(zip_name,
-                           rom_name,
-                           &this->cart_[load_address],
-                           load_size,
-                           rom_load,
-                           times_mirrored,
-                           rom_type)) {
+        const std::string rom_name       = files[i][0];
+        const u32         load_address   = files[i][1];
+        const u32         load_size      = files[i][2];
+        const auto        rom_load       = Config::rom_load[files[i][3]];
+        const u32         times_mirrored = files[i][4];
+        const auto        rom_type       = Config::rom_type[files[i][5]];
+        if (!this->loadRom(zip_name, rom_name, &this->cart_[load_address], load_size, rom_load, times_mirrored, rom_type)) {
             return false;
         }
     }
@@ -219,7 +211,6 @@ void Memory::initializeHandlers() {
     // Dummy access
     initializeHandlers<readDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
     initializeHandlers<writeDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
-
 
     // ROM access
     initializeHandlers<readRom, u8, u16, u32>(0x00000000, 0x000FFFFF);
@@ -355,7 +346,6 @@ void Memory::initializeHandlers() {
 }
 
 u32 Memory::readStvProtection(const u32 addr, u32 data) const {
-
     if (this->isStvProtectionEnabled()) {
         switch (data) {
             // Astra Superstars
@@ -390,13 +380,10 @@ u32 Memory::readStvProtection(const u32 addr, u32 data) const {
                 // Elan Doreé
             case 0xff7f0000:
             case 0xf9ff0000:
-            case 0xffbf0000:
-                data = 0x02002000;
-                break;
+            case 0xffbf0000: data = 0x02002000; break;
         }
         Log::debug("memory", "ST-V protection read index: {}, value: {}", stv_protection_offset, data);
-    }
-    else {
+    } else {
         stv_protection_offset = 0;
     }
 
@@ -404,8 +391,8 @@ u32 Memory::readStvProtection(const u32 addr, u32 data) const {
 }
 
 void Memory::writeStvProtection(const u32 addr, u32 data) {
-    u32 relative_addr = calculateRelativeCartAddress(stv_protection_register_address);
-    const u32 index = rawRead<u32>(this->cart_, relative_addr);
+    u32       relative_addr = calculateRelativeCartAddress(stv_protection_register_address);
+    const u32 index         = rawRead<u32>(this->cart_, relative_addr);
     switch (index) {
         // Astra Superstars
         case 0x01230000:
@@ -417,30 +404,17 @@ void Memory::writeStvProtection(const u32 addr, u32 data) {
             this->stv_protection_offset_ = (0x02B994) - 4;
             break;
             // Streep Slope Sliders
-        case 0x2c5b0000:
-            this->stv_protection_offset_ = (0x145ffac) - 4;
-            break;
-        case 0x47F10000:
-            this->stv_protection_offset_ = (0x145ffac + 0xbaf0) - 4;
-            break;
-        case 0xfcda0000:
-            this->stv_protection_offset_ = (0x145ffac + 0x12fd0) - 4;
-            break;
-        case 0xb5e60000:
-            this->stv_protection_offset_ = (0x145ffac + 0x1a4c4) - 4;
-            break;
-        case 0x392c0000:
-            this->stv_protection_offset_ = (0x145ffac + 0x219b0) - 4;
-            break;
-        case 0x77c30000:
-            this->stv_protection_offset_ = (0x145ffac + 0x28ea0) - 4;
-            break;
+        case 0x2c5b0000: this->stv_protection_offset_ = (0x145ffac) - 4; break;
+        case 0x47F10000: this->stv_protection_offset_ = (0x145ffac + 0xbaf0) - 4; break;
+        case 0xfcda0000: this->stv_protection_offset_ = (0x145ffac + 0x12fd0) - 4; break;
+        case 0xb5e60000: this->stv_protection_offset_ = (0x145ffac + 0x1a4c4) - 4; break;
+        case 0x392c0000: this->stv_protection_offset_ = (0x145ffac + 0x219b0) - 4; break;
+        case 0x77c30000: this->stv_protection_offset_ = (0x145ffac + 0x28ea0) - 4; break;
         case 0x8a620000:
             this->stv_protection_offset_ = (0x145ffac + 0x30380) - 4;
             break;
             // Radiant Silvergun
-        case 0x77770000:
-            break;
+        case 0x77770000: break;
     }
     Log::debug("memory", fmt::format(core::tr("ST-V offset start: {}"), this->stv_protection_offset_));
 }
@@ -450,50 +424,36 @@ bool Memory::isStvProtectionEnabled() const {
     return cart_[relative_addr] == 0x1;
 }
 
-void Memory::sendFrtInterruptToMaster() const {
-    masterSh2()->sendInterruptCaptureSignal();
-}
+void Memory::sendFrtInterruptToMaster() const { masterSh2()->sendInterruptCaptureSignal(); }
 
-void Memory::sendFrtInterruptToSlave() const {
-    slaveSh2()->sendInterruptCaptureSignal();
-}
+void Memory::sendFrtInterruptToSlave() const { slaveSh2()->sendInterruptCaptureSignal(); }
 
-Config* Memory::config() const { 
-    return emulator_context_->config(); 
-};
+Config* Memory::config() const { return emulator_context_->config(); };
 
-sh2::Sh2* Memory::masterSh2() const {
-    return emulator_context_->masterSh2();
-};
+sh2::Sh2* Memory::masterSh2() const { return emulator_context_->masterSh2(); };
 
-sh2::Sh2* Memory::slaveSh2() const {
-    return emulator_context_->slaveSh2();
-};
+sh2::Sh2* Memory::slaveSh2() const { return emulator_context_->slaveSh2(); };
 
-Scu* Memory::scu() const {
-    return emulator_context_->scu();
-};
+Scu* Memory::scu() const { return emulator_context_->scu(); };
 
-Smpc* Memory::smpc() const {
-    return emulator_context_->smpc();
-};
+Smpc* Memory::smpc() const { return emulator_context_->smpc(); };
 
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad RomLoad) {
     if (times_mirrored > 0) {
         u32 multiple{};
         switch (RomLoad) {
             case RomLoad::not_interleaved: multiple = 1; break;
-            case RomLoad::even_interleaved:multiple = 2; break;
+            case RomLoad::even_interleaved: multiple = 2; break;
             case RomLoad::odd_interleaved: multiple = 2; break;
         }
         for (u8 i = 1; i <= times_mirrored; ++i) {
-            std::copy(data, data + size * multiple - 1, data + (i*size*multiple));
+            std::copy(data, data + size * multiple - 1, data + (i * size * multiple));
         }
     }
 }
 
 std::vector<std::string> listStvConfigurationFiles() {
-    auto full_path = fs::current_path() / "stv";
+    auto                     full_path = fs::current_path() / "stv";
     std::vector<std::string> files;
     for (auto& p : fs::directory_iterator(full_path)) {
         if ((p.path().extension() == ".cfg") && (p.path().filename() != "dummy.cfg")) {
@@ -503,9 +463,7 @@ std::vector<std::string> listStvConfigurationFiles() {
     return files;
 }
 
-inline bool isMasterSh2InOperation(const Memory& m) {
-    return (m.sh2_in_operation_ == sh2::Sh2Type::master);
-}
+inline bool isMasterSh2InOperation(const Memory& m) { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
 
 void Memory::initialize() {
     sh2_in_operation_ = sh2::Sh2Type::unknown;
@@ -513,5 +471,5 @@ void Memory::initialize() {
     initializeHandlers();
 }
 
-}
-}
+} // namespace core
+} // namespace saturnin

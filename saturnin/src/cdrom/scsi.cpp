@@ -1,4 +1,4 @@
-// 
+//
 // scsi.cpp
 // Saturnin
 //
@@ -25,45 +25,41 @@ namespace saturnin {
 namespace cdrom {
 
 // Static declarations
-std::function<bool(void)>								        Scsi::initialize;
-std::function<std::vector<ScsiDriveInfo>(void)>				    Scsi::scanBus;
-std::function<std::string(const uint32_t &, const int32_t &)>	Scsi::readSector;
-std::function<void(void)>								        Scsi::shutdown;
-std::function<bool(ScsiToc& toc_data)>					        Scsi::readToc;
-
+std::function<bool(void)>                                   Scsi::initialize;
+std::function<std::vector<ScsiDriveInfo>(void)>             Scsi::scanBus;
+std::function<std::string(const uint32_t&, const int32_t&)> Scsi::readSector;
+std::function<void(void)>                                   Scsi::shutdown;
+std::function<bool(ScsiToc& toc_data)>                      Scsi::readToc;
 
 HANDLE Scsi::openDrive(const wchar_t letter) {
-    HANDLE h = 0;
+    HANDLE       h          = 0;
     std::wstring drive_name = L"\\\\.\\";
     drive_name += letter;
     drive_name += L":";
 
-    h = CreateFile(drive_name.c_str(),
-                   GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ,
-                   NULL, 
-                   OPEN_EXISTING, 
-                   0, 
-                   NULL);
-    if (h == INVALID_HANDLE_VALUE) return NULL;
+    h = CreateFile(
+        drive_name.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+    if (h == INVALID_HANDLE_VALUE)
+        return NULL;
 
     return h;
 }
 
 void Scsi::settingUpAspiFunctions() {
-    initialize  = &Aspi::initialize;
-    scanBus     = &Aspi::scanBus;
-    readSector  = &Aspi::readSector;
-    shutdown    = &Aspi::shutdown;
-    readToc     = &Aspi::readToc;
+    initialize = &Aspi::initialize;
+    scanBus    = &Aspi::scanBus;
+    readSector = &Aspi::readSector;
+    shutdown   = &Aspi::shutdown;
+    readToc    = &Aspi::readToc;
 }
 
 void Scsi::settingUpSptiFunctions() {
-    initialize  = &Spti::initialize;
-    scanBus     = &Spti::scanBus;
-    readSector  = &Spti::readSector;
-    shutdown    = &Spti::shutdown;
-    readToc     = &Spti::readToc;
+    initialize = &Spti::initialize;
+    scanBus    = &Spti::scanBus;
+    readSector = &Spti::readSector;
+    shutdown   = &Spti::shutdown;
+    readToc    = &Spti::readToc;
 }
 
-}
-}
+} // namespace cdrom
+} // namespace saturnin

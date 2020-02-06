@@ -1,4 +1,4 @@
-// 
+//
 // main.cpp
 // Saturnin
 //
@@ -20,14 +20,13 @@
 #include "log.h"
 #include "emulator_context.h"
 
-namespace core  = saturnin::core;
+namespace core = saturnin::core;
 
-using core::Log;
 using core::EmulatorContext;
+using core::Log;
 using core::tr;
 
-int main(int argc, char *argv[]) {
-    
+int main(int argc, char* argv[]) {
     try {
         EmulatorContext state;
         if (!state.initialize()) {
@@ -37,14 +36,11 @@ int main(int argc, char *argv[]) {
 
         state.startInterface();
         std::exit(EXIT_SUCCESS);
-    }
-    catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error& e) {
         Log::error("exception", e.what());
-    }
-    catch (const std::exception& e) {
+    } catch (const std::exception& e) {
         Log::error("exception", e.what());
-    }
-    catch (...) {
+    } catch (...) {
         Log::error("exception", tr("Uncaught exception !"));
     }
 };

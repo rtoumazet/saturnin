@@ -1,4 +1,4 @@
-// 
+//
 // imgui_wrapper.h
 // Saturnin
 //
@@ -28,8 +28,7 @@
 #include <vector>
 #include <string>
 
-namespace ImGui
-{
+namespace ImGui {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn bool Combo(const char* label, int* currIndex, std::vector<std::string>& values)
@@ -45,7 +44,7 @@ namespace ImGui
 ///
 /// \return True if it succeeds.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// 
+///
 bool Combo(const char* label, int* currIndex, std::vector<std::string>& values);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,4 +64,4 @@ bool Combo(const char* label, int* currIndex, std::vector<std::string>& values);
 
 bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values);
 
-}
+} // namespace ImGui

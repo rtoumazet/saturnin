@@ -1,4 +1,4 @@
-// 
+//
 // locale.h
 // Saturnin
 //
@@ -19,7 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	locale.h
 ///
-/// \brief	Declares everything related to localization. 
+/// \brief	Declares everything related to localization.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -39,33 +39,32 @@ namespace core {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Locale {
-    public:
+  public:
+    //@{
+    // Constructors / Destructors
+    Locale()              = delete;
+    Locale(const Locale&) = delete;
+    Locale(Locale&&)      = delete;
+    Locale& operator=(const Locale&) & = delete;
+    Locale& operator=(Locale&&) & = delete;
+    ~Locale()                     = delete;
+    //@}
 
-        //@{
-        // Constructors / Destructors
-        Locale()                           = delete;
-        Locale(const Locale&)              = delete;
-        Locale(Locale&&)                   = delete;
-        Locale& operator=(const Locale&) & = delete;
-        Locale& operator=(Locale&&) &      = delete;
-        ~Locale()                          = delete;
-        //@}
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static bool Locale::initialize();
+    ///
+    /// \brief  Initializes the locales.
+    ///
+    /// \author Runik
+    /// \date   24/12/2017
+    ///
+    /// \return True if it succeeds.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// \fn static bool Locale::initialize();
-        ///
-        /// \brief  Initializes the locales.
-        ///
-        /// \author Runik
-        /// \date   24/12/2017
-        ///
-        /// \return True if it succeeds.
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    static bool initialize(const std::string& country);
 
-        static bool initialize(const std::string& country);
-
-    private:
-        static std::unique_ptr<spirit_po::catalog<>> cat_;
+  private:
+    static std::unique_ptr<spirit_po::catalog<>> cat_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,5 +82,5 @@ class Locale {
 
 std::string tr(const std::string& str);
 
-};
-};
+}; // namespace core
+}; // namespace saturnin

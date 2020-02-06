@@ -1,4 +1,4 @@
-// 
+//
 // opengl_legacy.cpp
 // Saturnin
 //
@@ -43,8 +43,8 @@ using core::Log;
 
 void OpenglLegacy::initialize() {
     GLFWwindow* window = glfwGetCurrentContext();
-    s32 display_w{};
-    s32 display_h{};
+    s32         display_w{};
+    s32         display_h{};
     glfwGetFramebufferSize(window, &display_w, &display_h);
     initializeTexture(display_w, display_h);
 
@@ -63,7 +63,7 @@ void OpenglLegacy::shutdown() {
     glDeleteTextures(1, &texture_);
 }
 
-//void OpenglLegacy::initializeTexture(const u32 width, const u32 height) {
+// void OpenglLegacy::initializeTexture(const u32 width, const u32 height) {
 //    if (texture_ != 0) glDeleteTextures(1, &texture_);
 //    this->texture_ = generateEmptyTexture(width, height);
 //    setTextureDimension(width, height);
@@ -96,13 +96,11 @@ void OpenglLegacy::render() {
     ++i;
 };
 
-void OpenglLegacy::postRender() {
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-};
+void OpenglLegacy::postRender() { glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); };
 
-void OpenglLegacy::updateTextureSize(const u32 width, const u32 height){
+void OpenglLegacy::updateTextureSize(const u32 width, const u32 height) {
     initializeTexture(width, height);
-    //setTextureDimension(width, height);
+    // setTextureDimension(width, height);
 }
 
 u32 OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const {
@@ -122,14 +120,14 @@ void OpenglLegacy::bindTextureToFbo() const {
 }
 
 void OpenglLegacy::deleteTexture() const {
-    if (texture_ != 0) glDeleteTextures(1, &texture_);
+    if (texture_ != 0)
+        glDeleteTextures(1, &texture_);
 }
 
 static void error_callback(int error, const char* description) {
     Log::error("opengl", "Error {}: {}", error, description);
     throw std::runtime_error("Opengl error !");
 }
-    
 
 s32 runLegacyOpengl(core::EmulatorContext& state) {
     // Setup window
@@ -138,37 +136,37 @@ s32 runLegacyOpengl(core::EmulatorContext& state) {
         return EXIT_FAILURE;
 
     std::string window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
-    auto window = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
+    auto        window       = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
     if (window == NULL)
         return EXIT_FAILURE;
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
-    //glfwSetWindowUserPointer(window, (void*)&state);
+    // glfwSetWindowUserPointer(window, (void*)&state);
     glfwSetWindowUserPointer(window, static_cast<void*>(&state));
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
-                            //cout << epoxy_gl_version() << endl;
+    // cout << epoxy_gl_version() << endl;
 
-                            //epoxy_handle_external_wglMakeCurrent();
-                            //if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pbuffer"))
-                            //    cout << "WGL_ARB_pbuffer not found !" << endl;
+    // epoxy_handle_external_wglMakeCurrent();
+    // if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pbuffer"))
+    //    cout << "WGL_ARB_pbuffer not found !" << endl;
 
-                            //if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pixel_format"))
-                            //    cout << "WGL_ARB_pixel_format not found !" << endl;
+    // if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_pixel_format"))
+    //    cout << "WGL_ARB_pixel_format not found !" << endl;
 
-                            //if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_render_texture"))
-                            //    cout << "WGL_ARB_render_texture not found !" << endl;
-                            //
-                            //if (!epoxy_has_gl_extension("GL_ARB_framebuffer_object"))
-                            //    cout << "GL_ARB_framebuffer_object not found !" << endl;
-                            //
-                            //if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
-                            //    cout << "GL_EXT_framebuffer_object not found !" << endl;
-                            
+    // if (!epoxy_has_wgl_extension(wglGetCurrentDC(), "WGL_ARB_render_texture"))
+    //    cout << "WGL_ARB_render_texture not found !" << endl;
+    //
+    // if (!epoxy_has_gl_extension("GL_ARB_framebuffer_object"))
+    //    cout << "GL_ARB_framebuffer_object not found !" << endl;
+    //
+    // if (!epoxy_has_gl_extension("GL_EXT_framebuffer_object"))
+    //    cout << "GL_EXT_framebuffer_object not found !" << endl;
+
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
-    
+
     glbinding::initialize(glfwGetProcAddress);
 
     OpenglLegacy opengl(state.config());
@@ -176,38 +174,38 @@ s32 runLegacyOpengl(core::EmulatorContext& state) {
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
-    // 
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    //
 
     // Setup style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    // ImGui::StyleColorsClassic();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL2_Init();
 
     // Load Fonts
     // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
-    //ImGuiIO& io = ImGui::GetIO();
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("../../extra_fonts/Cousine-Regular.ttf", 15.0f);
-    //io.Fonts->AddFontFromFileTTF("../../extra_fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../extra_fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
-    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+    // ImGuiIO& io = ImGui::GetIO();
+    // io.Fonts->AddFontDefault();
+    // io.Fonts->AddFontFromFileTTF("../../extra_fonts/Cousine-Regular.ttf", 15.0f);
+    // io.Fonts->AddFontFromFileTTF("../../extra_fonts/DroidSans.ttf", 16.0f);
+    // io.Fonts->AddFontFromFileTTF("../../extra_fonts/Roboto-Medium.ttf", 16.0f);
+    // io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
+    // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        //glfwSetFramebufferSizeCallback(window, opengl.framebufferSizeCallback );
+        // glfwSetFramebufferSizeCallback(window, opengl.framebufferSizeCallback );
 
         // Rendering
         int display_w, display_h;
@@ -218,10 +216,11 @@ s32 runLegacyOpengl(core::EmulatorContext& state) {
 
         gui::buildGui(state, opengl, display_w, display_h);
 
-        if (state.renderingStatus() == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
+        if (state.renderingStatus() == core::RenderingStatus::reset)
+            glfwSetWindowShouldClose(window, true);
 
         ImGui::Render();
-            
+
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 
         glfwMakeContextCurrent(window);
@@ -239,6 +238,5 @@ s32 runLegacyOpengl(core::EmulatorContext& state) {
     return EXIT_SUCCESS;
 }
 
-
-};
-};
+}; // namespace video
+}; // namespace saturnin

@@ -1,4 +1,4 @@
-// 
+//
 // opengl_legacy.h
 // Saturnin
 //
@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	opengl_legacy.h
 ///
-/// \brief	OpenGL class and functions for legacy code (OpenGL 2.1). 
+/// \brief	OpenGL class and functions for legacy code (OpenGL 2.1).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -30,9 +30,9 @@
 
 // Forward declarations
 namespace saturnin::core {
-    class Config;
-    class EmulatorContext;
-}
+class Config;
+class EmulatorContext;
+} // namespace saturnin::core
 
 namespace saturnin {
 namespace video {
@@ -40,16 +40,14 @@ namespace video {
 using saturnin::core::Config;
 using saturnin::core::EmulatorContext;
 
-
 class OpenglLegacy : public Opengl {
-
-public:
+  public:
     //@{
     // Constructors / Destructors
-    OpenglLegacy(core::Config* config) : Opengl(config) { initialize();  };
+    OpenglLegacy(core::Config* config) : Opengl(config) { initialize(); };
     ~OpenglLegacy() { shutdown(); };
     //@}
-        
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void initialize() override;
     ///
@@ -70,8 +68,8 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     void shutdown() override;
 
-    //void initializeTexture(const u32 width, const u32 height);
-        
+    // void initializeTexture(const u32 width, const u32 height);
+
     void preRender() override;
 
     void render() override;
@@ -80,8 +78,7 @@ public:
 
     void updateTextureSize(const u32 width, const u32 height) override;
 
-private:
-
+  private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn u32 OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const;
     ///
@@ -96,7 +93,7 @@ private:
     /// \return The empty texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32 generateEmptyTexture(const u32 width, const u32 height) const ;
+    u32 generateEmptyTexture(const u32 width, const u32 height) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn u32 OpenglLegacy::bindTextureToFbo() const override;
@@ -127,5 +124,5 @@ private:
 
 s32 runLegacyOpengl(EmulatorContext& state);
 
-};
-};
+}; // namespace video
+}; // namespace saturnin

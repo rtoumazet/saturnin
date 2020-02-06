@@ -1,4 +1,4 @@
-// 
+//
 // locale.cpp
 // Saturnin
 //
@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 
-#include <iostream>                // cout
+#include <iostream> // cout
 #include <fstream>
 #include <string>
 #include "locale.h"
@@ -27,23 +27,23 @@ namespace fs = std::filesystem;
 namespace saturnin {
 namespace core {
 
-spirit_po::catalog<> Locale::cat_ = std::make_unique<spirit_po::catalog<>>();
-    
-/* static */
-bool Locale::initialize(const std::string& country = "" ) {
-    std::ifstream ifs("./lang/" + country + "/saturnin.po");
-    std::string po_file{ std::istreambuf_iterator<char>{ifs}, std::istreambuf_iterator<char>() };
+//spirit_po::catalog<> Locale::cat_ = std::make_unique<spirit_po::catalog<>>();
 
-    //spirit_po::catalog<> cat{ spirit_po::catalog<>::from_range(po_file) };
-    cat_ = spirit_po::catalog<>::from_range(po_file);
+/* static */
+bool Locale::initialize(const std::string& country = "") {
+    std::ifstream ifs("./lang/" + country + "/saturnin.po");
+    std::string   po_file{std::istreambuf_iterator<char>{ifs}, std::istreambuf_iterator<char>()};
+
+    // spirit_po::catalog<> cat{ spirit_po::catalog<>::from_range(po_file) };
+//    cat_ = spirit_po::catalog<>::from_range(po_file);
 
     return true;
 }
 
-    std::string tr(const std::string& str) {
-        //return locale::translate(str);
-        return "";
-    }
+std::string tr(const std::string& str) {
+    // return locale::translate(str);
+    return "";
+}
 
-};
-};
+}; // namespace core
+}; // namespace saturnin

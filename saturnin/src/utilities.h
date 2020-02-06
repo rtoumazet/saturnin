@@ -1,4 +1,4 @@
-// 
+//
 // utilities.h
 // Saturnin
 //
@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include <string> // string
+#include <string>      // string
 #include <type_traits> // underlying_type_t
-#include <vector> // vector
+#include <vector>      // vector
 
 namespace saturnin {
 namespace utilities {
@@ -73,7 +73,7 @@ std::string getLastErrorMessage();
 ///
 /// \return The enumeration underlying value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename E>
+template<typename E>
 constexpr auto toUnderlying(E e) noexcept {
     return static_cast<std::underlying_type_t<E>>(e);
 }
@@ -81,7 +81,7 @@ constexpr auto toUnderlying(E e) noexcept {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct remove_cvref
 ///
-/// \brief  If the type T is a reference type, provides the member typedef type which is the type 
+/// \brief  If the type T is a reference type, provides the member typedef type which is the type
 ///         referred to by T with its topmost cv-qualifiers removed. Otherwise type is T with its topmost cv-qualifiers removed.
 ///         Will be added in C++20.
 ///
@@ -91,7 +91,7 @@ constexpr auto toUnderlying(E e) noexcept {
 /// \tparam T   Generic type parameter.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template< class T >
+template<class T>
 struct remove_cvref {
     typedef std::remove_cv_t<std::remove_reference_t<T>> type;
 };
@@ -112,11 +112,9 @@ struct remove_cvref {
 /// \return An iterator corresponding to the found key, or end().
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <typename M, typename V>
+template<typename M, typename V>
 const auto getKeyFromValue(const M& map, const V find_value) {
-    return std::find_if(map.begin(),
-                           map.end(),
-                           [find_value](const M::value_type & p) { return p.second == find_value; });
+    return std::find_if(map.begin(), map.end(), [find_value](const M::value_type& p) { return p.second == find_value; });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +131,7 @@ const auto getKeyFromValue(const M& map, const V find_value) {
 /// \return A vector of strings
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::string> explode(std::string const & s, char delim);
+std::vector<std::string> explode(std::string const& s, char delim);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn uint32_t dec2bcd(uint16_t dec)
@@ -150,5 +148,5 @@ std::vector<std::string> explode(std::string const & s, char delim);
 
 uint32_t dec2bcd(uint16_t dec);
 
-}
-}
+} // namespace utilities
+} // namespace saturnin

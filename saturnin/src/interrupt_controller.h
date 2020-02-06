@@ -1,4 +1,4 @@
-// 
+//
 // interrupt_controller.h
 // Saturnin
 //
@@ -15,12 +15,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	interrupt_controller.h
 ///
-/// \brief	Declares everything related to interrupt management. 
+/// \brief	Declares everything related to interrupt management.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -31,7 +31,6 @@
 namespace saturnin {
 namespace core {
 
-   
 struct Interrupt {
     u8                        vector;
     u8                        level;
@@ -42,6 +41,5 @@ struct Interrupt {
     operator int() const { return vector; } ///< Internal conversion operator.
 };
 
-
-}
-}
+} // namespace core
+} // namespace saturnin

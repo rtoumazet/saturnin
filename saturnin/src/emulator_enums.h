@@ -1,4 +1,4 @@
-// 
+//
 // emulator_enums.h
 // Saturnin
 //
@@ -15,12 +15,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	emulator_enums.h
 ///
-/// \brief	Emulator enumerations. 
+/// \brief	Emulator enumerations.
 ///
 /// Regroups enumerations related to the emulator context
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,12 +33,12 @@ namespace core {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	HardwareMode
 ///
-/// \brief	Hardware mode used. 
+/// \brief	Hardware mode used.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class HardwareMode {
-    saturn  = 0, ///< Saturn.
-    stv     = 1  ///< ST-V.
+    saturn = 0, ///< Saturn.
+    stv    = 1  ///< ST-V.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,10 +48,10 @@ enum class HardwareMode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class EmulationStatus {
-    running,    ///< Emulator is running
-    paused,     ///< Emulator is paused
-    stopped,    ///< Emulator is stopped
-    reset       ///< Emulator is reset
+    running, ///< Emulator is running
+    paused,  ///< Emulator is paused
+    stopped, ///< Emulator is stopped
+    reset    ///< Emulator is reset
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,11 +60,7 @@ enum class EmulationStatus {
 /// \brief  Rendering status. Needed to reset display when modifying rendering type in the options.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class RenderingStatus {
-    running,
-    reset,
-    stopped
-};
+enum class RenderingStatus { running, reset, stopped };
 
-}
-}
+} // namespace core
+} // namespace saturnin
