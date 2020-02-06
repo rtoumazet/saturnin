@@ -45,8 +45,7 @@ enum class Sh2Type;
 namespace sh2  = saturnin::sh2;
 namespace util = saturnin::utilities;
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 // Forward declarations
 class EmulatorContext;
@@ -57,31 +56,47 @@ class Smpc;
 // using saturnin::sh2::Sh2;
 // using saturnin::sh2::Sh2Type;
 
-constexpr u32 rom_memory_mask              = 0x7FFFF;
-constexpr u32 smpc_memory_mask             = 0x7F;
-constexpr u32 backup_ram_memory_mask       = 0xFFFF;
-constexpr u32 workram_low_memory_mask      = 0xFFFFF;
-constexpr u32 stv_io_memory_mask           = 0xFF;
-constexpr u32 cart_memory_mask             = 0x01FFFFFF;
-constexpr u32 vdp1_ram_memory_mask         = 0x7FFFF;
-constexpr u32 vdp1_framebuffer_memory_mask = 0x3FFFF;
-constexpr u32 vdp1_registers_memory_mask   = 0x1F;
-constexpr u32 vdp2_vram_memory_mask        = 0x7FFFF;
-constexpr u32 vdp2_cram_memory_mask        = 0xFFF;
-constexpr u32 vdp2_registers_memory_mask   = 0x1FF;
-constexpr u32 scu_memory_mask              = 0xFF;
-constexpr u32 workram_high_memory_mask     = 0xFFFFF;
+constexpr u32 workram_low_size{0x100000};
+constexpr u32 workram_high_size{0x100000};
+constexpr u32 rom_size{0x80000};
+constexpr u8  smpc_size{0x80};
+constexpr u32 backup_ram_size{0x10000};
+constexpr u8  scu_size{0xD0};
+constexpr u32 vdp2_vram_size{0x80000};
+constexpr u16 vdp2_cram_size{0x1000};
+constexpr u16 vdp2_registers_size{0x200};
+constexpr u32 vdp1_vram_size{0x80000};
+constexpr u32 vdp1_framebuffer_size{0x40000};
+constexpr u8  vdp1_registers_size{0x18};
+constexpr u32 sound_ram_size{0x100000};
+constexpr u16 stv_io_size{0x100};
+constexpr u32 cart_size{0x3000000};
 
-static const u32 stv_io_port_a{0x400001};
-static const u32 stv_io_port_b{0x400003};
-static const u32 stv_io_port_c{0x400005};
-static const u32 stv_io_port_d{0x400007};
+constexpr u32 rom_memory_mask{0x7FFFF};
+constexpr u32 smpc_memory_mask{0x7F};
+constexpr u32 backup_ram_memory_mask{0xFFFF};
+constexpr u32 workram_low_memory_mask{0xFFFFF};
+constexpr u32 stv_io_memory_mask{0xFF};
+constexpr u32 cart_memory_mask{0x01FFFFFF};
+constexpr u32 vdp1_ram_memory_mask{0x7FFFF};
+constexpr u32 vdp1_framebuffer_memory_mask{0x3FFFF};
+constexpr u32 vdp1_registers_memory_mask{0x1F};
+constexpr u32 vdp2_vram_memory_mask{0x7FFFF};
+constexpr u32 vdp2_cram_memory_mask{0xFFF};
+constexpr u32 vdp2_registers_memory_mask{0x1FF};
+constexpr u32 scu_memory_mask{0xFF};
+constexpr u32 workram_high_memory_mask{0xFFFFF};
 
-static const u32 stv_protection_register_address{0x04FFFFFC};
-static const u32 stv_protection_enabled{0x04FFFFF1};
-static u32       stv_protection_offset{};
+constexpr u32 stv_io_port_a{0x400001};
+constexpr u32 stv_io_port_b{0x400003};
+constexpr u32 stv_io_port_c{0x400005};
+constexpr u32 stv_io_port_d{0x400007};
 
-static const u32 memory_handler_size{0x10000};
+constexpr u32 stv_protection_register_address{0x04FFFFFC};
+constexpr u32 stv_protection_enabled{0x04FFFFF1};
+static u32    stv_protection_offset{};
+
+constexpr u32 memory_handler_size{0x10000};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	RomType
@@ -151,21 +166,21 @@ class Memory {
     /// \name Saturn memory map definition.
     ///
 
-    std::array<u8, 0x100000>  workram_low_;      ///< low workram (1MB).
-    std::array<u8, 0x100000>  workram_high_;     ///< high workram (1MB).
-    std::array<u8, 0x80000>   rom_;              ///< ROM (512KB).
-    std::array<u8, 0x80>      smpc_;             ///< SMPC (128B).
-    std::array<u8, 0x10000>   backup_ram_;       ///< Backup RAM (64KB).
-    std::array<u8, 0xD0>      scu_;              ///< SCU (208B)
-    std::array<u8, 0x80000>   vdp2_vram_;        ///< VDP2 video RAM (512KB)
-    std::array<u8, 0x1000>    vdp2_cram_;        ///< VDP2 color RAM (4KB).
-    std::array<u8, 0x200>     vdp2_registers_;   ///< VDP2 registers (512B).
-    std::array<u8, 0x80000>   vdp1_vram_;        ///< VDP1 video RAM (512KB).
-    std::array<u8, 0x40000>   vdp1_framebuffer_; ///< VDP1 framebuffer (256KB).
-    std::array<u8, 0x18>      vdp1_registers_;   ///< VDP1 registers (24B).
-    std::array<u8, 0x100000>  sound_ram_;        ///< Sound RAM (1MB).
-    std::array<u8, 0x100>     stv_io_;           ///< STV I/O (256B).
-    std::array<u8, 0x3000000> cart_;             ///< Cart (50MB).
+    std::array<u8, workram_low_size>      workram_low_;      ///< low workram (1MB).
+    std::array<u8, workram_high_size>     workram_high_;     ///< high workram (1MB).
+    std::array<u8, rom_size>              rom_;              ///< ROM (512KB).
+    std::array<u8, smpc_size>             smpc_;             ///< SMPC (128B).
+    std::array<u8, backup_ram_size>       backup_ram_;       ///< Backup RAM (64KB).
+    std::array<u8, scu_size>              scu_;              ///< SCU (208B)
+    std::array<u8, vdp2_vram_size>        vdp2_vram_;        ///< VDP2 video RAM (512KB)
+    std::array<u8, vdp2_cram_size>        vdp2_cram_;        ///< VDP2 color RAM (4KB).
+    std::array<u8, vdp2_registers_size>   vdp2_registers_;   ///< VDP2 registers (512B).
+    std::array<u8, vdp1_vram_size>        vdp1_vram_;        ///< VDP1 video RAM (512KB).
+    std::array<u8, vdp1_framebuffer_size> vdp1_framebuffer_; ///< VDP1 framebuffer (256KB).
+    std::array<u8, vdp1_registers_size>   vdp1_registers_;   ///< VDP1 registers (24B).
+    std::array<u8, sound_ram_size>        sound_ram_;        ///< Sound RAM (1MB).
+    std::array<u8, stv_io_size>           stv_io_;           ///< STV I/O (256B).
+    std::array<u8, cart_size>             cart_;             ///< Cart (50MB).
     // std::array <u8, 0x400>     cache_addresses_;  ///< Cache addresses (1KB).
     // std::array <u8, 0x1000>    cache_data_;       ///< Cache data (4KB).
 
@@ -1537,5 +1552,4 @@ struct writeCacheData {
 
 inline bool isMasterSh2InOperation(const Memory& m);
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

@@ -27,6 +27,7 @@
 #include "video/opengl.h"
 #include "video/opengl_legacy.h"
 #include "video/opengl_modern.h"
+#include "locale.h"
 #include "config.h"
 #include "emulator_context.h"
 #include "log.h"
@@ -42,8 +43,7 @@ namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
 namespace sh2   = saturnin::sh2;
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 using cdrom::Cdrom;
 using sh2::Sh2;
@@ -51,6 +51,7 @@ using sh2::Sh2Type;
 using sound::Scsp;
 
 EmulatorContext::EmulatorContext() {
+    locale_     = std::make_unique<Locale>();
     config_     = std::make_unique<Config>("saturnin.cfg");
     master_sh2_ = std::make_unique<Sh2>(Sh2Type::master, this);
     slave_sh2_  = std::make_unique<Sh2>(Sh2Type::slave, this);
@@ -63,6 +64,7 @@ EmulatorContext::EmulatorContext() {
 
 EmulatorContext::~EmulatorContext() = default;
 
+Locale* EmulatorContext::locale() { return locale_.get(); };
 Config* EmulatorContext::config() { return config_.get(); };
 Memory* EmulatorContext::memory() { return memory_.get(); };
 Sh2*    EmulatorContext::masterSh2() { return master_sh2_.get(); };
@@ -79,7 +81,7 @@ bool EmulatorContext::initialize() {
         return false;
 
     std::string country = this->config()->readValue(core::AccessKeys::cfg_global_language);
-    if (!core::Locale::initialize(country))
+    if (!this->locale()->initialize(country))
         return false;
 
     this->smpc()->initializePeripheralMappings();
@@ -177,5 +179,4 @@ void EmulatorContext::startInterface() {
     (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
 }
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

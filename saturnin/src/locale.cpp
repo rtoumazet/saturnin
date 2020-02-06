@@ -24,26 +24,21 @@
 
 namespace fs = std::filesystem;
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
-//spirit_po::catalog<> Locale::cat_ = std::make_unique<spirit_po::catalog<>>();
-
-/* static */
 bool Locale::initialize(const std::string& country = "") {
     std::ifstream ifs("./lang/" + country + "/saturnin.po");
     std::string   po_file{std::istreambuf_iterator<char>{ifs}, std::istreambuf_iterator<char>()};
 
-    // spirit_po::catalog<> cat{ spirit_po::catalog<>::from_range(po_file) };
-//    cat_ = spirit_po::catalog<>::from_range(po_file);
-
+    //spirit_po::catalog<> cat{ spirit_po::catalog<>::from_range(po_file) };
+    //    cat_ = spirit_po::catalog<>::from_range(po_file);
+    cat_ = std::make_unique<spirit_po::default_catalog>(spirit_po::catalog<>::from_range(po_file));
     return true;
 }
 
-std::string tr(const std::string& str) {
+std::string Locale::tr(const std::string& str) {
     // return locale::translate(str);
-    return "";
+    return cat_.get()->gettext(str.c_str());
 }
 
-}; // namespace core
-}; // namespace saturnin
+}; // namespace saturnin::core

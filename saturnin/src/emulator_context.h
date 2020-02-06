@@ -51,6 +51,7 @@ namespace core {
 /// Used to speed up build time as the .h files are included in the .cpp
 ///
 //@{
+class Locale;
 class Config;
 class Memory;
 class Scu;
@@ -128,6 +129,7 @@ class EmulatorContext {
 
     //@{
     // Functions returning pointers to the various systems of the emulator
+    Locale*       locale();
     Config*       config();
     Memory*       memory();
     sh2::Sh2*     masterSh2();
@@ -202,6 +204,7 @@ class EmulatorContext {
 
     void emulationMainThread();
 
+    std::unique_ptr<Locale>       locale_;     ///< Locale object
     std::unique_ptr<Config>       config_;     ///< Configuration object
     std::unique_ptr<Memory>       memory_;     ///< Memory object
     std::unique_ptr<sh2::Sh2>     master_sh2_; ///< Master SH2 object

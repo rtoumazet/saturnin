@@ -26,8 +26,11 @@
 
 #include <spirit_po/spirit_po.hpp>
 
-namespace saturnin {
-namespace core {
+namespace spirit_po {
+using default_catalog = catalog<>;
+}
+
+namespace saturnin::core {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Locale
@@ -42,12 +45,12 @@ class Locale {
   public:
     //@{
     // Constructors / Destructors
-    Locale()              = delete;
+    Locale()              = default;
     Locale(const Locale&) = delete;
     Locale(Locale&&)      = delete;
     Locale& operator=(const Locale&) & = delete;
     Locale& operator=(Locale&&) & = delete;
-    ~Locale()                     = delete;
+    ~Locale()                     = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,26 +64,27 @@ class Locale {
     /// \return True if it succeeds.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static bool initialize(const std::string& country);
+    bool initialize(const std::string& country);
 
-  private:
-    static std::unique_ptr<spirit_po::catalog<>> cat_;
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn std::string tr(const std::string& str);
+    ///
+    /// \brief  Translates the given string.
+    ///
+    /// \author Runik
+    /// \date   23/01/2018
+    ///
+    /// \param  str The string to translate.
+    ///
+    /// \return The translated string.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn std::string tr(const std::string& str);
-///
-/// \brief  Translates the given string.
-///
-/// \author Runik
-/// \date   23/01/2018
-///
-/// \param  str The string to translate.
-///
-/// \return The translated string.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    std::string tr(const std::string& str);
 
-std::string tr(const std::string& str);
+private:
+    std::unique_ptr<spirit_po::default_catalog> cat_;
+}; // classLocale
 
-}; // namespace core
-}; // namespace saturnin
+
+
+}; // namespace saturnin::core

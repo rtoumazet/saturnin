@@ -27,8 +27,7 @@
 #include "emulator_context.h"
 #include "sh2.h"
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 namespace util = saturnin::utilities;
 
@@ -321,15 +320,9 @@ void Smpc::reset() {
     // System clock is 320 at reset.
     std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (Config::tv_standard[ts]) {
-        case video::TvStandard::pal:
-            clock_ = SystemClock::pal_320;
-            break;
-        case video::TvStandard::ntsc:
-            clock_ = SystemClock::ntsc_320;
-            break;
-        default:
-            Log::warning("smpc", tr("Could not set system clock !"));
-            clock_ = SystemClock::not_set;
+        case video::TvStandard::pal: clock_ = SystemClock::pal_320; break;
+        case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
+        default: Log::warning("smpc", tr("Could not set system clock !")); clock_ = SystemClock::not_set;
     }
 }
 
@@ -350,29 +343,19 @@ void Smpc::setCommandDuration() {
         case SmpcCommand::sound_off:
         case SmpcCommand::nmi_request:
         case SmpcCommand::reset_enable:
-        case SmpcCommand::reset_disable:
-            intback_remaining_cycles_ = calculateCyclesNumber(micro(30));
-            break;
+        case SmpcCommand::reset_disable: intback_remaining_cycles_ = calculateCyclesNumber(micro(30)); break;
         case SmpcCommand::cd_on:
         case SmpcCommand::cd_off:
-        case SmpcCommand::smpc_memory_setting:
-            intback_remaining_cycles_ = calculateCyclesNumber(micro(40));
-            break;
+        case SmpcCommand::smpc_memory_setting: intback_remaining_cycles_ = calculateCyclesNumber(micro(40)); break;
         case SmpcCommand::reset_entire_system:
         case SmpcCommand::clock_change_320:
         case SmpcCommand::clock_change_352:
             // Alpha is fixed to 0
             intback_remaining_cycles_ = calculateCyclesNumber(milli(100));
             break;
-        case SmpcCommand::time_setting:
-            intback_remaining_cycles_ = calculateCyclesNumber(micro(70));
-            break;
-        case SmpcCommand::interrupt_back:
-
-            break;
-        default:
-
-            break;
+        case SmpcCommand::time_setting: intback_remaining_cycles_ = calculateCyclesNumber(micro(70)); break;
+        case SmpcCommand::interrupt_back: break;
+        default: break;
     }
 }
 
@@ -448,9 +431,7 @@ void Smpc::executeCommand() {
                     break;
                 case video::TvStandard::ntsc:
                     clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::ntsc_320 : SystemClock::ntsc_352;
-                default:
-                    Log::warning("smpc", tr("Could not set system clock !"));
-                    clock_ = SystemClock::not_set;
+                default: Log::warning("smpc", tr("Could not set system clock !")); clock_ = SystemClock::not_set;
             }
             is_slave_sh2_on_ = false;
             emulator_context_->slaveSh2()->powerOnReset();
@@ -500,8 +481,7 @@ void Smpc::executeCommand() {
             oreg_[31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
-        default:
-            Log::warning("smpc", tr("Unknown SMPC command '{}'"), util::toUnderlying(command));
+        default: Log::warning("smpc", tr("Unknown SMPC command '{}'"), util::toUnderlying(command));
     }
 }
 
@@ -644,72 +624,39 @@ u8 Smpc::read(const u32 addr) {
             if (emulator_context_->hardwareMode() == HardwareMode::stv)
                 return 0xCF;
             return sr_.get(StatusRegister::all_bits);
-        case status_flag:
-            return sf_.get(StatusFlag::sf);
-        case output_register_0:
-            return oreg_[0].get(OutputRegister::all_bits);
-        case output_register_1:
-            return oreg_[1].get(OutputRegister::all_bits);
-        case output_register_2:
-            return oreg_[2].get(OutputRegister::all_bits);
-        case output_register_3:
-            return oreg_[3].get(OutputRegister::all_bits);
-        case output_register_4:
-            return oreg_[4].get(OutputRegister::all_bits);
-        case output_register_5:
-            return oreg_[5].get(OutputRegister::all_bits);
-        case output_register_6:
-            return oreg_[6].get(OutputRegister::all_bits);
-        case output_register_7:
-            return oreg_[7].get(OutputRegister::all_bits);
-        case output_register_8:
-            return oreg_[8].get(OutputRegister::all_bits);
-        case output_register_9:
-            return oreg_[9].get(OutputRegister::all_bits);
-        case output_register_10:
-            return oreg_[10].get(OutputRegister::all_bits);
-        case output_register_11:
-            return oreg_[11].get(OutputRegister::all_bits);
-        case output_register_12:
-            return oreg_[12].get(OutputRegister::all_bits);
-        case output_register_13:
-            return oreg_[13].get(OutputRegister::all_bits);
-        case output_register_14:
-            return oreg_[14].get(OutputRegister::all_bits);
-        case output_register_15:
-            return oreg_[15].get(OutputRegister::all_bits);
-        case output_register_16:
-            return oreg_[16].get(OutputRegister::all_bits);
-        case output_register_17:
-            return oreg_[17].get(OutputRegister::all_bits);
-        case output_register_18:
-            return oreg_[18].get(OutputRegister::all_bits);
-        case output_register_19:
-            return oreg_[19].get(OutputRegister::all_bits);
-        case output_register_20:
-            return oreg_[20].get(OutputRegister::all_bits);
-        case output_register_21:
-            return oreg_[21].get(OutputRegister::all_bits);
-        case output_register_22:
-            return oreg_[22].get(OutputRegister::all_bits);
-        case output_register_23:
-            return oreg_[23].get(OutputRegister::all_bits);
-        case output_register_24:
-            return oreg_[24].get(OutputRegister::all_bits);
-        case output_register_25:
-            return oreg_[25].get(OutputRegister::all_bits);
-        case output_register_26:
-            return oreg_[26].get(OutputRegister::all_bits);
-        case output_register_27:
-            return oreg_[27].get(OutputRegister::all_bits);
-        case output_register_28:
-            return oreg_[28].get(OutputRegister::all_bits);
-        case output_register_29:
-            return oreg_[29].get(OutputRegister::all_bits);
-        case output_register_30:
-            return oreg_[30].get(OutputRegister::all_bits);
-        case output_register_31:
-            return oreg_[31].get(OutputRegister::all_bits);
+        case status_flag: return sf_.get(StatusFlag::sf);
+        case output_register_0: return oreg_[0].get(OutputRegister::all_bits);
+        case output_register_1: return oreg_[1].get(OutputRegister::all_bits);
+        case output_register_2: return oreg_[2].get(OutputRegister::all_bits);
+        case output_register_3: return oreg_[3].get(OutputRegister::all_bits);
+        case output_register_4: return oreg_[4].get(OutputRegister::all_bits);
+        case output_register_5: return oreg_[5].get(OutputRegister::all_bits);
+        case output_register_6: return oreg_[6].get(OutputRegister::all_bits);
+        case output_register_7: return oreg_[7].get(OutputRegister::all_bits);
+        case output_register_8: return oreg_[8].get(OutputRegister::all_bits);
+        case output_register_9: return oreg_[9].get(OutputRegister::all_bits);
+        case output_register_10: return oreg_[10].get(OutputRegister::all_bits);
+        case output_register_11: return oreg_[11].get(OutputRegister::all_bits);
+        case output_register_12: return oreg_[12].get(OutputRegister::all_bits);
+        case output_register_13: return oreg_[13].get(OutputRegister::all_bits);
+        case output_register_14: return oreg_[14].get(OutputRegister::all_bits);
+        case output_register_15: return oreg_[15].get(OutputRegister::all_bits);
+        case output_register_16: return oreg_[16].get(OutputRegister::all_bits);
+        case output_register_17: return oreg_[17].get(OutputRegister::all_bits);
+        case output_register_18: return oreg_[18].get(OutputRegister::all_bits);
+        case output_register_19: return oreg_[19].get(OutputRegister::all_bits);
+        case output_register_20: return oreg_[20].get(OutputRegister::all_bits);
+        case output_register_21: return oreg_[21].get(OutputRegister::all_bits);
+        case output_register_22: return oreg_[22].get(OutputRegister::all_bits);
+        case output_register_23: return oreg_[23].get(OutputRegister::all_bits);
+        case output_register_24: return oreg_[24].get(OutputRegister::all_bits);
+        case output_register_25: return oreg_[25].get(OutputRegister::all_bits);
+        case output_register_26: return oreg_[26].get(OutputRegister::all_bits);
+        case output_register_27: return oreg_[27].get(OutputRegister::all_bits);
+        case output_register_28: return oreg_[28].get(OutputRegister::all_bits);
+        case output_register_29: return oreg_[29].get(OutputRegister::all_bits);
+        case output_register_30: return oreg_[30].get(OutputRegister::all_bits);
+        case output_register_31: return oreg_[31].get(OutputRegister::all_bits);
         case port_data_register_1:
             if (emulator_context_->hardwareMode() == HardwareMode::stv)
                 return 0xFF;
@@ -724,8 +671,7 @@ u8 Smpc::read(const u32 addr) {
             //}
             return pdr2_.get(PortDataRegister::all_bits);
 
-        default:
-            return 0;
+        default: return 0;
     }
 }
 
@@ -735,33 +681,15 @@ void Smpc::write(const u32 addr, const u8 data) {
             comreg_.set(CommandRegister::all_bits, data);
             setCommandDuration();
             break;
-        case status_flag:
-            sf_.set(StatusFlag::sf, data);
-            break;
-        case input_register_0:
-
-            break;
-        case input_register_1:
-            ireg_[1].set(InputRegister::all_bits, data);
-            break;
-        case input_register_2:
-            ireg_[2].set(InputRegister::all_bits, data);
-            break;
-        case input_register_3:
-            ireg_[3].set(InputRegister::all_bits, data);
-            break;
-        case input_register_4:
-            ireg_[4].set(InputRegister::all_bits, data);
-            break;
-        case input_register_5:
-            ireg_[5].set(InputRegister::all_bits, data);
-            break;
-        case input_register_6:
-            ireg_[6].set(InputRegister::all_bits, data);
-            break;
-        case port_data_register_1:
-            pdr1_.set(PortDataRegister::all_bits, data);
-            break;
+        case status_flag: sf_.set(StatusFlag::sf, data); break;
+        case input_register_0: break;
+        case input_register_1: ireg_[1].set(InputRegister::all_bits, data); break;
+        case input_register_2: ireg_[2].set(InputRegister::all_bits, data); break;
+        case input_register_3: ireg_[3].set(InputRegister::all_bits, data); break;
+        case input_register_4: ireg_[4].set(InputRegister::all_bits, data); break;
+        case input_register_5: ireg_[5].set(InputRegister::all_bits, data); break;
+        case input_register_6: ireg_[6].set(InputRegister::all_bits, data); break;
+        case port_data_register_1: pdr1_.set(PortDataRegister::all_bits, data); break;
         case port_data_register_2:
             if (emulator_context_->hardwareMode() == HardwareMode::stv) {
                 if (data & 0x10) {
@@ -779,20 +707,11 @@ void Smpc::write(const u32 addr, const u8 data) {
             }
             pdr2_.set(PortDataRegister::all_bits, data);
             break;
-        case data_direction_register_1:
-            ddr1_.set(DataDirectionRegister::all_bits, data);
-            break;
-        case data_direction_register_2:
-            ddr2_.set(DataDirectionRegister::all_bits, data);
-            break;
-        case io_select_register:
-            iosel_.set(IOSelect::all_bits, data);
-            break;
-        case external_latch_register:
-            exle_.set(ExternalLatchEnable::all_bits, data);
-            break;
-        default:
-            break;
+        case data_direction_register_1: ddr1_.set(DataDirectionRegister::all_bits, data); break;
+        case data_direction_register_2: ddr2_.set(DataDirectionRegister::all_bits, data); break;
+        case io_select_register: iosel_.set(IOSelect::all_bits, data); break;
+        case external_latch_register: exle_.set(ExternalLatchEnable::all_bits, data); break;
+        default: break;
     }
 }
 
@@ -866,5 +785,5 @@ RtcTime getRtcTime() {
 
     return rtc;
 }
-} // namespace core
-} // namespace saturnin
+
+} // namespace saturnin::core
