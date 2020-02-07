@@ -45,13 +45,15 @@ class Locale {
   public:
     //@{
     // Constructors / Destructors
-    Locale()              = default;
+    //Locale()              = default;
     Locale(const Locale&) = delete;
     Locale(Locale&&)      = delete;
     Locale& operator=(const Locale&) & = delete;
     Locale& operator=(Locale&&) & = delete;
     ~Locale()                     = default;
     //@}
+
+    static Locale& getInstance();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static bool Locale::initialize();
@@ -66,6 +68,15 @@ class Locale {
 
     bool initialize(const std::string& country);
 
+    spirit_po::default_catalog* catalog();
+
+
+private:
+    Locale() = default;
+
+    std::unique_ptr<spirit_po::default_catalog> cat_;
+}; // classLocale
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn std::string tr(const std::string& str);
     ///
@@ -79,12 +90,6 @@ class Locale {
     /// \return The translated string.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::string tr(const std::string& str);
-
-private:
-    std::unique_ptr<spirit_po::default_catalog> cat_;
-}; // classLocale
-
-
+std::string tr(const std::string& str);
 
 }; // namespace saturnin::core
