@@ -32,8 +32,7 @@
 #include "iso9660.h"
 #include "scsi.h"
 
-namespace saturnin {
-namespace cdrom {
+namespace saturnin::cdrom {
 // not used ?
 ///// \name CD drive status
 ////@{
@@ -611,5 +610,4 @@ class Cdrom {
     //@}
 };
 
-} // namespace cdrom
-} // namespace saturnin
+} // namespace saturnin::cdrom

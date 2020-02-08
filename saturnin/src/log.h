@@ -35,8 +35,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "locale.h" // tr
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Log
@@ -275,5 +274,4 @@ class Log {
         loggers_; ///< Map containing all the loggers used in the program
 };
 
-}; // namespace core
-}; // namespace saturnin
+}; // namespace saturnin::core

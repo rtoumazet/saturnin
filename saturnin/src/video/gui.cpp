@@ -35,8 +35,7 @@ namespace util  = saturnin::utilities;
 namespace cdrom = saturnin::cdrom;
 namespace fs    = std::filesystem;
 
-namespace saturnin {
-namespace gui {
+namespace saturnin::gui {
 
 static bool show_options     = false;
 static bool show_load_stv    = false;
@@ -719,5 +718,4 @@ void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t 
                                          ImVec2(0, 1),
                                          ImVec2(1, 0));
 }
-} // namespace gui
-} // namespace saturnin
+} // namespace saturnin::gui

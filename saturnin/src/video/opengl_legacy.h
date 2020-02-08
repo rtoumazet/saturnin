@@ -34,8 +34,7 @@ class Config;
 class EmulatorContext;
 } // namespace saturnin::core
 
-namespace saturnin {
-namespace video {
+namespace saturnin::video {
 
 using saturnin::core::Config;
 using saturnin::core::EmulatorContext;
@@ -124,5 +123,4 @@ class OpenglLegacy : public Opengl {
 
 s32 runLegacyOpengl(EmulatorContext& state);
 
-}; // namespace video
-}; // namespace saturnin
+}; // namespace saturnin::video

@@ -21,8 +21,7 @@
 #include "aspi.h"
 #include "spti.h"
 
-namespace saturnin {
-namespace cdrom {
+namespace saturnin::cdrom {
 
 // Static declarations
 std::function<bool(void)>                                   Scsi::initialize;
@@ -61,5 +60,4 @@ void Scsi::settingUpSptiFunctions() {
     readToc    = &Spti::readToc;
 }
 
-} // namespace cdrom
-} // namespace saturnin
+} // namespace saturnin::cdrom

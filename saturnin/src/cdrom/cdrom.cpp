@@ -29,8 +29,7 @@
 //#include "../sh2.h"
 //#include "../utilities.h"
 
-namespace saturnin {
-namespace cdrom {
+namespace saturnin::cdrom {
 
 // Static variables initialization
 CdromAccessMethod Cdrom::access_method = CdromAccessMethod::spti;
@@ -294,11 +293,10 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				EmuState::pLog->CdBlockWrite("change initialization flag");
 //				(CR1&0x1) ? EmuState::pLog->CdBlockWrite("software reset"):EmuState::pLog->CdBlockWrite("no software reset");
 //				(CR1&0x2) ? EmuState::pLog->CdBlockWrite("decode subcode RW"):EmuState::pLog->CdBlockWrite("no decode subcode
-//RW"); 				(CR1&0x4) ? EmuState::pLog->CdBlockWrite("no recognize mode 2 subheader"):EmuState::pLog->CdBlockWrite("recognize mode 2
-//subheader"); 				(CR1&0x8) ? EmuState::pLog->CdBlockWrite("retry form 2 read"):EmuState::pLog->CdBlockWrite("no retry form 2 read");
-//				(CR1&0x80) ? EmuState::pLog->CdBlockWrite("no change"):EmuState::pLog->CdBlockWrite("change");
-//			}else EmuState::pLog->CdBlockWrite("don't change initialization flag");
-//			#endif
+// RW"); 				(CR1&0x4) ? EmuState::pLog->CdBlockWrite("no recognize mode 2 subheader"):EmuState::pLog->CdBlockWrite("recognize
+// mode 2 subheader"); 				(CR1&0x8) ? EmuState::pLog->CdBlockWrite("retry form 2 read"):EmuState::pLog->CdBlockWrite("no
+// retry form 2 read"); 				(CR1&0x80) ? EmuState::pLog->CdBlockWrite("no change"):EmuState::pLog->CdBlockWrite("change"); 			}else
+//EmuState::pLog->CdBlockWrite("don't change initialization flag"); 			#endif
 //
 //			switch(CR1 & 0x3)
 //			{
@@ -1090,8 +1088,8 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			numberOfSectors=CR4;
 //
 //			if (sectorPosInBuffer==0xFFFF) MessageBox(NULL,L"CalculateActualSize:
-//sectorPosInBuffer==0xFFFF",L"unimplemented",MB_ICONWARNING); 			if (numberOfSectors==0xFFFF) MessageBox(NULL,L"CalculateActualSize:
-//numberOfSectors==0xFFFF",L"unimplemented",MB_ICONWARNING);
+// sectorPosInBuffer==0xFFFF",L"unimplemented",MB_ICONWARNING); 			if (numberOfSectors==0xFFFF)
+// MessageBox(NULL,L"CalculateActualSize: numberOfSectors==0xFFFF",L"unimplemented",MB_ICONWARNING);
 //
 //			actualSize=0;
 //			/*for (int32_t i=sectorPosInBuffer;i<(sectorPosInBuffer+numberOfSectors);i++)
@@ -1151,8 +1149,8 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			CR1|=bufferPartitions[bufferNum].sectors[sectorNum]->FAD>>16;
 //			CR2=(uint16_t)(bufferPartitions[bufferNum].sectors[sectorNum]->FAD & 0xFFFF);
 //			CR3=bufferPartitions[bufferNum].sectors[sectorNum]->fileNumber << 8 |
-//bufferPartitions[bufferNum].sectors[sectorNum]->channelNumber; 			CR4=bufferPartitions[bufferNum].sectors[sectorNum]->subMode << 8
-//| bufferPartitions[bufferNum].sectors[sectorNum]->codingInfo;
+// bufferPartitions[bufferNum].sectors[sectorNum]->channelNumber; 			CR4=bufferPartitions[bufferNum].sectors[sectorNum]->subMode
+// << 8 | bufferPartitions[bufferNum].sectors[sectorNum]->codingInfo;
 //
 //			HIRQREQ|=CMOK|ESEL;
 //			#ifdef _LOGS
@@ -1417,7 +1415,7 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //					break;
 //				default:
 //					MessageBox(NULL,L"ChangeDirectory: change to another directory than root
-//directory",L"warning",MB_ICONWARNING); 					break;
+// directory",L"warning",MB_ICONWARNING); 					break;
 //			}
 //
 //			HIRQREQ|=CMOK|EFLS;
@@ -1726,10 +1724,10 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //
 //			//dataLength=*(uint32_t *)strBuff.substr(iCurrent+10,4).c_str();
 //			//Packed32 data_length = { strBuff[iCurrent + 10], strBuff[iCurrent + 11], strBuff[iCurrent + 12], strBuff[iCurrent +
-//13]};
+// 13]};
 //			//infos.dataLength = data_length.val32;
 //			std::array <int8_t,4> data_length = { strBuff[iCurrent + 10], strBuff[iCurrent + 11], strBuff[iCurrent + 12],
-//strBuff[iCurrent + 13]};
+// strBuff[iCurrent + 13]};
 //            infos.dataLength = swap_endian<uint32_t>(RawRead32(data_length, 0));
 //
 //
@@ -2253,5 +2251,4 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 // void CCdRom::RefreshPeriod(){
 //	UpdatePeriod();
 //}
-} // namespace cdrom
-} // namespace saturnin
+} // namespace saturnin::cdrom

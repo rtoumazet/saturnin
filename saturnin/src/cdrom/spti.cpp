@@ -31,8 +31,7 @@
 
 namespace util = saturnin::utilities;
 
-namespace saturnin {
-namespace cdrom {
+namespace saturnin::cdrom {
 
 using core::Log;
 using core::tr;
@@ -240,5 +239,4 @@ bool Spti::readToc(ScsiToc& toc) {
     toc = reinterpret_cast<ScsiToc&>(cdrom_toc);
     return true;
 }
-} // namespace cdrom
-} // namespace saturnin
+} // namespace saturnin::cdrom

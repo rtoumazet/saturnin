@@ -44,8 +44,7 @@ namespace libcfg = libconfig;
 namespace util   = saturnin::utilities;
 namespace video  = saturnin::video;
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   AccessKeys
@@ -534,5 +533,4 @@ class Config {
     libconfig::Config cfg_; ///< Internal configuration object
 };
 
-}; // namespace core
-}; // namespace saturnin
+}; // namespace saturnin::core

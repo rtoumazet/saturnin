@@ -26,8 +26,7 @@
 
 #include <cstdint>
 
-namespace saturnin {
-namespace cdrom {
+namespace saturnin::cdrom {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct AspiTocTrack
@@ -221,5 +220,4 @@ struct PrimaryVolumeDescriptor {
     uint8_t reserved_for_future_standardization2[653];   ///< 0
 };
 
-} // namespace cdrom
-} // namespace saturnin
+} // namespace saturnin::cdrom

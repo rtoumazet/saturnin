@@ -29,8 +29,7 @@ namespace lzpp = libzippp;
 namespace fs   = std::filesystem;
 namespace sh2  = saturnin::sh2;
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 using core::Log;
 
@@ -471,5 +470,4 @@ void Memory::initialize() {
     initializeHandlers();
 }
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

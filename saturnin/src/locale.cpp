@@ -37,17 +37,12 @@ bool Locale::initialize(const std::string& country = "") {
     std::ifstream ifs("./lang/" + country + "/saturnin.po");
     std::string   po_file{std::istreambuf_iterator<char>{ifs}, std::istreambuf_iterator<char>()};
 
-    // spirit_po::catalog<> cat{ spirit_po::catalog<>::from_range(po_file) };
-    //    cat_ = spirit_po::catalog<>::from_range(po_file);
     cat_ = std::make_unique<spirit_po::default_catalog>(spirit_po::catalog<>::from_range(po_file));
     return true;
 }
 
 std::string tr(const std::string& str) {
-    // return locale::translate(str);
-    // return cat_.get()->gettext(str.c_str());
     return Locale::getInstance().catalog()->gettext_str(str);
-    //return "";
 }
 
 }; // namespace saturnin::core

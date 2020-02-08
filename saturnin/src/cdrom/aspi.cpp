@@ -27,8 +27,7 @@
 #include "iso9660.h"
 #include "../utilities.h"
 
-namespace saturnin {
-namespace cdrom {
+namespace saturnin::cdrom {
 
 // static declarations
 HINSTANCE Aspi::hWnAspi32;
@@ -323,5 +322,4 @@ bool Aspi::readToc(ScsiToc& TOCData) {
     return true;
 }
 
-} // namespace cdrom
-} // namespace saturnin
+} // namespace saturnin::cdrom

@@ -28,8 +28,7 @@
 #include <cstdint> // uint8_t
 #include <string>  // string
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 enum class Rom_stv : std::uint8_t {
     none                     = 0,  ///< None
@@ -180,5 +179,4 @@ static const Stv_rom_data stv_rom_list[] = {
     // clang-format on
 };
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

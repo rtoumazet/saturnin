@@ -43,17 +43,16 @@ msgid "Undefined default value '{}'!"
 msgstr ""
 
 #: ..\src\config.h:312 ..\src\config.h:341 config.h:312 config.h:341
-#, fuzzy
 msgid "Setting '{0}' using the wrong type !"
-msgstr "Paramètre '{0}' non trouvé !"
+msgstr "Le paramètre '{0}' n'utilise pas le bon type !"
 
 #: ..\src\emulator_context.cpp:157
 msgid "Emulation main thread started"
-msgstr ""
+msgstr "Thread principal d'émulation démarré"
 
 #: ..\src\emulator_context.cpp:164
 msgid "Emulation main thread finished"
-msgstr ""
+msgstr "Thread principal d'émulation terminé"
 
 #: ..\src\emulator_context.cpp:170 ..\src\main.cpp:48 main.cpp:48
 msgid "Uncaught exception !"
@@ -244,14 +243,12 @@ msgid "General"
 msgstr ""
 
 #: ..\src\video\gui.cpp:158
-#, fuzzy
 msgid "Hardware mode"
-msgstr "Mode matériel inconnu"
+msgstr "Mode matériel"
 
 #: ..\src\video\gui.cpp:167 ..\src\video\gui.cpp:173
-#, fuzzy
 msgid "Unknown hardware mode ..."
-msgstr "Mode matériel inconnu"
+msgstr "Mode matériel inconnu ..."
 
 #: ..\src\video\gui.cpp:177
 msgid "Language"
@@ -430,17 +427,16 @@ msgid "Button 4"
 msgstr ""
 
 #: ..\src\video\gui.cpp:630
-#, fuzzy
 msgid "Configuration saved."
-msgstr "Création du fichier de configuration."
+msgstr "Configuration enregistrée."
 
 #: ..\src\video\gui.cpp:679
 msgid "File"
-msgstr ""
+msgstr "Fichier"
 
 #: ..\src\video\gui.cpp:680
 msgid "Load ST-V rom"
-msgstr ""
+msgstr "Charger rom ST-V"
 
 #: ..\src\video\gui.cpp:681
 msgid "Load binary file"
@@ -448,7 +444,7 @@ msgstr ""
 
 #: ..\src\video\gui.cpp:685
 msgid "Options"
-msgstr ""
+msgstr "Options"
 
 #: ..\src\video\opengl_legacy.cpp:140
 msgid "Saturnin {0} - Legacy rendering"

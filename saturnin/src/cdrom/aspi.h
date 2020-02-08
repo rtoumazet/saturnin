@@ -30,8 +30,7 @@
 //#include <scsidefs.h>
 //#include <wnaspi32.h>
 
-namespace saturnin {
-namespace cdrom {
+namespace saturnin::cdrom {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \typedef	uint32_t (WINAPI *func)(LPSRB)
@@ -167,5 +166,4 @@ class Aspi {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // static std::function<uint32_t(LPSRB)> pfSendAspi32Command;
 };
-} // namespace cdrom
-} // namespace saturnin
+} // namespace saturnin::cdrom

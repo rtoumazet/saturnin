@@ -38,8 +38,7 @@ class Config;
 }
 struct GLFWwindow;
 
-namespace saturnin {
-namespace video {
+namespace saturnin::video {
 
 using saturnin::core::Config;
 
@@ -160,5 +159,4 @@ bool isModernOpenglCapable();
 
 void windowCloseCallback(GLFWwindow* window);
 
-}; // namespace video
-}; // namespace saturnin
+}; // namespace saturnin::video

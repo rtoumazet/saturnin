@@ -37,8 +37,7 @@
 
 using namespace gl;
 
-namespace saturnin {
-namespace video {
+namespace saturnin::video {
 
 using core::Log;
 
@@ -240,8 +239,9 @@ int32_t runModernOpengl(core::EmulatorContext& state) {
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
-                                                                   // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+    glfwWindowHint(GLFW_OPENGL_PROFILE,
+                   GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
+                                              // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
     std::string window_title = fmt::format(core::tr("Saturnin {0} - Modern rendering"), core::saturnin_version);
     auto        window       = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
@@ -368,5 +368,4 @@ void checkProgramCompilation(const u32 program) {
     }
 }
 
-}; // namespace video
-}; // namespace saturnin
+}; // namespace saturnin::video

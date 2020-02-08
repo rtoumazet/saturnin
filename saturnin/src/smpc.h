@@ -32,13 +32,10 @@
 #include <array>        // array
 #include "smpc_registers.h"
 
-// Forward declarations
 namespace saturnin::core {
-class EmulatorContext;
-}
 
-namespace saturnin {
-namespace core {
+// Forward declarations
+class EmulatorContext;
 
 enum class AreaCode : u8 {
     japan                      = 0x1, ///< Japan
@@ -559,5 +556,4 @@ std::string getKeyName(const PeripheralKey pk);
 
 RtcTime getRtcTime();
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

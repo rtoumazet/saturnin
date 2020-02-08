@@ -34,8 +34,7 @@ class Config;
 class EmulatorContext;
 } // namespace saturnin::core
 
-namespace saturnin {
-namespace video {
+namespace saturnin::video {
 
 using saturnin::core::Config;
 using saturnin::core::EmulatorContext;
@@ -177,5 +176,4 @@ void checkShaderCompilation(const u32 shader);
 
 void checkProgramCompilation(const u32 program);
 
-}; // namespace video
-}; // namespace saturnin
+}; // namespace saturnin::video

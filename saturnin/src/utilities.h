@@ -29,8 +29,7 @@
 #include <type_traits> // underlying_type_t
 #include <vector>      // vector
 
-namespace saturnin {
-namespace utilities {
+namespace saturnin::utilities {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn std::vector<char> stringToVector(const std::string& source, const uint32_t reserved_size);
@@ -148,5 +147,4 @@ std::vector<std::string> explode(std::string const& s, char delim);
 
 uint32_t dec2bcd(uint16_t dec);
 
-} // namespace utilities
-} // namespace saturnin
+} // namespace saturnin::utilities

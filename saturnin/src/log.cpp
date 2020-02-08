@@ -23,8 +23,7 @@
 
 namespace fs = std::filesystem;
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 std::map<std::string, std::shared_ptr<spdlog::logger>> Log::loggers_;
 
 /* static */
@@ -94,5 +93,4 @@ void Log::flush() {
         l.second->flush();
     }
 }
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

@@ -27,8 +27,7 @@
 
 #pragma once
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	HardwareMode
@@ -62,5 +61,4 @@ enum class EmulationStatus {
 
 enum class RenderingStatus { running, reset, stopped };
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

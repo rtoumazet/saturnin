@@ -31,8 +31,7 @@
 
 namespace video = saturnin::video;
 
-namespace saturnin {
-namespace gui {
+namespace saturnin::gui {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showImguiDemoWindow(const bool show_demo_window);
@@ -147,5 +146,4 @@ void buildGui(core::EmulatorContext& context, video::Opengl& opengl, const u32 w
 
 void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t height);
 
-} // namespace gui
-} // namespace saturnin
+} // namespace saturnin::gui

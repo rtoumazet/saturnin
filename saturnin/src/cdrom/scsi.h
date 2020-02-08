@@ -29,8 +29,7 @@
 #include <windows.h>
 #pragma warning(pop)
 
-namespace saturnin {
-namespace cdrom {
+namespace saturnin::cdrom {
 
 const uint8_t scsi_max_drives     = 10;  ///< Maximum number of drives checked on the host system.
 const uint8_t scsi_max_toc_tracks = 100; ///< Maximum number of tracks saved in the TOC
@@ -144,5 +143,4 @@ class Scsi {
     //@}
 };
 
-} // namespace cdrom
-} // namespace saturnin
+} // namespace saturnin::cdrom

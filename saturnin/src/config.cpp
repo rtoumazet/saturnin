@@ -30,8 +30,7 @@ namespace libcfg = libconfig;
 namespace fs     = std::filesystem;
 namespace cdrom  = saturnin::cdrom;
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 using core::Log;
 
@@ -238,7 +237,6 @@ void Config::createDefault(const AccessKeys& value) {
             throw std::runtime_error("Config error !");
         }
     }
-    writeFile();
 }
 std::vector<PeripheralKey> Config::readPeripheralConfiguration(const AccessKeys& key) {
     std::vector<PeripheralKey> pad_values;
@@ -268,5 +266,4 @@ std::vector<std::string> Config::listAreaCodes() {
     return codes;
 }
 
-}; // namespace core
-}; // namespace saturnin
+}; // namespace saturnin::core

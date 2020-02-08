@@ -29,8 +29,7 @@
 #include "emulator_defs.h"
 #include "sh2.h"
 
-namespace saturnin {
-namespace sh2 {
+namespace saturnin::sh2 {
 
 // Forward declarations
 // class Sh2;
@@ -63,7 +62,7 @@ inline void add(Sh2& s);
 inline void addi(Sh2& s);
 inline void addc(Sh2& s);
 inline void addv(Sh2& s);
-inline void and(Sh2& s);
+inline void and (Sh2 & s);
 inline void andi(Sh2& s);
 inline void andm(Sh2& s);
 inline void bf(Sh2& s);
@@ -379,5 +378,4 @@ void initializeOpcodesLut();
 
 void execute(Sh2& s);
 
-} // namespace sh2
-} // namespace saturnin
+} // namespace saturnin::sh2

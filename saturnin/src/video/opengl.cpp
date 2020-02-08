@@ -30,8 +30,7 @@
 #include "../config.h"
 #include "../log.h"
 
-namespace saturnin {
-namespace video {
+namespace saturnin::video {
 
 using core::Log;
 
@@ -184,5 +183,4 @@ void windowCloseCallback(GLFWwindow* window) {
     state->renderingStatus(core::RenderingStatus::stopped);
 }
 
-}; // namespace video
-}; // namespace saturnin
+}; // namespace saturnin::video

@@ -32,8 +32,7 @@ namespace saturnin::core {
 class EmulatorContext;
 }
 
-namespace saturnin {
-namespace sound {
+namespace saturnin::sound {
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::Log;
@@ -55,5 +54,4 @@ class Scsp {
     void setSound(bool) { Log::error("scsp", "setSound() not implemented"); };
 };
 
-} // namespace sound
-} // namespace saturnin
+} // namespace saturnin::sound

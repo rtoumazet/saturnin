@@ -27,8 +27,7 @@
 
 #include "interrupt_controller.h" // Interrupt
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \namespace  InterruptSource
@@ -123,5 +122,4 @@ static Interrupt sh2_frt_output_compare_flag_b_set{ 0, 0 , InterruptMaskRegister
 static Interrupt sh2_frt_overflow_flag_set        { 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 }
 // clang-format on
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

@@ -27,10 +27,7 @@
 
 #include "emulator_defs.h"
 
-// namespace core = saturnin::core;
-
-namespace saturnin {
-namespace sh2 {
+namespace saturnin::sh2 {
 
 /// \name Onboard i/o registers addresses
 //@{
@@ -1810,5 +1807,4 @@ class ReceiveShiftRegister : public Register {
     using Register::Register;
     inline static const BitRange<u8> all_bits{0, 7}; ///< Defines the whole register bits
 };
-} // namespace sh2
-} // namespace saturnin
+} // namespace saturnin::sh2

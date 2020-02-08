@@ -45,13 +45,24 @@ class Locale {
   public:
     //@{
     // Constructors / Destructors
-    //Locale()              = default;
+    // Locale()              = default;
     Locale(const Locale&) = delete;
     Locale(Locale&&)      = delete;
     Locale& operator=(const Locale&) & = delete;
     Locale& operator=(Locale&&) & = delete;
     ~Locale()                     = default;
     //@}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static Locale& Locale::getInstance();
+    ///
+    /// \brief  Gets the singleton instance.
+    ///
+    /// \author Runik
+    /// \date   07/02/2020
+    ///
+    /// \return The instance.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static Locale& getInstance();
 
@@ -70,25 +81,34 @@ class Locale {
 
     spirit_po::default_catalog* catalog();
 
-
-private:
-    Locale() = default;
-
-    std::unique_ptr<spirit_po::default_catalog> cat_;
-}; // classLocale
-
+  private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn std::string tr(const std::string& str);
+    /// \fn Locale::Locale() = default;
     ///
-    /// \brief  Translates the given string.
+    /// \brief  Default constructor.
     ///
     /// \author Runik
-    /// \date   23/01/2018
-    ///
-    /// \param  str The string to translate.
-    ///
-    /// \return The translated string.
+    /// \date   07/02/2020
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    Locale() = default;
+
+    std::unique_ptr<spirit_po::default_catalog> cat_; ///< Catalog of translated strings
+
+}; // class Locale
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn std::string tr(const std::string& str);
+///
+/// \brief  Translates the given string.
+///
+/// \author Runik
+/// \date   23/01/2018
+///
+/// \param  str The string to translate.
+///
+/// \return The translated string.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::string tr(const std::string& str);
 

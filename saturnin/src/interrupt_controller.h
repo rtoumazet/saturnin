@@ -28,8 +28,7 @@
 #include "emulator_defs.h"
 #include "scu_registers.h" // InterruptMask, InterruptEnable
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 struct Interrupt {
     u8                        vector;
@@ -41,5 +40,4 @@ struct Interrupt {
     operator int() const { return vector; } ///< Internal conversion operator.
 };
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

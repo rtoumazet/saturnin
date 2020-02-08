@@ -36,8 +36,7 @@
 using namespace gl21;
 using namespace gl21ext;
 
-namespace saturnin {
-namespace video {
+namespace saturnin::video {
 
 using core::Log;
 
@@ -238,5 +237,4 @@ s32 runLegacyOpengl(core::EmulatorContext& state) {
     return EXIT_SUCCESS;
 }
 
-}; // namespace video
-}; // namespace saturnin
+}; // namespace saturnin::video

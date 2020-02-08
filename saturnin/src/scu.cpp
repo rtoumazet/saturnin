@@ -26,8 +26,7 @@
 #include "sh2.h"
 #include "utilities.h"
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 // SCU DMA accesses
 // Write to A-Bus prohibited
@@ -847,5 +846,4 @@ void Scu::dmaUpdateWriteAddress(const DmaLevel l, const u32 data) {
     }
 }
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

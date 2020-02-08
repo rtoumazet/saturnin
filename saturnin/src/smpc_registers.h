@@ -27,8 +27,7 @@
 
 #include "emulator_defs.h"
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 /// \name SH2 interface registers addresses
 //@{
@@ -413,5 +412,4 @@ public:
 };
 
 // clang-format on
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

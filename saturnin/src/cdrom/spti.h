@@ -27,8 +27,7 @@
 #include <string>
 #include "scsi.h"
 
-namespace saturnin {
-namespace cdrom {
+namespace saturnin::cdrom {
 
 const uint8_t spti_timeout = 5; // in seconds
 
@@ -164,5 +163,4 @@ class Spti {
 
     static bool readToc(ScsiToc& toc_data);
 };
-} // namespace cdrom
-} // namespace saturnin
+} // namespace saturnin::cdrom

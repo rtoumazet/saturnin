@@ -26,8 +26,7 @@
 
 namespace is = saturnin::core::interrupt_source;
 
-namespace saturnin {
-namespace sh2 {
+namespace saturnin::sh2 {
 
 using core::Log;
 
@@ -73,18 +72,14 @@ bool isInstructionIllegal(const u16 inst) {
             switch (x000n(inst)) {
                 case 0b0011:
                     switch (x00n0(inst)) {
-                        case 0b0000:
-                            return true; // BSRF Rm*2
-                        case 0b0010:
-                            return true; // BRAF Rm*2
+                        case 0b0000: return true; // BSRF Rm*2
+                        case 0b0010: return true; // BRAF Rm*2
                     }
                     break;
                 case 0xb1011:
                     switch (x00n0(inst)) {
-                        case 0b0000:
-                            return true; // RTS
-                        case 0b0010:
-                            return true; // RTE
+                        case 0b0000: return true; // RTS
+                        case 0b0010: return true; // RTE
                     }
                     break;
             }
@@ -93,34 +88,25 @@ bool isInstructionIllegal(const u16 inst) {
             switch (x000n(inst)) {
                 case 0b1011:
                     switch (x00n0(inst)) {
-                        case 0b0000:
-                            return true; // JSR @Rm
-                        case 0b0010:
-                            return true; // JMP @Rm
+                        case 0b0000: return true; // JSR @Rm
+                        case 0b0010: return true; // JMP @Rm
                     }
                     break;
             }
             break;
         case 0b1000:
             switch (x0n00(inst)) {
-                case 0b1001:
-                    return true; // BT label
-                case 0b1011:
-                    return true; // BF label
-                case 0x1101:
-                    return true; // BT/S label*2
-                case 0x1111:
-                    return true; // BF/S label*2
+                case 0b1001: return true; // BT label
+                case 0b1011: return true; // BF label
+                case 0x1101: return true; // BT/S label*2
+                case 0x1111: return true; // BF/S label*2
             }
             break;
-        case 0b1010:
-            return true; // BRA label
-        case 0b1011:
-            return true; // BSR label
+        case 0b1010: return true; // BRA label
+        case 0b1011: return true; // BSR label
         case 0b1100:
             switch (x0n00(inst)) {
-                case 0x0011:
-                    return true; // TRAPA #imm
+                case 0x0011: return true; // TRAPA #imm
             }
             break;
     }
@@ -190,7 +176,7 @@ void addv(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void and(Sh2& s) {
+void and (Sh2 & s) {
     // Rn & Rm -> Rn
     s.r_[xn00(s)] &= s.r_[x0n0(s)];
     s.pc_ += 2;
@@ -496,12 +482,8 @@ void div1(Sh2& s) {
                     s.r_[xn00(s)] -= s.r_[x0n0(s)];
                     tmp1 = (static_cast<u32>(s.r_[xn00(s)]) > tmp0);
                     switch (s.sr_.get(StatusRegister::q)) {
-                        case 0:
-                            (tmp1) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q);
-                            break;
-                        case 1:
-                            (tmp1 == 0) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q);
-                            break;
+                        case 0: (tmp1) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q); break;
+                        case 1: (tmp1 == 0) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q); break;
                     }
                     break;
                 case 1:
@@ -509,12 +491,8 @@ void div1(Sh2& s) {
                     s.r_[xn00(s)] += s.r_[x0n0(s)];
                     tmp1 = (static_cast<u32>(s.r_[xn00(s)]) < tmp0);
                     switch (s.sr_.get(StatusRegister::q)) {
-                        case 0:
-                            (tmp1 == 0) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q);
-                            break;
-                        case 1:
-                            (tmp1) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q);
-                            break;
+                        case 0: (tmp1 == 0) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q); break;
+                        case 1: (tmp1) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q); break;
                     }
                     break;
             }
@@ -526,12 +504,8 @@ void div1(Sh2& s) {
                     s.r_[xn00(s)] += s.r_[x0n0(s)];
                     tmp1 = (static_cast<uint32_t>(s.r_[xn00(s)]) < tmp0);
                     switch (s.sr_.get(StatusRegister::q)) {
-                        case 0:
-                            (tmp1) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q);
-                            break;
-                        case 1:
-                            (tmp1 == 0) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q);
-                            break;
+                        case 0: (tmp1) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q); break;
+                        case 1: (tmp1 == 0) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q); break;
                     }
                     break;
                 case 1:
@@ -539,12 +513,8 @@ void div1(Sh2& s) {
                     s.r_[xn00(s)] -= s.r_[x0n0(s)];
                     tmp1 = (static_cast<u32>(s.r_[xn00(s)]) > tmp0);
                     switch (s.sr_.get(StatusRegister::q)) {
-                        case 0:
-                            (tmp1 == 0) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q);
-                            break;
-                        case 1:
-                            (tmp1) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q);
-                            break;
+                        case 0: (tmp1 == 0) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q); break;
+                        case 1: (tmp1) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q); break;
                     }
                     break;
             }
@@ -1340,48 +1310,20 @@ void rte(Sh2& s) {
             s.scu()->clearInterruptFlag(s.current_interrupt_);
             Log::debug("sh2", "*** Back from interrupt ***");
             switch (s.current_interrupt_.vector) {
-                case is::vector_v_blank_in:
-                    Log::debug("sh2", "VBlank-In interrupt routine finished");
-                    break;
-                case is::vector_v_blank_out:
-                    Log::debug("sh2", "VBlank-Out interrupt routine finished");
-                    break;
-                case is::vector_h_blank_in:
-                    Log::debug("sh2", "HBlank-In interrupt routine finished");
-                    break;
-                case is::vector_timer_0:
-                    Log::debug("sh2", "Timer 0 interrupt routine finished");
-                    break;
-                case is::vector_timer_1:
-                    Log::debug("sh2", "Timer 1 interrupt routine finished");
-                    break;
-                case is::vector_dsp_end:
-                    Log::debug("sh2", "DSP End interrupt routine finished");
-                    break;
-                case is::vector_sound_request:
-                    Log::debug("sh2", "Sound Request interrupt routine finished");
-                    break;
-                case is::vector_system_manager:
-                    Log::debug("sh2", "System Manager interrupt routine finished");
-                    break;
-                case is::vector_pad_interrupt:
-                    Log::debug("sh2", "Pad interrupt routine finished");
-                    break;
-                case is::vector_level_2_dma_end:
-                    Log::debug("sh2", "Level 2 DMA End interrupt routine finished");
-                    break;
-                case is::vector_level_1_dma_end:
-                    Log::debug("sh2", "Level 1 DMA End interrupt routine finished");
-                    break;
-                case is::vector_level_0_dma_end:
-                    Log::debug("sh2", "Level 0 DMA End interrupt routine finished");
-                    break;
-                case is::vector_dma_illegal:
-                    Log::debug("sh2", "DMA Illegal interrupt routine finished");
-                    break;
-                case is::vector_sprite_draw_end:
-                    Log::debug("sh2", "Sprite Draw End interrupt routine finished");
-                    break;
+                case is::vector_v_blank_in: Log::debug("sh2", "VBlank-In interrupt routine finished"); break;
+                case is::vector_v_blank_out: Log::debug("sh2", "VBlank-Out interrupt routine finished"); break;
+                case is::vector_h_blank_in: Log::debug("sh2", "HBlank-In interrupt routine finished"); break;
+                case is::vector_timer_0: Log::debug("sh2", "Timer 0 interrupt routine finished"); break;
+                case is::vector_timer_1: Log::debug("sh2", "Timer 1 interrupt routine finished"); break;
+                case is::vector_dsp_end: Log::debug("sh2", "DSP End interrupt routine finished"); break;
+                case is::vector_sound_request: Log::debug("sh2", "Sound Request interrupt routine finished"); break;
+                case is::vector_system_manager: Log::debug("sh2", "System Manager interrupt routine finished"); break;
+                case is::vector_pad_interrupt: Log::debug("sh2", "Pad interrupt routine finished"); break;
+                case is::vector_level_2_dma_end: Log::debug("sh2", "Level 2 DMA End interrupt routine finished"); break;
+                case is::vector_level_1_dma_end: Log::debug("sh2", "Level 1 DMA End interrupt routine finished"); break;
+                case is::vector_level_0_dma_end: Log::debug("sh2", "Level 0 DMA End interrupt routine finished"); break;
+                case is::vector_dma_illegal: Log::debug("sh2", "DMA Illegal interrupt routine finished"); break;
+                case is::vector_sprite_draw_end: Log::debug("sh2", "Sprite Draw End interrupt routine finished"); break;
             }
 
             Log::debug("sh2", "Level:{:#0x}", s.current_interrupt_.level);
@@ -1778,5 +1720,4 @@ void initializeOpcodesLut() {
 
 void execute(Sh2& s) { opcodes_lut[s.current_opcode_](s); }
 
-} // namespace sh2
-} // namespace saturnin
+} // namespace saturnin::sh2

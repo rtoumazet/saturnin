@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace saturnin {
-namespace video {
+namespace saturnin::video {
 
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
@@ -57,5 +56,4 @@ class Vdp2 {
   private:
 };
 
-} // namespace video
-} // namespace saturnin
+} // namespace saturnin::video

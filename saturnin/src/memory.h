@@ -35,7 +35,7 @@
 #include "log.h"
 #include "scu.h"
 #include "smpc.h"
-#include "utilities.h" // to‹nderlying
+#include "utilities.h" // toUnderlying
 
 // Forward declarations
 namespace saturnin::sh2 {
