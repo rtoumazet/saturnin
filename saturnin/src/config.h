@@ -247,9 +247,9 @@ class Config {
             return;
         }
 
-        if (!root.exists(key.c_str()))
+        if (!root.exists(key.c_str())) {
             root.add(key.c_str(), ToMySetting<std::decay_t<T>>::index) = value;
-        else {
+        } else {
             libconfig::Setting& s = root[key.c_str()];
             s                     = value;
         }
@@ -269,9 +269,9 @@ class Config {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void writeValue(libconfig::Setting& root, const std::string& key, const std::string& value) {
-        if (!root.exists(key.c_str()))
+        if (!root.exists(key.c_str())) {
             root.add(key.c_str(), libconfig::Setting::TypeString) = value.c_str();
-        else {
+        } else {
             libconfig::Setting& s = root[key.c_str()];
             s                     = value.c_str();
         }
@@ -284,9 +284,9 @@ class Config {
             return;
         }
 
-        if (!root.exists(key.c_str()))
+        if (!root.exists(key.c_str())) {
             root.add(key.c_str(), libconfig::Setting::TypeInt) = util::toUnderlying(value);
-        else {
+        } else {
             libconfig::Setting& s = root[key.c_str()];
             s                     = util::toUnderlying(value);
         }
@@ -307,9 +307,9 @@ class Config {
 
     template<size_t N>
     void writeValue(libconfig::Setting& root, const std::string& key, const char (&value)[N]) {
-        if (!root.exists(key.c_str()))
+        if (!root.exists(key.c_str())) {
             root.add(key.c_str(), libconfig::Setting::TypeString) = value;
-        else {
+        } else {
             libconfig::Setting& s = root[key.c_str()];
             s                     = value;
         }
@@ -442,9 +442,9 @@ class Config {
     template<class T>
     void add(const std::string key, T default) {
         auto        tokens{util::explode(key, '.')};
-        std::string parent_path = "";
+        std::string parent_path{};
         for (const auto& t : tokens) {
-            if (parent_path == "") {
+            if (parent_path.empty()) {
                 libcfg::Setting& root = cfg_.getRoot();
                 parent_path           = addGroup(root, t);
             } else {
@@ -463,9 +463,9 @@ class Config {
     template<class T>
     void add(const std::string key, std::vector<T> elements) {
         auto        tokens{util::explode(key, '.')};
-        std::string parent_path = "";
+        std::string parent_path{};
         for (const auto& t : tokens) {
-            if (parent_path == "") {
+            if (parent_path.empty()) {
                 libcfg::Setting& root = cfg_.getRoot();
                 parent_path           = addGroup(root, t);
             } else {

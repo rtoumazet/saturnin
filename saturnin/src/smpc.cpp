@@ -621,8 +621,9 @@ void Smpc::getPeripheralData() {
 u8 Smpc::read(const u32 addr) {
     switch (addr) {
         case status_register:
-            if (emulator_context_->hardwareMode() == HardwareMode::stv)
+            if (emulator_context_->hardwareMode() == HardwareMode::stv) {
                 return 0xCF;
+            }
             return sr_.get(StatusRegister::all_bits);
         case status_flag: return sf_.get(StatusFlag::sf);
         case output_register_0: return oreg_[0].get(OutputRegister::all_bits);
@@ -780,8 +781,8 @@ RtcTime getRtcTime() {
 
     u16  second       = static_cast<u16>(time.seconds().count());
     auto second_bcd   = util::dec2bcd(second);
-    rtc.second_10_bcd = 0;
-    rtc.second_1_bcd  = 0;
+    rtc.second_10_bcd = std::bitset<4>((second_bcd >> 4) & 0xF);
+    rtc.second_1_bcd  = std::bitset<4>(second_bcd & 0xF);
 
     return rtc;
 }

@@ -757,63 +757,89 @@ struct readStvIo<u8> {
             // WIP use gainput/glfw3 to manage inputs
             u8 data{};
             switch (addr & 0x00FFFFFF) {
-                case stv_io_port_a:
+                case stv_io_port_a: {
                     auto p1 = m.smpc()->getStvPeripheralMapping().player_1;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_1)) == GLFW_PRESS)
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_1)) == GLFW_PRESS) {
                         data |= 0x01;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_2)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_2)) == GLFW_PRESS) {
                         data |= 0x02;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_3)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_3)) == GLFW_PRESS) {
                         data |= 0x04;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_4)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_4)) == GLFW_PRESS) {
                         data |= 0x08;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_down)) == GLFW_PRESS)
-                        data |= 0x10;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_up)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_down)) == GLFW_PRESS) {
+                        data |= 0x1;
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_up)) == GLFW_PRESS) {
                         data |= 0x20;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_right)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_right)) == GLFW_PRESS) {
                         data |= 0x40;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_left)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_left)) == GLFW_PRESS) {
                         data |= 0x80;
+                    }
                     break;
-                case stv_io_port_b:
+                }
+                case stv_io_port_b: {
                     auto p2 = m.smpc()->getStvPeripheralMapping().player_2;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_1)) == GLFW_PRESS)
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_1)) == GLFW_PRESS) {
                         data |= 0x01;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_2)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_2)) == GLFW_PRESS) {
                         data |= 0x02;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_3)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_3)) == GLFW_PRESS) {
                         data |= 0x04;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_4)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_4)) == GLFW_PRESS) {
                         data |= 0x08;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_down)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_down)) == GLFW_PRESS) {
                         data |= 0x10;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_up)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_up)) == GLFW_PRESS) {
                         data |= 0x20;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_right)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_right)) == GLFW_PRESS) {
                         data |= 0x40;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_left)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_left)) == GLFW_PRESS) {
                         data |= 0x80;
+                    }
                     break;
-                case stv_io_port_c:
+                }
+                case stv_io_port_c: {
                     auto board = m.smpc()->getStvPeripheralMapping().board_controls;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_coin_switch)) == GLFW_PRESS)
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_coin_switch)) == GLFW_PRESS) {
                         data |= 0x01;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_coin_switch)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_coin_switch)) == GLFW_PRESS) {
                         data |= 0x02;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.test_switch)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.test_switch)) == GLFW_PRESS) {
                         data |= 0x04;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.service_switch)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.service_switch)) == GLFW_PRESS) {
                         data |= 0x08;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_start)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_start)) == GLFW_PRESS) {
                         data |= 0x10;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_start)) == GLFW_PRESS)
+                    }
+                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_start)) == GLFW_PRESS) {
                         data |= 0x20;
+                    }
                     break;
-                case stv_io_port_d:
+                }
+                case stv_io_port_d: {
                     data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
                     data |= 0x3;
                     break;
+                }
                 default: data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
             }
             data = ~data;

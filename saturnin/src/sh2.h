@@ -612,7 +612,7 @@ class Sh2 {
     friend void addi(Sh2& s);
     friend void addc(Sh2& s);
     friend void addv(Sh2& s);
-    friend void and (Sh2 & s);
+    friend void and(Sh2 & s);
     friend void andi(Sh2& s);
     friend void andm(Sh2& s);
     friend void bf(Sh2& s);
