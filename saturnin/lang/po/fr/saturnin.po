@@ -19,11 +19,11 @@ msgstr ""
 
 #: ..\src\cdrom\spti.cpp:73
 msgid "Not selected"
-msgstr ""
+msgstr "Aucune sélection"
 
 #: ..\src\cdrom\spti.cpp:139
 msgid "Drive isn't accessible"
-msgstr ""
+msgstr "Lecteur inaccessible"
 
 #: ..\src\config.cpp:130 config.cpp:71 config.cpp:130
 msgid "Could not read file {0} : {1}"
@@ -40,24 +40,23 @@ msgstr "Paramètre '{0}' non trouvé !"
 
 #: ..\src\config.cpp:244 config.cpp:244
 msgid "Undefined default value '{}'!"
-msgstr ""
+msgstr "Valeur par défaut '{}' non définie !"
 
 #: ..\src\config.h:312 ..\src\config.h:341 config.h:312 config.h:341
-#, fuzzy
 msgid "Setting '{0}' using the wrong type !"
-msgstr "Paramètre '{0}' non trouvé !"
+msgstr "Paramètre '{0}' n'utilise pas le bon type !"
 
 #: ..\src\emulator_context.cpp:157
 msgid "Emulation main thread started"
-msgstr ""
+msgstr "Fil d'émulation principal démarré"
 
 #: ..\src\emulator_context.cpp:164
 msgid "Emulation main thread finished"
-msgstr ""
+msgstr "Fil d'émulation principal terminé"
 
 #: ..\src\emulator_context.cpp:170 ..\src\main.cpp:48 main.cpp:48
 msgid "Uncaught exception !"
-msgstr ""
+msgstr "Exception non captée !"
 
 #: ..\src\log.h:186 log.h:183 log.h:186
 msgid "Log '{0}' is not defined !"
@@ -65,7 +64,7 @@ msgstr "Log '{0}' non défini !"
 
 #: ..\src\main.cpp:34 main.cpp:34
 msgid "Could not initialize the program ..."
-msgstr ""
+msgstr "Impossible d'initialiser le programme ..."
 
 #: ..\src\memory.cpp:105 memory.cpp:103 memory.cpp:105
 msgid "Unknown rom type while loading {0}.zip"
@@ -85,15 +84,15 @@ msgstr "Mode matériel inconnu"
 
 #: ..\src\memory.cpp:445 memory.cpp:445
 msgid "ST-V offset start: {}"
-msgstr ""
+msgstr "Début du décalage ST-V"
 
 #: ..\src\memory.h:544
 msgid "Write ({}) to unmapped area {:#0x} : {:#x}"
-msgstr ""
+msgstr "Ecriture ({}) dans une zone inconnue {:#0x} : {:#x}"
 
 #: ..\src\memory.h:564
 msgid "Read ({}) from unmapped area {:#0x}"
-msgstr ""
+msgstr "Lecture ({}) depuis une zone inconnue {:#0x}"
 
 #: ..\src\memory.h:603
 msgid "SMPC read ({}) access {:#0x}"
