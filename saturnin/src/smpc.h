@@ -188,9 +188,9 @@ enum class PeripheralKey : u16 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PeripheralLayout {
-    empty,   ///< Empty layout, nothing is mapped
-    default, ///< Default layout
-    current  ///< Currently mapped layout
+    empty_layout,   ///< Empty layout, nothing is mapped
+    default_layout, ///< Default layout 
+    current_layout  ///< Currently mapped layout
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

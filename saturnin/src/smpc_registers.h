@@ -336,6 +336,7 @@ class DataDirectionRegister : public Register {
 public:
     using Register::Register;
     inline static const BitRange<u8> all_bits{ 0, 6 };         ///< Defines the range of all the bits of the register.
+    //NOLINTNEXTLINE
     inline static const u32 accessMask() { return 0b1111111; } ///< Returns access mask;
 };
 
@@ -352,6 +353,7 @@ class PortDataRegister : public Register {
 public:
     using Register::Register;
     inline static const BitRange<u8> all_bits{ 0, 6 };         ///< Defines the range of all the bits of the register.
+    //NOLINTNEXTLINE
     inline static const u32 accessMask() { return 0b1111111; } ///< Returns access mask;
 };
 

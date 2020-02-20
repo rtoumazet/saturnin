@@ -153,11 +153,11 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
     add(full_keys[AccessKeys::cfg_cdrom_drive],              std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_cdrom_drive]));
     add(full_keys[AccessKeys::cfg_cdrom_access_method],      std::any_cast<const std::string&>(default_keys[AccessKeys::cfg_cdrom_access_method]));
     add(full_keys[AccessKeys::cfg_sound_disabled],           std::any_cast<const bool>(default_keys[AccessKeys::cfg_sound_disabled]));
-    add(full_keys[AccessKeys::cfg_controls_saturn_player_1], SaturnDigitalPad().toConfig(PeripheralLayout::default));
-    add(full_keys[AccessKeys::cfg_controls_saturn_player_2], SaturnDigitalPad().toConfig(PeripheralLayout::empty));
-    add(full_keys[AccessKeys::cfg_controls_stv_board],       StvBoardControls().toConfig(PeripheralLayout::default));
-    add(full_keys[AccessKeys::cfg_controls_stv_player_1],    StvPlayerControls().toConfig(PeripheralLayout::default));
-    add(full_keys[AccessKeys::cfg_controls_stv_player_2],    StvPlayerControls().toConfig(PeripheralLayout::empty));
+    add(full_keys[AccessKeys::cfg_controls_saturn_player_1], SaturnDigitalPad().toConfig(PeripheralLayout::default_layout));
+    add(full_keys[AccessKeys::cfg_controls_saturn_player_2], SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout));
+    add(full_keys[AccessKeys::cfg_controls_stv_board],       StvBoardControls().toConfig(PeripheralLayout::default_layout));
+    add(full_keys[AccessKeys::cfg_controls_stv_player_1],    StvPlayerControls().toConfig(PeripheralLayout::default_layout));
+    add(full_keys[AccessKeys::cfg_controls_stv_player_2],    StvPlayerControls().toConfig(PeripheralLayout::empty_layout));
     // clang-format on
 }
 
@@ -218,19 +218,19 @@ void Config::createDefault(const AccessKeys& value) {
         case AccessKeys::cfg_rendering_legacy_opengl:
         case AccessKeys::cfg_sound_disabled: add(full_keys[value], std::any_cast<const bool>(default_keys[value])); break;
         case AccessKeys::cfg_controls_saturn_player_1:
-            add(full_keys[value], SaturnDigitalPad().toConfig(PeripheralLayout::default));
+            add(full_keys[value], SaturnDigitalPad().toConfig(PeripheralLayout::default_layout));
             break;
         case AccessKeys::cfg_controls_saturn_player_2:
-            add(full_keys[value], SaturnDigitalPad().toConfig(PeripheralLayout::empty));
+            add(full_keys[value], SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout));
             break;
         case AccessKeys::cfg_controls_stv_board:
-            add(full_keys[value], StvBoardControls().toConfig(PeripheralLayout::default));
+            add(full_keys[value], StvBoardControls().toConfig(PeripheralLayout::default_layout));
             break;
         case AccessKeys::cfg_controls_stv_player_1:
-            add(full_keys[value], StvPlayerControls().toConfig(PeripheralLayout::default));
+            add(full_keys[value], StvPlayerControls().toConfig(PeripheralLayout::default_layout));
             break;
         case AccessKeys::cfg_controls_stv_player_2:
-            add(full_keys[value], StvPlayerControls().toConfig(PeripheralLayout::empty));
+            add(full_keys[value], StvPlayerControls().toConfig(PeripheralLayout::empty_layout));
             break;
         default: {
             Log::error("config", tr("Undefined default value '{}'!"), full_keys[value]);

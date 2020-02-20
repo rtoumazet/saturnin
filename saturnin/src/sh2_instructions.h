@@ -62,7 +62,7 @@ inline void add(Sh2& s);
 inline void addi(Sh2& s);
 inline void addc(Sh2& s);
 inline void addv(Sh2& s);
-inline void and (Sh2 & s);
+inline void and_op(Sh2 & s);
 inline void andi(Sh2& s);
 inline void andm(Sh2& s);
 inline void bf(Sh2& s);
@@ -152,8 +152,8 @@ inline void mulu(Sh2& s);
 inline void neg(Sh2& s);
 inline void negc(Sh2& s);
 inline void nop(Sh2& s);
-inline void not(Sh2& s);
-inline void or(Sh2& s);
+inline void not_op(Sh2& s);
+inline void or_op(Sh2& s);
 inline void ori(Sh2& s);
 inline void orm(Sh2& s);
 inline void rotcl(Sh2& s);
@@ -199,7 +199,7 @@ inline void trapa(Sh2& s);
 inline void tst(Sh2& s);
 inline void tsti(Sh2& s);
 inline void tstm(Sh2& s);
-inline void xor(Sh2& s);
+inline void xor_op(Sh2& s);
 inline void xori(Sh2& s);
 inline void xorm(Sh2& s);
 inline void xtrct(Sh2& s);
@@ -234,7 +234,7 @@ static std::array<Sh2Instruction, instructions_number> const opcodes_table
     { 0xF000, 0x7000, true,  &addi},
     { 0xF00F, 0x300E, true,  &addc},
     { 0xF00F, 0x300F, true,  &addv},
-    { 0xF00F, 0x2009, true,  &and},
+    { 0xF00F, 0x2009, true,  &and_op},
     { 0xFF00, 0xC900, true,  &andi},
     { 0xFF00, 0xCD00, false, &andm}, // R0GBR
     { 0xFF00, 0x8B00, false, &bf},
@@ -325,8 +325,8 @@ static std::array<Sh2Instruction, instructions_number> const opcodes_table
     { 0xF00F, 0x200E, true,  &mulu},
     { 0xF00F, 0x600B, true,  &neg},
     { 0xF00F, 0x600A, true,  &negc},
-    { 0xF00F, 0x6007, true,  &not},
-    { 0xF00F, 0x200B, true,  &or},
+    { 0xF00F, 0x6007, true,  &not_op},
+    { 0xF00F, 0x200B, true,  &or_op},
     { 0xFF00, 0xCB00, true,  &ori},
     { 0xFF00, 0xCF00, false, &orm}, // R0GBR
     { 0xF0FF, 0x4024, true,  &rotcl},
@@ -367,7 +367,7 @@ static std::array<Sh2Instruction, instructions_number> const opcodes_table
     { 0xF00F, 0x2008, true,  &tst},
     { 0xFF00, 0xC800, true,  &tsti},
     { 0xFF00, 0xCC00, true,  &tstm},
-    { 0xF00F, 0x200A, true,  &xor},
+    { 0xF00F, 0x200A, true,  &xor_op},
     { 0xFF00, 0xCA00, true,  &xori},
     { 0xFF00, 0xCE00, false, &orm}, // R0GBR
     { 0xF00F, 0x200D, true,  &xtrct}

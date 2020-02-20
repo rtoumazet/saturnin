@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Saturnin\n"
 "Report-Msgid-Bugs-To: saturnin@runik.info\n"
-"POT-Creation-Date: 2020-02-03 22:49+0100\n"
+"POT-Creation-Date: 2020-02-04 13:44+0100\n"
 "PO-Revision-Date: 2018-08-24 11:41+0200\n"
 "Last-Translator: <EMAIL@ADDRESS>\n"
 "Language-Team: French\n"
@@ -17,63 +17,447 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: config.cpp:71 config.cpp:130
+#: ..\src\cdrom\spti.cpp:73
+msgid "Not selected"
+msgstr "Aucune sélection"
+
+#: ..\src\cdrom\spti.cpp:139
+msgid "Drive isn't accessible"
+msgstr "Lecteur inaccessible"
+
+#: ..\src\config.cpp:130 config.cpp:71 config.cpp:130
 msgid "Could not read file {0} : {1}"
 msgstr "Impossible de lire le fichier {0} : {1}"
 
-#: config.cpp:80 config.cpp:140
+#: ..\src\config.cpp:140 config.cpp:80 config.cpp:140
 msgid "Creating configuration file."
 msgstr "Création du fichier de configuration."
 
+#: ..\src\config.cpp:200 ..\src\config.h:306 ..\src\config.h:335
 #: config.cpp:122 config.cpp:200 config.h:306 config.h:335
 msgid "Setting '{0}' not found !"
 msgstr "Paramètre '{0}' non trouvé !"
+
+#: ..\src\config.cpp:244 config.cpp:244
+msgid "Undefined default value '{}'!"
+msgstr "Valeur par défaut '{}' non définie !"
+
+#: ..\src\config.h:312 ..\src\config.h:341 config.h:312 config.h:341
+msgid "Setting '{0}' using the wrong type !"
+msgstr "Paramètre '{0}' n'utilise pas le bon type !"
+
+#: ..\src\emulator_context.cpp:157
+msgid "Emulation main thread started"
+msgstr "Fil d'émulation principal démarré"
+
+#: ..\src\emulator_context.cpp:164
+msgid "Emulation main thread finished"
+msgstr "Fil d'émulation principal terminé"
+
+#: ..\src\emulator_context.cpp:170 ..\src\main.cpp:48 main.cpp:48
+msgid "Uncaught exception !"
+msgstr "Exception non captée !"
+
+#: ..\src\log.h:186 log.h:183 log.h:186
+msgid "Log '{0}' is not defined !"
+msgstr "Log '{0}' non défini !"
+
+#: ..\src\main.cpp:34 main.cpp:34
+msgid "Could not initialize the program ..."
+msgstr "Impossible d'initialiser le programme ..."
+
+#: ..\src\memory.cpp:105 memory.cpp:103 memory.cpp:105
+msgid "Unknown rom type while loading {0}.zip"
+msgstr "Type de ROM inconnu lors du chargement du fichier {0}.zip"
+
+#: ..\src\memory.cpp:113 memory.cpp:111 memory.cpp:113
+msgid "File '{0}' not found in zip file !"
+msgstr "Fichier '{0}' non trouvé dans le fichier zip !"
+
+#: ..\src\memory.cpp:120 memory.cpp:118 memory.cpp:120
+msgid "Zip file '{0}' not found !"
+msgstr "Fichier zip '{0}' non trouvé !"
+
+#: ..\src\memory.cpp:133 memory.cpp:131 memory.cpp:133
+msgid "Unknown hardware mode"
+msgstr "Mode matériel inconnu"
+
+#: ..\src\memory.cpp:445 memory.cpp:445
+msgid "ST-V offset start: {}"
+msgstr "Début du décalage ST-V: {}"
+
+#: ..\src\memory.h:544
+msgid "Write ({}) to unmapped area {:#0x} : {:#x}"
+msgstr "Ecriture ({}) dans une zone inconnue {:#0x} : {:#x}"
+
+#: ..\src\memory.h:564
+msgid "Read ({}) from unmapped area {:#0x}"
+msgstr "Lecture ({}) depuis une zone inconnue {:#0x}"
+
+#: ..\src\memory.h:603
+msgid "SMPC read ({}) access {:#0x}"
+msgstr "SMPC : accès en lecture ({}) {:#0x}"
+
+#: ..\src\memory.h:636
+msgid "SMPC write ({}) access {:#0x} : {:#x}"
+msgstr "SMPC : accès en écriture ({}) {:#0x} : {:#x}"
+
+#: ..\src\memory.h:934
+msgid "Read ({}) needs to be handled through CD-ROM {:#0x}"
+msgstr "Lecture ({}) doit être gérée par le CD-ROM {:#0x}"
+
+#: ..\src\memory.h:955
+msgid "Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"
+msgstr "Ecriture ({}) doit être gérée par le CD-ROM {:#0x}"
+
+#: ..\src\memory.h:975
+msgid "Read ({}) needs to be handled through SCSP {:#0x}"
+msgstr "Lecture ({}) doit être gérée par le SCSP {:#0x}"
+
+#: ..\src\memory.h:996
+msgid "Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"
+msgstr "Ecriture ({}) doit être gérée par le SCSP {:#0x}"
+
+#: ..\src\memory.h:1403
+msgid "{}bits write to the master SH2 FRT memory area !"
+msgstr "Ecriture {}bits dans la zone mémoire FRT du SH2 maitre !"
+
+#: ..\src\memory.h:1434
+msgid "{}bits write to the slave SH2 FRT memory area !"
+msgstr "Ecriture {}bits dans la zone mémoire FRT du SH2 esclave !"
+
+#: ..\src\smpc.cpp:179
+msgid "Incorrect Saturn pad data"
+msgstr "Données du pad Saturn incorrectes"
+
+#: ..\src\smpc.cpp:224
+msgid "Incorrect ST-V player control data"
+msgstr "Données de contrôle du joueur ST-V incorrectes"
+
+#: ..\src\smpc.cpp:262
+msgid "Incorrect ST-V board control data"
+msgstr "Données de contrôle de la plaque ST-V incorrectes"
+
+#: ..\src\smpc.cpp:304 ..\src\smpc.cpp:427
+msgid "Could not set system clock !"
+msgstr "Impossible d'initialiser l'horloge système !"
+
+#: ..\src\smpc.cpp:360
+msgid "-=Master SH2 ON=- command executed"
+msgstr "Exécution commande -= Démarrage SH2 maitre =-"
+
+#: ..\src\smpc.cpp:367
+msgid "-=Slave SH2 ON=- command executed"
+msgstr "Exécution commande -= Démarrage SH2 esclave =-"
+
+#: ..\src\smpc.cpp:373
+msgid "-=Slave SH2 OFF=- command executed"
+msgstr "Exécution commande -= Arrêt SH2 esclave"
+
+#: ..\src\smpc.cpp:381
+msgid "-=Sound ON=- command executed"
+msgstr "Exécution commande -= Démarrage son =-"
+
+#: ..\src\smpc.cpp:388
+msgid "-=Sound OFF=- command executed"
+msgstr "Exécution commande -= Arrêt son =-"
+
+#: ..\src\smpc.cpp:394
+msgid "-=CD ON=- command executed"
+msgstr "Exécution commande -= Démarrage CD =-"
+
+#: ..\src\smpc.cpp:400
+msgid "-=CD OFF=- command executed"
+msgstr "Exécution commande -= Arrêt CD =-"
+
+#: ..\src\smpc.cpp:408
+msgid "-=Reset Entire System=- command executed"
+msgstr "Exécution commande -= Réinitialisation système complet =-"
+
+#: ..\src\smpc.cpp:435
+msgid "-=Clock Change 320 Mode=- command executed"
+msgstr "Exécution commande -= Changement horloge en mode 320 =-"
+
+#: ..\src\smpc.cpp:439
+msgid "-=Clock Change 352 Mode=- command executed"
+msgstr "Exécution commande -= Changement horloge en mode 352 =-"
+
+#: ..\src\smpc.cpp:446
+msgid "-=NMI Request=- command executed"
+msgstr "Exécution commande -= Requête NMI =-"
+
+#: ..\src\smpc.cpp:452
+msgid "-=Reset Enable=- command executed"
+msgstr "Exécution commande -= Activation reset =-"
+
+#: ..\src\smpc.cpp:458
+msgid "-=Reset Disable=- command executed"
+msgstr "Exécution commande -= Désactivation reset =-"
+
+#: ..\src\smpc.cpp:469
+msgid "-=SMPC Memory Setting=- command executed"
+msgstr "Exécution commande -= Mise à jour mémoire SMPC =-"
+
+#: ..\src\smpc.cpp:474
+msgid "-=Time Setting=- command executed"
+msgstr "Exécution commande -= Mise à jour heure =-"
+
+#: ..\src\smpc.cpp:479
+msgid "Unknown SMPC command '{}'"
+msgstr "Commande SMPC inconnue '{}'"
+
+#: ..\src\smpc.cpp:488
+msgid "INTBACK break request"
+msgstr "INTBACK : requête d'interruption"
+
+#: ..\src\smpc.cpp:495
+msgid "INTBACK continue request"
+msgstr "INTBACK : requête de continuation"
+
+#: ..\src\smpc.cpp:500
+msgid "INTBACK started"
+msgstr "INTBACK : démarrage"
+
+#: ..\src\smpc.cpp:515
+msgid "INTBACK returning status data"
+msgstr "INTBACK : retour des données de statut"
+
+#: ..\src\smpc.cpp:564 ..\src\smpc.cpp:605
+msgid "Interrupt request"
+msgstr "Requête d'interruption"
+
+#: ..\src\smpc.cpp:569
+msgid "INTBACK returning peripheral data"
+msgstr "INTBACK : retour des données de périphérique"
+
+#: ..\src\smpc.cpp:684
+msgid "-=Sound OFF=-"
+msgstr "-= Démarrage son =-"
+
+#: ..\src\smpc.cpp:689
+msgid "-=Sound ON=-"
+msgstr "-= Arrêt son =-"
+
+#: ..\src\video\gui.cpp:156
+msgid "General"
+msgstr "Général"
+
+#: ..\src\video\gui.cpp:158
+msgid "Hardware mode"
+msgstr "Mode matériel"
+
+#: ..\src\video\gui.cpp:167 ..\src\video\gui.cpp:173
+msgid "Unknown hardware mode ..."
+msgstr "Mode matériel inconnu ..."
+
+#: ..\src\video\gui.cpp:177
+msgid "Language"
+msgstr "Langue"
+
+#: ..\src\video\gui.cpp:191
+msgid "Area code"
+msgstr "Code région"
+
+#: ..\src\video\gui.cpp:206
+msgid "Rendering"
+msgstr "Affichage"
+
+#: ..\src\video\gui.cpp:208
+msgid "TV standard"
+msgstr "Standard TV"
+
+#: ..\src\video\gui.cpp:217 ..\src\video\gui.cpp:223
+msgid "Unknown TV standard ..."
+msgstr "Standard TV inconnu ..."
+
+#: ..\src\video\gui.cpp:227
+msgid "Legacy OpenGL"
+msgstr "OpenGL ancien"
+
+#: ..\src\video\gui.cpp:239
+msgid "Paths"
+msgstr "Chemins"
+
+#: ..\src\video\gui.cpp:242
+msgid "Saturn bios"
+msgstr "Bios Saturn"
+
+#: ..\src\video\gui.cpp:251
+msgid "ST-V bios"
+msgstr "Bios ST-V"
+
+#: ..\src\video\gui.cpp:259
+msgid "ST-V roms"
+msgstr "Roms ST-V"
+
+#: ..\src\video\gui.cpp:270
+msgid "CD-Rom"
+msgstr "CD-Rom"
+
+#: ..\src\video\gui.cpp:272
+msgid "Drive"
+msgstr "Lecteur"
+
+#: ..\src\video\gui.cpp:293
+msgid "Access method"
+msgstr "Méthode d'accès"
+
+#: ..\src\video\gui.cpp:304 ..\src\video\gui.cpp:314
+msgid "Unknown drive access method ..."
+msgstr "Méthode d'accès au lecteur inconnue ..."
+
+#: ..\src\video\gui.cpp:322
+msgid "Sound"
+msgstr "Son"
+
+#: ..\src\video\gui.cpp:324
+msgid "Sound disabled"
+msgstr "Son désactivé"
+
+#: ..\src\video\gui.cpp:334
+msgid "Peripherals"
+msgstr "Périphériques"
+
+#: ..\src\video\gui.cpp:352 ..\src\video\gui.cpp:527
+msgid "Player 1"
+msgstr "Joueur 1"
+
+#: ..\src\video\gui.cpp:354 ..\src\video\gui.cpp:421 ..\src\video\gui.cpp:529
+#: ..\src\video\gui.cpp:578
+msgid "Left"
+msgstr "Gauche"
+
+#: ..\src\video\gui.cpp:358 ..\src\video\gui.cpp:425 ..\src\video\gui.cpp:533
+#: ..\src\video\gui.cpp:582
+msgid "Right"
+msgstr "Droite"
+
+#: ..\src\video\gui.cpp:362 ..\src\video\gui.cpp:429 ..\src\video\gui.cpp:537
+#: ..\src\video\gui.cpp:586
+msgid "Up"
+msgstr "Haut"
+
+#: ..\src\video\gui.cpp:366 ..\src\video\gui.cpp:433 ..\src\video\gui.cpp:541
+#: ..\src\video\gui.cpp:590
+msgid "Down"
+msgstr "Bas"
+
+#: ..\src\video\gui.cpp:370 ..\src\video\gui.cpp:437
+msgid "Left shoulder"
+msgstr "Epaule gauche"
+
+#: ..\src\video\gui.cpp:374 ..\src\video\gui.cpp:441
+msgid "Right shoulder"
+msgstr "Epaule droite"
+
+#: ..\src\video\gui.cpp:378 ..\src\video\gui.cpp:445
+msgid "Button A"
+msgstr "Bouton A"
+
+#: ..\src\video\gui.cpp:382 ..\src\video\gui.cpp:449
+msgid "Button B"
+msgstr "Bouton B"
+
+#: ..\src\video\gui.cpp:386 ..\src\video\gui.cpp:453
+msgid "Button C"
+msgstr "Bouton C"
+
+#: ..\src\video\gui.cpp:390 ..\src\video\gui.cpp:457
+msgid "Button X"
+msgstr "Bouton X"
+
+#: ..\src\video\gui.cpp:394 ..\src\video\gui.cpp:461
+msgid "Button Y"
+msgstr "Bouton Y"
+
+#: ..\src\video\gui.cpp:398 ..\src\video\gui.cpp:465
+msgid "Button Z"
+msgstr "Bouton Z"
+
+#: ..\src\video\gui.cpp:402 ..\src\video\gui.cpp:469
+msgid "Button Start"
+msgstr "Bouton Start"
+
+#: ..\src\video\gui.cpp:419 ..\src\video\gui.cpp:576
+msgid "Player 2"
+msgstr "Joueur 2"
+
+#: ..\src\video\gui.cpp:487
+msgid "Board"
+msgstr "Plaque"
+
+#: ..\src\video\gui.cpp:489
+msgid "Service switch"
+msgstr "Interrupteur service"
+
+#: ..\src\video\gui.cpp:493
+msgid "Test switch"
+msgstr "Interrupteur test"
+
+#: ..\src\video\gui.cpp:497
+msgid "Player 1 coin switch"
+msgstr "Monnayeur joueur 1"
+
+#: ..\src\video\gui.cpp:501
+msgid "Player 2 coin switch"
+msgstr "Monnayeur joueur 2"
+
+#: ..\src\video\gui.cpp:505
+msgid "Player 1 start"
+msgstr ""
+
+#: ..\src\video\gui.cpp:509
+msgid "Player 2 start"
+msgstr ""
+
+#: ..\src\video\gui.cpp:546 ..\src\video\gui.cpp:595
+msgid "Button 1"
+msgstr "Bouton 1"
+
+#: ..\src\video\gui.cpp:550 ..\src\video\gui.cpp:599
+msgid "Button 2"
+msgstr "Bouton 2"
+
+#: ..\src\video\gui.cpp:554 ..\src\video\gui.cpp:603
+msgid "Button 3"
+msgstr "Bouton 3"
+
+#: ..\src\video\gui.cpp:558 ..\src\video\gui.cpp:607
+msgid "Button 4"
+msgstr ""
+
+#: ..\src\video\gui.cpp:630
+msgid "Configuration saved."
+msgstr "Configuration enregistrée."
+
+#: ..\src\video\gui.cpp:679
+msgid "File"
+msgstr "Fichier"
+
+#: ..\src\video\gui.cpp:680
+msgid "Load ST-V rom"
+msgstr "Charger rom ST-V"
+
+#: ..\src\video\gui.cpp:681
+msgid "Load binary file"
+msgstr "Charger fichier binaire"
+
+#: ..\src\video\gui.cpp:685
+msgid "Options"
+msgstr "Options"
+
+#: ..\src\video\opengl_legacy.cpp:140
+msgid "Saturnin {0} - Legacy rendering"
+msgstr "Saturnin {0} - Rendu ancien"
+
+#: ..\src\video\opengl_modern.cpp:259
+msgid "Saturnin {0} - Modern rendering"
+msgstr "Saturnin {0} - Rendu moderne"
 
 #: config.cpp:124 memory.cpp:132
 msgid "Exiting ..."
 msgstr "Sortie ..."
 
-#: config.cpp:244
-msgid "Undefined default value '{}'!"
-msgstr ""
-
-#: config.h:312 config.h:341
-#, fuzzy
-msgid "Setting '{0}' using the wrong type !"
-msgstr "Paramètre '{0}' non trouvé !"
-
-#: log.h:183 log.h:186
-msgid "Log '{0}' is not defined !"
-msgstr "Log '{0}' non défini !"
-
-#: main.cpp:34
-msgid "Could not initialize the program ..."
-msgstr ""
-
 #: main.cpp:41
 msgid "Hello world."
 msgstr "Bonjour le monde."
-
-#: main.cpp:48
-msgid "Uncaught exception !"
-msgstr ""
-
-#: memory.cpp:103 memory.cpp:105
-msgid "Unknown rom type while loading {0}.zip"
-msgstr "Type de ROM inconnu lors du chargement du fichier {0}.zip"
-
-#: memory.cpp:111 memory.cpp:113
-msgid "File '{0}' not found in zip file !"
-msgstr "Fichier '{0}' non trouvé dans le fichier zip !"
-
-#: memory.cpp:118 memory.cpp:120
-msgid "Zip file '{0}' not found !"
-msgstr "Fichier zip '{0}' non trouvé !"
-
-#: memory.cpp:131 memory.cpp:133
-msgid "Unknown hardware mode"
-msgstr "Mode matériel inconnu"
-
-#: memory.cpp:445
-msgid "ST-V offset start: {}"
-msgstr ""

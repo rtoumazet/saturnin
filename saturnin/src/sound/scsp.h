@@ -51,7 +51,7 @@ class Scsp {
     //@}
 
     void reset() { Log::error("scsp", "reset() not implemented"); };
-    void setSound(bool) { Log::error("scsp", "setSound() not implemented"); };
+    void setSound(bool isSet) { Log::error("scsp", "setSound() not implemented"); };
 };
 
 } // namespace saturnin::sound

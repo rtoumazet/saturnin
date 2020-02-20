@@ -408,7 +408,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::peripheralKeyCombo(keys, pad.button_start, "button_start");
 
                     state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1,
-                                               pad.toConfig(PeripheralLayout::current));
+                                               pad.toConfig(PeripheralLayout::current_layout));
 
                     ImGui::EndChild();
                 }
@@ -478,7 +478,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_start, "button_start");
 
                     state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_2,
-                                               pad_p2.toConfig(PeripheralLayout::current));
+                                               pad_p2.toConfig(PeripheralLayout::current_layout));
 
                     ImGui::EndChild();
                 }
@@ -519,7 +519,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::peripheralKeyCombo(keys, board.p2_start, "p2_start");
 
                     state.config()->writeValue(core::AccessKeys::cfg_controls_stv_board,
-                                               board.toConfig(PeripheralLayout::current));
+                                               board.toConfig(PeripheralLayout::current_layout));
 
                     ImGui::EndChild();
                 }
@@ -569,7 +569,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
 
                     state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_1,
-                                               controls.toConfig(PeripheralLayout::current));
+                                               controls.toConfig(PeripheralLayout::current_layout));
 
                     ImGui::EndChild();
                 }
@@ -619,7 +619,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
 
                     state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_2,
-                                               controls.toConfig(PeripheralLayout::current));
+                                               controls.toConfig(PeripheralLayout::current_layout));
 
                     ImGui::EndChild();
                 }

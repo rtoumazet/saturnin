@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Saturnin\n"
 "Report-Msgid-Bugs-To: saturnin@runik.info\n"
-"POT-Creation-Date: 2020-02-04 17:01+0100\n"
+"POT-Creation-Date: 2020-02-17 16:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,441 +17,466 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ..\src\cdrom\spti.cpp:73
+#: ..\src\cdrom\spti.cpp:70 ..\src\cdrom\spti.cpp:73
 msgid "Not selected"
 msgstr ""
 
-#: ..\src\cdrom\spti.cpp:139
+#: ..\src\cdrom\spti.cpp:127 ..\src\cdrom\spti.cpp:139
 msgid "Drive isn't accessible"
 msgstr ""
 
-#: ..\src\config.cpp:130 config.cpp:71 config.cpp:130
+#: ..\src\config.cpp:126 ..\src\config.cpp:130 config.cpp:71 config.cpp:130
 msgid "Could not read file {0} : {1}"
 msgstr ""
 
-#: ..\src\config.cpp:140 config.cpp:80 config.cpp:140
+#: ..\src\config.cpp:136 ..\src\config.cpp:140 config.cpp:80 config.cpp:140
 msgid "Creating configuration file."
 msgstr ""
 
-#: ..\src\config.cpp:200 ..\src\config.h:306 ..\src\config.h:335
-#: config.cpp:122 config.cpp:200 config.h:306 config.h:335
+#: ..\src\config.cpp:198 ..\src\config.cpp:200 ..\src\config.h:306
+#: ..\src\config.h:335 ..\src\config.h:337 ..\src\config.h:363 config.cpp:122
+#: config.cpp:200 config.h:306 config.h:335
 msgid "Setting '{0}' not found !"
 msgstr ""
 
-#: ..\src\config.cpp:244 config.cpp:244
+#: ..\src\config.cpp:236 ..\src\config.cpp:244 config.cpp:244
 msgid "Undefined default value '{}'!"
 msgstr ""
 
-#: ..\src\config.h:312 ..\src\config.h:341 config.h:312 config.h:341
+#: ..\src\config.h:312 ..\src\config.h:341 ..\src\config.h:367 config.h:312
+#: config.h:341
 msgid "Setting '{0}' using the wrong type !"
 msgstr ""
 
-#: ..\src\emulator_context.cpp:157
+#: ..\src\emulator_context.cpp:157 ..\src\emulator_context.cpp:159
 msgid "Emulation main thread started"
 msgstr ""
 
-#: ..\src\emulator_context.cpp:164
+#: ..\src\emulator_context.cpp:164 ..\src\emulator_context.cpp:166
 msgid "Emulation main thread finished"
 msgstr ""
 
-#: ..\src\emulator_context.cpp:170 ..\src\main.cpp:48 main.cpp:48
+#: ..\src\emulator_context.cpp:170 ..\src\main.cpp:44 ..\src\main.cpp:48
+#: main.cpp:48
 msgid "Uncaught exception !"
 msgstr ""
 
-#: ..\src\log.h:186 log.h:183 log.h:186
+#: ..\src\log.h:186 ..\src\log.h:189 log.h:183 log.h:186
 msgid "Log '{0}' is not defined !"
 msgstr ""
 
-#: ..\src\main.cpp:34 main.cpp:34
+#: ..\src\main.cpp:33 ..\src\main.cpp:34 main.cpp:34
 msgid "Could not initialize the program ..."
 msgstr ""
 
-#: ..\src\memory.cpp:105 memory.cpp:103 memory.cpp:105
+#: ..\src\memory.cpp:104 ..\src\memory.cpp:105 memory.cpp:103 memory.cpp:105
 msgid "Unknown rom type while loading {0}.zip"
 msgstr ""
 
-#: ..\src\memory.cpp:113 memory.cpp:111 memory.cpp:113
+#: ..\src\memory.cpp:111 ..\src\memory.cpp:113 memory.cpp:111 memory.cpp:113
 msgid "File '{0}' not found in zip file !"
 msgstr ""
 
-#: ..\src\memory.cpp:120 memory.cpp:118 memory.cpp:120
+#: ..\src\memory.cpp:117 ..\src\memory.cpp:120 memory.cpp:118 memory.cpp:120
 msgid "Zip file '{0}' not found !"
 msgstr ""
 
-#: ..\src\memory.cpp:133 memory.cpp:131 memory.cpp:133
+#: ..\src\memory.cpp:130 ..\src\memory.cpp:133 memory.cpp:131 memory.cpp:133
 msgid "Unknown hardware mode"
 msgstr ""
 
-#: ..\src\memory.cpp:445 memory.cpp:445
+#: ..\src\memory.cpp:418 ..\src\memory.cpp:445 memory.cpp:445
 msgid "ST-V offset start: {}"
 msgstr ""
 
-#: ..\src\memory.h:544
+#: ..\src\memory.h:544 ..\src\memory.h:556
 msgid "Write ({}) to unmapped area {:#0x} : {:#x}"
 msgstr ""
 
-#: ..\src\memory.h:564
+#: ..\src\memory.h:564 ..\src\memory.h:576
 msgid "Read ({}) from unmapped area {:#0x}"
 msgstr ""
 
-#: ..\src\memory.h:603
+#: ..\src\memory.h:603 ..\src\memory.h:615
 msgid "SMPC read ({}) access {:#0x}"
 msgstr ""
 
-#: ..\src\memory.h:636
+#: ..\src\memory.h:636 ..\src\memory.h:648
 msgid "SMPC write ({}) access {:#0x} : {:#x}"
 msgstr ""
 
-#: ..\src\memory.h:934
+#: ..\src\memory.h:934 ..\src\memory.h:978
 msgid "Read ({}) needs to be handled through CD-ROM {:#0x}"
 msgstr ""
 
-#: ..\src\memory.h:955
+#: ..\src\memory.h:955 ..\src\memory.h:1000
 msgid "Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"
 msgstr ""
 
-#: ..\src\memory.h:975
+#: ..\src\memory.h:975 ..\src\memory.h:1020
 msgid "Read ({}) needs to be handled through SCSP {:#0x}"
 msgstr ""
 
-#: ..\src\memory.h:996
+#: ..\src\memory.h:996 ..\src\memory.h:1042
 msgid "Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"
 msgstr ""
 
-#: ..\src\memory.h:1403
+#: ..\src\memory.h:1403 ..\src\memory.h:1434
 msgid "{}bits write to the master SH2 FRT memory area !"
 msgstr ""
 
-#: ..\src\memory.h:1434
+#: ..\src\memory.h:1434 ..\src\memory.h:1463
 msgid "{}bits write to the slave SH2 FRT memory area !"
 msgstr ""
 
-#: ..\src\smpc.cpp:179
+#: ..\src\smpc.cpp:179 ..\src\smpc.cpp:193
 msgid "Incorrect Saturn pad data"
 msgstr ""
 
-#: ..\src\smpc.cpp:224
+#: ..\src\smpc.cpp:224 ..\src\smpc.cpp:244
 msgid "Incorrect ST-V player control data"
 msgstr ""
 
-#: ..\src\smpc.cpp:262
+#: ..\src\smpc.cpp:262 ..\src\smpc.cpp:284
 msgid "Incorrect ST-V board control data"
 msgstr ""
 
-#: ..\src\smpc.cpp:304 ..\src\smpc.cpp:427
+#: ..\src\smpc.cpp:304 ..\src\smpc.cpp:325 ..\src\smpc.cpp:427
+#: ..\src\smpc.cpp:434
 msgid "Could not set system clock !"
 msgstr ""
 
-#: ..\src\smpc.cpp:360
+#: ..\src\smpc.cpp:360 ..\src\smpc.cpp:368
 msgid "-=Master SH2 ON=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:367
+#: ..\src\smpc.cpp:367 ..\src\smpc.cpp:375
 msgid "-=Slave SH2 ON=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:373
+#: ..\src\smpc.cpp:373 ..\src\smpc.cpp:381
 msgid "-=Slave SH2 OFF=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:381
+#: ..\src\smpc.cpp:381 ..\src\smpc.cpp:389
 msgid "-=Sound ON=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:388
+#: ..\src\smpc.cpp:388 ..\src\smpc.cpp:396
 msgid "-=Sound OFF=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:394
+#: ..\src\smpc.cpp:394 ..\src\smpc.cpp:402
 msgid "-=CD ON=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:400
+#: ..\src\smpc.cpp:400 ..\src\smpc.cpp:408
 msgid "-=CD OFF=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:408
+#: ..\src\smpc.cpp:408 ..\src\smpc.cpp:416
 msgid "-=Reset Entire System=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:435
+#: ..\src\smpc.cpp:435 ..\src\smpc.cpp:441
 msgid "-=Clock Change 320 Mode=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:439
+#: ..\src\smpc.cpp:439 ..\src\smpc.cpp:445
 msgid "-=Clock Change 352 Mode=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:446
+#: ..\src\smpc.cpp:446 ..\src\smpc.cpp:452
 msgid "-=NMI Request=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:452
+#: ..\src\smpc.cpp:452 ..\src\smpc.cpp:458
 msgid "-=Reset Enable=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:458
+#: ..\src\smpc.cpp:458 ..\src\smpc.cpp:464
 msgid "-=Reset Disable=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:469
+#: ..\src\smpc.cpp:469 ..\src\smpc.cpp:475
 msgid "-=SMPC Memory Setting=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:474
+#: ..\src\smpc.cpp:474 ..\src\smpc.cpp:480
 msgid "-=Time Setting=- command executed"
 msgstr ""
 
-#: ..\src\smpc.cpp:479
+#: ..\src\smpc.cpp:479 ..\src\smpc.cpp:484
 msgid "Unknown SMPC command '{}'"
 msgstr ""
 
-#: ..\src\smpc.cpp:488
+#: ..\src\smpc.cpp:488 ..\src\smpc.cpp:491
 msgid "INTBACK break request"
 msgstr ""
 
-#: ..\src\smpc.cpp:495
+#: ..\src\smpc.cpp:495 ..\src\smpc.cpp:498
 msgid "INTBACK continue request"
 msgstr ""
 
-#: ..\src\smpc.cpp:500 ..\src\smpc.cpp:501
+#: ..\src\smpc.cpp:500 ..\src\smpc.cpp:501 ..\src\smpc.cpp:504
 msgid "INTBACK started"
 msgstr ""
 
-#: ..\src\smpc.cpp:515 ..\src\smpc.cpp:521
+#: ..\src\smpc.cpp:515 ..\src\smpc.cpp:521 ..\src\smpc.cpp:525
 msgid "INTBACK returning status data"
 msgstr ""
 
-#: ..\src\smpc.cpp:564 ..\src\smpc.cpp:570 ..\src\smpc.cpp:605
-#: ..\src\smpc.cpp:611
+#: ..\src\smpc.cpp:564 ..\src\smpc.cpp:570 ..\src\smpc.cpp:577
+#: ..\src\smpc.cpp:605 ..\src\smpc.cpp:611 ..\src\smpc.cpp:617
 msgid "Interrupt request"
 msgstr ""
 
-#: ..\src\smpc.cpp:569 ..\src\smpc.cpp:575
+#: ..\src\smpc.cpp:569 ..\src\smpc.cpp:575 ..\src\smpc.cpp:582
 msgid "INTBACK returning peripheral data"
 msgstr ""
 
-#: ..\src\smpc.cpp:684 ..\src\smpc.cpp:690
+#: ..\src\smpc.cpp:684 ..\src\smpc.cpp:690 ..\src\smpc.cpp:697
 msgid "-=Sound OFF=-"
 msgstr ""
 
-#: ..\src\smpc.cpp:689 ..\src\smpc.cpp:695
+#: ..\src\smpc.cpp:689 ..\src\smpc.cpp:695 ..\src\smpc.cpp:702
 msgid "-=Sound ON=-"
 msgstr ""
 
-#: ..\src\video\gui.cpp:156
+#: ..\src\video\gui.cpp:151 ..\src\video\gui.cpp:156
 msgid "General"
 msgstr ""
 
-#: ..\src\video\gui.cpp:158
+#: ..\src\video\gui.cpp:153 ..\src\video\gui.cpp:158
 msgid "Hardware mode"
 msgstr ""
 
-#: ..\src\video\gui.cpp:167 ..\src\video\gui.cpp:173
+#: ..\src\video\gui.cpp:165 ..\src\video\gui.cpp:167 ..\src\video\gui.cpp:173
+#: ..\src\video\gui.cpp:174
 msgid "Unknown hardware mode ..."
 msgstr ""
 
-#: ..\src\video\gui.cpp:177
+#: ..\src\video\gui.cpp:177 ..\src\video\gui.cpp:178
 msgid "Language"
 msgstr ""
 
-#: ..\src\video\gui.cpp:191
+#: ..\src\video\gui.cpp:190 ..\src\video\gui.cpp:191
 msgid "Area code"
 msgstr ""
 
-#: ..\src\video\gui.cpp:206
+#: ..\src\video\gui.cpp:203 ..\src\video\gui.cpp:206
 msgid "Rendering"
 msgstr ""
 
-#: ..\src\video\gui.cpp:208
+#: ..\src\video\gui.cpp:205 ..\src\video\gui.cpp:208
 msgid "TV standard"
 msgstr ""
 
-#: ..\src\video\gui.cpp:217 ..\src\video\gui.cpp:223
+#: ..\src\video\gui.cpp:217 ..\src\video\gui.cpp:223 ..\src\video\gui.cpp:226
 msgid "Unknown TV standard ..."
 msgstr ""
 
-#: ..\src\video\gui.cpp:227
+#: ..\src\video\gui.cpp:227 ..\src\video\gui.cpp:230
 msgid "Legacy OpenGL"
 msgstr ""
 
-#: ..\src\video\gui.cpp:239
+#: ..\src\video\gui.cpp:239 ..\src\video\gui.cpp:243
 msgid "Paths"
 msgstr ""
 
-#: ..\src\video\gui.cpp:242
+#: ..\src\video\gui.cpp:242 ..\src\video\gui.cpp:245
 msgid "Saturn bios"
 msgstr ""
 
-#: ..\src\video\gui.cpp:251
+#: ..\src\video\gui.cpp:251 ..\src\video\gui.cpp:254
 msgid "ST-V bios"
 msgstr ""
 
-#: ..\src\video\gui.cpp:259
+#: ..\src\video\gui.cpp:259 ..\src\video\gui.cpp:262
 msgid "ST-V roms"
 msgstr ""
 
-#: ..\src\video\gui.cpp:270
+#: ..\src\video\gui.cpp:270 ..\src\video\gui.cpp:273
 msgid "CD-Rom"
 msgstr ""
 
-#: ..\src\video\gui.cpp:272
+#: ..\src\video\gui.cpp:272 ..\src\video\gui.cpp:275
 msgid "Drive"
 msgstr ""
 
-#: ..\src\video\gui.cpp:293
+#: ..\src\video\gui.cpp:293 ..\src\video\gui.cpp:297
 msgid "Access method"
 msgstr ""
 
-#: ..\src\video\gui.cpp:304 ..\src\video\gui.cpp:314
+#: ..\src\video\gui.cpp:304 ..\src\video\gui.cpp:308 ..\src\video\gui.cpp:314
+#: ..\src\video\gui.cpp:318
 msgid "Unknown drive access method ..."
 msgstr ""
 
-#: ..\src\video\gui.cpp:322
+#: ..\src\video\gui.cpp:322 ..\src\video\gui.cpp:326
 msgid "Sound"
 msgstr ""
 
-#: ..\src\video\gui.cpp:324
+#: ..\src\video\gui.cpp:324 ..\src\video\gui.cpp:328
 msgid "Sound disabled"
 msgstr ""
 
-#: ..\src\video\gui.cpp:334
+#: ..\src\video\gui.cpp:334 ..\src\video\gui.cpp:338
 msgid "Peripherals"
 msgstr ""
 
-#: ..\src\video\gui.cpp:352 ..\src\video\gui.cpp:527
+#: ..\src\video\gui.cpp:352 ..\src\video\gui.cpp:356 ..\src\video\gui.cpp:527
+#: ..\src\video\gui.cpp:537
 msgid "Player 1"
 msgstr ""
 
-#: ..\src\video\gui.cpp:354 ..\src\video\gui.cpp:421 ..\src\video\gui.cpp:529
-#: ..\src\video\gui.cpp:578
+#: ..\src\video\gui.cpp:354 ..\src\video\gui.cpp:358 ..\src\video\gui.cpp:421
+#: ..\src\video\gui.cpp:428 ..\src\video\gui.cpp:529 ..\src\video\gui.cpp:539
+#: ..\src\video\gui.cpp:578 ..\src\video\gui.cpp:589
 msgid "Left"
 msgstr ""
 
-#: ..\src\video\gui.cpp:358 ..\src\video\gui.cpp:425 ..\src\video\gui.cpp:533
-#: ..\src\video\gui.cpp:582
+#: ..\src\video\gui.cpp:358 ..\src\video\gui.cpp:362 ..\src\video\gui.cpp:425
+#: ..\src\video\gui.cpp:432 ..\src\video\gui.cpp:533 ..\src\video\gui.cpp:543
+#: ..\src\video\gui.cpp:582 ..\src\video\gui.cpp:593
 msgid "Right"
 msgstr ""
 
-#: ..\src\video\gui.cpp:362 ..\src\video\gui.cpp:429 ..\src\video\gui.cpp:537
-#: ..\src\video\gui.cpp:586
+#: ..\src\video\gui.cpp:362 ..\src\video\gui.cpp:366 ..\src\video\gui.cpp:429
+#: ..\src\video\gui.cpp:436 ..\src\video\gui.cpp:537 ..\src\video\gui.cpp:547
+#: ..\src\video\gui.cpp:586 ..\src\video\gui.cpp:597
 msgid "Up"
 msgstr ""
 
-#: ..\src\video\gui.cpp:366 ..\src\video\gui.cpp:433 ..\src\video\gui.cpp:541
-#: ..\src\video\gui.cpp:590
+#: ..\src\video\gui.cpp:366 ..\src\video\gui.cpp:370 ..\src\video\gui.cpp:433
+#: ..\src\video\gui.cpp:440 ..\src\video\gui.cpp:541 ..\src\video\gui.cpp:551
+#: ..\src\video\gui.cpp:590 ..\src\video\gui.cpp:601
 msgid "Down"
 msgstr ""
 
-#: ..\src\video\gui.cpp:370 ..\src\video\gui.cpp:437
+#: ..\src\video\gui.cpp:370 ..\src\video\gui.cpp:374 ..\src\video\gui.cpp:437
+#: ..\src\video\gui.cpp:444
 msgid "Left shoulder"
 msgstr ""
 
-#: ..\src\video\gui.cpp:374 ..\src\video\gui.cpp:441
+#: ..\src\video\gui.cpp:374 ..\src\video\gui.cpp:378 ..\src\video\gui.cpp:441
+#: ..\src\video\gui.cpp:448
 msgid "Right shoulder"
 msgstr ""
 
-#: ..\src\video\gui.cpp:378 ..\src\video\gui.cpp:445
+#: ..\src\video\gui.cpp:378 ..\src\video\gui.cpp:382 ..\src\video\gui.cpp:445
+#: ..\src\video\gui.cpp:452
 msgid "Button A"
 msgstr ""
 
-#: ..\src\video\gui.cpp:382 ..\src\video\gui.cpp:449
+#: ..\src\video\gui.cpp:382 ..\src\video\gui.cpp:386 ..\src\video\gui.cpp:449
+#: ..\src\video\gui.cpp:456
 msgid "Button B"
 msgstr ""
 
-#: ..\src\video\gui.cpp:386 ..\src\video\gui.cpp:453
+#: ..\src\video\gui.cpp:386 ..\src\video\gui.cpp:390 ..\src\video\gui.cpp:453
+#: ..\src\video\gui.cpp:460
 msgid "Button C"
 msgstr ""
 
-#: ..\src\video\gui.cpp:390 ..\src\video\gui.cpp:457
+#: ..\src\video\gui.cpp:390 ..\src\video\gui.cpp:394 ..\src\video\gui.cpp:457
+#: ..\src\video\gui.cpp:464
 msgid "Button X"
 msgstr ""
 
-#: ..\src\video\gui.cpp:394 ..\src\video\gui.cpp:461
+#: ..\src\video\gui.cpp:394 ..\src\video\gui.cpp:398 ..\src\video\gui.cpp:461
+#: ..\src\video\gui.cpp:468
 msgid "Button Y"
 msgstr ""
 
-#: ..\src\video\gui.cpp:398 ..\src\video\gui.cpp:465
+#: ..\src\video\gui.cpp:398 ..\src\video\gui.cpp:402 ..\src\video\gui.cpp:465
+#: ..\src\video\gui.cpp:472
 msgid "Button Z"
 msgstr ""
 
-#: ..\src\video\gui.cpp:402 ..\src\video\gui.cpp:469
+#: ..\src\video\gui.cpp:402 ..\src\video\gui.cpp:406 ..\src\video\gui.cpp:469
+#: ..\src\video\gui.cpp:476
 msgid "Button Start"
 msgstr ""
 
-#: ..\src\video\gui.cpp:419 ..\src\video\gui.cpp:576
+#: ..\src\video\gui.cpp:419 ..\src\video\gui.cpp:426 ..\src\video\gui.cpp:576
+#: ..\src\video\gui.cpp:587
 msgid "Player 2"
 msgstr ""
 
-#: ..\src\video\gui.cpp:487
+#: ..\src\video\gui.cpp:487 ..\src\video\gui.cpp:495
 msgid "Board"
 msgstr ""
 
-#: ..\src\video\gui.cpp:489
+#: ..\src\video\gui.cpp:489 ..\src\video\gui.cpp:497
 msgid "Service switch"
 msgstr ""
 
-#: ..\src\video\gui.cpp:493
+#: ..\src\video\gui.cpp:493 ..\src\video\gui.cpp:501
 msgid "Test switch"
 msgstr ""
 
-#: ..\src\video\gui.cpp:497
+#: ..\src\video\gui.cpp:497 ..\src\video\gui.cpp:505
 msgid "Player 1 coin switch"
 msgstr ""
 
-#: ..\src\video\gui.cpp:501
+#: ..\src\video\gui.cpp:501 ..\src\video\gui.cpp:509
 msgid "Player 2 coin switch"
 msgstr ""
 
-#: ..\src\video\gui.cpp:505
+#: ..\src\video\gui.cpp:505 ..\src\video\gui.cpp:513
 msgid "Player 1 start"
 msgstr ""
 
-#: ..\src\video\gui.cpp:509
+#: ..\src\video\gui.cpp:509 ..\src\video\gui.cpp:517
 msgid "Player 2 start"
 msgstr ""
 
-#: ..\src\video\gui.cpp:546 ..\src\video\gui.cpp:595
+#: ..\src\video\gui.cpp:546 ..\src\video\gui.cpp:555 ..\src\video\gui.cpp:595
+#: ..\src\video\gui.cpp:605
 msgid "Button 1"
 msgstr ""
 
-#: ..\src\video\gui.cpp:550 ..\src\video\gui.cpp:599
+#: ..\src\video\gui.cpp:550 ..\src\video\gui.cpp:559 ..\src\video\gui.cpp:599
+#: ..\src\video\gui.cpp:609
 msgid "Button 2"
 msgstr ""
 
-#: ..\src\video\gui.cpp:554 ..\src\video\gui.cpp:603
+#: ..\src\video\gui.cpp:554 ..\src\video\gui.cpp:563 ..\src\video\gui.cpp:603
+#: ..\src\video\gui.cpp:613
 msgid "Button 3"
 msgstr ""
 
-#: ..\src\video\gui.cpp:558 ..\src\video\gui.cpp:607
+#: ..\src\video\gui.cpp:558 ..\src\video\gui.cpp:567 ..\src\video\gui.cpp:607
+#: ..\src\video\gui.cpp:617
 msgid "Button 4"
 msgstr ""
 
-#: ..\src\video\gui.cpp:630
+#: ..\src\video\gui.cpp:630 ..\src\video\gui.cpp:640
 msgid "Configuration saved."
 msgstr ""
 
-#: ..\src\video\gui.cpp:679
+#: ..\src\video\gui.cpp:679 ..\src\video\gui.cpp:689
 msgid "File"
 msgstr ""
 
-#: ..\src\video\gui.cpp:680
+#: ..\src\video\gui.cpp:680 ..\src\video\gui.cpp:690
 msgid "Load ST-V rom"
 msgstr ""
 
-#: ..\src\video\gui.cpp:681
+#: ..\src\video\gui.cpp:681 ..\src\video\gui.cpp:691
 msgid "Load binary file"
 msgstr ""
 
-#: ..\src\video\gui.cpp:685
+#: ..\src\video\gui.cpp:685 ..\src\video\gui.cpp:695
 msgid "Options"
 msgstr ""
 
-#: ..\src\video\opengl_legacy.cpp:140
+#: ..\src\video\opengl_legacy.cpp:137 ..\src\video\opengl_legacy.cpp:140
 msgid "Saturnin {0} - Legacy rendering"
 msgstr ""
 
-#: ..\src\video\opengl_modern.cpp:259
+#: ..\src\video\opengl_modern.cpp:246 ..\src\video\opengl_modern.cpp:259
 msgid "Saturnin {0} - Modern rendering"
 msgstr ""
 

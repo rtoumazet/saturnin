@@ -33,7 +33,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-#include "locale.h" // tr
+#include "locale.h" // tr NOLINT
 
 namespace saturnin::core {
 

@@ -291,6 +291,7 @@ class VectorNumberSettingRegisterDiv : public Register {
     inline static const BitRange<u16> upper_16_bits{16, 31};       ///< Defines the range of the upper 16 bits of the register.
     inline static const BitRange<u16> lower_16_bits{0, 15};        ///< Defines the range of the lower 16 bits of the register.
     inline static const BitRange<u32> all_bits{0, 31};             ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     inline static const u32           accessMask() { return 0b1111111; } ///< Returns access mask;
 };
 
@@ -308,6 +309,7 @@ class VectorNumberSettingRegisterDma : public Register {
     using Register::Register;
     inline static const BitRange<u8>  dma_transfert_end_vector{0, 7};      ///< Defines DMACx vector number.
     inline static const BitRange<u32> all_bits{0, 31};                     ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     inline static const u32           writeMask() { return 0x00000000FF; } ///< Returns write mask;
 };
 
@@ -382,6 +384,7 @@ class BusControlRegister1 : public Register {
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};                      ///< Defines the whole register bits
     inline static const BitRange<u32> all_bits{0, 31};                           ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                       writeMask() { return 0b0001111111110111; } ///< returns write mask.
 };
 
@@ -399,6 +402,7 @@ class BusControlRegister2 : public Register {
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};                      ///< Defines the whole register bits
     inline static const BitRange<u32> all_bits{0, 31};                           ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                       writeMask() { return 0b0000000011111100; } ///< returns write mask;
 };
 
@@ -448,6 +452,7 @@ class RefreshTimeControlStatusRegister : public Register {
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};                      ///< Defines the lower 16 bits of the register.
     inline static const BitRange<u32> all_bits{0, 31};                           ///< Defines the whole register bits.
+    //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                       writeMask() { return 0b0000000011111000; } ///< returns write mask;
 };
 
@@ -465,6 +470,7 @@ class RefreshTimerCounter : public Register {
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};                      ///< Defines the lower 16 bits of the register.
     inline static const BitRange<u32> all_bits{0, 31};                           ///< Defines the whole register bits.
+   //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                       writeMask() { return 0b0000000011111111; } ///< returns write mask;
 };
 
@@ -482,6 +488,7 @@ class RefreshTimerConstantRegister : public Register {
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};                      ///< Defines the lower 16 bits of the register.
     inline static const BitRange<u32> all_bits{0, 31};                           ///< Defines the whole register bits.
+    //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                       writeMask() { return 0b0000000011111111; } ///< returns write mask;
 };
 
@@ -576,6 +583,7 @@ class CacheControlRegister : public Register {
     inline static const BitRange<InstructionReplacementDisable> instruction_replacement_disable{1}; ///< Defines ID bit.
     inline static const BitRange<CacheEnable>                   cache_enable{0};                    ///< Defines CE bit.
     inline static const BitRange<u8>                            all_bits{0, 7}; ///< Defines the whole register bits.
+    //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                                                 writeMask() { return 0b11011111; } ///< returns write mask;
 };
 
@@ -626,6 +634,7 @@ class DmaTransferCountRegister : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u32> all_bits{0, 31};                   ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                       writeMask() { return 0x00FFFFFF; } ///< returns write mask;
 };
 
@@ -804,6 +813,7 @@ class DmaChannelControlRegister : public Register {
     inline static const BitRange<TransferEndFlag>        transfer_end_flag{1};              ///< Defines TE bit.
     inline static const BitRange<Sh2DmaEnable>           dma_enable{0};                     ///< Defines DE bit.
     inline static const BitRange<u32>                    all_bits{0, 31};                   ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                                          writeMask() { return 0x000000FF; } ///< returns write mask;
 };
 
@@ -828,6 +838,7 @@ class DmaRequestResponseSelectionControlRegister : public Register {
     using Register::Register;
     inline static const BitRange<ResourceSelect> resource_select{0, 1};             ///< Defines RSx bits.
     inline static const BitRange<u8>             all_bits{0, 7};                    ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                                  writeMask() { return 0b00000011; } ///< returns write mask;
 };
 
@@ -892,6 +903,7 @@ class DmaOperationRegister : public Register {
     inline static const BitRange<NmiFlag>          nmi_flag{1};                       ///< Defines NMIF bit.
     inline static const BitRange<DmaMasterEnable>  dma_master_enable{0};              ///< Defines DME bit.
     inline static const BitRange<u32>              all_bits{0, 31};                   ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     static auto                                    writeMask() { return 0x0000000F; } ///< returns write mask;
 };
 
@@ -957,6 +969,7 @@ class DivisionControlRegister : public Register {
     inline static const BitRange<u16> upper_16_bits{16, 31};        ///< Defines the range of the upper 16 bits of the register.
     inline static const BitRange<u16> lower_16_bits{0, 15};         ///< Defines the range of the lower 16 bits of the register.
     inline static const BitRange<u32> all_bits{0, 31};              ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     inline static const u32           accessMask() { return 0b11; } ///< Returns access mask;
 };
 
@@ -1256,6 +1269,7 @@ class TimerOutputCompareControlRegister : public Register {
     inline static const BitRange<OutputLevelA>                output_level_a{1};                 ///< Defines OLVLA bit.
     inline static const BitRange<OutputLevelB>                output_level_b{0};                 ///< Defines OLVLB bit.
     inline static const BitRange<u8>                          all_bits{0, 7}; ///< Defines the whole register bits
+    //NOLINTNEXTLINE(readability-magic-numbers)
     inline static const u8                                    accessMask() { return 0b00010011; } ///< Returns access mask;
 };
 

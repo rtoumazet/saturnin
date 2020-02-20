@@ -30,11 +30,11 @@ namespace saturnin::sh2 {
 
 using core::Log;
 
-u16 xn00(Sh2& s) { return (s.current_opcode_ & 0x0f00) >> 8; }
-u16 x0n0(Sh2& s) { return (s.current_opcode_ & 0x00f0) >> 4; }
-u16 x00n(Sh2& s) { return s.current_opcode_ & 0x000f; }
-u16 xnnn(Sh2& s) { return s.current_opcode_ & 0x0fff; }
-u16 x0nn(Sh2& s) { return s.current_opcode_ & 0x00ff; }
+u16 xn00(Sh2& s) { return (s.current_opcode_ & 0x0f00) >> 8; } // NOLINT(readability-magic-numbers)
+u16 x0n0(Sh2& s) { return (s.current_opcode_ & 0x00f0) >> 4; } // NOLINT(readability-magic-numbers)
+u16 x00n(Sh2& s) { return s.current_opcode_ & 0x000f; }        // NOLINT(readability-magic-numbers)
+u16 xnnn(Sh2& s) { return s.current_opcode_ & 0x0fff; }        // NOLINT(readability-magic-numbers)
+u16 x0nn(Sh2& s) { return s.current_opcode_ & 0x00ff; }        // NOLINT(readability-magic-numbers)
 
 void delaySlot(Sh2& s, const u32 addr) {
     // Algorithm :
@@ -64,49 +64,46 @@ void delaySlot(Sh2& s, const u32 addr) {
 bool isInstructionIllegal(const u16 inst) {
     // 'Illegal Slot' detection
     // Returns true if an ISI (illegal slot instruction) is detected
-    // 0 otherwise
-    bool returnValue = false;
-
     switch (xn000(inst)) {
-        case 0b0000:
+        case 0b0000: // NOLINT(readability-magic-numbers)
             switch (x000n(inst)) {
-                case 0b0011:
+                case 0b0011: // NOLINT(readability-magic-numbers)
                     switch (x00n0(inst)) {
-                        case 0b0000: return true; // BSRF Rm*2
-                        case 0b0010: return true; // BRAF Rm*2
+                        case 0b0000: return true; // BSRF Rm*2 //NOLINT(readability-magic-numbers)
+                        case 0b0010: return true; // BRAF Rm*2 //NOLINT(readability-magic-numbers)
                     }
                     break;
-                case 0xb1011:
+                case 0xb1011: // NOLINT(readability-magic-numbers)
                     switch (x00n0(inst)) {
-                        case 0b0000: return true; // RTS
-                        case 0b0010: return true; // RTE
+                        case 0b0000: return true; // RTS //NOLINT(readability-magic-numbers)
+                        case 0b0010: return true; // RTE //NOLINT(readability-magic-numbers)
                     }
                     break;
             }
             break;
-        case 0b0100:
+        case 0b0100: // NOLINT(readability-magic-numbers)
             switch (x000n(inst)) {
-                case 0b1011:
+                case 0b1011: // NOLINT(readability-magic-numbers)
                     switch (x00n0(inst)) {
-                        case 0b0000: return true; // JSR @Rm
-                        case 0b0010: return true; // JMP @Rm
+                        case 0b0000: return true; // JSR @Rm //NOLINT(readability-magic-numbers)
+                        case 0b0010: return true; // JMP @Rm //NOLINT(readability-magic-numbers)
                     }
                     break;
             }
             break;
-        case 0b1000:
+        case 0b1000: // NOLINT(readability-magic-numbers)
             switch (x0n00(inst)) {
-                case 0b1001: return true; // BT label
-                case 0b1011: return true; // BF label
-                case 0x1101: return true; // BT/S label*2
-                case 0x1111: return true; // BF/S label*2
+                case 0b1001: return true; // BT label //NOLINT(readability-magic-numbers)
+                case 0b1011: return true; // BF label //NOLINT(readability-magic-numbers)
+                case 0x1101: return true; // BT/S label*2 //NOLINT(readability-magic-numbers)
+                case 0x1111: return true; // BF/S label*2 //NOLINT(readability-magic-numbers)
             }
             break;
-        case 0b1010: return true; // BRA label
-        case 0b1011: return true; // BSR label
-        case 0b1100:
+        case 0b1010: return true; // BRA label //NOLINT(readability-magic-numbers)
+        case 0b1011: return true; // BSR label //NOLINT(readability-magic-numbers)
+        case 0b1100:              // NOLINT(readability-magic-numbers)
             switch (x0n00(inst)) {
-                case 0x0011: return true; // TRAPA #imm
+                case 0x0011: return true; // TRAPA #imm //NOLINT(readability-magic-numbers)
             }
             break;
     }
@@ -130,10 +127,14 @@ void add(Sh2& s) {
 
 void addi(Sh2& s) {
     // Rn + imm -> Rn
-    if ((x0nn(s) & 0x80) == 0)
-        s.r_[xn00(s)] += (0x000000FF & static_cast<u32>(x0nn(s))); // #imm positive, 32bits sign extension
+    if ((x0nn(s) & 0x80) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[xn00(s)]
+            += (0x000000FF
+                & static_cast<u32>(x0nn(s))); // #imm positive, 32bits sign extension //NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] += (0xFFFFFF00 | static_cast<u32>(x0nn(s))); // #imm negative, 32bits sign extension
+        s.r_[xn00(s)]
+            += (0xFFFFFF00
+                | static_cast<u32>(x0nn(s))); // #imm negative, 32bits sign extension //NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -176,7 +177,7 @@ void addv(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void and (Sh2 & s) {
+void and_op(Sh2& s) {
     // Rn & Rm -> Rn
     s.r_[xn00(s)] &= s.r_[x0n0(s)];
     s.pc_ += 2;
@@ -185,7 +186,7 @@ void and (Sh2 & s) {
 
 void andi(Sh2& s) {
     // R0 & imm -> R0
-    s.r_[0] &= (0x000000FF & x0nn(s));
+    s.r_[0] &= (0x000000FF & x0nn(s)); // NOLINT(readability-magic-numbers)
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -194,7 +195,7 @@ void andm(Sh2& s) {
     //(R0 + GBR) & imm -> (R0 + GBR)
 
     s32 temp = s.memory()->read<u8>(s.gbr_ + s.r_[0]);
-    temp &= (0x000000FF & static_cast<s32>(x0nn(s)));
+    temp &= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
     s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -207,9 +208,9 @@ void bf(Sh2& s) {
     if (s.sr_.get(StatusRegister::t) == 0) {
         s32 disp{};
         if ((static_cast<s32>(x0nn(s)) & 0x80) == 0)
-            disp = (0x000000FF & static_cast<s32>(x0nn(s)));
+            disp = (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
         else
-            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
+            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
 
         s.pc_             = s.pc_ + (disp << 1) + 4;
         s.cycles_elapsed_ = 3;
@@ -227,9 +228,9 @@ void bfs(Sh2& s) {
     if (s.sr_.get(StatusRegister::t) == 0) {
         s32 disp{};
         if ((x0nn(s) & 0x80) == 0)
-            disp = (0x000000FF & static_cast<s32>(x0nn(s)));
+            disp = (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
         else
-            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
+            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
 
         u32 saved_pc{s.pc_};
         delaySlot(s, s.pc_ + 2);
@@ -247,9 +248,9 @@ void bra(Sh2& s) {
 
     s32 disp{};
     if ((xnnn(s) & 0x800) == 0)
-        disp = (0x00000FFF & xnnn(s));
+        disp = (0x00000FFF & xnnn(s)); // NOLINT(readability-magic-numbers)
     else
-        disp = (0xFFFFF000 | xnnn(s));
+        disp = (0xFFFFF000 | xnnn(s)); // NOLINT(readability-magic-numbers)
 
     u32 saved_pc{s.pc_};
     delaySlot(s, s.pc_ + 2);
@@ -274,9 +275,9 @@ void bsr(Sh2& s) {
     // Modified using SH4 manual + correction
     s32 disp{};
     if ((xnnn(s) & 0x800) == 0)
-        disp = (0x00000FFF & xnnn(s));
+        disp = (0x00000FFF & xnnn(s)); // NOLINT(readability-magic-numbers)
     else
-        disp = (0xFFFFF000 | xnnn(s));
+        disp = (0xFFFFF000 | xnnn(s)); // NOLINT(readability-magic-numbers)
     s.pr_ = s.pc_ + 4;
     u32 old_pc{s.pc_};
     delaySlot(s, s.pc_ + 2);
@@ -304,9 +305,9 @@ void bt(Sh2& s) {
     if (s.sr_.get(StatusRegister::t) == 1) {
         s32 disp{};
         if ((x0nn(s) & 0x80) == 0)
-            disp = (0x000000FF & static_cast<s32>(x0nn(s)));
+            disp = (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
         else
-            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
+            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
 
         s.pc_             = s.pc_ + (disp << 1) + 4;
         s.cycles_elapsed_ = 3;
@@ -323,9 +324,9 @@ void bts(Sh2& s) {
     if (s.sr_.get(StatusRegister::t) == 0x1) {
         s32 disp{};
         if ((x0nn(s) & 0x80) == 0)
-            disp = (0x000000FF & static_cast<s32>(x0nn(s)));
+            disp = (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
         else
-            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
+            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
 
         u32 old_pc{s.pc_};
         delaySlot(s, s.pc_ + 2);
@@ -418,10 +419,10 @@ void cmpstr(Sh2& s) {
     // If one byte of Rn = one byte of Rm then T=1
 
     u32 temp{s.r_[xn00(s)] ^ s.r_[x0n0(s)]};
-    s32 hh{(temp >> 12) & 0x000000FF};
-    s32 hl{(temp >> 8) & 0x000000FF};
-    s32 lh{(temp >> 4) & 0x000000FF};
-    s32 ll{temp & 0x000000FF};
+    s32 hh{(temp >> 12) & 0x000000FF}; // NOLINT(readability-magic-numbers)
+    s32 hl{(temp >> 8) & 0x000000FF};  // NOLINT(readability-magic-numbers)
+    s32 lh{(temp >> 4) & 0x000000FF};  // NOLINT(readability-magic-numbers)
+    s32 ll{temp & 0x000000FF};         // NOLINT(readability-magic-numbers)
     hh = hh && hl && lh && ll;
     (hh == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
@@ -433,9 +434,9 @@ void cmpim(Sh2& s) {
     // If R0 = imm, T=1
     s32 imm{};
     if ((static_cast<s32>(x0nn(s)) & 0x80) == 0)
-        imm = (0x000000FF & static_cast<s32>(x0nn(s)));
+        imm = (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
     else
-        imm = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
+        imm = (0xFFFFFF00 | static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
 
     (s.r_[0] == imm) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
@@ -445,8 +446,10 @@ void cmpim(Sh2& s) {
 
 void div0s(Sh2& s) {
     // Rn MSB -> Q, Rm MSB -> M, M^Q -> T
-    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::q) : s.sr_.set(StatusRegister::q);
-    ((s.r_[x0n0(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::m) : s.sr_.set(StatusRegister::m);
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::q)
+                                        : s.sr_.set(StatusRegister::q); // NOLINT(readability-magic-numbers)
+    ((s.r_[x0n0(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::m)
+                                        : s.sr_.set(StatusRegister::m); // NOLINT(readability-magic-numbers)
     (s.sr_.get(StatusRegister::m) == s.sr_.get(StatusRegister::q)) ? s.sr_.reset(StatusRegister::t)
                                                                    : s.sr_.set(StatusRegister::t);
 
@@ -470,7 +473,8 @@ void div1(Sh2& s) {
     u8  tmp1{};
 
     u8 old_q{s.sr_.get(StatusRegister::q)};
-    ((0x80000000 & s.r_[xn00(s)]) != 0) ? s.sr_.set(StatusRegister::q) : s.sr_.reset(StatusRegister::q);
+    ((0x80000000 & s.r_[xn00(s)]) != 0) ? s.sr_.set(StatusRegister::q)
+                                        : s.sr_.reset(StatusRegister::q); // NOLINT(readability-magic-numbers)
 
     s.r_[xn00(s)] <<= 1;
     s.r_[xn00(s)] |= s.sr_.get(StatusRegister::t);
@@ -533,7 +537,7 @@ void dmuls(Sh2& s) {
     // Arranged using SH4 manual
     s64 result{static_cast<s64>(s.r_[x0n0(s)]) * static_cast<s64>(s.r_[xn00(s)])};
     s.mach_ = static_cast<s32>(result >> 32);
-    s.macl_ = static_cast<u32>(result & 0x00000000FFFFFFFF);
+    s.macl_ = static_cast<u32>(result & 0x00000000FFFFFFFF); // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -547,7 +551,7 @@ void dmulu(Sh2& s) {
     // Arranged using SH4 manual
     u64 result{static_cast<u64>(s.r_[x0n0(s)]) * static_cast<u64>(s.r_[xn00(s)])};
     s.mach_ = static_cast<u32>(result >> 32);
-    s.macl_ = static_cast<u32>(result & 0x00000000FFFFFFFF);
+    s.macl_ = static_cast<u32>(result & 0x00000000FFFFFFFF); // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -567,10 +571,10 @@ void dt(Sh2& s) {
 void extsb(Sh2& s) {
     // Rm sign extension (byte) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
-    if ((s.r_[x0n0(s)] & 0x00000080) == 0)
-        s.r_[xn00(s)] &= 0x000000FF;
+    if ((s.r_[x0n0(s)] & 0x00000080) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[xn00(s)] &= 0x000000FF;       // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] |= 0xFFFFFF00;
+        s.r_[xn00(s)] |= 0xFFFFFF00; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -579,10 +583,10 @@ void extsb(Sh2& s) {
 void extsw(Sh2& s) {
     // Rm sign extension (word) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
-    if ((s.r_[x0n0(s)] & 0x00008000) == 0)
-        s.r_[xn00(s)] &= 0x0000FFFF;
+    if ((s.r_[x0n0(s)] & 0x00008000) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[xn00(s)] &= 0x0000FFFF;       // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] |= 0xFFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -591,7 +595,7 @@ void extsw(Sh2& s) {
 void extub(Sh2& s) {
     // Rm is 0 extended (byte) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
-    s.r_[xn00(s)] &= 0x000000FF;
+    s.r_[xn00(s)] &= 0x000000FF; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -600,7 +604,7 @@ void extub(Sh2& s) {
 void extuw(Sh2& s) {
     // Rm is 0 extended (word) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
-    s.r_[xn00(s)] &= 0x0000FFFF;
+    s.r_[xn00(s)] &= 0x0000FFFF; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -631,7 +635,7 @@ void jsr(Sh2& s) {
 
 void ldcsr(Sh2& s) {
     // Rm -> SR
-    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.r_[xn00(s)] & 0x000003F3));
+    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.r_[xn00(s)] & 0x000003F3)); // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -655,7 +659,8 @@ void ldcvbr(Sh2& s) {
 
 void ldcmsr(Sh2& s) {
     // (Rm) -> SR, Rm + 4 -> Rm
-    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.memory()->read<u32>(s.r_[xn00(s)]) & 0x000003F3));
+    s.sr_.set(StatusRegister::all_bits,
+              static_cast<u16>(s.memory()->read<u32>(s.r_[xn00(s)]) & 0x000003F3)); // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -748,13 +753,13 @@ void mac(Sh2& s) {
     mac += mul;
 
     if (s.sr_.get(StatusRegister::s) == 1) {
-        if (mac < 0xFFFF800000000000)
-            mac = 0xFFFF800000000000;
-        if (mac > 0x800000000000)
-            mac = 0x7FFFFFFFFFFF;
+        if (mac < 0xFFFF800000000000) // NOLINT(readability-magic-numbers)
+            mac = 0xFFFF800000000000; // NOLINT(readability-magic-numbers)
+        if (mac > 0x800000000000)     // NOLINT(readability-magic-numbers)
+            mac = 0x7FFFFFFFFFFF;     // NOLINT(readability-magic-numbers)
     }
     s.mach_ = static_cast<u32>(mac >> 32);
-    s.macl_ = static_cast<u32>(mac & 0xFFFFFFFF);
+    s.macl_ = static_cast<u32>(mac & 0xFFFFFFFF); // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -776,23 +781,23 @@ void macw(Sh2& s) {
         mac <<= 32;
         mac |= s.macl_;
         mac += mul;
-        s.mach_ = static_cast<u32>(mac >> 32);
-        s.macl_ = static_cast<u32>(mac & 0xFFFFFFFF);
+        s.mach_ = static_cast<u32>(mac >> 32); // NOLINT(readability-magic-numbers)
+        s.macl_ = static_cast<u32>(mac & 0xFFFFFFFF); // NOLINT(readability-magic-numbers)
     } else {
-        if (s.macl_ & 0x80000000)
-            mac = static_cast<s64>(s.macl_ | 0xFFFFFFFF00000000);
+        if (s.macl_ & 0x80000000)                                 // NOLINT(readability-magic-numbers)
+            mac = static_cast<s64>(s.macl_ | 0xFFFFFFFF00000000); // NOLINT(readability-magic-numbers)
         else
-            mac = static_cast<s64>(s.macl_ & 0x00000000FFFFFFFF);
+            mac = static_cast<s64>(s.macl_ & 0x00000000FFFFFFFF); // NOLINT(readability-magic-numbers)
         mac += mul;
-        if (mac > 0x7FFFFFFF) {
+        if (mac > 0x7FFFFFFF) { // NOLINT(readability-magic-numbers)
             s.mach_ |= 0x00000001;
-            s.macl_ = 0x7FFFFFFF;
-        } else if (mac < 0xFFFFFFFF80000000) {
+            s.macl_ = 0x7FFFFFFF;              // NOLINT(readability-magic-numbers)
+        } else if (mac < 0xFFFFFFFF80000000) { // NOLINT(readability-magic-numbers)
             s.mach_ |= 0x00000001;
-            s.macl_ = 0x80000000;
+            s.macl_ = 0x80000000; // NOLINT(readability-magic-numbers)
         } else {
             s.mach_ &= 0xFFFFFFFE;
-            s.macl_ = static_cast<u32>(mac & 0x00000000FFFFFFFF);
+            s.macl_ = static_cast<u32>(mac & 0x00000000FFFFFFFF); // NOLINT(readability-magic-numbers)
         }
     }
     s.pc_ += 2;
@@ -835,9 +840,9 @@ void movbl(Sh2& s) {
     // (Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = static_cast<s32>(s.memory()->read<u8>(s.r_[x0n0(s)]));
     if ((s.r_[xn00(s)] & 0x80) == 0)
-        s.r_[xn00(s)] &= 0x000000FF;
+        s.r_[xn00(s)] &= 0x000000FF; // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] |= 0xFFFFFF00;
+        s.r_[xn00(s)] |= 0xFFFFFF00; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -846,10 +851,10 @@ void movbl(Sh2& s) {
 void movwl(Sh2& s) {
     // (Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = static_cast<s32>(s.memory()->read<u16>(s.r_[x0n0(s)]));
-    if ((s.r_[xn00(s)] & 0x8000) == 0)
-        s.r_[xn00(s)] &= 0x0000FFFF;
+    if ((s.r_[xn00(s)] & 0x8000) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[xn00(s)] &= 0x0000FFFF;   // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] |= 0xFFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -893,10 +898,10 @@ void movlm(Sh2& s) {
 void movbp(Sh2& s) {
     // (Rm) -> sign extension -> Rn, Rm + 1 -> Rm
     s.r_[xn00(s)] = static_cast<s32>(s.memory()->read<u8>(s.r_[x0n0(s)]));
-    if ((s.r_[xn00(s)] & 0x80) == 0)
-        s.r_[xn00(s)] &= 0x000000FF;
+    if ((s.r_[xn00(s)] & 0x80) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[xn00(s)] &= 0x000000FF; // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] |= 0xFFFFFF00;
+        s.r_[xn00(s)] |= 0xFFFFFF00; // NOLINT(readability-magic-numbers)
     if (xn00(s) != x0n0(s))
         ++s.r_[x0n0(s)];
 
@@ -907,10 +912,10 @@ void movbp(Sh2& s) {
 void movwp(Sh2& s) {
     // (Rm) -> sign extension -> Rn, Rm + 2 -> Rm
     s.r_[xn00(s)] = static_cast<s32>(s.memory()->read<u16>(s.r_[x0n0(s)]));
-    if ((s.r_[xn00(s)] & 0x8000) == 0)
-        s.r_[xn00(s)] &= 0x0000FFFF;
+    if ((s.r_[xn00(s)] & 0x8000) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[xn00(s)] &= 0x0000FFFF;   // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] |= 0xFFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000; // NOLINT(readability-magic-numbers)
     if (xn00(s) != x0n0(s))
         s.r_[x0n0(s)] += 2;
 
@@ -954,10 +959,10 @@ void movls0(Sh2& s) {
 void movbl0(Sh2& s) {
     // (R0 + Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = static_cast<s32>(s.memory()->read<u8>(s.r_[x0n0(s)] + s.r_[0]));
-    if ((s.r_[xn00(s)] & 0x80) == 0)
-        s.r_[xn00(s)] &= 0x000000FF;
+    if ((s.r_[xn00(s)] & 0x80) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[xn00(s)] &= 0x000000FF; // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] |= 0xFFFFFF00;
+        s.r_[xn00(s)] |= 0xFFFFFF00; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -966,10 +971,10 @@ void movbl0(Sh2& s) {
 void movwl0(Sh2& s) {
     // (R0 + Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = static_cast<s32>(s.memory()->read<u16>(s.r_[x0n0(s)] + s.r_[0]));
-    if ((s.r_[xn00(s)] & 0x8000) == 0)
-        s.r_[xn00(s)] &= 0x0000FFFF;
+    if ((s.r_[xn00(s)] & 0x8000) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[xn00(s)] &= 0x0000FFFF;   // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] |= 0xFFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -986,9 +991,9 @@ void movll0(Sh2& s) {
 void movi(Sh2& s) {
     // imm -> sign extension -> Rn
     if ((x0nn(s) & 0x80) == 0)
-        s.r_[xn00(s)] = (0x000000FF & static_cast<s32>(x0nn(s)));
+        s.r_[xn00(s)] = (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] = (0xFFFFFF00 | static_cast<s32>(x0nn(s)));
+        s.r_[xn00(s)] = (0xFFFFFF00 | static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -996,12 +1001,12 @@ void movi(Sh2& s) {
 
 void movwi(Sh2& s) {
     //(disp * 2 + PC) -> sign extension -> Rn
-    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))};
+    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))};                               // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] = static_cast<s32>(s.memory()->read<u16>(s.pc_ + (disp << 1) + 4)); // + 4 added
-    if ((s.r_[xn00(s)] & 0x8000) == 0)
-        s.r_[xn00(s)] &= 0x0000FFFF;
+    if ((s.r_[xn00(s)] & 0x8000) == 0)                                                // NOLINT(readability-magic-numbers)
+        s.r_[xn00(s)] &= 0x0000FFFF;                                                  // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] |= 0xFFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1009,8 +1014,9 @@ void movwi(Sh2& s) {
 
 void movli(Sh2& s) {
     //(disp * 4 + PC) -> Rn
-    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))};
-    s.r_[xn00(s)] = s.memory()->read<u32>((s.pc_ & 0xFFFFFFFC) + (disp << 2) + 4); // + 4 added
+    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))}; // NOLINT(readability-magic-numbers)
+    s.r_[xn00(s)]
+        = s.memory()->read<u32>((s.pc_ & 0xFFFFFFFC) + (disp << 2) + 4); // + 4 added //NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1018,12 +1024,12 @@ void movli(Sh2& s) {
 
 void movblg(Sh2& s) {
     //(disp + GBR) -> sign extension -> R0
-    s32 disp{(0x000000FF & static_cast<u32>(x0nn(s)))};
+    s32 disp{(0x000000FF & static_cast<u32>(x0nn(s)))}; // NOLINT(readability-magic-numbers)
     s.r_[0] = static_cast<s32>(s.memory()->read<u8>(s.gbr_ + disp));
-    if ((s.r_[0] & 0x80) == 0)
-        s.r_[0] &= 0x000000FF;
+    if ((s.r_[0] & 0x80) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[0] &= 0x000000FF; // NOLINT(readability-magic-numbers)
     else
-        s.r_[0] |= 0xFFFFFF00;
+        s.r_[0] |= 0xFFFFFF00; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1031,12 +1037,12 @@ void movblg(Sh2& s) {
 
 void movwlg(Sh2& s) {
     // (disp *2 + BGR) -> sign extension -> R0
-    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))};
+    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))}; // NOLINT(readability-magic-numbers)
     s.r_[0] = static_cast<s32>(s.memory()->read<u16>(s.gbr_ + (disp << 1)));
-    if ((s.r_[0] & 0x8000) == 0)
-        s.r_[0] &= 0x0000FFFF;
+    if ((s.r_[0] & 0x8000) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[0] &= 0x0000FFFF;   // NOLINT(readability-magic-numbers)
     else
-        s.r_[0] |= 0xFFFF0000;
+        s.r_[0] |= 0xFFFF0000; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1044,7 +1050,7 @@ void movwlg(Sh2& s) {
 
 void movllg(Sh2& s) {
     // (disp *4 + GBR) -> R0
-    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))};
+    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))}; // NOLINT(readability-magic-numbers)
     s.r_[0] = s.memory()->read<u32>(s.gbr_ + (disp << 2));
 
     s.pc_ += 2;
@@ -1053,7 +1059,7 @@ void movllg(Sh2& s) {
 
 void movbsg(Sh2& s) {
     // R0 -> (disp + GBR)
-    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))};
+    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))}; // NOLINT(readability-magic-numbers)
     s.memory()->write<u8>(s.gbr_ + disp, static_cast<u8>(s.r_[0]));
 
     s.pc_ += 2;
@@ -1062,7 +1068,7 @@ void movbsg(Sh2& s) {
 
 void movwsg(Sh2& s) {
     // R0 -> (disp *2 + GBR)
-    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))};
+    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))}; // NOLINT(readability-magic-numbers)
     s.memory()->write<u16>(s.gbr_ + (disp << 1), static_cast<u16>(s.r_[0]));
 
     s.pc_ += 2;
@@ -1071,7 +1077,7 @@ void movwsg(Sh2& s) {
 
 void movlsg(Sh2& s) {
     // R0 -> (disp *4 + GBR)
-    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))};
+    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))}; // NOLINT(readability-magic-numbers)
     s.memory()->write<u32>(s.gbr_ + (disp << 2), s.r_[0]);
 
     s.pc_ += 2;
@@ -1080,7 +1086,7 @@ void movlsg(Sh2& s) {
 
 inline void movbs4(Sh2& s) {
     // R0 -> (disp + Rn)
-    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))};
+    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))}; // NOLINT(readability-magic-numbers)
     s.memory()->write<u8>(s.r_[x0n0(s)] + disp, static_cast<u8>(s.r_[0]));
 
     s.pc_ += 2;
@@ -1089,7 +1095,7 @@ inline void movbs4(Sh2& s) {
 
 void movws4(Sh2& s) {
     // R0 -> (disp *2 + Rn)
-    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))};
+    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))}; // NOLINT(readability-magic-numbers)
     s.memory()->write<u16>(s.r_[x0n0(s)] + (disp << 1), static_cast<u16>(s.r_[0]));
 
     s.pc_ += 2;
@@ -1098,7 +1104,7 @@ void movws4(Sh2& s) {
 
 void movls4(Sh2& s) {
     // Rm -> (disp *4 + Rn)
-    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))};
+    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))}; // NOLINT(readability-magic-numbers)
     s.memory()->write<u32>(s.r_[xn00(s)] + (disp << 2), s.r_[x0n0(s)]);
 
     s.pc_ += 2;
@@ -1107,12 +1113,12 @@ void movls4(Sh2& s) {
 
 void movbl4(Sh2& s) {
     // (disp + Rm)-> sign extension ->R0
-    s32 disp = (0x0000000F & static_cast<s32>(x00n(s)));
+    s32 disp = (0x0000000F & static_cast<s32>(x00n(s))); // NOLINT(readability-magic-numbers)
     s.r_[0]  = s.memory()->read<u8>(s.r_[x0n0(s)] + disp);
     if ((s.r_[0] & 0x80) == 0)
-        s.r_[0] &= 0x000000FF;
+        s.r_[0] &= 0x000000FF; // NOLINT(readability-magic-numbers)
     else
-        s.r_[0] |= 0xFFFFFF00;
+        s.r_[0] |= 0xFFFFFF00; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1120,12 +1126,12 @@ void movbl4(Sh2& s) {
 
 void movwl4(Sh2& s) {
     // (disp *2 + Rm)-> sign extension ->R0
-    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))};
+    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))}; // NOLINT(readability-magic-numbers)
     s.r_[0] = s.memory()->read<u16>(s.r_[x0n0(s)] + (disp << 1));
-    if ((s.r_[0] & 0x8000) == 0)
-        s.r_[0] &= 0x0000FFFF;
+    if ((s.r_[0] & 0x8000) == 0) // NOLINT(readability-magic-numbers)
+        s.r_[0] &= 0x0000FFFF;   // NOLINT(readability-magic-numbers)
     else
-        s.r_[0] |= 0xFFFF0000;
+        s.r_[0] |= 0xFFFF0000; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1133,7 +1139,7 @@ void movwl4(Sh2& s) {
 
 void movll4(Sh2& s) {
     // (disp *4 +Rm) -> Rn
-    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))};
+    s32 disp{(0x0000000F & static_cast<s32>(x00n(s)))}; // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] = s.memory()->read<u32>(s.r_[x0n0(s)] + (disp << 2));
 
     s.pc_ += 2;
@@ -1142,8 +1148,8 @@ void movll4(Sh2& s) {
 
 void mova(Sh2& s) {
     // disp *4 + PC -> R0
-    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))};
-    s.r_[0] = (s.pc_ & 0xFFFFFFFC) + (disp << 2) + 4; // + 4 added
+    s32 disp{(0x000000FF & static_cast<s32>(x0nn(s)))}; // NOLINT(readability-magic-numbers)
+    s.r_[0] = (s.pc_ & 0xFFFFFFFC) + (disp << 2) + 4;   // + 4 added //NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1206,7 +1212,7 @@ void nop(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void not(Sh2 & s) {
+void not_op(Sh2& s) {
     // -Rm -> Rn
     s.r_[xn00(s)] = ~s.r_[x0n0(s)];
 
@@ -1214,7 +1220,7 @@ void not(Sh2 & s) {
     s.cycles_elapsed_ = 1;
 }
 
-void or (Sh2 & s) {
+void or_op(Sh2& s) {
     // Rn | Rm -> Rn
     s.r_[xn00(s)] |= s.r_[x0n0(s)];
 
@@ -1224,7 +1230,7 @@ void or (Sh2 & s) {
 
 void ori(Sh2& s) {
     // R0 | imm -> R0
-    s.r_[0] |= (0x000000FF & static_cast<s32>(x0nn(s)));
+    s.r_[0] |= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1233,7 +1239,7 @@ void ori(Sh2& s) {
 void orm(Sh2& s) {
     // (R0 + GBR) | imm -> (R0 + GBR)
     s32 temp{static_cast<s32>(s.memory()->read<u8>(s.gbr_ + s.r_[0]))};
-    temp |= (0x000000FF & static_cast<s32>(x0nn(s)));
+    temp |= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
     s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
 
     s.pc_ += 2;
@@ -1242,12 +1248,12 @@ void orm(Sh2& s) {
 
 void rotcl(Sh2& s) {
     // T <- Rn <- T
-    s32 temp{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1};
+    s32 temp{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1}; // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] <<= 1;
     if (s.sr_.get(StatusRegister::t))
-        s.r_[xn00(s)] |= 0x00000001;
+        s.r_[xn00(s)] |= 0x00000001; // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] &= 0xFFFFFFFE;
+        s.r_[xn00(s)] &= 0xFFFFFFFE; // NOLINT(readability-magic-numbers)
     (temp == 1) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
     s.pc_ += 2;
@@ -1259,9 +1265,9 @@ void rotcr(Sh2& s) {
     s32 temp{((s.r_[xn00(s)] & 0x00000001) == 0) ? 0 : 1};
     s.r_[xn00(s)] >>= 1;
     if (s.sr_.get(StatusRegister::t))
-        s.r_[xn00(s)] |= 0x80000000;
+        s.r_[xn00(s)] |= 0x80000000; // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] &= 0x7FFFFFFF;
+        s.r_[xn00(s)] &= 0x7FFFFFFF; // NOLINT(readability-magic-numbers)
     (temp == 1) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
     s.pc_ += 2;
@@ -1270,12 +1276,13 @@ void rotcr(Sh2& s) {
 
 void rotl(Sh2& s) {
     // T <- Rn <- MSB
-    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::t) : s.sr_.set(StatusRegister::t);
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::t)
+                                        : s.sr_.set(StatusRegister::t); // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] <<= 1;
     if (s.sr_.get(StatusRegister::t))
-        s.r_[xn00(s)] |= 0x00000001;
+        s.r_[xn00(s)] |= 0x00000001; // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] &= 0xFFFFFFFE;
+        s.r_[xn00(s)] &= 0xFFFFFFFE; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1286,9 +1293,9 @@ void rotr(Sh2& s) {
     ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.sr_.reset(StatusRegister::t) : s.sr_.set(StatusRegister::t);
     s.r_[xn00(s)] >>= 1;
     if (s.sr_.get(StatusRegister::t))
-        s.r_[xn00(s)] |= 0x80000000;
+        s.r_[xn00(s)] |= 0x80000000; // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] &= 0x7FFFFFFF;
+        s.r_[xn00(s)] &= 0x7FFFFFFF; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1300,7 +1307,8 @@ void rte(Sh2& s) {
     delaySlot(s, s.pc_ + 2);
     s.pc_ = s.memory()->read<u32>(s.r_[0xF]);
     s.r_[0xF] += 4;
-    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.memory()->read<u16>(s.r_[0xF] + 2) & 0x03F3));
+    s.sr_.set(StatusRegister::all_bits,
+              static_cast<u16>(s.memory()->read<u16>(s.r_[0xF] + 2) & 0x03F3)); // NOLINT(readability-magic-numbers)
     s.r_[0xF] += 4;
     s.cycles_elapsed_ = 4;
 
@@ -1354,7 +1362,8 @@ void sett(Sh2& s) {
 
 void shal(Sh2& s) {
     // T <- Rn <- 0
-    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::t) : s.sr_.set(StatusRegister::t);
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::t)
+                                        : s.sr_.set(StatusRegister::t); // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] <<= 1;
 
     s.pc_ += 2;
@@ -1364,12 +1373,12 @@ void shal(Sh2& s) {
 void shar(Sh2& s) {
     // MSB -> Rn -> T
     ((s.r_[xn00(s)] & 0x0000001) == 0) ? s.sr_.reset(StatusRegister::t) : s.sr_.set(StatusRegister::t);
-    s32 temp{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1};
+    s32 temp{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1}; // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] >>= 1;
     if (temp == 1)
-        s.r_[xn00(s)] |= 0x80000000;
+        s.r_[xn00(s)] |= 0x80000000; // NOLINT(readability-magic-numbers)
     else
-        s.r_[xn00(s)] &= 0x7FFFFFFF;
+        s.r_[xn00(s)] &= 0x7FFFFFFF; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1377,7 +1386,8 @@ void shar(Sh2& s) {
 
 void shll(Sh2& s) {
     // T <- Rn <- 0
-    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::t) : s.sr_.set(StatusRegister::t);
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.sr_.reset(StatusRegister::t)
+                                        : s.sr_.set(StatusRegister::t); // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] <<= 1;
 
     s.pc_ += 2;
@@ -1412,7 +1422,7 @@ void shlr(Sh2& s) {
     // 0 -> Rn -> T
     ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.sr_.reset(StatusRegister::t) : s.sr_.set(StatusRegister::t);
     s.r_[xn00(s)] >>= 1;
-    s.r_[xn00(s)] &= 0x7FFFFFFF;
+    s.r_[xn00(s)] &= 0x7FFFFFFF; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1421,7 +1431,7 @@ void shlr(Sh2& s) {
 void shlr2(Sh2& s) {
     // Rn >> 2 -> Rn
     s.r_[xn00(s)] >>= 2;
-    s.r_[xn00(s)] &= 0x3FFFFFFF;
+    s.r_[xn00(s)] &= 0x3FFFFFFF; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1430,7 +1440,7 @@ void shlr2(Sh2& s) {
 void shlr8(Sh2& s) {
     // Rn >> 8 -> Rn
     s.r_[xn00(s)] >>= 8;
-    s.r_[xn00(s)] &= 0x00FFFFFF;
+    s.r_[xn00(s)] &= 0x00FFFFFF; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1439,7 +1449,7 @@ void shlr8(Sh2& s) {
 void shlr16(Sh2& s) {
     // Rn >> 16 -> Rn
     s.r_[xn00(s)] >>= 16;
-    s.r_[xn00(s)] &= 0x0000FFFF;
+    s.r_[xn00(s)] &= 0x0000FFFF; // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1597,9 +1607,9 @@ void subv(Sh2& s) {
 
 void swapb(Sh2& s) {
     // Rm -> bytes swap -> Rn
-    u32 temp0{s.r_[x0n0(s)] & 0xFFFF0000};
-    u32 temp1{(s.r_[x0n0(s)] & 0x000000FF) << 8};
-    s.r_[xn00(s)] = (s.r_[x0n0(s)] >> 8) & 0x000000FF;
+    u32 temp0{s.r_[x0n0(s)] & 0xFFFF0000};             // NOLINT(readability-magic-numbers)
+    u32 temp1{(s.r_[x0n0(s)] & 0x000000FF) << 8};      // NOLINT(readability-magic-numbers)
+    s.r_[xn00(s)] = (s.r_[x0n0(s)] >> 8) & 0x000000FF; // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] = s.r_[xn00(s)] | temp1 | temp0;
 
     s.pc_ += 2;
@@ -1608,7 +1618,7 @@ void swapb(Sh2& s) {
 
 void swapw(Sh2& s) {
     // Rm -> words swap -> Rn
-    u32 temp{(s.r_[x0n0(s)] >> 16) & 0x0000FFFF};
+    u32 temp{(s.r_[x0n0(s)] >> 16) & 0x0000FFFF}; // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] = s.r_[x0n0(s)] << 16;
     s.r_[xn00(s)] |= temp;
 
@@ -1620,7 +1630,7 @@ void tas(Sh2& s) {
     // If (Rn) = 0, 1 -> T, 1 -> MSB of (Rn)
     s32 temp{static_cast<s32>(s.memory()->read<u8>(s.r_[xn00(s)]))};
     (temp == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
-    temp |= 0x00000080;
+    temp |= 0x00000080; // NOLINT(readability-magic-numbers)
     s.memory()->write<u8>(s.r_[xn00(s)], static_cast<u8>(temp));
 
     s.pc_ += 2;
@@ -1629,7 +1639,7 @@ void tas(Sh2& s) {
 
 void trapa(Sh2& s) {
     // PC/SR -> stack, (imm*4 + VBR) -> PC
-    s32 imm{(0x000000FF & x0nn(s))};
+    s32 imm{(0x000000FF & x0nn(s))}; // NOLINT(readability-magic-numbers)
     s.r_[15] -= 4;
     s.memory()->write<u32>(s.r_[15], s.sr_.get(StatusRegister::all_bits));
     s.r_[15] -= 4;
@@ -1649,7 +1659,7 @@ void tst(Sh2& s) {
 
 void tsti(Sh2& s) {
     // R0 & imm, if result is 0, 1 -> T
-    s32 temp{s.r_[0] & (0x000000FF & static_cast<s32>(x0nn(s)))};
+    s32 temp{s.r_[0] & (0x000000FF & static_cast<s32>(x0nn(s)))}; // NOLINT(readability-magic-numbers)
     (temp == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
     s.pc_ += 2;
@@ -1659,14 +1669,14 @@ void tsti(Sh2& s) {
 void tstm(Sh2& s) {
     // (R0 + GBR) & imm, if result is 0, 1 -> T
     s32 temp{static_cast<s32>(s.memory()->read<u8>(s.gbr_ + s.r_[0]))};
-    temp &= (0x000000FF & static_cast<s32>(x0nn(s)));
+    temp &= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
     (temp == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
 }
 
-void xor(Sh2& s) {
+void xor_op(Sh2& s) {
     // Rn^Rm -> Rn
     s.r_[xn00(s)] ^= s.r_[x0n0(s)];
 
@@ -1676,7 +1686,7 @@ void xor(Sh2& s) {
 
 void xori(Sh2& s) {
     // R0 ^imm -> R0
-    s.r_[0] ^= (0x000000FF & static_cast<s32>(x0nn(s)));
+    s.r_[0] ^= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1685,7 +1695,7 @@ void xori(Sh2& s) {
 void xorm(Sh2& s) {
     // (R0 + GBR)^imm -> (R0 + GBR)
     s32 temp{static_cast<s32>(s.memory()->read<u8>(s.gbr_ + s.r_[0]))};
-    temp ^= (0x000000FF & static_cast<s32>(x0nn(s)));
+    temp ^= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
     s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
 
     s.pc_ += 2;
@@ -1694,8 +1704,8 @@ void xorm(Sh2& s) {
 
 void xtrct(Sh2& s) {
     // Middle 32 bits of Rm and Rn -> Rn
-    u32 temp      = (s.r_[x0n0(s)] << 16) & 0xFFFF0000;
-    s.r_[xn00(s)] = (s.r_[xn00(s)] >> 16) & 0x0000FFFF;
+    u32 temp      = (s.r_[x0n0(s)] << 16) & 0xFFFF0000; // NOLINT(readability-magic-numbers)
+    s.r_[xn00(s)] = (s.r_[xn00(s)] >> 16) & 0x0000FFFF; // NOLINT(readability-magic-numbers)
     s.r_[xn00(s)] |= temp;
 
     s.pc_ += 2;
