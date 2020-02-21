@@ -42,6 +42,8 @@ using s16  = std::int16_t;
 using s32  = std::int32_t;
 using s64  = std::int64_t;
 
+constexpr u8 register_bits_number{32};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct BitRange
 ///
@@ -80,13 +82,13 @@ class Register {
     Register()                = default;
     Register(const Register&) = default;
     Register(Register&&)      = default;
-    Register& operator=(const Register&) & = default;
-    Register& operator=(Register&&) & = default;
-    ~Register()                       = default;
+    auto operator=(const Register&) & -> Register& = default;
+    auto operator=(Register&&) & -> Register& = default;
+    ~Register()                               = default;
     //@}
 
     template<typename T>
-    inline T get(const BitRange<T>& r) {
+    inline auto get(const BitRange<T>& r) -> T {
         auto range = register_value;
         range >>= r.first_bit_pos_;           // drops rightmost bits
         range <<= (32 - r.last_bit_pos_ - 1); // drops leftmost bits
@@ -113,7 +115,7 @@ class Register {
 
     inline void set() { register_value.set(); }
 
-    inline std::bitset<32>::reference operator[](const u8 index) { return register_value[index]; }
+    inline auto operator[](const u8 index) -> std::bitset<32>::reference { return register_value[index]; }
 
     template<typename T>
     inline void reset(const BitRange<T>& r) {
@@ -124,14 +126,14 @@ class Register {
 
     inline void reset() { register_value.reset(); }
 
-    inline bool none() const { return register_value.none(); }
-    inline bool any() const { return register_value.any(); }
-    inline bool all() const { return register_value.all(); }
+    [[nodiscard]] inline auto none() const -> bool { return register_value.none(); }
+    [[nodiscard]] inline auto any() const -> bool { return register_value.any(); }
+    [[nodiscard]] inline auto all() const -> bool { return register_value.all(); }
 
-    inline u32 toU32() const { return register_value.to_ulong(); };
+    [[nodiscard]] inline auto toU32() const -> u32 { return register_value.to_ulong(); };
 
   protected:
-    std::bitset<32> register_value; ///< Internal register value.
+    std::bitset<register_bits_number> register_value; ///< Internal register value.
 };
 
 }; // namespace saturnin

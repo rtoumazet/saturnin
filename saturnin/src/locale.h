@@ -48,13 +48,13 @@ class Locale {
     // Locale()              = default;
     Locale(const Locale&) = delete;
     Locale(Locale&&)      = delete;
-    Locale& operator=(const Locale&) & = delete;
-    Locale& operator=(Locale&&) & = delete;
-    ~Locale()                     = default;
+    auto operator=(const Locale&) & -> Locale& = delete;
+    auto operator=(Locale&&) & -> Locale& = delete;
+    ~Locale()                             = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static Locale& Locale::getInstance();
+    /// \fn static auto Locale::getInstance() -> Locale&;
     ///
     /// \brief  Gets the singleton instance.
     ///
@@ -64,10 +64,10 @@ class Locale {
     /// \return The instance.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static Locale& getInstance();
+    static auto getInstance() -> Locale&;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static bool Locale::initialize();
+    /// \fn static auto Locale::initialize(const std::string& country) -> bool;
     ///
     /// \brief  Initializes the locales.
     ///
@@ -77,9 +77,9 @@ class Locale {
     /// \return True if it succeeds.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool initialize(const std::string& country);
+    auto initialize(const std::string& country) -> bool;
 
-    spirit_po::default_catalog* catalog();
+    auto catalog() -> spirit_po::default_catalog*;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ class Locale {
 }; // class Locale
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn std::string tr(const std::string& str);
+/// \fn auto tr(const std::string& str) -> std::string;
 ///
 /// \brief  Translates the given string.
 ///
@@ -110,6 +110,6 @@ class Locale {
 /// \return The translated string.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string tr(const std::string& str);
+auto tr(const std::string& str) -> std::string;
 
 }; // namespace saturnin::core

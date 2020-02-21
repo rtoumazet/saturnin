@@ -20,20 +20,20 @@
 #include <iostream> // cout
 #include <fstream>
 #include <string>
-#include "locale.h"
+#include "locale.h" // NOLINT(modernize-deprecated-headers)
 
 namespace fs = std::filesystem;
 
 namespace saturnin::core {
 
-Locale& Locale::getInstance() {
+auto Locale::getInstance() -> Locale& {
     static Locale instance;
     return instance;
 }
 
-spirit_po::default_catalog* Locale::catalog() { return cat_.get(); };
+auto Locale::catalog() -> spirit_po::default_catalog* { return cat_.get(); };
 
-bool Locale::initialize(const std::string& country = "") {
+auto Locale::initialize(const std::string& country = "") -> bool { // NOLINT(readability-convert-member-functions-to-static)
     std::ifstream ifs("./lang/" + country + "/saturnin.po");
     std::string   po_file{std::istreambuf_iterator<char>{ifs}, std::istreambuf_iterator<char>()};
 
@@ -41,8 +41,6 @@ bool Locale::initialize(const std::string& country = "") {
     return true;
 }
 
-std::string tr(const std::string& str) {
-    return Locale::getInstance().catalog()->gettext_str(str);
-}
+auto tr(const std::string& str) -> std::string { return Locale::getInstance().catalog()->gettext_str(str); }
 
 }; // namespace saturnin::core
