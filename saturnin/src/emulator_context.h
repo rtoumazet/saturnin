@@ -74,13 +74,13 @@ class EmulatorContext {
     EmulatorContext();
     EmulatorContext(const EmulatorContext&) = delete;
     EmulatorContext(EmulatorContext&&)      = delete;
-    EmulatorContext& operator=(const EmulatorContext&) & = delete;
-    EmulatorContext& operator=(EmulatorContext&&) & = delete;
+    auto operator=(const EmulatorContext&) & -> EmulatorContext& = delete;
+    auto operator=(EmulatorContext&&) & -> EmulatorContext& = delete;
     ~EmulatorContext();
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void initialize()
+    /// \fn auto initialize() -> bool
     ///
     /// \brief  Initializes the emulator
     ///
@@ -90,7 +90,7 @@ class EmulatorContext {
     /// \return True if the initialization went well.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool initialize();
+    auto initialize() -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::startEmulation();
@@ -127,18 +127,18 @@ class EmulatorContext {
 
     //@{
     // Functions returning pointers to the various systems of the emulator
-    Config*       config();
-    Memory*       memory();
-    sh2::Sh2*     masterSh2();
-    sh2::Sh2*     slaveSh2();
-    Scu*          scu();
-    Smpc*         smpc();
-    sound::Scsp*  scsp();
-    cdrom::Cdrom* cdrom();
+    auto config() -> Config*;
+    auto memory() -> Memory*;
+    auto masterSh2() -> sh2::Sh2*;
+    auto slaveSh2() -> sh2::Sh2*;
+    auto scu() -> Scu*;
+    auto smpc() -> Smpc*;
+    auto scsp() -> sound::Scsp*;
+    auto cdrom() -> cdrom::Cdrom*;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn HardwareMode EmulatorContext::hardwareMode() const
+    /// \fn auto EmulatorContext::hardwareMode() const -> HardwareMode
     ///
     /// \brief  Current hardware mode of the emulator.
     ///
@@ -148,7 +148,7 @@ class EmulatorContext {
     /// \return A HardwareMode.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    HardwareMode hardwareMode() const { return hardware_mode_; };
+    [[nodiscard]] auto hardwareMode() const -> HardwareMode { return hardware_mode_; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::emulationStatus(const EmulationStatus status) const
@@ -177,7 +177,7 @@ class EmulatorContext {
     void renderingStatus(const RenderingStatus status) { rendering_status_ = status; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn RenderingStatus EmulatorContext::renderingStatus()
+    /// \fn auto EmulatorContext::renderingStatus() -> RenderingStatus
     ///
     /// \brief  Gets the current rendering status.
     ///
@@ -187,7 +187,7 @@ class EmulatorContext {
     /// \return The RenderingStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    RenderingStatus renderingStatus() { return rendering_status_; };
+    auto renderingStatus() -> RenderingStatus { return rendering_status_; };
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////

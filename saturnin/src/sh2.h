@@ -57,8 +57,15 @@ constexpr u16 cache_address_size       = 0x400;
 constexpr u16 cache_data_size          = 0x1000;
 constexpr u16 io_registers_size        = 0x200;
 
-constexpr u32 sh2_memory_mask = 0x1FF;
+constexpr u32 sh2_memory_mask    = 0x1FF;
+constexpr u8  cache_lines_number = 32;
 
+constexpr u8 frt_clock_divisor_8        = 8;
+constexpr u8 frt_clock_divisor_32       = 32;
+constexpr u8 frt_clock_divisor_128      = 128;
+constexpr u8 frt_clock_divisor_mask_8   = 0b00000111;
+constexpr u8 frt_clock_divisor_mask_32  = 0b00011111;
+constexpr u8 frt_clock_divisor_mask_128 = 0b01111111;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   Sh2Type
 ///
@@ -220,7 +227,7 @@ class Sh2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    auto readCacheAddresses(const u32 addr) const -> T  {
+    auto readCacheAddresses(const u32 addr) const -> T {
         return rawRead<T>(cache_addresses_, addr & 0x3FF);
     }
 
@@ -243,7 +250,7 @@ class Sh2 {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<typename T> T Sh2::readCacheData(const u32 addr) const
+    /// \fn template<typename T> auto Sh2::readCacheData(const u32 addr) const -> T
     ///
     /// \brief  Read interface for cache data.
     ///
@@ -257,7 +264,7 @@ class Sh2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    T readCacheData(const u32 addr) const {
+    auto readCacheData(const u32 addr) const -> T {
         return rawRead<T>(cache_data_, addr & 0xFFF);
     }
 
@@ -304,7 +311,7 @@ class Sh2 {
     void sendInterruptCaptureSignal();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u8 Sh2::run();
+    /// \fn auto Sh2::run() -> u8;
     ///
     /// \brief  Runs the SH2.
     ///
@@ -314,7 +321,7 @@ class Sh2 {
     /// \return Elapsed cycles.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u8 run();
+    auto run() -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::powerOnReset();
@@ -336,7 +343,7 @@ class Sh2 {
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u8 Sh2::readRegisters8(u32 addr);
+    /// \fn auto Sh2::readRegisters8(u32 addr) -> u8;
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -348,10 +355,10 @@ class Sh2 {
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u8 readRegisters8(u32 addr);
+    auto readRegisters8(u32 addr) -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u16 Sh2::readRegisters16(u32 addr);
+    /// \fn auto Sh2::readRegisters16(u32 addr) -> u16;
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -363,10 +370,10 @@ class Sh2 {
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u16 readRegisters16(u32 addr);
+    auto readRegisters16(u32 addr) -> u16;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 Sh2::readRegisters32(u32 addr);
+    /// \fn auto Sh2::readRegisters32(u32 addr) -> u32;
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -378,7 +385,7 @@ class Sh2 {
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32 readRegisters32(u32 addr);
+    auto readRegisters32(u32 addr) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::writeRegisters(u32 addr, u8 data);
@@ -479,7 +486,7 @@ class Sh2 {
     void executeDma();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Sh2::dmaStartConditionsAreSatisfied(DmaChannel dc);
+    /// \fn auto Sh2::dmaStartConditionsAreSatisfied(DmaChannel dc) -> bool;
     ///
     /// \brief  Checks if the DMA channel start conditions are satisfied.
     ///
@@ -491,10 +498,10 @@ class Sh2 {
     /// \return True if it succeeds, false if it fails.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool dmaStartConditionsAreSatisfied(DmaChannel dc);
+    auto dmaStartConditionsAreSatisfied(DmaChannel dc) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn Sh2DmaConfiguration Sh2::configureDmaTransfer(DmaChannel dc);
+    /// \fn auto Sh2::configureDmaTransfer(DmaChannel dc) -> Sh2DmaConfiguration;
     ///
     /// \brief  Returns a struct configured for the DMA channel passed as parameter.
     ///
@@ -506,7 +513,7 @@ class Sh2 {
     /// \return A Sh2DmaConfiguration.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Sh2DmaConfiguration configureDmaTransfer(DmaChannel dc);
+    auto configureDmaTransfer(DmaChannel dc) -> Sh2DmaConfiguration;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf);
@@ -570,7 +577,7 @@ class Sh2 {
     void runFreeRunningTimer(u8 cycles_to_run);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn Memory* Sh2::memory() const;
+    /// \fn auto Sh2::memory() const -> Memory*;
     ///
     /// \brief  Returns the memory object.
     ///
@@ -580,10 +587,10 @@ class Sh2 {
     /// \return SCU memory array.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] Memory* memory() const;
+    [[nodiscard]] auto memory() const -> Memory*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn Scu* Sh2::scu() const;
+    /// \fn auto Sh2::scu() const -> Scu*;
     ///
     /// \brief  Returns the SCU object.
     ///
@@ -593,10 +600,10 @@ class Sh2 {
     /// \return The SCU object.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] Scu* scu() const;
+    [[nodiscard]] auto scu() const -> Scu*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  EmulatorContext* Sh2::emultaorContext() const;
+    /// \fn  auto Sh2::emultaorContext() const -> EmulatorContext*;
     ///
     /// \brief  Returns the EmulatorContext object.
     ///
@@ -606,13 +613,13 @@ class Sh2 {
     /// \return The EmulatorContext object.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    EmulatorContext* emulatorContext();
+    auto emulatorContext() -> EmulatorContext*;
 
-    friend u16 xn00(Sh2& s);
-    friend u16 x0n0(Sh2& s);
-    friend u16 x00n(Sh2& s);
-    friend u16 xnnn(Sh2& s);
-    friend u16 x0nn(Sh2& s);
+    friend auto xn00(Sh2& s) -> u16;
+    friend auto x0n0(Sh2& s) -> u16;
+    friend auto x00n(Sh2& s) -> u16;
+    friend auto xnnn(Sh2& s) -> u16;
+    friend auto x0nn(Sh2& s) -> u16;
 
     friend void add(Sh2& s);
     friend void addi(Sh2& s);

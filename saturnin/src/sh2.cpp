@@ -32,13 +32,13 @@ using core::Log;
 
 Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : sh2_type_(st), emulator_context_(ec) { reset(); }
 
-core::Memory* Sh2::memory() const { return emulator_context_->memory(); }
+auto Sh2::memory() const -> core::Memory* { return emulator_context_->memory(); }
 
-Scu* Sh2::scu() const { return emulator_context_->scu(); }
+auto Sh2::scu() const -> Scu* { return emulator_context_->scu(); }
 
-core::EmulatorContext* Sh2::emulatorContext() { return emulator_context_; }
+auto Sh2::emulatorContext() -> core::EmulatorContext* { return emulator_context_; }
 
-u8 Sh2::readRegisters8(const u32 addr) {
+auto Sh2::readRegisters8(const u32 addr) -> u8 {
     switch (addr) {
         /////////////
         // 5. INTC //
@@ -115,7 +115,7 @@ u8 Sh2::readRegisters8(const u32 addr) {
     }
 }
 
-u16 Sh2::readRegisters16(const u32 addr) {
+auto Sh2::readRegisters16(const u32 addr) -> u16 {
     switch (addr) {
         /////////////
         // 5. INTC //
@@ -174,7 +174,7 @@ u16 Sh2::readRegisters16(const u32 addr) {
     }
 }
 
-u32 Sh2::readRegisters32(const u32 addr) {
+auto Sh2::readRegisters32(const u32 addr) -> u32 {
     switch (addr) {
         /////////////
         // 5. INTC //
@@ -325,16 +325,16 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             frt_tcr_.set(TimerControlRegister::all_bits, data);
             switch (frt_tcr_.get(TimerControlRegister::clock_select)) {
                 case FrtClockSelect::internal_divided_by_8:
-                    frt_clock_divisor_ = 8;
-                    frt_mask_          = 0b00000111;
+                    frt_clock_divisor_ = frt_clock_divisor_8;
+                    frt_mask_          = frt_clock_divisor_mask_8;
                     break;
                 case FrtClockSelect::internal_divided_by_32:
-                    frt_clock_divisor_ = 32;
-                    frt_mask_          = 0b00011111;
+                    frt_clock_divisor_ = frt_clock_divisor_32;
+                    frt_mask_          = frt_clock_divisor_mask_32;
                     break;
                 case FrtClockSelect::internal_divided_by_128:
-                    frt_clock_divisor_ = 128;
-                    frt_mask_          = 0b01111111;
+                    frt_clock_divisor_ = frt_clock_divisor_128;
+                    frt_mask_          = frt_clock_divisor_mask_128;
                     break;
                 case FrtClockSelect::external: Log::warning("sh2", "FRT - External clock not implemented"); break;
             }
@@ -367,7 +367,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
     // core::rawWrite<u8>(io_registers_, addr & sh2_memory_mask, data);
 }
 
-void Sh2::writeRegisters(u32 addr, u16 data) {
+void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-member-functions-to-static)
     switch (addr) {
         /////////////
         // 5. INTC //
@@ -494,38 +494,38 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         // 7. BSC //
         /////////////
         case bus_control_register1:
-            if ((data & 0xFFFF0000) == 0xA55A0000) {
+            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
                 bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::writeMask()));
             }
             break;
         case bus_control_register2:
-            if ((data & 0xFFFF0000) == 0xA55A0000) {
+            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
                 bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::writeMask()));
             }
             break;
         case wait_state_control_register:
-            if ((data & 0xFFFF0000) == 0xA55A0000) {
+            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
                 bsc_wcr_.set(WaitControlRegister::lower_16_bits, static_cast<u16>(data));
             }
             break;
         case individual_memory_control_register:
-            if ((data & 0xFFFF0000) == 0xA55A0000) {
+            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
                 bsc_mcr_.set(IndividualMemoryControlRegister::lower_16_bits, static_cast<u16>(data));
             }
             break;
         case refresh_timer_control_status_register:
-            if ((data & 0xFFFF0000) == 0xA55A0000) {
+            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
                 bsc_rtcsr_.set(RefreshTimeControlStatusRegister::lower_16_bits,
                                static_cast<u16>(data & RefreshTimeControlStatusRegister::writeMask()));
             }
             break;
         case refresh_timer_counter:
-            if ((data & 0xFFFF0000) == 0xA55A0000) {
+            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
                 bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & RefreshTimerCounter::writeMask()));
             }
             break;
         case refresh_time_constant_register:
-            if ((data & 0xFFFF0000) == 0xA55A0000) {
+            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
                 bsc_rtcor_.set(RefreshTimerConstantRegister::lower_16_bits,
                                static_cast<u16>(data & RefreshTimerConstantRegister::writeMask()));
             }
@@ -614,12 +614,12 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
     }
 }
 
-void Sh2::purgeCache() {
+void Sh2::purgeCache() { // NOLINT(readability-convert-member-functions-to-static)
     // All the valid bits and LRU bits are initialized to 0
-    for (u8 i = 0; i < 32; ++i) {
+    for (u8 i = 0; i < cache_lines_number; ++i) {
         // :WARNING: following code is untested
         u32 data = core::rawRead<u32>(cache_addresses_, i);
-        data &= 0xFFFFFC0B;
+        data &= 0xFFFFFC0B; // NOLINT(readability-magic-numbers)
         core::rawWrite<u32>(cache_addresses_, i, data);
     }
 }
@@ -639,7 +639,7 @@ void Sh2::initializeOnChipRegisters() {
     intc_icr_.reset();
 
     // Bus State Controler registers
-    u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? 0x000003F0 : 0x000083F0;
+    u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? 0x000003F0 : 0x000083F0; // NOLINT(readability-magic-numbers)
     bsc_bcr1_.set(BusControlRegister1::all_bits, default_bcr1);
     bsc_bcr2_.set(BusControlRegister2::all_bits, 0x000000FCu);
     bsc_wcr_.set(WaitControlRegister::all_bits, 0x0000AAFFu);
@@ -711,11 +711,11 @@ void Sh2::start32bitsDivision() {
     divu_dvdntl_.set(DividendRegisterL::all_bits, divu_dvdnt_.toU32());
 
     s32 dvdnt = divu_dvdnt_.toU32();
-    if (dvdnt < 0)
+    if (dvdnt < 0) {
         divu_dvdnth_.set();
-    else
+    } else {
         divu_dvdnth_.reset();
-
+    }
     s32 dvsr = divu_dvsr_.toU32();
 
     Log::debug("sh2", "Dividend : {}, divisor : {}", dvdnt, dvsr);
@@ -725,12 +725,15 @@ void Sh2::start32bitsDivision() {
     if (divu_dvsr_.any()) {
         divu_quot_ = dvdnt / dvsr;
         divu_rem_  = dvdnt % dvsr;
-    } else
+    } else {
         divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+    }
 
     // Overflow check
-    if ((dvdnt & 0x80000000) && (dvsr & 0x80000000)) {
-        if ((divu_quot_ == 0x7FFFFFFF) && (divu_rem_ & 0x80000000))
+    bool is_dvdnt_ovf = static_cast<bool>(dvdnt & 0x80000000); // NOLINT(readability-magic-numbers)
+    bool is_dvsr_ovf  = static_cast<bool>(dvsr & 0x80000000);  // NOLINT(readability-magic-numbers)
+    if (is_dvdnt_ovf && is_dvsr_ovf) {
+        if ((divu_quot_ == 0x7FFFFFFF) && (divu_rem_ & 0x80000000)) // NOLINT(readability-magic-numbers)
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
     }
 
@@ -738,7 +741,7 @@ void Sh2::start32bitsDivision() {
     divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
 
     divu_is_running_ = true;
-}
+} // namespace saturnin::sh2
 
 void Sh2::start64bitsDivision() {
     Log::debug("sh2", "64/32 division");
@@ -747,7 +750,7 @@ void Sh2::start64bitsDivision() {
     s32 dvdnth = divu_dvdnth_.toU32();
     s32 dvsr   = divu_dvsr_.toU32();
 
-    s64 dividend = (static_cast<s64>(dvdnth) << 32) | (dvdntl & 0xffffffff);
+    s64 dividend = (static_cast<s64>(dvdnth) << 32) | (dvdntl & 0xffffffff); // NOLINT(readability-magic-numbers)
 
     Log::debug("sh2", "Dividend : {}, divisor : {}", dividend, dvsr);
 
@@ -757,11 +760,14 @@ void Sh2::start64bitsDivision() {
     if (divu_dvsr_.any()) {
         quotient  = dividend / dvsr;
         remainder = dividend % dvsr;
-    } else
+    } else {
         divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+    }
 
     // Overflow check
-    if ((dvdnth & 0x80000000) && (dvsr & 0x80000000)) {
+    bool is_dvdnth_ovf = static_cast<bool>(dvdnth & 0x80000000); // NOLINT(readability-magic-numbers)
+    bool is_dvsr_ovf   = static_cast<bool>(dvsr & 0x80000000);   // NOLINT(readability-magic-numbers)
+    if (is_dvdnth_ovf && is_dvsr_ovf) {
         if ((quotient == 0x7FFFFFFF) && (remainder & 0x80000000))
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
     }
@@ -843,7 +849,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
     u32 counter_increment{elapsed_cycles / frt_clock_divisor_};
     u32 cycles_remainder{elapsed_cycles % frt_clock_divisor_};
 
-    if (counter_increment) {
+    if (counter_increment > 0) {
         u32 old_frc{frt_frc_.get(FreeRunningCounter::all_bits)};
         u32 current_frc{old_frc + counter_increment};
         frt_frc_.set(FreeRunningCounter::all_bits, static_cast<u16>(current_frc));
@@ -851,7 +857,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
         frt_elapsed_cycles_ = elapsed_cycles & frt_mask_;
 
         // Checking overflow
-        if (current_frc > 0xFFFF) {
+        if (current_frc > 0xFFFF) { // NOLINT(readability-magic-numbers)
             frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::timer_overflow_flag);
             if (frt_tier_.get(TimerInterruptEnableRegister::timer_overflow_interrupt_enable)
                 == TimerOverflowInterruptEnable::interrupt_request_enabled) {
@@ -928,7 +934,7 @@ void Sh2::executeDma() {
     }
 }
 
-bool Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) {
+auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLINT(readability-convert-member-functions-to-static)
     // DE=1 TE=0 NMIF=0 AE=0
     switch (dc) {
         case DmaChannel::channel_0: {
@@ -953,12 +959,12 @@ bool Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) {
     return false;
 }
 
-Sh2DmaConfiguration Sh2::configureDmaTransfer(const DmaChannel dc) {
+auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
     Sh2DmaConfiguration conf;
     switch (dc) {
         case DmaChannel::channel_0:
             conf.channel     = DmaChannel::channel_0;
-            conf.counter     = dmac_tcr0_.toU32() & 0x00FFFFFF;
+            conf.counter     = dmac_tcr0_.toU32() & 0x00FFFFFF; // NOLINT(readability-magic-numbers)
             conf.source      = dmac_sar0_.toU32();
             conf.destination = dmac_dar0_.toU32();
             conf.chcr        = dmac_chcr0_;
@@ -966,7 +972,7 @@ Sh2DmaConfiguration Sh2::configureDmaTransfer(const DmaChannel dc) {
             break;
         case DmaChannel::channel_1:
             conf.channel     = DmaChannel::channel_1;
-            conf.counter     = dmac_tcr1_.toU32() & 0x00FFFFFF;
+            conf.counter     = dmac_tcr1_.toU32() & 0x00FFFFFF; // NOLINT(readability-magic-numbers)
             conf.source      = dmac_sar1_.toU32();
             conf.destination = dmac_dar1_.toU32();
             conf.chcr        = dmac_chcr1_;
@@ -1062,11 +1068,11 @@ void Sh2::reset() {
     initializeOnChipRegisters();
 
     frt_elapsed_cycles_ = 0;
-    frt_clock_divisor_  = 8;
-    frt_mask_           = 0b00000111;
+    frt_clock_divisor_  = frt_clock_divisor_8;
+    frt_mask_           = frt_clock_divisor_mask_8;
 }
 
-void Sh2::sendInterrupt(const core::Interrupt& i) {
+void Sh2::sendInterrupt(const core::Interrupt& i) { // NOLINT(readability-convert-member-functions-to-static)
     if (i.level != 0) {
         if (pending_interrupts_.size() <= max_interrupt_number) {
             if (!is_level_interrupted_[i.level]) {
@@ -1110,7 +1116,7 @@ void Sh2::sendInterruptCaptureSignal() {
     frt_icr_.set(InputCaptureRegister::all_bits, frt_frc_.get(FreeRunningCounter::all_bits));
 }
 
-u8 Sh2::run() {
+auto Sh2::run() -> u8 {
     runInterruptController();
     u8 cycles_to_run = 1; // Will have to be changed when instruction execution is plugged in
 
