@@ -633,7 +633,7 @@ void Scu::initializeRegisters() {
     // dsta = 0;
 }
 
-DmaConfiguration Scu::configureDmaTransfer(const DmaLevel level) {
+auto Scu::configureDmaTransfer(const DmaLevel level) -> DmaConfiguration {
     DmaConfiguration dc{};
     dc.dma_level = level;
     switch (level) {

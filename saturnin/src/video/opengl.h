@@ -57,14 +57,14 @@ class Opengl {
 
     //@{
     // Abstract functions
-    virtual void initialize() abstract;
-    virtual void shutdown() abstract;
-    virtual void preRender() abstract;
-    virtual void render() abstract;
-    virtual void postRender() abstract;
-    virtual u32  generateEmptyTexture(const u32 width, const u32 height) const abstract;
-    virtual void updateTextureSize(const u32 width, const u32 height) abstract;
-    virtual void deleteTexture() const abstract;
+    virtual void initialize()                                                  = 0;
+    virtual void shutdown()                                                    = 0;
+    virtual void preRender()                                                   = 0;
+    virtual void render()                                                      = 0;
+    virtual void postRender()                                                  = 0;
+    virtual u32  generateEmptyTexture(const u32 width, const u32 height) const = 0;
+    virtual void updateTextureSize(const u32 width, const u32 height)          = 0;
+    virtual void deleteTexture() const                                         = 0;
 
     //@}
 
@@ -77,7 +77,7 @@ class Opengl {
     /// \date   18/10/2019
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    virtual void bindTextureToFbo() const abstract;
+    virtual void bindTextureToFbo() const = 0;
 
     u32 texture() const { return this->texture_; };
 

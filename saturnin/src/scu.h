@@ -135,16 +135,16 @@ class Scu {
     //@{
     // Constructors / Destructors
     Scu() = delete;
-    Scu(EmulatorContext*);
+    Scu(EmulatorContext* ec);
     Scu(const Scu&) = delete;
     Scu(Scu&&)      = delete;
-    Scu& operator=(const Scu&) & = delete;
-    Scu& operator=(Scu&&) & = delete;
-    ~Scu()                  = default;
+    auto operator=(const Scu&) & -> Scu& = delete;
+    auto operator=(Scu&&) & -> Scu& = delete;
+    ~Scu()                          = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 Scu::read32(const u32 addr) const;
+    /// \fn auto Scu::read32(u32 addr) const -> u32;
     ///
     /// \brief  Reads 32 bits of data from the specified address in the SCU memory space.
     ///
@@ -156,7 +156,7 @@ class Scu {
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32 read32(const u32 addr) const;
+    [[nodiscard]] auto read32(u32 addr) const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::write32(const u32 addr, const u32 data);
@@ -170,7 +170,7 @@ class Scu {
     /// \param  data    Data to write.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void write32(const u32 addr, const u32 data);
+    void write32(u32 addr, u32 data);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::executeDma(const DmaConfiguration& dc);
@@ -225,7 +225,7 @@ class Scu {
     void generateInterrupt(const Interrupt& i);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Scu::isInterruptMasked(const Interrupt& i);
+    /// \fn auto Scu::isInterruptMasked(const Interrupt& i) -> bool;
     ///
     /// \brief  Checks if the interrupt is masked in the SCU.
     ///
@@ -237,10 +237,10 @@ class Scu {
     /// \return True if interrupt is masked.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool isInterruptMasked(const Interrupt& i);
+    auto isInterruptMasked(const Interrupt& i) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Scu::isInterruptExecuting(const Interrupt& i);
+    /// \fn auto Scu::isInterruptExecuting(const Interrupt& i) -> bool;
     ///
     /// \brief  Checks if the interrupt is currently executing.
     ///
@@ -252,20 +252,20 @@ class Scu {
     /// \return True if interrupt is executing.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool isInterruptExecuting(const Interrupt& i);
+    auto isInterruptExecuting(const Interrupt& i) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Scu::sendStartFactor(const StartingFactorSelect sfs);
+    /// \fn void Scu::sendStartFactor(StartingFactorSelect sfs);
     ///
     /// \brief  Notifies the SCU that a DMA start factor has occured.
     ///
     /// \author Runik
     /// \date   22/03/2019
     ///
-    /// \param  sfs   Start factor sent.
+    /// \param  sfs Start factor sent.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void sendStartFactor(const StartingFactorSelect sfs);
+    void sendStartFactor(StartingFactorSelect sfs);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn bool Scu::clearInterruptFlag(const Interrupt& i);
@@ -278,14 +278,14 @@ class Scu {
     /// \param  i   Interrupt to clear.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void clearInterruptFlag(const Interrupt&);
+    void clearInterruptFlag(const Interrupt& i);
 
     void dmaTest();
 
     /// \name Context objects accessors
     //@{
-    EmulatorContext* emulatorContext() const;
-    Memory*          memory() const;
+    [[nodiscard]] auto emulatorContext() const -> EmulatorContext*;
+    [[nodiscard]] auto memory() const -> Memory*;
     //@}
 
   private:
@@ -301,19 +301,19 @@ class Scu {
     void initializeRegisters();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn DmaConfiguration Scu::configureDmaTransfer(DmaLevel dl);
+    /// \fn auto Scu::configureDmaTransfer(DmaLevel level) -> DmaConfiguration;
     ///
     /// \brief  Configures the DMA transfer.
     ///
     /// \author Runik
     /// \date   24/01/2019
     ///
-    /// \param  dl  DMA level to configure.
+    /// \param  level   DMA level to configure.
     ///
     /// \return A DmaConfiguration struct.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    DmaConfiguration configureDmaTransfer(const DmaLevel dl);
+    auto configureDmaTransfer(DmaLevel level) -> DmaConfiguration;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc);
@@ -412,49 +412,53 @@ class Scu {
     void addDmaToQueue(const DmaConfiguration& dc);
 
     struct DmaCompare {
-        bool operator()(const DmaConfiguration& dc1, const DmaConfiguration& dc2) const {
+        auto operator()(const DmaConfiguration& dc1, const DmaConfiguration& dc2) const -> bool {
             return dc1.dma_status < dc2.dma_status;
         }
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn DmaBus Scu::getDmaBus(const u32 address);
+    /// \fn auto Scu::getDmaBus(u32 address) -> DmaBus;
     ///
     /// \brief  Returns the DMA bus of the specified address.
     ///
     /// \author Runik
     /// \date   26/06/2019
     ///
-    /// \param address        Memory map address.
+    /// \param  address Memory map address.
+    ///
+    /// \return The dma bus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    DmaBus getDmaBus(const u32 address);
+    auto getDmaBus(u32 address) -> DmaBus;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn ScuRegion Scu::getScuRegion(cconst u32 address);
+    /// \fn auto Scu::getScuRegion(u32 address) -> ScuRegion;
     ///
     /// \brief  Returns the SCU region of the specified address.
     ///
     /// \author Runik
     /// \date   26/06/2019
     ///
-    /// \param address        Memory map address.
+    /// \param  address Memory map address.
+    ///
+    /// \return The scu region.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    ScuRegion getScuRegion(const u32 address);
+    auto getScuRegion(u32 address) -> ScuRegion;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::sendDmaEndInterrupt(const DmaLevel l);
+    /// \fn void Scu::sendDmaEndInterrupt(DmaLevel l);
     ///
     /// \brief  Sends dma end interrupt of the current dma level.
     ///
     /// \author Runik
     /// \date   05/08/2019
     ///
-    /// \param l        DMA level to send interrupt for.
+    /// \param  l   DMA level to send interrupt for.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void sendDmaEndInterrupt(const DmaLevel l);
+    void sendDmaEndInterrupt(DmaLevel l);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::resetDmaEnable(const DmaConfiguration& dc);
@@ -470,18 +474,18 @@ class Scu {
     void resetDmaEnable(const DmaConfiguration& dc);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::dmaUpdateWriteAddress(const DmaLevel l);
+    /// \fn void Scu::dmaUpdateWriteAddress(DmaLevel l, u32 data);
     ///
     /// \brief  Updates write address of the current dma level.
     ///
     /// \author Runik
     /// \date   12/08/2019
     ///
-    /// \param l        DMA level.
-    /// \param data     Data to write
+    /// \param  l       DMA level.
+    /// \param  data    Data to write.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void dmaUpdateWriteAddress(const DmaLevel l, const u32 data);
+    void dmaUpdateWriteAddress(DmaLevel l, u32 data);
 
     using DmaConfigurations = std::vector<DmaConfiguration>;
     using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;

@@ -42,7 +42,7 @@ using s16  = std::int16_t;
 using s32  = std::int32_t;
 using s64  = std::int64_t;
 
-constexpr u8 register_bits_number{32};
+constexpr u8 register_size{32};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct BitRange
@@ -90,9 +90,9 @@ class Register {
     template<typename T>
     inline auto get(const BitRange<T>& r) -> T {
         auto range = register_value;
-        range >>= r.first_bit_pos_;           // drops rightmost bits
-        range <<= (32 - r.last_bit_pos_ - 1); // drops leftmost bits
-        range >>= (32 - r.last_bit_pos_ - 1); // shifts back into place
+        range >>= r.first_bit_pos_;                      // drops rightmost bits
+        range <<= (register_size - r.last_bit_pos_ - 1); // drops leftmost bits
+        range >>= (register_size - r.last_bit_pos_ - 1); // shifts back into place
         return static_cast<T>(range.to_ulong());
     }
 
@@ -133,7 +133,7 @@ class Register {
     [[nodiscard]] inline auto toU32() const -> u32 { return register_value.to_ulong(); };
 
   protected:
-    std::bitset<register_bits_number> register_value; ///< Internal register value.
+    std::bitset<register_size> register_value; ///< Internal register value.
 };
 
 }; // namespace saturnin

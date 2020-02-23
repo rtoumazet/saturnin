@@ -53,23 +53,23 @@ class Log {
     Log()           = delete;
     Log(const Log&) = delete;
     Log(Log&&)      = delete;
-    Log& operator=(const Log&) & = delete;
-    Log& operator=(Log&&) & = delete;
-    ~Log()                  = delete;
+    auto operator=(const Log&) & -> Log& = delete;
+    auto operator=(Log&&) & -> Log& = delete;
+    ~Log()                          = delete;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static bool Log::initialize();
+    /// \fn static auto Log::initialize() -> bool;
     ///
     /// \brief  Initializes various logs used in Saturnin.
     ///
     /// \author Runik
     /// \date   08/02/2018
     ///
-    /// \return True if it succeeds, false if it fails.
+    /// \return True if initialization is successful.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static bool initialize();
+    static auto initialize() -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template <typename... Args> static inline void Log::error(const std::string& logger_name, const std::string& value,
@@ -146,8 +146,9 @@ class Log {
 
     template<typename... Args>
     static inline void info(const std::string& logger_name, const std::string& value, const Args&... args) {
-        if (loggerExists(logger_name))
+        if (loggerExists(logger_name)) {
             loggers_.at(logger_name)->info(value.c_str(), args...);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,19 +173,21 @@ class Log {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static inline bool Log::loggerExists(const std::string& logger_name);
+    /// \fn static inline auto Log::loggerExists(const std::string& logger_name) -> bool
     ///
     /// \brief  Queries if a given logger exists.
     ///
     /// \author Runik
     /// \date   08/02/2018
     ///
+    /// \exception  std::runtime_error  Raised when a runtime error condition occurs.
+    ///
     /// \param  logger_name Name of the logger.
     ///
     /// \return True if the logger exists.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static inline bool loggerExists(const std::string& logger_name) {
+    static inline auto loggerExists(const std::string& logger_name) -> bool {
         if (loggers_.count(logger_name) == 0) {
             throw std::runtime_error(fmt::format(tr("Log '{0}' is not defined !"), logger_name));
         }
@@ -207,7 +210,7 @@ class Log {
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> createFileSink(const std::string& logger_path);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> Log::createConsoleSink();
+    /// \fn static auto Log::createConsoleSink() ->std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt>;
     ///
     /// \brief  Creates a color console sink.
     ///
@@ -217,7 +220,7 @@ class Log {
     /// \return Sink linked to the color console.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> createConsoleSink();
+    static auto createConsoleSink() -> std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Log::createLogger(const std::string& logger_name, const

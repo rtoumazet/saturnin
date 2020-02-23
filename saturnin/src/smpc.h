@@ -189,7 +189,7 @@ enum class PeripheralKey : u16 {
 
 enum class PeripheralLayout {
     empty_layout,   ///< Empty layout, nothing is mapped
-    default_layout, ///< Default layout 
+    default_layout, ///< Default layout
     current_layout  ///< Currently mapped layout
 };
 
@@ -217,8 +217,8 @@ struct SaturnDigitalPad {
     PeripheralKey button_z;
     PeripheralKey button_start;
 
-    std::vector<PeripheralKey> toConfig(const PeripheralLayout);
-    void                       fromConfig(std::vector<PeripheralKey>);
+    auto toConfig(PeripheralLayout pl) -> std::vector<PeripheralKey>;
+    void fromConfig(std::vector<PeripheralKey> pk);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -254,8 +254,8 @@ struct StvPlayerControls {
     PeripheralKey button_3;
     PeripheralKey button_4;
 
-    std::vector<PeripheralKey> toConfig(const PeripheralLayout);
-    void                       fromConfig(std::vector<PeripheralKey>);
+    auto toConfig(PeripheralLayout pl) -> std::vector<PeripheralKey>;
+    void fromConfig(std::vector<PeripheralKey> pk);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,8 +275,8 @@ struct StvBoardControls {
     PeripheralKey p1_start;
     PeripheralKey p2_start;
 
-    std::vector<PeripheralKey> toConfig(const PeripheralLayout);
-    void                       fromConfig(std::vector<PeripheralKey>);
+    auto toConfig(PeripheralLayout pl) -> std::vector<PeripheralKey>;
+    void fromConfig(std::vector<PeripheralKey> pk);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,19 +319,19 @@ struct RtcTime {
     std::bitset<4> second_10_bcd;
     std::bitset<4> second_1_bcd;
 
-    u8 getUpperYear() { return concat(year_1000_bcd, year_100_bcd); }
-    u8 getLowerYear() { return concat(year_10_bcd, year_1_bcd); }
-    u8 getDayMonth() { return concat(day_hex, month_hex); }
-    u8 getDays() { return concat(day_10_bcd, day_1_bcd); }
-    u8 getHours() { return concat(hour_10_bcd, hour_1_bcd); }
-    u8 getMinutes() { return concat(minute_10_bcd, minute_1_bcd); }
-    u8 getSeconds() { return concat(second_10_bcd, second_1_bcd); }
+    auto getUpperYear() -> u8 { return concat(year_1000_bcd, year_100_bcd); }
+    auto getLowerYear() -> u8 { return concat(year_10_bcd, year_1_bcd); }
+    auto getDayMonth() -> u8 { return concat(day_hex, month_hex); }
+    auto getDays() -> u8 { return concat(day_10_bcd, day_1_bcd); }
+    auto getHours() -> u8 { return concat(hour_10_bcd, hour_1_bcd); }
+    auto getMinutes() -> u8 { return concat(minute_10_bcd, minute_1_bcd); }
+    auto getSeconds() -> u8 { return concat(second_10_bcd, second_1_bcd); }
 
   private:
-    u8 concat(std::bitset<4> upper, std::bitset<4> lower) {
-        std::bitset<8> left = upper.to_ulong();
+    static auto concat(std::bitset<4> upper, std::bitset<4> lower) -> u8 {
+        std::bitset<8> left = upper.to_ulong(); // NOLINT(readability-magic-numbers)
         left <<= 4;
-        std::bitset<8> right = lower.to_ulong();
+        std::bitset<8> right = lower.to_ulong(); // NOLINT(readability-magic-numbers)
         left |= right;
         return static_cast<u8>(left.to_ulong());
     }
@@ -345,16 +345,16 @@ class Smpc {
     Smpc(EmulatorContext* ec) : emulator_context_(ec) { reset(); };
     Smpc(const Smpc&) = delete;
     Smpc(Smpc&&)      = delete;
-    Smpc& operator=(const Smpc&) & = delete;
-    Smpc& operator=(Smpc&&) & = delete;
-    ~Smpc()                   = default;
+    auto operator=(const Smpc&) & -> Smpc& = delete;
+    auto operator=(Smpc&&) & -> Smpc& = delete;
+    ~Smpc()                           = default;
     //@}
 
-    u8   read(const u32 addr);
-    void write(const u32 addr, const u8 data);
+    auto read(u32 addr) -> u8;
+    void write(u32 addr, u8 data);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn std::vector<PeripheralKey> Smpc::listAvailableKeys();
+    /// \fn auto Smpc::listAvailableKeys() -> std::vector<PeripheralKey>;
     ///
     /// \brief  Returns the keyboard keys available.
     ///
@@ -364,7 +364,7 @@ class Smpc {
     /// \return A std::vector&lt;PeripheralKey&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::vector<PeripheralKey> listAvailableKeys();
+    auto listAvailableKeys() -> std::vector<PeripheralKey>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::initializePeripheralMappings();
@@ -378,7 +378,7 @@ class Smpc {
     void initializePeripheralMappings();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn SaturnPeripheralMapping Smpc::getSaturnPeripheralMapping();
+    /// \fn auto Smpc::getSaturnPeripheralMapping() -> SaturnPeripheralMapping;
     ///
     /// \brief  Returns the current Saturn peripheral mapping.
     ///
@@ -388,10 +388,10 @@ class Smpc {
     /// \return The saturn peripheral mapping.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    SaturnPeripheralMapping getSaturnPeripheralMapping();
+    auto getSaturnPeripheralMapping() -> SaturnPeripheralMapping;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn StvPeripheralMapping Smpc::getStvPeripheralMapping();
+    /// \fn auto Smpc::getStvPeripheralMapping() -> StvPeripheralMapping;
     ///
     /// \brief  Returns the current ST-V peripheral mapping.
     ///
@@ -401,9 +401,12 @@ class Smpc {
     /// \return The stv peripheral mapping.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    StvPeripheralMapping getStvPeripheralMapping();
+    auto getStvPeripheralMapping() -> StvPeripheralMapping;
 
   private:
+    static constexpr u8 input_registers_number{7};
+    static constexpr u8 output_registers_number{32};
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::reset();
     ///
@@ -438,7 +441,7 @@ class Smpc {
     void executeCommand();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d);
+    /// \fn auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
     ///
     /// \brief  Calculates the number of cycles needed for the duration.
     ///
@@ -450,7 +453,7 @@ class Smpc {
     /// \return The number of cycles needed for the duration.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32 calculateCyclesNumber(const std::chrono::duration<double>& d);
+    auto calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::getStatus();
@@ -489,17 +492,17 @@ class Smpc {
 
     //@{
     // Internal registers
-    CommandRegister       comreg_;
-    StatusRegister        sr_;
-    StatusFlag            sf_;
-    InputRegister         ireg_[7];
-    OutputRegister        oreg_[32];
-    PortDataRegister      pdr1_;
-    PortDataRegister      pdr2_;
-    DataDirectionRegister ddr1_;
-    DataDirectionRegister ddr2_;
-    IOSelect              iosel_;
-    ExternalLatchEnable   exle_;
+    CommandRegister                                     comreg_;
+    StatusRegister                                      sr_;
+    StatusFlag                                          sf_;
+    std::array<InputRegister, input_registers_number>   ireg_;
+    std::array<OutputRegister, output_registers_number> oreg_;
+    PortDataRegister                                    pdr1_;
+    PortDataRegister                                    pdr2_;
+    DataDirectionRegister                               ddr1_;
+    DataDirectionRegister                               ddr2_;
+    IOSelect                                            iosel_;
+    ExternalLatchEnable                                 exle_;
     //@}
 
     SystemClock clock_{SystemClock::not_set};
@@ -529,7 +532,7 @@ class Smpc {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn std::string getKeyName(const PeripheralKey pk);
+/// \fn auto getKeyName(PeripheralKey pk) -> std::string;
 ///
 /// \brief  Gets printable name of the key.
 ///
@@ -541,10 +544,10 @@ class Smpc {
 /// \return The key name.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string getKeyName(const PeripheralKey pk);
+auto getKeyName(PeripheralKey pk) -> std::string;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn RtcTime getRtcTime();
+/// \fn auto getRtcTime() -> RtcTime;
 ///
 /// \brief  Returns current time in SMPC RTC format (BCD).
 ///
@@ -554,6 +557,6 @@ std::string getKeyName(const PeripheralKey pk);
 /// \return The RTC time.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RtcTime getRtcTime();
+auto getRtcTime() -> RtcTime;
 
 } // namespace saturnin::core

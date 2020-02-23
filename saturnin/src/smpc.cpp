@@ -142,7 +142,7 @@ MapKeyboardLayout keyboard_layout = {{PeripheralKey::key_space, "space"},
                                      {PeripheralKey::key_right_super, "right super"},
                                      {PeripheralKey::key_menu, "menu"}};
 
-std::vector<PeripheralKey> SaturnDigitalPad::toConfig(const PeripheralLayout layout) {
+auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
     switch (layout) {
         case PeripheralLayout::empty_layout:
             return std::vector<PeripheralKey>{PeripheralKey::key_unknown,
@@ -213,7 +213,7 @@ void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
     button_start          = config[12];
 }
 
-std::vector<PeripheralKey> StvPlayerControls::toConfig(const PeripheralLayout layout) {
+auto StvPlayerControls::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
     switch (layout) {
         case PeripheralLayout::empty_layout:
             return std::vector<PeripheralKey>{PeripheralKey::key_unknown,
@@ -258,7 +258,7 @@ void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
     button_4        = config[7];
 }
 
-std::vector<PeripheralKey> StvBoardControls::toConfig(const PeripheralLayout layout) {
+auto StvBoardControls::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
     switch (layout) {
         case PeripheralLayout::empty_layout:
             return std::vector<PeripheralKey>{PeripheralKey::key_unknown,
@@ -326,7 +326,7 @@ void Smpc::reset() {
     }
 }
 
-u32 Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) {
+auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 {
     using seconds = std::chrono::duration<double>;
     const seconds cycle_duration{(static_cast<double>(1) / static_cast<double>(util::toUnderlying(clock_)))};
     return static_cast<u32>(d / cycle_duration);
@@ -618,7 +618,7 @@ void Smpc::getPeripheralData() {
     emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
 }
 
-u8 Smpc::read(const u32 addr) {
+auto Smpc::read(const u32 addr) -> u8 {
     switch (addr) {
         case status_register:
             if (emulator_context_->hardwareMode() == HardwareMode::stv) {
@@ -716,7 +716,7 @@ void Smpc::write(const u32 addr, const u8 data) {
     }
 }
 
-std::vector<PeripheralKey> Smpc::listAvailableKeys() {
+auto Smpc::listAvailableKeys() -> std::vector<PeripheralKey> {
     std::vector<PeripheralKey> v{};
     for (std::pair<PeripheralKey, const std::string&> key : keyboard_layout) {
         v.push_back(key.first);
@@ -743,7 +743,7 @@ StvPeripheralMapping Smpc::getStvPeripheralMapping() { return stv_mapping_; }
 
 std::string getKeyName(const PeripheralKey pk) { return keyboard_layout[pk]; }
 
-RtcTime getRtcTime() {
+auto getRtcTime() -> RtcTime {
     using namespace date;
     using namespace std::chrono;
 

@@ -22,7 +22,7 @@
 
 namespace saturnin::utilities {
 
-std::vector<char> stringToVector(const std::string& source, const uint32_t reserved_size) {
+auto stringToVector(const std::string& source, const uint32_t reserved_size) -> std::vector<char> {
     std::vector<char> v(source.c_str(), source.c_str() + source.size() + 1u);
     v.reserve(reserved_size);
     return v;
@@ -51,7 +51,7 @@ std::string getLastErrorMessage() {
     return std::string();
 }
 
-std::vector<std::string> explode(std::string const& s, char delim) {
+auto explode(std::string const& s, char delim) -> std::vector<std::string> {
     std::vector<std::string> result;
     std::istringstream       iss(s);
 
@@ -62,7 +62,7 @@ std::vector<std::string> explode(std::string const& s, char delim) {
     return result;
 }
 
-uint32_t dec2bcd(uint16_t dec) {
+auto dec2bcd(uint16_t dec) -> uint32_t {
     uint32_t result = 0;
     int      shift  = 0;
 

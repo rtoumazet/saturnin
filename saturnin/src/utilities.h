@@ -32,7 +32,7 @@
 namespace saturnin::utilities {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn std::vector<char> stringToVector(const std::string& source, const uint32_t reserved_size);
+/// \fn auto stringToVector(const std::string& source, uint32_t reserved_size) -> std::vector<char>;
 ///
 /// \brief  String to vector.
 ///
@@ -45,10 +45,10 @@ namespace saturnin::utilities {
 /// \return A std::vector&lt;char&gt;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<char> stringToVector(const std::string& source, const uint32_t reserved_size);
+auto stringToVector(const std::string& source, uint32_t reserved_size) -> std::vector<char>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn std::string getLastErrorMessage();
+/// \fn auto getLastErrorMessage() -> std::string;
 ///
 /// \brief  Returns a std::string corresponding to GetLastError() value.
 ///
@@ -58,7 +58,7 @@ std::vector<char> stringToVector(const std::string& source, const uint32_t reser
 /// \return System message linked to GetLastError().
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string getLastErrorMessage();
+auto getLastErrorMessage() -> std::string;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn constexpr auto toUnderlying(E e) noexcept
@@ -78,25 +78,7 @@ constexpr auto toUnderlying(E e) noexcept {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct remove_cvref
-///
-/// \brief  If the type T is a reference type, provides the member typedef type which is the type
-///         referred to by T with its topmost cv-qualifiers removed. Otherwise type is T with its topmost cv-qualifiers removed.
-///         Will be added in C++20.
-///
-/// \author Runik
-/// \date   19/12/2019
-///
-/// \tparam T   Generic type parameter.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<class T>
-struct remove_cvref {
-    typedef std::remove_cv_t<std::remove_reference_t<T>> type;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template <typename M, typename V> const auto getKeyFromValue(const M& map, const V find_value)
+/// \fn template <typename M, typename V> auto getKeyFromValue(const M& map, const V find_value)
 ///
 /// \brief  Gets the key from its value in a 1<->1 map.
 ///
@@ -112,12 +94,12 @@ struct remove_cvref {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename M, typename V>
-const auto getKeyFromValue(const M& map, const V find_value) {
+auto getKeyFromValue(const M& map, const V find_value) {
     return std::find_if(map.begin(), map.end(), [find_value](const M::value_type& p) { return p.second == find_value; });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn std::vector<std::string> explode(std::string const & s, char delim);
+/// \fn auto explode(std::string const& s, char delim) -> std::vector<std::string>;
 ///
 /// \brief  Explodes the string based on the delimiter.
 ///
@@ -127,13 +109,13 @@ const auto getKeyFromValue(const M& map, const V find_value) {
 /// \param  s       String to process.
 /// \param  delim   The delimiter.
 ///
-/// \return A vector of strings
+/// \return A vector of strings.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::string> explode(std::string const& s, char delim);
+auto explode(std::string const& s, char delim) -> std::vector<std::string>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn uint32_t dec2bcd(uint16_t dec)
+/// \fn auto dec2bcd(uint16_t dec) -> uint32_t;
 ///
 /// \brief  Converts a number to BCD.
 ///
@@ -145,6 +127,6 @@ std::vector<std::string> explode(std::string const& s, char delim);
 /// \return The number in bcd representation.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint32_t dec2bcd(uint16_t dec);
+auto dec2bcd(uint16_t dec) -> uint32_t;
 
 } // namespace saturnin::utilities

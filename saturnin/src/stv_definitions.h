@@ -95,25 +95,17 @@ enum class Rom_stv : std::uint8_t {
     mausuke_no_ojama         = 61  ///< Mausuke no Ojama the World
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct Stv_rom_data
-///
-/// \brief  ST-V ROM data structure.
-///
-/// \author Runik
-/// \date   14/06/2018
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-typedef struct {
-    std::string name;    ///< rom name
-    Rom_stv     id;      ///< identifiant
-    std::string zip;     ///< zip name
-    std::string parent;  ///< zip parent (if any)
-    std::string version; ///< version
-} Stv_rom_data;
+using Stv_rom_data = struct { ///< ST-V ROM data structure
+    std::string name;         ///< rom name
+    Rom_stv     id;           ///< identifiant
+    std::string zip;          ///< zip name
+    std::string parent;       ///< zip parent (if any)
+    std::string version;      ///< version
+};
 
 /// ST-V roms list array
-static const Stv_rom_data stv_rom_list[] = {
+ static const Stv_rom_data stv_rom_list[] = { //NOLINT(modernize-avoid-c-arrays)
+
     // clang-format off
     { "Astra Superstars",                          Rom_stv::astra_superstars,        "astrass"  ,""         ,"J         \n19980514  \nV1.002" },
     { "Baku Baku Animal",                          Rom_stv::baku_baku_animals,       "bakubaku" ,""         ,"J         \n19950407  \nV1.000" },
@@ -175,7 +167,7 @@ static const Stv_rom_data stv_rom_list[] = {
     { "Technical Bowling",                         Rom_stv::technical_bowling,       "techbowl" ,""         ,"J         \n19971212  \nV1.000" },
     { "Microman Battle Charge",                    Rom_stv::microman_battle_charge,  "micrombc" ,""         ,"J         \n19990326  \nV1.000" },
     { "Sport Fishing 2 (J)",                       Rom_stv::sport_fishing_2_j,       "sfish2j"  ,"sfish2"   ,"J         \n19951201  \nV1.100" },
-    { "Mausuke no Ojama the World",                Rom_stv::mausuke_no_ojama,        "mausuke"  ,""         ,"J         \n19960314  \nV1.000" },
+    { "Mausuke no Ojama the World",                Rom_stv::mausuke_no_ojama,        "mausuke"  ,""         ,"J         \n19960314  \nV1.000" }
     // clang-format on
 };
 
