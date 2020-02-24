@@ -7,6 +7,7 @@
   <PropertyGroup>
     <OutDir>$(BuildRootDir)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(BuildRootDir)$(ProjectName)\obj\$(Configuration)\</IntDir>
+	<LinkIncremental>true</LinkIncremental>									   
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>

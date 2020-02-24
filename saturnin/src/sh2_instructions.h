@@ -36,33 +36,33 @@ namespace saturnin::sh2 {
 
 /// \name Instruction split functions.
 //@{
-inline u8  xn000(const u16 inst) { return static_cast<u8>((inst & 0xF000) >> 12); }
-inline u8  x0n00(const u16 inst) { return static_cast<u8>((inst & 0xF00) >> 8); }
-inline u8  x00n0(const u16 inst) { return static_cast<u8>((inst & 0xF0) >> 4); }
-inline u16 x0nnn(const u16 inst) { return (inst & 0xFFF); }
-inline u8  x00nn(const u16 inst) { return static_cast<u8>(inst & 0xFF); }
-inline u8  x000n(const u16 inst) { return static_cast<u8>(inst & 0xF); }
+inline auto xn000(const u16 inst) -> u8 { return static_cast<u8>((inst & 0xF000) >> 12); } // NOLINT(readability-magic-numbers)
+inline auto x0n00(const u16 inst) -> u8 { return static_cast<u8>((inst & 0xF00) >> 8); }   // NOLINT(readability-magic-numbers)
+inline auto x00n0(const u16 inst) -> u8 { return static_cast<u8>((inst & 0xF0) >> 4); }    // NOLINT(readability-magic-numbers)
+inline auto x0nnn(const u16 inst) -> u16 { return (inst & 0xFFF); }                        // NOLINT(readability-magic-numbers)
+inline auto x00nn(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xFF); }           // NOLINT(readability-magic-numbers)
+inline auto x000n(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xF); }            // NOLINT(readability-magic-numbers)
 //@}
 
 /// \name Opcode decoding helpers
 //@{
-inline u16 xn00(Sh2& s);
-inline u16 x0n0(Sh2& s);
-inline u16 x00n(Sh2& s);
-inline u16 xnnn(Sh2& s);
-inline u16 x0nn(Sh2& s);
+inline auto xn00(Sh2& s) -> u16;
+inline auto x0n0(Sh2& s) -> u16;
+inline auto x00n(Sh2& s) -> u16;
+inline auto xnnn(Sh2& s) -> u16;
+inline auto x0nn(Sh2& s) -> u16;
 //@}
 
 /// \name SH2 instructions
 //@{
 inline void delaySlot(Sh2& s, u32 addr);
-inline bool isInstructionIllegal(const u16 inst);
+inline auto isInstructionIllegal(u16 inst) -> bool;
 inline void badOpcode(Sh2& s);
 inline void add(Sh2& s);
 inline void addi(Sh2& s);
 inline void addc(Sh2& s);
 inline void addv(Sh2& s);
-inline void and_op(Sh2 & s);
+inline void and_op(Sh2& s);
 inline void andi(Sh2& s);
 inline void andm(Sh2& s);
 inline void bf(Sh2& s);
@@ -205,7 +205,8 @@ inline void xorm(Sh2& s);
 inline void xtrct(Sh2& s);
 //@}
 
-constexpr u8 instructions_number = 142; ///< Total number of SH2 instructions used.
+constexpr u8  instructions_number = 142;     ///< Total number of SH2 instructions used.
+constexpr u32 opcodes_lut_size    = 0x10000; ///< Size of the opcodes lookup table
 
 using ExecuteType = void (*)(Sh2&); ///< Type of the execute
 
@@ -224,7 +225,7 @@ struct Sh2Instruction {
     ExecuteType execute; ///< Link to the corresponding function.
 };
 
-static std::array<ExecuteType, 0x10000> opcodes_lut; ///< The opcodes LUT, used for instruction fast fetching
+static std::array<ExecuteType, opcodes_lut_size> opcodes_lut; ///< The opcodes LUT, used for instruction fast fetching
 
 // clang-format off
 static std::array<Sh2Instruction, instructions_number> const opcodes_table

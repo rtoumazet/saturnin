@@ -126,9 +126,9 @@ class Config {
     Config(const std::string configuration_filename) : filename_(configuration_filename){};
     Config(const Config&) = delete;
     Config(Config&&)      = delete;
-    Config& operator=(const Config&) & = delete;
-    Config& operator=(Config&&) & = delete;
-    ~Config()                     = default;
+    auto operator=(const Config&) & -> Config& = delete;
+    auto operator=(Config&&) & -> Config& = delete;
+    ~Config()                             = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ class Config {
     void writeFile();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Config::readFile();
+    /// \fn auto Config::readFile() -> bool;
     ///
     /// \brief  Reads the configuration file linked to the object.
     ///
@@ -153,10 +153,10 @@ class Config {
     /// \return True if it succeeds.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool readFile();
+    auto readFile() -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Config::initialize(const bool isModernOpenGlCapable);
+    /// \fn auto Config::initialize(const bool isModernOpenGlCapable) -> bool;
     ///
     /// \brief  Initializes the configuration by reading 'saturnin.cfg'. The file is created if missing
     ///
@@ -168,10 +168,10 @@ class Config {
     /// \return True if it succeeds.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool initialize(const bool isModernOpenGlCapable);
+    auto initialize(bool isModernOpenGlCapable) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn libconfig::Setting& Config::getGroup(libconfig::Setting& root, const std::string& group_name);
+    /// \fn auto Config::getGroup(libconfig::Setting& root, const std::string& group_name) -> libconfig::Setting&
     ///
     /// \brief  Returns the group under the specified root setting, creates it if missing.
     ///
@@ -184,7 +184,7 @@ class Config {
     /// \return A reference to a Setting.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    libconfig::Setting& getGroup(libconfig::Setting& root, const std::string& group_name);
+    auto getGroup(libconfig::Setting& root, const std::string& group_name) -> libconfig::Setting&;
 
     void test();
 
@@ -371,7 +371,7 @@ class Config {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  libconfig::Setting& Config::readValue(const AccessKeys& value);
+    /// \fn  auto Config::readValue(const AccessKeys& value) -> libconfig::Setting&;
     ///
     /// \brief   Reads a value from the specified root setting.
     ///
@@ -383,10 +383,10 @@ class Config {
     /// \return  Read value.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    libconfig::Setting& readValue(const AccessKeys& value);
+    auto readValue(const AccessKeys& value) -> libconfig::Setting&;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  bool Config::existsValue(const AccessKeys& key);
+    /// \fn  auto Config::existsValue(const AccessKeys& key) -> bool;
     ///
     /// \brief   Checks if the key exists in the configuration file.
     ///
@@ -398,10 +398,10 @@ class Config {
     /// \return  True if the key exists.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool existsValue(const AccessKeys& key);
+    auto existsValue(const AccessKeys& value) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  std::vector<std::string> Config::listAvailableLanguages();
+    /// \fn  auto Config::listAvailableLanguages() -> std::vector<std::string>;
     ///
     /// \brief   Returns a vector populated with available languages.
     ///
@@ -411,10 +411,10 @@ class Config {
     /// \return  Available languages.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::vector<std::string> listAvailableLanguages();
+    auto listAvailableLanguages() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  std::vector<std::string> Config::listAreaCodes();
+    /// \fn  auto Config::listAreaCodes() -> std::vector<std::string>;
     ///
     /// \brief   Returns a vector populated with area codes.
     ///
@@ -424,7 +424,7 @@ class Config {
     /// \return  A std::vector<std::string>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::vector<std::string> listAreaCodes();
+    auto listAreaCodes() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn  template<class T> void Config::add(const std::string key, T default)
@@ -436,11 +436,11 @@ class Config {
     ///
     /// \tparam  T   Type of the default value
     /// \param   key     The key.
-    /// \param   default Default value to add.
+    /// \param   def_value Default value to add.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<class T>
-    void add(const std::string key, T default) {
+    void add(const std::string key, T def_value) { // NOLINT(readability-avoid-const-params-in-decls)
         auto        tokens{util::explode(key, '.')};
         std::string parent_path{};
         for (const auto& t : tokens) {
@@ -453,7 +453,7 @@ class Config {
                     parent_path           = addGroup(root, t);
                 } else {
                     libcfg::Setting& root = cfg_.lookup(parent_path);
-                    this->writeValue<T>(root, t, default);
+                    this->writeValue<T>(root, t, def_value);
                 }
             }
         }
@@ -500,7 +500,7 @@ class Config {
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Config::generateConfigurationTree(const bool isModernOpenglCapable);
+    /// \fn void Config::generateConfigurationTree(bool isModernOpenglCapable);
     ///
     /// \brief  Generates the configuration tree with default values in the configuration file.
     ///
@@ -510,10 +510,10 @@ class Config {
     /// \param  isModernOpenglCapable   The is modern opengl capable.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void generateConfigurationTree(const bool isModernOpenglCapable);
+    void generateConfigurationTree(bool isModernOpenglCapable);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn std::string Config::addGroup(libcfg::Setting& root, const std::string& group_name);
+    /// \fn auto Config::addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string;
     ///
     /// \brief  Adds a group to a setting.
     ///
@@ -526,7 +526,7 @@ class Config {
     /// \return A std::string.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::string addGroup(libcfg::Setting& root, const std::string& group_name);
+    auto addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string;
 
     std::string filename_; ///< Name of the configuration file used
 

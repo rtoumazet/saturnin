@@ -30,11 +30,11 @@ namespace saturnin::sh2 {
 
 using core::Log;
 
-u16 xn00(Sh2& s) { return (s.current_opcode_ & 0x0f00) >> 8; } // NOLINT(readability-magic-numbers)
-u16 x0n0(Sh2& s) { return (s.current_opcode_ & 0x00f0) >> 4; } // NOLINT(readability-magic-numbers)
-u16 x00n(Sh2& s) { return s.current_opcode_ & 0x000f; }        // NOLINT(readability-magic-numbers)
-u16 xnnn(Sh2& s) { return s.current_opcode_ & 0x0fff; }        // NOLINT(readability-magic-numbers)
-u16 x0nn(Sh2& s) { return s.current_opcode_ & 0x00ff; }        // NOLINT(readability-magic-numbers)
+auto xn00(Sh2& s) -> u16 { return (s.current_opcode_ & 0x0f00) >> 8; } // NOLINT(readability-magic-numbers)
+auto x0n0(Sh2& s) -> u16 { return (s.current_opcode_ & 0x00f0) >> 4; } // NOLINT(readability-magic-numbers)
+auto x00n(Sh2& s) -> u16 { return s.current_opcode_ & 0x000f; }        // NOLINT(readability-magic-numbers)
+auto xnnn(Sh2& s) -> u16 { return s.current_opcode_ & 0x0fff; }        // NOLINT(readability-magic-numbers)
+auto x0nn(Sh2& s) -> u16 { return s.current_opcode_ & 0x00ff; }        // NOLINT(readability-magic-numbers)
 
 void delaySlot(Sh2& s, const u32 addr) {
     // Algorithm :
@@ -45,7 +45,7 @@ void delaySlot(Sh2& s, const u32 addr) {
     //		Slot instruction execution
     // end
 
-    uint32_t current_inst_cycles = s.cycles_elapsed_; // We musn't forget the DS instruction count
+    u32 current_inst_cycles = s.cycles_elapsed_; // We musn't forget the DS instruction count
     if (addr != 0x20000202) { // Delay slot isn't detected after the Power On Reset (to prevent the "illegal instruction slot")
 
         s.current_opcode_ = s.memory()->read<u16>(addr);
@@ -61,7 +61,7 @@ void delaySlot(Sh2& s, const u32 addr) {
     }
 }
 
-bool isInstructionIllegal(const u16 inst) {
+auto isInstructionIllegal(const u16 inst) -> bool {
     // 'Illegal Slot' detection
     // Returns true if an ISI (illegal slot instruction) is detected
     switch (xn000(inst)) {
@@ -304,7 +304,7 @@ void bt(Sh2& s) {
 
     if (s.sr_.get(StatusRegister::t) == 1) {
         s32 disp{};
-        if ((x0nn(s) & 0x80) == 0)
+        if ((x0nn(s) & 0x80) == 0) // NOLINT(readability-magic-numbers)
             disp = (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
         else
             disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)

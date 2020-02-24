@@ -217,8 +217,8 @@ struct SaturnDigitalPad {
     PeripheralKey button_z;
     PeripheralKey button_start;
 
-    auto toConfig(PeripheralLayout pl) -> std::vector<PeripheralKey>;
-    void fromConfig(std::vector<PeripheralKey> pk);
+    auto toConfig(PeripheralLayout layout) -> std::vector<PeripheralKey>;
+    void fromConfig(std::vector<PeripheralKey> config);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -254,8 +254,8 @@ struct StvPlayerControls {
     PeripheralKey button_3;
     PeripheralKey button_4;
 
-    auto toConfig(PeripheralLayout pl) -> std::vector<PeripheralKey>;
-    void fromConfig(std::vector<PeripheralKey> pk);
+    auto toConfig(PeripheralLayout layout) -> std::vector<PeripheralKey>;
+    void fromConfig(std::vector<PeripheralKey> config);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,8 +275,8 @@ struct StvBoardControls {
     PeripheralKey p1_start;
     PeripheralKey p2_start;
 
-    auto toConfig(PeripheralLayout pl) -> std::vector<PeripheralKey>;
-    void fromConfig(std::vector<PeripheralKey> pk);
+    auto toConfig(PeripheralLayout layout) -> std::vector<PeripheralKey>;
+    void fromConfig(std::vector<PeripheralKey> config);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

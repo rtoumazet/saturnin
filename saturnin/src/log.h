@@ -168,8 +168,9 @@ class Log {
 
     template<typename... Args>
     static inline void debug(const std::string& logger_name, const std::string& value, const Args&... args) {
-        if (loggerExists(logger_name))
+        if (loggerExists(logger_name)) {
             loggers_.at(logger_name)->debug(value.c_str(), args...);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +196,7 @@ class Log {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static std::shared_ptr<spdlog::sinks::simple_file_sink_mt> Log::createFileSink(const std::string& logger_path);
+    /// \fn static auto Log::createFileSink(const std::string& logger_path) -> std::shared_ptr<spdlog::sinks::basic_file_sink_mt>;
     ///
     /// \brief  Creates a file sink.
     ///
@@ -207,7 +208,7 @@ class Log {
     /// \return Sink linked to the logger file.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> createFileSink(const std::string& logger_path);
+    static auto createFileSink(const std::string& logger_path) -> std::shared_ptr<spdlog::sinks::basic_file_sink_mt>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Log::createConsoleSink() ->std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt>;
