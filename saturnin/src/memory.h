@@ -99,6 +99,32 @@ static u32    stv_protection_offset{};
 constexpr u32 memory_handler_size{0x10000};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   StvIOPort
+///
+/// \brief  Values of the ST-V IO port for players.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class StvIOPort {
+    button_1 = 0x01,
+    button_2 = 0x02,
+    button_3 = 0x04,
+    button_4 = 0x08,
+    down     = 0x10,
+    up       = 0x20,
+    right    = 0x40,
+    left     = 0x80,
+
+    coin_switch_player1 = 0x01,
+    coin_switch_player2 = 0x02,
+    test_switch         = 0x04,
+    service_switch      = 0x08,
+    start_player1       = 0x10,
+    start_player2       = 0x20,
+
+    port_d = 0x3
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	RomType
 ///
 /// \brief	ROM type.
@@ -139,9 +165,9 @@ class Memory {
     Memory(EmulatorContext* ec) : emulator_context_(ec) { initialize(); };
     Memory(const Memory&) = delete;
     Memory(Memory&&)      = delete;
-    Memory& operator=(const Memory&) & = delete;
-    Memory& operator=(Memory&&) & = delete;
-    ~Memory()                     = default;
+    auto operator=(const Memory&) & -> Memory& = delete;
+    auto operator=(Memory&&) & -> Memory& = delete;
+    ~Memory()                             = default;
     //@}
 
     /// \name Memory handlers functions typedefs
@@ -193,7 +219,7 @@ class Memory {
     // bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Memory::loadBios(const HardwareMode mode);
+    /// \fn void Memory::loadBios(saturnin::core::HardwareMode mode);
     ///
     /// \brief  Loads the BIOS into memory.
     ///
@@ -203,16 +229,16 @@ class Memory {
     /// \param  mode    Hardware mode of the bios to load (Saturn/ST-V).
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void loadBios(const saturnin::core::HardwareMode mode);
+    void loadBios(saturnin::core::HardwareMode mode);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Memory::loadRom(   const std::string& zip_name,
+    /// \fn auto Memory::loadRom(   const std::string& zip_name,
     ///                             const std::string& file_name,
     ///                             u8* destination,
     ///                             const u32 size,
     ///                             const RomLoad RomLoad,
     ///                             const u8 times_mirrored,
-    ///                             const RomType RomType);
+    ///                             const RomType RomType) -> bool;
     ///
     /// \brief  Loads a ST-V rom from a zip file in memory (cart area).
     ///
@@ -230,28 +256,28 @@ class Memory {
     /// \return True if it succeeds.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool loadRom(const std::string& zip_name,
+    auto loadRom(const std::string& zip_name,
                  const std::string& file_name,
                  u8*                destination,
-                 const u32          size,
-                 const RomLoad      RomLoad,
-                 const u8           times_mirrored,
-                 const RomType      RomType);
+                 u32                size,
+                 RomLoad            RomLoad,
+                 u8                 times_mirrored,
+                 RomType            RomType) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Memory::loadStvGame(const std::string& file_name);
+    /// \fn auto Memory::loadStvGame(const std::string& config_filename) -> bool;
     ///
     /// \brief  Loads a ST-V game into the cart area.
     ///
     /// \author Runik
     /// \date   28/08/2018
     ///
-    /// \param  file_name   configuration file name, with cfg extension.
+    /// \param  config_filename configuration file name, with cfg extension.
     ///
     /// \return True if the game is loaded.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool loadStvGame(const std::string& config_filename);
+    auto loadStvGame(const std::string& config_filename) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::swapCartArea();
@@ -264,30 +290,30 @@ class Memory {
 
     void swapCartArea();
 
-    u32 readStvProtection(const u32 addr, u32 data) const;
+    [[nodiscard]] auto readStvProtection(u32 addr, u32 data) const -> u32;
 
-    void writeStvProtection(const u32 addr, u32 data);
+    void writeStvProtection(u32 addr, u32 data);
 
-    bool isStvProtectionEnabled() const;
+    [[nodiscard]] auto isStvProtectionEnabled() const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<typename T> T Memory::read(const u32 addr);
+    /// \fn template<typename T> auto Memory::read(const u32 addr) -> T
     ///
     /// \brief  Saturn memory global read method.
     ///
     /// \author Runik
     /// \date   04/11/2018
     ///
-    /// \tparam T       Type of data to return.
+    /// \tparam T   Generic type parameter.
     /// \param  addr    Address to read in the memory map.
     ///
-    /// \return         Data read
+    /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    T read(const u32 addr) {
+    auto read(const u32 addr) -> T {
         auto& handler = std::get<ReadHandler<T>&>(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
-        return handler[addr >> 16](*this, addr);
+        return handler[addr >> 16](*this, addr); // NOLINT(readability-magic-numbers)
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::write(const u32 addr, const T data);
@@ -305,7 +331,7 @@ class Memory {
     template<typename T>
     void write(const u32 addr, const T data) {
         auto& handler = std::get<WriteHandler<T>&>(std::tie(write_8_handler_, write_16_handler_, write_32_handler_));
-        handler[addr >> 16](*this, addr, data);
+        handler[addr >> 16](*this, addr, data); // NOLINT(readability-magic-numbers)
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -332,11 +358,11 @@ class Memory {
 
     /// \name Context objects accessors
     //@{
-    sh2::Sh2* masterSh2() const;
-    sh2::Sh2* slaveSh2() const;
-    Scu*      scu() const;
-    Config*   config() const;
-    Smpc*     smpc() const;
+    [[nodiscard]] auto masterSh2() const -> sh2::Sh2*;
+    [[nodiscard]] auto slaveSh2() const -> sh2::Sh2*;
+    [[nodiscard]] auto scu() const -> Scu*;
+    [[nodiscard]] auto config() const -> Config*;
+    [[nodiscard]] auto smpc() const -> Smpc*;
     //@}
 
   private:
@@ -449,12 +475,9 @@ class Memory {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void mirrorData( u8* data,
-///                             const u32 size,
-///                             const u8 times_mirrored,
-///                             const RomLoad RomLoad);
+/// \fn void mirrorData(u8* data, u32 size, u8 times_mirrored, RomLoad RomLoad);
 ///
-/// \brief  Mirrors data in memory. Data between 0 and size-1 will mirrored times_mirrored times
+/// \brief  Mirrors data in memory. Data between 0 and size-1 will mirrored times_mirrored times.
 ///
 /// \author Runik
 /// \date   21/08/2018
@@ -462,13 +485,14 @@ class Memory {
 /// \param [in,out] data            If non-null, the array containing the data to be mirrored.
 /// \param          size            Size of the data to mirror.
 /// \param          times_mirrored  Number of times the data has to be mirrored.
-/// \param          RomLoad        Type of loading used (non interleaved, odd interleaved or even interleaved).
+/// \param          RomLoad         Type of loading used (non interleaved, odd interleaved or
+///                                 even interleaved).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad RomLoad);
+void mirrorData(u8* data, u32 size, u8 times_mirrored, RomLoad RomLoad);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn std::vector<std::filesystem::path> listStvConfigurationFiles();
+/// \fn auto listStvConfigurationFiles() -> std::vector<std::string>;
 ///
 /// \brief  Returns a vector populated with valid ST-V configuration files found in.
 ///
@@ -478,21 +502,21 @@ void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad
 /// \return The stv configuration files.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::string> listStvConfigurationFiles();
+auto listStvConfigurationFiles() -> std::vector<std::string>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T, typename U, size_t N> T rawRead(const std::array<U, N>& arr, const u32 addr)
+/// \fn template<typename T, typename U, size_t N> auto rawRead(const std::array<U, N>& arr, u32 addr) -> T
 ///
-/// \brief  Reads a value from an array.
-///         Usage : auto val = read<u32>(memory, 0);
-///         Don't forget to use the related mask against the address value not to be off bounds ...
+/// \brief  Reads a value from an array. Usage : auto val = read&lt;u32&gt;(memory, 0);
+///         Don't forget to use the related mask against the address value not to be off bounds
+///         ...
 ///
 /// \author Runik
 /// \date   07/06/2018
 ///
-/// \tparam T   Type of data to read.
-/// \tparam U   Type of data stored in the array.
-/// \tparam N   Size of the array.
+/// \tparam T   Generic type parameter.
+/// \tparam U   Generic type parameter.
+/// \tparam N   Type of the n.
 /// \param  arr     The array to read from.
 /// \param  addr    The address to read data from.
 ///
@@ -500,10 +524,10 @@ std::vector<std::string> listStvConfigurationFiles();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename T, typename U, size_t N>
-T rawRead(const std::array<U, N>& arr, const u32 addr) {
+auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
     T returnValue{arr[addr]};
     for (u8 i = 1; i < sizeof(T); ++i) {
-        returnValue <<= 8;
+        returnValue <<= 8; // NOLINT(readability-magic-numbers)
         returnValue |= arr[addr + i];
     }
     return returnValue;
@@ -532,7 +556,7 @@ void rawWrite(std::array<U, N>& arr, const u32 addr, const T value) {
     constexpr u8 bitsByByte{std::numeric_limits<u8>::digits};
     constexpr u8 offset{std::numeric_limits<T>::digits};
     for (u8 i = 0; i <= sizeof(T) - 1; ++i) {
-        arr[addr + i] = (value >> (offset - (bitsByByte * i + bitsByByte))) & 0xff;
+        arr[addr + i] = (value >> (offset - (bitsByByte * i + bitsByByte))) & 0xff; // NOLINT(readability-magic-numbers)
     }
 }
 
@@ -756,88 +780,88 @@ struct readStvIo<u8> {
         return [](const Memory& m, const u32 addr) -> u8 {
             // WIP use gainput/glfw3 to manage inputs
             u8 data{};
-            switch (addr & 0x00FFFFFF) {
+            switch (addr & 0x00FFFFFF) { // NOLINT(readability-magic-numbers)
                 case stv_io_port_a: {
                     auto p1 = m.smpc()->getStvPeripheralMapping().player_1;
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_1)) == GLFW_PRESS) {
-                        data |= 0x01;
+                        data |= util::toUnderlying(StvIOPort::button_1);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_2)) == GLFW_PRESS) {
-                        data |= 0x02;
+                        data |= util::toUnderlying(StvIOPort::button_2);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_3)) == GLFW_PRESS) {
-                        data |= 0x04;
+                        data |= util::toUnderlying(StvIOPort::button_3);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_4)) == GLFW_PRESS) {
-                        data |= 0x08;
+                        data |= util::toUnderlying(StvIOPort::button_4);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_down)) == GLFW_PRESS) {
-                        data |= 0x1;
+                        data |= util::toUnderlying(StvIOPort::down);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_up)) == GLFW_PRESS) {
-                        data |= 0x20;
+                        data |= util::toUnderlying(StvIOPort::up);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_right)) == GLFW_PRESS) {
-                        data |= 0x40;
+                        data |= util::toUnderlying(StvIOPort::right);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_left)) == GLFW_PRESS) {
-                        data |= 0x80;
+                        data |= util::toUnderlying(StvIOPort::left);
                     }
                     break;
                 }
                 case stv_io_port_b: {
                     auto p2 = m.smpc()->getStvPeripheralMapping().player_2;
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_1)) == GLFW_PRESS) {
-                        data |= 0x01;
+                        data |= util::toUnderlying(StvIOPort::button_1);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_2)) == GLFW_PRESS) {
-                        data |= 0x02;
+                        data |= util::toUnderlying(StvIOPort::button_2);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_3)) == GLFW_PRESS) {
-                        data |= 0x04;
+                        data |= util::toUnderlying(StvIOPort::button_3);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_4)) == GLFW_PRESS) {
-                        data |= 0x08;
+                        data |= util::toUnderlying(StvIOPort::button_4);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_down)) == GLFW_PRESS) {
-                        data |= 0x10;
+                        data |= util::toUnderlying(StvIOPort::down);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_up)) == GLFW_PRESS) {
-                        data |= 0x20;
+                        data |= util::toUnderlying(StvIOPort::up);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_right)) == GLFW_PRESS) {
-                        data |= 0x40;
+                        data |= util::toUnderlying(StvIOPort::right);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_left)) == GLFW_PRESS) {
-                        data |= 0x80;
+                        data |= util::toUnderlying(StvIOPort::left);
                     }
                     break;
                 }
                 case stv_io_port_c: {
                     auto board = m.smpc()->getStvPeripheralMapping().board_controls;
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_coin_switch)) == GLFW_PRESS) {
-                        data |= 0x01;
+                        data |= util::toUnderlying(StvIOPort::coin_switch_player1);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_coin_switch)) == GLFW_PRESS) {
-                        data |= 0x02;
+                        data |= util::toUnderlying(StvIOPort::coin_switch_player2);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.test_switch)) == GLFW_PRESS) {
-                        data |= 0x04;
+                        data |= util::toUnderlying(StvIOPort::test_switch);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.service_switch)) == GLFW_PRESS) {
-                        data |= 0x08;
+                        data |= util::toUnderlying(StvIOPort::service_switch);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_start)) == GLFW_PRESS) {
-                        data |= 0x10;
+                        data |= util::toUnderlying(StvIOPort::start_player1);
                     }
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_start)) == GLFW_PRESS) {
-                        data |= 0x20;
+                        data |= util::toUnderlying(StvIOPort::start_player2);
                     }
                     break;
                 }
                 case stv_io_port_d: {
                     data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
-                    data |= 0x3;
+                    data |= util::toUnderlying(StvIOPort::port_d);
                     break;
                 }
                 default: data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
@@ -867,7 +891,7 @@ struct writeStvIo {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn inline u32 calculateRelativeCartAddress(const u32 addr)
+/// \fn inline auto calculateRelativeCartAddress(const u32 addr) -> u32
 ///
 /// \brief  Calculates the relative cart address from a real address.
 ///
@@ -879,8 +903,8 @@ struct writeStvIo {
 /// \return The calculated relative cart address.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline u32 calculateRelativeCartAddress(const u32 addr) {
-    u32 temp{(addr >> 1) & 0x02000000};
+inline auto calculateRelativeCartAddress(const u32 addr) -> u32 {
+    u32 temp{(addr >> 1) & 0x02000000}; // NOLINT(readability-magic-numbers)
     return (addr & cart_memory_mask) | temp;
 }
 
@@ -913,7 +937,7 @@ struct readCart<u32> {
             u32 relative_addr = calculateRelativeCartAddress(addr);
             u32 data{rawRead<u32>(m.cart_, relative_addr)};
 
-            if ((addr & 0x0FFFFFFF) == stv_protection_register_address) {
+            if ((addr & 0x0FFFFFFF) == stv_protection_register_address) { // NOLINT(readability-magic-numbers)
                 if (m.HardwareMode_ == HardwareMode::stv) {
                     data = m.readStvProtection(addr, data);
                 }
@@ -950,8 +974,8 @@ struct writeCart<u8> {
     operator Memory::WriteType<u8>() const {
         return [](Memory& m, const u32 addr, const u8 data) {
             if (m.HardwareMode_ == HardwareMode::stv) {
-                if ((addr & 0x0FFFFFFF) == stv_protection_enabled) {
-                    if (data == 0x1) { // Is the protection enabled ?
+                if ((addr & 0x0FFFFFFF) == stv_protection_enabled) { // NOLINT(readability-magic-numbers)
+                    if (data == 0x1) {                               // Is the protection enabled ?
                         m.writeStvProtection(addr, data);
                     }
                 }
@@ -1576,6 +1600,6 @@ struct writeCacheData {
 /// \return Returns true if master SH2 is in operation, false if slave SH2 is in operation.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline bool isMasterSh2InOperation(const Memory& m);
+inline auto isMasterSh2InOperation(const Memory& m) -> bool;
 
 } // namespace saturnin::core

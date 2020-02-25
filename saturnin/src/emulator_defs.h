@@ -115,7 +115,7 @@ class Register {
 
     inline void set() { register_value.set(); }
 
-    inline auto operator[](const u8 index) -> std::bitset<32>::reference { return register_value[index]; }
+    inline auto operator[](const u8 index) -> std::bitset<register_size>::reference { return register_value[index]; }
 
     template<typename T>
     inline void reset(const BitRange<T>& r) {
