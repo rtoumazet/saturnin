@@ -334,12 +334,25 @@ class Sh2 {
 
     void powerOnReset();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> static void Sh2::unmappedAccess(const u32 addr, const T data)
+    ///
+    /// \brief  Unmapped access.
+    ///
+    /// \author Runik
+    /// \date   27/02/2020
+    ///
+    /// \tparam T   Generic type parameter.
+    /// \param  addr    The address.
+    /// \param  data    The data.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     template<typename T>
-    void unmappedAccess(const u32 addr, const T data) const {
+    static void unmappedAccess(const u32 addr, const T data) {
         Log::warning("sh2", "Unmapped write access : address :{:#0x} data:{:#0x}", addr, data);
     }
 
-    void unmappedAccess(const u32 addr) const { Log::warning("sh2", "Unmapped read access : address :{:#0x}", addr); }
+    static void unmappedAccess(const u32 addr) { Log::warning("sh2", "Unmapped read access : address :{:#0x}", addr); }
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////

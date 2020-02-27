@@ -1676,6 +1676,7 @@ void tst(Sh2& s) {
 
 void tsti(Sh2& s) {
     // R0 & imm, if result is 0, 1 -> T
+    // NOLINTNEXTLINE(readability-magic-numbers)
     ((s.r_[0] & (0x000000FF & x0nn(s))) == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
     s.pc_ += 2;

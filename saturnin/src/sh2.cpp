@@ -341,7 +341,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             break;
         case timer_output_compare_control_register:
             frt_tocr_.set(TimerOutputCompareControlRegister::all_bits,
-                          static_cast<u8>(data & TimerOutputCompareControlRegister::accessMask()));
+                          static_cast<u8>(data & TimerOutputCompareControlRegister::access_mask));
             break;
         case input_capture_register: frt_icr_.set(InputCaptureRegister::upper_8_bits, data); break;
         case input_capture_register + 1:
@@ -386,7 +386,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         case vector_number_setting_register_div: break; // Read only access
         case vector_number_setting_register_div + 2:
             intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::lower_16_bits,
-                             static_cast<u16>(data & DivisionControlRegister::accessMask()));
+                             static_cast<u16>(data & DivisionControlRegister::access_mask));
             break;
         case interrupt_control_register: {
             auto new_icr = InterruptControlRegister(data);
@@ -411,23 +411,23 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         // 7. BSC //
         /////////////
         case bus_control_register1 + 2:
-            bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::writeMask()));
+            bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::write_mask));
             break;
         case bus_control_register2 + 2:
-            bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::writeMask()));
+            bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::write_mask));
             break;
         case wait_state_control_register + 2: bsc_wcr_.set(WaitControlRegister::lower_16_bits, data); break;
         case individual_memory_control_register + 2: bsc_mcr_.set(IndividualMemoryControlRegister::lower_16_bits, data); break;
         case refresh_timer_control_status_register + 2:
             bsc_rtcsr_.set(RefreshTimeControlStatusRegister::lower_16_bits,
-                           static_cast<u16>(data & RefreshTimeControlStatusRegister::writeMask()));
+                           static_cast<u16>(data & RefreshTimeControlStatusRegister::write_mask));
             break;
         case refresh_timer_counter + 2:
-            bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & RefreshTimerCounter::writeMask()));
+            bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & RefreshTimerCounter::write_mask));
             break;
         case refresh_time_constant_register + 2:
             bsc_rtcor_.set(RefreshTimerConstantRegister::lower_16_bits,
-                           static_cast<u16>(data & RefreshTimerConstantRegister::writeMask()));
+                           static_cast<u16>(data & RefreshTimerConstantRegister::write_mask));
             break;
 
         //////////////
@@ -443,8 +443,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         //////////////
         case division_control_register: break; // Read only access
         case division_control_register + 2:
-            divu_dvcr_.set(DivisionControlRegister::lower_16_bits,
-                           static_cast<u16>(data & DivisionControlRegister::accessMask()));
+            divu_dvcr_.set(DivisionControlRegister::lower_16_bits, static_cast<u16>(data & DivisionControlRegister::access_mask));
             break;
 
         /////////////
@@ -463,10 +462,13 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         // 12. WDT //
         /////////////
         case watchdog_timer_control_status_register:
+            // NOLINTNEXTLINE(readability-magic-numbers)
             wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, static_cast<u8>(data >> 8));
+            // NOLINTNEXTLINE(readability-magic-numbers)
             wdt_wtcnt_.set(WatchdogTimerCounter::all_bits, static_cast<u8>(data & 0xFF));
             break;
         case reset_control_status_register:
+            // NOLINTNEXTLINE(readability-magic-numbers)
             wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, static_cast<u8>(data >> 8));
             break;
 
@@ -495,12 +497,12 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         /////////////
         case bus_control_register1:
             if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
-                bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::writeMask()));
+                bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::write_mask));
             }
             break;
         case bus_control_register2:
             if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
-                bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::writeMask()));
+                bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::write_mask));
             }
             break;
         case wait_state_control_register:
@@ -516,18 +518,18 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         case refresh_timer_control_status_register:
             if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
                 bsc_rtcsr_.set(RefreshTimeControlStatusRegister::lower_16_bits,
-                               static_cast<u16>(data & RefreshTimeControlStatusRegister::writeMask()));
+                               static_cast<u16>(data & RefreshTimeControlStatusRegister::write_mask));
             }
             break;
         case refresh_timer_counter:
             if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
-                bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & RefreshTimerCounter::writeMask()));
+                bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & RefreshTimerCounter::write_mask));
             }
             break;
         case refresh_time_constant_register:
             if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
                 bsc_rtcor_.set(RefreshTimerConstantRegister::lower_16_bits,
-                               static_cast<u16>(data & RefreshTimerConstantRegister::writeMask()));
+                               static_cast<u16>(data & RefreshTimerConstantRegister::write_mask));
             }
             break;
 
@@ -543,21 +545,21 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         case dma_destination_address_register_0: dmac_dar0_.set(DmaDestinationAddressRegister::all_bits, data); break;
         case dma_destination_address_register_1: dmac_dar1_.set(DmaDestinationAddressRegister::all_bits, data); break;
         case dma_tranfer_count_register_0:
-            dmac_tcr0_.set(DmaTransferCountRegister::all_bits, data & DmaTransferCountRegister::writeMask());
+            dmac_tcr0_.set(DmaTransferCountRegister::all_bits, data & DmaTransferCountRegister::write_mask);
             break;
         case dma_tranfer_count_register_1:
-            dmac_tcr1_.set(DmaTransferCountRegister::all_bits, data & DmaTransferCountRegister::writeMask());
+            dmac_tcr1_.set(DmaTransferCountRegister::all_bits, data & DmaTransferCountRegister::write_mask);
             break;
         case dma_channel_control_register_0:
-            dmac_chcr0_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::writeMask());
+            dmac_chcr0_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::write_mask);
             executeDma();
             break;
         case dma_channel_control_register_1:
-            dmac_chcr1_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::writeMask());
+            dmac_chcr1_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::write_mask);
             executeDma();
             break;
         case dma_operation_register: {
-            auto new_dmaor = DmaOperationRegister(data & DmaOperationRegister::writeMask());
+            auto new_dmaor = DmaOperationRegister(data & DmaOperationRegister::write_mask);
             if (dmac_dmaor_.get(DmaOperationRegister::priority_mode) != new_dmaor.get(DmaOperationRegister::priority_mode)) {
                 dmac_next_transfer_priority_ = (new_dmaor.get(DmaOperationRegister::priority_mode) == PriorityMode::fixed)
                                                    ? DmaNextTransferPriority::channel_0_first
@@ -579,8 +581,9 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             divu_dvdntl_shadow_.set(DividendRegisterL::all_bits, data);
 
             // Sign extension for the upper 32 bits if needed
-            (data & 0x80000000) ? divu_dvdnth_.set(DividendRegisterH::all_bits, 0xFFFFFFFFu)
-                                : divu_dvdnth_.set(DividendRegisterH::all_bits, 0x00000000u);
+            ((data & 0x80000000) != 0)                                        // NOLINT(readability-magic-numbers)
+                ? divu_dvdnth_.set(DividendRegisterH::all_bits, 0xFFFFFFFFu)  // NOLINT(readability-magic-numbers)
+                : divu_dvdnth_.set(DividendRegisterH::all_bits, 0x00000000u); // NOLINT(readability-magic-numbers)
 
             start32bitsDivision();
             break;
@@ -641,8 +644,8 @@ void Sh2::initializeOnChipRegisters() {
     // Bus State Controler registers
     u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? 0x000003F0 : 0x000083F0; // NOLINT(readability-magic-numbers)
     bsc_bcr1_.set(BusControlRegister1::all_bits, default_bcr1);
-    bsc_bcr2_.set(BusControlRegister2::all_bits, 0x000000FCu);
-    bsc_wcr_.set(WaitControlRegister::all_bits, 0x0000AAFFu);
+    bsc_bcr2_.set(BusControlRegister2::all_bits, 0x000000FCu); // NOLINT(readability-magic-numbers)
+    bsc_wcr_.set(WaitControlRegister::all_bits, 0x0000AAFFu);  // NOLINT(readability-magic-numbers)
     bsc_mcr_.reset();
     bsc_rtcsr_.reset();
     bsc_rtcnt_.reset();
@@ -667,29 +670,29 @@ void Sh2::initializeOnChipRegisters() {
     frt_tier_.set(TimerInterruptEnableRegister::all_bits, static_cast<u8>(0x01));
     frt_ftcsr_.reset();
     frt_frc_.reset();
-    frt_ocra_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));
-    frt_ocrb_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));
+    frt_ocra_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFFu)); // NOLINT(readability-magic-numbers)
+    frt_ocrb_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));  // NOLINT(readability-magic-numbers)
     frt_tcr_.reset();
-    frt_tocr_.set(TimerOutputCompareControlRegister::all_bits, static_cast<u8>(0xe0));
+    frt_tocr_.set(TimerOutputCompareControlRegister::all_bits, static_cast<u8>(0xe0)); // NOLINT(readability-magic-numbers)
     frt_tcr_.reset();
 
     // Watch Dog Timer
-    wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, static_cast<u8>(0x18));
+    wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, static_cast<u8>(0x18)); // NOLINT(readability-magic-numbers)
     wdt_wtcnt_.reset();
-    wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, static_cast<u8>(0x1F));
+    wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, static_cast<u8>(0x1F)); // NOLINT(readability-magic-numbers)
 
     // Serial Communication Interface
     sci_smr_.reset();
     sci_brr_.set();
     sci_scr_.reset();
     sci_tdr_.set();
-    sci_ssr_.set(SerialStatusRegister::all_bits, static_cast<u8>(0x84));
+    sci_ssr_.set(SerialStatusRegister::all_bits, static_cast<u8>(0x84)); // NOLINT(readability-magic-numbers)
     sci_rdr_.reset();
 }
 
 void Sh2::powerOnReset() {
-    pc_    = memory()->read<u32>(0x00000008);
-    r_[15] = memory()->read<u32>(0x0000000c);
+    pc_    = memory()->read<u32>(0x00000008); // NOLINT(readability-magic-numbers)
+    r_[15] = memory()->read<u32>(0x0000000c); // NOLINT(readability-magic-numbers)
     vbr_   = 0;
     sr_.reset();
     gbr_  = 0;
@@ -697,9 +700,9 @@ void Sh2::powerOnReset() {
     macl_ = 0;
     pr_   = 0;
 
-    for (u8 i = 0; i < 15; ++i)
+    for (u8 i = 0; i < general_registers_number; ++i) {
         r_[i] = 0;
-
+    }
     initializeOnChipRegisters();
 }
 
@@ -733,11 +736,13 @@ void Sh2::start32bitsDivision() {
     bool is_dvdnt_ovf = static_cast<bool>(dvdnt & 0x80000000); // NOLINT(readability-magic-numbers)
     bool is_dvsr_ovf  = static_cast<bool>(dvsr & 0x80000000);  // NOLINT(readability-magic-numbers)
     if (is_dvdnt_ovf && is_dvsr_ovf) {
-        if ((divu_quot_ == 0x7FFFFFFF) && (divu_rem_ & 0x80000000)) // NOLINT(readability-magic-numbers)
+        if ((divu_quot_ == 0x7FFFFFFF) && ((divu_rem_ & 0x80000000) != 0u)) { // NOLINT(readability-magic-numbers)
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+}
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
+    // NOLINTNEXTLINE(readability-magic-numbers)
     divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
 
     divu_is_running_ = true;
@@ -768,11 +773,13 @@ void Sh2::start64bitsDivision() {
     bool is_dvdnth_ovf = static_cast<bool>(dvdnth & 0x80000000); // NOLINT(readability-magic-numbers)
     bool is_dvsr_ovf   = static_cast<bool>(dvsr & 0x80000000);   // NOLINT(readability-magic-numbers)
     if (is_dvdnth_ovf && is_dvsr_ovf) {
-        if ((quotient == 0x7FFFFFFF) && (remainder & 0x80000000))
+        if ((quotient == 0x7FFFFFFF) && ((remainder & 0x80000000) != 0)) { // NOLINT(readability-magic-numbers)
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+}
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
+    // NOLINTNEXTLINE(readability-magic-numbers)
     divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
     divu_quot_             = static_cast<s32>(quotient);
     divu_rem_              = static_cast<s32>(remainder);
@@ -796,8 +803,8 @@ void Sh2::runInterruptController() {
                 is_level_interrupted_[interrupt.level] = false;
 
                 // SR and PC are saved to the stack.
-                memory()->write(r_[0xf] - 4, sr_.toU32());
-                memory()->write(r_[0xf] - 8, pc_);
+                memory()->write(r_[0xf] - 4, sr_.toU32()); // NOLINT(readability-magic-numbers)
+                memory()->write(r_[0xf] - 8, pc_);         // NOLINT(readability-magic-numbers)
 
                 r_[0xf] = r_[0xf] - 8; // Stack pointer is updated.
 
@@ -905,8 +912,9 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
 }
 
 void Sh2::executeDma() {
-    if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::disabled)
+    if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::disabled) {
         return;
+}
 
     auto conf_channel_0{configureDmaTransfer(DmaChannel::channel_0)};
     auto conf_channel_1{configureDmaTransfer(DmaChannel::channel_1)};
@@ -955,6 +963,7 @@ auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLIN
                 &= dmac_dmaor_.get(DmaOperationRegister::address_error_flag) == AddressErrorFlag::no_dmac_address_error;
             return channel_1_is_set;
         }
+        case DmaChannel::channel_unknown: return false;
     }
     return false;
 }
@@ -1018,8 +1027,11 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                         break;
                     case TransferSize::sixteen_byte_unit:
                         memory()->write<u32>(destination, memory()->read<u32>(source));
+                        // NOLINTNEXTLINE(readability-magic-numbers)
                         memory()->write<u32>(destination + 4, memory()->read<u32>(source + 4));
+                        // NOLINTNEXTLINE(readability-magic-numbers)
                         memory()->write<u32>(destination + 8, memory()->read<u32>(source + 8));
+                        // NOLINTNEXTLINE(readability-magic-numbers)
                         memory()->write<u32>(destination + 12, memory()->read<u32>(source + 12));
                         transfer_size = 0x10;
                         counter -= 4;
