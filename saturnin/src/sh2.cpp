@@ -37,10 +37,17 @@ constexpr u32 cache_purge_mask{0xFFFFFC0B};
 
 // Default values
 // BSC
-constexpr u32 default_bcr1_master_value{0x000003F0};
-constexpr u32 default_bcr1_slave_value{0x000083F0};
-constexpr u32 default_bcr2_slave_value{0x000000FCu};
-constexpr u32 default_wcr_value{0x0000AAFFu};
+constexpr u32 bsc_bcr1_master_default_value{0x000003F0};
+constexpr u32 bsc_bcr1_slave_default_value{0x000083F0};
+constexpr u32 bsc_bcr2_default_value{0x000000FCu};
+constexpr u32 bsc_wcr_default_value{0x0000AAFFu};
+constexpr u8  frt_tier_default_value{0x01};
+constexpr u16 frt_ocra_default_value{0xFFFF};
+constexpr u16 frt_ocrb_default_value{0xFFFF};
+constexpr u8  frt_tocr_default_value{0xe0};
+constexpr u8  wdt_wtcsr_default_value{0x18};
+constexpr u8  wdt_rstcsr_default_value{0x1F};
+constexpr u8  sci_ssr_default_value{0x84};
 
 Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : sh2_type_(st), emulator_context_(ec) { reset(); }
 
@@ -650,10 +657,10 @@ void Sh2::initializeOnChipRegisters() {
     intc_icr_.reset();
 
     // Bus State Controler registers
-    u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? default_bcr1_master_value : default_bcr1_slave_value;
+    u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? bsc_bcr1_master_default_value : bsc_bcr1_slave_default_value;
     bsc_bcr1_.set(BusControlRegister1::all_bits, default_bcr1);
-    bsc_bcr2_.set(BusControlRegister2::all_bits, default_bcr2_slave_value);
-    bsc_wcr_.set(WaitControlRegister::all_bits, default_wcr_value);
+    bsc_bcr2_.set(BusControlRegister2::all_bits, bsc_bcr2_default_value);
+    bsc_wcr_.set(WaitControlRegister::all_bits, bsc_wcr_default_value);
     bsc_mcr_.reset();
     bsc_rtcsr_.reset();
     bsc_rtcnt_.reset();
@@ -675,26 +682,26 @@ void Sh2::initializeOnChipRegisters() {
     divu_dvcr_.reset();
 
     // Free Running timer
-    frt_tier_.set(TimerInterruptEnableRegister::all_bits, static_cast<u8>(0x01));
+    frt_tier_.set(TimerInterruptEnableRegister::all_bits, frt_tier_default_value);
     frt_ftcsr_.reset();
     frt_frc_.reset();
-    frt_ocra_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFFu)); // NOLINT(readability-magic-numbers)
-    frt_ocrb_.set(OutputCompareRegister::all_bits, static_cast<u16>(0xFFFF));  // NOLINT(readability-magic-numbers)
+    frt_ocra_.set(OutputCompareRegister::all_bits, frt_ocra_default_value);
+    frt_ocrb_.set(OutputCompareRegister::all_bits, frt_ocrb_default_value);
     frt_tcr_.reset();
-    frt_tocr_.set(TimerOutputCompareControlRegister::all_bits, static_cast<u8>(0xe0)); // NOLINT(readability-magic-numbers)
+    frt_tocr_.set(TimerOutputCompareControlRegister::all_bits, frt_tocr_default_value);
     frt_tcr_.reset();
 
     // Watch Dog Timer
-    wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, static_cast<u8>(0x18)); // NOLINT(readability-magic-numbers)
+    wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, wdt_wtcsr_default_value);
     wdt_wtcnt_.reset();
-    wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, static_cast<u8>(0x1F)); // NOLINT(readability-magic-numbers)
+    wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, wdt_rstcsr_default_value);
 
     // Serial Communication Interface
     sci_smr_.reset();
     sci_brr_.set();
     sci_scr_.reset();
     sci_tdr_.set();
-    sci_ssr_.set(SerialStatusRegister::all_bits, static_cast<u8>(0x84)); // NOLINT(readability-magic-numbers)
+    sci_ssr_.set(SerialStatusRegister::all_bits, sci_ssr_default_value);
     sci_rdr_.reset();
 }
 
