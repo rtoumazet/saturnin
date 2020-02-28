@@ -30,6 +30,18 @@ namespace saturnin::sh2 {
 
 using core::Log;
 
+// Masks constants
+constexpr u32 allow_bsc_write_mask{0xA55A0000};
+constexpr u32 sign_bit_32_mask{0x80000000};
+constexpr u32 cache_purge_mask{0xFFFFFC0B};
+
+// Default values
+// BSC
+constexpr u32 default_bcr1_master_value{0x000003F0};
+constexpr u32 default_bcr1_slave_value{0x000083F0};
+constexpr u32 default_bcr2_slave_value{0x000000FCu};
+constexpr u32 default_wcr_value{0x0000AAFFu};
+
 Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : sh2_type_(st), emulator_context_(ec) { reset(); }
 
 auto Sh2::memory() const -> core::Memory* { return emulator_context_->memory(); }
@@ -462,14 +474,11 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         // 12. WDT //
         /////////////
         case watchdog_timer_control_status_register:
-            // NOLINTNEXTLINE(readability-magic-numbers)
-            wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, static_cast<u8>(data >> 8));
-            // NOLINTNEXTLINE(readability-magic-numbers)
-            wdt_wtcnt_.set(WatchdogTimerCounter::all_bits, static_cast<u8>(data & 0xFF));
+            wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, static_cast<u8>(data >> number_of_bits_8));
+            wdt_wtcnt_.set(WatchdogTimerCounter::all_bits, static_cast<u8>(data & bitmask_00FF));
             break;
         case reset_control_status_register:
-            // NOLINTNEXTLINE(readability-magic-numbers)
-            wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, static_cast<u8>(data >> 8));
+            wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, static_cast<u8>(data >> number_of_bits_8));
             break;
 
             /////////////
@@ -496,38 +505,38 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         // 7. BSC //
         /////////////
         case bus_control_register1:
-            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
+            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
                 bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::write_mask));
             }
             break;
         case bus_control_register2:
-            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
+            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
                 bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::write_mask));
             }
             break;
         case wait_state_control_register:
-            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
+            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
                 bsc_wcr_.set(WaitControlRegister::lower_16_bits, static_cast<u16>(data));
             }
             break;
         case individual_memory_control_register:
-            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
+            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
                 bsc_mcr_.set(IndividualMemoryControlRegister::lower_16_bits, static_cast<u16>(data));
             }
             break;
         case refresh_timer_control_status_register:
-            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
+            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
                 bsc_rtcsr_.set(RefreshTimeControlStatusRegister::lower_16_bits,
                                static_cast<u16>(data & RefreshTimeControlStatusRegister::write_mask));
             }
             break;
         case refresh_timer_counter:
-            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
+            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
                 bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & RefreshTimerCounter::write_mask));
             }
             break;
         case refresh_time_constant_register:
-            if ((data & 0xFFFF0000) == 0xA55A0000) { // NOLINT(readability-magic-numbers)
+            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
                 bsc_rtcor_.set(RefreshTimerConstantRegister::lower_16_bits,
                                static_cast<u16>(data & RefreshTimerConstantRegister::write_mask));
             }
@@ -581,9 +590,8 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             divu_dvdntl_shadow_.set(DividendRegisterL::all_bits, data);
 
             // Sign extension for the upper 32 bits if needed
-            ((data & 0x80000000) != 0)                                        // NOLINT(readability-magic-numbers)
-                ? divu_dvdnth_.set(DividendRegisterH::all_bits, 0xFFFFFFFFu)  // NOLINT(readability-magic-numbers)
-                : divu_dvdnth_.set(DividendRegisterH::all_bits, 0x00000000u); // NOLINT(readability-magic-numbers)
+            ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.set(DividendRegisterH::all_bits, 0xFFFFFFFFu)
+                                             : divu_dvdnth_.set(DividendRegisterH::all_bits, 0x00000000u);
 
             start32bitsDivision();
             break;
@@ -622,7 +630,7 @@ void Sh2::purgeCache() { // NOLINT(readability-convert-member-functions-to-stati
     for (u8 i = 0; i < cache_lines_number; ++i) {
         // :WARNING: following code is untested
         u32 data = core::rawRead<u32>(cache_addresses_, i);
-        data &= 0xFFFFFC0B; // NOLINT(readability-magic-numbers)
+        data &= cache_purge_mask;
         core::rawWrite<u32>(cache_addresses_, i, data);
     }
 }
@@ -642,10 +650,10 @@ void Sh2::initializeOnChipRegisters() {
     intc_icr_.reset();
 
     // Bus State Controler registers
-    u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? 0x000003F0 : 0x000083F0; // NOLINT(readability-magic-numbers)
+    u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? default_bcr1_master_value : default_bcr1_slave_value;
     bsc_bcr1_.set(BusControlRegister1::all_bits, default_bcr1);
-    bsc_bcr2_.set(BusControlRegister2::all_bits, 0x000000FCu); // NOLINT(readability-magic-numbers)
-    bsc_wcr_.set(WaitControlRegister::all_bits, 0x0000AAFFu);  // NOLINT(readability-magic-numbers)
+    bsc_bcr2_.set(BusControlRegister2::all_bits, default_bcr2_slave_value);
+    bsc_wcr_.set(WaitControlRegister::all_bits, default_wcr_value);
     bsc_mcr_.reset();
     bsc_rtcsr_.reset();
     bsc_rtcnt_.reset();
@@ -738,7 +746,7 @@ void Sh2::start32bitsDivision() {
     if (is_dvdnt_ovf && is_dvsr_ovf) {
         if ((divu_quot_ == 0x7FFFFFFF) && ((divu_rem_ & 0x80000000) != 0u)) { // NOLINT(readability-magic-numbers)
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
-}
+        }
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
@@ -775,7 +783,7 @@ void Sh2::start64bitsDivision() {
     if (is_dvdnth_ovf && is_dvsr_ovf) {
         if ((quotient == 0x7FFFFFFF) && ((remainder & 0x80000000) != 0)) { // NOLINT(readability-magic-numbers)
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
-}
+        }
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
@@ -914,7 +922,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
 void Sh2::executeDma() {
     if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::disabled) {
         return;
-}
+    }
 
     auto conf_channel_0{configureDmaTransfer(DmaChannel::channel_0)};
     auto conf_channel_1{configureDmaTransfer(DmaChannel::channel_1)};

@@ -98,6 +98,8 @@ static u32    stv_protection_offset{};
 
 constexpr u32 memory_handler_size{0x10000};
 
+constexpr u32 cart_absolute_address{0x02000000};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   StvIOPort
 ///
@@ -313,7 +315,7 @@ class Memory {
     template<typename T>
     auto read(const u32 addr) -> T {
         auto& handler = std::get<ReadHandler<T>&>(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
-        return handler[addr >> 16](*this, addr); // NOLINT(readability-magic-numbers)
+        return handler[addr >> number_of_bits_16](*this, addr);
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::write(const u32 addr, const T data);
@@ -331,7 +333,7 @@ class Memory {
     template<typename T>
     void write(const u32 addr, const T data) {
         auto& handler = std::get<WriteHandler<T>&>(std::tie(write_8_handler_, write_16_handler_, write_32_handler_));
-        handler[addr >> 16](*this, addr, data); // NOLINT(readability-magic-numbers)
+        handler[addr >> number_of_bits_16](*this, addr, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -404,8 +406,8 @@ class Memory {
 
     template<typename T>
     void initializeHandler(u32 begin, u32 end, ReadType<T> func) {
-        begin >>= 16;
-        end >>= 16;
+        begin >>= number_of_bits_16;
+        end >>= number_of_bits_16;
 
         auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
         for (u32 current = begin; current <= end; ++current) {
@@ -430,8 +432,8 @@ class Memory {
 
     template<typename T>
     void initializeHandler(u32 begin, u32 end, WriteType<T> func) {
-        begin >>= 16;
-        end >>= 16;
+        begin >>= number_of_bits_16;
+        end >>= number_of_bits_16;
 
         auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
         for (u32 current = begin; current <= end; ++current) {
@@ -525,12 +527,12 @@ auto listStvConfigurationFiles() -> std::vector<std::string>;
 
 template<typename T, typename U, size_t N>
 auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
-    T returnValue{arr[addr]};
+    T return_value{arr[addr]};
     for (u8 i = 1; i < sizeof(T); ++i) {
-        returnValue <<= 8; // NOLINT(readability-magic-numbers)
-        returnValue |= arr[addr + i];
+        return_value <<= number_of_bits_8;
+        return_value |= arr[addr + i];
     }
-    return returnValue;
+    return return_value;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -553,10 +555,10 @@ auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
 
 template<typename T, typename U, size_t N>
 void rawWrite(std::array<U, N>& arr, const u32 addr, const T value) {
-    constexpr u8 bitsByByte{std::numeric_limits<u8>::digits};
+    constexpr u8 bits_by_byte{std::numeric_limits<u8>::digits};
     constexpr u8 offset{std::numeric_limits<T>::digits};
     for (u8 i = 0; i <= sizeof(T) - 1; ++i) {
-        arr[addr + i] = (value >> (offset - (bitsByByte * i + bitsByByte))) & 0xff; // NOLINT(readability-magic-numbers)
+        arr[addr + i] = (value >> (offset - (bits_by_byte * i + bits_by_byte))) & bitmask_000000FF;
     }
 }
 
@@ -780,7 +782,7 @@ struct readStvIo<u8> {
         return [](const Memory& m, const u32 addr) -> u8 {
             // WIP use gainput/glfw3 to manage inputs
             u8 data{};
-            switch (addr & 0x00FFFFFF) { // NOLINT(readability-magic-numbers)
+            switch (addr & bitmask_00FFFFFF) {
                 case stv_io_port_a: {
                     auto p1 = m.smpc()->getStvPeripheralMapping().player_1;
                     if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_1)) == GLFW_PRESS) {
@@ -904,7 +906,7 @@ struct writeStvIo {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline auto calculateRelativeCartAddress(const u32 addr) -> u32 {
-    u32 temp{(addr >> 1) & 0x02000000}; // NOLINT(readability-magic-numbers)
+    u32 temp{(addr >> 1) & cart_absolute_address};
     return (addr & cart_memory_mask) | temp;
 }
 
@@ -937,7 +939,7 @@ struct readCart<u32> {
             u32 relative_addr = calculateRelativeCartAddress(addr);
             u32 data{rawRead<u32>(m.cart_, relative_addr)};
 
-            if ((addr & 0x0FFFFFFF) == stv_protection_register_address) { // NOLINT(readability-magic-numbers)
+            if ((addr & bitmask_0FFFFFFF) == stv_protection_register_address) {
                 if (m.HardwareMode_ == HardwareMode::stv) {
                     data = m.readStvProtection(addr, data);
                 }
@@ -974,8 +976,8 @@ struct writeCart<u8> {
     operator Memory::WriteType<u8>() const {
         return [](Memory& m, const u32 addr, const u8 data) {
             if (m.HardwareMode_ == HardwareMode::stv) {
-                if ((addr & 0x0FFFFFFF) == stv_protection_enabled) { // NOLINT(readability-magic-numbers)
-                    if (data == 0x1) {                               // Is the protection enabled ?
+                if ((addr & bitmask_0FFFFFFF) == stv_protection_enabled) {
+                    if (data == 0x1) { // Is the protection enabled ?
                         m.writeStvProtection(addr, data);
                     }
                 }

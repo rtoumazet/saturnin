@@ -44,6 +44,26 @@ using s64  = std::int64_t;
 
 constexpr u8 register_size{32};
 
+constexpr u8 number_of_bits_16{16};
+constexpr u8 number_of_bits_12{12};
+constexpr u8 number_of_bits_8{8};
+constexpr u8 number_of_bits_4{4};
+
+constexpr u32 bitmask_000000FF{0x000000FF};
+constexpr u32 bitmask_0000FFFF{0x0000FFFF};
+constexpr u32 bitmask_00FFFFFF{0x00FFFFFF};
+constexpr u32 bitmask_0FFFFFFF{0x0FFFFFFF};
+constexpr u32 bitmask_0000FF00{0x0000FF00};
+constexpr u32 bitmask_00FF0000{0x00FF0000};
+constexpr u32 bitmask_FF000000{0xFF000000};
+constexpr u32 bitmask_FFFF0000{0xFFFF0000};
+constexpr u16 bitmask_F000{0xF000};
+constexpr u16 bitmask_0F00{0x0F00};
+constexpr u16 bitmask_00F0{0x00F0};
+constexpr u16 bitmask_000F{0x000F};
+constexpr u16 bitmask_00FF{0x00FF};
+constexpr u16 bitmask_0FFF{0x0FFF};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct BitRange
 ///
