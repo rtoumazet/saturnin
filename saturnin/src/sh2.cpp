@@ -32,7 +32,6 @@ using core::Log;
 
 // Masks constants
 constexpr u32 allow_bsc_write_mask{0xA55A0000};
-constexpr u32 sign_bit_32_mask{0x80000000};
 constexpr u32 cache_purge_mask{0xFFFFFC0B};
 
 // Default values
@@ -48,6 +47,19 @@ constexpr u8  frt_tocr_default_value{0xe0};
 constexpr u8  wdt_wtcsr_default_value{0x18};
 constexpr u8  wdt_rstcsr_default_value{0x1F};
 constexpr u8  sci_ssr_default_value{0x84};
+
+constexpr u8 divu_normal_cycles_number{39};
+constexpr u8 divu_overflow_cycles_number{6};
+
+constexpr u32 pc_start_vector{0x00000008};
+constexpr u32 sp_start_vector{0x0000000C};
+constexpr u8  sr_stack_offset{4};
+constexpr u8  pc_stack_offset{8};
+
+constexpr u8 transfer_byte_size_1{0x1};
+constexpr u8 transfer_byte_size_2{0x2};
+constexpr u8 transfer_byte_size_4{0x4};
+constexpr u8 transfer_byte_size_16{0x10};
 
 Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : sh2_type_(st), emulator_context_(ec) { reset(); }
 
@@ -597,7 +609,8 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             divu_dvdntl_shadow_.set(DividendRegisterL::all_bits, data);
 
             // Sign extension for the upper 32 bits if needed
-            ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.set(DividendRegisterH::all_bits, 0xFFFFFFFFu)
+
+            ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.set(DividendRegisterH::all_bits, UINT32_MAX)
                                              : divu_dvdnth_.set(DividendRegisterH::all_bits, 0x00000000u);
 
             start32bitsDivision();
@@ -706,9 +719,9 @@ void Sh2::initializeOnChipRegisters() {
 }
 
 void Sh2::powerOnReset() {
-    pc_    = memory()->read<u32>(0x00000008); // NOLINT(readability-magic-numbers)
-    r_[15] = memory()->read<u32>(0x0000000c); // NOLINT(readability-magic-numbers)
-    vbr_   = 0;
+    pc_                   = memory()->read<u32>(pc_start_vector);
+    r_[sp_register_index] = memory()->read<u32>(sp_start_vector);
+    vbr_                  = 0;
     sr_.reset();
     gbr_  = 0;
     mach_ = 0;
@@ -748,20 +761,21 @@ void Sh2::start32bitsDivision() {
     }
 
     // Overflow check
-    bool is_dvdnt_ovf = static_cast<bool>(dvdnt & 0x80000000); // NOLINT(readability-magic-numbers)
-    bool is_dvsr_ovf  = static_cast<bool>(dvsr & 0x80000000);  // NOLINT(readability-magic-numbers)
+    bool is_dvdnt_ovf{(dvdnt & sign_bit_32_mask) != 0};
+    bool is_dvsr_ovf{(dvsr & sign_bit_32_mask) != 0};
     if (is_dvdnt_ovf && is_dvsr_ovf) {
-        if ((divu_quot_ == 0x7FFFFFFF) && ((divu_rem_ & 0x80000000) != 0u)) { // NOLINT(readability-magic-numbers)
+        if ((divu_quot_ == INT32_MAX) && ((divu_rem_ & sign_bit_32_mask) != 0)) {
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
         }
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
+    divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow)
+                                 ? divu_overflow_cycles_number
+                                 : divu_normal_cycles_number;
 
     divu_is_running_ = true;
-} // namespace saturnin::sh2
+}
 
 void Sh2::start64bitsDivision() {
     Log::debug("sh2", "64/32 division");
@@ -770,7 +784,7 @@ void Sh2::start64bitsDivision() {
     s32 dvdnth = divu_dvdnth_.toU32();
     s32 dvsr   = divu_dvsr_.toU32();
 
-    s64 dividend = (static_cast<s64>(dvdnth) << 32) | (dvdntl & 0xffffffff); // NOLINT(readability-magic-numbers)
+    s64 dividend = (static_cast<s64>(dvdnth) << number_of_bits_32) | dvdntl;
 
     Log::debug("sh2", "Dividend : {}, divisor : {}", dividend, dvsr);
 
@@ -785,19 +799,20 @@ void Sh2::start64bitsDivision() {
     }
 
     // Overflow check
-    bool is_dvdnth_ovf = static_cast<bool>(dvdnth & 0x80000000); // NOLINT(readability-magic-numbers)
-    bool is_dvsr_ovf   = static_cast<bool>(dvsr & 0x80000000);   // NOLINT(readability-magic-numbers)
+    bool is_dvdnth_ovf{(dvdnth & sign_bit_32_mask) != 0};
+    bool is_dvsr_ovf{(dvsr & sign_bit_32_mask) != 0};
     if (is_dvdnth_ovf && is_dvsr_ovf) {
-        if ((quotient == 0x7FFFFFFF) && ((remainder & 0x80000000) != 0)) { // NOLINT(readability-magic-numbers)
+        if ((quotient == INT32_MAX) && ((remainder & sign_bit_32_mask) != 0)) {
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
         }
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) ? 6 : 39;
-    divu_quot_             = static_cast<s32>(quotient);
-    divu_rem_              = static_cast<s32>(remainder);
+    divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow)
+                                 ? divu_overflow_cycles_number
+                                 : divu_normal_cycles_number;
+    divu_quot_ = static_cast<s32>(quotient);
+    divu_rem_  = static_cast<s32>(remainder);
 
     divu_is_running_ = true;
 }
@@ -818,10 +833,10 @@ void Sh2::runInterruptController() {
                 is_level_interrupted_[interrupt.level] = false;
 
                 // SR and PC are saved to the stack.
-                memory()->write(r_[0xf] - 4, sr_.toU32()); // NOLINT(readability-magic-numbers)
-                memory()->write(r_[0xf] - 8, pc_);         // NOLINT(readability-magic-numbers)
+                memory()->write(r_[sp_register_index] - sr_stack_offset, sr_.toU32());
+                memory()->write(r_[sp_register_index] - pc_stack_offset, pc_);
 
-                r_[0xf] = r_[0xf] - 8; // Stack pointer is updated.
+                r_[sp_register_index] = r_[sp_register_index] - displacement_8; // Stack pointer is updated.
 
                 sr_.set(StatusRegister::i, interrupt.level);
 
@@ -879,7 +894,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
         frt_elapsed_cycles_ = elapsed_cycles & frt_mask_;
 
         // Checking overflow
-        if (current_frc > 0xFFFF) { // NOLINT(readability-magic-numbers)
+        if (current_frc > UINT16_MAX) {
             frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::timer_overflow_flag);
             if (frt_tier_.get(TimerInterruptEnableRegister::timer_overflow_interrupt_enable)
                 == TimerOverflowInterruptEnable::interrupt_request_enabled) {
@@ -988,7 +1003,7 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
     switch (dc) {
         case DmaChannel::channel_0:
             conf.channel     = DmaChannel::channel_0;
-            conf.counter     = dmac_tcr0_.toU32() & 0x00FFFFFF; // NOLINT(readability-magic-numbers)
+            conf.counter     = dmac_tcr0_.toU32() & bitmask_00FFFFFF;
             conf.source      = dmac_sar0_.toU32();
             conf.destination = dmac_dar0_.toU32();
             conf.chcr        = dmac_chcr0_;
@@ -996,7 +1011,7 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
             break;
         case DmaChannel::channel_1:
             conf.channel     = DmaChannel::channel_1;
-            conf.counter     = dmac_tcr1_.toU32() & 0x00FFFFFF; // NOLINT(readability-magic-numbers)
+            conf.counter     = dmac_tcr1_.toU32() & bitmask_00FFFFFF;
             conf.source      = dmac_sar1_.toU32();
             conf.destination = dmac_dar1_.toU32();
             conf.chcr        = dmac_chcr1_;
@@ -1027,28 +1042,25 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                 switch (conf.chcr.get(DmaChannelControlRegister::transfer_size)) {
                     case TransferSize::one_byte_unit:
                         memory()->write<u8>(destination, memory()->read<u8>(source));
-                        transfer_size = 0x1;
+                        transfer_size = transfer_byte_size_1;
                         --counter;
                         break;
                     case TransferSize::two_byte_unit:
                         memory()->write<u16>(destination, memory()->read<u16>(source));
-                        transfer_size = 0x2;
+                        transfer_size = transfer_byte_size_2;
                         --counter;
                         break;
                     case TransferSize::four_byte_unit:
                         memory()->write<u32>(destination, memory()->read<u32>(source));
-                        transfer_size = 0x4;
+                        transfer_size = transfer_byte_size_4;
                         --counter;
                         break;
                     case TransferSize::sixteen_byte_unit:
                         memory()->write<u32>(destination, memory()->read<u32>(source));
-                        // NOLINTNEXTLINE(readability-magic-numbers)
-                        memory()->write<u32>(destination + 4, memory()->read<u32>(source + 4));
-                        // NOLINTNEXTLINE(readability-magic-numbers)
-                        memory()->write<u32>(destination + 8, memory()->read<u32>(source + 8));
-                        // NOLINTNEXTLINE(readability-magic-numbers)
-                        memory()->write<u32>(destination + 12, memory()->read<u32>(source + 12));
-                        transfer_size = 0x10;
+                        memory()->write<u32>(destination + displacement_4, memory()->read<u32>(source + displacement_4));
+                        memory()->write<u32>(destination + displacement_8, memory()->read<u32>(source + displacement_8));
+                        memory()->write<u32>(destination + displacement_12, memory()->read<u32>(source + displacement_12));
+                        transfer_size = transfer_byte_size_16;
                         counter -= 4;
                         break;
                 }

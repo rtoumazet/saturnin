@@ -20,6 +20,7 @@
 #include "sh2.h"
 #include "sh2_instructions.h"
 #include "emulator_context.h"
+#include "emulator_defs.h"
 #include "interrupt_sources.h"
 #include "memory.h"
 #include "scu.h"
@@ -30,11 +31,13 @@ namespace saturnin::sh2 {
 
 using core::Log;
 
-auto xn00(Sh2& s) -> u16 { return (s.current_opcode_ & 0x0f00) >> 8; } // NOLINT(readability-magic-numbers)
-auto x0n0(Sh2& s) -> u16 { return (s.current_opcode_ & 0x00f0) >> 4; } // NOLINT(readability-magic-numbers)
-auto x00n(Sh2& s) -> u16 { return s.current_opcode_ & 0x000f; }        // NOLINT(readability-magic-numbers)
-auto xnnn(Sh2& s) -> u16 { return s.current_opcode_ & 0x0fff; }        // NOLINT(readability-magic-numbers)
-auto x0nn(Sh2& s) -> u16 { return s.current_opcode_ & 0x00ff; }        // NOLINT(readability-magic-numbers)
+constexpr u32 ignored_delay_slot_address{0x20000202};
+
+auto xn00(Sh2& s) -> u16 { return (s.current_opcode_ & bitmask_0F00) >> displacement_8; }
+auto x0n0(Sh2& s) -> u16 { return (s.current_opcode_ & bitmask_00F0) >> displacement_4; }
+auto x00n(Sh2& s) -> u16 { return s.current_opcode_ & bitmask_000F; }
+auto xnnn(Sh2& s) -> u16 { return s.current_opcode_ & bitmask_0FFF; }
+auto x0nn(Sh2& s) -> u16 { return s.current_opcode_ & bitmask_00FF; }
 
 void delaySlot(Sh2& s, const u32 addr) {
     // Algorithm :
@@ -46,8 +49,8 @@ void delaySlot(Sh2& s, const u32 addr) {
     // end
 
     u32 current_inst_cycles = s.cycles_elapsed_; // We musn't forget the DS instruction count
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    if (addr != 0x20000202) { // Delay slot isn't detected after the Power On Reset (to prevent the "illegal instruction slot")
+    if (addr != ignored_delay_slot_address) {    // Delay slot isn't detected after the Power On Reset (to prevent the "illegal
+                                                 // instruction slot")
 
         s.current_opcode_ = s.memory()->read<u16>(addr);
 
@@ -65,50 +68,51 @@ void delaySlot(Sh2& s, const u32 addr) {
 auto isInstructionIllegal(const u16 inst) -> bool {
     // 'Illegal Slot' detection
     // Returns true if an ISI (illegal slot instruction) is detected
-    switch (xn000(inst)) {
-        case 0b0000: // NOLINT(readability-magic-numbers)
-            switch (x000n(inst)) {
-                case 0b0011: // NOLINT(readability-magic-numbers)
-                    switch (x00n0(inst)) {
-                        case 0b0000: return true; // BSRF Rm*2 //NOLINT(readability-magic-numbers)
-                        case 0b0010: return true; // BRAF Rm*2 //NOLINT(readability-magic-numbers)
-                    }
-                    break;
-                case 0xb1011: // NOLINT(readability-magic-numbers)
-                    switch (x00n0(inst)) {
-                        case 0b0000: return true; // RTS //NOLINT(readability-magic-numbers)
-                        case 0b0010: return true; // RTE //NOLINT(readability-magic-numbers)
-                    }
-                    break;
-            }
-            break;
-        case 0b0100: // NOLINT(readability-magic-numbers)
-            switch (x000n(inst)) {
-                case 0b1011: // NOLINT(readability-magic-numbers)
-                    switch (x00n0(inst)) {
-                        case 0b0000: return true; // JSR @Rm //NOLINT(readability-magic-numbers)
-                        case 0b0010: return true; // JMP @Rm //NOLINT(readability-magic-numbers)
-                    }
-                    break;
-            }
-            break;
-        case 0b1000: // NOLINT(readability-magic-numbers)
-            switch (x0n00(inst)) {
-                case 0b1001: return true; // BT label //NOLINT(readability-magic-numbers)
-                case 0b1011: return true; // BF label //NOLINT(readability-magic-numbers)
-                case 0x1101: return true; // BT/S label*2 //NOLINT(readability-magic-numbers)
-                case 0x1111: return true; // BF/S label*2 //NOLINT(readability-magic-numbers)
-            }
-            break;
-        case 0b1010: return true; // BRA label //NOLINT(readability-magic-numbers)
-        case 0b1011: return true; // BSR label //NOLINT(readability-magic-numbers)
-        case 0b1100:              // NOLINT(readability-magic-numbers)
-            switch (x0n00(inst)) {
-                case 0x0011: return true; // TRAPA #imm //NOLINT(readability-magic-numbers)
-            }
-            break;
-    }
-    return false;
+    return illegal_instruction_lut[inst];
+    // switch (xn000(inst)) {
+    //    case 0b0000:
+    //        switch (x000n(inst)) {
+    //            case 0b0011:
+    //                switch (x00n0(inst)) {
+    //                    case 0b0000: return true; // BSRF Rm*2
+    //                    case 0b0010: return true; // BRAF Rm*2
+    //                }
+    //                break;
+    //            case 0xb1011:
+    //                switch (x00n0(inst)) {
+    //                    case 0b0000: return true; // RTS
+    //                    case 0b0010: return true; // RTE
+    //                }
+    //                break;
+    //        }
+    //        break;
+    //    case 0b0100:
+    //        switch (x000n(inst)) {
+    //            case 0b1011:
+    //                switch (x00n0(inst)) {
+    //                    case 0b0000: return true; // JSR @Rm
+    //                    case 0b0010: return true; // JMP @Rm
+    //                }
+    //                break;
+    //        }
+    //        break;
+    //    case 0b1000:
+    //        switch (x0n00(inst)) {
+    //            case 0b1001: return true; // BT label
+    //            case 0b1011: return true; // BF label
+    //            case 0x1101: return true; // BT/S label*2
+    //            case 0x1111: return true; // BF/S label*2
+    //        }
+    //        break;
+    //    case 0b1010: return true; // BRA label
+    //    case 0b1011: return true; // BSR label
+    //    case 0b1100:
+    //        switch (x0n00(inst)) {
+    //            case 0x0011: return true; // TRAPA #imm
+    //        }
+    //        break;
+    //}
+    // return false;
 }
 
 void badOpcode(Sh2& s) {
@@ -128,12 +132,10 @@ void add(Sh2& s) {
 
 void addi(Sh2& s) {
     // Rn + imm -> Rn
-    if ((x0nn(s) & 0x80) == 0) { // NOLINT(readability-magic-numbers)
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        s.r_[xn00(s)] += (0x000000FF & static_cast<u32>(x0nn(s))); // #imm positive, 32bits sign extension
+    if ((x0nn(s) & sign_bit_8_mask) == 0) {
+        s.r_[xn00(s)] += (bitmask_000000FF & static_cast<u32>(x0nn(s))); // #imm positive, 32bits sign extension
     } else {
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        s.r_[xn00(s)] += (0xFFFFFF00 | static_cast<u32>(x0nn(s))); // #imm negative, 32bits sign extension
+        s.r_[xn00(s)] += (bitmask_FFFFFF00 | static_cast<u32>(x0nn(s))); // #imm negative, 32bits sign extension
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -185,7 +187,7 @@ void and_op(Sh2& s) {
 
 void andi(Sh2& s) {
     // R0 & imm -> R0
-    s.r_[0] &= (0x000000FF & x0nn(s)); // NOLINT(readability-magic-numbers)
+    s.r_[0] &= (bitmask_000000FF & x0nn(s));
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -194,7 +196,7 @@ void andm(Sh2& s) {
     //(R0 + GBR) & imm -> (R0 + GBR)
 
     s32 temp = s.memory()->read<u8>(s.gbr_ + s.r_[0]);
-    temp &= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
+    temp &= (bitmask_000000FF & static_cast<s32>(x0nn(s)));
     s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -206,10 +208,10 @@ void bf(Sh2& s) {
 
     if (s.sr_.get(StatusRegister::t) == 0) {
         s32 disp{};
-        if ((static_cast<s32>(x0nn(s)) & 0x80) == 0) {       // NOLINT(readability-magic-numbers)
-            disp = (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
+        if ((static_cast<s32>(x0nn(s)) & sign_bit_8_mask) == 0) {
+            disp = (bitmask_000000FF & static_cast<s32>(x0nn(s)));
         } else {
-            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
+            disp = (bitmask_FFFFFF00 | static_cast<s32>(x0nn(s)));
         }
         s.pc_             = s.pc_ + (disp << 1) + 4;
         s.cycles_elapsed_ = 3;
@@ -226,10 +228,10 @@ void bfs(Sh2& s) {
 
     if (s.sr_.get(StatusRegister::t) == 0) {
         s32 disp{};
-        if ((x0nn(s) & 0x80) == 0) {                         // NOLINT(readability-magic-numbers)
-            disp = (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
+        if ((x0nn(s) & sign_bit_8_mask) == 0) {
+            disp = (bitmask_000000FF & static_cast<s32>(x0nn(s)));
         } else {
-            disp = (0xFFFFFF00 | static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
+            disp = (bitmask_FFFFFF00 | static_cast<s32>(x0nn(s)));
         }
         u32 saved_pc{s.pc_};
         delaySlot(s, s.pc_ + 2);
@@ -246,10 +248,10 @@ void bra(Sh2& s) {
     // Modified using SH4 manual
 
     s32 disp{};
-    if ((xnnn(s) & 0x800) == 0) {      // NOLINT(readability-magic-numbers)
-        disp = (0x00000FFF & xnnn(s)); // NOLINT(readability-magic-numbers)
+    if ((xnnn(s) & sign_bit_12_mask) == 0) {
+        disp = (bitmask_00000FFF & xnnn(s));
     } else {
-        disp = (0xFFFFF000 | xnnn(s)); // NOLINT(readability-magic-numbers)
+        disp = (bitmask_FFFFF000 | xnnn(s));
     }
     u32 saved_pc{s.pc_};
     delaySlot(s, s.pc_ + 2);
@@ -1322,11 +1324,11 @@ void rte(Sh2& s) {
     // Stack -> PC/SR
     // Fixed
     delaySlot(s, s.pc_ + 2);
-    s.pc_ = s.memory()->read<u32>(s.r_[0xF]); // NOLINT(readability-magic-numbers)
-    s.r_[0xF] += 4;                           // NOLINT(readability-magic-numbers)
+    s.pc_ = s.memory()->read<u32>(s.r_[sp_register_index]);
+    s.r_[sp_register_index] += 4;
     s.sr_.set(StatusRegister::all_bits,
-              static_cast<u16>(s.memory()->read<u16>(s.r_[0xF] + 2) & 0x03F3)); // NOLINT(readability-magic-numbers)
-    s.r_[0xF] += 4;                                                             // NOLINT(readability-magic-numbers)
+              static_cast<u16>(s.memory()->read<u16>(s.r_[sp_register_index] + 2) & 0x03F3)); // NOLINT(readability-magic-numbers)
+    s.r_[sp_register_index] += 4;
     s.cycles_elapsed_ = 4;
 
     if (s.is_interrupted_) {
@@ -1656,11 +1658,11 @@ void tas(Sh2& s) {
 
 void trapa(Sh2& s) {
     // PC/SR -> stack, (imm*4 + VBR) -> PC
-    s32 imm{(0x000000FF & x0nn(s))};                                       // NOLINT(readability-magic-numbers)
-    s.r_[15] -= 4;                                                         // NOLINT(readability-magic-numbers)
-    s.memory()->write<u32>(s.r_[15], s.sr_.get(StatusRegister::all_bits)); // NOLINT(readability-magic-numbers)
-    s.r_[15] -= 4;                                                         // NOLINT(readability-magic-numbers)
-    s.memory()->write<u32>(s.r_[15], s.pc_ + 2);                           // NOLINT(readability-magic-numbers)
+    s32 imm{(bitmask_000000FF & x0nn(s))};
+    s.r_[sp_register_index] -= 4;
+    s.memory()->write<u32>(s.r_[sp_register_index], s.sr_.get(StatusRegister::all_bits));
+    s.r_[sp_register_index] -= 4;
+    s.memory()->write<u32>(s.r_[sp_register_index], s.pc_ + 2);
 
     s.pc_             = s.memory()->read<u32>(s.vbr_ + (imm << 2));
     s.cycles_elapsed_ = 8; // NOLINT(readability-magic-numbers)
@@ -1676,8 +1678,7 @@ void tst(Sh2& s) {
 
 void tsti(Sh2& s) {
     // R0 & imm, if result is 0, 1 -> T
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    ((s.r_[0] & (0x000000FF & x0nn(s))) == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
+    ((s.r_[0] & (bitmask_000000FF & x0nn(s))) == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1686,7 +1687,7 @@ void tsti(Sh2& s) {
 void tstm(Sh2& s) {
     // (R0 + GBR) & imm, if result is 0, 1 -> T
     s32 temp{static_cast<s32>(s.memory()->read<u8>(s.gbr_ + s.r_[0]))};
-    temp &= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
+    temp &= (bitmask_000000FF & static_cast<s32>(x0nn(s)));
     (temp == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
     s.pc_ += 2;
@@ -1703,7 +1704,7 @@ void xor_op(Sh2& s) {
 
 void xori(Sh2& s) {
     // R0 ^imm -> R0
-    s.r_[0] ^= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
+    s.r_[0] ^= (bitmask_000000FF & static_cast<s32>(x0nn(s)));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1712,7 +1713,7 @@ void xori(Sh2& s) {
 void xorm(Sh2& s) {
     // (R0 + GBR)^imm -> (R0 + GBR)
     s32 temp{static_cast<s32>(s.memory()->read<u8>(s.gbr_ + s.r_[0]))};
-    temp ^= (0x000000FF & static_cast<s32>(x0nn(s))); // NOLINT(readability-magic-numbers)
+    temp ^= (bitmask_000000FF & static_cast<s32>(x0nn(s)));
     s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
 
     s.pc_ += 2;
@@ -1721,8 +1722,8 @@ void xorm(Sh2& s) {
 
 void xtrct(Sh2& s) {
     // Middle 32 bits of Rm and Rn -> Rn
-    u32 temp      = (s.r_[x0n0(s)] << 16) & 0xFFFF0000; // NOLINT(readability-magic-numbers)
-    s.r_[xn00(s)] = (s.r_[xn00(s)] >> 16) & 0x0000FFFF; // NOLINT(readability-magic-numbers)
+    u32 temp      = (s.r_[x0n0(s)] << displacement_16) & bitmask_FFFF0000;
+    s.r_[xn00(s)] = (s.r_[xn00(s)] >> displacement_16) & bitmask_0000FFFF;
     s.r_[xn00(s)] |= temp;
 
     s.pc_ += 2;
@@ -1735,11 +1736,13 @@ void initializeOpcodesLut() {
         for (u32 i = 0; i < instructions_number; ++i) {
             if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
                 //                nextInstructionLut[counter] = OpcodeInfoTable[i].goNext;
-                opcodes_lut[counter] = opcodes_table[i].execute;
+                opcodes_lut[counter]             = opcodes_table[i].execute;
+                illegal_instruction_lut[counter] = opcodes_table[i].illegal_instruction_slot;
                 break;
             }
             //            nextInstructionLut[counter] = false;
-            opcodes_lut[counter] = &badOpcode;
+            opcodes_lut[counter]             = &badOpcode;
+            illegal_instruction_lut[counter] = false;
         }
         ++counter;
     }

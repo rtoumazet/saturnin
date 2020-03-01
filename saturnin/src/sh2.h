@@ -50,22 +50,23 @@ using saturnin::core::Scu;
 using saturnin::core::rawRead;
 using saturnin::core::rawWrite;
 
-constexpr u8  max_interrupt_number     = 10;
-constexpr u8  max_interrupt_level      = 10;
-constexpr u8  general_registers_number = 16;
-constexpr u16 cache_address_size       = 0x400;
-constexpr u16 cache_data_size          = 0x1000;
-constexpr u16 io_registers_size        = 0x200;
+constexpr u8  max_interrupt_number{10};
+constexpr u8  max_interrupt_level{10};
+constexpr u8  general_registers_number{16};
+constexpr u8  sp_register_index{0xF};
+constexpr u16 cache_address_size{0x400};
+constexpr u16 cache_data_size{0x1000};
+constexpr u16 io_registers_size{0x200};
 
-constexpr u32 sh2_memory_mask    = 0x1FF;
-constexpr u8  cache_lines_number = 32;
+constexpr u32 sh2_memory_mask{0x1FF};
+constexpr u8  cache_lines_number{32};
 
-constexpr u8 frt_clock_divisor_8        = 8;
-constexpr u8 frt_clock_divisor_32       = 32;
-constexpr u8 frt_clock_divisor_128      = 128;
-constexpr u8 frt_clock_divisor_mask_8   = 0b00000111;
-constexpr u8 frt_clock_divisor_mask_32  = 0b00011111;
-constexpr u8 frt_clock_divisor_mask_128 = 0b01111111;
+constexpr u8 frt_clock_divisor_8{8};
+constexpr u8 frt_clock_divisor_32{32};
+constexpr u8 frt_clock_divisor_128{128};
+constexpr u8 frt_clock_divisor_mask_8{0b00000111};
+constexpr u8 frt_clock_divisor_mask_32{0b00011111};
+constexpr u8 frt_clock_divisor_mask_128{0b01111111};
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   Sh2Type
 ///
