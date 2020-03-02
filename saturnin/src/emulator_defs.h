@@ -52,6 +52,7 @@ constexpr u8 displacement_4{4};
 constexpr u8 displacement_8{8};
 constexpr u8 displacement_12{12};
 constexpr u8 displacement_16{16};
+constexpr u8 displacement_32{32};
 
 constexpr u32 bitmask_000000FF{0x000000FF};
 constexpr u32 bitmask_00000FFF{0x00000FFF};
@@ -71,6 +72,7 @@ constexpr u16 bitmask_000F{0x000F};
 constexpr u16 bitmask_00FF{0x00FF};
 constexpr u16 bitmask_0FFF{0x0FFF};
 
+constexpr u32 sign_bit_48_mask{0x800000000000};
 constexpr u32 sign_bit_32_mask{0x80000000};
 constexpr u16 sign_bit_16_mask{0x8000};
 constexpr u16 sign_bit_12_mask{0x0800};
