@@ -54,6 +54,8 @@ constexpr u8 displacement_12{12};
 constexpr u8 displacement_16{16};
 constexpr u8 displacement_32{32};
 
+constexpr u64 bitmask_FFFFFFFF00000000{0xFFFFFFFF00000000};
+constexpr u32 bitmask_0000000F{0x0000000F};
 constexpr u32 bitmask_000000FF{0x000000FF};
 constexpr u32 bitmask_00000FFF{0x00000FFF};
 constexpr u32 bitmask_0000FFFF{0x0000FFFF};
@@ -65,6 +67,8 @@ constexpr u32 bitmask_FF000000{0xFF000000};
 constexpr u32 bitmask_FFFFFF00{0xFFFFFF00};
 constexpr u32 bitmask_FFFFF000{0xFFFFF000};
 constexpr u32 bitmask_FFFF0000{0xFFFF0000};
+constexpr u32 bitmask_FFFFFFFE{0xFFFFFFFE};
+constexpr u32 bitmask_FFFFFFFC{0xFFFFFFFC};
 constexpr u16 bitmask_F000{0xF000};
 constexpr u16 bitmask_0F00{0x0F00};
 constexpr u16 bitmask_00F0{0x00F0};
@@ -72,11 +76,18 @@ constexpr u16 bitmask_000F{0x000F};
 constexpr u16 bitmask_00FF{0x00FF};
 constexpr u16 bitmask_0FFF{0x0FFF};
 
-constexpr u32 sign_bit_48_mask{0x800000000000};
+constexpr u64 sign_bit_48_mask{0x800000000000};
 constexpr u32 sign_bit_32_mask{0x80000000};
 constexpr u16 sign_bit_16_mask{0x8000};
 constexpr u16 sign_bit_12_mask{0x0800};
 constexpr u8  sign_bit_8_mask{0x80};
+
+constexpr u64 uint31_min_64_extended{0xFFFFFFFF80000000};
+constexpr u64 uint47_min_64_extended{0xFFFF800000000000};
+constexpr u64 uint47_max{0x00007FFFFFFFFFFF};
+constexpr u32 uint32_max{UINT32_MAX};
+constexpr u32 uint31_max{0x7FFFFFFF};
+constexpr u32 uint30_max{0x3FFFFFFF};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct BitRange
