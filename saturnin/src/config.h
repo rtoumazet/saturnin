@@ -268,7 +268,7 @@ class Config {
     /// \param          value   Value to write.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void writeValue(libconfig::Setting& root, const std::string& key, const std::string& value) {
+    static void writeValue(libconfig::Setting& root, const std::string& key, const std::string& value) {
         if (!root.exists(key.c_str())) {
             root.add(key.c_str(), libconfig::Setting::TypeString) = value.c_str();
         } else {
@@ -484,7 +484,7 @@ class Config {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  void Config::createDefault(const AccessKeys& key);
+    /// \fn  auto Config::createDefault(const AccessKeys& key) -> std::vector<PeripheralKey>;
     ///
     /// \brief   Creates a default entry for the specified key.
     ///
@@ -496,7 +496,7 @@ class Config {
 
     void createDefault(const AccessKeys& key);
 
-    std::vector<PeripheralKey> readPeripheralConfiguration(const AccessKeys& key);
+    auto readPeripheralConfiguration(const AccessKeys& key) -> std::vector<PeripheralKey>;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////

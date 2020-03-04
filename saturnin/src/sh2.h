@@ -266,7 +266,7 @@ class Sh2 {
 
     template<typename T>
     auto readCacheData(const u32 addr) const -> T {
-        return rawRead<T>(cache_data_, addr & 0xFFF);
+        return rawRead<T>(cache_data_, addr & bitmask_0FFF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ class Sh2 {
 
     template<typename T>
     void writeCacheData(const u32 addr, const T data) {
-        rawWrite<T>(cache_data_, addr & 0xFFF, data);
+        rawWrite<T>(cache_data_, addr & bitmask_0FFF, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

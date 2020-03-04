@@ -95,7 +95,7 @@ constexpr auto toUnderlying(E e) noexcept {
 
 template<typename M, typename V>
 auto getKeyFromValue(const M& map, const V find_value) {
-    return std::find_if(map.begin(), map.end(), [find_value](const M::value_type& p) { return p.second == find_value; });
+    return std::find_if(map.begin(), map.end(), [find_value](const typename M::value_type& p) { return p.second == find_value; });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

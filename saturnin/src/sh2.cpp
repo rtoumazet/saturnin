@@ -645,13 +645,13 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
     }
 }
 
-void Sh2::purgeCache() { // NOLINT(readability-convert-member-functions-to-static)
+void Sh2::purgeCache() {
     // All the valid bits and LRU bits are initialized to 0
     for (u8 i = 0; i < cache_lines_number; ++i) {
         // :WARNING: following code is untested
-        u32 data = core::rawRead<u32>(cache_addresses_, i);
+        u32 data = core::rawRead<u32>(this->cache_addresses_, i);
         data &= cache_purge_mask;
-        core::rawWrite<u32>(cache_addresses_, i, data);
+        core::rawWrite<u32>(this->cache_addresses_, i, data);
     }
 }
 
@@ -1069,12 +1069,14 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                     case SourceAddressMode::fixed: break;
                     case SourceAddressMode::incremented: source += transfer_size; break;
                     case SourceAddressMode::decremented: source -= transfer_size; break;
+                    case SourceAddressMode::reserved: Log::warning("sh2", "Reserved source address mode used !");
                 }
 
                 switch (conf.chcr.get(DmaChannelControlRegister::destination_address_mode)) {
                     case DestinationAddressMode::fixed: break;
                     case DestinationAddressMode::incremented: destination += transfer_size; break;
                     case DestinationAddressMode::decremented: destination -= transfer_size; break;
+                    case DestinationAddressMode::reserved: Log::warning("sh2", "Reserved destination address mode used !");
                 }
             }
 
@@ -1091,6 +1093,7 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                     dmac_dar1_.set(DmaDestinationAddressRegister::all_bits, destination);
                     dmac_chcr1_.set(DmaChannelControlRegister::transfer_end_flag);
                     break;
+                case DmaChannel::channel_unknown: Log::warning("sh2", "Unknown DMA channel used !");
             }
 
             if (conf.chcr.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {

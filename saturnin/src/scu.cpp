@@ -822,17 +822,18 @@ void Scu::sendDmaEndInterrupt(const DmaLevel l) {
         case DmaLevel::level_0: generateInterrupt(interrupt_source::level_0_dma_end); break;
         case DmaLevel::level_1: generateInterrupt(interrupt_source::level_1_dma_end); break;
         case DmaLevel::level_2: generateInterrupt(interrupt_source::level_2_dma_end); break;
+        case DmaLevel::level_unknown: Log::warning("scu", "Unknown DMA level !");
     }
 }
 
 void Scu::resetDmaEnable(const DmaConfiguration& dc) {
     if (dc.dma_enable == DmaEnable::enabled) {
         if (dc.starting_factor_select == StartingFactorSelect::dma_start_factor) {
-            u32 dma_enable_data{};
             switch (dc.dma_level) {
                 case DmaLevel::level_0: d0en_.reset(DmaEnableRegister::dma_enable); break;
                 case DmaLevel::level_1: d1en_.reset(DmaEnableRegister::dma_enable); break;
                 case DmaLevel::level_2: d2en_.reset(DmaEnableRegister::dma_enable); break;
+                case DmaLevel::level_unknown: Log::warning("scu", "Unknown DMA level !");
             }
         }
     }
@@ -843,6 +844,7 @@ void Scu::dmaUpdateWriteAddress(const DmaLevel l, const u32 data) {
         case DmaLevel::level_0: d0w_.set(DmaWriteAddressRegister::all_bits, data); break;
         case DmaLevel::level_1: d1w_.set(DmaWriteAddressRegister::all_bits, data); break;
         case DmaLevel::level_2: d2w_.set(DmaWriteAddressRegister::all_bits, data); break;
+        case DmaLevel::level_unknown: Log::warning("scu", "Unknown DMA level !");
     }
 }
 

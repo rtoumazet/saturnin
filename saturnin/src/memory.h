@@ -411,8 +411,8 @@ class Memory {
 
         auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
         for (u32 current = begin; current <= end; ++current) {
-            auto& handler             = std::get<ReadHandler<T>&>(t);
-            handler[current & 0xFFFF] = func;
+            auto& handler                   = std::get<ReadHandler<T>&>(t);
+            handler[current & bitmask_FFFF] = func;
         }
     }
 
@@ -437,8 +437,8 @@ class Memory {
 
         auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
         for (u32 current = begin; current <= end; ++current) {
-            auto& handler             = std::get<WriteHandler<T>&>(t);
-            handler[current & 0xFFFF] = func;
+            auto& handler                   = std::get<WriteHandler<T>&>(t);
+            handler[current & bitmask_FFFF] = func;
         }
     }
 
@@ -638,7 +638,7 @@ template<typename T>
 struct readSmpc {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::warning("memory", core::tr("SMPC read ({}) access {:#0x}"), sizeof(T) * 8, addr);
+            Log::warning("memory", core::tr("SMPC read ({}) access {:#0x}"), sizeof(T) * number_of_bits_8, addr);
             return rawRead<T>(m.smpc_, addr & smpc_memory_mask);
         };
     }
@@ -671,7 +671,7 @@ template<typename T>
 struct writeSmpc {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            Log::warning("memory", core::tr("SMPC write ({}) access {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
+            Log::warning("memory", core::tr("SMPC write ({}) access {:#0x} : {:#x}"), sizeof(T) * number_of_bits_8, addr, data);
             // rawWrite<T>(m.smpc_, addr & smpc_memory_mask, data);
         };
     }
@@ -1001,7 +1001,8 @@ template<typename T>
 struct readCdBlock {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::warning("memory", core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T) * 8, addr);
+            Log::warning(
+                "memory", core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T) * number_of_bits_8, addr);
             return 0;
         };
     }
@@ -1022,8 +1023,11 @@ template<typename T>
 struct writeCdBlock {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            Log::warning(
-                "memory", core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
+            Log::warning("memory",
+                         core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"),
+                         sizeof(T) * number_of_bits_8,
+                         addr,
+                         data);
         };
     }
 };
@@ -1043,7 +1047,8 @@ template<typename T>
 struct readScsp {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::warning("memory", core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * 8, addr);
+            Log::warning(
+                "memory", core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * number_of_bits_8, addr);
             return 0;
         };
     }
@@ -1064,8 +1069,11 @@ template<typename T>
 struct writeScsp {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            Log::warning(
-                "memory", core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
+            Log::warning("memory",
+                         core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"),
+                         sizeof(T) * number_of_bits_8,
+                         addr,
+                         data);
         };
     }
 };
@@ -1457,7 +1465,7 @@ struct writeMasterSh2Frt {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             // m.interrupt_signal_is_sent_from_master_sh2_ = true;
-            Log::warning("memory", core::tr("{}bits write to the master SH2 FRT memory area !"), sizeof(T) * 8);
+            Log::warning("memory", core::tr("{}bits write to the master SH2 FRT memory area !"), sizeof(T) * number_of_bits_8);
         };
     }
 };
@@ -1486,7 +1494,7 @@ struct writeSlaveSh2Frt {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             // m.interrupt_signal_is_sent_from_slave_sh2_ = true;
-            Log::warning("memory", core::tr("{}bits write to the slave SH2 FRT memory area !"), sizeof(T) * 8);
+            Log::warning("memory", core::tr("{}bits write to the slave SH2 FRT memory area !"), sizeof(T) * number_of_bits_8);
         };
     }
 };

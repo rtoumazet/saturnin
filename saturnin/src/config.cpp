@@ -203,8 +203,8 @@ libcfg::Setting& Config::readValue(const AccessKeys& value) {
 
 bool Config::existsValue(const AccessKeys& value) { return cfg_.exists(Config::full_keys[value]); }
 
-void Config::createDefault(const AccessKeys& value) {
-    switch (value) {
+void Config::createDefault(const AccessKeys& key) {
+    switch (key) {
         case AccessKeys::cfg_global_language:
         case AccessKeys::cfg_global_hardware_mode:
         case AccessKeys::cfg_global_area_code:
@@ -214,31 +214,31 @@ void Config::createDefault(const AccessKeys& value) {
         case AccessKeys::cfg_paths_bios_saturn:
         case AccessKeys::cfg_cdrom_drive:
         case AccessKeys::cfg_cdrom_access_method:
-        case AccessKeys::cfg_sound_soundcard: add(full_keys[value], std::any_cast<const std::string>(default_keys[value])); break;
+        case AccessKeys::cfg_sound_soundcard: add(full_keys[key], std::any_cast<const std::string>(default_keys[key])); break;
         case AccessKeys::cfg_rendering_legacy_opengl:
-        case AccessKeys::cfg_sound_disabled: add(full_keys[value], std::any_cast<const bool>(default_keys[value])); break;
+        case AccessKeys::cfg_sound_disabled: add(full_keys[key], std::any_cast<const bool>(default_keys[key])); break;
         case AccessKeys::cfg_controls_saturn_player_1:
-            add(full_keys[value], SaturnDigitalPad().toConfig(PeripheralLayout::default_layout));
+            add(full_keys[key], SaturnDigitalPad().toConfig(PeripheralLayout::default_layout));
             break;
         case AccessKeys::cfg_controls_saturn_player_2:
-            add(full_keys[value], SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout));
+            add(full_keys[key], SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout));
             break;
         case AccessKeys::cfg_controls_stv_board:
-            add(full_keys[value], StvBoardControls().toConfig(PeripheralLayout::default_layout));
+            add(full_keys[key], StvBoardControls().toConfig(PeripheralLayout::default_layout));
             break;
         case AccessKeys::cfg_controls_stv_player_1:
-            add(full_keys[value], StvPlayerControls().toConfig(PeripheralLayout::default_layout));
+            add(full_keys[key], StvPlayerControls().toConfig(PeripheralLayout::default_layout));
             break;
         case AccessKeys::cfg_controls_stv_player_2:
-            add(full_keys[value], StvPlayerControls().toConfig(PeripheralLayout::empty_layout));
+            add(full_keys[key], StvPlayerControls().toConfig(PeripheralLayout::empty_layout));
             break;
         default: {
-            Log::error("config", tr("Undefined default value '{}'!"), full_keys[value]);
+            Log::error("config", tr("Undefined default value '{}'!"), full_keys[key]);
             throw std::runtime_error("Config error !");
         }
     }
 }
-std::vector<PeripheralKey> Config::readPeripheralConfiguration(const AccessKeys& key) {
+auto Config::readPeripheralConfiguration(const AccessKeys& key) -> std::vector<PeripheralKey> {
     std::vector<PeripheralKey> pad_values;
     const auto&                pad_setting = readValue(key);
     for (int i = 0; i < pad_setting.getLength(); ++i) {
