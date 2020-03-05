@@ -214,7 +214,7 @@ class Sh2 {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<typename T> T Sh2::readCacheAddresses(const u32 addr) const
+    /// \fn template<typename T> [[nodiscard]] auto Sh2::readCacheAddresses(const u32 addr) const -> T
     ///
     /// \brief  Read interface for cache addresses.
     ///
@@ -228,7 +228,7 @@ class Sh2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    auto readCacheAddresses(const u32 addr) const -> T {
+    [[nodiscard]] auto readCacheAddresses(const u32 addr) const -> T {
         return rawRead<T>(cache_addresses_, addr & 0x3FF);
     }
 

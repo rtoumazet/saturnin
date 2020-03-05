@@ -1418,10 +1418,10 @@ template<typename T>
 struct readSh2Registers {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m))
+            if (isMasterSh2InOperation(m)) {
                 return m.masterSh2()->readRegisters<T>(addr);
-            else
-                return m.slaveSh2()->readRegisters<T>(addr);
+            }
+            return m.slaveSh2()->readRegisters<T>(addr);
         };
     }
 };
@@ -1441,10 +1441,10 @@ template<typename T>
 struct writeSh2Registers {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m))
+            if (isMasterSh2InOperation(m)) {
                 return m.masterSh2()->writeRegisters<T>(addr, data);
-            else
-                return m.slaveSh2()->writeRegisters<T>(addr, data);
+            }
+            return m.slaveSh2()->writeRegisters<T>(addr, data);
         };
     }
 };
@@ -1522,10 +1522,10 @@ template<typename T>
 struct readCacheAddresses {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m))
+            if (isMasterSh2InOperation(m)) {
                 return m.masterSh2()->readCacheAddresses<T>(addr);
-            else
-                return m.slaveSh2()->readCacheAddresses<T>(addr);
+            }
+            return m.slaveSh2()->readCacheAddresses<T>(addr);
         };
     }
 };
@@ -1545,10 +1545,10 @@ template<typename T>
 struct writeCacheAddresses {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m))
+            if (isMasterSh2InOperation(m)) {
                 return m.masterSh2()->writeCacheAddresses<T>(addr, data);
-            else
-                return m.slaveSh2()->writeCacheAddresses<T>(addr, data);
+            }
+            return m.slaveSh2()->writeCacheAddresses<T>(addr, data);
         };
     }
 };
@@ -1568,10 +1568,10 @@ template<typename T>
 struct readCacheData {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m))
+            if (isMasterSh2InOperation(m)) {
                 return m.masterSh2()->readCacheData<T>(addr);
-            else
-                return m.slaveSh2()->readCacheData<T>(addr);
+            }
+            return m.slaveSh2()->readCacheData<T>(addr);
         };
     }
 };
@@ -1591,10 +1591,10 @@ template<typename T>
 struct writeCacheData {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m))
+            if (isMasterSh2InOperation(m)) {
                 return m.masterSh2()->writeCacheData<T>(addr, data);
-            else
-                return m.slaveSh2()->writeCacheData<T>(addr, data);
+            }
+            return m.slaveSh2()->writeCacheData<T>(addr, data);
         };
     }
 };
