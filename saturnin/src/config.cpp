@@ -23,7 +23,7 @@
 #include <vector>       // vector
 #include "config.h"
 #include "cdrom/cdrom.h"
-#include "locale.h"
+#include "locale.h" //NOLINT(modernize-deprecated-headers)
 #include "log.h"
 
 namespace libcfg = libconfig;
@@ -118,7 +118,7 @@ Config::MapAreaCode Config::area_code = {
 
 void Config::writeFile() { cfg_.writeFile(this->filename_.c_str()); }
 
-bool Config::readFile() {
+auto Config::readFile() -> bool {
     try {
         cfg_.readFile(filename_.c_str());
         return true;
@@ -131,7 +131,7 @@ bool Config::readFile() {
     }
 }
 
-bool Config::initialize(const bool isModernOpenGlCapable) {
+auto Config::initialize(const bool isModernOpenGlCapable) -> bool {
     if (!readFile()) {
         std::cout << tr("Creating configuration file.") << std::endl;
         this->generateConfigurationTree(isModernOpenGlCapable);
@@ -161,38 +161,39 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
     // clang-format on
 }
 
-libcfg::Setting& Config::getGroup(libcfg::Setting& root, const std::string& group_name) {
-    if (!root.exists(group_name.c_str()))
+auto Config::getGroup(libcfg::Setting& root, const std::string& group_name) -> libcfg::Setting& {
+    if (!root.exists(group_name.c_str())) {
         root.add(group_name.c_str(), libcfg::Setting::TypeGroup);
+    }
     return root[group_name.c_str()];
 }
 
-std::string Config::addGroup(libcfg::Setting& root, const std::string& group_name) {
+auto Config::addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string {
     // libcfg::Setting doesn't have a copy constructor, so it has to be declared twice
     if (!root.exists(group_name)) {
         libcfg::Setting& new_setting = root.add(group_name, libcfg::Setting::TypeGroup);
         return new_setting.getPath();
-    } else {
-        libcfg::Setting& new_setting = root.lookup(group_name);
-        return new_setting.getPath();
     }
+    libcfg::Setting& new_setting = root.lookup(group_name);
+    return new_setting.getPath();
 }
 
 void Config::test() {
     libcfg::Setting& root = cfg_.getRoot();
     std::string      str{"test"};
 
-    this->writeValue(root, "test_c_string", str.c_str());
-    this->writeValue(root, "test_string", std::string{"test"});
-    this->writeValue(root, "test_char_array", "test");
+    Config::writeValue(root, "test_c_string", str.c_str());
+    Config::writeValue(root, "test_string", std::string{"test"});
+    Config::writeValue(root, "test_char_array", "test");
 
     this->writeFile();
 }
 
-libcfg::Setting& Config::readValue(const AccessKeys& value) {
+auto Config::readValue(const AccessKeys& value) -> libcfg::Setting& {
     try {
-        if (!existsValue(value))
+        if (!existsValue(value)) {
             createDefault(value);
+        }
         return cfg_.lookup(Config::full_keys[value]);
     } catch (const libcfg::SettingNotFoundException& e) {
         auto errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
@@ -201,7 +202,7 @@ libcfg::Setting& Config::readValue(const AccessKeys& value) {
     }
 }
 
-bool Config::existsValue(const AccessKeys& value) { return cfg_.exists(Config::full_keys[value]); }
+auto Config::existsValue(const AccessKeys& value) -> bool { return cfg_.exists(Config::full_keys[value]); }
 
 void Config::createDefault(const AccessKeys& key) {
     switch (key) {
@@ -247,7 +248,8 @@ auto Config::readPeripheralConfiguration(const AccessKeys& key) -> std::vector<P
     return pad_values;
 }
 
-std::vector<std::string> Config::listAvailableLanguages() {
+/* static */
+auto Config::listAvailableLanguages() -> std::vector<std::string> {
     auto                     full_path = fs::current_path() / "lang";
     std::vector<std::string> files{"en"}; // english is the default language, even if the directory isn't present
     for (auto& p : fs::directory_iterator(full_path)) {
@@ -258,7 +260,8 @@ std::vector<std::string> Config::listAvailableLanguages() {
     return files;
 }
 
-std::vector<std::string> Config::listAreaCodes() {
+/* static */
+auto Config::listAreaCodes() -> std::vector<std::string> {
     std::vector<std::string> codes;
     for (const auto& code : area_code) {
         codes.push_back(code.first);

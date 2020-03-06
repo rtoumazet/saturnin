@@ -20,7 +20,7 @@
 #include <sstream> // stringstream
 #include <fstream> // ifstream
 #include <libzippp/libzippp.h>
-#include "locale.h"
+#include "locale.h" // NOLINT(modernize-deprecated-headers)
 #include "emulator_context.h"
 #include "config.h"
 #include "sh2.h"
@@ -33,13 +33,19 @@ namespace saturnin::core {
 
 using core::Log;
 
-bool Memory::loadRom(const std::string& zip_name,
+constexpr u8 region_cart_address_not_interleaved  = 0x40;
+constexpr u8 region_cart_address_odd_interleaved  = 0x81;
+constexpr u8 region_cart_address_even_interleaved = 0x80;
+
+// constexpr u32 direct_address_offset     = 0x20000000;
+
+auto Memory::loadRom(const std::string& zip_name,
                      const std::string& file_name,
                      u8*                destination,
                      const u32          size,
                      const RomLoad      RomLoad,
                      const u8           times_mirrored,
-                     const RomType      RomType) {
+                     const RomType      RomType) -> bool {
     std::string zip = zip_name + ".zip";
     fs::path    rom_path{config()->readValue(AccessKeys::cfg_paths_roms_stv).c_str()};
     rom_path /= zip;
@@ -72,7 +78,7 @@ bool Memory::loadRom(const std::string& zip_name,
                             const auto& src_begin = data.get();
                             std::move(src_begin, std::next(src_begin, size), destination);
 
-                            region_cart_address = 0x40;
+                            region_cart_address = region_cart_address_not_interleaved;
                             break;
                         }
                         case RomLoad::odd_interleaved: { // Data is loaded on odd bytes only
@@ -80,7 +86,7 @@ bool Memory::loadRom(const std::string& zip_name,
                                 destination[(i * 2 + 1)] = data[i];
                             }
 
-                            region_cart_address = 0x81;
+                            region_cart_address = region_cart_address_odd_interleaved;
                             break;
                         }
                         case RomLoad::even_interleaved: { // Data is loaded on even bytes only
@@ -88,14 +94,15 @@ bool Memory::loadRom(const std::string& zip_name,
                                 destination[i * 2] = data[i];
                             }
 
-                            region_cart_address = 0x80;
+                            region_cart_address = region_cart_address_even_interleaved;
                             break;
                         }
                     }
 
                     // bios region is forced for program roms
-                    if (RomType == RomType::program)
+                    if (RomType == RomType::program) {
                         this->cart_[region_cart_address] = this->rom_[stv_bios_region_address];
+                    }
 
                     mirrorData(destination, size, times_mirrored, RomLoad);
                     break;
@@ -160,7 +167,7 @@ void Memory::loadBios(const HardwareMode mode) {
     }
 }
 
-bool Memory::loadStvGame(const std::string& config_filename) {
+auto Memory::loadStvGame(const std::string& config_filename) -> bool {
     auto full_path = std::filesystem::current_path() / "stv" / config_filename;
 
     core::Config stv(full_path.string());
@@ -208,178 +215,267 @@ void Memory::swapCartArea() {
 
 void Memory::initializeHandlers() {
     // Dummy access
-    initializeHandlers<readDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
-    initializeHandlers<writeDummy, u8, u16, u32>(0x00000000, 0xFFFFFFFF);
+    constexpr u32 dummy_start_address = 0x00000000;
+    constexpr u32 dummy_end_address   = 0xFFFFFFFF;
+    initializeHandlers<readDummy, u8, u16, u32>(dummy_start_address, dummy_end_address);
+    initializeHandlers<writeDummy, u8, u16, u32>(dummy_start_address, dummy_end_address);
 
     // ROM access
-    initializeHandlers<readRom, u8, u16, u32>(0x00000000, 0x000FFFFF);
-    initializeHandlers<readRom, u8, u16, u32>(0x20000000, 0x200FFFFF);
+    constexpr u32 rom_start_address = 0x00000000;
+    constexpr u32 rom_end_address   = 0x000FFFFF;
+
+    initializeHandlers<readRom, u8, u16, u32>(rom_start_address, rom_end_address);
+    initializeHandlers<readRom, u8, u16, u32>(getDirectAddress(rom_start_address), getDirectAddress(rom_end_address));
 
     // SMPC access
-    initializeHandlers<readSmpc, u8, u16, u32>(0x00100000, 0x0017FFFF);
-    initializeHandlers<readSmpc, u8, u16, u32>(0x20100000, 0x2017FFFF);
+    constexpr u32 smpc_start_address = 0x00100000;
+    constexpr u32 smpc_end_address   = 0x0017FFFF;
 
-    initializeHandlers<writeSmpc, u8, u16, u32>(0x00100000, 0x0017FFFF);
-    initializeHandlers<writeSmpc, u8, u16, u32>(0x20100000, 0x2017FFFF);
+    initializeHandlers<readSmpc, u8, u16, u32>(smpc_start_address, smpc_end_address);
+    initializeHandlers<readSmpc, u8, u16, u32>(getDirectAddress(smpc_start_address), getDirectAddress(smpc_end_address));
+
+    initializeHandlers<writeSmpc, u8, u16, u32>(smpc_start_address, smpc_end_address);
+    initializeHandlers<writeSmpc, u8, u16, u32>(getDirectAddress(smpc_start_address), getDirectAddress(smpc_end_address));
 
     // Backup RAM access
-    initializeHandlers<readBackupRam, u8, u16, u32>(0x00180000, 0x001FFFFF);
-    initializeHandlers<readBackupRam, u8, u16, u32>(0x20180000, 0x201FFFFF);
+    constexpr u32 backup_ram_start_address = 0x00180000;
+    constexpr u32 backup_ram_end_address   = 0x001FFFFF;
 
-    initializeHandlers<writeBackupRam, u8, u16, u32>(0x00180000, 0x001FFFFF);
-    initializeHandlers<writeBackupRam, u8, u16, u32>(0x20180000, 0x201FFFFF);
+    initializeHandlers<readBackupRam, u8, u16, u32>(backup_ram_start_address, backup_ram_end_address);
+    initializeHandlers<readBackupRam, u8, u16, u32>(getDirectAddress(backup_ram_start_address),
+                                                    getDirectAddress(backup_ram_end_address));
+
+    initializeHandlers<writeBackupRam, u8, u16, u32>(backup_ram_start_address, backup_ram_end_address);
+    initializeHandlers<writeBackupRam, u8, u16, u32>(getDirectAddress(backup_ram_start_address),
+                                                     getDirectAddress(backup_ram_end_address));
 
     // Low workram access
-    initializeHandlers<readWorkramLow, u8, u16, u32>(0x00200000, 0x002FFFFF);
-    initializeHandlers<readWorkramLow, u8, u16, u32>(0x20200000, 0x202FFFFF);
+    constexpr u32 workram_low_start_address = 0x00200000;
+    constexpr u32 workram_low_end_address   = 0x002FFFFF;
 
-    initializeHandlers<writeWorkramLow, u8, u16, u32>(0x00200000, 0x002FFFFF);
-    initializeHandlers<writeWorkramLow, u8, u16, u32>(0x20200000, 0x202FFFFF);
+    initializeHandlers<readWorkramLow, u8, u16, u32>(workram_low_start_address, workram_low_end_address);
+    initializeHandlers<readWorkramLow, u8, u16, u32>(getDirectAddress(workram_low_start_address),
+                                                     getDirectAddress(workram_low_end_address));
+
+    initializeHandlers<writeWorkramLow, u8, u16, u32>(workram_low_start_address, workram_low_end_address);
+    initializeHandlers<writeWorkramLow, u8, u16, u32>(getDirectAddress(workram_low_start_address),
+                                                      getDirectAddress(workram_low_end_address));
 
     // STV I/O access
-    initializeHandlers<readStvIo, u8, u16, u32>(0x00400000, 0x004FFFFF);
-    initializeHandlers<readStvIo, u8, u16, u32>(0x20400000, 0x204FFFFF);
+    constexpr u32 stv_io_start_address = 0x00400000;
+    constexpr u32 stv_io_end_address   = 0x004FFFFF;
 
-    initializeHandlers<writeStvIo, u8, u16, u32>(0x00400000, 0x004FFFFF);
-    initializeHandlers<writeStvIo, u8, u16, u32>(0x20400000, 0x204FFFFF);
+    initializeHandlers<readStvIo, u8, u16, u32>(stv_io_start_address, stv_io_end_address);
+    initializeHandlers<readStvIo, u8, u16, u32>(getDirectAddress(stv_io_start_address), getDirectAddress(stv_io_end_address));
+
+    initializeHandlers<writeStvIo, u8, u16, u32>(stv_io_start_address, stv_io_end_address);
+    initializeHandlers<writeStvIo, u8, u16, u32>(getDirectAddress(stv_io_start_address), getDirectAddress(stv_io_end_address));
 
     // Cart access
-    initializeHandlers<readCart, u8, u16, u32>(0x02000000, 0x04FFFFFF);
-    initializeHandlers<readCart, u8, u16, u32>(0x22000000, 0x24FFFFFF);
+    constexpr u32 cart_start_address = 0x02000000;
+    constexpr u32 cart_end_address   = 0x04FFFFFF;
 
-    initializeHandlers<writeCart, u8, u16, u32>(0x02000000, 0x04FFFFFF);
-    initializeHandlers<writeCart, u8, u16, u32>(0x22000000, 0x24FFFFFF);
+    initializeHandlers<readCart, u8, u16, u32>(cart_start_address, cart_end_address);
+    initializeHandlers<readCart, u8, u16, u32>(getDirectAddress(cart_start_address), getDirectAddress(cart_end_address));
+
+    initializeHandlers<writeCart, u8, u16, u32>(cart_start_address, cart_end_address);
+    initializeHandlers<writeCart, u8, u16, u32>(getDirectAddress(cart_start_address), getDirectAddress(cart_end_address));
 
     // CdBlock access
-    initializeHandlers<readCdBlock, u8, u16, u32>(0x05800000, 0x058FFFFF);
-    initializeHandlers<readCdBlock, u8, u16, u32>(0x25800000, 0x258FFFFF);
+    constexpr u32 cd_block_start_address = 0x05800000;
+    constexpr u32 cd_block_end_address   = 0x058FFFFF;
 
-    initializeHandlers<writeCdBlock, u8, u16, u32>(0x05800000, 0x058FFFFF);
-    initializeHandlers<writeCdBlock, u8, u16, u32>(0x25800000, 0x258FFFFF);
+    initializeHandlers<readCdBlock, u8, u16, u32>(cd_block_start_address, cd_block_end_address);
+    initializeHandlers<readCdBlock, u8, u16, u32>(getDirectAddress(cd_block_start_address),
+                                                  getDirectAddress(cd_block_end_address));
+
+    initializeHandlers<writeCdBlock, u8, u16, u32>(cd_block_start_address, cd_block_end_address);
+    initializeHandlers<writeCdBlock, u8, u16, u32>(getDirectAddress(cd_block_start_address),
+                                                   getDirectAddress(cd_block_end_address));
 
     // SCSP access
-    initializeHandlers<readScsp, u8, u16, u32>(0x05A00000, 0x05BFFFFF);
-    initializeHandlers<readScsp, u8, u16, u32>(0x25A00000, 0x25BFFFFF);
+    constexpr u32 scsp_start_address = 0x05A00000;
+    constexpr u32 scsp_end_address   = 0x05BFFFFF;
 
-    initializeHandlers<writeScsp, u8, u16, u32>(0x05A00000, 0x05BFFFFF);
-    initializeHandlers<writeScsp, u8, u16, u32>(0x25A00000, 0x25BFFFFF);
+    initializeHandlers<readScsp, u8, u16, u32>(scsp_start_address, scsp_end_address);
+    initializeHandlers<readScsp, u8, u16, u32>(getDirectAddress(scsp_start_address), getDirectAddress(scsp_end_address));
+
+    initializeHandlers<writeScsp, u8, u16, u32>(scsp_start_address, scsp_end_address);
+    initializeHandlers<writeScsp, u8, u16, u32>(getDirectAddress(scsp_start_address), getDirectAddress(scsp_end_address));
 
     // VDP1 RAM access
-    initializeHandlers<readVdp1Ram, u8, u16, u32>(0x05C00000, 0x05C7FFFF);
-    initializeHandlers<readVdp1Ram, u8, u16, u32>(0x25C00000, 0x25C7FFFF);
+    constexpr u32 vdp1_ram_start_address = 0x05C00000;
+    constexpr u32 vdp1_ram_end_address   = 0x05C7FFFF;
 
-    initializeHandlers<writeVdp1Ram, u8, u16, u32>(0x05C00000, 0x05C7FFFF);
-    initializeHandlers<writeVdp1Ram, u8, u16, u32>(0x25C00000, 0x25C7FFFF);
+    initializeHandlers<readVdp1Ram, u8, u16, u32>(vdp1_ram_start_address, vdp1_ram_end_address);
+    initializeHandlers<readVdp1Ram, u8, u16, u32>(getDirectAddress(vdp1_ram_start_address),
+                                                  getDirectAddress(vdp1_ram_end_address));
+
+    initializeHandlers<writeVdp1Ram, u8, u16, u32>(vdp1_ram_start_address, vdp1_ram_end_address);
+    initializeHandlers<writeVdp1Ram, u8, u16, u32>(getDirectAddress(vdp1_ram_start_address),
+                                                   getDirectAddress(vdp1_ram_end_address));
 
     // VDP1 framebuffer access
-    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(0x05C80000, 0x05CFFFFF);
-    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(0x25C80000, 0x25CFFFFF);
+    constexpr u32 vdp1_fb_start_address = 0x05C80000;
+    constexpr u32 vdp1_fb_end_address   = 0x05CFFFFF;
 
-    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(0x05C80000, 0x05CFFFFF);
-    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(0x25C80000, 0x25CFFFFF);
+    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(vdp1_fb_start_address, vdp1_fb_end_address);
+    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(getDirectAddress(vdp1_fb_start_address),
+                                                          getDirectAddress(vdp1_fb_end_address));
 
-    //// VDP1 Registers access
-    initializeHandlers<readVdp1Registers, u8, u16, u32>(0x05D00000, 0x05D7FFFF);
-    initializeHandlers<readVdp1Registers, u8, u16, u32>(0x25D00000, 0x25D7FFFF);
+    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(vdp1_fb_start_address, vdp1_fb_end_address);
+    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(getDirectAddress(vdp1_fb_start_address),
+                                                           getDirectAddress(vdp1_fb_end_address));
 
-    initializeHandlers<writeVdp1Registers, u8, u16, u32>(0x05D00000, 0x05D7FFFF);
-    initializeHandlers<writeVdp1Registers, u8, u16, u32>(0x25D00000, 0x25D7FFFF);
+    // VDP1 Registers access
+    constexpr u32 vdp1_regs_start_address = 0x05D00000;
+    constexpr u32 vdp1_regs_end_address   = 0x05D7FFFF;
+
+    initializeHandlers<readVdp1Registers, u8, u16, u32>(vdp1_regs_start_address, vdp1_regs_end_address);
+    initializeHandlers<readVdp1Registers, u8, u16, u32>(getDirectAddress(vdp1_regs_start_address),
+                                                        getDirectAddress(vdp1_regs_end_address));
+
+    initializeHandlers<writeVdp1Registers, u8, u16, u32>(vdp1_regs_start_address, vdp1_regs_end_address);
+    initializeHandlers<writeVdp1Registers, u8, u16, u32>(getDirectAddress(vdp1_regs_start_address),
+                                                         getDirectAddress(vdp1_regs_end_address));
 
     // VDP2 VRAM access
-    initializeHandlers<readVdp2Vram, u8, u16, u32>(0x05E00000, 0x05EFFFFF);
-    initializeHandlers<readVdp2Vram, u8, u16, u32>(0x25E00000, 0x25EFFFFF);
+    constexpr u32 vdp2_vram_start_address = 0x05E00000;
+    constexpr u32 vdp2_vram_end_address   = 0x05EFFFFF;
 
-    initializeHandlers<writeVdp2Vram, u8, u16, u32>(0x05E00000, 0x05EFFFFF);
-    initializeHandlers<writeVdp2Vram, u8, u16, u32>(0x25E00000, 0x25EFFFFF);
+    initializeHandlers<readVdp2Vram, u8, u16, u32>(vdp2_vram_start_address, vdp2_vram_end_address);
+    initializeHandlers<readVdp2Vram, u8, u16, u32>(getDirectAddress(vdp2_vram_start_address),
+                                                   getDirectAddress(vdp2_vram_end_address));
+
+    initializeHandlers<writeVdp2Vram, u8, u16, u32>(vdp2_vram_start_address, vdp2_vram_end_address);
+    initializeHandlers<writeVdp2Vram, u8, u16, u32>(getDirectAddress(vdp2_vram_start_address),
+                                                    getDirectAddress(vdp2_vram_end_address));
 
     // VDP2 CRAM access
-    initializeHandlers<readVdp2Cram, u8, u16, u32>(0x05F00000, 0x05F7FFFF);
-    initializeHandlers<readVdp2Cram, u8, u16, u32>(0x25F00000, 0x25F7FFFF);
+    constexpr u32 vdp2_cram_start_address = 0x05F00000;
+    constexpr u32 vdp2_cram_end_address   = 0x05F7FFFF;
 
-    initializeHandlers<writeVdp2Cram, u8, u16, u32>(0x05F00000, 0x05F7FFFF);
-    initializeHandlers<writeVdp2Cram, u8, u16, u32>(0x25F00000, 0x25F7FFFF);
+    initializeHandlers<readVdp2Cram, u8, u16, u32>(vdp2_cram_start_address, vdp2_cram_end_address);
+    initializeHandlers<readVdp2Cram, u8, u16, u32>(getDirectAddress(vdp2_cram_start_address),
+                                                   getDirectAddress(vdp2_cram_end_address));
+
+    initializeHandlers<writeVdp2Cram, u8, u16, u32>(vdp2_cram_start_address, vdp2_cram_end_address);
+    initializeHandlers<writeVdp2Cram, u8, u16, u32>(getDirectAddress(vdp2_cram_start_address),
+                                                    getDirectAddress(vdp2_cram_end_address));
 
     // VDP2 Registers access
-    initializeHandlers<readVdp2Registers, u8, u16, u32>(0x05F80000, 0x05FBFFFF);
-    initializeHandlers<readVdp2Registers, u8, u16, u32>(0x25F80000, 0x25FBFFFF);
+    constexpr u32 vdp2_regs_start_address = 0x05F80000;
+    constexpr u32 vdp2_regs_end_address   = 0x05FBFFFF;
 
-    initializeHandlers<writeVdp2Registers, u8, u16, u32>(0x05F80000, 0x05FBFFFF);
-    initializeHandlers<writeVdp2Registers, u8, u16, u32>(0x25F80000, 0x25FBFFFF);
+    initializeHandlers<readVdp2Registers, u8, u16, u32>(vdp2_regs_start_address, vdp2_regs_end_address);
+    initializeHandlers<readVdp2Registers, u8, u16, u32>(getDirectAddress(vdp2_regs_start_address),
+                                                        getDirectAddress(vdp2_regs_end_address));
+
+    initializeHandlers<writeVdp2Registers, u8, u16, u32>(vdp2_regs_start_address, vdp2_regs_end_address);
+    initializeHandlers<writeVdp2Registers, u8, u16, u32>(getDirectAddress(vdp2_regs_start_address),
+                                                         getDirectAddress(vdp2_regs_end_address));
 
     // SCU access
-    initializeHandlers<readScu, u8, u16, u32>(0x05FE0000, 0x05FEFFFF);
-    initializeHandlers<readScu, u8, u16, u32>(0x25FE0000, 0x25FEFFFF);
+    constexpr u32 scu_start_address = 0x05FE0000;
+    constexpr u32 scu_end_address   = 0x05FEFFFF;
 
-    initializeHandlers<writeScu, u8, u16, u32>(0x05FE0000, 0x05FEFFFF);
-    initializeHandlers<writeScu, u8, u16, u32>(0x25FE0000, 0x25FEFFFF);
+    initializeHandlers<readScu, u8, u16, u32>(scu_start_address, scu_end_address);
+    initializeHandlers<readScu, u8, u16, u32>(getDirectAddress(scu_start_address), getDirectAddress(scu_end_address));
+
+    initializeHandlers<writeScu, u8, u16, u32>(scu_start_address, scu_end_address);
+    initializeHandlers<writeScu, u8, u16, u32>(getDirectAddress(scu_start_address), getDirectAddress(scu_end_address));
 
     // Workram high access
-    initializeHandlers<readWorkramHigh, u8, u16, u32>(0x06000000, 0x07FFFFFF);
-    initializeHandlers<readWorkramHigh, u8, u16, u32>(0x26000000, 0x27FFFFFF);
+    constexpr u32 workram_high_start_address = 0x06000000;
+    constexpr u32 workram_high_end_address   = 0x07FFFFFF;
 
-    initializeHandlers<writeWorkramHigh, u8, u16, u32>(0x06000000, 0x07FFFFFF);
-    initializeHandlers<writeWorkramHigh, u8, u16, u32>(0x26000000, 0x27FFFFFF);
+    initializeHandlers<readWorkramHigh, u8, u16, u32>(workram_high_start_address, workram_high_end_address);
+    initializeHandlers<readWorkramHigh, u8, u16, u32>(getDirectAddress(workram_high_start_address),
+                                                      getDirectAddress(workram_high_end_address));
+
+    initializeHandlers<writeWorkramHigh, u8, u16, u32>(workram_high_start_address, workram_high_end_address);
+    initializeHandlers<writeWorkramHigh, u8, u16, u32>(getDirectAddress(workram_high_start_address),
+                                                       getDirectAddress(workram_high_end_address));
 
     // Master FRT access
-    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(0x01800000, 0x01FFFFFF);
-    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(0x21800000, 0x21FFFFFF);
+    constexpr u32 master_frt_start_address = 0x01800000;
+    constexpr u32 master_frt_end_address   = 0x01FFFFFF;
+
+    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(master_frt_start_address, master_frt_end_address);
+    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(getDirectAddress(master_frt_start_address),
+                                                        getDirectAddress(master_frt_end_address));
 
     // Slave FRT access
-    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(0x01000000, 0x017FFFFF);
-    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(0x21000000, 0x217FFFFF);
+    constexpr u32 slave_frt_start_address = 0x01000000;
+    constexpr u32 slave_frt_end_address   = 0x017FFFFF;
+
+    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(slave_frt_start_address, slave_frt_end_address);
+    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(getDirectAddress(slave_frt_start_address),
+                                                       getDirectAddress(slave_frt_end_address));
 
     // SH2 register access
-    initializeHandlers<readSh2Registers, u8, u16, u32>(0xFFFFFE00, 0xFFFFFFFF);
-    initializeHandlers<writeSh2Registers, u8, u16, u32>(0xFFFFFE00, 0xFFFFFFFF);
+    constexpr u32 sh2_regs_start_address = 0xFFFFFE00;
+    constexpr u32 sh2_regs_end_address   = 0xFFFFFFFF;
+
+    initializeHandlers<readSh2Registers, u8, u16, u32>(sh2_regs_start_address, sh2_regs_end_address);
+    initializeHandlers<writeSh2Registers, u8, u16, u32>(sh2_regs_start_address, sh2_regs_end_address);
 
     // Cache addresses access
-    initializeHandlers<readCacheAddresses, u8, u16, u32>(0x60000000, 0x6FFFFFFF);
-    initializeHandlers<writeCacheAddresses, u8, u16, u32>(0x60000000, 0x6FFFFFFF);
+    constexpr u32 cache_addresses_start_address = 0x60000000;
+    constexpr u32 cache_addresses_end_address   = 0x6FFFFFFF;
+
+    initializeHandlers<readCacheAddresses, u8, u16, u32>(cache_addresses_start_address, cache_addresses_end_address);
+    initializeHandlers<writeCacheAddresses, u8, u16, u32>(cache_addresses_start_address, cache_addresses_end_address);
 
     // Cache data access
-    initializeHandlers<readCacheData, u8, u16, u32>(0x80000000, 0x8FFFFFFF);
-    initializeHandlers<readCacheData, u8, u16, u32>(0xC0000000, 0xCFFFFFFF);
+    constexpr u32 cache_data_1_start_address = 0x80000000;
+    constexpr u32 cache_data_1_end_address   = 0x8FFFFFFF;
+    constexpr u32 cache_data_2_start_address = 0xC0000000;
+    constexpr u32 cache_data_2_end_address   = 0xCFFFFFFF;
 
-    initializeHandlers<writeCacheData, u8, u16, u32>(0x80000000, 0x8FFFFFFF);
-    initializeHandlers<writeCacheData, u8, u16, u32>(0xC0000000, 0xCFFFFFFF);
+    initializeHandlers<readCacheData, u8, u16, u32>(cache_data_1_start_address, cache_data_1_end_address);
+    initializeHandlers<readCacheData, u8, u16, u32>(cache_data_2_start_address, cache_data_2_end_address);
+
+    initializeHandlers<writeCacheData, u8, u16, u32>(cache_data_1_start_address, cache_data_1_end_address);
+    initializeHandlers<writeCacheData, u8, u16, u32>(cache_data_2_start_address, cache_data_2_end_address);
 }
 
-u32 Memory::readStvProtection(const u32 addr, u32 data) const {
+auto Memory::readStvProtection(const u32 addr, u32 data) const -> u32 {
     if (this->isStvProtectionEnabled()) {
         switch (data) {
             // Astra Superstars
-            case 0x01230000:
+            case 0x01230000: // NOLINT(readability-magic-numbers)
                 stv_protection_offset += 4;
                 data = rawRead<u32>(this->cart_, stv_protection_offset);
                 break;
                 // Final Fight Revenge
-            case 0x10da0000:
+            case 0x10da0000: // NOLINT(readability-magic-numbers)
                 stv_protection_offset += 4;
                 data = rawRead<u32>(this->cart_, stv_protection_offset);
                 break;
-            case 0x10d70000:
+            case 0x10d70000: // NOLINT(readability-magic-numbers)
                 stv_protection_offset += 4;
                 data = rawRead<u32>(this->cart_, stv_protection_offset);
                 break;
                 // Steep Slope Sliders
-            case 0x2c5b0000:
-            case 0x47F10000:
-            case 0xfcda0000:
-            case 0xb5e60000:
-            case 0x392c0000:
-            case 0x77c30000:
-            case 0x8a620000:
+            case 0x2c5b0000: // NOLINT(readability-magic-numbers)
+            case 0x47F10000: // NOLINT(readability-magic-numbers)
+            case 0xfcda0000: // NOLINT(readability-magic-numbers)
+            case 0xb5e60000: // NOLINT(readability-magic-numbers)
+            case 0x392c0000: // NOLINT(readability-magic-numbers)
+            case 0x77c30000: // NOLINT(readability-magic-numbers)
+            case 0x8a620000: // NOLINT(readability-magic-numbers)
                 stv_protection_offset += 4;
                 data = rawRead<u32>(this->cart_, stv_protection_offset);
                 break;
                 // Radiant Silvergun
-            case 0x77770000:
+            case 0x77770000: // NOLINT(readability-magic-numbers)
                 data = 0;
                 break;
                 // Elan Doreé
-            case 0xff7f0000:
-            case 0xf9ff0000:
-            case 0xffbf0000: data = 0x02002000; break;
+            case 0xff7f0000:                           // NOLINT(readability-magic-numbers)
+            case 0xf9ff0000:                           // NOLINT(readability-magic-numbers)
+            case 0xffbf0000: data = 0x02002000; break; // NOLINT(readability-magic-numbers)
         }
         Log::debug("memory", "ST-V protection read index: {}, value: {}", stv_protection_offset, data);
     } else {
@@ -394,31 +490,31 @@ void Memory::writeStvProtection(const u32 addr, u32 data) {
     const u32 index         = rawRead<u32>(this->cart_, relative_addr);
     switch (index) {
         // Astra Superstars
-        case 0x01230000:
-            this->stv_protection_offset_ = (0x0400000) - 4;
+        case 0x01230000:                                    // NOLINT(readability-magic-numbers)
+            this->stv_protection_offset_ = (0x0400000) - 4; // NOLINT(readability-magic-numbers)
             break;
             // Final Fight Revenge
-        case 0x10d70000:
-        case 0x10da0000:
-            this->stv_protection_offset_ = (0x02B994) - 4;
+        case 0x10d70000:                                   // NOLINT(readability-magic-numbers)
+        case 0x10da0000:                                   // NOLINT(readability-magic-numbers)
+            this->stv_protection_offset_ = (0x02B994) - 4; // NOLINT(readability-magic-numbers)
             break;
             // Streep Slope Sliders
-        case 0x2c5b0000: this->stv_protection_offset_ = (0x145ffac) - 4; break;
-        case 0x47F10000: this->stv_protection_offset_ = (0x145ffac + 0xbaf0) - 4; break;
-        case 0xfcda0000: this->stv_protection_offset_ = (0x145ffac + 0x12fd0) - 4; break;
-        case 0xb5e60000: this->stv_protection_offset_ = (0x145ffac + 0x1a4c4) - 4; break;
-        case 0x392c0000: this->stv_protection_offset_ = (0x145ffac + 0x219b0) - 4; break;
-        case 0x77c30000: this->stv_protection_offset_ = (0x145ffac + 0x28ea0) - 4; break;
-        case 0x8a620000:
-            this->stv_protection_offset_ = (0x145ffac + 0x30380) - 4;
+        case 0x2c5b0000: this->stv_protection_offset_ = (0x145ffac) - 4; break;           // NOLINT(readability-magic-numbers)
+        case 0x47F10000: this->stv_protection_offset_ = (0x145ffac + 0xbaf0) - 4; break;  // NOLINT(readability-magic-numbers)
+        case 0xfcda0000: this->stv_protection_offset_ = (0x145ffac + 0x12fd0) - 4; break; // NOLINT(readability-magic-numbers)
+        case 0xb5e60000: this->stv_protection_offset_ = (0x145ffac + 0x1a4c4) - 4; break; // NOLINT(readability-magic-numbers)
+        case 0x392c0000: this->stv_protection_offset_ = (0x145ffac + 0x219b0) - 4; break; // NOLINT(readability-magic-numbers)
+        case 0x77c30000: this->stv_protection_offset_ = (0x145ffac + 0x28ea0) - 4; break; // NOLINT(readability-magic-numbers)
+        case 0x8a620000:                                                                  // NOLINT(readability-magic-numbers)
+            this->stv_protection_offset_ = (0x145ffac + 0x30380) - 4;                     // NOLINT(readability-magic-numbers)
             break;
             // Radiant Silvergun
-        case 0x77770000: break;
+        case 0x77770000: break; // NOLINT(readability-magic-numbers)
     }
     Log::debug("memory", fmt::format(core::tr("ST-V offset start: {}"), this->stv_protection_offset_));
 }
 
-bool Memory::isStvProtectionEnabled() const {
+auto Memory::isStvProtectionEnabled() const -> bool {
     u32 relative_addr = calculateRelativeCartAddress(stv_protection_enabled);
     return cart_[relative_addr] == 0x1;
 }
@@ -427,15 +523,15 @@ void Memory::sendFrtInterruptToMaster() const { masterSh2()->sendInterruptCaptur
 
 void Memory::sendFrtInterruptToSlave() const { slaveSh2()->sendInterruptCaptureSignal(); }
 
-Config* Memory::config() const { return emulator_context_->config(); };
+auto Memory::config() const -> Config* { return emulator_context_->config(); };
 
-sh2::Sh2* Memory::masterSh2() const { return emulator_context_->masterSh2(); };
+auto Memory::masterSh2() const -> sh2::Sh2* { return emulator_context_->masterSh2(); };
 
-sh2::Sh2* Memory::slaveSh2() const { return emulator_context_->slaveSh2(); };
+auto Memory::slaveSh2() const -> sh2::Sh2* { return emulator_context_->slaveSh2(); };
 
-Scu* Memory::scu() const { return emulator_context_->scu(); };
+auto Memory::scu() const -> Scu* { return emulator_context_->scu(); };
 
-Smpc* Memory::smpc() const { return emulator_context_->smpc(); };
+auto Memory::smpc() const -> Smpc* { return emulator_context_->smpc(); };
 
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad RomLoad) {
     if (times_mirrored > 0) {
@@ -451,7 +547,7 @@ void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad
     }
 }
 
-std::vector<std::string> listStvConfigurationFiles() {
+auto listStvConfigurationFiles() -> std::vector<std::string> {
     auto                     full_path = fs::current_path() / "stv";
     std::vector<std::string> files;
     for (auto& p : fs::directory_iterator(full_path)) {
@@ -462,7 +558,12 @@ std::vector<std::string> listStvConfigurationFiles() {
     return files;
 }
 
-inline bool isMasterSh2InOperation(const Memory& m) { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
+inline auto isMasterSh2InOperation(const Memory& m) -> bool { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
+
+inline auto getDirectAddress(u32 cached_address) -> u32 {
+    constexpr u32 direct_address_offset = 0x20000000;
+    return cached_address + direct_address_offset;
+}
 
 void Memory::initialize() {
     sh2_in_operation_ = sh2::Sh2Type::unknown;

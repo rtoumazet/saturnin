@@ -50,7 +50,7 @@ namespace saturnin::cdrom {
 class Aspi {
   public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static bool initialize()
+    /// \fn	static auto initialize() -> bool
     ///
     /// \brief	Initialises this object.
     ///
@@ -59,7 +59,7 @@ class Aspi {
     ///
     /// \return	true if initialization is successful.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static bool initialize();
+    static auto initialize() -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static void shutdown()
@@ -82,10 +82,10 @@ class Aspi {
     /// \return The list of drives found.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static std::vector<ScsiDriveInfo> scanBus();
+    static auto scanBus() -> std::vector<ScsiDriveInfo>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static std::string readSector(const uint32_t & fad, const int32_t & nb)
+    /// \fn	static auto readSector(const uint32_t & fad, const int32_t & nb) -> std::string
     ///
     /// \brief	Reads sector(s).
     ///
@@ -97,10 +97,10 @@ class Aspi {
     ///
     /// \return	Sector(s) data.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static std::string readSector(const uint32_t& fad, const int32_t& nb);
+    static auto readSector(const uint32_t& fad, const int32_t& nb) -> std::string;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static bool readToc(ScsiToc& toc_data)
+    /// \fn	static auto readToc(ScsiToc& toc_data) -> bool
     ///
     /// \brief	Reads the CD TOC.
     ///
@@ -111,7 +111,7 @@ class Aspi {
     ///
     /// \return	true if successful.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static bool readToc(ScsiToc& toc_data);
+    static auto readToc(ScsiToc& toc_data) -> bool;
 
   private:
     static HINSTANCE hWnAspi32; ///< Handle to the wnaspi32 dll.

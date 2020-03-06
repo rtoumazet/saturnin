@@ -42,7 +42,7 @@ const uint8_t spti_timeout = 5; // in seconds
 class Spti {
   public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static bool initialize()
+    /// \fn	static auto initialize() -> bool
     ///
     /// \brief	Initialises the SPTI context.
     ///
@@ -51,7 +51,7 @@ class Spti {
     ///
     /// \return	true if initialization is successful.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static bool initialize();
+    static auto initialize() -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Spti::shutdown();
@@ -65,7 +65,7 @@ class Spti {
     static void shutdown();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static std::vector<ScsiDriveInfo> Spti::scanBus();
+    /// \fn static auto Spti::scanBus() -> std::vector<ScsiDriveInfo>;
     ///
     /// \brief  Scans the bus to get cdrom drives information.
     ///
@@ -75,7 +75,7 @@ class Spti {
     /// \return number of drive.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static std::vector<ScsiDriveInfo> scanBus();
+    static auto scanBus() -> std::vector<ScsiDriveInfo>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Spti::test();
@@ -89,7 +89,8 @@ class Spti {
     static void test();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static std::string Spti::readSector(const std::uint32_t & fad, const std::int32_t & nb, const core::Config& cfg);
+    /// \fn static auto Spti::readSector(const std::uint32_t & fad, const std::int32_t & nb, const core::Config& cfg) ->
+    /// std::string;
     ///
     /// \brief  Reads sector(s).
     ///
@@ -103,10 +104,10 @@ class Spti {
     /// \return The sector.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static std::string readSector(const std::uint32_t& fad, const std::int32_t& nb);
+    static auto readSector(const std::uint32_t& fad, const std::int32_t& nb) -> std::string;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static std::string Spti::readOneSector(const std::uint32_t & fad);
+    /// \fn static auto Spti::readOneSector(const std::uint32_t & fad) -> std::string;
     ///
     /// \brief  Reads one sector.
     ///
@@ -118,7 +119,7 @@ class Spti {
     /// \return Sector read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static std::string readOneSector(const std::uint32_t& fad);
+    static auto readOneSector(const std::uint32_t& fad) -> std::string;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Spti::inquiry(const HANDLE & h, ScsiDriveInfo & di);
@@ -149,7 +150,7 @@ class Spti {
     static void getAdapterAddress(const HANDLE& h, ScsiDriveInfo& di);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static bool Spti::readToc(ScsiToc& toc_data);
+    /// \fn static auto Spti::readToc(ScsiToc& toc_data) -> bool;
     ///
     /// \brief  Reads the CD TOC.
     ///
@@ -161,6 +162,6 @@ class Spti {
     /// \return true if successful.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static bool readToc(ScsiToc& toc_data);
+    static auto readToc(ScsiToc& toc_data) -> bool;
 };
 } // namespace saturnin::cdrom

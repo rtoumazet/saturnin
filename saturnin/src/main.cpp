@@ -26,7 +26,7 @@ using core::EmulatorContext;
 using core::Log;
 using core::tr;
 
-int main(int argc, char* argv[]) {
+auto main(int argc, char* argv[]) -> int {
     try {
         EmulatorContext state;
         if (!state.initialize()) {

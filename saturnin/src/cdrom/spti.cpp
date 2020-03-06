@@ -37,7 +37,7 @@ using core::Log;
 using core::tr;
 
 /* static */
-bool Spti::initialize() {
+auto Spti::initialize() -> bool {
     Cdrom::di_list.clear();
     Cdrom::di_list = Spti::scanBus();
     std::wstring full_drive_name{};
@@ -58,7 +58,7 @@ bool Spti::initialize() {
 void Spti::shutdown() {}
 
 /* static */
-std::vector<ScsiDriveInfo> Spti::scanBus() {
+auto Spti::scanBus() -> std::vector<ScsiDriveInfo> {
     std::vector<ScsiDriveInfo> drives;
     std::wstring               path = L"C:\\";
 
@@ -77,7 +77,7 @@ std::vector<ScsiDriveInfo> Spti::scanBus() {
             HANDLE drive_handle = Scsi::openDrive(path[0]);
             if (drive_handle != INVALID_HANDLE_VALUE) {
                 ScsiDriveInfo di{};
-                di.letter = path.c_str();
+                di.letter = path;
                 Spti::getAdapterAddress(drive_handle, di);
                 Spti::inquiry(drive_handle, di);
                 drives.push_back(di);
@@ -93,8 +93,8 @@ std::vector<ScsiDriveInfo> Spti::scanBus() {
 void Spti::test() {}
 
 /* static */
-std::string Spti::readOneSector(const uint32_t& fad) {
-    uint32_t                        real_fad    = fad - 150;
+auto Spti::readOneSector(const uint32_t& fad) -> std::string {
+    const uint32_t                  real_fad    = fad - 150;
     constexpr uint32_t              sector_size = 2048;
     std::array<int8_t, sector_size> output_buffer{};
 
@@ -145,9 +145,9 @@ std::string Spti::readOneSector(const uint32_t& fad) {
 }
 
 /* static */
-std::string Spti::readSector(const uint32_t& fad, const int32_t& sectors_number) {
+std::string Spti::readSector(const uint32_t& fad, const int32_t& nb) {
     std::string sector_data{};
-    for (uint8_t cnt = 0; cnt < sectors_number; ++cnt) {
+    for (uint8_t cnt = 0; cnt < nb; ++cnt) {
         sector_data += readOneSector(fad);
     }
 
@@ -155,7 +155,7 @@ std::string Spti::readSector(const uint32_t& fad, const int32_t& sectors_number)
 }
 
 /* static */
-void Spti::inquiry(const HANDLE& drive_handle, ScsiDriveInfo& di) {
+void Spti::inquiry(const HANDLE& h, ScsiDriveInfo& di) {
     std::array<int8_t, 36> output_buffer{};
 
     SCSI_PASS_THROUGH_DIRECT input_buffer{};
@@ -174,14 +174,14 @@ void Spti::inquiry(const HANDLE& drive_handle, ScsiDriveInfo& di) {
     input_buffer.TimeOutValue       = spti_timeout;
 
     uint32_t dummy{};
-    if (!DeviceIoControl(drive_handle,
+    if (!DeviceIoControl(h,
                          IOCTL_SCSI_PASS_THROUGH_DIRECT,
                          &input_buffer,
                          sizeof(input_buffer),
                          &input_buffer,
                          sizeof(input_buffer),
                          reinterpret_cast<LPDWORD>(&dummy),
-                         NULL)) {
+                         nullptr)) {
         Log::warning("cdrom", util::getLastErrorMessage());
 
     } else {
@@ -191,29 +191,32 @@ void Spti::inquiry(const HANDLE& drive_handle, ScsiDriveInfo& di) {
 }
 
 /* static */
-void Spti::getAdapterAddress(const HANDLE& drive_handle, ScsiDriveInfo& di) {
+void Spti::getAdapterAddress(const HANDLE& h, ScsiDriveInfo& di) {
     // std::array<int8_t, 1024> v(1024);
 
     di.path   = -1;
     di.target = -1;
     di.lun    = -1;
-    if (drive_handle == 0)
+    if (h == nullptr) {
         return;
+    }
 
     // pSA = reinterpret_cast<PSCSI_ADDRESS>(&v[0]);
     SCSI_ADDRESS psa{};
     psa.Length = sizeof(SCSI_ADDRESS);
 
     uint32_t status{};
-    if (!DeviceIoControl(drive_handle,
-                         IOCTL_SCSI_GET_ADDRESS,
-                         NULL,
-                         0,
-                         (LPVOID)&psa,
-                         sizeof(SCSI_ADDRESS),
-                         reinterpret_cast<LPDWORD>(&status),
-                         NULL))
+    if (DeviceIoControl(h,
+                        IOCTL_SCSI_GET_ADDRESS,
+                        nullptr,
+                        0,
+                        (LPVOID)&psa,
+                        sizeof(SCSI_ADDRESS),
+                        reinterpret_cast<LPDWORD>(&status),
+                        nullptr)
+        == 0) {
         return;
+    }
 
     di.path   = psa.PortNumber;
     di.target = psa.TargetId;
@@ -221,18 +224,19 @@ void Spti::getAdapterAddress(const HANDLE& drive_handle, ScsiDriveInfo& di) {
 }
 
 /* static */
-bool Spti::readToc(ScsiToc& toc) {
+auto Spti::readToc(ScsiToc& toc) -> bool {
     uint32_t  out_bytes{};
     CDROM_TOC cdrom_toc;
     HANDLE    drive_handle = Scsi::openDrive(Cdrom::scsi_letter);
-    if (!DeviceIoControl(drive_handle,
-                         IOCTL_CDROM_READ_TOC,
-                         NULL,
-                         0,
-                         &cdrom_toc,
-                         sizeof(cdrom_toc),
-                         reinterpret_cast<LPDWORD>(&out_bytes),
-                         (LPOVERLAPPED)NULL)) {
+    if (DeviceIoControl(drive_handle,
+                        IOCTL_CDROM_READ_TOC,
+                        nullptr,
+                        0,
+                        &cdrom_toc,
+                        sizeof(cdrom_toc),
+                        reinterpret_cast<LPDWORD>(&out_bytes),
+                        (LPOVERLAPPED) nullptr)
+        == 0) {
         return false;
     }
 

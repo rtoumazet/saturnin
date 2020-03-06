@@ -45,9 +45,9 @@ class Scsp {
     Scsp(EmulatorContext* ec){};
     Scsp(const Scsp&) = delete;
     Scsp(Scsp&&)      = delete;
-    Scsp& operator=(const Scsp&) & = delete;
-    Scsp& operator=(Scsp&&) & = delete;
-    ~Scsp()                   = default;
+    auto operator=(const Scsp&) & -> Scsp& = delete;
+    auto operator=(Scsp&&) & -> Scsp& = delete;
+    ~Scsp()                           = default;
     //@}
 
     void reset() { Log::error("scsp", "reset() not implemented"); };

@@ -62,37 +62,38 @@ EmulatorContext::EmulatorContext() {
 
 EmulatorContext::~EmulatorContext() = default;
 
-Config* EmulatorContext::config() { return config_.get(); };
-Memory* EmulatorContext::memory() { return memory_.get(); };
-Sh2*    EmulatorContext::masterSh2() { return master_sh2_.get(); };
-Sh2*    EmulatorContext::slaveSh2() { return slave_sh2_.get(); };
-Scu*    EmulatorContext::scu() { return scu_.get(); };
-Smpc*   EmulatorContext::smpc() { return smpc_.get(); };
-Scsp*   EmulatorContext::scsp() { return scsp_.get(); };
-Cdrom*  EmulatorContext::cdrom() { return cdrom_.get(); };
+auto EmulatorContext::config() -> Config* { return config_.get(); };
+auto EmulatorContext::memory() -> Memory* { return memory_.get(); };
+auto EmulatorContext::masterSh2() -> Sh2* { return master_sh2_.get(); };
+auto EmulatorContext::slaveSh2() -> Sh2* { return slave_sh2_.get(); };
+auto EmulatorContext::scu() -> Scu* { return scu_.get(); };
+auto EmulatorContext::smpc() -> Smpc* { return smpc_.get(); };
+auto EmulatorContext::scsp() -> Scsp* { return scsp_.get(); };
+auto EmulatorContext::cdrom() -> Cdrom* { return cdrom_.get(); };
 
-bool EmulatorContext::initialize() {
+auto EmulatorContext::initialize() -> bool {
     Log::initialize();
 
-    if (!this->config()->initialize(video::isModernOpenglCapable()))
+    if (!this->config()->initialize(video::isModernOpenglCapable())) {
         return false;
+    }
 
     std::string country = this->config()->readValue(core::AccessKeys::cfg_global_language);
-    if (!Locale::getInstance().initialize(country))
+    if (!Locale::getInstance().initialize(country)) {
         return false;
+    }
 
     this->smpc()->initializePeripheralMappings();
 
     cdrom::Scsi::settingUpSptiFunctions();
-    if (!cdrom::Scsi::initialize())
-        return false;
 
-    return true;
+    return cdrom::Scsi::initialize();
 }
 
 void EmulatorContext::startEmulation() {
-    if (emulation_status_ == EmulationStatus::running)
+    if (emulation_status_ == EmulationStatus::running) {
         return;
+    }
 
     emulation_status_ = EmulationStatus::running;
 
@@ -101,8 +102,9 @@ void EmulatorContext::startEmulation() {
     sh2::initializeOpcodesLut();
 
     emulation_main_thread_ = std::thread(&EmulatorContext::emulationMainThread, this);
-    if (emulation_main_thread_.joinable())
+    if (emulation_main_thread_.joinable()) {
         emulation_main_thread_.detach();
+    }
 
     // static std::thread emu_thread;
     // if (ImGui::Button("Play")) {
@@ -117,8 +119,9 @@ void EmulatorContext::startEmulation() {
     const seconds cycle_duration{((double)1 / (double)sh2_freq_hz)};
     // const std::chrono::seconds test{ cycle_duration };
     using micro = std::chrono::duration<double, std::micro>;
-    auto val    = micro(30) / cycle_duration;
-    auto val2   = static_cast<u32>(val);
+    constexpr u8 op_duration{30};
+    auto         val  = micro(op_duration) / cycle_duration;
+    auto         val2 = static_cast<u32>(val);
 
     auto rtc  = getRtcTime();
     auto year = rtc.getUpperYear();
@@ -150,8 +153,9 @@ void EmulatorContext::startEmulation() {
 
 void EmulatorContext::stopEmulation() {
     emulation_status_ = core::EmulationStatus::stopped;
-    if (emulation_main_thread_.joinable())
+    if (emulation_main_thread_.joinable()) {
         emulation_main_thread_.join();
+    }
 }
 
 void EmulatorContext::emulationMainThread() {

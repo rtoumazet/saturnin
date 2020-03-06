@@ -27,7 +27,7 @@ namespace saturnin::core {
 std::map<std::string, std::shared_ptr<spdlog::logger>> Log::loggers_;
 
 /* static */
-bool Log::initialize() {
+auto Log::initialize() -> bool {
     createConsole();
     auto sink = createFileSink("logs/saturnin.log");
     createLogger("cdrom", sink);
@@ -51,14 +51,14 @@ bool Log::initialize() {
 }
 
 /* static */
-std::shared_ptr<spdlog::sinks::basic_file_sink_mt> Log::createFileSink(const std::string& logger_path) {
+auto Log::createFileSink(const std::string& logger_path) -> std::shared_ptr<spdlog::sinks::basic_file_sink_mt> {
     removeFile(logger_path);
 
     return std::make_shared<spdlog::sinks::basic_file_sink_mt>(logger_path);
 }
 
 /* static */
-std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> Log::createConsoleSink() {
+auto Log::createConsoleSink() -> std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> {
     return std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
 }
 

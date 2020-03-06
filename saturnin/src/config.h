@@ -171,7 +171,7 @@ class Config {
     auto initialize(bool isModernOpenGlCapable) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::getGroup(libconfig::Setting& root, const std::string& group_name) -> libconfig::Setting&
+    /// \fn static auto Config::getGroup(libconfig::Setting& root, const std::string& group_name) -> libconfig::Setting&
     ///
     /// \brief  Returns the group under the specified root setting, creates it if missing.
     ///
@@ -184,7 +184,7 @@ class Config {
     /// \return A reference to a Setting.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getGroup(libconfig::Setting& root, const std::string& group_name) -> libconfig::Setting&;
+    static auto getGroup(libconfig::Setting& root, const std::string& group_name) -> libconfig::Setting&;
 
     void test();
 
@@ -401,7 +401,7 @@ class Config {
     auto existsValue(const AccessKeys& value) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  auto Config::listAvailableLanguages() -> std::vector<std::string>;
+    /// \fn static auto Config::listAvailableLanguages() -> std::vector<std::string>;
     ///
     /// \brief   Returns a vector populated with available languages.
     ///
@@ -411,10 +411,10 @@ class Config {
     /// \return  Available languages.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto listAvailableLanguages() -> std::vector<std::string>;
+    static auto listAvailableLanguages() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  auto Config::listAreaCodes() -> std::vector<std::string>;
+    /// \fn  static auto Config::listAreaCodes() -> std::vector<std::string>;
     ///
     /// \brief   Returns a vector populated with area codes.
     ///
@@ -424,7 +424,7 @@ class Config {
     /// \return  A std::vector<std::string>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto listAreaCodes() -> std::vector<std::string>;
+    static auto listAreaCodes() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn  template<class T> void Config::add(const std::string key, T default)
@@ -513,7 +513,7 @@ class Config {
     void generateConfigurationTree(bool isModernOpenglCapable);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string;
+    /// \fn static auto Config::addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string;
     ///
     /// \brief  Adds a group to a setting.
     ///
@@ -526,7 +526,7 @@ class Config {
     /// \return A std::string.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string;
+    static auto addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string;
 
     std::string filename_; ///< Name of the configuration file used
 

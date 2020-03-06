@@ -18,29 +18,30 @@
 
 #include <windows.h>
 #include <sstream> // istringstream
+#include "emulator_defs.h"
 #include "utilities.h"
 
 namespace saturnin::utilities {
 
-auto stringToVector(const std::string& source, const uint32_t reserved_size) -> std::vector<char> {
+auto stringToVector(const std::string& source, const u32 reserved_size) -> std::vector<char> {
     std::vector<char> v(source.c_str(), source.c_str() + source.size() + 1u);
     v.reserve(reserved_size);
     return v;
 }
 
-std::string getLastErrorMessage() {
+auto getLastErrorMessage() -> std::string {
     DWORD error = GetLastError();
-    if (error) {
+    if (error != 0) {
         LPVOID buffer;
         DWORD buf_len = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                      NULL,
+                                      nullptr,
                                       error,
                                       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                                       (LPTSTR)&buffer,
                                       0,
-                                      NULL);
-        if (buf_len) {
-            LPCSTR      str = (LPCSTR)buffer;
+                                      nullptr);
+        if (buf_len != 0) {
+            auto        str = static_cast<LPCSTR>(buffer);
             std::string result(str, str + buf_len);
 
             LocalFree(buffer);
@@ -62,13 +63,14 @@ auto explode(std::string const& s, char delim) -> std::vector<std::string> {
     return result;
 }
 
-auto dec2bcd(uint16_t dec) -> uint32_t {
-    uint32_t result = 0;
-    int      shift  = 0;
+auto dec2bcd(uint16_t dec) -> u32 {
+    constexpr u8 decimal_base{10};
+    u32          result{};
+    s32          shift{};
 
-    while (dec) {
-        result += (dec % 10) << shift;
-        dec = dec / 10;
+    while (dec != 0) {
+        result += (dec % decimal_base) << shift;
+        dec = dec / decimal_base;
         shift += 4;
     }
     return result;

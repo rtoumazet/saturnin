@@ -1612,4 +1612,6 @@ struct writeCacheData {
 
 inline auto isMasterSh2InOperation(const Memory& m) -> bool;
 
+inline auto getDirectAddress(u32 cached_address) -> u32;
+
 } // namespace saturnin::core

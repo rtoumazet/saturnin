@@ -284,7 +284,7 @@ void Aspi::resetBus() {
     //    }
 }
 
-bool Aspi::readToc(ScsiToc& TOCData) {
+bool Aspi::readToc(ScsiToc& toc_data) {
     ////pLog->CdBlockWrite("Trying to read CD TOC..");
     ////BYTE TOCBuffer[1024];
     // uint8_t TOCBuffer[1024];

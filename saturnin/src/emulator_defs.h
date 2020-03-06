@@ -64,6 +64,7 @@ constexpr u32 bitmask_0FFFFFFF{0x0FFFFFFF};
 constexpr u32 bitmask_0000FF00{0x0000FF00};
 constexpr u32 bitmask_00FF0000{0x00FF0000};
 constexpr u32 bitmask_FF000000{0xFF000000};
+constexpr u32 bitmask_7FFFFFFF{0x7FFFFFFF};
 constexpr u32 bitmask_FFFFFF00{0xFFFFFF00};
 constexpr u32 bitmask_FFFFF000{0xFFFFF000};
 constexpr u32 bitmask_FFFF0000{0xFFFF0000};
@@ -74,6 +75,7 @@ constexpr u16 bitmask_0F00{0x0F00};
 constexpr u16 bitmask_00F0{0x00F0};
 constexpr u16 bitmask_000F{0x000F};
 constexpr u16 bitmask_00FF{0x00FF};
+constexpr u16 bitmask_03FF{0x03FF};
 constexpr u16 bitmask_0FFF{0x0FFF};
 constexpr u16 bitmask_FFFF{0xFFFF};
 
