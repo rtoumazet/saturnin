@@ -34,7 +34,7 @@ namespace video = saturnin::video;
 namespace saturnin::gui {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showImguiDemoWindow(const bool show_demo_window);
+/// \fn void showImguiDemoWindow(const bool show_window);
 ///
 /// \brief  Displays the imgui demo window.
 ///
@@ -44,24 +44,24 @@ namespace saturnin::gui {
 /// \param  show_demo_window    True to display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showImguiDemoWindow(const bool show_demo_window);
+void showImguiDemoWindow(bool show_window);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showCoreWindow(core::EmulatorContext& context, const video::Opengl& opengl);
+/// \fn void showCoreWindow(core::EmulatorContext& state, const video::Opengl& opengl);
 ///
 /// \brief  Displays the core window.
 ///
 /// \author Runik
 /// \date   24/10/2019
 ///
-/// \param [in,out] context The emulator context.
+/// \param [in,out] state The emulator context.
 /// \param          opengl  The opengl object.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showCoreWindow(core::EmulatorContext& context, const video::Opengl& opengl);
+void showCoreWindow(core::EmulatorContext& state, const video::Opengl& opengl);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showRenderingWindow(const video::Opengl& opengl, const u32 width, const u32 height);
+/// \fn void showRenderingWindow(const video::Opengl& opengl, u32 width, u32 height);
 ///
 /// \brief  Displays the rendering window.
 ///
@@ -73,7 +73,7 @@ void showCoreWindow(core::EmulatorContext& context, const video::Opengl& opengl)
 /// \param  height  Height of the rendering window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showRenderingWindow(video::Opengl& opengl, const u32 width, const u32 height);
+void showRenderingWindow(video::Opengl& opengl, u32 width, u32 height);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showStvWindow(bool *opened);
@@ -96,11 +96,11 @@ void showStvWindow(bool* opened);
 /// \author Runik
 /// \date   24/10/2019
 ///
-/// \param [in,out] context The emulator context.
+/// \param [in,out] state The emulator context.
 /// \param [in,out] opened  True to display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showOptionsWindow(core::EmulatorContext& context, bool* opened);
+void showOptionsWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showLogWindow(bool* opened);
@@ -116,23 +116,23 @@ void showOptionsWindow(core::EmulatorContext& context, bool* opened);
 void showLogWindow(bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void buildGui(const core::EmulatorContext& context, const video::Opengl& opengl, const u32 width, const u32 height);
+/// \fn void buildGui(const core::EmulatorContext& state, const video::Opengl& opengl, u32 width, u32 height);
 ///
 /// \brief  Builds a graphical user interface.
 ///
 /// \author Runik
 /// \date   24/10/2019
 ///
-/// \param  context The emulator context.
+/// \param  state The emulator context.
 /// \param  opengl  The opengl object.
 /// \param  width   Width of the rendering window.
 /// \param  height  Height of the rendering window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void buildGui(core::EmulatorContext& context, video::Opengl& opengl, const u32 width, const u32 height);
+void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u32 height);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t height);
+/// \fn void addTextureToDrawList(int32_t texture, uint32_t width, uint32_t height);
 ///
 /// \brief  Adds the rendered texture to the draw list.
 ///
@@ -144,6 +144,6 @@ void buildGui(core::EmulatorContext& context, video::Opengl& opengl, const u32 w
 /// \param  height  Height of the texture.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t height);
+void addTextureToDrawList(int32_t texture, uint32_t width, uint32_t height);
 
 } // namespace saturnin::gui

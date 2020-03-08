@@ -65,7 +65,7 @@ void OpenglModern::initialize() {
 
 void OpenglModern::shutdown() { glDeleteProgram(program_shader_); }
 
-u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const {
+auto OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 
     u32 texture{};
@@ -75,9 +75,9 @@ u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    gl::GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    gl::GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, draw_buffers); // "1" is the size of DrawBuffers
 
     return texture;
 }
@@ -90,11 +90,12 @@ void OpenglModern::bindTextureToFbo() const {
 }
 
 void OpenglModern::deleteTexture() const {
-    if (texture_ != 0)
+    if (texture_ != 0) {
         glDeleteTextures(1, &texture_);
+    }
 }
 
-u32 OpenglModern::createVertexShader() {
+auto OpenglModern::createVertexShader() -> u32 {
     const char* vertex_shader_source = R"(
         #version 330 core
 
@@ -127,7 +128,8 @@ u32 OpenglModern::createVertexShader() {
 
     return vertex_shader;
 }
-u32 OpenglModern::createFragmentShader() {
+/* static */
+auto OpenglModern::createFragmentShader() -> u32 {
     const char* fragment_shader_source = R"(
         #version 330 core
         
@@ -150,7 +152,8 @@ u32 OpenglModern::createFragmentShader() {
     return fragment_shader;
 }
 
-u32 OpenglModern::createProgramShader(const u32 vertex_shader, const u32 fragment_shader) {
+/* static */
+auto OpenglModern::createProgramShader(const u32 vertex_shader, const u32 fragment_shader) -> u32 {
     u32 shader_program = glCreateProgram();
 
     glAttachShader(shader_program, vertex_shader);
@@ -161,6 +164,7 @@ u32 OpenglModern::createProgramShader(const u32 vertex_shader, const u32 fragmen
     return shader_program;
 }
 
+/* static */
 void OpenglModern::deleteShaders(std::vector<u32> shaders) {
     for (auto shader : shaders) {
         glDeleteShader(shader);
@@ -220,13 +224,14 @@ void OpenglModern::postRender() { glBindFramebuffer(GL_FRAMEBUFFER, 0); };
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
-int32_t runModernOpengl(core::EmulatorContext& state) {
+auto runModernOpengl(core::EmulatorContext& state) -> s32 {
     // Setup window
     glfwSetErrorCallback(error_callback);
-    if (!glfwInit())
+    if (glfwInit() == GLFW_FALSE) {
         return EXIT_FAILURE;
+    }
 
-        // Decide GL+GLSL versions
+    // Decide GL+GLSL versions
 #if __APPLE__
     // GL 3.2 + GLSL 150
     const char* glsl_version = "#version 150";
@@ -244,7 +249,10 @@ int32_t runModernOpengl(core::EmulatorContext& state) {
                                               // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
     std::string window_title = fmt::format(core::tr("Saturnin {0} - Modern rendering"), core::saturnin_version);
-    auto        window       = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
+
+    constexpr u16 h_window_size{1280};
+    constexpr u16 v_window_size{720};
+    auto          window = glfwCreateWindow(h_window_size, v_window_size, window_title.c_str(), nullptr, nullptr);
     if (window == nullptr) {
         return EXIT_FAILURE;
     }
@@ -308,8 +316,7 @@ int32_t runModernOpengl(core::EmulatorContext& state) {
 
         gui::buildGui(state, opengl, display_w, display_h);
 
-        if (state.renderingStatus() == core::RenderingStatus::reset)
-            glfwSetWindowShouldClose(window, true);
+        if (state.renderingStatus() == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

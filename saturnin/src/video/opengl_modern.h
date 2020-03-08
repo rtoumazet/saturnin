@@ -44,13 +44,13 @@ class OpenglModern : public Opengl {
     //@{
     // Constructors / Destructors
     OpenglModern(core::Config* config) : Opengl(config) { initialize(); };
-    ~OpenglModern() { shutdown(); };
+    ~OpenglModern() final { shutdown(); };
     //@}
 
-    u32  createVertexShader();
-    u32  createFragmentShader();
-    u32  createProgramShader(const u32 vertex_shader, const u32 fragment_shader);
-    void deleteShaders(std::vector<u32> shaders);
+    auto        createVertexShader() -> u32;
+    static auto createFragmentShader() -> u32;
+    static auto createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
+    static void deleteShaders(std::vector<u32> shaders);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::setupTriangle();
@@ -75,36 +75,36 @@ class OpenglModern : public Opengl {
     void drawTriangle();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void initialize() override;
+    /// \fn void initialize() final;
     ///
     /// \brief  Initializes the object.
     ///
     /// \author Runik
     /// \date   16/10/2019
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void initialize() override;
+    void initialize() final;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void shutdown() override;
+    /// \fn void shutdown() final;
     ///
     /// \brief  Clean up code.
     ///
     /// \author Runik
     /// \date   16/10/2019
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void shutdown() override;
+    void shutdown() final;
 
-    void preRender();
+    void preRender() final;
 
-    void render();
+    void render() final;
 
-    void postRender();
+    void postRender() final;
 
-    void updateTextureSize(const u32 width, const u32 height) override;
+    void updateTextureSize(u32 width, u32 height) final;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const override;
+    /// \fn [[nodiscard]] auto OpenglModern::generateEmptyTexture(u32 width, u32 height) const -> u32 final;
     ///
     /// \brief  Generates an empty texture.
     ///
@@ -117,17 +117,17 @@ class OpenglModern : public Opengl {
     /// \return The empty texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32 generateEmptyTexture(const u32 width, const u32 height) const override;
+    [[nodiscard]] auto generateEmptyTexture(u32 width, u32 height) const -> u32 final;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 OpenglLegacy::bindTextureToFbo() const override;
+    /// \fn void OpenglLegacy::bindTextureToFbo() const final;
     ///
     /// \brief  Binds the internal texture to the internal fbo.
     ///
     /// \author Runik
     /// \date   18/10/2019
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void bindTextureToFbo() const override;
+    void bindTextureToFbo() const final;
 
     void deleteTexture() const override;
 
@@ -136,7 +136,7 @@ class OpenglModern : public Opengl {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn s32 runModernOpengl(core::EmulatorContext& config);
+/// \fn auto runModernOpengl(core::EmulatorContext& config) -> s32;
 ///
 /// \brief  Executes OpenGL code in modern mode (3.3+).
 ///
@@ -148,7 +148,7 @@ class OpenglModern : public Opengl {
 /// \return An int32_t.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-s32 runModernOpengl(EmulatorContext& state);
+auto runModernOpengl(EmulatorContext& state) -> s32;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void checkShaderCompilation(const u32 shader);
@@ -161,7 +161,7 @@ s32 runModernOpengl(EmulatorContext& state);
 /// \param  shader  The shader to check.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void checkShaderCompilation(const u32 shader);
+void checkShaderCompilation(u32 shader);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void checkProgramCompilation(const u32 program);
@@ -174,6 +174,6 @@ void checkShaderCompilation(const u32 shader);
 /// \param  program The program to check.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void checkProgramCompilation(const u32 program);
+void checkProgramCompilation(u32 program);
 
 }; // namespace saturnin::video

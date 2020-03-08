@@ -329,7 +329,7 @@ class Scu {
     void initializeDmaTransferByteNumber(DmaConfiguration& dc);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg);
+    /// \fn static void Scu::initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg);
     ///
     /// \brief  Initializes the DMA mode part of DMA configuration.
     ///
@@ -340,10 +340,10 @@ class Scu {
     /// \param          reg     Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg);
+    static void initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg);
+    /// \fn void static Scu::initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg);
     ///
     /// \brief  Initializes the DMA enable part of DMA configuration.
     ///
@@ -354,10 +354,10 @@ class Scu {
     /// \param          reg    Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg);
+    static void initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg);
+    /// \fn static void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg);
     ///
     /// \brief  Initializes the DMA address add part of DMA configuration.
     ///
@@ -368,10 +368,10 @@ class Scu {
     /// \param          reg    Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg);
+    static void initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg);
+    /// \fn static void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg);
     ///
     /// \brief  Initializes the DMA write address part of DMA configuration.
     ///
@@ -382,10 +382,10 @@ class Scu {
     /// \param          reg    Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg);
+    static void initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg);
+    /// \fn static void Scu::initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg);
     ///
     /// \brief  Initializes the DMA read address part of DMA configuration.
     ///
@@ -396,7 +396,7 @@ class Scu {
     /// \param       reg    Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg);
+    static void initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::addDmaToQueue(const DmaConfiguration& dc);
@@ -418,7 +418,7 @@ class Scu {
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Scu::getDmaBus(u32 address) -> DmaBus;
+    /// \fn static auto Scu::getDmaBus(u32 address) -> DmaBus;
     ///
     /// \brief  Returns the DMA bus of the specified address.
     ///
@@ -430,10 +430,10 @@ class Scu {
     /// \return The dma bus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getDmaBus(u32 address) -> DmaBus;
+    static auto getDmaBus(u32 address) -> DmaBus;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Scu::getScuRegion(u32 address) -> ScuRegion;
+    /// \fn static auto Scu::getScuRegion(u32 address) -> ScuRegion;
     ///
     /// \brief  Returns the SCU region of the specified address.
     ///
@@ -445,7 +445,7 @@ class Scu {
     /// \return The scu region.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getScuRegion(u32 address) -> ScuRegion;
+    static auto getScuRegion(u32 address) -> ScuRegion;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::sendDmaEndInterrupt(DmaLevel l);

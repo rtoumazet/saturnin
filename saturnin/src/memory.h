@@ -71,7 +71,6 @@ constexpr u8  vdp1_registers_size{0x18};
 constexpr u32 sound_ram_size{0x100000};
 constexpr u16 stv_io_size{0x100};
 constexpr u32 cart_size{0x3000000};
-
 constexpr u32 rom_memory_mask{0x7FFFF};
 constexpr u32 smpc_memory_mask{0x7F};
 constexpr u32 backup_ram_memory_mask{0xFFFF};
@@ -86,7 +85,6 @@ constexpr u32 vdp2_cram_memory_mask{0xFFF};
 constexpr u32 vdp2_registers_memory_mask{0x1FF};
 constexpr u32 scu_memory_mask{0xFF};
 constexpr u32 workram_high_memory_mask{0xFFFFF};
-
 constexpr u32 stv_io_port_a{0x400001};
 constexpr u32 stv_io_port_b{0x400003};
 constexpr u32 stv_io_port_c{0x400005};

@@ -172,7 +172,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         case interrupt_mask_register:
             interrupt_mask_register_.set(InterruptMaskRegister::all_bits, data);
             return;
-            //        case dma_status_register + 0x0C:
+            //        case dma_status_register:
             //            // DMA registers write
             //            dmaUpdate_ = true;
             //            break;
@@ -626,7 +626,7 @@ void Scu::initializeRegisters() {
     d1md_.set(DmaModeRegister::all_bits, mode_default_value);
     d2md_.set(DmaModeRegister::all_bits, mode_default_value);
     rawWrite<u32>(memory()->scu_, dma_forced_stop & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, (dma_status_register + 0x0C) & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(memory()->scu_, (dma_status_register)&scu_memory_mask, 0x00000000);
 
     // DSP
     rawWrite<u32>(memory()->scu_, dsp_program_control_port & scu_memory_mask, 0x00000000);
@@ -690,6 +690,7 @@ auto Scu::configureDmaTransfer(const DmaLevel level) -> DmaConfiguration {
     return dc;
 }
 
+/* static */
 void Scu::initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg) {
     dc.dma_mode               = reg.get(DmaModeRegister::dma_mode);
     dc.read_address_update    = reg.get(DmaModeRegister::read_address_update);
@@ -697,11 +698,13 @@ void Scu::initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg) {
     dc.starting_factor_select = reg.get(DmaModeRegister::starting_factor_select);
 }
 
+/* static */
 void Scu::initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg) {
     dc.dma_enable   = reg.get(DmaEnableRegister::dma_enable);
     dc.dma_starting = reg.get(DmaEnableRegister::dma_starting);
 }
 
+/* static */
 void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg) {
     dc.read_add_value  = reg.get(DmaAddressAddValueRegister::read_add_value);
     dc.write_add_value = reg.get(DmaAddressAddValueRegister::write_add_value);
@@ -721,10 +724,12 @@ void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc) {
         default: Log::warning("scu", "Unknown DMA level !"); break;
     }
 }
+/* static */
 void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg) {
     dc.write_address = reg.get(DmaWriteAddressRegister::write_address);
 }
 
+/* static */
 void Scu::initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg) {
     dc.read_address = reg.get(DmaReadAddressRegister::read_address);
 }
@@ -756,6 +761,7 @@ void Scu::activateDma() {
     }
 }
 
+/* static */
 auto Scu::getDmaBus(const u32 address) -> DmaBus {
     u32 a = address & bitmask_0FFFFFFF;
 
@@ -769,53 +775,124 @@ auto Scu::getDmaBus(const u32 address) -> DmaBus {
     constexpr u32 a_bus_end_address{0x5900000};
     if ((a >= a_bus_start_address) && (a < a_bus_end_address)) {
         return DmaBus::a_bus;
-    } else {
-        // CPU or DSP write
-        Log::warning("scu", "DMA - Bus access not implemented {}", address);
     }
+    // CPU or DSP write
+    Log::warning("scu", "DMA - Bus access not implemented {}", address);
 
     return DmaBus::unknown_bus;
 }
 
+/* static */
 auto Scu::getScuRegion(const u32 address) -> ScuRegion {
     u32 a = address & bitmask_0FFFFFFF;
 
-    if ((a >= 0x0) && (a < 0x80000))
+    constexpr u32 rom_start{0};
+    constexpr u32 rom_end{0x80000};
+    if ((a >= rom_start) && (a < rom_end)) {
         return ScuRegion::rom;
-    else if ((a >= 0x100000) && (a < 0x100080))
+    }
+
+    constexpr u32 smpc_start{0x100000};
+    constexpr u32 smpc_end{0x100080};
+    if ((a >= smpc_start) && (a < smpc_end)) {
         return ScuRegion::smpc;
-    else if ((a >= 0x180000) && (a < 0x190000))
+    }
+
+    constexpr u32 backup_ram_start{0x180000};
+    constexpr u32 backup_ram_end{0x190000};
+    if ((a >= backup_ram_start) && (a < backup_ram_end)) {
         return ScuRegion::backup_ram;
-    else if ((a >= 0x200000) && (a < 0x300000))
+    }
+
+    constexpr u32 workram_l_start{0x200000};
+    constexpr u32 workram_l_end{0x300000};
+    if ((a >= workram_l_start) && (a < workram_l_end)) {
         return ScuRegion::work_ram_l;
-    else if ((a >= 0x1000000) && (a < 0x1000004))
+    }
+
+    constexpr u32 minit_start{0x1000000};
+    constexpr u32 minit_end{0x1000004};
+    if ((a >= minit_start) && (a < minit_end)) {
         return ScuRegion::minit;
-    else if ((a >= 0x1800000) && (a < 0x1800004))
+    }
+
+    constexpr u32 sinit_start{0x1800000};
+    constexpr u32 sinit_end{0x1800004};
+    if ((a >= sinit_start) && (a < sinit_end)) {
         return ScuRegion::sinit;
-    else if ((a >= 0x2000000) && (a < 0x4000000))
+    }
+
+    constexpr u32 a_bus_cs0_start{0x2000000};
+    constexpr u32 a_bus_cs0_end{0x4000000};
+    if ((a >= a_bus_cs0_start) && (a < a_bus_cs0_end)) {
         return ScuRegion::a_bus_cs0;
-    else if ((a >= 0x4000000) && (a < 0x5000000))
+    }
+
+    constexpr u32 a_bus_cs1_start{0x4000000};
+    constexpr u32 a_bus_cs1_end{0x5000000};
+    if ((a >= a_bus_cs1_start) && (a < a_bus_cs1_end)) {
         return ScuRegion::a_bus_cs1;
-    else if ((a >= 0x5000000) && (a < 0x5800000))
+    }
+
+    constexpr u32 a_bus_dummy_start{0x5000000};
+    constexpr u32 a_bus_dummy_end{0x5800000};
+    if ((a >= a_bus_dummy_start) && (a < a_bus_dummy_end)) {
         return ScuRegion::a_bus_dummy;
-    else if ((a >= 0x5800000) && (a < 0x5900000))
+    }
+
+    constexpr u32 a_bus_cs2_start{0x5800000};
+    constexpr u32 a_bus_cs2_end{0x5900000};
+    if ((a >= a_bus_cs2_start) && (a < a_bus_cs2_end)) {
         return ScuRegion::a_bus_cs2;
-    else if ((a >= 0x5A00000) && (a < 0x5B00EE4))
+    }
+
+    constexpr u32 sound_start{0x5A00000};
+    constexpr u32 sound_end{0x5B00EE4};
+    if ((a >= sound_start) && (a < sound_end)) {
         return ScuRegion::sound;
-    else if ((a >= 0x5C00000) && (a < 0x5CC0000))
+    }
+
+    constexpr u32 vdp1_start_area_1{0x5C00000};
+    constexpr u32 vdp1_end_area_1{0x5CC0000};
+    if ((a >= vdp1_start_area_1) && (a < vdp1_end_area_1)) {
         return ScuRegion::vdp1;
-    else if ((a >= 0x5D00000) && (a < 0x5D00018))
+    }
+
+    constexpr u32 vdp1_start_area_2{0x5D00000};
+    constexpr u32 vdp1_end_area_2{0x5D00018};
+    if ((a >= vdp1_start_area_2) && (a < vdp1_end_area_2)) {
         return ScuRegion::vdp1;
-    else if ((a >= 0x5E00000) && (a < 0x5E80000))
+    }
+
+    constexpr u32 vdp2_start_area_1{0x5E00000};
+    constexpr u32 vdp2_end_area_1{0x5E80000};
+    if ((a >= vdp2_start_area_1) && (a < vdp2_end_area_1)) {
         return ScuRegion::vdp2;
-    else if ((a >= 0x5F00000) && (a < 0x5F01000))
+    }
+
+    constexpr u32 vdp2_start_area_2{0x5F00000};
+    constexpr u32 vdp2_end_area_2{0x5F01000};
+    if ((a >= vdp2_start_area_2) && (a < vdp2_end_area_2)) {
         return ScuRegion::vdp2;
-    else if ((a >= 0x5F80000) && (a < 0x5F80120))
+    }
+
+    constexpr u32 vdp2_start_area_3{0x5F80000};
+    constexpr u32 vdp2_end_area_3{0x5F80120};
+    if ((a >= vdp2_start_area_3) && (a < vdp2_end_area_3)) {
         return ScuRegion::vdp2;
-    else if ((a >= 0x5FE0000) && (a < 0x5FE00D0))
+    }
+
+    constexpr u32 scu_regs_start{0x5FE0000};
+    constexpr u32 scu_regs_end{0x5FE00D0};
+    if ((a >= scu_regs_start) && (a < scu_regs_end)) {
         return ScuRegion::scu_register;
-    else if ((a >= 0x6000000) && (a < 0x6100000))
+    }
+
+    constexpr u32 workram_h_start{0x6000000};
+    constexpr u32 workram_h_end{0x6100000};
+    if ((a >= workram_h_start) && (a < workram_h_end)) {
         return ScuRegion::work_ram_h;
+    }
 
     return ScuRegion::unknown;
 }

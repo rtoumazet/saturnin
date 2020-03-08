@@ -43,9 +43,9 @@ Opengl::Opengl(core::Config* config) {
     iconsTextureId = generateIconsTexture();
 }
 
-Config* Opengl::config() const { return config_; }
+auto Opengl::config() const -> Config* { return config_; }
 
-bool Opengl::isWindowResized(const u32 new_width, const u32 new_height) const {
+auto Opengl::isWindowResized(const u32 new_width, const u32 new_height) const -> bool {
     return (new_width != current_texture_width_ || new_height != current_texture_height_);
 }
 
@@ -65,11 +65,12 @@ void Opengl::setTextureDimension(const u32 width, const u32 height) {
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
-bool Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) {
+/* static */
+auto Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool {
     // Load file and decode image.
-    uint32_t width{};
-    uint32_t height{};
-    uint32_t error = lodepng::decode(image, width, height, source_data, LCT_RGBA);
+    u32 width{};
+    u32 height{};
+    u32 error = lodepng::decode(image, width, height, source_data, LCT_RGBA);
 
     // If there's an error, display it.
     if (error != 0) {
@@ -102,7 +103,8 @@ bool Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<u
     return true;
 }
 
-uint32_t Opengl::loadIcons(std::vector<uint8_t>& image) {
+/* static */
+auto Opengl::loadIcons(std::vector<uint8_t>& image) -> u32 {
     // Opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
     // std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
     // return loadPngImage(icons_vector, image);
@@ -130,7 +132,8 @@ uint32_t Opengl::loadIcons(std::vector<uint8_t>& image) {
     return 0;
 }
 
-uint32_t Opengl::generateIconsTexture() {
+/* static */
+auto Opengl::generateIconsTexture() -> u32 {
     // uint32_t width{};
     // uint32_t height{};
     // std::vector<uint8_t> icons_raw_data(icons_png, icons_png + sizeof(icons_png));
@@ -154,12 +157,16 @@ uint32_t Opengl::generateIconsTexture() {
     return 0;
 }
 
-bool isModernOpenglCapable() {
-    if (!glfwInit())
+auto isModernOpenglCapable() -> bool {
+    if (glfwInit() == GLFW_FALSE) {
         return false;
+    }
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "", nullptr, nullptr);
+    constexpr u16 h_window_size{1280};
+    constexpr u16 v_window_size{720};
+
+    GLFWwindow* window = glfwCreateWindow(h_window_size, v_window_size, "", nullptr, nullptr);
     if (window == nullptr) {
         glfwTerminate();
         return false;
@@ -175,11 +182,11 @@ bool isModernOpenglCapable() {
 
     Log::info("opengl", "Max version supported : {}", version.toString());
 
-    return (version < glbinding::Version(3, 3)) ? false : true;
+    return (version >= glbinding::Version(3, 3));
 }
 
 void windowCloseCallback(GLFWwindow* window) {
-    core::EmulatorContext* state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
+    auto state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
     state->renderingStatus(core::RenderingStatus::stopped);
 }
 

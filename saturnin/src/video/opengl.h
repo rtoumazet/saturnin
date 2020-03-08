@@ -50,21 +50,21 @@ class Opengl {
     Opengl(core::Config* config);
     Opengl(const Opengl&) = delete;
     Opengl(Opengl&&)      = delete;
-    Opengl& operator=(const Opengl&) & = delete;
-    Opengl& operator=(Opengl&&) & = delete;
-    virtual ~Opengl()             = default;
+    auto operator=(const Opengl&) & -> Opengl& = delete;
+    auto operator=(Opengl&&) & -> Opengl& = delete;
+    virtual ~Opengl()                     = default;
     //@}
 
     //@{
     // Abstract functions
-    virtual void initialize()                                                  = 0;
-    virtual void shutdown()                                                    = 0;
-    virtual void preRender()                                                   = 0;
-    virtual void render()                                                      = 0;
-    virtual void postRender()                                                  = 0;
-    virtual u32  generateEmptyTexture(const u32 width, const u32 height) const = 0;
-    virtual void updateTextureSize(const u32 width, const u32 height)          = 0;
-    virtual void deleteTexture() const                                         = 0;
+    virtual void               initialize()                                             = 0;
+    virtual void               shutdown()                                               = 0;
+    virtual void               preRender()                                              = 0;
+    virtual void               render()                                                 = 0;
+    virtual void               postRender()                                             = 0;
+    [[nodiscard]] virtual auto generateEmptyTexture(u32 width, u32 height) const -> u32 = 0;
+    virtual void               updateTextureSize(u32 width, u32 height)                 = 0;
+    virtual void               deleteTexture() const                                    = 0;
 
     //@}
 
@@ -79,10 +79,10 @@ class Opengl {
 
     virtual void bindTextureToFbo() const = 0;
 
-    u32 texture() const { return this->texture_; };
+    [[nodiscard]] auto texture() const -> u32 { return this->texture_; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn bool Opengl::isWindowResized(const u32 new_width, const u32 new_height) const;
+    /// \fn [[nodiscard]] auto Opengl::isWindowResized(const u32 new_width, const u32 new_height) const -> bool;
     ///
     /// \brief  Checks if the window size has changed.
     ///
@@ -92,21 +92,21 @@ class Opengl {
     /// \return True if the window has been resized.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool isWindowResized(const u32 new_width, const u32 new_height) const;
+    [[nodiscard]] auto isWindowResized(u32 new_width, u32 new_height) const -> bool;
 
-    void initializeTexture(const u32 width, const u32 height);
+    void initializeTexture(u32 width, u32 height);
 
-    bool loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image);
+    static auto loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool;
 
-    uint32_t loadIcons(std::vector<uint8_t>& image);
+    static auto loadIcons(std::vector<uint8_t>& image) -> u32;
 
-    uint32_t generateIconsTexture();
+    static auto generateIconsTexture() -> u32;
 
     uptr iconsTextureId; ///< Texture id storing data for UI icons
 
   protected:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn Config* Opengl::config() const;
+    /// \fn [[nodiscard]] auto Opengl::config() const -> Config*;
     ///
     /// \brief  Returns the Configobject.
     ///
@@ -116,9 +116,9 @@ class Opengl {
     /// \return The Config object.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Config* config() const;
+    [[nodiscard]] auto config() const -> Config*;
 
-    void setTextureDimension(const u32 width, const u32 height);
+    void setTextureDimension(u32 width, u32 height);
 
     u32 fbo_{};     ///< Framebuffer Object used for rendering to texture.
     u32 texture_{}; ///< Destination texture for render to texture.
@@ -133,7 +133,7 @@ class Opengl {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn bool OpenGl::is_modern_opengl_capable();
+/// \fn auto OpenGl::is_modern_opengl_capable() -> bool;
 ///
 /// \brief  Query if the current video card is capable of rendering modern opengl (ie version
 ///         3.3+).
@@ -144,7 +144,7 @@ class Opengl {
 /// \return True if the video car can render modern OpenGL .
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool isModernOpenglCapable();
+auto isModernOpenglCapable() -> bool;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void windowCloseCallback(GLFWwindow* window);

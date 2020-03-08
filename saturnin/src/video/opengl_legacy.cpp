@@ -102,7 +102,7 @@ void OpenglLegacy::updateTextureSize(const u32 width, const u32 height) {
     // setTextureDimension(width, height);
 }
 
-u32 OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const {
+auto OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
     u32 texture{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -119,8 +119,7 @@ void OpenglLegacy::bindTextureToFbo() const {
 }
 
 void OpenglLegacy::deleteTexture() const {
-    if (texture_ != 0)
-        glDeleteTextures(1, &texture_);
+    if (texture_ != 0) glDeleteTextures(1, &texture_);
 }
 
 static void error_callback(int error, const char* description) {
@@ -131,13 +130,11 @@ static void error_callback(int error, const char* description) {
 s32 runLegacyOpengl(core::EmulatorContext& state) {
     // Setup window
     glfwSetErrorCallback(error_callback);
-    if (!glfwInit())
-        return EXIT_FAILURE;
+    if (!glfwInit()) return EXIT_FAILURE;
 
     std::string window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
     auto        window       = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
-    if (window == NULL)
-        return EXIT_FAILURE;
+    if (window == NULL) return EXIT_FAILURE;
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
     // glfwSetWindowUserPointer(window, (void*)&state);
@@ -215,8 +212,7 @@ s32 runLegacyOpengl(core::EmulatorContext& state) {
 
         gui::buildGui(state, opengl, display_w, display_h);
 
-        if (state.renderingStatus() == core::RenderingStatus::reset)
-            glfwSetWindowShouldClose(window, true);
+        if (state.renderingStatus() == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
 
         ImGui::Render();
 
