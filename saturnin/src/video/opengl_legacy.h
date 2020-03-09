@@ -44,42 +44,42 @@ class OpenglLegacy : public Opengl {
     //@{
     // Constructors / Destructors
     OpenglLegacy(core::Config* config) : Opengl(config) { initialize(); };
-    ~OpenglLegacy() { shutdown(); };
+    ~OpenglLegacy() final { shutdown(); };
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void initialize() override;
+    /// \fn void initialize() final;
     ///
     /// \brief  Initializes the object.
     ///
     /// \author Runik
     /// \date   16/10/2019
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void initialize() override;
+    void initialize() final;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void shutdown() override;
+    /// \fn void shutdown() final;
     ///
     /// \brief  Clean up code.
     ///
     /// \author Runik
     /// \date   16/10/2019
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void shutdown() override;
+    void shutdown() final;
 
     // void initializeTexture(const u32 width, const u32 height);
 
-    void preRender() override;
+    void preRender() final;
 
-    void render() override;
+    void render() final;
 
-    void postRender() override;
+    void postRender() final;
 
-    void updateTextureSize(const u32 width, const u32 height) override;
+    void updateTextureSize(u32 width, u32 height) final;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const;
+    /// \fn [[nodiscard]] auto OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const -> u32 final;
     ///
     /// \brief  Generates an empty texture.
     ///
@@ -92,10 +92,10 @@ class OpenglLegacy : public Opengl {
     /// \return The empty texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32 generateEmptyTexture(const u32 width, const u32 height) const;
+    [[nodiscard]] auto generateEmptyTexture(u32 width, u32 height) const -> u32 final;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 OpenglLegacy::bindTextureToFbo() const override;
+    /// \fn u32 OpenglLegacy::bindTextureToFbo() const final;
     ///
     /// \brief  Binds the internal texture to the internal fbo.
     ///
@@ -103,9 +103,9 @@ class OpenglLegacy : public Opengl {
     /// \date   18/10/2019
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void bindTextureToFbo() const override;
+    void bindTextureToFbo() const final;
 
-    void deleteTexture() const override;
+    void deleteTexture() const final;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,6 +121,6 @@ class OpenglLegacy : public Opengl {
 /// \return An int32_t.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-s32 runLegacyOpengl(EmulatorContext& state);
+auto runLegacyOpengl(EmulatorContext& state) -> s32;
 
 }; // namespace saturnin::video

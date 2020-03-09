@@ -85,10 +85,18 @@ void OpenglLegacy::render() {
     glRotatef(i, 0.0f, 0.0f, 1.0f);
 
     glBegin(GL_TRIANGLES);
-    glColor4f(1.0f, 0.5f, 0.2f, 1.0f);
-    glVertex3f(-0.5f, -0.5f, 0.0f);
-    glVertex3f(0.5f, -0.5f, 0.0f);
-    glVertex3f(0.0f, 0.5f, 0.0f);
+    constexpr float red{1.0f};
+    constexpr float green{0.5f};
+    constexpr float blue{0.2f};
+    constexpr float alpha{1.0f};
+    glColor4f(red, green, blue, alpha);
+
+    float verts[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+
+    // glVertex3f(-0.5f, -0.5f, 0.0f);
+    // glVertex3f(0.5f, -0.5f, 0.0f);
+    // glVertex3f(0.0f, 0.5f, 0.0f);
+    glDrawElements(GL_TRIANGLES, 1, GL_UNSIGNED_BYTE, nullptr);
     glEnd();
 
     glPopMatrix();
@@ -108,7 +116,7 @@ auto OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     return texture;
 }
@@ -119,7 +127,9 @@ void OpenglLegacy::bindTextureToFbo() const {
 }
 
 void OpenglLegacy::deleteTexture() const {
-    if (texture_ != 0) glDeleteTextures(1, &texture_);
+    if (texture_ != 0) {
+        glDeleteTextures(1, &texture_);
+    }
 }
 
 static void error_callback(int error, const char* description) {
@@ -127,14 +137,20 @@ static void error_callback(int error, const char* description) {
     throw std::runtime_error("Opengl error !");
 }
 
-s32 runLegacyOpengl(core::EmulatorContext& state) {
+auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
     // Setup window
     glfwSetErrorCallback(error_callback);
-    if (!glfwInit()) return EXIT_FAILURE;
+    if (glfwInit() == GLFW_FALSE) {
+        return EXIT_FAILURE;
+    }
 
-    std::string window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
-    auto        window       = glfwCreateWindow(1280, 720, window_title.c_str(), NULL, NULL);
-    if (window == NULL) return EXIT_FAILURE;
+    std::string   window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
+    constexpr u16 width{1280};
+    constexpr u16 height{720};
+    auto          window = glfwCreateWindow(width, height, window_title.c_str(), nullptr, nullptr);
+    if (window == nullptr) {
+        return EXIT_FAILURE;
+    }
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
     // glfwSetWindowUserPointer(window, (void*)&state);
@@ -193,10 +209,11 @@ s32 runLegacyOpengl(core::EmulatorContext& state) {
     // io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    const ImVec4 clear_color(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
-    while (!glfwWindowShouldClose(window)) {
+    while (glfwWindowShouldClose(window) == GLFW_TRUE) {
         glfwPollEvents();
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -204,7 +221,8 @@ s32 runLegacyOpengl(core::EmulatorContext& state) {
         // glfwSetFramebufferSizeCallback(window, opengl.framebufferSizeCallback );
 
         // Rendering
-        int display_w, display_h;
+        s32 display_w{};
+        s32 display_h{};
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
@@ -212,7 +230,9 @@ s32 runLegacyOpengl(core::EmulatorContext& state) {
 
         gui::buildGui(state, opengl, display_w, display_h);
 
-        if (state.renderingStatus() == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
+        if (state.renderingStatus() == core::RenderingStatus::reset) {
+            glfwSetWindowShouldClose(window, GLFW_TRUE);
+        }
 
         ImGui::Render();
 

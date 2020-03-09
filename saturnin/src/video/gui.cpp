@@ -509,7 +509,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     static StvBoardControls board;
                     board.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_board));
 
-                    ImGui::BeginChild("ChildStvBoard", ImVec2(0, 160), true, window_flags);
+                    constexpr u16 h_size{0};
+                    constexpr u16 v_size{160};
+                    ImGui::BeginChild("ChildStvBoard", ImVec2(h_size, v_size), true, window_flags);
 
                     ImGui::CenteredText(tr("Board"));
 
@@ -548,8 +550,11 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     static StvPlayerControls controls;
                     controls.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
 
-                    ImGui::BeginChild(
-                        "ChildStvPlayer1", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 220), true, window_flags);
+                    constexpr u16 child_height{220};
+                    ImGui::BeginChild("ChildStvPlayer1",
+                                      ImVec2(ImGui::GetWindowContentRegionWidth() * child_width_ratio, child_height),
+                                      true,
+                                      window_flags);
 
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
@@ -598,8 +603,11 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     static StvPlayerControls controls;
                     controls.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
 
-                    ImGui::BeginChild(
-                        "ChildStvPlayer2", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 220), true, window_flags);
+                    constexpr u16 child_height{220};
+                    ImGui::BeginChild("ChildStvPlayer2",
+                                      ImVec2(ImGui::GetWindowContentRegionWidth() * child_width_ratio, child_height),
+                                      true,
+                                      window_flags);
 
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
@@ -657,7 +665,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         state.config()->writeFile();
         state.smpc()->initializePeripheralMappings();
         status_message = tr("Configuration saved.");
-        counter        = 5 * 60;
+        const u8 frames_per_second{60};
+        const u8 number_of_seconds{5};
+        counter = number_of_seconds * frames_per_second;
 
         if (reset_rendering) {
             state.renderingStatus(core::RenderingStatus::reset);
@@ -734,7 +744,7 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 wid
         showStvWindow(&show_load_stv);
     }
     if (show_demo) {
-        showImguiDemoWindow(&show_demo);
+        showImguiDemoWindow(show_demo);
     }
     if (show_log) {
         showLogWindow(&show_log);
