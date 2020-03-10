@@ -34,14 +34,14 @@ namespace video = saturnin::video;
 namespace saturnin::gui {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showImguiDemoWindow(const bool show_window);
+/// \fn void showImguiDemoWindow(bool show_window);
 ///
 /// \brief  Displays the imgui demo window.
 ///
 /// \author Runik
 /// \date   24/10/2019
 ///
-/// \param  show_demo_window    True to display the window.
+/// \param  show_window True to display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void showImguiDemoWindow(bool show_window);
@@ -54,29 +54,29 @@ void showImguiDemoWindow(bool show_window);
 /// \author Runik
 /// \date   24/10/2019
 ///
-/// \param [in,out] state The emulator context.
+/// \param [in,out] state   The emulator context.
 /// \param          opengl  The opengl object.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void showCoreWindow(core::EmulatorContext& state, const video::Opengl& opengl);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showRenderingWindow(const video::Opengl& opengl, u32 width, u32 height);
+/// \fn void showRenderingWindow(video::Opengl& opengl, u32 width, u32 height);
 ///
 /// \brief  Displays the rendering window.
 ///
 /// \author Runik
 /// \date   24/10/2019
 ///
-/// \param  opengl  The opengl object.
-/// \param  width   Width of the rendering window.
-/// \param  height  Height of the rendering window.
+/// \param [in,out] opengl  The opengl object.
+/// \param          width   Width of the rendering window.
+/// \param          height  Height of the rendering window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void showRenderingWindow(video::Opengl& opengl, u32 width, u32 height);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showStvWindow(bool *opened);
+/// \fn void showStvWindow(bool* opened);
 ///
 /// \brief  Displays the ST-V games choice window.
 ///
@@ -89,14 +89,14 @@ void showRenderingWindow(video::Opengl& opengl, u32 width, u32 height);
 void showStvWindow(bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showOptionsWindow(core::EmulatorContext& context, bool* opened);
+/// \fn void showOptionsWindow(core::EmulatorContext& state, bool* opened);
 ///
 /// \brief  Displays the options window.
 ///
 /// \author Runik
 /// \date   24/10/2019
 ///
-/// \param [in,out] state The emulator context.
+/// \param [in,out] state   The emulator context.
 /// \param [in,out] opened  True to display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -116,17 +116,17 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened);
 void showLogWindow(bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void buildGui(const core::EmulatorContext& state, const video::Opengl& opengl, u32 width, u32 height);
+/// \fn void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u32 height);
 ///
 /// \brief  Builds a graphical user interface.
 ///
 /// \author Runik
 /// \date   24/10/2019
 ///
-/// \param  state The emulator context.
-/// \param  opengl  The opengl object.
-/// \param  width   Width of the rendering window.
-/// \param  height  Height of the rendering window.
+/// \param [in,out] state   The emulator context.
+/// \param [in,out] opengl  The opengl object.
+/// \param          width   Width of the rendering window.
+/// \param          height  Height of the rendering window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u32 height);
