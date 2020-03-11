@@ -76,8 +76,9 @@ auto OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    gl::GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, draw_buffers); // "1" is the size of DrawBuffers
+    // gl::GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+    std::array<GLenum, 1> draw_buffers = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, draw_buffers.data()); // "1" is the size of DrawBuffers
 
     return texture;
 }
@@ -172,7 +173,8 @@ void OpenglModern::deleteShaders(std::vector<u32> shaders) {
 }
 
 void OpenglModern::setupTriangle() {
-    float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+    // constexpr float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+    constexpr std::array<float, 9> vertices = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
 
     glGenVertexArrays(1, &vao_);
     u32 vertex_buffer{};
@@ -181,7 +183,7 @@ void OpenglModern::setupTriangle() {
     glBindVertexArray(vao_);
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GLenum::GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
@@ -293,12 +295,12 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
     // io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    const ImVec4 clear_color = {0.45f, 0.55f, 0.60f, 1.00f};
 
     OpenglModern opengl(state.config());
 
     // Main loop
-    while (!glfwWindowShouldClose(window)) {
+    while (glfwWindowShouldClose(window) == GLFW_FALSE) {
         glfwPollEvents();
 
         // Start the ImGui frame
@@ -307,7 +309,8 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
         ImGui::NewFrame();
 
         // Rendering
-        int display_w, display_h;
+        s32 display_w{};
+        s32 display_h{};
         glfwMakeContextCurrent(window);
         glfwGetFramebufferSize(window, &display_w, &display_h);
         // glViewport(0, 0, display_w, display_h);
@@ -316,7 +319,9 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
 
         gui::buildGui(state, opengl, display_w, display_h);
 
-        if (state.renderingStatus() == core::RenderingStatus::reset) glfwSetWindowShouldClose(window, true);
+        if (state.renderingStatus() == core::RenderingStatus::reset) {
+            glfwSetWindowShouldClose(window, GLFW_TRUE);
+        }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -337,11 +342,11 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
 }
 
 void checkShaderCompilation(const u32 shader) {
-    s32 success{};
+    GLboolean success{};
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     s32 length{};
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-    if (!success) {
+    if (success == GL_FALSE) {
         std::vector<char> v(length);
         glGetShaderInfoLog(shader, length, nullptr, v.data());
         std::string info(v.begin(), v.end());
@@ -360,12 +365,12 @@ void checkShaderCompilation(const u32 shader) {
 }
 
 void checkProgramCompilation(const u32 program) {
-    s32 success{};
+    GLboolean success{};
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     s32 length{};
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
 
-    if (!success) {
+    if (success == GL_FALSE) {
         std::vector<char> v(length);
         glGetProgramInfoLog(program, length, nullptr, v.data());
         std::string info(v.begin(), v.end());

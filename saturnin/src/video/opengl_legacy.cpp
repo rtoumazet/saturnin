@@ -84,20 +84,29 @@ void OpenglLegacy::render() {
     glTranslatef(0.0f, 0.0f, 0.0f);
     glRotatef(i, 0.0f, 0.0f, 1.0f);
 
-    glBegin(GL_TRIANGLES);
+    //    glBegin(GL_TRIANGLES);
     constexpr float red{1.0f};
     constexpr float green{0.5f};
     constexpr float blue{0.2f};
     constexpr float alpha{1.0f};
     glColor4f(red, green, blue, alpha);
 
-    float verts[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+    constexpr std::array<float, 9> verts = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+
+    // activate and specify pointer to vertex array
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, verts.data());
+
+    // draw a cube
+    glDrawArrays(GL_TRIANGLES, 0, verts.size());
+
+    // deactivate vertex arrays after drawing
+    glDisableClientState(GL_VERTEX_ARRAY);
 
     // glVertex3f(-0.5f, -0.5f, 0.0f);
     // glVertex3f(0.5f, -0.5f, 0.0f);
     // glVertex3f(0.0f, 0.5f, 0.0f);
-    glDrawElements(GL_TRIANGLES, 1, GL_UNSIGNED_BYTE, nullptr);
-    glEnd();
+    //   glEnd();
 
     glPopMatrix();
     ++i;
@@ -213,7 +222,7 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
     const ImVec4 clear_color(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
-    while (glfwWindowShouldClose(window) == GLFW_TRUE) {
+    while (glfwWindowShouldClose(window) == GLFW_FALSE) {
         glfwPollEvents();
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGlfw_NewFrame();
