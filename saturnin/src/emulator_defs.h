@@ -78,6 +78,7 @@ constexpr u16 bitmask_00FF{0x00FF};
 constexpr u16 bitmask_03FF{0x03FF};
 constexpr u16 bitmask_0FFF{0x0FFF};
 constexpr u16 bitmask_FFFF{0xFFFF};
+constexpr u8  bitmask_0F{0x0F};
 
 constexpr u64 sign_bit_48_mask{0x800000000000};
 constexpr u32 sign_bit_32_mask{0x80000000};

@@ -194,6 +194,60 @@ enum class PeripheralLayout {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SaturnPadConfigIndexes
+///
+/// \brief  Saturn Pad configuration indexes.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SaturnPadConfigIndexes : u8 {
+    direction_left        = 0,
+    direction_right       = 1,
+    direction_up          = 2,
+    direction_down        = 3,
+    button_shoulder_left  = 4,
+    button_shoulder_right = 5,
+    button_a              = 6,
+    button_b              = 7,
+    button_c              = 8,
+    button_x              = 9,
+    button_y              = 10,
+    button_z              = 11,
+    button_start          = 12
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   StvControlConfigIndexes
+///
+/// \brief  ST-V Control configuration indexes.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class StvControlConfigIndexes : u8 {
+    direction_left  = 0,
+    direction_right = 1,
+    direction_up    = 2,
+    direction_down  = 3,
+    button_1        = 4,
+    button_2        = 5,
+    button_3        = 6,
+    button_4        = 7
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   StvBoardConfigIndexes
+///
+/// \brief  ST-V board configuration indexes.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class StvBoardConfigIndexes : u8 {
+    service_switch = 0,
+    test_switch    = 1,
+    p1_coin_switch = 2,
+    p2_coin_switch = 3,
+    p1_start       = 4,
+    p2_start       = 5
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct SaturnDigitalPad
 ///
 /// \brief  Mapping between the Saturn Digital Pad and the host.

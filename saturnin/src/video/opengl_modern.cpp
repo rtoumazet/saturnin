@@ -96,6 +96,7 @@ void OpenglModern::deleteTexture() const {
     }
 }
 
+/* static */
 auto OpenglModern::createVertexShader() -> u32 {
     const char* vertex_shader_source = R"(
         #version 330 core

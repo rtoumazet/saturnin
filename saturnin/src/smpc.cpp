@@ -189,7 +189,8 @@ auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) -> std::vector<Pe
     }
 }
 void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
-    if (config.size() != 13) {
+    constexpr u8 param_number{13};
+    if (config.size() != param_number) {
         Log::warning("smpc", tr("Incorrect Saturn pad data"));
         auto             v = SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout);
         SaturnDigitalPad pad;
@@ -198,19 +199,19 @@ void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
         return;
     }
 
-    direction_left        = config[0];
-    direction_right       = config[1];
-    direction_up          = config[2];
-    direction_down        = config[3];
-    button_shoulder_left  = config[4];
-    button_shoulder_right = config[5];
-    button_a              = config[6];
-    button_b              = config[7];
-    button_c              = config[8];
-    button_x              = config[9];
-    button_y              = config[10];
-    button_z              = config[11];
-    button_start          = config[12];
+    direction_left        = config[util::toUnderlying(SaturnPadConfigIndexes::direction_left)];
+    direction_right       = config[util::toUnderlying(SaturnPadConfigIndexes::direction_right)];
+    direction_up          = config[util::toUnderlying(SaturnPadConfigIndexes::direction_up)];
+    direction_down        = config[util::toUnderlying(SaturnPadConfigIndexes::direction_down)];
+    button_shoulder_left  = config[util::toUnderlying(SaturnPadConfigIndexes::button_shoulder_left)];
+    button_shoulder_right = config[util::toUnderlying(SaturnPadConfigIndexes::button_shoulder_right)];
+    button_a              = config[util::toUnderlying(SaturnPadConfigIndexes::button_a)];
+    button_b              = config[util::toUnderlying(SaturnPadConfigIndexes::button_b)];
+    button_c              = config[util::toUnderlying(SaturnPadConfigIndexes::button_c)];
+    button_x              = config[util::toUnderlying(SaturnPadConfigIndexes::button_x)];
+    button_y              = config[util::toUnderlying(SaturnPadConfigIndexes::button_y)];
+    button_z              = config[util::toUnderlying(SaturnPadConfigIndexes::button_z)];
+    button_start          = config[util::toUnderlying(SaturnPadConfigIndexes::button_start)];
 }
 
 auto StvPlayerControls::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
@@ -240,7 +241,8 @@ auto StvPlayerControls::toConfig(const PeripheralLayout layout) -> std::vector<P
 }
 
 void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
-    if (config.size() != 8) {
+    constexpr u8 param_number{8};
+    if (config.size() != param_number) {
         Log::warning("smpc", tr("Incorrect ST-V player control data"));
         auto              v = StvPlayerControls().toConfig(PeripheralLayout::empty_layout);
         StvPlayerControls control;
@@ -248,14 +250,14 @@ void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
         *this = control;
         return;
     }
-    direction_left  = config[0];
-    direction_right = config[1];
-    direction_up    = config[2];
-    direction_down  = config[3];
-    button_1        = config[4];
-    button_2        = config[5];
-    button_3        = config[6];
-    button_4        = config[7];
+    direction_left  = config[util::toUnderlying(StvControlConfigIndexes::direction_left)];
+    direction_right = config[util::toUnderlying(StvControlConfigIndexes::direction_right)];
+    direction_up    = config[util::toUnderlying(StvControlConfigIndexes::direction_up)];
+    direction_down  = config[util::toUnderlying(StvControlConfigIndexes::direction_down)];
+    button_1        = config[util::toUnderlying(StvControlConfigIndexes::button_1)];
+    button_2        = config[util::toUnderlying(StvControlConfigIndexes::button_2)];
+    button_3        = config[util::toUnderlying(StvControlConfigIndexes::button_3)];
+    button_4        = config[util::toUnderlying(StvControlConfigIndexes::button_4)];
 }
 
 auto StvBoardControls::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
@@ -280,7 +282,8 @@ auto StvBoardControls::toConfig(const PeripheralLayout layout) -> std::vector<Pe
 }
 
 void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
-    if (config.size() != 6) {
+    constexpr u8 param_number{6};
+    if (config.size() != param_number) {
         Log::warning("smpc", tr("Incorrect ST-V board control data"));
         auto             v = StvBoardControls().toConfig(PeripheralLayout::empty_layout);
         StvBoardControls control;
@@ -288,22 +291,22 @@ void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
         *this = control;
         return;
     }
-    service_switch = config[0];
-    test_switch    = config[1];
-    p1_coin_switch = config[2];
-    p2_coin_switch = config[3];
-    p1_start       = config[4];
-    p2_start       = config[5];
+    service_switch = config[util::toUnderlying(StvBoardConfigIndexes::service_switch)];
+    test_switch    = config[util::toUnderlying(StvBoardConfigIndexes::test_switch)];
+    p1_coin_switch = config[util::toUnderlying(StvBoardConfigIndexes::p1_coin_switch)];
+    p2_coin_switch = config[util::toUnderlying(StvBoardConfigIndexes::p2_coin_switch)];
+    p1_start       = config[util::toUnderlying(StvBoardConfigIndexes::p1_start)];
+    p2_start       = config[util::toUnderlying(StvBoardConfigIndexes::p2_start)];
 }
 
 void Smpc::reset() {
     comreg_.reset();
     sr_.reset();
     sf_.reset();
-    for (u8 i = 0; i < 7; ++i) {
+    for (u8 i = 0; i < input_registers_number; ++i) {
         ireg_[i].reset();
     }
-    for (u8 i = 0; i < 32; ++i) {
+    for (u8 i = 0; i < output_registers_number; ++i) {
         oreg_[i].reset();
     }
     pdr1_.reset();
@@ -524,8 +527,8 @@ void Smpc::executeIntback() {
 void Smpc::getStatus() {
     Log::debug("smpc", tr("INTBACK returning status data"));
     sr_.reset();
-    sr_[7] = 0;
-    sr_[6] = 1;
+    sr_[7] = false;
+    sr_[6] = true;
     bool is_peripheral_data_returned
         = ireg_[1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned;
     if (is_peripheral_data_returned) {
@@ -535,10 +538,11 @@ void Smpc::getStatus() {
     }
 
     oreg_[0].reset();
-    if (is_soft_reset_allowed_)
+    if (is_soft_reset_allowed_) {
         oreg_[0].set(OutputRegister::oreg0_reset_status, ResetStatus::enabled);
-    else
+    } else {
         oreg_[0].set(OutputRegister::oreg0_reset_status, ResetStatus::disabled);
+    }
 
     oreg_[0].set(OutputRegister::oreg0_set_time, SetTime::set_time);
 
@@ -659,8 +663,7 @@ auto Smpc::read(const u32 addr) -> u8 {
         case output_register_30: return oreg_[30].get(OutputRegister::all_bits);
         case output_register_31: return oreg_[31].get(OutputRegister::all_bits);
         case port_data_register_1:
-            if (emulator_context_->hardwareMode() == HardwareMode::stv)
-                return 0xFF;
+            if (emulator_context_->hardwareMode() == HardwareMode::stv) return 0xFF;
             return pdr1_.get(PortDataRegister::all_bits);
         case port_data_register_2:
             // if (emulator_context_->hardwareMode() == HardwareMode::stv) {
@@ -737,11 +740,11 @@ void Smpc::initializePeripheralMappings() {
         emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
 }
 
-SaturnPeripheralMapping Smpc::getSaturnPeripheralMapping() { return saturn_mapping_; }
+auto Smpc::getSaturnPeripheralMapping() -> SaturnPeripheralMapping { return saturn_mapping_; }
 
-StvPeripheralMapping Smpc::getStvPeripheralMapping() { return stv_mapping_; }
+auto Smpc::getStvPeripheralMapping() -> StvPeripheralMapping { return stv_mapping_; }
 
-std::string getKeyName(const PeripheralKey pk) { return keyboard_layout[pk]; }
+auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout[pk]; }
 
 auto getRtcTime() -> RtcTime {
     using namespace date;
@@ -756,32 +759,32 @@ auto getRtcTime() -> RtcTime {
     RtcTime rtc;
     u16     year      = static_cast<int>(today.year());
     auto    year_bcd  = util::dec2bcd(year);
-    rtc.year_1000_bcd = std::bitset<4>((year_bcd >> 12) & 0xF);
-    rtc.year_100_bcd  = std::bitset<4>((year_bcd >> 8) & 0xF);
-    rtc.year_10_bcd   = std::bitset<4>((year_bcd >> 4) & 0xF);
-    rtc.year_1_bcd    = std::bitset<4>(year_bcd & 0xF);
+    rtc.year_1000_bcd = std::bitset<4>((year_bcd >> 12) & bitmask_0F);
+    rtc.year_100_bcd  = std::bitset<4>((year_bcd >> 8) & bitmask_0F);
+    rtc.year_10_bcd   = std::bitset<4>((year_bcd >> 4) & bitmask_0F);
+    rtc.year_1_bcd    = std::bitset<4>(year_bcd & bitmask_0F);
 
     rtc.month_hex = static_cast<unsigned>(today.month());
     rtc.day_hex   = weekday.weekday().c_encoding();
 
     u16  month     = static_cast<unsigned>(today.month());
     auto month_bcd = util::dec2bcd(month);
-    rtc.day_10_bcd = std::bitset<4>((month_bcd >> 4) & 0xF);
-    rtc.day_1_bcd  = std::bitset<4>(month_bcd & 0xF);
+    rtc.day_10_bcd = std::bitset<4>((month_bcd >> 4) & bitmask_0F);
+    rtc.day_1_bcd  = std::bitset<4>(month_bcd & bitmask_0F);
 
     u16  hour       = time.hours().count();
     auto hour_bcd   = util::dec2bcd(hour);
-    rtc.hour_10_bcd = std::bitset<4>((hour_bcd >> 4) & 0xF);
-    rtc.hour_1_bcd  = std::bitset<4>(hour_bcd & 0xF);
+    rtc.hour_10_bcd = std::bitset<4>((hour_bcd >> 4) & bitmask_0F);
+    rtc.hour_1_bcd  = std::bitset<4>(hour_bcd & bitmask_0F);
 
     u16  minute       = time.minutes().count();
     auto minute_bcd   = util::dec2bcd(minute);
-    rtc.minute_10_bcd = std::bitset<4>((minute_bcd >> 4) & 0xF);
-    rtc.minute_1_bcd  = std::bitset<4>(minute_bcd & 0xF);
+    rtc.minute_10_bcd = std::bitset<4>((minute_bcd >> 4) & bitmask_0F);
+    rtc.minute_1_bcd  = std::bitset<4>(minute_bcd & bitmask_0F);
 
     u16  second       = static_cast<u16>(time.seconds().count());
     auto second_bcd   = util::dec2bcd(second);
-    rtc.second_10_bcd = std::bitset<4>((second_bcd >> 4) & 0xF);
+    rtc.second_10_bcd = std::bitset<4>((second_bcd >> 4) & bitmask_0F);
     rtc.second_1_bcd  = std::bitset<4>(second_bcd & 0xF);
 
     return rtc;

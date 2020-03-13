@@ -47,7 +47,7 @@ class OpenglModern : public Opengl {
     ~OpenglModern() final { shutdown(); };
     //@}
 
-    auto        createVertexShader() -> u32;
+    static auto createVertexShader() -> u32;
     static auto createFragmentShader() -> u32;
     static auto createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
     static void deleteShaders(std::vector<u32> shaders);
