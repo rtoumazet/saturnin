@@ -34,7 +34,7 @@ HINSTANCE Aspi::hWnAspi32;
 // function<uint32_t(void)>	Aspi::pfGetAspi32SupportInfo;
 // function<uint32_t(LPSRB)>	Aspi::pfSendAspi32Command;
 
-bool Aspi::initialize() {
+auto Aspi::initialize() -> bool {
     ////hinstWNASPI32=LoadLibrary("WNASPI32");
     // hWnAspi32 = LoadLibrary(L"WNASPI32");
     // if (!hWnAspi32)
@@ -96,7 +96,7 @@ void Aspi::shutdown() {
     //    FreeLibrary(hWnAspi32);
 }
 
-std::vector<ScsiDriveInfo> Aspi::scanBus() {
+auto Aspi::scanBus() -> std::vector<ScsiDriveInfo> {
     // int8_t byHaId;
     // int8_t byTarget;
     // SRB_GDEVBlock srbGDEVBlock;
@@ -168,7 +168,7 @@ void Aspi::inquiry(ScsiDriveInfo& di) {
     ////delete[] byBuffer;
 }
 
-std::string Aspi::readSector(const uint32_t& dwFAD, const int32_t& iNb) {
+auto Aspi::readSector(const uint32_t& dwFAD, const int32_t& iNb) -> std::string {
     //// CDROM fad
     // uint32_t dwRealFAD = dwFAD - 150;
     // vector<int8_t> v(2048 * iNb);
@@ -284,7 +284,7 @@ void Aspi::resetBus() {
     //    }
 }
 
-bool Aspi::readToc(ScsiToc& toc_data) {
+auto Aspi::readToc(ScsiToc& toc_data) -> bool {
     ////pLog->CdBlockWrite("Trying to read CD TOC..");
     ////BYTE TOCBuffer[1024];
     // uint8_t TOCBuffer[1024];

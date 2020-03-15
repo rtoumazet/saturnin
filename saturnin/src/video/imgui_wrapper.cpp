@@ -46,14 +46,14 @@ static auto vectorGetter = [](void* vec, int idx, const char** out_text) {
     return true;
 };
 
-bool Combo(const char* label, int* currIndex, std::vector<std::string>& values) {
+auto Combo(const char* label, int* currIndex, std::vector<std::string>& values) -> bool {
     if (values.empty()) {
         return false;
     }
     return Combo(label, currIndex, vectorGetter, static_cast<void*>(&values), values.size());
 }
 
-bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values) {
+auto ListBox(const char* label, int* currIndex, std::vector<std::string>& values) -> bool {
     if (values.empty()) {
         return false;
     }

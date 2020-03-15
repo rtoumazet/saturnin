@@ -31,7 +31,7 @@
 namespace ImGui {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn bool Combo(const char* label, int* currIndex, std::vector<std::string>& values)
+/// \fn auto Combo(const char* label, int* currIndex, std::vector<std::string>& values) -> bool;
 ///
 /// \brief  Wrapper for ImGui combos allowing the use of vector of strings
 ///
@@ -42,13 +42,13 @@ namespace ImGui {
 /// \param [in,out] currIndex   Current index selected.
 /// \param [in,out] values      Values to display in the combo.
 ///
-/// \return True if it succeeds.
+/// \returns    True if it succeeds.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-///
-bool Combo(const char* label, int* currIndex, std::vector<std::string>& values);
+
+auto Combo(const char* label, int* currIndex, std::vector<std::string>& values) -> bool;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values)
+/// \fn auto ListBox(const char* label, int* currIndex, std::vector<std::string>& values) -> bool;
 ///
 /// \brief  Wrapper for ImGui listboxes allowing the use of vector of strings
 ///
@@ -59,9 +59,9 @@ bool Combo(const char* label, int* currIndex, std::vector<std::string>& values);
 /// \param [in,out] currIndex   Current index selected.
 /// \param [in,out] values      Values to display in the combo.
 ///
-/// \return True if it succeeds.
+/// \returns    True if it succeeds.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values);
+auto ListBox(const char* label, int* currIndex, std::vector<std::string>& values) -> bool;
 
 } // namespace ImGui

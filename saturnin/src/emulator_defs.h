@@ -52,6 +52,7 @@ constexpr u8 displacement_4{4};
 constexpr u8 displacement_8{8};
 constexpr u8 displacement_12{12};
 constexpr u8 displacement_16{16};
+constexpr u8 displacement_24{24};
 constexpr u8 displacement_32{32};
 
 constexpr u64 bitmask_FFFFFFFF00000000{0xFFFFFFFF00000000};
@@ -92,6 +93,48 @@ constexpr u64 uint47_max{0x00007FFFFFFFFFFF};
 constexpr u32 uint32_max{UINT32_MAX};
 constexpr u32 uint31_max{0x7FFFFFFF};
 constexpr u32 uint30_max{0x3FFFFFFF};
+
+constexpr u8 index_0{0};
+constexpr u8 index_1{1};
+constexpr u8 index_2{2};
+constexpr u8 index_3{3};
+constexpr u8 index_4{4};
+constexpr u8 index_5{5};
+constexpr u8 index_6{6};
+constexpr u8 index_7{7};
+constexpr u8 index_8{8};
+constexpr u8 index_9{9};
+constexpr u8 index_10{10};
+constexpr u8 index_11{11};
+constexpr u8 index_12{12};
+constexpr u8 index_13{13};
+constexpr u8 index_14{14};
+constexpr u8 index_15{15};
+constexpr u8 index_16{16};
+constexpr u8 index_17{17};
+constexpr u8 index_18{18};
+constexpr u8 index_19{19};
+constexpr u8 index_20{20};
+constexpr u8 index_21{21};
+constexpr u8 index_22{22};
+constexpr u8 index_23{23};
+constexpr u8 index_24{24};
+constexpr u8 index_25{25};
+constexpr u8 index_26{26};
+constexpr u8 index_27{27};
+constexpr u8 index_28{28};
+constexpr u8 index_29{29};
+constexpr u8 index_30{30};
+constexpr u8 index_31{31};
+
+constexpr u8 bit_0{0};
+constexpr u8 bit_1{1};
+constexpr u8 bit_2{2};
+constexpr u8 bit_3{3};
+constexpr u8 bit_4{4};
+constexpr u8 bit_5{5};
+constexpr u8 bit_6{6};
+constexpr u8 bit_7{7};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct BitRange

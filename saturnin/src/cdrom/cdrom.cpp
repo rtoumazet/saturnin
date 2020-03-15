@@ -46,7 +46,7 @@ ScsiToc Cdrom::toc_data;
 std::vector<std::string> Cdrom::scsi_drives_list = {};
 
 /* static */
-uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8_t lun) {
+auto Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8_t lun) -> u8 {
     auto it = std::find_if(di_list.begin(), di_list.end(), [path, target, lun](const ScsiDriveInfo& di) {
         return (di.path == path) && (di.target == target) && (di.lun == lun);
     });
@@ -293,10 +293,12 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //				EmuState::pLog->CdBlockWrite("change initialization flag");
 //				(CR1&0x1) ? EmuState::pLog->CdBlockWrite("software reset"):EmuState::pLog->CdBlockWrite("no software reset");
 //				(CR1&0x2) ? EmuState::pLog->CdBlockWrite("decode subcode RW"):EmuState::pLog->CdBlockWrite("no decode subcode
-// RW"); 				(CR1&0x4) ? EmuState::pLog->CdBlockWrite("no recognize mode 2 subheader"):EmuState::pLog->CdBlockWrite("recognize
+// RW"); 				(CR1&0x4) ? EmuState::pLog->CdBlockWrite("no recognize mode 2
+// subheader"):EmuState::pLog->CdBlockWrite("recognize
 // mode 2 subheader"); 				(CR1&0x8) ? EmuState::pLog->CdBlockWrite("retry form 2 read"):EmuState::pLog->CdBlockWrite("no
-// retry form 2 read"); 				(CR1&0x80) ? EmuState::pLog->CdBlockWrite("no change"):EmuState::pLog->CdBlockWrite("change"); 			}else
-//EmuState::pLog->CdBlockWrite("don't change initialization flag"); 			#endif
+// retry form 2 read"); 				(CR1&0x80) ? EmuState::pLog->CdBlockWrite("no
+// change"):EmuState::pLog->CdBlockWrite("change"); }else EmuState::pLog->CdBlockWrite("don't change initialization flag");
+// #endif
 //
 //			switch(CR1 & 0x3)
 //			{
@@ -1149,7 +1151,8 @@ uint8_t Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8
 //			CR1|=bufferPartitions[bufferNum].sectors[sectorNum]->FAD>>16;
 //			CR2=(uint16_t)(bufferPartitions[bufferNum].sectors[sectorNum]->FAD & 0xFFFF);
 //			CR3=bufferPartitions[bufferNum].sectors[sectorNum]->fileNumber << 8 |
-// bufferPartitions[bufferNum].sectors[sectorNum]->channelNumber; 			CR4=bufferPartitions[bufferNum].sectors[sectorNum]->subMode
+// bufferPartitions[bufferNum].sectors[sectorNum]->channelNumber;
+// CR4=bufferPartitions[bufferNum].sectors[sectorNum]->subMode
 // << 8 | bufferPartitions[bufferNum].sectors[sectorNum]->codingInfo;
 //
 //			HIRQREQ|=CMOK|ESEL;

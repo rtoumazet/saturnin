@@ -306,7 +306,8 @@ class Config {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<size_t N>
-    void writeValue(libconfig::Setting& root, const std::string& key, const char (&value)[N]) {
+    void
+        writeValue(libconfig::Setting& root, const std::string& key, const char (&value)[N]) { // NOLINT(modernize-avoid-c-arrays)
         if (!root.exists(key.c_str())) {
             root.add(key.c_str(), libconfig::Setting::TypeString) = value;
         } else {

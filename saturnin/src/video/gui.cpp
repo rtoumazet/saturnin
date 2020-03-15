@@ -348,7 +348,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
     // Peripheral header
     if (ImGui::CollapsingHeader(tr("Peripherals").c_str())) {
-        static const auto keys{state.smpc()->listAvailableKeys()};
+        static const auto keys{core::Smpc::listAvailableKeys()};
 
         ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
         if (ImGui::BeginTabBar("PeripheralTabBar", tab_bar_flags)) {

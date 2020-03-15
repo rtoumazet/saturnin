@@ -31,10 +31,9 @@
 namespace ImGui {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn bool ImageButtonWithText(ImTextureID texId, const char* label, const ImVec2& imageSize = ImVec2(0, 0), const ImVec2& uv0 =
-/// ImVec2(0, 0),
-///     const ImVec2& uv1 = ImVec2(1, 1), int frame_padding = -1, const ImVec4& bg_col = ImVec4(0, 0, 0, 0), const ImVec4&
-///     tint_col = ImVec4(1, 1, 1, 1));
+/// \fn auto ImageButtonWithText(ImTextureID texId, const char* label, const ImVec2& imageSize = ImVec2(0, 0), const ImVec2& uv0 =
+/// ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), int frame_padding = -1, const ImVec4& bg_col = ImVec4(0, 0, 0, 0), const
+/// ImVec4& tint_col = ImVec4(1, 1, 1, 1)) -> bool;
 ///
 /// \brief  Image button with text.
 ///
@@ -50,17 +49,17 @@ namespace ImGui {
 /// \param  bg_col          (Optional) The background col.
 /// \param  tint_col        (Optional) The tint col.
 ///
-/// \return True if it succeeds, false if it fails.
+/// \returns    True if it succeeds, false if it fails.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ImageButtonWithText(ImTextureID   texId,
+auto ImageButtonWithText(ImTextureID   texId,
                          const char*   label,
                          const ImVec2& imageSize     = ImVec2(0, 0),
                          const ImVec2& uv0           = ImVec2(0, 0),
                          const ImVec2& uv1           = ImVec2(1, 1),
                          int           frame_padding = -1,
                          const ImVec4& bg_col        = ImVec4(0, 0, 0, 0),
-                         const ImVec4& tint_col      = ImVec4(1, 1, 1, 1));
+                         const ImVec4& tint_col      = ImVec4(1, 1, 1, 1)) -> bool;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void peripheralKeyCombo(const std::vector<saturnin::core::PeripheralKey>& keys, saturnin::core::PeripheralKey&

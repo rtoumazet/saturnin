@@ -30,16 +30,17 @@ std::function<std::string(const uint32_t&, const int32_t&)> Scsi::readSector;
 std::function<void(void)>                                   Scsi::shutdown;
 std::function<bool(ScsiToc& toc_data)>                      Scsi::readToc;
 
-HANDLE Scsi::openDrive(const wchar_t letter) {
-    HANDLE       h          = 0;
+auto Scsi::openDrive(const wchar_t letter) -> HANDLE {
+    HANDLE       h          = nullptr;
     std::wstring drive_name = L"\\\\.\\";
     drive_name += letter;
     drive_name += L":";
 
     h = CreateFile(
-        drive_name.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-    if (h == INVALID_HANDLE_VALUE)
-        return NULL;
+        drive_name.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (h == INVALID_HANDLE_VALUE) {
+        return nullptr;
+    }
 
     return h;
 }

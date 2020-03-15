@@ -94,16 +94,21 @@ void Spti::test() {}
 
 /* static */
 auto Spti::readOneSector(const uint32_t& fad) -> std::string {
-    const uint32_t                  real_fad    = fad - 150;
-    constexpr uint32_t              sector_size = 2048;
-    std::array<int8_t, sector_size> output_buffer{};
+    const u32                   real_fad{fad - 150};
+    constexpr u32               sector_size{2048};
+    constexpr u8                cdb_length{12};
+    constexpr u8                timeout_value{60};
+    constexpr u8                command_code{0xBE};
+    constexpr u8                number_of_frames_to_read{1};
+    constexpr u8                only_main_channel_data{0x10};
+    std::array<s8, sector_size> output_buffer{};
 
     SCSI_PASS_THROUGH_DIRECT input_buffer{};
 
     input_buffer.Length             = sizeof(SCSI_PASS_THROUGH_DIRECT);
-    input_buffer.CdbLength          = 12;
+    input_buffer.CdbLength          = cdb_length;
     input_buffer.DataTransferLength = sector_size;
-    input_buffer.TimeOutValue       = 60;
+    input_buffer.TimeOutValue       = timeout_value;
     input_buffer.DataBuffer         = &output_buffer[0];
     input_buffer.SenseInfoLength    = 0;
     input_buffer.PathId             = Cdrom::scsi_path;
@@ -111,30 +116,33 @@ auto Spti::readOneSector(const uint32_t& fad) -> std::string {
     input_buffer.Lun                = Cdrom::scsi_lun;
     input_buffer.SenseInfoOffset    = 0; // offsetof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER, ucSenseBuf);
     input_buffer.DataIn             = SCSI_IOCTL_DATA_IN;
-    input_buffer.Cdb[0]             = 0xBE;
-    input_buffer.Cdb[2]             = static_cast<uint8_t>(real_fad >> 24);
-    input_buffer.Cdb[3]             = static_cast<uint8_t>(real_fad >> 16);
-    input_buffer.Cdb[4]             = static_cast<uint8_t>(real_fad >> 8);
-    input_buffer.Cdb[5]             = static_cast<uint8_t>(real_fad);
-    input_buffer.Cdb[6]             = 0;
-    input_buffer.Cdb[7]             = 0;
-    input_buffer.Cdb[8]             = 1;    // one frame read
-    input_buffer.Cdb[9]             = 0x10; // getting only main channel data
+    input_buffer.Cdb[index_0]       = command_code;
+    input_buffer.Cdb[index_2]       = static_cast<u8>(real_fad >> displacement_24);
+    input_buffer.Cdb[index_3]       = static_cast<u8>(real_fad >> displacement_16);
+    input_buffer.Cdb[index_4]       = static_cast<u8>(real_fad >> displacement_8);
+    input_buffer.Cdb[index_5]       = static_cast<u8>(real_fad);
+    input_buffer.Cdb[index_6]       = 0;
+    input_buffer.Cdb[index_7]       = 0;
+    input_buffer.Cdb[index_8]       = number_of_frames_to_read;
+    input_buffer.Cdb[index_9]       = only_main_channel_data;
 
-    HANDLE   drive_handle = Scsi::openDrive(Cdrom::scsi_letter);
-    uint32_t dummy{};
-    if (!DeviceIoControl(drive_handle, IOCTL_STORAGE_CHECK_VERIFY, NULL, 0, NULL, 0, reinterpret_cast<LPDWORD>(&dummy), NULL)) {
+    HANDLE drive_handle = Scsi::openDrive(Cdrom::scsi_letter);
+    u32    dummy{};
+    if (DeviceIoControl(
+            drive_handle, IOCTL_STORAGE_CHECK_VERIFY, nullptr, 0, nullptr, 0, reinterpret_cast<LPDWORD>(&dummy), nullptr)
+        == 0) {
         Log::warning("cdrom", tr("Drive isn't accessible"));
 
     } else {
-        if (!DeviceIoControl(drive_handle,
-                             IOCTL_SCSI_PASS_THROUGH_DIRECT,
-                             &input_buffer,
-                             sizeof(input_buffer),
-                             &input_buffer,
-                             sizeof(input_buffer),
-                             reinterpret_cast<LPDWORD>(&dummy),
-                             NULL)) {
+        if (DeviceIoControl(drive_handle,
+                            IOCTL_SCSI_PASS_THROUGH_DIRECT,
+                            &input_buffer,
+                            sizeof(input_buffer),
+                            &input_buffer,
+                            sizeof(input_buffer),
+                            reinterpret_cast<LPDWORD>(&dummy),
+                            nullptr)
+            == 0) {
             Log::warning("cdrom", util::getLastErrorMessage());
         }
     }
@@ -145,9 +153,9 @@ auto Spti::readOneSector(const uint32_t& fad) -> std::string {
 }
 
 /* static */
-std::string Spti::readSector(const uint32_t& fad, const int32_t& nb) {
+auto Spti::readSector(const u32& fad, const s32& nb) -> std::string {
     std::string sector_data{};
-    for (uint8_t cnt = 0; cnt < nb; ++cnt) {
+    for (u8 cnt = 0; cnt < nb; ++cnt) {
         sector_data += readOneSector(fad);
     }
 
@@ -156,7 +164,9 @@ std::string Spti::readSector(const uint32_t& fad, const int32_t& nb) {
 
 /* static */
 void Spti::inquiry(const HANDLE& h, ScsiDriveInfo& di) {
-    std::array<int8_t, 36> output_buffer{};
+    constexpr u8                       output_buffer_size{36};
+    constexpr u8                       cdb_length{6};
+    std::array<s8, output_buffer_size> output_buffer{};
 
     SCSI_PASS_THROUGH_DIRECT input_buffer{};
 
@@ -165,28 +175,31 @@ void Spti::inquiry(const HANDLE& h, ScsiDriveInfo& di) {
     input_buffer.DataIn             = SCSI_IOCTL_DATA_IN;
     input_buffer.TargetId           = di.target;
     input_buffer.Lun                = di.lun;
-    input_buffer.DataTransferLength = 36;
+    input_buffer.DataTransferLength = output_buffer_size;
     input_buffer.DataBuffer         = &output_buffer[0];
     input_buffer.SenseInfoLength    = 0;
-    input_buffer.CdbLength          = 6;
-    input_buffer.Cdb[0]             = scsi_inquiry;
-    input_buffer.Cdb[4]             = 36;
+    input_buffer.CdbLength          = cdb_length;
+    input_buffer.Cdb[index_0]       = scsi_inquiry;
+    input_buffer.Cdb[index_4]       = output_buffer_size;
     input_buffer.TimeOutValue       = spti_timeout;
 
     uint32_t dummy{};
-    if (!DeviceIoControl(h,
-                         IOCTL_SCSI_PASS_THROUGH_DIRECT,
-                         &input_buffer,
-                         sizeof(input_buffer),
-                         &input_buffer,
-                         sizeof(input_buffer),
-                         reinterpret_cast<LPDWORD>(&dummy),
-                         nullptr)) {
+    if (DeviceIoControl(h,
+                        IOCTL_SCSI_PASS_THROUGH_DIRECT,
+                        &input_buffer,
+                        sizeof(input_buffer),
+                        &input_buffer,
+                        sizeof(input_buffer),
+                        reinterpret_cast<LPDWORD>(&dummy),
+                        nullptr)
+        == 0) {
         Log::warning("cdrom", util::getLastErrorMessage());
 
     } else {
         std::wstring temp(output_buffer.begin(), output_buffer.end());
-        di.name = temp.substr(8, 28);
+        constexpr u8 start_pos{8};
+        constexpr u8 end_pos{28};
+        di.name = temp.substr(start_pos, end_pos);
     }
 }
 
@@ -205,7 +218,7 @@ void Spti::getAdapterAddress(const HANDLE& h, ScsiDriveInfo& di) {
     SCSI_ADDRESS psa{};
     psa.Length = sizeof(SCSI_ADDRESS);
 
-    uint32_t status{};
+    u32 status{};
     if (DeviceIoControl(h,
                         IOCTL_SCSI_GET_ADDRESS,
                         nullptr,
@@ -225,7 +238,7 @@ void Spti::getAdapterAddress(const HANDLE& h, ScsiDriveInfo& di) {
 
 /* static */
 auto Spti::readToc(ScsiToc& toc) -> bool {
-    uint32_t  out_bytes{};
+    u32       out_bytes{};
     CDROM_TOC cdrom_toc;
     HANDLE    drive_handle = Scsi::openDrive(Cdrom::scsi_letter);
     if (DeviceIoControl(drive_handle,

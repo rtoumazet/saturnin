@@ -26,14 +26,14 @@ namespace ImGui {
 using saturnin::core::getKeyName;
 using saturnin::core::PeripheralKey;
 
-bool ImageButtonWithText(ImTextureID   texId,
+auto ImageButtonWithText(ImTextureID   texId,
                          const char*   label,
                          const ImVec2& imageSize,
                          const ImVec2& uv0,
                          const ImVec2& uv1,
                          int           frame_padding,
                          const ImVec4& bg_col,
-                         const ImVec4& tint_col) {
+                         const ImVec4& tint_col) -> bool {
     // ImGuiWindow* window = GetCurrentWindow();
     // if (window->SkipItems)
     //    return false;
@@ -87,8 +87,7 @@ void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& d
             bool is_selected = (default_key_name.c_str() == getKeyName(key).c_str());
             if (ImGui::Selectable(getKeyName(key).c_str(), is_selected)) {
                 default_key = key;
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
+                if (is_selected) ImGui::SetItemDefaultFocus();
             }
         }
         ImGui::EndCombo();

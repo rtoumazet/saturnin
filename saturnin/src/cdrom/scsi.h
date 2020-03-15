@@ -24,18 +24,20 @@
 #pragma once
 
 #pragma warning(push, 3)
+#include <array>      // array
 #include <functional> // function
 #include <string>     // string
 #include <windows.h>
+#include "../emulator_defs.h"
 #pragma warning(pop)
 
 namespace saturnin::cdrom {
 
-const uint8_t scsi_max_drives     = 10;  ///< Maximum number of drives checked on the host system.
-const uint8_t scsi_max_toc_tracks = 100; ///< Maximum number of tracks saved in the TOC
+constexpr u8 scsi_max_drives     = 10;  ///< Maximum number of drives checked on the host system.
+constexpr u8 scsi_max_toc_tracks = 100; ///< Maximum number of tracks saved in the TOC
 
 // SCSI COMMANDS
-const uint8_t scsi_inquiry = 0x12; ///< Inquiry (MANDATORY)
+constexpr u8 scsi_inquiry = 0x12; ///< Inquiry (MANDATORY)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	ScsiDriveInfo
@@ -46,9 +48,9 @@ const uint8_t scsi_inquiry = 0x12; ///< Inquiry (MANDATORY)
 /// \date	28/02/2010
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScsiDriveInfo {
-    int8_t       path;
-    int8_t       target;
-    int8_t       lun;
+    s8           path;
+    s8           target;
+    s8           lun;
     std::wstring name;   ///< Name of the current device after an inquiry.
     std::wstring letter; ///< filled with a drive letter in SPTI (ex: E:\), and a SCSI address in ASPI (ex: 0:2:0).
 };
@@ -64,11 +66,11 @@ struct ScsiDriveInfo {
 /// \date	28/02/2010
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScsiTocTrack {
-    uint8_t reserved;
-    uint8_t adr_ctrl;
-    uint8_t trackno;
-    uint8_t reserved1;
-    uint8_t addr[4];
+    u8                reserved;
+    u8                adr_ctrl;
+    u8                trackno;
+    u8                reserved1;
+    std::array<u8, 4> addr;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,10 +83,10 @@ struct ScsiTocTrack {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct ScsiToc {
-    uint8_t      size[2];
-    uint8_t      first;
-    uint8_t      last;
-    ScsiTocTrack track[scsi_max_toc_tracks];
+    std::array<u8, 2>                             size;
+    u8                                            first;
+    u8                                            last;
+    std::array<ScsiTocTrack, scsi_max_toc_tracks> track;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,18 +100,19 @@ struct ScsiToc {
 class Scsi {
   public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static HANDLE openDrive(const wchar_t cLetter)
+    /// \fn static auto Scsi::openDrive(wchar_t letter) -> HANDLE;
     ///
-    /// \brief	Returns a handle to the drive passed as parameter.
+    /// \brief  Returns a handle to the drive passed as parameter.
     ///
-    /// \author	Runik
-    /// \date	28/02/2010
+    /// \author Runik
+    /// \date   28/02/2010
     ///
-    /// \param	letter	Letter of the drive to get the handle to.
+    /// \param  letter  Letter of the drive to get the handle to.
     ///
-    /// \return	Handle to the drive.
+    /// \returns    Handle to the drive.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static HANDLE openDrive(const wchar_t letter);
+
+    static auto openDrive(wchar_t letter) -> HANDLE;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static void settingUpAspiFunctions()
@@ -135,11 +138,11 @@ class Scsi {
     ///
     /// Will hold the pointer to the Spti or Aspi functions
     //@{
-    static std::function<bool(void)>                                     initialize;
-    static std::function<std::vector<ScsiDriveInfo>(void)>               scanBus;
-    static std::function<::std::string(const uint32_t&, const int32_t&)> readSector;
-    static std::function<void(void)>                                     shutdown;
-    static std::function<bool(ScsiToc& toc_data)>                        readToc;
+    static std::function<bool(void)>                                 initialize;
+    static std::function<std::vector<ScsiDriveInfo>(void)>           scanBus;
+    static std::function<::std::string(const uint32_t&, const s32&)> readSector;
+    static std::function<void(void)>                                 shutdown;
+    static std::function<bool(ScsiToc& toc_data)>                    readToc;
     //@}
 };
 
