@@ -97,10 +97,6 @@ void EmulatorContext::startEmulation() {
 
     emulation_status_ = EmulationStatus::running;
 
-    memory()->loadBios(hardware_mode_);
-
-    sh2::initializeOpcodesLut();
-
     emulation_main_thread_ = std::thread(&EmulatorContext::emulationMainThread, this);
     if (emulation_main_thread_.joinable()) {
         emulation_main_thread_.detach();
@@ -161,6 +157,11 @@ void EmulatorContext::stopEmulation() {
 void EmulatorContext::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
+
+        memory()->loadBios(hardware_mode_);
+
+        sh2::initializeOpcodesLut();
+        smpc()->initialize();
 
         while (this->emulation_status_ == EmulationStatus::running) {
             master_sh2_->run();

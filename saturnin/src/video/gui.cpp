@@ -372,6 +372,18 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                     ImGui::CenteredText(tr("Player 1"));
 
+                    ImGui::Text(tr("Connection").c_str());
+                    ImGui::SameLine(second_column_offset);
+                    static auto connections = core::Config::listPeripheralConnections();
+                    std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
+                    auto        it_connection
+                        = std::find_if(connections.begin(), connections.end(), [&c](std::string& str) { return c == str; });
+                    static s32 index_connection = static_cast<s32>(it_connection - connections.begin());
+                    if (ImGui::Combo("##peripheral_connection_1", &index_connection, connections)) {
+                        state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
+                                                   connections[index_connection]);
+                    }
+
                     ImGui::Text(tr("Left").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.direction_left, "direction_left");
@@ -443,6 +455,18 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
                     ImGui::CenteredText(tr("Player 2"));
+
+                    ImGui::Text(tr("Connection").c_str());
+                    ImGui::SameLine(second_column_offset);
+                    static auto connections = core::Config::listPeripheralConnections();
+                    std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
+                    auto        it_connection
+                        = std::find_if(connections.begin(), connections.end(), [&c](std::string& str) { return c == str; });
+                    static s32 index_connection = static_cast<s32>(it_connection - connections.begin());
+                    if (ImGui::Combo("##peripheral_connection_2", &index_connection, connections)) {
+                        state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
+                                                   connections[index_connection]);
+                    }
 
                     ImGui::Text(tr("Left").c_str());
                     ImGui::SameLine(second_column_offset);

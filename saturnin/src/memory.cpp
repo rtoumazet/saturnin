@@ -129,12 +129,13 @@ auto Memory::loadRom(const std::string& zip_name,
 }
 
 void Memory::loadBios(const HardwareMode mode) {
+    Log::info("memory", tr("Loading bios"));
     std::string bios_path{};
     switch (mode) {
         case HardwareMode::saturn: bios_path = config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
         case HardwareMode::stv: bios_path = config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
         default: {
-            Log::error("config", tr("Unknown hardware mode"));
+            Log::error("memory", tr("Unknown hardware mode"));
             throw std::runtime_error("Config error !");
             break;
         }

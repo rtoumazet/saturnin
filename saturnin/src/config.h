@@ -66,7 +66,9 @@ enum class AccessKeys {
     cfg_sound_soundcard,
     cfg_sound_disabled,
     cfg_controls_saturn_player_1,
+    cfg_controls_saturn_player_1_connection,
     cfg_controls_saturn_player_2,
+    cfg_controls_saturn_player_2_connection,
     cfg_controls_stv_board,
     cfg_controls_stv_player_1,
     cfg_controls_stv_player_2,
@@ -119,6 +121,11 @@ class Config {
 
     using MapAreaCode = std::map<const std::string, const AreaCode>; ///< MapAreaCode alias definition.
     static MapAreaCode area_code; ///< Link between the area code string value defined in the config file and the AreaCode type.
+
+    using MapPeripheralConnection
+        = std::map<const std::string, const PeripheralConnection>; ///< MapPeripheralConnection alias definition.
+    static MapPeripheralConnection peripheral_connection; ///< Link between the peripheral connection string value defined in the
+                                                          ///< config file and the PeripheralConnection type.
 
     //@{
     // Constructors / Destructors
@@ -426,6 +433,34 @@ class Config {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static auto listAreaCodes() -> std::vector<std::string>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static auto Config::listPeripheralConnections() -> std::vector<std::string>;
+    ///
+    /// \brief  Returns a vector populated with peripheral connections.
+    ///
+    /// \author Runik
+    /// \date   17/03/2020
+    ///
+    /// \returns    A std::vector&lt;std::string&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto listPeripheralConnections() -> std::vector<std::string>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static auto Config::configToPeripheralConnection(std::string value) -> PeripheralConnection;
+    ///
+    /// \brief  Configuration to peripheral connection
+    ///
+    /// \author Runik
+    /// \date   18/03/2020
+    ///
+    /// \param  value   The config value.
+    ///
+    /// \returns    A PeripheralConnection.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto configToPeripheralConnection(std::string value) -> PeripheralConnection;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn  template<class T> void Config::add(const std::string key, T default)

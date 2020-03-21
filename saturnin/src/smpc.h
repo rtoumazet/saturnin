@@ -295,6 +295,42 @@ struct StvPeripheralMapping {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PeripheralConnection
+///
+/// \brief  Values that represent connection status of a peripheral.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PeripheralConnection : u8 { not_connected = 0, direct_connection = 1, multitap = 2 };
+
+enum class SaturnPeripheralId : u8 {
+    megadrive_3_button_pad = 0xE1,
+    megadrive_6_button_pad = 0xE2,
+    saturn_mouse           = 0xE3,
+    saturn_standard_pad    = 0x02,
+    saturn_analog_joystick = 0x15,
+    saturn_keyboard        = 0x34
+};
+
+struct PeripheralData {
+    SaturnPeripheralId saturn_peripheral_id;
+    u8                 extension_data_size;
+    std::vector<u8>    peripheral_data;
+};
+
+enum class PortStatus : u8 {
+    not_connected      = 0xF0,
+    direct_connection  = 0xF1,
+    sega_tap           = 0x04,
+    saturn_6p_multitap = 0x16
+
+};
+
+struct PortData {
+    PortStatus port_status;
+    // std::vector<PeripheralData>
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct RtcTime
 ///
 /// \brief  RTC time struct.
@@ -402,6 +438,17 @@ class Smpc {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto getStvPeripheralMapping() -> StvPeripheralMapping;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::initialize();
+    ///
+    /// \brief  Initializes the SMPC module.
+    ///
+    /// \author Runik
+    /// \date   18/03/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initialize();
 
   private:
     static constexpr u8 input_registers_number{7};
@@ -527,6 +574,8 @@ class Smpc {
     bool is_intback_processing_{false}; ///< Intback status
     // bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
     PeripheralDataLocation next_peripheral_return_;
+    PeripheralConnection   player_1_peripheral_connection_{PeripheralConnection::not_connected};
+    PeripheralConnection   player_2_peripheral_connection_{PeripheralConnection::not_connected};
 
     std::array<u8, 0x4> smem_; ///< SMPC battery backupable memory (4B).
 };

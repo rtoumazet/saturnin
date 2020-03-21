@@ -129,6 +129,19 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PortMode
+///
+/// \brief  Port mode values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PortMode : u8 {
+    mode_15_byte  = 0b00, ///< 15-byte mode.
+    mode_255_byte = 0b01, ///< 255-byte mode.
+    mode_reserved = 0b10, ///< Sega reserved.
+    mode_0_byte   = 0b11  ///< 0-byte mode.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ResetButtonStatus
 ///
 /// \brief  Reset button status values.
@@ -173,6 +186,8 @@ enum class PeripheralDataLocation: u8 {
 class StatusRegister : public Register {
 public:
     using Register::Register;
+    inline static const BitRange<PortMode>                    port_1_mode{ 0, 1 }; ///< Defines port 1 mode (P1MD).
+    inline static const BitRange<PortMode>                    port_2_mode{ 2, 3 }; ///< Defines port 2 mode (P2MD).
     inline static const BitRange<ResetButtonStatus> reset_button_status{ 4 }; ///< Defines RESB bit.
     inline static const BitRange<PeripheralDataRemaining> peripheral_data_remaining{ 5 }; ///< Defines PDE bit.
     inline static const BitRange<PeripheralDataLocation> peripheral_data_location{ 6 }; ///< Defines PDL bit.
@@ -247,19 +262,6 @@ enum class AcquisitionTimeOptimization : u8 {
 enum class PeripheralDataEnable : u8 {
     peripheral_data_not_returned = 0,
     peripheral_data_returned     = 1
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PortMode
-///
-/// \brief  Port mode values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class PortMode : u8 {
-    mode_15_byte  = 0b00, ///< 15-byte mode.
-    mode_255_byte = 0b01, ///< 255-byte mode.
-    mode_reserved = 0b10, ///< Sega reserved.
-    mode_0_byte   = 0b11  ///< 0-byte mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

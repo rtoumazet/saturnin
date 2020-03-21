@@ -327,6 +327,12 @@ void Smpc::reset() {
         case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
         default: Log::warning("smpc", tr("Could not set system clock !")); clock_ = SystemClock::not_set;
     }
+
+    std::string p1c = emulator_context_->config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
+    player_1_peripheral_connection_ = Config::configToPeripheralConnection(p1c);
+
+    std::string p2c = emulator_context_->config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
+    player_2_peripheral_connection_ = Config::configToPeripheralConnection(p2c);
 }
 
 auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 {
@@ -600,11 +606,6 @@ void Smpc::getStatus() {
 void Smpc::getPeripheralData() {
     Log::debug("smpc", tr("INTBACK returning peripheral data"));
 
-    // SR page 66
-    sr_.reset();
-    sr_[bit_7] = true;
-    // sr_[7] = first_return;
-
     // SMPC Peripheral result :
     // [SR]
     // [Port 1 Data] (1)
@@ -632,6 +633,16 @@ void Smpc::getPeripheralData() {
 
     // (4) Saturn Peripheral ID structure :
     // [Saturn Peripheral Type | Data Size]
+
+    // SR page 66
+    sr_.reset();
+    sr_[bit_7] = true;
+    sr_.set(StatusRegister::peripheral_data_location, next_peripheral_return_);
+    // sr_.set(StatusRegister::peripheral_data_remaining, ? ? ? );
+    sr_.set(StatusRegister::port_2_mode, ireg_[index_1].get(InputRegister::ireg1_port_2_mode));
+    sr_.set(StatusRegister::port_1_mode, ireg_[index_1].get(InputRegister::ireg1_port_1_mode));
+
+    // oreg_[index_0] =
 
     Log::debug("smpc", tr("Interrupt request"));
     emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
@@ -764,6 +775,11 @@ void Smpc::initializePeripheralMappings() {
 auto Smpc::getSaturnPeripheralMapping() -> SaturnPeripheralMapping { return saturn_mapping_; }
 
 auto Smpc::getStvPeripheralMapping() -> StvPeripheralMapping { return stv_mapping_; }
+
+void Smpc::initialize() {
+    Log::info("smpc", tr("SMPC initialization"));
+    reset();
+}
 
 auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout[pk]; }
 
