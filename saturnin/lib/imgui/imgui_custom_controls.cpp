@@ -87,7 +87,9 @@ void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& d
             bool is_selected = (default_key_name.c_str() == getKeyName(key).c_str());
             if (ImGui::Selectable(getKeyName(key).c_str(), is_selected)) {
                 default_key = key;
-                if (is_selected) ImGui::SetItemDefaultFocus();
+                if (is_selected) {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
         }
         ImGui::EndCombo();
@@ -95,8 +97,9 @@ void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& d
 }
 
 void CenteredText(const std::string& text) {
-    auto size = ImGui::CalcTextSize(text.c_str());
-    ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * 0.5f - size.x / 2);
+    auto            size = ImGui::CalcTextSize(text.c_str());
+    constexpr float ratio{0.5f};
+    ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * ratio - size.x / 2);
     ImGui::Text(text.c_str());
 }
 
