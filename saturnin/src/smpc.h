@@ -294,14 +294,6 @@ struct StvPeripheralMapping {
     StvPlayerControls player_2;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PeripheralConnection
-///
-/// \brief  Values that represent connection status of a peripheral.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class PeripheralConnection : u8 { not_connected = 0, direct_connection = 1, multitap = 2 };
-
 enum class SaturnPeripheralId : u8 {
     megadrive_3_button_pad = 0xE1,
     megadrive_6_button_pad = 0xE2,
@@ -311,11 +303,27 @@ enum class SaturnPeripheralId : u8 {
     saturn_keyboard        = 0x34
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct PeripheralData
+///
+/// \brief  Peripheral Data structure.
+///
+/// \author Runik
+/// \date   21/03/2020
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct PeripheralData {
-    SaturnPeripheralId saturn_peripheral_id;
-    u8                 extension_data_size;
-    std::vector<u8>    peripheral_data;
+    SaturnPeripheralId          saturn_peripheral_id;
+    u8                          data_size;
+    u8                          extension_data_size;
+    std::vector<OutputRegister> peripheral_data_table;
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PortStatus
+///
+/// \brief  [Multitap ID | Num. of connectors]
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PortStatus : u8 {
     not_connected      = 0xF0,
@@ -325,9 +333,18 @@ enum class PortStatus : u8 {
 
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct PortData
+///
+/// \brief  Port Data structure.
+///
+/// \author Runik
+/// \date   21/03/2020
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct PortData {
-    PortStatus port_status;
-    // std::vector<PeripheralData>
+    PortStatus                  port_status;
+    std::vector<PeripheralData> peripheral_data_table;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -525,6 +542,21 @@ class Smpc {
     void getPeripheralData();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Smpc::generatePeripheralData(SaturnPeripheralId id) -> PeripheralData;
+    ///
+    /// \brief  Generates the peripheral data for a Saturn peripheral
+    ///
+    /// \author Runik
+    /// \date   26/03/2020
+    ///
+    /// \param  id  The Saturn peripheral to generate data for.
+    ///
+    /// \returns    The peripheral data.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto generatePeripheralData(SaturnPeripheralId id) -> PeripheralData;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::executeIntback();
     ///
     /// \brief  Executes Intback command.
@@ -574,8 +606,8 @@ class Smpc {
     bool is_intback_processing_{false}; ///< Intback status
     // bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
     PeripheralDataLocation next_peripheral_return_;
-    PeripheralConnection   player_1_peripheral_connection_{PeripheralConnection::not_connected};
-    PeripheralConnection   player_2_peripheral_connection_{PeripheralConnection::not_connected};
+    PortStatus             port_1_status_{PortStatus::not_connected};
+    PortStatus             port_2_status_{PortStatus::not_connected};
 
     std::array<u8, 0x4> smem_; ///< SMPC battery backupable memory (4B).
 };
@@ -607,5 +639,20 @@ auto getKeyName(PeripheralKey pk) -> std::string;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto getRtcTime() -> RtcTime;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto isKeyPressed(PeripheralKey pk) -> bool;
+///
+/// \brief  Query if a key is pressed.
+///
+/// \author Runik
+/// \date   26/03/2020
+///
+/// \param  pk  The peripheral key to test.
+///
+/// \returns    True if key is pressed.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto isKeyPressed(PeripheralKey pk) -> bool;
 
 } // namespace saturnin::core

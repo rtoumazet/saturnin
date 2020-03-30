@@ -122,10 +122,9 @@ class Config {
     using MapAreaCode = std::map<const std::string, const AreaCode>; ///< MapAreaCode alias definition.
     static MapAreaCode area_code; ///< Link between the area code string value defined in the config file and the AreaCode type.
 
-    using MapPeripheralConnection
-        = std::map<const std::string, const PeripheralConnection>; ///< MapPeripheralConnection alias definition.
-    static MapPeripheralConnection peripheral_connection; ///< Link between the peripheral connection string value defined in the
-                                                          ///< config file and the PeripheralConnection type.
+    using MapPortStatus = std::map<const std::string, const PortStatus>; ///< MapPeripheralConnection alias definition.
+    static MapPortStatus
+        port_status; ///< Link between the port status string value defined in the config file and the PortStatus type.
 
     //@{
     // Constructors / Destructors
@@ -448,19 +447,19 @@ class Config {
     static auto listPeripheralConnections() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Config::configToPeripheralConnection(std::string value) -> PeripheralConnection;
+    /// \fn static auto Config::configToPortStatus(std::string value) -> PortStatus;
     ///
-    /// \brief  Configuration to peripheral connection
+    /// \brief  Configuration entry to port status
     ///
     /// \author Runik
     /// \date   18/03/2020
     ///
     /// \param  value   The config value.
     ///
-    /// \returns    A PeripheralConnection.
+    /// \returns    A PortStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto configToPeripheralConnection(std::string value) -> PeripheralConnection;
+    static auto configToPortStatus(std::string value) -> PortStatus;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn  template<class T> void Config::add(const std::string key, T default)

@@ -783,80 +783,36 @@ struct readStvIo<u8> {
             switch (addr & bitmask_00FFFFFF) {
                 case stv_io_port_a: {
                     auto p1 = m.smpc()->getStvPeripheralMapping().player_1;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_1)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::button_1);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_2)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::button_2);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_3)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::button_3);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.button_4)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::button_4);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_down)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::down);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_up)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::up);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_right)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::right);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p1.direction_left)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::left);
-                    }
+                    if (isKeyPressed(p1.button_1)) { data |= util::toUnderlying(StvIOPort::button_1); }
+                    if (isKeyPressed(p1.button_2)) { data |= util::toUnderlying(StvIOPort::button_2); }
+                    if (isKeyPressed(p1.button_3)) { data |= util::toUnderlying(StvIOPort::button_3); }
+                    if (isKeyPressed(p1.button_4)) { data |= util::toUnderlying(StvIOPort::button_4); }
+                    if (isKeyPressed(p1.direction_down)) { data |= util::toUnderlying(StvIOPort::down); }
+                    if (isKeyPressed(p1.direction_up)) { data |= util::toUnderlying(StvIOPort::up); }
+                    if (isKeyPressed(p1.direction_right)) { data |= util::toUnderlying(StvIOPort::right); }
+                    if (isKeyPressed(p1.direction_left)) { data |= util::toUnderlying(StvIOPort::left); }
                     break;
                 }
                 case stv_io_port_b: {
                     auto p2 = m.smpc()->getStvPeripheralMapping().player_2;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_1)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::button_1);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_2)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::button_2);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_3)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::button_3);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.button_4)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::button_4);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_down)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::down);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_up)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::up);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_right)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::right);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(p2.direction_left)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::left);
-                    }
+                    if (isKeyPressed(p2.button_1)) { data |= util::toUnderlying(StvIOPort::button_1); }
+                    if (isKeyPressed(p2.button_2)) { data |= util::toUnderlying(StvIOPort::button_2); }
+                    if (isKeyPressed(p2.button_3)) { data |= util::toUnderlying(StvIOPort::button_3); }
+                    if (isKeyPressed(p2.button_4)) { data |= util::toUnderlying(StvIOPort::button_4); }
+                    if (isKeyPressed(p2.direction_down)) { data |= util::toUnderlying(StvIOPort::down); }
+                    if (isKeyPressed(p2.direction_up)) { data |= util::toUnderlying(StvIOPort::up); }
+                    if (isKeyPressed(p2.direction_right)) { data |= util::toUnderlying(StvIOPort::right); }
+                    if (isKeyPressed(p2.direction_left)) { data |= util::toUnderlying(StvIOPort::left); }
                     break;
                 }
                 case stv_io_port_c: {
                     auto board = m.smpc()->getStvPeripheralMapping().board_controls;
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_coin_switch)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::coin_switch_player1);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_coin_switch)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::coin_switch_player2);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.test_switch)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::test_switch);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.service_switch)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::service_switch);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p1_start)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::start_player1);
-                    }
-                    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(board.p2_start)) == GLFW_PRESS) {
-                        data |= util::toUnderlying(StvIOPort::start_player2);
-                    }
+                    if (isKeyPressed(board.p1_coin_switch)) { data |= util::toUnderlying(StvIOPort::coin_switch_player1); }
+                    if (isKeyPressed(board.p2_coin_switch)) { data |= util::toUnderlying(StvIOPort::coin_switch_player2); }
+                    if (isKeyPressed(board.test_switch)) { data |= util::toUnderlying(StvIOPort::test_switch); }
+                    if (isKeyPressed(board.service_switch)) { data |= util::toUnderlying(StvIOPort::service_switch); }
+                    if (isKeyPressed(board.p1_start)) { data |= util::toUnderlying(StvIOPort::start_player1); }
+                    if (isKeyPressed(board.p2_start)) { data |= util::toUnderlying(StvIOPort::start_player2); }
                     break;
                 }
                 case stv_io_port_d: {
@@ -938,9 +894,7 @@ struct readCart<u32> {
             u32 data{rawRead<u32>(m.cart_, relative_addr)};
 
             if ((addr & bitmask_0FFFFFFF) == stv_protection_register_address) {
-                if (m.HardwareMode_ == HardwareMode::stv) {
-                    data = m.readStvProtection(addr, data);
-                }
+                if (m.HardwareMode_ == HardwareMode::stv) { data = m.readStvProtection(addr, data); }
             }
             return data;
         };
@@ -1416,9 +1370,7 @@ template<typename T>
 struct readSh2Registers {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) {
-                return m.masterSh2()->readRegisters<T>(addr);
-            }
+            if (isMasterSh2InOperation(m)) { return m.masterSh2()->readRegisters<T>(addr); }
             return m.slaveSh2()->readRegisters<T>(addr);
         };
     }
@@ -1439,9 +1391,7 @@ template<typename T>
 struct writeSh2Registers {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) {
-                return m.masterSh2()->writeRegisters<T>(addr, data);
-            }
+            if (isMasterSh2InOperation(m)) { return m.masterSh2()->writeRegisters<T>(addr, data); }
             return m.slaveSh2()->writeRegisters<T>(addr, data);
         };
     }
@@ -1520,9 +1470,7 @@ template<typename T>
 struct readCacheAddresses {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) {
-                return m.masterSh2()->readCacheAddresses<T>(addr);
-            }
+            if (isMasterSh2InOperation(m)) { return m.masterSh2()->readCacheAddresses<T>(addr); }
             return m.slaveSh2()->readCacheAddresses<T>(addr);
         };
     }
@@ -1543,9 +1491,7 @@ template<typename T>
 struct writeCacheAddresses {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) {
-                return m.masterSh2()->writeCacheAddresses<T>(addr, data);
-            }
+            if (isMasterSh2InOperation(m)) { return m.masterSh2()->writeCacheAddresses<T>(addr, data); }
             return m.slaveSh2()->writeCacheAddresses<T>(addr, data);
         };
     }
@@ -1566,9 +1512,7 @@ template<typename T>
 struct readCacheData {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) {
-                return m.masterSh2()->readCacheData<T>(addr);
-            }
+            if (isMasterSh2InOperation(m)) { return m.masterSh2()->readCacheData<T>(addr); }
             return m.slaveSh2()->readCacheData<T>(addr);
         };
     }
@@ -1589,9 +1533,7 @@ template<typename T>
 struct writeCacheData {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) {
-                return m.masterSh2()->writeCacheData<T>(addr, data);
-            }
+            if (isMasterSh2InOperation(m)) { return m.masterSh2()->writeCacheData<T>(addr, data); }
             return m.slaveSh2()->writeCacheData<T>(addr, data);
         };
     }

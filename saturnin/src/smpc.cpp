@@ -329,10 +329,10 @@ void Smpc::reset() {
     }
 
     std::string p1c = emulator_context_->config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
-    player_1_peripheral_connection_ = Config::configToPeripheralConnection(p1c);
+    port_1_status_  = Config::configToPortStatus(p1c);
 
     std::string p2c = emulator_context_->config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
-    player_2_peripheral_connection_ = Config::configToPeripheralConnection(p2c);
+    port_2_status_  = Config::configToPortStatus(p2c);
 }
 
 auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 {
@@ -638,14 +638,113 @@ void Smpc::getPeripheralData() {
     sr_.reset();
     sr_[bit_7] = true;
     sr_.set(StatusRegister::peripheral_data_location, next_peripheral_return_);
-    // sr_.set(StatusRegister::peripheral_data_remaining, ? ? ? );
+    // PeripheralDataRemaining will have to be handled differently when multitap will be implemented
+    sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
     sr_.set(StatusRegister::port_2_mode, ireg_[index_1].get(InputRegister::ireg1_port_2_mode));
     sr_.set(StatusRegister::port_1_mode, ireg_[index_1].get(InputRegister::ireg1_port_1_mode));
 
-    // oreg_[index_0] =
+    for (u32 i = 0; i < output_registers_number; ++i) {
+        oreg_[i] = u32_max;
+    }
+
+    u8 oreg_index{0};
+
+    switch (sr_.get(StatusRegister::port_1_mode)) {
+        case PortMode::mode_0_byte: break; // no data returned
+        case PortMode::mode_15_byte:
+        case PortMode::mode_255_byte:
+            // no difference between 15 byte and 255 byte for now
+            PortData port_1_data;
+            switch (port_1_status_) {
+                case PortStatus::not_connected: {
+                    break;
+                }
+                case PortStatus::direct_connection: {
+                    auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
+                    oreg_[oreg_index].set(OutputRegister::all_bits, util::toUnderlying(port_1_status_));
+                    ++oreg_index;
+                    u8 local_data_size = (pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size;
+
+                    for (u8 index = 0; index < local_data_size; ++index) {
+                        oreg_[index + oreg_index] = pad_data.peripheral_data_table[index];
+                    }
+                    oreg_index += pad_data.data_size;
+                    break;
+                }
+                default: {
+                    Log::warning("smpc", tr("Port Status not implemented"));
+                }
+            }
+
+            break;
+    }
+
+    switch (sr_.get(StatusRegister::port_2_mode)) {
+        case PortMode::mode_0_byte: break; // no data returned
+        case PortMode::mode_15_byte:
+        case PortMode::mode_255_byte: // no difference between 15 byte and 255 byte for now
+            PortData port_2_data;
+            switch (port_2_status_) {
+                case PortStatus::not_connected: {
+                    break;
+                }
+                case PortStatus::direct_connection: {
+                    auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
+                    oreg_[oreg_index].set(OutputRegister::all_bits, util::toUnderlying(port_2_status_));
+                    ++oreg_index;
+                    u8 local_data_size = (pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size;
+
+                    for (u8 index = 0; index < local_data_size; ++index) {
+                        oreg_[index + oreg_index] = pad_data.peripheral_data_table[index];
+                    }
+                    oreg_index += pad_data.data_size;
+                    break;
+                }
+                default: {
+                    Log::warning("smpc", tr("Port Status not implemented"));
+                }
+            }
+
+            break;
+    }
 
     Log::debug("smpc", tr("Interrupt request"));
     emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
+} // namespace saturnin::core
+
+auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData {
+    PeripheralData peripheral_data;
+    peripheral_data.saturn_peripheral_id = id;
+    peripheral_data.data_size            = util::toUnderlying(id) & bitmask_0F;
+    if (peripheral_data.data_size != 0) { peripheral_data.extension_data_size = 0; }
+
+    auto p1 = getSaturnPeripheralMapping().player_1;
+    switch (id) {
+        case SaturnPeripheralId::saturn_standard_pad:
+            SaturnStandardPad1stData first_data;
+            first_data.set();
+            if (isKeyPressed(p1.direction_right)) { first_data.reset(SaturnStandardPad1stData::direction_right); }
+            if (isKeyPressed(p1.direction_left)) { first_data.reset(SaturnStandardPad1stData::direction_left); }
+            if (isKeyPressed(p1.direction_down)) { first_data.reset(SaturnStandardPad1stData::direction_down); }
+            if (isKeyPressed(p1.direction_up)) { first_data.reset(SaturnStandardPad1stData::direction_up); }
+            if (isKeyPressed(p1.button_start)) { first_data.reset(SaturnStandardPad1stData::button_start); }
+            if (isKeyPressed(p1.button_a)) { first_data.reset(SaturnStandardPad1stData::button_a); }
+            if (isKeyPressed(p1.button_c)) { first_data.reset(SaturnStandardPad1stData::button_c); }
+            if (isKeyPressed(p1.button_b)) { first_data.reset(SaturnStandardPad1stData::button_b); }
+            peripheral_data.peripheral_data_table.push_back(first_data);
+
+            SaturnStandardPad2ndData second_data;
+            second_data.set();
+            if (isKeyPressed(p1.button_shoulder_right)) { second_data.reset(SaturnStandardPad2ndData::button_shoulder_right); }
+            if (isKeyPressed(p1.button_x)) { second_data.reset(SaturnStandardPad2ndData::button_x); }
+            if (isKeyPressed(p1.button_y)) { second_data.reset(SaturnStandardPad2ndData::button_y); }
+            if (isKeyPressed(p1.button_z)) { second_data.reset(SaturnStandardPad2ndData::button_z); }
+            if (isKeyPressed(p1.button_shoulder_left)) { second_data.reset(SaturnStandardPad2ndData::button_shoulder_left); }
+            peripheral_data.peripheral_data_table.push_back(second_data);
+            break;
+    }
+
+    return peripheral_data;
 }
 
 auto Smpc::read(const u32 addr) -> u8 {
@@ -825,6 +924,10 @@ auto getRtcTime() -> RtcTime {
     rtc.second_1_bcd  = std::bitset<4>(second_bcd & bitmask_0F);
 
     return rtc;
+}
+
+auto isKeyPressed(const PeripheralKey pk) -> bool {
+    return glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(pk)) == GLFW_PRESS;
 }
 
 } // namespace saturnin::core

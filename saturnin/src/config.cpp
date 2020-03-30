@@ -120,10 +120,11 @@ Config::MapAreaCode Config::area_code = {
     {"CENTRAL_SOUTH_AMERICA_PAL",  AreaCode::central_south_america_pal}
 };
 
-Config::MapPeripheralConnection Config::peripheral_connection = {
-    {"NONE",     PeripheralConnection::not_connected},
-    {"DIRECT",   PeripheralConnection::direct_connection},
-    {"MULTITAP", PeripheralConnection::multitap}
+Config::MapPortStatus Config::port_status = {
+    {"NONE",     PortStatus::not_connected},
+    {"DIRECT",   PortStatus::direct_connection},
+    {"SEGATAP",  PortStatus::sega_tap},
+    {"MULTITAP", PortStatus::saturn_6p_multitap}
 };
 
 // clang-format on
@@ -175,9 +176,7 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
 }
 
 auto Config::getGroup(libcfg::Setting& root, const std::string& group_name) -> libcfg::Setting& {
-    if (!root.exists(group_name.c_str())) {
-        root.add(group_name.c_str(), libcfg::Setting::TypeGroup);
-    }
+    if (!root.exists(group_name.c_str())) { root.add(group_name.c_str(), libcfg::Setting::TypeGroup); }
     return root[group_name.c_str()];
 }
 
@@ -204,9 +203,7 @@ void Config::test() {
 
 auto Config::readValue(const AccessKeys& value) -> libcfg::Setting& {
     try {
-        if (!existsValue(value)) {
-            createDefault(value);
-        }
+        if (!existsValue(value)) { createDefault(value); }
         return cfg_.lookup(Config::full_keys[value]);
     } catch (const libcfg::SettingNotFoundException& e) {
         auto errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
@@ -270,9 +267,7 @@ auto Config::listAvailableLanguages() -> std::vector<std::string> {
     auto                     full_path = fs::current_path() / "lang";
     std::vector<std::string> files{"en"}; // english is the default language, even if the directory isn't present
     for (auto& p : fs::directory_iterator(full_path)) {
-        if ((p.is_directory()) && (p.path().filename().string() != "en")) {
-            files.push_back(p.path().filename().string());
-        }
+        if ((p.is_directory()) && (p.path().filename().string() != "en")) { files.push_back(p.path().filename().string()); }
     }
     return files;
 }
@@ -289,15 +284,13 @@ auto Config::listAreaCodes() -> std::vector<std::string> {
 /* static */
 auto Config::listPeripheralConnections() -> std::vector<std::string> {
     std::vector<std::string> connections;
-    for (const auto& connection : peripheral_connection) {
+    for (const auto& connection : port_status) {
         connections.push_back(connection.first);
     }
     return connections;
 }
 
 /* static */
-auto Config::configToPeripheralConnection(const std::string value) -> PeripheralConnection {
-    return peripheral_connection[value];
-}
+auto Config::configToPortStatus(const std::string value) -> PortStatus { return port_status[value]; }
 
 }; // namespace saturnin::core

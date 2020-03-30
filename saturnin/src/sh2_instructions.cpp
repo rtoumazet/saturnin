@@ -545,7 +545,7 @@ void dmuls(Sh2& s) {
     // Arranged using SH4 manual
     s64 result{static_cast<s64>(s.r_[x0n0(s)]) * static_cast<s64>(s.r_[xn00(s)])};
     s.mach_ = static_cast<s32>(result >> displacement_32);
-    s.macl_ = static_cast<u32>(result & uint32_max);
+    s.macl_ = static_cast<u32>(result & u32_max);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -559,7 +559,7 @@ void dmulu(Sh2& s) {
     // Arranged using SH4 manual
     u64 result{static_cast<u64>(s.r_[x0n0(s)]) * static_cast<u64>(s.r_[xn00(s)])};
     s.mach_ = static_cast<u32>(result >> displacement_32);
-    s.macl_ = static_cast<u32>(result & uint32_max);
+    s.macl_ = static_cast<u32>(result & u32_max);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -760,15 +760,15 @@ void mac(Sh2& s) {
     mac += mul;
 
     if (s.sr_.get(StatusRegister::s) == 1) {
-        if (mac < uint47_min_64_extended) {
-            mac = uint47_min_64_extended;
+        if (mac < u47_min_64_extended) {
+            mac = u47_min_64_extended;
         }
         if (mac > sign_bit_48_mask) {
-            mac = uint47_max;
+            mac = u47_max;
         }
     }
     s.mach_ = static_cast<u32>(mac >> displacement_32);
-    s.macl_ = static_cast<u32>(mac & uint32_max);
+    s.macl_ = static_cast<u32>(mac & u32_max);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -791,23 +791,23 @@ void macw(Sh2& s) {
         mac |= s.macl_;
         mac += mul;
         s.mach_ = static_cast<u32>(mac >> displacement_32);
-        s.macl_ = static_cast<u32>(mac & uint32_max);
+        s.macl_ = static_cast<u32>(mac & u32_max);
     } else {
         if ((s.macl_ & sign_bit_32_mask) > 0) {
             mac = static_cast<s64>(s.macl_ | bitmask_FFFFFFFF00000000);
         } else {
-            mac = static_cast<s64>(s.macl_ & uint32_max);
+            mac = static_cast<s64>(s.macl_ & u32_max);
         }
         mac += mul;
-        if (mac > uint31_max) {
+        if (mac > u31_max) {
             s.mach_ |= 0x00000001;
-            s.macl_ = uint31_max;
-        } else if (mac < uint31_min_64_extended) {
+            s.macl_ = u31_max;
+        } else if (mac < u31_min_64_extended) {
             s.mach_ |= 0x00000001;
             s.macl_ = sign_bit_32_mask;
         } else {
             s.mach_ &= bitmask_FFFFFFFE;
-            s.macl_ = static_cast<u32>(mac & uint32_max);
+            s.macl_ = static_cast<u32>(mac & u32_max);
         }
     }
     s.pc_ += 2;
@@ -1280,7 +1280,7 @@ void rotcr(Sh2& s) {
     if (s.sr_.get(StatusRegister::t) == 1) {
         s.r_[xn00(s)] |= sign_bit_32_mask;
     } else {
-        s.r_[xn00(s)] &= uint31_max;
+        s.r_[xn00(s)] &= u31_max;
     }
     (temp == 1) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
@@ -1309,7 +1309,7 @@ void rotr(Sh2& s) {
     if (s.sr_.get(StatusRegister::t) == 1) {
         s.r_[xn00(s)] |= sign_bit_32_mask;
     } else {
-        s.r_[xn00(s)] &= uint31_max;
+        s.r_[xn00(s)] &= u31_max;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1390,7 +1390,7 @@ void shar(Sh2& s) {
     if (temp == 1) {
         s.r_[xn00(s)] |= sign_bit_32_mask;
     } else {
-        s.r_[xn00(s)] &= uint31_max;
+        s.r_[xn00(s)] &= u31_max;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1433,7 +1433,7 @@ void shlr(Sh2& s) {
     // 0 -> Rn -> T
     ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.sr_.reset(StatusRegister::t) : s.sr_.set(StatusRegister::t);
     s.r_[xn00(s)] >>= 1;
-    s.r_[xn00(s)] &= uint31_max;
+    s.r_[xn00(s)] &= u31_max;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1442,7 +1442,7 @@ void shlr(Sh2& s) {
 void shlr2(Sh2& s) {
     // Rn >> 2 -> Rn
     s.r_[xn00(s)] >>= 2;
-    s.r_[xn00(s)] &= uint30_max;
+    s.r_[xn00(s)] &= u30_max;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;

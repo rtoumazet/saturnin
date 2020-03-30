@@ -326,6 +326,40 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ResetButtonStatus
+///
+/// \brief  Reset button status values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ButtonStatus : u8 {
+    pressed  = 0, ///< Button is pressed.
+    released = 1  ///< Button is released.
+};
+
+class SaturnStandardPad1stData : public OutputRegister {
+public:
+    using OutputRegister::OutputRegister;
+    inline static const BitRange<ButtonStatus> direction_right{7};
+    inline static const BitRange<ButtonStatus> direction_left{6};
+    inline static const BitRange<ButtonStatus> direction_down{5};
+    inline static const BitRange<ButtonStatus> direction_up{4};
+    inline static const BitRange<ButtonStatus> button_start{3};
+    inline static const BitRange<ButtonStatus> button_a{2};
+    inline static const BitRange<ButtonStatus> button_c{1};
+    inline static const BitRange<ButtonStatus> button_b{2};
+};
+
+class SaturnStandardPad2ndData : public OutputRegister {
+public:
+    using OutputRegister::OutputRegister;
+    inline static const BitRange<ButtonStatus> button_shoulder_right{ 7 };
+    inline static const BitRange<ButtonStatus> button_x{ 6 };
+    inline static const BitRange<ButtonStatus> button_y{ 5 };
+    inline static const BitRange<ButtonStatus> button_z{ 4 };
+    inline static const BitRange<ButtonStatus> button_shoulder_left{ 3 };
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  DataDirectionRegister
 ///
 /// \brief  Data Direction Register (DDRx).

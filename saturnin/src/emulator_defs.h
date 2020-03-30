@@ -87,12 +87,14 @@ constexpr u16 sign_bit_16_mask{0x8000};
 constexpr u16 sign_bit_12_mask{0x0800};
 constexpr u8  sign_bit_8_mask{0x80};
 
-constexpr u64 uint31_min_64_extended{0xFFFFFFFF80000000};
-constexpr u64 uint47_min_64_extended{0xFFFF800000000000};
-constexpr u64 uint47_max{0x00007FFFFFFFFFFF};
-constexpr u32 uint32_max{UINT32_MAX};
-constexpr u32 uint31_max{0x7FFFFFFF};
-constexpr u32 uint30_max{0x3FFFFFFF};
+constexpr u64 u31_min_64_extended{0xFFFFFFFF80000000};
+constexpr u64 u47_min_64_extended{0xFFFF800000000000};
+constexpr u64 u47_max{0x00007FFFFFFFFFFF};
+constexpr u32 u32_max{UINT32_MAX};
+constexpr u32 u31_max{0x7FFFFFFF};
+constexpr u32 u30_max{0x3FFFFFFF};
+constexpr u16 u16_max{UINT16_MAX};
+constexpr u8  u8_max{UINT8_MAX};
 
 constexpr u8 index_0{0};
 constexpr u8 index_1{1};

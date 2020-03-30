@@ -610,7 +610,7 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
 
             // Sign extension for the upper 32 bits if needed
 
-            ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.set(DividendRegisterH::all_bits, UINT32_MAX)
+            ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.set(DividendRegisterH::all_bits, u32_max)
                                              : divu_dvdnth_.set(DividendRegisterH::all_bits, 0x00000000u);
 
             start32bitsDivision();
