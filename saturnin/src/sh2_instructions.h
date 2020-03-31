@@ -208,7 +208,8 @@ inline void xtrct(Sh2& s);
 constexpr u8  instructions_number = 142;     ///< Total number of SH2 instructions used.
 constexpr u32 opcodes_lut_size    = 0x10000; ///< Size of the opcodes lookup table
 
-using ExecuteType = void (*)(Sh2&); ///< Type of the execute
+using ExecuteType = void (*)(Sh2&);             ///< Type of the execute
+using DebugType   = void (*)(const u16 opcode); ///< Type of the execute
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	Sh2Instruction
@@ -224,6 +225,7 @@ struct Sh2Instruction {
     bool        is_simple;                ///< True if this instruction isn't a jump or doesn't modify system registers.
     bool        illegal_instruction_slot; ///< True if the instruction can't be used in a delay slot
     ExecuteType execute;                  ///< Link to the corresponding function.
+    // DebugType   debug;                    ///< Link to the debug formatting function.
 };
 
 static std::array<ExecuteType, opcodes_lut_size> opcodes_lut; ///< The opcodes LUT, used for instruction fast fetching

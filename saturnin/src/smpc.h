@@ -295,6 +295,7 @@ struct StvPeripheralMapping {
 };
 
 enum class SaturnPeripheralId : u8 {
+    unknown                = 0x00,
     megadrive_3_button_pad = 0xE1,
     megadrive_6_button_pad = 0xE2,
     saturn_mouse           = 0xE3,
@@ -313,9 +314,9 @@ enum class SaturnPeripheralId : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct PeripheralData {
-    SaturnPeripheralId          saturn_peripheral_id;
-    u8                          data_size;
-    u8                          extension_data_size;
+    SaturnPeripheralId          saturn_peripheral_id{SaturnPeripheralId::unknown};
+    u8                          data_size{};
+    u8                          extension_data_size{};
     std::vector<OutputRegister> peripheral_data_table;
 };
 
@@ -326,6 +327,7 @@ struct PeripheralData {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PortStatus : u8 {
+    unknown            = 0x00,
     not_connected      = 0xF0,
     direct_connection  = 0xF1,
     sega_tap           = 0x04,
@@ -343,7 +345,7 @@ enum class PortStatus : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct PortData {
-    PortStatus                  port_status;
+    PortStatus                  port_status{PortStatus::unknown};
     std::vector<PeripheralData> peripheral_data_table;
 };
 
@@ -605,9 +607,10 @@ class Smpc {
 
     bool is_intback_processing_{false}; ///< Intback status
     // bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
-    PeripheralDataLocation next_peripheral_return_;
-    PortStatus             port_1_status_{PortStatus::not_connected};
-    PortStatus             port_2_status_{PortStatus::not_connected};
+    PeripheralDataLocation      next_peripheral_return_;
+    PortStatus                  port_1_status_{PortStatus::not_connected}; ///< The port 1 status
+    PortStatus                  port_2_status_{PortStatus::not_connected}; ///< The port 2 status
+    std::vector<OutputRegister> full_peripheral_data_table_;               ///< The full peripheral data table
 
     std::array<u8, 0x4> smem_; ///< SMPC battery backupable memory (4B).
 };

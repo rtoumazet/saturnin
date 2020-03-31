@@ -377,7 +377,11 @@ void Smpc::setCommandDuration() {
             intback_remaining_cycles_ = calculateCyclesNumber(duration);
             break;
         }
-        case SmpcCommand::interrupt_back: break;
+        case SmpcCommand::interrupt_back: {
+            constexpr auto duration{milli(320)};
+            intback_remaining_cycles_ = calculateCyclesNumber(duration);
+            break;
+        }
         default: break;
     }
 }
@@ -489,7 +493,8 @@ void Smpc::executeCommand() {
             sf_.reset();
             break;
         case SmpcCommand::interrupt_back:
-            // WIP //
+            executeIntback();
+            sf_.reset();
             break;
         case SmpcCommand::smpc_memory_setting:
             for (u8 i = 0; i < 4; ++i) {
@@ -638,16 +643,12 @@ void Smpc::getPeripheralData() {
     sr_.reset();
     sr_[bit_7] = true;
     sr_.set(StatusRegister::peripheral_data_location, next_peripheral_return_);
-    // PeripheralDataRemaining will have to be handled differently when multitap will be implemented
-    sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
     sr_.set(StatusRegister::port_2_mode, ireg_[index_1].get(InputRegister::ireg1_port_2_mode));
     sr_.set(StatusRegister::port_1_mode, ireg_[index_1].get(InputRegister::ireg1_port_1_mode));
 
     for (u32 i = 0; i < output_registers_number; ++i) {
         oreg_[i] = u32_max;
     }
-
-    u8 oreg_index{0};
 
     switch (sr_.get(StatusRegister::port_1_mode)) {
         case PortMode::mode_0_byte: break; // no data returned
@@ -657,25 +658,24 @@ void Smpc::getPeripheralData() {
             PortData port_1_data;
             switch (port_1_status_) {
                 case PortStatus::not_connected: {
+                    full_peripheral_data_table_.emplace_back(util::toUnderlying(port_1_status_));
                     break;
                 }
                 case PortStatus::direct_connection: {
                     auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
-                    oreg_[oreg_index].set(OutputRegister::all_bits, util::toUnderlying(port_1_status_));
-                    ++oreg_index;
-                    u8 local_data_size = (pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size;
+                    full_peripheral_data_table_.emplace_back(util::toUnderlying(port_1_status_));
 
-                    for (u8 index = 0; index < local_data_size; ++index) {
-                        oreg_[index + oreg_index] = pad_data.peripheral_data_table[index];
-                    }
-                    oreg_index += pad_data.data_size;
+                    u8 local_data_size = (pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size;
+                    full_peripheral_data_table_.reserve(full_peripheral_data_table_.size() + local_data_size);
+                    full_peripheral_data_table_.insert(std::end(full_peripheral_data_table_),
+                                                       std::begin(pad_data.peripheral_data_table),
+                                                       std::end(pad_data.peripheral_data_table));
                     break;
                 }
                 default: {
                     Log::warning("smpc", tr("Port Status not implemented"));
                 }
             }
-
             break;
     }
 
@@ -686,26 +686,42 @@ void Smpc::getPeripheralData() {
             PortData port_2_data;
             switch (port_2_status_) {
                 case PortStatus::not_connected: {
+                    full_peripheral_data_table_.emplace_back(util::toUnderlying(port_2_status_));
                     break;
                 }
                 case PortStatus::direct_connection: {
                     auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
-                    oreg_[oreg_index].set(OutputRegister::all_bits, util::toUnderlying(port_2_status_));
-                    ++oreg_index;
+                    full_peripheral_data_table_.emplace_back(util::toUnderlying(port_2_status_));
                     u8 local_data_size = (pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size;
-
-                    for (u8 index = 0; index < local_data_size; ++index) {
-                        oreg_[index + oreg_index] = pad_data.peripheral_data_table[index];
-                    }
-                    oreg_index += pad_data.data_size;
+                    full_peripheral_data_table_.reserve(full_peripheral_data_table_.size() + local_data_size);
+                    full_peripheral_data_table_.insert(std::end(full_peripheral_data_table_),
+                                                       std::begin(pad_data.peripheral_data_table),
+                                                       std::end(pad_data.peripheral_data_table));
                     break;
                 }
                 default: {
                     Log::warning("smpc", tr("Port Status not implemented"));
                 }
             }
-
             break;
+    }
+
+    // Checking if there's more data to send than existing OREG registers
+    if (full_peripheral_data_table_.size() > output_registers_number) {
+        for (u32 i = 0; i < output_registers_number; ++i) {
+            oreg_[i] = full_peripheral_data_table_[i];
+        }
+        full_peripheral_data_table_.erase(full_peripheral_data_table_.begin(),
+                                          full_peripheral_data_table_.begin() + output_registers_number);
+
+        sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::remaining_peripheral_data);
+    } else {
+        for (u32 i = 0; i < full_peripheral_data_table_.size(); ++i) {
+            oreg_[i] = full_peripheral_data_table_[i];
+        }
+        full_peripheral_data_table_.clear();
+
+        sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
     }
 
     Log::debug("smpc", tr("Interrupt request"));
