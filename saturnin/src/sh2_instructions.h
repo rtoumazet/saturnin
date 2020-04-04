@@ -28,6 +28,7 @@
 #include <array> // array
 #include "emulator_defs.h"
 #include "sh2.h"
+#include "sh2_debug.h"
 
 namespace saturnin::sh2 {
 
@@ -208,8 +209,8 @@ inline void xtrct(Sh2& s);
 constexpr u8  instructions_number = 142;     ///< Total number of SH2 instructions used.
 constexpr u32 opcodes_lut_size    = 0x10000; ///< Size of the opcodes lookup table
 
-using ExecuteType = void (*)(Sh2&);             ///< Type of the execute
-using DebugType   = void (*)(const u16 opcode); ///< Type of the execute
+using ExecuteType = void (*)(Sh2&);                      ///< Type of execute functions
+using DebugType   = auto (*)(u16 opcode) -> std::string; ///< Type of debug functions
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	Sh2Instruction
@@ -225,7 +226,7 @@ struct Sh2Instruction {
     bool        is_simple;                ///< True if this instruction isn't a jump or doesn't modify system registers.
     bool        illegal_instruction_slot; ///< True if the instruction can't be used in a delay slot
     ExecuteType execute;                  ///< Link to the corresponding function.
-    // DebugType   debug;                    ///< Link to the debug formatting function.
+    DebugType   debug;                    ///< Link to the debug formatting function.
 };
 
 static std::array<ExecuteType, opcodes_lut_size> opcodes_lut; ///< The opcodes LUT, used for instruction fast fetching
@@ -236,148 +237,148 @@ static std::array<bool, opcodes_lut_size>
 // clang-format off
 static std::array<Sh2Instruction, instructions_number> const opcodes_table
 { {
-    { 0xFFFF, 0x0009, true,  false, &nop},
-    { 0xF00F, 0x300C, true,  false, &add},
-    { 0xF000, 0x7000, true,  false, &addi},
-    { 0xF00F, 0x300E, true,  false, &addc},
-    { 0xF00F, 0x300F, true,  false, &addv},
-    { 0xF00F, 0x2009, true,  false, &and_op},
-    { 0xFF00, 0xC900, true,  false, &andi},
-    { 0xFF00, 0xCD00, false, false, &andm}, // R0GBR
-    { 0xFF00, 0x8B00, false, true, &bf},
-    { 0xFF00, 0x8F00, false, true, &bfs},
-    { 0xFF00, 0x8900, false, true, &bt},
-    { 0xFF00, 0x8D00, false, true, &bts},
-    { 0xFFFF, 0x0028, true,  false, &clrmac},
-    { 0xFFFF, 0x0008, true,  false, &clrt},
-    { 0xFFFF, 0x0018, true,  false, &sett},
-    { 0xF00F, 0x3000, true,  false, &cmpeq},
-    { 0xF00F, 0x3003, true,  false, &cmpge},
-    { 0xF00F, 0x3007, true,  false, &cmpgt},
-    { 0xF00F, 0x3006, true,  false, &cmphi},
-    { 0xF00F, 0x3002, true,  false, &cmphs},
-    { 0xF0FF, 0x4015, true,  false, &cmppl},
-    { 0xF0FF, 0x4011, true,  false, &cmppz},
-    { 0xF00F, 0x200C, true,  false, &cmpstr},
-    { 0xFF00, 0x8800, true,  false, &cmpim},
-    { 0xF00F, 0x2007, true,  false, &div0s},
-    { 0xFFFF, 0x0019, true,  false, &div0u},
-    { 0xF00F, 0x3004, true,  false, &div1},
-    { 0xF00F, 0x300D, true,  false, &dmuls},
-    { 0xF00F, 0x3005, true,  false, &dmulu},
-    { 0xF0FF, 0x4010, true,  false, &dt},
-    { 0xF00F, 0x600E, true,  false, &extsb},
-    { 0xF00F, 0x600F, true,  false, &extsw},
-    { 0xF00F, 0x600C, true,  false, &extub},
-    { 0xF00F, 0x600D, true,  false, &extuw},
-    { 0xFFFF, 0x001B, true,  false, &sleep},
-    { 0xF000, 0xA000, false, true, &bra},
-    { 0xF0FF, 0x0023, false, true, &braf},
-    { 0xF000, 0xB000, false, true, &bsr},
-    { 0xF0FF, 0x0003, false, true, &bsrf},
-    { 0xF0FF, 0x402B, false, true, &jmp},
-    { 0xF0FF, 0x400B, false, true, &jsr},
-    { 0xF0FF, 0x400E, true,  false, &ldcsr},
-    { 0xF0FF, 0x401E, true,  false, &ldcgbr},
-    { 0xF0FF, 0x402E, true,  false, &ldcvbr},
-    { 0xF0FF, 0x4007, true,  false, &ldcmsr},
-    { 0xF0FF, 0x4017, true,  false, &ldcmgbr},
-    { 0xF0FF, 0x4027, true,  false, &ldcmvbr},
-    { 0xF0FF, 0x400A, true,  false, &ldsmach},
-    { 0xF0FF, 0x401A, true,  false, &ldsmacl},
-    { 0xF0FF, 0x402A, true,  false, &ldspr},
-    { 0xF0FF, 0x4006, true,  false, &ldsmmach},
-    { 0xF0FF, 0x4016, true,  false, &ldsmmacl},
-    { 0xF0FF, 0x4026, true,  false, &ldsmpr},
-    { 0xF00F, 0x000F, true,  false, &mac},
-    { 0xF00F, 0x400F, true,  false, &macw},
-    { 0xF00F, 0x6003, true,  false, &mov},
-    { 0xF00F, 0x0004, false, false, &movbs0}, // R0R
-    { 0xF00F, 0x0005, false, false, &movws0}, // R0R
-    { 0xF00F, 0x0006, false, false, &movls0}, // R0R
-    { 0xF00F, 0x2000, false, false, &movbs}, // CheckRegValue
-    { 0xF00F, 0x2001, false, false, &movws}, // CheckRegValue
-    { 0xF00F, 0x2002, false, false, &movls}, // CheckRegValue
-    { 0xF00F, 0x6000, true,  false, &movbl},
-    { 0xF00F, 0x6001, true,  false, &movwl},
-    { 0xF00F, 0x6002, true,  false, &movll},
-    { 0xF00F, 0x2004, false, false, &movbm}, // CheckRegValueRM1
-    { 0xF00F, 0x2005, false, false, &movwm}, // CheckRegValueRM2
-    { 0xF00F, 0x2006, false, false, &movlm}, // CheckRegValueRM4
-    { 0xF00F, 0x6004, true,  false, &movbp},
-    { 0xF00F, 0x6005, true,  false, &movwp},
-    { 0xF00F, 0x6006, true,  false, &movlp},
-    { 0xF00F, 0x000C, true,  false, &movbl0},
-    { 0xF00F, 0x000D, true,  false, &movwl0},
-    { 0xF00F, 0x000E, true,  false, &movll0},
-    { 0xF000, 0xE000, true,  false, &movi},
-    { 0xF000, 0x9000, true,  false, &movwi},
-    { 0xF000, 0xD000, true,  false, &movli},
-    { 0xFF00, 0xC400, true,  false, &movblg},
-    { 0xFF00, 0xC500, true,  false, &movwlg},
-    { 0xFF00, 0xC600, true,  false, &movllg},
-    { 0xFF00, 0xC000, false, false, &movbsg}, // DispGBR
-    { 0xFF00, 0xC100, false, false, &movwsg}, // DispGBR
-    { 0xFF00, 0xC200, false, false, &movlsg}, // DispGBR
-    { 0xFF00, 0x8000, false, false, &movbs4}, // DispR
-    { 0xFF00, 0x8100, false, false, &movws4}, // DispR
-    { 0xF000, 0x1000, false, false, &movls4}, // DispR
-    { 0xFF00, 0x8400, true,  false, &movbl4},
-    { 0xFF00, 0x8500, true,  false, &movwl4},
-    { 0xF000, 0x5000, true,  false, &movll4},
-    { 0xFF00, 0xC700, true,  false, &mova},
-    { 0xF0FF, 0x0029, true,  false, &movt},
-    { 0xF00F, 0x0007, true,  false, &mull},
-    { 0xF00F, 0x200F, true,  false, &muls},
-    { 0xF00F, 0x200E, true,  false, &mulu},
-    { 0xF00F, 0x600B, true,  false, &neg},
-    { 0xF00F, 0x600A, true,  false, &negc},
-    { 0xF00F, 0x6007, true,  false, &not_op},
-    { 0xF00F, 0x200B, true,  false, &or_op},
-    { 0xFF00, 0xCB00, true,  false, &ori},
-    { 0xFF00, 0xCF00, false, false, &orm}, // R0GBR
-    { 0xF0FF, 0x4024, true,  false, &rotcl},
-    { 0xF0FF, 0x4025, true,  false, &rotcr},
-    { 0xF0FF, 0x4004, true,  false, &rotl},
-    { 0xF0FF, 0x4005, true,  false, &rotr},
-    { 0xFFFF, 0x002B, false, true, &rte},
-    { 0xFFFF, 0x000B, false, true, &rts},
-    { 0xF0FF, 0x4020, true,  false, &shal},
-    { 0xF0FF, 0x4021, true,  false, &shar},
-    { 0xF0FF, 0x4000, true,  false, &shll},
-    { 0xF0FF, 0x4008, true,  false, &shll2},
-    { 0xF0FF, 0x4018, true,  false, &shll8},
-    { 0xF0FF, 0x4028, true,  false, &shll16},
-    { 0xF0FF, 0x4001, true,  false, &shlr},
-    { 0xF0FF, 0x4009, true,  false, &shlr2},
-    { 0xF0FF, 0x4019, true,  false, &shlr8},
-    { 0xF0FF, 0x4029, true,  false, &shlr16},
-    { 0xF0FF, 0x0002, true,  false, &stcsr},
-    { 0xF0FF, 0x0012, true,  false, &stcgbr},
-    { 0xF0FF, 0x0022, true,  false, &stcvbr},
-    { 0xF0FF, 0x4003, false, false, &stcmsr}, // CheckRegValueRM4
-    { 0xF0FF, 0x4013, false, false, &stcmgbr}, // CheckRegValueRM4
-    { 0xF0FF, 0x4023, false, false, &stcmvbr}, // CheckRegValueRM4
-    { 0xF0FF, 0x000A, true,  false, &stsmach},
-    { 0xF0FF, 0x001A, true,  false, &stsmacl},
-    { 0xF0FF, 0x002A, true,  false, &stspr},
-    { 0xF0FF, 0x4002, false, false, &stsmmach}, // CheckRegValueRM4
-    { 0xF0FF, 0x4012, false, false, &stsmmacl}, // CheckRegValueRM4
-    { 0xF0FF, 0x4022, false, false, &stsmpr}, // CheckRegValueRM4
-    { 0xF00F, 0x3008, true,  false, &sub},
-    { 0xF00F, 0x300A, true,  false, &subc},
-    { 0xF00F, 0x300B, true,  false, &subv},
-    { 0xF00F, 0x6008, true,  false, &swapb},
-    { 0xF00F, 0x6009, true,  false, &swapw},
-    { 0xF0FF, 0x401B, false, false, &tas}, // CheckRegValue
-    { 0xFF00, 0xC300, true,  true, &trapa},
-    { 0xF00F, 0x2008, true,  false, &tst},
-    { 0xFF00, 0xC800, true,  false, &tsti},
-    { 0xFF00, 0xCC00, true,  false, &tstm},
-    { 0xF00F, 0x200A, true,  false, &xor_op},
-    { 0xFF00, 0xCA00, true,  false, &xori},
-    { 0xFF00, 0xCE00, false, false, &orm}, // R0GBR
-    { 0xF00F, 0x200D, true,  false, &xtrct}
+    { 0xFFFF, 0x0009, true,  false, &nop, &nop_d},
+    { 0xF00F, 0x300C, true,  false, &add, &add_d},
+    { 0xF000, 0x7000, true,  false, &addi, &addi_d},
+    { 0xF00F, 0x300E, true,  false, &addc, &addc_d},
+    { 0xF00F, 0x300F, true,  false, &addv, &addv_d},
+    { 0xF00F, 0x2009, true,  false, &and_op, &and_op_d},
+    { 0xFF00, 0xC900, true,  false, &andi, &andi_d},
+    { 0xFF00, 0xCD00, false, false, &andm, &andm_d}, // R0GBR
+    { 0xFF00, 0x8B00, false, true, &bf, &bf_d},
+    { 0xFF00, 0x8F00, false, true, &bfs, &bfs_d},
+    { 0xFF00, 0x8900, false, true, &bt, &bt_d},
+    { 0xFF00, 0x8D00, false, true, &bts, &bts_d},
+    { 0xFFFF, 0x0028, true,  false, &clrmac, &clrmac_d},
+    { 0xFFFF, 0x0008, true,  false, &clrt, &clrt_d},
+    { 0xFFFF, 0x0018, true,  false, &sett, &sett_d},
+    { 0xF00F, 0x3000, true,  false, &cmpeq, &cmpeq_d},
+    { 0xF00F, 0x3003, true,  false, &cmpge, &cmpge_d},
+    { 0xF00F, 0x3007, true,  false, &cmpgt, &cmpgt_d},
+    { 0xF00F, 0x3006, true,  false, &cmphi, &cmphi_d},
+    { 0xF00F, 0x3002, true,  false, &cmphs, &cmphs_d},
+    { 0xF0FF, 0x4015, true,  false, &cmppl, &cmppl_d},
+    { 0xF0FF, 0x4011, true,  false, &cmppz, &cmppz_d},
+    { 0xF00F, 0x200C, true,  false, &cmpstr, &cmpstr_d},
+    { 0xFF00, 0x8800, true,  false, &cmpim, &cmpim_d},
+    { 0xF00F, 0x2007, true,  false, &div0s, &div0s_d},
+    { 0xFFFF, 0x0019, true,  false, &div0u, &div0u_d},
+    { 0xF00F, 0x3004, true,  false, &div1, &div1_d},
+    { 0xF00F, 0x300D, true,  false, &dmuls, &dmuls_d},
+    { 0xF00F, 0x3005, true,  false, &dmulu, &dmulu_d},
+    { 0xF0FF, 0x4010, true,  false, &dt, &dt_d},
+    { 0xF00F, 0x600E, true,  false, &extsb, &extsb_d},
+    { 0xF00F, 0x600F, true,  false, &extsw, &extsw_d},
+    { 0xF00F, 0x600C, true,  false, &extub, &extub_d},
+    { 0xF00F, 0x600D, true,  false, &extuw, &extuw_d},
+    { 0xFFFF, 0x001B, true,  false, &sleep, &sleep_d},
+    { 0xF000, 0xA000, false, true, &bra, &bra_d},
+    { 0xF0FF, 0x0023, false, true, &braf, &braf_d},
+    { 0xF000, 0xB000, false, true, &bsr, &bsr_d},
+    { 0xF0FF, 0x0003, false, true, &bsrf, &bsrf_d},
+    { 0xF0FF, 0x402B, false, true, &jmp, &jmp_d},
+    { 0xF0FF, 0x400B, false, true, &jsr, &jsr_d},
+    { 0xF0FF, 0x400E, true,  false, &ldcsr, &ldcsr_d},
+    { 0xF0FF, 0x401E, true,  false, &ldcgbr, &ldcgbr_d},
+    { 0xF0FF, 0x402E, true,  false, &ldcvbr, &ldcvbr_d},
+    { 0xF0FF, 0x4007, true,  false, &ldcmsr, &ldcmsr_d},
+    { 0xF0FF, 0x4017, true,  false, &ldcmgbr, &ldcmgbr_d},
+    { 0xF0FF, 0x4027, true,  false, &ldcmvbr, &ldcmvbr_d},
+    { 0xF0FF, 0x400A, true,  false, &ldsmach, &ldsmach_d},
+    { 0xF0FF, 0x401A, true,  false, &ldsmacl, &ldsmacl_d},
+    { 0xF0FF, 0x402A, true,  false, &ldspr, &ldspr_d},
+    { 0xF0FF, 0x4006, true,  false, &ldsmmach, &ldsmmach_d},
+    { 0xF0FF, 0x4016, true,  false, &ldsmmacl, &ldsmmacl_d},
+    { 0xF0FF, 0x4026, true,  false, &ldsmpr, &ldsmpr_d},
+    { 0xF00F, 0x000F, true,  false, &mac, &mac_d},
+    { 0xF00F, 0x400F, true,  false, &macw, &macw_d},
+    { 0xF00F, 0x6003, true,  false, &mov, &mov_d},
+    { 0xF00F, 0x0004, false, false, &movbs0, &movbs0_d}, // R0R
+    { 0xF00F, 0x0005, false, false, &movws0, &movws0_d}, // R0R
+    { 0xF00F, 0x0006, false, false, &movls0, &movls0_d}, // R0R
+    { 0xF00F, 0x2000, false, false, &movbs, &movbs_d}, // CheckRegValue
+    { 0xF00F, 0x2001, false, false, &movws, &movws_d}, // CheckRegValue
+    { 0xF00F, 0x2002, false, false, &movls, &movls_d}, // CheckRegValue
+    { 0xF00F, 0x6000, true,  false, &movbl, &movbl_d},
+    { 0xF00F, 0x6001, true,  false, &movwl, &movwl_d},
+    { 0xF00F, 0x6002, true,  false, &movll, &movll_d},
+    { 0xF00F, 0x2004, false, false, &movbm, &movbm_d}, // CheckRegValueRM1
+    { 0xF00F, 0x2005, false, false, &movwm, &movwm_d}, // CheckRegValueRM2
+    { 0xF00F, 0x2006, false, false, &movlm, &movlm_d}, // CheckRegValueRM4
+    { 0xF00F, 0x6004, true,  false, &movbp, &movbp_d},
+    { 0xF00F, 0x6005, true,  false, &movwp, &movwp_d},
+    { 0xF00F, 0x6006, true,  false, &movlp, &movlp_d},
+    { 0xF00F, 0x000C, true,  false, &movbl0, &movbl0_d},
+    { 0xF00F, 0x000D, true,  false, &movwl0, &movwl0_d},
+    { 0xF00F, 0x000E, true,  false, &movll0, &movll0_d},
+    { 0xF000, 0xE000, true,  false, &movi, &movi_d},
+    { 0xF000, 0x9000, true,  false, &movwi, &movwi_d},
+    { 0xF000, 0xD000, true,  false, &movli, &movli_d},
+    { 0xFF00, 0xC400, true,  false, &movblg, &movblg_d},
+    { 0xFF00, 0xC500, true,  false, &movwlg, &movwlg_d},
+    { 0xFF00, 0xC600, true,  false, &movllg, &movllg_d},
+    { 0xFF00, 0xC000, false, false, &movbsg, &movbsg_d}, // DispGBR
+    { 0xFF00, 0xC100, false, false, &movwsg, &movwsg_d}, // DispGBR
+    { 0xFF00, 0xC200, false, false, &movlsg, &movlsg_d}, // DispGBR
+    { 0xFF00, 0x8000, false, false, &movbs4, &movbs4_d}, // DispR
+    { 0xFF00, 0x8100, false, false, &movws4, &movws4_d}, // DispR
+    { 0xF000, 0x1000, false, false, &movls4, &movls4_d}, // DispR
+    { 0xFF00, 0x8400, true,  false, &movbl4, &movbl4_d},
+    { 0xFF00, 0x8500, true,  false, &movwl4, &movwl4_d},
+    { 0xF000, 0x5000, true,  false, &movll4, &movll4_d},
+    { 0xFF00, 0xC700, true,  false, &mova, &mova_d},
+    { 0xF0FF, 0x0029, true,  false, &movt, &movt_d},
+    { 0xF00F, 0x0007, true,  false, &mull, &mull_d},
+    { 0xF00F, 0x200F, true,  false, &muls, &muls_d},
+    { 0xF00F, 0x200E, true,  false, &mulu, &mulu_d},
+    { 0xF00F, 0x600B, true,  false, &neg, &neg_d},
+    { 0xF00F, 0x600A, true,  false, &negc, &negc_d},
+    { 0xF00F, 0x6007, true,  false, &not_op, &not_op_d},
+    { 0xF00F, 0x200B, true,  false, &or_op, &or_op_d},
+    { 0xFF00, 0xCB00, true,  false, &ori, &ori_d},
+    { 0xFF00, 0xCF00, false, false, &orm, &orm_d}, // R0GBR
+    { 0xF0FF, 0x4024, true,  false, &rotcl, &rotcl_d},
+    { 0xF0FF, 0x4025, true,  false, &rotcr, &rotcr_d},
+    { 0xF0FF, 0x4004, true,  false, &rotl, &rotl_d},
+    { 0xF0FF, 0x4005, true,  false, &rotr, &rotr_d},
+    { 0xFFFF, 0x002B, false, true, &rte, &rte_d},
+    { 0xFFFF, 0x000B, false, true, &rts, &rts_d},
+    { 0xF0FF, 0x4020, true,  false, &shal, &shal_d},
+    { 0xF0FF, 0x4021, true,  false, &shar, &shar_d},
+    { 0xF0FF, 0x4000, true,  false, &shll, &shll_d},
+    { 0xF0FF, 0x4008, true,  false, &shll2, &shll2_d},
+    { 0xF0FF, 0x4018, true,  false, &shll8, &shll8_d},
+    { 0xF0FF, 0x4028, true,  false, &shll16, &shll16_d},
+    { 0xF0FF, 0x4001, true,  false, &shlr, &shlr_d},
+    { 0xF0FF, 0x4009, true,  false, &shlr2, &shlr2_d},
+    { 0xF0FF, 0x4019, true,  false, &shlr8, &shlr8_d},
+    { 0xF0FF, 0x4029, true,  false, &shlr16, &shlr16_d},
+    { 0xF0FF, 0x0002, true,  false, &stcsr, &stcsr_d},
+    { 0xF0FF, 0x0012, true,  false, &stcgbr, &stcgbr_d},
+    { 0xF0FF, 0x0022, true,  false, &stcvbr, &stcvbr_d},
+    { 0xF0FF, 0x4003, false, false, &stcmsr, &stcmsr_d}, // CheckRegValueRM4
+    { 0xF0FF, 0x4013, false, false, &stcmgbr, &stcmgbr_d}, // CheckRegValueRM4
+    { 0xF0FF, 0x4023, false, false, &stcmvbr, &stcmvbr_d}, // CheckRegValueRM4
+    { 0xF0FF, 0x000A, true,  false, &stsmach, &stsmach_d},
+    { 0xF0FF, 0x001A, true,  false, &stsmacl, &stsmacl_d},
+    { 0xF0FF, 0x002A, true,  false, &stspr, &stspr_d},
+    { 0xF0FF, 0x4002, false, false, &stsmmach, &stsmmach_d}, // CheckRegValueRM4
+    { 0xF0FF, 0x4012, false, false, &stsmmacl, &stsmmacl_d}, // CheckRegValueRM4
+    { 0xF0FF, 0x4022, false, false, &stsmpr, &stsmpr_d}, // CheckRegValueRM4
+    { 0xF00F, 0x3008, true,  false, &sub, &sub_d},
+    { 0xF00F, 0x300A, true,  false, &subc, &subc_d},
+    { 0xF00F, 0x300B, true,  false, &subv, &subv_d},
+    { 0xF00F, 0x6008, true,  false, &swapb, &swapb_d},
+    { 0xF00F, 0x6009, true,  false, &swapw, &swapw_d},
+    { 0xF0FF, 0x401B, false, false, &tas, &tas_d}, // CheckRegValue
+    { 0xFF00, 0xC300, true,  true, &trapa, &trapa_d},
+    { 0xF00F, 0x2008, true,  false, &tst, &tst_d},
+    { 0xFF00, 0xC800, true,  false, &tsti, &tsti_d},
+    { 0xFF00, 0xCC00, true,  false, &tstm, &tstm_d},
+    { 0xF00F, 0x200A, true,  false, &xor_op, &xor_op_d},
+    { 0xFF00, 0xCA00, true,  false, &xori, &xori_d},
+    { 0xFF00, 0xCE00, false, false, &xorm, &xorm_d}, // R0GBR
+    { 0xF00F, 0x200D, true,  false, &xtrct, &xtrct_d}
 } };
 // clang-format on
 

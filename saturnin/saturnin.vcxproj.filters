@@ -99,6 +99,9 @@
     <ClCompile Include="src\smpc.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\sh2_debug.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -205,6 +208,9 @@
     </ClInclude>
     <ClInclude Include="src\sound\scsp.h">
       <Filter>Fichiers sources\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2_debug.h">
+      <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
