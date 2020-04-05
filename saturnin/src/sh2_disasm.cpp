@@ -1,5 +1,5 @@
 //
-// sh2_debug.cpp
+// sh2_disasm.cpp
 // Saturnin
 //
 // Copyright (c) 2020 Renaud Toumazet
@@ -18,11 +18,12 @@
 //
 
 #include <fmt/format.h>
-#include "sh2_debug.h"
+#include "sh2_disasm.h"
 #include "sh2_instructions.h"
 
 namespace saturnin::sh2 {
 
+auto badOpcode_d(const u16 opcode) -> std::string { return fmt::format("{:#06x} Unknown opcode"); };
 auto add_d(const u16 opcode) -> std::string {
     return fmt::format("{:#06x} ADD R{d},R{d}", opcode, x00n0(opcode), x0n00(opcode));
 };

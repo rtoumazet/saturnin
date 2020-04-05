@@ -194,7 +194,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClCompile Include="src\memory.cpp" />
     <ClCompile Include="src\scu.cpp" />
     <ClCompile Include="src\sh2.cpp" />
-    <ClCompile Include="src\sh2_debug.cpp" />
+    <ClCompile Include="src\sh2_disasm.cpp" />
     <ClCompile Include="src\sh2_instructions.cpp" />
     <ClCompile Include="src\smpc.cpp" />
     <ClCompile Include="src\utilities.cpp" />
@@ -227,7 +227,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="src\scu.h" />
     <ClInclude Include="src\scu_registers.h" />
     <ClInclude Include="src\sh2.h" />
-    <ClInclude Include="src\sh2_debug.h" />
+    <ClInclude Include="src\sh2_disasm.h" />
     <ClInclude Include="src\sh2_instructions.h" />
     <ClInclude Include="src\sh2_registers.h" />
     <ClInclude Include="src\smpc.h" />

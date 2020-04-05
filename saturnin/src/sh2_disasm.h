@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	sh2_debug.h
 ///
-/// \brief	Declares SH2 debug instructions
+/// \brief	Declares SH2 disasm instructions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -32,6 +32,7 @@ namespace saturnin::sh2 {
 
 /// \name SH2 debug instructions
 //@{
+auto badOpcode_d(u16 opcode) -> std::string;
 auto add_d(u16 opcode) -> std::string;
 auto addi_d(u16 opcode) -> std::string;
 auto addc_d(u16 opcode) -> std::string;

@@ -151,9 +151,7 @@ void addc(Sh2& s) {
 
     (tmp0 > tmp1) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
-    if (tmp1 > static_cast<s32>(s.r_[xn00(s)])) {
-        s.sr_.set(StatusRegister::t);
-    }
+    if (tmp1 > static_cast<s32>(s.r_[xn00(s)])) { s.sr_.set(StatusRegister::t); }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -760,12 +758,8 @@ void mac(Sh2& s) {
     mac += mul;
 
     if (s.sr_.get(StatusRegister::s) == 1) {
-        if (mac < u47_min_64_extended) {
-            mac = u47_min_64_extended;
-        }
-        if (mac > sign_bit_48_mask) {
-            mac = u47_max;
-        }
+        if (mac < u47_min_64_extended) { mac = u47_min_64_extended; }
+        if (mac > sign_bit_48_mask) { mac = u47_max; }
     }
     s.mach_ = static_cast<u32>(mac >> displacement_32);
     s.macl_ = static_cast<u32>(mac & u32_max);
@@ -913,9 +907,7 @@ void movbp(Sh2& s) {
     } else {
         s.r_[xn00(s)] |= bitmask_FFFFFF00;
     }
-    if (xn00(s) != x0n0(s)) {
-        ++s.r_[x0n0(s)];
-    }
+    if (xn00(s) != x0n0(s)) { ++s.r_[x0n0(s)]; }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -928,9 +920,7 @@ void movwp(Sh2& s) {
     } else {
         s.r_[xn00(s)] |= bitmask_FFFF0000;
     }
-    if (xn00(s) != x0n0(s)) {
-        s.r_[x0n0(s)] += 2;
-    }
+    if (xn00(s) != x0n0(s)) { s.r_[x0n0(s)] += 2; }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -938,9 +928,7 @@ void movwp(Sh2& s) {
 void movlp(Sh2& s) {
     // (Rm) -> Rn, Rm + 4 -> Rm
     s.r_[xn00(s)] = s.memory()->read<u32>(s.r_[x0n0(s)]);
-    if (xn00(s) != x0n0(s)) {
-        s.r_[x0n0(s)] += 4;
-    }
+    if (xn00(s) != x0n0(s)) { s.r_[x0n0(s)] += 4; }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -1211,9 +1199,7 @@ void negc(Sh2& s) {
     u32 temp{0 - s.r_[x0n0(s)]};
     s.r_[xn00(s)] = temp - s.sr_.get(StatusRegister::t);
     (0 < temp) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
-    if (temp < static_cast<u32>(s.r_[xn00(s)])) {
-        s.sr_.set(StatusRegister::t);
-    }
+    if (temp < static_cast<u32>(s.r_[xn00(s)])) { s.sr_.set(StatusRegister::t); }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -1591,9 +1577,7 @@ void subc(Sh2& s) {
     u32 tmp0{s.r_[xn00(s)]};
     s.r_[xn00(s)] = tmp1 - s.sr_.get(StatusRegister::t);
     (tmp0 < tmp1) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
-    if (tmp1 < static_cast<u32>(s.r_[xn00(s)])) {
-        s.sr_.set(StatusRegister::t);
-    }
+    if (tmp1 < static_cast<u32>(s.r_[xn00(s)])) { s.sr_.set(StatusRegister::t); }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -1729,11 +1713,13 @@ void initializeOpcodesLut() {
             if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
                 //                nextInstructionLut[counter] = OpcodeInfoTable[i].goNext;
                 opcodes_lut[counter]             = opcodes_table[i].execute;
+                opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
                 illegal_instruction_lut[counter] = opcodes_table[i].illegal_instruction_slot;
                 break;
             }
             //            nextInstructionLut[counter] = false;
             opcodes_lut[counter]             = &badOpcode;
+            opcodes_disasm_lut[counter]      = &badOpcode_d;
             illegal_instruction_lut[counter] = false;
         }
         ++counter;
@@ -1741,5 +1727,7 @@ void initializeOpcodesLut() {
 }
 
 void execute(Sh2& s) { opcodes_lut[s.current_opcode_](s); }
+
+auto disasm(u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](opcode); }
 
 } // namespace saturnin::sh2

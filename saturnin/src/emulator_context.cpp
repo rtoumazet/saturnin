@@ -74,14 +74,10 @@ auto EmulatorContext::cdrom() -> Cdrom* { return cdrom_.get(); };
 auto EmulatorContext::initialize() -> bool {
     Log::initialize();
 
-    if (!this->config()->initialize(video::isModernOpenglCapable())) {
-        return false;
-    }
+    if (!this->config()->initialize(video::isModernOpenglCapable())) { return false; }
 
     std::string country = this->config()->readValue(core::AccessKeys::cfg_global_language);
-    if (!Locale::getInstance().initialize(country)) {
-        return false;
-    }
+    if (!Locale::getInstance().initialize(country)) { return false; }
 
     this->smpc()->initializePeripheralMappings();
 
@@ -91,16 +87,12 @@ auto EmulatorContext::initialize() -> bool {
 }
 
 void EmulatorContext::startEmulation() {
-    if (emulation_status_ == EmulationStatus::running) {
-        return;
-    }
+    if (emulation_status_ == EmulationStatus::running) { return; }
 
     emulation_status_ = EmulationStatus::running;
 
     emulation_main_thread_ = std::thread(&EmulatorContext::emulationMainThread, this);
-    if (emulation_main_thread_.joinable()) {
-        emulation_main_thread_.detach();
-    }
+    if (emulation_main_thread_.joinable()) { emulation_main_thread_.detach(); }
 
     // static std::thread emu_thread;
     // if (ImGui::Button("Play")) {
@@ -149,9 +141,7 @@ void EmulatorContext::startEmulation() {
 
 void EmulatorContext::stopEmulation() {
     emulation_status_ = core::EmulationStatus::stopped;
-    if (emulation_main_thread_.joinable()) {
-        emulation_main_thread_.join();
-    }
+    if (emulation_main_thread_.joinable()) { emulation_main_thread_.join(); }
 }
 
 void EmulatorContext::emulationMainThread() {
@@ -161,6 +151,7 @@ void EmulatorContext::emulationMainThread() {
         memory()->loadBios(hardware_mode_);
 
         sh2::initializeOpcodesLut();
+        // Log::info("main", sh2::debug(0xCD43));
         smpc()->initialize();
 
         while (this->emulation_status_ == EmulationStatus::running) {
@@ -169,9 +160,7 @@ void EmulatorContext::emulationMainThread() {
             // throw std::runtime_error(tr("Exception during main emulation thread !"));
         }
         Log::info("main", tr("Emulation main thread finished"));
-    } catch (const std::exception& e) {
-        Log::error("exception", e.what());
-    } catch (...) {
+    } catch (const std::exception& e) { Log::error("exception", e.what()); } catch (...) {
         Log::error("exception", tr("Uncaught exception !"));
     }
 }

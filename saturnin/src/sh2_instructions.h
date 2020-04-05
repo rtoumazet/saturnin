@@ -25,10 +25,11 @@
 
 #pragma once
 
-#include <array> // array
+#include <array>  // array
+#include <string> // string
 #include "emulator_defs.h"
 #include "sh2.h"
-#include "sh2_debug.h"
+#include "sh2_disasm.h"
 
 namespace saturnin::sh2 {
 
@@ -210,7 +211,7 @@ constexpr u8  instructions_number = 142;     ///< Total number of SH2 instructio
 constexpr u32 opcodes_lut_size    = 0x10000; ///< Size of the opcodes lookup table
 
 using ExecuteType = void (*)(Sh2&);                      ///< Type of execute functions
-using DebugType   = auto (*)(u16 opcode) -> std::string; ///< Type of debug functions
+using DisasmType  = auto (*)(u16 opcode) -> std::string; ///< Type of disassembly functions
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	Sh2Instruction
@@ -226,10 +227,12 @@ struct Sh2Instruction {
     bool        is_simple;                ///< True if this instruction isn't a jump or doesn't modify system registers.
     bool        illegal_instruction_slot; ///< True if the instruction can't be used in a delay slot
     ExecuteType execute;                  ///< Link to the corresponding function.
-    DebugType   debug;                    ///< Link to the debug formatting function.
+    DisasmType  disasm;                   ///< Link to the disassembly formatting function.
 };
 
 static std::array<ExecuteType, opcodes_lut_size> opcodes_lut; ///< The opcodes LUT, used for instruction fast fetching
+static std::array<DisasmType, opcodes_lut_size>
+    opcodes_disasm_lut; ///< The opcodes disasm LUT, used for instruction fast fetching
 
 static std::array<bool, opcodes_lut_size>
     illegal_instruction_lut; ///< The illegal instruction LUT, used for instruction fast fetching
@@ -385,5 +388,7 @@ static std::array<Sh2Instruction, instructions_number> const opcodes_table
 void initializeOpcodesLut();
 
 void execute(Sh2& s);
+
+auto disasm(u16 opcode) -> std::string;
 
 } // namespace saturnin::sh2
