@@ -23,7 +23,9 @@
 
 namespace saturnin::sh2 {
 
-auto badOpcode_d(const u32 pc, const u16 opcode) -> std::string { return fmt::format("{:#010x} {:#06x} Unknown opcode"); };
+auto badOpcode_d(const u32 pc, const u16 opcode) -> std::string {
+    return fmt::format("{:#010x} {:#06x} Unknown opcode", pc, opcode);
+};
 auto add_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} ADD R{:d},R{:d}", pc, opcode, x00n0(opcode), x0n00(opcode));
 };

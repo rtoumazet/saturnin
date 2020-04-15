@@ -739,16 +739,23 @@ void showLogWindow(bool* opened) {
 }
 
 void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
-    const ImVec2 window_size(620, 320);
+    const ImVec2 window_size(650, 320);
     ImGui::SetNextWindowSize(window_size);
 
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
     ImGui::Begin("Sh2 debug", opened, window_flags);
 
     static Sh2Type sh2_type{Sh2Type::master};
-    if (ImGui::RadioButton(tr("Master").c_str(), sh2_type == Sh2Type::master)) { sh2_type = Sh2Type::master; };
+    static u32     current_pc{state.slaveSh2()->getRegister(Sh2Register::pc)};
+    if (ImGui::RadioButton(tr("Master").c_str(), sh2_type == Sh2Type::master)) {
+        sh2_type   = Sh2Type::master;
+        current_pc = state.masterSh2()->getRegister(Sh2Register::pc);
+    }
     ImGui::SameLine();
-    if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) { sh2_type = Sh2Type::slave; };
+    if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) {
+        sh2_type   = Sh2Type::slave;
+        current_pc = state.slaveSh2()->getRegister(Sh2Register::pc);
+    };
 
     sh2::Sh2* current_sh2{nullptr};
     switch (sh2_type) {
@@ -819,21 +826,37 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
     ImGui::SameLine();
     {
         // Disassembly
-        const ImVec2 child_size(300, 262);
+        const ImVec2 child_size(340, 262);
         ImGui::BeginChild("ChildDisassembly", child_size, true, window_flags);
 
         ImGui::TextDisabled(tr("Disassembly").c_str());
         ImGui::Separator();
 
-        auto pc = current_sh2->getRegister(Sh2Register::pc);
-        for (u32 i = (pc - 6); i < (pc + 20); i += 2) {
+        ImGui::Columns(2);
+        ImGui::SetColumnWidth(0, 300.0f);
+        ImGui::SetColumnWidth(1, 30.0f);
+
+        for (u32 i = (current_pc - 6); i < (current_pc + 20); i += 2) {
             auto opcode = state.memory()->read<u16>(i);
-            if (i == pc) {
+            if (i == current_pc) {
                 ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), sh2::disasm(i, opcode).c_str());
             } else {
                 ImGui::Text(sh2::disasm(i, opcode).c_str());
             }
         }
+
+        ImGui::NextColumn();
+
+        ImGui::NewLine();
+        ImGui::NewLine();
+        ImGui::NewLine();
+        ImGui::NewLine();
+        ImGui::NewLine();
+        ImGui::PushButtonRepeat(true);
+        if (ImGui::ArrowButton("##up", ImGuiDir_Up)) { current_pc -= 2; }
+        if (ImGui::ArrowButton("##down", ImGuiDir_Down)) { current_pc += 2; }
+        ImGui::PopButtonRepeat();
+
         ImGui::EndChild();
     }
 
