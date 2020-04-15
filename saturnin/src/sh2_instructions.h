@@ -210,8 +210,8 @@ inline void xtrct(Sh2& s);
 constexpr u8  instructions_number = 142;     ///< Total number of SH2 instructions used.
 constexpr u32 opcodes_lut_size    = 0x10000; ///< Size of the opcodes lookup table
 
-using ExecuteType = void (*)(Sh2&);                      ///< Type of execute functions
-using DisasmType  = auto (*)(u16 opcode) -> std::string; ///< Type of disassembly functions
+using ExecuteType = void (*)(Sh2&);                              ///< Type of execute functions
+using DisasmType  = auto (*)(u32 pc, u16 opcode) -> std::string; ///< Type of disassembly functions
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	Sh2Instruction
@@ -389,6 +389,6 @@ void initializeOpcodesLut();
 
 void execute(Sh2& s);
 
-auto disasm(u16 opcode) -> std::string;
+auto disasm(u32 pc, u16 opcode) -> std::string;
 
 } // namespace saturnin::sh2

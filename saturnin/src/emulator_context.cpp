@@ -87,12 +87,22 @@ auto EmulatorContext::initialize() -> bool {
 }
 
 void EmulatorContext::startEmulation() {
-    if (emulation_status_ == EmulationStatus::running) { return; }
+    switch (emulation_status_) {
+        case EmulationStatus::running: {
+            return;
+        }
+        case EmulationStatus::paused: {
+            emulation_status_ = EmulationStatus::running;
+            break;
+        }
+        case EmulationStatus::stopped: {
+            emulation_status_ = EmulationStatus::running;
 
-    emulation_status_ = EmulationStatus::running;
-
-    emulation_main_thread_ = std::thread(&EmulatorContext::emulationMainThread, this);
-    if (emulation_main_thread_.joinable()) { emulation_main_thread_.detach(); }
+            emulation_main_thread_ = std::thread(&EmulatorContext::emulationMainThread, this);
+            if (emulation_main_thread_.joinable()) { emulation_main_thread_.detach(); }
+            break;
+        }
+    }
 
     // static std::thread emu_thread;
     // if (ImGui::Button("Play")) {
@@ -144,6 +154,8 @@ void EmulatorContext::stopEmulation() {
     if (emulation_main_thread_.joinable()) { emulation_main_thread_.join(); }
 }
 
+void EmulatorContext::pauseEmulation() { emulation_status_ = core::EmulationStatus::paused; }
+
 void EmulatorContext::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
@@ -151,13 +163,16 @@ void EmulatorContext::emulationMainThread() {
         memory()->loadBios(hardware_mode_);
 
         sh2::initializeOpcodesLut();
+        masterSh2()->powerOnReset();
+        slaveSh2()->powerOnReset();
         // Log::info("main", sh2::debug(0xCD43));
         smpc()->initialize();
 
-        while (this->emulation_status_ == EmulationStatus::running) {
-            master_sh2_->run();
-            slave_sh2_->run();
-            // throw std::runtime_error(tr("Exception during main emulation thread !"));
+        while (this->emulation_status_ == EmulationStatus::running || this->emulation_status_ == EmulationStatus::paused) {
+            if (this->emulation_status_ == EmulationStatus::running) {
+                master_sh2_->run();
+                if (smpc()->isSlaveSh2On()) { slave_sh2_->run(); }
+            }
         }
         Log::info("main", tr("Emulation main thread finished"));
     } catch (const std::exception& e) { Log::error("exception", e.what()); } catch (...) {

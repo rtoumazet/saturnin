@@ -36,11 +36,7 @@ auto main(int argc, char* argv[]) -> int {
 
         state.startInterface();
         std::exit(EXIT_SUCCESS);
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error& e) { Log::error("exception", e.what()); } catch (const std::exception& e) {
         Log::error("exception", e.what());
-    } catch (const std::exception& e) {
-        Log::error("exception", e.what());
-    } catch (...) {
-        Log::error("exception", tr("Uncaught exception !"));
-    }
+    } catch (...) { Log::error("exception", tr("Uncaught exception !")); }
 };

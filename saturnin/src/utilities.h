@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <algorithm>   // count
+#include <fstream>     // ifstream
 #include <string>      // string
 #include <type_traits> // underlying_type_t
 #include <vector>      // vector
@@ -128,5 +130,20 @@ auto explode(std::string const& s, char delim) -> std::vector<std::string>;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto dec2bcd(uint16_t dec) -> uint32_t;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto linesNumber(std::ifstream& ifs) -> uint32_t
+///
+/// \brief  Lines number of the specified input file.
+///
+/// \author Runik
+/// \date   12/04/2020
+///
+/// \param [in,out] ifs The input file.
+///
+/// \returns    The line number.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto linesNumber(std::ifstream& ifs) -> uint32_t;
 
 } // namespace saturnin::utilities

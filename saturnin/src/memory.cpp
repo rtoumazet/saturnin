@@ -100,9 +100,7 @@ auto Memory::loadRom(const std::string& zip_name,
                     }
 
                     // bios region is forced for program roms
-                    if (RomType == RomType::program) {
-                        this->cart_[region_cart_address] = this->rom_[stv_bios_region_address];
-                    }
+                    if (RomType == RomType::program) { this->cart_[region_cart_address] = this->rom_[stv_bios_region_address]; }
 
                     mirrorData(destination, size, times_mirrored, RomLoad);
                     break;
@@ -165,6 +163,8 @@ void Memory::loadBios(const HardwareMode mode) {
                 break;
             }
         }
+    } else {
+        Log::warning("memory", tr("Bios file not found !"));
     }
 }
 

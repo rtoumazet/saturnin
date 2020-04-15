@@ -1728,6 +1728,6 @@ void initializeOpcodesLut() {
 
 void execute(Sh2& s) { opcodes_lut[s.current_opcode_](s); }
 
-auto disasm(u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](opcode); }
+auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }
 
 } // namespace saturnin::sh2

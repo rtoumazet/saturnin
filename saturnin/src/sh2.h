@@ -80,6 +80,14 @@ enum class Sh2Type {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Sh2Register
+///
+/// \brief  Values that represent SH2 internal registers.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Sh2Register { pc, pr, macl, mach, vbr, gbr, sr, r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   DmaChannel
 ///
 /// \brief  DMA channel.
@@ -334,6 +342,21 @@ class Sh2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void powerOnReset();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn [[nodiscard]] auto Sh2::getRegister(Sh2Register reg) -> u32;
+    ///
+    /// \brief  Gets the register
+    ///
+    /// \author Runik
+    /// \date   08/04/2020
+    ///
+    /// \param  reg Register to get.
+    ///
+    /// \returns    The register value.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    [[nodiscard]] auto getRegister(Sh2Register reg) const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> static void Sh2::unmappedAccess(const u32 addr, const T data)
@@ -795,7 +818,7 @@ class Sh2 {
 
     /// \name Processor registers
     //@{
-    u32                                       pc_;    ///< Progream Counter
+    u32                                       pc_;    ///< Program Counter
     u32                                       pr_;    ///< Procedure Register
     u32                                       macl_;  ///< Multiply and ACummulate register Low (0x48)
     u32                                       mach_;  ///< Multiply and ACummulate register High (0x4C)

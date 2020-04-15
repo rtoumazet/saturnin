@@ -469,6 +469,19 @@ class Smpc {
 
     void initialize();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Smpc::isSlaveSh2On() -> bool
+    ///
+    /// \brief  Query if the slave SH2 is on
+    ///
+    /// \author Runik
+    /// \date   10/04/2020
+    ///
+    /// \returns    True if the slave SH2 is on.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto isSlaveSh2On() -> bool { return is_slave_sh2_on_; };
+
   private:
     static constexpr u8 input_registers_number{7};
     static constexpr u8 output_registers_number{32};

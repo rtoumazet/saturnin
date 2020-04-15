@@ -116,6 +116,20 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened);
 void showLogWindow(bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void showDebugSh2Window(core::EmulatorContext& state,bool* opened);
+///
+/// \brief  Display the debug window for both SH2.
+///
+/// \author Runik
+/// \date   06/04/2020
+///
+/// \param [in,out] state   The emulator context.
+/// \param [in,out] opened  True will display the window.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void showDebugSh2Window(core::EmulatorContext& state, bool* opened);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u32 height);
 ///
 /// \brief  Builds a graphical user interface.

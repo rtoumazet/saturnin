@@ -76,4 +76,8 @@ auto dec2bcd(uint16_t dec) -> u32 {
     return result;
 }
 
+auto linesNumber(std::ifstream& ifs) -> uint32_t {
+    return std::count(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>(), '\n');
+}
+
 } // namespace saturnin::utilities

@@ -27,12 +27,14 @@
 
 #include <memory>
 #include <string>
+#include <sstream>
 #include <map>
 #define SPDLOG_FMT_EXTERNAL
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/ostream_sink.h>
 // NOLINTNEXTLINE(modernize-deprecated-headers)
 #include "locale.h" // tr
 
@@ -96,14 +98,12 @@ class Log {
                 auto message{"[{}] " + value};
                 loggers_.at("console")->error(message.c_str(), logger_name, args...);
             }
-        } catch (const std::runtime_error& e) {
-            loggers_.at("console")->warn(e.what());
-        }
+        } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template <typename... Args> static inline void Log::warning(const std::string& logger_name, const std::string& value,
-    /// const Args&... args)
+    /// \fn template <typename... Args> static inline void Log::warning(const std::string& logger_name, const std::string&
+    /// value, const Args&... args)
     ///
     /// \brief  Writes a warning message to the specified logger.
     ///
@@ -125,9 +125,7 @@ class Log {
                 auto message{"[{}] " + value};
                 loggers_.at("console")->warn(message.c_str(), logger_name, args...);
             }
-        } catch (const std::runtime_error& e) {
-            loggers_.at("console")->warn(e.what());
-        }
+        } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,14 +145,12 @@ class Log {
 
     template<typename... Args>
     static inline void info(const std::string& logger_name, const std::string& value, const Args&... args) {
-        if (loggerExists(logger_name)) {
-            loggers_.at(logger_name)->info(value.c_str(), args...);
-        }
+        if (loggerExists(logger_name)) { loggers_.at(logger_name)->info(value.c_str(), args...); }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template <typename... Args> static inline void Log::debug(const std::string& logger_name, const std::string& value,
-    /// const Args&... args)
+    /// \fn template <typename... Args> static inline void Log::debug(const std::string& logger_name, const std::string&
+    /// value, const Args&... args)
     ///
     /// \brief  Writes a debug message to the specified logger.
     ///
@@ -169,9 +165,7 @@ class Log {
 
     template<typename... Args>
     static inline void debug(const std::string& logger_name, const std::string& value, const Args&... args) {
-        if (loggerExists(logger_name)) {
-            loggers_.at(logger_name)->debug(value.c_str(), args...);
-        }
+        if (loggerExists(logger_name)) { loggers_.at(logger_name)->debug(value.c_str(), args...); }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,7 +191,8 @@ class Log {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Log::createFileSink(const std::string& logger_path) -> std::shared_ptr<spdlog::sinks::basic_file_sink_mt>;
+    /// \fn static auto Log::createFileSink(const std::string& logger_path) ->
+    /// std::shared_ptr<spdlog::sinks::basic_file_sink_mt>;
     ///
     /// \brief  Creates a file sink.
     ///
@@ -225,6 +220,19 @@ class Log {
     static auto createConsoleSink() -> std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static auto Log::createStreamSink() -> std::shared_ptr<spdlog::sinks::ostream_sink_mt>;
+    ///
+    /// \brief  Creates a ostream sink.
+    ///
+    /// \author Runik
+    /// \date   12/04/2020
+    ///
+    /// \returns    The new stream sink.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto createStreamSink() -> std::shared_ptr<spdlog::sinks::ostream_sink_mt>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Log::createLogger(const std::string& logger_name, const
     /// std::shared_ptr<spdlog::sinks::simple_file_sink_mt>& sink);
     ///
@@ -237,7 +245,8 @@ class Log {
     /// \param  sink        The sink.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink);
+    // static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink);
+    static void createLogger(const std::string& logger_name, const spdlog::sinks_init_list& sink);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Log::createConsole();
@@ -249,6 +258,17 @@ class Log {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static void createConsole();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Log::createStream();
+    ///
+    /// \brief  Creates the stream logger, will be displayed in the gui.
+    ///
+    /// \author Runik
+    /// \date   12/04/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void createStream();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Log::removeFile(const std::string& path);
@@ -274,7 +294,32 @@ class Log {
 
     static void flush();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Log::dumpBacktraceToConsole();
+    ///
+    /// \brief  Dumps the backtrace to console.
+    ///
+    /// \author Runik
+    /// \date   13/04/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void dumpBacktraceToConsole();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static auto Log::getStream() -> std::string;
+    ///
+    /// \brief  Gets the stream of logged messages
+    ///
+    /// \author Runik
+    /// \date   14/04/2020
+    ///
+    /// \returns    A string containing every logged message.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto getStream() -> std::string;
+
   private:
+    static std::ostringstream oss_;
     static std::map<std::string, std::shared_ptr<spdlog::logger>>
         loggers_; ///< Map containing all the loggers used in the program
 };

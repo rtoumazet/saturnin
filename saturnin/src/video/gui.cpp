@@ -25,7 +25,9 @@
 #include "../../lib/imgui/imgui_custom_controls.h" // peripheralKeyCombo
 #include "../emulator_enums.h"                     // EmulationStatus
 #include "../config.h"
-#include "../locale.h"      // tr
+#include "../locale.h" // tr
+#include "../sh2.h"    // Sh2
+#include "../sh2_instructions.h"
 #include "../smpc.h"        // SaturnDigitalPad, PeripheralKey
 #include "../utilities.h"   // stringToVector
 #include "../cdrom/cdrom.h" // Cdrom
@@ -37,9 +39,10 @@ namespace fs    = std::filesystem;
 
 namespace saturnin::gui {
 
-static bool show_options     = false;
 static bool show_load_stv    = false;
 static bool show_load_binary = false;
+static bool show_debug_sh2   = false;
+static bool show_options     = false;
 static bool show_demo        = true;
 static bool show_log         = true;
 
@@ -50,13 +53,14 @@ using core::SaturnDigitalPad;
 using core::StvBoardControls;
 using core::StvPlayerControls;
 using core::tr;
+using sh2::Sh2Register;
+using sh2::Sh2Type;
 
 void showImguiDemoWindow(const bool show_window) {
     // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
     if (show_window) {
-        constexpr u16 h_window_pos{650};
-        constexpr u16 v_window_pos{20};
-        ImGui::SetNextWindowPos(ImVec2(h_window_pos, v_window_pos), ImGuiCond_FirstUseEver);
+        const ImVec2 window_pos(650, 20);
+        ImGui::SetNextWindowPos(window_pos, ImGuiCond_FirstUseEver);
         ImGui::ShowDemoWindow();
     }
 }
@@ -70,25 +74,22 @@ void showCoreWindow(core::EmulatorContext& state, const video::Opengl& opengl) {
     // std::vector<uint8_t> icons;
     // uint32_t tex = opengl.loadIcons(icons);
 
-    constexpr u16 h_window_pos{400};
-    constexpr u16 v_window_pos{0};
-    ImGui::SetNextWindowPos(ImVec2(h_window_pos, v_window_pos), ImGuiCond_Once);
+    const ImVec2 window_pos(400, 0);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
 
-    constexpr u16 h_window_size{300};
-    constexpr u16 v_window_size{40};
-    ImGui::SetNextWindowSize(ImVec2(h_window_size, v_window_size));
+    const ImVec2 window_size(300, 40);
+    ImGui::SetNextWindowSize(window_size);
 
     bool show_window;
     ImGui::Begin("Core", &show_window, window_flags);
 
-    if (ImGui::Button("Play")) {
-        state.startEmulation();
-    }
+    if (ImGui::Button("Play")) { state.startEmulation(); }
     ImGui::SameLine();
-    ImGui::Button("Pause");
+    if (ImGui::Button("Pause")) { state.pauseEmulation(); };
     ImGui::SameLine();
     if (ImGui::Button("Stop")) {
         state.stopEmulation();
+        show_debug_sh2 = false;
     }
 
     // ImGui::SameLine();
@@ -104,9 +105,11 @@ void showCoreWindow(core::EmulatorContext& state, const video::Opengl& opengl) {
 }
 
 void showRenderingWindow(video::Opengl& opengl, const u32 width, const u32 height) {
-    constexpr u8 offset{20};
+    constexpr float offset{20};
     ImGui::SetNextWindowPos(ImVec2(0, 0 + offset), ImGuiCond_Once);
-    ImGui::SetNextWindowSize(ImVec2(static_cast<float>(width), static_cast<float>(height + offset))); // + 20
+
+    const ImVec2 window_size(static_cast<float>(width), static_cast<float>(height + offset));
+    ImGui::SetNextWindowSize(window_size);
 
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -128,9 +131,7 @@ void showRenderingWindow(video::Opengl& opengl, const u32 width, const u32 heigh
     opengl.preRender();
 
     opengl.render();
-    if (opengl.texture() != 0) {
-        gui::addTextureToDrawList(opengl.texture(), width, height);
-    }
+    if (opengl.texture() != 0) { gui::addTextureToDrawList(opengl.texture(), width, height); }
 
     opengl.postRender();
 
@@ -246,9 +247,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         bool        initial_rendering = is_legacy;
         if (ImGui::Checkbox("", &is_legacy)) {
             state.config()->writeValue(core::AccessKeys::cfg_rendering_legacy_opengl, is_legacy);
-            if (initial_rendering != is_legacy) {
-                reset_rendering = true;
-            }
+            if (initial_rendering != is_legacy) { reset_rendering = true; }
         }
     }
 
@@ -341,9 +340,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::SameLine(second_column_offset);
 
         static bool disabled = state.config()->readValue(core::AccessKeys::cfg_sound_disabled);
-        if (ImGui::Checkbox("", &disabled)) {
-            state.config()->writeValue(core::AccessKeys::cfg_sound_disabled, disabled);
-        }
+        if (ImGui::Checkbox("", &disabled)) { state.config()->writeValue(core::AccessKeys::cfg_sound_disabled, disabled); }
     }
 
     // Peripheral header
@@ -713,32 +710,133 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 void showLogWindow(bool* opened) {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
     window_flags |= ImGuiWindowFlags_NoResize;
+    window_flags |= ImGuiWindowFlags_NoSavedSettings;
 
-    constexpr u16 h_window_pos{0};
-    constexpr u16 v_window_pos{400};
-    ImGui::SetNextWindowPos(ImVec2(h_window_pos, v_window_pos), ImGuiCond_Once);
-    constexpr u16 h_window_size{600};
-    constexpr u16 v_window_size{150};
-    ImGui::SetNextWindowSize(ImVec2(h_window_size, v_window_size));
+    const ImVec2 window_size(600, 150);
+    ImGui::SetNextWindowSize(window_size);
+
+    GLFWwindow* window = glfwGetCurrentContext();
+    s32         width{};
+    s32         height{};
+    glfwGetWindowSize(window, &width, &height);
+
+    const auto   v_pos{(float)height - window_size.y};
+    const ImVec2 window_pos(0, v_pos);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
 
     ImGui::Begin("Log", opened, window_flags);
 
-    static std::filesystem::file_time_type log_time;
-    auto                                   log_file = fs::current_path() / "logs" / "saturnin.log";
+    const auto stream = Log::getStream();
+    ImGui::TextUnformatted(stream.c_str());
 
-    static std::string value_displayed{};
-    if (log_time != fs::last_write_time(log_file)) {
-        std::ifstream input_file(log_file.c_str(), std::ios::in);
-        if (input_file.is_open()) {
-            std::stringstream buffer;
-            buffer << input_file.rdbuf();
-            input_file.close();
-
-            value_displayed = buffer.str();
-        }
-        log_time = fs::last_write_time(log_file);
+    static size_t current_size{0};
+    if (stream.size() > current_size) {
+        ImGui::SetScrollHereY(1.0f);
+        current_size = stream.size();
     }
-    ImGui::TextUnformatted(value_displayed.c_str());
+
+    ImGui::End();
+}
+
+void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
+    const ImVec2 window_size(620, 320);
+    ImGui::SetNextWindowSize(window_size);
+
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
+    ImGui::Begin("Sh2 debug", opened, window_flags);
+
+    static Sh2Type sh2_type{Sh2Type::master};
+    if (ImGui::RadioButton(tr("Master").c_str(), sh2_type == Sh2Type::master)) { sh2_type = Sh2Type::master; };
+    ImGui::SameLine();
+    if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) { sh2_type = Sh2Type::slave; };
+
+    sh2::Sh2* current_sh2{nullptr};
+    switch (sh2_type) {
+        case Sh2Type::master: current_sh2 = state.masterSh2(); break;
+        case Sh2Type::slave: current_sh2 = state.slaveSh2(); break;
+    }
+
+    {
+        // General registers
+        const ImVec2 child_size(300, 262);
+        ImGui::BeginChild("ChildRegisters", child_size, true, window_flags);
+
+        ImGui::TextDisabled(tr("General registers").c_str());
+        ImGui::Separator();
+
+        const std::string mask{"R{:<2d} = {:#010x}"};
+        u8                i{};
+
+        ImGui::Columns(2);
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r0)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r1)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r2)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r3)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r4)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r5)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r6)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r7)).c_str());
+
+        ImGui::NextColumn();
+
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r8)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r9)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r10)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r11)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r12)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r13)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r14)).c_str());
+        ImGui::Text(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r15)).c_str());
+
+        ImGui::Columns(1);
+        ImGui::Separator();
+
+        ImGui::Columns(2);
+        ImGui::TextDisabled(tr("System registers").c_str());
+        ImGui::NextColumn();
+        ImGui::TextDisabled(tr("Control registers").c_str());
+
+        ImGui::Columns(1);
+        ImGui::Separator();
+
+        ImGui::Columns(2);
+        const std::string system_mask{"{:<4} = {:#010x}"};
+        ImGui::Text(fmt::format(system_mask, "MACH", current_sh2->getRegister(Sh2Register::mach)).c_str());
+        ImGui::Text(fmt::format(system_mask, "MACL", current_sh2->getRegister(Sh2Register::macl)).c_str());
+        ImGui::Text(fmt::format(system_mask, "PR", current_sh2->getRegister(Sh2Register::pr)).c_str());
+        ImGui::Text(fmt::format(system_mask, "PC", current_sh2->getRegister(Sh2Register::pc)).c_str());
+
+        ImGui::NextColumn();
+
+        // ImGui::Separator();
+        const std::string control_mask{"{:<3} = {:#010x}"};
+        ImGui::Text(fmt::format(control_mask, "VBR", current_sh2->getRegister(Sh2Register::vbr)).c_str());
+        ImGui::Text(fmt::format(control_mask, "GBR", current_sh2->getRegister(Sh2Register::gbr)).c_str());
+        ImGui::Text(fmt::format(control_mask, "SR", current_sh2->getRegister(Sh2Register::sr)).c_str());
+
+        ImGui::EndChild();
+    }
+    ImGui::SameLine();
+    {
+        // Disassembly
+        const ImVec2 child_size(300, 262);
+        ImGui::BeginChild("ChildDisassembly", child_size, true, window_flags);
+
+        ImGui::TextDisabled(tr("Disassembly").c_str());
+        ImGui::Separator();
+
+        auto pc = current_sh2->getRegister(Sh2Register::pc);
+        for (u32 i = (pc - 6); i < (pc + 20); i += 2) {
+            auto opcode = state.memory()->read<u16>(i);
+            if (i == pc) {
+                ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), sh2::disasm(i, opcode).c_str());
+            } else {
+                ImGui::Text(sh2::disasm(i, opcode).c_str());
+            }
+        }
+        ImGui::EndChild();
+    }
+
     ImGui::End();
 }
 
@@ -748,6 +846,17 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 wid
             ImGui::MenuItem(tr("Load ST-V rom").c_str(), nullptr, &show_load_stv);
             ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary);
             ImGui::EndMenu();
+        }
+        switch (state.emulationStatus()) {
+            case core::EmulationStatus::running:
+            case core::EmulationStatus::paused:
+            case core::EmulationStatus::reset: {
+                if (ImGui::BeginMenu(tr("Debug").c_str())) {
+                    ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
+
+                    ImGui::EndMenu();
+                }
+            }
         }
 
         ImGui::MenuItem(tr("Options").c_str(), nullptr, &show_options);
@@ -761,18 +870,11 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 wid
     constexpr u16 window_height{200};
     showRenderingWindow(opengl, window_width, window_height);
 
-    if (show_options) {
-        showOptionsWindow(state, &show_options);
-    }
-    if (show_load_stv) {
-        showStvWindow(&show_load_stv);
-    }
-    if (show_demo) {
-        showImguiDemoWindow(show_demo);
-    }
-    if (show_log) {
-        showLogWindow(&show_log);
-    }
+    if (show_options) { showOptionsWindow(state, &show_options); }
+    if (show_load_stv) { showStvWindow(&show_load_stv); }
+    if (show_demo) { showImguiDemoWindow(show_demo); }
+    if (show_log) { showLogWindow(&show_log); }
+    if (show_debug_sh2) { showDebugSh2Window(state, &show_debug_sh2); }
 }
 
 void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t height) {

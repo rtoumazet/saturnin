@@ -22,6 +22,7 @@
 #include "interrupt_sources.h"
 #include "scu_registers.h"
 #include "scu.h"
+#include "sh2_instructions.h"
 #include "utilities.h"
 
 namespace is = saturnin::core::interrupt_source;
@@ -942,9 +943,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
 }
 
 void Sh2::executeDma() {
-    if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::disabled) {
-        return;
-    }
+    if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::disabled) { return; }
 
     auto conf_channel_0{configureDmaTransfer(DmaChannel::channel_0)};
     auto conf_channel_1{configureDmaTransfer(DmaChannel::channel_1)};
@@ -1160,11 +1159,40 @@ void Sh2::sendInterruptCaptureSignal() {
 
 auto Sh2::run() -> u8 {
     runInterruptController();
-    u8 cycles_to_run = 1; // Will have to be changed when instruction execution is plugged in
+    current_opcode_ = memory()->read<u16>(pc_);
+    execute(*this);
+    runDivisionUnit(cycles_elapsed_);
+    runFreeRunningTimer(cycles_elapsed_);
+    return cycles_elapsed_;
+}
 
-    runDivisionUnit(cycles_to_run);
-    runFreeRunningTimer(cycles_to_run);
-    return cycles_to_run;
+auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
+    switch (reg) {
+        case Sh2Register::pc: return pc_; break;
+        case Sh2Register::pr: return pr_; break;
+        case Sh2Register::macl: return macl_; break;
+        case Sh2Register::mach: return mach_; break;
+        case Sh2Register::vbr: return vbr_; break;
+        case Sh2Register::gbr: return gbr_; break;
+        case Sh2Register::sr: return sr_.toU32(); break;
+        case Sh2Register::r0: return r_[0]; break;
+        case Sh2Register::r1: return r_[1]; break;
+        case Sh2Register::r2: return r_[2]; break;
+        case Sh2Register::r3: return r_[3]; break;
+        case Sh2Register::r4: return r_[4]; break;
+        case Sh2Register::r5: return r_[5]; break;
+        case Sh2Register::r6: return r_[6]; break;
+        case Sh2Register::r7: return r_[7]; break;
+        case Sh2Register::r8: return r_[8]; break;
+        case Sh2Register::r9: return r_[9]; break;
+        case Sh2Register::r10: return r_[10]; break;
+        case Sh2Register::r11: return r_[11]; break;
+        case Sh2Register::r12: return r_[12]; break;
+        case Sh2Register::r13: return r_[13]; break;
+        case Sh2Register::r14: return r_[14]; break;
+        case Sh2Register::r15: return r_[15]; break;
+    }
+    return 0;
 }
 
 } // namespace saturnin::sh2
