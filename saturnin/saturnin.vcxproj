@@ -210,6 +210,7 @@ xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ 
     <ClInclude Include="lib\imgui\imgui_impl_opengl2.h" />
     <ClInclude Include="lib\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="lib\imgui\imgui_loader.h" />
+    <ClInclude Include="lib\imgui\imgui_memory_editor.h" />
     <ClInclude Include="src\cdrom\aspi.h" />
     <ClInclude Include="src\cdrom\cdrom.h" />
     <ClInclude Include="src\cdrom\iso9660.h" />

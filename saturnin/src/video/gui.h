@@ -116,7 +116,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened);
 void showLogWindow(bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showDebugSh2Window(core::EmulatorContext& state,bool* opened);
+/// \fn void showSh2DebugWindow(core::EmulatorContext& state, bool* opened);
 ///
 /// \brief  Display the debug window for both SH2.
 ///
@@ -127,7 +127,9 @@ void showLogWindow(bool* opened);
 /// \param [in,out] opened  True will display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showDebugSh2Window(core::EmulatorContext& state, bool* opened);
+void showSh2DebugWindow(core::EmulatorContext& state, bool* opened);
+
+void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u32 height);

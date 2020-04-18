@@ -21,12 +21,19 @@
 #include <filesystem> // filesystem
 #include <fstream>    // ifstream
 #include <thread>     // thread
+#include <tuple>      //tuple
 #include "gui.h"
+#include "../locale.h"                             // tr
 #include "../../lib/imgui/imgui_custom_controls.h" // peripheralKeyCombo
-#include "../emulator_enums.h"                     // EmulationStatus
+
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#include "../../lib/imgui/imgui_memory_editor.h" // MemoryEditor
+#pragma warning(pop)
+
+#include "../emulator_enums.h" // EmulationStatus
 #include "../config.h"
-#include "../locale.h" // tr
-#include "../sh2.h"    // Sh2
+#include "../sh2.h" // Sh2
 #include "../sh2_instructions.h"
 #include "../smpc.h"        // SaturnDigitalPad, PeripheralKey
 #include "../utilities.h"   // stringToVector
@@ -39,14 +46,16 @@ namespace fs    = std::filesystem;
 
 namespace saturnin::gui {
 
-static bool show_load_stv    = false;
-static bool show_load_binary = false;
-static bool show_debug_sh2   = false;
-static bool show_options     = false;
-static bool show_demo        = true;
-static bool show_log         = true;
+static bool show_load_stv     = false;
+static bool show_load_binary  = false;
+static bool show_debug_sh2    = false;
+static bool show_debug_memory = false;
+static bool show_options      = false;
+static bool show_demo         = true;
+static bool show_log          = true;
 
 using core::Log;
+using core::MemoryMapArea;
 using core::PeripheralKey;
 using core::PeripheralLayout;
 using core::SaturnDigitalPad;
@@ -738,7 +747,7 @@ void showLogWindow(bool* opened) {
     ImGui::End();
 }
 
-void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
+void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
     const ImVec2 window_size(650, 320);
     ImGui::SetNextWindowSize(window_size);
 
@@ -853,12 +862,41 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
         ImGui::NewLine();
         ImGui::NewLine();
         ImGui::PushButtonRepeat(true);
-        if (ImGui::ArrowButton("##up", ImGuiDir_Up)) { current_pc -= 2; }
+        if (ImGui::ArrowButton("##up", ImGuiDir_Up)) {
+            if (current_pc > 0) { current_pc -= 2; }
+        }
         if (ImGui::ArrowButton("##down", ImGuiDir_Down)) { current_pc += 2; }
         ImGui::PopButtonRepeat();
 
         ImGui::EndChild();
     }
+
+    ImGui::End();
+}
+
+void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
+    const ImVec2 window_size(600, 320);
+    ImGui::SetNextWindowSize(window_size);
+
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
+    ImGui::Begin(tr("Memory debug").c_str(), opened, window_flags);
+
+    static auto current_area = MemoryMapArea::rom;
+
+    if (ImGui::BeginCombo(tr("Memory area").c_str(), state.memory()->memory_map_[current_area].c_str())) {
+        for (const auto& [k, v] : state.memory()->memory_map_) {
+            bool is_selected = (current_area == k);
+            if (ImGui::Selectable(v.c_str(), is_selected)) current_area = k;
+            if (is_selected) ImGui::SetItemDefaultFocus();
+        }
+
+        ImGui::EndCombo();
+    }
+
+    auto area_data = state.memory()->getMemoryMapAreaData(current_area);
+
+    static MemoryEditor editor; // store your state somewhere
+    editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
 
     ImGui::End();
 }
@@ -876,7 +914,7 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 wid
             case core::EmulationStatus::reset: {
                 if (ImGui::BeginMenu(tr("Debug").c_str())) {
                     ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
-
+                    ImGui::MenuItem(tr("Memory").c_str(), nullptr, &show_debug_memory);
                     ImGui::EndMenu();
                 }
             }
@@ -897,7 +935,8 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 wid
     if (show_load_stv) { showStvWindow(&show_load_stv); }
     if (show_demo) { showImguiDemoWindow(show_demo); }
     if (show_log) { showLogWindow(&show_log); }
-    if (show_debug_sh2) { showDebugSh2Window(state, &show_debug_sh2); }
+    if (show_debug_sh2) { showSh2DebugWindow(state, &show_debug_sh2); }
+    if (show_debug_memory) { showMemoryDebugWindow(state, &show_debug_memory); }
 }
 
 void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t height) {

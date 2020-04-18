@@ -31,7 +31,7 @@
 namespace ImGui {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto Combo(const char* label, int* currIndex, std::vector<std::string>& values) -> bool;
+/// \fn auto Combo(const char* label, int* current_index, std::vector<std::string>& values) -> bool;
 ///
 /// \brief  Wrapper for ImGui combos allowing the use of vector of strings
 ///
@@ -39,16 +39,16 @@ namespace ImGui {
 /// \date   06/09/2018
 ///
 /// \param          label       Label of the combo.
-/// \param [in,out] currIndex   Current index selected.
+/// \param [in,out] current_index   Current index selected.
 /// \param [in,out] values      Values to display in the combo.
 ///
 /// \returns    True if it succeeds.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto Combo(const char* label, int* currIndex, std::vector<std::string>& values) -> bool;
+auto Combo(const char* label, int* current_index, std::vector<std::string>& values) -> bool;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto ListBox(const char* label, int* currIndex, std::vector<std::string>& values) -> bool;
+/// \fn auto ListBox(const char* label, int* current_index, std::vector<std::string>& values) -> bool;
 ///
 /// \brief  Wrapper for ImGui listboxes allowing the use of vector of strings
 ///
@@ -56,12 +56,12 @@ auto Combo(const char* label, int* currIndex, std::vector<std::string>& values) 
 /// \date   06/09/2018
 ///
 /// \param          label       Label of the combo.
-/// \param [in,out] currIndex   Current index selected.
+/// \param [in,out] current_index   Current index selected.
 /// \param [in,out] values      Values to display in the combo.
 ///
 /// \returns    True if it succeeds.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto ListBox(const char* label, int* currIndex, std::vector<std::string>& values) -> bool;
+auto ListBox(const char* label, int* current_index, std::vector<std::string>& values) -> bool;
 
 } // namespace ImGui

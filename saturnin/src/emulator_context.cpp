@@ -160,6 +160,7 @@ void EmulatorContext::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
 
+        memory()->initialize();
         memory()->loadBios(hardware_mode_);
 
         sh2::initializeOpcodesLut();

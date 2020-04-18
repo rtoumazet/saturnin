@@ -27,6 +27,7 @@
 
 #include <array>      // array
 #include <filesystem> // filesystem
+#include <string>     // string
 #include <vector>     // vector
 #include <Windows.h>  // VK constants
 
@@ -98,6 +99,8 @@ constexpr u32 memory_handler_size{0x10000};
 
 constexpr u32 cart_absolute_address{0x02000000};
 
+constexpr u32 full_memory_map_size{0x10000000};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   StvIOPort
 ///
@@ -148,6 +151,36 @@ enum class RomLoad {
     even_interleaved ///< Data loaded on even bytes.
 };
 
+enum class MemoryMapArea {
+    rom,                 ///< ROM
+    smpc,                ///< SMPC
+    backup_ram,          ///< Backup RAM
+    workram_low,         ///< Workram low
+    stv_io,              ///< ST-V IO ports
+    cart,                ///< Cartridge
+    cd_block,            ///< Cd block
+    scsp,                ///< SCSP
+    vdp1_ram,            ///< VDP1 RAM
+    vdp1_framebuffer,    ///< VDP1 framebuffer
+    vdp1_registers,      ///< VDP1 registers
+    vdp2_video_ram,      ///< VDP2 video RAM
+    vdp2_color_ram,      ///< VDP2 color RAM
+    vdp2_registers,      ///< VDP2 registers
+    scu,                 ///< SCU
+    workram_high,        ///< Workram high
+    master_frt,          ///< Master FRT
+    slave_frt,           ///< Slave FRT
+    sh2_registers,       ///< SH2 registers
+    sh2_cache_addresses, ///< SH2 cache addresses
+    sh2_cache_data       ///< SH2 cache data
+};
+
+// Memory map address ranges
+struct AddressRange {
+    u32 start;
+    u32 end;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Memory
 ///
@@ -159,10 +192,13 @@ enum class RomLoad {
 
 class Memory {
   public:
+    using MapArea = std::map<const MemoryMapArea, const std::string>; ///< MapArea alias definition.
+    MapArea memory_map_; ///< Link between MemoryMapArea enumerators and string values.
+
     //@{
     // Constructors / Destructors
     Memory() = delete;
-    Memory(EmulatorContext* ec) : emulator_context_(ec) { initialize(); };
+    Memory(EmulatorContext* ec) : emulator_context_(ec){};
     Memory(const Memory&) = delete;
     Memory(Memory&&)      = delete;
     auto operator=(const Memory&) & -> Memory& = delete;
@@ -356,16 +392,6 @@ class Memory {
 
     void sendFrtInterruptToSlave() const;
 
-    /// \name Context objects accessors
-    //@{
-    [[nodiscard]] auto masterSh2() const -> sh2::Sh2*;
-    [[nodiscard]] auto slaveSh2() const -> sh2::Sh2*;
-    [[nodiscard]] auto scu() const -> Scu*;
-    [[nodiscard]] auto config() const -> Config*;
-    [[nodiscard]] auto smpc() const -> Smpc*;
-    //@}
-
-  private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::initialize();
     ///
@@ -378,6 +404,31 @@ class Memory {
     void initialize();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Memory::getMemoryMapAreaData(MemoryMapArea area) -> std::tuple<u8*, size_t, u32> const;
+    ///
+    /// \brief  Gets data related to the memory memory map area.
+    ///
+    /// \author Runik
+    /// \date   16/04/2020
+    ///
+    /// \param  area    The area to get data from.
+    ///
+    /// \returns    Null if it fails, else the memory area data.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    [[nodiscard]] auto getMemoryMapAreaData(MemoryMapArea area) -> std::tuple<u8*, size_t, u32> const;
+
+    /// \name Context objects accessors
+    //@{
+    [[nodiscard]] auto masterSh2() const -> sh2::Sh2*;
+    [[nodiscard]] auto slaveSh2() const -> sh2::Sh2*;
+    [[nodiscard]] auto scu() const -> Scu*;
+    [[nodiscard]] auto config() const -> Config*;
+    [[nodiscard]] auto smpc() const -> Smpc*;
+    //@}
+
+  private:
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::initializeHandlers();
     ///
     /// \brief  Initializes all the memory handlers of the memory map.
@@ -389,74 +440,75 @@ class Memory {
     void initializeHandlers();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<typename T> void Memory::initializeHandler(u32 begin, u32 end, ReadType<T> func);
+    /// \fn void Memory::initializeMemoryMap();
+    ///
+    /// \brief  Initializes the memory map
+    ///
+    /// \author Runik
+    /// \date   17/04/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initializeMemoryMap();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> void Memory::initializeHandler(AddressRange& ar, ReadType<T> func)
     ///
     /// \brief  Binds the read function to a memory range in the Saturn memory.
     ///
-    /// \author Runik
-    /// \date   04/11/2018
-    ///
-    /// \tparam T       Type of data.
-    /// \param  begin   Start address.
-    /// \param  end     End address.
-    /// \param  func    Function to bind.
+    /// \tparam T   Type of data.
+    /// \param [in,out] ar      Start address.
+    /// \param          func    Function to bind.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    void initializeHandler(u32 begin, u32 end, ReadType<T> func) {
-        begin >>= number_of_bits_16;
-        end >>= number_of_bits_16;
+    void initializeHandler(AddressRange ar, ReadType<T> func) {
+        ar.start >>= number_of_bits_16;
+        ar.end >>= number_of_bits_16;
 
         auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
-        for (u32 current = begin; current <= end; ++current) {
+        for (u32 current = ar.start; current <= ar.end; ++current) {
             auto& handler                   = std::get<ReadHandler<T>&>(t);
             handler[current & bitmask_FFFF] = func;
         }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<typename T> void Memory::initializeHandler(u32 begin, u32 end, WriteType<T> func);
+    /// \fn template<typename T> void Memory::initializeHandler(AddressRange& ar, WriteType<T> func)
     ///
     /// \brief  Binds the write function to a memory range in the Saturn memory.
     ///
-    /// \author Runik
-    /// \date   04/11/2018
-    ///
-    /// \tparam T       Type of data.
-    /// \param  begin   Start address.
-    /// \param  end     End address.
-    /// \param  func    Function to bind.
+    /// \tparam T   Type of data.
+    /// \param [in,out] ar      Address range.
+    /// \param          func    Function to bind.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    void initializeHandler(u32 begin, u32 end, WriteType<T> func) {
-        begin >>= number_of_bits_16;
-        end >>= number_of_bits_16;
+    void initializeHandler(AddressRange ar, WriteType<T> func) {
+        ar.start >>= number_of_bits_16;
+        ar.end >>= number_of_bits_16;
 
         auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
-        for (u32 current = begin; current <= end; ++current) {
+        for (u32 current = ar.start; current <= ar.end; ++current) {
             auto& handler                   = std::get<WriteHandler<T>&>(t);
             handler[current & bitmask_FFFF] = func;
         }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template <template <class> class OpType, class... T> auto Memory::initializeHandlers(u32 begin, u32 end)
+    /// \fn template<template<class> class OpType, class... T> auto Memory::initializeHandlers(AddressRange& ar)
     ///
     /// \brief  Initializes a group of handlers.
     ///
-    /// \author Runik
-    /// \date   20/12/2018
+    /// \tparam OpType  Type of the operation type.
+    /// \tparam T       Generic type parameter.
+    /// \param [in,out] ar  The address range.
     ///
-    /// \param  begin   Start address.
-    /// \param  end     End address.
-    ///
-    /// \return An auto.
+    /// \returns    An auto.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<template<class> class OpType, class... T>
-    auto initializeHandlers(u32 begin, u32 end) {
-        (initializeHandler<T>(begin, end, OpType<T>{}), ...);
+    auto initializeHandlers(const AddressRange& ar) {
+        (initializeHandler<T>(ar, OpType<T>{}), ...);
     }
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
@@ -1552,6 +1604,19 @@ struct writeCacheData {
 
 inline auto isMasterSh2InOperation(const Memory& m) -> bool;
 
-inline auto getDirectAddress(u32 cached_address) -> u32;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn inline auto getDirectAddress(AddressRange ar) -> AddressRange;
+///
+/// \brief  Returns the direct address of the address range.
+///
+/// \author Runik
+/// \date   18/04/2020
+///
+/// \param  ar  The address range.
+///
+/// \returns    The direct address.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline auto getDirectAddress(AddressRange ar) -> AddressRange;
 
 } // namespace saturnin::core

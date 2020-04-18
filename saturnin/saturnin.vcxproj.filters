@@ -212,5 +212,8 @@
     <ClInclude Include="src\sh2_disasm.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_memory_editor.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
