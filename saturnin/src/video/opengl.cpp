@@ -20,27 +20,27 @@
 #include <windows.h> // removes C4005 warning
 #include <iostream>  // cout
 #include <lodepng.h>
-#include <GLFW/glfw3.h>
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>
+#include <GLFW/glfw3.h>
 
 #include "opengl.h"
 #include "gui.h"
 #include "../config.h"
+#include "../locale.h" // tr
 #include "../log.h"
 
 namespace saturnin::video {
 
 using core::Log;
+using core::tr;
 
 Opengl::Opengl(core::Config* config) {
     config_        = config;
     bool is_legacy = config->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
-    // if (is_legacy)  calculateRendering = std::bind(&Opengl::calculateLegacyRendering, this);
-    // else            calculateRendering = std::bind(&Opengl::calculateModernRendering, this);
 
-    iconsTextureId = generateIconsTexture();
+    // iconsTextureId = generateIconsTexture();
 }
 
 auto Opengl::config() const -> Config* { return config_; }
@@ -64,6 +64,69 @@ void Opengl::setTextureDimension(const u32 width, const u32 height) {
 };
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
+
+auto Opengl::generateTextureFromFile(const std::string& filename) const -> u32 {
+    const auto full_path{std::filesystem::current_path() / "res" / filename};
+
+    std::ifstream input_file(full_path, std::ios::binary);
+    if (input_file) {
+        std::stringstream buffer;
+        buffer << input_file.rdbuf();
+        input_file.close();
+
+        std::string     str = buffer.str();
+        std::vector<u8> source_data{};
+        source_data.reserve(str.size());
+
+        for (const auto s : str) {
+            source_data.emplace_back(s);
+        }
+
+        u32             width{};
+        u32             height{};
+        std::vector<u8> decoded_data{};
+        u32             error = lodepng::decode(decoded_data, width, height, source_data, LCT_RGBA);
+
+        // If there's an error, display it.
+        if (error != 0) {
+            Log::warning("opengl", lodepng_error_text(error));
+            return 0;
+        }
+
+        // glEnable(GL_TEXTURE_2D);
+
+        u32 texture{generateTextureFromVector(width, height, decoded_data)};
+        // glGenTextures(1, &texture);
+        // glBindTexture(GL_TEXTURE_2D, texture);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, decoded_data.data());
+
+        return texture;
+    } else {
+        Log::warning("opengl", tr("Image res/{} not found !"), filename);
+    }
+
+    return 0;
+};
+
+auto Opengl::generateUiIcons() -> bool {
+    icons_map_.emplace(IconId::play, generateTextureFromFile("icon-play.png"));
+    icons_map_.emplace(IconId::pause, generateTextureFromFile("icon-pause.png"));
+    icons_map_.emplace(IconId::stop, generateTextureFromFile("icon-stop.png"));
+    icons_map_.emplace(IconId::config, generateTextureFromFile("icon-config.png"));
+    icons_map_.emplace(IconId::step_into, generateTextureFromFile("icon-step-into.png"));
+    icons_map_.emplace(IconId::step_over, generateTextureFromFile("icon-step-over.png"));
+    icons_map_.emplace(IconId::step_out, generateTextureFromFile("icon-step-out.png"));
+    icons_map_.emplace(IconId::file, generateTextureFromFile("icon-file.png"));
+    icons_map_.emplace(IconId::debug, generateTextureFromFile("icon-debug.png"));
+
+    return true;
+}
+
+auto Opengl::getIconTexture(const IconId id) -> ImTextureID {
+    return reinterpret_cast<ImTextureID>(static_cast<uptr>(icons_map_[id]));
+}
 
 /* static */
 auto Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool {
@@ -158,9 +221,7 @@ auto Opengl::generateIconsTexture() -> u32 {
 }
 
 auto isModernOpenglCapable() -> bool {
-    if (glfwInit() == GLFW_FALSE) {
-        return false;
-    }
+    if (glfwInit() == GLFW_FALSE) { return false; }
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     constexpr u16 h_window_size{1280};

@@ -26,8 +26,9 @@
 #pragma once
 
 #include <windows.h> // removes C4005 warning
-//#include <functional> // function
-//#include <cstdint>
+#include <imgui.h>
+#include <map> // map
+#include <string>
 #include <vector>
 #include "../emulator_defs.h"
 //#include "../../lib/imgui/imgui_loader.h"
@@ -41,6 +42,8 @@ struct GLFWwindow;
 namespace saturnin::video {
 
 using saturnin::core::Config;
+
+enum class IconId { play, pause, stop, step_into, step_over, step_out, config, file, debug };
 
 class Opengl {
   public:
@@ -65,7 +68,6 @@ class Opengl {
     [[nodiscard]] virtual auto generateEmptyTexture(u32 width, u32 height) const -> u32 = 0;
     virtual void               updateTextureSize(u32 width, u32 height)                 = 0;
     virtual void               deleteTexture() const                                    = 0;
-
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,6 +98,36 @@ class Opengl {
 
     void initializeTexture(u32 width, u32 height);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::generateTextureFromFile(const std::string& filename) const -> u32;
+    ///
+    /// \brief  Generates a texture from a png file located in the ./res directory.
+    ///
+    /// \author Runik
+    /// \date   22/04/2020
+    ///
+    /// \param  filename    Name of the file to generate the texture from.
+    ///
+    /// \returns    The id of the generated texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    [[nodiscard]] auto generateTextureFromFile(const std::string& filename) const -> u32;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::getIconTexture(const IconId id) -> ImTextureID;
+    ///
+    /// \brief  Gets the texture id of the IconId.
+    ///
+    /// \author Runik
+    /// \date   22/04/2020
+    ///
+    /// \param  id  The icon identifier.
+    ///
+    /// \returns    The icon texture id.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    [[nodiscard]] auto getIconTexture(const IconId id) -> ImTextureID;
+
     static auto loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool;
 
     static auto loadIcons(std::vector<uint8_t>& image) -> u32;
@@ -119,6 +151,39 @@ class Opengl {
     [[nodiscard]] auto config() const -> Config*;
 
     void setTextureDimension(u32 width, u32 height);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn virtual auto Opengl::generateTextureFromVector(const u32 width, const u32 height, std::vector<u8>& data) const -> u32
+    /// = 0;
+    ///
+    /// \brief  Generates a texture from a vector.
+    ///
+    /// \author Runik
+    /// \date   22/04/2020
+    ///
+    /// \param          width   Width of the texture.
+    /// \param          height  Height of the texture.
+    /// \param [in,out] data    Texture data.
+    ///
+    /// \returns    The id of the generated texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    virtual auto generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const -> u32 = 0;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::generateUiIcons() -> bool;
+    ///
+    /// \brief  Generates the user interface icons.
+    ///
+    /// \author Runik
+    /// \date   22/04/2020
+    ///
+    /// \returns    True if it succeeds.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto generateUiIcons() -> bool;
+
+    std::map<IconId, u32> icons_map_;
 
     u32 fbo_{};     ///< Framebuffer Object used for rendering to texture.
     u32 texture_{}; ///< Destination texture for render to texture.

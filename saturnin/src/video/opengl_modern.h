@@ -102,6 +102,9 @@ class OpenglModern : public Opengl {
 
     void updateTextureSize(u32 width, u32 height) final;
 
+  protected:
+    u32 generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const final;
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn [[nodiscard]] auto OpenglModern::generateEmptyTexture(u32 width, u32 height) const -> u32 final;

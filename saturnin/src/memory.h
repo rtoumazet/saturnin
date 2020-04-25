@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include <array>      // array
+#include <array> // array
+#include <cassert>
 #include <filesystem> // filesystem
 #include <string>     // string
 #include <vector>     // vector
@@ -630,6 +631,7 @@ struct writeDummy {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
+            // assert(false);
         };
     }
 };
@@ -650,6 +652,7 @@ struct readDummy {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
             Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
+            // assert(false);
             return T{};
         };
     }

@@ -39,6 +39,7 @@ using namespace gl21ext;
 namespace saturnin::video {
 
 using core::Log;
+using core::tr;
 
 void OpenglLegacy::initialize() {
     GLFWwindow* window = glfwGetCurrentContext();
@@ -51,9 +52,11 @@ void OpenglLegacy::initialize() {
     bindTextureToFbo();
     auto status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
     if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
-        Log::error("opengl", "Could not initialize framebuffer object !");
+        Log::error("opengl", tr("Could not initialize framebuffer object !"));
         throw std::runtime_error("Opengl error !");
     }
+
+    if (!generateUiIcons()) { Log::warning("opengl", tr("Could not generate textures for UI icons !")); }
 }
 
 void OpenglLegacy::shutdown() {
@@ -136,9 +139,23 @@ void OpenglLegacy::bindTextureToFbo() const {
 }
 
 void OpenglLegacy::deleteTexture() const {
-    if (texture_ != 0) {
-        glDeleteTextures(1, &texture_);
-    }
+    if (texture_ != 0) { glDeleteTextures(1, &texture_); }
+}
+
+u32 OpenglLegacy::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const {
+    glEnable(GL_TEXTURE_2D);
+
+    u32 texture{};
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    return texture;
 }
 
 static void error_callback(int error, const char* description) {
@@ -149,17 +166,13 @@ static void error_callback(int error, const char* description) {
 auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
     // Setup window
     glfwSetErrorCallback(error_callback);
-    if (glfwInit() == GLFW_FALSE) {
-        return EXIT_FAILURE;
-    }
+    if (glfwInit() == GLFW_FALSE) { return EXIT_FAILURE; }
 
     std::string   window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
     constexpr u16 width{1280};
     constexpr u16 height{720};
     auto          window = glfwCreateWindow(width, height, window_title.c_str(), nullptr, nullptr);
-    if (window == nullptr) {
-        return EXIT_FAILURE;
-    }
+    if (window == nullptr) { return EXIT_FAILURE; }
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
     // glfwSetWindowUserPointer(window, (void*)&state);
@@ -239,9 +252,7 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
 
         gui::buildGui(state, opengl, display_w, display_h);
 
-        if (state.renderingStatus() == core::RenderingStatus::reset) {
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-        }
+        if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
 
         ImGui::Render();
 

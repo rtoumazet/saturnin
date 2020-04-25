@@ -51,7 +51,7 @@ static bool show_load_binary  = false;
 static bool show_debug_sh2    = false;
 static bool show_debug_memory = false;
 static bool show_options      = false;
-static bool show_demo         = true;
+static bool show_demo         = false;
 static bool show_log          = true;
 
 using core::Log;
@@ -74,44 +74,116 @@ void showImguiDemoWindow(const bool show_window) {
     }
 }
 
-void showCoreWindow(core::EmulatorContext& state, const video::Opengl& opengl) {
-    ImGuiWindowFlags window_flags = 0;
-    window_flags |= ImGuiWindowFlags_NoTitleBar;
-    window_flags |= ImGuiWindowFlags_NoResize;
-    window_flags |= ImGuiWindowFlags_NoScrollbar;
+void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration;
+    window_flags |= ImGuiWindowFlags_NoMove;
 
-    // std::vector<uint8_t> icons;
-    // uint32_t tex = opengl.loadIcons(icons);
-
-    const ImVec2 window_pos(400, 0);
+    const ImVec2 window_pos(0, 18);
     ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
 
-    const ImVec2 window_size(300, 40);
+    GLFWwindow* window = glfwGetCurrentContext();
+    s32         width{};
+    s32         height{};
+    glfwGetWindowSize(window, &width, &height);
+
+    const ImVec2 window_size(static_cast<float>(width), 42);
     ImGui::SetNextWindowSize(window_size);
 
     bool show_window;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImColor(180, 180, 180, 102).Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(110, 110, 110, 255).Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor(51, 51, 51, 255).Value);
+
     ImGui::Begin("Core", &show_window, window_flags);
 
-    if (ImGui::Button("Play")) { state.startEmulation(); }
+    const ImVec2 button_size(30, 30);
+
+    // File icon
+    ImGui::ImageButton(opengl.getIconTexture(video::IconId::file), button_size);
+    if (ImGui::IsItemClicked()) {
+        ImGui::SetNextWindowPos(ImVec2(0, 60));
+        ImGui::OpenPopup("file_popup");
+    }
+
+    ImGuiWindowFlags popup_flags = ImGuiWindowFlags_NoMove;
+    if (ImGui::BeginPopup("file_popup", popup_flags)) {
+        ImGui::MenuItem(tr("Load ST-V rom").c_str(), nullptr, &show_load_stv);
+        ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary);
+
+        ImGui::EndPopup();
+    }
+
     ImGui::SameLine();
-    if (ImGui::Button("Pause")) { state.pauseEmulation(); };
+
+    // Debug icon
+    switch (state.emulationStatus()) {
+        case core::EmulationStatus::running:
+        case core::EmulationStatus::paused:
+        case core::EmulationStatus::reset: {
+            ImGui::ImageButton(opengl.getIconTexture(video::IconId::debug), button_size);
+            if (ImGui::IsItemClicked()) {
+                ImGui::SetNextWindowPos(ImVec2(40, 60));
+                ImGui::OpenPopup("debug_popup");
+            }
+
+            if (ImGui::BeginPopup("debug_popup", ImGuiWindowFlags_NoMove)) {
+                ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
+                ImGui::MenuItem(tr("Memory editor").c_str(), nullptr, &show_debug_memory);
+
+                ImGui::EndPopup();
+            }
+        }
+    }
+
     ImGui::SameLine();
-    if (ImGui::Button("Stop")) {
+
+    // Config icon
+    ImGui::ImageButton(opengl.getIconTexture(video::IconId::config), button_size);
+    if (ImGui::IsItemClicked()) { show_options = !show_options; }
+    if (show_options) showOptionsWindow(state, &show_options);
+
+    // Play icon
+    ImGui::SameLine((static_cast<float>(width - 240)) / 2);
+    ImGui::ImageButton(opengl.getIconTexture(video::IconId::play), button_size);
+    if (ImGui::IsItemClicked()) { state.startEmulation(); }
+
+    ImGui::SameLine();
+
+    // Pause icon
+    ImGui::ImageButton(opengl.getIconTexture(video::IconId::pause), button_size);
+    if (ImGui::IsItemClicked()) { state.pauseEmulation(); }
+
+    ImGui::SameLine();
+
+    // Stop icon
+    ImGui::ImageButton(opengl.getIconTexture(video::IconId::stop), button_size);
+    if (ImGui::IsItemClicked()) {
         state.stopEmulation();
         show_debug_sh2 = false;
     }
 
-    // ImGui::SameLine();
-    // ImGui::PushID(0);
-    // ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0 / 7.0f, 0.6f, 0.6f));
-    // ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0 / 7.0f, 0.7f, 0.7f));
-    // ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0 / 7.0f, 0.8f, 0.8f));
-    // ImGui::Button("Click");
-    // ImGui::PopStyleColor(3);
-    // ImGui::PopID();
+    ImGui::SameLine();
+
+    ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_into), button_size);
+    ImGui::SameLine();
+    ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_over), button_size);
+    ImGui::SameLine();
+    ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_out), button_size);
+
+    // ImGui::SameLine(width - 40);
 
     ImGui::End();
-}
+
+    ImGui::PopStyleColor(3);
+    ImGui::PopStyleVar(5);
+} // namespace saturnin::gui
 
 void showRenderingWindow(video::Opengl& opengl, const u32 width, const u32 height) {
     constexpr float offset{20};
@@ -902,28 +974,6 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 width, const u32 height) {
-    if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu(tr("File").c_str())) {
-            ImGui::MenuItem(tr("Load ST-V rom").c_str(), nullptr, &show_load_stv);
-            ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary);
-            ImGui::EndMenu();
-        }
-        switch (state.emulationStatus()) {
-            case core::EmulationStatus::running:
-            case core::EmulationStatus::paused:
-            case core::EmulationStatus::reset: {
-                if (ImGui::BeginMenu(tr("Debug").c_str())) {
-                    ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
-                    ImGui::MenuItem(tr("Memory").c_str(), nullptr, &show_debug_memory);
-                    ImGui::EndMenu();
-                }
-            }
-        }
-
-        ImGui::MenuItem(tr("Options").c_str(), nullptr, &show_options);
-    }
-    ImGui::EndMainMenuBar();
-
     showCoreWindow(state, opengl);
 
     // showRenderingWindow(opengl, width, height);
@@ -931,12 +981,8 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 wid
     constexpr u16 window_height{200};
     showRenderingWindow(opengl, window_width, window_height);
 
-    if (show_options) { showOptionsWindow(state, &show_options); }
-    if (show_load_stv) { showStvWindow(&show_load_stv); }
     if (show_demo) { showImguiDemoWindow(show_demo); }
     if (show_log) { showLogWindow(&show_log); }
-    if (show_debug_sh2) { showSh2DebugWindow(state, &show_debug_sh2); }
-    if (show_debug_memory) { showMemoryDebugWindow(state, &show_debug_memory); }
 }
 
 void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t height) {

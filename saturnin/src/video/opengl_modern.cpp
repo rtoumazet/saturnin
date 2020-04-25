@@ -40,6 +40,7 @@ using namespace gl;
 namespace saturnin::video {
 
 using core::Log;
+using core::tr;
 
 void OpenglModern::initialize() {
     GLFWwindow* window = glfwGetCurrentContext();
@@ -61,6 +62,8 @@ void OpenglModern::initialize() {
     program_shader_                         = createProgramShader(vertex_shader, fragment_shader);
     std::vector<uint32_t> shaders_to_delete = {vertex_shader, fragment_shader};
     deleteShaders(shaders_to_delete);
+
+    if (!generateUiIcons()) { Log::warning("opengl", tr("Could not generate textures for UI icons !")); }
 }
 
 void OpenglModern::shutdown() { glDeleteProgram(program_shader_); }
@@ -91,9 +94,23 @@ void OpenglModern::bindTextureToFbo() const {
 }
 
 void OpenglModern::deleteTexture() const {
-    if (texture_ != 0) {
-        glDeleteTextures(1, &texture_);
-    }
+    if (texture_ != 0) { glDeleteTextures(1, &texture_); }
+}
+
+u32 OpenglModern::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const {
+    glEnable(GL_TEXTURE_2D);
+
+    u32 texture{};
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    return texture;
 }
 
 /* static */
@@ -230,9 +247,7 @@ static void error_callback(int error, const char* description) { fprintf(stderr,
 auto runModernOpengl(core::EmulatorContext& state) -> s32 {
     // Setup window
     glfwSetErrorCallback(error_callback);
-    if (glfwInit() == GLFW_FALSE) {
-        return EXIT_FAILURE;
-    }
+    if (glfwInit() == GLFW_FALSE) { return EXIT_FAILURE; }
 
     // Decide GL+GLSL versions
 #if __APPLE__
@@ -256,9 +271,7 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
     constexpr u16 h_window_size{1280};
     constexpr u16 v_window_size{720};
     auto          window = glfwCreateWindow(h_window_size, v_window_size, window_title.c_str(), nullptr, nullptr);
-    if (window == nullptr) {
-        return EXIT_FAILURE;
-    }
+    if (window == nullptr) { return EXIT_FAILURE; }
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
     // glfwSetWindowUserPointer(window, (void*)&state);
@@ -320,9 +333,7 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
 
         gui::buildGui(state, opengl, display_w, display_h);
 
-        if (state.renderingStatus() == core::RenderingStatus::reset) {
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-        }
+        if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
