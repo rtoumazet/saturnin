@@ -47,7 +47,7 @@ namespace saturnin::gui {
 void showImguiDemoWindow(bool show_window);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showCoreWindow(core::EmulatorContext& state, const video::Opengl& opengl);
+/// \fn void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl);
 ///
 /// \brief  Displays the core window.
 ///
@@ -55,10 +55,10 @@ void showImguiDemoWindow(bool show_window);
 /// \date   24/10/2019
 ///
 /// \param [in,out] state   The emulator context.
-/// \param          opengl  The opengl object.
+/// \param [in,out] opengl  The opengl object.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showCoreWindow(core::EmulatorContext& state, const video::Opengl& opengl);
+void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showRenderingWindow(video::Opengl& opengl, u32 width, u32 height);
@@ -116,18 +116,31 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened);
 void showLogWindow(bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showSh2DebugWindow(core::EmulatorContext& state, bool* opened);
+/// \fn void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, bool* opened);
 ///
-/// \brief  Display the debug window for both SH2.
+/// \brief  Displays the debug window for both SH2.
 ///
 /// \author Runik
 /// \date   06/04/2020
 ///
 /// \param [in,out] state   The emulator context.
+/// \param [in,out] opengl  The opengl.
 /// \param [in,out] opened  True will display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showSh2DebugWindow(core::EmulatorContext& state, bool* opened);
+void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, bool* opened);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
+///
+/// \brief  Displays the memory debug window
+///
+/// \author Runik
+/// \date   27/04/2020
+///
+/// \param [in,out] state   The emulator state.
+/// \param [in,out] opened  If non-null, true if opened.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
 

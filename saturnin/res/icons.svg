@@ -24,11 +24,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="32"
-     inkscape:cx="25.599185"
-     inkscape:cy="25.759112"
+     inkscape:zoom="11.313709"
+     inkscape:cx="18.450918"
+     inkscape:cy="10.85163"
      inkscape:document-units="mm"
-     inkscape:current-layer="g4619"
+     inkscape:current-layer="g4523"
      showgrid="true"
      showguides="true"
      inkscape:guide-bbox="true"
@@ -101,7 +101,7 @@
          inkscape:connector-curvature="0"
          id="icon-stop"
          d="m 2.6458297,287.73958 v 6.61459 h 6.614587 v -6.61459 z"
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:#ff0002;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
     <path
        inkscape:connector-curvature="0"
@@ -121,7 +121,7 @@
          inkscape:connector-curvature="0"
          id="icon-play"
          d="m 2.6458333,287.73958 v 6.61458 l 6.6145831,-3.30729 z"
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:#00ff05;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
     <g
        style="display:none"
@@ -133,23 +133,23 @@
          transform="matrix(0.83333331,0,0,0.83333331,-9.4809027,299.31076)"
          inkscape:export-ydpi="303"
          inkscape:export-xdpi="303"
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.12;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:#0100ff;fill-opacity:1;stroke:#000000;stroke-width:0.12;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          id="icon-pause">
         <g
-           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.12;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           style="fill:#0100ff;fill-opacity:1;stroke:#000000;stroke-width:0.12;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            id="g4515"
            transform="translate(-6.6145833,-33.072916)">
           <path
              inkscape:connector-curvature="0"
              id="path4509"
              d="M 21.166667,19.187499 H 23.8125 v 7.9375 h -2.645833 z"
-             style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.12;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+             style="fill:#0100ff;fill-opacity:1;stroke:#000000;stroke-width:0.12;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
              sodipodi:nodetypes="ccccc" />
           <path
              inkscape:connector-curvature="0"
              id="path4511"
              d="m 29.104167,19.187499 h -2.645834 v 7.9375 h 2.645834 z"
-             style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.12;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+             style="fill:#0100ff;fill-opacity:1;stroke:#000000;stroke-width:0.12;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
              sodipodi:nodetypes="ccccc" />
         </g>
       </g>
@@ -183,7 +183,7 @@
            inkscape:connector-curvature="0"
            id="path4530-8-2-0"
            d="m 57.414583,-14.555133 v 2.468442 h -1.322917 l 1.992643,2.2113019 1.976107,-2.2113019 h -1.322917 l 10e-7,-2.468442 z"
-           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+           style="fill:#00c8ff;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       </g>
     </g>
     <g
@@ -199,7 +199,7 @@
          inkscape:label="#g4649"
          id="icon-step-over">
         <path
-           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           style="fill:#00c8ff;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 40.48165,-11.316993 c 4.19768,-4.028144 7.850065,-0.740219 7.850065,-0.740219 l 0.706716,-0.791203 0.438248,2.8741365 -2.558397,-0.5005285 0.706717,-0.791203 c 0,0 -3.174999,-2.619407 -6.243846,0.956053 z"
            id="path4530-8-3"
            inkscape:connector-curvature="0"
@@ -219,7 +219,7 @@
       </g>
     </g>
     <g
-       style="display:none"
+       style="display:inline"
        inkscape:label="Step out"
        id="g4523"
        inkscape:groupmode="layer">
@@ -247,7 +247,7 @@
            inkscape:connector-curvature="0"
            id="path4530-8-2-0-3"
            d="m 57.414583,-9.8753891 v -2.4684419 h -1.322917 l 1.992643,-2.211302 1.976107,2.211302 h -1.322917 l 10e-7,2.4684419 z"
-           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+           style="fill:#00c8ff;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       </g>
     </g>
     <g
@@ -301,7 +301,7 @@
       </g>
     </g>
     <g
-       style="display:inline"
+       style="display:none"
        inkscape:label="Debug"
        id="g4619"
        inkscape:groupmode="layer">
