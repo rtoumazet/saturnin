@@ -89,14 +89,11 @@ auto EmulatorContext::initialize() -> bool {
 void EmulatorContext::startEmulation() {
     switch (emulation_status_) {
         case EmulationStatus::running: {
+            debugStatus(DebugStatus::disabled);
             return;
         }
-        case EmulationStatus::paused: {
-            emulation_status_ = EmulationStatus::running;
-            break;
-        }
         case EmulationStatus::stopped: {
-            emulation_status_ = EmulationStatus::running;
+            emulationStatus(EmulationStatus::running);
 
             emulation_main_thread_ = std::thread(&EmulatorContext::emulationMainThread, this);
             if (emulation_main_thread_.joinable()) { emulation_main_thread_.detach(); }
@@ -154,7 +151,7 @@ void EmulatorContext::stopEmulation() {
     if (emulation_main_thread_.joinable()) { emulation_main_thread_.join(); }
 }
 
-void EmulatorContext::pauseEmulation() { emulation_status_ = core::EmulationStatus::paused; }
+void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
 
 void EmulatorContext::emulationMainThread() {
     try {
@@ -169,11 +166,13 @@ void EmulatorContext::emulationMainThread() {
         // Log::info("main", sh2::debug(0xCD43));
         smpc()->initialize();
 
-        while (this->emulation_status_ == EmulationStatus::running || this->emulation_status_ == EmulationStatus::paused) {
-            if (this->emulation_status_ == EmulationStatus::running) {
+        while (emulationStatus() == EmulationStatus::running) {
+            if (debugStatus() != DebugStatus::paused) {
                 master_sh2_->run();
                 if (smpc()->isSlaveSh2On()) { slave_sh2_->run(); }
             }
+
+            if (debugStatus() == DebugStatus::step_over) { debugStatus(DebugStatus::paused); }
         }
         Log::info("main", tr("Emulation main thread finished"));
     } catch (const std::exception& e) { Log::error("exception", e.what()); } catch (...) {

@@ -212,6 +212,32 @@ class EmulatorContext {
 
     auto renderingStatus() -> RenderingStatus { return rendering_status_; };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::debugStatus(const DebugStatus status)
+    ///
+    /// \brief  Sets the debug status of the emulator.
+    ///
+    /// \author Runik
+    /// \date   30/04/2020
+    ///
+    /// \param  status  The new status.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void debugStatus(const DebugStatus status) { debug_status_ = status; };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto EmulatorContext::debugStatus() -> DebugStatus
+    ///
+    /// \brief  Gets the current debug status.
+    ///
+    /// \author Runik
+    /// \date   30/04/2020
+    ///
+    /// \returns    The DebugStatus.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto debugStatus() -> DebugStatus { return debug_status_; };
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::emulationMainThread();
@@ -236,6 +262,7 @@ class EmulatorContext {
     HardwareMode    hardware_mode_{HardwareMode::saturn};        ///< Hardware mode
     EmulationStatus emulation_status_{EmulationStatus::stopped}; ///< Emulation status
     RenderingStatus rendering_status_{RenderingStatus::running}; ///< Rendering status.
+    DebugStatus     debug_status_{DebugStatus::disabled};        ///< Debug status.
 
     /// \name Command line variables
     ///

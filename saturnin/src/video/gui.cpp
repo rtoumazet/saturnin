@@ -129,7 +129,6 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
         // Debug icon
         switch (state.emulationStatus()) {
             case core::EmulationStatus::running:
-            case core::EmulationStatus::paused:
             case core::EmulationStatus::reset: {
                 ImGui::ImageButton(opengl.getIconTexture(video::IconId::debug), button_size);
                 if (ImGui::IsItemClicked()) {
@@ -837,13 +836,13 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
     static Sh2Type sh2_type{Sh2Type::master};
     static u32     current_pc{state.slaveSh2()->getRegister(Sh2Register::pc)};
     if (ImGui::RadioButton(tr("Master").c_str(), sh2_type == Sh2Type::master)) {
-        sh2_type   = Sh2Type::master;
-        current_pc = state.masterSh2()->getRegister(Sh2Register::pc);
+        sh2_type = Sh2Type::master;
+        //        current_pc = state.masterSh2()->getRegister(Sh2Register::pc);
     }
     ImGui::SameLine();
     if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) {
-        sh2_type   = Sh2Type::slave;
-        current_pc = state.slaveSh2()->getRegister(Sh2Register::pc);
+        sh2_type = Sh2Type::slave;
+        // current_pc = state.slaveSh2()->getRegister(Sh2Register::pc);
     };
 
     sh2::Sh2* current_sh2{nullptr};
@@ -852,6 +851,8 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         case Sh2Type::slave: current_sh2 = state.slaveSh2(); break;
     }
 
+    current_pc = current_sh2->getRegister(Sh2Register::pc);
+
     ImGui::SameLine(ImGui::GetWindowWidth() / 2);
 
     {
@@ -859,7 +860,10 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         const ImVec2 button_size(30, 30);
         ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_into), button_size);
         ImGui::SameLine();
-        ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_over), button_size);
+        ImGui::PushButtonRepeat(true);
+        if (ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_over), button_size)) {
+            state.debugStatus(core::DebugStatus::step_over);
+        }
         ImGui::SameLine();
         ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_out), button_size);
     }

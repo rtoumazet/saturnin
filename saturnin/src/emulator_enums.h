@@ -48,7 +48,6 @@ enum class HardwareMode {
 
 enum class EmulationStatus {
     running, ///< Emulator is running
-    paused,  ///< Emulator is paused
     stopped, ///< Emulator is stopped
     reset    ///< Emulator is reset
 };
@@ -60,5 +59,13 @@ enum class EmulationStatus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class RenderingStatus { running, reset, stopped };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   DebugStatus
+///
+/// \brief  Debug status, used when debugging.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class DebugStatus { disabled, step_over, step_into, step_out, paused };
 
 } // namespace saturnin::core
