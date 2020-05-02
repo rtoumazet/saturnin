@@ -826,7 +826,7 @@ void showLogWindow(bool* opened) {
 }
 
 void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, bool* opened) {
-    const ImVec2 window_size(650, 320);
+    const ImVec2 window_size(650, 420);
     ImGui::SetNextWindowSize(window_size);
 
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse
@@ -963,6 +963,26 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         }
         if (ImGui::ArrowButton("##down", ImGuiDir_Down)) { current_pc += 2; }
         ImGui::PopButtonRepeat();
+
+        ImGui::EndChild();
+    }
+
+    ImGui::NewLine();
+    ImGui::SameLine(304);
+
+    {
+        // Callstack
+
+        const ImVec2 child_size(330, 100);
+        ImGui::BeginChild("ChildCallstack", child_size, true, window_flags);
+
+        ImGui::TextDisabled(tr("Callstack").c_str());
+        ImGui::Separator();
+
+        const std::string callstack_mask{"{:#010x}"};
+        for (auto i = current_sh2->callstack().rbegin(); i != current_sh2->callstack().rend(); ++i) {
+            ImGui::Text(fmt::format(callstack_mask, *i).c_str());
+        }
 
         ImGui::EndChild();
     }

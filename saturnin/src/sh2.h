@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include <array> // array
+#include <array>  // array
+#include <vector> // vector
 #include "emulator_defs.h"
 #include "memory.h"
 #include "sh2_registers.h"
@@ -377,6 +378,12 @@ class Sh2 {
     }
 
     static void unmappedAccess(const u32 addr) { Log::warning("sh2", "Unmapped read access : address :{:#0x}", addr); }
+
+    void addToCallstack(const u32 addr) { callstack_.push_back(addr); };
+
+    void popFromCallstack() { callstack_.pop_back(); };
+
+    const std::vector<u32>& callstack() const { return callstack_; };
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -938,6 +945,8 @@ class Sh2 {
     SerialStatusRegister  sci_ssr_;
     BitRateRegister       sci_brr_;
     //@}
+
+    std::vector<u32> callstack_;
 };
 
 } // namespace saturnin::sh2

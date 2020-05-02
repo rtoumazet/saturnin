@@ -273,6 +273,8 @@ void braf(Sh2& s) {
 void bsr(Sh2& s) {
     // PC -> PR, disp*2 + PC -> PC
     // Modified using SH4 manual + correction
+    s.addToCallstack(s.pc_);
+
     u32 disp{};
     if ((xnnn(s) & sign_bit_12_mask) == 0) {
         disp = (bitmask_00000FFF & xnnn(s));
@@ -290,6 +292,8 @@ void bsrf(Sh2& s) {
     // PC -> PR, Rm + PC -> PC
     // Modified using SH4 manual + correction
     // Registers save for the delay slot
+    s.addToCallstack(s.pc_);
+
     s.pr_ = s.pc_ + 4;
 
     u32 old_pc{s.pc_};
@@ -630,6 +634,8 @@ void jmp(Sh2& s) {
 void jsr(Sh2& s) {
     // PC -> PR, Rm -> PC
     // Arranged and fixed using SH4 manual
+
+    s.addToCallstack(s.pc_);
 
     u32 old_r{s.r_[xn00(s)]};
     s.pr_ = s.pc_ + 4;
@@ -1346,6 +1352,8 @@ void rts(Sh2& s) {
     // PR -> PC
     // Arranged and fixed using SH4 manual
     delaySlot(s, s.pc_ + 2);
+
+    s.popFromCallstack();
 
     s.pc_             = s.pr_;
     s.cycles_elapsed_ = 2;
