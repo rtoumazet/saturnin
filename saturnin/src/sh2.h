@@ -131,6 +131,22 @@ struct Sh2DmaConfiguration {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct CallstackItem
+///
+/// \brief  A callstack item.
+///
+/// \author Runik
+/// \date   04/05/2020
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct CallstackItem {
+    u32 call_address;
+    u32 return_address;
+
+    CallstackItem(u32 c, u32 r) : call_address(c), return_address(r) {}
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Sh2
 ///
 /// \brief  Encapsulates Sh2 processor and related methods.
@@ -379,11 +395,67 @@ class Sh2 {
 
     static void unmappedAccess(const u32 addr) { Log::warning("sh2", "Unmapped read access : address :{:#0x}", addr); }
 
-    void addToCallstack(const u32 addr) { callstack_.push_back(addr); };
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::addToCallstack(const u32 call_addr, const u32 return_addr);
+    ///
+    /// \brief  Adds an item to the callstack.
+    ///
+    /// \author Runik
+    /// \date   06/05/2020
+    ///
+    /// \param  call_addr   The call address.
+    /// \param  return_addr The return address.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void popFromCallstack() { callstack_.pop_back(); };
+    void addToCallstack(const u32 call_addr, const u32 return_addr);
 
-    const std::vector<u32>& callstack() const { return callstack_; };
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::popFromCallstack();
+    ///
+    /// \brief  Pops the last added item from callstack.
+    ///
+    /// \author Runik
+    /// \date   06/05/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void popFromCallstack();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn const std::vector<CallstackItem>& Sh2::callstack() const
+    ///
+    /// \brief  Returns the callstack of the CPU
+    ///
+    /// \author Runik
+    /// \date   06/05/2020
+    ///
+    /// \returns    A reference to a const std::vector&lt;CallstackItem&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    const std::vector<CallstackItem>& callstack() const { return callstack_; };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::initializeSubroutineDepth()
+    ///
+    /// \brief  Initializes the subroutine depth
+    ///
+    /// \author Runik
+    /// \date   06/05/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initializeSubroutineDepth() { step_over_subroutine_depth_ = callstack_.size(); };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn u8 Sh2::subroutineDepth()
+    ///
+    /// \brief  The saved subroutine depth.
+    ///
+    /// \author Runik
+    /// \date   06/05/2020
+    ///
+    /// \returns    An u8.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    u8 subroutineDepth() { return step_over_subroutine_depth_; };
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -946,7 +1018,8 @@ class Sh2 {
     BitRateRegister       sci_brr_;
     //@}
 
-    std::vector<u32> callstack_;
+    std::vector<CallstackItem> callstack_;                    ///< Callstack of the processor
+    u8                         step_over_subroutine_depth_{}; ///< Subroutine depth, used with DebugStatus::step_over
 };
 
 } // namespace saturnin::sh2

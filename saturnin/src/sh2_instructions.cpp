@@ -273,7 +273,6 @@ void braf(Sh2& s) {
 void bsr(Sh2& s) {
     // PC -> PR, disp*2 + PC -> PC
     // Modified using SH4 manual + correction
-    s.addToCallstack(s.pc_);
 
     u32 disp{};
     if ((xnnn(s) & sign_bit_12_mask) == 0) {
@@ -286,13 +285,14 @@ void bsr(Sh2& s) {
     delaySlot(s, s.pc_ + 2);
     s.pc_             = old_pc + (disp << 1) + 4;
     s.cycles_elapsed_ = 2;
+
+    s.addToCallstack(old_pc, s.pr_);
 }
 
 void bsrf(Sh2& s) {
     // PC -> PR, Rm + PC -> PC
     // Modified using SH4 manual + correction
     // Registers save for the delay slot
-    s.addToCallstack(s.pc_);
 
     s.pr_ = s.pc_ + 4;
 
@@ -301,6 +301,8 @@ void bsrf(Sh2& s) {
     delaySlot(s, s.pc_ + 2);
     s.pc_             = old_pc + 4 + old_r;
     s.cycles_elapsed_ = 2;
+
+    s.addToCallstack(old_pc, s.pr_);
 }
 
 void bt(Sh2& s) {
@@ -635,11 +637,11 @@ void jsr(Sh2& s) {
     // PC -> PR, Rm -> PC
     // Arranged and fixed using SH4 manual
 
-    s.addToCallstack(s.pc_);
-
     u32 old_r{s.r_[xn00(s)]};
     s.pr_ = s.pc_ + 4;
     delaySlot(s, s.pc_ + 2);
+
+    s.addToCallstack(s.pc_, s.pr_);
 
     s.pc_             = old_r;
     s.cycles_elapsed_ = 2;
@@ -1354,6 +1356,13 @@ void rts(Sh2& s) {
     delaySlot(s, s.pc_ + 2);
 
     s.popFromCallstack();
+    switch (s.emulatorContext()->debugStatus()) {
+        case core::DebugStatus::step_out:
+        case core::DebugStatus::wait_end_of_routine: {
+            if (s.subroutineDepth() == s.callstack().size()) { s.emulatorContext()->debugStatus(core::DebugStatus::paused); }
+            break;
+        }
+    }
 
     s.pc_             = s.pr_;
     s.cycles_elapsed_ = 2;
@@ -1723,18 +1732,39 @@ void initializeOpcodesLut() {
                 opcodes_lut[counter]             = opcodes_table[i].execute;
                 opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
                 illegal_instruction_lut[counter] = opcodes_table[i].illegal_instruction_slot;
+                calls_subroutine_lut[counter]    = opcodes_table[i].is_subroutine_call;
                 break;
             }
             //            nextInstructionLut[counter] = false;
             opcodes_lut[counter]             = &badOpcode;
             opcodes_disasm_lut[counter]      = &badOpcode_d;
             illegal_instruction_lut[counter] = false;
+            calls_subroutine_lut[counter]    = false;
         }
         ++counter;
     }
 }
 
-void execute(Sh2& s) { opcodes_lut[s.current_opcode_](s); }
+void execute(Sh2& s) {
+    switch (s.emulatorContext()->debugStatus()) {
+        case core::DebugStatus::step_over: {
+            if (!calls_subroutine_lut[s.current_opcode_]) {
+                //
+                s.emulatorContext()->debugStatus(core::DebugStatus::paused);
+            } else {
+                s.emulatorContext()->debugStatus(core::DebugStatus::wait_end_of_routine);
+                s.initializeSubroutineDepth();
+            }
+            break;
+        }
+        case core::DebugStatus::step_into: {
+            s.emulatorContext()->debugStatus(core::DebugStatus::paused);
+            break;
+        }
+    }
+
+    opcodes_lut[s.current_opcode_](s);
+}
 
 auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }
 

@@ -733,6 +733,8 @@ void Sh2::powerOnReset() {
         r_[i] = 0;
     }
     initializeOnChipRegisters();
+
+    callstack_.clear();
 }
 
 void Sh2::start32bitsDivision() {
@@ -1194,5 +1196,15 @@ auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
     }
     return 0;
 }
+
+void Sh2::addToCallstack(const u32 call_addr, const u32 return_addr) {
+    callstack_.emplace_back(call_addr, return_addr);
+    // if (emulatorContext()->debugStatus() == core::DebugStatus::wait_end_of_routine) { ++step_over_subroutine_depth_; }
+}
+
+void Sh2::popFromCallstack() {
+    callstack_.pop_back();
+    // if (emulatorContext()->debugStatus() == core::DebugStatus::wait_end_of_routine) { --step_over_subroutine_depth_; }
+};
 
 } // namespace saturnin::sh2

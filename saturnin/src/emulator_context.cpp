@@ -171,8 +171,6 @@ void EmulatorContext::emulationMainThread() {
                 master_sh2_->run();
                 if (smpc()->isSlaveSh2On()) { slave_sh2_->run(); }
             }
-
-            if (debugStatus() == DebugStatus::step_over) { debugStatus(DebugStatus::paused); }
         }
         Log::info("main", tr("Emulation main thread finished"));
     } catch (const std::exception& e) { Log::error("exception", e.what()); } catch (...) {

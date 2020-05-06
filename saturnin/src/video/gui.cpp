@@ -858,14 +858,18 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
     {
         // Debug buttons
         const ImVec2 button_size(30, 30);
-        ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_into), button_size);
+        if (ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_into), button_size)) {
+            state.debugStatus(core::DebugStatus::step_into);
+        }
         ImGui::SameLine();
         ImGui::PushButtonRepeat(true);
         if (ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_over), button_size)) {
             state.debugStatus(core::DebugStatus::step_over);
         }
         ImGui::SameLine();
-        ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_out), button_size);
+        if (ImGui::ImageButton(opengl.getIconTexture(video::IconId::step_out), button_size)) {
+            state.debugStatus(core::DebugStatus::step_out);
+        }
     }
 
     {
@@ -981,7 +985,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
 
         const std::string callstack_mask{"{:#010x}"};
         for (auto i = current_sh2->callstack().rbegin(); i != current_sh2->callstack().rend(); ++i) {
-            ImGui::Text(fmt::format(callstack_mask, *i).c_str());
+            ImGui::Text(fmt::format(callstack_mask, (*i).call_address).c_str());
         }
 
         ImGui::EndChild();
