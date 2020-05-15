@@ -50,11 +50,11 @@ ScsiToc Cdrom::toc_data;
 std::vector<std::string> Cdrom::scsi_drives_list = {};
 
 /* static */
-auto Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8_t lun) -> u8 {
+auto Cdrom::getDriveIndice(const s8 path, const s8 target, const s8 lun) -> u8 {
     auto it = std::find_if(di_list.begin(), di_list.end(), [path, target, lun](const ScsiDriveInfo& di) {
         return (di.path == path) && (di.target == target) && (di.lun == lun);
     });
-    return it - di_list.begin(); // returns the indice
+    return static_cast<u8>(it - di_list.begin()); // returns the indice
 }
 
 // CCdRom::CCdRom()

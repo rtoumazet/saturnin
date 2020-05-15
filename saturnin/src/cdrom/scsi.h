@@ -48,11 +48,11 @@ constexpr u8 scsi_inquiry = 0x12; ///< Inquiry (MANDATORY)
 /// \date	28/02/2010
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScsiDriveInfo {
-    s8           path;
-    s8           target;
-    s8           lun;
-    std::wstring name;   ///< Name of the current device after an inquiry.
-    std::wstring letter; ///< filled with a drive letter in SPTI (ex: E:\), and a SCSI address in ASPI (ex: 0:2:0).
+    s8          path;
+    s8          target;
+    s8          lun;
+    std::string name;   ///< Name of the current device after an inquiry.
+    std::string letter; ///< filled with a drive letter in SPTI (ex: E:\), and a SCSI address in ASPI (ex: 0:2:0).
 };
 
 /// SCSI structs

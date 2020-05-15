@@ -40,15 +40,12 @@ using core::tr;
 auto Spti::initialize() -> bool {
     Cdrom::di_list.clear();
     Cdrom::di_list = Spti::scanBus();
-    std::wstring full_drive_name{};
-    // Cdrom::scsi_drives_list.push_back(tr("Not selected"));
-
+    std::string full_drive_name{};
     for (auto& di : Cdrom::di_list) {
         full_drive_name = di.letter;
-        full_drive_name += L" ";
+        full_drive_name += " ";
         full_drive_name += di.name;
-        std::string str(full_drive_name.begin(), full_drive_name.end());
-        Cdrom::scsi_drives_list.push_back(str);
+        Cdrom::scsi_drives_list.push_back(full_drive_name);
     }
 
     return true;
@@ -60,20 +57,18 @@ void Spti::shutdown() {}
 /* static */
 auto Spti::scanBus() -> std::vector<ScsiDriveInfo> {
     std::vector<ScsiDriveInfo> drives;
-    std::wstring               path = L"C:\\";
+    std::string                path = "C:\\";
 
     ScsiDriveInfo unselected{};
-    unselected.letter = L"";
+    unselected.letter = "";
     unselected.path   = -1;
     unselected.target = -1;
     unselected.lun    = -1;
-    std::string  name = core::tr("Not selected");
-    std::wstring wname(name.begin(), name.end());
-    unselected.name = wname;
+    unselected.name   = core::tr("Not selected");
     drives.push_back(unselected);
 
     for (path[0] = 'C'; path[0] <= 'Z'; ++path[0]) {
-        if (GetDriveType(path.c_str()) == DRIVE_CDROM) {
+        if (GetDriveTypeA(path.c_str()) == DRIVE_CDROM) {
             HANDLE drive_handle = Scsi::openDrive(path[0]);
             if (drive_handle != INVALID_HANDLE_VALUE) {
                 ScsiDriveInfo di{};
@@ -196,7 +191,7 @@ void Spti::inquiry(const HANDLE& h, ScsiDriveInfo& di) {
         Log::warning("cdrom", util::getLastErrorMessage());
 
     } else {
-        std::wstring temp(output_buffer.begin(), output_buffer.end());
+        std::string  temp(output_buffer.begin(), output_buffer.end());
         constexpr u8 start_pos{8};
         constexpr u8 end_pos{28};
         di.name = temp.substr(start_pos, end_pos);
@@ -210,9 +205,7 @@ void Spti::getAdapterAddress(const HANDLE& h, ScsiDriveInfo& di) {
     di.path   = -1;
     di.target = -1;
     di.lun    = -1;
-    if (h == nullptr) {
-        return;
-    }
+    if (h == nullptr) { return; }
 
     // pSA = reinterpret_cast<PSCSI_ADDRESS>(&v[0]);
     SCSI_ADDRESS psa{};
