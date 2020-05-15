@@ -34,6 +34,7 @@
 
 #include "emulator_defs.h"
 #include "emulator_enums.h"
+#include "cdrom/cdrom.h"
 #include "log.h"
 #include "scu.h"
 #include "smpc.h"
@@ -426,6 +427,8 @@ class Memory {
     [[nodiscard]] auto scu() const -> Scu*;
     [[nodiscard]] auto config() const -> Config*;
     [[nodiscard]] auto smpc() const -> Smpc*;
+    [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
+    [[nodiscard]] auto cdrom() const -> cdrom::Cdrom*;
     //@}
 
   private:
@@ -838,36 +841,42 @@ struct readStvIo<u8> {
             switch (addr & bitmask_00FFFFFF) {
                 case stv_io_port_a: {
                     auto p1 = m.smpc()->getStvPeripheralMapping().player_1;
-                    if (isKeyPressed(p1.button_1)) { data |= util::toUnderlying(StvIOPort::button_1); }
-                    if (isKeyPressed(p1.button_2)) { data |= util::toUnderlying(StvIOPort::button_2); }
-                    if (isKeyPressed(p1.button_3)) { data |= util::toUnderlying(StvIOPort::button_3); }
-                    if (isKeyPressed(p1.button_4)) { data |= util::toUnderlying(StvIOPort::button_4); }
-                    if (isKeyPressed(p1.direction_down)) { data |= util::toUnderlying(StvIOPort::down); }
-                    if (isKeyPressed(p1.direction_up)) { data |= util::toUnderlying(StvIOPort::up); }
-                    if (isKeyPressed(p1.direction_right)) { data |= util::toUnderlying(StvIOPort::right); }
-                    if (isKeyPressed(p1.direction_left)) { data |= util::toUnderlying(StvIOPort::left); }
+                    if (isKeyPressed(p1.button_1, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_1); }
+                    if (isKeyPressed(p1.button_2, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_2); }
+                    if (isKeyPressed(p1.button_3, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_3); }
+                    if (isKeyPressed(p1.button_4, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_4); }
+                    if (isKeyPressed(p1.direction_down, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::down); }
+                    if (isKeyPressed(p1.direction_up, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::up); }
+                    if (isKeyPressed(p1.direction_right, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::right); }
+                    if (isKeyPressed(p1.direction_left, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::left); }
                     break;
                 }
                 case stv_io_port_b: {
                     auto p2 = m.smpc()->getStvPeripheralMapping().player_2;
-                    if (isKeyPressed(p2.button_1)) { data |= util::toUnderlying(StvIOPort::button_1); }
-                    if (isKeyPressed(p2.button_2)) { data |= util::toUnderlying(StvIOPort::button_2); }
-                    if (isKeyPressed(p2.button_3)) { data |= util::toUnderlying(StvIOPort::button_3); }
-                    if (isKeyPressed(p2.button_4)) { data |= util::toUnderlying(StvIOPort::button_4); }
-                    if (isKeyPressed(p2.direction_down)) { data |= util::toUnderlying(StvIOPort::down); }
-                    if (isKeyPressed(p2.direction_up)) { data |= util::toUnderlying(StvIOPort::up); }
-                    if (isKeyPressed(p2.direction_right)) { data |= util::toUnderlying(StvIOPort::right); }
-                    if (isKeyPressed(p2.direction_left)) { data |= util::toUnderlying(StvIOPort::left); }
+                    if (isKeyPressed(p2.button_1, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_1); }
+                    if (isKeyPressed(p2.button_2, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_2); }
+                    if (isKeyPressed(p2.button_3, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_3); }
+                    if (isKeyPressed(p2.button_4, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_4); }
+                    if (isKeyPressed(p2.direction_down, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::down); }
+                    if (isKeyPressed(p2.direction_up, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::up); }
+                    if (isKeyPressed(p2.direction_right, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::right); }
+                    if (isKeyPressed(p2.direction_left, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::left); }
                     break;
                 }
                 case stv_io_port_c: {
                     auto board = m.smpc()->getStvPeripheralMapping().board_controls;
-                    if (isKeyPressed(board.p1_coin_switch)) { data |= util::toUnderlying(StvIOPort::coin_switch_player1); }
-                    if (isKeyPressed(board.p2_coin_switch)) { data |= util::toUnderlying(StvIOPort::coin_switch_player2); }
-                    if (isKeyPressed(board.test_switch)) { data |= util::toUnderlying(StvIOPort::test_switch); }
-                    if (isKeyPressed(board.service_switch)) { data |= util::toUnderlying(StvIOPort::service_switch); }
-                    if (isKeyPressed(board.p1_start)) { data |= util::toUnderlying(StvIOPort::start_player1); }
-                    if (isKeyPressed(board.p2_start)) { data |= util::toUnderlying(StvIOPort::start_player2); }
+                    if (isKeyPressed(board.p1_coin_switch, m.openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::coin_switch_player1);
+                    }
+                    if (isKeyPressed(board.p2_coin_switch, m.openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::coin_switch_player2);
+                    }
+                    if (isKeyPressed(board.test_switch, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::test_switch); }
+                    if (isKeyPressed(board.service_switch, m.openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::service_switch);
+                    }
+                    if (isKeyPressed(board.p1_start, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::start_player1); }
+                    if (isKeyPressed(board.p2_start, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::start_player2); }
                     break;
                 }
                 case stv_io_port_d: {
@@ -1015,6 +1024,27 @@ struct readCdBlock {
     }
 };
 
+template<>
+struct readCdBlock<u8> {
+    operator Memory::ReadType<u8>() const {
+        return [](const Memory& m, const u32 addr) -> u8 { return m.cdrom()->read8(addr); };
+    }
+};
+
+template<>
+struct readCdBlock<u16> {
+    operator Memory::ReadType<u16>() const {
+        return [](const Memory& m, const u32 addr) -> u16 { return m.cdrom()->read16(addr); };
+    }
+};
+
+template<>
+struct readCdBlock<u32> {
+    operator Memory::ReadType<u32>() const {
+        return [](const Memory& m, const u32 addr) -> u32 { return m.cdrom()->read32(addr); };
+    }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct writeCdBlock
 ///
@@ -1036,6 +1066,28 @@ struct writeCdBlock {
                          addr,
                          data);
         };
+    }
+};
+
+// Specializations.
+template<>
+struct writeCdBlock<u8> {
+    operator Memory::WriteType<u8>() const {
+        return [](Memory& m, const u32 addr, const u8 data) { return m.cdrom()->write8(addr, data); };
+    }
+};
+
+template<>
+struct writeCdBlock<u16> {
+    operator Memory::WriteType<u16>() const {
+        return [](Memory& m, const u32 addr, const u16 data) { return m.cdrom()->write16(addr, data); };
+    }
+};
+
+template<>
+struct writeCdBlock<u32> {
+    operator Memory::WriteType<u32>() const {
+        return [](Memory& m, const u32 addr, const u32 data) { return m.cdrom()->write32(addr, data); };
     }
 };
 

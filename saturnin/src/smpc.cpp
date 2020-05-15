@@ -739,23 +739,27 @@ auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData
         case SaturnPeripheralId::saturn_standard_pad:
             SaturnStandardPad1stData first_data;
             first_data.set();
-            if (isKeyPressed(p1.direction_right)) { first_data.reset(SaturnStandardPad1stData::direction_right); }
-            if (isKeyPressed(p1.direction_left)) { first_data.reset(SaturnStandardPad1stData::direction_left); }
-            if (isKeyPressed(p1.direction_down)) { first_data.reset(SaturnStandardPad1stData::direction_down); }
-            if (isKeyPressed(p1.direction_up)) { first_data.reset(SaturnStandardPad1stData::direction_up); }
-            if (isKeyPressed(p1.button_start)) { first_data.reset(SaturnStandardPad1stData::button_start); }
-            if (isKeyPressed(p1.button_a)) { first_data.reset(SaturnStandardPad1stData::button_a); }
-            if (isKeyPressed(p1.button_c)) { first_data.reset(SaturnStandardPad1stData::button_c); }
-            if (isKeyPressed(p1.button_b)) { first_data.reset(SaturnStandardPad1stData::button_b); }
+            if (isKeyPressed(p1.direction_right, openglWindow())) { first_data.reset(SaturnStandardPad1stData::direction_right); }
+            if (isKeyPressed(p1.direction_left, openglWindow())) { first_data.reset(SaturnStandardPad1stData::direction_left); }
+            if (isKeyPressed(p1.direction_down, openglWindow())) { first_data.reset(SaturnStandardPad1stData::direction_down); }
+            if (isKeyPressed(p1.direction_up, openglWindow())) { first_data.reset(SaturnStandardPad1stData::direction_up); }
+            if (isKeyPressed(p1.button_start, openglWindow())) { first_data.reset(SaturnStandardPad1stData::button_start); }
+            if (isKeyPressed(p1.button_a, openglWindow())) { first_data.reset(SaturnStandardPad1stData::button_a); }
+            if (isKeyPressed(p1.button_c, openglWindow())) { first_data.reset(SaturnStandardPad1stData::button_c); }
+            if (isKeyPressed(p1.button_b, openglWindow())) { first_data.reset(SaturnStandardPad1stData::button_b); }
             peripheral_data.peripheral_data_table.push_back(first_data);
 
             SaturnStandardPad2ndData second_data;
             second_data.set();
-            if (isKeyPressed(p1.button_shoulder_right)) { second_data.reset(SaturnStandardPad2ndData::button_shoulder_right); }
-            if (isKeyPressed(p1.button_x)) { second_data.reset(SaturnStandardPad2ndData::button_x); }
-            if (isKeyPressed(p1.button_y)) { second_data.reset(SaturnStandardPad2ndData::button_y); }
-            if (isKeyPressed(p1.button_z)) { second_data.reset(SaturnStandardPad2ndData::button_z); }
-            if (isKeyPressed(p1.button_shoulder_left)) { second_data.reset(SaturnStandardPad2ndData::button_shoulder_left); }
+            if (isKeyPressed(p1.button_shoulder_right, openglWindow())) {
+                second_data.reset(SaturnStandardPad2ndData::button_shoulder_right);
+            }
+            if (isKeyPressed(p1.button_x, openglWindow())) { second_data.reset(SaturnStandardPad2ndData::button_x); }
+            if (isKeyPressed(p1.button_y, openglWindow())) { second_data.reset(SaturnStandardPad2ndData::button_y); }
+            if (isKeyPressed(p1.button_z, openglWindow())) { second_data.reset(SaturnStandardPad2ndData::button_z); }
+            if (isKeyPressed(p1.button_shoulder_left, openglWindow())) {
+                second_data.reset(SaturnStandardPad2ndData::button_shoulder_left);
+            }
             peripheral_data.peripheral_data_table.push_back(second_data);
             break;
     }
@@ -896,6 +900,15 @@ void Smpc::initialize() {
     reset();
 }
 
+void Smpc::run(const s8 cycles) {
+    if (intback_remaining_cycles_ > 0) {
+        intback_remaining_cycles_ -= cycles;
+        if (intback_remaining_cycles_ <= 0) { executeCommand(); }
+    }
+}
+
+auto Smpc::openglWindow() const -> GLFWwindow* { return emulator_context_->openglWindow(); };
+
 auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout[pk]; }
 
 auto getRtcTime() -> RtcTime {
@@ -942,8 +955,8 @@ auto getRtcTime() -> RtcTime {
     return rtc;
 }
 
-auto isKeyPressed(const PeripheralKey pk) -> bool {
-    return glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(pk)) == GLFW_PRESS;
+auto isKeyPressed(const PeripheralKey pk, GLFWwindow* window) -> bool {
+    return glfwGetKey(window, util::toUnderlying(pk)) == GLFW_PRESS;
 }
 
 } // namespace saturnin::core

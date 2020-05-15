@@ -174,6 +174,8 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
     auto          window = glfwCreateWindow(width, height, window_title.c_str(), nullptr, nullptr);
     if (window == nullptr) { return EXIT_FAILURE; }
 
+    state.openglWindow(window);
+
     glfwSetWindowCloseCallback(window, windowCloseCallback);
     // glfwSetWindowUserPointer(window, (void*)&state);
     glfwSetWindowUserPointer(window, static_cast<void*>(&state));

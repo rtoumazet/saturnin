@@ -188,6 +188,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\cdrom\aspi.cpp" />
     <ClCompile Include="src\cdrom\cdrom.cpp" />
+    <ClCompile Include="src\cdrom\cdrom_registers.h" />
     <ClCompile Include="src\cdrom\scsi.cpp" />
     <ClCompile Include="src\cdrom\spti.cpp" />
     <ClCompile Include="src\config.cpp" />

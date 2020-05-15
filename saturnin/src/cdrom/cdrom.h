@@ -29,10 +29,19 @@
 #include <vector>
 #include <string>
 
+#include "cdrom_registers.h"
 #include "iso9660.h"
 #include "scsi.h"
 
+// Forward declarations
+namespace saturnin::core {
+class EmulatorContext;
+}
+
+using saturnin::core::EmulatorContext;
+
 namespace saturnin::cdrom {
+
 // not used ?
 ///// \name CD drive status
 ////@{
@@ -255,6 +264,19 @@ enum class CdromAccessMethod {
 
 class Cdrom {
   public:
+    //@{
+    // Constructors / Destructors
+    Cdrom() = delete;
+    Cdrom(EmulatorContext* ec) : emulator_context_(ec){};
+    Cdrom(const Cdrom&) = delete;
+    Cdrom(Cdrom&&)      = delete;
+    auto operator=(const Cdrom&) & -> Cdrom& = delete;
+    auto operator=(Cdrom&&) & -> Cdrom& = delete;
+    ~Cdrom()                            = default;
+    //@}
+
+    void initialize();
+
     static CdromAccessMethod access_method; ///< Current CD-ROM access method.
 
     /// \name SCSI variables
@@ -286,84 +308,51 @@ class Cdrom {
 
     static auto getDriveIndice(s8 path, s8 target, s8 lun) -> u8;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn     u8 GetCdDriveStatus()
-    ///
-    /// \brief	Gets the CD drive status.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ///
-    /// \return	The CD drive status.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    auto GetCdDriveStatus() -> u8;
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn     u8 GetCdDriveStatus()
+    /////
+    ///// \brief	Gets the CD drive status.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    /////
+    ///// \return	The CD drive status.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // auto GetCdDriveStatus() -> u8;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void SetCdDriveStatus(std::u8 value)
-    ///
-    /// \brief	Sets the CD drive status.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ///
-    /// \param	value	Status.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void SetCdDriveStatus(u8 value);
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void SetCdDriveStatus(std::u8 value)
+    /////
+    ///// \brief	Sets the CD drive status.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    /////
+    ///// \param	value	Status.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void SetCdDriveStatus(u8 value);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void ExecuteCdBlockCommand(std::u16 value)
-    ///
-    /// \brief	Executes the CD block command.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ///
-    /// \param	value	Value of the command to execute.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void ExecuteCdBlockCommand(u16 value);
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void ExecuteCdBlockCommand(std::u16 value)
+    /////
+    ///// \brief	Executes the CD block command.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    /////
+    ///// \param	value	Value of the command to execute.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void ExecuteCdBlockCommand(u16 value);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void SendStatus()
-    ///
-    /// \brief	Send drive status.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void SendStatus();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn Cdrom::Cdrom() = default;
-    ///
-    /// \brief  Default constructor.
-    ///
-    /// \author Runik
-    /// \date   01/03/2010
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    Cdrom() = default;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn Cdrom::Cdrom(bool)
-    ///
-    /// \brief  Constructor.
-    ///
-    /// \author Runik
-    /// \date   01/03/2010
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    Cdrom(bool b){};
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn virtual Cdrom::~Cdrom();
-    ///
-    /// \brief  Finaliser.
-    ///
-    /// \author Runik
-    /// \date   01/03/2010
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    virtual ~Cdrom() = default;
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void SendStatus()
+    /////
+    ///// \brief	Send drive status.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void SendStatus();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void RefreshPeriod()
@@ -375,242 +364,263 @@ class Cdrom {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     void refreshPeriod(){};
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Cdrom::SetSectorBurstSize(u32 size);
-    ///
-    /// \brief  Sets the number of sectors to read at a time.
-    ///
-    /// \author Runik
-    /// \date   01/03/2010
-    ///
-    /// \param  size    Number of sectors.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn void Cdrom::SetSectorBurstSize(u32 size);
+    /////
+    ///// \brief  Sets the number of sectors to read at a time.
+    /////
+    ///// \author Runik
+    ///// \date   01/03/2010
+    /////
+    ///// \param  size    Number of sectors.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void SetSectorBurstSize(u32 size);
+    // void SetSectorBurstSize(u32 size);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn     u32 GetSectorBurstSize()
-    ///
-    /// \brief	Gets the sector burst size.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ///
-    /// \return	Number of sectors.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    auto GetSectorBurstSize() -> u32;
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn     u32 GetSectorBurstSize()
+    /////
+    ///// \brief	Gets the sector burst size.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    /////
+    ///// \return	Number of sectors.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // auto GetSectorBurstSize() -> u32;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void InsertCd()
-    ///
-    /// \brief	Notifies that a CD has been inserted.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void InsertCd();
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void InsertCd()
+    /////
+    ///// \brief	Notifies that a CD has been inserted.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void InsertCd();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void RunCdBlock(std::int32_t cycles)
-    ///
-    /// \brief	Runs the CD block for the specified number of cycles.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ///
-    /// \param	cycles	Number of cycles to run.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void RunCdBlock(u32 cycles);
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void RunCdBlock(std::int32_t cycles)
+    /////
+    ///// \brief	Runs the CD block for the specified number of cycles.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    /////
+    ///// \param	cycles	Number of cycles to run.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void RunCdBlock(u32 cycles);
 
     /// \name CD block memory accessors
     //@{
-    void WriteByte(u32 address, u8 data);
-    void WriteWord(u32 address, u16 data);
-    void WriteLong(u32 address, u32 data);
-    auto ReadByte(u32 address) -> u8;
-    auto ReadWord(u32 address) -> u16;
-    auto ReadLong(u32 address) -> u32;
+    void               write8(u32 addr, u8 data);
+    void               write16(u32 addr, u16 data);
+    void               write32(u32 addr, u32 data);
+    [[nodiscard]] auto read8(u32 addr) const -> u8;
+    [[nodiscard]] auto read16(u32 addr) const -> u16;
+    [[nodiscard]] auto read32(u32 addr) const -> u32;
     //@}
 
   private:
-    u8 drive_status_; ///< CD drive status.
-
-    ::std::vector<DirFileInfos> filesOnCD; ///< File list present on CD.
-
-    /// \name CD block registers
-    //@{
-    u16 HIRQREQ{};
-    u16 HIRQMSK{};
-    u16 CR1{};
-    u16 CR2{};
-    u16 CR3{};
-    u16 CR4{};
-    //@}
-
-    std::array<Sector, MAX_SECTORS>            sectorsBuffer{};    ///< Sector buffer.
-    std::array<Filter, MAX_SELECTORS>          filters{};          ///< Filters.
-    std::array<BufferPartition, MAX_SELECTORS> bufferPartitions{}; ///< Buffer partitions.
-
-    u32 driveSpeed{};     ///< 1x speed, 2x speed or standby.
-    u32 cyclesPerMs{};    ///< number of SH2 cycles per millisecond.
-    u32 standbyTime{};    ///< Santdby time.
-    u32 responsePeriod{}; ///< Response period.
-    u32 ECCFreq{};        ///< ECC frequency update.
-    u32 retryFreq{};      ///< Retry frequency when sector reading error occurs.
-
-    /// \name Sector length accessors (in bytes)
-    //@{
-    u32 getSectorLength{};
-    u32 putSectorLength{};
-    //@}
-
-    /// \name CD block status and report
-    //@{
-    u8  status{};          ///< Status.
-    u8  flag{};            ///< Flag.
-    u8  repCnt{};          ///< Repeat frequency.
-    u8  ctrlAdr{};         ///< Control/adr byte of subcode Q.
-    u8  tno{};             ///< Track number of subcode Q.
-    u8  ino{};             ///< Index number of subcode Q.
-    u32 FAD{};             ///< Frame address.
-    u32 currentPlayMode{}; ///< Track mode or fad mode.
-    u32 playFADStart{};    ///< Initial position at the beginning of last play disk command.
-    u32 remainingFADs{};   ///< Remaining number of FADS to play in FAD mode.
-                           //@}
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn     u32 FindCurrentTrack()
+    /// \fn void Cdrom::reset();
     ///
-    /// \brief	Searches for the current track.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ///
-    /// \return	Current track.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    auto FindCurrentTrack() -> u32;
-
-    bool DeleteSectorDataExecuted{}; ///< To know if sectors must be deleted in sectors buffer.
-    u32  numberOfSectorsToDelete{};  ///< Number of sectors to delete.
-    u32  posOfSectorsToDelete{};     ///< Position of sectors to delete.
-    u32  currentFilter{};            ///< Current filter connection.
-
-    /// \name Current fetching parameters
-    //@{
-    u32 fetchedBuffer{};     ///< Fetched buffer.
-    u32 sectorNumInBuffer{}; ///< Sector number in buffer.
-    u32 posInSector{};       ///< Posiiton in sector.
-    u32 bytesTransfered{};   ///< Number of bytes transfered by the CD block.
-    u32 actualSize{};        ///< Actual size command variable.
-    u32 lastFetchedBuffer{}; ///< Last buffer partition fetched (for GetLastBufferDestination).
-                             //@}
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn     u32 FreeNumOfSectorsInBuffer()
-    ///
-    /// \brief	Free number of sectors in buffer.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ///
-    /// \return	The number of available sectors in sector buffer.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    auto FreeNumOfSectorsInBuffer() -> u32;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Cdrom::FindFreeSector() -> u32;
-    ///
-    /// \brief  Searches for the first free sector.
+    /// \brief  Resets the cdrom module
     ///
     /// \author Runik
-    /// \date   01/03/2010
-    ///
-    /// \returns    The first free sector found, or -1 if no free sector available.
+    /// \date   14/05/2020
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto FindFreeSector() -> u32;
+    void reset();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void CdBlockReadSectors(std::int32_t num)
-    ///
-    /// \brief	Requests the reading of num sector at current FAD and outputs data to current filter.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ///
-    /// \param	num	Number of the sector to read.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void CdBlockReadSectors(u32 num);
-    u32  sectorBurstSize{}; ///< Sector burst read size.
+    // u8 drive_status_; ///< CD drive status.
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Cdrom::CdInserted() -> bool;
-    ///
-    /// \brief  Checks if a CD is present in the CD drive.
-    ///
-    /// \author Runik
-    /// \date   01/03/2010
-    ///
-    /// \returns    true if a cd is inserted.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //::std::vector<DirFileInfos> filesOnCD; ///< File list present on CD.
 
-    auto CdInserted() -> bool;
+    ///// \name CD block registers
+    ////@{
+    //// u16 HIRQREQ{};
+    // HirqRegister hirqreg_;
+    // u16          HIRQMSK{};
+    // u16          CR1{};
+    // u16          CR2{};
+    // u16          CR3{};
+    // u16          CR4{};
+    ////@}
 
-    AspiToc* AspiTOC{}; ///< ASPI TOC.
+    // std::array<Sector, MAX_SECTORS>            sectorsBuffer{};    ///< Sector buffer.
+    // std::array<Filter, MAX_SELECTORS>          filters{};          ///< Filters.
+    // std::array<BufferPartition, MAX_SELECTORS> bufferPartitions{}; ///< Buffer partitions.
 
-    std::array<u8, saturn_toc_size> saturnTOC;        ///< Current saturn game disk TOC.
-    void                            BuildSaturnTOC(); ///< Builds the TOC.
+    // u32 driveSpeed{};     ///< 1x speed, 2x speed or standby.
+    // u32 cyclesPerMs{};    ///< number of SH2 cycles per millisecond.
+    // u32 standbyTime{};    ///< Santdby time.
+    // u32 responsePeriod{}; ///< Response period.
+    // u32 ECCFreq{};        ///< ECC frequency update.
+    // u32 retryFreq{};      ///< Retry frequency when sector reading error occurs.
 
-    std::array<u8, file_info_size> filesInfos; ///< Buffer holding saturn files infos.
+    ///// \name Sector length accessors (in bytes)
+    ////@{
+    // u32 getSectorLength{};
+    // u32 putSectorLength{};
+    ////@}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void BuildFileInfos(std::u32 fileId)
-    ///
-    /// \brief	Builds the Saturn file infos.
-    ///
-    /// \author	Runik
-    /// \date	04/03/2010
-    ///
-    /// \param	fileId	Identifier for the file.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void BuildFileInfos(u32 fileId);
+    ///// \name CD block status and report
+    ////@{
+    // u8  status{};          ///< Status.
+    // u8  flag{};            ///< Flag.
+    // u8  repCnt{};          ///< Repeat frequency.
+    // u8  ctrlAdr{};         ///< Control/adr byte of subcode Q.
+    // u8  tno{};             ///< Track number of subcode Q.
+    // u8  ino{};             ///< Index number of subcode Q.
+    // u32 FAD{};             ///< Frame address.
+    // u32 currentPlayMode{}; ///< Track mode or fad mode.
+    // u32 playFADStart{};    ///< Initial position at the beginning of last play disk command.
+    // u32 remainingFADs{};   ///< Remaining number of FADS to play in FAD mode.
+    //                       //@}
 
-    u8* dataBuffer{};      ///< Pointer to data read when file info or TOC is read.
-    u32 dataBufferSize{};  ///< Size of data held in buffer in word unit.
-    u32 posInDataBuffer{}; ///< Current word being read in data buffer (TOC or file infos).
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn     u32 FindCurrentTrack()
+    /////
+    ///// \brief	Searches for the current track.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    /////
+    ///// \return	Current track.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // auto FindCurrentTrack() -> u32;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void BuildFileSystemTree()
-    ///
-    /// \brief	Builds the current CD file system directory tree.
-    ///
-    /// \author	Runik
-    /// \date	04/03/2010
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void BuildFileSystemTree();
+    // bool DeleteSectorDataExecuted{}; ///< To know if sectors must be deleted in sectors buffer.
+    // u32  numberOfSectorsToDelete{};  ///< Number of sectors to delete.
+    // u32  posOfSectorsToDelete{};     ///< Position of sectors to delete.
+    // u32  currentFilter{};            ///< Current filter connection.
 
-    bool writingCRRegs{}; ///< Prevents from executing periodic response while a command is written in CR register.
-    bool firstReading{};  ///< Prevents from executing periodic response before initialisation string is read in CR registers.
+    ///// \name Current fetching parameters
+    ////@{
+    // u32 fetchedBuffer{};     ///< Fetched buffer.
+    // u32 sectorNumInBuffer{}; ///< Sector number in buffer.
+    // u32 posInSector{};       ///< Posiiton in sector.
+    // u32 bytesTransfered{};   ///< Number of bytes transfered by the CD block.
+    // u32 actualSize{};        ///< Actual size command variable.
+    // u32 lastFetchedBuffer{}; ///< Last buffer partition fetched (for GetLastBufferDestination).
+    //                         //@}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void UpdatePeriod()
-    ///
-    /// \brief	Updates the drive period.
-    ///
-    /// \author	Runik
-    /// \date	01/03/2010
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void UpdatePeriod();
-    u32  counter{};             ///< Counter.
-    u32  executedCommands{};    ///< Number of commands executed.
-    u32  executedCommandsMax{}; ///< Number max of commands executed during periodic response.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn     u32 FreeNumOfSectorsInBuffer()
+    /////
+    ///// \brief	Free number of sectors in buffer.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    /////
+    ///// \return	The number of available sectors in sector buffer.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // auto FreeNumOfSectorsInBuffer() -> u32;
 
-    /// \name Current parameters for transfer from host to CD block
-    //@{
-    u32 sectorNumInBufferPut{};
-    u32 posInSectorPut{};
-    u32 numOfSectorToPut{};
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn auto Cdrom::FindFreeSector() -> u32;
+    /////
+    ///// \brief  Searches for the first free sector.
+    /////
+    ///// \author Runik
+    ///// \date   01/03/2010
+    /////
+    ///// \returns    The first free sector found, or -1 if no free sector available.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // auto FindFreeSector() -> u32;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void CdBlockReadSectors(std::int32_t num)
+    /////
+    ///// \brief	Requests the reading of num sector at current FAD and outputs data to current filter.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    /////
+    ///// \param	num	Number of the sector to read.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void CdBlockReadSectors(u32 num);
+    // u32  sectorBurstSize{}; ///< Sector burst read size.
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn auto Cdrom::CdInserted() -> bool;
+    /////
+    ///// \brief  Checks if a CD is present in the CD drive.
+    /////
+    ///// \author Runik
+    ///// \date   01/03/2010
+    /////
+    ///// \returns    true if a cd is inserted.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // auto CdInserted() -> bool;
+
+    // AspiToc* AspiTOC{}; ///< ASPI TOC.
+
+    // std::array<u8, saturn_toc_size> saturnTOC;        ///< Current saturn game disk TOC.
+    // void                            BuildSaturnTOC(); ///< Builds the TOC.
+
+    // std::array<u8, file_info_size> filesInfos; ///< Buffer holding saturn files infos.
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void BuildFileInfos(std::u32 fileId)
+    /////
+    ///// \brief	Builds the Saturn file infos.
+    /////
+    ///// \author	Runik
+    ///// \date	04/03/2010
+    /////
+    ///// \param	fileId	Identifier for the file.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void BuildFileInfos(u32 fileId);
+
+    // u8* dataBuffer{};      ///< Pointer to data read when file info or TOC is read.
+    // u32 dataBufferSize{};  ///< Size of data held in buffer in word unit.
+    // u32 posInDataBuffer{}; ///< Current word being read in data buffer (TOC or file infos).
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void BuildFileSystemTree()
+    /////
+    ///// \brief	Builds the current CD file system directory tree.
+    /////
+    ///// \author	Runik
+    ///// \date	04/03/2010
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void BuildFileSystemTree();
+
+    // bool writingCRRegs{}; ///< Prevents from executing periodic response while a command is written in CR register.
+    // bool firstReading{};  ///< Prevents from executing periodic response before initialisation string is read in CR registers.
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void UpdatePeriod()
+    /////
+    ///// \brief	Updates the drive period.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void UpdatePeriod();
+    // u32  counter{};             ///< Counter.
+    // u32  executedCommands{};    ///< Number of commands executed.
+    // u32  executedCommandsMax{}; ///< Number max of commands executed during periodic response.
+
+    ///// \name Current parameters for transfer from host to CD block
+    ////@{
+    // u32 sectorNumInBufferPut{};
+    // u32 posInSectorPut{};
+    // u32 numOfSectorToPut{};
     //@}
+
+    EmulatorContext* emulator_context_; ///< Emulator context object.
+
+    HirqStatusRegister hirq_status_reg_; ///< HIrq status register.
+    HirqMaskRegister   hirq_mask_reg_;   ///< HIrq mask register.
+    CommandRegister    cr1_;             ///< Command register 1.
+    CommandRegister    cr2_;             ///< Command register 2.
+    CommandRegister    cr3_;             ///< Command register 3.
+    CommandRegister    cr4_;             ///< Command register 4.
 };
 
 } // namespace saturnin::cdrom

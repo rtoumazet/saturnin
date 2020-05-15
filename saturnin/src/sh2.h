@@ -445,7 +445,7 @@ class Sh2 {
     void initializeSubroutineDepth() { step_over_subroutine_depth_ = callstack_.size(); };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u8 Sh2::subroutineDepth()
+    /// \fn size_t Sh2::subroutineDepth()
     ///
     /// \brief  The saved subroutine depth.
     ///
@@ -455,7 +455,7 @@ class Sh2 {
     /// \returns    An u8.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u8 subroutineDepth() { return step_over_subroutine_depth_; };
+    size_t subroutineDepth() { return step_over_subroutine_depth_; };
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1019,7 +1019,7 @@ class Sh2 {
     //@}
 
     std::vector<CallstackItem> callstack_;                    ///< Callstack of the processor
-    u8                         step_over_subroutine_depth_{}; ///< Subroutine depth, used with DebugStatus::step_over
+    size_t                     step_over_subroutine_depth_{}; ///< Subroutine depth, used with DebugStatus::step_over
 };
 
 } // namespace saturnin::sh2

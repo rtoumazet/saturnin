@@ -482,6 +482,21 @@ class Smpc {
 
     auto isSlaveSh2On() -> bool { return is_slave_sh2_on_; };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::run(s8 cycles);
+    ///
+    /// \brief  Runs the SMPC module for the given cycles.
+    ///
+    /// \author Runik
+    /// \date   07/05/2020
+    ///
+    /// \param  cycles  The number of cycles to run.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void run(s8 cycles);
+
+    [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
+
   private:
     static constexpr u8 input_registers_number{7};
     static constexpr u8 output_registers_number{32};
@@ -604,7 +619,7 @@ class Smpc {
     SaturnPeripheralMapping saturn_mapping_; ///< Saturn paripheral mapping
     StvPeripheralMapping    stv_mapping_;    ///< ST-V peripheral mapping
 
-    u16 intback_remaining_cycles_{}; ///< The intback remaining cycles
+    s16 intback_remaining_cycles_{}; ///< The intback remaining cycles
 
     u32 total_display_duration_in_cycles_{};   ///< Number of cycles needed to display a full frame.
     u32 visible_display_duration_in_cycles_{}; ///< Number of cycles needed to display the visible part of a frame (total -
@@ -657,18 +672,19 @@ auto getKeyName(PeripheralKey pk) -> std::string;
 auto getRtcTime() -> RtcTime;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto isKeyPressed(PeripheralKey pk) -> bool;
+/// \fn auto isKeyPressed(PeripheralKey pk, GLFWwindow* window) -> bool;
 ///
 /// \brief  Query if a key is pressed.
 ///
 /// \author Runik
 /// \date   26/03/2020
 ///
-/// \param  pk  The peripheral key to test.
+/// \param          pk      The peripheral key to test.
+/// \param [in,out] window  If non-null, the OpenGL window.
 ///
 /// \returns    True if key is pressed.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto isKeyPressed(PeripheralKey pk) -> bool;
+auto isKeyPressed(PeripheralKey pk, GLFWwindow* window) -> bool;
 
 } // namespace saturnin::core

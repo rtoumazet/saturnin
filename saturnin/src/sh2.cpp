@@ -1160,6 +1160,7 @@ void Sh2::sendInterruptCaptureSignal() {
 }
 
 auto Sh2::run() -> u8 {
+    memory()->sh2_in_operation_ = sh2_type_;
     runInterruptController();
     current_opcode_ = memory()->read<u16>(pc_);
     execute(*this);

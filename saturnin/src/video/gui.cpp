@@ -799,7 +799,7 @@ void showLogWindow(bool* opened) {
     window_flags |= ImGuiWindowFlags_NoResize;
     window_flags |= ImGuiWindowFlags_NoSavedSettings;
 
-    const ImVec2 window_size(600, 150);
+    const ImVec2 window_size(700, 150);
     ImGui::SetNextWindowSize(window_size);
 
     GLFWwindow* window = glfwGetCurrentContext();

@@ -37,6 +37,7 @@
 #include "sh2_registers.h"
 #include "sh2.h"
 #include "smpc.h"
+#include <GLFW/glfw3.h>
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
@@ -121,6 +122,10 @@ void EmulatorContext::startEmulation() {
     auto rtc  = getRtcTime();
     auto year = rtc.getUpperYear();
 
+    // cdrom::CommandRegister cr{0b1111};
+    // const u8               data{0b0011};
+    // cr &= data;
+
     // boost::filesystem::path lib_path(boost::filesystem::current_path());          // argv[1] contains path to directory with
     // our plugin library boost::shared_ptr<LogPlugin> plugin;            // variable to hold a pointer to plugin variable
     // std::cout << "loading the plugin" << std::endl;
@@ -165,11 +170,13 @@ void EmulatorContext::emulationMainThread() {
         slaveSh2()->powerOnReset();
         // Log::info("main", sh2::debug(0xCD43));
         smpc()->initialize();
+        cdrom()->initialize();
 
         while (emulationStatus() == EmulationStatus::running) {
             if (debugStatus() != DebugStatus::paused) {
-                master_sh2_->run();
+                auto cycles = master_sh2_->run();
                 if (smpc()->isSlaveSh2On()) { slave_sh2_->run(); }
+                smpc()->run(cycles);
             }
         }
         Log::info("main", tr("Emulation main thread finished"));
@@ -182,5 +189,9 @@ void EmulatorContext::startInterface() {
     bool is_legacy_opengl = this->config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
     (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
 }
+
+void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
+
+auto EmulatorContext::openglWindow() const -> GLFWwindow* { return opengl_window_; }
 
 } // namespace saturnin::core

@@ -273,6 +273,8 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
     auto          window = glfwCreateWindow(h_window_size, v_window_size, window_title.c_str(), nullptr, nullptr);
     if (window == nullptr) { return EXIT_FAILURE; }
 
+    state.openglWindow(window);
+
     glfwSetWindowCloseCallback(window, windowCloseCallback);
     // glfwSetWindowUserPointer(window, (void*)&state);
     glfwSetWindowUserPointer(window, static_cast<void*>(&state));

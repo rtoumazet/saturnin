@@ -23,6 +23,7 @@
 
 //#include "../emustate.h"
 #include "cdrom.h"
+#include "../log.h"
 //#include "../smpc.h"
 //#include "../log.h"
 //#include "../memory.h"
@@ -30,6 +31,9 @@
 //#include "../utilities.h"
 
 namespace saturnin::cdrom {
+
+using core::Log;
+using core::tr;
 
 // Static variables initialization
 CdromAccessMethod Cdrom::access_method = CdromAccessMethod::spti;
@@ -150,15 +154,6 @@ auto Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8_t 
 //	executedCommands = 0;
 //}
 //
-// CCdRom::CCdRom(bool blank)
-//{
-//	Scsi::initialize();
-//}
-//
-// CCdRom::~CCdRom()
-//{
-//	Scsi::deInitialize();
-//}
 //
 // void CCdRom::ExecuteCdBlockCommand(uint16_t value)
 //{
@@ -1889,242 +1884,190 @@ auto Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8_t 
 //}
 //
 //
-// uint8_t CCdRom::ReadByte(uint32_t address)
-//{
-//	address&=0xFFFFF;
-//
-//	switch (address)
-//	{
-//		case LOCAL_FETCH_DATA_PTR:
-//		case LOCAL_FETCH_DATA_PTR+1:
-//		case LOCAL_FETCH_DATA_PTR+2:
-//		case LOCAL_FETCH_DATA_PTR+3:
-//			{
-//				uint8_t data=0;
-//				if (posInSector>=2048)
-//				{
-//					posInSector=0;
-//					sectorNumInBuffer++;
-//				}
-//				if (bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer])
-//				{
-//					data|=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector];
-//					bytesTransfered++;
-//					posInSector++;
-//					lastFetchedBuffer=fetchedBuffer;
-//				}
-//				return data;
-//			}
-//			break;
-//		default:
-//			#ifdef _LOGS
-//			EmuState::pLog->UnmappedAreas(address);
-//			#endif
-//			return 0;
-//			break;
-//	}
-//}
-//
-// uint16_t CCdRom::ReadWord(uint32_t address)
-//{
-//	address&=0xFFFFF;
-//
-//	switch (address)
-//	{
-//		case LOCAL_HIRQReg:
-//            //EmuState::pLog->CdBlockWrite(str(format("(R) HIRQREQ=0x%x") % HIRQREQ));
-//			return HIRQREQ;
-//			break;
-//		case LOCAL_HIRQMaskReg:
-//			return HIRQMSK;
-//			break;
-//		case LOCAL_CR1:
-//			return CR1;
-//			break;
-//		case LOCAL_CR2:
-//			return CR2;
-//			break;
-//		case LOCAL_CR3:
-//			return CR3;
-//			break;
-//		case LOCAL_CR4:
-//			firstReading=false;
-//			return CR4;
-//			break;
-//		case LOCAL_TOC_DATA_PTR:
-//			{
-//				uint16_t data=0;
-//				// reading in data buffer
-//				if ((uint32_t)posInDataBuffer<dataBufferSize)
-//				{
-//					data=dataBuffer[posInDataBuffer*2]<<8|dataBuffer[posInDataBuffer*2+1];
-//				}
-//				posInDataBuffer++;
-//				bytesTransfered+=2;
-//				return data;
-//			}
-//			break;
-//		default:
-//			#ifdef _LOGS
-//			EmuState::pLog->UnmappedAreas(address);
-//			#endif
-//			return 0;
-//			break;
-//	}
-//}
-//
-// uint32_t CCdRom::ReadLong(uint32_t address)
-//{
-//	address&=0xFFFFF;
-//
-//	switch (address)
-//	{
-//		case LOCAL_FETCH_DATA_PTR:
-//			{
-//				uint32_t data=0;
-//				if (posInSector>=2048)
-//				{
-//					posInSector=0;
-//					sectorNumInBuffer++;
-//				}
-//				if (bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer])
-//				{
-//					data=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector];
-//					data<<=8;
-//					data|=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector+1];
-//					data<<=8;
-//					data|=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector+2];
-//					data<<=8;
-//					data|=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector+3];
-//					bytesTransfered+=4;
-//					posInSector+=4;
-//					lastFetchedBuffer=fetchedBuffer;
-//				}
-//				return data;
-//			}
-//			break;
-//		default:
-//			#ifdef _LOGS
-//			EmuState::pLog->UnmappedAreas(address);
-//			#endif
-//			return 0;
-//			break;
-//	}
-//}
-//
-// void CCdRom::WriteByte(uint32_t address,uint8_t data)
-//{
-//	address&=0xFFFFF;
-//
-//	switch (address)
-//	{
-//		case 0:
-//		default:
-//			#ifdef _LOGS
-//			EmuState::pLog->UnmappedAreas(address,data);
-//			#endif
-//			break;
-//	}
-//}
-// void CCdRom::WriteWord(uint32_t address,uint16_t data)
-//{
-//	address&=0xFFFFF;
-//
-//	switch (address)
-//	{
-//		case LOCAL_HIRQReg:
-//			HIRQREQ&=data;
-//			break;
-//		case LOCAL_HIRQMaskReg:
-//			HIRQMSK=data;
-//			break;
-//		case LOCAL_CR1:
-//			CR1=data;
-//			writingCRRegs=true;
-//			break;
-//		case LOCAL_CR2:
-//			CR2=data;
-//			writingCRRegs=true;
-//			break;
-//		case LOCAL_CR3:
-//			CR3=data;
-//			writingCRRegs=true;
-//			break;
-//		case LOCAL_CR4:
-//			CR4=data;
-//			writingCRRegs=false;
-//			ExecuteCdBlockCommand(CR1);
-//			break;
-//		default:
-//			#ifdef _LOGS
-//			EmuState::pLog->UnmappedAreas(address,data);
-//			#endif
-//			break;
-//	}
-//}
-// void CCdRom::WriteLong(uint32_t address,uint32_t data)
-//{
-//	address&=0xFFFFF;
-//
-//	switch (address)
-//	{
-//		case LOCAL_FETCH_DATA_PTR:
-//			{
-//				int32_t freeSector=0;
-//				if (posInSectorPut>=2048)
-//				{
-//					// current sector in buffer partition is full, add a new sector
-//					posInSectorPut=0;
-//					sectorNumInBufferPut++;
-//
-//					if ((freeSector==NO_FREE_SECTOR))//&&(sectorNumInBufferPut<numOfSectorToPut))
-//					{
-//						// full!
-//
-//						status=STAT_PAUSE|STAT_TRNS;
-//						HIRQREQ|=BFUL|DRDY;
-//						HIRQREQ&=~EFLS;
-//						//HIRQREQ&=~EHST;
-//						HIRQREQ|=EHST;
-//					}
-//					else
-//					{
-//						// we bind the sector with the current buffer partition connected with the current filter
-//						int32_t posInBufferPartition=0;
-//						for (;posInBufferPartition<MAX_SECTORS;posInBufferPartition++)
-//						{
-//							if (bufferPartitions[fetchedBuffer].sectors[posInBufferPartition]==NULL) break;
-//						}
-//						bufferPartitions[fetchedBuffer].sectors[posInBufferPartition]=&sectorsBuffer[freeSector];
-//						bufferPartitions[fetchedBuffer].size=posInBufferPartition+1;
-//					}
-//				}
-//				if (freeSector!=NO_FREE_SECTOR)
-//				{
-//					bufferPartitions[fetchedBuffer].sectors[sectorNumInBufferPut]->data[posInSectorPut]=static_cast<uint8_t>(data>>24);
-//					bufferPartitions[fetchedBuffer].sectors[sectorNumInBufferPut]->data[posInSectorPut+1]=static_cast<uint8_t>(data>>16);
-//					bufferPartitions[fetchedBuffer].sectors[sectorNumInBufferPut]->data[posInSectorPut+2]=static_cast<uint8_t>(data>>8);
-//					bufferPartitions[fetchedBuffer].sectors[sectorNumInBufferPut]->data[posInSectorPut+3]=static_cast<uint8_t>(data);
-//
-//					bytesTransfered+=4;
-//					posInSectorPut+=4;
-//					lastFetchedBuffer=fetchedBuffer;
-//
-//					HIRQREQ|=CSCT;
-//				}
-//				else
-//				{
-//					//log("put long data over the end of the buffer partition, sectorNumInBufferPut: %d, numOfSectorToPut: %d\n",
-//					//	sectorNumInBufferPut,numOfSectorToPut);
-//				}
-//			}
-//		default:
-//			#ifdef _LOGS
-//			EmuState::pLog->UnmappedAreas(address,data);
-//			#endif
-//			break;
-//	}
-//}
+
+void Cdrom::initialize() {
+    Log::info("cdrom", tr("CD-ROM initialization"));
+    reset();
+}
+
+auto Cdrom::read8(const u32 addr) const -> u8 {
+    //	address&=0xFFFFF;
+    //
+    switch (addr) {
+        case fetch_data_pointer_address:
+        case fetch_data_pointer_address + 1:
+        case fetch_data_pointer_address + 2:
+        case fetch_data_pointer_address + 3:
+            //			{
+            //				uint8_t data=0;
+            //				if (posInSector>=2048)
+            //				{
+            //					posInSector=0;
+            //					sectorNumInBuffer++;
+            //				}
+            //				if (bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer])
+            //				{
+            //					data|=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector];
+            //					bytesTransfered++;
+            //					posInSector++;
+            //					lastFetchedBuffer=fetchedBuffer;
+            //				}
+            //				return data;
+            //			}
+            break;
+
+        default: Log::warning("cdrom", "Unmapped access {:#010x}", addr); return 0;
+    }
+
+    return 0;
+} // namespace saturnin::cdrom
+
+auto Cdrom::read16(const u32 addr) const -> u16 {
+    switch (addr) {
+        case hirq_register_address:
+            Log::debug("cdrom", "HIrqReg={:#06x}", hirq_status_reg_.toU32());
+            return hirq_status_reg_.toU32();
+        case hirq_mask_register_address: return hirq_mask_reg_.toU32();
+        case command_register_1_address: return cr1_.toU32();
+        case command_register_2_address: return cr2_.toU32();
+        case command_register_3_address: return cr3_.toU32();
+        case command_register_4_address:
+            // firstReading = false;
+            return cr4_.toU32();
+        case toc_data_pointer_address:
+            //			{
+            //				uint16_t data=0;
+            //				// reading in data buffer
+            //				if ((uint32_t)posInDataBuffer<dataBufferSize)
+            //				{
+            //					data=dataBuffer[posInDataBuffer*2]<<8|dataBuffer[posInDataBuffer*2+1];
+            //				}
+            //				posInDataBuffer++;
+            //				bytesTransfered+=2;
+            //				return data;
+            //			}
+            //			break;
+        default: Log::warning("cdrom", "Unmapped access {:#010x}", addr); return 0;
+    }
+    return 0;
+}
+
+auto Cdrom::read32(const u32 addr) const -> u32 {
+    switch (addr) {
+        case fetch_data_pointer_address:
+            //			{
+            //				uint32_t data=0;
+            //				if (posInSector>=2048)
+            //				{
+            //					posInSector=0;
+            //					sectorNumInBuffer++;
+            //				}
+            //				if (bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer])
+            //				{
+            //					data=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector];
+            //					data<<=8;
+            //					data|=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector+1];
+            //					data<<=8;
+            //					data|=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector+2];
+            //					data<<=8;
+            //					data|=bufferPartitions[fetchedBuffer].sectors[sectorNumInBuffer]->data[posInSector+3];
+            //					bytesTransfered+=4;
+            //					posInSector+=4;
+            //					lastFetchedBuffer=fetchedBuffer;
+            //				}
+            //				return data;
+            //			}
+            break;
+
+        default: Log::warning("cdrom", "Unmapped access {:#010x}", addr); return 0;
+    }
+    return 0;
+}
+
+void Cdrom::write8(const u32 addr, const u8 data) { Log::warning("cdrom", "Unmapped write access {:#010x} {:#04x}", addr, data); }
+
+void Cdrom::write16(const u32 addr, const u16 data) {
+    switch (addr) {
+        case hirq_register_address: hirq_status_reg_ &= data; break;
+        case hirq_mask_register_address: hirq_mask_reg_.set(HirqMaskRegister::all_bits, data); break;
+        case command_register_1_address:
+            cr1_.set(CommandRegister::all_bits, data);
+            // writingCRRegs = true;
+            break;
+        case command_register_2_address:
+            cr2_.set(CommandRegister::all_bits, data);
+            // writingCRRegs = true;
+            break;
+        case command_register_3_address:
+            cr3_.set(CommandRegister::all_bits, data);
+            // writingCRRegs = true;
+            break;
+        case command_register_4_address:
+            cr4_.set(CommandRegister::all_bits, data);
+            // writingCRRegs = false;
+            // ExecuteCdBlockCommand(CR1);
+            break;
+        default: Log::warning("cdrom", "Unmapped write access {:#010x} {:#04x}", addr, data); break;
+    }
+}
+
+void Cdrom::write32(const u32 addr, const u32 data) {
+    switch (addr) {
+        case fetch_data_pointer_address:
+            //			{
+            //				int32_t freeSector=0;
+            //				if (posInSectorPut>=2048)
+            //				{
+            //					// current sector in buffer partition is full, add a new sector
+            //					posInSectorPut=0;
+            //					sectorNumInBufferPut++;
+            //
+            //					if ((freeSector==NO_FREE_SECTOR))//&&(sectorNumInBufferPut<numOfSectorToPut))
+            //					{
+            //						// full!
+            //
+            //						status=STAT_PAUSE|STAT_TRNS;
+            //						HIRQREQ|=BFUL|DRDY;
+            //						HIRQREQ&=~EFLS;
+            //						//HIRQREQ&=~EHST;
+            //						HIRQREQ|=EHST;
+            //					}
+            //					else
+            //					{
+            //						// we bind the sector with the current buffer partition connected with the current filter
+            //						int32_t posInBufferPartition=0;
+            //						for (;posInBufferPartition<MAX_SECTORS;posInBufferPartition++)
+            //						{
+            //							if (bufferPartitions[fetchedBuffer].sectors[posInBufferPartition]==NULL) break;
+            //						}
+            //						bufferPartitions[fetchedBuffer].sectors[posInBufferPartition]=&sectorsBuffer[freeSector];
+            //						bufferPartitions[fetchedBuffer].size=posInBufferPartition+1;
+            //					}
+            //				}
+            //				if (freeSector!=NO_FREE_SECTOR)
+            //				{
+            //					bufferPartitions[fetchedBuffer].sectors[sectorNumInBufferPut]->data[posInSectorPut]=static_cast<uint8_t>(data>>24);
+            //					bufferPartitions[fetchedBuffer].sectors[sectorNumInBufferPut]->data[posInSectorPut+1]=static_cast<uint8_t>(data>>16);
+            //					bufferPartitions[fetchedBuffer].sectors[sectorNumInBufferPut]->data[posInSectorPut+2]=static_cast<uint8_t>(data>>8);
+            //					bufferPartitions[fetchedBuffer].sectors[sectorNumInBufferPut]->data[posInSectorPut+3]=static_cast<uint8_t>(data);
+            //
+            //					bytesTransfered+=4;
+            //					posInSectorPut+=4;
+            //					lastFetchedBuffer=fetchedBuffer;
+            //
+            //					HIRQREQ|=CSCT;
+            //				}
+            //				else
+            //				{
+            //					//log("put long data over the end of the buffer partition, sectorNumInBufferPut: %d,
+            // numOfSectorToPut: %d\n",
+            //					//	sectorNumInBufferPut,numOfSectorToPut);
+            //				}
+            //			}
+            break;
+        default: Log::warning("cdrom", "Unmapped write access {:#010x} {:#04x}", addr, data); break;
+    }
+}
 //
 // void CCdRom::RunCdBlock(int32_t cycles)
 //{
@@ -2254,4 +2197,36 @@ auto Cdrom::getDriveIndice(const int8_t path, const int8_t target, const int8_t 
 // void CCdRom::RefreshPeriod(){
 //	UpdatePeriod();
 //}
+
+void Cdrom::reset() {
+    // CD-BLOCK registers initialization
+    hirq_status_reg_.reset();
+    hirq_status_reg_.set(HirqStatusRegister::scdq, Scdq::subcode_q_decoded);
+    hirq_status_reg_.set(HirqStatusRegister::efls, Efls::file_system_finished);
+    hirq_status_reg_.set(HirqStatusRegister::ecpy, Ecpy::sector_copy_or_move_finished);
+    hirq_status_reg_.set(HirqStatusRegister::ehst, Ehst::host_io_finished);
+    hirq_status_reg_.set(HirqStatusRegister::esel, Esel::soft_reset_or_selector_set_finished);
+    hirq_status_reg_.set(HirqStatusRegister::dchg, Dchg::disk_has_not_changed);
+    hirq_status_reg_.set(HirqStatusRegister::pend, Pend::cd_play_has_ended);
+    hirq_status_reg_.set(HirqStatusRegister::bful, Bful::buffer_not_full);
+    hirq_status_reg_.set(HirqStatusRegister::csct, Csct::sector_not_stored);
+    hirq_status_reg_.set(HirqStatusRegister::drdy, Drdy::setup_complete);
+    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+
+    hirq_mask_reg_.set();
+
+    constexpr u8 cr1_default{'C'};
+    cr1_.set(CommandRegister::lower_8_bits, cr1_default);
+    constexpr u16 cr2_default{'DB'};
+    cr2_.set(CommandRegister::all_bits, cr2_default);
+    constexpr u16 cr3_default{'LO'};
+    cr3_.set(CommandRegister::all_bits, cr3_default);
+    constexpr u16 cr4_default{'CK'};
+    cr4_.set(CommandRegister::all_bits, cr4_default);
+
+    //	CR1='C';
+    //	CR2=('D'<< 8)|'B';
+    //	CR3=('L'<< 8)|'O';
+    //	CR4=('C'<< 8)|'K';
+}
 } // namespace saturnin::cdrom

@@ -40,7 +40,7 @@ constexpr u8 region_cart_address_even_interleaved = 0x80;
 
 constexpr AddressRange dummy_address        = {0x00000000, 0xFFFFFFFF};
 constexpr AddressRange rom_address          = {0x00000000, 0x000FFFFF};
-constexpr AddressRange smpc_address         = {0x00100000, 0x000FFFFF};
+constexpr AddressRange smpc_address         = {0x00100000, 0x0017FFFF};
 constexpr AddressRange backup_ram_address   = {0x00180000, 0x001FFFFF};
 constexpr AddressRange workram_low_address  = {0x00200000, 0x002FFFFF};
 constexpr AddressRange stv_io_address       = {0x00400000, 0x004FFFFF};
@@ -495,6 +495,10 @@ auto Memory::scu() const -> Scu* { return emulator_context_->scu(); };
 
 auto Memory::smpc() const -> Smpc* { return emulator_context_->smpc(); };
 
+auto Memory::openglWindow() const -> GLFWwindow* { return emulator_context_->openglWindow(); };
+
+auto Memory::cdrom() const -> cdrom::Cdrom* { return emulator_context_->cdrom(); };
+
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad RomLoad) {
     if (times_mirrored > 0) {
         u32 multiple{};
@@ -538,6 +542,7 @@ void Memory::initialize() {
 
 void Memory::initializeMemoryMap() {
     memory_map_.insert(MapArea::value_type(MemoryMapArea::rom, tr("Rom")));
+    memory_map_.insert(MapArea::value_type(MemoryMapArea::smpc, tr("SMPC")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::backup_ram, tr("Backup RAM")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::workram_low, tr("Workram low")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::stv_io, tr("ST-V I/O")));

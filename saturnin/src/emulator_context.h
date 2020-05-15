@@ -44,6 +44,8 @@ namespace saturnin::cdrom {
 class Cdrom;
 }
 
+struct GLFWwindow;
+
 namespace saturnin::core {
 
 /// \name Class declarations.
@@ -210,7 +212,7 @@ class EmulatorContext {
     /// \return The RenderingStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto renderingStatus() -> RenderingStatus { return rendering_status_; };
+    auto renderingStatus() const -> RenderingStatus { return rendering_status_; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::debugStatus(const DebugStatus status)
@@ -236,7 +238,33 @@ class EmulatorContext {
     /// \returns    The DebugStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto debugStatus() -> DebugStatus { return debug_status_; };
+    auto debugStatus() const -> DebugStatus { return debug_status_; };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::openglWindow(GLFWwindow* window);
+    ///
+    /// \brief  Sets the Opengl window pointer.
+    ///
+    /// \author Runik
+    /// \date   08/05/2020
+    ///
+    /// \param [in,out] window  If non-null, the OpenGL window pointer.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void openglWindow(GLFWwindow* window);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto EmulatorContext::openglWindow() const -> GLFWwindow*;
+    ///
+    /// \brief  Returns the Opengl window pointer.
+    ///
+    /// \author Runik
+    /// \date   08/05/2020
+    ///
+    /// \returns    Null if it fails, else a pointer to a GLFWwindow.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto openglWindow() const -> GLFWwindow*;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,6 +303,8 @@ class EmulatorContext {
     Rom_stv stv_rom_{Rom_stv::none}; ///< Current ST-V ROM loaded.
 
     std::thread emulation_main_thread_; ///< The emulation main thread.
+
+    GLFWwindow* opengl_window_; ///< The OpenGL window.
 };
 
 } // namespace saturnin::core

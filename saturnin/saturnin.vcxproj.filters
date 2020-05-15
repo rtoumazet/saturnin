@@ -102,6 +102,9 @@
     <ClCompile Include="src\sh2_disasm.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\cdrom\cdrom_registers.h">
+      <Filter>Fichiers sources\cdrom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
