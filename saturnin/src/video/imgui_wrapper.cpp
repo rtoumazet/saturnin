@@ -46,12 +46,12 @@ static auto vectorGetter = [](void* vec, int idx, const char** out_text) {
 
 auto Combo(const char* label, int* current_index, std::vector<std::string>& values) -> bool {
     if (values.empty()) { return false; }
-    return Combo(label, current_index, vectorGetter, static_cast<void*>(&values), values.size());
+    return Combo(label, current_index, vectorGetter, static_cast<void*>(&values), static_cast<int32_t>(values.size()));
 }
 
 auto ListBox(const char* label, int* current_index, std::vector<std::string>& values) -> bool {
     if (values.empty()) { return false; }
-    return ListBox(label, current_index, vectorGetter, static_cast<void*>(&values), values.size());
+    return ListBox(label, current_index, vectorGetter, static_cast<void*>(&values), static_cast<int32_t>(values.size()));
 }
 
 } // namespace ImGui

@@ -101,7 +101,7 @@ void OpenglLegacy::render() {
     glVertexPointer(3, GL_FLOAT, 0, verts.data());
 
     // draw a cube
-    glDrawArrays(GL_TRIANGLES, 0, verts.size());
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<s32>(verts.size()));
 
     // deactivate vertex arrays after drawing
     glDisableClientState(GL_VERTEX_ARRAY);
