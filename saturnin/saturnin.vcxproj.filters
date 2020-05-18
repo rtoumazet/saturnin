@@ -105,6 +105,9 @@
     <ClCompile Include="src\cdrom\cdrom_registers.h">
       <Filter>Fichiers sources\cdrom</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\vdp2.cpp">
+      <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -217,6 +220,9 @@
     </ClInclude>
     <ClInclude Include="lib\imgui\imgui_memory_editor.h">
       <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\vdp2_registers.h">
+      <Filter>Fichiers sources\video</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

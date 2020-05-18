@@ -27,6 +27,7 @@
 #include "video/opengl.h"
 #include "video/opengl_legacy.h"
 #include "video/opengl_modern.h"
+#include "video/vdp2.h"
 #include "config.h"
 #include "emulator_context.h"
 #include "log.h"
@@ -49,6 +50,7 @@ using cdrom::Cdrom;
 using sh2::Sh2;
 using sh2::Sh2Type;
 using sound::Scsp;
+using video::Vdp2;
 
 EmulatorContext::EmulatorContext() {
     config_     = std::make_unique<Config>("saturnin.cfg");
@@ -59,6 +61,7 @@ EmulatorContext::EmulatorContext() {
     smpc_       = std::make_unique<Smpc>(this);
     scsp_       = std::make_unique<Scsp>(this);
     cdrom_      = std::make_unique<Cdrom>(this);
+    vdp2_       = std::make_unique<Vdp2>(this);
 }
 
 EmulatorContext::~EmulatorContext() = default;
@@ -71,6 +74,7 @@ auto EmulatorContext::scu() -> Scu* { return scu_.get(); };
 auto EmulatorContext::smpc() -> Smpc* { return smpc_.get(); };
 auto EmulatorContext::scsp() -> Scsp* { return scsp_.get(); };
 auto EmulatorContext::cdrom() -> Cdrom* { return cdrom_.get(); };
+auto EmulatorContext::vdp2() -> Vdp2* { return vdp2_.get(); };
 
 auto EmulatorContext::initialize() -> bool {
     Log::initialize();
@@ -168,14 +172,14 @@ void EmulatorContext::emulationMainThread() {
         sh2::initializeOpcodesLut();
         masterSh2()->powerOnReset();
         slaveSh2()->powerOnReset();
-        // Log::info("main", sh2::debug(0xCD43));
         smpc()->initialize();
         cdrom()->initialize();
+        vdp2()->initialize();
 
         while (emulationStatus() == EmulationStatus::running) {
             if (debugStatus() != DebugStatus::paused) {
-                auto cycles = master_sh2_->run();
-                if (smpc()->isSlaveSh2On()) { slave_sh2_->run(); }
+                auto cycles = masterSh2()->run();
+                if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
                 smpc()->run(cycles);
             }
         }

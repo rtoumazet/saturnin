@@ -25,7 +25,16 @@
 
 #pragma once
 
+#include "vdp2_registers.h"
+
+// Forward declarations
+namespace saturnin::core {
+class EmulatorContext;
+}
+
 namespace saturnin::video {
+
+using saturnin::core::EmulatorContext;
 
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
@@ -53,7 +62,67 @@ enum class TvStandard : s8 {
 
 class Vdp2 {
   public:
+    //@{
+    // Constructors / Destructors
+    Vdp2() = delete;
+    Vdp2(EmulatorContext* ec) : emulator_context_(ec){};
+    Vdp2(const Vdp2&) = delete;
+    Vdp2(Vdp2&&)      = delete;
+    auto operator=(const Vdp2&) & -> Vdp2& = delete;
+    auto operator=(Vdp2&&) & -> Vdp2& = delete;
+    ~Vdp2()                           = default;
+    //@}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::initialize();
+    ///
+    /// \brief  Initializes the VDP2
+    ///
+    /// \author Runik
+    /// \date   16/05/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initialize();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::run(u8 sh2_cycles);
+    ///
+    /// \brief  Runs the VDP2 for the given number of SH2 cycles
+    ///
+    /// \author Runik
+    /// \date   17/05/2020
+    ///
+    /// \param  cycles  The cycles to run.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void run(u8 cycles);
+
+    /// \name Vdp2 registers accessors
+    //@{
+    void               write8(u32 addr, u8 data);
+    void               write16(u32 addr, u16 data);
+    void               write32(u32 addr, u32 data);
+    [[nodiscard]] auto read8(u32 addr) const -> u8;
+    [[nodiscard]] auto read16(u32 addr) const -> u16;
+    [[nodiscard]] auto read32(u32 addr) const -> u32;
+    //@}
+
   private:
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn   void Vdp2::reset();
+    ///
+    /// \brief    Resets the VPD2
+    ///
+    /// \author   Runik
+    /// \date 16/05/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void reset();
+
+    EmulatorContext* emulator_context_; ///< Emulator context object.
+
+    // VDP2 registers
+    TvScreenModeRegister tvmd_;
 };
 
 } // namespace saturnin::video

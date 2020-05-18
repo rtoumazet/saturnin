@@ -208,6 +208,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClCompile Include="src\video\opengl.cpp" />
     <ClCompile Include="src\video\opengl_legacy.cpp" />
     <ClCompile Include="src\video\opengl_modern.cpp" />
+    <ClCompile Include="src\video\vdp2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imgui_custom_controls.h" />
@@ -247,6 +248,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClInclude Include="src\video\opengl_legacy.h" />
     <ClInclude Include="src\video\opengl_modern.h" />
     <ClInclude Include="src\video\vdp2.h" />
+    <ClInclude Include="src\video\vdp2_registers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

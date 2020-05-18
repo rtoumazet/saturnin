@@ -43,6 +43,9 @@ class Scsp;
 namespace saturnin::cdrom {
 class Cdrom;
 }
+namespace saturnin::video {
+class Vdp2;
+}
 
 struct GLFWwindow;
 
@@ -148,6 +151,7 @@ class EmulatorContext {
     auto smpc() -> Smpc*;
     auto scsp() -> sound::Scsp*;
     auto cdrom() -> cdrom::Cdrom*;
+    auto vdp2() -> video::Vdp2*;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +216,7 @@ class EmulatorContext {
     /// \return The RenderingStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto renderingStatus() const -> RenderingStatus { return rendering_status_; };
+    [[nodiscard]] auto renderingStatus() const -> RenderingStatus { return rendering_status_; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::debugStatus(const DebugStatus status)
@@ -238,7 +242,7 @@ class EmulatorContext {
     /// \returns    The DebugStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto debugStatus() const -> DebugStatus { return debug_status_; };
+    [[nodiscard]] auto debugStatus() const -> DebugStatus { return debug_status_; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::openglWindow(GLFWwindow* window);
@@ -286,6 +290,7 @@ class EmulatorContext {
     std::unique_ptr<Smpc>         smpc_;       ///< SMPC object
     std::unique_ptr<sound::Scsp>  scsp_;       ///< SCSP object
     std::unique_ptr<cdrom::Cdrom> cdrom_;      ///< CDROM object
+    std::unique_ptr<video::Vdp2>  vdp2_;       ///< Vdp2 object
 
     HardwareMode    hardware_mode_{HardwareMode::saturn};        ///< Hardware mode
     EmulationStatus emulation_status_{EmulationStatus::stopped}; ///< Emulation status
