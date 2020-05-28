@@ -88,10 +88,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;IMGUI_USER_CONFIG="$(ProjectDir)src\video\imgui_wrapper.h";IMGUI_IMPL_OPENGL_LOADER_CUSTOM="$(ProjectDir)lib\imgui\imgui_loader.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__SCL_SECURE_NO_WARNINGS;IMGUI_USER_CONFIG="$(ProjectDir)src\video\imgui_wrapper.h";IMGUI_IMPL_OPENGL_LOADER_CUSTOM="$(ProjectDir)lib\imgui\imgui_loader.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <PostBuildEvent />
     <Link />
@@ -110,10 +111,12 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;IMGUI_USER_CONFIG="$(ProjectDir)src\video\imgui_wrapper.h";IMGUI_IMPL_OPENGL_LOADER_CUSTOM="$(ProjectDir)lib\imgui\imgui_loader.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__SCL_SECURE_NO_WARNINGS;IMGUI_USER_CONFIG="$(ProjectDir)src\video\imgui_wrapper.h";IMGUI_IMPL_OPENGL_LOADER_CUSTOM="$(ProjectDir)lib\imgui\imgui_loader.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link />
     <Link>

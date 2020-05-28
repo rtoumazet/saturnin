@@ -87,9 +87,7 @@ void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& d
             bool is_selected = (default_key_name.c_str() == getKeyName(key).c_str());
             if (ImGui::Selectable(getKeyName(key).c_str(), is_selected)) {
                 default_key = key;
-                if (is_selected) {
-                    ImGui::SetItemDefaultFocus();
-                }
+                if (is_selected) { ImGui::SetItemDefaultFocus(); }
             }
         }
         ImGui::EndCombo();

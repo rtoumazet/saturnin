@@ -24,6 +24,7 @@
 #include "emulator_context.h"
 #include "config.h"
 #include "sh2.h"
+#include "video/vdp2.h"
 
 namespace lzpp = libzippp;
 namespace fs   = std::filesystem;
@@ -498,6 +499,8 @@ auto Memory::smpc() const -> Smpc* { return emulator_context_->smpc(); };
 auto Memory::openglWindow() const -> GLFWwindow* { return emulator_context_->openglWindow(); };
 
 auto Memory::cdrom() const -> cdrom::Cdrom* { return emulator_context_->cdrom(); };
+
+auto Memory::vdp2() const -> video::Vdp2* { return emulator_context_->vdp2(); };
 
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad RomLoad) {
     if (times_mirrored > 0) {

@@ -152,12 +152,11 @@ class StatusRegister : public Register {
 class InterruptPriorityLevelSettingRegisterA : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  divu_level{12, 15};  ///< Defines DIVU priority level.
-    inline static const BitRange<u8>  dmac_level{8, 11};   ///< Defines DMAC0/DMAC1 priority level.
-    inline static const BitRange<u8>  wdt_level{4, 7};     ///< Defines WDT/DRAM refresh priority level.
-    inline static const BitRange<u16> all_bits{0, 15};     ///< Defines the range of all the bits of the register.
-    inline static const BitRange<u8>  upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u8> divu_level{12, 15};  ///< Defines DIVU priority level.
+    inline static const BitRange<u8> dmac_level{8, 11};   ///< Defines DMAC0/DMAC1 priority level.
+    inline static const BitRange<u8> wdt_level{4, 7};     ///< Defines WDT/DRAM refresh priority level.
+    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,11 +171,10 @@ class InterruptPriorityLevelSettingRegisterA : public Register {
 class InterruptPriorityLevelSettingRegisterB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  sci_level{12, 15};   ///< Defines SCI priority level.
-    inline static const BitRange<u8>  frt_level{8, 11};    ///< Defines FRT priority level.
-    inline static const BitRange<u16> all_bits{0, 15};     ///< Defines the range of all the bits of the register.
-    inline static const BitRange<u8>  upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u8> sci_level{12, 15};   ///< Defines SCI priority level.
+    inline static const BitRange<u8> frt_level{8, 11};    ///< Defines FRT priority level.
+    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,12 +189,11 @@ class InterruptPriorityLevelSettingRegisterB : public Register {
 class VectorNumberSettingRegisterA : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  sci_receive_error_vector{8, 14}; ///< Defines SCI receive error interrupt vector number.
-    inline static const BitRange<u8>  sci_receive_data_full_vector{0,
+    inline static const BitRange<u8> sci_receive_error_vector{8, 14}; ///< Defines SCI receive error interrupt vector number.
+    inline static const BitRange<u8> sci_receive_data_full_vector{0,
                                                                   6}; ///< Defines SCI receive data full interrupt vector number.
-    inline static const BitRange<u16> all_bits{0, 15};                 ///< Defines the range of all the bits of the register.
-    inline static const BitRange<u8>  upper_8_bits{8, 15};             ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};              ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u8> upper_8_bits{8, 15};             ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};              ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,11 +209,10 @@ class VectorNumberSettingRegisterB : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u8> sci_transmit_data_empty_vector{
-        8, 14};                                                      ///< Defines SCI transmit data empty interrupt vector number.
-    inline static const BitRange<u8>  sci_transmit_end_vector{0, 6}; ///< Defines SCI transmit end interrupt vector number.
-    inline static const BitRange<u16> all_bits{0, 15};               ///< Defines the range of all the bits of the register.
-    inline static const BitRange<u8>  upper_8_bits{8, 15};           ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};            ///< Defines the range of the lower 8 bits of the register.
+        8, 14};                                                     ///< Defines SCI transmit data empty interrupt vector number.
+    inline static const BitRange<u8> sci_transmit_end_vector{0, 6}; ///< Defines SCI transmit end interrupt vector number.
+    inline static const BitRange<u8> upper_8_bits{8, 15};           ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};            ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -231,11 +227,10 @@ class VectorNumberSettingRegisterB : public Register {
 class VectorNumberSettingRegisterC : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  frt_input_capture_vector{8, 14}; ///< Defines FRT input capture interrupt vector number.
-    inline static const BitRange<u8>  frt_output_compare_vector{0, 6}; ///< Defines FRT output compare interrupt vector number.
-    inline static const BitRange<u16> all_bits{0, 15};                 ///< Defines the range of all the bits of the register.
-    inline static const BitRange<u8>  upper_8_bits{8, 15};             ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};              ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u8> frt_input_capture_vector{8, 14}; ///< Defines FRT input capture interrupt vector number.
+    inline static const BitRange<u8> frt_output_compare_vector{0, 6}; ///< Defines FRT output compare interrupt vector number.
+    inline static const BitRange<u8> upper_8_bits{8, 15};             ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};              ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -250,10 +245,9 @@ class VectorNumberSettingRegisterC : public Register {
 class VectorNumberSettingRegisterD : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  frt_overflow_vector{8, 14}; ///< Defines FRT overflow interrupt vector number.
-    inline static const BitRange<u16> all_bits{0, 15};            ///< Defines the range of all the bits of the register.
-    inline static const BitRange<u8>  upper_8_bits{8, 15};        ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};         ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u8> frt_overflow_vector{8, 14}; ///< Defines FRT overflow interrupt vector number.
+    inline static const BitRange<u8> upper_8_bits{8, 15};        ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};         ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -268,11 +262,10 @@ class VectorNumberSettingRegisterD : public Register {
 class VectorNumberSettingRegisterWdt : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  wdt_interval_vector{8, 14};     ///< Defines WDT interval interrupt vector number.
-    inline static const BitRange<u8>  wdt_compare_match_vector{0, 6}; ///< Defines WDT compare match interrupt vector number.
-    inline static const BitRange<u16> all_bits{0, 15};                ///< Defines the range of all the bits of the register.
-    inline static const BitRange<u8>  upper_8_bits{8, 15};            ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};             ///< Defines the range of the lower 8 bits of the register.
+    inline static const BitRange<u8> wdt_interval_vector{8, 14};     ///< Defines WDT interval interrupt vector number.
+    inline static const BitRange<u8> wdt_compare_match_vector{0, 6}; ///< Defines WDT compare match interrupt vector number.
+    inline static const BitRange<u8> upper_8_bits{8, 15};            ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};             ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -290,7 +283,6 @@ class VectorNumberSettingRegisterDiv : public Register {
     inline static const BitRange<u8>  divu_interrupt_vector{0, 6}; ///< Defines DIVU vector number.
     inline static const BitRange<u16> upper_16_bits{16, 31};       ///< Defines the range of the upper 16 bits of the register.
     inline static const BitRange<u16> lower_16_bits{0, 15};        ///< Defines the range of the lower 16 bits of the register.
-    inline static const BitRange<u32> all_bits{0, 31};             ///< Defines the whole register bits
     static constexpr u32              access_mask{0b1111111};      ///< The access mask
 };
 
@@ -306,9 +298,8 @@ class VectorNumberSettingRegisterDiv : public Register {
 class VectorNumberSettingRegisterDma : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  dma_transfert_end_vector{0, 7}; ///< Defines DMACx vector number.
-    inline static const BitRange<u32> all_bits{0, 31};                ///< Defines the whole register bits
-    static constexpr u32              access_mask{0x00000000FF};      ///< The access mask
+    inline static const BitRange<u8> dma_transfert_end_vector{0, 7}; ///< Defines DMACx vector number.
+    static constexpr u32             access_mask{0x00000000FF};      ///< The access mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -359,9 +350,8 @@ class InterruptControlRegister : public Register {
     inline static const BitRange<NmiInputLevel>    nmi_input_level{15};   ///< Defines NMIL  bit.
     inline static const BitRange<NmiEdgeDetection> nmi_edge_detection{8}; ///< Defines NMIE  bit.
     inline static const BitRange<VectorMode>       vector_mode{0};        ///< Defines VECMD  bit.
-    inline static const BitRange<u8>  upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
-    inline static const BitRange<u16> all_bits{0, 15};     ///< Defines the whole register bits
+    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 //////////////////////////////////
@@ -381,7 +371,6 @@ class BusControlRegister1 : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the whole register bits
-    inline static const BitRange<u32> all_bits{0, 31};                ///< Defines the whole register bits
     static constexpr u16              write_mask{0b0001111111110111}; ///< The write mask
 };
 
@@ -398,7 +387,6 @@ class BusControlRegister2 : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the whole register bits
-    inline static const BitRange<u32> all_bits{0, 31};                ///< Defines the whole register bits
     static constexpr u16              write_mask{0b0000000011111100}; ///< The write mask
 };
 
@@ -415,7 +403,6 @@ class WaitControlRegister : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15}; ///< Defines the lower 16 bits of the register.
-    inline static const BitRange<u32> all_bits{0, 31};      ///< Defines the whole register bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +418,6 @@ class IndividualMemoryControlRegister : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15}; ///< Defines the lower 16 bits of the register.
-    inline static const BitRange<u32> all_bits{0, 31};      ///< Defines the whole register bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -447,7 +433,6 @@ class RefreshTimeControlStatusRegister : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the lower 16 bits of the register.
-    inline static const BitRange<u32> all_bits{0, 31};                ///< Defines the whole register bits.
     static constexpr u16              write_mask{0b0000000011111000}; ///< The write mask
 };
 
@@ -464,7 +449,6 @@ class RefreshTimerCounter : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the lower 16 bits of the register.
-    inline static const BitRange<u32> all_bits{0, 31};                ///< Defines the whole register bits.
     static constexpr u16              write_mask{0b0000000011111111}; ///< The write mask
 };
 
@@ -481,7 +465,6 @@ class RefreshTimerConstantRegister : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the lower 16 bits of the register.
-    inline static const BitRange<u32> all_bits{0, 31};                ///< Defines the whole register bits.
     static constexpr u16              write_mask{0b0000000011111111}; ///< The write mask
 };
 
@@ -575,8 +558,7 @@ class CacheControlRegister : public Register {
     inline static const BitRange<DataReplacementDisable>        data_replacement_disable{2};        ///< Defines OD bit.
     inline static const BitRange<InstructionReplacementDisable> instruction_replacement_disable{1}; ///< Defines ID bit.
     inline static const BitRange<CacheEnable>                   cache_enable{0};                    ///< Defines CE bit.
-    inline static const BitRange<u8>                            all_bits{0, 7};         ///< Defines the whole register bits.
-    static constexpr u8                                         write_mask{0b11011111}; ///< The write mask
+    static constexpr u8                                         write_mask{0b11011111};             ///< The write mask
 };
 
 //////////////////////////////////////////////
@@ -595,7 +577,6 @@ class CacheControlRegister : public Register {
 class DmaSourceAddressRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> all_bits{0, 31}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -610,7 +591,6 @@ class DmaSourceAddressRegister : public Register {
 class DmaDestinationAddressRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> all_bits{0, 31}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -625,8 +605,7 @@ class DmaDestinationAddressRegister : public Register {
 class DmaTransferCountRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> all_bits{0, 31};        ///< Defines the whole register bits
-    static constexpr u32              write_mask{0x00FFFFFF}; ///< The write mask
+    static constexpr u32 write_mask{0x00FFFFFF}; ///< The write mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -803,7 +782,6 @@ class DmaChannelControlRegister : public Register {
     inline static const BitRange<Sh2DmaInterruptEnable>  interrupt_enable{2};              ///< Defines IE bit.
     inline static const BitRange<TransferEndFlag>        transfer_end_flag{1};             ///< Defines TE bit.
     inline static const BitRange<Sh2DmaEnable>           dma_enable{0};                    ///< Defines DE bit.
-    inline static const BitRange<u32>                    all_bits{0, 31};                  ///< Defines the whole register bits
     static constexpr u32                                 write_mask{0x000000FF};           ///< The write mask
 };
 
@@ -827,7 +805,6 @@ class DmaRequestResponseSelectionControlRegister : public Register {
   public:
     using Register::Register;
     inline static const BitRange<ResourceSelect> resource_select{0, 1};  ///< Defines RSx bits.
-    inline static const BitRange<u8>             all_bits{0, 7};         ///< Defines the whole register bits
     static constexpr u8                          write_mask{0b00000011}; ///< The write mask
 };
 
@@ -891,7 +868,6 @@ class DmaOperationRegister : public Register {
     inline static const BitRange<AddressErrorFlag> address_error_flag{2};  ///< Defines AE bit.
     inline static const BitRange<NmiFlag>          nmi_flag{1};            ///< Defines NMIF bit.
     inline static const BitRange<DmaMasterEnable>  dma_master_enable{0};   ///< Defines DME bit.
-    inline static const BitRange<u32>              all_bits{0, 31};        ///< Defines the whole register bits
     static constexpr u32                           write_mask{0x0000000F}; ///< The write mask
 };
 
@@ -911,7 +887,6 @@ class DmaOperationRegister : public Register {
 class DivisorRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> all_bits{0, 31}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -926,7 +901,6 @@ class DivisorRegister : public Register {
 class DividendRegister32Bits : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> all_bits{0, 31}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -956,7 +930,6 @@ class DivisionControlRegister : public Register {
     inline static const BitRange<OverflowFlag>          overflow_flag{0};    ///< Defines OVF bit.
     inline static const BitRange<u16> upper_16_bits{16, 31}; ///< Defines the range of the upper 16 bits of the register.
     inline static const BitRange<u16> lower_16_bits{0, 15};  ///< Defines the range of the lower 16 bits of the register.
-    inline static const BitRange<u32> all_bits{0, 31};       ///< Defines the whole register bits
     static constexpr u32              access_mask{0b11};     ///< The access mask
 };
 
@@ -972,7 +945,6 @@ class DivisionControlRegister : public Register {
 class DividendRegisterH : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> all_bits{0, 31}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -987,7 +959,6 @@ class DividendRegisterH : public Register {
 class DividendRegisterL : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> all_bits{0, 31}; ///< Defines the whole register bits
 };
 
 //////////////////////////////////////////
@@ -1054,7 +1025,6 @@ class TimerInterruptEnableRegister : public Register {
     inline static const BitRange<OutputCompareInterruptAEnable>   output_compare_interrupt_a_enable{3};  ///< Defines OCIAE bit.
     inline static const BitRange<OutputCompareInterruptBEnable>   output_compare_interrupt_b_enable{2};  ///< Defines OCIBE bit.
     inline static const BitRange<TimerOverflowInterruptEnable>    timer_overflow_interrupt_enable{1};    ///< Defines OVIE bit.
-    inline static const BitRange<u8>                              all_bits{0, 7}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1129,7 +1099,6 @@ class FreeRunningTimerControlStatusRegister : public Register {
     inline static const BitRange<OutputCompareFlagB> output_compare_flag_b{2}; ///< Defines OCFB bit.
     inline static const BitRange<TimerOverflowFlag>  timer_overflow_flag{1};   ///< Defines OVF bit.
     inline static const BitRange<CounterClearA>      counter_clear_a{0};       ///< Defines CCLRA bit.
-    inline static const BitRange<u8>                 all_bits{0, 7};           ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1144,9 +1113,8 @@ class FreeRunningTimerControlStatusRegister : public Register {
 class FreeRunningCounter : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
-    inline static const BitRange<u16> all_bits{0, 15};     ///< Defines the whole register bits
+    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1161,9 +1129,8 @@ class FreeRunningCounter : public Register {
 class OutputCompareRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
-    inline static const BitRange<u16> all_bits{0, 15};     ///< Defines the whole register bits
+    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1204,7 +1171,6 @@ class TimerControlRegister : public Register {
     using Register::Register;
     inline static const BitRange<InputEdgeSelect> input_edge_select{7}; ///< Defines IEDG bit.
     inline static const BitRange<FrtClockSelect>  clock_select{0, 1};   ///< Defines IEDG bit.
-    inline static const BitRange<u8>              all_bits{0, 7};       ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1255,8 +1221,7 @@ class TimerOutputCompareControlRegister : public Register {
     inline static const BitRange<OutputCompareRegisterSelect> output_compare_register_select{4}; ///< Defines OCRS bit.
     inline static const BitRange<OutputLevelA>                output_level_a{1};                 ///< Defines OLVLA bit.
     inline static const BitRange<OutputLevelB>                output_level_b{0};                 ///< Defines OLVLB bit.
-    inline static const BitRange<u8>                          all_bits{0, 7};          ///< Defines the whole register bits
-    static constexpr u8                                       access_mask{0b00010011}; ///< The access mask
+    static constexpr u8                                       access_mask{0b00010011};           ///< The access mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1271,9 +1236,8 @@ class TimerOutputCompareControlRegister : public Register {
 class InputCaptureRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8>  lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
-    inline static const BitRange<u16> all_bits{0, 15};     ///< Defines the whole register bits
+    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ///////////////////////////////
@@ -1292,7 +1256,6 @@ class InputCaptureRegister : public Register {
 class WatchdogTimerCounter : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> all_bits{0, 7}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1362,7 +1325,6 @@ class WatchdogTimerControlStatusRegister : public Register {
     inline static const BitRange<TimerModeSelect> timer_mode_select{6}; ///< Defines WT/IT bit.
     inline static const BitRange<TimerEnable>     timer_enable{5};      ///< Defines TME bit.
     inline static const BitRange<WdtClockSelect>  clock_select{0, 2};   ///< Defines CKSx bits.
-    inline static const BitRange<u8>              all_bits{0, 7};       ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1413,7 +1375,6 @@ class ResetControlStatusRegister : public Register {
     inline static const BitRange<WatchdogTimerOverflowFlag> watchdog_timer_overflow_flag{7}; ///< Defines WOVF bit.
     inline static const BitRange<ResetEnable>               reset_enable{6};                 ///< Defines RSTE bit.
     inline static const BitRange<ResetSelect>               reset_select{5};                 ///< Defines RSTS bit.
-    inline static const BitRange<u8>                        all_bits{0, 7};                  ///< Defines the whole register bits
 };
 
 /////////////////////////////////////////////
@@ -1518,7 +1479,6 @@ class SerialModeRegister : public Register {
     inline static const BitRange<StopBitLength>      stop_bit_length{3};     ///< Defines STOP bit.
     inline static const BitRange<MultiprocessorMode> multiprocessor_mode{2}; ///< Defines MP bit.
     inline static const BitRange<SciClockSelect>     clock_select{0, 1};     ///< Defines CKSx bit.
-    inline static const BitRange<u8>                 all_bits{0, 7};         ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1533,7 +1493,6 @@ class SerialModeRegister : public Register {
 class BitRateRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> all_bits{0, 7}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1634,7 +1593,6 @@ class SerialControlRegister : public Register {
     inline static const BitRange<MultiprocessorInterruptEnable> multiprocessor_interrupt_enable{3}; ///< Defines MPIE bit.
     inline static const BitRange<TransmitEndInterruptEnable>    transmit_end_interrupt_enable{2};   ///< Defines TEIE bit.
     inline static const BitRange<ClockEnable>                   clock_enable{0, 1};                 ///< Defines CKEx bit.
-    inline static const BitRange<u8>                            all_bits{0, 7}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1649,7 +1607,6 @@ class SerialControlRegister : public Register {
 class TransmitDataRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> all_bits{0, 7}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1664,7 +1621,6 @@ class TransmitDataRegister : public Register {
 class TransmitShiftRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> all_bits{0, 7}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1775,7 +1731,6 @@ class SerialStatusRegister : public Register {
     inline static const BitRange<TransmitEnd>               transmit_end{2};                 ///< Defines TEND bit.
     inline static const BitRange<MultiprocessorBit>         multiprocessor_bit{1};           ///< Defines MPB bit.
     inline static const BitRange<MultiprocessorBitTransfer> multiprocessor_bit_transfer{0};  ///< Defines MPBT bit.
-    inline static const BitRange<u8>                        all_bits{0, 7};                  ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1790,7 +1745,6 @@ class SerialStatusRegister : public Register {
 class ReceiveDataRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> all_bits{0, 7}; ///< Defines the whole register bits
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1805,6 +1759,5 @@ class ReceiveDataRegister : public Register {
 class ReceiveShiftRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> all_bits{0, 7}; ///< Defines the whole register bits
 };
 } // namespace saturnin::sh2

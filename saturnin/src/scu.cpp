@@ -120,7 +120,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         //            current_DSP_data_ram_dataport_ = data;
         //            break;
         case level_0_dma_enable_register: {
-            d0en_.set(DmaEnableRegister::all_bits, data);
+            d0en_.set(bits_0_31, data);
             if (d0en_.get(DmaEnableRegister::dma_enable) == DmaEnable::enabled) {
                 auto dma_0_config = configureDmaTransfer(DmaLevel::level_0);
                 // executeDma(dma_0_config);
@@ -136,7 +136,7 @@ void Scu::write32(const u32 addr, const u32 data) {
             // break;
         }
         case level_1_dma_enable_register: {
-            d1en_.set(DmaEnableRegister::all_bits, data);
+            d1en_.set(bits_0_31, data);
             if (d1en_.get(DmaEnableRegister::dma_enable) == DmaEnable::enabled) {
                 auto dma_1_config = configureDmaTransfer(DmaLevel::level_1);
                 // executeDma(dma_1_config);
@@ -145,7 +145,7 @@ void Scu::write32(const u32 addr, const u32 data) {
             return;
         }
         case level_2_dma_enable_register: {
-            d2en_.set(DmaEnableRegister::all_bits, data);
+            d2en_.set(bits_0_31, data);
             if (d2en_.get(DmaEnableRegister::dma_enable) == DmaEnable::enabled) {
                 auto dma_2_config = configureDmaTransfer(DmaLevel::level_2);
                 // executeDma(dma_1_config);
@@ -153,24 +153,24 @@ void Scu::write32(const u32 addr, const u32 data) {
             }
             return;
         }
-        case level_0_dma_add_value_register: d0ad_.set(DmaAddressAddValueRegister::all_bits, data); return;
-        case level_1_dma_add_value_register: d1ad_.set(DmaAddressAddValueRegister::all_bits, data); return;
-        case level_2_dma_add_value_register: d2ad_.set(DmaAddressAddValueRegister::all_bits, data); return;
-        case level_0_dma_read_address: d0r_.set(DmaReadAddressRegister::all_bits, data); return;
-        case level_1_dma_read_address: d1r_.set(DmaReadAddressRegister::all_bits, data); return;
-        case level_2_dma_read_address: d2r_.set(DmaReadAddressRegister::all_bits, data); return;
-        case level_0_dma_write_address: d0w_.set(DmaWriteAddressRegister::all_bits, data); return;
-        case level_1_dma_write_address: d1w_.set(DmaWriteAddressRegister::all_bits, data); return;
-        case level_2_dma_write_address: d2w_.set(DmaWriteAddressRegister::all_bits, data); return;
-        case level_0_dma_mode_register: d0md_.set(DmaModeRegister::all_bits, data); return;
-        case level_1_dma_mode_register: d1md_.set(DmaModeRegister::all_bits, data); return;
-        case level_2_dma_mode_register: d2md_.set(DmaModeRegister::all_bits, data); return;
-        case level_0_dma_transfer_byte_number: d0c_.set(DmaLevel0TransferByteNumberRegister::all_bits, data); return;
-        case level_1_dma_transfer_byte_number: d1c_.set(DmaLevel1TransferByteNumberRegister::all_bits, data); return;
-        case level_2_dma_transfer_byte_number: d2c_.set(DmaLevel2TransferByteNumberRegister::all_bits, data); return;
-        case interrupt_status_register: interrupt_status_register_.set(InterruptStatusRegister::all_bits, data); return;
+        case level_0_dma_add_value_register: d0ad_.set(bits_0_31, data); return;
+        case level_1_dma_add_value_register: d1ad_.set(bits_0_31, data); return;
+        case level_2_dma_add_value_register: d2ad_.set(bits_0_31, data); return;
+        case level_0_dma_read_address: d0r_.set(bits_0_31, data); return;
+        case level_1_dma_read_address: d1r_.set(bits_0_31, data); return;
+        case level_2_dma_read_address: d2r_.set(bits_0_31, data); return;
+        case level_0_dma_write_address: d0w_.set(bits_0_31, data); return;
+        case level_1_dma_write_address: d1w_.set(bits_0_31, data); return;
+        case level_2_dma_write_address: d2w_.set(bits_0_31, data); return;
+        case level_0_dma_mode_register: d0md_.set(bits_0_31, data); return;
+        case level_1_dma_mode_register: d1md_.set(bits_0_31, data); return;
+        case level_2_dma_mode_register: d2md_.set(bits_0_31, data); return;
+        case level_0_dma_transfer_byte_number: d0c_.set(bits_0_31, data); return;
+        case level_1_dma_transfer_byte_number: d1c_.set(bits_0_31, data); return;
+        case level_2_dma_transfer_byte_number: d2c_.set(bits_0_31, data); return;
+        case interrupt_status_register: interrupt_status_register_.set(bits_0_31, data); return;
         case interrupt_mask_register:
-            interrupt_mask_register_.set(InterruptMaskRegister::all_bits, data);
+            interrupt_mask_register_.set(bits_0_31, data);
             return;
             //        case dma_status_register:
             //            // DMA registers write
@@ -248,9 +248,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                         case ScuRegion::a_bus_dummy: write_address_add = 4; break;
 
                         default:
-                            if (write_address_add != 0) {
-                                write_address_add = 4;
-                            }
+                            if (write_address_add != 0) { write_address_add = 4; }
                             break;
                     }
 
@@ -330,13 +328,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                 default: Log::warning("scu", "Unknown DMA bus ! : {}", dc.write_address); break;
             }
 
-            if (dc.read_address_update == ReadAddressUpdate::update) {
-                read_address += long_counter * read_address_add;
-            }
+            if (dc.read_address_update == ReadAddressUpdate::update) { read_address += long_counter * read_address_add; }
 
-            if (dc.write_address_update == WriteAddressUpdate::update) {
-                write_address += word_counter * write_address_add;
-            }
+            if (dc.write_address_update == WriteAddressUpdate::update) { write_address += word_counter * write_address_add; }
 
             sendDmaEndInterrupt(dc.dma_level);
             resetDmaEnable(dc);
@@ -372,9 +366,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                 read_address  = memory()->read<u32>(execute_address_storage_buffer + displacement_8);
                 write_address = memory()->read<u32>(execute_address_storage_buffer + displacement_4);
                 count         = memory()->read<u32>(execute_address_storage_buffer);
-                if (count == 0) {
-                    count = max_transfer_byte_number;
-                }
+                if (count == 0) { count = max_transfer_byte_number; }
 
                 Log::debug("scu", "Read address : ", read_address);
                 Log::debug("scu", "Write address : ", write_address);
@@ -409,9 +401,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                             case ScuRegion::a_bus_dummy: write_address_add = 4; break;
 
                             default:
-                                if (write_address_add != 0) {
-                                    write_address_add = 4;
-                                }
+                                if (write_address_add != 0) { write_address_add = 4; }
                                 break;
                         }
 
@@ -492,9 +482,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                     default: Log::warning("scu", "Unknown DMA bus ! : {}", dc.write_address); break;
                 }
 
-                if ((read_address & indirect_dma_end_code) > 0) {
-                    is_transfer_done = true;
-                }
+                if ((read_address & indirect_dma_end_code) > 0) { is_transfer_done = true; }
                 execute_address_storage_buffer += storage_buffer_size;
             }
 
@@ -549,9 +537,7 @@ auto Scu::isInterruptMasked(const Interrupt& i) -> bool {
     switch (i) {
         case is::vector_nmi: return true; // NMI interrupt is always accepted
         case is::vector_system_manager:
-            if (emulatorContext()->hardwareMode() == HardwareMode::stv) {
-                return true;
-            }
+            if (emulatorContext()->hardwareMode() == HardwareMode::stv) { return true; }
             return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
         case is::vector_v_blank_in:
         case is::vector_v_blank_out:
@@ -598,9 +584,7 @@ void Scu::sendStartFactor(const StartingFactorSelect sfs) {
         dma_queue_.pop();
 
         if (dc.dma_status == DmaStatus::waiting_start_factor) {
-            if (dc.starting_factor_select == sfs) {
-                dc.dma_status = DmaStatus::queued;
-            }
+            if (dc.starting_factor_select == sfs) { dc.dma_status = DmaStatus::queued; }
         }
         new_queue.push(dc);
     }
@@ -615,16 +599,16 @@ void Scu::clearInterruptFlag(const Interrupt& i) { interrupt_status_register_.re
 void Scu::initializeRegisters() {
     // DMA
     constexpr u32 address_add_default_value{0x101};
-    d0ad_.set(DmaAddressAddValueRegister::all_bits, address_add_default_value);
-    d1ad_.set(DmaAddressAddValueRegister::all_bits, address_add_default_value);
-    d2ad_.set(DmaAddressAddValueRegister::all_bits, address_add_default_value);
+    d0ad_.set(bits_0_31, address_add_default_value);
+    d1ad_.set(bits_0_31, address_add_default_value);
+    d2ad_.set(bits_0_31, address_add_default_value);
     d0en_.reset();
     d1en_.reset();
     d2en_.reset();
     constexpr u32 mode_default_value{0x7};
-    d0md_.set(DmaModeRegister::all_bits, mode_default_value);
-    d1md_.set(DmaModeRegister::all_bits, mode_default_value);
-    d2md_.set(DmaModeRegister::all_bits, mode_default_value);
+    d0md_.set(bits_0_31, mode_default_value);
+    d1md_.set(bits_0_31, mode_default_value);
+    d2md_.set(bits_0_31, mode_default_value);
     rawWrite<u32>(memory()->scu_, dma_forced_stop & scu_memory_mask, 0x00000000);
     rawWrite<u32>(memory()->scu_, (dma_status_register)&scu_memory_mask, 0x00000000);
 
@@ -638,7 +622,7 @@ void Scu::initializeRegisters() {
 
     // Interrupt control
     constexpr u32 interrupt_mask_default_value{0xBFFF};
-    interrupt_mask_register_.set(InterruptMaskRegister::all_bits, interrupt_mask_default_value);
+    interrupt_mask_register_.set(bits_0_31, interrupt_mask_default_value);
     interrupt_status_register_.reset();
 
     // A-BUS control
@@ -748,9 +732,7 @@ void Scu::activateDma() {
     // Timing is not handled for now, DMA transfer is immediate
 
     // This case should only happend when timing is handled
-    if (dma_queue_.top().dma_status == DmaStatus::active) {
-        return;
-    }
+    if (dma_queue_.top().dma_status == DmaStatus::active) { return; }
 
     while (dma_queue_.top().dma_status == DmaStatus::queued) {
         executeDma(dma_queue_.top());
@@ -767,15 +749,11 @@ auto Scu::getDmaBus(const u32 address) -> DmaBus {
 
     constexpr u32 b_bus_start_address{0x05A00000};
     constexpr u32 b_bus_end_address{0x6000000};
-    if ((a >= b_bus_start_address) && (a < b_bus_end_address)) {
-        return DmaBus::b_bus;
-    }
+    if ((a >= b_bus_start_address) && (a < b_bus_end_address)) { return DmaBus::b_bus; }
 
     constexpr u32 a_bus_start_address{0x02000000};
     constexpr u32 a_bus_end_address{0x5900000};
-    if ((a >= a_bus_start_address) && (a < a_bus_end_address)) {
-        return DmaBus::a_bus;
-    }
+    if ((a >= a_bus_start_address) && (a < a_bus_end_address)) { return DmaBus::a_bus; }
     // CPU or DSP write
     Log::warning("scu", "DMA - Bus access not implemented {}", address);
 
@@ -788,111 +766,75 @@ auto Scu::getScuRegion(const u32 address) -> ScuRegion {
 
     constexpr u32 rom_start{0};
     constexpr u32 rom_end{0x80000};
-    if ((a >= rom_start) && (a < rom_end)) {
-        return ScuRegion::rom;
-    }
+    if ((a >= rom_start) && (a < rom_end)) { return ScuRegion::rom; }
 
     constexpr u32 smpc_start{0x100000};
     constexpr u32 smpc_end{0x100080};
-    if ((a >= smpc_start) && (a < smpc_end)) {
-        return ScuRegion::smpc;
-    }
+    if ((a >= smpc_start) && (a < smpc_end)) { return ScuRegion::smpc; }
 
     constexpr u32 backup_ram_start{0x180000};
     constexpr u32 backup_ram_end{0x190000};
-    if ((a >= backup_ram_start) && (a < backup_ram_end)) {
-        return ScuRegion::backup_ram;
-    }
+    if ((a >= backup_ram_start) && (a < backup_ram_end)) { return ScuRegion::backup_ram; }
 
     constexpr u32 workram_l_start{0x200000};
     constexpr u32 workram_l_end{0x300000};
-    if ((a >= workram_l_start) && (a < workram_l_end)) {
-        return ScuRegion::work_ram_l;
-    }
+    if ((a >= workram_l_start) && (a < workram_l_end)) { return ScuRegion::work_ram_l; }
 
     constexpr u32 minit_start{0x1000000};
     constexpr u32 minit_end{0x1000004};
-    if ((a >= minit_start) && (a < minit_end)) {
-        return ScuRegion::minit;
-    }
+    if ((a >= minit_start) && (a < minit_end)) { return ScuRegion::minit; }
 
     constexpr u32 sinit_start{0x1800000};
     constexpr u32 sinit_end{0x1800004};
-    if ((a >= sinit_start) && (a < sinit_end)) {
-        return ScuRegion::sinit;
-    }
+    if ((a >= sinit_start) && (a < sinit_end)) { return ScuRegion::sinit; }
 
     constexpr u32 a_bus_cs0_start{0x2000000};
     constexpr u32 a_bus_cs0_end{0x4000000};
-    if ((a >= a_bus_cs0_start) && (a < a_bus_cs0_end)) {
-        return ScuRegion::a_bus_cs0;
-    }
+    if ((a >= a_bus_cs0_start) && (a < a_bus_cs0_end)) { return ScuRegion::a_bus_cs0; }
 
     constexpr u32 a_bus_cs1_start{0x4000000};
     constexpr u32 a_bus_cs1_end{0x5000000};
-    if ((a >= a_bus_cs1_start) && (a < a_bus_cs1_end)) {
-        return ScuRegion::a_bus_cs1;
-    }
+    if ((a >= a_bus_cs1_start) && (a < a_bus_cs1_end)) { return ScuRegion::a_bus_cs1; }
 
     constexpr u32 a_bus_dummy_start{0x5000000};
     constexpr u32 a_bus_dummy_end{0x5800000};
-    if ((a >= a_bus_dummy_start) && (a < a_bus_dummy_end)) {
-        return ScuRegion::a_bus_dummy;
-    }
+    if ((a >= a_bus_dummy_start) && (a < a_bus_dummy_end)) { return ScuRegion::a_bus_dummy; }
 
     constexpr u32 a_bus_cs2_start{0x5800000};
     constexpr u32 a_bus_cs2_end{0x5900000};
-    if ((a >= a_bus_cs2_start) && (a < a_bus_cs2_end)) {
-        return ScuRegion::a_bus_cs2;
-    }
+    if ((a >= a_bus_cs2_start) && (a < a_bus_cs2_end)) { return ScuRegion::a_bus_cs2; }
 
     constexpr u32 sound_start{0x5A00000};
     constexpr u32 sound_end{0x5B00EE4};
-    if ((a >= sound_start) && (a < sound_end)) {
-        return ScuRegion::sound;
-    }
+    if ((a >= sound_start) && (a < sound_end)) { return ScuRegion::sound; }
 
     constexpr u32 vdp1_start_area_1{0x5C00000};
     constexpr u32 vdp1_end_area_1{0x5CC0000};
-    if ((a >= vdp1_start_area_1) && (a < vdp1_end_area_1)) {
-        return ScuRegion::vdp1;
-    }
+    if ((a >= vdp1_start_area_1) && (a < vdp1_end_area_1)) { return ScuRegion::vdp1; }
 
     constexpr u32 vdp1_start_area_2{0x5D00000};
     constexpr u32 vdp1_end_area_2{0x5D00018};
-    if ((a >= vdp1_start_area_2) && (a < vdp1_end_area_2)) {
-        return ScuRegion::vdp1;
-    }
+    if ((a >= vdp1_start_area_2) && (a < vdp1_end_area_2)) { return ScuRegion::vdp1; }
 
     constexpr u32 vdp2_start_area_1{0x5E00000};
     constexpr u32 vdp2_end_area_1{0x5E80000};
-    if ((a >= vdp2_start_area_1) && (a < vdp2_end_area_1)) {
-        return ScuRegion::vdp2;
-    }
+    if ((a >= vdp2_start_area_1) && (a < vdp2_end_area_1)) { return ScuRegion::vdp2; }
 
     constexpr u32 vdp2_start_area_2{0x5F00000};
     constexpr u32 vdp2_end_area_2{0x5F01000};
-    if ((a >= vdp2_start_area_2) && (a < vdp2_end_area_2)) {
-        return ScuRegion::vdp2;
-    }
+    if ((a >= vdp2_start_area_2) && (a < vdp2_end_area_2)) { return ScuRegion::vdp2; }
 
     constexpr u32 vdp2_start_area_3{0x5F80000};
     constexpr u32 vdp2_end_area_3{0x5F80120};
-    if ((a >= vdp2_start_area_3) && (a < vdp2_end_area_3)) {
-        return ScuRegion::vdp2;
-    }
+    if ((a >= vdp2_start_area_3) && (a < vdp2_end_area_3)) { return ScuRegion::vdp2; }
 
     constexpr u32 scu_regs_start{0x5FE0000};
     constexpr u32 scu_regs_end{0x5FE00D0};
-    if ((a >= scu_regs_start) && (a < scu_regs_end)) {
-        return ScuRegion::scu_register;
-    }
+    if ((a >= scu_regs_start) && (a < scu_regs_end)) { return ScuRegion::scu_register; }
 
     constexpr u32 workram_h_start{0x6000000};
     constexpr u32 workram_h_end{0x6100000};
-    if ((a >= workram_h_start) && (a < workram_h_end)) {
-        return ScuRegion::work_ram_h;
-    }
+    if ((a >= workram_h_start) && (a < workram_h_end)) { return ScuRegion::work_ram_h; }
 
     return ScuRegion::unknown;
 }
@@ -949,9 +891,9 @@ void Scu::resetDmaEnable(const DmaConfiguration& dc) {
 
 void Scu::dmaUpdateWriteAddress(const DmaLevel l, const u32 data) {
     switch (l) {
-        case DmaLevel::level_0: d0w_.set(DmaWriteAddressRegister::all_bits, data); break;
-        case DmaLevel::level_1: d1w_.set(DmaWriteAddressRegister::all_bits, data); break;
-        case DmaLevel::level_2: d2w_.set(DmaWriteAddressRegister::all_bits, data); break;
+        case DmaLevel::level_0: d0w_.set(bits_0_31, data); break;
+        case DmaLevel::level_1: d1w_.set(bits_0_31, data); break;
+        case DmaLevel::level_2: d2w_.set(bits_0_31, data); break;
         case DmaLevel::level_unknown: Log::warning("scu", "Unknown DMA level !");
     }
 }

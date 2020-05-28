@@ -411,6 +411,50 @@ class Cdrom {
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // void RunCdBlock(u32 cycles);
 
+    template<typename T>
+    void writeRegisters(const u32 addr, const T data) {
+        // rawWrite<T>(io_registers_, addr & sh2_memory_mask, data);
+    }
+
+    // 8 bits specialization
+    template<>
+    void writeRegisters<u8>(const u32 addr, const u8 data) {
+        write8(addr, data);
+    }
+
+    // 16 bits specialization
+    template<>
+    void writeRegisters<u16>(const u32 addr, const u16 data) {
+        write16(addr, data);
+    }
+
+    // 32 bits specialization
+    template<>
+    void writeRegisters<u32>(const u32 addr, const u32 data) {
+        write32(addr, data);
+    }
+
+    template<typename T>
+    auto readRegisters(const u32 addr) -> T {
+        // return rawRead<T>(this->io_registers_, addr & sh2_memory_mask);
+    }
+    // 8 bits specialization
+    template<>
+    auto readRegisters<u8>(const u32 addr) -> u8 {
+        return read8(addr);
+    }
+    // 16 bits specialization
+    template<>
+    auto readRegisters<u16>(const u32 addr) -> u16 {
+        return read16(addr);
+    }
+    // 32 bits specialization
+    template<>
+    auto readRegisters<u32>(const u32 addr) -> u32 {
+        return read32(addr);
+    }
+
+  private:
     /// \name CD block memory accessors
     //@{
     void               write8(u32 addr, u8 data);
@@ -421,7 +465,6 @@ class Cdrom {
     [[nodiscard]] auto read32(u32 addr) const -> u32;
     //@}
 
-  private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Cdrom::reset();
     ///

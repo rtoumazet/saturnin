@@ -233,9 +233,14 @@ class Register {
     [[nodiscard]] inline auto all() const -> bool { return register_value.all(); }
 
     [[nodiscard]] inline auto toU32() const -> u32 { return register_value.to_ulong(); };
+    [[nodiscard]] inline auto toU16() const -> u16 { return static_cast<u16>(register_value.to_ulong()); };
 
   protected:
     std::bitset<register_size> register_value; ///< Internal register value.
 };
+
+const BitRange<u8>  bits_0_7{0, 7};   ///< Defines the lower 8 bits range of the bitset.
+const BitRange<u16> bits_0_15{0, 15}; ///< Defines the lower 16 bits range of the bitset.
+const BitRange<u32> bits_0_31{0, 31}; ///< Defines the 32 bits range of the bitset.
 
 }; // namespace saturnin

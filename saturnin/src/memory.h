@@ -45,7 +45,12 @@ namespace saturnin::sh2 {
 class Sh2;
 enum class Sh2Type;
 } // namespace saturnin::sh2
-namespace sh2  = saturnin::sh2;
+namespace sh2 = saturnin::sh2;
+
+namespace saturnin::video {
+class Vdp2;
+}
+
 namespace util = saturnin::utilities;
 
 namespace saturnin::core {
@@ -55,9 +60,6 @@ class EmulatorContext;
 class Config;
 class Scu;
 class Smpc;
-
-// using saturnin::sh2::Sh2;
-// using saturnin::sh2::Sh2Type;
 
 constexpr u32 workram_low_size{0x100000};
 constexpr u32 workram_high_size{0x100000};
@@ -429,6 +431,7 @@ class Memory {
     [[nodiscard]] auto smpc() const -> Smpc*;
     [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
     [[nodiscard]] auto cdrom() const -> cdrom::Cdrom*;
+    [[nodiscard]] auto vdp2() const -> video::Vdp2*;
     //@}
 
   private:
@@ -1016,32 +1019,7 @@ struct writeCart<u8> {
 template<typename T>
 struct readCdBlock {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T {
-            Log::warning(
-                "memory", core::tr("Read ({}) needs to be handled through CD-ROM {:#0x}"), sizeof(T) * number_of_bits_8, addr);
-            return 0;
-        };
-    }
-};
-
-template<>
-struct readCdBlock<u8> {
-    operator Memory::ReadType<u8>() const {
-        return [](const Memory& m, const u32 addr) -> u8 { return m.cdrom()->read8(addr); };
-    }
-};
-
-template<>
-struct readCdBlock<u16> {
-    operator Memory::ReadType<u16>() const {
-        return [](const Memory& m, const u32 addr) -> u16 { return m.cdrom()->read16(addr); };
-    }
-};
-
-template<>
-struct readCdBlock<u32> {
-    operator Memory::ReadType<u32>() const {
-        return [](const Memory& m, const u32 addr) -> u32 { return m.cdrom()->read32(addr); };
+        return [](const Memory& m, const u32 addr) -> T { return m.cdrom()->readRegisters<T>(addr); };
     }
 };
 
@@ -1059,35 +1037,7 @@ struct readCdBlock<u32> {
 template<typename T>
 struct writeCdBlock {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) {
-            Log::warning("memory",
-                         core::tr("Write ({}) needs to be handled through CD-ROM {:#0x} : {:#x}"),
-                         sizeof(T) * number_of_bits_8,
-                         addr,
-                         data);
-        };
-    }
-};
-
-// Specializations.
-template<>
-struct writeCdBlock<u8> {
-    operator Memory::WriteType<u8>() const {
-        return [](Memory& m, const u32 addr, const u8 data) { return m.cdrom()->write8(addr, data); };
-    }
-};
-
-template<>
-struct writeCdBlock<u16> {
-    operator Memory::WriteType<u16>() const {
-        return [](Memory& m, const u32 addr, const u16 data) { return m.cdrom()->write16(addr, data); };
-    }
-};
-
-template<>
-struct writeCdBlock<u32> {
-    operator Memory::WriteType<u32>() const {
-        return [](Memory& m, const u32 addr, const u32 data) { return m.cdrom()->write32(addr, data); };
+        return [](Memory& m, const u32 addr, const T data) { m.cdrom()->writeRegisters<T>(addr, data); };
     }
 };
 
@@ -1347,8 +1297,7 @@ struct writeVdp2Cram {
 template<typename T>
 struct readVdp2Registers {
     operator Memory::ReadType<T>() const {
-        return
-            [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.vdp2_registers_, addr & vdp2_registers_memory_mask); };
+        return [](const Memory& m, const u32 addr) -> T { return m.vdp2()->readRegisters<T>(addr); };
     }
 };
 
@@ -1367,7 +1316,7 @@ template<typename T>
 struct writeVdp2Registers {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp2_registers_, addr & vdp2_registers_memory_mask, data);
+            m.vdp2()->writeRegisters(addr, data);
             // :TODO: handle bitmap update
         };
     }

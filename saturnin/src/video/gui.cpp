@@ -1013,10 +1013,20 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::EndCombo();
     }
 
-    auto area_data = state.memory()->getMemoryMapAreaData(current_area);
+    switch (current_area) {
+        case MemoryMapArea::vdp2_registers:
+            for (auto const& r : state.memory()->vdp2()->getRegisters()) {
+                std::string mask{"{:#010x} {:<35} : {:#06x}"};
 
-    static MemoryEditor editor; // store your state somewhere
-    editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
+                ImGui::Text(fmt::format(mask, r.first, r.second, state.memory()->vdp2()->readRegisters<u16>(r.first)).c_str());
+                // r.first
+            }
+            break;
+        default:
+            auto                area_data = state.memory()->getMemoryMapAreaData(current_area);
+            static MemoryEditor editor; // store your state somewhere
+            editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
+    }
 
     ImGui::End();
 }

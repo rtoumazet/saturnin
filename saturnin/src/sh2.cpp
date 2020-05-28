@@ -106,10 +106,8 @@ auto Sh2::readRegisters8(const u32 addr) -> u8 {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_request_response_selection_control_register_0:
-            return dmac_drcr0_.get(DmaRequestResponseSelectionControlRegister::all_bits);
-        case dma_request_response_selection_control_register_1:
-            return dmac_drcr1_.get(DmaRequestResponseSelectionControlRegister::all_bits);
+        case dma_request_response_selection_control_register_0: return dmac_drcr0_.get(bits_0_7);
+        case dma_request_response_selection_control_register_1: return dmac_drcr1_.get(bits_0_7);
         //////////////
         // 10. DIVU //
         //////////////
@@ -117,31 +115,31 @@ auto Sh2::readRegisters8(const u32 addr) -> u8 {
         /////////////
         // 11. FRT //
         /////////////
-        case timer_interrupt_enable_register: return frt_tier_.get(TimerInterruptEnableRegister::all_bits);
-        case free_running_timer_control_status_register: return frt_ftcsr_.get(FreeRunningTimerControlStatusRegister::all_bits);
+        case timer_interrupt_enable_register: return frt_tier_.get(bits_0_7);
+        case free_running_timer_control_status_register: return frt_ftcsr_.get(bits_0_7);
         case free_running_counter: return frt_frc_.get(FreeRunningCounter::upper_8_bits);
         case free_running_counter + 1: return frt_frc_.get(FreeRunningCounter::lower_8_bits);
-        case timer_control_register: return frt_tcr_.get(TimerControlRegister::all_bits);
-        case timer_output_compare_control_register: return frt_tocr_.get(TimerOutputCompareControlRegister::all_bits);
+        case timer_control_register: return frt_tcr_.get(bits_0_7);
+        case timer_output_compare_control_register: return frt_tocr_.get(bits_0_7);
         case input_capture_register: return frt_icr_.get(InputCaptureRegister::upper_8_bits);
         case input_capture_register + 1: return frt_icr_.get(InputCaptureRegister::lower_8_bits);
 
         /////////////
         // 12. WDT //
         /////////////
-        case watchdog_timer_control_status_register: return wdt_wtcsr_.get(WatchdogTimerControlStatusRegister::all_bits);
-        case watchdog_timer_counter: return wdt_wtcnt_.get(WatchdogTimerCounter::all_bits);
-        case reset_control_status_register + 1: return wdt_rstcsr_.get(ResetControlStatusRegister::all_bits);
+        case watchdog_timer_control_status_register: return wdt_wtcsr_.get(bits_0_7);
+        case watchdog_timer_counter: return wdt_wtcnt_.get(bits_0_7);
+        case reset_control_status_register + 1: return wdt_rstcsr_.get(bits_0_7);
 
         /////////////
         // 13. SCI //
         /////////////
-        case serial_mode_register: return sci_smr_.get(SerialModeRegister::all_bits);
-        case bit_rate_register: return sci_brr_.get(BitRateRegister::all_bits);
-        case serial_control_register: return sci_scr_.get(SerialControlRegister::all_bits);
-        case transmit_data_register: return sci_tdr_.get(TransmitDataRegister::all_bits);
-        case serial_status_register: return sci_ssr_.get(SerialStatusRegister::all_bits);
-        case receive_data_register: return sci_rdr_.get(ReceiveDataRegister::all_bits);
+        case serial_mode_register: return sci_smr_.get(bits_0_7);
+        case bit_rate_register: return sci_brr_.get(bits_0_7);
+        case serial_control_register: return sci_scr_.get(bits_0_7);
+        case transmit_data_register: return sci_tdr_.get(bits_0_7);
+        case serial_status_register: return sci_ssr_.get(bits_0_7);
+        case receive_data_register: return sci_rdr_.get(bits_0_7);
 
         default: unmappedAccess(addr); return 0;
     }
@@ -152,14 +150,14 @@ auto Sh2::readRegisters16(const u32 addr) -> u16 {
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a: return intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::all_bits);
-        case interrupt_priority_level_setting_register_b: return intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::all_bits);
-        case vector_number_setting_register_a: return intc_vcra_.get(VectorNumberSettingRegisterA::all_bits);
-        case vector_number_setting_register_b: return intc_vcrb_.get(VectorNumberSettingRegisterB::all_bits);
-        case vector_number_setting_register_c: return intc_vcrc_.get(VectorNumberSettingRegisterC::all_bits);
-        case vector_number_setting_register_d: return intc_vcrd_.get(VectorNumberSettingRegisterD::all_bits);
-        case vector_number_setting_register_wdt: return intc_vcrwdt_.get(VectorNumberSettingRegisterWdt::all_bits);
-        case interrupt_control_register: return intc_icr_.get(InterruptControlRegister::all_bits);
+        case interrupt_priority_level_setting_register_a: return intc_ipra_.get(bits_0_15);
+        case interrupt_priority_level_setting_register_b: return intc_iprb_.get(bits_0_15);
+        case vector_number_setting_register_a: return intc_vcra_.get(bits_0_15);
+        case vector_number_setting_register_b: return intc_vcrb_.get(bits_0_15);
+        case vector_number_setting_register_c: return intc_vcrc_.get(bits_0_15);
+        case vector_number_setting_register_d: return intc_vcrd_.get(bits_0_15);
+        case vector_number_setting_register_wdt: return intc_vcrwdt_.get(bits_0_15);
+        case interrupt_control_register: return intc_icr_.get(bits_0_15);
         case vector_number_setting_register_div: return intc_vcrdiv_.get(VectorNumberSettingRegisterDiv::upper_16_bits);
         case vector_number_setting_register_div + 2: return intc_vcrdiv_.get(VectorNumberSettingRegisterDiv::lower_16_bits);
 
@@ -177,7 +175,7 @@ auto Sh2::readRegisters16(const u32 addr) -> u16 {
         //////////////
         // 8. Cache //
         //////////////
-        case cache_control_register: return cache_ccr_.get(CacheControlRegister::all_bits);
+        case cache_control_register: return cache_ccr_.get(bits_0_15);
 
         /////////////
         // 9. DMAC //
@@ -309,7 +307,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case cache_control_register:
             Log::debug("sh2", "CCR byte write: {}", data);
 
-            cache_ccr_.set(CacheControlRegister::all_bits, data);
+            cache_ccr_.set(bits_0_7, data);
             if (cache_ccr_.get(CacheControlRegister::cache_purge) == CachePurge::cache_purge) {
                 purgeCache();
 
@@ -321,12 +319,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_request_response_selection_control_register_0:
-            dmac_drcr0_.set(DmaRequestResponseSelectionControlRegister::all_bits, data);
-            break;
-        case dma_request_response_selection_control_register_1:
-            dmac_drcr1_.set(DmaRequestResponseSelectionControlRegister::all_bits, data);
-            break;
+        case dma_request_response_selection_control_register_0: dmac_drcr0_.set(bits_0_7, data); break;
+        case dma_request_response_selection_control_register_1: dmac_drcr1_.set(bits_0_7, data); break;
 
         //////////////
         // 10. DIVU //
@@ -335,10 +329,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         /////////////
         // 11. FRT //
         /////////////
-        case timer_interrupt_enable_register: frt_tier_.set(TimerInterruptEnableRegister::all_bits, data); break;
-        case free_running_timer_control_status_register:
-            frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::all_bits, data);
-            break;
+        case timer_interrupt_enable_register: frt_tier_.set(bits_0_7, data); break;
+        case free_running_timer_control_status_register: frt_ftcsr_.set(bits_0_7, data); break;
         case free_running_counter: frt_frc_.set(FreeRunningCounter::upper_8_bits, data); break;
         case free_running_counter + 1: frt_frc_.set(FreeRunningCounter::lower_8_bits, data); break;
         case output_compare_register:
@@ -354,7 +346,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             }
             break;
         case timer_control_register:
-            frt_tcr_.set(TimerControlRegister::all_bits, data);
+            frt_tcr_.set(bits_0_7, data);
             switch (frt_tcr_.get(TimerControlRegister::clock_select)) {
                 case FrtClockSelect::internal_divided_by_8:
                     frt_clock_divisor_ = frt_clock_divisor_8;
@@ -372,8 +364,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             }
             break;
         case timer_output_compare_control_register:
-            frt_tocr_.set(TimerOutputCompareControlRegister::all_bits,
-                          static_cast<u8>(data & TimerOutputCompareControlRegister::access_mask));
+            frt_tocr_.set(bits_0_7, static_cast<u8>(data & TimerOutputCompareControlRegister::access_mask));
             break;
         case input_capture_register: frt_icr_.set(InputCaptureRegister::upper_8_bits, data); break;
         case input_capture_register + 1:
@@ -388,11 +379,11 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             // 13. SCI //
             /////////////
 
-        case serial_mode_register: sci_smr_.set(SerialModeRegister::all_bits, data); break;
-        case bit_rate_register: sci_brr_.set(BitRateRegister::all_bits, data); break;
-        case serial_control_register: sci_scr_.set(SerialControlRegister::all_bits, data); break;
-        case transmit_data_register: sci_tdr_.set(TransmitDataRegister::all_bits, data); break;
-        case serial_status_register: sci_ssr_.set(SerialStatusRegister::all_bits, data); break;
+        case serial_mode_register: sci_smr_.set(bits_0_7, data); break;
+        case bit_rate_register: sci_brr_.set(bits_0_7, data); break;
+        case serial_control_register: sci_scr_.set(bits_0_7, data); break;
+        case transmit_data_register: sci_tdr_.set(bits_0_7, data); break;
+        case serial_status_register: sci_ssr_.set(bits_0_7, data); break;
 
         default: unmappedAccess(addr, data); break;
     }
@@ -404,17 +395,13 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a:
-            intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::all_bits, data);
-            break;
-        case interrupt_priority_level_setting_register_b:
-            intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::all_bits, data);
-            break;
-        case vector_number_setting_register_a: intc_vcra_.set(VectorNumberSettingRegisterA::all_bits, data); break;
-        case vector_number_setting_register_b: intc_vcrb_.set(VectorNumberSettingRegisterB::all_bits, data); break;
-        case vector_number_setting_register_c: intc_vcrc_.set(VectorNumberSettingRegisterC::all_bits, data); break;
-        case vector_number_setting_register_d: intc_vcrd_.set(VectorNumberSettingRegisterD::all_bits, data); break;
-        case vector_number_setting_register_wdt: intc_vcrwdt_.set(VectorNumberSettingRegisterWdt::all_bits, data); break;
+        case interrupt_priority_level_setting_register_a: intc_ipra_.set(bits_0_15, data); break;
+        case interrupt_priority_level_setting_register_b: intc_iprb_.set(bits_0_15, data); break;
+        case vector_number_setting_register_a: intc_vcra_.set(bits_0_15, data); break;
+        case vector_number_setting_register_b: intc_vcrb_.set(bits_0_15, data); break;
+        case vector_number_setting_register_c: intc_vcrc_.set(bits_0_15, data); break;
+        case vector_number_setting_register_d: intc_vcrd_.set(bits_0_15, data); break;
+        case vector_number_setting_register_wdt: intc_vcrwdt_.set(bits_0_15, data); break;
         case vector_number_setting_register_div: break; // Read only access
         case vector_number_setting_register_div + 2:
             intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::lower_16_bits,
@@ -436,7 +423,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
                     }
                     break;
             }
-            intc_icr_.set(InterruptControlRegister::all_bits, data);
+            intc_icr_.set(bits_0_15, data);
         } break;
 
         /////////////
@@ -481,24 +468,24 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         /////////////
         // 11. FRT //
         /////////////
-        case free_running_counter: frt_frc_.set(FreeRunningCounter::all_bits, data); break;
+        case free_running_counter: frt_frc_.set(bits_0_15, data); break;
         case output_compare_register:
             switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegister::all_bits, data); break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegister::all_bits, data); break;
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(bits_0_15, data); break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(bits_0_15, data); break;
             }
             break;
-        case input_capture_register: frt_icr_.set(InputCaptureRegister::all_bits, data); break;
+        case input_capture_register: frt_icr_.set(bits_0_15, data); break;
 
         /////////////
         // 12. WDT //
         /////////////
         case watchdog_timer_control_status_register:
-            wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, static_cast<u8>(data >> number_of_bits_8));
-            wdt_wtcnt_.set(WatchdogTimerCounter::all_bits, static_cast<u8>(data & bitmask_00FF));
+            wdt_wtcsr_.set(bits_0_7, static_cast<u8>(data >> number_of_bits_8));
+            wdt_wtcnt_.set(bits_0_7, static_cast<u8>(data & bitmask_00FF));
             break;
         case reset_control_status_register:
-            wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, static_cast<u8>(data >> number_of_bits_8));
+            wdt_rstcsr_.set(bits_0_7, static_cast<u8>(data >> number_of_bits_8));
             break;
 
             /////////////
@@ -517,9 +504,9 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         /////////////
         // 5. INTC //
         /////////////
-        case vector_number_setting_register_div: intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::all_bits, data); break;
-        case dma_vector_number_register_0: intc_vcrdma0_.set(VectorNumberSettingRegisterDma::all_bits, data); break;
-        case dma_vector_number_register_1: intc_vcrdma1_.set(VectorNumberSettingRegisterDma::all_bits, data); break;
+        case vector_number_setting_register_div: intc_vcrdiv_.set(bits_0_31, data); break;
+        case dma_vector_number_register_0: intc_vcrdma0_.set(bits_0_31, data); break;
+        case dma_vector_number_register_1: intc_vcrdma1_.set(bits_0_31, data); break;
 
         /////////////
         // 7. BSC //
@@ -569,22 +556,18 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_source_address_register_0: dmac_sar0_.set(DmaSourceAddressRegister::all_bits, data); break;
-        case dma_source_address_register_1: dmac_sar1_.set(DmaSourceAddressRegister::all_bits, data); break;
-        case dma_destination_address_register_0: dmac_dar0_.set(DmaDestinationAddressRegister::all_bits, data); break;
-        case dma_destination_address_register_1: dmac_dar1_.set(DmaDestinationAddressRegister::all_bits, data); break;
-        case dma_tranfer_count_register_0:
-            dmac_tcr0_.set(DmaTransferCountRegister::all_bits, data & DmaTransferCountRegister::write_mask);
-            break;
-        case dma_tranfer_count_register_1:
-            dmac_tcr1_.set(DmaTransferCountRegister::all_bits, data & DmaTransferCountRegister::write_mask);
-            break;
+        case dma_source_address_register_0: dmac_sar0_.set(bits_0_31, data); break;
+        case dma_source_address_register_1: dmac_sar1_.set(bits_0_31, data); break;
+        case dma_destination_address_register_0: dmac_dar0_.set(bits_0_31, data); break;
+        case dma_destination_address_register_1: dmac_dar1_.set(bits_0_31, data); break;
+        case dma_tranfer_count_register_0: dmac_tcr0_.set(bits_0_31, data & DmaTransferCountRegister::write_mask); break;
+        case dma_tranfer_count_register_1: dmac_tcr1_.set(bits_0_31, data & DmaTransferCountRegister::write_mask); break;
         case dma_channel_control_register_0:
-            dmac_chcr0_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::write_mask);
+            dmac_chcr0_.set(bits_0_31, data & DmaChannelControlRegister::write_mask);
             executeDma();
             break;
         case dma_channel_control_register_1:
-            dmac_chcr1_.set(DmaChannelControlRegister::all_bits, data & DmaChannelControlRegister::write_mask);
+            dmac_chcr1_.set(bits_0_31, data & DmaChannelControlRegister::write_mask);
             executeDma();
             break;
         case dma_operation_register: {
@@ -601,30 +584,29 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         //////////////
         // 10. DIVU //
         //////////////
-        case divisor_register: divu_dvsr_.set(DivisorRegister::all_bits, data); break;
+        case divisor_register: divu_dvsr_.set(bits_0_31, data); break;
         case dividend_register_l_32_bits:
-            divu_dvdnt_.set(DividendRegister32Bits::all_bits, data);
+            divu_dvdnt_.set(bits_0_31, data);
 
             // ST-V needs some mirroring
-            divu_dvdntl_.set(DividendRegisterL::all_bits, data);
-            divu_dvdntl_shadow_.set(DividendRegisterL::all_bits, data);
+            divu_dvdntl_.set(bits_0_31, data);
+            divu_dvdntl_shadow_.set(bits_0_31, data);
 
             // Sign extension for the upper 32 bits if needed
 
-            ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.set(DividendRegisterH::all_bits, u32_max)
-                                             : divu_dvdnth_.set(DividendRegisterH::all_bits, 0x00000000u);
+            ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.set(bits_0_31, u32_max) : divu_dvdnth_.set(bits_0_31, 0x00000000u);
 
             start32bitsDivision();
             break;
-        case division_control_register: divu_dvcr_.set(DivisionControlRegister::all_bits, data); break;
+        case division_control_register: divu_dvcr_.set(bits_0_31, data); break;
         case dividend_register_l:
-            divu_dvdntl_.set(DividendRegisterL::all_bits, data);
-            divu_dvdntl_shadow_.set(DividendRegisterL::all_bits, data);
+            divu_dvdntl_.set(bits_0_31, data);
+            divu_dvdntl_shadow_.set(bits_0_31, data);
 
             start64bitsDivision();
             break;
         case dividend_register_h:
-            divu_dvdnth_.set(DividendRegisterH::all_bits, data);
+            divu_dvdnth_.set(bits_0_31, data);
             break;
 
             /////////////
@@ -672,9 +654,9 @@ void Sh2::initializeOnChipRegisters() {
 
     // Bus State Controler registers
     u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? bsc_bcr1_master_default_value : bsc_bcr1_slave_default_value;
-    bsc_bcr1_.set(BusControlRegister1::all_bits, default_bcr1);
-    bsc_bcr2_.set(BusControlRegister2::all_bits, bsc_bcr2_default_value);
-    bsc_wcr_.set(WaitControlRegister::all_bits, bsc_wcr_default_value);
+    bsc_bcr1_.set(bits_0_31, default_bcr1);
+    bsc_bcr2_.set(bits_0_31, bsc_bcr2_default_value);
+    bsc_wcr_.set(bits_0_31, bsc_wcr_default_value);
     bsc_mcr_.reset();
     bsc_rtcsr_.reset();
     bsc_rtcnt_.reset();
@@ -696,26 +678,26 @@ void Sh2::initializeOnChipRegisters() {
     divu_dvcr_.reset();
 
     // Free Running timer
-    frt_tier_.set(TimerInterruptEnableRegister::all_bits, frt_tier_default_value);
+    frt_tier_.set(bits_0_7, frt_tier_default_value);
     frt_ftcsr_.reset();
     frt_frc_.reset();
-    frt_ocra_.set(OutputCompareRegister::all_bits, frt_ocra_default_value);
-    frt_ocrb_.set(OutputCompareRegister::all_bits, frt_ocrb_default_value);
+    frt_ocra_.set(bits_0_15, frt_ocra_default_value);
+    frt_ocrb_.set(bits_0_15, frt_ocrb_default_value);
     frt_tcr_.reset();
-    frt_tocr_.set(TimerOutputCompareControlRegister::all_bits, frt_tocr_default_value);
+    frt_tocr_.set(bits_0_7, frt_tocr_default_value);
     frt_tcr_.reset();
 
     // Watch Dog Timer
-    wdt_wtcsr_.set(WatchdogTimerControlStatusRegister::all_bits, wdt_wtcsr_default_value);
+    wdt_wtcsr_.set(bits_0_7, wdt_wtcsr_default_value);
     wdt_wtcnt_.reset();
-    wdt_rstcsr_.set(ResetControlStatusRegister::all_bits, wdt_rstcsr_default_value);
+    wdt_rstcsr_.set(bits_0_7, wdt_rstcsr_default_value);
 
     // Serial Communication Interface
     sci_smr_.reset();
     sci_brr_.set();
     sci_scr_.reset();
     sci_tdr_.set();
-    sci_ssr_.set(SerialStatusRegister::all_bits, sci_ssr_default_value);
+    sci_ssr_.set(bits_0_7, sci_ssr_default_value);
     sci_rdr_.reset();
 }
 
@@ -742,7 +724,7 @@ void Sh2::start32bitsDivision() {
     Log::debug("sh2", "32/32 division");
 
     // DVDNT is copied in DVDNTL and DVDNTH
-    divu_dvdntl_.set(DividendRegisterL::all_bits, divu_dvdnt_.toU32());
+    divu_dvdntl_.set(bits_0_31, divu_dvdnt_.toU32());
 
     s32 dvdnt = divu_dvdnt_.toU32();
     if (dvdnt < 0) {
@@ -873,12 +855,12 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
             }
         } else {
             // Copy in DVDNTL and DVDNTH + ST-V mirroring
-            divu_dvdnt_.set(DividendRegister32Bits::all_bits, static_cast<u32>(divu_quot_));
-            divu_dvdntl_.set(DividendRegisterL::all_bits, static_cast<u32>(divu_quot_));
-            divu_dvdntl_shadow_.set(DividendRegisterL::all_bits, static_cast<u32>(divu_quot_));
+            divu_dvdnt_.set(bits_0_31, static_cast<u32>(divu_quot_));
+            divu_dvdntl_.set(bits_0_31, static_cast<u32>(divu_quot_));
+            divu_dvdntl_shadow_.set(bits_0_31, static_cast<u32>(divu_quot_));
 
-            divu_dvdnth_.set(DividendRegisterH::all_bits, static_cast<u32>(divu_rem_));
-            divu_dvdnth_shadow_.set(DividendRegisterH::all_bits, static_cast<u32>(divu_rem_));
+            divu_dvdnth_.set(bits_0_31, static_cast<u32>(divu_rem_));
+            divu_dvdnth_shadow_.set(bits_0_31, static_cast<u32>(divu_rem_));
         }
         divu_is_running_ = false;
     }
@@ -890,9 +872,9 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
     u32 cycles_remainder{elapsed_cycles % frt_clock_divisor_};
 
     if (counter_increment > 0) {
-        u32 old_frc{frt_frc_.get(FreeRunningCounter::all_bits)};
+        u32 old_frc{frt_frc_.get(bits_0_31)};
         u32 current_frc{old_frc + counter_increment};
-        frt_frc_.set(FreeRunningCounter::all_bits, static_cast<u16>(current_frc));
+        frt_frc_.set(bits_0_15, static_cast<u16>(current_frc));
 
         frt_elapsed_cycles_ = elapsed_cycles & frt_mask_;
 
@@ -1083,15 +1065,15 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
 
             switch (conf.channel) {
                 case DmaChannel::channel_0:
-                    dmac_tcr0_.set(DmaTransferCountRegister::all_bits, counter);
-                    dmac_sar0_.set(DmaSourceAddressRegister::all_bits, source);
-                    dmac_dar0_.set(DmaDestinationAddressRegister::all_bits, destination);
+                    dmac_tcr0_.set(bits_0_31, counter);
+                    dmac_sar0_.set(bits_0_31, source);
+                    dmac_dar0_.set(bits_0_31, destination);
                     dmac_chcr0_.set(DmaChannelControlRegister::transfer_end_flag);
                     break;
                 case DmaChannel::channel_1:
-                    dmac_tcr1_.set(DmaTransferCountRegister::all_bits, counter);
-                    dmac_sar1_.set(DmaSourceAddressRegister::all_bits, source);
-                    dmac_dar1_.set(DmaDestinationAddressRegister::all_bits, destination);
+                    dmac_tcr1_.set(bits_0_31, counter);
+                    dmac_sar1_.set(bits_0_31, source);
+                    dmac_dar1_.set(bits_0_31, destination);
                     dmac_chcr1_.set(DmaChannelControlRegister::transfer_end_flag);
                     break;
                 case DmaChannel::channel_unknown: Log::warning("sh2", "Unknown DMA channel used !");
@@ -1156,7 +1138,7 @@ void Sh2::sendInterruptCaptureSignal() {
     }
 
     frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::input_capture_flag);
-    frt_icr_.set(InputCaptureRegister::all_bits, frt_frc_.get(FreeRunningCounter::all_bits));
+    frt_icr_.set(bits_0_15, frt_frc_.get(bits_0_15));
 }
 
 auto Sh2::run() -> u8 {
