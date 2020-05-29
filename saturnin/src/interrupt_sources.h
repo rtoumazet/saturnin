@@ -70,6 +70,7 @@ static constexpr u8 vector_external_13      { 0x5D };
 static constexpr u8 vector_external_14      { 0x5E };
 static constexpr u8 vector_external_15      { 0x5F };
 static constexpr u8 vector_frt_input_capture{ 0x64 };
+static constexpr u8 vector_frt_input_capture2{ 0x65 };
 
 static const Interrupt undefined         { 0,                        0,    InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "Undefined" };
 static const Interrupt nmi               { vector_nmi,               0xF , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "NMI" };

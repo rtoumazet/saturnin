@@ -539,9 +539,7 @@ auto Scu::isInterruptMasked(const Interrupt& i) -> bool {
         case is::vector_system_manager:
             if (emulatorContext()->hardwareMode() == HardwareMode::stv) { return true; }
             return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
-        case is::vector_v_blank_in:
         case is::vector_v_blank_out:
-        case is::vector_h_blank_in:
         case is::vector_timer_0:
         case is::vector_timer_1:
         case is::vector_dsp_end:
@@ -568,6 +566,16 @@ auto Scu::isInterruptMasked(const Interrupt& i) -> bool {
         case is::vector_external_13:
         case is::vector_external_14:
         case is::vector_external_15: return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
+        case is::vector_frt_input_capture: return (isMasterSh2InOperation(*emulatorContext()->memory())) ? false : true;
+        case is::vector_frt_input_capture2: Log::warning("scu", "FRT Input Capture vector 0x65 !"); break;
+        case is::vector_v_blank_in:
+        case is::vector_h_blank_in: {
+            if (isMasterSh2InOperation(*emulatorContext()->memory())) {
+                return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
+            } else {
+                return true;
+            }
+        }
     }
     return false;
 }
