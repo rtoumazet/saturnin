@@ -497,6 +497,21 @@ class Smpc {
 
     [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
+    ///
+    /// \brief  Calculates the number of cycles needed for the duration.
+    ///
+    /// \author Runik
+    /// \date   06/01/2020
+    ///
+    /// \param  d   duration.
+    ///
+    /// \return The number of cycles needed for the duration.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
+
   private:
     static constexpr u8 input_registers_number{7};
     static constexpr u8 output_registers_number{32};
@@ -533,21 +548,6 @@ class Smpc {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void executeCommand();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
-    ///
-    /// \brief  Calculates the number of cycles needed for the duration.
-    ///
-    /// \author Runik
-    /// \date   06/01/2020
-    ///
-    /// \param  d   duration.
-    ///
-    /// \return The number of cycles needed for the duration.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::getStatus();
@@ -620,11 +620,6 @@ class Smpc {
     StvPeripheralMapping    stv_mapping_;    ///< ST-V peripheral mapping
 
     s16 intback_remaining_cycles_{}; ///< The intback remaining cycles
-
-    u32 total_display_duration_in_cycles_{};   ///< Number of cycles needed to display a full frame.
-    u32 visible_display_duration_in_cycles_{}; ///< Number of cycles needed to display the visible part of a frame (total -
-                                               ///< vblank).
-    u32 vblank_duration_in_cycles_{}; ///< Number of cycles needed to display the vblank part of a frame (total - visible).
 
     bool is_master_sh2_on_{false};      ///< Master SH2 status
     bool is_slave_sh2_on_{false};       ///< Slave SH2 status

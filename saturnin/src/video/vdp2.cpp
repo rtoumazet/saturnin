@@ -17,10 +17,18 @@
 // limitations under the License.
 //
 
+#include <chrono>
+
 #include "vdp2.h"
+#include "../config.h"
+#include "../emulator_context.h"
+#include "../smpc.h"
 
 namespace saturnin::video {
 using namespace register_address;
+using core::Config;
+using core::EmulatorContext;
+using core::Smpc;
 
 void Vdp2::initialize() { initializeRegisterNameMap(); }
 
@@ -479,6 +487,61 @@ void Vdp2::initializeRegisterNameMap() {
     addToRegisterNameMap(color_offset_b_red, "Color Offset B (Red)");
     addToRegisterNameMap(color_offset_b_green, "Color Offset B (Green)");
     addToRegisterNameMap(color_offset_b_blue, "Color Offset B (Blue)");
+}
+
+void Vdp2::onSystemClockUpdate() {}
+
+void Vdp2::calculateDisplayDuration() {
+    // - A full frame vertical resolution is :
+    //      - 262.5 lines for NTSC
+    //      - 312.5 for PAL
+
+    using seconds  = std::chrono::duration<double>;
+    using nano     = std::chrono::duration<double, std::nano>;
+    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    switch (Config::tv_standard[ts]) {
+        case video::TvStandard::pal: {
+            const seconds frame_duration{1 / 50};
+            cycles_per_frame_ = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
+
+            constexpr u16 total_lines{312};
+            u16           visible_lines{};
+            switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                case VerticalResolution::lines_nb_224: visible_lines = 224; break;
+                case VerticalResolution::lines_nb_240: visible_lines = 240; break;
+                case VerticalResolution::lines_nb_256: visible_lines = 256; break;
+            }
+            const u16 vblank_lines{static_cast<u16>(total_lines - visible_lines)};
+            cycles_per_vblank_ = vblank_lines * cycles_per_frame_ / total_lines;
+
+            constexpr auto total_line_duration{nano(64)};
+            constexpr auto hblank_duration{nano(12)};
+            constexpr auto active_line_duration{total_line_duration - hblank_duration};
+            cycles_per_hblank_       = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
+            cycles_per_visible_line_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
+            break;
+        }
+        case video::TvStandard::ntsc: {
+            const seconds frame_duration{1 / 60};
+            cycles_per_frame_ = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
+
+            constexpr u16 total_lines{262};
+            u16           visible_lines{};
+            switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                case VerticalResolution::lines_nb_224: visible_lines = 224; break;
+                case VerticalResolution::lines_nb_240: visible_lines = 240; break;
+            }
+            const u16 vblank_lines{static_cast<u16>(total_lines - visible_lines)};
+            cycles_per_vblank_ = vblank_lines * cycles_per_frame_ / total_lines;
+
+            constexpr auto total_line_duration{nano(63.5)};
+            constexpr auto hblank_duration{nano(10.9)};
+            constexpr auto active_line_duration{total_line_duration - hblank_duration};
+            cycles_per_hblank_       = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
+            cycles_per_visible_line_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
+            break;
+        }
+    }
 }
 
 } // namespace saturnin::video

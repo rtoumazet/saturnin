@@ -42,13 +42,13 @@ using AddressToNameMap = std::map<u32, std::string>;
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
 //  Vertical resolution :
 //  - PAL
-//     - 312.5 lines non interlaced (50Hz / frame), 625 lines interlaced  (25Hz / frame)
-//     - 288 active lines (non interlaced), 576 active lines (interlaced)
-//     - 24.5 blanking lines (non interlaced), 49 blanking lines (interlaced)
+//     - Total of 313 lines
+//     - 224, 240 or 256 active lines
+//     - 89, 73 or 57 lines corresponding blanking lines
 //  - NTSC :
-//     - 262.5 lines non interlaced (60Hz / frame), 525 lines interlaced (30Hz / frame)
-//     - 240 active lines (non interlaced), 480 active lines (interlaced)
-//     - 22.5 blanking lines (non interlaced), 45 blanking lines (interlaced)
+//     - Total of 262 lines
+//     - 224 or 240 active lines
+//     - 39 or 23 corresponding blanking lines
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   TvStandard
@@ -134,6 +134,28 @@ class Vdp2 {
 
     auto getRegisters() const -> const AddressToNameMap&;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::onSystemClockUpdate();
+    ///
+    /// \brief  Executes the actions needed after a system clock change.
+    ///
+    /// \author Runik
+    /// \date   29/05/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void onSystemClockUpdate();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::calculateDisplayDuration();
+    ///
+    /// \brief  Calculates everything related to the display duration (frame, vblank, hblank length ...)
+    ///
+    /// \author Runik
+    /// \date   01/06/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void calculateDisplayDuration();
+
   private:
     /// \name Vdp2 registers accessors
     //@{
@@ -169,8 +191,13 @@ class Vdp2 {
 
     AddressToNameMap address_to_name_; ///< Link between a register address and its name.
 
-    u32 elapsed_frame_cycles_{}; ///< Elapsed cycles for the current frame.
-    u32 cycles_by_frame_{};      ///< Number of SH2 cycles needed to display one frame
+    u32  elapsed_frame_cycles_{};    ///< Elapsed cycles for the current frame.
+    u32  cycles_per_frame_{};        ///< Number of SH2 cycles needed to display one frame.
+    u32  cycles_per_vblank_{};       ///< Number of SH2 cycles needed for VBlank duration.
+    u32  cycles_per_hblank_{};       ///< Number of SH2 cycles needed for HBlank duration.
+    u32  cycles_per_visible_line_{}; ///< Number of SH2 cycles needed to display the visible part of a line.
+    bool is_vblank_current_{};       ///< True if VBlank is current
+    bool is_hblank_current_{};       ///< True if HBlank is current
 
     // VDP2 registers
     TvScreenMode                                    tvmd_;

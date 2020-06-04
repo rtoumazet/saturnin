@@ -181,6 +181,7 @@ void EmulatorContext::emulationMainThread() {
                 auto cycles = masterSh2()->run();
                 if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
                 smpc()->run(cycles);
+                vdp2()->run(cycles);
             }
         }
         Log::info("main", tr("Emulation main thread finished"));
