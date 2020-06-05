@@ -12,3 +12,5 @@ saturnin/lib/vcpkg/vcpkg.cfg
 .vs/slnx.sqlite
 .vs/VSWorkspaceState.json
 saturnin/compile_commands.json
+*.db-wal
+*.db-shm

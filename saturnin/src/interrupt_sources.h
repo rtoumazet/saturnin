@@ -40,8 +40,10 @@ namespace interrupt_source {
 static constexpr u8 vector_nmi              { 0xB };
 static constexpr u8 vector_user_break       { 0xC };
 static constexpr u8 vector_v_blank_in       { 0x40 };
+static constexpr u8 vector_v_blank_in_slave { 0x43 };
 static constexpr u8 vector_v_blank_out      { 0x41 };
 static constexpr u8 vector_h_blank_in       { 0x42 };
+static constexpr u8 vector_h_blank_in_slave { 0x41 };
 static constexpr u8 vector_timer_0          { 0x43 };
 static constexpr u8 vector_timer_1          { 0x44 };
 static constexpr u8 vector_dsp_end          { 0x45 };
@@ -76,8 +78,10 @@ static const Interrupt undefined         { 0,                        0,    Inter
 static const Interrupt nmi               { vector_nmi,               0xF , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "NMI" };
 static const Interrupt user_break        { vector_user_break,        0xF , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "User break" };
 static const Interrupt v_blank_in        { vector_v_blank_in,        0xF , InterruptMaskRegister::v_blank_in, InterruptStatusRegister::v_blank_in, "V-Blank-IN" };
+static const Interrupt v_blank_in_slave  { vector_v_blank_in_slave,  0x6 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "V-Blank-IN (slave)" };
 static const Interrupt v_blank_out       { vector_v_blank_out,       0xE , InterruptMaskRegister::v_blank_out, InterruptStatusRegister::v_blank_out, "V-Blank-OUT" };
 static const Interrupt h_blank_in        { vector_h_blank_in,        0xD , InterruptMaskRegister::h_blank_in, InterruptStatusRegister::h_blank_in, "H-Blank-IN" };
+static const Interrupt h_blank_in_slave  { vector_h_blank_in_slave,  0x2 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "H-Blank-IN (slave)" };
 static const Interrupt timer_0           { vector_timer_0,           0xC , InterruptMaskRegister::timer_0, InterruptStatusRegister::timer_0, "Timer 0" };
 static const Interrupt timer_1           { vector_timer_1,           0xB , InterruptMaskRegister::timer_1, InterruptStatusRegister::timer_1, "Timer 1" };
 static const Interrupt dsp_end           { vector_dsp_end,           0xA , InterruptMaskRegister::dsp_end, InterruptStatusRegister::dsp_end, "DSP End" };

@@ -52,7 +52,7 @@ using saturnin::core::rawRead;
 using saturnin::core::rawWrite;
 
 constexpr u8  max_interrupt_number{10};
-constexpr u8  max_interrupt_level{10};
+constexpr u8  max_interrupt_level{16};
 constexpr u8  general_registers_number{16};
 constexpr u8  sp_register_index{0xF};
 constexpr u16 cache_address_size{0x400};

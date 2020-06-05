@@ -17,22 +17,89 @@
 // limitations under the License.
 //
 
-#include <chrono>
-
 #include "vdp2.h"
 #include "../config.h"
 #include "../emulator_context.h"
+#include "../log.h"
 #include "../smpc.h"
+#include "../interrupt_sources.h"
 
 namespace saturnin::video {
+namespace interrupt_source = core::interrupt_source;
 using namespace register_address;
+
 using core::Config;
 using core::EmulatorContext;
+using core::Log;
 using core::Smpc;
+using core::StartingFactorSelect;
+using core::tr;
 
-void Vdp2::initialize() { initializeRegisterNameMap(); }
+void Vdp2::initialize() {
+    initializeRegisterNameMap();
 
-void Vdp2::run(const u8 cycles) {}
+    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    switch (Config::tv_standard[ts]) {
+        case video::TvStandard::pal: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard); break;
+        case video::TvStandard::ntsc: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard); break;
+    }
+    calculateDisplayDuration();
+}
+
+void Vdp2::run(const u8 cycles) {
+    elapsed_frame_cycles_ += cycles;
+    if (elapsed_frame_cycles_ > cycles_per_vactive_) {
+        if (!is_vblank_current_) {
+            // Entering vertical blanking
+            is_vblank_current_ = true;
+            tvstat_.set(ScreenStatus::vertical_blank_flag, VerticalBlankFlag::during_vertical_retrace);
+
+            tvmd_.set(TvScreenMode::display, Display::not_displayed);
+
+            Log::debug("vdp2", tr("VBlankIn interrupt request"));
+            emulator_context_->scu()->generateInterrupt(interrupt_source::v_blank_in);
+            emulator_context_->scu()->sendStartFactor(StartingFactorSelect::v_blank_in);
+        }
+    }
+
+    if (elapsed_frame_cycles_ > cycles_per_frame_) {
+        // End of the frame display (active + vblank)
+        elapsed_frame_cycles_ = 0;
+        is_vblank_current_    = false;
+        tvstat_.set(ScreenStatus::vertical_blank_flag, VerticalBlankFlag::during_vertical_scan);
+
+        elapsed_line_cycles_ = 0;
+        is_hblank_current_   = false;
+        tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_scan);
+
+        tvmd_.set(TvScreenMode::display, Display::displayed);
+
+        Log::debug("vdp2", tr("VBlankOut interrupt request"));
+        emulator_context_->scu()->generateInterrupt(interrupt_source::v_blank_out);
+        emulator_context_->scu()->sendStartFactor(StartingFactorSelect::v_blank_out);
+        return;
+    }
+
+    elapsed_line_cycles_ += cycles;
+    if (elapsed_line_cycles_ > cycles_per_hactive_) {
+        if (!is_hblank_current_) {
+            // Entering horizontal blanking
+            is_hblank_current_ = true;
+            tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_retrace);
+
+            Log::debug("vdp2", tr("HBlankIn interrupt request"));
+            emulator_context_->scu()->generateInterrupt(interrupt_source::h_blank_in);
+            emulator_context_->scu()->sendStartFactor(StartingFactorSelect::h_blank_in);
+        }
+    }
+
+    if (elapsed_line_cycles_ > cycles_per_line_) {
+        // End of line display (active + hblank)
+        elapsed_line_cycles_ = 0;
+        is_hblank_current_   = false;
+        tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_scan);
+    }
+}
 
 auto Vdp2::read16(const u32 addr) const -> u16 {
     switch (addr) {
@@ -496,52 +563,65 @@ void Vdp2::calculateDisplayDuration() {
     //      - 262.5 lines for NTSC
     //      - 312.5 for PAL
 
-    using seconds  = std::chrono::duration<double>;
-    using nano     = std::chrono::duration<double, std::nano>;
+    constexpr u16 lines_nb_224{224};
+    constexpr u16 lines_nb_240{240};
+    constexpr u16 lines_nb_256{256};
+
     std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (Config::tv_standard[ts]) {
         case video::TvStandard::pal: {
-            const seconds frame_duration{1 / 50};
+            const seconds frame_duration{1.0 / 50.0};
             cycles_per_frame_ = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
 
             constexpr u16 total_lines{312};
             u16           visible_lines{};
             switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                case VerticalResolution::lines_nb_224: visible_lines = 224; break;
-                case VerticalResolution::lines_nb_240: visible_lines = 240; break;
-                case VerticalResolution::lines_nb_256: visible_lines = 256; break;
+                case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
+                case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
+                case VerticalResolution::lines_nb_256: visible_lines = lines_nb_256; break;
             }
             const u16 vblank_lines{static_cast<u16>(total_lines - visible_lines)};
-            cycles_per_vblank_ = vblank_lines * cycles_per_frame_ / total_lines;
+            cycles_per_vblank_  = vblank_lines * cycles_per_frame_ / total_lines;
+            cycles_per_vactive_ = cycles_per_frame_ - cycles_per_vblank_;
 
-            constexpr auto total_line_duration{nano(64)};
-            constexpr auto hblank_duration{nano(12)};
-            constexpr auto active_line_duration{total_line_duration - hblank_duration};
-            cycles_per_hblank_       = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
-            cycles_per_visible_line_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
+            const micro pal_total_line_duration{64};
+            const micro pal_hblank_duration{12};
+            calculateLineDuration(pal_total_line_duration, pal_hblank_duration);
+
+            // constexpr auto total_line_duration{nano(64)};
+            // constexpr auto hblank_duration{nano(12)};
+            // constexpr auto active_line_duration{total_line_duration - hblank_duration};
+            // cycles_per_hblank_  = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
+            // cycles_per_hactive_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
+            // cycles_per_line_    = cycles_per_hactive_ + cycles_per_hblank_;
             break;
         }
         case video::TvStandard::ntsc: {
-            const seconds frame_duration{1 / 60};
+            const seconds frame_duration{1.0 / 60.0};
             cycles_per_frame_ = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
 
             constexpr u16 total_lines{262};
             u16           visible_lines{};
             switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                case VerticalResolution::lines_nb_224: visible_lines = 224; break;
-                case VerticalResolution::lines_nb_240: visible_lines = 240; break;
+                case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
+                case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
             }
             const u16 vblank_lines{static_cast<u16>(total_lines - visible_lines)};
-            cycles_per_vblank_ = vblank_lines * cycles_per_frame_ / total_lines;
+            cycles_per_vblank_  = vblank_lines * cycles_per_frame_ / total_lines;
+            cycles_per_vactive_ = cycles_per_frame_ - cycles_per_vblank_;
 
-            constexpr auto total_line_duration{nano(63.5)};
-            constexpr auto hblank_duration{nano(10.9)};
-            constexpr auto active_line_duration{total_line_duration - hblank_duration};
-            cycles_per_hblank_       = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
-            cycles_per_visible_line_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
+            const micro ntsc_total_line_duration{63.5};
+            const micro ntsc_hblank_duration{10.9};
+            calculateLineDuration(ntsc_total_line_duration, ntsc_hblank_duration);
             break;
         }
     }
 }
 
+void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& hblank_duration) {
+    const auto active_line_duration{total_line_duration - hblank_duration};
+    cycles_per_hblank_  = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
+    cycles_per_hactive_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
+    cycles_per_line_    = cycles_per_hactive_ + cycles_per_hblank_;
+}
 } // namespace saturnin::video

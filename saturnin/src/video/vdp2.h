@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <chrono>
+
 #include "vdp2_registers.h"
 #include "../log.h"
 
@@ -37,6 +39,9 @@ namespace saturnin::video {
 
 using saturnin::core::EmulatorContext;
 using AddressToNameMap = std::map<u32, std::string>;
+
+using seconds = std::chrono::duration<double>;
+using micro   = std::chrono::duration<double, std::micro>;
 
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
@@ -122,7 +127,7 @@ class Vdp2 {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::getRegisters() -> AddressToNameMap;
+    /// \fn auto Vdp2::getRegisters() const -> const AddressToNameMap&;
     ///
     /// \brief  Gets registers content for debug purpose.
     ///
@@ -132,7 +137,7 @@ class Vdp2 {
     /// \returns    The registers content.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getRegisters() const -> const AddressToNameMap&;
+    [[nodiscard]] auto getRegisters() const -> const AddressToNameMap&;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::onSystemClockUpdate();
@@ -185,19 +190,39 @@ class Vdp2 {
 
     void initializeRegisterNameMap();
 
-    void addToRegisterNameMap(const u32 addr, const std::string& name);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::addToRegisterNameMap(u32 addr, const std::string& name);
+    ///
+    /// \brief  Adds an entry to the RegisterName map.
+    ///
+    /// \author Runik
+    /// \date   04/06/2020
+    ///
+    /// \param  addr    The address.
+    /// \param  name    The name.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void addToRegisterNameMap(u32 addr, const std::string& name);
+
+    void calculateLineDuration(const micro& total_line_duration, const micro& hblank_duration);
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
 
     AddressToNameMap address_to_name_; ///< Link between a register address and its name.
 
-    u32  elapsed_frame_cycles_{};    ///< Elapsed cycles for the current frame.
-    u32  cycles_per_frame_{};        ///< Number of SH2 cycles needed to display one frame.
-    u32  cycles_per_vblank_{};       ///< Number of SH2 cycles needed for VBlank duration.
-    u32  cycles_per_hblank_{};       ///< Number of SH2 cycles needed for HBlank duration.
-    u32  cycles_per_visible_line_{}; ///< Number of SH2 cycles needed to display the visible part of a line.
-    bool is_vblank_current_{};       ///< True if VBlank is current
-    bool is_hblank_current_{};       ///< True if HBlank is current
+    u32 elapsed_frame_cycles_{}; ///< Elapsed cycles for the current frame.
+    u32 elapsed_line_cycles_{};  ///< Elapsed cycles for the current line.
+
+    u32 cycles_per_frame_{};   ///< Number of SH2 cycles needed to display one frame (active + blanking).
+    u32 cycles_per_vblank_{};  ///< Number of SH2 cycles needed for VBlank duration.
+    u32 cycles_per_vactive_{}; ///< Number of SH2 cycles needed to display the visible part of the frame
+
+    u32 cycles_per_line_{};    ///< Number of SH2 cycles needed to display one line (active + blanking).
+    u32 cycles_per_hblank_{};  ///< Number of SH2 cycles needed for HBlank duration.
+    u32 cycles_per_hactive_{}; ///< Number of SH2 cycles needed to display the visible part of a line.
+
+    bool is_vblank_current_{}; ///< True if VBlank is current
+    bool is_hblank_current_{}; ///< True if HBlank is current
 
     // VDP2 registers
     TvScreenMode                                    tvmd_;

@@ -275,6 +275,72 @@ class ExternalSignalEnable : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ExternalLatchFlag
+///
+/// \brief  EXLTFG bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ExternalLatchFlag : u8 {
+    not_latched_in_register = 0, ///< Not latched in register.
+    latched_in_register     = 1  ///< Latched in register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ExternalSyncFlag
+///
+/// \brief  EXSYFG bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ExternalSyncFlag : u8 {
+    no_sync       = 0, ///< Not synchronized.
+    internal_sync = 1  ///< Internal circuit synchronized.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   VerticalBlankFlag
+///
+/// \brief  VBLANK bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class VerticalBlankFlag : u8 {
+    during_vertical_scan    = 0, ///< During vertical scan.
+    during_vertical_retrace = 1  ///< During vertical retrace (vblank).
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   HorizontalBlankFlag
+///
+/// \brief  HBLANK bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class HorizontalBlankFlag : u8 {
+    during_horizontal_scan    = 0, ///< During horizontal scan.
+    during_horizontal_retrace = 1  ///< During horizontal retrace (hblank).
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ScanFieldFlag
+///
+/// \brief  ODD bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ScanFieldFlag : u8 {
+    during_even_field_scan = 0, ///< During even field scan.
+    during_odd_field_scan  = 1  ///< During odd field scan.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TvStandardFlag
+///
+/// \brief  PAL bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TvStandardFlag : u8 {
+    ntsc_standard = 0, ///< NTSC standard.
+    pal_standard  = 1  ///< PAL standard.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  ScreenStatus
 ///
 /// \brief  Screen Status register (TVSTAT).
@@ -286,6 +352,12 @@ class ExternalSignalEnable : public Register {
 class ScreenStatus : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<ExternalLatchFlag>   external_latch_flag{9};   ///< Defines EXLTFG bit.
+    inline static const BitRange<ExternalSyncFlag>    external_sync_flag{8};    ///< Defines EXSYFG bit.
+    inline static const BitRange<VerticalBlankFlag>   vertical_blank_flag{3};   ///< Defines VBLANK bit.
+    inline static const BitRange<HorizontalBlankFlag> horizontal_blank_flag{2}; ///< Defines HBLANK bit.
+    inline static const BitRange<ScanFieldFlag>       scan_field_flag{1};       ///< Defines ODD bit.
+    inline static const BitRange<TvStandardFlag>      tv_standard_flag{0};      ///< Defines PAL bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
