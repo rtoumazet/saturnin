@@ -77,6 +77,8 @@ void Vdp2::run(const u8 cycles) {
         Log::debug("vdp2", tr("VBlankOut interrupt request"));
         emulator_context_->scu()->generateInterrupt(interrupt_source::v_blank_out);
         emulator_context_->scu()->sendStartFactor(StartingFactorSelect::v_blank_out);
+
+        timer_0_counter_ = 0;
         return;
     }
 
@@ -90,6 +92,13 @@ void Vdp2::run(const u8 cycles) {
             Log::debug("vdp2", tr("HBlankIn interrupt request"));
             emulator_context_->scu()->generateInterrupt(interrupt_source::h_blank_in);
             emulator_context_->scu()->sendStartFactor(StartingFactorSelect::h_blank_in);
+
+            timer_0_counter_++;
+
+            if (timer_0_counter_ == emulator_context_->scu()->getTimer0CompareValue()) {
+                emulator_context_->scu()->generateInterrupt(interrupt_source::timer_0);
+                emulator_context_->scu()->sendStartFactor(StartingFactorSelect::timer_0);
+            }
         }
     }
 
@@ -99,6 +108,8 @@ void Vdp2::run(const u8 cycles) {
         is_hblank_current_   = false;
         tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_scan);
     }
+
+    // Yet to implement : H Counter, V Counter, Timer 1
 }
 
 auto Vdp2::read16(const u32 addr) const -> u16 {
@@ -573,7 +584,7 @@ void Vdp2::calculateDisplayDuration() {
             const seconds frame_duration{1.0 / 50.0};
             cycles_per_frame_ = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
 
-            constexpr u16 total_lines{312};
+            constexpr u16 total_lines{313};
             u16           visible_lines{};
             switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
                 case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
@@ -600,7 +611,7 @@ void Vdp2::calculateDisplayDuration() {
             const seconds frame_duration{1.0 / 60.0};
             cycles_per_frame_ = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
 
-            constexpr u16 total_lines{262};
+            constexpr u16 total_lines{263};
             u16           visible_lines{};
             switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
                 case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;

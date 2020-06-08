@@ -40,21 +40,11 @@ auto Log::initialize() -> bool {
     for (auto n : loggers_names) {
         createLogger(n, sink_list);
     }
-    // createLogger("cdrom", sink_list);
-    // createLogger("config", sink);
-    // createLogger("main", sink);
-    // createLogger("memory", sink);
-    // createLogger("sh2", sink);
-    // createLogger("scu", sink);
-    // createLogger("vdp1", sink);
-    // createLogger("vdp2", sink);
-    // createLogger("opengl", sink);
-    // createLogger("exception", sink);
-    // createLogger("smpc", sink);
-
     spdlog::flush_every(std::chrono::seconds(3));
 
     auto log_file = fs::current_path() / "logs" / "saturnin.log";
+
+    // spdlog::set_level(spdlog::level::debug); // Set global log level to debug
 
     return true;
 }

@@ -169,8 +169,11 @@ void Scu::write32(const u32 addr, const u32 data) {
         case level_1_dma_transfer_byte_number: d1c_.set(bits_0_31, data); return;
         case level_2_dma_transfer_byte_number: d2c_.set(bits_0_31, data); return;
         case interrupt_status_register: interrupt_status_register_.set(bits_0_31, data); return;
-        case interrupt_mask_register:
-            interrupt_mask_register_.set(bits_0_31, data);
+        case interrupt_mask_register: interrupt_mask_register_.set(bits_0_31, data); return;
+        case timer_0_compare_register: t0c_.set(bits_0_31, data); return;
+        case timer_1_set_data_register: t1s_.set(bits_0_31, data); return;
+        case timer_1_mode_register:
+            t1md_.set(bits_0_31, data);
             return;
             //        case dma_status_register:
             //            // DMA registers write
@@ -631,7 +634,7 @@ void Scu::initializeRegisters() {
     rawWrite<u32>(memory()->scu_, dsp_data_ram_data_port & scu_memory_mask, 0x00000000);
 
     // Timer
-    rawWrite<u32>(memory()->scu_, timer_1_mode_register & scu_memory_mask, 0x00000000);
+    t1md_.reset();
 
     // Interrupt control
     constexpr u32 interrupt_mask_default_value{0xBFFF};
@@ -910,5 +913,7 @@ void Scu::dmaUpdateWriteAddress(const DmaLevel l, const u32 data) {
         case DmaLevel::level_unknown: Log::warning("scu", "Unknown DMA level !");
     }
 }
+
+auto Scu::getTimer0CompareValue() -> u32 { return t0c_.get(Timer0CompareRegister::timer_compare_data); }
 
 } // namespace saturnin::core

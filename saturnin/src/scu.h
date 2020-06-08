@@ -280,6 +280,19 @@ class Scu {
 
     void clearInterruptFlag(const Interrupt& i);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Scu::getTimer0CompareValue()->u32;
+    ///
+    /// \brief  Gets timer 0 compare value
+    ///
+    /// \author Runik
+    /// \date   07/06/2020
+    ///
+    /// \returns    The timer 0 compare value.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getTimer0CompareValue() -> u32;
+
     void dmaTest();
 
     /// \name Context objects accessors
@@ -517,6 +530,9 @@ class Scu {
     DmaLevel2TransferByteNumberRegister d2c_;
     InterruptStatusRegister             interrupt_status_register_;
     InterruptMaskRegister               interrupt_mask_register_;
+    Timer0CompareRegister               t0c_;
+    Timer1SetDataRegister               t1s_;
+    Timer1ModeRegister                  t1md_;
     //@}
 };
 

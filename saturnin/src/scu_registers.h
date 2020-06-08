@@ -581,4 +581,72 @@ class InterruptStatusRegister : public Register {
     inline static const BitRange<InterruptEnable> undefined{0};        ///< Undefined value.
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Timer0CompareRegister
+///
+/// \brief  Timer 0 compare register (T0C).
+///
+/// \author Runik
+/// \date   07/06/2020
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Timer0CompareRegister : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u32> timer_0_compare_data{0, 9}; ///< Defines timer 0 compare data bits.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Timer1SetDataRegister
+///
+/// \brief  Timer 1 Set Data Register (T1S).
+///
+/// \author Runik
+/// \date   07/06/2020
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Timer1SetDataRegister : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u32> timer_1_set_data{0, 8}; ///< Defines timer 1 set data bits.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Timer1Mode
+///
+/// \brief  T1MD bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Timer1Mode : u8 {
+    interrupt_occurs_each_line     = 0, ///< Interrupt occurs at each line.
+    interrupt_occurs_only_at_timer = 1  ///< Interrupt occurs only at lines indicated by Timer 0.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TimerEnable
+///
+/// \brief  TENB bit value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TimerEnable : u8 {
+    timer_operation_off = 0, ///< Timer operation off.
+    timer_operation_on  = 1  ///< Timer operation on.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Timer1ModeRegister
+///
+/// \brief  Timer 1 Mode Register (T1MD).
+///
+/// \author Runik
+/// \date   07/06/2020
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Timer1ModeRegister : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<Timer1Mode>  timer_1_mode{8}; ///< Defines T1MD bit.
+    inline static const BitRange<TimerEnable> timer_enable{0}; ///< Defines TENB bit.
+};
+
 } // namespace saturnin::core

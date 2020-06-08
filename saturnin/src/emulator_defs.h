@@ -184,9 +184,9 @@ class Register {
     template<typename T>
     inline auto get(const BitRange<T>& r) -> T {
         auto range = register_value;
-        range >>= r.first_bit_pos_;                      // drops rightmost bits
-        range <<= (register_size - r.last_bit_pos_ - 1); // drops leftmost bits
-        range >>= (register_size - r.last_bit_pos_ - 1); // shifts back into place
+        range >>= r.first_bit_pos_;                                           // drops rightmost bits
+        range <<= (register_size - (r.last_bit_pos_ - r.first_bit_pos_) - 1); // drops leftmost bits
+        range >>= (register_size - (r.last_bit_pos_ - r.first_bit_pos_) - 1); // shifts back into place
         return static_cast<T>(range.to_ulong());
     }
 

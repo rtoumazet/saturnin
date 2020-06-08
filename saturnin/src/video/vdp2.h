@@ -221,8 +221,11 @@ class Vdp2 {
     u32 cycles_per_hblank_{};  ///< Number of SH2 cycles needed for HBlank duration.
     u32 cycles_per_hactive_{}; ///< Number of SH2 cycles needed to display the visible part of a line.
 
-    bool is_vblank_current_{}; ///< True if VBlank is current
-    bool is_hblank_current_{}; ///< True if HBlank is current
+    bool is_vblank_current_{}; ///< True if VBlank is current.
+    bool is_hblank_current_{}; ///< True if HBlank is current.
+
+    u16 timer_0_counter_{}; ///< Timer 0 counter.
+    u16 timer_1_counter_{}; ///< Timer 1 counter.
 
     // VDP2 registers
     TvScreenMode                                    tvmd_;
