@@ -108,6 +108,12 @@
     <ClCompile Include="src\video\vdp2.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\vdp1_registers.h">
+      <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp1.cpp">
+      <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -222,6 +228,9 @@
       <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
     <ClInclude Include="src\video\vdp2_registers.h">
+      <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\vdp1.h">
       <Filter>Fichiers sources\video</Filter>
     </ClInclude>
   </ItemGroup>

@@ -26,7 +26,7 @@
 
 namespace saturnin::video {
 namespace interrupt_source = core::interrupt_source;
-using namespace register_address;
+using namespace vdp2_register_address;
 
 using core::Config;
 using core::EmulatorContext;

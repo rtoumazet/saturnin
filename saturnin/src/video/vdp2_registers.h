@@ -28,7 +28,7 @@
 #include "../emulator_defs.h"
 
 namespace saturnin::video {
-namespace register_address {
+namespace vdp2_register_address {
 constexpr u32 tv_screen_mode                           = {0x25f80000};
 constexpr u32 external_signal_enable                   = {0x25f80002};
 constexpr u32 screen_status                            = {0x25f80004};
@@ -174,7 +174,7 @@ constexpr u32 color_offset_b_red                       = {0x25f8011a};
 constexpr u32 color_offset_b_green                     = {0x25f8011c};
 constexpr u32 color_offset_b_blue                      = {0x25f8011e};
 
-} // namespace register_address
+} // namespace vdp2_register_address
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   Display

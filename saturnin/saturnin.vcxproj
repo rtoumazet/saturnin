@@ -83,6 +83,18 @@
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -211,6 +223,8 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClCompile Include="src\video\opengl.cpp" />
     <ClCompile Include="src\video\opengl_legacy.cpp" />
     <ClCompile Include="src\video\opengl_modern.cpp" />
+    <ClCompile Include="src\video\vdp1.cpp" />
+    <ClCompile Include="src\video\vdp1_registers.h" />
     <ClCompile Include="src\video\vdp2.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -250,6 +264,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClInclude Include="src\video\opengl.h" />
     <ClInclude Include="src\video\opengl_legacy.h" />
     <ClInclude Include="src\video\opengl_modern.h" />
+    <ClInclude Include="src\video\vdp1.h" />
     <ClInclude Include="src\video\vdp2.h" />
     <ClInclude Include="src\video\vdp2_registers.h" />
   </ItemGroup>

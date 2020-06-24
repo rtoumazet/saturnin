@@ -293,6 +293,19 @@ class Scu {
 
     auto getTimer0CompareValue() -> u32;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Scu::isTimer1Enabled() -> bool;
+    ///
+    /// \brief  Queries if Timer 1 is enabled.
+    ///
+    /// \author Runik
+    /// \date   08/06/2020
+    ///
+    /// \returns    True if Timer 1 is enabled.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto isTimer1Enabled() -> bool;
+
     void dmaTest();
 
     /// \name Context objects accessors

@@ -56,9 +56,9 @@ enum class AreaCode : u8 {
 
 enum class SystemClock : u32 {
     not_set  = 0,        ///< not set
-    ntsc_320 = 26874100, ///< NTSC 320 horizontal dot
+    ntsc_320 = 26842600, ///< NTSC 320 horizontal dot
     ntsc_352 = 28636400, ///< NTSC 352 horizontal dot
-    pal_320  = 26687500, ///< PAL 320 horizontal dot
+    pal_320  = 26656400, ///< PAL 320 horizontal dot
     pal_352  = 28437500  ///< PAL 352 horizontal dot
 };
 
