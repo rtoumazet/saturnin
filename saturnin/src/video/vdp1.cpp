@@ -17,12 +17,22 @@
 // limitations under the License.
 //
 
+#define GLFW_INCLUDE_NONE
+#include <windows.h> // removes C4005 warning
+#include <glbinding/gl21/gl.h>
+#include <glbinding/gl21ext/gl.h>
+#include <glbinding/glbinding.h>
+#include <GLFW/glfw3.h>
+
 #include "vdp1.h"
 //#include "../config.h"
 #include "../emulator_context.h"
 #include "../log.h"
 //#include "../smpc.h"
 #include "../interrupt_sources.h"
+
+using namespace gl21;
+using namespace gl21ext;
 
 namespace saturnin::video {
 namespace interrupt_source = core::interrupt_source;
@@ -37,7 +47,13 @@ using core::tr;
 
 void Vdp1::initialize() {}
 
-auto Vdp1::intializeFramebuffer() -> bool {}
+auto Vdp1::intializeFramebuffer() -> bool {
+    // glGenTextures(2, &framebuffer_[0]);
+    // glBindTexture(GL_TEXTURE_2D, texture);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+}
 
 void Vdp1::run(const u8 cycles) {}
 

@@ -1160,22 +1160,22 @@ auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
         case Sh2Register::vbr: return vbr_; break;
         case Sh2Register::gbr: return gbr_; break;
         case Sh2Register::sr: return sr_.toU32(); break;
-        case Sh2Register::r0: return r_[0]; break;
-        case Sh2Register::r1: return r_[1]; break;
-        case Sh2Register::r2: return r_[2]; break;
-        case Sh2Register::r3: return r_[3]; break;
-        case Sh2Register::r4: return r_[4]; break;
-        case Sh2Register::r5: return r_[5]; break;
-        case Sh2Register::r6: return r_[6]; break;
-        case Sh2Register::r7: return r_[7]; break;
-        case Sh2Register::r8: return r_[8]; break;
-        case Sh2Register::r9: return r_[9]; break;
-        case Sh2Register::r10: return r_[10]; break;
-        case Sh2Register::r11: return r_[11]; break;
-        case Sh2Register::r12: return r_[12]; break;
-        case Sh2Register::r13: return r_[13]; break;
-        case Sh2Register::r14: return r_[14]; break;
-        case Sh2Register::r15: return r_[15]; break;
+        case Sh2Register::r0: return r_[index_0]; break;
+        case Sh2Register::r1: return r_[index_1]; break;
+        case Sh2Register::r2: return r_[index_2]; break;
+        case Sh2Register::r3: return r_[index_3]; break;
+        case Sh2Register::r4: return r_[index_4]; break;
+        case Sh2Register::r5: return r_[index_5]; break;
+        case Sh2Register::r6: return r_[index_6]; break;
+        case Sh2Register::r7: return r_[index_7]; break;
+        case Sh2Register::r8: return r_[index_8]; break;
+        case Sh2Register::r9: return r_[index_9]; break;
+        case Sh2Register::r10: return r_[index_10]; break;
+        case Sh2Register::r11: return r_[index_11]; break;
+        case Sh2Register::r12: return r_[index_12]; break;
+        case Sh2Register::r13: return r_[index_13]; break;
+        case Sh2Register::r14: return r_[index_14]; break;
+        case Sh2Register::r15: return r_[index_15]; break;
     }
     return 0;
 }

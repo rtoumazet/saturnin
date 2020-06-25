@@ -174,7 +174,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         case timer_1_set_data_register: t1s_.set(bits_0_31, data); return;
         case timer_1_mode_register:
             t1md_.set(bits_0_31, data);
-            if (isTimer1Enabled()) Log::warning("scu", "Timer 1 enabled");
+            if (isTimer1Enabled()) { Log::warning("scu", "Timer 1 enabled"); }
             return;
             //        case dma_status_register:
             //            // DMA registers write

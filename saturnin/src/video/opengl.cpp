@@ -69,45 +69,44 @@ auto Opengl::generateTextureFromFile(const std::string& filename) const -> u32 {
     const auto full_path{std::filesystem::current_path() / "res" / filename};
 
     std::ifstream input_file(full_path, std::ios::binary);
-    if (input_file) {
-        std::stringstream buffer;
-        buffer << input_file.rdbuf();
-        input_file.close();
-
-        std::string     str = buffer.str();
-        std::vector<u8> source_data{};
-        source_data.reserve(str.size());
-
-        for (const auto s : str) {
-            source_data.emplace_back(s);
-        }
-
-        u32             width{};
-        u32             height{};
-        std::vector<u8> decoded_data{};
-        u32             error = lodepng::decode(decoded_data, width, height, source_data, LCT_RGBA);
-
-        // If there's an error, display it.
-        if (error != 0) {
-            Log::warning("opengl", lodepng_error_text(error));
-            return 0;
-        }
-
-        // glEnable(GL_TEXTURE_2D);
-
-        u32 texture{generateTextureFromVector(width, height, decoded_data)};
-        // glGenTextures(1, &texture);
-        // glBindTexture(GL_TEXTURE_2D, texture);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, decoded_data.data());
-
-        return texture;
-    } else {
+    if (!input_file) {
         Log::warning("opengl", tr("Image res/{} not found !"), filename);
+        return 0;
     }
 
-    return 0;
+    std::stringstream buffer;
+    buffer << input_file.rdbuf();
+    input_file.close();
+
+    std::string     str = buffer.str();
+    std::vector<u8> source_data{};
+    source_data.reserve(str.size());
+
+    for (const auto s : str) {
+        source_data.emplace_back(s);
+    }
+
+    u32             width{};
+    u32             height{};
+    std::vector<u8> decoded_data{};
+    u32             error = lodepng::decode(decoded_data, width, height, source_data, LCT_RGBA);
+
+    // If there's an error, display it.
+    if (error != 0) {
+        Log::warning("opengl", lodepng_error_text(error));
+        return 0;
+    }
+
+    // glEnable(GL_TEXTURE_2D);
+
+    u32 texture{generateTextureFromVector(width, height, decoded_data)};
+    // glGenTextures(1, &texture);
+    // glBindTexture(GL_TEXTURE_2D, texture);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, decoded_data.data());
+
+    return texture;
 };
 
 auto Opengl::generateUiIcons() -> bool {

@@ -396,7 +396,7 @@ class Sh2 {
     static void unmappedAccess(const u32 addr) { Log::warning("sh2", "Unmapped read access : address :{:#0x}", addr); }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Sh2::addToCallstack(const u32 call_addr, const u32 return_addr);
+    /// \fn void Sh2::addToCallstack(u32 call_addr, u32 return_addr);
     ///
     /// \brief  Adds an item to the callstack.
     ///
@@ -407,7 +407,7 @@ class Sh2 {
     /// \param  return_addr The return address.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void addToCallstack(const u32 call_addr, const u32 return_addr);
+    void addToCallstack(u32 call_addr, u32 return_addr);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::popFromCallstack();
@@ -431,7 +431,7 @@ class Sh2 {
     /// \returns    A reference to a const std::vector&lt;CallstackItem&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    const std::vector<CallstackItem>& callstack() const { return callstack_; };
+    [[nodiscard]] const std::vector<CallstackItem>& callstack() const { return callstack_; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::initializeSubroutineDepth()
@@ -445,7 +445,7 @@ class Sh2 {
     void initializeSubroutineDepth() { step_over_subroutine_depth_ = callstack_.size(); };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn size_t Sh2::subroutineDepth()
+    /// \fn auto Sh2::subroutineDepth() -> size_t
     ///
     /// \brief  The saved subroutine depth.
     ///
@@ -455,7 +455,7 @@ class Sh2 {
     /// \returns    An u8.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    size_t subroutineDepth() { return step_over_subroutine_depth_; };
+    auto subroutineDepth() -> size_t { return step_over_subroutine_depth_; };
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
