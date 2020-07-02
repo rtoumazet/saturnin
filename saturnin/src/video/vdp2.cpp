@@ -79,6 +79,8 @@ void Vdp2::run(const u8 cycles) {
         emulator_context_->scu()->sendStartFactor(StartingFactorSelect::v_blank_out);
 
         timer_0_counter_ = 0;
+
+        calculateDisplayDuration();
         return;
     }
 
@@ -567,7 +569,7 @@ void Vdp2::initializeRegisterNameMap() {
     addToRegisterNameMap(color_offset_b_blue, "Color Offset B (Blue)");
 }
 
-void Vdp2::onSystemClockUpdate() {}
+void Vdp2::onSystemClockUpdate() { calculateDisplayDuration(); }
 
 void Vdp2::calculateDisplayDuration() {
     // - A full frame vertical resolution is :

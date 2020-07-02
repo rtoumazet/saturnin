@@ -463,6 +463,7 @@ void Smpc::executeCommand() {
             is_slave_sh2_on_ = false;
             emulator_context_->slaveSh2()->powerOnReset();
             emulator_context_->cdrom()->refreshPeriod();
+            emulator_context_->vdp2()->onSystemClockUpdate();
             if (command == SmpcCommand::clock_change_320) {
                 is_horizontal_res_352 = false;
                 Log::debug("smpc", tr("-=Clock Change 320 Mode=- command executed"));

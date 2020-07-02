@@ -66,7 +66,11 @@ void OpenglModern::initialize() {
     if (!generateUiIcons()) { Log::warning("opengl", tr("Could not generate textures for UI icons !")); }
 }
 
-void OpenglModern::shutdown() { glDeleteProgram(program_shader_); }
+void OpenglModern::shutdown() {
+    glDeleteProgram(program_shader_);
+    glDeleteFramebuffers(1, &fbo_);
+    glDeleteTextures(1, &texture_);
+}
 
 auto OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
