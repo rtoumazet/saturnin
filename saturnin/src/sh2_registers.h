@@ -1760,4 +1760,9 @@ class ReceiveShiftRegister : public Register {
   public:
     using Register::Register;
 };
+
+class StandbyControlRegister : public Register {
+  public:
+    using Register::Register;
+};
 } // namespace saturnin::sh2

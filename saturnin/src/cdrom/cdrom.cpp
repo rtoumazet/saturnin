@@ -20,15 +20,15 @@
 #include <windows.h>
 //#include <wnaspi32.h>
 #include <array> // std::array
+//#include <fmt/format.h> // format
 
-//#include "../emustate.h"
 #include "cdrom.h"
+#include "../emulator_context.h"
 #include "../log.h"
-//#include "../smpc.h"
-//#include "../log.h"
+#include "../smpc.h"
 //#include "../memory.h"
 //#include "../sh2.h"
-//#include "../utilities.h"
+#include "../utilities.h" // toUnderlying
 
 namespace saturnin::cdrom {
 
@@ -1750,27 +1750,28 @@ auto Cdrom::getDriveIndice(const s8 path, const s8 target, const s8 lun) -> u8 {
 //}
 //
 //
-// void CCdRom::SendStatus()
-//{
-//	CR1 = cdDriveStatus<<8; // CR1-H
-//	switch(cdDriveStatus)
-//	{
-//		case STAT_OPEN:
-//		case STAT_NODISC:
-//		case STAT_ERROR:
-//			CR1|=0xFF;
-//			CR2=0xFFFF;
-//			CR3=0xFFFF;
-//			CR4=0xFFFF;
-//			break;
-//		default:
-//			CR1|=((flag&0xF)<<4)|(repCnt&0xF);
-//			CR2=(ctrlAdr<<8)|tno;
-//			CR3=(uint16_t)((ino<<8)|(FAD>>16));
-//			CR4=(uint16_t)FAD;
-//			break;
-//	}
-//}
+void Cdrom::sendStatus() {
+    // CR1 = cd_drive_status_ << 8; // CR1-H
+    cr1_ = CommandRegister(utilities::toUnderlying(cd_drive_status_));
+    cr1_ <<= 8;
+    // cd_drive_status_.get(bits_0_7);
+    switch (cd_drive_status_) {
+        case CdDriveStatus::drive_is_open:
+        case CdDriveStatus::no_disc_inserted:
+        case CdDriveStatus::error:
+            // CR1 |= 0xFF;
+            // CR2 = 0xFFFF;
+            // CR3 = 0xFFFF;
+            // CR4 = 0xFFFF;
+            break;
+        default:
+            // CR1 |= ((flag & 0xF) << 4) | (repCnt & 0xF);
+            // CR2 = (ctrlAdr << 8) | tno;
+            // CR3 = (uint16_t)((ino << 8) | (FAD >> 16));
+            // CR4 = (uint16_t)FAD;
+            break;
+    }
+}
 //
 // void CCdRom::CdBlockReadSectors(int32_t num)
 //{
@@ -1922,7 +1923,7 @@ auto Cdrom::read8(const u32 addr) const -> u8 {
     return 0;
 } // namespace saturnin::cdrom
 
-auto Cdrom::read16(const u32 addr) const -> u16 {
+auto Cdrom::read16(const u32 addr) -> u16 {
     switch (addr) {
         case hirq_register_address:
             Log::debug("cdrom", "HIrqReg={:#06x}", hirq_status_reg_.toU32());
@@ -1933,6 +1934,7 @@ auto Cdrom::read16(const u32 addr) const -> u16 {
         case command_register_3_address: return cr3_.toU32();
         case command_register_4_address:
             // firstReading = false;
+            is_initialization_done_ = true;
             return cr4_.toU32();
         case toc_data_pointer_address:
             //			{
@@ -1992,19 +1994,19 @@ void Cdrom::write16(const u32 addr, const u16 data) {
         case hirq_mask_register_address: hirq_mask_reg_.set(HirqMaskRegister::all_bits, data); break;
         case command_register_1_address:
             cr1_.set(CommandRegister::all_bits, data);
-            // writingCRRegs = true;
+            is_command_running_ = true;
             break;
         case command_register_2_address:
             cr2_.set(CommandRegister::all_bits, data);
-            // writingCRRegs = true;
+            is_command_running_ = true;
             break;
         case command_register_3_address:
             cr3_.set(CommandRegister::all_bits, data);
-            // writingCRRegs = true;
+            is_command_running_ = true;
             break;
         case command_register_4_address:
             cr4_.set(CommandRegister::all_bits, data);
-            // writingCRRegs = false;
+            is_command_running_ = false;
             // ExecuteCdBlockCommand(CR1);
             break;
         default: Log::warning("cdrom", "Unmapped write access {:#010x} {:#04x}", addr, data); break;
@@ -2067,6 +2069,34 @@ void Cdrom::write32(const u32 addr, const u32 data) {
             break;
         default: Log::warning("cdrom", "Unmapped write access {:#010x} {:#04x}", addr, data); break;
     }
+}
+
+void Cdrom::run(const u8 cycles) {
+    // Periodic response musn't be issued before the initialisation string is read from CR registers
+    if (!is_initialization_done_) return;
+
+    elapsed_cycles_ -= cycles;
+    if (elapsed_cycles_ <= 0) {
+        // Periodic response is sent
+
+        // Periodic response is not sent if a command is being executed
+        if (is_command_running_) return;
+
+        sendStatus();
+        elapsed_cycles_ = calculatePeriodicResponsePeriod();
+    }
+}
+
+auto Cdrom::getRegisters() -> std::vector<std::string> {
+    std::vector<std::string> registers;
+    registers.emplace_back(fmt::format("HIrq Status Register : {:#06x}", hirq_status_reg_.toU16()));
+    registers.emplace_back(fmt::format("HIrq Mask Register : {:#06x}", hirq_mask_reg_.toU16()));
+    registers.emplace_back(fmt::format("Command Register 1 : {:#06x}", cr1_.toU16()));
+    registers.emplace_back(fmt::format("Command Register 2 : {:#06x}", cr2_.toU16()));
+    registers.emplace_back(fmt::format("Command Register 3 : {:#06x}", cr3_.toU16()));
+    registers.emplace_back(fmt::format("Command Register 4 : {:#06x}", cr4_.toU16()));
+
+    return registers;
 }
 //
 // void CCdRom::RunCdBlock(int32_t cycles)
@@ -2224,9 +2254,26 @@ void Cdrom::reset() {
     constexpr u16 cr4_default{'CK'};
     cr4_.set(CommandRegister::all_bits, cr4_default);
 
-    //	CR1='C';
-    //	CR2=('D'<< 8)|'B';
-    //	CR3=('L'<< 8)|'O';
-    //	CR4=('C'<< 8)|'K';
+    cd_drive_status_    = CdDriveStatus::no_disc_inserted;
+    cd_drive_play_mode_ = CdDrivePlayMode::standby;
+
+    elapsed_cycles_ = calculatePeriodicResponsePeriod();
+}
+
+auto Cdrom::calculatePeriodicResponsePeriod() -> u32 {
+    switch (cd_drive_play_mode_) {
+        case CdDrivePlayMode::standard_play_speed:
+            max_number_of_commands_ = 34;
+            return emulator_context_->smpc()->calculateCyclesNumber(periodic_response_period_standard);
+
+        case CdDrivePlayMode::double_play_speed:
+            max_number_of_commands_ = 30;
+            return emulator_context_->smpc()->calculateCyclesNumber(periodic_response_period_double);
+
+        case CdDrivePlayMode::standby:
+            max_number_of_commands_ = 60;
+            return emulator_context_->smpc()->calculateCyclesNumber(periodic_response_period_standby);
+        default: Log::warning("cdrom", "Unknown play mode"); return 0;
+    }
 }
 } // namespace saturnin::cdrom

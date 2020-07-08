@@ -219,6 +219,9 @@ class Register {
         return register_value |= other;
     };
 
+    inline auto operator<<=(const u8 size) -> std::bitset<register_size>& { return register_value <<= size; };
+    inline auto operator>>=(const u8 size) -> std::bitset<register_size>& { return register_value >>= size; };
+
     template<typename T>
     inline void reset(const BitRange<T>& r) {
         for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {
@@ -227,6 +230,7 @@ class Register {
     }
 
     inline void reset() { register_value.reset(); }
+    inline void flip() { register_value.flip(); }
 
     [[nodiscard]] inline auto none() const -> bool { return register_value.none(); }
     [[nodiscard]] inline auto any() const -> bool { return register_value.any(); }
@@ -239,8 +243,14 @@ class Register {
     std::bitset<register_size> register_value; ///< Internal register value.
 };
 
-const BitRange<u8>  bits_0_7{0, 7};   ///< Defines the lower 8 bits range of the bitset.
-const BitRange<u16> bits_0_15{0, 15}; ///< Defines the lower 16 bits range of the bitset.
-const BitRange<u32> bits_0_31{0, 31}; ///< Defines the 32 bits range of the bitset.
+const BitRange<u8>  bits_0_3{0, 3};     ///< Defines bits 0-3 range of the bitset.
+const BitRange<u8>  bits_4_7{4, 7};     ///< Defines bits 4-7 range of the bitset.
+const BitRange<u8>  bits_0_7{0, 7};     ///< Defines the lower 8 bits range of the bitset.
+const BitRange<u8>  bits_8_15{8, 15};   ///< Defines bits 8-15 range of the bitset.
+const BitRange<u8>  bits_16_23{16, 23}; ///< Defines bits 16-23 range of the bitset.
+const BitRange<u8>  bits_24_31{24, 31}; ///< Defines bits 24-31 range of the bitset.
+const BitRange<u16> bits_0_15{0, 15};   ///< Defines the lower 16 bits range of the bitset.
+const BitRange<u16> bits_16_31{16, 31}; ///< Defines the upper 16 bits range of the bitset.
+const BitRange<u32> bits_0_31{0, 31};   ///< Defines the 32 bits range of the bitset.
 
 }; // namespace saturnin

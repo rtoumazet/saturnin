@@ -619,7 +619,7 @@ class Smpc {
     SaturnPeripheralMapping saturn_mapping_; ///< Saturn paripheral mapping
     StvPeripheralMapping    stv_mapping_;    ///< ST-V peripheral mapping
 
-    s16 intback_remaining_cycles_{}; ///< The intback remaining cycles
+    s32 intback_remaining_cycles_{}; ///< The intback remaining cycles
 
     bool is_master_sh2_on_{false};      ///< Master SH2 status
     bool is_slave_sh2_on_{false};       ///< Slave SH2 status

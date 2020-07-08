@@ -26,6 +26,7 @@
 #pragma once
 
 //#include <cstdint>
+#include <chrono>
 #include <vector>
 #include <string>
 
@@ -39,28 +40,33 @@ class EmulatorContext;
 }
 
 using saturnin::core::EmulatorContext;
+using milli = std::chrono::duration<double, std::milli>;
 
 namespace saturnin::cdrom {
 
-// not used ?
-///// \name CD drive status
-////@{
-// const u8 STAT_BUSY = 0x00; ///< Busy.
-// const u8 STAT_PAUSE = 0x01;	///< Paused.
-// const u8 STAT_STANDBY = 0x02;	///< Stand-by.
-// const u8 STAT_PLAY = 0x03;	///< Playing.
-// const u8 STAT_SEEK = 0x04;	///< Seeking.
-// const u8 STAT_SCAN = 0x05;	///< Scanning.
-// const u8 STAT_OPEN = 0x06;	///< Drive is open.
-// const u8 STAT_NODISC = 0x07;	///< No disc inserted.
-// const u8 STAT_RETRY = 0x08;	///< Retrying.
-// const u8 STAT_ERROR = 0x09;	///< Error.
-// const u8 STAT_FATAL = 0x0A;	///< Fatal error.
-// const u8 STAT_PERI = 0x20; ///< Periodical response
-// const u8 STAT_TRNS = 0x40; ///< Transfer request
-// const u8 STAT_WAIT = 0x80; ///< Waiting
-// const u8 STAT_REJECT = 0xFF;	///< Command rejected.
-////@}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CdDriveStatus
+///
+/// \brief  Values that represent CD drive status
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CdDriveStatus : u8 {
+    busy                = 0x00,
+    paused              = 0x01,
+    standby             = 0x02,
+    playing             = 0x03,
+    seeking             = 0x04,
+    scanning            = 0x05,
+    drive_is_open       = 0x06,
+    no_disc_inserted    = 0x07,
+    retrying            = 0x08,
+    error               = 0x09,
+    fatal_error         = 0x0a,
+    periodical_response = 0x20,
+    transfer_request    = 0x40,
+    waiting             = 0x80,
+    command_rejected    = 0xff
+};
 
 /// \name Local memory registers
 //@{
@@ -105,13 +111,18 @@ const u8 CDC_PM_NOCHG     = 0xFF;
 
 /// \name Periodic response update cycle in ms
 //@{
-const float STD_PLAY_SPEED_PERIOD = 13.3f; ///< Standard play speed.
-const float DBL_PLAY_SPEED_PERIOD = 6.7f;  ///< Double play speed.
-const float STANDBY_PERIOD        = 16.7f; ///< Standby period.
-const u8    STD_PLAY_SPEED        = 0;
-const u8    DBL_PLAY_SPEED        = 1;
-const u8    STANDBY               = 2;
+constexpr auto periodic_response_period_standard{milli(13.3f)}; ///< Standard play speed period.
+constexpr auto periodic_response_period_double{milli(6.7f)};    ///< Double play speed period.
+constexpr auto periodic_response_period_standby{milli(16.7f)};  ///< Standby period.
 //@}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PlayMode
+///
+/// \brief  Values that represent cd drive play mode
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CdDrivePlayMode : u8 { unknown = 0xff, standard_play_speed = 0, double_play_speed = 1, standby = 2 };
 
 /// \name Retry frequency
 //@{
@@ -344,16 +355,6 @@ class Cdrom {
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // void ExecuteCdBlockCommand(u16 value);
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///// \fn	void SendStatus()
-    /////
-    ///// \brief	Send drive status.
-    /////
-    ///// \author	Runik
-    ///// \date	01/03/2010
-    //////////////////////////////////////////////////////////////////////////////////////////////////////
-    // void SendStatus();
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void RefreshPeriod()
     ///
@@ -454,6 +455,10 @@ class Cdrom {
         return read32(addr);
     }
 
+    void run(const u8 cycles);
+
+    auto getRegisters() -> std::vector<std::string>;
+
   private:
     /// \name CD block memory accessors
     //@{
@@ -461,7 +466,7 @@ class Cdrom {
     void               write16(u32 addr, u16 data);
     void               write32(u32 addr, u32 data);
     [[nodiscard]] auto read8(u32 addr) const -> u8;
-    [[nodiscard]] auto read16(u32 addr) const -> u16;
+    [[nodiscard]] auto read16(u32 addr) -> u16;
     [[nodiscard]] auto read32(u32 addr) const -> u32;
     //@}
 
@@ -476,7 +481,29 @@ class Cdrom {
 
     void reset();
 
-    // u8 drive_status_; ///< CD drive status.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Cdrom::calculatePeriodicResponsePeriod()-> u32;
+    ///
+    /// \brief  Calculates the periodic response period, depending on the current SH2 clock and the drive speed
+    ///
+    /// \author Runik
+    /// \date   05/07/2020
+    ///
+    /// \returns    The calculated periodic response period.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto calculatePeriodicResponsePeriod() -> u32;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn    void Cdrom::sendStatus();
+    ///
+    /// \brief Sends the status of the drive
+    ///
+    /// \author    Runik
+    /// \date  05/07/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void sendStatus();
 
     //::std::vector<DirFileInfos> filesOnCD; ///< File list present on CD.
 
@@ -664,6 +691,15 @@ class Cdrom {
     CommandRegister    cr2_;             ///< Command register 2.
     CommandRegister    cr3_;             ///< Command register 3.
     CommandRegister    cr4_;             ///< Command register 4.
+
+    u16  elapsed_cycles_;                ///< The elapsed cycles
+    bool is_command_running_{false};     ///< True if a command is being executed, ie command registers are written
+    bool is_initialization_done_{false}; ///< Prevents writing to command registers while init string hasn't been read
+
+    CdDriveStatus   cd_drive_status_;
+    CdDrivePlayMode cd_drive_play_mode_;
+
+    u8 max_number_of_commands_{}; ///< The maximum number of executable commands by the cd block
 };
 
 } // namespace saturnin::cdrom

@@ -168,6 +168,19 @@ class EmulatorContext {
     [[nodiscard]] auto hardwareMode() const -> HardwareMode { return hardware_mode_; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::hardwareMode(const HardwareMode hm)
+    ///
+    /// \brief  Updates the hardware mode of the emulator.
+    ///
+    /// \author Runik
+    /// \date   06/07/2020
+    ///
+    /// \param  hm  The new hardware mode.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void hardwareMode(const HardwareMode hm) { hardware_mode_ = hm; };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::emulationStatus(const EmulationStatus status) const
     ///
     /// \brief  Sets the emulation status of the emulator.

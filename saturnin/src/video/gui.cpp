@@ -772,6 +772,11 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     if (ImGui::Button("Save")) {
         state.config()->writeFile();
         state.smpc()->initializePeripheralMappings();
+
+        // Updating global state variables
+        std::string hm = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
+        state.hardwareMode(core::Config::hardware_mode[hm]);
+
         status_message = tr("Configuration saved.");
         const u8 frames_per_second{60};
         const u8 number_of_seconds{5};
@@ -1020,6 +1025,11 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 
                 ImGui::Text(fmt::format(mask, r.first, r.second, state.memory()->vdp2()->readRegisters<u16>(r.first)).c_str());
                 // r.first
+            }
+            break;
+        case MemoryMapArea::cd_block:
+            for (auto const& r : state.memory()->cdrom()->getRegisters()) {
+                ImGui::Text(r.c_str());
             }
             break;
         default:

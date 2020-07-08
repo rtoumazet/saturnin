@@ -91,7 +91,7 @@ void Vdp2::run(const u8 cycles) {
             is_hblank_current_ = true;
             tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_retrace);
 
-            Log::debug("vdp2", tr("HBlankIn interrupt request"));
+            // Log::debug("vdp2", tr("HBlankIn interrupt request"));
             emulator_context_->scu()->generateInterrupt(interrupt_source::h_blank_in);
             emulator_context_->scu()->sendStartFactor(StartingFactorSelect::h_blank_in);
 
@@ -412,6 +412,286 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case color_offset_b_red: cobr_.set(bits_0_15, data); break;
         case color_offset_b_green: cobg_.set(bits_0_15, data); break;
         case color_offset_b_blue: cobb_.set(bits_0_15, data); break;
+        default: core::Log::warning("vdp2", core::tr("Unimplemented register write {:#010x}"), addr);
+    }
+}
+
+void Vdp2::write32(const u32 addr, const u32 data) {
+    u16 h = (data >> displacement_16);
+    u16 l = (data & bitmask_FFFF);
+    switch (addr) {
+        case vram_cycle_pattern_bank_a0_lower:
+            cyca0l_.set(bits_0_15, h);
+            cyca0u_.set(bits_0_15, l);
+            break;
+        case vram_cycle_pattern_bank_a1_lower:
+            cyca1l_.set(bits_0_15, h);
+            cyca1u_.set(bits_0_15, l);
+            break;
+        case vram_cycle_pattern_bank_b0_lower:
+            cycb0l_.set(bits_0_15, h);
+            cycb0u_.set(bits_0_15, l);
+            break;
+        case vram_cycle_pattern_bank_b1_lower:
+            cycb1l_.set(bits_0_15, h);
+            cycb1u_.set(bits_0_15, l);
+            break;
+        case screen_display_enable:
+            bgon_.set(bits_0_15, h);
+            mzctl_.set(bits_0_15, l);
+            break;
+        case special_function_code_select:
+            sfsel_.set(bits_0_15, h);
+            sfcode_.set(bits_0_15, l);
+            break;
+        case character_control_a:
+            chctla_.set(bits_0_15, h);
+            chctlb_.set(bits_0_15, l);
+            break;
+        case bitmap_palette_number_a:
+            bmpna_.set(bits_0_15, h);
+            bmpnb_.set(bits_0_15, l);
+            break;
+        case pattern_name_control_nbg0:
+            pncn0_.set(bits_0_15, h);
+            pncn1_.set(bits_0_15, l);
+            break;
+        case pattern_name_control_nbg2:
+            pncn2_.set(bits_0_15, h);
+            pncn3_.set(bits_0_15, l);
+            break;
+        case pattern_name_control_rbg0:
+            pncnr_.set(bits_0_15, h);
+            pnsz_.set(bits_0_15, l);
+            break;
+        case map_offset_n:
+            mpofn_.set(bits_0_15, h);
+            mpofr_.set(bits_0_15, l);
+            break;
+        case map_nbg0_plane_a_b:
+            mpabn0_.set(bits_0_15, h);
+            mpcdn0_.set(bits_0_15, l);
+            break;
+        case map_nbg1_plane_a_b:
+            mpabn1_.set(bits_0_15, h);
+            mpcdn1_.set(bits_0_15, l);
+            break;
+        case map_nbg2_plane_a_b:
+            mpabn2_.set(bits_0_15, h);
+            mpcdn2_.set(bits_0_15, l);
+            break;
+        case map_nbg3_plane_a_b:
+            mpabn3_.set(bits_0_15, h);
+            mpcdn3_.set(bits_0_15, l);
+            break;
+        case map_rotation_parameter_a_plane_a_b:
+            mpabra_.set(bits_0_15, h);
+            mpcdra_.set(bits_0_15, l);
+            break;
+        case map_rotation_parameter_a_plane_e_f:
+            mpefra_.set(bits_0_15, h);
+            mpghra_.set(bits_0_15, l);
+            break;
+        case map_rotation_parameter_a_plane_i_j:
+            mpijra_.set(bits_0_15, h);
+            mpklra_.set(bits_0_15, l);
+            break;
+        case map_rotation_parameter_a_plane_m_n:
+            mpmnra_.set(bits_0_15, h);
+            mpopra_.set(bits_0_15, l);
+            break;
+        case map_rotation_parameter_b_plane_a_b:
+            mpabrb_.set(bits_0_15, h);
+            mpcdrb_.set(bits_0_15, l);
+            break;
+        case map_rotation_parameter_b_plane_e_f:
+            mpefrb_.set(bits_0_15, h);
+            mpghrb_.set(bits_0_15, l);
+            break;
+        case map_rotation_parameter_b_plane_i_j:
+            mpijrb_.set(bits_0_15, h);
+            mpklrb_.set(bits_0_15, l);
+            break;
+        case map_rotation_parameter_b_plane_m_n:
+            mpmnrb_.set(bits_0_15, h);
+            mpoprb_.set(bits_0_15, l);
+            break;
+        case screen_scroll_value_nbg0_h_int_part:
+            scxin0_.set(bits_0_15, h);
+            scxdn0_.set(bits_0_15, l);
+            break;
+        case screen_scroll_value_nbg0_v_int_part:
+            scyin0_.set(bits_0_15, h);
+            scydn0_.set(bits_0_15, l);
+            break;
+        case coordinate_increment_nbg0_h_int_part:
+            zmxin0_.set(bits_0_15, h);
+            zmxdn0_.set(bits_0_15, l);
+            break;
+        case coordinate_increment_nbg0_v_int_part:
+            zmyin0_.set(bits_0_15, h);
+            zmydn0_.set(bits_0_15, l);
+            break;
+        case screen_scroll_value_nbg1_h_int_part:
+            scxin1_.set(bits_0_15, h);
+            scxdn1_.set(bits_0_15, l);
+            break;
+        case screen_scroll_value_nbg1_v_int_part:
+            scyin1_.set(bits_0_15, h);
+            scydn1_.set(bits_0_15, l);
+            break;
+        case coordinate_increment_nbg1_h_int_part:
+            zmxin1_.set(bits_0_15, h);
+            zmxdn1_.set(bits_0_15, l);
+            break;
+        case coordinate_increment_nbg1_v_int_part:
+            zmyin1_.set(bits_0_15, h);
+            zmydn1_.set(bits_0_15, l);
+            break;
+        case screen_scroll_value_nbg2_h:
+            scxn2_.set(bits_0_15, h);
+            scyn2_.set(bits_0_15, l);
+            break;
+        case screen_scroll_value_nbg3_h:
+            scxn3_.set(bits_0_15, h);
+            scyn3_.set(bits_0_15, l);
+            break;
+        case reduction_enable:
+            zmctl_.set(bits_0_15, h);
+            scrctl_.set(bits_0_15, l);
+            break;
+        case vertical_cell_scroll_table_address_upper:
+            vcstau_.set(bits_0_15, h);
+            vcstal_.set(bits_0_15, l);
+            break;
+        case line_scroll_table_address_nbg0_upper:
+            lsta0u_.set(bits_0_15, h);
+            lsta0l_.set(bits_0_15, l);
+            break;
+        case line_scroll_table_address_nbg1_upper:
+            lsta1u_.set(bits_0_15, h);
+            lsta1l_.set(bits_0_15, l);
+            break;
+        case line_color_screen_table_address_upper:
+            lctau_.set(bits_0_15, h);
+            lctal_.set(bits_0_15, l);
+            break;
+        case back_screen_table_address_upper:
+            bktau_.set(bits_0_15, h);
+            bktal_.set(bits_0_15, l);
+            break;
+        case rotation_parameter_mode:
+            rpmd_.set(bits_0_15, h);
+            rprctl_.set(bits_0_15, l);
+            break;
+        case coefficient_table_control:
+            ktctl_.set(bits_0_15, h);
+            ktaof_.set(bits_0_15, l);
+            break;
+        case screen_over_pattern_name_a:
+            ovpnra_.set(bits_0_15, h);
+            ovpnrb_.set(bits_0_15, l);
+            break;
+        case rotation_parameter_table_address_upper:
+            rptau_.set(bits_0_15, h);
+            rptal_.set(bits_0_15, l);
+            break;
+        case window_position_w0_h_start_point:
+            wpsx0_.set(bits_0_15, h);
+            wpsy0_.set(bits_0_15, l);
+            break;
+        case window_position_w0_h_end_point:
+            wpex0_.set(bits_0_15, h);
+            wpey0_.set(bits_0_15, l);
+            break;
+        case window_position_w1_h_start_point:
+            wpsx1_.set(bits_0_15, h);
+            wpsy1_.set(bits_0_15, l);
+            break;
+        case window_position_w1_h_end_point:
+            wpex1_.set(bits_0_15, h);
+            wpey1_.set(bits_0_15, l);
+            break;
+        case window_control_a:
+            wctla_.set(bits_0_15, h);
+            wctlb_.set(bits_0_15, l);
+            break;
+        case window_control_c:
+            wctlc_.set(bits_0_15, h);
+            wctld_.set(bits_0_15, l);
+            break;
+        case line_window_table_address_w0_upper:
+            lwta0u_.set(bits_0_15, h);
+            lwta0l_.set(bits_0_15, l);
+            break;
+        case line_window_table_address_w1_upper:
+            lwta1u_.set(bits_0_15, h);
+            lwta1l_.set(bits_0_15, l);
+            break;
+        case sprite_control:
+            spctl_.set(bits_0_15, h);
+            sdctl_.set(bits_0_15, l);
+            break;
+        case color_ram_address_offset_a:
+            craofa_.set(bits_0_15, h);
+            craofb_.set(bits_0_15, l);
+            break;
+        case line_color_screen_enable:
+            lnclen_.set(bits_0_15, h);
+            sfprmd_.set(bits_0_15, l);
+            break;
+        case color_calculation_control:
+            ccctl_.set(bits_0_15, h);
+            sfccmd_.set(bits_0_15, l);
+            break;
+        case priority_number_sprite_0_1:
+            prisa_.set(bits_0_15, h);
+            prisb_.set(bits_0_15, l);
+            break;
+        case priority_number_sprite_4_5:
+            prisc_.set(bits_0_15, h);
+            prisd_.set(bits_0_15, l);
+            break;
+        case priority_number_nbg0_nbg1:
+            prina_.set(bits_0_15, h);
+            prinb_.set(bits_0_15, l);
+            break;
+        case priority_number_rbg0:
+            prir_.set(bits_0_15, h);
+            rsv2_.set(bits_0_15, l);
+            break;
+        case color_calculation_ratio_sprite_0_1:
+            ccrsa_.set(bits_0_15, h);
+            ccrsb_.set(bits_0_15, l);
+            break;
+        case color_calculation_ratio_sprite_4_5:
+            ccrsc_.set(bits_0_15, h);
+            ccrsd_.set(bits_0_15, l);
+            break;
+        case color_calculation_ratio_nbg0_nbg1:
+            ccrna_.set(bits_0_15, h);
+            ccrnb_.set(bits_0_15, l);
+            break;
+        case color_calculation_ratio_rbg0:
+            ccrr_.set(bits_0_15, h);
+            ccrlb_.set(bits_0_15, l);
+            break;
+        case color_offset_enable:
+            clofen_.set(bits_0_15, h);
+            clofsl_.set(bits_0_15, l);
+            break;
+        case color_offset_a_red:
+            coar_.set(bits_0_15, h);
+            coag_.set(bits_0_15, l);
+            break;
+        case color_offset_a_blue:
+            coab_.set(bits_0_15, h);
+            cobr_.set(bits_0_15, l);
+            break;
+        case color_offset_b_green:
+            cobg_.set(bits_0_15, h);
+            cobb_.set(bits_0_15, l);
+            break;
         default: core::Log::warning("vdp2", core::tr("Unimplemented register write {:#010x}"), addr);
     }
 }

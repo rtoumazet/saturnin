@@ -550,7 +550,7 @@ void Memory::initializeMemoryMap() {
     memory_map_.insert(MapArea::value_type(MemoryMapArea::workram_low, tr("Workram low")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::stv_io, tr("ST-V I/O")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::cart, tr("Cartridge")));
-    // memory_map_.insert(MapArea::value_type(MemoryMapArea::cd_block, tr("Cd block")));
+    memory_map_.insert(MapArea::value_type(MemoryMapArea::cd_block, tr("Cd block")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::scsp, tr("Sound RAM")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::vdp1_ram, tr("VDP1 RAM")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::vdp1_framebuffer, tr("VDP1 framebuffer")));

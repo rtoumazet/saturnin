@@ -81,8 +81,11 @@ auto EmulatorContext::initialize() -> bool {
 
     if (!this->config()->initialize(video::isModernOpenglCapable())) { return false; }
 
-    std::string country = this->config()->readValue(core::AccessKeys::cfg_global_language);
+    std::string country = config()->readValue(core::AccessKeys::cfg_global_language);
     if (!Locale::getInstance().initialize(country)) { return false; }
+
+    std::string hm = config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
+    hardwareMode(core::Config::hardware_mode[hm]);
 
     this->smpc()->initializePeripheralMappings();
 
@@ -182,6 +185,7 @@ void EmulatorContext::emulationMainThread() {
                 if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
                 smpc()->run(cycles);
                 vdp2()->run(cycles);
+                cdrom()->run(cycles);
             }
         }
         Log::info("main", tr("Emulation main thread finished"));

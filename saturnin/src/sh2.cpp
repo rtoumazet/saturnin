@@ -141,6 +141,11 @@ auto Sh2::readRegisters8(const u32 addr) -> u8 {
         case serial_status_register: return sci_ssr_.get(bits_0_7);
         case receive_data_register: return sci_rdr_.get(bits_0_7);
 
+        //////////////////////////
+        // 14. Power-Down modes //
+        //////////////////////////
+        case standby_control_register: return sbycr_.get(bits_0_7);
+
         default: unmappedAccess(addr); return 0;
     }
 }
@@ -383,7 +388,18 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case bit_rate_register: sci_brr_.set(bits_0_7, data); break;
         case serial_control_register: sci_scr_.set(bits_0_7, data); break;
         case transmit_data_register: sci_tdr_.set(bits_0_7, data); break;
-        case serial_status_register: sci_ssr_.set(bits_0_7, data); break;
+        case serial_status_register:
+            sci_ssr_.set(bits_0_7, data);
+            break;
+
+            //////////////////////////
+            // 14. Power-Down modes //
+            //////////////////////////
+
+        case standby_control_register:
+            sbycr_.set(bits_0_7, data);
+            Log::warning("sh2", "PWR - Standby control register write {:#0x}", data);
+            break;
 
         default: unmappedAccess(addr, data); break;
     }
@@ -423,6 +439,10 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
                     }
                     break;
             }
+
+            // Will force exit from the Sleep instruction. Will have to be adapted using Power Down modes.
+            is_nmi_registered_ = true;
+
             intc_icr_.set(bits_0_15, data);
         } break;
 
@@ -699,6 +719,10 @@ void Sh2::initializeOnChipRegisters() {
     sci_tdr_.set();
     sci_ssr_.set(bits_0_7, sci_ssr_default_value);
     sci_rdr_.reset();
+
+    // Power-Down Modes
+    constexpr u8 sbycr_default_value{0x60};
+    sbycr_.set(bits_0_7, sbycr_default_value);
 }
 
 void Sh2::powerOnReset() {
@@ -807,7 +831,7 @@ void Sh2::runInterruptController() {
         if (!pending_interrupts_.empty()) {
             u8   interrupt_mask = sr_.get(StatusRegister::i);
             auto interrupt      = pending_interrupts_.front();
-            if (interrupt.level > interrupt_mask) {
+            if ((interrupt.level > interrupt_mask) || interrupt == is::nmi) {
                 Log::debug("sh2",
                            "{} SH2 interrupt request {:#0x} {:#0x}, PC={:#0x}",
                            sh2_type_name_.at(sh2_type_),

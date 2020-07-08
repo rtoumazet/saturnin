@@ -114,7 +114,11 @@ class Vdp2 {
     void writeRegisters<u16>(const u32 addr, const u16 data) {
         write16(addr, data);
     }
-
+    // 32 bits specialization
+    template<>
+    void writeRegisters<u32>(const u32 addr, const u32 data) {
+        write32(addr, data);
+    }
     template<typename T>
     auto readRegisters(const u32 addr) -> T {
         core::Log::warning("vdp2", core::tr("{}bits register read {:#0x}"), sizeof(T) * number_of_bits_8, addr);
@@ -165,6 +169,7 @@ class Vdp2 {
     /// \name Vdp2 registers accessors
     //@{
     void               write16(u32 addr, u16 data);
+    void               write32(u32 addr, u32 data);
     [[nodiscard]] auto read16(u32 addr) const -> u16;
     //@}
 

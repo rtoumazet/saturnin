@@ -1018,8 +1018,15 @@ class Sh2 {
     BitRateRegister       sci_brr_;
     //@}
 
+    /// \name Power-Down modes
+    //@{
+    StandbyControlRegister sbycr_;
+    //@}
+
     std::vector<CallstackItem> callstack_;                    ///< Callstack of the processor
     size_t                     step_over_subroutine_depth_{}; ///< Subroutine depth, used with DebugStatus::step_over
+
+    bool is_nmi_registered_{false}; ///< True if a Non Maskable Interrupt is registered
 };
 
 } // namespace saturnin::sh2

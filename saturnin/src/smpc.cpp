@@ -823,6 +823,9 @@ auto Smpc::read(const u32 addr) -> u8 {
 
             //    }
             //}
+            pdr2_.none();
+
+            pdr2_.flip();
             return pdr2_.get(PortDataRegister::all_bits);
 
         default: return 0;

@@ -1475,6 +1475,12 @@ void sleep(Sh2& s) {
     // It'll involve waiting until an interrupt is fired up
     // Fixing needs some more researches on the Power Down Mode
     // Maybe a SH2 boolean to update ?
+
+    if (s.is_nmi_registered_) {
+        s.sendInterrupt(is::nmi);
+        s.is_nmi_registered_ = false;
+    }
+
     s.cycles_elapsed_ = 3;
 }
 

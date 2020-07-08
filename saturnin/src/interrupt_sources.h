@@ -75,7 +75,7 @@ static constexpr u8 vector_frt_input_capture{ 0x64 };
 static constexpr u8 vector_frt_input_capture2{ 0x65 };
 
 static const Interrupt undefined         { 0,                        0,    InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "Undefined" };
-static const Interrupt nmi               { vector_nmi,               0xF , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "NMI" };
+static const Interrupt nmi               { vector_nmi,               0xF, InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "NMI" };
 static const Interrupt user_break        { vector_user_break,        0xF , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "User break" };
 static const Interrupt v_blank_in        { vector_v_blank_in,        0xF , InterruptMaskRegister::v_blank_in, InterruptStatusRegister::v_blank_in, "V-Blank-IN" };
 static const Interrupt v_blank_in_slave  { vector_v_blank_in_slave,  0x6 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined, "V-Blank-IN (slave)" };
