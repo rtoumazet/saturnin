@@ -357,9 +357,9 @@ class Vdp2 {
     PriorityNumberSpriteB                           prisb_;
     PriorityNumberSpriteC                           prisc_;
     PriorityNumberSpriteD                           prisd_;
-    PriorityNumberNbg0Nbg1                          prina_;
-    PriorityNumberNbg2Nbg3                          prinb_;
-    PriorityNumberRbg0                              prir_;
+    PriorityNumberA                                 prina_;
+    PriorityNumberB                                 prinb_;
+    PriorityNumberR                                 prir_;
     Reserve                                         rsv2_;
     ColorCalculationRatioSpriteA                    ccrsa_;
     ColorCalculationRatioSpriteB                    ccrsb_;

@@ -417,6 +417,40 @@ class Reserve : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CoefficientTableStorage
+///
+/// \brief  Selects whether to store the coefficient table in the color RAM (CRKTE bit).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CoefficientTableStorage : u8 {
+    stored_in_vram      = 0, ///< Coefficient table is stored in VRAM.
+    stored_in_color_ram = 1  ///< Coefficient table is stored in color RAM.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ColorRamMode
+///
+/// \brief  Selects the color RAM mode (CRMDx bits).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ColorRamMode : u8 {
+    mode_0_rgb_5_bits_1024_colors = 0b00, ///< RGB each 5 bits, 1024 colors settings.
+    mode_1_rgb_5_bits_2048_colors = 0b01, ///< RGB each 5 bits, 2048 colors settings.
+    mode_2_rgb_8_bits_1024_colors = 0b10  ///< RGB each 8 bits, 1024 colors settings.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   VramMode
+///
+/// \brief  VRAM mode bit (VRxMD bit).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class VramMode : u8 {
+    no_partition         = 0, ///< Do not partition in 2 banks.
+    partition_in_2_banks = 1  ///< Partition in 2 banks.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  RamControl
 ///
 /// \brief  RAM Control register (RAMCTL).
@@ -428,6 +462,10 @@ class Reserve : public Register {
 class RamControl : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<CoefficientTableStorage> coefficient_table_storage{15}; ///< Defines CRKTE bit.
+    inline static const BitRange<ColorRamMode>            color_ram_mode{12, 13};        ///< Defines CRMDx bits.
+    inline static const BitRange<VramMode>                vram_b_mode_{9};               ///< Defines VRBMD bit.
+    inline static const BitRange<VramMode>                vram_a_mode_{8};               ///< Defines VRAMD bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -543,6 +581,29 @@ class VramCyclePatternBankB1Upper : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransparentDisplayEnable
+///
+/// \brief  xxTPON bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransparentDisplayEnable : u8 {
+    transparency_code_valid = 0, ///< Validates transparency code (transparency code becomes valid).
+    transparency_code_invalid
+    = 1 ///< Invalidates transparency code (transparency code dots are displayed according to data values).
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ScreenDisplayEnableBit
+///
+/// \brief  xxON bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ScreenDisplayEnableBit : u8 {
+    cannot_display = 0, ///< Cannot display (Does not execute VRAM access for display).
+    can_display    = 1  ///< Can display.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  ScreenDisplayEnable
 ///
 /// \brief  Screen Display Enable register (BGON).
@@ -554,6 +615,17 @@ class VramCyclePatternBankB1Upper : public Register {
 class ScreenDisplayEnable : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_rbg0{12}; ///< Defines R0TPON bit.
+    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_nbg3{11}; ///< Defines N3TPON bit.
+    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_nbg2{10}; ///< Defines N2TPON bit.
+    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_nbg1{9};  ///< Defines N1TPON bit.
+    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_nbg0{8};  ///< Defines N0TPON bit.
+    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_rbg1{5};        ///< Defines R1ON bit.
+    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_rbg0{4};        ///< Defines R0ON bit.
+    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_nbg3{3};        ///< Defines N3ON bit.
+    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_nbg2{2};        ///< Defines N2ON bit.
+    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_nbg1{1};        ///< Defines N1ON bit.
+    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_nbg0{0};        ///< Defines N0ON bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2055,45 +2127,50 @@ class PriorityNumberSpriteD : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberNbg0Nbg1
+/// \class  PriorityNumberA
 ///
-/// \brief  Priority Number (NBG0, NBG1) (PRINA).
+/// \brief  Priority Number A (NBG0, NBG1) (PRINA).
 ///
 /// \author Runik
 /// \date   27/05/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberNbg0Nbg1 : public Register {
+class PriorityNumberA : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> nbg1{8, 10}; ///< Defines the priority number of NBG1 (N1PRINx).
+    inline static const BitRange<u8> nbg0{0, 2};  ///< Defines the priority number of NBG0 (N0PRINx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberNbg2Nbg3
+/// \class  PriorityNumberB
 ///
-/// \brief  Priority Number (NBG2, NBG3) (PRINB).
+/// \brief  Priority Number B (NBG2, NBG3) (PRINB).
 ///
 /// \author Runik
 /// \date   27/05/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberNbg2Nbg3 : public Register {
+class PriorityNumberB : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> nbg3{8, 10}; ///< Defines the priority number of NBG3 (N3PRINx).
+    inline static const BitRange<u8> nbg2{0, 2};  ///< Defines the priority number of NBG2 (N2PRINx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberRbg0
+/// \class  PriorityNumberR
 ///
-/// \brief  Priority Number (Rbg0) (PRIR).
+/// \brief  Priority Number R (Rbg0) (PRIR).
 ///
 /// \author Runik
 /// \date   27/05/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberRbg0 : public Register {
+class PriorityNumberR : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> rbg0{0, 2}; ///< Defines the priority number of RBG0 (R0PRINx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
