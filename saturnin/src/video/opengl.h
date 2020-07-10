@@ -114,7 +114,7 @@ class Opengl {
     [[nodiscard]] auto generateTextureFromFile(const std::string& filename) const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getIconTexture(const IconId id) -> ImTextureID;
+    /// \fn auto Opengl::getIconTexture(IconId id) -> ImTextureID;
     ///
     /// \brief  Gets the texture id of the IconId.
     ///
@@ -126,7 +126,7 @@ class Opengl {
     /// \returns    The icon texture id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] auto getIconTexture(const IconId id) -> ImTextureID;
+    [[nodiscard]] auto getIconTexture(IconId id) -> ImTextureID;
 
     static auto loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool;
 
@@ -153,22 +153,22 @@ class Opengl {
     void setTextureDimension(u32 width, u32 height);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn virtual auto Opengl::generateTextureFromVector(const u32 width, const u32 height, std::vector<u8>& data) const -> u32
-    /// = 0;
+    /// \fn virtual auto Opengl::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const
+    /// -> u32 = 0;
     ///
     /// \brief  Generates a texture from a vector.
     ///
     /// \author Runik
     /// \date   22/04/2020
     ///
-    /// \param          width   Width of the texture.
-    /// \param          height  Height of the texture.
-    /// \param [in,out] data    Texture data.
+    /// \param  width   Width of the texture.
+    /// \param  height  Height of the texture.
+    /// \param  data    Texture data.
     ///
     /// \returns    The id of the generated texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    virtual auto generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const -> u32 = 0;
+    [[nodiscard]] virtual auto generateTextureFromVector(u32 width, u32 height, const std::vector<u8>& data) const -> u32 = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::generateUiIcons() -> bool;

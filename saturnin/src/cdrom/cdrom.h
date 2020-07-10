@@ -455,7 +455,18 @@ class Cdrom {
         return read32(addr);
     }
 
-    void run(const u8 cycles);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Cdrom::run(const u8 cycles);
+    ///
+    /// \brief  Runs the cdblock for the given number of cycles
+    ///
+    /// \author Renaud Toumazet
+    /// \date   10/07/2020
+    ///
+    /// \param  cycles  The number of cycles to run.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void run(u8 cycles);
 
     auto getRegisters() -> std::vector<std::string>;
 

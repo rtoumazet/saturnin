@@ -421,7 +421,7 @@ class Sh2 {
     void popFromCallstack();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn const std::vector<CallstackItem>& Sh2::callstack() const
+    /// \fn auto Sh2::callstack() const -> const std::vector<CallstackItem>&
     ///
     /// \brief  Returns the callstack of the CPU
     ///
@@ -431,7 +431,7 @@ class Sh2 {
     /// \returns    A reference to a const std::vector&lt;CallstackItem&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] const std::vector<CallstackItem>& callstack() const { return callstack_; };
+    [[nodiscard]] auto callstack() const -> const std::vector<CallstackItem>& { return callstack_; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::initializeSubroutineDepth()

@@ -1753,7 +1753,7 @@ auto Cdrom::getDriveIndice(const s8 path, const s8 target, const s8 lun) -> u8 {
 void Cdrom::sendStatus() {
     // CR1 = cd_drive_status_ << 8; // CR1-H
     cr1_ = CommandRegister(utilities::toUnderlying(cd_drive_status_));
-    cr1_ <<= 8;
+    cr1_ <<= displacement_8;
     // cd_drive_status_.get(bits_0_7);
     switch (cd_drive_status_) {
         case CdDriveStatus::drive_is_open:
@@ -2073,14 +2073,14 @@ void Cdrom::write32(const u32 addr, const u32 data) {
 
 void Cdrom::run(const u8 cycles) {
     // Periodic response musn't be issued before the initialisation string is read from CR registers
-    if (!is_initialization_done_) return;
+    if (!is_initialization_done_) { return; }
 
     elapsed_cycles_ -= cycles;
     if (elapsed_cycles_ <= 0) {
         // Periodic response is sent
 
         // Periodic response is not sent if a command is being executed
-        if (is_command_running_) return;
+        if (is_command_running_) { return; }
 
         sendStatus();
         elapsed_cycles_ = calculatePeriodicResponsePeriod();
@@ -2261,17 +2261,19 @@ void Cdrom::reset() {
 }
 
 auto Cdrom::calculatePeriodicResponsePeriod() -> u32 {
+    enum class NumberOfCommands { standard_play_speed = 34, double_play_speed = 30, standby = 60 };
+
     switch (cd_drive_play_mode_) {
         case CdDrivePlayMode::standard_play_speed:
-            max_number_of_commands_ = 34;
+            max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::standard_play_speed);
             return emulator_context_->smpc()->calculateCyclesNumber(periodic_response_period_standard);
 
         case CdDrivePlayMode::double_play_speed:
-            max_number_of_commands_ = 30;
+            max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::double_play_speed);
             return emulator_context_->smpc()->calculateCyclesNumber(periodic_response_period_double);
 
         case CdDrivePlayMode::standby:
-            max_number_of_commands_ = 60;
+            max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::standby);
             return emulator_context_->smpc()->calculateCyclesNumber(periodic_response_period_standby);
         default: Log::warning("cdrom", "Unknown play mode"); return 0;
     }
