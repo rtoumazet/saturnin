@@ -671,6 +671,80 @@ class SpecialFunctionCode : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CharacterColorNumber3Bits
+///
+/// \brief  N0CHCNx / R0CHCNx bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CharacterColorNumber3bits : u8 {
+    palette_16   = 0b000, ///< Palette format, 16 colors.
+    palette_256  = 0b001, ///< Palette format, 256 colors.
+    palette_2048 = 0b010, ///< Palette format, 2048 colors.
+    rgb_32k      = 0b011, ///< RGB format, 32768 colors.
+    rgb_16m      = 0b100  ///< RGB format, 16770000 colors.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CharacterColorNumber2Bits
+///
+/// \brief  N1CHCNx bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CharacterColorNumber2Bits : u8 {
+    palette_16   = 0b00, ///< Palette format, 16 colors.
+    palette_256  = 0b01, ///< Palette format, 256 colors.
+    palette_2048 = 0b10, ///< Palette format, 2048 colors.
+    rgb_32k      = 0b11, ///< RGB format, 32768 colors.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CharacterColorNumberNbg1
+///
+/// \brief  N2CHCNx / N3CHCNx bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CharacterColorNumber1Bit : u8 {
+    palette_16  = 0b0, ///< Palette format, 16 colors.
+    palette_256 = 0b1, ///< Palette format, 256 colors.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   BitmapSize2Bits
+///
+/// \brief  N0BMSZx / N1BMSZx bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class BitmapSize2Bits : u8 {
+    size_512_by_256  = 0b00, ///< 512 H dots* 256 V dots.
+    size_512_by_512  = 0b01, ///< 512 H dots* 512 V dots.
+    size_1024_by_256 = 0b10, ///< 1024 H dots* 256 V dots.
+    size_1024_by_512 = 0b11  ///< 1024 H dots* 512 V dots.
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   BitmapSize1Bit
+///
+/// \brief  R0BMSZ bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class BitmapSize1Bit : u8 {
+    size_512_by_256 = 0b0, ///< 512 H dots* 256 V dots.
+    size_512_by_512 = 0b1  ///< 512 H dots* 512 V dots.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   BitmapEnable
+///
+/// \brief  xxBMEN bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class BitmapEnable : u8 {
+    cell_format   = 0b0, ///< Cell Format.
+    bitmap_format = 0b1  ///< Bitmap Format.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  CharacterControlA
 ///
 /// \brief  Character Control (NBG0, NBG1) register (CHCTLA).
@@ -682,6 +756,12 @@ class SpecialFunctionCode : public Register {
 class CharacterControlA : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<CharacterColorNumber2Bits> character_color_number_nbg1{12, 13}; ///< Defines N1CHCNx bits.
+    inline static const BitRange<CharacterColorNumber3bits> character_color_number_nbg0{4, 6};   ///< Defines N0CHCNx bits.
+    inline static const BitRange<BitmapSize2Bits>           bitmap_size_nbg1{10, 11};            ///< Defines N1BMSZx bits.
+    inline static const BitRange<BitmapSize2Bits>           bitmap_size_nbg0{2, 3};              ///< Defines N0BMSZx bits.
+    inline static const BitRange<BitmapEnable>              bitmap_enable_nbg0{1};               ///< Defines N0BMEN bit.
+    inline static const BitRange<BitmapEnable>              bitmap_enable_nbg1{9};               ///< Defines N1BMEN bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -696,6 +776,11 @@ class CharacterControlA : public Register {
 class CharacterControlB : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<CharacterColorNumber3bits> character_color_number_rbg0{12, 14}; ///< Defines R0CHCNx bits.
+    inline static const BitRange<CharacterColorNumber1Bit>  character_color_number_nbg3{5};      ///< Defines N3CHCNx bit.
+    inline static const BitRange<CharacterColorNumber1Bit>  character_color_number_nbg2{1};      ///< Defines N2CHCNx bit.
+    inline static const BitRange<BitmapSize1Bit>            bitmap_size_rbg0{2};                 ///< Defines R0BMSZ bit.
+    inline static const BitRange<BitmapEnable>              bitmap_enable_rbg0{9};               ///< Defines R0BMEN bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
