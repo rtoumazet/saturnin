@@ -745,6 +745,17 @@ enum class BitmapEnable : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CharacterSize
+///
+/// \brief  xxCHSZ bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CharacterSize : u8 {
+    one_by_one = 0b0, ///< 1 H Cell x 1 V Cell.
+    two_by_two = 0b1  ///< 2 H Cells x 2 V Cells.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  CharacterControlA
 ///
 /// \brief  Character Control (NBG0, NBG1) register (CHCTLA).
@@ -762,6 +773,8 @@ class CharacterControlA : public Register {
     inline static const BitRange<BitmapSize2Bits>           bitmap_size_nbg0{2, 3};              ///< Defines N0BMSZx bits.
     inline static const BitRange<BitmapEnable>              bitmap_enable_nbg0{1};               ///< Defines N0BMEN bit.
     inline static const BitRange<BitmapEnable>              bitmap_enable_nbg1{9};               ///< Defines N1BMEN bit.
+    inline static const BitRange<CharacterSize>             character_size_nbg0{0};              ///< Defines N0CHSZ bit.
+    inline static const BitRange<CharacterSize>             character_size_nbg1{8};              ///< Defines N1CHSZ bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -781,6 +794,9 @@ class CharacterControlB : public Register {
     inline static const BitRange<CharacterColorNumber1Bit>  character_color_number_nbg2{1};      ///< Defines N2CHCNx bit.
     inline static const BitRange<BitmapSize1Bit>            bitmap_size_rbg0{2};                 ///< Defines R0BMSZ bit.
     inline static const BitRange<BitmapEnable>              bitmap_enable_rbg0{9};               ///< Defines R0BMEN bit.
+    inline static const BitRange<CharacterSize>             character_size_nbg2{0};              ///< Defines N2CHSZ bit.
+    inline static const BitRange<CharacterSize>             character_size_nbg3{4};              ///< Defines N3CHSZ bit.
+    inline static const BitRange<CharacterSize>             character_size_rbg0{8};              ///< Defines R0CHSZ bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -812,6 +828,29 @@ class BitmapPaletteNumberB : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PatternNameDataSize
+///
+/// \brief  PNCNx / PNCR bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PatternNameDataSize : u8 {
+    two_words = 0b0, ///< 2 Words.
+    one_word  = 0b1  ///< 1 Word.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CharacterNumberSupplementMode
+///
+/// \brief  NxCNSM / R0CNSM bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CharacterNumberSupplementMode : u8 {
+    character_number_10_bits
+    = 0b0, ///< Character number in pattern name data is 10 bits. Flip function can be selected in character units.
+    character_number_12_bits = 0b1 ///< Character number in pattern name data is 12 bits. Flip function cannot be used.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  PatternNameControlNbg0
 ///
 /// \brief  Pattern Name Control (NBG0) register (PNCN0).
@@ -823,6 +862,11 @@ class BitmapPaletteNumberB : public Register {
 class PatternNameControlNbg0 : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines N0PNB bit.
+    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines N0CNSM bit.
+    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines N0SCC bit.
+    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines N0SPLTx bits.
+    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines N0SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -837,6 +881,11 @@ class PatternNameControlNbg0 : public Register {
 class PatternNameControlNbg1 : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines N1PNB bit.
+    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines N1CNSM bit.
+    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines N1SCC bit.
+    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines N1SPLTx bits.
+    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines N1SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -851,6 +900,11 @@ class PatternNameControlNbg1 : public Register {
 class PatternNameControlNbg2 : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines N2PNB bit.
+    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines N2CNSM bit.
+    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines N2SCC bit.
+    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines N2SPLTx bits.
+    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines N2SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -865,6 +919,11 @@ class PatternNameControlNbg2 : public Register {
 class PatternNameControlNbg3 : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines N3PNB bit.
+    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines N3CNSM bit.
+    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines N3SCC bit.
+    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines N3SPLTx bits.
+    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines N3SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -879,6 +938,40 @@ class PatternNameControlNbg3 : public Register {
 class PatternNameControlRbg0 : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines R0PNB bit.
+    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines R0CNSM bit.
+    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines R0SCC bit.
+    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines R0SPLTx bits.
+    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines R0SCNx bits.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PlaneSize
+///
+/// \brief  xxPLSZx bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PlaneSize : u8 {
+    size_1_by_1 = 0b00, ///< 1 H Page x 1 V Page.
+    size_2_by_1 = 0b01, ///< 2 H Page x 1 V Page.
+    invalid     = 0b10, ///< Invalid (Do not set).
+    size_2_by_2 = 0b11  ///< 2 H Page x 2 V Page.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ScreenOverProcess
+///
+/// \brief  RxOVRx bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ScreenOverProcess : u8 {
+    image_is_repeated = 0b00, ///< Outside the display area, the image set in the display area is repeated.
+    character_pattern_is_repeated
+    = 0b01, ///< Outside the display area,the character pattern specified by screen over pattern name register is repeated (Only
+            ///< when the rotation scroll surface is in cell format).
+    scroll_screen_is_transparent = 0b10, ///< Outside the display area, the scroll screen is transparent.
+    force_display_and_make_transparent
+    = 0b11 ///< Set the display area as 0<=X<=512, 0<=Y<=512 regardless of plane or bitmap size and makes that area transparent.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -890,9 +983,17 @@ class PatternNameControlRbg0 : public Register {
 /// \date   23/05/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PlaneSize : public Register {
+class PlaneSizeRegister : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<PlaneSize>         plane_size_nbg0{0, 1};   ///< Defines N0PLSZx bits.
+    inline static const BitRange<PlaneSize>         plane_size_nbg1{2, 3};   ///< Defines N1PLSZx bits.
+    inline static const BitRange<PlaneSize>         plane_size_nbg2{4, 5};   ///< Defines N2PLSZx bits.
+    inline static const BitRange<PlaneSize>         plane_size_nbg3{6, 7};   ///< Defines N3PLSZx bits.
+    inline static const BitRange<PlaneSize>         plane_size_rpa{8, 9};    ///< Defines RAPLSZx bits.
+    inline static const BitRange<PlaneSize>         plane_size_rpb{12, 13};  ///< Defines RBPLSZx bits.
+    inline static const BitRange<ScreenOverProcess> screen_over_rpa{10, 11}; ///< Defines RAOVRx bits.
+    inline static const BitRange<ScreenOverProcess> screen_over_rpb{14, 15}; ///< Defines RBOVRx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -907,6 +1008,10 @@ class PlaneSize : public Register {
 class MapOffsetNbg : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> map_offset_nbg0{0, 2};   ///< Defines N0MPx bits.
+    inline static const BitRange<u8> map_offset_nbg1{4, 6};   ///< Defines N1MPx bits.
+    inline static const BitRange<u8> map_offset_nbg2{8, 10};  ///< Defines N2MPx bits.
+    inline static const BitRange<u8> map_offset_nbg3{12, 14}; ///< Defines N3MPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -921,6 +1026,8 @@ class MapOffsetNbg : public Register {
 class MapOffsetRbg : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> map_offset_rpa{0, 2}; ///< Defines RAMPx bits.
+    inline static const BitRange<u8> map_offset_rpb{4, 6}; ///< Defines RBMPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -935,6 +1042,8 @@ class MapOffsetRbg : public Register {
 class MapNbg0PlaneAB : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines N0MPAx bits.
+    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines N0MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -949,6 +1058,8 @@ class MapNbg0PlaneAB : public Register {
 class MapNbg0PlaneCD : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines N0MPCx bits.
+    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines N0MPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -963,6 +1074,8 @@ class MapNbg0PlaneCD : public Register {
 class MapNbg1PlaneAB : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines N1MPAx bits.
+    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines N1MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -977,6 +1090,8 @@ class MapNbg1PlaneAB : public Register {
 class MapNbg1PlaneCD : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines N1MPCx bits.
+    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines N1MPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -991,6 +1106,8 @@ class MapNbg1PlaneCD : public Register {
 class MapNbg2PlaneAB : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines N2MPAx bits.
+    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines N2MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1005,6 +1122,8 @@ class MapNbg2PlaneAB : public Register {
 class MapNbg2PlaneCD : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines N2MPCx bits.
+    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines N2MPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1019,6 +1138,8 @@ class MapNbg2PlaneCD : public Register {
 class MapNbg3PlaneAB : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines N3MPAx bits.
+    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines N3MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1033,6 +1154,8 @@ class MapNbg3PlaneAB : public Register {
 class MapNbg3PlaneCD : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines N3MPCx bits.
+    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines N3MPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1047,6 +1170,8 @@ class MapNbg3PlaneCD : public Register {
 class MapRotationParameterAPlaneAB : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines RAMPAx bits.
+    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines RAMPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1061,6 +1186,8 @@ class MapRotationParameterAPlaneAB : public Register {
 class MapRotationParameterAPlaneCD : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines RAMPCx bits.
+    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines RAMPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1075,6 +1202,8 @@ class MapRotationParameterAPlaneCD : public Register {
 class MapRotationParameterAPlaneEF : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_e{0, 5};  ///< Defines RAMPEx bits.
+    inline static const BitRange<u8> plane_f{8, 13}; ///< Defines RAMPFx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1089,6 +1218,8 @@ class MapRotationParameterAPlaneEF : public Register {
 class MapRotationParameterAPlaneGH : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_g{0, 5};  ///< Defines RAMPGx bits.
+    inline static const BitRange<u8> plane_h{8, 13}; ///< Defines RAMPHx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1103,6 +1234,8 @@ class MapRotationParameterAPlaneGH : public Register {
 class MapRotationParameterAPlaneIJ : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_i{0, 5};  ///< Defines RAMPIx bits.
+    inline static const BitRange<u8> plane_j{8, 13}; ///< Defines RAMPJx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1117,6 +1250,8 @@ class MapRotationParameterAPlaneIJ : public Register {
 class MapRotationParameterAPlaneKL : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_k{0, 5};  ///< Defines RAMPKx bits.
+    inline static const BitRange<u8> plane_l{8, 13}; ///< Defines RAMPLx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1131,6 +1266,8 @@ class MapRotationParameterAPlaneKL : public Register {
 class MapRotationParameterAPlaneMN : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_m{0, 5};  ///< Defines RAMPMx bits.
+    inline static const BitRange<u8> plane_n{8, 13}; ///< Defines RAMPNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1145,6 +1282,8 @@ class MapRotationParameterAPlaneMN : public Register {
 class MapRotationParameterAPlaneOP : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_o{0, 5};  ///< Defines RAMPOx bits.
+    inline static const BitRange<u8> plane_p{8, 13}; ///< Defines RAMPPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1159,6 +1298,8 @@ class MapRotationParameterAPlaneOP : public Register {
 class MapRotationParameterBPlaneAB : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines RBMPAx bits.
+    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines RBMPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1173,6 +1314,8 @@ class MapRotationParameterBPlaneAB : public Register {
 class MapRotationParameterBPlaneCD : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines RBMPCx bits.
+    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines RBMPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1187,6 +1330,8 @@ class MapRotationParameterBPlaneCD : public Register {
 class MapRotationParameterBPlaneEF : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_e{0, 5};  ///< Defines RBMPEx bits.
+    inline static const BitRange<u8> plane_f{8, 13}; ///< Defines RBMPFx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1201,6 +1346,8 @@ class MapRotationParameterBPlaneEF : public Register {
 class MapRotationParameterBPlaneGH : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_g{0, 5};  ///< Defines RBMPGx bits.
+    inline static const BitRange<u8> plane_h{8, 13}; ///< Defines RBMPHx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1215,6 +1362,8 @@ class MapRotationParameterBPlaneGH : public Register {
 class MapRotationParameterBPlaneIJ : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_i{0, 5};  ///< Defines RBMPIx bits.
+    inline static const BitRange<u8> plane_j{8, 13}; ///< Defines RBMPJx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1229,6 +1378,8 @@ class MapRotationParameterBPlaneIJ : public Register {
 class MapRotationParameterBPlaneKL : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_k{0, 5};  ///< Defines RBMPKx bits.
+    inline static const BitRange<u8> plane_l{8, 13}; ///< Defines RBMPLx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1243,6 +1394,8 @@ class MapRotationParameterBPlaneKL : public Register {
 class MapRotationParameterBPlaneMN : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_m{0, 5};  ///< Defines RBMPMx bits.
+    inline static const BitRange<u8> plane_n{8, 13}; ///< Defines RBMPNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1257,6 +1410,8 @@ class MapRotationParameterBPlaneMN : public Register {
 class MapRotationParameterBPlaneOP : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> plane_o{0, 5};  ///< Defines RBMPOx bits.
+    inline static const BitRange<u8> plane_p{8, 13}; ///< Defines RBMPPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
