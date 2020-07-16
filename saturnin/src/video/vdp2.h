@@ -236,7 +236,7 @@ class Vdp2 {
     TvScreenMode                                    tvmd_;
     ExternalSignalEnable                            exten_;
     ScreenStatus                                    tvstat_;
-    VramSize                                        vrsize_;
+    VramSizeRegister                                vrsize_;
     HCounter                                        hcnt_;
     VCounter                                        vcnt_;
     RamControl                                      ramctl_;

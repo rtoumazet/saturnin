@@ -361,6 +361,17 @@ class ScreenStatus : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TvStandardFlag
+///
+/// \brief  PAL bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class VramSize : u8 {
+    size_4_mbits = 0, ///< 4 Mbit.
+    size_8_mbits = 1  ///< 8 Mbit.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  VramSize
 ///
 /// \brief  VRAM Size register (VRSIZE).
@@ -369,9 +380,11 @@ class ScreenStatus : public Register {
 /// \date   20/05/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VramSize : public Register {
+class VramSizeRegister : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<VramSize> vram_size{15};        ///< Defines VRAMSZ bit.
+    inline static const BitRange<u8>       version_number{0, 3}; ///< Defines VERx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -469,6 +482,26 @@ class RamControl : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   VramAccessCommand
+///
+/// \brief  VRAM access command (VCP0A0x, VCP0A1x, VCP0B0x, VCP0B1x bits).
+////////////////////////////////////////////////////////////////////////////////////////////////////
+enum class VramAccessCommand : u8 {
+    nbg0_pattern_name_read                    = 0b0000,
+    nbg1_pattern_name_read                    = 0b0001,
+    nbg2_pattern_name_read                    = 0b0010,
+    nbg3_pattern_name_read                    = 0b0011,
+    nbg0_character_pattern_data_read          = 0b0100,
+    nbg1_character_pattern_data_read          = 0b0101,
+    nbg2_character_pattern_data_read          = 0b0110,
+    nbg3_character_pattern_data_read          = 0b0111,
+    nbg0_vertical_cell_scroll_table_data_read = 0b1100,
+    nbg1_vertical_cell_scroll_table_data_read = 0b1101,
+    cpu_read_write                            = 0b1110,
+    no_access                                 = 0b1111
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  VramCyclePatternBankA0Lower
 ///
 /// \brief  VRAM Cycle Pattern (Bank A0) lower register (CYCA0L).
@@ -480,6 +513,10 @@ class RamControl : public Register {
 class VramCyclePatternBankA0Lower : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t0{12, 15}; ///< Defines VCP0A0x bits.
+    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t1{8, 11};  ///< Defines VCP1A0x bits.
+    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t2{4, 7};   ///< Defines VCP2A0x bits.
+    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t3{0, 3};   ///< Defines VCP3A0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -494,6 +531,10 @@ class VramCyclePatternBankA0Lower : public Register {
 class VramCyclePatternBankA0Upper : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t4{12, 15}; ///< Defines VCP4A0x bits.
+    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t5{8, 11};  ///< Defines VCP5A0x bits.
+    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t6{4, 7};   ///< Defines VCP6A0x bits.
+    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t7{0, 3};   ///< Defines VCP7A0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -508,6 +549,10 @@ class VramCyclePatternBankA0Upper : public Register {
 class VramCyclePatternBankA1Lower : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t0{12, 15}; ///< Defines VCP0A1x bits.
+    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t1{8, 11};  ///< Defines VCP1A1x bits.
+    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t2{4, 7};   ///< Defines VCP2A1x bits.
+    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t3{0, 3};   ///< Defines VCP3A1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -522,6 +567,10 @@ class VramCyclePatternBankA1Lower : public Register {
 class VramCyclePatternBankA1Upper : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t4{12, 15}; ///< Defines VCP4A1x bits.
+    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t5{8, 11};  ///< Defines VCP5A1x bits.
+    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t6{4, 7};   ///< Defines VCP6A1x bits.
+    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t7{0, 3};   ///< Defines VCP7A1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -536,6 +585,10 @@ class VramCyclePatternBankA1Upper : public Register {
 class VramCyclePatternBankB0Lower : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t0{12, 15}; ///< Defines VCP0B0x bits.
+    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t1{8, 11};  ///< Defines VCP1B0x bits.
+    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t2{4, 7};   ///< Defines VCP2B0x bits.
+    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t3{0, 3};   ///< Defines VCP3B0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -550,6 +603,10 @@ class VramCyclePatternBankB0Lower : public Register {
 class VramCyclePatternBankB0Upper : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t4{12, 15}; ///< Defines VCP4B0x bits.
+    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t5{8, 11};  ///< Defines VCP5B0x bits.
+    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t6{4, 7};   ///< Defines VCP6B0x bits.
+    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t7{0, 3};   ///< Defines VCP7B0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -564,6 +621,10 @@ class VramCyclePatternBankB0Upper : public Register {
 class VramCyclePatternBankB1Lower : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t0{12, 15}; ///< Defines VCP0B1x bits.
+    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t1{8, 11};  ///< Defines VCP1B1x bits.
+    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t2{4, 7};   ///< Defines VCP2B1x bits.
+    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t3{0, 3};   ///< Defines VCP3B1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -578,6 +639,10 @@ class VramCyclePatternBankB1Lower : public Register {
 class VramCyclePatternBankB1Upper : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t4{12, 15}; ///< Defines VCP4B1x bits.
+    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t5{8, 11};  ///< Defines VCP5B1x bits.
+    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t6{4, 7};   ///< Defines VCP6B1x bits.
+    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t7{0, 3};   ///< Defines VCP7B1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -811,6 +876,12 @@ class CharacterControlB : public Register {
 class BitmapPaletteNumberA : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> bitmap_special_priority_nbg0{5};           ///< Defines N0BMPR bit.
+    inline static const BitRange<u8> bitmap_special_priority_nbg1{13};          ///< Defines N1BMPR bit.
+    inline static const BitRange<u8> bitmap_special_color_calculation_nbg0{4};  ///< Defines N0BMCC bit.
+    inline static const BitRange<u8> bitmap_special_color_calculation_nbg1{12}; ///< Defines N1BMCC bit.
+    inline static const BitRange<u8> bitmap_palette_number_nbg0{0, 2};          ///< Defines N0BMPx bit.
+    inline static const BitRange<u8> bitmap_palette_number_nbg1{8, 10};         ///< Defines N1BMPx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -825,6 +896,9 @@ class BitmapPaletteNumberA : public Register {
 class BitmapPaletteNumberB : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<u8> bitmap_special_priority_rbg0{5};          ///< Defines N0BMPR bit.
+    inline static const BitRange<u8> bitmap_special_color_calculation_rbg0{4}; ///< Defines R0BMCC bit.
+    inline static const BitRange<u8> bitmap_palette_number_rbg0{0, 2};         ///< Defines R0BMPx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
