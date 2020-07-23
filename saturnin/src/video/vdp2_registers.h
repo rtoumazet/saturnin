@@ -1769,6 +1769,22 @@ class ScreenScrollValueNbg3Vertical : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ZoomQuarter
+///
+/// \brief  NxZMQT bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ZoomQuarter : u8 { none = 0, up_to_one_quarter = 1 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ZoomHalf
+///
+/// \brief  NxZMHF bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ZoomHalf : u8 { none = 0, up_to_one_half = 1 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  ReductionEnable
 ///
 /// \brief  Reduction Enable (ZMCTL).
@@ -1780,6 +1796,10 @@ class ScreenScrollValueNbg3Vertical : public Register {
 class ReductionEnable : public Register {
   public:
     using Register::Register;
+    inline static const BitRange<ZoomHalf>    zoom_half_nbg0{0};    ///< Defines N0ZMHF bits.
+    inline static const BitRange<ZoomQuarter> zoom_quarter_nbg0{1}; ///< Defines N0ZMQT bits.
+    inline static const BitRange<ZoomHalf>    zoom_half_nbg1{8};    ///< Defines N1ZMHF bits.
+    inline static const BitRange<ZoomQuarter> zoom_quarter_nbg1{9}; ///< Defines N1ZMQT bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

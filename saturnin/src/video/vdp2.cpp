@@ -917,4 +917,78 @@ void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& 
     cycles_per_hactive_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
     cycles_per_line_    = cycles_per_hactive_ + cycles_per_hblank_;
 }
+
+auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
+    u8 pattern_data_reads_required{};
+    u8 character_pattern_data_reads_required{};
+    u8 bitmap_pattern_data_reads_required{};
+
+    // First check to ensure scroll screen must be displayed. If the screen cannot display, no vram access will be performed.
+    switch (s) {
+        case ScrollScreen::nbg0:
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display)
+                return false;
+
+            // Pattern name data reads depend on the reduction setting of the screen
+            pattern_data_reads_required = 1;
+            if (zmctl_.get(ReductionEnable::zoom_quarter_nbg0) == ZoomQuarter::up_to_one_quarter) {
+                pattern_data_reads_required = 4;
+            } else {
+                if (zmctl_.get(ReductionEnable::zoom_half_nbg0) == ZoomHalf::up_to_one_half) { pattern_data_reads_required = 2; }
+            }
+
+            // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
+            if (chctla_.get(CharacterControlA::bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
+                // Needs only bitmap pattern data.
+                bitmap_pattern_data_reads_required;
+                switch (chctla_.get(CharacterControlA::character_color_number_nbg0)) {
+                    case CharacterColorNumber3bits::palette_16: break;
+                    case CharacterColorNumber3bits::palette_256: break;
+                    case CharacterColorNumber3bits::palette_2048: break;
+                    case CharacterColorNumber3bits::rgb_32k: break;
+                    case CharacterColorNumber3bits::rgb_16m: break;
+                }
+            } else {
+                // Needs character pattern data and pattern name data.
+                character_pattern_data_reads_required;
+
+                // Character pattern data
+            }
+
+            break;
+        case ScrollScreen::nbg1:
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg1) == ScreenDisplayEnableBit::cannot_display)
+                return false;
+            break;
+        case ScrollScreen::nbg2:
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg2) == ScreenDisplayEnableBit::cannot_display)
+                return false;
+            break;
+        case ScrollScreen::nbg3:
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg3) == ScreenDisplayEnableBit::cannot_display)
+                return false;
+            break;
+        case ScrollScreen::rbg0:
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display)
+                return false;
+            break;
+        case ScrollScreen::rbg1:
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display)
+                return false;
+            break;
+    }
+
+    if (ramctl_.get(RamControl::vram_a_mode_) == VramMode::no_partition) {}
+    if (ramctl_.get(RamControl::vram_b_mode_) == VramMode::no_partition) {}
+
+    // 8 timings (T0 to T7) are available for each bank in normal mode during 1 display cycle, only 4 (T0 to T3) in hires
+    // or exclusive monitor mode.
+
+    // Pattern name data read during 1 cycle can access 2 banks max, one being A0 or B0, the other being A1 or B1.
+
+    // ReductionEnable zmctl_
+
+    return false;
+}
+
 } // namespace saturnin::video

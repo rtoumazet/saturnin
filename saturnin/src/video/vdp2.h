@@ -67,6 +67,27 @@ enum class TvStandard : s8 {
     ntsc    = 1   ///< NTSC.
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ScrollScreen
+///
+/// \brief  Scroll screens.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ScrollScreen { nbg0, nbg1, nbg2, nbg3, rbg0, rbg1 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ColorCount
+///
+/// \brief  Number of colors.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+enum class ColorCount {
+    colors_16,   ///< 16 colors
+    colors_256,  ///< 256 colors
+    colors_2048, ///< 2048 colors
+    colors_32k,  ///< 32768 colors
+    colors_16m   ///< 16770000 colors
+};
+
 class Vdp2 {
   public:
     //@{
@@ -210,6 +231,8 @@ class Vdp2 {
     void addToRegisterNameMap(u32 addr, const std::string& name);
 
     void calculateLineDuration(const micro& total_line_duration, const micro& hblank_duration);
+
+    auto isScreenDisplayed(ScrollScreen s) -> bool;
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
 
@@ -377,6 +400,6 @@ class Vdp2 {
     ColorOffsetBRed                                 cobr_;
     ColorOffsetBGreen                               cobg_;
     ColorOffsetBBlue                                cobb_;
-};
+}; // namespace saturnin::video
 
 } // namespace saturnin::video
