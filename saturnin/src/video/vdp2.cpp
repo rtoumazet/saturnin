@@ -926,15 +926,21 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // First check to ensure scroll screen must be displayed. If the screen cannot display, no vram access will be performed.
     switch (s) {
         case ScrollScreen::nbg0:
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display)
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
+            }
 
             // Pattern name data reads depend on the reduction setting of the screen
             pattern_data_reads_required = 1;
+            u8 reduction                = 1;
             if (zmctl_.get(ReductionEnable::zoom_quarter_nbg0) == ZoomQuarter::up_to_one_quarter) {
+                reduction                   = 4;
                 pattern_data_reads_required = 4;
             } else {
-                if (zmctl_.get(ReductionEnable::zoom_half_nbg0) == ZoomHalf::up_to_one_half) { pattern_data_reads_required = 2; }
+                if (zmctl_.get(ReductionEnable::zoom_half_nbg0) == ZoomHalf::up_to_one_half) {
+                    reduction                   = 2;
+                    pattern_data_reads_required = 2;
+                }
             }
 
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
