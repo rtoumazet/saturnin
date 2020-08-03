@@ -919,26 +919,27 @@ void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& 
 }
 
 auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
-    u8 pattern_data_reads_required{};
-    u8 character_pattern_data_reads_required{};
-    u8 bitmap_pattern_data_reads_required{};
+    u8               pattern_data_reads_required{};
+    u8               character_pattern_data_reads_required{};
+    u8               bitmap_pattern_data_reads_required{};
+    ReductionSetting reduction{ReductionSetting::none};
 
     // First check to ensure scroll screen must be displayed. If the screen cannot display, no vram access will be performed.
     switch (s) {
-        case ScrollScreen::nbg0:
+        case ScrollScreen::nbg0: {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
 
             // Pattern name data reads depend on the reduction setting of the screen
             pattern_data_reads_required = 1;
-            u8 reduction                = 1;
+
             if (zmctl_.get(ReductionEnable::zoom_quarter_nbg0) == ZoomQuarter::up_to_one_quarter) {
-                reduction                   = 4;
+                reduction                   = ReductionSetting::up_to_one_quarter;
                 pattern_data_reads_required = 4;
             } else {
                 if (zmctl_.get(ReductionEnable::zoom_half_nbg0) == ZoomHalf::up_to_one_half) {
-                    reduction                   = 2;
+                    reduction                   = ReductionSetting::up_to_one_half;
                     pattern_data_reads_required = 2;
                 }
             }
@@ -948,12 +949,19 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
                 // Needs only bitmap pattern data.
                 bitmap_pattern_data_reads_required;
                 switch (chctla_.get(CharacterControlA::character_color_number_nbg0)) {
-                    case CharacterColorNumber3bits::palette_16: break;
+                    case CharacterColorNumber3bits::palette_16:
+                        switch (reduction) {
+                            case ReductionSetting::none: bitmap_pattern_data_reads_required = 1; break;
+                            case ReductionSetting::up_to_one_half: bitmap_pattern_data_reads_required = 2; break;
+                            case ReductionSetting::up_to_one_quarter: bitmap_pattern_data_reads_required = 4; break;
+                        }
+                        break;
                     case CharacterColorNumber3bits::palette_256: break;
                     case CharacterColorNumber3bits::palette_2048: break;
                     case CharacterColorNumber3bits::rgb_32k: break;
                     case CharacterColorNumber3bits::rgb_16m: break;
                 }
+
             } else {
                 // Needs character pattern data and pattern name data.
                 character_pattern_data_reads_required;
@@ -962,6 +970,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             }
 
             break;
+        }
         case ScrollScreen::nbg1:
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg1) == ScreenDisplayEnableBit::cannot_display)
                 return false;
