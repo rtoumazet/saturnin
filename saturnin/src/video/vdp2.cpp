@@ -919,8 +919,8 @@ void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& 
 }
 
 auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
-    u8               pattern_data_reads_required{};
-    u8               character_pattern_data_reads_required{};
+    u8               required_pattern_data_reads{};
+    u8               required_character_pattern_data_reads{};
     u8               bitmap_pattern_data_reads_required{};
     ReductionSetting reduction{ReductionSetting::none};
 
@@ -932,15 +932,15 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             }
 
             // Pattern name data reads depend on the reduction setting of the screen
-            pattern_data_reads_required = 1;
+            required_pattern_data_reads = 1;
 
             if (zmctl_.get(ReductionEnable::zoom_quarter_nbg0) == ZoomQuarter::up_to_one_quarter) {
                 reduction                   = ReductionSetting::up_to_one_quarter;
-                pattern_data_reads_required = 4;
+                required_pattern_data_reads = 4;
             } else {
                 if (zmctl_.get(ReductionEnable::zoom_half_nbg0) == ZoomHalf::up_to_one_half) {
                     reduction                   = ReductionSetting::up_to_one_half;
-                    pattern_data_reads_required = 2;
+                    required_pattern_data_reads = 2;
                 }
             }
 
@@ -964,7 +964,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 
             } else {
                 // Needs character pattern data and pattern name data.
-                character_pattern_data_reads_required;
+                required_character_pattern_data_reads;
 
                 // Character pattern data
             }
