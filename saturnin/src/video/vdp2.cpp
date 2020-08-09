@@ -42,6 +42,7 @@ void Vdp2::initialize() {
     switch (Config::tv_standard[ts]) {
         case video::TvStandard::pal: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard); break;
         case video::TvStandard::ntsc: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard); break;
+        default: Log::warning("vdp2", tr("Unknown TV standard"));
     }
     calculateDisplayDuration();
 }
