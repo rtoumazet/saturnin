@@ -55,6 +55,12 @@ using micro   = std::chrono::duration<double, std::micro>;
 //     - 224 or 240 active lines
 //     - 39 or 23 corresponding blanking lines
 
+constexpr u8 vram_access_none = 0xff;
+constexpr u8 vram_access_1    = 1;
+constexpr u8 vram_access_2    = 2;
+constexpr u8 vram_access_4    = 4;
+constexpr u8 vram_access_8    = 8;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   TvStandard
 ///
@@ -410,4 +416,19 @@ class Vdp2 {
     ColorOffsetBBlue                                cobb_;
 }; // namespace saturnin::video
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto calculateVramCharacterPatternReadAccessNumber(ReductionSetting r, CharacterColorNumber3bits ccn) -> u8;
+///
+/// \brief  Calculates the VRAM character/bitmap pattern read access number
+///
+/// \author Runik
+/// \date   10/08/2020
+///
+/// \param  r   The reduction setting.
+/// \param  ccn The character color number.
+///
+/// \returns    The calculated VRAM character pattern read access number.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto calculateVramCharacterPatternReadAccessNumber(ReductionSetting r, CharacterColorNumber3bits ccn) -> u8;
 } // namespace saturnin::video

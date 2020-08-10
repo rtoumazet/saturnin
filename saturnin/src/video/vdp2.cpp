@@ -920,9 +920,9 @@ void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& 
 }
 
 auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
-    u8               required_pattern_data_reads{};
+    u8               required_pattern_name_data_reads{};
     u8               required_character_pattern_data_reads{};
-    u8               bitmap_pattern_data_reads_required{};
+    u8               required_bitmap_pattern_data_reads{};
     ReductionSetting reduction{ReductionSetting::none};
 
     // First check to ensure scroll screen must be displayed. If the screen cannot display, no vram access will be performed.
@@ -933,35 +933,23 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             }
 
             // Pattern name data reads depend on the reduction setting of the screen
-            required_pattern_data_reads = 1;
+            required_pattern_name_data_reads = 1;
 
             if (zmctl_.get(ReductionEnable::zoom_quarter_nbg0) == ZoomQuarter::up_to_one_quarter) {
-                reduction                   = ReductionSetting::up_to_one_quarter;
-                required_pattern_data_reads = 4;
+                reduction                        = ReductionSetting::up_to_one_quarter;
+                required_pattern_name_data_reads = 4;
             } else {
                 if (zmctl_.get(ReductionEnable::zoom_half_nbg0) == ZoomHalf::up_to_one_half) {
-                    reduction                   = ReductionSetting::up_to_one_half;
-                    required_pattern_data_reads = 2;
+                    reduction                        = ReductionSetting::up_to_one_half;
+                    required_pattern_name_data_reads = 2;
                 }
             }
 
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
             if (chctla_.get(CharacterControlA::bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
                 // Needs only bitmap pattern data.
-                bitmap_pattern_data_reads_required;
-                switch (chctla_.get(CharacterControlA::character_color_number_nbg0)) {
-                    case CharacterColorNumber3bits::palette_16:
-                        switch (reduction) {
-                            case ReductionSetting::none: bitmap_pattern_data_reads_required = 1; break;
-                            case ReductionSetting::up_to_one_half: bitmap_pattern_data_reads_required = 2; break;
-                            case ReductionSetting::up_to_one_quarter: bitmap_pattern_data_reads_required = 4; break;
-                        }
-                        break;
-                    case CharacterColorNumber3bits::palette_256: break;
-                    case CharacterColorNumber3bits::palette_2048: break;
-                    case CharacterColorNumber3bits::rgb_32k: break;
-                    case CharacterColorNumber3bits::rgb_16m: break;
-                }
+                CharacterColorNumber3bits ccn      = chctla_.get(CharacterControlA::character_color_number_nbg0);
+                required_bitmap_pattern_data_reads = calculateVramCharacterPatternReadAccessNumber(reduction, ccn);
 
             } else {
                 // Needs character pattern data and pattern name data.
@@ -1005,6 +993,45 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // ReductionEnable zmctl_
 
     return false;
+}
+
+auto calculateVramCharacterPatternReadAccessNumber(ReductionSetting r, CharacterColorNumber3bits ccn) -> u8 {
+    switch (ccn) {
+        case CharacterColorNumber3bits::palette_16:
+            switch (r) {
+                case ReductionSetting::none: return vram_access_1;
+                case ReductionSetting::up_to_one_half: return vram_access_2;
+                case ReductionSetting::up_to_one_quarter: return vram_access_4;
+            }
+            break;
+        case CharacterColorNumber3bits::palette_256:
+            switch (r) {
+                case ReductionSetting::none: return vram_access_2;
+                case ReductionSetting::up_to_one_half: return vram_access_4;
+                default: return vram_access_none;
+            }
+            break;
+        case CharacterColorNumber3bits::palette_2048:
+            switch (r) {
+                case ReductionSetting::none: return vram_access_4;
+                default: return vram_access_none;
+            }
+            break;
+        case CharacterColorNumber3bits::rgb_32k:
+            switch (r) {
+                case ReductionSetting::none: return vram_access_4;
+                default: return vram_access_none;
+            }
+            break;
+        case CharacterColorNumber3bits::rgb_16m:
+            switch (r) {
+                case ReductionSetting::none: return vram_access_8;
+                default: return vram_access_none;
+            }
+            break;
+    }
+
+    return vram_access_none;
 }
 
 } // namespace saturnin::video
