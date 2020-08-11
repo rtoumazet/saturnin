@@ -269,6 +269,13 @@ class Vdp2 {
     u16 timer_0_counter_{}; ///< Timer 0 counter.
     u16 timer_1_counter_{}; ///< Timer 1 counter.
 
+    using VramTiming = std::array<bool, 8>;
+
+    VramTiming a0_{false, false, false, false, false, false, false, false};
+    VramTiming a1_{false, false, false, false, false, false, false, false};
+    VramTiming b0_{false, false, false, false, false, false, false, false};
+    VramTiming b1_{false, false, false, false, false, false, false, false};
+
     // VDP2 registers
     TvScreenMode                                    tvmd_;
     ExternalSignalEnable                            exten_;
@@ -431,4 +438,35 @@ class Vdp2 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto calculateVramCharacterPatternReadAccessNumber(ReductionSetting r, CharacterColorNumber3bits ccn) -> u8;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto calculateVramPatternNameReadAccessNumber(ReductionSetting r) -> u8;
+///
+/// \brief  Calculates the VRAM pattern name read access number.
+///
+/// \author Runik
+/// \date   11/08/2020
+///
+/// \param  r   Reduction setting of the plane.
+///
+/// \returns    The calculated VRAM pattern name read access number.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto calculateVramPatternNameReadAccessNumber(ReductionSetting r) -> u8;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
+///
+/// \brief  Returns the reduction setting for the specified parameters
+///
+/// \author Runik
+/// \date   11/08/2020
+///
+/// \param  zq  Zoom quarter reduction setting of the plane.
+/// \param  zh  Zoom half reduction setting of the plane.
+///
+/// \returns    The reduction setting.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
 } // namespace saturnin::video

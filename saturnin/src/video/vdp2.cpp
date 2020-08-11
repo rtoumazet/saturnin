@@ -932,28 +932,30 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
                 return false;
             }
 
-            // Pattern name data reads depend on the reduction setting of the screen
-            required_pattern_name_data_reads = 1;
+            // For normal scroll screens (NBG0 to NBG3) :
+            // - in cell display format, required image data is pattern name data and character pattern data
+            // - in bitmap format, required image data is bitmap pattern data (same as character pattern data)
+            //
+            // Pattern name data read access during 1 cycle must be set to a maximum of 2 banks, one being either VRAM-A0 or
+            // VRAM-B0, the other being VRAM-A1 or VRAM-B1.
+            // When the VRAM is not divided in 2 partitions, VRAM-A0 is used as VRAM-A and VRAM-B0 as VRAM-B.
+            //
 
-            if (zmctl_.get(ReductionEnable::zoom_quarter_nbg0) == ZoomQuarter::up_to_one_quarter) {
-                reduction                        = ReductionSetting::up_to_one_quarter;
-                required_pattern_name_data_reads = 4;
-            } else {
-                if (zmctl_.get(ReductionEnable::zoom_half_nbg0) == ZoomHalf::up_to_one_half) {
-                    reduction                        = ReductionSetting::up_to_one_half;
-                    required_pattern_name_data_reads = 2;
-                }
-            }
+            // Pattern name data reads depend on the reduction setting of the screen
+            reduction = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg0),
+                                            zmctl_.get(ReductionEnable::zoom_half_nbg0));
+
+            required_pattern_name_data_reads = calculateVramPatternNameReadAccessNumber(reduction);
 
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
             if (chctla_.get(CharacterControlA::bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
                 // Needs only bitmap pattern data.
                 CharacterColorNumber3bits ccn      = chctla_.get(CharacterControlA::character_color_number_nbg0);
                 required_bitmap_pattern_data_reads = calculateVramCharacterPatternReadAccessNumber(reduction, ccn);
-
             } else {
                 // Needs character pattern data and pattern name data.
-                required_character_pattern_data_reads;
+                CharacterColorNumber3bits ccn         = chctla_.get(CharacterControlA::character_color_number_nbg0);
+                required_character_pattern_data_reads = calculateVramCharacterPatternReadAccessNumber(reduction, ccn);
 
                 // Character pattern data
             }
@@ -994,6 +996,25 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 
     return false;
 }
+
+auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
+    ReductionSetting r{ReductionSetting::none};
+    if (zq == ZoomQuarter::up_to_one_quarter) {
+        r = ReductionSetting::up_to_one_quarter;
+    } else {
+        if (zh == ZoomHalf::up_to_one_half) { r = ReductionSetting::up_to_one_half; }
+    }
+
+    return r;
+};
+
+auto calculateVramPatternNameReadAccessNumber(ReductionSetting r) -> u8 {
+    switch (r) {
+        case ReductionSetting::up_to_one_quarter: return vram_access_4;
+        case ReductionSetting::up_to_one_half: return vram_access_2;
+        default: return vram_access_1;
+    }
+};
 
 auto calculateVramCharacterPatternReadAccessNumber(ReductionSetting r, CharacterColorNumber3bits ccn) -> u8 {
     switch (ccn) {
