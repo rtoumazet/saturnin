@@ -936,9 +936,17 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             // - in cell display format, required image data is pattern name data and character pattern data
             // - in bitmap format, required image data is bitmap pattern data (same as character pattern data)
             //
-            // Pattern name data read access during 1 cycle must be set to a maximum of 2 banks, one being either VRAM-A0 or
+            // Pattern name data (PND) read access during 1 cycle must be set to a maximum of 2 banks, one being either VRAM-A0 or
             // VRAM-B0, the other being VRAM-A1 or VRAM-B1.
             // When the VRAM is not divided in 2 partitions, VRAM-A0 is used as VRAM-A and VRAM-B0 as VRAM-B.
+            // Selectable timing in normal mode, :
+            // - TO-T7 in bank VRAM-A0 or VRAM-B0, TO-T7 in bank VRAM-A1 or VRAM-B1 (case where both banks are splitted)
+            // - TO-T7 in bank VRAM-A or VRAM-B (case where no bank is splitted)
+            // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
+            //
+            // Character Pattern data (CPD) read access during 1 cycle
+            // PND access in T0 for NBG0 or NBG1 -> CPD can select any timing without limits, access number must be the same as
+            // the conditions.
             //
 
             // Pattern name data reads depend on the reduction setting of the screen
