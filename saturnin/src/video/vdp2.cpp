@@ -945,9 +945,13 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
             //
             // Character Pattern data (CPD) read access during 1 cycle
-            // PND access in T0 for NBG0 or NBG1 -> CPD can select any timing without limits, access number must be the same as
+            // - PND access in T0 for NBG0 or NBG1 -> CPD can select any timing without limits, access number must be the same as
             // the conditions.
-            //
+            // - When reduction setting is 1, all CPD read access must observe selection limits if CPD read access is 2 or
+            // greater.
+            // - When reduction setting is 1/2 or 1/4, the required access number when the reduction setting is 1 (one time for 16
+            // colors and two times for 256) must observe selection limits through one time PND read access.
+            // -
 
             // Pattern name data reads depend on the reduction setting of the screen
             reduction = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg0),
