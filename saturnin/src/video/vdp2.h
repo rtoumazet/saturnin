@@ -246,7 +246,31 @@ class Vdp2 {
 
     void calculateLineDuration(const micro& total_line_duration, const micro& hblank_duration);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool;
+    ///
+    /// \brief  Query if scroll screen 's' is displayed.
+    ///
+    /// \author Runik
+    /// \date   21/08/2020
+    ///
+    /// \param  s   A ScrollScreen to process.
+    ///
+    /// \returns    True if the scroll screen is displayed.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     auto isScreenDisplayed(ScrollScreen s) -> bool;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::setVramTimingLimitations();
+    ///
+    /// \brief  Sets VRAM timing limitations.
+    ///
+    /// \author Runik
+    /// \date   21/08/2020
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void setVramTimingLimitations();
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
 

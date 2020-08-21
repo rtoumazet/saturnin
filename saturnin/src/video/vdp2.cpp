@@ -957,8 +957,6 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             reduction = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg0),
                                             zmctl_.get(ReductionEnable::zoom_half_nbg0));
 
-            required_pattern_name_data_reads = calculateVramPatternNameReadAccessNumber(reduction);
-
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
             if (chctla_.get(CharacterControlA::bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
                 // Needs only bitmap pattern data.
@@ -966,10 +964,9 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
                 required_bitmap_pattern_data_reads = calculateVramCharacterPatternReadAccessNumber(reduction, ccn);
             } else {
                 // Needs character pattern data and pattern name data.
+                required_pattern_name_data_reads      = calculateVramPatternNameReadAccessNumber(reduction);
                 CharacterColorNumber3bits ccn         = chctla_.get(CharacterControlA::character_color_number_nbg0);
                 required_character_pattern_data_reads = calculateVramCharacterPatternReadAccessNumber(reduction, ccn);
-
-                // Character pattern data
             }
 
             break;
@@ -1008,6 +1005,8 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 
     return false;
 }
+
+void Vdp2::setVramTimingLimitations() {}
 
 auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
     ReductionSetting r{ReductionSetting::none};
