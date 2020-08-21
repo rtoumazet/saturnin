@@ -35,7 +35,7 @@ Saturnin is a Sega Saturn emulator
 
 ### Contribution guidelines ###
 
-* [Saturnin Style Guide](https://bitbucket.org/Runik/saturnin-vs2017/wiki/Saturnin%20Style%20Guide)
+* [Saturnin Style Guide](wiki/saturnin%20style%20guide.md)
 * Code review
 * Other guidelines
 
