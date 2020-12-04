@@ -497,6 +497,24 @@ Ordinarily, functions should use "camel case". Such names should not have unders
         deleteUrl()
         openFileOrDie()
 
+* **Almost Always Auto:**
+use _auto_ whenever you can.  
+
+        #!C++
+        auto val = getValue(); // type deduction
+        auto s = std::string{"a string"}; // auto to stick : s is sure to be a std::string and not a const char *
+        auto getValue() -> int; // function declaration
+        
+
+* **Auto and const:**
+place _auto_ and  _const_ at the left most part of a declaration.  
+When both are present, start with _auto_.
+        
+        #!C++
+        auto i = int{0};
+        auto const j = 25.f;
+
+
 ---------------
 
 ## Namespaces
