@@ -4,7 +4,7 @@ Loosely based on [Google C++ Style Guide](https://google.github.io/styleguide/cp
 
 
 - [General](#markdown-header-general)
-- [Interfaces](#markdown-header-interfaces)
+- [Interfaces](#interfaces)
 - [Functions](#markdown-header-functions)
 - [Classes and classes hierarchies](#markdown-header-classes-and-classes-hierarchies)
 - [Enumerations](#markdown-header-classes-and-classes-enumerations)
