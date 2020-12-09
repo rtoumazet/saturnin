@@ -507,12 +507,12 @@ use _auto_ whenever you can.
         
 
 * **Auto and const:**
-place _auto_ and  _const_ at the left most part of a declaration.  
-When both are present, start with _auto_.
+place _auto_ and  _const_ / _constexpr_ at the left most part of a declaration.  
+When both are present, start with _const_ / _constexpr_.
         
         #!C++
         auto i = int{0};
-        auto const j = 25.f;
+        const auto j = 25.f;
 
 
 ---------------
