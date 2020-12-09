@@ -30,6 +30,7 @@
 #include "../log.h"
 //#include "../smpc.h"
 #include "../interrupt_sources.h"
+#include "../locale.h"
 
 using namespace gl21;
 using namespace gl21ext;

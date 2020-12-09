@@ -41,6 +41,8 @@ auto Locale::initialize(const std::string& country = "") -> bool { // NOLINT(rea
     return true;
 }
 
-auto tr(const std::string& str) -> std::string { return Locale::getInstance().catalog()->gettext_str(str); }
+// auto tr(const std::string& str) -> std::string { return Locale::getInstance().catalog()->gettext_str(str); }
+
+auto tr(const std::string& str) -> const char* { return Locale::getInstance().catalog()->gettext(str.c_str()); }
 
 }; // namespace saturnin::core

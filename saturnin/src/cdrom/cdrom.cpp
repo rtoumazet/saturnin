@@ -24,6 +24,7 @@
 
 #include "cdrom.h"
 #include "../emulator_context.h"
+#include "../locale.h"
 #include "../log.h"
 #include "../smpc.h"
 //#include "../memory.h"

@@ -76,7 +76,7 @@ auto Memory::loadRom(const std::string& zip_name,
     // rom_path += "\\" + zip_name + ".zip";
 
     lzpp::ZipArchive zf(rom_path.string());
-    if (zf.open(lzpp::ZipArchive::READ_ONLY)) {
+    if (zf.open(lzpp::ZipArchive::ReadOnly)) {
         if (zf.hasEntry(file_name, false, false)) {
             lzpp::ZipEntry        entry = zf.getEntry(file_name, false, false);
             std::unique_ptr<u8[]> data(static_cast<u8*>(entry.readAsBinary()));

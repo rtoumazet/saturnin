@@ -21,6 +21,7 @@
 #include "scu.h"
 #include "scu_registers.h"
 #include "emulator_context.h"
+#include "locale.h"
 #include "memory.h"
 #include "interrupt_sources.h"
 #include "sh2.h"

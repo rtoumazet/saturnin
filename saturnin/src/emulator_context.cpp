@@ -30,6 +30,7 @@
 #include "video/vdp2.h"
 #include "config.h"
 #include "emulator_context.h"
+#include "locale.h"
 #include "log.h"
 #include "memory.h"
 #include "scu_registers.h"

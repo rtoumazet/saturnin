@@ -64,7 +64,7 @@ auto Spti::scanBus() -> std::vector<ScsiDriveInfo> {
     unselected.path   = -1;
     unselected.target = -1;
     unselected.lun    = -1;
-    unselected.name   = core::tr("Not selected");
+    unselected.name   = tr("Not selected");
     drives.push_back(unselected);
 
     for (path[0] = 'C'; path[0] <= 'Z'; ++path[0]) {

@@ -110,6 +110,8 @@ class Locale {
 /// \return The translated string.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto tr(const std::string& str) -> std::string;
+// auto tr(const std::string& str) -> std::string;
+
+auto tr(const std::string& str) -> const char*;
 
 }; // namespace saturnin::core

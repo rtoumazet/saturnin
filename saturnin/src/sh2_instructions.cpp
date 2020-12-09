@@ -22,6 +22,7 @@
 #include "emulator_context.h"
 #include "emulator_defs.h"
 #include "interrupt_sources.h"
+#include "locale.h"
 #include "memory.h"
 #include "scu.h"
 

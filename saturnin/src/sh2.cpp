@@ -24,6 +24,7 @@
 #include "scu.h"
 #include "sh2_instructions.h"
 #include "utilities.h"
+#include "locale.h"
 
 namespace is = saturnin::core::interrupt_source;
 

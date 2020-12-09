@@ -34,6 +34,7 @@
 #include "../../lib/imgui/imgui_impl_opengl3.h"
 #include "../emulator_context.h"
 #include "../log.h"
+#include "../locale.h"
 
 using namespace gl;
 
