@@ -204,7 +204,7 @@ auto Aspi::readSector(const uint32_t& dwFAD, const int32_t& iNb) -> std::string 
 
     // string str_return(v.begin(), v.end());
     // return str_return; // returning the string
-    std::string str{};
+    auto str = std::string{};
 
     return str;
 }

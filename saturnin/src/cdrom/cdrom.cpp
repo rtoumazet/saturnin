@@ -41,9 +41,9 @@ CdromAccessMethod Cdrom::access_method = CdromAccessMethod::spti;
 
 // ScsiDriveInfo	    Cdrom::di_list[scsi_max_drives];
 std::vector<ScsiDriveInfo> Cdrom::di_list;
-int8_t                     Cdrom::scsi_path   = -1;
-int8_t                     Cdrom::scsi_target = -1;
-int8_t                     Cdrom::scsi_lun    = -1;
+s8                         Cdrom::scsi_path   = -1;
+s8                         Cdrom::scsi_target = -1;
+s8                         Cdrom::scsi_lun    = -1;
 wchar_t                    Cdrom::scsi_letter = 0;
 
 ScsiToc Cdrom::toc_data;
@@ -52,7 +52,7 @@ std::vector<std::string> Cdrom::scsi_drives_list = {};
 
 /* static */
 auto Cdrom::getDriveIndice(const s8 path, const s8 target, const s8 lun) -> u8 {
-    auto it = std::find_if(di_list.begin(), di_list.end(), [path, target, lun](const ScsiDriveInfo& di) {
+    const auto it = std::find_if(di_list.begin(), di_list.end(), [path, target, lun](const ScsiDriveInfo& di) {
         return (di.path == path) && (di.target == target) && (di.lun == lun);
     });
     return static_cast<u8>(it - di_list.begin()); // returns the indice
@@ -2246,13 +2246,13 @@ void Cdrom::reset() {
 
     hirq_mask_reg_.set();
 
-    constexpr u8 cr1_default{'C'};
+    constexpr auto cr1_default = u8{'C'};
     cr1_.set(CommandRegister::lower_8_bits, cr1_default);
-    constexpr u16 cr2_default{'DB'};
+    constexpr auto cr2_default = u16{'DB'};
     cr2_.set(CommandRegister::all_bits, cr2_default);
-    constexpr u16 cr3_default{'LO'};
+    constexpr auto cr3_default = u16{'LO'};
     cr3_.set(CommandRegister::all_bits, cr3_default);
-    constexpr u16 cr4_default{'CK'};
+    constexpr auto cr4_default = u16{'CK'};
     cr4_.set(CommandRegister::all_bits, cr4_default);
 
     cd_drive_status_    = CdDriveStatus::no_disc_inserted;

@@ -33,11 +33,11 @@
 
 namespace saturnin::cdrom {
 
-constexpr u8 scsi_max_drives     = 10;  ///< Maximum number of drives checked on the host system.
-constexpr u8 scsi_max_toc_tracks = 100; ///< Maximum number of tracks saved in the TOC
+constexpr auto scsi_max_drives     = u8{10};  ///< Maximum number of drives checked on the host system.
+constexpr auto scsi_max_toc_tracks = u8{100}; ///< Maximum number of tracks saved in the TOC
 
 // SCSI COMMANDS
-constexpr u8 scsi_inquiry = 0x12; ///< Inquiry (MANDATORY)
+constexpr auto scsi_inquiry = u8{0x12}; ///< Inquiry (MANDATORY)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	ScsiDriveInfo

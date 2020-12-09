@@ -29,7 +29,7 @@
 
 namespace saturnin::cdrom {
 
-const uint8_t spti_timeout = 5; // in seconds
+constexpr auto spti_timeout = uint8_t{5}; // in seconds
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class	Spti

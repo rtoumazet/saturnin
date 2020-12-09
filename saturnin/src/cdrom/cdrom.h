@@ -70,43 +70,43 @@ enum class CdDriveStatus : u8 {
 
 /// \name Local memory registers
 //@{
-const u32 LOCAL_HIRQReg        = 0x90008; ///< HIrq Register.
-const u32 LOCAL_HIRQMaskReg    = 0x9000C; ///< HIrq Mask Register.
-const u32 LOCAL_CR1            = 0x90018; ///< Command Reg 1.
-const u32 LOCAL_CR2            = 0x9001C; ///< Command Reg 2.
-const u32 LOCAL_CR3            = 0x90020; ///< Command Reg 3.
-const u32 LOCAL_CR4            = 0x90024; ///< Command Reg 4.
-const u32 LOCAL_TOC_DATA_PTR   = 0x98000; ///< TOC data pointer.
-const u32 LOCAL_FETCH_DATA_PTR = 0x18000; ///< Fetch data pointer.
+constexpr auto LOCAL_HIRQReg        = u32{0x90008}; ///< HIrq Register.
+constexpr auto LOCAL_HIRQMaskReg    = u32{0x9000C}; ///< HIrq Mask Register.
+constexpr auto LOCAL_CR1            = u32{0x90018}; ///< Command Reg 1.
+constexpr auto LOCAL_CR2            = u32{0x9001C}; ///< Command Reg 2.
+constexpr auto LOCAL_CR3            = u32{0x90020}; ///< Command Reg 3.
+constexpr auto LOCAL_CR4            = u32{0x90024}; ///< Command Reg 4.
+constexpr auto LOCAL_TOC_DATA_PTR   = u32{0x98000}; ///< TOC data pointer.
+constexpr auto LOCAL_FETCH_DATA_PTR = u32{0x18000}; ///< Fetch data pointer.
 //@}
 
 /// \name Status flags
 //@{
-const u16 CMOK = 0x0001; ///< System ready for a new command / System processing the last command.
-const u16 DRDY = 0x0002; ///< Data transfer setup (complete/not setup).
-const u16 CSCT = 0x0004; ///< Sector status (stored / discarded).
-const u16 BFUL = 0x0008; ///< CD buffer status (full / not full).
-const u16 PEND = 0x0010; ///< CD play status.
-const u16 DCHG = 0x0020; ///< Disk change status (changed/not changed).
-const u16 ESEL = 0x0040; ///< Soft reset or selector status (finished or not).
-const u16 EHST = 0x0080; ///< Host I/O status (finished or not).
-const u16 ECPY = 0x0100; ///< Sector copy or move status (finished or not).
-const u16 EFLS = 0x0200; ///< CD block file system status (finished or not).
-const u16 SCDQ = 0x0400; ///< Subcode Q decoding for current sector (decoded/not completed).
+constexpr auto CMOK = u16{0x0001}; ///< System ready for a new command / System processing the last command.
+constexpr auto DRDY = u16{0x0002}; ///< Data transfer setup (complete/not setup).
+constexpr auto CSCT = u16{0x0004}; ///< Sector status (stored / discarded).
+constexpr auto BFUL = u16{0x0008}; ///< CD buffer status (full / not full).
+constexpr auto PEND = u16{0x0010}; ///< CD play status.
+constexpr auto DCHG = u16{0x0020}; ///< Disk change status (changed/not changed).
+constexpr auto ESEL = u16{0x0040}; ///< Soft reset or selector status (finished or not).
+constexpr auto EHST = u16{0x0080}; ///< Host I/O status (finished or not).
+constexpr auto ECPY = u16{0x0100}; ///< Sector copy or move status (finished or not).
+constexpr auto EFLS = u16{0x0200}; ///< CD block file system status (finished or not).
+constexpr auto SCDQ = u16{0x0400}; ///< Subcode Q decoding for current sector (decoded/not completed).
 //@{
 
 /// \name CD type flags
 //@{
-const u8 FLAG_CDROM = 0x8; ///< CD-ROM flag.
-const u8 FLAG_CDDA  = 0x0; ///< CDDA flag.
+constexpr auto FLAG_CDROM = u8{0x8}; ///< CD-ROM flag.
+constexpr auto FLAG_CDDA  = u8{0x0}; ///< CDDA flag.
 //@}
 
 /// \name Play mode
 //@{
-const u8 CDC_PM_DFL       = 0x00;
-const u8 CDC_PM_REP_NOCHG = 0x7f;
-const u8 CDC_PM_PIC_NOCHG = 0x80;
-const u8 CDC_PM_NOCHG     = 0xFF;
+constexpr auto CDC_PM_DFL       = u8{0x00};
+constexpr auto CDC_PM_REP_NOCHG = u8{0x7f};
+constexpr auto CDC_PM_PIC_NOCHG = u8{0x80};
+constexpr auto CDC_PM_NOCHG     = u8{0xFF};
 //@}
 
 /// \name Periodic response update cycle in ms
@@ -126,43 +126,43 @@ enum class CdDrivePlayMode : u8 { unknown = 0xff, standard_play_speed = 0, doubl
 
 /// \name Retry frequency
 //@{
-const u8 RETRY_FREQ_INFINITE          = -1;
-const u8 RETRY_FREQ_DATA_OUT_NO_RETRY = -2;
-const u8 RETRY_FREQ_NO_RETRY          = 0;
+constexpr auto RETRY_FREQ_INFINITE          = u8{0xFF};
+constexpr auto RETRY_FREQ_DATA_OUT_NO_RETRY = u8{0xFE};
+constexpr auto RETRY_FREQ_NO_RETRY          = u8{0};
 //@]
 
 /// \name Play modes
 //@{
-const u8 PLAY_MODE_FAD   = 0; ///< FAD mode.
-const u8 PLAY_MODE_TRACK = 1; ///< Track mode.
+constexpr auto PLAY_MODE_FAD   = u8{0}; ///< FAD mode.
+constexpr auto PLAY_MODE_TRACK = u8{1}; ///< Track mode.
 //@}
 
-const u8  MAX_SELECTORS = 24;   ///< Selectors (filter+buffer partition) number.
-const u8  MAX_SECTORS   = 200;  ///< Number of sectors that can be stored.
-const u16 sector_size   = 2352; ///< Sector size in bytes.
+constexpr auto MAX_SELECTORS = u8{24};    ///< Selectors (filter+buffer partition) number.
+constexpr auto MAX_SECTORS   = u8{200};   ///< Number of sectors that can be stored.
+constexpr auto sector_size   = u16{2352}; ///< Sector size in bytes.
 
-const u8 NO_FREE_SECTOR = -1; ///< No free sector remaining in buffer.
+constexpr auto NO_FREE_SECTOR = u8{0xFF}; ///< No free sector remaining in buffer.
 
 /// \name Valid sector lengths
 //@{
-const u8 SLEN_2048 = 0;
-const u8 SLEN_2336 = 1;
-const u8 SLEN_2340 = 2;
-const u8 SLEN_2352 = 3;
+constexpr auto SLEN_2048 = u8{0};
+constexpr auto SLEN_2336 = u8{1};
+constexpr auto SLEN_2340 = u8{2};
+constexpr auto SLEN_2352 = u8{3};
 //@}
 
-const u8 FILTER_NOT_CONNECTED = -1; ///< No filter connexion.
+constexpr auto FILTER_NOT_CONNECTED = u8{0xFF}; ///< No filter connexion.
 
-const u32 INVALID_FAD = 0xFFFFFF; ///< Invalid FAD.
+constexpr auto INVALID_FAD = u32{0xFFFFFF}; ///< Invalid FAD.
 
 /// \name Number of cycles to read a sector
 //@{
-const u32 SECTOR_READ_1X = 439560;
-const u32 SECTOR_READ_2X = 219580;
+constexpr auto SECTOR_READ_1X = u32{439560};
+constexpr auto SECTOR_READ_2X = u32{219580};
 //@}
 
-constexpr u32 file_info_size{12 * 256};
-constexpr u32 saturn_toc_size{4 * 102};
+constexpr auto file_info_size  = u32{12 * 256};
+constexpr auto saturn_toc_size = u32{4 * 102};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	Sector

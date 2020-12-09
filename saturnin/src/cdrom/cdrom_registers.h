@@ -31,14 +31,14 @@ namespace saturnin::cdrom {
 
 /// \name CDROM registers addresses
 //@{
-constexpr u32 hirq_register_address      = 0x25890008;
-constexpr u32 hirq_mask_register_address = 0x2589000c;
-constexpr u32 command_register_1_address = 0x25890018;
-constexpr u32 command_register_2_address = 0x2589001C;
-constexpr u32 command_register_3_address = 0x25890020;
-constexpr u32 command_register_4_address = 0x25890024;
-constexpr u32 toc_data_pointer_address   = 0x25898000;
-constexpr u32 fetch_data_pointer_address = 0x25818000;
+constexpr auto hirq_register_address      = u32{0x25890008};
+constexpr auto hirq_mask_register_address = u32{0x2589000c};
+constexpr auto command_register_1_address = u32{0x25890018};
+constexpr auto command_register_2_address = u32{0x2589001C};
+constexpr auto command_register_3_address = u32{0x25890020};
+constexpr auto command_register_4_address = u32{0x25890024};
+constexpr auto toc_data_pointer_address   = u32{0x25898000};
+constexpr auto fetch_data_pointer_address = u32{0x25818000};
 
 //@}
 
@@ -175,18 +175,18 @@ enum class Cmok : u8 {
 class HirqStatusRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<Scdq> scdq{10};        ///< Defines the SCDQ bit.
-    inline static const BitRange<Efls> efls{9};         ///< Defines the EFLS bit.
-    inline static const BitRange<Ecpy> ecpy{8};         ///< Defines the ECPY bit.
-    inline static const BitRange<Ehst> ehst{7};         ///< Defines the EHST bit.
-    inline static const BitRange<Esel> esel{6};         ///< Defines the ESEL bit.
-    inline static const BitRange<Dchg> dchg{5};         ///< Defines the DCHG bit.
-    inline static const BitRange<Pend> pend{4};         ///< Defines the PEND bit.
-    inline static const BitRange<Bful> bful{3};         ///< Defines the BFUL bit.
-    inline static const BitRange<Csct> csct{2};         ///< Defines the CSCT bit.
-    inline static const BitRange<Drdy> drdy{1};         ///< Defines the DRDY bit.
-    inline static const BitRange<Cmok> cmok{0};         ///< Defines the CMOK bit.
-    inline static const BitRange<u16>  all_bits{0, 15}; ///< Defines the range of all the bits of the register.
+    inline static const auto scdq     = BitRange<Scdq>{10};   ///< Defines the SCDQ bit.
+    inline static const auto efls     = BitRange<Efls>{9};    ///< Defines the EFLS bit.
+    inline static const auto ecpy     = BitRange<Ecpy>{8};    ///< Defines the ECPY bit.
+    inline static const auto ehst     = BitRange<Ehst>{7};    ///< Defines the EHST bit.
+    inline static const auto esel     = BitRange<Esel>{6};    ///< Defines the ESEL bit.
+    inline static const auto dchg     = BitRange<Dchg>{5};    ///< Defines the DCHG bit.
+    inline static const auto pend     = BitRange<Pend>{4};    ///< Defines the PEND bit.
+    inline static const auto bful     = BitRange<Bful>{3};    ///< Defines the BFUL bit.
+    inline static const auto csct     = BitRange<Csct>{2};    ///< Defines the CSCT bit.
+    inline static const auto drdy     = BitRange<Drdy>{1};    ///< Defines the DRDY bit.
+    inline static const auto cmok     = BitRange<Cmok>{0};    ///< Defines the CMOK bit.
+    inline static const auto all_bits = BitRange<u16>{0, 15}; ///< Defines the range of all the bits of the register.
 };
 
 enum class InterruptStatus : u8 {
@@ -197,29 +197,28 @@ enum class InterruptStatus : u8 {
 class HirqMaskRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<InterruptStatus> scdq_status{10}; ///< Defines the SCDQ bit interrupt status.
-    inline static const BitRange<InterruptStatus> efls_status{9};  ///< Defines the EFLS bit interrupt status.
-    inline static const BitRange<InterruptStatus> ecpy_status{8};  ///< Defines the ECPY bit interrupt status.
-    inline static const BitRange<InterruptStatus> ehst_status{7};  ///< Defines the EHST bit interrupt status.
-    inline static const BitRange<InterruptStatus> esel_status{6};  ///< Defines the ESEL bit interrupt status.
-    inline static const BitRange<InterruptStatus> dchg_status{5};  ///< Defines the DCHG bit interrupt status.
-    inline static const BitRange<InterruptStatus> pend_status{4};  ///< Defines the PEND bit interrupt status.
-    inline static const BitRange<InterruptStatus> bful_status{3};  ///< Defines the BFUL bit interrupt status.
-    inline static const BitRange<InterruptStatus> csct_status{2};  ///< Defines the CSCT bit interrupt status.
-    inline static const BitRange<InterruptStatus> drdy_status{1};  ///< Defines the DRDY bit interrupt status.
-    inline static const BitRange<InterruptStatus> cmok_status{0};  ///< Defines the CMOK bit interrupt status.
-    inline static const BitRange<u16>             all_bits{0, 15}; ///< Defines the range of all the bits of the register.
+    inline static const auto scdq_status = BitRange<InterruptStatus>{10}; ///< Defines the SCDQ bit interrupt status.
+    inline static const auto efls_status = BitRange<InterruptStatus>{9};  ///< Defines the EFLS bit interrupt status.
+    inline static const auto ecpy_status = BitRange<InterruptStatus>{8};  ///< Defines the ECPY bit interrupt status.
+    inline static const auto ehst_status = BitRange<InterruptStatus>{7};  ///< Defines the EHST bit interrupt status.
+    inline static const auto esel_status = BitRange<InterruptStatus>{6};  ///< Defines the ESEL bit interrupt status.
+    inline static const auto dchg_status = BitRange<InterruptStatus>{5};  ///< Defines the DCHG bit interrupt status.
+    inline static const auto pend_status = BitRange<InterruptStatus>{4};  ///< Defines the PEND bit interrupt status.
+    inline static const auto bful_status = BitRange<InterruptStatus>{3};  ///< Defines the BFUL bit interrupt status.
+    inline static const auto csct_status = BitRange<InterruptStatus>{2};  ///< Defines the CSCT bit interrupt status.
+    inline static const auto drdy_status = BitRange<InterruptStatus>{1};  ///< Defines the DRDY bit interrupt status.
+    inline static const auto cmok_status = BitRange<InterruptStatus>{0};  ///< Defines the CMOK bit interrupt status.
+    inline static const auto all_bits    = BitRange<u16>{0, 15};          ///< Defines the range of all the bits of the register.
 };
 
 class CommandRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< 8..15 bits range of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< 0..7 bits range of the register.
-    inline static const BitRange<u8> bits_4_7{4, 7};      ///< 4..7 bits range of the register.
-    inline static const BitRange<u8> bits_0_3{0, 3};      ///< 0..3 bits range of the register.
-
-    inline static const BitRange<u16> all_bits{0, 15}; ///< Defines the range of all the bits of the register.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15};  ///< 8..15 bits range of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};   ///< 0..7 bits range of the register.
+    inline static const auto bits_4_7     = BitRange<u8>{4, 7};   ///< 4..7 bits range of the register.
+    inline static const auto bits_0_3     = BitRange<u8>{0, 3};   ///< 0..3 bits range of the register.
+    inline static const auto all_bits     = BitRange<u16>{0, 15}; ///< Defines the range of all the bits of the register.
 };
 
 } // namespace saturnin::cdrom

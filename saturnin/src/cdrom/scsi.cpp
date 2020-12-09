@@ -31,16 +31,13 @@ std::function<void(void)>                                   Scsi::shutdown;
 std::function<bool(ScsiToc& toc_data)>                      Scsi::readToc;
 
 auto Scsi::openDrive(const wchar_t letter) -> HANDLE {
-    HANDLE       h          = nullptr;
-    std::wstring drive_name = L"\\\\.\\";
+    auto drive_name = std::wstring{L"\\\\.\\"};
     drive_name += letter;
     drive_name += L":";
 
-    h = CreateFile(
+    auto h = CreateFile(
         drive_name.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
-    if (h == INVALID_HANDLE_VALUE) {
-        return nullptr;
-    }
+    if (h == INVALID_HANDLE_VALUE) { return nullptr; }
 
     return h;
 }
