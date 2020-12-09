@@ -42,101 +42,101 @@ using s16  = std::int16_t;
 using s32  = std::int32_t;
 using s64  = std::int64_t;
 
-constexpr u8 register_size{32};
+constexpr auto register_size = u8{32};
 
-constexpr u8 number_of_bits_32{32};
-constexpr u8 number_of_bits_16{16};
-constexpr u8 number_of_bits_8{8};
+constexpr auto number_of_bits_32 = u8{32};
+constexpr auto number_of_bits_16 = u8{16};
+constexpr auto number_of_bits_8  = u8{8};
 
-constexpr u8 displacement_4{4};
-constexpr u8 displacement_8{8};
-constexpr u8 displacement_12{12};
-constexpr u8 displacement_16{16};
-constexpr u8 displacement_24{24};
-constexpr u8 displacement_32{32};
+constexpr auto displacement_4  = u8{4};
+constexpr auto displacement_8  = u8{8};
+constexpr auto displacement_12 = u8{12};
+constexpr auto displacement_16 = u8{16};
+constexpr auto displacement_24 = u8{24};
+constexpr auto displacement_32 = u8{32};
 
-constexpr u64 bitmask_FFFFFFFF00000000{0xFFFFFFFF00000000};
-constexpr u32 bitmask_0000000F{0x0000000F};
-constexpr u32 bitmask_000000FF{0x000000FF};
-constexpr u32 bitmask_00000FFF{0x00000FFF};
-constexpr u32 bitmask_0000FFFF{0x0000FFFF};
-constexpr u32 bitmask_00FFFFFF{0x00FFFFFF};
-constexpr u32 bitmask_0FFFFFFF{0x0FFFFFFF};
-constexpr u32 bitmask_0000FF00{0x0000FF00};
-constexpr u32 bitmask_00FF0000{0x00FF0000};
-constexpr u32 bitmask_FF000000{0xFF000000};
-constexpr u32 bitmask_7FFFFFFF{0x7FFFFFFF};
-constexpr u32 bitmask_FFFFFF00{0xFFFFFF00};
-constexpr u32 bitmask_FFFFF000{0xFFFFF000};
-constexpr u32 bitmask_FFFF0000{0xFFFF0000};
-constexpr u32 bitmask_FFFFFFFE{0xFFFFFFFE};
-constexpr u32 bitmask_FFFFFFFC{0xFFFFFFFC};
-constexpr u16 bitmask_F000{0xF000};
-constexpr u16 bitmask_0F00{0x0F00};
-constexpr u16 bitmask_00F0{0x00F0};
-constexpr u16 bitmask_000F{0x000F};
-constexpr u16 bitmask_00FF{0x00FF};
-constexpr u16 bitmask_03FF{0x03FF};
-constexpr u16 bitmask_0FFF{0x0FFF};
-constexpr u16 bitmask_FFFF{0xFFFF};
-constexpr u8  bitmask_0F{0x0F};
+constexpr auto bitmask_FFFFFFFF00000000 = u64{0xFFFFFFFF00000000};
+constexpr auto bitmask_0000000F         = u32{0x0000000F};
+constexpr auto bitmask_000000FF         = u32{0x000000FF};
+constexpr auto bitmask_00000FFF         = u32{0x00000FFF};
+constexpr auto bitmask_0000FFFF         = u32{0x0000FFFF};
+constexpr auto bitmask_00FFFFFF         = u32{0x00FFFFFF};
+constexpr auto bitmask_0FFFFFFF         = u32{0x0FFFFFFF};
+constexpr auto bitmask_0000FF00         = u32{0x0000FF00};
+constexpr auto bitmask_00FF0000         = u32{0x00FF0000};
+constexpr auto bitmask_FF000000         = u32{0xFF000000};
+constexpr auto bitmask_7FFFFFFF         = u32{0x7FFFFFFF};
+constexpr auto bitmask_FFFFFF00         = u32{0xFFFFFF00};
+constexpr auto bitmask_FFFFF000         = u32{0xFFFFF000};
+constexpr auto bitmask_FFFF0000         = u32{0xFFFF0000};
+constexpr auto bitmask_FFFFFFFE         = u32{0xFFFFFFFE};
+constexpr auto bitmask_FFFFFFFC         = u32{0xFFFFFFFC};
+constexpr auto bitmask_F000             = u16{0xF000};
+constexpr auto bitmask_0F00             = u16{0x0F00};
+constexpr auto bitmask_00F0             = u16{0x00F0};
+constexpr auto bitmask_000F             = u16{0x000F};
+constexpr auto bitmask_00FF             = u16{0x00FF};
+constexpr auto bitmask_03FF             = u16{0x03FF};
+constexpr auto bitmask_0FFF             = u16{0x0FFF};
+constexpr auto bitmask_FFFF             = u16{0xFFFF};
+constexpr auto bitmask_0F               = u8{0x0F};
 
-constexpr u64 sign_bit_48_mask{0x800000000000};
-constexpr u32 sign_bit_32_mask{0x80000000};
-constexpr u16 sign_bit_16_mask{0x8000};
-constexpr u16 sign_bit_12_mask{0x0800};
-constexpr u8  sign_bit_8_mask{0x80};
+constexpr auto sign_bit_48_mask = u64{0x800000000000};
+constexpr auto sign_bit_32_mask = u32{0x80000000};
+constexpr auto sign_bit_16_mask = u16{0x8000};
+constexpr auto sign_bit_12_mask = u16{0x0800};
+constexpr auto sign_bit_8_mask  = u8{0x80};
 
-constexpr u64 u31_min_64_extended{0xFFFFFFFF80000000};
-constexpr u64 u47_min_64_extended{0xFFFF800000000000};
-constexpr u64 u47_max{0x00007FFFFFFFFFFF};
-constexpr u32 u32_max{UINT32_MAX};
-constexpr u32 u31_max{0x7FFFFFFF};
-constexpr u32 u30_max{0x3FFFFFFF};
-constexpr u16 u16_max{UINT16_MAX};
-constexpr u8  u8_max{UINT8_MAX};
+constexpr auto u31_min_64_extended = u64{0xFFFFFFFF80000000};
+constexpr auto u47_min_64_extended = u64{0xFFFF800000000000};
+constexpr auto u47_max             = u64{0x00007FFFFFFFFFFF};
+constexpr auto u32_max             = u32{UINT32_MAX};
+constexpr auto u31_max             = u32{0x7FFFFFFF};
+constexpr auto u30_max             = u32{0x3FFFFFFF};
+constexpr auto u16_max             = u16{UINT16_MAX};
+constexpr auto u8_max              = u8{UINT8_MAX};
 
-constexpr u8 index_0{0};
-constexpr u8 index_1{1};
-constexpr u8 index_2{2};
-constexpr u8 index_3{3};
-constexpr u8 index_4{4};
-constexpr u8 index_5{5};
-constexpr u8 index_6{6};
-constexpr u8 index_7{7};
-constexpr u8 index_8{8};
-constexpr u8 index_9{9};
-constexpr u8 index_10{10};
-constexpr u8 index_11{11};
-constexpr u8 index_12{12};
-constexpr u8 index_13{13};
-constexpr u8 index_14{14};
-constexpr u8 index_15{15};
-constexpr u8 index_16{16};
-constexpr u8 index_17{17};
-constexpr u8 index_18{18};
-constexpr u8 index_19{19};
-constexpr u8 index_20{20};
-constexpr u8 index_21{21};
-constexpr u8 index_22{22};
-constexpr u8 index_23{23};
-constexpr u8 index_24{24};
-constexpr u8 index_25{25};
-constexpr u8 index_26{26};
-constexpr u8 index_27{27};
-constexpr u8 index_28{28};
-constexpr u8 index_29{29};
-constexpr u8 index_30{30};
-constexpr u8 index_31{31};
+constexpr auto index_0  = u8{0};
+constexpr auto index_1  = u8{1};
+constexpr auto index_2  = u8{2};
+constexpr auto index_3  = u8{3};
+constexpr auto index_4  = u8{4};
+constexpr auto index_5  = u8{5};
+constexpr auto index_6  = u8{6};
+constexpr auto index_7  = u8{7};
+constexpr auto index_8  = u8{8};
+constexpr auto index_9  = u8{9};
+constexpr auto index_10 = u8{10};
+constexpr auto index_11 = u8{11};
+constexpr auto index_12 = u8{12};
+constexpr auto index_13 = u8{13};
+constexpr auto index_14 = u8{14};
+constexpr auto index_15 = u8{15};
+constexpr auto index_16 = u8{16};
+constexpr auto index_17 = u8{17};
+constexpr auto index_18 = u8{18};
+constexpr auto index_19 = u8{19};
+constexpr auto index_20 = u8{20};
+constexpr auto index_21 = u8{21};
+constexpr auto index_22 = u8{22};
+constexpr auto index_23 = u8{23};
+constexpr auto index_24 = u8{24};
+constexpr auto index_25 = u8{25};
+constexpr auto index_26 = u8{26};
+constexpr auto index_27 = u8{27};
+constexpr auto index_28 = u8{28};
+constexpr auto index_29 = u8{29};
+constexpr auto index_30 = u8{30};
+constexpr auto index_31 = u8{31};
 
-constexpr u8 bit_0{0};
-constexpr u8 bit_1{1};
-constexpr u8 bit_2{2};
-constexpr u8 bit_3{3};
-constexpr u8 bit_4{4};
-constexpr u8 bit_5{5};
-constexpr u8 bit_6{6};
-constexpr u8 bit_7{7};
+constexpr auto bit_0 = u8{0};
+constexpr auto bit_1 = u8{1};
+constexpr auto bit_2 = u8{2};
+constexpr auto bit_3 = u8{3};
+constexpr auto bit_4 = u8{4};
+constexpr auto bit_5 = u8{5};
+constexpr auto bit_6 = u8{6};
+constexpr auto bit_7 = u8{7};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct BitRange
@@ -154,8 +154,8 @@ struct BitRange {
     u8 first_bit_pos_;
     u8 last_bit_pos_;
 
-    BitRange(u8 pos) : first_bit_pos_{pos}, last_bit_pos_{pos} {};
-    BitRange(u8 first, u8 last) : first_bit_pos_{first}, last_bit_pos_{last} {};
+    BitRange(const u8 pos) : first_bit_pos_{pos}, last_bit_pos_{pos} {};
+    BitRange(const u8 first, const u8 last) : first_bit_pos_{first}, last_bit_pos_{last} {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,8 +192,8 @@ class Register {
 
     template<typename T>
     inline void set(const BitRange<T>& r, T new_value) {
-        u32 nv = static_cast<u32>(new_value);
-        u8  j  = 0;
+        const auto nv = u32{new_value};
+        auto       j  = u8{0};
         for (u8 i = r.first_bit_pos_; i <= r.last_bit_pos_; ++i) {
             register_value[i] = (nv & 1 << j) ? true : false;
             ++j;
@@ -243,14 +243,14 @@ class Register {
     std::bitset<register_size> register_value; ///< Internal register value.
 };
 
-const BitRange<u8>  bits_0_3{0, 3};     ///< Defines bits 0-3 range of the bitset.
-const BitRange<u8>  bits_4_7{4, 7};     ///< Defines bits 4-7 range of the bitset.
-const BitRange<u8>  bits_0_7{0, 7};     ///< Defines the lower 8 bits range of the bitset.
-const BitRange<u8>  bits_8_15{8, 15};   ///< Defines bits 8-15 range of the bitset.
-const BitRange<u8>  bits_16_23{16, 23}; ///< Defines bits 16-23 range of the bitset.
-const BitRange<u8>  bits_24_31{24, 31}; ///< Defines bits 24-31 range of the bitset.
-const BitRange<u16> bits_0_15{0, 15};   ///< Defines the lower 16 bits range of the bitset.
-const BitRange<u16> bits_16_31{16, 31}; ///< Defines the upper 16 bits range of the bitset.
-const BitRange<u32> bits_0_31{0, 31};   ///< Defines the 32 bits range of the bitset.
+const auto bits_0_3   = BitRange<u8>{0, 3};    ///< Defines bits 0-3 range of the bitset.
+const auto bits_4_7   = BitRange<u8>{4, 7};    ///< Defines bits 4-7 range of the bitset.
+const auto bits_0_7   = BitRange<u8>{0, 7};    ///< Defines the lower 8 bits range of the bitset.
+const auto bits_8_15  = BitRange<u8>{8, 15};   ///< Defines bits 8-15 range of the bitset.
+const auto bits_16_23 = BitRange<u8>{16, 23};  ///< Defines bits 16-23 range of the bitset.
+const auto bits_24_31 = BitRange<u8>{24, 31};  ///< Defines bits 24-31 range of the bitset.
+const auto bits_0_15  = BitRange<u16>{0, 15};  ///< Defines the lower 16 bits range of the bitset.
+const auto bits_16_31 = BitRange<u16>{16, 31}; ///< Defines the upper 16 bits range of the bitset.
+const auto bits_0_31  = BitRange<u32>{0, 31};  ///< Defines the 32 bits range of the bitset.
 
 }; // namespace saturnin
