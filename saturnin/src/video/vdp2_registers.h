@@ -29,150 +29,150 @@
 
 namespace saturnin::video {
 namespace vdp2_register_address {
-constexpr u32 tv_screen_mode                           = {0x25f80000};
-constexpr u32 external_signal_enable                   = {0x25f80002};
-constexpr u32 screen_status                            = {0x25f80004};
-constexpr u32 vram_size                                = {0x25f80006};
-constexpr u32 h_counter                                = {0x25f80008};
-constexpr u32 v_counter                                = {0x25f8000a};
-constexpr u32 reserve_1                                = {0x25f8000c};
-constexpr u32 ram_control                              = {0x25f8000e};
-constexpr u32 vram_cycle_pattern_bank_a0_lower         = {0x25f80010};
-constexpr u32 vram_cycle_pattern_bank_a0_upper         = {0x25f80012};
-constexpr u32 vram_cycle_pattern_bank_a1_lower         = {0x25f80014};
-constexpr u32 vram_cycle_pattern_bank_a1_upper         = {0x25f80016};
-constexpr u32 vram_cycle_pattern_bank_b0_lower         = {0x25f80018};
-constexpr u32 vram_cycle_pattern_bank_b0_upper         = {0x25f8001a};
-constexpr u32 vram_cycle_pattern_bank_b1_lower         = {0x25f8001c};
-constexpr u32 vram_cycle_pattern_bank_b1_upper         = {0x25f8001e};
-constexpr u32 screen_display_enable                    = {0x25f80020};
-constexpr u32 mosaic_control                           = {0x25f80022};
-constexpr u32 special_function_code_select             = {0x25f80024};
-constexpr u32 special_function_code                    = {0x25f80026};
-constexpr u32 character_control_a                      = {0x25f80028};
-constexpr u32 character_control_b                      = {0x25f8002a};
-constexpr u32 bitmap_palette_number_a                  = {0x25f8002c};
-constexpr u32 bitmap_palette_number_b                  = {0x25f8002e};
-constexpr u32 pattern_name_control_nbg0                = {0x25f80030};
-constexpr u32 pattern_name_control_nbg1                = {0x25f80032};
-constexpr u32 pattern_name_control_nbg2                = {0x25f80034};
-constexpr u32 pattern_name_control_nbg3                = {0x25f80036};
-constexpr u32 pattern_name_control_rbg0                = {0x25f80038};
-constexpr u32 plane_size                               = {0x25f8003a};
-constexpr u32 map_offset_n                             = {0x25f8003c};
-constexpr u32 map_offset_r                             = {0x25f8003e};
-constexpr u32 map_nbg0_plane_a_b                       = {0x25f80040};
-constexpr u32 map_nbg0_plane_c_d                       = {0x25f80042};
-constexpr u32 map_nbg1_plane_a_b                       = {0x25f80044};
-constexpr u32 map_nbg1_plane_c_d                       = {0x25f80046};
-constexpr u32 map_nbg2_plane_a_b                       = {0x25f80048};
-constexpr u32 map_nbg2_plane_c_d                       = {0x25f8004a};
-constexpr u32 map_nbg3_plane_a_b                       = {0x25f8004c};
-constexpr u32 map_nbg3_plane_c_d                       = {0x25f8004e};
-constexpr u32 map_rotation_parameter_a_plane_a_b       = {0x25f80050};
-constexpr u32 map_rotation_parameter_a_plane_c_d       = {0x25f80052};
-constexpr u32 map_rotation_parameter_a_plane_e_f       = {0x25f80054};
-constexpr u32 map_rotation_parameter_a_plane_g_h       = {0x25f80056};
-constexpr u32 map_rotation_parameter_a_plane_i_j       = {0x25f80058};
-constexpr u32 map_rotation_parameter_a_plane_k_l       = {0x25f8005a};
-constexpr u32 map_rotation_parameter_a_plane_m_n       = {0x25f8005c};
-constexpr u32 map_rotation_parameter_a_plane_o_p       = {0x25f8005e};
-constexpr u32 map_rotation_parameter_b_plane_a_b       = {0x25f80060};
-constexpr u32 map_rotation_parameter_b_plane_c_d       = {0x25f80062};
-constexpr u32 map_rotation_parameter_b_plane_e_f       = {0x25f80064};
-constexpr u32 map_rotation_parameter_b_plane_g_h       = {0x25f80066};
-constexpr u32 map_rotation_parameter_b_plane_i_j       = {0x25f80068};
-constexpr u32 map_rotation_parameter_b_plane_k_l       = {0x25f8006a};
-constexpr u32 map_rotation_parameter_b_plane_m_n       = {0x25f8006c};
-constexpr u32 map_rotation_parameter_b_plane_o_p       = {0x25f8006e};
-constexpr u32 screen_scroll_value_nbg0_h_int_part      = {0x25f80070};
-constexpr u32 screen_scroll_value_nbg0_h_fract_part    = {0x25f80072};
-constexpr u32 screen_scroll_value_nbg0_v_int_part      = {0x25f80074};
-constexpr u32 screen_scroll_value_nbg0_v_fract_part    = {0x25f80076};
-constexpr u32 coordinate_increment_nbg0_h_int_part     = {0x25f80078};
-constexpr u32 coordinate_increment_nbg0_h_fract_part   = {0x25f8007a};
-constexpr u32 coordinate_increment_nbg0_v_int_part     = {0x25f8007c};
-constexpr u32 coordinate_increment_nbg0_v_fract_part   = {0x25f8007e};
-constexpr u32 screen_scroll_value_nbg1_h_int_part      = {0x25f80080};
-constexpr u32 screen_scroll_value_nbg1_h_fract_part    = {0x25f80082};
-constexpr u32 screen_scroll_value_nbg1_v_int_part      = {0x25f80084};
-constexpr u32 screen_scroll_value_nbg1_v_fract_part    = {0x25f80086};
-constexpr u32 coordinate_increment_nbg1_h_int_part     = {0x25f80088};
-constexpr u32 coordinate_increment_nbg1_h_fract_part   = {0x25f8008a};
-constexpr u32 coordinate_increment_nbg1_v_int_part     = {0x25f8008c};
-constexpr u32 coordinate_increment_nbg1_v_fract_part   = {0x25f8008e};
-constexpr u32 screen_scroll_value_nbg2_h               = {0x25f80090};
-constexpr u32 screen_scroll_value_nbg2_v               = {0x25f80092};
-constexpr u32 screen_scroll_value_nbg3_h               = {0x25f80094};
-constexpr u32 screen_scroll_value_nbg3_v               = {0x25f80096};
-constexpr u32 reduction_enable                         = {0x25f80098};
-constexpr u32 line_and_vertical_cell_scroll_control    = {0x25f8009a};
-constexpr u32 vertical_cell_scroll_table_address_upper = {0x25f8009c};
-constexpr u32 vertical_cell_scroll_table_address_lower = {0x25f8009e};
-constexpr u32 line_scroll_table_address_nbg0_upper     = {0x25f800a0};
-constexpr u32 line_scroll_table_address_nbg0_lower     = {0x25f800a2};
-constexpr u32 line_scroll_table_address_nbg1_upper     = {0x25f800a4};
-constexpr u32 line_scroll_table_address_nbg1_lower     = {0x25f800a6};
-constexpr u32 line_color_screen_table_address_upper    = {0x25f800a8};
-constexpr u32 line_color_screen_table_address_lower    = {0x25f800aa};
-constexpr u32 back_screen_table_address_upper          = {0x25f800ac};
-constexpr u32 back_screen_table_address_lower          = {0x25f800ae};
-constexpr u32 rotation_parameter_mode                  = {0x25f800b0};
-constexpr u32 rotation_parameter_read_control          = {0x25f800b2};
-constexpr u32 coefficient_table_control                = {0x25f800b4};
-constexpr u32 coefficient_table_address_offset         = {0x25f800b6};
-constexpr u32 screen_over_pattern_name_a               = {0x25f800b8};
-constexpr u32 screen_over_pattern_name_b               = {0x25f800ba};
-constexpr u32 rotation_parameter_table_address_upper   = {0x25f800bc};
-constexpr u32 rotation_parameter_table_address_lower   = {0x25f800be};
-constexpr u32 window_position_w0_h_start_point         = {0x25f800c0};
-constexpr u32 window_position_w0_v_start_point         = {0x25f800c2};
-constexpr u32 window_position_w0_h_end_point           = {0x25f800c4};
-constexpr u32 window_position_w0_v_end_point           = {0x25f800c6};
-constexpr u32 window_position_w1_h_start_point         = {0x25f800c8};
-constexpr u32 window_position_w1_v_start_point         = {0x25f800ca};
-constexpr u32 window_position_w1_h_end_point           = {0x25f800cc};
-constexpr u32 window_position_w1_v_end_point           = {0x25f800ce};
-constexpr u32 window_control_a                         = {0x25f800d0};
-constexpr u32 window_control_b                         = {0x25f800d2};
-constexpr u32 window_control_c                         = {0x25f800d4};
-constexpr u32 window_control_d                         = {0x25f800d6};
-constexpr u32 line_window_table_address_w0_upper       = {0x25f800d8};
-constexpr u32 line_window_table_address_w0_lower       = {0x25f800da};
-constexpr u32 line_window_table_address_w1_upper       = {0x25f800dc};
-constexpr u32 line_window_table_address_w1_lower       = {0x25f800de};
-constexpr u32 sprite_control                           = {0x25f800e0};
-constexpr u32 shadow_control                           = {0x25f800e2};
-constexpr u32 color_ram_address_offset_a               = {0x25f800e4};
-constexpr u32 color_ram_address_offset_b               = {0x25f800e6};
-constexpr u32 line_color_screen_enable                 = {0x25f800e8};
-constexpr u32 special_priority_mode                    = {0x25f800ea};
-constexpr u32 color_calculation_control                = {0x25f800ec};
-constexpr u32 special_color_calculation_mode           = {0x25f800ee};
-constexpr u32 priority_number_sprite_0_1               = {0x25f800f0};
-constexpr u32 priority_number_sprite_2_3               = {0x25f800f2};
-constexpr u32 priority_number_sprite_4_5               = {0x25f800f4};
-constexpr u32 priority_number_sprite_6_7               = {0x25f800f6};
-constexpr u32 priority_number_nbg0_nbg1                = {0x25f800f8};
-constexpr u32 priority_number_nbg2_nbg3                = {0x25f800fa};
-constexpr u32 priority_number_rbg0                     = {0x25f800fc};
-constexpr u32 reserve_2                                = {0x25f800fe};
-constexpr u32 color_calculation_ratio_sprite_0_1       = {0x25f80100};
-constexpr u32 color_calculation_ratio_sprite_2_3       = {0x25f80102};
-constexpr u32 color_calculation_ratio_sprite_4_5       = {0x25f80104};
-constexpr u32 color_calculation_ratio_sprite_6_7       = {0x25f80106};
-constexpr u32 color_calculation_ratio_nbg0_nbg1        = {0x25f80108};
-constexpr u32 color_calculation_ratio_nbg2_nbg3        = {0x25f8010a};
-constexpr u32 color_calculation_ratio_rbg0             = {0x25f8010c};
-constexpr u32 color_calculation_ratio_line_color_back  = {0x25f8010e};
-constexpr u32 color_offset_enable                      = {0x25f80110};
-constexpr u32 color_offset_select                      = {0x25f80112};
-constexpr u32 color_offset_a_red                       = {0x25f80114};
-constexpr u32 color_offset_a_green                     = {0x25f80116};
-constexpr u32 color_offset_a_blue                      = {0x25f80118};
-constexpr u32 color_offset_b_red                       = {0x25f8011a};
-constexpr u32 color_offset_b_green                     = {0x25f8011c};
-constexpr u32 color_offset_b_blue                      = {0x25f8011e};
+constexpr auto tv_screen_mode                           = u32{0x25f80000};
+constexpr auto external_signal_enable                   = u32{0x25f80002};
+constexpr auto screen_status                            = u32{0x25f80004};
+constexpr auto vram_size                                = u32{0x25f80006};
+constexpr auto h_counter                                = u32{0x25f80008};
+constexpr auto v_counter                                = u32{0x25f8000a};
+constexpr auto reserve_1                                = u32{0x25f8000c};
+constexpr auto ram_control                              = u32{0x25f8000e};
+constexpr auto vram_cycle_pattern_bank_a0_lower         = u32{0x25f80010};
+constexpr auto vram_cycle_pattern_bank_a0_upper         = u32{0x25f80012};
+constexpr auto vram_cycle_pattern_bank_a1_lower         = u32{0x25f80014};
+constexpr auto vram_cycle_pattern_bank_a1_upper         = u32{0x25f80016};
+constexpr auto vram_cycle_pattern_bank_b0_lower         = u32{0x25f80018};
+constexpr auto vram_cycle_pattern_bank_b0_upper         = u32{0x25f8001a};
+constexpr auto vram_cycle_pattern_bank_b1_lower         = u32{0x25f8001c};
+constexpr auto vram_cycle_pattern_bank_b1_upper         = u32{0x25f8001e};
+constexpr auto screen_display_enable                    = u32{0x25f80020};
+constexpr auto mosaic_control                           = u32{0x25f80022};
+constexpr auto special_function_code_select             = u32{0x25f80024};
+constexpr auto special_function_code                    = u32{0x25f80026};
+constexpr auto character_control_a                      = u32{0x25f80028};
+constexpr auto character_control_b                      = u32{0x25f8002a};
+constexpr auto bitmap_palette_number_a                  = u32{0x25f8002c};
+constexpr auto bitmap_palette_number_b                  = u32{0x25f8002e};
+constexpr auto pattern_name_control_nbg0                = u32{0x25f80030};
+constexpr auto pattern_name_control_nbg1                = u32{0x25f80032};
+constexpr auto pattern_name_control_nbg2                = u32{0x25f80034};
+constexpr auto pattern_name_control_nbg3                = u32{0x25f80036};
+constexpr auto pattern_name_control_rbg0                = u32{0x25f80038};
+constexpr auto plane_size                               = u32{0x25f8003a};
+constexpr auto map_offset_n                             = u32{0x25f8003c};
+constexpr auto map_offset_r                             = u32{0x25f8003e};
+constexpr auto map_nbg0_plane_a_b                       = u32{0x25f80040};
+constexpr auto map_nbg0_plane_c_d                       = u32{0x25f80042};
+constexpr auto map_nbg1_plane_a_b                       = u32{0x25f80044};
+constexpr auto map_nbg1_plane_c_d                       = u32{0x25f80046};
+constexpr auto map_nbg2_plane_a_b                       = u32{0x25f80048};
+constexpr auto map_nbg2_plane_c_d                       = u32{0x25f8004a};
+constexpr auto map_nbg3_plane_a_b                       = u32{0x25f8004c};
+constexpr auto map_nbg3_plane_c_d                       = u32{0x25f8004e};
+constexpr auto map_rotation_parameter_a_plane_a_b       = u32{0x25f80050};
+constexpr auto map_rotation_parameter_a_plane_c_d       = u32{0x25f80052};
+constexpr auto map_rotation_parameter_a_plane_e_f       = u32{0x25f80054};
+constexpr auto map_rotation_parameter_a_plane_g_h       = u32{0x25f80056};
+constexpr auto map_rotation_parameter_a_plane_i_j       = u32{0x25f80058};
+constexpr auto map_rotation_parameter_a_plane_k_l       = u32{0x25f8005a};
+constexpr auto map_rotation_parameter_a_plane_m_n       = u32{0x25f8005c};
+constexpr auto map_rotation_parameter_a_plane_o_p       = u32{0x25f8005e};
+constexpr auto map_rotation_parameter_b_plane_a_b       = u32{0x25f80060};
+constexpr auto map_rotation_parameter_b_plane_c_d       = u32{0x25f80062};
+constexpr auto map_rotation_parameter_b_plane_e_f       = u32{0x25f80064};
+constexpr auto map_rotation_parameter_b_plane_g_h       = u32{0x25f80066};
+constexpr auto map_rotation_parameter_b_plane_i_j       = u32{0x25f80068};
+constexpr auto map_rotation_parameter_b_plane_k_l       = u32{0x25f8006a};
+constexpr auto map_rotation_parameter_b_plane_m_n       = u32{0x25f8006c};
+constexpr auto map_rotation_parameter_b_plane_o_p       = u32{0x25f8006e};
+constexpr auto screen_scroll_value_nbg0_h_int_part      = u32{0x25f80070};
+constexpr auto screen_scroll_value_nbg0_h_fract_part    = u32{0x25f80072};
+constexpr auto screen_scroll_value_nbg0_v_int_part      = u32{0x25f80074};
+constexpr auto screen_scroll_value_nbg0_v_fract_part    = u32{0x25f80076};
+constexpr auto coordinate_increment_nbg0_h_int_part     = u32{0x25f80078};
+constexpr auto coordinate_increment_nbg0_h_fract_part   = u32{0x25f8007a};
+constexpr auto coordinate_increment_nbg0_v_int_part     = u32{0x25f8007c};
+constexpr auto coordinate_increment_nbg0_v_fract_part   = u32{0x25f8007e};
+constexpr auto screen_scroll_value_nbg1_h_int_part      = u32{0x25f80080};
+constexpr auto screen_scroll_value_nbg1_h_fract_part    = u32{0x25f80082};
+constexpr auto screen_scroll_value_nbg1_v_int_part      = u32{0x25f80084};
+constexpr auto screen_scroll_value_nbg1_v_fract_part    = u32{0x25f80086};
+constexpr auto coordinate_increment_nbg1_h_int_part     = u32{0x25f80088};
+constexpr auto coordinate_increment_nbg1_h_fract_part   = u32{0x25f8008a};
+constexpr auto coordinate_increment_nbg1_v_int_part     = u32{0x25f8008c};
+constexpr auto coordinate_increment_nbg1_v_fract_part   = u32{0x25f8008e};
+constexpr auto screen_scroll_value_nbg2_h               = u32{0x25f80090};
+constexpr auto screen_scroll_value_nbg2_v               = u32{0x25f80092};
+constexpr auto screen_scroll_value_nbg3_h               = u32{0x25f80094};
+constexpr auto screen_scroll_value_nbg3_v               = u32{0x25f80096};
+constexpr auto reduction_enable                         = u32{0x25f80098};
+constexpr auto line_and_vertical_cell_scroll_control    = u32{0x25f8009a};
+constexpr auto vertical_cell_scroll_table_address_upper = u32{0x25f8009c};
+constexpr auto vertical_cell_scroll_table_address_lower = u32{0x25f8009e};
+constexpr auto line_scroll_table_address_nbg0_upper     = u32{0x25f800a0};
+constexpr auto line_scroll_table_address_nbg0_lower     = u32{0x25f800a2};
+constexpr auto line_scroll_table_address_nbg1_upper     = u32{0x25f800a4};
+constexpr auto line_scroll_table_address_nbg1_lower     = u32{0x25f800a6};
+constexpr auto line_color_screen_table_address_upper    = u32{0x25f800a8};
+constexpr auto line_color_screen_table_address_lower    = u32{0x25f800aa};
+constexpr auto back_screen_table_address_upper          = u32{0x25f800ac};
+constexpr auto back_screen_table_address_lower          = u32{0x25f800ae};
+constexpr auto rotation_parameter_mode                  = u32{0x25f800b0};
+constexpr auto rotation_parameter_read_control          = u32{0x25f800b2};
+constexpr auto coefficient_table_control                = u32{0x25f800b4};
+constexpr auto coefficient_table_address_offset         = u32{0x25f800b6};
+constexpr auto screen_over_pattern_name_a               = u32{0x25f800b8};
+constexpr auto screen_over_pattern_name_b               = u32{0x25f800ba};
+constexpr auto rotation_parameter_table_address_upper   = u32{0x25f800bc};
+constexpr auto rotation_parameter_table_address_lower   = u32{0x25f800be};
+constexpr auto window_position_w0_h_start_point         = u32{0x25f800c0};
+constexpr auto window_position_w0_v_start_point         = u32{0x25f800c2};
+constexpr auto window_position_w0_h_end_point           = u32{0x25f800c4};
+constexpr auto window_position_w0_v_end_point           = u32{0x25f800c6};
+constexpr auto window_position_w1_h_start_point         = u32{0x25f800c8};
+constexpr auto window_position_w1_v_start_point         = u32{0x25f800ca};
+constexpr auto window_position_w1_h_end_point           = u32{0x25f800cc};
+constexpr auto window_position_w1_v_end_point           = u32{0x25f800ce};
+constexpr auto window_control_a                         = u32{0x25f800d0};
+constexpr auto window_control_b                         = u32{0x25f800d2};
+constexpr auto window_control_c                         = u32{0x25f800d4};
+constexpr auto window_control_d                         = u32{0x25f800d6};
+constexpr auto line_window_table_address_w0_upper       = u32{0x25f800d8};
+constexpr auto line_window_table_address_w0_lower       = u32{0x25f800da};
+constexpr auto line_window_table_address_w1_upper       = u32{0x25f800dc};
+constexpr auto line_window_table_address_w1_lower       = u32{0x25f800de};
+constexpr auto sprite_control                           = u32{0x25f800e0};
+constexpr auto shadow_control                           = u32{0x25f800e2};
+constexpr auto color_ram_address_offset_a               = u32{0x25f800e4};
+constexpr auto color_ram_address_offset_b               = u32{0x25f800e6};
+constexpr auto line_color_screen_enable                 = u32{0x25f800e8};
+constexpr auto special_priority_mode                    = u32{0x25f800ea};
+constexpr auto color_calculation_control                = u32{0x25f800ec};
+constexpr auto special_color_calculation_mode           = u32{0x25f800ee};
+constexpr auto priority_number_sprite_0_1               = u32{0x25f800f0};
+constexpr auto priority_number_sprite_2_3               = u32{0x25f800f2};
+constexpr auto priority_number_sprite_4_5               = u32{0x25f800f4};
+constexpr auto priority_number_sprite_6_7               = u32{0x25f800f6};
+constexpr auto priority_number_nbg0_nbg1                = u32{0x25f800f8};
+constexpr auto priority_number_nbg2_nbg3                = u32{0x25f800fa};
+constexpr auto priority_number_rbg0                     = u32{0x25f800fc};
+constexpr auto reserve_2                                = u32{0x25f800fe};
+constexpr auto color_calculation_ratio_sprite_0_1       = u32{0x25f80100};
+constexpr auto color_calculation_ratio_sprite_2_3       = u32{0x25f80102};
+constexpr auto color_calculation_ratio_sprite_4_5       = u32{0x25f80104};
+constexpr auto color_calculation_ratio_sprite_6_7       = u32{0x25f80106};
+constexpr auto color_calculation_ratio_nbg0_nbg1        = u32{0x25f80108};
+constexpr auto color_calculation_ratio_nbg2_nbg3        = u32{0x25f8010a};
+constexpr auto color_calculation_ratio_rbg0             = u32{0x25f8010c};
+constexpr auto color_calculation_ratio_line_color_back  = u32{0x25f8010e};
+constexpr auto color_offset_enable                      = u32{0x25f80110};
+constexpr auto color_offset_select                      = u32{0x25f80112};
+constexpr auto color_offset_a_red                       = u32{0x25f80114};
+constexpr auto color_offset_a_green                     = u32{0x25f80116};
+constexpr auto color_offset_a_blue                      = u32{0x25f80118};
+constexpr auto color_offset_b_red                       = u32{0x25f8011a};
+constexpr auto color_offset_b_green                     = u32{0x25f8011c};
+constexpr auto color_offset_b_blue                      = u32{0x25f8011e};
 
 } // namespace vdp2_register_address
 
@@ -253,11 +253,11 @@ enum class HorizontalResolution : u8 {
 class TvScreenMode : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<Display>              display{15};                 ///< Defines DISP bit.
-    inline static const BitRange<BorderColorMode>      border_color_mode{8};        ///< Defines BDCLMD bit.
-    inline static const BitRange<InterlaceMode>        interlace_mode{6, 7};        ///< Defines LSMDx bit.
-    inline static const BitRange<VerticalResolution>   vertical_resolution{4, 5};   ///< Defines VRESOx bit.
-    inline static const BitRange<HorizontalResolution> horizontal_resolution{0, 2}; ///< Defines HRESOx bit.
+    inline static const auto display               = BitRange<Display>{15};                ///< Defines DISP bit.
+    inline static const auto border_color_mode     = BitRange<BorderColorMode>{8};         ///< Defines BDCLMD bit.
+    inline static const auto interlace_mode        = BitRange<InterlaceMode>{6, 7};        ///< Defines LSMDx bit.
+    inline static const auto vertical_resolution   = BitRange<VerticalResolution>{4, 5};   ///< Defines VRESOx bit.
+    inline static const auto horizontal_resolution = BitRange<HorizontalResolution>{0, 2}; ///< Defines HRESOx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -352,12 +352,12 @@ enum class TvStandardFlag : u8 {
 class ScreenStatus : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<ExternalLatchFlag>   external_latch_flag{9};   ///< Defines EXLTFG bit.
-    inline static const BitRange<ExternalSyncFlag>    external_sync_flag{8};    ///< Defines EXSYFG bit.
-    inline static const BitRange<VerticalBlankFlag>   vertical_blank_flag{3};   ///< Defines VBLANK bit.
-    inline static const BitRange<HorizontalBlankFlag> horizontal_blank_flag{2}; ///< Defines HBLANK bit.
-    inline static const BitRange<ScanFieldFlag>       scan_field_flag{1};       ///< Defines ODD bit.
-    inline static const BitRange<TvStandardFlag>      tv_standard_flag{0};      ///< Defines PAL bit.
+    inline static const auto external_latch_flag   = BitRange<ExternalLatchFlag>{9};   ///< Defines EXLTFG bit.
+    inline static const auto external_sync_flag    = BitRange<ExternalSyncFlag>{8};    ///< Defines EXSYFG bit.
+    inline static const auto vertical_blank_flag   = BitRange<VerticalBlankFlag>{3};   ///< Defines VBLANK bit.
+    inline static const auto horizontal_blank_flag = BitRange<HorizontalBlankFlag>{2}; ///< Defines HBLANK bit.
+    inline static const auto scan_field_flag       = BitRange<ScanFieldFlag>{1};       ///< Defines ODD bit.
+    inline static const auto tv_standard_flag      = BitRange<TvStandardFlag>{0};      ///< Defines PAL bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -383,8 +383,8 @@ enum class VramSize : u8 {
 class VramSizeRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<VramSize> vram_size{15};        ///< Defines VRAMSZ bit.
-    inline static const BitRange<u8>       version_number{0, 3}; ///< Defines VERx bits.
+    inline static const auto vram_size      = BitRange<VramSize>{15}; ///< Defines VRAMSZ bit.
+    inline static const auto version_number = BitRange<u8>{0, 3};     ///< Defines VERx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -475,10 +475,10 @@ enum class VramMode : u8 {
 class RamControl : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<CoefficientTableStorage> coefficient_table_storage{15}; ///< Defines CRKTE bit.
-    inline static const BitRange<ColorRamMode>            color_ram_mode{12, 13};        ///< Defines CRMDx bits.
-    inline static const BitRange<VramMode>                vram_b_mode_{9};               ///< Defines VRBMD bit.
-    inline static const BitRange<VramMode>                vram_a_mode_{8};               ///< Defines VRAMD bit.
+    inline static const auto coefficient_table_storage = BitRange<CoefficientTableStorage>{15}; ///< Defines CRKTE bit.
+    inline static const auto color_ram_mode            = BitRange<ColorRamMode>{12, 13};        ///< Defines CRMDx bits.
+    inline static const auto vram_b_mode_              = BitRange<VramMode>{9};                 ///< Defines VRBMD bit.
+    inline static const auto vram_a_mode_              = BitRange<VramMode>{8};                 ///< Defines VRAMD bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -513,10 +513,10 @@ enum class VramAccessCommand : u8 {
 class VramCyclePatternBankA0Lower : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t0{12, 15}; ///< Defines VCP0A0x bits.
-    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t1{8, 11};  ///< Defines VCP1A0x bits.
-    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t2{4, 7};   ///< Defines VCP2A0x bits.
-    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t3{0, 3};   ///< Defines VCP3A0x bits.
+    inline static const auto vram_a0_timing_for_t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0A0x bits.
+    inline static const auto vram_a0_timing_for_t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1A0x bits.
+    inline static const auto vram_a0_timing_for_t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2A0x bits.
+    inline static const auto vram_a0_timing_for_t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3A0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -531,10 +531,10 @@ class VramCyclePatternBankA0Lower : public Register {
 class VramCyclePatternBankA0Upper : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t4{12, 15}; ///< Defines VCP4A0x bits.
-    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t5{8, 11};  ///< Defines VCP5A0x bits.
-    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t6{4, 7};   ///< Defines VCP6A0x bits.
-    inline static const BitRange<VramAccessCommand> vram_a0_timing_for_t7{0, 3};   ///< Defines VCP7A0x bits.
+    inline static const auto vram_a0_timing_for_t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4A0x bits.
+    inline static const auto vram_a0_timing_for_t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5A0x bits.
+    inline static const auto vram_a0_timing_for_t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6A0x bits.
+    inline static const auto vram_a0_timing_for_t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7A0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -549,10 +549,10 @@ class VramCyclePatternBankA0Upper : public Register {
 class VramCyclePatternBankA1Lower : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t0{12, 15}; ///< Defines VCP0A1x bits.
-    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t1{8, 11};  ///< Defines VCP1A1x bits.
-    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t2{4, 7};   ///< Defines VCP2A1x bits.
-    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t3{0, 3};   ///< Defines VCP3A1x bits.
+    inline static const auto vram_a1_timing_for_t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0A1x bits.
+    inline static const auto vram_a1_timing_for_t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1A1x bits.
+    inline static const auto vram_a1_timing_for_t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2A1x bits.
+    inline static const auto vram_a1_timing_for_t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3A1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -567,10 +567,10 @@ class VramCyclePatternBankA1Lower : public Register {
 class VramCyclePatternBankA1Upper : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t4{12, 15}; ///< Defines VCP4A1x bits.
-    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t5{8, 11};  ///< Defines VCP5A1x bits.
-    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t6{4, 7};   ///< Defines VCP6A1x bits.
-    inline static const BitRange<VramAccessCommand> vram_a1_timing_for_t7{0, 3};   ///< Defines VCP7A1x bits.
+    inline static const auto vram_a1_timing_for_t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4A1x bits.
+    inline static const auto vram_a1_timing_for_t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5A1x bits.
+    inline static const auto vram_a1_timing_for_t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6A1x bits.
+    inline static const auto vram_a1_timing_for_t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7A1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -585,10 +585,10 @@ class VramCyclePatternBankA1Upper : public Register {
 class VramCyclePatternBankB0Lower : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t0{12, 15}; ///< Defines VCP0B0x bits.
-    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t1{8, 11};  ///< Defines VCP1B0x bits.
-    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t2{4, 7};   ///< Defines VCP2B0x bits.
-    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t3{0, 3};   ///< Defines VCP3B0x bits.
+    inline static const auto vram_b0_timing_for_t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0B0x bits.
+    inline static const auto vram_b0_timing_for_t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1B0x bits.
+    inline static const auto vram_b0_timing_for_t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2B0x bits.
+    inline static const auto vram_b0_timing_for_t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3B0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -603,10 +603,10 @@ class VramCyclePatternBankB0Lower : public Register {
 class VramCyclePatternBankB0Upper : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t4{12, 15}; ///< Defines VCP4B0x bits.
-    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t5{8, 11};  ///< Defines VCP5B0x bits.
-    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t6{4, 7};   ///< Defines VCP6B0x bits.
-    inline static const BitRange<VramAccessCommand> vram_b0_timing_for_t7{0, 3};   ///< Defines VCP7B0x bits.
+    inline static const auto vram_b0_timing_for_t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4B0x bits.
+    inline static const auto vram_b0_timing_for_t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5B0x bits.
+    inline static const auto vram_b0_timing_for_t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6B0x bits.
+    inline static const auto vram_b0_timing_for_t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7B0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -621,10 +621,10 @@ class VramCyclePatternBankB0Upper : public Register {
 class VramCyclePatternBankB1Lower : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t0{12, 15}; ///< Defines VCP0B1x bits.
-    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t1{8, 11};  ///< Defines VCP1B1x bits.
-    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t2{4, 7};   ///< Defines VCP2B1x bits.
-    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t3{0, 3};   ///< Defines VCP3B1x bits.
+    inline static const auto vram_b1_timing_for_t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0B1x bits.
+    inline static const auto vram_b1_timing_for_t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1B1x bits.
+    inline static const auto vram_b1_timing_for_t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2B1x bits.
+    inline static const auto vram_b1_timing_for_t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3B1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -639,10 +639,10 @@ class VramCyclePatternBankB1Lower : public Register {
 class VramCyclePatternBankB1Upper : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t4{12, 15}; ///< Defines VCP4B1x bits.
-    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t5{8, 11};  ///< Defines VCP5B1x bits.
-    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t6{4, 7};   ///< Defines VCP6B1x bits.
-    inline static const BitRange<VramAccessCommand> vram_b1_timing_for_t7{0, 3};   ///< Defines VCP7B1x bits.
+    inline static const auto vram_b1_timing_for_t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4B1x bits.
+    inline static const auto vram_b1_timing_for_t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5B1x bits.
+    inline static const auto vram_b1_timing_for_t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6B1x bits.
+    inline static const auto vram_b1_timing_for_t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7B1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -680,17 +680,17 @@ enum class ScreenDisplayEnableBit : u8 {
 class ScreenDisplayEnable : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_rbg0{12}; ///< Defines R0TPON bit.
-    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_nbg3{11}; ///< Defines N3TPON bit.
-    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_nbg2{10}; ///< Defines N2TPON bit.
-    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_nbg1{9};  ///< Defines N1TPON bit.
-    inline static const BitRange<TransparentDisplayEnable> transparency_display_enable_nbg0{8};  ///< Defines N0TPON bit.
-    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_rbg1{5};        ///< Defines R1ON bit.
-    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_rbg0{4};        ///< Defines R0ON bit.
-    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_nbg3{3};        ///< Defines N3ON bit.
-    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_nbg2{2};        ///< Defines N2ON bit.
-    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_nbg1{1};        ///< Defines N1ON bit.
-    inline static const BitRange<ScreenDisplayEnableBit>   screen_display_enable_nbg0{0};        ///< Defines N0ON bit.
+    inline static const auto transparency_display_enable_rbg0 = BitRange<TransparentDisplayEnable>{12}; ///< Defines R0TPON bit.
+    inline static const auto transparency_display_enable_nbg3 = BitRange<TransparentDisplayEnable>{11}; ///< Defines N3TPON bit.
+    inline static const auto transparency_display_enable_nbg2 = BitRange<TransparentDisplayEnable>{10}; ///< Defines N2TPON bit.
+    inline static const auto transparency_display_enable_nbg1 = BitRange<TransparentDisplayEnable>{9};  ///< Defines N1TPON bit.
+    inline static const auto transparency_display_enable_nbg0 = BitRange<TransparentDisplayEnable>{8};  ///< Defines N0TPON bit.
+    inline static const auto screen_display_enable_rbg1       = BitRange<ScreenDisplayEnableBit>{5};    ///< Defines R1ON bit.
+    inline static const auto screen_display_enable_rbg0       = BitRange<ScreenDisplayEnableBit>{4};    ///< Defines R0ON bit.
+    inline static const auto screen_display_enable_nbg3       = BitRange<ScreenDisplayEnableBit>{3};    ///< Defines N3ON bit.
+    inline static const auto screen_display_enable_nbg2       = BitRange<ScreenDisplayEnableBit>{2};    ///< Defines N2ON bit.
+    inline static const auto screen_display_enable_nbg1       = BitRange<ScreenDisplayEnableBit>{1};    ///< Defines N1ON bit.
+    inline static const auto screen_display_enable_nbg0       = BitRange<ScreenDisplayEnableBit>{0};    ///< Defines N0ON bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -832,14 +832,14 @@ enum class CharacterSize : u8 {
 class CharacterControlA : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<CharacterColorNumber2Bits> character_color_number_nbg1{12, 13}; ///< Defines N1CHCNx bits.
-    inline static const BitRange<CharacterColorNumber3bits> character_color_number_nbg0{4, 6};   ///< Defines N0CHCNx bits.
-    inline static const BitRange<BitmapSize2Bits>           bitmap_size_nbg1{10, 11};            ///< Defines N1BMSZx bits.
-    inline static const BitRange<BitmapSize2Bits>           bitmap_size_nbg0{2, 3};              ///< Defines N0BMSZx bits.
-    inline static const BitRange<BitmapEnable>              bitmap_enable_nbg0{1};               ///< Defines N0BMEN bit.
-    inline static const BitRange<BitmapEnable>              bitmap_enable_nbg1{9};               ///< Defines N1BMEN bit.
-    inline static const BitRange<CharacterSize>             character_size_nbg0{0};              ///< Defines N0CHSZ bit.
-    inline static const BitRange<CharacterSize>             character_size_nbg1{8};              ///< Defines N1CHSZ bit.
+    inline static const auto character_color_number_nbg1 = BitRange<CharacterColorNumber2Bits>{12, 13}; ///< Defines N1CHCNx bits.
+    inline static const auto character_color_number_nbg0 = BitRange<CharacterColorNumber3bits>{4, 6};   ///< Defines N0CHCNx bits.
+    inline static const auto bitmap_size_nbg1            = BitRange<BitmapSize2Bits>{10, 11};           ///< Defines N1BMSZx bits.
+    inline static const auto bitmap_size_nbg0            = BitRange<BitmapSize2Bits>{2, 3};             ///< Defines N0BMSZx bits.
+    inline static const auto bitmap_enable_nbg0          = BitRange<BitmapEnable>{1};                   ///< Defines N0BMEN bit.
+    inline static const auto bitmap_enable_nbg1          = BitRange<BitmapEnable>{9};                   ///< Defines N1BMEN bit.
+    inline static const auto character_size_nbg0         = BitRange<CharacterSize>{0};                  ///< Defines N0CHSZ bit.
+    inline static const auto character_size_nbg1         = BitRange<CharacterSize>{8};                  ///< Defines N1CHSZ bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -854,14 +854,14 @@ class CharacterControlA : public Register {
 class CharacterControlB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<CharacterColorNumber3bits> character_color_number_rbg0{12, 14}; ///< Defines R0CHCNx bits.
-    inline static const BitRange<CharacterColorNumber1Bit>  character_color_number_nbg3{5};      ///< Defines N3CHCNx bit.
-    inline static const BitRange<CharacterColorNumber1Bit>  character_color_number_nbg2{1};      ///< Defines N2CHCNx bit.
-    inline static const BitRange<BitmapSize1Bit>            bitmap_size_rbg0{2};                 ///< Defines R0BMSZ bit.
-    inline static const BitRange<BitmapEnable>              bitmap_enable_rbg0{9};               ///< Defines R0BMEN bit.
-    inline static const BitRange<CharacterSize>             character_size_nbg2{0};              ///< Defines N2CHSZ bit.
-    inline static const BitRange<CharacterSize>             character_size_nbg3{4};              ///< Defines N3CHSZ bit.
-    inline static const BitRange<CharacterSize>             character_size_rbg0{8};              ///< Defines R0CHSZ bit.
+    inline static const auto character_color_number_rbg0 = BitRange<CharacterColorNumber3bits>{12, 14}; ///< Defines R0CHCNx bits.
+    inline static const auto character_color_number_nbg3 = BitRange<CharacterColorNumber1Bit>{5};       ///< Defines N3CHCNx bit.
+    inline static const auto character_color_number_nbg2 = BitRange<CharacterColorNumber1Bit>{1};       ///< Defines N2CHCNx bit.
+    inline static const auto bitmap_size_rbg0            = BitRange<BitmapSize1Bit>{2};                 ///< Defines R0BMSZ bit.
+    inline static const auto bitmap_enable_rbg0          = BitRange<BitmapEnable>{9};                   ///< Defines R0BMEN bit.
+    inline static const auto character_size_nbg2         = BitRange<CharacterSize>{0};                  ///< Defines N2CHSZ bit.
+    inline static const auto character_size_nbg3         = BitRange<CharacterSize>{4};                  ///< Defines N3CHSZ bit.
+    inline static const auto character_size_rbg0         = BitRange<CharacterSize>{8};                  ///< Defines R0CHSZ bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -876,12 +876,12 @@ class CharacterControlB : public Register {
 class BitmapPaletteNumberA : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> bitmap_special_priority_nbg0{5};           ///< Defines N0BMPR bit.
-    inline static const BitRange<u8> bitmap_special_priority_nbg1{13};          ///< Defines N1BMPR bit.
-    inline static const BitRange<u8> bitmap_special_color_calculation_nbg0{4};  ///< Defines N0BMCC bit.
-    inline static const BitRange<u8> bitmap_special_color_calculation_nbg1{12}; ///< Defines N1BMCC bit.
-    inline static const BitRange<u8> bitmap_palette_number_nbg0{0, 2};          ///< Defines N0BMPx bit.
-    inline static const BitRange<u8> bitmap_palette_number_nbg1{8, 10};         ///< Defines N1BMPx bit.
+    inline static const auto bitmap_special_priority_nbg0          = BitRange<u8>{5};     ///< Defines N0BMPR bit.
+    inline static const auto bitmap_special_priority_nbg1          = BitRange<u8>{13};    ///< Defines N1BMPR bit.
+    inline static const auto bitmap_special_color_calculation_nbg0 = BitRange<u8>{4};     ///< Defines N0BMCC bit.
+    inline static const auto bitmap_special_color_calculation_nbg1 = BitRange<u8>{12};    ///< Defines N1BMCC bit.
+    inline static const auto bitmap_palette_number_nbg0            = BitRange<u8>{0, 2};  ///< Defines N0BMPx bit.
+    inline static const auto bitmap_palette_number_nbg1            = BitRange<u8>{8, 10}; ///< Defines N1BMPx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -896,9 +896,9 @@ class BitmapPaletteNumberA : public Register {
 class BitmapPaletteNumberB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> bitmap_special_priority_rbg0{5};          ///< Defines N0BMPR bit.
-    inline static const BitRange<u8> bitmap_special_color_calculation_rbg0{4}; ///< Defines R0BMCC bit.
-    inline static const BitRange<u8> bitmap_palette_number_rbg0{0, 2};         ///< Defines R0BMPx bit.
+    inline static const auto bitmap_special_priority_rbg0          = BitRange<u8>{5};    ///< Defines N0BMPR bit.
+    inline static const auto bitmap_special_color_calculation_rbg0 = BitRange<u8>{4};    ///< Defines R0BMCC bit.
+    inline static const auto bitmap_palette_number_rbg0            = BitRange<u8>{0, 2}; ///< Defines R0BMPx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -936,11 +936,11 @@ enum class CharacterNumberSupplementMode : u8 {
 class PatternNameControlNbg0 : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines N0PNB bit.
-    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines N0CNSM bit.
-    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines N0SCC bit.
-    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines N0SPLTx bits.
-    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines N0SCNx bits.
+    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N0PNB bit.
+    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N0CNSM bit.
+    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N0SCC bit.
+    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N0SPLTx bits.
+    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N0SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -955,11 +955,11 @@ class PatternNameControlNbg0 : public Register {
 class PatternNameControlNbg1 : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines N1PNB bit.
-    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines N1CNSM bit.
-    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines N1SCC bit.
-    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines N1SPLTx bits.
-    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines N1SCNx bits.
+    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N1PNB bit.
+    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N1CNSM bit.
+    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N1SCC bit.
+    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N1SPLTx bits.
+    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N1SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -974,11 +974,11 @@ class PatternNameControlNbg1 : public Register {
 class PatternNameControlNbg2 : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines N2PNB bit.
-    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines N2CNSM bit.
-    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines N2SCC bit.
-    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines N2SPLTx bits.
-    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines N2SCNx bits.
+    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N2PNB bit.
+    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N2CNSM bit.
+    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N2SCC bit.
+    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N2SPLTx bits.
+    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N2SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -993,11 +993,11 @@ class PatternNameControlNbg2 : public Register {
 class PatternNameControlNbg3 : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines N3PNB bit.
-    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines N3CNSM bit.
-    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines N3SCC bit.
-    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines N3SPLTx bits.
-    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines N3SCNx bits.
+    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N3PNB bit.
+    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N3CNSM bit.
+    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N3SCC bit.
+    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N3SPLTx bits.
+    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N3SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1012,11 +1012,11 @@ class PatternNameControlNbg3 : public Register {
 class PatternNameControlRbg0 : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<PatternNameDataSize>           pattern_name_data_size{15};           ///< Defines R0PNB bit.
-    inline static const BitRange<CharacterNumberSupplementMode> character_number_mode{14};            ///< Defines R0CNSM bit.
-    inline static const BitRange<u8>                            special_color_calculation{8};         ///< Defines R0SCC bit.
-    inline static const BitRange<u8>                            supplementary_palette_number{5, 7};   ///< Defines R0SPLTx bits.
-    inline static const BitRange<u8>                            supplementary_character_number{0, 4}; ///< Defines R0SCNx bits.
+    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines R0PNB bit.
+    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines R0CNSM bit.
+    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines R0SCC bit.
+    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines R0SPLTx bits.
+    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines R0SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1060,14 +1060,14 @@ enum class ScreenOverProcess : u8 {
 class PlaneSizeRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<PlaneSize>         plane_size_nbg0{0, 1};   ///< Defines N0PLSZx bits.
-    inline static const BitRange<PlaneSize>         plane_size_nbg1{2, 3};   ///< Defines N1PLSZx bits.
-    inline static const BitRange<PlaneSize>         plane_size_nbg2{4, 5};   ///< Defines N2PLSZx bits.
-    inline static const BitRange<PlaneSize>         plane_size_nbg3{6, 7};   ///< Defines N3PLSZx bits.
-    inline static const BitRange<PlaneSize>         plane_size_rpa{8, 9};    ///< Defines RAPLSZx bits.
-    inline static const BitRange<PlaneSize>         plane_size_rpb{12, 13};  ///< Defines RBPLSZx bits.
-    inline static const BitRange<ScreenOverProcess> screen_over_rpa{10, 11}; ///< Defines RAOVRx bits.
-    inline static const BitRange<ScreenOverProcess> screen_over_rpb{14, 15}; ///< Defines RBOVRx bits.
+    inline static const auto plane_size_nbg0 = BitRange<PlaneSize>{0, 1};           ///< Defines N0PLSZx bits.
+    inline static const auto plane_size_nbg1 = BitRange<PlaneSize>{2, 3};           ///< Defines N1PLSZx bits.
+    inline static const auto plane_size_nbg2 = BitRange<PlaneSize>{4, 5};           ///< Defines N2PLSZx bits.
+    inline static const auto plane_size_nbg3 = BitRange<PlaneSize>{6, 7};           ///< Defines N3PLSZx bits.
+    inline static const auto plane_size_rpa  = BitRange<PlaneSize>{8, 9};           ///< Defines RAPLSZx bits.
+    inline static const auto plane_size_rpb  = BitRange<PlaneSize>{12, 13};         ///< Defines RBPLSZx bits.
+    inline static const auto screen_over_rpa = BitRange<ScreenOverProcess>{10, 11}; ///< Defines RAOVRx bits.
+    inline static const auto screen_over_rpb = BitRange<ScreenOverProcess>{14, 15}; ///< Defines RBOVRx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1082,10 +1082,10 @@ class PlaneSizeRegister : public Register {
 class MapOffsetNbg : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> map_offset_nbg0{0, 2};   ///< Defines N0MPx bits.
-    inline static const BitRange<u8> map_offset_nbg1{4, 6};   ///< Defines N1MPx bits.
-    inline static const BitRange<u8> map_offset_nbg2{8, 10};  ///< Defines N2MPx bits.
-    inline static const BitRange<u8> map_offset_nbg3{12, 14}; ///< Defines N3MPx bits.
+    inline static const auto map_offset_nbg0 = BitRange<u8>{0, 2};   ///< Defines N0MPx bits.
+    inline static const auto map_offset_nbg1 = BitRange<u8>{4, 6};   ///< Defines N1MPx bits.
+    inline static const auto map_offset_nbg2 = BitRange<u8>{8, 10};  ///< Defines N2MPx bits.
+    inline static const auto map_offset_nbg3 = BitRange<u8>{12, 14}; ///< Defines N3MPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1100,8 +1100,8 @@ class MapOffsetNbg : public Register {
 class MapOffsetRbg : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> map_offset_rpa{0, 2}; ///< Defines RAMPx bits.
-    inline static const BitRange<u8> map_offset_rpb{4, 6}; ///< Defines RBMPx bits.
+    inline static const auto map_offset_rpa = BitRange<u8>{0, 2}; ///< Defines RAMPx bits.
+    inline static const auto map_offset_rpb = BitRange<u8>{4, 6}; ///< Defines RBMPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1116,8 +1116,8 @@ class MapOffsetRbg : public Register {
 class MapNbg0PlaneAB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines N0MPAx bits.
-    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines N0MPBx bits.
+    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines N0MPAx bits.
+    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines N0MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1132,8 +1132,8 @@ class MapNbg0PlaneAB : public Register {
 class MapNbg0PlaneCD : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines N0MPCx bits.
-    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines N0MPDx bits.
+    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines N0MPCx bits.
+    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines N0MPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1148,8 +1148,8 @@ class MapNbg0PlaneCD : public Register {
 class MapNbg1PlaneAB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines N1MPAx bits.
-    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines N1MPBx bits.
+    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines N1MPAx bits.
+    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines N1MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1164,8 +1164,8 @@ class MapNbg1PlaneAB : public Register {
 class MapNbg1PlaneCD : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines N1MPCx bits.
-    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines N1MPDx bits.
+    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines N1MPCx bits.
+    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines N1MPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1180,8 +1180,8 @@ class MapNbg1PlaneCD : public Register {
 class MapNbg2PlaneAB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines N2MPAx bits.
-    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines N2MPBx bits.
+    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines N2MPAx bits.
+    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines N2MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1196,8 +1196,8 @@ class MapNbg2PlaneAB : public Register {
 class MapNbg2PlaneCD : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines N2MPCx bits.
-    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines N2MPDx bits.
+    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines N2MPCx bits.
+    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines N2MPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1212,8 +1212,8 @@ class MapNbg2PlaneCD : public Register {
 class MapNbg3PlaneAB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines N3MPAx bits.
-    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines N3MPBx bits.
+    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines N3MPAx bits.
+    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines N3MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1228,8 +1228,8 @@ class MapNbg3PlaneAB : public Register {
 class MapNbg3PlaneCD : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines N3MPCx bits.
-    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines N3MPDx bits.
+    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines N3MPCx bits.
+    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines N3MPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1244,8 +1244,8 @@ class MapNbg3PlaneCD : public Register {
 class MapRotationParameterAPlaneAB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines RAMPAx bits.
-    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines RAMPBx bits.
+    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines RAMPAx bits.
+    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines RAMPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1260,8 +1260,8 @@ class MapRotationParameterAPlaneAB : public Register {
 class MapRotationParameterAPlaneCD : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines RAMPCx bits.
-    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines RAMPDx bits.
+    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines RAMPCx bits.
+    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines RAMPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1276,8 +1276,8 @@ class MapRotationParameterAPlaneCD : public Register {
 class MapRotationParameterAPlaneEF : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_e{0, 5};  ///< Defines RAMPEx bits.
-    inline static const BitRange<u8> plane_f{8, 13}; ///< Defines RAMPFx bits.
+    inline static const auto plane_e = BitRange<u8>{0, 5};  ///< Defines RAMPEx bits.
+    inline static const auto plane_f = BitRange<u8>{8, 13}; ///< Defines RAMPFx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1292,8 +1292,8 @@ class MapRotationParameterAPlaneEF : public Register {
 class MapRotationParameterAPlaneGH : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_g{0, 5};  ///< Defines RAMPGx bits.
-    inline static const BitRange<u8> plane_h{8, 13}; ///< Defines RAMPHx bits.
+    inline static const auto plane_g = BitRange<u8>{0, 5};  ///< Defines RAMPGx bits.
+    inline static const auto plane_h = BitRange<u8>{8, 13}; ///< Defines RAMPHx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1308,8 +1308,8 @@ class MapRotationParameterAPlaneGH : public Register {
 class MapRotationParameterAPlaneIJ : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_i{0, 5};  ///< Defines RAMPIx bits.
-    inline static const BitRange<u8> plane_j{8, 13}; ///< Defines RAMPJx bits.
+    inline static const auto plane_i = BitRange<u8>{0, 5};  ///< Defines RAMPIx bits.
+    inline static const auto plane_j = BitRange<u8>{8, 13}; ///< Defines RAMPJx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1324,8 +1324,8 @@ class MapRotationParameterAPlaneIJ : public Register {
 class MapRotationParameterAPlaneKL : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_k{0, 5};  ///< Defines RAMPKx bits.
-    inline static const BitRange<u8> plane_l{8, 13}; ///< Defines RAMPLx bits.
+    inline static const auto plane_k = BitRange<u8>{0, 5};  ///< Defines RAMPKx bits.
+    inline static const auto plane_l = BitRange<u8>{8, 13}; ///< Defines RAMPLx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1340,8 +1340,8 @@ class MapRotationParameterAPlaneKL : public Register {
 class MapRotationParameterAPlaneMN : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_m{0, 5};  ///< Defines RAMPMx bits.
-    inline static const BitRange<u8> plane_n{8, 13}; ///< Defines RAMPNx bits.
+    inline static const auto plane_m = BitRange<u8>{0, 5};  ///< Defines RAMPMx bits.
+    inline static const auto plane_n = BitRange<u8>{8, 13}; ///< Defines RAMPNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1356,8 +1356,8 @@ class MapRotationParameterAPlaneMN : public Register {
 class MapRotationParameterAPlaneOP : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_o{0, 5};  ///< Defines RAMPOx bits.
-    inline static const BitRange<u8> plane_p{8, 13}; ///< Defines RAMPPx bits.
+    inline static const auto plane_o = BitRange<u8>{0, 5};  ///< Defines RAMPOx bits.
+    inline static const auto plane_p = BitRange<u8>{8, 13}; ///< Defines RAMPPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1372,8 +1372,8 @@ class MapRotationParameterAPlaneOP : public Register {
 class MapRotationParameterBPlaneAB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_a{0, 5};  ///< Defines RBMPAx bits.
-    inline static const BitRange<u8> plane_b{8, 13}; ///< Defines RBMPBx bits.
+    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines RBMPAx bits.
+    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines RBMPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1388,8 +1388,8 @@ class MapRotationParameterBPlaneAB : public Register {
 class MapRotationParameterBPlaneCD : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_c{0, 5};  ///< Defines RBMPCx bits.
-    inline static const BitRange<u8> plane_d{8, 13}; ///< Defines RBMPDx bits.
+    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines RBMPCx bits.
+    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines RBMPDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1404,8 +1404,8 @@ class MapRotationParameterBPlaneCD : public Register {
 class MapRotationParameterBPlaneEF : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_e{0, 5};  ///< Defines RBMPEx bits.
-    inline static const BitRange<u8> plane_f{8, 13}; ///< Defines RBMPFx bits.
+    inline static const auto plane_e = BitRange<u8>{0, 5};  ///< Defines RBMPEx bits.
+    inline static const auto plane_f = BitRange<u8>{8, 13}; ///< Defines RBMPFx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1420,8 +1420,8 @@ class MapRotationParameterBPlaneEF : public Register {
 class MapRotationParameterBPlaneGH : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_g{0, 5};  ///< Defines RBMPGx bits.
-    inline static const BitRange<u8> plane_h{8, 13}; ///< Defines RBMPHx bits.
+    inline static const auto plane_g = BitRange<u8>{0, 5};  ///< Defines RBMPGx bits.
+    inline static const auto plane_h = BitRange<u8>{8, 13}; ///< Defines RBMPHx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1436,8 +1436,8 @@ class MapRotationParameterBPlaneGH : public Register {
 class MapRotationParameterBPlaneIJ : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_i{0, 5};  ///< Defines RBMPIx bits.
-    inline static const BitRange<u8> plane_j{8, 13}; ///< Defines RBMPJx bits.
+    inline static const auto plane_i = BitRange<u8>{0, 5};  ///< Defines RBMPIx bits.
+    inline static const auto plane_j = BitRange<u8>{8, 13}; ///< Defines RBMPJx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1452,8 +1452,8 @@ class MapRotationParameterBPlaneIJ : public Register {
 class MapRotationParameterBPlaneKL : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_k{0, 5};  ///< Defines RBMPKx bits.
-    inline static const BitRange<u8> plane_l{8, 13}; ///< Defines RBMPLx bits.
+    inline static const auto plane_k = BitRange<u8>{0, 5};  ///< Defines RBMPKx bits.
+    inline static const auto plane_l = BitRange<u8>{8, 13}; ///< Defines RBMPLx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1468,8 +1468,8 @@ class MapRotationParameterBPlaneKL : public Register {
 class MapRotationParameterBPlaneMN : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_m{0, 5};  ///< Defines RBMPMx bits.
-    inline static const BitRange<u8> plane_n{8, 13}; ///< Defines RBMPNx bits.
+    inline static const auto plane_m = BitRange<u8>{0, 5};  ///< Defines RBMPMx bits.
+    inline static const auto plane_n = BitRange<u8>{8, 13}; ///< Defines RBMPNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1484,8 +1484,8 @@ class MapRotationParameterBPlaneMN : public Register {
 class MapRotationParameterBPlaneOP : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> plane_o{0, 5};  ///< Defines RBMPOx bits.
-    inline static const BitRange<u8> plane_p{8, 13}; ///< Defines RBMPPx bits.
+    inline static const auto plane_o = BitRange<u8>{0, 5};  ///< Defines RBMPOx bits.
+    inline static const auto plane_p = BitRange<u8>{8, 13}; ///< Defines RBMPPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1796,10 +1796,10 @@ enum class ZoomHalf : u8 { none = 0, up_to_one_half = 1 };
 class ReductionEnable : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<ZoomHalf>    zoom_half_nbg0{0};    ///< Defines N0ZMHF bits.
-    inline static const BitRange<ZoomQuarter> zoom_quarter_nbg0{1}; ///< Defines N0ZMQT bits.
-    inline static const BitRange<ZoomHalf>    zoom_half_nbg1{8};    ///< Defines N1ZMHF bits.
-    inline static const BitRange<ZoomQuarter> zoom_quarter_nbg1{9}; ///< Defines N1ZMQT bits.
+    inline static const auto zoom_half_nbg0    = BitRange<ZoomHalf>{0};    ///< Defines N0ZMHF bits.
+    inline static const auto zoom_quarter_nbg0 = BitRange<ZoomQuarter>{1}; ///< Defines N0ZMQT bits.
+    inline static const auto zoom_half_nbg1    = BitRange<ZoomHalf>{8};    ///< Defines N1ZMHF bits.
+    inline static const auto zoom_quarter_nbg1 = BitRange<ZoomQuarter>{9}; ///< Defines N1ZMQT bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2472,8 +2472,8 @@ class PriorityNumberSpriteD : public Register {
 class PriorityNumberA : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> nbg1{8, 10}; ///< Defines the priority number of NBG1 (N1PRINx).
-    inline static const BitRange<u8> nbg0{0, 2};  ///< Defines the priority number of NBG0 (N0PRINx).
+    inline static const auto nbg1 = BitRange<u8>{8, 10}; ///< Defines the priority number of NBG1 (N1PRINx).
+    inline static const auto nbg0 = BitRange<u8>{0, 2};  ///< Defines the priority number of NBG0 (N0PRINx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2488,8 +2488,8 @@ class PriorityNumberA : public Register {
 class PriorityNumberB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> nbg3{8, 10}; ///< Defines the priority number of NBG3 (N3PRINx).
-    inline static const BitRange<u8> nbg2{0, 2};  ///< Defines the priority number of NBG2 (N2PRINx).
+    inline static const auto nbg3 = BitRange<u8>{8, 10}; ///< Defines the priority number of NBG3 (N3PRINx).
+    inline static const auto nbg2 = BitRange<u8>{0, 2};  ///< Defines the priority number of NBG2 (N2PRINx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2504,7 +2504,7 @@ class PriorityNumberB : public Register {
 class PriorityNumberR : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> rbg0{0, 2}; ///< Defines the priority number of RBG0 (R0PRINx).
+    inline static const auto rbg0 = BitRange<u8>{0, 2}; ///< Defines the priority number of RBG0 (R0PRINx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

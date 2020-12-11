@@ -44,24 +44,24 @@ using core::Log;
 using core::tr;
 
 void OpenglModern::initialize() {
-    GLFWwindow* window = glfwGetCurrentContext();
-    s32         display_w{};
-    s32         display_h{};
+    const auto window    = glfwGetCurrentContext();
+    auto       display_w = s32{};
+    auto       display_h = s32{};
     glfwGetFramebufferSize(window, &display_w, &display_h);
     initializeTexture(display_w, display_h);
 
     glGenFramebuffers(1, &fbo_);
     bindTextureToFbo();
-    auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    const auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
         Log::error("opengl", "Could not initialize framebuffer object !");
         throw std::runtime_error("Opengl error !");
     }
 
-    u32 vertex_shader                       = createVertexShader();
-    u32 fragment_shader                     = createFragmentShader();
-    program_shader_                         = createProgramShader(vertex_shader, fragment_shader);
-    std::vector<uint32_t> shaders_to_delete = {vertex_shader, fragment_shader};
+    const auto vertex_shader     = createVertexShader();
+    const auto fragment_shader   = createFragmentShader();
+    program_shader_              = createProgramShader(vertex_shader, fragment_shader);
+    const auto shaders_to_delete = std::vector<uint32_t>{vertex_shader, fragment_shader};
     deleteShaders(shaders_to_delete);
 
     if (!generateUiIcons()) { Log::warning("opengl", tr("Could not generate textures for UI icons !")); }
@@ -76,7 +76,7 @@ void OpenglModern::shutdown() {
 auto OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 
-    u32 texture{};
+    auto texture = u32{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -85,7 +85,7 @@ auto OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     // gl::GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-    std::array<GLenum, 1> draw_buffers = {GL_COLOR_ATTACHMENT0};
+    const auto draw_buffers = std::array<GLenum, 1>{GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, draw_buffers.data()); // "1" is the size of DrawBuffers
 
     return texture;
@@ -105,7 +105,7 @@ void OpenglModern::deleteTexture() const {
 u32 OpenglModern::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const {
     glEnable(GL_TEXTURE_2D);
 
-    u32 texture{};
+    auto texture = u32{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -144,8 +144,7 @@ auto OpenglModern::createVertexShader() -> u32 {
         }
     )";
 
-    u32 vertex_shader{};
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
     glCompileShader(vertex_shader);
     checkShaderCompilation(vertex_shader);
@@ -166,8 +165,7 @@ auto OpenglModern::createFragmentShader() -> u32 {
         } 
     )";
 
-    u32 fragment_shader{};
-    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    const auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
     glCompileShader(fragment_shader);
 
@@ -178,7 +176,7 @@ auto OpenglModern::createFragmentShader() -> u32 {
 
 /* static */
 auto OpenglModern::createProgramShader(const u32 vertex_shader, const u32 fragment_shader) -> u32 {
-    u32 shader_program = glCreateProgram();
+    const auto shader_program = glCreateProgram();
 
     glAttachShader(shader_program, vertex_shader);
     glAttachShader(shader_program, fragment_shader);
@@ -200,7 +198,7 @@ void OpenglModern::setupTriangle() {
     constexpr std::array<float, 9> vertices = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
 
     glGenVertexArrays(1, &vao_);
-    u32 vertex_buffer{};
+    auto vertex_buffer = u32{};
     glGenBuffers(1, &vertex_buffer);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(vao_);
@@ -225,9 +223,10 @@ void OpenglModern::drawTriangle() {
     glBindVertexArray(vao_); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep
                              // things a bit more organized
 
-    glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+    // glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+    const auto rotate = glm::mat4{glm::rotate(glm::mat4(1.0f), (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f))};
 
-    GLint uni_rotate = glGetUniformLocation(program_shader_, "rotate");
+    const auto uni_rotate = glGetUniformLocation(program_shader_, "rotate");
     glUniformMatrix4fv(uni_rotate, 1, GL_FALSE, glm::value_ptr(rotate));
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -273,9 +272,9 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
 #endif
     std::string window_title = fmt::format(core::tr("Saturnin {0} - Modern rendering"), core::saturnin_version);
 
-    constexpr u16 h_window_size{1280};
-    constexpr u16 v_window_size{720};
-    auto          window = glfwCreateWindow(h_window_size, v_window_size, window_title.c_str(), nullptr, nullptr);
+    constexpr auto h_window_size = u16{1280};
+    constexpr auto v_window_size = u16{720};
+    const auto     window        = glfwCreateWindow(h_window_size, v_window_size, window_title.c_str(), nullptr, nullptr);
     if (window == nullptr) { return EXIT_FAILURE; }
 
     state.openglWindow(window);
@@ -294,7 +293,7 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    auto io = ImGui::GetIO();
     (void)io;
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
@@ -316,9 +315,10 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
     // io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
-    const ImVec4 clear_color = {0.45f, 0.55f, 0.60f, 1.00f};
+    const auto clear_color = ImVec4{0.45f, 0.55f, 0.60f, 1.00f};
 
-    OpenglModern opengl(state.config());
+    // OpenglModern opengl(state.config());
+    auto opengl = OpenglModern(state.config());
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
@@ -330,8 +330,8 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
         ImGui::NewFrame();
 
         // Rendering
-        s32 display_w{};
-        s32 display_h{};
+        auto display_w = s32{};
+        auto display_h = s32{};
         glfwMakeContextCurrent(window);
         glfwGetFramebufferSize(window, &display_w, &display_h);
         // glViewport(0, 0, display_w, display_h);
@@ -361,17 +361,17 @@ auto runModernOpengl(core::EmulatorContext& state) -> s32 {
 }
 
 void checkShaderCompilation(const u32 shader) {
-    GLboolean success{};
+    auto success = GLboolean{};
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    s32 length{};
+    auto length = s32{};
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
     if (success == GL_FALSE) {
-        std::vector<char> v(length);
+        auto v = std::vector<char>(length);
         glGetShaderInfoLog(shader, length, nullptr, v.data());
-        std::string info(v.begin(), v.end());
+        const auto info = std::string(v.begin(), v.end());
 
-        GLenum      type{};
-        std::string shader_type{};
+        auto type        = GLenum{};
+        auto shader_type = std::string{};
         glGetShaderiv(shader, GL_SHADER_TYPE, &type);
         switch (type) {
             case GL_VERTEX_SHADER: shader_type = "Vertex shader"; break;
@@ -384,15 +384,15 @@ void checkShaderCompilation(const u32 shader) {
 }
 
 void checkProgramCompilation(const u32 program) {
-    GLboolean success{};
+    auto success = GLboolean{};
     glGetProgramiv(program, GL_LINK_STATUS, &success);
-    s32 length{};
+    auto length = s32{};
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
 
     if (success == GL_FALSE) {
-        std::vector<char> v(length);
+        auto v = std::vector<char>(length);
         glGetProgramInfoLog(program, length, nullptr, v.data());
-        std::string info(v.begin(), v.end());
+        const auto info = std::string(v.begin(), v.end());
 
         Log::error("opengl", "Shader program link failed : {}", info);
         throw std::runtime_error("Opengl error !");

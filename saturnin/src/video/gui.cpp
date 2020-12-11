@@ -68,28 +68,28 @@ using sh2::Sh2Type;
 void showImguiDemoWindow(const bool show_window) {
     // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
     if (show_window) {
-        const ImVec2 window_pos(650, 20);
+        const auto window_pos = ImVec2(650, 20);
         ImGui::SetNextWindowPos(window_pos, ImGuiCond_FirstUseEver);
         ImGui::ShowDemoWindow();
     }
 }
 
 void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration;
+    auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_NoDecoration};
     window_flags |= ImGuiWindowFlags_NoMove;
 
-    const ImVec2 window_pos(0, 0);
+    const auto window_pos = ImVec2(0, 0);
     ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
 
-    GLFWwindow* window = glfwGetCurrentContext();
-    s32         width{};
-    s32         height{};
+    auto window = glfwGetCurrentContext();
+    auto width  = s32{};
+    auto height = s32{};
     glfwGetWindowSize(window, &width, &height);
 
-    const ImVec2 window_size(static_cast<float>(width), 42);
+    const auto window_size = ImVec2(static_cast<float>(width), 42);
     ImGui::SetNextWindowSize(window_size);
 
-    bool show_window;
+    auto show_window = bool{};
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
@@ -103,7 +103,7 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
 
     ImGui::Begin("Core", &show_window, window_flags);
 
-    const ImVec2 button_size(30, 30);
+    const auto button_size = ImVec2(30, 30);
 
     {
         // File icon
@@ -113,7 +113,7 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
             ImGui::OpenPopup("file_popup");
         }
 
-        ImGuiWindowFlags popup_flags = ImGuiWindowFlags_NoMove;
+        auto popup_flags = ImGuiWindowFlags{ImGuiWindowFlags_NoMove};
         if (ImGui::BeginPopup("file_popup", popup_flags)) {
             ImGui::MenuItem(tr("Load ST-V rom"), nullptr, &show_load_stv);
             ImGui::MenuItem(tr("Load binary file"), nullptr, &show_load_binary);
@@ -192,16 +192,16 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
 } // namespace saturnin::gui
 
 void showRenderingWindow(video::Opengl& opengl, const u32 width, const u32 height) {
-    constexpr float offset{40};
+    constexpr auto offset = float{40};
     ImGui::SetNextWindowPos(ImVec2(0, 0 + offset), ImGuiCond_Once);
 
-    const ImVec2 window_size(static_cast<float>(width), static_cast<float>(height + offset));
+    const auto window_size = ImVec2(static_cast<float>(width), static_cast<float>(height + offset));
     ImGui::SetNextWindowSize(window_size);
 
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize;
+    auto flags = ImGuiWindowFlags{ImGuiWindowFlags_NoResize};
     flags |= ImGuiWindowFlags_NoScrollbar;
     flags |= ImGuiWindowFlags_NoCollapse;
     flags |= ImGuiWindowFlags_NoSavedSettings;
@@ -231,7 +231,7 @@ void showRenderingWindow(video::Opengl& opengl, const u32 width, const u32 heigh
 void showStvWindow(bool* opened) {
     auto files = core::listStvConfigurationFiles();
 
-    static int listbox_item_current = 1;
+    static auto listbox_item_current = int{1};
 
     ImGui::Begin("ST-V window", opened);
     ImGui::Combo("", &listbox_item_current, files);
@@ -239,25 +239,26 @@ void showStvWindow(bool* opened) {
 }
 
 void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
-    static bool reset_rendering{}; // used to check if rendering has to be reset after changing the option
+    static auto reset_rendering = bool{}; // used to check if rendering has to be reset after changing the option
     // ImGui::SetNextWindowSize(ImVec2(600, 300));
-    constexpr s8 item_width{-10};
+    constexpr auto item_width = s8{-10};
     ImGui::Begin("Options", opened);
     ImGui::PushItemWidth(item_width);
     ImGui::Spacing();
 
-    constexpr u8 second_column_offset{150};
+    constexpr auto second_column_offset = u8{150};
     // General header
     if (ImGui::CollapsingHeader(tr("General"))) {
         // Hardware mode
         ImGui::TextUnformatted(tr("Hardware mode"));
         ImGui::SameLine(second_column_offset);
 
+        // std::string hm   = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
         std::string hm   = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
-        static int  mode = util::toUnderlying(core::Config::hardware_mode[hm]);
+        static auto mode = int{util::toUnderlying(core::Config::hardware_mode[hm])};
 
         if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::HardwareMode::saturn))) {
-            auto it = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::saturn);
+            const auto it = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::saturn);
             if (it != core::Config::hardware_mode.end()) {
                 state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, it->first);
             } else {
@@ -266,7 +267,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::HardwareMode::stv))) {
-            auto it = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::stv);
+            const auto it = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::stv);
             if (it != core::Config::hardware_mode.end()) {
                 state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, it->first);
             } else {
@@ -280,8 +281,8 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
         static auto locales = core::Config::listAvailableLanguages();
         std::string l       = state.config()->readValue(core::AccessKeys::cfg_global_language);
-        auto        it      = std::find_if(locales.begin(), locales.end(), [&l](std::string& str) { return l == str; });
-        static s32  index   = static_cast<s32>(it - locales.begin());
+        const auto  it      = std::find_if(locales.begin(), locales.end(), [&l](std::string& str) { return l == str; });
+        static auto index   = static_cast<s32>(it - locales.begin());
         if (ImGui::Combo("##language", &index, locales)) {
             state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
         }
@@ -292,8 +293,8 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
         static auto codes      = core::Config::listAreaCodes();
         std::string c          = state.config()->readValue(core::AccessKeys::cfg_global_area_code);
-        auto        it_code    = std::find_if(codes.begin(), codes.end(), [&c](std::string& str) { return c == str; });
-        static s32  index_code = static_cast<s32>(it_code - codes.begin());
+        const auto  it_code    = std::find_if(codes.begin(), codes.end(), [&c](std::string& str) { return c == str; });
+        static auto index_code = static_cast<s32>(it_code - codes.begin());
         if (ImGui::Combo("##area_code", &index_code, codes)) {
             state.config()->writeValue(core::AccessKeys::cfg_global_area_code, codes[index_code]);
         }
@@ -306,10 +307,10 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::SameLine(second_column_offset);
 
         std::string ts       = state.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-        static int  standard = util::toUnderlying(core::Config::tv_standard[ts]);
+        static auto standard = int{util::toUnderlying(core::Config::tv_standard[ts])};
 
         if (ImGui::RadioButton("PAL", &standard, util::toUnderlying(video::TvStandard::pal))) {
-            auto it = util::getKeyFromValue(core::Config::tv_standard, video::TvStandard::pal);
+            const auto it = util::getKeyFromValue(core::Config::tv_standard, video::TvStandard::pal);
             if (it != core::Config::tv_standard.end()) {
                 state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, it->first);
             } else {
@@ -318,7 +319,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("NTSC", &standard, util::toUnderlying(video::TvStandard::ntsc))) {
-            auto it = util::getKeyFromValue(core::Config::tv_standard, video::TvStandard::ntsc);
+            const auto it = util::getKeyFromValue(core::Config::tv_standard, video::TvStandard::ntsc);
             if (it != core::Config::tv_standard.end()) {
                 state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, it->first);
             } else {
@@ -331,7 +332,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::SameLine(second_column_offset);
 
         static bool is_legacy         = state.config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
-        bool        initial_rendering = is_legacy;
+        const auto  initial_rendering = bool{is_legacy};
         if (ImGui::Checkbox("", &is_legacy)) {
             state.config()->writeValue(core::AccessKeys::cfg_rendering_legacy_opengl, is_legacy);
             if (initial_rendering != is_legacy) { reset_rendering = true; }
@@ -344,7 +345,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::TextUnformatted(tr("Saturn bios"));
         ImGui::SameLine(second_column_offset);
 
-        constexpr u8 string_size{255};
+        constexpr auto string_size = u8{255};
         auto bios_saturn = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_bios_saturn), string_size);
         if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
             state.config()->writeValue(core::AccessKeys::cfg_paths_bios_saturn, bios_saturn.data());
@@ -375,16 +376,16 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::TextUnformatted(tr("Drive"));
         ImGui::SameLine(second_column_offset);
 
-        std::string drive = state.config()->readValue(core::AccessKeys::cfg_cdrom_drive);
-        static int  current_item{};
-        auto        drive_parts = util::explode(drive, ':');
+        std::string drive        = state.config()->readValue(core::AccessKeys::cfg_cdrom_drive);
+        static auto current_item = int{};
+        const auto  drive_parts  = util::explode(drive, ':');
         if (drive_parts.size() == 3) {
             current_item
                 = cdrom::Cdrom::getDriveIndice(std::stoi(drive_parts[0]), std::stoi(drive_parts[1]), std::stoi(drive_parts[2]));
         }
 
         if (ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list)) {
-            std::string value = std::to_string(cdrom::Cdrom::di_list[current_item].path);
+            auto value = std::to_string(cdrom::Cdrom::di_list[current_item].path);
             value += ':';
             value += std::to_string(cdrom::Cdrom::di_list[current_item].target);
             value += ':';
@@ -398,9 +399,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::SameLine(second_column_offset);
 
         std::string access_method = state.config()->readValue(core::AccessKeys::cfg_cdrom_access_method);
-        static int  method        = util::toUnderlying(core::Config::cdrom_access[access_method]);
+        static auto method        = int{util::toUnderlying(core::Config::cdrom_access[access_method])};
         if (ImGui::RadioButton("SPTI", &method, util::toUnderlying(cdrom::CdromAccessMethod::spti))) {
-            auto it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::CdromAccessMethod::spti);
+            const auto it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::CdromAccessMethod::spti);
             if (it != core::Config::cdrom_access.end()) {
                 state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, it->first);
             } else {
@@ -409,7 +410,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("ASPI", &method, util::toUnderlying(cdrom::CdromAccessMethod::aspi))) {
-            auto it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::CdromAccessMethod::aspi);
+            const auto it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::CdromAccessMethod::aspi);
             if (it != core::Config::cdrom_access.end()) {
                 state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, it->first);
             } else {
@@ -434,17 +435,17 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     if (ImGui::CollapsingHeader(tr("Peripherals"))) {
         static const auto keys{core::Smpc::listAvailableKeys()};
 
-        ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+        auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
         if (ImGui::BeginTabBar("PeripheralTabBar", tab_bar_flags)) {
-            ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
-            constexpr float  rounding{5.0f};
-            constexpr float  child_width_ratio{0.5f};
-            constexpr u16    child_height{280};
+            auto           window_flags      = ImGuiWindowFlags{ImGuiWindowFlags_None};
+            constexpr auto rounding          = float{5.0f};
+            constexpr auto child_width_ratio = float{0.5f};
+            constexpr auto child_height      = u16{280};
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, rounding);
             if (ImGui::BeginTabItem("Saturn")) {
                 {
                     //**** Saturn Player 1 ****//
-                    static SaturnDigitalPad pad;
+                    static auto pad = SaturnDigitalPad{};
                     pad.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_1));
 
                     ImGui::BeginChild("ChildSaturnPlayer1",
@@ -460,9 +461,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::SameLine(second_column_offset);
                     static auto connections = core::Config::listPeripheralConnections();
                     std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
-                    auto        it_connection
+                    const auto  it_connection
                         = std::find_if(connections.begin(), connections.end(), [&c](std::string& str) { return c == str; });
-                    static s32 index_connection = static_cast<s32>(it_connection - connections.begin());
+                    static auto index_connection = static_cast<s32>(it_connection - connections.begin());
                     if (ImGui::Combo("##peripheral_connection_1", &index_connection, connections)) {
                         state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
                                                    connections[index_connection]);
@@ -528,7 +529,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::SameLine();
                 {
                     //**** Saturn Player 2 ****//
-                    static SaturnDigitalPad pad_p2;
+                    static auto pad_p2 = SaturnDigitalPad{};
                     pad_p2.fromConfig(
                         state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_2));
 
@@ -544,9 +545,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::SameLine(second_column_offset);
                     static auto connections = core::Config::listPeripheralConnections();
                     std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
-                    auto        it_connection
+                    const auto  it_connection
                         = std::find_if(connections.begin(), connections.end(), [&c](std::string& str) { return c == str; });
-                    static s32 index_connection = static_cast<s32>(it_connection - connections.begin());
+                    static auto index_connection = static_cast<s32>(it_connection - connections.begin());
                     if (ImGui::Combo("##peripheral_connection_2", &index_connection, connections)) {
                         state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
                                                    connections[index_connection]);
@@ -614,11 +615,11 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
             if (ImGui::BeginTabItem("ST-V")) {
                 {
                     //**** ST-V Board ****//
-                    static StvBoardControls board;
+                    static auto board = StvBoardControls{};
                     board.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_board));
 
-                    constexpr u16 h_size{0};
-                    constexpr u16 v_size{160};
+                    constexpr auto h_size = u16{0};
+                    constexpr auto v_size = u16{160};
                     ImGui::BeginChild("ChildStvBoard", ImVec2(h_size, v_size), true, window_flags);
 
                     ImGui::CenteredText(tr("Board"));
@@ -655,10 +656,10 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                 {
                     //**** ST-V Player 1 ****//
-                    static StvPlayerControls controls;
+                    static auto controls = StvPlayerControls{};
                     controls.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
 
-                    constexpr u16 child_height{220};
+                    constexpr auto child_height = u16{220};
                     ImGui::BeginChild("ChildStvPlayer1",
                                       ImVec2(ImGui::GetWindowContentRegionWidth() * child_width_ratio, child_height),
                                       true,
@@ -708,10 +709,10 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::SameLine();
                 {
                     //**** ST-V Player 2 ****//
-                    static StvPlayerControls controls;
+                    static auto controls = StvPlayerControls{};
                     controls.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
 
-                    constexpr u16 child_height{220};
+                    constexpr auto child_height = u16{220};
                     ImGui::BeginChild("ChildStvPlayer2",
                                       ImVec2(ImGui::GetWindowContentRegionWidth() * child_width_ratio, child_height),
                                       true,
@@ -767,8 +768,8 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::PopItemWidth();
     }
 
-    static u16         counter{};
-    static std::string status_message{};
+    static auto counter        = u16{};
+    static auto status_message = std::string{};
     if (ImGui::Button("Save")) {
         state.config()->writeFile();
         state.smpc()->initializePeripheralMappings();
@@ -777,10 +778,10 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         std::string hm = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
         state.hardwareMode(core::Config::hardware_mode[hm]);
 
-        status_message = tr("Configuration saved.");
-        const u8 frames_per_second{60};
-        const u8 number_of_seconds{5};
-        counter = number_of_seconds * frames_per_second;
+        status_message                   = tr("Configuration saved.");
+        constexpr auto frames_per_second = u8{60};
+        constexpr auto number_of_seconds = u8{5};
+        counter                          = number_of_seconds * frames_per_second;
 
         if (reset_rendering) {
             state.renderingStatus(core::RenderingStatus::reset);
@@ -800,20 +801,20 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showLogWindow(bool* opened) {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
+    auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_None};
     window_flags |= ImGuiWindowFlags_NoResize;
     window_flags |= ImGuiWindowFlags_NoSavedSettings;
 
-    const ImVec2 window_size(700, 150);
+    const auto window_size = ImVec2(700, 150);
     ImGui::SetNextWindowSize(window_size);
 
-    GLFWwindow* window = glfwGetCurrentContext();
-    s32         width{};
-    s32         height{};
+    auto window = glfwGetCurrentContext();
+    auto width  = s32{};
+    auto height = s32{};
     glfwGetWindowSize(window, &width, &height);
 
-    const auto   v_pos{(float)height - window_size.y};
-    const ImVec2 window_pos(0, v_pos);
+    const auto v_pos{(float)height - window_size.y};
+    const auto window_pos = ImVec2(0, v_pos);
     ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
 
     ImGui::Begin("Log", opened, window_flags);
@@ -821,7 +822,7 @@ void showLogWindow(bool* opened) {
     const auto stream = Log::getStream();
     ImGui::TextUnformatted(stream.c_str());
 
-    static size_t current_size{0};
+    static auto current_size = size_t{};
     if (stream.size() > current_size) {
         ImGui::SetScrollHereY(1.0f);
         current_size = stream.size();
@@ -831,15 +832,15 @@ void showLogWindow(bool* opened) {
 }
 
 void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, bool* opened) {
-    const ImVec2 window_size(650, 420);
+    const auto window_size = ImVec2(650, 420);
     ImGui::SetNextWindowSize(window_size);
 
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse
-                                    | ImGuiWindowFlags_NoScrollbar;
+    auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings
+                                         | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar};
     ImGui::Begin("Sh2 debug", opened, window_flags);
 
-    static Sh2Type sh2_type{Sh2Type::master};
-    static u32     current_pc{state.slaveSh2()->getRegister(Sh2Register::pc)};
+    static auto sh2_type   = Sh2Type{Sh2Type::master};
+    static auto current_pc = u32{state.slaveSh2()->getRegister(Sh2Register::pc)};
     if (ImGui::RadioButton(tr("Master"), sh2_type == Sh2Type::master)) {
         sh2_type = Sh2Type::master;
         //        current_pc = state.masterSh2()->getRegister(Sh2Register::pc);
@@ -879,14 +880,14 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
 
     {
         // General registers
-        const ImVec2 child_size(300, 240);
+        const auto child_size = ImVec2(300, 240);
         ImGui::BeginChild("ChildRegisters", child_size, true, window_flags);
 
         ImGui::TextDisabled(tr("General registers"));
         ImGui::Separator();
 
-        const std::string mask{"R{:<2d} = {:#010x}"};
-        u8                i{};
+        const auto mask = std::string{"R{:<2d} = {:#010x}"};
+        auto       i    = u8{};
 
         ImGui::Columns(2);
         ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r0)).c_str());
@@ -921,7 +922,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         ImGui::Separator();
 
         ImGui::Columns(2);
-        const std::string system_mask{"{:<4} = {:#010x}"};
+        const auto system_mask = std::string{"{:<4} = {:#010x}"};
         ImGui::TextUnformatted(fmt::format(system_mask, "MACH", current_sh2->getRegister(Sh2Register::mach)).c_str());
         ImGui::TextUnformatted(fmt::format(system_mask, "MACL", current_sh2->getRegister(Sh2Register::macl)).c_str());
         ImGui::TextUnformatted(fmt::format(system_mask, "PR", current_sh2->getRegister(Sh2Register::pr)).c_str());
@@ -930,7 +931,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         ImGui::NextColumn();
 
         // ImGui::Separator();
-        const std::string control_mask{"{:<3} = {:#010x}"};
+        const auto control_mask = std::string{"{:<3} = {:#010x}"};
         ImGui::TextUnformatted(fmt::format(control_mask, "VBR", current_sh2->getRegister(Sh2Register::vbr)).c_str());
         ImGui::TextUnformatted(fmt::format(control_mask, "GBR", current_sh2->getRegister(Sh2Register::gbr)).c_str());
         ImGui::TextUnformatted(fmt::format(control_mask, "SR", current_sh2->getRegister(Sh2Register::sr)).c_str());
@@ -940,7 +941,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
     ImGui::SameLine();
     {
         // Disassembly
-        const ImVec2 child_size(330, 240);
+        const auto child_size = ImVec2(330, 240);
         ImGui::BeginChild("ChildDisassembly", child_size, true, window_flags);
 
         ImGui::TextDisabled(tr("Disassembly"));
@@ -951,7 +952,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         ImGui::SetColumnWidth(1, 25.0f);
 
         for (u32 i = (current_pc - 6); i < (current_pc + 20); i += 2) {
-            auto opcode = state.memory()->read<u16>(i);
+            const auto opcode = state.memory()->read<u16>(i);
             if (i == current_pc) {
                 ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), sh2::disasm(i, opcode).c_str());
             } else {
@@ -982,13 +983,13 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
     {
         // Callstack
 
-        const ImVec2 child_size(330, 100);
+        const auto child_size = ImVec2(330, 100);
         ImGui::BeginChild("ChildCallstack", child_size, true, window_flags);
 
         ImGui::TextDisabled(tr("Callstack"));
         ImGui::Separator();
 
-        const std::string callstack_mask{"{:#010x}"};
+        const auto callstack_mask = std::string{"{:#010x}"};
         for (auto i = current_sh2->callstack().rbegin(); i != current_sh2->callstack().rend(); ++i) {
             ImGui::TextUnformatted(fmt::format(callstack_mask, (*i).call_address).c_str());
         }
@@ -1000,17 +1001,18 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
 }
 
 void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
-    const ImVec2 window_size(600, 320);
+    const auto window_size = ImVec2(600, 320);
     ImGui::SetNextWindowSize(window_size);
 
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
+    auto window_flags
+        = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
     ImGui::Begin(tr("Memory debug"), opened, window_flags);
 
     static auto current_area = MemoryMapArea::rom;
 
     if (ImGui::BeginCombo(tr("Memory area"), state.memory()->memory_map_[current_area].c_str())) {
         for (const auto& [k, v] : state.memory()->memory_map_) {
-            bool is_selected = (current_area == k);
+            const auto is_selected = bool{current_area == k};
             if (ImGui::Selectable(v.c_str(), is_selected)) { current_area = k; }
             if (is_selected) { ImGui::SetItemDefaultFocus(); }
         }
@@ -1021,7 +1023,7 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
     switch (current_area) {
         case MemoryMapArea::vdp2_registers:
             for (auto const& r : state.memory()->vdp2()->getRegisters()) {
-                std::string mask{"{:#010x} {:<35} : {:#06x}"};
+                const auto mask = std::string{"{:#010x} {:<35} : {:#06x}"};
 
                 ImGui::TextUnformatted(
                     fmt::format(mask, r.first, r.second, state.memory()->vdp2()->readRegisters<u16>(r.first)).c_str());
@@ -1034,8 +1036,8 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
             }
             break;
         default:
-            auto                area_data = state.memory()->getMemoryMapAreaData(current_area);
-            static MemoryEditor editor; // store your state somewhere
+            auto        area_data = state.memory()->getMemoryMapAreaData(current_area);
+            static auto editor    = MemoryEditor{}; // store your state somewhere
             editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
     }
 
@@ -1045,8 +1047,8 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 width, const u32 height) {
     showCoreWindow(state, opengl);
 
-    constexpr u16 window_width{320};
-    constexpr u16 window_height{200};
+    constexpr auto window_width  = u16{320};
+    constexpr auto window_height = u16{200};
     showRenderingWindow(opengl, window_width, window_height);
 
     if (show_demo) { showImguiDemoWindow(show_demo); }

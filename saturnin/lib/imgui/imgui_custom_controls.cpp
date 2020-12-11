@@ -80,8 +80,8 @@ auto ImageButtonWithText(ImTextureID   texId,
 }
 
 void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& default_key, const std::string& combo_name) {
-    const std::string default_key_name{getKeyName(default_key)};
-    std::string       combo{"##combo_" + combo_name};
+    const auto default_key_name = std::string{getKeyName(default_key)};
+    const auto combo            = std::string{"##combo_" + combo_name};
     if (ImGui::BeginCombo(combo.c_str(), default_key_name.c_str())) {
         for (auto key : keys) {
             bool is_selected = (default_key_name.c_str() == getKeyName(key).c_str());
@@ -95,8 +95,8 @@ void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& d
 }
 
 void CenteredText(const std::string& text) {
-    auto            size = ImGui::CalcTextSize(text.c_str());
-    constexpr float ratio{0.5f};
+    auto           size  = ImGui::CalcTextSize(text.c_str());
+    constexpr auto ratio = float{0.5f};
     ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * ratio - size.x / 2);
     ImGui::Text(text.c_str());
 }

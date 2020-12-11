@@ -42,15 +42,15 @@ using core::Log;
 using core::tr;
 
 void OpenglLegacy::initialize() {
-    GLFWwindow* window = glfwGetCurrentContext();
-    s32         display_w{};
-    s32         display_h{};
+    const auto window    = glfwGetCurrentContext();
+    auto       display_w = s32{};
+    auto       display_h = s32{};
     glfwGetFramebufferSize(window, &display_w, &display_h);
     initializeTexture(display_w, display_h);
 
     glGenFramebuffersEXT(1, &fbo_);
     bindTextureToFbo();
-    auto status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    const auto status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
     if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
         Log::error("opengl", tr("Could not initialize framebuffer object !"));
         throw std::runtime_error("Opengl error !");
@@ -82,19 +82,19 @@ void OpenglLegacy::preRender() {
 };
 
 void OpenglLegacy::render() {
-    static float i = 0;
+    static auto i = float{0};
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 0.0f);
     glRotatef(i, 0.0f, 0.0f, 1.0f);
 
     //    glBegin(GL_TRIANGLES);
-    constexpr float red{1.0f};
-    constexpr float green{0.5f};
-    constexpr float blue{0.2f};
-    constexpr float alpha{1.0f};
+    constexpr auto red   = float{1.0f};
+    constexpr auto green = float{0.5f};
+    constexpr auto blue  = float{0.2f};
+    constexpr auto alpha = float{1.0f};
     glColor4f(red, green, blue, alpha);
 
-    constexpr std::array<float, 9> verts = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+    constexpr auto verts = std::array<float, 9>{-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
 
     // activate and specify pointer to vertex array
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -123,7 +123,7 @@ void OpenglLegacy::updateTextureSize(const u32 width, const u32 height) {
 }
 
 auto OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
-    u32 texture{};
+    auto texture = u32{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -145,7 +145,7 @@ void OpenglLegacy::deleteTexture() const {
 u32 OpenglLegacy::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const {
     glEnable(GL_TEXTURE_2D);
 
-    u32 texture{};
+    auto texture = u32{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -168,10 +168,10 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
     glfwSetErrorCallback(error_callback);
     if (glfwInit() == GLFW_FALSE) { return EXIT_FAILURE; }
 
-    std::string   window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
-    constexpr u16 width{1280};
-    constexpr u16 height{720};
-    auto          window = glfwCreateWindow(width, height, window_title.c_str(), nullptr, nullptr);
+    const auto     window_title = fmt::format(core::tr("Saturnin {0} - Legacy rendering"), core::saturnin_version);
+    constexpr auto width        = u16{1280};
+    constexpr auto height       = u16{720};
+    const auto     window       = glfwCreateWindow(width, height, window_title.c_str(), nullptr, nullptr);
     if (window == nullptr) { return EXIT_FAILURE; }
 
     state.openglWindow(window);
@@ -210,7 +210,7 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    auto io = ImGui::GetIO();
     (void)io;
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
@@ -234,7 +234,7 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
     // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    const ImVec4 clear_color(0.45f, 0.55f, 0.60f, 1.00f);
+    const auto clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
@@ -245,8 +245,8 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
         // glfwSetFramebufferSizeCallback(window, opengl.framebufferSizeCallback );
 
         // Rendering
-        s32 display_w{};
-        s32 display_h{};
+        auto display_w = s32{};
+        auto display_h = s32{};
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);

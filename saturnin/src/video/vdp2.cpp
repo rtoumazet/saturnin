@@ -38,7 +38,7 @@ using core::tr;
 void Vdp2::initialize() {
     initializeRegisterNameMap();
 
-    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    const std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (Config::tv_standard[ts]) {
         case video::TvStandard::pal: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard); break;
         case video::TvStandard::ntsc: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard); break;
@@ -418,8 +418,8 @@ void Vdp2::write16(const u32 addr, const u16 data) {
 }
 
 void Vdp2::write32(const u32 addr, const u32 data) {
-    u16 h = (data >> displacement_16);
-    u16 l = (data & bitmask_FFFF);
+    const auto h = u16{(data >> displacement_16)};
+    const auto l = u16{(data & bitmask_FFFF)};
     switch (addr) {
         case vram_cycle_pattern_bank_a0_lower:
             cyca0l_.set(bits_0_15, h);
@@ -857,29 +857,30 @@ void Vdp2::calculateDisplayDuration() {
     //      - 262.5 lines for NTSC
     //      - 312.5 for PAL
 
-    constexpr u16 lines_nb_224{224};
-    constexpr u16 lines_nb_240{240};
-    constexpr u16 lines_nb_256{256};
+    constexpr auto lines_nb_224 = u16{224};
+    constexpr auto lines_nb_240 = u16{240};
+    constexpr auto lines_nb_256 = u16{256};
 
     std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (Config::tv_standard[ts]) {
         case video::TvStandard::pal: {
-            const seconds frame_duration{1.0 / 50.0};
-            cycles_per_frame_ = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
+            constexpr auto frame_duration = seconds{1.0 / 50.0};
+            cycles_per_frame_             = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
 
-            constexpr u16 total_lines{313};
-            u16           visible_lines{};
+            constexpr auto total_lines   = u16{313};
+            auto           visible_lines = u16{};
             switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
                 case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
                 case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
                 case VerticalResolution::lines_nb_256: visible_lines = lines_nb_256; break;
+                default: core::Log::warning("vdp2", core::tr("Unknown PAL vertical resolution."));
             }
-            const u16 vblank_lines{static_cast<u16>(total_lines - visible_lines)};
-            cycles_per_vblank_  = vblank_lines * cycles_per_frame_ / total_lines;
-            cycles_per_vactive_ = cycles_per_frame_ - cycles_per_vblank_;
+            const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
+            cycles_per_vblank_      = vblank_lines * cycles_per_frame_ / total_lines;
+            cycles_per_vactive_     = cycles_per_frame_ - cycles_per_vblank_;
 
-            const micro pal_total_line_duration{64};
-            const micro pal_hblank_duration{12};
+            constexpr auto pal_total_line_duration = micro{64};
+            constexpr auto pal_hblank_duration     = micro{12};
             calculateLineDuration(pal_total_line_duration, pal_hblank_duration);
 
             // constexpr auto total_line_duration{nano(64)};
@@ -891,39 +892,43 @@ void Vdp2::calculateDisplayDuration() {
             break;
         }
         case video::TvStandard::ntsc: {
-            const seconds frame_duration{1.0 / 60.0};
-            cycles_per_frame_ = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
+            constexpr auto frame_duration = seconds{1.0 / 60.0};
+            cycles_per_frame_             = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
 
-            constexpr u16 total_lines{263};
-            u16           visible_lines{};
+            constexpr auto total_lines   = u16{263};
+            auto           visible_lines = u16{};
             switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
                 case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
                 case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
+                default: core::Log::warning("vdp2", core::tr("Unknown NTSC vertical resolution."));
             }
-            const u16 vblank_lines{static_cast<u16>(total_lines - visible_lines)};
-            cycles_per_vblank_  = vblank_lines * cycles_per_frame_ / total_lines;
-            cycles_per_vactive_ = cycles_per_frame_ - cycles_per_vblank_;
+            const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
+            cycles_per_vblank_      = vblank_lines * cycles_per_frame_ / total_lines;
+            cycles_per_vactive_     = cycles_per_frame_ - cycles_per_vblank_;
 
-            const micro ntsc_total_line_duration{63.5};
-            const micro ntsc_hblank_duration{10.9};
+            constexpr auto ntsc_total_line_duration = micro{63.5};
+            constexpr auto ntsc_hblank_duration     = micro{10.9};
             calculateLineDuration(ntsc_total_line_duration, ntsc_hblank_duration);
             break;
+        }
+        default: {
+            core::Log::warning("vdp2", core::tr("Undefined TV standard."));
         }
     }
 }
 
 void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& hblank_duration) {
-    const auto active_line_duration{total_line_duration - hblank_duration};
-    cycles_per_hblank_  = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
-    cycles_per_hactive_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
-    cycles_per_line_    = cycles_per_hactive_ + cycles_per_hblank_;
+    const auto active_line_duration = micro{total_line_duration - hblank_duration};
+    cycles_per_hblank_              = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
+    cycles_per_hactive_             = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
+    cycles_per_line_                = cycles_per_hactive_ + cycles_per_hblank_;
 }
 
 auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
-    u8               required_pattern_name_data_reads{};
-    u8               required_character_pattern_data_reads{};
-    u8               required_bitmap_pattern_data_reads{};
-    ReductionSetting reduction{ReductionSetting::none};
+    auto required_pattern_name_data_reads      = u8{};
+    auto required_character_pattern_data_reads = u8{};
+    auto required_bitmap_pattern_data_reads    = u8{};
+    auto reduction                             = ReductionSetting{ReductionSetting::none};
 
     // First check to ensure scroll screen must be displayed. If the screen cannot display, no vram access will be performed.
     switch (s) {
@@ -971,26 +976,36 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 
             break;
         }
-        case ScrollScreen::nbg1:
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg1) == ScreenDisplayEnableBit::cannot_display)
+        case ScrollScreen::nbg1: {
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
+            }
             break;
-        case ScrollScreen::nbg2:
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg2) == ScreenDisplayEnableBit::cannot_display)
+        }
+        case ScrollScreen::nbg2: {
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg2) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
+            }
             break;
-        case ScrollScreen::nbg3:
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg3) == ScreenDisplayEnableBit::cannot_display)
+        }
+        case ScrollScreen::nbg3: {
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg3) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
+            }
             break;
-        case ScrollScreen::rbg0:
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display)
+        }
+        case ScrollScreen::rbg0: {
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
+            }
             break;
-        case ScrollScreen::rbg1:
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display)
+        }
+        case ScrollScreen::rbg1: {
+            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
+            }
             break;
+        }
     }
 
     if (ramctl_.get(RamControl::vram_a_mode_) == VramMode::no_partition) {}
@@ -1009,7 +1024,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 void Vdp2::setVramTimingLimitations() {}
 
 auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
-    ReductionSetting r{ReductionSetting::none};
+    auto r = ReductionSetting{ReductionSetting::none};
     if (zq == ZoomQuarter::up_to_one_quarter) {
         r = ReductionSetting::up_to_one_quarter;
     } else {

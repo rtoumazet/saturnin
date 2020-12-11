@@ -313,7 +313,7 @@ class EmulatorContext {
     /// \name Command line variables
     ///
     //@{
-    std::string command_line_{""};       ///< Command line content
+    std::string command_line_{};         ///< Command line content
     bool        binary_autoload_{false}; ///< True when the binary has to be automatically loaded.
     uint32_t    binary_address_{0};      ///< The PC will be set to this address after loading the binary.
     //@}

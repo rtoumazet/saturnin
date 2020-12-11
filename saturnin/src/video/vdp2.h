@@ -55,11 +55,12 @@ using micro   = std::chrono::duration<double, std::micro>;
 //     - 224 or 240 active lines
 //     - 39 or 23 corresponding blanking lines
 
-constexpr u8 vram_access_none = 0xff;
-constexpr u8 vram_access_1    = 1;
-constexpr u8 vram_access_2    = 2;
-constexpr u8 vram_access_4    = 4;
-constexpr u8 vram_access_8    = 8;
+constexpr auto vram_access_none = u8{0xff};
+constexpr auto vram_access_1    = u8{1};
+constexpr auto vram_access_2    = u8{2};
+constexpr auto vram_access_4    = u8{4};
+constexpr auto vram_access_8    = u8{8};
+constexpr auto vram_timing_size = u8{8};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   TvStandard
@@ -293,7 +294,7 @@ class Vdp2 {
     u16 timer_0_counter_{}; ///< Timer 0 counter.
     u16 timer_1_counter_{}; ///< Timer 1 counter.
 
-    using VramTiming = std::array<bool, 8>;
+    using VramTiming = std::array<bool, vram_timing_size>;
 
     VramTiming a0_{false, false, false, false, false, false, false, false};
     VramTiming a1_{false, false, false, false, false, false, false, false};

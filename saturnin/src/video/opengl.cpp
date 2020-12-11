@@ -37,8 +37,8 @@ using core::Log;
 using core::tr;
 
 Opengl::Opengl(core::Config* config) {
-    config_        = config;
-    bool is_legacy = config->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
+    config_ = config;
+    // bool is_legacy = config->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
 
     // iconsTextureId = generateIconsTexture();
 }
@@ -68,28 +68,28 @@ static void error_callback(int error, const char* description) { fprintf(stderr,
 auto Opengl::generateTextureFromFile(const std::string& filename) const -> u32 {
     const auto full_path{std::filesystem::current_path() / "res" / filename};
 
-    std::ifstream input_file(full_path, std::ios::binary);
+    auto input_file = std::ifstream(full_path, std::ios::binary);
     if (!input_file) {
         Log::warning("opengl", tr("Image res/{} not found !"), filename);
         return 0;
     }
 
-    std::stringstream buffer;
+    auto buffer = std::stringstream{};
     buffer << input_file.rdbuf();
     input_file.close();
 
-    std::string     str = buffer.str();
-    std::vector<u8> source_data{};
+    const auto str         = buffer.str();
+    auto       source_data = std::vector<u8>{};
     source_data.reserve(str.size());
 
     for (const auto s : str) {
         source_data.emplace_back(s);
     }
 
-    u32             width{};
-    u32             height{};
-    std::vector<u8> decoded_data{};
-    u32             error = lodepng::decode(decoded_data, width, height, source_data, LCT_RGBA);
+    auto       width        = u32{};
+    auto       height       = u32{};
+    auto       decoded_data = std::vector<u8>{};
+    const auto error        = lodepng::decode(decoded_data, width, height, source_data, LCT_RGBA);
 
     // If there's an error, display it.
     if (error != 0) {
@@ -99,7 +99,7 @@ auto Opengl::generateTextureFromFile(const std::string& filename) const -> u32 {
 
     // glEnable(GL_TEXTURE_2D);
 
-    u32 texture{generateTextureFromVector(width, height, decoded_data)};
+    auto texture = generateTextureFromVector(width, height, decoded_data);
     // glGenTextures(1, &texture);
     // glBindTexture(GL_TEXTURE_2D, texture);
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -130,9 +130,9 @@ auto Opengl::getIconTexture(const IconId id) -> ImTextureID {
 /* static */
 auto Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool {
     // Load file and decode image.
-    u32 width{};
-    u32 height{};
-    u32 error = lodepng::decode(image, width, height, source_data, LCT_RGBA);
+    auto       width  = u32{};
+    auto       height = u32{};
+    const auto error  = lodepng::decode(image, width, height, source_data, LCT_RGBA);
 
     // If there's an error, display it.
     if (error != 0) {
@@ -223,10 +223,10 @@ auto isModernOpenglCapable() -> bool {
     if (glfwInit() == GLFW_FALSE) { return false; }
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    constexpr u16 h_window_size{1280};
-    constexpr u16 v_window_size{720};
+    constexpr auto h_window_size = u16{1280};
+    constexpr auto v_window_size = u16{720};
 
-    GLFWwindow* window = glfwCreateWindow(h_window_size, v_window_size, "", nullptr, nullptr);
+    auto window = glfwCreateWindow(h_window_size, v_window_size, "", nullptr, nullptr);
     if (window == nullptr) {
         glfwTerminate();
         return false;
@@ -235,7 +235,7 @@ auto isModernOpenglCapable() -> bool {
     glfwMakeContextCurrent(window);
 
     glbinding::initialize(glfwGetProcAddress);
-    const glbinding::Version version = glbinding::aux::ContextInfo::version();
+    const auto version = glbinding::aux::ContextInfo::version();
 
     glfwDestroyWindow(window);
     glfwTerminate();
