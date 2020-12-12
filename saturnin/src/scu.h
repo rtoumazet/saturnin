@@ -49,7 +49,7 @@ class EmulatorContext;
 // using saturnin::sh2::Sh2;
 // using saturnin::sh2::Sh2Type;
 
-constexpr u32 indirect_dma_end_code = 0x80000000;
+constexpr auto indirect_dma_end_code = u32{0x80000000};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   DmaLevel

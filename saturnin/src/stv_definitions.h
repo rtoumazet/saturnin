@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint> // uint8_t
 #include <string>  // string
 
@@ -104,9 +105,10 @@ using Stv_rom_data = struct { ///< ST-V ROM data structure
 };
 
 /// ST-V roms list array
- static const Stv_rom_data stv_rom_list[] = { //NOLINT(modernize-avoid-c-arrays)
-
-    // clang-format off
+// clang-format off
+constexpr auto stv_rom_list_size = std::uint8_t{ 61 };
+static const auto stv_rom_list = std::array<Stv_rom_data, stv_rom_list_size>
+{ {
     { "Astra Superstars",                          Rom_stv::astra_superstars,        "astrass"  ,""         ,"J         \n19980514  \nV1.002" },
     { "Baku Baku Animal",                          Rom_stv::baku_baku_animals,       "bakubaku" ,""         ,"J         \n19950407  \nV1.000" },
     { "Columns 97",                                Rom_stv::columns_97,              "colmns97" ,""         ,"JET       \n19961209  \nV1.000" },
@@ -169,6 +171,6 @@ using Stv_rom_data = struct { ///< ST-V ROM data structure
     { "Sport Fishing 2 (J)",                       Rom_stv::sport_fishing_2_j,       "sfish2j"  ,"sfish2"   ,"J         \n19951201  \nV1.100" },
     { "Mausuke no Ojama the World",                Rom_stv::mausuke_no_ojama,        "mausuke"  ,""         ,"J         \n19960314  \nV1.000" }
     // clang-format on
-};
+}};
 
 } // namespace saturnin::core

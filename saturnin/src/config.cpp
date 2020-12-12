@@ -136,9 +136,8 @@ auto Config::readFile() -> bool {
         cfg_.readFile(filename_.c_str());
         return true;
     } catch (const libcfg::FileIOException& fioex) {
-        // auto errorString = fmt::format(tr("Could not read file {0} : {1}"), filename_, fioex.what());
-        auto errorString = fmt::format("Could not read file {0} : {1}", filename_, fioex.what());
-        Log::error("config", errorString);
+        const auto error = fmt::format("Could not read file {0} : {1}", filename_, fioex.what());
+        Log::error("config", error);
         return false;
     }
 }
@@ -183,16 +182,16 @@ auto Config::getGroup(libcfg::Setting& root, const std::string& group_name) -> l
 auto Config::addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string {
     // libcfg::Setting doesn't have a copy constructor, so it has to be declared twice
     if (!root.exists(group_name)) {
-        libcfg::Setting& new_setting = root.add(group_name, libcfg::Setting::TypeGroup);
+        const auto& new_setting = root.add(group_name, libcfg::Setting::TypeGroup);
         return new_setting.getPath();
     }
-    libcfg::Setting& new_setting = root.lookup(group_name);
+    const auto& new_setting = root.lookup(group_name);
     return new_setting.getPath();
 }
 
 void Config::test() {
-    libcfg::Setting& root = cfg_.getRoot();
-    std::string      str{"test"};
+    auto&      root = cfg_.getRoot();
+    const auto str  = std::string{"test"};
 
     Config::writeValue(root, "test_c_string", str.c_str());
     Config::writeValue(root, "test_string", std::string{"test"});
@@ -206,8 +205,8 @@ auto Config::readValue(const AccessKeys& value) -> libcfg::Setting& {
         if (!existsValue(value)) { createDefault(value); }
         return cfg_.lookup(Config::full_keys[value]);
     } catch (const libcfg::SettingNotFoundException& e) {
-        auto errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
-        Log::error("config", errorString);
+        const auto error = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
+        Log::error("config", error);
         throw std::runtime_error("Config error !");
     }
 }
@@ -254,8 +253,8 @@ void Config::createDefault(const AccessKeys& key) {
     }
 }
 auto Config::readPeripheralConfiguration(const AccessKeys& key) -> std::vector<PeripheralKey> {
-    std::vector<PeripheralKey> pad_values;
-    const auto&                pad_setting = readValue(key);
+    auto        pad_values  = std::vector<PeripheralKey>{};
+    const auto& pad_setting = readValue(key);
     for (int i = 0; i < pad_setting.getLength(); ++i) {
         pad_values.push_back(static_cast<PeripheralKey>(static_cast<int>(pad_setting[i])));
     }
@@ -264,8 +263,8 @@ auto Config::readPeripheralConfiguration(const AccessKeys& key) -> std::vector<P
 
 /* static */
 auto Config::listAvailableLanguages() -> std::vector<std::string> {
-    auto                     full_path = fs::current_path() / "lang";
-    std::vector<std::string> files{"en"}; // english is the default language, even if the directory isn't present
+    const auto full_path = fs::current_path() / "lang";
+    auto       files     = std::vector<std::string>{"en"}; // english is the default language, even if the directory isn't present
     for (auto& p : fs::directory_iterator(full_path)) {
         if ((p.is_directory()) && (p.path().filename().string() != "en")) { files.push_back(p.path().filename().string()); }
     }
@@ -274,7 +273,7 @@ auto Config::listAvailableLanguages() -> std::vector<std::string> {
 
 /* static */
 auto Config::listAreaCodes() -> std::vector<std::string> {
-    std::vector<std::string> codes;
+    auto codes = std::vector<std::string>{};
     for (const auto& code : area_code) {
         codes.push_back(code.first);
     }
@@ -283,7 +282,7 @@ auto Config::listAreaCodes() -> std::vector<std::string> {
 
 /* static */
 auto Config::listPeripheralConnections() -> std::vector<std::string> {
-    std::vector<std::string> connections;
+    auto connections = std::vector<std::string>{};
     for (const auto& connection : port_status) {
         connections.push_back(connection.first);
     }

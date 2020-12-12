@@ -39,7 +39,7 @@ namespace saturnin::video {
 using saturnin::core::Config;
 using saturnin::core::EmulatorContext;
 
-class OpenglModern : public Opengl {
+class OpenglModern final : public Opengl {
   public:
     //@{
     // Constructors / Destructors
@@ -103,8 +103,7 @@ class OpenglModern : public Opengl {
     void updateTextureSize(u32 width, u32 height) final;
 
   protected:
-    [[nodiscard]] auto generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const
-        -> u32 final;
+    [[nodiscard]] auto generateTextureFromVector(u32 width, u32 height, const std::vector<u8>& data) const -> u32 final;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////

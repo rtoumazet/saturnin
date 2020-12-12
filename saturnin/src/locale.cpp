@@ -34,8 +34,8 @@ auto Locale::getInstance() -> Locale& {
 auto Locale::catalog() -> spirit_po::default_catalog* { return cat_.get(); };
 
 auto Locale::initialize(const std::string& country = "") -> bool { // NOLINT(readability-convert-member-functions-to-static)
-    std::ifstream ifs("./lang/" + country + "/saturnin.po");
-    std::string   po_file{std::istreambuf_iterator<char>{ifs}, std::istreambuf_iterator<char>()};
+    auto ifs     = std::ifstream("./lang/" + country + "/saturnin.po");
+    auto po_file = std::string{std::istreambuf_iterator<char>{ifs}, std::istreambuf_iterator<char>()};
 
     cat_ = std::make_unique<spirit_po::default_catalog>(spirit_po::catalog<>::from_range(po_file));
     return true;

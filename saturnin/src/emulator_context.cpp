@@ -116,19 +116,22 @@ void EmulatorContext::startEmulation() {
     //    emu_thread = move(local_thread);
 
     // TESTING //
-    const u32 sh2_freq_hz{28636400};
+    // const u32 sh2_freq_hz{28636400};
     // const double cycle_duration{ (double)1 / (double)sh2_freq_hz };
     // const std::chrono::seconds cycle_duration{ (double)1 / (double)sh2_freq_hz };
-    using seconds = std::chrono::duration<double>;
-    const seconds cycle_duration{((double)1 / (double)sh2_freq_hz)};
+    // using seconds = std::chrono::duration<double>;
+    // const seconds cycle_duration{((double)1 / (double)sh2_freq_hz)};
     // const std::chrono::seconds test{ cycle_duration };
-    using micro = std::chrono::duration<double, std::micro>;
-    constexpr u8 op_duration{30};
-    auto         val  = micro(op_duration) / cycle_duration;
-    auto         val2 = static_cast<u32>(val);
+    // using micro = std::chrono::duration<double, std::micro>;
+    // constexpr u8 op_duration{30};
+    // auto         val  = micro(op_duration) / cycle_duration;
+    // auto         val2 = static_cast<u32>(val);
 
-    auto rtc  = getRtcTime();
-    auto year = rtc.getUpperYear();
+    // auto rtc  = getRtcTime();
+    // auto year = rtc.getUpperYear();
+
+    // IOSelect ios{0xFF};
+    // auto     b = ios.get(IOSelect::all_bits);
 
     // cdrom::CommandRegister cr{0b1111};
     // const u8               data{0b0011};
@@ -182,7 +185,7 @@ void EmulatorContext::emulationMainThread() {
 
         while (emulationStatus() == EmulationStatus::running) {
             if (debugStatus() != DebugStatus::paused) {
-                auto cycles = masterSh2()->run();
+                const auto cycles = masterSh2()->run();
                 if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
                 smpc()->run(cycles);
                 vdp2()->run(cycles);

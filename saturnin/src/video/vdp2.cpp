@@ -1008,8 +1008,8 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
         }
     }
 
-    if (ramctl_.get(RamControl::vram_a_mode_) == VramMode::no_partition) {}
-    if (ramctl_.get(RamControl::vram_b_mode_) == VramMode::no_partition) {}
+    if (ramctl_.get(RamControl::vram_a_mode) == VramMode::no_partition) {}
+    if (ramctl_.get(RamControl::vram_b_mode) == VramMode::no_partition) {}
 
     // 8 timings (T0 to T7) are available for each bank in normal mode during 1 display cycle, only 4 (T0 to T3) in hires
     // or exclusive monitor mode.

@@ -30,8 +30,8 @@ auto add_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} ADD R{:d},R{:d}", pc, opcode, x00n0(opcode), x0n00(opcode));
 };
 auto addi_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x00nn(opcode)};
-    imm = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
+    auto imm = u32{x00nn(opcode)};
+    imm      = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
     return fmt::format("{:#010x} {:#06x} ADD #{:#010x},R{:d}", pc, opcode, imm, x0n00(opcode));
 };
 auto addc_d(const u32 pc, const u16 opcode) -> std::string {
@@ -50,39 +50,39 @@ auto andm_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} AND.B #{:#x},@(R0,GBR)", pc, opcode, x000n(opcode));
 };
 auto bf_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x00nn(opcode)};
-    imm = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
+    auto imm = u32{x00nn(opcode)};
+    imm      = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
     return fmt::format("{:#010x} {:#06x} BF {:#x}", pc, opcode, pc + imm * 2 + 4);
 };
 auto bfs_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x00nn(opcode)};
-    imm = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
+    auto imm = u32{x00nn(opcode)};
+    imm      = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
     return fmt::format("{:#010x} {:#06x} BF/S {:#x}", pc, opcode, pc + imm * 2 + 4);
 };
 auto bra_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x0nnn(opcode)};
-    imm = ((imm & sign_bit_12_mask) == 0) ? imm & bitmask_00000FFF : imm | bitmask_FFFFF000;
+    auto imm = u32{x0nnn(opcode)};
+    imm      = ((imm & sign_bit_12_mask) == 0) ? imm & bitmask_00000FFF : imm | bitmask_FFFFF000;
     return fmt::format("{:#010x} {:#06x} BRA {:#x}", pc, opcode, pc + imm * 2 + 4);
 };
 auto braf_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} BRAF R{:d}", pc, opcode, x0n00(opcode));
 };
 auto bsr_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x0nnn(opcode)};
-    imm = ((imm & sign_bit_12_mask) == 0) ? imm & bitmask_00000FFF : imm | bitmask_FFFFF000;
+    auto imm = u32{x0nnn(opcode)};
+    imm      = ((imm & sign_bit_12_mask) == 0) ? imm & bitmask_00000FFF : imm | bitmask_FFFFF000;
     return fmt::format("{:#010x} {:#06x} BSR {:#x}", pc, opcode, pc + imm * 2 + 4);
 };
 auto bsrf_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} BSRF R{:d}", pc, opcode, x0n00(opcode));
 };
 auto bt_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x00nn(opcode)};
-    imm = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
+    auto imm = u32{x00nn(opcode)};
+    imm      = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
     return fmt::format("{:#010x} {:#06x} BT {:#x}", pc, opcode, pc + imm * 2 + 4);
 };
 auto bts_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x00nn(opcode)};
-    imm = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
+    auto imm = u32{x00nn(opcode)};
+    imm      = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
     return fmt::format("{:#010x} {:#06x} BT/S {:#x}", pc, opcode, pc + imm * 2 + 4);
 };
 auto clrmac_d(const u32 pc, const u16 opcode) -> std::string { return fmt::format("{:#010x} {:#06x} CLRMAC", pc, opcode); };
@@ -112,8 +112,8 @@ auto cmpstr_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} CMP/STR R{:d},R{:d}", pc, opcode, x00n0(opcode), x0n00(opcode));
 };
 auto cmpim_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x00nn(opcode)};
-    imm = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
+    auto imm = u32{x00nn(opcode)};
+    imm      = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
     return fmt::format("{:#010x} {:#06x} CMP/EQ #{:#x},R0", pc, opcode, imm);
 };
 auto div0s_d(const u32 pc, const u16 opcode) -> std::string {
@@ -250,16 +250,16 @@ auto movll0_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} MOV.L @(R0,R{:d}),R{:d}", pc, opcode, x00n0(opcode), x0n00(opcode));
 };
 auto movi_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x00nn(opcode)};
-    imm = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
+    auto imm = u32{x00nn(opcode)};
+    imm      = ((imm & sign_bit_8_mask) == 0) ? imm & bitmask_000000FF : imm | bitmask_FFFFFF00;
     return fmt::format("{:#010x} {:#06x} MOV #{:#x},R{:d}", pc, opcode, imm, x0n00(opcode));
 };
 auto movwi_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 imm{x00nn(opcode)};
+    auto imm = u32{x00nn(opcode)};
     return fmt::format("{:#010x} {:#06x} BT {:#x}", pc, opcode, pc + imm * 2 + 4);
 };
 auto movli_d(const u32 pc, const u16 opcode) -> std::string {
-    u32 disp{(bitmask_000000FF & x00nn(opcode))};
+    auto disp = u32{(bitmask_000000FF & x00nn(opcode))};
     return fmt::format(
         "{:#010x} {:#06x} MOV.L @({:#x}),R{:d}", pc, opcode, (pc & bitmask_FFFFFFFC) + (disp << 2) + 4, x0n00(opcode));
 };

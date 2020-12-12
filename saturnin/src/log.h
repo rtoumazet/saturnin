@@ -95,7 +95,7 @@ class Log {
             if (loggerExists(logger_name)) {
                 loggers_.at(logger_name)->error(value.c_str(), args...);
                 // errors are also logged to console, using original logger name
-                auto message{"[{}] " + value};
+                const auto message = std::string{"[{}] " + value};
                 loggers_.at("console")->error(message.c_str(), logger_name, args...);
             }
         } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }
@@ -122,7 +122,7 @@ class Log {
             if (loggerExists(logger_name)) {
                 loggers_.at(logger_name)->warn(value.c_str(), args...);
                 // warnings are also logged to console, using original logger name
-                auto message{"[{}] " + value};
+                const auto message = std::string{"[{}] " + value};
                 loggers_.at("console")->warn(message.c_str(), logger_name, args...);
             }
         } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }

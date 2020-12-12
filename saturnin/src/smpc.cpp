@@ -33,114 +33,114 @@ namespace util = saturnin::utilities;
 
 // using sound::Scsp;
 
-using MapKeyboardLayout           = std::map<PeripheralKey, const std::string>;
-MapKeyboardLayout keyboard_layout = {{PeripheralKey::key_space, "space"},
-                                     {PeripheralKey::key_apostrophe, "'"},
-                                     {PeripheralKey::key_comma, ","},
-                                     {PeripheralKey::key_minus, "-"},
-                                     {PeripheralKey::key_period, "."},
-                                     {PeripheralKey::key_slash, "/"},
-                                     {PeripheralKey::key_semicolon, ";"},
-                                     {PeripheralKey::key_equal, "="},
-                                     {PeripheralKey::key_0, "0"},
-                                     {PeripheralKey::key_1, "1"},
-                                     {PeripheralKey::key_2, "2"},
-                                     {PeripheralKey::key_3, "3"},
-                                     {PeripheralKey::key_4, "4"},
-                                     {PeripheralKey::key_5, "5"},
-                                     {PeripheralKey::key_6, "6"},
-                                     {PeripheralKey::key_7, "7"},
-                                     {PeripheralKey::key_8, "8"},
-                                     {PeripheralKey::key_9, "9"},
-                                     {PeripheralKey::key_a, "a"},
-                                     {PeripheralKey::key_b, "b"},
-                                     {PeripheralKey::key_c, "c"},
-                                     {PeripheralKey::key_d, "d"},
-                                     {PeripheralKey::key_e, "e"},
-                                     {PeripheralKey::key_f, "f"},
-                                     {PeripheralKey::key_g, "g"},
-                                     {PeripheralKey::key_h, "h"},
-                                     {PeripheralKey::key_i, "i"},
-                                     {PeripheralKey::key_j, "j"},
-                                     {PeripheralKey::key_k, "k"},
-                                     {PeripheralKey::key_l, "l"},
-                                     {PeripheralKey::key_m, "m"},
-                                     {PeripheralKey::key_n, "n"},
-                                     {PeripheralKey::key_o, "o"},
-                                     {PeripheralKey::key_p, "p"},
-                                     {PeripheralKey::key_q, "q"},
-                                     {PeripheralKey::key_r, "r"},
-                                     {PeripheralKey::key_s, "s"},
-                                     {PeripheralKey::key_t, "t"},
-                                     {PeripheralKey::key_u, "u"},
-                                     {PeripheralKey::key_v, "v"},
-                                     {PeripheralKey::key_w, "w"},
-                                     {PeripheralKey::key_x, "x"},
-                                     {PeripheralKey::key_y, "y"},
-                                     {PeripheralKey::key_z, "z"},
-                                     {PeripheralKey::key_left_bracket, "["},
-                                     {PeripheralKey::key_backslash, "\\"},
-                                     {PeripheralKey::key_right_bracket, "]"},
-                                     {PeripheralKey::key_grave_accent, "`"},
+using MapKeyboardLayout = std::map<PeripheralKey, const std::string>;
+auto keyboard_layout    = MapKeyboardLayout{{PeripheralKey::key_space, "space"},
+                                         {PeripheralKey::key_apostrophe, "'"},
+                                         {PeripheralKey::key_comma, ","},
+                                         {PeripheralKey::key_minus, "-"},
+                                         {PeripheralKey::key_period, "."},
+                                         {PeripheralKey::key_slash, "/"},
+                                         {PeripheralKey::key_semicolon, ";"},
+                                         {PeripheralKey::key_equal, "="},
+                                         {PeripheralKey::key_0, "0"},
+                                         {PeripheralKey::key_1, "1"},
+                                         {PeripheralKey::key_2, "2"},
+                                         {PeripheralKey::key_3, "3"},
+                                         {PeripheralKey::key_4, "4"},
+                                         {PeripheralKey::key_5, "5"},
+                                         {PeripheralKey::key_6, "6"},
+                                         {PeripheralKey::key_7, "7"},
+                                         {PeripheralKey::key_8, "8"},
+                                         {PeripheralKey::key_9, "9"},
+                                         {PeripheralKey::key_a, "a"},
+                                         {PeripheralKey::key_b, "b"},
+                                         {PeripheralKey::key_c, "c"},
+                                         {PeripheralKey::key_d, "d"},
+                                         {PeripheralKey::key_e, "e"},
+                                         {PeripheralKey::key_f, "f"},
+                                         {PeripheralKey::key_g, "g"},
+                                         {PeripheralKey::key_h, "h"},
+                                         {PeripheralKey::key_i, "i"},
+                                         {PeripheralKey::key_j, "j"},
+                                         {PeripheralKey::key_k, "k"},
+                                         {PeripheralKey::key_l, "l"},
+                                         {PeripheralKey::key_m, "m"},
+                                         {PeripheralKey::key_n, "n"},
+                                         {PeripheralKey::key_o, "o"},
+                                         {PeripheralKey::key_p, "p"},
+                                         {PeripheralKey::key_q, "q"},
+                                         {PeripheralKey::key_r, "r"},
+                                         {PeripheralKey::key_s, "s"},
+                                         {PeripheralKey::key_t, "t"},
+                                         {PeripheralKey::key_u, "u"},
+                                         {PeripheralKey::key_v, "v"},
+                                         {PeripheralKey::key_w, "w"},
+                                         {PeripheralKey::key_x, "x"},
+                                         {PeripheralKey::key_y, "y"},
+                                         {PeripheralKey::key_z, "z"},
+                                         {PeripheralKey::key_left_bracket, "["},
+                                         {PeripheralKey::key_backslash, "\\"},
+                                         {PeripheralKey::key_right_bracket, "]"},
+                                         {PeripheralKey::key_grave_accent, "`"},
 
-                                     /* Function keys */
-                                     {PeripheralKey::key_escape, "esc"},
-                                     {PeripheralKey::key_enter, "enter"},
-                                     {PeripheralKey::key_tab, "tab"},
-                                     {PeripheralKey::key_backspace, "backspace"},
-                                     {PeripheralKey::key_insert, "insert"},
-                                     {PeripheralKey::key_delete, "del"},
-                                     {PeripheralKey::key_right, "right"},
-                                     {PeripheralKey::key_left, "left"},
-                                     {PeripheralKey::key_down, "down"},
-                                     {PeripheralKey::key_up, "up"},
-                                     {PeripheralKey::key_page_up, "page up"},
-                                     {PeripheralKey::key_page_down, "page down"},
-                                     {PeripheralKey::key_home, "home"},
-                                     {PeripheralKey::key_end, "end"},
-                                     {PeripheralKey::key_caps_lock, "caps lock"},
-                                     {PeripheralKey::key_scroll_lock, "scroll lock"},
-                                     {PeripheralKey::key_num_lock, "num lock"},
-                                     {PeripheralKey::key_print_screen, "print screen"},
-                                     {PeripheralKey::key_pause, "pause"},
-                                     {PeripheralKey::key_f1, "f1"},
-                                     {PeripheralKey::key_f2, "f2"},
-                                     {PeripheralKey::key_f3, "f3"},
-                                     {PeripheralKey::key_f4, "f4"},
-                                     {PeripheralKey::key_f5, "f5"},
-                                     {PeripheralKey::key_f6, "f6"},
-                                     {PeripheralKey::key_f7, "f7"},
-                                     {PeripheralKey::key_f8, "f8"},
-                                     {PeripheralKey::key_f9, "f9"},
-                                     {PeripheralKey::key_f10, "f10"},
-                                     {PeripheralKey::key_f11, "f11"},
-                                     {PeripheralKey::key_f12, "f12"},
-                                     {PeripheralKey::key_kp_0, "keypad 0"},
-                                     {PeripheralKey::key_kp_1, "keypad 1"},
-                                     {PeripheralKey::key_kp_2, "keypad 2"},
-                                     {PeripheralKey::key_kp_3, "keypad 3"},
-                                     {PeripheralKey::key_kp_4, "keypad 4"},
-                                     {PeripheralKey::key_kp_5, "keypad 5"},
-                                     {PeripheralKey::key_kp_6, "keypad 6"},
-                                     {PeripheralKey::key_kp_7, "keypad 7"},
-                                     {PeripheralKey::key_kp_8, "keypad 8"},
-                                     {PeripheralKey::key_kp_9, "keypad 9"},
-                                     {PeripheralKey::key_kp_decimal, "keypad ."},
-                                     {PeripheralKey::key_kp_divide, "keypad /"},
-                                     {PeripheralKey::key_kp_multiply, "keypad *"},
-                                     {PeripheralKey::key_kp_substract, "keypad -"},
-                                     {PeripheralKey::key_kp_add, "keypad +"},
-                                     {PeripheralKey::key_kp_enter, "keypad enter"},
-                                     {PeripheralKey::key_kp_equal, "keypad ="},
-                                     {PeripheralKey::key_left_shift, "left shift"},
-                                     {PeripheralKey::key_left_control, "left control"},
-                                     {PeripheralKey::key_left_alt, "left alt"},
-                                     {PeripheralKey::key_left_super, "left super"},
-                                     {PeripheralKey::key_right_shift, "right shift"},
-                                     {PeripheralKey::key_right_control, "right control"},
-                                     {PeripheralKey::key_right_alt, "right alt"},
-                                     {PeripheralKey::key_right_super, "right super"},
-                                     {PeripheralKey::key_menu, "menu"}};
+                                         /* Function keys */
+                                         {PeripheralKey::key_escape, "esc"},
+                                         {PeripheralKey::key_enter, "enter"},
+                                         {PeripheralKey::key_tab, "tab"},
+                                         {PeripheralKey::key_backspace, "backspace"},
+                                         {PeripheralKey::key_insert, "insert"},
+                                         {PeripheralKey::key_delete, "del"},
+                                         {PeripheralKey::key_right, "right"},
+                                         {PeripheralKey::key_left, "left"},
+                                         {PeripheralKey::key_down, "down"},
+                                         {PeripheralKey::key_up, "up"},
+                                         {PeripheralKey::key_page_up, "page up"},
+                                         {PeripheralKey::key_page_down, "page down"},
+                                         {PeripheralKey::key_home, "home"},
+                                         {PeripheralKey::key_end, "end"},
+                                         {PeripheralKey::key_caps_lock, "caps lock"},
+                                         {PeripheralKey::key_scroll_lock, "scroll lock"},
+                                         {PeripheralKey::key_num_lock, "num lock"},
+                                         {PeripheralKey::key_print_screen, "print screen"},
+                                         {PeripheralKey::key_pause, "pause"},
+                                         {PeripheralKey::key_f1, "f1"},
+                                         {PeripheralKey::key_f2, "f2"},
+                                         {PeripheralKey::key_f3, "f3"},
+                                         {PeripheralKey::key_f4, "f4"},
+                                         {PeripheralKey::key_f5, "f5"},
+                                         {PeripheralKey::key_f6, "f6"},
+                                         {PeripheralKey::key_f7, "f7"},
+                                         {PeripheralKey::key_f8, "f8"},
+                                         {PeripheralKey::key_f9, "f9"},
+                                         {PeripheralKey::key_f10, "f10"},
+                                         {PeripheralKey::key_f11, "f11"},
+                                         {PeripheralKey::key_f12, "f12"},
+                                         {PeripheralKey::key_kp_0, "keypad 0"},
+                                         {PeripheralKey::key_kp_1, "keypad 1"},
+                                         {PeripheralKey::key_kp_2, "keypad 2"},
+                                         {PeripheralKey::key_kp_3, "keypad 3"},
+                                         {PeripheralKey::key_kp_4, "keypad 4"},
+                                         {PeripheralKey::key_kp_5, "keypad 5"},
+                                         {PeripheralKey::key_kp_6, "keypad 6"},
+                                         {PeripheralKey::key_kp_7, "keypad 7"},
+                                         {PeripheralKey::key_kp_8, "keypad 8"},
+                                         {PeripheralKey::key_kp_9, "keypad 9"},
+                                         {PeripheralKey::key_kp_decimal, "keypad ."},
+                                         {PeripheralKey::key_kp_divide, "keypad /"},
+                                         {PeripheralKey::key_kp_multiply, "keypad *"},
+                                         {PeripheralKey::key_kp_substract, "keypad -"},
+                                         {PeripheralKey::key_kp_add, "keypad +"},
+                                         {PeripheralKey::key_kp_enter, "keypad enter"},
+                                         {PeripheralKey::key_kp_equal, "keypad ="},
+                                         {PeripheralKey::key_left_shift, "left shift"},
+                                         {PeripheralKey::key_left_control, "left control"},
+                                         {PeripheralKey::key_left_alt, "left alt"},
+                                         {PeripheralKey::key_left_super, "left super"},
+                                         {PeripheralKey::key_right_shift, "right shift"},
+                                         {PeripheralKey::key_right_control, "right control"},
+                                         {PeripheralKey::key_right_alt, "right alt"},
+                                         {PeripheralKey::key_right_super, "right super"},
+                                         {PeripheralKey::key_menu, "menu"}};
 
 auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
     switch (layout) {
@@ -189,11 +189,11 @@ auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) -> std::vector<Pe
     }
 }
 void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
-    constexpr u8 param_number{13};
+    constexpr auto param_number = u8{13};
     if (config.size() != param_number) {
         Log::warning("smpc", tr("Incorrect Saturn pad data"));
-        auto             v = SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout);
-        SaturnDigitalPad pad;
+        const auto v   = SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout);
+        auto       pad = SaturnDigitalPad{};
         pad.fromConfig(v);
         *this = pad;
         return;
@@ -241,11 +241,11 @@ auto StvPlayerControls::toConfig(const PeripheralLayout layout) -> std::vector<P
 }
 
 void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
-    constexpr u8 param_number{8};
+    constexpr auto param_number = u8{8};
     if (config.size() != param_number) {
         Log::warning("smpc", tr("Incorrect ST-V player control data"));
-        auto              v = StvPlayerControls().toConfig(PeripheralLayout::empty_layout);
-        StvPlayerControls control;
+        const auto v       = StvPlayerControls().toConfig(PeripheralLayout::empty_layout);
+        auto       control = StvPlayerControls{};
         control.fromConfig(v);
         *this = control;
         return;
@@ -282,11 +282,11 @@ auto StvBoardControls::toConfig(const PeripheralLayout layout) -> std::vector<Pe
 }
 
 void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
-    constexpr u8 param_number{6};
+    constexpr auto param_number = u8{6};
     if (config.size() != param_number) {
         Log::warning("smpc", tr("Incorrect ST-V board control data"));
-        auto             v = StvBoardControls().toConfig(PeripheralLayout::empty_layout);
-        StvBoardControls control;
+        const auto v       = StvBoardControls().toConfig(PeripheralLayout::empty_layout);
+        auto       control = StvBoardControls{};
         control.fromConfig(v);
         *this = control;
         return;
@@ -336,8 +336,8 @@ void Smpc::reset() {
 }
 
 auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 {
-    using seconds = std::chrono::duration<double>;
-    const seconds cycle_duration{(static_cast<double>(1) / static_cast<double>(util::toUnderlying(clock_)))};
+    using seconds             = std::chrono::duration<double>;
+    const auto cycle_duration = seconds{(static_cast<double>(1) / static_cast<double>(util::toUnderlying(clock_)))};
     return static_cast<u32>(d / cycle_duration);
 }
 
@@ -515,14 +515,15 @@ void Smpc::executeCommand() {
 }
 
 void Smpc::executeIntback() {
-    bool is_break_requested{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
+    auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
     if (is_break_requested) {
         Log::debug("smpc", tr("INTBACK break request"));
         sf_.reset();
         return;
     }
 
-    bool is_continue_requested{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
+    auto is_continue_requested
+        = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
     if (is_continue_requested) {
         Log::debug("smpc", tr("INTBACK continue request"));
         next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
@@ -533,12 +534,12 @@ void Smpc::executeIntback() {
     Log::debug("smpc", tr("INTBACK started"));
     oreg_[index_31].reset();
     next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
-    bool is_status_returned{ireg_[index_0].get(InputRegister::ireg0_status_acquisition)
-                            == SmpcStatusAcquisition::status_returned};
+    auto is_status_returned
+        = bool{ireg_[index_0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned};
     if (is_status_returned) {
         getStatus();
-        bool is_peripheral_data_returned{ireg_[index_1].get(InputRegister::ireg1_peripheral_data_enable)
-                                         == PeripheralDataEnable::peripheral_data_returned};
+        auto is_peripheral_data_returned = bool{ireg_[index_1].get(InputRegister::ireg1_peripheral_data_enable)
+                                                == PeripheralDataEnable::peripheral_data_returned};
         if (is_peripheral_data_returned) {
             next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
             sf_.set();
@@ -556,8 +557,8 @@ void Smpc::getStatus() {
     sr_.reset();
     sr_[bit_7] = false;
     sr_[bit_6] = true;
-    bool is_peripheral_data_returned
-        = ireg_[index_1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned;
+    auto is_peripheral_data_returned
+        = bool{ireg_[index_1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned};
     if (is_peripheral_data_returned) {
         sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::remaining_peripheral_data);
     } else {
@@ -656,17 +657,18 @@ void Smpc::getPeripheralData() {
         case PortMode::mode_15_byte:
         case PortMode::mode_255_byte:
             // no difference between 15 byte and 255 byte for now
-            PortData port_1_data;
+            auto port_1_data = PortData{};
             switch (port_1_status_) {
                 case PortStatus::not_connected: {
                     full_peripheral_data_table_.emplace_back(util::toUnderlying(port_1_status_));
                     break;
                 }
                 case PortStatus::direct_connection: {
-                    auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
+                    const auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
                     full_peripheral_data_table_.emplace_back(util::toUnderlying(port_1_status_));
 
-                    u8 local_data_size = (pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size;
+                    const auto local_data_size
+                        = u8{(pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size};
                     full_peripheral_data_table_.reserve(full_peripheral_data_table_.size() + local_data_size);
                     full_peripheral_data_table_.insert(std::end(full_peripheral_data_table_),
                                                        std::begin(pad_data.peripheral_data_table),
@@ -684,16 +686,17 @@ void Smpc::getPeripheralData() {
         case PortMode::mode_0_byte: break; // no data returned
         case PortMode::mode_15_byte:
         case PortMode::mode_255_byte: // no difference between 15 byte and 255 byte for now
-            PortData port_2_data;
+            auto port_2_data = PortData{};
             switch (port_2_status_) {
                 case PortStatus::not_connected: {
                     full_peripheral_data_table_.emplace_back(util::toUnderlying(port_2_status_));
                     break;
                 }
                 case PortStatus::direct_connection: {
-                    auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
+                    const auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
                     full_peripheral_data_table_.emplace_back(util::toUnderlying(port_2_status_));
-                    u8 local_data_size = (pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size;
+                    const auto local_data_size
+                        = u8{(pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size};
                     full_peripheral_data_table_.reserve(full_peripheral_data_table_.size() + local_data_size);
                     full_peripheral_data_table_.insert(std::end(full_peripheral_data_table_),
                                                        std::begin(pad_data.peripheral_data_table),
@@ -730,15 +733,15 @@ void Smpc::getPeripheralData() {
 } // namespace saturnin::core
 
 auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData {
-    PeripheralData peripheral_data;
+    auto peripheral_data                 = PeripheralData{};
     peripheral_data.saturn_peripheral_id = id;
     peripheral_data.data_size            = util::toUnderlying(id) & bitmask_0F;
     if (peripheral_data.data_size != 0) { peripheral_data.extension_data_size = 0; }
 
-    auto p1 = getSaturnPeripheralMapping().player_1;
+    const auto p1 = getSaturnPeripheralMapping().player_1;
     switch (id) {
         case SaturnPeripheralId::saturn_standard_pad:
-            SaturnStandardPad1stData first_data;
+            auto first_data = SaturnStandardPad1stData{};
             first_data.set();
             if (isKeyPressed(p1.direction_right, openglWindow())) { first_data.reset(SaturnStandardPad1stData::direction_right); }
             if (isKeyPressed(p1.direction_left, openglWindow())) { first_data.reset(SaturnStandardPad1stData::direction_left); }
@@ -750,7 +753,7 @@ auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData
             if (isKeyPressed(p1.button_b, openglWindow())) { first_data.reset(SaturnStandardPad1stData::button_b); }
             peripheral_data.peripheral_data_table.push_back(first_data);
 
-            SaturnStandardPad2ndData second_data;
+            auto second_data = SaturnStandardPad2ndData{};
             second_data.set();
             if (isKeyPressed(p1.button_shoulder_right, openglWindow())) {
                 second_data.reset(SaturnStandardPad2ndData::button_shoulder_right);
@@ -772,7 +775,7 @@ auto Smpc::read(const u32 addr) -> u8 {
     switch (addr) {
         case status_register:
             if (emulator_context_->hardwareMode() == HardwareMode::stv) {
-                constexpr u8 default_stv_data{0xcf};
+                constexpr auto default_stv_data = u8{0xcf};
                 return default_stv_data;
             }
             return sr_.get(StatusRegister::all_bits);
@@ -811,7 +814,7 @@ auto Smpc::read(const u32 addr) -> u8 {
         case output_register_31: return oreg_[index_31].get(OutputRegister::all_bits);
         case port_data_register_1:
             if (emulator_context_->hardwareMode() == HardwareMode::stv) {
-                constexpr u8 default_stv_data{0xff};
+                constexpr auto default_stv_data = u8{0xff};
                 return default_stv_data;
             }
             return pdr1_.get(PortDataRegister::all_bits);
@@ -849,7 +852,7 @@ void Smpc::write(const u32 addr, const u8 data) {
         case port_data_register_1: pdr1_.set(PortDataRegister::all_bits, data); break;
         case port_data_register_2:
             if (emulator_context_->hardwareMode() == HardwareMode::stv) {
-                constexpr u8 sound_status{0x10};
+                constexpr auto sound_status = u8{0x10};
                 if ((data & sound_status) > 0) {
                     Log::debug("smpc", tr("-=Sound OFF=-"));
 
@@ -875,7 +878,7 @@ void Smpc::write(const u32 addr, const u8 data) {
 
 /* static */
 auto Smpc::listAvailableKeys() -> std::vector<PeripheralKey> {
-    std::vector<PeripheralKey> v{};
+    auto v = std::vector<PeripheralKey>{};
     for (std::pair<PeripheralKey, const std::string&> key : keyboard_layout) {
         v.push_back(key.first);
     }
@@ -919,42 +922,42 @@ auto getRtcTime() -> RtcTime {
     using namespace date;
     using namespace std::chrono;
 
-    auto tp      = system_clock::now();
-    auto dp      = floor<days>(tp);    // Day part of time_point
-    auto time    = make_time(tp - dp); // Time part of time_point
-    auto today   = year_month_day(dp);
-    auto weekday = year_month_weekday(dp);
+    const auto tp      = system_clock::now();
+    const auto dp      = floor<days>(tp);    // Day part of time_point
+    const auto time    = make_time(tp - dp); // Time part of time_point
+    const auto today   = year_month_day(dp);
+    const auto weekday = year_month_weekday(dp);
 
-    RtcTime rtc;
-    u16     year      = static_cast<int>(today.year());
-    auto    year_bcd  = util::dec2bcd(year);
-    rtc.year_1000_bcd = std::bitset<4>((year_bcd >> displacement_12) & bitmask_0F);
-    rtc.year_100_bcd  = std::bitset<4>((year_bcd >> displacement_8) & bitmask_0F);
-    rtc.year_10_bcd   = std::bitset<4>((year_bcd >> displacement_4) & bitmask_0F);
-    rtc.year_1_bcd    = std::bitset<4>(year_bcd & bitmask_0F);
+    auto       rtc      = RtcTime{};
+    const auto year     = static_cast<int>(today.year());
+    const auto year_bcd = util::dec2bcd(year);
+    rtc.year_1000_bcd   = std::bitset<4>((year_bcd >> displacement_12) & bitmask_0F);
+    rtc.year_100_bcd    = std::bitset<4>((year_bcd >> displacement_8) & bitmask_0F);
+    rtc.year_10_bcd     = std::bitset<4>((year_bcd >> displacement_4) & bitmask_0F);
+    rtc.year_1_bcd      = std::bitset<4>(year_bcd & bitmask_0F);
 
     rtc.month_hex = static_cast<unsigned>(today.month());
     rtc.day_hex   = weekday.weekday().c_encoding();
 
-    u16  month     = static_cast<unsigned>(today.month());
-    auto month_bcd = util::dec2bcd(month);
-    rtc.day_10_bcd = std::bitset<4>((month_bcd >> displacement_4) & bitmask_0F);
-    rtc.day_1_bcd  = std::bitset<4>(month_bcd & bitmask_0F);
+    const auto month     = static_cast<unsigned>(today.month());
+    const auto month_bcd = util::dec2bcd(month);
+    rtc.day_10_bcd       = std::bitset<4>((month_bcd >> displacement_4) & bitmask_0F);
+    rtc.day_1_bcd        = std::bitset<4>(month_bcd & bitmask_0F);
 
-    u16  hour       = time.hours().count();
-    auto hour_bcd   = util::dec2bcd(hour);
-    rtc.hour_10_bcd = std::bitset<4>((hour_bcd >> displacement_4) & bitmask_0F);
-    rtc.hour_1_bcd  = std::bitset<4>(hour_bcd & bitmask_0F);
+    const auto hour     = time.hours().count();
+    const auto hour_bcd = util::dec2bcd(hour);
+    rtc.hour_10_bcd     = std::bitset<4>((hour_bcd >> displacement_4) & bitmask_0F);
+    rtc.hour_1_bcd      = std::bitset<4>(hour_bcd & bitmask_0F);
 
-    u16  minute       = time.minutes().count();
-    auto minute_bcd   = util::dec2bcd(minute);
-    rtc.minute_10_bcd = std::bitset<4>((minute_bcd >> displacement_4) & bitmask_0F);
-    rtc.minute_1_bcd  = std::bitset<4>(minute_bcd & bitmask_0F);
+    const auto minute     = time.minutes().count();
+    const auto minute_bcd = util::dec2bcd(minute);
+    rtc.minute_10_bcd     = std::bitset<4>((minute_bcd >> displacement_4) & bitmask_0F);
+    rtc.minute_1_bcd      = std::bitset<4>(minute_bcd & bitmask_0F);
 
-    u16  second       = static_cast<u16>(time.seconds().count());
-    auto second_bcd   = util::dec2bcd(second);
-    rtc.second_10_bcd = std::bitset<4>((second_bcd >> displacement_4) & bitmask_0F);
-    rtc.second_1_bcd  = std::bitset<4>(second_bcd & bitmask_0F);
+    const auto second     = static_cast<u16>(time.seconds().count());
+    const auto second_bcd = util::dec2bcd(second);
+    rtc.second_10_bcd     = std::bitset<4>((second_bcd >> displacement_4) & bitmask_0F);
+    rtc.second_1_bcd      = std::bitset<4>(second_bcd & bitmask_0F);
 
     return rtc;
 }

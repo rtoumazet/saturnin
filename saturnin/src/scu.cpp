@@ -123,7 +123,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         case level_0_dma_enable_register: {
             d0en_.set(bits_0_31, data);
             if (d0en_.get(DmaEnableRegister::dma_enable) == DmaEnable::enabled) {
-                auto dma_0_config = configureDmaTransfer(DmaLevel::level_0);
+                const auto dma_0_config = configureDmaTransfer(DmaLevel::level_0);
                 // executeDma(dma_0_config);
                 addDmaToQueue(dma_0_config);
             }
@@ -139,7 +139,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         case level_1_dma_enable_register: {
             d1en_.set(bits_0_31, data);
             if (d1en_.get(DmaEnableRegister::dma_enable) == DmaEnable::enabled) {
-                auto dma_1_config = configureDmaTransfer(DmaLevel::level_1);
+                const auto dma_1_config = configureDmaTransfer(DmaLevel::level_1);
                 // executeDma(dma_1_config);
                 addDmaToQueue(dma_1_config);
             }
@@ -148,7 +148,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         case level_2_dma_enable_register: {
             d2en_.set(bits_0_31, data);
             if (d2en_.get(DmaEnableRegister::dma_enable) == DmaEnable::enabled) {
-                auto dma_2_config = configureDmaTransfer(DmaLevel::level_2);
+                const auto dma_2_config = configureDmaTransfer(DmaLevel::level_2);
                 // executeDma(dma_1_config);
                 addDmaToQueue(dma_2_config);
             }
@@ -189,24 +189,24 @@ void Scu::write32(const u32 addr, const u32 data) {
 };
 
 void Scu::executeDma(const DmaConfiguration& dc) {
-    constexpr u32 max_transfer_byte_number{0x100000};
-    constexpr u8  address_add_0{0};
-    constexpr u8  address_add_2{2};
-    constexpr u8  address_add_4{4};
-    constexpr u8  address_add_8{8};
-    constexpr u8  address_add_16{16};
-    constexpr u8  address_add_32{32};
-    constexpr u8  address_add_64{64};
-    constexpr u8  address_add_128{128};
+    constexpr auto max_transfer_byte_number = u32{0x100000};
+    constexpr auto address_add_0            = u8{0};
+    constexpr auto address_add_2            = u8{2};
+    constexpr auto address_add_4            = u8{4};
+    constexpr auto address_add_8            = u8{8};
+    constexpr auto address_add_16           = u8{16};
+    constexpr auto address_add_32           = u8{32};
+    constexpr auto address_add_64           = u8{64};
+    constexpr auto address_add_128          = u8{128};
 
     switch (dc.dma_mode) {
         case DmaMode::direct: {
             Log::debug("scu", "Direct Mode DMA - Level {}", utilities::toUnderlying<DmaLevel>(dc.dma_level));
-            u32 write_address     = dc.write_address;
-            u32 read_address      = dc.read_address;
-            u32 count             = (dc.transfer_byte_number == 0) ? max_transfer_byte_number : dc.transfer_byte_number;
-            u8  read_address_add  = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
-            u8  write_address_add = 0;
+            auto write_address     = u32{dc.write_address};
+            auto read_address      = u32{dc.read_address};
+            auto count             = u32{(dc.transfer_byte_number == 0) ? max_transfer_byte_number : dc.transfer_byte_number};
+            auto read_address_add  = static_cast<u8>((dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0);
+            auto write_address_add = u8{0};
 
             Log::debug("scu", "Read address : ", read_address);
             Log::debug("scu", "Write address : ", write_address);
@@ -224,13 +224,13 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                 case WriteAddressAddValue::add_128: write_address_add = address_add_128;
             }
 
-            u32 byte_counter{};
-            u32 word_counter{};
-            u32 long_counter{};
-            u32 data{};
-            u32 read_offset{};
+            auto byte_counter = u32{};
+            auto word_counter = u32{};
+            auto long_counter = u32{};
+            auto data         = u32{};
+            auto read_offset  = u32{};
 
-            auto write_bus = getDmaBus(dc.write_address);
+            const auto write_bus = getDmaBus(dc.write_address);
             switch (write_bus) {
                 case DmaBus::a_bus:
                     Log::debug("scu", "A-Bus transfer");
@@ -283,7 +283,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                         default: read_address_add = 4;
                     }
 
-                    u32 write_offset{};
+                    auto write_offset = u32{};
 
                     while (byte_counter < dc.transfer_byte_number) {
                         data = memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
@@ -345,11 +345,11 @@ void Scu::executeDma(const DmaConfiguration& dc) {
         }
         case DmaMode::indirect: {
             Log::debug("scu", "Indirect Mode DMA - Level {}", utilities::toUnderlying<DmaLevel>(dc.dma_level));
-            constexpr u8 storage_buffer_size{0xC};
-            u32          execute_address_storage_buffer = dc.write_address;
+            constexpr auto storage_buffer_size            = u8{0xC};
+            auto           execute_address_storage_buffer = u32{dc.write_address};
 
-            u8 read_address_add  = (dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0;
-            u8 write_address_add = 0;
+            auto read_address_add  = static_cast<u8>((dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0);
+            auto write_address_add = u8{0};
             switch (dc.write_add_value) {
                 case WriteAddressAddValue::add_0: write_address_add = address_add_0;
                 case WriteAddressAddValue::add_2: write_address_add = address_add_2;
@@ -361,12 +361,12 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                 case WriteAddressAddValue::add_128: write_address_add = address_add_128;
             }
 
-            u32 write_address{};
-            u32 read_address{};
-            u32 count{};
+            auto write_address = u32{};
+            auto read_address  = u32{};
+            auto count         = u32{};
             //= (dc.transfer_byte_number == 0) ? 0x100000 : dc.transfer_byte_number;
 
-            bool is_transfer_done = false;
+            auto is_transfer_done = bool{false};
             while (!is_transfer_done) {
                 read_address  = memory()->read<u32>(execute_address_storage_buffer + displacement_8);
                 write_address = memory()->read<u32>(execute_address_storage_buffer + displacement_4);
@@ -377,13 +377,13 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                 Log::debug("scu", "Write address : ", write_address);
                 Log::debug("scu", "Size : ", count);
 
-                u32 byte_counter{};
-                u32 word_counter{};
-                u32 long_counter{};
-                u32 data{};
-                u32 read_offset{};
+                auto byte_counter = u32{};
+                auto word_counter = u32{};
+                auto long_counter = u32{};
+                auto data         = u32{};
+                auto read_offset  = u32{};
 
-                auto write_bus = getDmaBus(dc.write_address);
+                const auto write_bus = getDmaBus(dc.write_address);
                 switch (write_bus) {
                     case DmaBus::a_bus:
                         Log::debug("scu", "A-Bus transfer");
@@ -593,7 +593,7 @@ auto Scu::isInterruptExecuting(const Interrupt& i) -> bool {
 }
 
 void Scu::sendStartFactor(const StartingFactorSelect sfs) {
-    DmaQueue new_queue;
+    auto new_queue = DmaQueue{};
 
     while (!dma_queue_.empty()) {
         auto dc{dma_queue_.top()};
@@ -616,14 +616,14 @@ void Scu::clearInterruptFlag(const Interrupt& i) { interrupt_status_register_.re
 
 void Scu::initializeRegisters() {
     // DMA
-    constexpr u32 address_add_default_value{0x101};
+    constexpr auto address_add_default_value = u32{0x101};
     d0ad_.set(bits_0_31, address_add_default_value);
     d1ad_.set(bits_0_31, address_add_default_value);
     d2ad_.set(bits_0_31, address_add_default_value);
     d0en_.reset();
     d1en_.reset();
     d2en_.reset();
-    constexpr u32 mode_default_value{0x7};
+    constexpr auto mode_default_value = u32{0x7};
     d0md_.set(bits_0_31, mode_default_value);
     d1md_.set(bits_0_31, mode_default_value);
     d2md_.set(bits_0_31, mode_default_value);
@@ -639,7 +639,7 @@ void Scu::initializeRegisters() {
     t1md_.reset();
 
     // Interrupt control
-    constexpr u32 interrupt_mask_default_value{0xBFFF};
+    constexpr auto interrupt_mask_default_value = u32{0xBFFF};
     interrupt_mask_register_.set(bits_0_31, interrupt_mask_default_value);
     interrupt_status_register_.reset();
 
@@ -660,7 +660,7 @@ void Scu::initializeRegisters() {
 }
 
 auto Scu::configureDmaTransfer(const DmaLevel level) -> DmaConfiguration {
-    DmaConfiguration dc{};
+    auto dc      = DmaConfiguration{};
     dc.dma_level = level;
     switch (level) {
         case DmaLevel::level_0:
@@ -737,7 +737,7 @@ void Scu::initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister&
 }
 
 void Scu::addDmaToQueue(const DmaConfiguration& dc) {
-    auto config{dc};
+    auto config = DmaConfiguration{dc};
 
     switch (config.starting_factor_select) {
         case StartingFactorSelect::dma_start_factor: config.dma_status = DmaStatus::queued; break;
@@ -763,14 +763,14 @@ void Scu::activateDma() {
 
 /* static */
 auto Scu::getDmaBus(const u32 address) -> DmaBus {
-    u32 a = address & bitmask_0FFFFFFF;
+    const auto a = u32{address & bitmask_0FFFFFFF};
 
-    constexpr u32 b_bus_start_address{0x05A00000};
-    constexpr u32 b_bus_end_address{0x6000000};
+    constexpr auto b_bus_start_address = u32{0x05A00000};
+    constexpr auto b_bus_end_address   = u32{0x6000000};
     if ((a >= b_bus_start_address) && (a < b_bus_end_address)) { return DmaBus::b_bus; }
 
-    constexpr u32 a_bus_start_address{0x02000000};
-    constexpr u32 a_bus_end_address{0x5900000};
+    constexpr auto a_bus_start_address = u32{0x02000000};
+    constexpr auto a_bus_end_address   = u32{0x5900000};
     if ((a >= a_bus_start_address) && (a < a_bus_end_address)) { return DmaBus::a_bus; }
     // CPU or DSP write
     Log::warning("scu", "DMA - Bus access not implemented {}", address);
@@ -780,85 +780,85 @@ auto Scu::getDmaBus(const u32 address) -> DmaBus {
 
 /* static */
 auto Scu::getScuRegion(const u32 address) -> ScuRegion {
-    u32 a = address & bitmask_0FFFFFFF;
+    const auto a = u32{address & bitmask_0FFFFFFF};
 
-    constexpr u32 rom_start{0};
-    constexpr u32 rom_end{0x80000};
+    constexpr auto rom_start = u32{0};
+    constexpr auto rom_end   = u32{0x80000};
     if ((a >= rom_start) && (a < rom_end)) { return ScuRegion::rom; }
 
-    constexpr u32 smpc_start{0x100000};
-    constexpr u32 smpc_end{0x100080};
+    constexpr auto smpc_start = u32{0x100000};
+    constexpr auto smpc_end   = u32{0x100080};
     if ((a >= smpc_start) && (a < smpc_end)) { return ScuRegion::smpc; }
 
-    constexpr u32 backup_ram_start{0x180000};
-    constexpr u32 backup_ram_end{0x190000};
+    constexpr auto backup_ram_start = u32{0x180000};
+    constexpr auto backup_ram_end   = u32{0x190000};
     if ((a >= backup_ram_start) && (a < backup_ram_end)) { return ScuRegion::backup_ram; }
 
-    constexpr u32 workram_l_start{0x200000};
-    constexpr u32 workram_l_end{0x300000};
+    constexpr auto workram_l_start = u32{0x200000};
+    constexpr auto workram_l_end   = u32{0x300000};
     if ((a >= workram_l_start) && (a < workram_l_end)) { return ScuRegion::work_ram_l; }
 
-    constexpr u32 minit_start{0x1000000};
-    constexpr u32 minit_end{0x1000004};
+    constexpr auto minit_start = u32{0x1000000};
+    constexpr auto minit_end   = u32{0x1000004};
     if ((a >= minit_start) && (a < minit_end)) { return ScuRegion::minit; }
 
-    constexpr u32 sinit_start{0x1800000};
-    constexpr u32 sinit_end{0x1800004};
+    constexpr auto sinit_start = u32{0x1800000};
+    constexpr auto sinit_end   = u32{0x1800004};
     if ((a >= sinit_start) && (a < sinit_end)) { return ScuRegion::sinit; }
 
-    constexpr u32 a_bus_cs0_start{0x2000000};
-    constexpr u32 a_bus_cs0_end{0x4000000};
+    constexpr auto a_bus_cs0_start = u32{0x2000000};
+    constexpr auto a_bus_cs0_end   = u32{0x4000000};
     if ((a >= a_bus_cs0_start) && (a < a_bus_cs0_end)) { return ScuRegion::a_bus_cs0; }
 
-    constexpr u32 a_bus_cs1_start{0x4000000};
-    constexpr u32 a_bus_cs1_end{0x5000000};
+    constexpr auto a_bus_cs1_start = u32{0x4000000};
+    constexpr auto a_bus_cs1_end   = u32{0x5000000};
     if ((a >= a_bus_cs1_start) && (a < a_bus_cs1_end)) { return ScuRegion::a_bus_cs1; }
 
-    constexpr u32 a_bus_dummy_start{0x5000000};
-    constexpr u32 a_bus_dummy_end{0x5800000};
+    constexpr auto a_bus_dummy_start = u32{0x5000000};
+    constexpr auto a_bus_dummy_end   = u32{0x5800000};
     if ((a >= a_bus_dummy_start) && (a < a_bus_dummy_end)) { return ScuRegion::a_bus_dummy; }
 
-    constexpr u32 a_bus_cs2_start{0x5800000};
-    constexpr u32 a_bus_cs2_end{0x5900000};
+    constexpr auto a_bus_cs2_start = u32{0x5800000};
+    constexpr auto a_bus_cs2_end   = u32{0x5900000};
     if ((a >= a_bus_cs2_start) && (a < a_bus_cs2_end)) { return ScuRegion::a_bus_cs2; }
 
-    constexpr u32 sound_start{0x5A00000};
-    constexpr u32 sound_end{0x5B00EE4};
+    constexpr auto sound_start = u32{0x5A00000};
+    constexpr auto sound_end   = u32{0x5B00EE4};
     if ((a >= sound_start) && (a < sound_end)) { return ScuRegion::sound; }
 
-    constexpr u32 vdp1_start_area_1{0x5C00000};
-    constexpr u32 vdp1_end_area_1{0x5CC0000};
+    constexpr auto vdp1_start_area_1 = u32{0x5C00000};
+    constexpr auto vdp1_end_area_1   = u32{0x5CC0000};
     if ((a >= vdp1_start_area_1) && (a < vdp1_end_area_1)) { return ScuRegion::vdp1; }
 
-    constexpr u32 vdp1_start_area_2{0x5D00000};
-    constexpr u32 vdp1_end_area_2{0x5D00018};
+    constexpr auto vdp1_start_area_2 = u32{0x5D00000};
+    constexpr auto vdp1_end_area_2   = u32{0x5D00018};
     if ((a >= vdp1_start_area_2) && (a < vdp1_end_area_2)) { return ScuRegion::vdp1; }
 
-    constexpr u32 vdp2_start_area_1{0x5E00000};
-    constexpr u32 vdp2_end_area_1{0x5E80000};
+    constexpr auto vdp2_start_area_1 = u32{0x5E00000};
+    constexpr auto vdp2_end_area_1   = u32{0x5E80000};
     if ((a >= vdp2_start_area_1) && (a < vdp2_end_area_1)) { return ScuRegion::vdp2; }
 
-    constexpr u32 vdp2_start_area_2{0x5F00000};
-    constexpr u32 vdp2_end_area_2{0x5F01000};
+    constexpr auto vdp2_start_area_2 = u32{0x5F00000};
+    constexpr auto vdp2_end_area_2   = u32{0x5F01000};
     if ((a >= vdp2_start_area_2) && (a < vdp2_end_area_2)) { return ScuRegion::vdp2; }
 
-    constexpr u32 vdp2_start_area_3{0x5F80000};
-    constexpr u32 vdp2_end_area_3{0x5F80120};
+    constexpr auto vdp2_start_area_3 = u32{0x5F80000};
+    constexpr auto vdp2_end_area_3   = u32{0x5F80120};
     if ((a >= vdp2_start_area_3) && (a < vdp2_end_area_3)) { return ScuRegion::vdp2; }
 
-    constexpr u32 scu_regs_start{0x5FE0000};
-    constexpr u32 scu_regs_end{0x5FE00D0};
+    constexpr auto scu_regs_start = u32{0x5FE0000};
+    constexpr auto scu_regs_end   = u32{0x5FE00D0};
     if ((a >= scu_regs_start) && (a < scu_regs_end)) { return ScuRegion::scu_register; }
 
-    constexpr u32 workram_h_start{0x6000000};
-    constexpr u32 workram_h_end{0x6100000};
+    constexpr auto workram_h_start = u32{0x6000000};
+    constexpr auto workram_h_end   = u32{0x6100000};
     if ((a >= workram_h_start) && (a < workram_h_end)) { return ScuRegion::work_ram_h; }
 
     return ScuRegion::unknown;
 }
 
 void Scu::dmaTest() {
-    DmaConfiguration dc;
+    auto dc       = DmaConfiguration{};
     dc.dma_status = DmaStatus::finished;
     dma_queue_.push(dc);
     dc.dma_status = DmaStatus::queued;

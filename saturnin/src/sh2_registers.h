@@ -31,78 +31,77 @@ namespace saturnin::sh2 {
 
 /// \name Onboard i/o registers addresses
 //@{
-constexpr u32 serial_mode_register                       = 0xFFFFFE00;
-constexpr u32 bit_rate_register                          = 0xFFFFFE01;
-constexpr u32 serial_control_register                    = 0xFFFFFE02;
-constexpr u32 transmit_data_register                     = 0xFFFFFE03;
-constexpr u32 serial_status_register                     = 0xFFFFFE04;
-constexpr u32 receive_data_register                      = 0xFFFFFE05;
-constexpr u32 timer_interrupt_enable_register            = 0xFFFFFE10;
-constexpr u32 free_running_timer_control_status_register = 0xFFFFFE11;
-constexpr u32 free_running_counter                       = 0xFFFFFE12;
-constexpr u32 free_running_counter_h                     = 0xFFFFFE12;
-constexpr u32 free_running_counter_l                     = 0xFFFFFE13;
-constexpr u32 output_compare_register                    = 0xFFFFFE14;
-constexpr u32 timer_control_register                     = 0xFFFFFE16;
-constexpr u32 timer_output_compare_control_register      = 0xFFFFFE17;
-// constexpr u32 ficr                                              = 0xFFFFFE18;
-constexpr u32 input_capture_register                            = 0xFFFFFE18;
-constexpr u32 interrupt_priority_level_setting_register_a       = 0xFFFFFEE2;
-constexpr u32 interrupt_priority_level_setting_register_b       = 0xFFFFFE60;
-constexpr u32 vector_number_setting_register_a                  = 0xFFFFFE62;
-constexpr u32 vector_number_setting_register_b                  = 0xFFFFFE64;
-constexpr u32 vector_number_setting_register_c                  = 0xFFFFFE66;
-constexpr u32 vector_number_setting_register_d                  = 0xFFFFFE68;
-constexpr u32 dma_request_response_selection_control_register_0 = 0xFFFFFE71;
-constexpr u32 dma_request_response_selection_control_register_1 = 0xFFFFFE72;
-constexpr u32 watchdog_timer_control_status_register            = 0xFFFFFE80;
-constexpr u32 watchdog_timer_counter                            = 0xFFFFFE81;
-constexpr u32 reset_control_status_register                     = 0xFFFFFE82;
-constexpr u32 standby_control_register                          = 0xFFFFFE91;
-constexpr u32 cache_control_register                            = 0xFFFFFE92;
-constexpr u32 interrupt_control_register                        = 0xFFFFFEE0;
-constexpr u32 vector_number_setting_register_wdt                = 0xFFFFFEE4;
-constexpr u32 divisor_register                                  = 0xFFFFFF00;
-constexpr u32 dividend_register_l_32_bits                       = 0xFFFFFF04;
-constexpr u32 division_control_register                         = 0xFFFFFF08;
-constexpr u32 vector_number_setting_register_div                = 0xFFFFFF0C;
-constexpr u32 dividend_register_h                               = 0xFFFFFF10;
-constexpr u32 dividend_register_l                               = 0xFFFFFF14;
-constexpr u32 dividend_register_h_shadow                        = 0xFFFFFF18;
-constexpr u32 dividend_register_l_shadow                        = 0xFFFFFF1C;
-constexpr u32 break_address_register_ah                         = 0xFFFFFF40;
-constexpr u32 break_address_register_al                         = 0xFFFFFF42;
-constexpr u32 break_address_mask_register_ah                    = 0xFFFFFF44;
-constexpr u32 break_address_mask_register_al                    = 0xFFFFFF46;
-constexpr u32 break_bus_cycle_register_a                        = 0xFFFFFF48;
-constexpr u32 break_address_register_bh                         = 0xFFFFFF60;
-constexpr u32 break_address_register_bl                         = 0xFFFFFF62;
-constexpr u32 break_address_mask_register_bh                    = 0xFFFFFF64;
-constexpr u32 break_address_mask_register_bl                    = 0xFFFFFF66;
-constexpr u32 break_bus_cycle_register_b                        = 0xFFFFFF68;
-constexpr u32 break_data_register_bh                            = 0xFFFFFF70;
-constexpr u32 break_data_register_bl                            = 0xFFFFFF72;
-constexpr u32 break_data_mask_register_bh                       = 0xFFFFFF74;
-constexpr u32 break_data_mask_register_bl                       = 0xFFFFFF76;
-constexpr u32 break_control_register                            = 0xFFFFFF78;
-constexpr u32 dma_source_address_register_0                     = 0xFFFFFF80;
-constexpr u32 dma_destination_address_register_0                = 0xFFFFFF84;
-constexpr u32 dma_tranfer_count_register_0                      = 0xFFFFFF88;
-constexpr u32 dma_channel_control_register_0                    = 0xFFFFFF8C;
-constexpr u32 dma_source_address_register_1                     = 0xFFFFFF90;
-constexpr u32 dma_destination_address_register_1                = 0xFFFFFF94;
-constexpr u32 dma_tranfer_count_register_1                      = 0xFFFFFF98;
-constexpr u32 dma_channel_control_register_1                    = 0xFFFFFF9C;
-constexpr u32 dma_vector_number_register_0                      = 0xFFFFFFA0;
-constexpr u32 dma_vector_number_register_1                      = 0xFFFFFFA8;
-constexpr u32 dma_operation_register                            = 0xFFFFFFB0;
-constexpr u32 bus_control_register1                             = 0xFFFFFFE0;
-constexpr u32 bus_control_register2                             = 0xFFFFFFE4;
-constexpr u32 wait_state_control_register                       = 0xFFFFFFE8;
-constexpr u32 individual_memory_control_register                = 0xFFFFFFEC;
-constexpr u32 refresh_timer_control_status_register             = 0xFFFFFFF0;
-constexpr u32 refresh_timer_counter                             = 0xFFFFFFF4;
-constexpr u32 refresh_time_constant_register                    = 0xFFFFFFF8;
+constexpr auto serial_mode_register                              = u32{0xFFFFFE00};
+constexpr auto bit_rate_register                                 = u32{0xFFFFFE01};
+constexpr auto serial_control_register                           = u32{0xFFFFFE02};
+constexpr auto transmit_data_register                            = u32{0xFFFFFE03};
+constexpr auto serial_status_register                            = u32{0xFFFFFE04};
+constexpr auto receive_data_register                             = u32{0xFFFFFE05};
+constexpr auto timer_interrupt_enable_register                   = u32{0xFFFFFE10};
+constexpr auto free_running_timer_control_status_register        = u32{0xFFFFFE11};
+constexpr auto free_running_counter                              = u32{0xFFFFFE12};
+constexpr auto free_running_counter_h                            = u32{0xFFFFFE12};
+constexpr auto free_running_counter_l                            = u32{0xFFFFFE13};
+constexpr auto output_compare_register                           = u32{0xFFFFFE14};
+constexpr auto timer_control_register                            = u32{0xFFFFFE16};
+constexpr auto timer_output_compare_control_register             = u32{0xFFFFFE17};
+constexpr auto input_capture_register                            = u32{0xFFFFFE18};
+constexpr auto interrupt_priority_level_setting_register_a       = u32{0xFFFFFEE2};
+constexpr auto interrupt_priority_level_setting_register_b       = u32{0xFFFFFE60};
+constexpr auto vector_number_setting_register_a                  = u32{0xFFFFFE62};
+constexpr auto vector_number_setting_register_b                  = u32{0xFFFFFE64};
+constexpr auto vector_number_setting_register_c                  = u32{0xFFFFFE66};
+constexpr auto vector_number_setting_register_d                  = u32{0xFFFFFE68};
+constexpr auto dma_request_response_selection_control_register_0 = u32{0xFFFFFE71};
+constexpr auto dma_request_response_selection_control_register_1 = u32{0xFFFFFE72};
+constexpr auto watchdog_timer_control_status_register            = u32{0xFFFFFE80};
+constexpr auto watchdog_timer_counter                            = u32{0xFFFFFE81};
+constexpr auto reset_control_status_register                     = u32{0xFFFFFE82};
+constexpr auto standby_control_register                          = u32{0xFFFFFE91};
+constexpr auto cache_control_register                            = u32{0xFFFFFE92};
+constexpr auto interrupt_control_register                        = u32{0xFFFFFEE0};
+constexpr auto vector_number_setting_register_wdt                = u32{0xFFFFFEE4};
+constexpr auto divisor_register                                  = u32{0xFFFFFF00};
+constexpr auto dividend_register_l_32_bits                       = u32{0xFFFFFF04};
+constexpr auto division_control_register                         = u32{0xFFFFFF08};
+constexpr auto vector_number_setting_register_div                = u32{0xFFFFFF0C};
+constexpr auto dividend_register_h                               = u32{0xFFFFFF10};
+constexpr auto dividend_register_l                               = u32{0xFFFFFF14};
+constexpr auto dividend_register_h_shadow                        = u32{0xFFFFFF18};
+constexpr auto dividend_register_l_shadow                        = u32{0xFFFFFF1C};
+constexpr auto break_address_register_ah                         = u32{0xFFFFFF40};
+constexpr auto break_address_register_al                         = u32{0xFFFFFF42};
+constexpr auto break_address_mask_register_ah                    = u32{0xFFFFFF44};
+constexpr auto break_address_mask_register_al                    = u32{0xFFFFFF46};
+constexpr auto break_bus_cycle_register_a                        = u32{0xFFFFFF48};
+constexpr auto break_address_register_bh                         = u32{0xFFFFFF60};
+constexpr auto break_address_register_bl                         = u32{0xFFFFFF62};
+constexpr auto break_address_mask_register_bh                    = u32{0xFFFFFF64};
+constexpr auto break_address_mask_register_bl                    = u32{0xFFFFFF66};
+constexpr auto break_bus_cycle_register_b                        = u32{0xFFFFFF68};
+constexpr auto break_data_register_bh                            = u32{0xFFFFFF70};
+constexpr auto break_data_register_bl                            = u32{0xFFFFFF72};
+constexpr auto break_data_mask_register_bh                       = u32{0xFFFFFF74};
+constexpr auto break_data_mask_register_bl                       = u32{0xFFFFFF76};
+constexpr auto break_control_register                            = u32{0xFFFFFF78};
+constexpr auto dma_source_address_register_0                     = u32{0xFFFFFF80};
+constexpr auto dma_destination_address_register_0                = u32{0xFFFFFF84};
+constexpr auto dma_tranfer_count_register_0                      = u32{0xFFFFFF88};
+constexpr auto dma_channel_control_register_0                    = u32{0xFFFFFF8C};
+constexpr auto dma_source_address_register_1                     = u32{0xFFFFFF90};
+constexpr auto dma_destination_address_register_1                = u32{0xFFFFFF94};
+constexpr auto dma_tranfer_count_register_1                      = u32{0xFFFFFF98};
+constexpr auto dma_channel_control_register_1                    = u32{0xFFFFFF9C};
+constexpr auto dma_vector_number_register_0                      = u32{0xFFFFFFA0};
+constexpr auto dma_vector_number_register_1                      = u32{0xFFFFFFA8};
+constexpr auto dma_operation_register                            = u32{0xFFFFFFB0};
+constexpr auto bus_control_register1                             = u32{0xFFFFFFE0};
+constexpr auto bus_control_register2                             = u32{0xFFFFFFE4};
+constexpr auto wait_state_control_register                       = u32{0xFFFFFFE8};
+constexpr auto individual_memory_control_register                = u32{0xFFFFFFEC};
+constexpr auto refresh_timer_control_status_register             = u32{0xFFFFFFF0};
+constexpr auto refresh_timer_counter                             = u32{0xFFFFFFF4};
+constexpr auto refresh_time_constant_register                    = u32{0xFFFFFFF8};
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,12 +127,12 @@ enum class BitValue : u8 {
 class StatusRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  m{9};           ///< Defines M bit.
-    inline static const BitRange<u8>  q{8};           ///< Defines Q bit.
-    inline static const BitRange<u8>  i{4, 7};        ///< Defines interrupt mask bits (I0-I3).
-    inline static const BitRange<u8>  s{1};           ///< Defines S bit.
-    inline static const BitRange<u8>  t{0};           ///< Defines T bit.
-    inline static const BitRange<u16> all_bits{0, 9}; ///< Defines the range of all the bits of the register.
+    inline static const auto m        = BitRange<u8>{9};     ///< Defines M bit.
+    inline static const auto q        = BitRange<u8>{8};     ///< Defines Q bit.
+    inline static const auto i        = BitRange<u8>{4, 7};  ///< Defines interrupt mask bits (I0-I3).
+    inline static const auto s        = BitRange<u8>{1};     ///< Defines S bit.
+    inline static const auto t        = BitRange<u8>{0};     ///< Defines T bit.
+    inline static const auto all_bits = BitRange<u16>{0, 9}; ///< Defines the range of all the bits of the register.
 };
 
 /////////////////////////////////////
@@ -152,11 +151,11 @@ class StatusRegister : public Register {
 class InterruptPriorityLevelSettingRegisterA : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> divu_level{12, 15};  ///< Defines DIVU priority level.
-    inline static const BitRange<u8> dmac_level{8, 11};   ///< Defines DMAC0/DMAC1 priority level.
-    inline static const BitRange<u8> wdt_level{4, 7};     ///< Defines WDT/DRAM refresh priority level.
-    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto divu_level   = BitRange<u8>{12, 15}; ///< Defines DIVU priority level.
+    inline static const auto dmac_level   = BitRange<u8>{8, 11};  ///< Defines DMAC0/DMAC1 priority level.
+    inline static const auto wdt_level    = BitRange<u8>{4, 7};   ///< Defines WDT/DRAM refresh priority level.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15};  ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};   ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,10 +170,10 @@ class InterruptPriorityLevelSettingRegisterA : public Register {
 class InterruptPriorityLevelSettingRegisterB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> sci_level{12, 15};   ///< Defines SCI priority level.
-    inline static const BitRange<u8> frt_level{8, 11};    ///< Defines FRT priority level.
-    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto sci_level    = BitRange<u8>{12, 15}; ///< Defines SCI priority level.
+    inline static const auto frt_level    = BitRange<u8>{8, 11};  ///< Defines FRT priority level.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15};  ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};   ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,11 +188,12 @@ class InterruptPriorityLevelSettingRegisterB : public Register {
 class VectorNumberSettingRegisterA : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> sci_receive_error_vector{8, 14}; ///< Defines SCI receive error interrupt vector number.
-    inline static const BitRange<u8> sci_receive_data_full_vector{0,
-                                                                  6}; ///< Defines SCI receive data full interrupt vector number.
-    inline static const BitRange<u8> upper_8_bits{8, 15};             ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};              ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto sci_receive_error_vector
+        = BitRange<u8>{8, 14}; ///< Defines SCI receive error interrupt vector number.
+    inline static const auto sci_receive_data_full_vector
+        = BitRange<u8>{0, 6};                                    ///< Defines SCI receive data full interrupt vector number.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -208,11 +208,11 @@ class VectorNumberSettingRegisterA : public Register {
 class VectorNumberSettingRegisterB : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> sci_transmit_data_empty_vector{
-        8, 14};                                                     ///< Defines SCI transmit data empty interrupt vector number.
-    inline static const BitRange<u8> sci_transmit_end_vector{0, 6}; ///< Defines SCI transmit end interrupt vector number.
-    inline static const BitRange<u8> upper_8_bits{8, 15};           ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};            ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto sci_transmit_data_empty_vector
+        = BitRange<u8>{8, 14}; ///< Defines SCI transmit data empty interrupt vector number.
+    inline static const auto sci_transmit_end_vector = BitRange<u8>{0, 6}; ///< Defines SCI transmit end interrupt vector number.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -227,10 +227,12 @@ class VectorNumberSettingRegisterB : public Register {
 class VectorNumberSettingRegisterC : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> frt_input_capture_vector{8, 14}; ///< Defines FRT input capture interrupt vector number.
-    inline static const BitRange<u8> frt_output_compare_vector{0, 6}; ///< Defines FRT output compare interrupt vector number.
-    inline static const BitRange<u8> upper_8_bits{8, 15};             ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};              ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto frt_input_capture_vector
+        = BitRange<u8>{8, 14}; ///< Defines FRT input capture interrupt vector number.
+    inline static const auto frt_output_compare_vector
+        = BitRange<u8>{0, 6};                                    ///< Defines FRT output compare interrupt vector number.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -245,9 +247,9 @@ class VectorNumberSettingRegisterC : public Register {
 class VectorNumberSettingRegisterD : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> frt_overflow_vector{8, 14}; ///< Defines FRT overflow interrupt vector number.
-    inline static const BitRange<u8> upper_8_bits{8, 15};        ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};         ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto frt_overflow_vector = BitRange<u8>{8, 14}; ///< Defines FRT overflow interrupt vector number.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -262,10 +264,11 @@ class VectorNumberSettingRegisterD : public Register {
 class VectorNumberSettingRegisterWdt : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> wdt_interval_vector{8, 14};     ///< Defines WDT interval interrupt vector number.
-    inline static const BitRange<u8> wdt_compare_match_vector{0, 6}; ///< Defines WDT compare match interrupt vector number.
-    inline static const BitRange<u8> upper_8_bits{8, 15};            ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};             ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto wdt_interval_vector = BitRange<u8>{8, 14}; ///< Defines WDT interval interrupt vector number.
+    inline static const auto wdt_compare_match_vector
+        = BitRange<u8>{0, 6};                                    ///< Defines WDT compare match interrupt vector number.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,10 +283,10 @@ class VectorNumberSettingRegisterWdt : public Register {
 class VectorNumberSettingRegisterDiv : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8>  divu_interrupt_vector{0, 6}; ///< Defines DIVU vector number.
-    inline static const BitRange<u16> upper_16_bits{16, 31};       ///< Defines the range of the upper 16 bits of the register.
-    inline static const BitRange<u16> lower_16_bits{0, 15};        ///< Defines the range of the lower 16 bits of the register.
-    static constexpr u32              access_mask{0b1111111};      ///< The access mask
+    inline static const auto divu_interrupt_vector = BitRange<u8>{0, 6}; ///< Defines DIVU vector number.
+    inline static const auto upper_16_bits = BitRange<u16>{16, 31}; ///< Defines the range of the upper 16 bits of the register.
+    inline static const auto lower_16_bits = BitRange<u16>{0, 15};  ///< Defines the range of the lower 16 bits of the register.
+    static constexpr auto    access_mask   = u32{0b1111111};        ///< The access mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -298,8 +301,8 @@ class VectorNumberSettingRegisterDiv : public Register {
 class VectorNumberSettingRegisterDma : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> dma_transfert_end_vector{0, 7}; ///< Defines DMACx vector number.
-    static constexpr u32             access_mask{0x00000000FF};      ///< The access mask
+    inline static const auto dma_transfert_end_vector = BitRange<u8>{0, 7}; ///< Defines DMACx vector number.
+    static constexpr auto    access_mask              = u32{0x00000000FF};  ///< The access mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -347,11 +350,11 @@ enum class VectorMode : u8 {
 class InterruptControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<NmiInputLevel>    nmi_input_level{15};   ///< Defines NMIL  bit.
-    inline static const BitRange<NmiEdgeDetection> nmi_edge_detection{8}; ///< Defines NMIE  bit.
-    inline static const BitRange<VectorMode>       vector_mode{0};        ///< Defines VECMD  bit.
-    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto nmi_input_level    = BitRange<NmiInputLevel>{15};   ///< Defines NMIL  bit.
+    inline static const auto nmi_edge_detection = BitRange<NmiEdgeDetection>{8}; ///< Defines NMIE  bit.
+    inline static const auto vector_mode        = BitRange<VectorMode>{0};       ///< Defines VECMD  bit.
+    inline static const auto upper_8_bits       = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits       = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 //////////////////////////////////
@@ -370,8 +373,8 @@ class InterruptControlRegister : public Register {
 class BusControlRegister1 : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the whole register bits
-    static constexpr u16              write_mask{0b0001111111110111}; ///< The write mask
+    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the whole register bits
+    static constexpr auto    write_mask    = u16{0b0001111111110111}; ///< The write mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -386,8 +389,8 @@ class BusControlRegister1 : public Register {
 class BusControlRegister2 : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the whole register bits
-    static constexpr u16              write_mask{0b0000000011111100}; ///< The write mask
+    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the whole register bits
+    static constexpr auto    write_mask    = u16{0b0000000011111100}; ///< The write mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -402,7 +405,7 @@ class BusControlRegister2 : public Register {
 class WaitControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u16> lower_16_bits{0, 15}; ///< Defines the lower 16 bits of the register.
+    inline static const auto lower_16_bits = BitRange<u16>{0, 15}; ///< Defines the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -417,7 +420,7 @@ class WaitControlRegister : public Register {
 class IndividualMemoryControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u16> lower_16_bits{0, 15}; ///< Defines the lower 16 bits of the register.
+    inline static const auto lower_16_bits = BitRange<u16>{0, 15}; ///< Defines the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -432,8 +435,8 @@ class IndividualMemoryControlRegister : public Register {
 class RefreshTimeControlStatusRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the lower 16 bits of the register.
-    static constexpr u16              write_mask{0b0000000011111000}; ///< The write mask
+    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the lower 16 bits of the register.
+    static constexpr auto    write_mask    = u16{0b0000000011111000}; ///< The write mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -448,8 +451,8 @@ class RefreshTimeControlStatusRegister : public Register {
 class RefreshTimerCounter : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the lower 16 bits of the register.
-    static constexpr u16              write_mask{0b0000000011111111}; ///< The write mask
+    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the lower 16 bits of the register.
+    static constexpr auto    write_mask    = u16{0b0000000011111111}; ///< The write mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -464,8 +467,8 @@ class RefreshTimerCounter : public Register {
 class RefreshTimerConstantRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u16> lower_16_bits{0, 15};           ///< Defines the lower 16 bits of the register.
-    static constexpr u16              write_mask{0b0000000011111111}; ///< The write mask
+    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the lower 16 bits of the register.
+    static constexpr auto    write_mask    = u16{0b0000000011111111}; ///< The write mask
 };
 
 //////////////
@@ -552,13 +555,13 @@ enum class CacheEnable : u8 {
 class CacheControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<WaySpecification>              way_specification{6, 7};            ///< Defines Wx bits.
-    inline static const BitRange<CachePurge>                    cache_purge{4};                     ///< Defines CP bit.
-    inline static const BitRange<TwoWayMode>                    two_way_mode{3};                    ///< Defines TW bit.
-    inline static const BitRange<DataReplacementDisable>        data_replacement_disable{2};        ///< Defines OD bit.
-    inline static const BitRange<InstructionReplacementDisable> instruction_replacement_disable{1}; ///< Defines ID bit.
-    inline static const BitRange<CacheEnable>                   cache_enable{0};                    ///< Defines CE bit.
-    static constexpr u8                                         write_mask{0b11011111};             ///< The write mask
+    inline static const auto way_specification               = BitRange<WaySpecification>{6, 7};           ///< Defines Wx bits.
+    inline static const auto cache_purge                     = BitRange<CachePurge>{4};                    ///< Defines CP bit.
+    inline static const auto two_way_mode                    = BitRange<TwoWayMode>{3};                    ///< Defines TW bit.
+    inline static const auto data_replacement_disable        = BitRange<DataReplacementDisable>{2};        ///< Defines OD bit.
+    inline static const auto instruction_replacement_disable = BitRange<InstructionReplacementDisable>{1}; ///< Defines ID bit.
+    inline static const auto cache_enable                    = BitRange<CacheEnable>{0};                   ///< Defines CE bit.
+    static constexpr auto    write_mask                      = u8{0b11011111};                             ///< The write mask
 };
 
 //////////////////////////////////////////////
@@ -605,7 +608,7 @@ class DmaDestinationAddressRegister : public Register {
 class DmaTransferCountRegister : public Register {
   public:
     using Register::Register;
-    static constexpr u32 write_mask{0x00FFFFFF}; ///< The write mask
+    static constexpr auto write_mask = u32{0x00FFFFFF}; ///< The write mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -769,20 +772,20 @@ enum class Sh2DmaEnable : u8 {
 class DmaChannelControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<DestinationAddressMode> destination_address_mode{14, 15}; ///< Defines DMx  bits.
-    inline static const BitRange<SourceAddressMode>      source_address_mode{12, 13};      ///< Defines SMx  bits.
-    inline static const BitRange<TransferSize>           transfer_size{10, 11};            ///< Defines TSx  bits.
-    inline static const BitRange<AutoRequestMode>        auto_request_mode{9};             ///< Defines AR  bit.
-    inline static const BitRange<AcknowledgeMode>        acknowledge_mode{8};              ///< Defines AM  bit.
-    inline static const BitRange<AcknowledgeLevel>       acknowledge_level{7};             ///< Defines AL  bit.
-    inline static const BitRange<DreqSelect>             dreq_select{6};                   ///< Defines DS bit.
-    inline static const BitRange<DreqLevel>              dreq_level{5};                    ///< Defines DL bit.
-    inline static const BitRange<TransferBusMode>        transfer_busMode{4};              ///< Defines TB bit.
-    inline static const BitRange<TransferAddressMode>    transfer_address_mode{3};         ///< Defines TA bit.
-    inline static const BitRange<Sh2DmaInterruptEnable>  interrupt_enable{2};              ///< Defines IE bit.
-    inline static const BitRange<TransferEndFlag>        transfer_end_flag{1};             ///< Defines TE bit.
-    inline static const BitRange<Sh2DmaEnable>           dma_enable{0};                    ///< Defines DE bit.
-    static constexpr u32                                 write_mask{0x000000FF};           ///< The write mask
+    inline static const auto destination_address_mode = BitRange<DestinationAddressMode>{14, 15}; ///< Defines DMx  bits.
+    inline static const auto source_address_mode      = BitRange<SourceAddressMode>{12, 13};      ///< Defines SMx  bits.
+    inline static const auto transfer_size            = BitRange<TransferSize>{10, 11};           ///< Defines TSx  bits.
+    inline static const auto auto_request_mode        = BitRange<AutoRequestMode>{9};             ///< Defines AR  bit.
+    inline static const auto acknowledge_mode         = BitRange<AcknowledgeMode>{8};             ///< Defines AM  bit.
+    inline static const auto acknowledge_level        = BitRange<AcknowledgeLevel>{7};            ///< Defines AL  bit.
+    inline static const auto dreq_select              = BitRange<DreqSelect>{6};                  ///< Defines DS bit.
+    inline static const auto dreq_level               = BitRange<DreqLevel>{5};                   ///< Defines DL bit.
+    inline static const auto transfer_busMode         = BitRange<TransferBusMode>{4};             ///< Defines TB bit.
+    inline static const auto transfer_address_mode    = BitRange<TransferAddressMode>{3};         ///< Defines TA bit.
+    inline static const auto interrupt_enable         = BitRange<Sh2DmaInterruptEnable>{2};       ///< Defines IE bit.
+    inline static const auto transfer_end_flag        = BitRange<TransferEndFlag>{1};             ///< Defines TE bit.
+    inline static const auto dma_enable               = BitRange<Sh2DmaEnable>{0};                ///< Defines DE bit.
+    static constexpr auto    write_mask               = u32{0x000000FF};                          ///< The write mask
 };
 
 enum class ResourceSelect : u8 {
@@ -804,8 +807,8 @@ enum class ResourceSelect : u8 {
 class DmaRequestResponseSelectionControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<ResourceSelect> resource_select{0, 1};  ///< Defines RSx bits.
-    static constexpr u8                          write_mask{0b00000011}; ///< The write mask
+    inline static const auto resource_select = BitRange<ResourceSelect>{0, 1}; ///< Defines RSx bits.
+    static constexpr auto    write_mask      = u8{0b00000011};                 ///< The write mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -864,11 +867,11 @@ enum class DmaMasterEnable : u8 {
 class DmaOperationRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<PriorityMode>     priority_mode{3};       ///< Defines PR bit.
-    inline static const BitRange<AddressErrorFlag> address_error_flag{2};  ///< Defines AE bit.
-    inline static const BitRange<NmiFlag>          nmi_flag{1};            ///< Defines NMIF bit.
-    inline static const BitRange<DmaMasterEnable>  dma_master_enable{0};   ///< Defines DME bit.
-    static constexpr u32                           write_mask{0x0000000F}; ///< The write mask
+    inline static const auto priority_mode      = BitRange<PriorityMode>{3};     ///< Defines PR bit.
+    inline static const auto address_error_flag = BitRange<AddressErrorFlag>{2}; ///< Defines AE bit.
+    inline static const auto nmi_flag           = BitRange<NmiFlag>{1};          ///< Defines NMIF bit.
+    inline static const auto dma_master_enable  = BitRange<DmaMasterEnable>{0};  ///< Defines DME bit.
+    static constexpr auto    write_mask         = u32{0x0000000F};               ///< The write mask
 };
 
 //////////////////////////////
@@ -926,11 +929,11 @@ enum class OverflowFlag : u8 {
 class DivisionControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<core::InterruptEnable> interrupt_enable{1}; ///< Defines OVFIE bit.
-    inline static const BitRange<OverflowFlag>          overflow_flag{0};    ///< Defines OVF bit.
-    inline static const BitRange<u16> upper_16_bits{16, 31}; ///< Defines the range of the upper 16 bits of the register.
-    inline static const BitRange<u16> lower_16_bits{0, 15};  ///< Defines the range of the lower 16 bits of the register.
-    static constexpr u32              access_mask{0b11};     ///< The access mask
+    inline static const auto interrupt_enable = BitRange<core::InterruptEnable>{1}; ///< Defines OVFIE bit.
+    inline static const auto overflow_flag    = BitRange<OverflowFlag>{0};          ///< Defines OVF bit.
+    inline static const auto upper_16_bits = BitRange<u16>{16, 31}; ///< Defines the range of the upper 16 bits of the register.
+    inline static const auto lower_16_bits = BitRange<u16>{0, 15};  ///< Defines the range of the lower 16 bits of the register.
+    static constexpr auto    access_mask   = u32{0b11};             ///< The access mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1021,10 +1024,13 @@ enum class TimerOverflowInterruptEnable : u8 {
 class TimerInterruptEnableRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<InterruptCaptureInterruptEnable> interrupt_capture_interrupt_enable{7}; ///< Defines ICIE bit.
-    inline static const BitRange<OutputCompareInterruptAEnable>   output_compare_interrupt_a_enable{3};  ///< Defines OCIAE bit.
-    inline static const BitRange<OutputCompareInterruptBEnable>   output_compare_interrupt_b_enable{2};  ///< Defines OCIBE bit.
-    inline static const BitRange<TimerOverflowInterruptEnable>    timer_overflow_interrupt_enable{1};    ///< Defines OVIE bit.
+    inline static const auto interrupt_capture_interrupt_enable
+        = BitRange<InterruptCaptureInterruptEnable>{7}; ///< Defines ICIE bit.
+    inline static const auto output_compare_interrupt_a_enable
+        = BitRange<OutputCompareInterruptAEnable>{3}; ///< Defines OCIAE bit.
+    inline static const auto output_compare_interrupt_b_enable
+        = BitRange<OutputCompareInterruptBEnable>{2};                                                     ///< Defines OCIBE bit.
+    inline static const auto timer_overflow_interrupt_enable = BitRange<TimerOverflowInterruptEnable>{1}; ///< Defines OVIE bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1094,11 +1100,11 @@ enum class CounterClearA : u8 {
 class FreeRunningTimerControlStatusRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<InputCaptureFlag>   input_capture_flag{7};    ///< Defines ICF bit.
-    inline static const BitRange<OutputCompareFlagA> output_compare_flag_a{3}; ///< Defines OCFA bit.
-    inline static const BitRange<OutputCompareFlagB> output_compare_flag_b{2}; ///< Defines OCFB bit.
-    inline static const BitRange<TimerOverflowFlag>  timer_overflow_flag{1};   ///< Defines OVF bit.
-    inline static const BitRange<CounterClearA>      counter_clear_a{0};       ///< Defines CCLRA bit.
+    inline static const auto input_capture_flag    = BitRange<InputCaptureFlag>{7};   ///< Defines ICF bit.
+    inline static const auto output_compare_flag_a = BitRange<OutputCompareFlagA>{3}; ///< Defines OCFA bit.
+    inline static const auto output_compare_flag_b = BitRange<OutputCompareFlagB>{2}; ///< Defines OCFB bit.
+    inline static const auto timer_overflow_flag   = BitRange<TimerOverflowFlag>{1};  ///< Defines OVF bit.
+    inline static const auto counter_clear_a       = BitRange<CounterClearA>{0};      ///< Defines CCLRA bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1113,8 +1119,8 @@ class FreeRunningTimerControlStatusRegister : public Register {
 class FreeRunningCounter : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1129,8 +1135,8 @@ class FreeRunningCounter : public Register {
 class OutputCompareRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1169,8 +1175,8 @@ enum class FrtClockSelect : u8 {
 class TimerControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<InputEdgeSelect> input_edge_select{7}; ///< Defines IEDG bit.
-    inline static const BitRange<FrtClockSelect>  clock_select{0, 1};   ///< Defines IEDG bit.
+    inline static const auto input_edge_select = BitRange<InputEdgeSelect>{7};   ///< Defines IEDG bit.
+    inline static const auto clock_select      = BitRange<FrtClockSelect>{0, 1}; ///< Defines IEDG bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1218,10 +1224,10 @@ enum class OutputLevelB : u8 {
 class TimerOutputCompareControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<OutputCompareRegisterSelect> output_compare_register_select{4}; ///< Defines OCRS bit.
-    inline static const BitRange<OutputLevelA>                output_level_a{1};                 ///< Defines OLVLA bit.
-    inline static const BitRange<OutputLevelB>                output_level_b{0};                 ///< Defines OLVLB bit.
-    static constexpr u8                                       access_mask{0b00010011};           ///< The access mask
+    inline static const auto output_compare_register_select = BitRange<OutputCompareRegisterSelect>{4}; ///< Defines OCRS bit.
+    inline static const auto output_level_a                 = BitRange<OutputLevelA>{1};                ///< Defines OLVLA bit.
+    inline static const auto output_level_b                 = BitRange<OutputLevelB>{0};                ///< Defines OLVLB bit.
+    static constexpr auto    access_mask                    = u8{0b00010011};                           ///< The access mask
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1236,8 +1242,8 @@ class TimerOutputCompareControlRegister : public Register {
 class InputCaptureRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> upper_8_bits{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const BitRange<u8> lower_8_bits{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
+    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ///////////////////////////////
@@ -1321,10 +1327,10 @@ enum class WdtClockSelect : u8 {
 class WatchdogTimerControlStatusRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<WdtOverflowFlag> overflow_flag{7};     ///< Defines OVF bit.
-    inline static const BitRange<TimerModeSelect> timer_mode_select{6}; ///< Defines WT/IT bit.
-    inline static const BitRange<TimerEnable>     timer_enable{5};      ///< Defines TME bit.
-    inline static const BitRange<WdtClockSelect>  clock_select{0, 2};   ///< Defines CKSx bits.
+    inline static const auto overflow_flag     = BitRange<WdtOverflowFlag>{7};   ///< Defines OVF bit.
+    inline static const auto timer_mode_select = BitRange<TimerModeSelect>{6};   ///< Defines WT/IT bit.
+    inline static const auto timer_enable      = BitRange<TimerEnable>{5};       ///< Defines TME bit.
+    inline static const auto clock_select      = BitRange<WdtClockSelect>{0, 2}; ///< Defines CKSx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1372,9 +1378,9 @@ enum class ResetSelect : u8 {
 class ResetControlStatusRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<WatchdogTimerOverflowFlag> watchdog_timer_overflow_flag{7}; ///< Defines WOVF bit.
-    inline static const BitRange<ResetEnable>               reset_enable{6};                 ///< Defines RSTE bit.
-    inline static const BitRange<ResetSelect>               reset_select{5};                 ///< Defines RSTS bit.
+    inline static const auto watchdog_timer_overflow_flag = BitRange<WatchdogTimerOverflowFlag>{7}; ///< Defines WOVF bit.
+    inline static const auto reset_enable                 = BitRange<ResetEnable>{6};               ///< Defines RSTE bit.
+    inline static const auto reset_select                 = BitRange<ResetSelect>{5};               ///< Defines RSTS bit.
 };
 
 /////////////////////////////////////////////
@@ -1472,13 +1478,13 @@ enum class SciClockSelect : u8 {
 class SerialModeRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<CommunicationMode>  communication_mode{7};  ///< Defines C/A bit.
-    inline static const BitRange<CharacterLength>    character_length{6};    ///< Defines CHR bit.
-    inline static const BitRange<ParityEnable>       parity_enable{5};       ///< Defines PE bit.
-    inline static const BitRange<ParityMode>         parity_mode{4};         ///< Defines O/E bit.
-    inline static const BitRange<StopBitLength>      stop_bit_length{3};     ///< Defines STOP bit.
-    inline static const BitRange<MultiprocessorMode> multiprocessor_mode{2}; ///< Defines MP bit.
-    inline static const BitRange<SciClockSelect>     clock_select{0, 1};     ///< Defines CKSx bit.
+    inline static const auto communication_mode  = BitRange<CommunicationMode>{7};  ///< Defines C/A bit.
+    inline static const auto character_length    = BitRange<CharacterLength>{6};    ///< Defines CHR bit.
+    inline static const auto parity_enable       = BitRange<ParityEnable>{5};       ///< Defines PE bit.
+    inline static const auto parity_mode         = BitRange<ParityMode>{4};         ///< Defines O/E bit.
+    inline static const auto stop_bit_length     = BitRange<StopBitLength>{3};      ///< Defines STOP bit.
+    inline static const auto multiprocessor_mode = BitRange<MultiprocessorMode>{2}; ///< Defines MP bit.
+    inline static const auto clock_select        = BitRange<SciClockSelect>{0, 1};  ///< Defines CKSx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1586,13 +1592,13 @@ enum class ClockEnable : u8 {
 class SerialControlRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<TransmitInterruptEnable>       transmit_interrupt_enable{7};       ///< Defines TIE bit.
-    inline static const BitRange<ReceiveInterruptEnable>        receive_interrupts_enable{6};       ///< Defines RIE bit.
-    inline static const BitRange<TransmitEnable>                transmit_enable{5};                 ///< Defines TE bit.
-    inline static const BitRange<ReceiveEnable>                 receive_enable{4};                  ///< Defines ORE bit.
-    inline static const BitRange<MultiprocessorInterruptEnable> multiprocessor_interrupt_enable{3}; ///< Defines MPIE bit.
-    inline static const BitRange<TransmitEndInterruptEnable>    transmit_end_interrupt_enable{2};   ///< Defines TEIE bit.
-    inline static const BitRange<ClockEnable>                   clock_enable{0, 1};                 ///< Defines CKEx bit.
+    inline static const auto transmit_interrupt_enable       = BitRange<TransmitInterruptEnable>{7};       ///< Defines TIE bit.
+    inline static const auto receive_interrupts_enable       = BitRange<ReceiveInterruptEnable>{6};        ///< Defines RIE bit.
+    inline static const auto transmit_enable                 = BitRange<TransmitEnable>{5};                ///< Defines TE bit.
+    inline static const auto receive_enable                  = BitRange<ReceiveEnable>{4};                 ///< Defines ORE bit.
+    inline static const auto multiprocessor_interrupt_enable = BitRange<MultiprocessorInterruptEnable>{3}; ///< Defines MPIE bit.
+    inline static const auto transmit_end_interrupt_enable   = BitRange<TransmitEndInterruptEnable>{2};    ///< Defines TEIE bit.
+    inline static const auto clock_enable                    = BitRange<ClockEnable>{0, 1};                ///< Defines CKEx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1723,14 +1729,14 @@ enum class MultiprocessorBitTransfer : u8 {
 class SerialStatusRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<TransmitDataRegisterEmpty> transmit_data_register_empty{7}; ///< Defines TDRE bit.
-    inline static const BitRange<ReceiveDataRegisterFull>   receive_data_register_full{6};   ///< Defines RDRF bit.
-    inline static const BitRange<OverrunError>              overrun_error{5};                ///< Defines ORER bit.
-    inline static const BitRange<FramingError>              framing_error{4};                ///< Defines FER bit.
-    inline static const BitRange<ParityError>               parity_error{3};                 ///< Defines PER bit.
-    inline static const BitRange<TransmitEnd>               transmit_end{2};                 ///< Defines TEND bit.
-    inline static const BitRange<MultiprocessorBit>         multiprocessor_bit{1};           ///< Defines MPB bit.
-    inline static const BitRange<MultiprocessorBitTransfer> multiprocessor_bit_transfer{0};  ///< Defines MPBT bit.
+    inline static const auto transmit_data_register_empty = BitRange<TransmitDataRegisterEmpty>{7}; ///< Defines TDRE bit.
+    inline static const auto receive_data_register_full   = BitRange<ReceiveDataRegisterFull>{6};   ///< Defines RDRF bit.
+    inline static const auto overrun_error                = BitRange<OverrunError>{5};              ///< Defines ORER bit.
+    inline static const auto framing_error                = BitRange<FramingError>{4};              ///< Defines FER bit.
+    inline static const auto parity_error                 = BitRange<ParityError>{3};               ///< Defines PER bit.
+    inline static const auto transmit_end                 = BitRange<TransmitEnd>{2};               ///< Defines TEND bit.
+    inline static const auto multiprocessor_bit           = BitRange<MultiprocessorBit>{1};         ///< Defines MPB bit.
+    inline static const auto multiprocessor_bit_transfer  = BitRange<MultiprocessorBitTransfer>{0}; ///< Defines MPBT bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

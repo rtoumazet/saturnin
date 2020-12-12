@@ -102,7 +102,7 @@ void OpenglModern::deleteTexture() const {
     if (texture_ != 0) { glDeleteTextures(1, &texture_); }
 }
 
-u32 OpenglModern::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const {
+auto OpenglModern::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const -> u32 {
     glEnable(GL_TEXTURE_2D);
 
     auto texture = u32{};

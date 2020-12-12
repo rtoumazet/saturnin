@@ -33,35 +33,35 @@ namespace saturnin::sh2 {
 using core::Log;
 
 // Masks constants
-constexpr u32 allow_bsc_write_mask{0xA55A0000};
-constexpr u32 cache_purge_mask{0xFFFFFC0B};
+constexpr auto allow_bsc_write_mask = u32{0xA55A0000};
+constexpr auto cache_purge_mask     = u32{0xFFFFFC0B};
 
 // Default values
 // BSC
-constexpr u32 bsc_bcr1_master_default_value{0x000003F0};
-constexpr u32 bsc_bcr1_slave_default_value{0x000083F0};
-constexpr u32 bsc_bcr2_default_value{0x000000FCu};
-constexpr u32 bsc_wcr_default_value{0x0000AAFFu};
-constexpr u8  frt_tier_default_value{0x01};
-constexpr u16 frt_ocra_default_value{0xFFFF};
-constexpr u16 frt_ocrb_default_value{0xFFFF};
-constexpr u8  frt_tocr_default_value{0xe0};
-constexpr u8  wdt_wtcsr_default_value{0x18};
-constexpr u8  wdt_rstcsr_default_value{0x1F};
-constexpr u8  sci_ssr_default_value{0x84};
+constexpr auto bsc_bcr1_master_default_value = u32{0x000003F0};
+constexpr auto bsc_bcr1_slave_default_value  = u32{0x000083F0};
+constexpr auto bsc_bcr2_default_value        = u32{0x000000FCu};
+constexpr auto bsc_wcr_default_value         = u32{0x0000AAFFu};
+constexpr auto frt_tier_default_value        = u8{0x01};
+constexpr auto frt_ocra_default_value        = u16{0xFFFF};
+constexpr auto frt_ocrb_default_value        = u16{0xFFFF};
+constexpr auto frt_tocr_default_value        = u8{0xe0};
+constexpr auto wdt_wtcsr_default_value       = u8{0x18};
+constexpr auto wdt_rstcsr_default_value      = u8{0x1F};
+constexpr auto sci_ssr_default_value         = u8{0x84};
 
-constexpr u8 divu_normal_cycles_number{39};
-constexpr u8 divu_overflow_cycles_number{6};
+constexpr auto divu_normal_cycles_number   = u8{39};
+constexpr auto divu_overflow_cycles_number = u8{6};
 
-constexpr u32 pc_start_vector{0x00000008};
-constexpr u32 sp_start_vector{0x0000000C};
-constexpr u8  sr_stack_offset{4};
-constexpr u8  pc_stack_offset{8};
+constexpr auto pc_start_vector = u32{0x00000008};
+constexpr auto sp_start_vector = u32{0x0000000C};
+constexpr auto sr_stack_offset = u8{4};
+constexpr auto pc_stack_offset = u8{8};
 
-constexpr u8 transfer_byte_size_1{0x1};
-constexpr u8 transfer_byte_size_2{0x2};
-constexpr u8 transfer_byte_size_4{0x4};
-constexpr u8 transfer_byte_size_16{0x10};
+constexpr auto transfer_byte_size_1  = u8{0x1};
+constexpr auto transfer_byte_size_2  = u8{0x2};
+constexpr auto transfer_byte_size_4  = u8{0x4};
+constexpr auto transfer_byte_size_16 = u8{0x10};
 
 Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : sh2_type_(st), emulator_context_(ec) { reset(); }
 
@@ -653,7 +653,7 @@ void Sh2::purgeCache() {
     // All the valid bits and LRU bits are initialized to 0
     for (u8 i = 0; i < cache_lines_number; ++i) {
         // :WARNING: following code is untested
-        u32 data = core::rawRead<u32>(this->cache_addresses_, i);
+        auto data = core::rawRead<u32>(this->cache_addresses_, i);
         data &= cache_purge_mask;
         core::rawWrite<u32>(this->cache_addresses_, i, data);
     }
@@ -674,7 +674,7 @@ void Sh2::initializeOnChipRegisters() {
     intc_icr_.reset();
 
     // Bus State Controler registers
-    u32 default_bcr1 = (sh2_type_ == Sh2Type::master) ? bsc_bcr1_master_default_value : bsc_bcr1_slave_default_value;
+    auto default_bcr1 = u32{(sh2_type_ == Sh2Type::master) ? bsc_bcr1_master_default_value : bsc_bcr1_slave_default_value};
     bsc_bcr1_.set(bits_0_31, default_bcr1);
     bsc_bcr2_.set(bits_0_31, bsc_bcr2_default_value);
     bsc_wcr_.set(bits_0_31, bsc_wcr_default_value);
@@ -722,7 +722,7 @@ void Sh2::initializeOnChipRegisters() {
     sci_rdr_.reset();
 
     // Power-Down Modes
-    constexpr u8 sbycr_default_value{0x60};
+    constexpr auto sbycr_default_value = u8{0x60};
     sbycr_.set(bits_0_7, sbycr_default_value);
 }
 
@@ -751,13 +751,13 @@ void Sh2::start32bitsDivision() {
     // DVDNT is copied in DVDNTL and DVDNTH
     divu_dvdntl_.set(bits_0_31, divu_dvdnt_.toU32());
 
-    s32 dvdnt = divu_dvdnt_.toU32();
+    const auto dvdnt = static_cast<s32>(divu_dvdnt_.toU32());
     if (dvdnt < 0) {
         divu_dvdnth_.set();
     } else {
         divu_dvdnth_.reset();
     }
-    s32 dvsr = divu_dvsr_.toU32();
+    const auto dvsr = static_cast<s32>(divu_dvsr_.toU32());
 
     Log::debug("sh2", "Dividend : {}, divisor : {}", dvdnt, dvsr);
 
@@ -771,8 +771,8 @@ void Sh2::start32bitsDivision() {
     }
 
     // Overflow check
-    bool is_dvdnt_ovf{(dvdnt & sign_bit_32_mask) != 0};
-    bool is_dvsr_ovf{(dvsr & sign_bit_32_mask) != 0};
+    const auto is_dvdnt_ovf = bool{(dvdnt & sign_bit_32_mask) != 0};
+    const auto is_dvsr_ovf  = bool{(dvsr & sign_bit_32_mask) != 0};
     if (is_dvdnt_ovf && is_dvsr_ovf) {
         if ((divu_quot_ == INT32_MAX) && ((divu_rem_ & sign_bit_32_mask) != 0)) {
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
@@ -790,17 +790,17 @@ void Sh2::start32bitsDivision() {
 void Sh2::start64bitsDivision() {
     Log::debug("sh2", "64/32 division");
 
-    s32 dvdntl = divu_dvdntl_.toU32();
-    s32 dvdnth = divu_dvdnth_.toU32();
-    s32 dvsr   = divu_dvsr_.toU32();
+    const auto dvdntl = static_cast<s32>(divu_dvdntl_.toU32());
+    const auto dvdnth = static_cast<s32>(divu_dvdnth_.toU32());
+    const auto dvsr   = static_cast<s32>(divu_dvsr_.toU32());
 
-    s64 dividend = (static_cast<s64>(dvdnth) << number_of_bits_32) | dvdntl;
+    const auto dividend = (static_cast<s64>(dvdnth) << number_of_bits_32) | dvdntl;
 
     Log::debug("sh2", "Dividend : {}, divisor : {}", dividend, dvsr);
 
     // auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
-    s64 quotient{};
-    s64 remainder{};
+    auto quotient  = s64{};
+    auto remainder = s64{};
     if (divu_dvsr_.any()) {
         quotient  = dividend / dvsr;
         remainder = dividend % dvsr;
@@ -809,8 +809,8 @@ void Sh2::start64bitsDivision() {
     }
 
     // Overflow check
-    bool is_dvdnth_ovf{(dvdnth & sign_bit_32_mask) != 0};
-    bool is_dvsr_ovf{(dvsr & sign_bit_32_mask) != 0};
+    const auto is_dvdnth_ovf = bool{(dvdnth & sign_bit_32_mask) != 0};
+    const auto is_dvsr_ovf   = bool{(dvsr & sign_bit_32_mask) != 0};
     if (is_dvdnth_ovf && is_dvsr_ovf) {
         if ((quotient == INT32_MAX) && ((remainder & sign_bit_32_mask) != 0)) {
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
@@ -821,8 +821,8 @@ void Sh2::start64bitsDivision() {
     divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow)
                                  ? divu_overflow_cycles_number
                                  : divu_normal_cycles_number;
-    divu_quot_ = static_cast<s32>(quotient);
-    divu_rem_  = static_cast<s32>(remainder);
+    divu_quot_             = static_cast<s32>(quotient);
+    divu_rem_              = static_cast<s32>(remainder);
 
     divu_is_running_ = true;
 }
@@ -830,8 +830,8 @@ void Sh2::start64bitsDivision() {
 void Sh2::runInterruptController() {
     if (!is_interrupted_) {
         if (!pending_interrupts_.empty()) {
-            u8   interrupt_mask = sr_.get(StatusRegister::i);
-            auto interrupt      = pending_interrupts_.front();
+            const auto interrupt_mask = sr_.get(StatusRegister::i);
+            const auto interrupt      = pending_interrupts_.front();
             if ((interrupt.level > interrupt_mask) || interrupt == is::nmi) {
                 Log::debug("sh2",
                            "{} SH2 interrupt request {:#0x} {:#0x}, PC={:#0x}",
@@ -892,13 +892,13 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
 }
 
 void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
-    u32 elapsed_cycles{frt_elapsed_cycles_ + cycles_to_run};
-    u32 counter_increment{elapsed_cycles / frt_clock_divisor_};
-    u32 cycles_remainder{elapsed_cycles % frt_clock_divisor_};
+    const auto elapsed_cycles    = u32{frt_elapsed_cycles_ + cycles_to_run};
+    const auto counter_increment = u32{elapsed_cycles / frt_clock_divisor_};
+    const auto cycles_remainder  = u32{elapsed_cycles % frt_clock_divisor_};
 
     if (counter_increment > 0) {
-        u32 old_frc{frt_frc_.get(bits_0_31)};
-        u32 current_frc{old_frc + counter_increment};
+        const auto old_frc     = u32{frt_frc_.get(bits_0_31)};
+        const auto current_frc = u32{old_frc + counter_increment};
         frt_frc_.set(bits_0_15, static_cast<u16>(current_frc));
 
         frt_elapsed_cycles_ = elapsed_cycles & frt_mask_;
@@ -916,7 +916,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
         }
 
         // Checking comparison for OCRA
-        u32 ocra = frt_ocra_.toU32();
+        const auto ocra = frt_ocra_.toU32();
         if ((old_frc <= ocra) && (current_frc > ocra)) {
             frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::output_compare_flag_a);
             if (frt_tier_.get(TimerInterruptEnableRegister::output_compare_interrupt_a_enable)
@@ -933,7 +933,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
         }
 
         // Checking comparison for OCRB
-        u32 ocrb = frt_ocrb_.toU32();
+        const auto ocrb = frt_ocrb_.toU32();
         if ((old_frc <= ocrb) && (current_frc > ocrb)) {
             frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::output_compare_flag_b);
             if (frt_tier_.get(TimerInterruptEnableRegister::output_compare_interrupt_b_enable)
@@ -984,7 +984,8 @@ auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLIN
     // DE=1 TE=0 NMIF=0 AE=0
     switch (dc) {
         case DmaChannel::channel_0: {
-            bool channel_0_is_set = dmac_chcr0_.get(DmaChannelControlRegister::dma_enable) == Sh2DmaEnable::dma_transfer_enabled;
+            auto channel_0_is_set
+                = bool{dmac_chcr0_.get(DmaChannelControlRegister::dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
             channel_0_is_set
                 &= dmac_chcr0_.get(DmaChannelControlRegister::transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
             channel_0_is_set &= dmac_dmaor_.get(DmaOperationRegister::nmi_flag) == NmiFlag::no_nmif_interrupt;
@@ -993,7 +994,8 @@ auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLIN
             return channel_0_is_set;
         }
         case DmaChannel::channel_1: {
-            bool channel_1_is_set = dmac_chcr1_.get(DmaChannelControlRegister::dma_enable) == Sh2DmaEnable::dma_transfer_enabled;
+            auto channel_1_is_set
+                = bool{dmac_chcr1_.get(DmaChannelControlRegister::dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
             channel_1_is_set
                 &= dmac_chcr1_.get(DmaChannelControlRegister::transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
             channel_1_is_set &= dmac_dmaor_.get(DmaOperationRegister::nmi_flag) == NmiFlag::no_nmif_interrupt;
@@ -1007,7 +1009,7 @@ auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLIN
 }
 
 auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
-    Sh2DmaConfiguration conf;
+    auto conf = Sh2DmaConfiguration{};
     switch (dc) {
         case DmaChannel::channel_0:
             conf.channel     = DmaChannel::channel_0;
@@ -1032,13 +1034,13 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
 
 void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
     if (dmaStartConditionsAreSatisfied(conf.channel)) {
-        u8 channel_number = (conf.channel == DmaChannel::channel_0) ? 0 : 1;
+        const auto channel_number = static_cast<u8>((conf.channel == DmaChannel::channel_0) ? 0 : 1);
         if (conf.chcr.get(DmaChannelControlRegister::auto_request_mode) == AutoRequestMode::module_request) {
             Log::warning("sh2", "DMAC - Channel {} module request not implemented !", channel_number);
         } else {
-            u32 counter{conf.counter};
-            u32 source{conf.source};
-            u32 destination{conf.destination};
+            auto counter     = u32{conf.counter};
+            auto source      = u32{conf.source};
+            auto destination = u32{conf.destination};
             Log::debug("sh2", "DMAC - Channel {} transfer", channel_number);
             Log::debug("sh2", "PC={:#0x}", pc_);
             Log::debug("sh2", "Source:{:#0x}", source);
@@ -1046,7 +1048,7 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
             Log::debug("sh2", "Count:{:#0x}", counter);
 
             while (counter > 0) {
-                u8 transfer_size{};
+                auto transfer_size = u8{};
                 switch (conf.chcr.get(DmaChannelControlRegister::transfer_size)) {
                     case TransferSize::one_byte_unit:
                         memory()->write<u8>(destination, memory()->read<u8>(source));

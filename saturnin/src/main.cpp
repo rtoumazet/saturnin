@@ -28,7 +28,7 @@ using core::tr;
 
 auto main(int argc, char* argv[]) -> int {
     try {
-        EmulatorContext state;
+        auto state = EmulatorContext{};
         if (!state.initialize()) {
             Log::error("main", tr("Could not initialize the program ..."));
             throw std::runtime_error("Main error !");

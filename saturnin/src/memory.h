@@ -61,49 +61,49 @@ class Config;
 class Scu;
 class Smpc;
 
-constexpr u32 workram_low_size{0x100000};
-constexpr u32 workram_high_size{0x100000};
-constexpr u32 rom_size{0x80000};
-constexpr u8  smpc_size{0x80};
-constexpr u32 backup_ram_size{0x10000};
-constexpr u8  scu_size{0xD0};
-constexpr u32 vdp2_vram_size{0x80000};
-constexpr u16 vdp2_cram_size{0x1000};
-constexpr u16 vdp2_registers_size{0x200};
-constexpr u32 vdp1_vram_size{0x80000};
-constexpr u32 vdp1_framebuffer_size{0x40000};
-constexpr u8  vdp1_registers_size{0x18};
-constexpr u32 sound_ram_size{0x100000};
-constexpr u16 stv_io_size{0x100};
-constexpr u32 cart_size{0x3000000};
-constexpr u32 rom_memory_mask{0x7FFFF};
-constexpr u32 smpc_memory_mask{0x7F};
-constexpr u32 backup_ram_memory_mask{0xFFFF};
-constexpr u32 workram_low_memory_mask{0xFFFFF};
-constexpr u32 stv_io_memory_mask{0xFF};
-constexpr u32 cart_memory_mask{0x01FFFFFF};
-constexpr u32 vdp1_ram_memory_mask{0x7FFFF};
-constexpr u32 vdp1_framebuffer_memory_mask{0x3FFFF};
-constexpr u32 vdp1_registers_memory_mask{0x1F};
-constexpr u32 vdp2_vram_memory_mask{0x7FFFF};
-constexpr u32 vdp2_cram_memory_mask{0xFFF};
-constexpr u32 vdp2_registers_memory_mask{0x1FF};
-constexpr u32 scu_memory_mask{0xFF};
-constexpr u32 workram_high_memory_mask{0xFFFFF};
-constexpr u32 stv_io_port_a{0x400001};
-constexpr u32 stv_io_port_b{0x400003};
-constexpr u32 stv_io_port_c{0x400005};
-constexpr u32 stv_io_port_d{0x400007};
+constexpr auto workram_low_size             = u32{0x100000};
+constexpr auto workram_high_size            = u32{0x100000};
+constexpr auto rom_size                     = u32{0x80000};
+constexpr auto smpc_size                    = u8{0x80};
+constexpr auto backup_ram_size              = u32{0x10000};
+constexpr auto scu_size                     = u8{0xD0};
+constexpr auto vdp2_vram_size               = u32{0x80000};
+constexpr auto vdp2_cram_size               = u16{0x1000};
+constexpr auto vdp2_registers_size          = u16{0x200};
+constexpr auto vdp1_vram_size               = u32{0x80000};
+constexpr auto vdp1_framebuffer_size        = u32{0x40000};
+constexpr auto vdp1_registers_size          = u8{0x18};
+constexpr auto sound_ram_size               = u32{0x100000};
+constexpr auto stv_io_size                  = u16{0x100};
+constexpr auto cart_size                    = u32{0x3000000};
+constexpr auto rom_memory_mask              = u32{0x7FFFF};
+constexpr auto smpc_memory_mask             = u32{0x7F};
+constexpr auto backup_ram_memory_mask       = u32{0xFFFF};
+constexpr auto workram_low_memory_mask      = u32{0xFFFFF};
+constexpr auto stv_io_memory_mask           = u32{0xFF};
+constexpr auto cart_memory_mask             = u32{0x01FFFFFF};
+constexpr auto vdp1_ram_memory_mask         = u32{0x7FFFF};
+constexpr auto vdp1_framebuffer_memory_mask = u32{0x3FFFF};
+constexpr auto vdp1_registers_memory_mask   = u32{0x1F};
+constexpr auto vdp2_vram_memory_mask        = u32{0x7FFFF};
+constexpr auto vdp2_cram_memory_mask        = u32{0xFFF};
+constexpr auto vdp2_registers_memory_mask   = u32{0x1FF};
+constexpr auto scu_memory_mask              = u32{0xFF};
+constexpr auto workram_high_memory_mask     = u32{0xFFFFF};
+constexpr auto stv_io_port_a                = u32{0x400001};
+constexpr auto stv_io_port_b                = u32{0x400003};
+constexpr auto stv_io_port_c                = u32{0x400005};
+constexpr auto stv_io_port_d                = u32{0x400007};
 
-constexpr u32 stv_protection_register_address{0x04FFFFFC};
-constexpr u32 stv_protection_enabled{0x04FFFFF1};
-static u32    stv_protection_offset{};
+constexpr auto stv_protection_register_address = u32{0x04FFFFFC};
+constexpr auto stv_protection_enabled          = u32{0x04FFFFF1};
+static auto    stv_protection_offset           = u32{};
 
-constexpr u32 memory_handler_size{0x10000};
+constexpr auto memory_handler_size = u32{0x10000};
 
-constexpr u32 cart_absolute_address{0x02000000};
+constexpr auto cart_absolute_address = u32{0x02000000};
 
-constexpr u32 full_memory_map_size{0x10000000};
+constexpr auto full_memory_map_size = u32{0x10000000};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   StvIOPort
@@ -840,10 +840,10 @@ struct readStvIo<u8> {
     operator Memory::ReadType<u8>() const {
         return [](const Memory& m, const u32 addr) -> u8 {
             // WIP use gainput/glfw3 to manage inputs
-            u8 data{};
+            auto data = u8{};
             switch (addr & bitmask_00FFFFFF) {
                 case stv_io_port_a: {
-                    auto p1 = m.smpc()->getStvPeripheralMapping().player_1;
+                    const auto p1 = m.smpc()->getStvPeripheralMapping().player_1;
                     if (isKeyPressed(p1.button_1, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_1); }
                     if (isKeyPressed(p1.button_2, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_2); }
                     if (isKeyPressed(p1.button_3, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_3); }
@@ -855,7 +855,7 @@ struct readStvIo<u8> {
                     break;
                 }
                 case stv_io_port_b: {
-                    auto p2 = m.smpc()->getStvPeripheralMapping().player_2;
+                    const auto p2 = m.smpc()->getStvPeripheralMapping().player_2;
                     if (isKeyPressed(p2.button_1, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_1); }
                     if (isKeyPressed(p2.button_2, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_2); }
                     if (isKeyPressed(p2.button_3, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_3); }
@@ -867,7 +867,7 @@ struct readStvIo<u8> {
                     break;
                 }
                 case stv_io_port_c: {
-                    auto board = m.smpc()->getStvPeripheralMapping().board_controls;
+                    const auto board = m.smpc()->getStvPeripheralMapping().board_controls;
                     if (isKeyPressed(board.p1_coin_switch, m.openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::coin_switch_player1);
                     }
@@ -889,8 +889,9 @@ struct readStvIo<u8> {
                 }
                 default: data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
             }
-            data = ~data;
-            return data;
+            // data = ~data;
+            // return data;
+            return ~data;
         };
     }
 };
@@ -927,7 +928,7 @@ struct writeStvIo {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline auto calculateRelativeCartAddress(const u32 addr) -> u32 {
-    u32 temp{(addr >> 1) & cart_absolute_address};
+    const auto temp = u32{(addr >> 1) & cart_absolute_address};
     return (addr & cart_memory_mask) | temp;
 }
 
@@ -946,7 +947,7 @@ template<typename T>
 struct readCart {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            u32 relative_addr = calculateRelativeCartAddress(addr);
+            const auto relative_addr = calculateRelativeCartAddress(addr);
             return rawRead<T>(m.cart_, relative_addr);
         };
     }
@@ -957,8 +958,8 @@ template<>
 struct readCart<u32> {
     operator Memory::ReadType<u32>() const {
         return [](const Memory& m, const u32 addr) -> u32 {
-            u32 relative_addr = calculateRelativeCartAddress(addr);
-            u32 data{rawRead<u32>(m.cart_, relative_addr)};
+            const auto relative_addr = calculateRelativeCartAddress(addr);
+            auto       data          = u32{rawRead<u32>(m.cart_, relative_addr)};
 
             if ((addr & bitmask_0FFFFFFF) == stv_protection_register_address) {
                 if (m.HardwareMode_ == HardwareMode::stv) { data = m.readStvProtection(addr, data); }

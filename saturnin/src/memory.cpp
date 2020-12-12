@@ -35,33 +35,33 @@ namespace saturnin::core {
 using core::Log;
 using std::copy;
 
-constexpr u8 region_cart_address_not_interleaved  = 0x40;
-constexpr u8 region_cart_address_odd_interleaved  = 0x81;
-constexpr u8 region_cart_address_even_interleaved = 0x80;
+constexpr auto region_cart_address_not_interleaved  = u8{0x40};
+constexpr auto region_cart_address_odd_interleaved  = u8{0x81};
+constexpr auto region_cart_address_even_interleaved = u8{0x80};
 
-constexpr AddressRange dummy_address        = {0x00000000, 0xFFFFFFFF};
-constexpr AddressRange rom_address          = {0x00000000, 0x000FFFFF};
-constexpr AddressRange smpc_address         = {0x00100000, 0x0017FFFF};
-constexpr AddressRange backup_ram_address   = {0x00180000, 0x001FFFFF};
-constexpr AddressRange workram_low_address  = {0x00200000, 0x002FFFFF};
-constexpr AddressRange stv_io_address       = {0x00400000, 0x004FFFFF};
-constexpr AddressRange cart_address         = {0x02000000, 0x04FFFFFF};
-constexpr AddressRange cd_block_address     = {0x05800000, 0x058FFFFF};
-constexpr AddressRange scsp_address         = {0x05A00000, 0x05BFFFFF};
-constexpr AddressRange vdp1_ram_address     = {0x05C00000, 0x05C7FFFF};
-constexpr AddressRange vdp1_fb_address      = {0x05C80000, 0x05CFFFFF};
-constexpr AddressRange vdp1_regs_address    = {0x05D00000, 0x05D7FFFF};
-constexpr AddressRange vdp2_vram_address    = {0x05E00000, 0x05EFFFFF};
-constexpr AddressRange vdp2_cram_address    = {0x05F00000, 0x05F7FFFF};
-constexpr AddressRange vdp2_regs_address    = {0x05F80000, 0x05FBFFFF};
-constexpr AddressRange scu_address          = {0x05FE0000, 0x05FEFFFF};
-constexpr AddressRange workram_high_address = {0x06000000, 0x07FFFFFF};
-constexpr AddressRange master_frt_address   = {0x01800000, 0x01FFFFFF};
-constexpr AddressRange slave_frt_address    = {0x01000000, 0x017FFFFF};
-constexpr AddressRange sh2_regs_address     = {0xFFFFFE00, 0xFFFFFFFF};
-constexpr AddressRange cache_address        = {0x60000000, 0x6FFFFFFF};
-constexpr AddressRange cache_data_1_address = {0x80000000, 0x8FFFFFFF};
-constexpr AddressRange cache_data_2_address = {0xC0000000, 0xCFFFFFFF};
+constexpr auto dummy_address        = AddressRange{0x00000000, 0xFFFFFFFF};
+constexpr auto rom_address          = AddressRange{0x00000000, 0x000FFFFF};
+constexpr auto smpc_address         = AddressRange{0x00100000, 0x0017FFFF};
+constexpr auto backup_ram_address   = AddressRange{0x00180000, 0x001FFFFF};
+constexpr auto workram_low_address  = AddressRange{0x00200000, 0x002FFFFF};
+constexpr auto stv_io_address       = AddressRange{0x00400000, 0x004FFFFF};
+constexpr auto cart_address         = AddressRange{0x02000000, 0x04FFFFFF};
+constexpr auto cd_block_address     = AddressRange{0x05800000, 0x058FFFFF};
+constexpr auto scsp_address         = AddressRange{0x05A00000, 0x05BFFFFF};
+constexpr auto vdp1_ram_address     = AddressRange{0x05C00000, 0x05C7FFFF};
+constexpr auto vdp1_fb_address      = AddressRange{0x05C80000, 0x05CFFFFF};
+constexpr auto vdp1_regs_address    = AddressRange{0x05D00000, 0x05D7FFFF};
+constexpr auto vdp2_vram_address    = AddressRange{0x05E00000, 0x05EFFFFF};
+constexpr auto vdp2_cram_address    = AddressRange{0x05F00000, 0x05F7FFFF};
+constexpr auto vdp2_regs_address    = AddressRange{0x05F80000, 0x05FBFFFF};
+constexpr auto scu_address          = AddressRange{0x05FE0000, 0x05FEFFFF};
+constexpr auto workram_high_address = AddressRange{0x06000000, 0x07FFFFFF};
+constexpr auto master_frt_address   = AddressRange{0x01800000, 0x01FFFFFF};
+constexpr auto slave_frt_address    = AddressRange{0x01000000, 0x017FFFFF};
+constexpr auto sh2_regs_address     = AddressRange{0xFFFFFE00, 0xFFFFFFFF};
+constexpr auto cache_address        = AddressRange{0x60000000, 0x6FFFFFFF};
+constexpr auto cache_data_1_address = AddressRange{0x80000000, 0x8FFFFFFF};
+constexpr auto cache_data_2_address = AddressRange{0xC0000000, 0xCFFFFFFF};
 
 auto Memory::loadRom(const std::string& zip_name,
                      const std::string& file_name,
@@ -70,8 +70,8 @@ auto Memory::loadRom(const std::string& zip_name,
                      const RomLoad      RomLoad,
                      const u8           times_mirrored,
                      const RomType      RomType) -> bool {
-    std::string zip = zip_name + ".zip";
-    fs::path    rom_path{config()->readValue(AccessKeys::cfg_paths_roms_stv).c_str()};
+    const auto zip      = std::string{zip_name + ".zip"};
+    auto       rom_path = fs::path{config()->readValue(AccessKeys::cfg_paths_roms_stv).c_str()};
     rom_path /= zip;
     // rom_path += "\\" + zip_name + ".zip";
 
@@ -83,7 +83,7 @@ auto Memory::loadRom(const std::string& zip_name,
 
             switch (RomType) {
                 case RomType::bios: {
-                    u32 counter = size / 4;
+                    const auto counter = u32{size / 4};
                     // Needs byteswapping
                     for (u32 i = 0; i < counter; ++i) {
                         destination[i * 4 + 1] = data[i * 4 + 0];
@@ -95,8 +95,8 @@ auto Memory::loadRom(const std::string& zip_name,
                 }
                 case RomType::program:
                 case RomType::graphic: {
-                    const u32 stv_bios_region_address = 0x808;
-                    u32       region_cart_address{};
+                    const auto stv_bios_region_address = u32{0x808};
+                    auto       region_cart_address     = u32{};
                     switch (RomLoad) {
                         case RomLoad::not_interleaved: {
                             const auto& src_begin = data.get();
@@ -137,13 +137,13 @@ auto Memory::loadRom(const std::string& zip_name,
             }
         } else {
             zf.close();
-            std::string str = fmt::format(tr("File '{0}' not found in zip file !"), file_name);
+            const auto str = fmt::format(tr("File '{0}' not found in zip file !"), file_name);
             Log::warning("memory", str);
             return false;
         }
         zf.close();
     } else {
-        std::string str = fmt::format(tr("Zip file '{0}' not found !"), rom_path.string());
+        const auto str = fmt::format(tr("Zip file '{0}' not found !"), rom_path.string());
         Log::warning("memory", str);
         return false;
     }
@@ -152,7 +152,7 @@ auto Memory::loadRom(const std::string& zip_name,
 
 void Memory::loadBios(const HardwareMode mode) {
     Log::info("memory", tr("Loading bios"));
-    std::string bios_path{};
+    auto bios_path = std::string{};
     switch (mode) {
         case HardwareMode::saturn: bios_path = config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
         case HardwareMode::stv: bios_path = config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
@@ -165,11 +165,11 @@ void Memory::loadBios(const HardwareMode mode) {
 
     std::ifstream input_file(bios_path, std::ios::binary);
     if (input_file) {
-        std::stringstream buffer;
+        auto buffer = std::stringstream{};
         buffer << input_file.rdbuf();
         input_file.close();
 
-        std::string str = buffer.str();
+        const auto str = buffer.str();
 
         switch (mode) {
             case HardwareMode::saturn: {
@@ -193,9 +193,9 @@ void Memory::loadBios(const HardwareMode mode) {
 }
 
 auto Memory::loadStvGame(const std::string& config_filename) -> bool {
-    auto full_path = std::filesystem::current_path() / "stv" / config_filename;
+    const auto full_path = std::filesystem::current_path() / "stv" / config_filename;
 
-    core::Config stv(full_path.string());
+    auto stv = core::Config(full_path.string());
     stv.readFile();
 
     const std::string         game_name    = stv.readValue(core::AccessKeys::stv_game_name);
@@ -207,10 +207,10 @@ auto Memory::loadStvGame(const std::string& config_filename) -> bool {
     const libconfig::Setting& files        = stv.readValue(core::AccessKeys::stv_files);
     for (u8 i = 0; i < files.getLength(); ++i) {
         const std::string rom_name       = files[i][0];
-        const u32         load_address   = files[i][1];
-        const u32         load_size      = files[i][2];
+        const auto        load_address   = u32{files[i][1]};
+        const auto        load_size      = u32{files[i][2]};
         const auto        rom_load       = Config::rom_load[files[i][3]];
-        const u32         times_mirrored = files[i][4];
+        const auto        times_mirrored = u32{files[i][4]};
         const auto        rom_type       = Config::rom_type[files[i][5]];
         if (!this->loadRom(zip_name, rom_name, &this->cart_[load_address], load_size, rom_load, times_mirrored, rom_type)) {
             return false;
@@ -223,7 +223,7 @@ auto Memory::loadStvGame(const std::string& config_filename) -> bool {
 }
 
 void Memory::swapCartArea() {
-    const u32 program_rom_size = 0x400000;
+    const auto program_rom_size = u32{0x400000};
 
     // ST-V data begins with 'SEGA' string.
     // If the first byte of the string is 'E', it means the program data has to be swapped
@@ -422,8 +422,8 @@ auto Memory::readStvProtection(const u32 addr, u32 data) const -> u32 {
 }
 
 void Memory::writeStvProtection(const u32 addr, u32 data) {
-    u32       relative_addr = calculateRelativeCartAddress(stv_protection_register_address);
-    const u32 index         = rawRead<u32>(this->cart_, relative_addr);
+    const auto relative_addr = calculateRelativeCartAddress(stv_protection_register_address);
+    const auto index         = rawRead<u32>(this->cart_, relative_addr);
     switch (index) {
         // Astra Superstars
         case 0x01230000:                                    // NOLINT(readability-magic-numbers)
@@ -451,7 +451,7 @@ void Memory::writeStvProtection(const u32 addr, u32 data) {
 }
 
 auto Memory::isStvProtectionEnabled() const -> bool {
-    u32 relative_addr = calculateRelativeCartAddress(stv_protection_enabled);
+    const auto relative_addr = calculateRelativeCartAddress(stv_protection_enabled);
     return cart_[relative_addr] == 0x1;
 }
 
@@ -504,7 +504,7 @@ auto Memory::vdp2() const -> video::Vdp2* { return emulator_context_->vdp2(); };
 
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad RomLoad) {
     if (times_mirrored > 0) {
-        u32 multiple{};
+        auto multiple = u32{};
         switch (RomLoad) {
             case RomLoad::not_interleaved: multiple = 1; break;
             case RomLoad::even_interleaved: multiple = 2; break;
@@ -517,8 +517,8 @@ void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad
 }
 
 auto listStvConfigurationFiles() -> std::vector<std::string> {
-    auto                     full_path = fs::current_path() / "stv";
-    std::vector<std::string> files;
+    const auto full_path = fs::current_path() / "stv";
+    auto       files     = std::vector<std::string>{};
     for (auto& p : fs::directory_iterator(full_path)) {
         if ((p.path().extension() == ".cfg") && (p.path().filename() != "dummy.cfg")) {
             files.push_back(p.path().filename().string());
@@ -530,7 +530,7 @@ auto listStvConfigurationFiles() -> std::vector<std::string> {
 inline auto isMasterSh2InOperation(const Memory& m) -> bool { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
 
 inline auto getDirectAddress(AddressRange ar) -> AddressRange {
-    constexpr u32 direct_address_offset = 0x20000000;
+    constexpr auto direct_address_offset = u32{0x20000000};
     ar.start |= direct_address_offset;
     ar.end |= direct_address_offset;
     return ar;

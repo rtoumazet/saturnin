@@ -477,8 +477,8 @@ class RamControl : public Register {
     using Register::Register;
     inline static const auto coefficient_table_storage = BitRange<CoefficientTableStorage>{15}; ///< Defines CRKTE bit.
     inline static const auto color_ram_mode            = BitRange<ColorRamMode>{12, 13};        ///< Defines CRMDx bits.
-    inline static const auto vram_b_mode_              = BitRange<VramMode>{9};                 ///< Defines VRBMD bit.
-    inline static const auto vram_a_mode_              = BitRange<VramMode>{8};                 ///< Defines VRAMD bit.
+    inline static const auto vram_b_mode               = BitRange<VramMode>{9};                 ///< Defines VRBMD bit.
+    inline static const auto vram_a_mode               = BitRange<VramMode>{8};                 ///< Defines VRAMD bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

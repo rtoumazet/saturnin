@@ -31,40 +31,40 @@ namespace saturnin::core {
 
 /// \name SCU registers addresses
 //@{
-constexpr u32 level_0_dma_read_address         = 0x25FE0000;
-constexpr u32 level_0_dma_write_address        = 0x25FE0004;
-constexpr u32 level_0_dma_transfer_byte_number = 0x25FE0008;
-constexpr u32 level_0_dma_add_value_register   = 0x25FE000C;
-constexpr u32 level_0_dma_enable_register      = 0x25FE0010;
-constexpr u32 level_0_dma_mode_register        = 0x25FE0014;
-constexpr u32 level_1_dma_read_address         = 0x25FE0020;
-constexpr u32 level_1_dma_write_address        = 0x25FE0024;
-constexpr u32 level_1_dma_transfer_byte_number = 0x25FE0028;
-constexpr u32 level_1_dma_add_value_register   = 0x25FE002C;
-constexpr u32 level_1_dma_enable_register      = 0x25FE0030;
-constexpr u32 level_1_dma_mode_register        = 0x25FE0034;
-constexpr u32 level_2_dma_read_address         = 0x25FE0040;
-constexpr u32 level_2_dma_write_address        = 0x25FE0044;
-constexpr u32 level_2_dma_transfer_byte_number = 0x25FE0048;
-constexpr u32 level_2_dma_add_value_register   = 0x25FE004C;
-constexpr u32 level_2_dma_enable_register      = 0x25FE0050;
-constexpr u32 level_2_dma_mode_register        = 0x25FE0054;
-constexpr u32 dma_forced_stop                  = 0x25FE0060; // not used anymore, according to SCU Final Specifications (No 14)
-constexpr u32 dma_status_register              = 0x25FE007C;
-constexpr u32 dsp_program_control_port         = 0x25FE0080;
-constexpr u32 dsp_program_ram_dataport         = 0x25FE0084;
-constexpr u32 dsp_data_ram_address_port        = 0x25FE0088;
-constexpr u32 dsp_data_ram_data_port           = 0x25FE008C;
-constexpr u32 timer_0_compare_register         = 0x25FE0090;
-constexpr u32 timer_1_set_data_register        = 0x25FE0094;
-constexpr u32 timer_1_mode_register            = 0x25FE0098;
-constexpr u32 interrupt_mask_register          = 0x25FE00A0;
-constexpr u32 interrupt_status_register        = 0x25FE00A4;
-constexpr u32 a_bus_interrupt_acknowledge      = 0x25FE00A8;
-constexpr u32 a_bus_set_register               = 0x25FE00B0;
-constexpr u32 a_bus_refresh_register           = 0x25FE00B8;
-constexpr u32 scu_sdram_select_register        = 0x25FE00C4;
-constexpr u32 scu_version_register             = 0x25FE00C8;
+constexpr auto level_0_dma_read_address         = u32{0x25FE0000};
+constexpr auto level_0_dma_write_address        = u32{0x25FE0004};
+constexpr auto level_0_dma_transfer_byte_number = u32{0x25FE0008};
+constexpr auto level_0_dma_add_value_register   = u32{0x25FE000C};
+constexpr auto level_0_dma_enable_register      = u32{0x25FE0010};
+constexpr auto level_0_dma_mode_register        = u32{0x25FE0014};
+constexpr auto level_1_dma_read_address         = u32{0x25FE0020};
+constexpr auto level_1_dma_write_address        = u32{0x25FE0024};
+constexpr auto level_1_dma_transfer_byte_number = u32{0x25FE0028};
+constexpr auto level_1_dma_add_value_register   = u32{0x25FE002C};
+constexpr auto level_1_dma_enable_register      = u32{0x25FE0030};
+constexpr auto level_1_dma_mode_register        = u32{0x25FE0034};
+constexpr auto level_2_dma_read_address         = u32{0x25FE0040};
+constexpr auto level_2_dma_write_address        = u32{0x25FE0044};
+constexpr auto level_2_dma_transfer_byte_number = u32{0x25FE0048};
+constexpr auto level_2_dma_add_value_register   = u32{0x25FE004C};
+constexpr auto level_2_dma_enable_register      = u32{0x25FE0050};
+constexpr auto level_2_dma_mode_register        = u32{0x25FE0054};
+constexpr auto dma_forced_stop             = u32{0x25FE0060}; // not used anymore, according to SCU Final Specifications (No 14)
+constexpr auto dma_status_register         = u32{0x25FE007C};
+constexpr auto dsp_program_control_port    = u32{0x25FE0080};
+constexpr auto dsp_program_ram_dataport    = u32{0x25FE0084};
+constexpr auto dsp_data_ram_address_port   = u32{0x25FE0088};
+constexpr auto dsp_data_ram_data_port      = u32{0x25FE008C};
+constexpr auto timer_0_compare_register    = u32{0x25FE0090};
+constexpr auto timer_1_set_data_register   = u32{0x25FE0094};
+constexpr auto timer_1_mode_register       = u32{0x25FE0098};
+constexpr auto interrupt_mask_register     = u32{0x25FE00A0};
+constexpr auto interrupt_status_register   = u32{0x25FE00A4};
+constexpr auto a_bus_interrupt_acknowledge = u32{0x25FE00A8};
+constexpr auto a_bus_set_register          = u32{0x25FE00B0};
+constexpr auto a_bus_refresh_register      = u32{0x25FE00B8};
+constexpr auto scu_sdram_select_register   = u32{0x25FE00C4};
+constexpr auto scu_version_register        = u32{0x25FE00C8};
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ constexpr u32 scu_version_register             = 0x25FE00C8;
 class DmaReadAddressRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> read_address{0, 26}; ///< Defines read address in bytes.
+    inline static const auto read_address = BitRange<u32>{0, 26}; ///< Defines read address in bytes.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ class DmaReadAddressRegister : public Register {
 class DmaWriteAddressRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> write_address{0, 26}; ///< Defines write address in bytes.
+    inline static const auto write_address = BitRange<u32>{0, 26}; ///< Defines write address in bytes.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ class DmaWriteAddressRegister : public Register {
 class DmaLevel0TransferByteNumberRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> transfer_byte_number{0, 19}; ///< Defines transfer byte number.
+    inline static const auto transfer_byte_number = BitRange<u32>{0, 19}; ///< Defines transfer byte number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ class DmaLevel0TransferByteNumberRegister : public Register {
 class DmaLevel1TransferByteNumberRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> transfer_byte_number{0, 11}; ///< Defines transfer byte number.
+    inline static const auto transfer_byte_number = BitRange<u32>{0, 11}; ///< Defines transfer byte number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +139,7 @@ class DmaLevel1TransferByteNumberRegister : public Register {
 class DmaLevel2TransferByteNumberRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> transfer_byte_number{0, 11}; ///< Defines transfer byte number.
+    inline static const auto transfer_byte_number = BitRange<u32>{0, 11}; ///< Defines transfer byte number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -182,10 +182,10 @@ enum class WriteAddressAddValue : u8 {
 class DmaAddressAddValueRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<ReadAddressAddValue> read_add_value{
-        8}; ///< Defines read address add value (D0RA, D1RA and D2RA).
-    inline static const BitRange<WriteAddressAddValue> write_add_value{
-        0, 2}; ///< Defines write address add value (D0WA, D1WA and D2WA).
+    inline static const auto read_add_value
+        = BitRange<ReadAddressAddValue>{8}; ///< Defines read address add value (D0RA, D1RA and D2RA).
+    inline static const auto write_add_value
+        = BitRange<WriteAddressAddValue>{0, 2}; ///< Defines write address add value (D0WA, D1WA and D2WA).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,8 +222,8 @@ enum class DmaStarting : u8 {
 class DmaEnableRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<DmaEnable>   dma_enable{8};   ///< Defines DMA Enable Bit (D0EN, D1EN, D2EN)
-    inline static const BitRange<DmaStarting> dma_starting{0}; ///< Defines DMA Starting Bit (D0GO, D1GO, D2GO).
+    inline static const auto dma_enable   = BitRange<DmaEnable>{8};   ///< Defines DMA Enable Bit (D0EN, D1EN, D2EN)
+    inline static const auto dma_starting = BitRange<DmaStarting>{0}; ///< Defines DMA Starting Bit (D0GO, D1GO, D2GO).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -289,10 +289,10 @@ enum class StartingFactorSelect : u8 {
 class DmaModeRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<DmaMode>              dma_mode{24};                 ///< Defines DxMOD bit.
-    inline static const BitRange<ReadAddressUpdate>    read_address_update{16};      ///< Defines DxRUP bit.
-    inline static const BitRange<WriteAddressUpdate>   write_address_update{8};      ///< Defines DxWUP bit.
-    inline static const BitRange<StartingFactorSelect> starting_factor_select{0, 2}; ///< Defines DxFTy bits.
+    inline static const auto dma_mode               = BitRange<DmaMode>{24};                ///< Defines DxMOD bit.
+    inline static const auto read_address_update    = BitRange<ReadAddressUpdate>{16};      ///< Defines DxRUP bit.
+    inline static const auto write_address_update   = BitRange<WriteAddressUpdate>{8};      ///< Defines DxWUP bit.
+    inline static const auto starting_factor_select = BitRange<StartingFactorSelect>{0, 2}; ///< Defines DxFTy bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -450,19 +450,19 @@ enum class DspDmaOperation : u8 {
 class DmaStatusRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<DspBusAccess>       dsp_bus_access{22};        ///< Defines DACSD bit.
-    inline static const BitRange<BBusAccess>         b_bus_access{21};          ///< Defines DACSB bit.
-    inline static const BitRange<ABusAccess>         a_bus_access{20};          ///< Defines DACSA bit.
-    inline static const BitRange<Level1DmaInterrupt> level_1_dma_interrupt{17}; ///< Defines D1BK bit.
-    inline static const BitRange<Level0DmaInterrupt> level_0_dma_interrupt{16}; ///< Defines D0BK bit.
-    inline static const BitRange<Level2DmaStandBy>   level_2_dma_stand_by{13};  ///< Defines D2WT bit.
-    inline static const BitRange<Level2DmaOperation> level_2_dma_operation{12}; ///< Defines D2MV bit.
-    inline static const BitRange<Level1DmaStandBy>   level_1_dma_stand_by{9};   ///< Defines D1WT bit.
-    inline static const BitRange<Level1DmaOperation> level_1_dma_operation{8};  ///< Defines D1MV bit.
-    inline static const BitRange<Level0DmaStandBy>   level_0_dma_stand_by{5};   ///< Defines D0WT bit.
-    inline static const BitRange<Level0DmaOperation> level_0_dma_operation{4};  ///< Defines D0MV bit.
-    inline static const BitRange<DspDmaStandBy>      dsp_dma_stand_by{1};       ///< Defines DDWT bit.
-    inline static const BitRange<DspDmaOperation>    dsp_dma_operation{0};      ///< Defines DDMV bit.
+    inline static const auto dsp_bus_access        = BitRange<DspBusAccess>{22};       ///< Defines DACSD bit.
+    inline static const auto b_bus_access          = BitRange<BBusAccess>{21};         ///< Defines DACSB bit.
+    inline static const auto a_bus_access          = BitRange<ABusAccess>{20};         ///< Defines DACSA bit.
+    inline static const auto level_1_dma_interrupt = BitRange<Level1DmaInterrupt>{17}; ///< Defines D1BK bit.
+    inline static const auto level_0_dma_interrupt = BitRange<Level0DmaInterrupt>{16}; ///< Defines D0BK bit.
+    inline static const auto level_2_dma_stand_by  = BitRange<Level2DmaStandBy>{13};   ///< Defines D2WT bit.
+    inline static const auto level_2_dma_operation = BitRange<Level2DmaOperation>{12}; ///< Defines D2MV bit.
+    inline static const auto level_1_dma_stand_by  = BitRange<Level1DmaStandBy>{9};    ///< Defines D1WT bit.
+    inline static const auto level_1_dma_operation = BitRange<Level1DmaOperation>{8};  ///< Defines D1MV bit.
+    inline static const auto level_0_dma_stand_by  = BitRange<Level0DmaStandBy>{5};    ///< Defines D0WT bit.
+    inline static const auto level_0_dma_operation = BitRange<Level0DmaOperation>{4};  ///< Defines D0MV bit.
+    inline static const auto dsp_dma_stand_by      = BitRange<DspDmaStandBy>{1};       ///< Defines DDWT bit.
+    inline static const auto dsp_dma_operation     = BitRange<DspDmaOperation>{0};     ///< Defines DDMV bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -489,38 +489,38 @@ class InterruptMaskRegister : public Register {
   public:
     using Register::Register;
 
-    inline static const BitRange<InterruptMask> external_15{31};     ///< Defines External interrupt 15 mask bit.
-    inline static const BitRange<InterruptMask> external_14{30};     ///< Defines External interrupt 14 mask bit.
-    inline static const BitRange<InterruptMask> external_13{29};     ///< Defines External interrupt 13 mask bit.
-    inline static const BitRange<InterruptMask> external_12{28};     ///< Defines External interrupt 12 mask bit.
-    inline static const BitRange<InterruptMask> external_11{27};     ///< Defines External interrupt 11 mask bit.
-    inline static const BitRange<InterruptMask> external_10{26};     ///< Defines External interrupt 10 mask bit.
-    inline static const BitRange<InterruptMask> external_09{25};     ///< Defines External interrupt 09 mask bit.
-    inline static const BitRange<InterruptMask> external_08{24};     ///< Defines External interrupt 08 mask bit.
-    inline static const BitRange<InterruptMask> external_07{23};     ///< Defines External interrupt 07 mask bit.
-    inline static const BitRange<InterruptMask> external_06{22};     ///< Defines External interrupt 06 mask bit.
-    inline static const BitRange<InterruptMask> external_05{21};     ///< Defines External interrupt 05 mask bit.
-    inline static const BitRange<InterruptMask> external_04{20};     ///< Defines External interrupt 04 mask bit.
-    inline static const BitRange<InterruptMask> external_03{19};     ///< Defines External interrupt 03 mask bit.
-    inline static const BitRange<InterruptMask> external_02{18};     ///< Defines External interrupt 02 mask bit.
-    inline static const BitRange<InterruptMask> external_01{17};     ///< Defines External interrupt 01 mask bit.
-    inline static const BitRange<InterruptMask> external_00{16};     ///< Defines External interrupt 00 mask bit.
-    inline static const BitRange<InterruptMask> a_bus{15};           ///< Defines A-Bus interrupt mask bit.
-    inline static const BitRange<InterruptMask> sprite_draw_end{13}; ///< Defines Sprite Draw End interrupt mask bit.
-    inline static const BitRange<InterruptMask> dma_illegal{12};     ///< Defines DMA Illegal interrupt mask bit.
-    inline static const BitRange<InterruptMask> level_0_dma{11};     ///< Defines Level 0 DMA interrupt mask bit.
-    inline static const BitRange<InterruptMask> level_1_dma{10};     ///< Defines Level 1 DMA interrupt mask bit.
-    inline static const BitRange<InterruptMask> level_2_dma{9};      ///< Defines Level 2 DMA interrupt mask bit.
-    inline static const BitRange<InterruptMask> pad{8};              ///< Defines PAD interrupt mask bit.
-    inline static const BitRange<InterruptMask> system_manager{7};   ///< Defines System Manager interrupt mask bit.
-    inline static const BitRange<InterruptMask> sound_request{6};    ///< Defines Sound Request interrupt mask bit.
-    inline static const BitRange<InterruptMask> dsp_end{5};          ///< Defines DSP End interrupt mask bit.
-    inline static const BitRange<InterruptMask> timer_1{4};          ///< Defines Timer 1 interrupt mask bit.
-    inline static const BitRange<InterruptMask> timer_0{3};          ///< Defines Timer 0 interrupt mask bit.
-    inline static const BitRange<InterruptMask> h_blank_in{2};       ///< Defines H-Blank-In interrupt mask bit.
-    inline static const BitRange<InterruptMask> v_blank_out{1};      ///< Defines V-Blank-Out interrupt mask bit.
-    inline static const BitRange<InterruptMask> v_blank_in{0};       ///< Defines V-Blank-In interrupt mask bit.
-    inline static const BitRange<InterruptMask> undefined{0};        ///< Undefined value.
+    inline static const auto external_15     = BitRange<InterruptMask>{31}; ///< Defines External interrupt 15 mask bit.
+    inline static const auto external_14     = BitRange<InterruptMask>{30}; ///< Defines External interrupt 14 mask bit.
+    inline static const auto external_13     = BitRange<InterruptMask>{29}; ///< Defines External interrupt 13 mask bit.
+    inline static const auto external_12     = BitRange<InterruptMask>{28}; ///< Defines External interrupt 12 mask bit.
+    inline static const auto external_11     = BitRange<InterruptMask>{27}; ///< Defines External interrupt 11 mask bit.
+    inline static const auto external_10     = BitRange<InterruptMask>{26}; ///< Defines External interrupt 10 mask bit.
+    inline static const auto external_09     = BitRange<InterruptMask>{25}; ///< Defines External interrupt 09 mask bit.
+    inline static const auto external_08     = BitRange<InterruptMask>{24}; ///< Defines External interrupt 08 mask bit.
+    inline static const auto external_07     = BitRange<InterruptMask>{23}; ///< Defines External interrupt 07 mask bit.
+    inline static const auto external_06     = BitRange<InterruptMask>{22}; ///< Defines External interrupt 06 mask bit.
+    inline static const auto external_05     = BitRange<InterruptMask>{21}; ///< Defines External interrupt 05 mask bit.
+    inline static const auto external_04     = BitRange<InterruptMask>{20}; ///< Defines External interrupt 04 mask bit.
+    inline static const auto external_03     = BitRange<InterruptMask>{19}; ///< Defines External interrupt 03 mask bit.
+    inline static const auto external_02     = BitRange<InterruptMask>{18}; ///< Defines External interrupt 02 mask bit.
+    inline static const auto external_01     = BitRange<InterruptMask>{17}; ///< Defines External interrupt 01 mask bit.
+    inline static const auto external_00     = BitRange<InterruptMask>{16}; ///< Defines External interrupt 00 mask bit.
+    inline static const auto a_bus           = BitRange<InterruptMask>{15}; ///< Defines A-Bus interrupt mask bit.
+    inline static const auto sprite_draw_end = BitRange<InterruptMask>{13}; ///< Defines Sprite Draw End interrupt mask bit.
+    inline static const auto dma_illegal     = BitRange<InterruptMask>{12}; ///< Defines DMA Illegal interrupt mask bit.
+    inline static const auto level_0_dma     = BitRange<InterruptMask>{11}; ///< Defines Level 0 DMA interrupt mask bit.
+    inline static const auto level_1_dma     = BitRange<InterruptMask>{10}; ///< Defines Level 1 DMA interrupt mask bit.
+    inline static const auto level_2_dma     = BitRange<InterruptMask>{9};  ///< Defines Level 2 DMA interrupt mask bit.
+    inline static const auto pad             = BitRange<InterruptMask>{8};  ///< Defines PAD interrupt mask bit.
+    inline static const auto system_manager  = BitRange<InterruptMask>{7};  ///< Defines System Manager interrupt mask bit.
+    inline static const auto sound_request   = BitRange<InterruptMask>{6};  ///< Defines Sound Request interrupt mask bit.
+    inline static const auto dsp_end         = BitRange<InterruptMask>{5};  ///< Defines DSP End interrupt mask bit.
+    inline static const auto timer_1         = BitRange<InterruptMask>{4};  ///< Defines Timer 1 interrupt mask bit.
+    inline static const auto timer_0         = BitRange<InterruptMask>{3};  ///< Defines Timer 0 interrupt mask bit.
+    inline static const auto h_blank_in      = BitRange<InterruptMask>{2};  ///< Defines H-Blank-In interrupt mask bit.
+    inline static const auto v_blank_out     = BitRange<InterruptMask>{1};  ///< Defines V-Blank-Out interrupt mask bit.
+    inline static const auto v_blank_in      = BitRange<InterruptMask>{0};  ///< Defines V-Blank-In interrupt mask bit.
+    inline static const auto undefined       = BitRange<InterruptMask>{0};  ///< Undefined value.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -547,38 +547,38 @@ class InterruptStatusRegister : public Register {
   public:
     using Register::Register;
 
-    inline static const BitRange<InterruptEnable> external_15{31};     ///< Defines External interrupt 15 status.
-    inline static const BitRange<InterruptEnable> external_14{30};     ///< Defines External interrupt 14 status.
-    inline static const BitRange<InterruptEnable> external_13{29};     ///< Defines External interrupt 13 status.
-    inline static const BitRange<InterruptEnable> external_12{28};     ///< Defines External interrupt 12 status.
-    inline static const BitRange<InterruptEnable> external_11{27};     ///< Defines External interrupt 11 status.
-    inline static const BitRange<InterruptEnable> external_10{26};     ///< Defines External interrupt 10 status.
-    inline static const BitRange<InterruptEnable> external_09{25};     ///< Defines External interrupt 09 status.
-    inline static const BitRange<InterruptEnable> external_08{24};     ///< Defines External interrupt 08 status.
-    inline static const BitRange<InterruptEnable> external_07{23};     ///< Defines External interrupt 07 status.
-    inline static const BitRange<InterruptEnable> external_06{22};     ///< Defines External interrupt 06 status.
-    inline static const BitRange<InterruptEnable> external_05{21};     ///< Defines External interrupt 05 status.
-    inline static const BitRange<InterruptEnable> external_04{20};     ///< Defines External interrupt 04 status.
-    inline static const BitRange<InterruptEnable> external_03{19};     ///< Defines External interrupt 03 status.
-    inline static const BitRange<InterruptEnable> external_02{18};     ///< Defines External interrupt 02 status.
-    inline static const BitRange<InterruptEnable> external_01{17};     ///< Defines External interrupt 01 status.
-    inline static const BitRange<InterruptEnable> external_00{16};     ///< Defines External interrupt 00 status.
-    inline static const BitRange<InterruptEnable> a_bus{15};           ///< Defines A-Bus interrupt status.
-    inline static const BitRange<InterruptEnable> sprite_draw_end{13}; ///< Defines Sprite Draw End interrupt status.
-    inline static const BitRange<InterruptEnable> dma_illegal{12};     ///< Defines DMA Illegal interrupt status.
-    inline static const BitRange<InterruptEnable> level_0_dma{11};     ///< Defines Level 0 DMA interrupt status.
-    inline static const BitRange<InterruptEnable> level_1_dma{10};     ///< Defines Level 1 DMA interrupt status.
-    inline static const BitRange<InterruptEnable> level_2_dma{9};      ///< Defines Level 2 DMA interrupt status.
-    inline static const BitRange<InterruptEnable> pad{8};              ///< Defines PAD interrupt status.
-    inline static const BitRange<InterruptEnable> system_manager{7};   ///< Defines System Manager interrupt status.
-    inline static const BitRange<InterruptEnable> sound_request{6};    ///< Defines Sound Request interrupt status.
-    inline static const BitRange<InterruptEnable> dsp_end{5};          ///< Defines DSP End interrupt status.
-    inline static const BitRange<InterruptEnable> timer_1{4};          ///< Defines Timer 1 interrupt status.
-    inline static const BitRange<InterruptEnable> timer_0{3};          ///< Defines Timer 0 interrupt status.
-    inline static const BitRange<InterruptEnable> h_blank_in{2};       ///< Defines H-Blank-In interrupt status.
-    inline static const BitRange<InterruptEnable> v_blank_out{1};      ///< Defines V-Blank-Out interrupt status.
-    inline static const BitRange<InterruptEnable> v_blank_in{0};       ///< Defines V-Blank-In interrupt status.
-    inline static const BitRange<InterruptEnable> undefined{0};        ///< Undefined value.
+    inline static const auto external_15     = BitRange<InterruptEnable>{31}; ///< Defines External interrupt 15 status.
+    inline static const auto external_14     = BitRange<InterruptEnable>{30}; ///< Defines External interrupt 14 status.
+    inline static const auto external_13     = BitRange<InterruptEnable>{29}; ///< Defines External interrupt 13 status.
+    inline static const auto external_12     = BitRange<InterruptEnable>{28}; ///< Defines External interrupt 12 status.
+    inline static const auto external_11     = BitRange<InterruptEnable>{27}; ///< Defines External interrupt 11 status.
+    inline static const auto external_10     = BitRange<InterruptEnable>{26}; ///< Defines External interrupt 10 status.
+    inline static const auto external_09     = BitRange<InterruptEnable>{25}; ///< Defines External interrupt 09 status.
+    inline static const auto external_08     = BitRange<InterruptEnable>{24}; ///< Defines External interrupt 08 status.
+    inline static const auto external_07     = BitRange<InterruptEnable>{23}; ///< Defines External interrupt 07 status.
+    inline static const auto external_06     = BitRange<InterruptEnable>{22}; ///< Defines External interrupt 06 status.
+    inline static const auto external_05     = BitRange<InterruptEnable>{21}; ///< Defines External interrupt 05 status.
+    inline static const auto external_04     = BitRange<InterruptEnable>{20}; ///< Defines External interrupt 04 status.
+    inline static const auto external_03     = BitRange<InterruptEnable>{19}; ///< Defines External interrupt 03 status.
+    inline static const auto external_02     = BitRange<InterruptEnable>{18}; ///< Defines External interrupt 02 status.
+    inline static const auto external_01     = BitRange<InterruptEnable>{17}; ///< Defines External interrupt 01 status.
+    inline static const auto external_00     = BitRange<InterruptEnable>{16}; ///< Defines External interrupt 00 status.
+    inline static const auto a_bus           = BitRange<InterruptEnable>{15}; ///< Defines A-Bus interrupt status.
+    inline static const auto sprite_draw_end = BitRange<InterruptEnable>{13}; ///< Defines Sprite Draw End interrupt status.
+    inline static const auto dma_illegal     = BitRange<InterruptEnable>{12}; ///< Defines DMA Illegal interrupt status.
+    inline static const auto level_0_dma     = BitRange<InterruptEnable>{11}; ///< Defines Level 0 DMA interrupt status.
+    inline static const auto level_1_dma     = BitRange<InterruptEnable>{10}; ///< Defines Level 1 DMA interrupt status.
+    inline static const auto level_2_dma     = BitRange<InterruptEnable>{9};  ///< Defines Level 2 DMA interrupt status.
+    inline static const auto pad             = BitRange<InterruptEnable>{8};  ///< Defines PAD interrupt status.
+    inline static const auto system_manager  = BitRange<InterruptEnable>{7};  ///< Defines System Manager interrupt status.
+    inline static const auto sound_request   = BitRange<InterruptEnable>{6};  ///< Defines Sound Request interrupt status.
+    inline static const auto dsp_end         = BitRange<InterruptEnable>{5};  ///< Defines DSP End interrupt status.
+    inline static const auto timer_1         = BitRange<InterruptEnable>{4};  ///< Defines Timer 1 interrupt status.
+    inline static const auto timer_0         = BitRange<InterruptEnable>{3};  ///< Defines Timer 0 interrupt status.
+    inline static const auto h_blank_in      = BitRange<InterruptEnable>{2};  ///< Defines H-Blank-In interrupt status.
+    inline static const auto v_blank_out     = BitRange<InterruptEnable>{1};  ///< Defines V-Blank-Out interrupt status.
+    inline static const auto v_blank_in      = BitRange<InterruptEnable>{0};  ///< Defines V-Blank-In interrupt status.
+    inline static const auto undefined       = BitRange<InterruptEnable>{0};  ///< Undefined value.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -593,7 +593,7 @@ class InterruptStatusRegister : public Register {
 class Timer0CompareRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> timer_0_compare_data{0, 9}; ///< Defines timer 0 compare data bits.
+    inline static const auto timer_0_compare_data = BitRange<u32>{0, 9}; ///< Defines timer 0 compare data bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -608,7 +608,7 @@ class Timer0CompareRegister : public Register {
 class Timer1SetDataRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u32> timer_1_set_data{0, 8}; ///< Defines timer 1 set data bits.
+    inline static const auto timer_1_set_data = BitRange<u32>{0, 8}; ///< Defines timer 1 set data bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -645,8 +645,8 @@ enum class TimerEnable : u8 {
 class Timer1ModeRegister : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<Timer1Mode>  timer_1_mode{8}; ///< Defines T1MD bit.
-    inline static const BitRange<TimerEnable> timer_enable{0}; ///< Defines TENB bit.
+    inline static const auto timer_1_mode = BitRange<Timer1Mode>{8};  ///< Defines T1MD bit.
+    inline static const auto timer_enable = BitRange<TimerEnable>{0}; ///< Defines TENB bit.
 };
 
 } // namespace saturnin::core

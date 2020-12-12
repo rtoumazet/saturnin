@@ -337,16 +337,17 @@ class Config {
     template<class T>
     void writeValue(const AccessKeys& key, const T& value) {
         try {
-            libconfig::Setting& setting = cfg_.lookup(Config::full_keys[key]);
-            setting                     = value;
+            // libconfig::Setting& setting = cfg_.lookup(Config::full_keys[key]);
+            auto& setting = cfg_.lookup(Config::full_keys[key]);
+            setting       = value;
         } catch (const libconfig::SettingNotFoundException& e) {
-            std::string s           = e.getPath();
-            auto        errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
-            Log::error("config", errorString);
+            const auto s     = std::string{e.getPath()};
+            const auto error = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
+            Log::error("config", error);
             throw std::runtime_error("Config error !");
         } catch (const libconfig::SettingTypeException& e) {
-            auto errorString = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
-            Log::error("config", errorString);
+            const auto error = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
+            Log::error("config", error);
             throw std::runtime_error("Config error !");
         }
     }
@@ -354,11 +355,11 @@ class Config {
     template<class T>
     void writeValue(const AccessKeys& key, const std::vector<T>& elements) {
         try {
-            libconfig::Setting& setting = cfg_.lookup(Config::full_keys[key]);
+            auto& setting = cfg_.lookup(Config::full_keys[key]);
             if (setting.isArray()) {
                 for (auto i = setting.begin(); i != setting.end(); ++i) {
-                    u8 idx       = (*i).getIndex();
-                    setting[idx] = util::toUnderlying(elements[idx]);
+                    const auto idx = static_cast<u8>((*i).getIndex());
+                    setting[idx]   = util::toUnderlying(elements[idx]);
                 }
 
                 // for (const T& e : elements) {
@@ -366,13 +367,13 @@ class Config {
                 //}
             }
         } catch (const libconfig::SettingNotFoundException& e) {
-            std::string s           = e.getPath();
-            auto        errorString = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
-            Log::error("config", errorString);
+            const auto s     = std::string{e.getPath()};
+            const auto error = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
+            Log::error("config", error);
             throw std::runtime_error("Config error !");
         } catch (const libconfig::SettingTypeException& e) {
-            auto errorString = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
-            Log::error("config", errorString);
+            const auto error = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
+            Log::error("config", error);
             throw std::runtime_error("Config error !");
         }
     }
@@ -476,18 +477,18 @@ class Config {
 
     template<class T>
     void add(const std::string key, T def_value) { // NOLINT(readability-avoid-const-params-in-decls)
-        auto        tokens{util::explode(key, '.')};
-        std::string parent_path{};
+        const auto tokens{util::explode(key, '.')};
+        auto       parent_path = std::string{};
         for (const auto& t : tokens) {
             if (parent_path.empty()) {
-                libcfg::Setting& root = cfg_.getRoot();
-                parent_path           = addGroup(root, t);
+                auto& root  = cfg_.getRoot();
+                parent_path = addGroup(root, t);
             } else {
                 if (&t != &tokens.back()) {
-                    libcfg::Setting& root = cfg_.lookup(parent_path);
-                    parent_path           = addGroup(root, t);
+                    auto& root  = cfg_.lookup(parent_path);
+                    parent_path = addGroup(root, t);
                 } else {
-                    libcfg::Setting& root = cfg_.lookup(parent_path);
+                    auto& root = cfg_.lookup(parent_path);
                     this->writeValue<T>(root, t, def_value);
                 }
             }
@@ -497,19 +498,19 @@ class Config {
     // Specialization for vector
     template<class T>
     void add(const std::string key, std::vector<T> elements) {
-        auto        tokens{util::explode(key, '.')};
-        std::string parent_path{};
+        const auto tokens{util::explode(key, '.')};
+        auto       parent_path = std::string{};
         for (const auto& t : tokens) {
             if (parent_path.empty()) {
-                libcfg::Setting& root = cfg_.getRoot();
-                parent_path           = addGroup(root, t);
+                auto& root  = cfg_.getRoot();
+                parent_path = addGroup(root, t);
             } else {
                 if (&t != &tokens.back()) {
-                    libcfg::Setting& root = cfg_.lookup(parent_path);
-                    parent_path           = addGroup(root, t);
+                    auto& root  = cfg_.lookup(parent_path);
+                    parent_path = addGroup(root, t);
                 } else {
-                    libcfg::Setting& root = cfg_.lookup(parent_path);
-                    libcfg::Setting& arr  = root.add(t, libcfg::Setting::TypeArray);
+                    auto& root = cfg_.lookup(parent_path);
+                    auto& arr  = root.add(t, libcfg::Setting::TypeArray);
                     for (const T& e : elements) {
                         this->writeValue<const T&>(arr, "", e);
                     }

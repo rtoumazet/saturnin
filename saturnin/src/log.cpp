@@ -35,14 +35,14 @@ auto Log::initialize() -> bool {
 
     spdlog::sinks_init_list sink_list = {file_sink, stream_sink};
 
-    const std::vector<std::string> loggers_names{
+    const auto loggers_names = std::vector<std::string>{
         "cdrom", "config", "main", "memory", "sh2", "scu", "vdp1", "vdp2", "opengl", "exception", "smpc"};
-    for (auto n : loggers_names) {
+    for (auto& n : loggers_names) {
         createLogger(n, sink_list);
     }
     spdlog::flush_every(std::chrono::seconds(3));
 
-    auto log_file = fs::current_path() / "logs" / "saturnin.log";
+    // auto log_file = fs::current_path() / "logs" / "saturnin.log";
 
     // spdlog::set_level(spdlog::level::debug); // Set global log level to debug
 
@@ -70,8 +70,8 @@ auto Log::createStreamSink() -> std::shared_ptr<spdlog::sinks::ostream_sink_mt> 
 // void Log::createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink) {
 void Log::createLogger(const std::string& logger_name, const spdlog::sinks_init_list& sinks_list) {
     // auto        logger  = std::make_shared<spdlog::logger>(logger_name, sink);
-    auto        logger  = std::make_shared<spdlog::logger>(logger_name, sinks_list.begin(), sinks_list.end());
-    std::string pattern = "[%X][%n][%l] %v";
+    auto       logger  = std::make_shared<spdlog::logger>(logger_name, sinks_list.begin(), sinks_list.end());
+    const auto pattern = std::string{"[%X][%n][%l] %v"};
     logger->set_pattern(pattern);
     loggers_[logger_name] = logger;
     spdlog::register_logger(logger);
@@ -79,8 +79,8 @@ void Log::createLogger(const std::string& logger_name, const spdlog::sinks_init_
 
 /* static */
 void Log::createConsole() {
-    auto        console = spdlog::stdout_color_mt("console");
-    std::string pattern = "[%X][%l] %v";
+    auto       console = spdlog::stdout_color_mt("console");
+    const auto pattern = std::string{"[%X][%l] %v"};
     console->set_pattern(pattern);
     loggers_["console"] = console;
     // no need to register the console as it already exists

@@ -207,8 +207,8 @@ inline void xorm(Sh2& s);
 inline void xtrct(Sh2& s);
 //@}
 
-constexpr u8  instructions_number = 142;     ///< Total number of SH2 instructions used.
-constexpr u32 opcodes_lut_size    = 0x10000; ///< Size of the opcodes lookup table
+constexpr auto instructions_number = u8{142};      ///< Total number of SH2 instructions used.
+constexpr auto opcodes_lut_size    = u32{0x10000}; ///< Size of the opcodes lookup table
 
 using ExecuteType = void (*)(Sh2&);                              ///< Type of execute functions
 using DisasmType  = auto (*)(u32 pc, u16 opcode) -> std::string; ///< Type of disassembly functions
@@ -241,7 +241,7 @@ static std::array<bool, opcodes_lut_size>
 static std::array<bool, opcodes_lut_size> calls_subroutine_lut;
 
 // clang-format off
-static std::array<Sh2Instruction, instructions_number> const opcodes_table
+static const auto opcodes_table=std::array<Sh2Instruction, instructions_number>
 { {
     { 0xFFFF, 0x0009, true,  false, false, &nop, &nop_d},
     { 0xF00F, 0x300C, true,  false, false, &add, &add_d},

@@ -24,25 +24,26 @@
 namespace saturnin::utilities {
 
 auto stringToVector(const std::string& source, const u32 reserved_size) -> std::vector<char> {
-    std::vector<char> v(source.c_str(), source.c_str() + source.size() + 1u);
+    auto v = std::vector<char>(source.c_str(), source.c_str() + source.size() + 1u);
     v.reserve(reserved_size);
     return v;
 }
 
 auto getLastErrorMessage() -> std::string {
-    DWORD error = GetLastError();
+    const auto error = GetLastError();
     if (error != 0) {
-        LPVOID buffer;
-        DWORD buf_len = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                      nullptr,
-                                      error,
-                                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                                      (LPTSTR)&buffer,
-                                      0,
-                                      nullptr);
+        auto       buffer = LPVOID{};
+        const auto buf_len
+            = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                            nullptr,
+                            error,
+                            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                            (LPTSTR)&buffer,
+                            0,
+                            nullptr);
         if (buf_len != 0) {
-            auto        str = static_cast<LPCSTR>(buffer);
-            std::string result(str, str + buf_len);
+            const auto str    = static_cast<LPCSTR>(buffer);
+            const auto result = std::string(str, str + buf_len);
 
             LocalFree(buffer);
 
@@ -53,8 +54,8 @@ auto getLastErrorMessage() -> std::string {
 }
 
 auto explode(std::string const& s, char delim) -> std::vector<std::string> {
-    std::vector<std::string> result;
-    std::istringstream       iss(s);
+    auto result = std::vector<std::string>{};
+    auto iss    = std::istringstream(s);
 
     for (std::string token; std::getline(iss, token, delim);) {
         result.push_back(std::move(token));
@@ -64,9 +65,9 @@ auto explode(std::string const& s, char delim) -> std::vector<std::string> {
 }
 
 auto dec2bcd(uint16_t dec) -> u32 {
-    constexpr u8 decimal_base{10};
-    u32          result{};
-    s32          shift{};
+    constexpr auto decimal_base = u8{10};
+    auto           result       = u32{};
+    auto           shift        = s32{};
 
     while (dec != 0) {
         result += (dec % decimal_base) << shift;
