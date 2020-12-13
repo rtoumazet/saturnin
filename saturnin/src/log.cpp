@@ -17,9 +17,10 @@
 // limitations under the License.
 //
 
+#include "log.h"
+
 #include <filesystem>
 #include <iostream>
-#include "log.h"
 
 namespace fs = std::filesystem;
 

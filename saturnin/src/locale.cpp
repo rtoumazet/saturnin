@@ -17,12 +17,10 @@
 // limitations under the License.
 //
 
-#include <iostream> // cout
-#include <fstream>
-#include <string>
 #include "locale.h" // NOLINT(modernize-deprecated-headers)
 
-namespace fs = std::filesystem;
+#include <fstream> // ifstream
+#include <string>
 
 namespace saturnin::core {
 

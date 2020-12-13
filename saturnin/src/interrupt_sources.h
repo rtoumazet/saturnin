@@ -25,7 +25,9 @@
 
 #pragma once
 
+#include "emulator_defs.h"        // u8
 #include "interrupt_controller.h" // Interrupt
+#include "scu_registers.h"        //InterruptMaskRegister, InterruptStatusRegister
 
 namespace saturnin::core {
 

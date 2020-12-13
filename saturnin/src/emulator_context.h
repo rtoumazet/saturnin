@@ -34,14 +34,14 @@
 #include "stv_definitions.h"
 
 // Forward declarations
+namespace saturnin::cdrom {
+class Cdrom;
+}
 namespace saturnin::sh2 {
 class Sh2;
 }
 namespace saturnin::sound {
 class Scsp;
-}
-namespace saturnin::cdrom {
-class Cdrom;
 }
 namespace saturnin::video {
 class Vdp2;

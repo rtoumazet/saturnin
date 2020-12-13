@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <string> // string
 #include "emulator_defs.h"
 #include "scu_registers.h" // InterruptMask, InterruptEnable
 

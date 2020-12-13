@@ -25,10 +25,9 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <sstream>
-#include <map>
+#include <iosfwd> // ostringstream
+#include <map>    // map
+#include <string> // string
 #define SPDLOG_FMT_EXTERNAL
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>

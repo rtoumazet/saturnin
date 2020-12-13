@@ -16,8 +16,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//#define NOMINMAX
-//#include <chrono>
+
+#include "emulator_context.h"
+
+#include <windows.h> // removes C4005 warning
+#include <GLFW/glfw3.h>
 #include <iostream>
 #include <future>
 #include <chrono>
@@ -29,7 +32,6 @@
 #include "video/opengl_modern.h"
 #include "video/vdp2.h"
 #include "config.h"
-#include "emulator_context.h"
 #include "locale.h"
 #include "log.h"
 #include "memory.h"
@@ -39,7 +41,6 @@
 #include "sh2_registers.h"
 #include "sh2.h"
 #include "smpc.h"
-#include <GLFW/glfw3.h>
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
