@@ -26,17 +26,20 @@
 
 #pragma warning(disable : 4275) // libconfig specific warning disable
 #include <libconfig.h++>
-#include <any>           // any
-#include <map>           // map
-#include <optional>      // optional
-#include <string>        // string
-#include <vector>        // vector
-#include "memory.h"      // RomLoad, RomType
-#include "cdrom/cdrom.h" // CdromAccessMethod
-#include "video/vdp2.h"  // TvStandard
+#include <any>              // any
+#include <map>              // map
+#include <optional>         // optional
+#include <string>           // string
+#include <vector>           // vector
+#include "cdrom/cdrom.h"    //CdromAccessMethod
+#include "video/vdp2.h"     // TvStandard
+#include "emulator_enums.h" // HardwareMode
+#include "memory.h"         // RomLoad, RomType
+#include "smpc.h"           // for AreaCode, PeripheralKey, PortStatus
+#include "utilities.h"      // toUnderlying
 
-namespace cdrom  = saturnin::cdrom;
 namespace libcfg = libconfig;
+namespace cdrom  = saturnin::cdrom;
 namespace util   = saturnin::utilities;
 namespace video  = saturnin::video;
 
@@ -76,9 +79,6 @@ enum class AccessKeys {
     stv_region,
     stv_files
 };
-
-enum class RomLoad;
-enum class RomType;
 
 using MapKeys         = std::map<const AccessKeys, const std::string>;               ///< MapKeys alias definition.
 using MapKeysDefault  = std::map<const AccessKeys, const std::any>;                  ///< MapKeysDefault alias definition.

@@ -21,9 +21,7 @@
 
 #include <windows.h>    // removes C4005 warning
 #include <GLFW/glfw3.h> // GLFW_KEYS
-#include <iostream>     // cout
-#include <vector>       // vector
-#include "cdrom/cdrom.h"
+#include <filesystem>
 #include "locale.h" //NOLINT(modernize-deprecated-headers)
 #include "log.h"
 
