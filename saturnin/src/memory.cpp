@@ -67,9 +67,9 @@ auto Memory::loadRom(const std::string& zip_name,
                      const std::string& file_name,
                      u8*                destination,
                      const u32          size,
-                     const RomLoad      RomLoad,
+                     const RomLoad      rom_load,
                      const u8           times_mirrored,
-                     const RomType      RomType) -> bool {
+                     const RomType      rom_type) -> bool {
     const auto zip      = std::string{zip_name + ".zip"};
     auto       rom_path = fs::path{config()->readValue(AccessKeys::cfg_paths_roms_stv).c_str()};
     rom_path /= zip;
@@ -81,7 +81,7 @@ auto Memory::loadRom(const std::string& zip_name,
             lzpp::ZipEntry        entry = zf.getEntry(file_name, false, false);
             std::unique_ptr<u8[]> data(static_cast<u8*>(entry.readAsBinary()));
 
-            switch (RomType) {
+            switch (rom_type) {
                 case RomType::bios: {
                     const auto counter = u32{size / 4};
                     // Needs byteswapping
@@ -97,7 +97,7 @@ auto Memory::loadRom(const std::string& zip_name,
                 case RomType::graphic: {
                     const auto stv_bios_region_address = u32{0x808};
                     auto       region_cart_address     = u32{};
-                    switch (RomLoad) {
+                    switch (rom_load) {
                         case RomLoad::not_interleaved: {
                             const auto& src_begin = data.get();
                             std::move(src_begin, std::next(src_begin, size), destination);
@@ -124,9 +124,9 @@ auto Memory::loadRom(const std::string& zip_name,
                     }
 
                     // bios region is forced for program roms
-                    if (RomType == RomType::program) { this->cart_[region_cart_address] = this->rom_[stv_bios_region_address]; }
+                    if (rom_type == RomType::program) { this->cart_[region_cart_address] = this->rom_[stv_bios_region_address]; }
 
-                    mirrorData(destination, size, times_mirrored, RomLoad);
+                    mirrorData(destination, size, times_mirrored, rom_load);
                     break;
                 }
                 default: {
@@ -209,9 +209,9 @@ auto Memory::loadStvGame(const std::string& config_filename) -> bool {
         const std::string rom_name       = files[i][0];
         const auto        load_address   = u32{files[i][1]};
         const auto        load_size      = u32{files[i][2]};
-        const auto        rom_load       = Config::rom_load[files[i][3]];
+        const auto        rom_load       = config()->getRomLoad(files[i][3]);
         const auto        times_mirrored = u32{files[i][4]};
-        const auto        rom_type       = Config::rom_type[files[i][5]];
+        const auto        rom_type       = config()->getRomType(files[i][5]);
         if (!this->loadRom(zip_name, rom_name, &this->cart_[load_address], load_size, rom_load, times_mirrored, rom_type)) {
             return false;
         }

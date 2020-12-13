@@ -26,16 +26,12 @@
 
 #pragma warning(disable : 4275) // libconfig specific warning disable
 #include <libconfig.h++>
-#include <any>
-#include <iostream>
-#include <map>
-#include <optional>
-#include <sstream>
-#include <string> // string
-#include <vector> // vector
-#include "log.h"
+#include <any>           // any
+#include <map>           // map
+#include <optional>      // optional
+#include <string>        // string
+#include <vector>        // vector
 #include "memory.h"      // RomLoad, RomType
-#include "utilities.h"   // toUnderlying
 #include "cdrom/cdrom.h" // CdromAccessMethod
 #include "video/vdp2.h"  // TvStandard
 
@@ -84,6 +80,16 @@ enum class AccessKeys {
 enum class RomLoad;
 enum class RomType;
 
+using MapKeys         = std::map<const AccessKeys, const std::string>;               ///< MapKeys alias definition.
+using MapKeysDefault  = std::map<const AccessKeys, const std::any>;                  ///< MapKeysDefault alias definition.
+using MapRomLoad      = std::map<const std::string, const RomLoad>;                  ///< MapRomLoad alias definition.
+using MapRomType      = std::map<const std::string, const RomType>;                  ///< MapRomType alias definition.
+using MapHardwareMode = std::map<const std::string, const HardwareMode>;             ///< MapHardwareMode alias definition.
+using MapCdromAccess  = std::map<const std::string, const cdrom::CdromAccessMethod>; ///< MapCdromAccess alias definition.
+using MapTvStandard   = std::map<const std::string, const video::TvStandard>;        ///< MapHardwareMode alias definition.
+using MapAreaCode     = std::map<const std::string, const AreaCode>;                 ///< MapAreaCode alias definition.
+using MapPortStatus   = std::map<const std::string, const PortStatus>; ///< MapPeripheralConnection alias definition.
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Config
 ///
@@ -95,41 +101,11 @@ enum class RomType;
 
 class Config {
   public:
-    using MapKeys = std::map<const AccessKeys, const std::string>; ///< MapKeys alias definition.
-    static MapKeys full_keys;                                      ///< Link between access keys enumerators and string keys.
-
-    using MapKeysDefault = std::map<const AccessKeys, const std::any>; ///< MapKeysDefault alias definition.
-    static MapKeysDefault default_keys; ///< Link between access keys enumerators and default values.
-
-    using MapRomLoad = std::map<const std::string, const RomLoad>; ///< MapRomLoad alias definition.
-    static MapRomLoad rom_load; ///< Link between the rom load string value defined in the config file and the RomLoad type.
-
-    using MapRomType = std::map<const std::string, const RomType>; ///< MapRomType alias definition.
-    static MapRomType rom_type; ///< Link between the rom type string value defined in the config file and the RomType type.
-
-    using MapCdromAccess = std::map<const std::string, const cdrom::CdromAccessMethod>; ///< MapCdromAccess alias definition.
-    static MapCdromAccess cdrom_access; ///< Link between the cdrom access method string value defined in the config file and the
-                                        ///< CdromAccessMethod type.
-
-    using MapHardwareMode = std::map<const std::string, const HardwareMode>; ///< MapHardwareMode alias definition.
-    static MapHardwareMode
-        hardware_mode; ///< Link between the hardware mode string value defined in the config file and the HardwareMode type.
-
-    using MapTvStandard = std::map<const std::string, const video::TvStandard>; ///< MapHardwareMode alias definition.
-    static MapTvStandard
-        tv_standard; ///< Link between the tv standard string value defined in the config file and the TvStandard type.
-
-    using MapAreaCode = std::map<const std::string, const AreaCode>; ///< MapAreaCode alias definition.
-    static MapAreaCode area_code; ///< Link between the area code string value defined in the config file and the AreaCode type.
-
-    using MapPortStatus = std::map<const std::string, const PortStatus>; ///< MapPeripheralConnection alias definition.
-    static MapPortStatus
-        port_status; ///< Link between the port status string value defined in the config file and the PortStatus type.
-
     //@{
     // Constructors / Destructors
     Config() = delete;
-    Config(const std::string configuration_filename) : filename_(configuration_filename){};
+    // Config(const std::string configuration_filename) : filename_(configuration_filename) {};
+    Config(const std::string& configuration_filename);
     Config(const Config&) = delete;
     Config(Config&&)      = delete;
     auto operator=(const Config&) & -> Config& = delete;
@@ -337,17 +313,13 @@ class Config {
     template<class T>
     void writeValue(const AccessKeys& key, const T& value) {
         try {
-            // libconfig::Setting& setting = cfg_.lookup(Config::full_keys[key]);
-            auto& setting = cfg_.lookup(Config::full_keys[key]);
+            auto& setting = cfg_.lookup(full_keys_[key]);
             setting       = value;
         } catch (const libconfig::SettingNotFoundException& e) {
-            const auto s     = std::string{e.getPath()};
-            const auto error = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
-            Log::error("config", error);
+            logError("Setting '{0}' not found !", e.getPath());
             throw std::runtime_error("Config error !");
         } catch (const libconfig::SettingTypeException& e) {
-            const auto error = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
-            Log::error("config", error);
+            logError("Setting '{0}' using the wrong type !", e.getPath());
             throw std::runtime_error("Config error !");
         }
     }
@@ -355,25 +327,18 @@ class Config {
     template<class T>
     void writeValue(const AccessKeys& key, const std::vector<T>& elements) {
         try {
-            auto& setting = cfg_.lookup(Config::full_keys[key]);
+            auto& setting = cfg_.lookup(full_keys_[key]);
             if (setting.isArray()) {
                 for (auto i = setting.begin(); i != setting.end(); ++i) {
                     const auto idx = static_cast<u8>((*i).getIndex());
                     setting[idx]   = util::toUnderlying(elements[idx]);
                 }
-
-                // for (const T& e : elements) {
-                //    this->writeValue<const T&>(setting, "", e);
-                //}
             }
         } catch (const libconfig::SettingNotFoundException& e) {
-            const auto s     = std::string{e.getPath()};
-            const auto error = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
-            Log::error("config", error);
+            logError("Setting '{0}' not found !", e.getPath());
             throw std::runtime_error("Config error !");
         } catch (const libconfig::SettingTypeException& e) {
-            const auto error = fmt::format(tr("Setting '{0}' using the wrong type !"), e.getPath());
-            Log::error("config", error);
+            logError("Setting '{0}' using the wrong type !", e.getPath());
             throw std::runtime_error("Config error !");
         }
     }
@@ -422,20 +387,20 @@ class Config {
     static auto listAvailableLanguages() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  static auto Config::listAreaCodes() -> std::vector<std::string>;
+    /// \fn auto saturnin::core::Config::listAreaCodes() -> std::vector<std::string>;
     ///
-    /// \brief   Returns a vector populated with area codes.
+    /// \brief  Returns a vector populated with area codes.
     ///
-    /// \author  Runik
-    /// \date    26/01/2020
+    /// \author Runik
+    /// \date   26/01/2020
     ///
-    /// \return  A std::vector<std::string>
+    /// \returns    A std::vector&lt;std::string&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto listAreaCodes() -> std::vector<std::string>;
+    auto listAreaCodes() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Config::listPeripheralConnections() -> std::vector<std::string>;
+    /// \fn auto saturnin::core::Config::listPeripheralConnections() -> std::vector<std::string>;
     ///
     /// \brief  Returns a vector populated with peripheral connections.
     ///
@@ -445,10 +410,10 @@ class Config {
     /// \returns    A std::vector&lt;std::string&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto listPeripheralConnections() -> std::vector<std::string>;
+    auto listPeripheralConnections() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Config::configToPortStatus(std::string value) -> PortStatus;
+    /// \fn auto saturnin::core::Config::configToPortStatus(std::string value) -> PortStatus;
     ///
     /// \brief  Configuration entry to port status
     ///
@@ -460,7 +425,7 @@ class Config {
     /// \returns    A PortStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto configToPortStatus(std::string value) -> PortStatus;
+    auto configToPortStatus(std::string value) -> PortStatus;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn  template<class T> void Config::add(const std::string key, T default)
@@ -532,7 +497,173 @@ class Config {
 
     void createDefault(const AccessKeys& key);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto saturnin::core::Config::readPeripheralConfiguration(const AccessKeys& key) -> std::vector<PeripheralKey>;
+    ///
+    /// \brief  Reads peripheral configuration of the key
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The peripheral configuration.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     auto readPeripheralConfiguration(const AccessKeys& key) -> std::vector<PeripheralKey>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Config::getHardwareMode(const std::string& key) -> HardwareMode;
+    ///
+    /// \brief  Returns the hardware mode corresponding to the key.
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The hardware mode.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getHardwareMode(const std::string& key) -> HardwareMode;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto saturnin::core::Config::getHardwareModeKey(const HardwareMode value) const -> std::optional<std::string>;
+    ///
+    /// \brief  Gets the hardware mode string key from a value. Returns nullopt if value is not found
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  value   The value.
+    ///
+    /// \returns    The hardware mode key.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getHardwareModeKey(const HardwareMode value) const -> std::optional<std::string>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Config::getCdromAccess(const std::string& key) -> cdrom::CdromAccessMethod;
+    ///
+    /// \brief  Returns the cdrom access method corresponding to the key.
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The cdrom access method.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getCdromAccess(const std::string& key) -> cdrom::CdromAccessMethod;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto saturnin::core::Config::getCdromAccessKey(const cdrom::CdromAccessMethod value) const ->
+    /// std::optional<std::string>;
+    ///
+    /// \brief  Gets the cdrom access method string key from a value. Returns nullopt if value is not
+    ///         found
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  value   The value.
+    ///
+    /// \returns    The cdrom access method key.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getCdromAccessKey(const cdrom::CdromAccessMethod value) const -> std::optional<std::string>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto saturnin::core::Config::getTvStandard(const std::string& key) -> video::TvStandard;
+    ///
+    /// \brief  Returns the TV standard method corresponding to the key.
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The TV standard.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getTvStandard(const std::string& key) -> video::TvStandard;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto saturnin::core::Config::getTvStandardKey(const video::TvStandard value) const -> std::optional<std::string>;
+    ///
+    /// \brief  Gets the TV standard string key from a value. Returns nullopt if value is not
+    ///         found
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  value   The value.
+    ///
+    /// \returns    The TV standard key.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getTvStandardKey(const video::TvStandard value) const -> std::optional<std::string>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Config::getRomLoad(const std::string& key) -> RomLoad;
+    ///
+    /// \brief  Returns the rom load method corresponding to the key.
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The rom load method.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getRomLoad(const std::string& key) -> RomLoad;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Config::getRomType(const std::string& key) -> RomType;
+    ///
+    /// \brief  Returns the rom type corresponding to the key.
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The rom type.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getRomType(const std::string& key) -> RomType;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Config::getAreaCode(const std::string& key) -> AreaCode;
+    ///
+    /// \brief  Returns the area code corresponding to the key.
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The area code.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getAreaCode(const std::string& key) -> AreaCode;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto saturnin::core::Config::getAreaCodeKey(const AreaCode value) const -> std::optional<std::string>;
+    ///
+    /// \brief  Gets the area code string key from a value. Returns nullopt if value is not found
+    ///
+    /// \author Runik
+    /// \date   13/12/2020
+    ///
+    /// \param  value   The value.
+    ///
+    /// \returns    The area code key.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getAreaCodeKey(const AreaCode value) const -> std::optional<std::string>;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -567,6 +698,32 @@ class Config {
     std::string filename_; ///< Name of the configuration file used
 
     libconfig::Config cfg_; ///< Internal configuration object
+
+    MapKeys        full_keys_;    ///< Link between access keys enumerators and string keys.
+    MapKeysDefault default_keys_; ///< Link between access keys enumerators and default values.
+    MapRomLoad     rom_load_;     ///< Link between the rom load string value defined in the config file and the RomLoad type.
+    MapRomType     rom_type_;     ///< Link between the rom type string value defined in the config file and the RomType type.
+    MapHardwareMode
+        hardware_mode_; ///< Link between the hardware mode string value defined in the config file and the HardwareMode type.
+    MapCdromAccess cdrom_access_; ///< Link between the cdrom access method string value defined in the config file and the
+                                  ///< CdromAccessMethod type.
+    MapTvStandard tv_standard_; ///< Link between the tv standard string value defined in the config file and the TvStandard type.
+    MapAreaCode   area_code_;   ///< Link between the area code string value defined in the config file and the AreaCode type.
+    MapPortStatus port_status_; ///< Link between the port status string value defined in the config file and the PortStatus type.
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void logError(const std::string& error, const std::string& path);
+///
+/// \brief  Logs an error while fetching a setting.
+///
+/// \author Runik
+/// \date   12/12/2020
+///
+/// \param  error   The raw error message (not translated).
+/// \param  path    Path of the setting.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void logError(const std::string& error, const std::string& path);
 
 }; // namespace saturnin::core

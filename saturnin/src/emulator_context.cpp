@@ -86,7 +86,7 @@ auto EmulatorContext::initialize() -> bool {
     if (!Locale::getInstance().initialize(country)) { return false; }
 
     std::string hm = config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
-    hardwareMode(core::Config::hardware_mode[hm]);
+    hardwareMode(config()->getHardwareMode(hm));
 
     this->smpc()->initializePeripheralMappings();
 

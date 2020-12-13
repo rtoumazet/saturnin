@@ -39,7 +39,7 @@ void Vdp2::initialize() {
     initializeRegisterNameMap();
 
     const std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-    switch (Config::tv_standard[ts]) {
+    switch (emulator_context_->config()->getTvStandard(ts)) {
         case video::TvStandard::pal: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard); break;
         case video::TvStandard::ntsc: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard); break;
         default: Log::warning("vdp2", tr("Unknown TV standard"));
@@ -862,7 +862,7 @@ void Vdp2::calculateDisplayDuration() {
     constexpr auto lines_nb_256 = u16{256};
 
     std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-    switch (Config::tv_standard[ts]) {
+    switch (emulator_context_->config()->getTvStandard(ts)) {
         case video::TvStandard::pal: {
             constexpr auto frame_duration = seconds{1.0 / 50.0};
             cycles_per_frame_             = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);

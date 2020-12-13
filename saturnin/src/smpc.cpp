@@ -322,17 +322,17 @@ void Smpc::reset() {
 
     // System clock is 320 at reset.
     std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-    switch (Config::tv_standard[ts]) {
+    switch (emulator_context_->config()->getTvStandard(ts)) {
         case video::TvStandard::pal: clock_ = SystemClock::pal_320; break;
         case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
         default: Log::warning("smpc", tr("Could not set system clock !")); clock_ = SystemClock::not_set;
     }
 
     std::string p1c = emulator_context_->config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
-    port_1_status_  = Config::configToPortStatus(p1c);
+    port_1_status_  = emulator_context_->config()->configToPortStatus(p1c);
 
     std::string p2c = emulator_context_->config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
-    port_2_status_  = Config::configToPortStatus(p2c);
+    port_2_status_  = emulator_context_->config()->configToPortStatus(p2c);
 }
 
 auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 {
@@ -452,7 +452,7 @@ void Smpc::executeCommand() {
             // -> CD block kept
             // -> Work RAM kept
             // -> VRAM emptied
-            switch (Config::tv_standard[ts]) {
+            switch (emulator_context_->config()->getTvStandard(ts)) {
                 case video::TvStandard::pal:
                     clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::pal_320 : SystemClock::pal_352;
                     break;
@@ -585,7 +585,7 @@ void Smpc::getStatus() {
     oreg_[index_8].reset(); // No cartridge code handling for now
 
     std::string ac = emulator_context_->config()->readValue(core::AccessKeys::cfg_global_area_code);
-    oreg_[index_9].set(OutputRegister::all_bits, util::toUnderlying(core::Config::area_code[ac]));
+    oreg_[index_9].set(OutputRegister::all_bits, util::toUnderlying(emulator_context_->config()->getAreaCode(ac)));
 
     oreg_[index_10][bit_7] = false;
     oreg_[index_10][bit_6] = is_horizontal_res_352;

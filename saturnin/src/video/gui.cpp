@@ -20,8 +20,9 @@
 #include <imgui.h>
 #include <filesystem> // filesystem
 #include <fstream>    // ifstream
-#include <thread>     // thread
-#include <tuple>      //tuple
+#include <optional>
+#include <thread> // thread
+#include <tuple>  //tuple
 #include "gui.h"
 #include "../locale.h"                             // tr
 #include "../../lib/imgui/imgui_custom_controls.h" // peripheralKeyCombo
@@ -253,23 +254,22 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::TextUnformatted(tr("Hardware mode"));
         ImGui::SameLine(second_column_offset);
 
-        // std::string hm   = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
         std::string hm   = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
-        static auto mode = int{util::toUnderlying(core::Config::hardware_mode[hm])};
+        static auto mode = int{util::toUnderlying(state.config()->getHardwareMode(hm))};
 
         if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::HardwareMode::saturn))) {
-            const auto it = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::saturn);
-            if (it != core::Config::hardware_mode.end()) {
-                state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, it->first);
+            const auto hm = state.config()->getHardwareModeKey(core::HardwareMode::saturn);
+            if (hm != std::nullopt) {
+                state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
             } else {
                 Log::warning("config", tr("Unknown hardware mode ..."));
             }
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::HardwareMode::stv))) {
-            const auto it = util::getKeyFromValue(core::Config::hardware_mode, core::HardwareMode::stv);
-            if (it != core::Config::hardware_mode.end()) {
-                state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, it->first);
+            const auto hm = state.config()->getHardwareModeKey(core::HardwareMode::stv);
+            if (hm != std::nullopt) {
+                state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
             } else {
                 Log::warning("config", tr("Unknown hardware mode ..."));
             }
@@ -291,7 +291,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::TextUnformatted(tr("Area code"));
         ImGui::SameLine(second_column_offset);
 
-        static auto codes      = core::Config::listAreaCodes();
+        static auto codes      = state.config()->listAreaCodes();
         std::string c          = state.config()->readValue(core::AccessKeys::cfg_global_area_code);
         const auto  it_code    = std::find_if(codes.begin(), codes.end(), [&c](std::string& str) { return c == str; });
         static auto index_code = static_cast<s32>(it_code - codes.begin());
@@ -307,21 +307,21 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::SameLine(second_column_offset);
 
         std::string ts       = state.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-        static auto standard = int{util::toUnderlying(core::Config::tv_standard[ts])};
+        static auto standard = int{util::toUnderlying(state.config()->getTvStandard(ts))};
 
         if (ImGui::RadioButton("PAL", &standard, util::toUnderlying(video::TvStandard::pal))) {
-            const auto it = util::getKeyFromValue(core::Config::tv_standard, video::TvStandard::pal);
-            if (it != core::Config::tv_standard.end()) {
-                state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, it->first);
+            const auto key = state.config()->getTvStandardKey(video::TvStandard::pal);
+            if (key != std::nullopt) {
+                state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
             } else {
                 Log::warning("config", tr("Unknown TV standard ..."));
             }
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("NTSC", &standard, util::toUnderlying(video::TvStandard::ntsc))) {
-            const auto it = util::getKeyFromValue(core::Config::tv_standard, video::TvStandard::ntsc);
-            if (it != core::Config::tv_standard.end()) {
-                state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, it->first);
+            const auto key = state.config()->getTvStandardKey(video::TvStandard::ntsc);
+            if (key != std::nullopt) {
+                state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
             } else {
                 Log::warning("config", tr("Unknown TV standard ..."));
             }
@@ -399,20 +399,20 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::SameLine(second_column_offset);
 
         std::string access_method = state.config()->readValue(core::AccessKeys::cfg_cdrom_access_method);
-        static auto method        = int{util::toUnderlying(core::Config::cdrom_access[access_method])};
+        static auto method        = int{util::toUnderlying(state.config()->getCdromAccess(access_method))};
         if (ImGui::RadioButton("SPTI", &method, util::toUnderlying(cdrom::CdromAccessMethod::spti))) {
-            const auto it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::CdromAccessMethod::spti);
-            if (it != core::Config::cdrom_access.end()) {
-                state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, it->first);
+            const auto key = state.config()->getCdromAccessKey(cdrom::CdromAccessMethod::spti);
+            if (key != std::nullopt) {
+                state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
             } else {
                 Log::warning("config", tr("Unknown drive access method ..."));
             }
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("ASPI", &method, util::toUnderlying(cdrom::CdromAccessMethod::aspi))) {
-            const auto it = util::getKeyFromValue(core::Config::cdrom_access, cdrom::CdromAccessMethod::aspi);
-            if (it != core::Config::cdrom_access.end()) {
-                state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, it->first);
+            const auto key = state.config()->getCdromAccessKey(cdrom::CdromAccessMethod::aspi);
+            if (key != std::nullopt) {
+                state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
             } else {
                 Log::warning("config", tr("Unknown drive access method ..."));
             }
@@ -459,7 +459,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                     ImGui::TextUnformatted(tr("Connection"));
                     ImGui::SameLine(second_column_offset);
-                    static auto connections = core::Config::listPeripheralConnections();
+                    static auto connections = state.config()->listPeripheralConnections();
                     std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
                     const auto  it_connection
                         = std::find_if(connections.begin(), connections.end(), [&c](std::string& str) { return c == str; });
@@ -543,7 +543,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                     ImGui::TextUnformatted(tr("Connection"));
                     ImGui::SameLine(second_column_offset);
-                    static auto connections = core::Config::listPeripheralConnections();
+                    static auto connections = state.config()->listPeripheralConnections();
                     std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
                     const auto  it_connection
                         = std::find_if(connections.begin(), connections.end(), [&c](std::string& str) { return c == str; });
@@ -776,7 +776,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
         // Updating global state variables
         std::string hm = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
-        state.hardwareMode(core::Config::hardware_mode[hm]);
+        state.hardwareMode(state.config()->getHardwareMode(hm));
 
         status_message                   = tr("Configuration saved.");
         constexpr auto frames_per_second = u8{60};
