@@ -17,14 +17,15 @@
 // limitations under the License.
 //
 
-#include "sh2.h"
 #include "sh2_instructions.h"
-#include "emulator_context.h"
+#include "emulator_context.h" // EmulatorContext
 #include "emulator_defs.h"
+#include "emulator_enums.h" // DebugStatus
 #include "interrupt_sources.h"
-#include "locale.h"
+#include "log.h"
 #include "memory.h"
 #include "scu.h"
+#include "sh2.h" // Sh2, Sh2Type
 
 namespace is = saturnin::core::interrupt_source;
 

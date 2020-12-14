@@ -28,6 +28,7 @@
 #include <array>  // array
 #include <vector> // vector
 #include "emulator_defs.h"
+#include "log.h"
 #include "memory.h"
 #include "sh2_registers.h"
 

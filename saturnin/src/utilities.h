@@ -25,16 +25,16 @@
 
 #pragma once
 
-#include <algorithm>   // count
-#include <fstream>     // ifstream
-#include <string>      // string
-#include <type_traits> // underlying_type_t
-#include <vector>      // vector
+#include <algorithm>       // count
+#include <string>          // string
+#include <type_traits>     // underlying_type_t
+#include <vector>          // vector
+#include "emulator_defs.h" // u8, u16, u32
 
 namespace saturnin::utilities {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto stringToVector(const std::string& source, uint32_t reserved_size) -> std::vector<char>;
+/// \fn auto stringToVector(const std::string& source, u32 reserved_size) -> std::vector<char>;
 ///
 /// \brief  String to vector.
 ///
@@ -44,10 +44,10 @@ namespace saturnin::utilities {
 /// \param  source          Source string to change in vector.
 /// \param  reserved_size   Reserved size for the new vector.
 ///
-/// \return A std::vector&lt;char&gt;
+/// \returns    A std::vector&lt;char&gt;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto stringToVector(const std::string& source, uint32_t reserved_size) -> std::vector<char>;
+auto stringToVector(const std::string& source, u32 reserved_size) -> std::vector<char>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn auto getLastErrorMessage() -> std::string;
@@ -117,7 +117,7 @@ auto getKeyFromValue(const M& map, const V find_value) {
 auto explode(std::string const& s, char delim) -> std::vector<std::string>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto dec2bcd(uint16_t dec) -> uint32_t;
+/// \fn auto dec2bcd(u16 dec) -> u32;
 ///
 /// \brief  Converts a number to BCD.
 ///
@@ -126,9 +126,9 @@ auto explode(std::string const& s, char delim) -> std::vector<std::string>;
 ///
 /// \param  dec The number to convert to bcd.
 ///
-/// \return The number in bcd representation.
+/// \returns    The number in bcd representation.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto dec2bcd(uint16_t dec) -> uint32_t;
+auto dec2bcd(u16 dec) -> u32;
 
 } // namespace saturnin::utilities

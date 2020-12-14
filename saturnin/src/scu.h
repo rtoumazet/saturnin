@@ -28,9 +28,7 @@
 #include <queue>  // priority_queue
 #include <vector> // vector
 #include "emulator_defs.h"
-#include "emulator_enums.h"
 #include "interrupt_sources.h"
-//#include "sh2.h"
 
 namespace is = saturnin::core::interrupt_source;
 
@@ -46,8 +44,6 @@ namespace core {
 // Forward declarations
 class Memory;
 class EmulatorContext;
-// using saturnin::sh2::Sh2;
-// using saturnin::sh2::Sh2Type;
 
 constexpr auto indirect_dma_end_code = u32{0x80000000};
 

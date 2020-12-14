@@ -19,12 +19,11 @@
 
 #include "sh2.h"
 #include "emulator_context.h"
+#include "interrupt_controller.h" //Interrupt
 #include "interrupt_sources.h"
-#include "scu_registers.h"
 #include "scu.h"
 #include "sh2_instructions.h"
 #include "utilities.h"
-#include "locale.h"
 
 namespace is = saturnin::core::interrupt_source;
 

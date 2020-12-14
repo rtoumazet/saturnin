@@ -17,8 +17,9 @@
 // limitations under the License.
 //
 
-#include "log.h"
-#include "emulator_context.h"
+#include "emulator_context.h" // EmulatorContext
+#include "locale.h"           // tr
+#include "log.h"              // Log
 
 namespace core = saturnin::core;
 

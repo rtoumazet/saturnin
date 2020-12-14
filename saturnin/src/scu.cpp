@@ -17,13 +17,13 @@
 // limitations under the License.
 //
 
-#include <iostream> // cout
 #include "scu.h"
-#include "scu_registers.h"
 #include "emulator_context.h"
-#include "locale.h"
-#include "memory.h"
 #include "interrupt_sources.h"
+#include "locale.h"
+#include "log.h"
+#include "memory.h"
+#include "scu_registers.h"
 #include "sh2.h"
 #include "utilities.h"
 
@@ -596,7 +596,7 @@ void Scu::sendStartFactor(const StartingFactorSelect sfs) {
     auto new_queue = DmaQueue{};
 
     while (!dma_queue_.empty()) {
-        auto dc{dma_queue_.top()};
+        auto dc{dma_queue_.top()}; // Disregard LNT1001 notice, copy is intended
         dma_queue_.pop();
 
         if (dc.dma_status == DmaStatus::waiting_start_factor) {
@@ -754,7 +754,7 @@ void Scu::activateDma() {
 
     while (dma_queue_.top().dma_status == DmaStatus::queued) {
         executeDma(dma_queue_.top());
-        auto dc{dma_queue_.top()};
+        auto dc{dma_queue_.top()}; // Disregard LNT1001 notice, copy is intended
         dc.dma_status = DmaStatus::finished;
         dma_queue_.pop();
         dma_queue_.push(dc);

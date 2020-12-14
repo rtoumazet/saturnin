@@ -17,8 +17,9 @@
 // limitations under the License.
 //
 
-#include <windows.h> // removes C4005 warning
-#include <iostream>  // cout
+#include <windows.h>  // removes C4005 warning
+#include <iostream>   // cout
+#include <filesystem> // filesystem
 #include <lodepng.h>
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>

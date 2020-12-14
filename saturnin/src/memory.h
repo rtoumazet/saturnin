@@ -25,22 +25,22 @@
 
 #pragma once
 
-#include <array> // array
-#include <cassert>
-#include <filesystem> // filesystem
-#include <string>     // string
-#include <vector>     // vector
-#include <Windows.h>  // VK constants
-
+#include <array>     // array
+#include <map>       // map
+#include <string>    // string
+#include <tuple>     //tuple
+#include <vector>    // vector
+#include <Windows.h> // VK constants
 #include "emulator_defs.h"
 #include "emulator_enums.h"
-#include "cdrom/cdrom.h"
-#include "log.h"
 #include "scu.h"
 #include "smpc.h"
 #include "utilities.h" // toUnderlying
 
 // Forward declarations
+namespace saturnin::cdrom {
+class Cdrom;
+}
 namespace saturnin::sh2 {
 class Sh2;
 enum class Sh2Type;

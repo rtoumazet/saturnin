@@ -16,10 +16,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "utilities.h"
 #include <windows.h>
 #include <sstream> // istringstream
-#include "emulator_defs.h"
-#include "utilities.h"
 
 namespace saturnin::utilities {
 
@@ -64,7 +63,7 @@ auto explode(std::string const& s, char delim) -> std::vector<std::string> {
     return result;
 }
 
-auto dec2bcd(uint16_t dec) -> u32 {
+auto dec2bcd(u16 dec) -> u32 {
     constexpr auto decimal_base = u8{10};
     auto           result       = u32{};
     auto           shift        = s32{};

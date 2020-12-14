@@ -25,11 +25,13 @@
 
 #pragma once
 
-#include <Windows.h>    // Removes C4005 warning
-#include <GLFW/glfw3.h> // Keyboard handling
-#include <vector>       // vector
-#include <chrono>       // duration
 #include <array>        // array
+#include <bitset>       // bitset
+#include <chrono>       // duration
+#include <vector>       // vector
+#define NOMINMAX        // Prevents errors when including date.h in the cpp
+#include <windows.h>    // Removes C4005 warning
+#include <GLFW/glfw3.h> // Keyboard handling
 #include "smpc_registers.h"
 
 namespace saturnin::core {

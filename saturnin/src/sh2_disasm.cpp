@@ -17,8 +17,8 @@
 // limitations under the License.
 //
 
-#include <fmt/format.h>
 #include "sh2_disasm.h"
+#include <fmt/format.h>
 #include "sh2_instructions.h"
 
 namespace saturnin::sh2 {

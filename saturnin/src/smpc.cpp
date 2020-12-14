@@ -17,15 +17,14 @@
 // limitations under the License.
 //
 
-#include <chrono>
+#include "smpc.h"
 #include <date/date.h>
 #include <map>    // map
 #include <string> // string
-#include "sound/scsp.h"
-#include "smpc.h"
 #include "config.h"
 #include "emulator_context.h"
 #include "sh2.h"
+#include "sound/scsp.h"
 
 namespace saturnin::core {
 
