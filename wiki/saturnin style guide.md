@@ -1,6 +1,6 @@
 # Saturnin Style Guide
 
-Loosely based on [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html) and [C++ Core Guidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md)
+Loosely based on [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html) and [C++ Core Guidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md). Use this as a reference, C++ field is so large that having a collection like this doesn't hurt.
 
 
 - [General](#general)
@@ -591,14 +591,13 @@ In your implementation you should have comments in tricky, non-obvious, interest
 * **Self-contained Headers:**
 textual inclusion files should use *.inc* extension instead of *.h*.
 * **The #define Guard:**
-all header files should have #define guards to prevent multiple inclusion. The format of the symbol name should be <PROJECT>\_<FILE>\_H\_.
+all header files should have #pragma once guard to prevent multiple inclusion.
 * **Order of includes:**  
 
         #!C++
-        // SYSTEM INCLUDES
-        C files
-        C++ files
-        // PROJECT INCLUDES
+        // Current file header
+        // System / external libraries includes (alphabetically ordered)
+        // Project includes (alphabetically ordered)
 
 ------------
 ## Other C++ Features
