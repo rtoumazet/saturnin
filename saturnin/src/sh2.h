@@ -27,10 +27,10 @@
 
 #include <array>  // array
 #include <vector> // vector
-#include "emulator_defs.h"
-#include "log.h"
-#include "memory.h"
-#include "sh2_registers.h"
+#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/log.h>
+#include <saturnin/src/memory.h>
+#include <saturnin/src/sh2_registers.h>
 
 // namespace core = saturnin::core;
 

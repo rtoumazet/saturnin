@@ -22,8 +22,8 @@
 #include <windows.h>    // removes C4005 warning
 #include <GLFW/glfw3.h> // GLFW_KEYS
 #include <filesystem>
-#include "locale.h" //NOLINT(modernize-deprecated-headers)
-#include "log.h"
+#include <saturnin/src/locale.h> //NOLINT(modernize-deprecated-headers)
+#include <saturnin/src/log.h>
 
 namespace libcfg = libconfig;
 namespace fs     = std::filesystem;

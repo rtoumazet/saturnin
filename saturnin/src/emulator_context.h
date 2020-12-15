@@ -30,8 +30,8 @@
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
 #include <thread> // thread
-#include "emulator_enums.h"
-#include "stv_definitions.h"
+#include <saturnin/src/emulator_enums.h>
+#include <saturnin/src/stv_definitions.h>
 
 // Forward declarations
 namespace saturnin::cdrom {

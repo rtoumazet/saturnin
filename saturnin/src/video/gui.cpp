@@ -24,21 +24,21 @@
 #include <thread> // thread
 #include <tuple>  //tuple
 #include "gui.h"
-#include "../locale.h"                             // tr
-#include "../../lib/imgui/imgui_custom_controls.h" // peripheralKeyCombo
+#include <saturnin/src/locale.h>                      //tr
+#include <saturnin/lib/imgui/imgui_custom_controls.h> // peripheralKeyCombo
 
 #pragma warning(push)
 #pragma warning(disable : 4996)
-#include "../../lib/imgui/imgui_memory_editor.h" // MemoryEditor
+#include <saturnin/lib/imgui/imgui_memory_editor.h> // MemoryEditor
 #pragma warning(pop)
 
-#include "../emulator_enums.h" // EmulationStatus
-#include "../config.h"
-#include "../sh2.h" // Sh2
-#include "../sh2_instructions.h"
-#include "../smpc.h"        // SaturnDigitalPad, PeripheralKey
-#include "../utilities.h"   // stringToVector
-#include "../cdrom/cdrom.h" // Cdrom
+#include <saturnin/src/emulator_enums.h> // EmulationStatus
+#include <saturnin/src/config.h>
+#include <saturnin/src/sh2.h> // Sh2
+#include <saturnin/src/sh2_instructions.h>
+#include <saturnin/src/smpc.h>        // SaturnDigitalPad, PeripheralKey
+#include <saturnin/src/utilities.h>   // stringToVector
+#include <saturnin/src/cdrom/cdrom.h> // Cdrom
 
 // namespace core  = saturnin::core;
 namespace util  = saturnin::utilities;

@@ -17,14 +17,14 @@
 // limitations under the License.
 //
 
-#include "smpc.h"
+#include <saturnin/src/smpc.h>
 #include <date/date.h>
 #include <map>    // map
 #include <string> // string
-#include "config.h"
-#include "emulator_context.h"
-#include "sh2.h"
-#include "sound/scsp.h"
+#include <saturnin/src/config.h>
+#include <saturnin/src/emulator_context.h>
+#include <saturnin/src/sh2.h>
+#include <saturnin/src/sound/scsp.h>
 
 namespace saturnin::core {
 

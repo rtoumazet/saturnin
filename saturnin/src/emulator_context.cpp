@@ -17,30 +17,30 @@
 // limitations under the License.
 //
 
-#include "emulator_context.h"
+#include <saturnin/src/emulator_context.h>
 
 #include <windows.h> // removes C4005 warning
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <future>
 #include <chrono>
-#include "cdrom/cdrom.h"
-#include "cdrom/scsi.h"
-#include "sound/scsp.h"
-#include "video/opengl.h"
-#include "video/opengl_legacy.h"
-#include "video/opengl_modern.h"
-#include "video/vdp2.h"
-#include "config.h"
-#include "locale.h"
-#include "log.h"
-#include "memory.h"
-#include "scu_registers.h"
-#include "scu.h"
-#include "sh2_instructions.h"
-#include "sh2_registers.h"
-#include "sh2.h"
-#include "smpc.h"
+#include <saturnin/src/config.h>
+#include <saturnin/src/locale.h>
+#include <saturnin/src/log.h>
+#include <saturnin/src/memory.h>
+#include <saturnin/src/scu_registers.h>
+#include <saturnin/src/scu.h>
+#include <saturnin/src/sh2_instructions.h>
+#include <saturnin/src/sh2_registers.h>
+#include <saturnin/src/sh2.h>
+#include <saturnin/src/smpc.h>
+#include <saturnin/src/cdrom/cdrom.h>
+#include <saturnin/src/cdrom/scsi.h>
+#include <saturnin/src/sound/scsp.h>
+#include <saturnin/src/video/opengl.h>
+#include <saturnin/src/video/opengl_legacy.h>
+#include <saturnin/src/video/opengl_modern.h>
+#include <saturnin/src/video/vdp2.h>
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;

@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 
-#include "log.h"
+#include <saturnin/src/log.h>
 
 #include <filesystem>
 #include <iostream>

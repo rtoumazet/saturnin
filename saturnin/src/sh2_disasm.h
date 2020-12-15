@@ -26,7 +26,7 @@
 #pragma once
 
 #include <string>
-#include "emulator_defs.h"
+#include <saturnin/src/emulator_defs.h>
 
 namespace saturnin::sh2 {
 

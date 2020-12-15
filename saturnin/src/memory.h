@@ -31,11 +31,11 @@
 #include <tuple>     //tuple
 #include <vector>    // vector
 #include <Windows.h> // VK constants
-#include "emulator_defs.h"
-#include "emulator_enums.h"
-#include "scu.h"
-#include "smpc.h"
-#include "utilities.h" // toUnderlying
+#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/emulator_enums.h>
+#include <saturnin/src/scu.h>
+#include <saturnin/src/smpc.h>
+#include <saturnin/src/utilities.h> // toUnderlying
 
 // Forward declarations
 namespace saturnin::cdrom {

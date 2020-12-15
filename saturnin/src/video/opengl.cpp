@@ -18,7 +18,7 @@
 //
 
 #include <windows.h>  // removes C4005 warning
-#include <iostream>   // cout
+#include <fstream>    // ifstream
 #include <filesystem> // filesystem
 #include <lodepng.h>
 #include <glbinding/glbinding.h>

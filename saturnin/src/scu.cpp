@@ -17,15 +17,15 @@
 // limitations under the License.
 //
 
-#include "scu.h"
-#include "emulator_context.h"
-#include "interrupt_sources.h"
-#include "locale.h"
-#include "log.h"
-#include "memory.h"
-#include "scu_registers.h"
-#include "sh2.h"
-#include "utilities.h"
+#include <saturnin/src/scu.h>
+#include <saturnin/src/emulator_context.h>
+#include <saturnin/src/interrupt_sources.h>
+#include <saturnin/src/locale.h>
+#include <saturnin/src/log.h>
+#include <saturnin/src/memory.h>
+#include <saturnin/src/scu_registers.h>
+#include <saturnin/src/sh2.h>
+#include <saturnin/src/utilities.h>
 
 namespace saturnin::core {
 

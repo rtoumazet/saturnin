@@ -27,9 +27,9 @@
 
 #include <array>  // array
 #include <string> // string
-#include "emulator_defs.h"
-#include "sh2.h"
-#include "sh2_disasm.h"
+#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/sh2.h>
+#include <saturnin/src/sh2_disasm.h>
 
 namespace saturnin::sh2 {
 

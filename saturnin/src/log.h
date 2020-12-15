@@ -35,7 +35,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/ostream_sink.h>
 // NOLINTNEXTLINE(modernize-deprecated-headers)
-#include "locale.h" // tr
+#include <saturnin/src/locale.h> // tr
 
 namespace saturnin::core {
 

@@ -27,8 +27,8 @@
 
 #include <queue>  // priority_queue
 #include <vector> // vector
-#include "emulator_defs.h"
-#include "interrupt_sources.h"
+#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/interrupt_sources.h>
 
 namespace is = saturnin::core::interrupt_source;
 

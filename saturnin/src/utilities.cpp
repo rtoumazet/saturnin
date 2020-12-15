@@ -16,7 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utilities.h"
+#include <saturnin/src/utilities.h>
 #include <windows.h>
 #include <sstream> // istringstream
 
