@@ -25,11 +25,7 @@
 
 #pragma once
 
-#include <algorithm>                    // count
-#include <string>                       // string
-#include <type_traits>                  // underlying_type_t
-#include <vector>                       // vector
-#include <saturnin/src/emulator_defs.h> // u8, u16, u32
+#include <saturnin/src/pch.h>
 
 namespace saturnin::utilities {
 

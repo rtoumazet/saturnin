@@ -23,10 +23,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <string>
-#include <vector>
-#include <windows.h>
-#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/pch.h>
 
 namespace saturnin::cdrom {
 

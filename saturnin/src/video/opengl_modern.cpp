@@ -17,10 +17,9 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #define GLFW_INCLUDE_NONE
 #include <saturnin/src/video/opengl_modern.h>
-#include <array>  // array
-#include <vector> // vector
 #include <glbinding/glbinding.h>
 #include <glbinding/gl/gl.h>
 #include <GLFW/glfw3.h>
@@ -29,8 +28,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include <saturnin/src/emulator_context.h>
-#include <saturnin/src/log.h>
-#include <saturnin/src/locale.h>
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/opengl.h>
 #include <saturnin/lib/imgui/imgui_impl_glfw.h>

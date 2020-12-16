@@ -17,11 +17,11 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp2.h>
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_context.h>
-#include <saturnin/src/interrupt_sources.h>
-#include <saturnin/src/scu_registers.h>
+//#include <saturnin/src/scu_registers.h>
 #include <saturnin/src/video/vdp2_registers.h>
 
 namespace saturnin::video {

@@ -17,11 +17,9 @@
 // limitations under the License.
 //
 
-#include "config.h"
-
-#include <windows.h>    // removes C4005 warning
-#include <GLFW/glfw3.h> // GLFW_KEYS
-#include <filesystem>
+#include <saturnin/src/pch.h>
+#include <saturnin/src/config.h>
+#include <GLFW/glfw3.h>          // GLFW_KEYS
 #include <saturnin/src/locale.h> //NOLINT(modernize-deprecated-headers)
 #include <saturnin/src/log.h>
 

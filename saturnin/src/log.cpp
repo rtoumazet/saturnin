@@ -18,7 +18,6 @@
 //
 
 #include <saturnin/src/log.h>
-
 #include <filesystem>
 #include <iostream>
 
@@ -36,8 +35,8 @@ auto Log::initialize() -> bool {
 
     spdlog::sinks_init_list sink_list = {file_sink, stream_sink};
 
-    const auto loggers_names = std::vector<std::string>{
-        "cdrom", "config", "main", "memory", "sh2", "scu", "vdp1", "vdp2", "opengl", "exception", "smpc"};
+    const auto loggers_names = std::vector<
+        std::string>{"cdrom", "config", "main", "memory", "sh2", "scu", "vdp1", "vdp2", "opengl", "exception", "smpc"};
     for (auto& n : loggers_names) {
         createLogger(n, sink_list);
     }

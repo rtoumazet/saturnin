@@ -25,13 +25,9 @@
 
 #pragma once
 
-#include <array>
-#include <cstdint> // uint8_t
-#include <string>  // string
-
 namespace saturnin::core {
 
-enum class Rom_stv : std::uint8_t {
+enum class Rom_stv : u8 {
     none                     = 0,  ///< None
     astra_superstars         = 1,  ///< Astra Superstars (IC13).
     baku_baku_animals        = 2,  ///< Baku Baku Animal (IC13)
@@ -106,7 +102,7 @@ using Stv_rom_data = struct { ///< ST-V ROM data structure
 
 /// ST-V roms list array
 // clang-format off
-constexpr auto stv_rom_list_size = std::uint8_t{ 61 };
+constexpr auto stv_rom_list_size = u8{ 61 };
 static const auto stv_rom_list = std::array<Stv_rom_data, stv_rom_list_size>
 { {
     { "Astra Superstars",                          Rom_stv::astra_superstars,        "astrass"  ,""         ,"J         \n19980514  \nV1.002" },

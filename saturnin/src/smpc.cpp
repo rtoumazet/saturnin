@@ -17,10 +17,8 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/smpc.h>
-#include <date/date.h>
-#include <map>    // map
-#include <string> // string
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/sh2.h>
@@ -225,8 +223,14 @@ auto StvPlayerControls::toConfig(const PeripheralLayout layout) -> std::vector<P
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown};
         case PeripheralLayout::current_layout:
-            return std::vector<PeripheralKey>{
-                direction_left, direction_right, direction_up, direction_down, button_1, button_2, button_3, button_4};
+            return std::vector<PeripheralKey>{direction_left,
+                                              direction_right,
+                                              direction_up,
+                                              direction_down,
+                                              button_1,
+                                              button_2,
+                                              button_3,
+                                              button_4};
         default:
             return std::vector<PeripheralKey>{PeripheralKey::key_left,
                                               PeripheralKey::key_right,

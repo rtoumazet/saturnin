@@ -17,13 +17,11 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/video/gui.h>
 #include <imgui.h>
 #include <saturnin/src/config.h>
-#include <saturnin/src/emulator_enums.h> // EmulationStatus
-#include <saturnin/src/locale.h>         // tr
-#include <saturnin/src/log.h>            // Log
-#include <saturnin/src/sh2.h>            // Sh2
+#include <saturnin/src/sh2.h> // Sh2
 #include <saturnin/src/sh2_instructions.h>
 #include <saturnin/src/smpc.h>                        // SaturnDigitalPad, PeripheralKey
 #include <saturnin/src/utilities.h>                   // stringToVector

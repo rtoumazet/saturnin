@@ -25,14 +25,7 @@
 
 #pragma once
 
-#include <array>     // array
-#include <map>       // map
-#include <string>    // string
-#include <tuple>     //tuple
-#include <vector>    // vector
-#include <Windows.h> // VK constants
-#include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/emulator_enums.h>
+#include <saturnin/src/pch.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/utilities.h> // toUnderlying
@@ -1057,8 +1050,10 @@ template<typename T>
 struct readScsp {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::warning(
-                "memory", core::tr("Read ({}) needs to be handled through SCSP {:#0x}"), sizeof(T) * number_of_bits_8, addr);
+            Log::warning("memory",
+                         core::tr("Read ({}) needs to be handled through SCSP {:#0x}"),
+                         sizeof(T) * number_of_bits_8,
+                         addr);
             return 0;
         };
     }

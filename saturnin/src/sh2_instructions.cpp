@@ -17,12 +17,9 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/sh2_instructions.h>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
-#include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/emulator_enums.h> // DebugStatus
-#include <saturnin/src/interrupt_sources.h>
-#include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/sh2.h> // Sh2, Sh2Type

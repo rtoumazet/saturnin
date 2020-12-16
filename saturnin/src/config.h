@@ -23,20 +23,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-
-#pragma warning(disable : 4275) // libconfig specific warning disable
-#include <libconfig.h++>
-#include <any>                           // any
-#include <map>                           // map
-#include <optional>                      // optional
-#include <string>                        // string
-#include <vector>                        // vector
-#include <saturnin/src/emulator_enums.h> // HardwareMode
-#include <saturnin/src/memory.h>         // RomLoad, RomType
-#include <saturnin/src/smpc.h>           // for AreaCode, PeripheralKey, PortStatus
-#include <saturnin/src/utilities.h>      // toUnderlying
-#include <saturnin/src/cdrom/cdrom.h>    // CdromAccessMethod
-#include <saturnin/src/video/vdp2.h>     // TvStandard
+#include <saturnin/src/pch.h>
+#include <saturnin/src/memory.h>      // RomLoad, RomType
+#include <saturnin/src/smpc.h>        // for AreaCode, PeripheralKey, PortStatus
+#include <saturnin/src/utilities.h>   // toUnderlying
+#include <saturnin/src/cdrom/cdrom.h> // CdromAccessMethod
+#include <saturnin/src/video/vdp2.h>  // TvStandard
 
 namespace libcfg = libconfig;
 namespace cdrom  = saturnin::cdrom;

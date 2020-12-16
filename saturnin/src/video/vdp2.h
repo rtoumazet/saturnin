@@ -25,11 +25,7 @@
 
 #pragma once
 
-#include <array>                        // array
-#include <chrono>                       // duration
-#include <saturnin/src/emulator_defs.h> // u8, u16, u32
-#include <saturnin/src/locale.h>        // tr
-#include <saturnin/src/log.h>           // Log
+#include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp2_registers.h>
 
 // Forward declarations

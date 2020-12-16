@@ -114,6 +114,9 @@
     <ClCompile Include="src\video\vdp1.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
+    <ClCompile Include="src\pch.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -232,6 +235,9 @@
     </ClInclude>
     <ClInclude Include="src\video\vdp1.h">
       <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pch.h">
+      <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

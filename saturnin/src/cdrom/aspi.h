@@ -24,10 +24,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <windows.h>
-#include <string>
-#include <vector>
-#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/pch.h>
 
 //#include <scsidefs.h>
 //#include <wnaspi32.h>

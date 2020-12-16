@@ -25,12 +25,8 @@
 
 #pragma once
 
-#include <array>  // array
-#include <vector> // vector
-#include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/log.h>
+#include <saturnin/src/pch.h>
 #include <saturnin/src/memory.h>
-#include <saturnin/src/sh2_registers.h>
 
 // namespace core = saturnin::core;
 

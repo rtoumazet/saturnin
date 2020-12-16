@@ -17,10 +17,10 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/sh2.h>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/interrupt_controller.h> //Interrupt
-#include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/sh2_instructions.h>
 #include <saturnin/src/utilities.h>

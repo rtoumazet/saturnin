@@ -18,8 +18,7 @@
 //
 
 #include <saturnin/src/locale.h> // NOLINT(modernize-deprecated-headers)
-
-#include <fstream> // ifstream
+#include <fstream>               // ifstream
 #include <string>
 
 namespace saturnin::core {

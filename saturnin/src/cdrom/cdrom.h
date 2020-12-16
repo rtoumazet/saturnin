@@ -25,11 +25,7 @@
 
 #pragma once
 
-#include <array>  // array
-#include <chrono> // duration
-#include <vector>
-#include <string>
-#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/pch.h>
 #include <saturnin/src/cdrom/cdrom_registers.h>
 
 // Forward declarations

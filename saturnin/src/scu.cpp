@@ -17,13 +17,11 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/emulator_context.h>
-#include <saturnin/src/interrupt_sources.h>
-#include <saturnin/src/locale.h>
-#include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
-#include <saturnin/src/scu_registers.h>
+//#include <saturnin/src/scu_registers.h>
 #include <saturnin/src/sh2.h>
 #include <saturnin/src/utilities.h>
 

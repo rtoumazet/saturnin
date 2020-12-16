@@ -17,8 +17,8 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/sh2_disasm.h>
-#include <fmt/format.h>
 #include <saturnin/src/sh2_instructions.h>
 
 namespace saturnin::sh2 {
@@ -260,8 +260,11 @@ auto movwi_d(const u32 pc, const u16 opcode) -> std::string {
 };
 auto movli_d(const u32 pc, const u16 opcode) -> std::string {
     auto disp = u32{(bitmask_000000FF & x00nn(opcode))};
-    return fmt::format(
-        "{:#010x} {:#06x} MOV.L @({:#x}),R{:d}", pc, opcode, (pc & bitmask_FFFFFFFC) + (disp << 2) + 4, x0n00(opcode));
+    return fmt::format("{:#010x} {:#06x} MOV.L @({:#x}),R{:d}",
+                       pc,
+                       opcode,
+                       (pc & bitmask_FFFFFFFC) + (disp << 2) + 4,
+                       x0n00(opcode));
 };
 auto movblg_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} MOV.B @({:#x},GBR)", pc, opcode, x000n(opcode));
@@ -294,12 +297,20 @@ auto movbl4_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} MOV.B @({:#x},R{:d}),R0", pc, opcode, x000n(opcode), x00n0(opcode));
 };
 auto movwl4_d(const u32 pc, const u16 opcode) -> std::string {
-    return fmt::format(
-        "{:#010x} {:#06x} MOV.W @({:#x},R{:d}),R{:d}", pc, opcode, x000n(opcode) * 2, x00n0(opcode), x0n00(opcode));
+    return fmt::format("{:#010x} {:#06x} MOV.W @({:#x},R{:d}),R{:d}",
+                       pc,
+                       opcode,
+                       x000n(opcode) * 2,
+                       x00n0(opcode),
+                       x0n00(opcode));
 };
 auto movll4_d(const u32 pc, const u16 opcode) -> std::string {
-    return fmt::format(
-        "{:#010x} {:#06x} MOV.L @({:#x},R{:d}),R{:d}", pc, opcode, x000n(opcode) * 4, x00n0(opcode), x0n00(opcode));
+    return fmt::format("{:#010x} {:#06x} MOV.L @({:#x},R{:d}),R{:d}",
+                       pc,
+                       opcode,
+                       x000n(opcode) * 4,
+                       x00n0(opcode),
+                       x0n00(opcode));
 };
 auto mova_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} MOVA @({:#x},PC),R0", pc, opcode, x000n(opcode));

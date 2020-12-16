@@ -23,13 +23,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-//#pragma warning(push, 3)
-#include <array>      // array
-#include <functional> // function
-#include <string>     // string
-#include <windows.h>
-#include <saturnin/src/emulator_defs.h>
-//#pragma warning(pop)
+#include <saturnin/src/pch.h>
 
 namespace saturnin::cdrom {
 

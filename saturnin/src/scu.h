@@ -25,10 +25,7 @@
 
 #pragma once
 
-#include <queue>  // priority_queue
-#include <vector> // vector
-#include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/interrupt_sources.h>
+#include <saturnin/src/pch.h>
 
 namespace is = saturnin::core::interrupt_source;
 

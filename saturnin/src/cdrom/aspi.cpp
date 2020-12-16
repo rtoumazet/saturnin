@@ -17,6 +17,7 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/cdrom/aspi.h>
 #include <saturnin/src/cdrom/iso9660.h>
 #include <saturnin/src/cdrom/scsi.h>
