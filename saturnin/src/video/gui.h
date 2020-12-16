@@ -26,10 +26,15 @@
 #pragma once
 
 #include <vector>
-#include "opengl.h"
-#include "../emulator_context.h"
+#include <saturnin/src/emulator_context.h> // EmulatorContext
+#include <saturnin/src/emulator_defs.h>    // s32, u32
 
 namespace video = saturnin::video;
+
+// Forward declaration
+namespace saturnin::video {
+class Opengl;
+}
 
 namespace saturnin::gui {
 
@@ -173,6 +178,6 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u3
 /// \param  height  Height of the texture.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void addTextureToDrawList(int32_t texture, uint32_t width, uint32_t height);
+void addTextureToDrawList(s32 texture, u32 width, u32 height);
 
 } // namespace saturnin::gui

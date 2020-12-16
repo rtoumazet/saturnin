@@ -17,33 +17,23 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/video/gui.h>
 #include <imgui.h>
-#include <filesystem> // filesystem
-#include <fstream>    // ifstream
-#include <optional>
-#include <thread> // thread
-#include <tuple>  //tuple
-#include "gui.h"
-#include <saturnin/src/locale.h>                      //tr
-#include <saturnin/lib/imgui/imgui_custom_controls.h> // peripheralKeyCombo
-
-#pragma warning(push)
-#pragma warning(disable : 4996)
-#include <saturnin/lib/imgui/imgui_memory_editor.h> // MemoryEditor
-#pragma warning(pop)
-
-#include <saturnin/src/emulator_enums.h> // EmulationStatus
 #include <saturnin/src/config.h>
-#include <saturnin/src/sh2.h> // Sh2
+#include <saturnin/src/emulator_enums.h> // EmulationStatus
+#include <saturnin/src/locale.h>         // tr
+#include <saturnin/src/log.h>            // Log
+#include <saturnin/src/sh2.h>            // Sh2
 #include <saturnin/src/sh2_instructions.h>
-#include <saturnin/src/smpc.h>        // SaturnDigitalPad, PeripheralKey
-#include <saturnin/src/utilities.h>   // stringToVector
-#include <saturnin/src/cdrom/cdrom.h> // Cdrom
+#include <saturnin/src/smpc.h>                        // SaturnDigitalPad, PeripheralKey
+#include <saturnin/src/utilities.h>                   // stringToVector
+#include <saturnin/src/cdrom/scsi.h>                  // ScsiDriveInfo
+#include <saturnin/src/video/opengl.h>                // Opengl
+#include <saturnin/lib/imgui/imgui_custom_controls.h> // peripheralKeyCombo
+#include <saturnin/lib/imgui/imgui_memory_editor.h>   // MemoryEditor
 
-// namespace core  = saturnin::core;
 namespace util  = saturnin::utilities;
 namespace cdrom = saturnin::cdrom;
-namespace fs    = std::filesystem;
 
 namespace saturnin::gui {
 

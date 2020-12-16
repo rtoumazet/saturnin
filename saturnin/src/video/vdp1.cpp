@@ -23,14 +23,10 @@
 #include <glbinding/gl21ext/gl.h>
 #include <glbinding/glbinding.h>
 #include <GLFW/glfw3.h>
-
-#include "vdp1.h"
-//#include "../config.h"
-#include "../emulator_context.h"
-#include "../log.h"
-//#include "../smpc.h"
-#include "../interrupt_sources.h"
-#include "../locale.h"
+#include <saturnin/src/emulator_context.h>
+#include <saturnin/src/interrupt_sources.h>
+#include <saturnin/src/scu_registers.h> // StartingFactorSelect
+#include <saturnin/src/video/vdp1.h>
 
 using namespace gl21;
 using namespace gl21ext;

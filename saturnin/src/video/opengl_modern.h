@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "opengl.h"
-#include "../emulator_defs.h"
+#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/video/opengl.h>
 
 // Forward declarations
 namespace saturnin::core {

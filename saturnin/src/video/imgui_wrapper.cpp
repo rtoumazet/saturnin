@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "imgui_wrapper.h"
+#include <saturnin/src/video/imgui_wrapper.h>
 
 namespace ImGui {
 

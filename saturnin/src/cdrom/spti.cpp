@@ -16,18 +16,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#pragma warning(push, 3)
-#include <windows.h>
-#include <memory>
+
+#include <saturnin/src/cdrom/spti.h>
 #include <ntddscsi.h>
 #include <ntddcdrm.h>
-#pragma warning(pop)
-
-#include "cdrom.h"
-#include "spti.h"
-#include "..\locale.h"
-#include "..\log.h"
-#include "..\utilities.h"
+#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/log.h>    // Log
+#include <saturnin/src/utilities.h>
+#include <saturnin/src/cdrom/cdrom.h>
+#include <saturnin/src/cdrom/scsi.h>
 
 namespace util = saturnin::utilities;
 
@@ -123,8 +120,14 @@ auto Spti::readOneSector(const uint32_t& fad) -> std::string {
 
     const auto drive_handle = Scsi::openDrive(Cdrom::scsi_letter);
     auto       dummy        = u32{};
-    if (DeviceIoControl(
-            drive_handle, IOCTL_STORAGE_CHECK_VERIFY, nullptr, 0, nullptr, 0, reinterpret_cast<LPDWORD>(&dummy), nullptr)
+    if (DeviceIoControl(drive_handle,
+                        IOCTL_STORAGE_CHECK_VERIFY,
+                        nullptr,
+                        0,
+                        nullptr,
+                        0,
+                        reinterpret_cast<LPDWORD>(&dummy),
+                        nullptr)
         == 0) {
         Log::warning("cdrom", tr("Drive isn't accessible"));
 

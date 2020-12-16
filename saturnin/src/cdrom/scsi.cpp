@@ -17,9 +17,9 @@
 // limitations under the License.
 //
 
-#include "scsi.h"
-#include "aspi.h"
-#include "spti.h"
+#include <saturnin/src/cdrom/scsi.h>
+#include <saturnin/src/cdrom/aspi.h>
+#include <saturnin/src/cdrom/spti.h>
 
 namespace saturnin::cdrom {
 
@@ -35,8 +35,13 @@ auto Scsi::openDrive(const wchar_t letter) -> HANDLE {
     drive_name += letter;
     drive_name += L":";
 
-    auto h = CreateFile(
-        drive_name.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+    auto h = CreateFile(drive_name.c_str(),
+                        GENERIC_READ | GENERIC_WRITE,
+                        FILE_SHARE_WRITE | FILE_SHARE_READ,
+                        nullptr,
+                        OPEN_EXISTING,
+                        0,
+                        nullptr);
     if (h == INVALID_HANDLE_VALUE) { return nullptr; }
 
     return h;

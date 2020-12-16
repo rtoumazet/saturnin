@@ -27,11 +27,9 @@
 
 #include <windows.h> // removes C4005 warning
 #include <imgui.h>
-#include <map> // map
-#include <string>
-#include <vector>
-#include "../emulator_defs.h"
-//#include "../../lib/imgui/imgui_loader.h"
+#include <map>    // map
+#include <string> // string
+#include <saturnin/src/emulator_defs.h>
 
 // Forward declarations
 namespace saturnin::core {

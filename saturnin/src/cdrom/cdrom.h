@@ -25,19 +25,21 @@
 
 #pragma once
 
-//#include <cstdint>
-#include <chrono>
+#include <array>  // array
+#include <chrono> // duration
 #include <vector>
 #include <string>
-
-#include "cdrom_registers.h"
-#include "iso9660.h"
-#include "scsi.h"
+#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/cdrom/cdrom_registers.h>
 
 // Forward declarations
 namespace saturnin::core {
 class EmulatorContext;
 }
+namespace saturnin::cdrom {
+struct ScsiDriveInfo;
+struct ScsiToc;
+} // namespace saturnin::cdrom
 
 using saturnin::core::EmulatorContext;
 using milli = std::chrono::duration<double, std::milli>;

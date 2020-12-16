@@ -17,12 +17,12 @@
 // limitations under the License.
 //
 
-#include "vdp2.h"
-#include "../config.h"
-#include "../emulator_context.h"
-#include "../log.h"
-#include "../smpc.h"
-#include "../interrupt_sources.h"
+#include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/config.h>
+#include <saturnin/src/emulator_context.h>
+#include <saturnin/src/interrupt_sources.h>
+#include <saturnin/src/scu_registers.h>
+#include <saturnin/src/video/vdp2_registers.h>
 
 namespace saturnin::video {
 namespace interrupt_source = core::interrupt_source;
@@ -31,7 +31,6 @@ using namespace vdp2_register_address;
 using core::Config;
 using core::EmulatorContext;
 using core::Log;
-using core::Smpc;
 using core::StartingFactorSelect;
 using core::tr;
 

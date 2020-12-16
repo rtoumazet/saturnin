@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "../log.h"
+#include <saturnin/src/log.h>
 
 // Forward declarations
 namespace saturnin::core {

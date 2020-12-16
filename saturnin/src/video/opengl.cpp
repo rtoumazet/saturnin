@@ -17,6 +17,7 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/video/opengl.h>
 #include <windows.h>  // removes C4005 warning
 #include <fstream>    // ifstream
 #include <filesystem> // filesystem
@@ -25,12 +26,10 @@
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>
 #include <GLFW/glfw3.h>
-
-#include "opengl.h"
-#include "gui.h"
-#include "../config.h"
-#include "../locale.h" // tr
-#include "../log.h"
+#include <saturnin/src/config.h>
+#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/log.h>
+#include <saturnin/src/video/gui.h>
 
 namespace saturnin::video {
 

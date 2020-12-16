@@ -25,8 +25,11 @@
 
 #pragma once
 
-#include "vdp1_registers.h"
-#include "../log.h"
+#include <array>                        // array
+#include <saturnin/src/emulator_defs.h> // u8, u16, u32
+#include <saturnin/src/locale.h>        // tr
+#include <saturnin/src/log.h>           // Log
+#include <saturnin/src/video/vdp1_registers.h>
 
 // Forward declarations
 namespace saturnin::core {

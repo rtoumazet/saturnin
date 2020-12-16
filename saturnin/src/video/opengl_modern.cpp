@@ -18,23 +18,23 @@
 //
 
 #define GLFW_INCLUDE_NONE
-#include <windows.h> // removes C4005 warning
-#include <glbinding/gl/gl.h>
+#include <saturnin/src/video/opengl_modern.h>
+#include <array>  // array
+#include <vector> // vector
 #include <glbinding/glbinding.h>
+#include <glbinding/gl/gl.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
-
-#include "gui.h"
-#include "opengl.h"
-#include "opengl_modern.h"
-#include "../../lib/imgui/imgui_impl_glfw.h"
-#include "../../lib/imgui/imgui_impl_opengl3.h"
-#include "../emulator_context.h"
-#include "../log.h"
-#include "../locale.h"
+#include <saturnin/src/emulator_context.h>
+#include <saturnin/src/log.h>
+#include <saturnin/src/locale.h>
+#include <saturnin/src/video/gui.h>
+#include <saturnin/src/video/opengl.h>
+#include <saturnin/lib/imgui/imgui_impl_glfw.h>
+#include <saturnin/lib/imgui/imgui_impl_opengl3.h>
 
 using namespace gl;
 

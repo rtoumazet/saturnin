@@ -24,13 +24,22 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <windows.h>
 #include <string>
-#include <cstdint>
-#include <functional> // function
+#include <vector>
+#include <saturnin/src/emulator_defs.h>
+
 //#include <scsidefs.h>
 //#include <wnaspi32.h>
 
 namespace saturnin::cdrom {
+
+/// \name Forward declarations.
+///
+//@{
+struct ScsiDriveInfo;
+struct ScsiToc;
+//@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \typedef	uint32_t (WINAPI *func)(LPSRB)
@@ -85,19 +94,20 @@ class Aspi {
     static auto scanBus() -> std::vector<ScsiDriveInfo>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static auto readSector(const uint32_t & fad, const int32_t & nb) -> std::string
+    /// \fn static auto Aspi::readSector(const u32& fad, const s32& nb) -> std::string;
     ///
-    /// \brief	Reads sector(s).
+    /// \brief  Reads sector(s).
     ///
-    /// \author	Runik
-    /// \date	01/03/2010
+    /// \author Runik
+    /// \date   01/03/2010
     ///
-    /// \param	fad	FAD where to read the sector.
-    /// \param	nb	Number of sectors to read.
+    /// \param  fad FAD where to read the sector.
+    /// \param  nb  Number of sectors to read.
     ///
-    /// \return	Sector(s) data.
+    /// \returns    Sector(s) data.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static auto readSector(const uint32_t& fad, const int32_t& nb) -> std::string;
+
+    static auto readSector(const u32& fad, const s32& nb) -> std::string;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto readToc(ScsiToc& toc_data) -> bool

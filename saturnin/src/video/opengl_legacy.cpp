@@ -18,20 +18,19 @@
 //
 
 #define GLFW_INCLUDE_NONE
+#include <saturnin/src/video/opengl_legacy.h>
 #include <windows.h> // removes C4005 warning
 #include <glbinding/gl21/gl.h>
 #include <glbinding/gl21ext/gl.h>
 #include <glbinding/glbinding.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-
-#include "gui.h"
-#include "opengl.h"
-#include "opengl_legacy.h"
-#include "../../lib/imgui/imgui_impl_glfw.h"
-#include "../../lib/imgui/imgui_impl_opengl2.h"
-#include "../emulator_context.h"
-#include "../log.h"
+#include <saturnin/src/emulator_context.h>
+#include <saturnin/src/log.h>
+#include <saturnin/src/video/gui.h> // buildGui
+#include <saturnin/src/video/opengl.h>
+#include <saturnin/lib/imgui/imgui_impl_glfw.h>
+#include <saturnin/lib/imgui/imgui_impl_opengl2.h>
 
 using namespace gl21;
 using namespace gl21ext;

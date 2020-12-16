@@ -16,20 +16,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// SYSTEM INCLUDES
-#include <windows.h>
-//#include <wnaspi32.h>
-#include <array> // std::array
-//#include <fmt/format.h> // format
 
-#include "cdrom.h"
-#include "../emulator_context.h"
-#include "../locale.h"
-#include "../log.h"
-#include "../smpc.h"
-//#include "../memory.h"
-//#include "../sh2.h"
-#include "../utilities.h" // toUnderlying
+#include <saturnin/src/cdrom/cdrom.h>
+#include <windows.h>
+#include <saturnin/src/emulator_context.h>
+#include <saturnin/src/locale.h>
+#include <saturnin/src/log.h> // Log
+#include <saturnin/src/smpc.h>
+#include <saturnin/src/utilities.h> // toUnderlying
+#include <saturnin/src/cdrom/scsi.h>
 
 namespace saturnin::cdrom {
 

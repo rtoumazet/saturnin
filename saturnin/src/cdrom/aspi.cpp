@@ -16,16 +16,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#pragma warning(push, 3)
-#include <windows.h>
-//#include <boost/lexical_cast.hpp>
-#include <string>
-#pragma warning(pop)
 
-#include "cdrom.h"
-#include "aspi.h"
-#include "iso9660.h"
-#include "../utilities.h"
+#include <saturnin/src/cdrom/aspi.h>
+#include <saturnin/src/cdrom/iso9660.h>
+#include <saturnin/src/cdrom/scsi.h>
 
 namespace saturnin::cdrom {
 

@@ -23,13 +23,21 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <cstdint>
 #include <string>
-#include "scsi.h"
+#include <vector>
+#include <windows.h>
+#include <saturnin/src/emulator_defs.h>
 
 namespace saturnin::cdrom {
 
-constexpr auto spti_timeout = uint8_t{5}; // in seconds
+/// \name Forward declarations.
+///
+//@{
+struct ScsiDriveInfo;
+struct ScsiToc;
+//@}
+
+constexpr auto spti_timeout = u8{5}; // in seconds
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class	Spti
@@ -89,8 +97,7 @@ class Spti {
     static void test();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Spti::readSector(const std::uint32_t & fad, const std::int32_t & nb, const core::Config& cfg) ->
-    /// std::string;
+    /// \fn static auto Spti::readSector(const u32& fad, const s32& nb) -> std::string;
     ///
     /// \brief  Reads sector(s).
     ///
@@ -99,15 +106,14 @@ class Spti {
     ///
     /// \param  fad FAD where to read the sector.
     /// \param  nb  Number of sectors to read.
-    /// \param  cfg The configuration object.
     ///
-    /// \return The sector.
+    /// \returns    The sector.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto readSector(const std::uint32_t& fad, const std::int32_t& nb) -> std::string;
+    static auto readSector(const u32& fad, const s32& nb) -> std::string;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Spti::readOneSector(const std::uint32_t & fad) -> std::string;
+    /// \fn static auto Spti::readOneSector(const u32& fad) -> std::string;
     ///
     /// \brief  Reads one sector.
     ///
@@ -116,10 +122,10 @@ class Spti {
     ///
     /// \param  fad FAD where to read the sector.
     ///
-    /// \return Sector read.
+    /// \returns    Sector read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto readOneSector(const std::uint32_t& fad) -> std::string;
+    static auto readOneSector(const u32& fad) -> std::string;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Spti::inquiry(const HANDLE & h, ScsiDriveInfo & di);

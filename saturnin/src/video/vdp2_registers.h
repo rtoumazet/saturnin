@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "../emulator_defs.h"
+#include <saturnin/src/emulator_defs.h>
 
 namespace saturnin::video {
 namespace vdp2_register_address {

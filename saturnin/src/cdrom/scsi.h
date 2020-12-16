@@ -23,13 +23,13 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#pragma warning(push, 3)
+//#pragma warning(push, 3)
 #include <array>      // array
 #include <functional> // function
 #include <string>     // string
 #include <windows.h>
-#include "../emulator_defs.h"
-#pragma warning(pop)
+#include <saturnin/src/emulator_defs.h>
+//#pragma warning(pop)
 
 namespace saturnin::cdrom {
 
@@ -138,11 +138,11 @@ class Scsi {
     ///
     /// Will hold the pointer to the Spti or Aspi functions
     //@{
-    static std::function<bool(void)>                                 initialize;
-    static std::function<std::vector<ScsiDriveInfo>(void)>           scanBus;
-    static std::function<::std::string(const uint32_t&, const s32&)> readSector;
-    static std::function<void(void)>                                 shutdown;
-    static std::function<bool(ScsiToc& toc_data)>                    readToc;
+    static std::function<bool(void)>                            initialize;
+    static std::function<std::vector<ScsiDriveInfo>(void)>      scanBus;
+    static std::function<::std::string(const u32&, const s32&)> readSector;
+    static std::function<void(void)>                            shutdown;
+    static std::function<bool(ScsiToc& toc_data)>               readToc;
     //@}
 };
 

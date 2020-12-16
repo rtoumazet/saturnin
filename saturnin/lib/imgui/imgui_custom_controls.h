@@ -24,9 +24,10 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
 #include <imgui.h>
-
-#include "../../src/smpc.h" // PeripheralKey
+#include <saturnin/src/smpc.h> // PeripheralKey
 
 namespace ImGui {
 
