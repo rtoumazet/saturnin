@@ -16,3 +16,4 @@ saturnin/compile_commands.json
 *.db-shm
 saturnin/src/cdrom/.clang-tidy.cpt_backup
 saturnin/src/.clang-tidy.cpt_backup
+*.tmp
