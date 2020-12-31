@@ -513,10 +513,10 @@ enum class VramAccessCommand : u8 {
 class VramCyclePatternBankA0Lower : public Register {
   public:
     using Register::Register;
-    inline static const auto vram_a0_timing_for_t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0A0x bits.
-    inline static const auto vram_a0_timing_for_t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1A0x bits.
-    inline static const auto vram_a0_timing_for_t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2A0x bits.
-    inline static const auto vram_a0_timing_for_t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3A0x bits.
+    inline static const auto t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0A0x bits.
+    inline static const auto t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1A0x bits.
+    inline static const auto t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2A0x bits.
+    inline static const auto t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3A0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -531,10 +531,10 @@ class VramCyclePatternBankA0Lower : public Register {
 class VramCyclePatternBankA0Upper : public Register {
   public:
     using Register::Register;
-    inline static const auto vram_a0_timing_for_t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4A0x bits.
-    inline static const auto vram_a0_timing_for_t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5A0x bits.
-    inline static const auto vram_a0_timing_for_t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6A0x bits.
-    inline static const auto vram_a0_timing_for_t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7A0x bits.
+    inline static const auto t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4A0x bits.
+    inline static const auto t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5A0x bits.
+    inline static const auto t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6A0x bits.
+    inline static const auto t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7A0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -549,10 +549,10 @@ class VramCyclePatternBankA0Upper : public Register {
 class VramCyclePatternBankA1Lower : public Register {
   public:
     using Register::Register;
-    inline static const auto vram_a1_timing_for_t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0A1x bits.
-    inline static const auto vram_a1_timing_for_t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1A1x bits.
-    inline static const auto vram_a1_timing_for_t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2A1x bits.
-    inline static const auto vram_a1_timing_for_t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3A1x bits.
+    inline static const auto t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0A1x bits.
+    inline static const auto t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1A1x bits.
+    inline static const auto t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2A1x bits.
+    inline static const auto t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3A1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -567,10 +567,10 @@ class VramCyclePatternBankA1Lower : public Register {
 class VramCyclePatternBankA1Upper : public Register {
   public:
     using Register::Register;
-    inline static const auto vram_a1_timing_for_t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4A1x bits.
-    inline static const auto vram_a1_timing_for_t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5A1x bits.
-    inline static const auto vram_a1_timing_for_t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6A1x bits.
-    inline static const auto vram_a1_timing_for_t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7A1x bits.
+    inline static const auto t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4A1x bits.
+    inline static const auto t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5A1x bits.
+    inline static const auto t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6A1x bits.
+    inline static const auto t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7A1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -585,10 +585,10 @@ class VramCyclePatternBankA1Upper : public Register {
 class VramCyclePatternBankB0Lower : public Register {
   public:
     using Register::Register;
-    inline static const auto vram_b0_timing_for_t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0B0x bits.
-    inline static const auto vram_b0_timing_for_t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1B0x bits.
-    inline static const auto vram_b0_timing_for_t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2B0x bits.
-    inline static const auto vram_b0_timing_for_t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3B0x bits.
+    inline static const auto t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0B0x bits.
+    inline static const auto t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1B0x bits.
+    inline static const auto t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2B0x bits.
+    inline static const auto t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3B0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -603,10 +603,10 @@ class VramCyclePatternBankB0Lower : public Register {
 class VramCyclePatternBankB0Upper : public Register {
   public:
     using Register::Register;
-    inline static const auto vram_b0_timing_for_t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4B0x bits.
-    inline static const auto vram_b0_timing_for_t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5B0x bits.
-    inline static const auto vram_b0_timing_for_t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6B0x bits.
-    inline static const auto vram_b0_timing_for_t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7B0x bits.
+    inline static const auto t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4B0x bits.
+    inline static const auto t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5B0x bits.
+    inline static const auto t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6B0x bits.
+    inline static const auto t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7B0x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -621,10 +621,10 @@ class VramCyclePatternBankB0Upper : public Register {
 class VramCyclePatternBankB1Lower : public Register {
   public:
     using Register::Register;
-    inline static const auto vram_b1_timing_for_t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0B1x bits.
-    inline static const auto vram_b1_timing_for_t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1B1x bits.
-    inline static const auto vram_b1_timing_for_t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2B1x bits.
-    inline static const auto vram_b1_timing_for_t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3B1x bits.
+    inline static const auto t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0B1x bits.
+    inline static const auto t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1B1x bits.
+    inline static const auto t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2B1x bits.
+    inline static const auto t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3B1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -639,10 +639,10 @@ class VramCyclePatternBankB1Lower : public Register {
 class VramCyclePatternBankB1Upper : public Register {
   public:
     using Register::Register;
-    inline static const auto vram_b1_timing_for_t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4B1x bits.
-    inline static const auto vram_b1_timing_for_t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5B1x bits.
-    inline static const auto vram_b1_timing_for_t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6B1x bits.
-    inline static const auto vram_b1_timing_for_t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7B1x bits.
+    inline static const auto t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4B1x bits.
+    inline static const auto t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5B1x bits.
+    inline static const auto t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6B1x bits.
+    inline static const auto t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7B1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

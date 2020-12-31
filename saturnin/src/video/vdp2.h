@@ -41,6 +41,9 @@ using AddressToNameMap = std::map<u32, std::string>;
 using seconds = std::chrono::duration<double>;
 using micro   = std::chrono::duration<double, std::micro>;
 
+constexpr auto vram_timing_size = u8{8};
+using VramTiming                = std::array<VramAccessCommand, vram_timing_size>;
+
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
 //  Vertical resolution :
@@ -52,13 +55,6 @@ using micro   = std::chrono::duration<double, std::micro>;
 //     - Total of 262 lines
 //     - 224 or 240 active lines
 //     - 39 or 23 corresponding blanking lines
-
-constexpr auto vram_access_none = u8{0xff};
-constexpr auto vram_access_1    = u8{1};
-constexpr auto vram_access_2    = u8{2};
-constexpr auto vram_access_4    = u8{4};
-constexpr auto vram_access_8    = u8{8};
-constexpr auto vram_timing_size = u8{8};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   TvStandard
@@ -100,6 +96,14 @@ enum class ColorCount {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ReductionSetting { none, up_to_one_half, up_to_one_quarter };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   VramAccessNumber
+///
+/// \brief  Number of VRAM access.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class VramAccessNumber : u8 { none = 0xff, one = 1, two = 2, four = 4, eight = 8 };
 
 class Vdp2 {
   public:
@@ -271,6 +275,99 @@ class Vdp2 {
 
     void setVramTimingLimitations();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8;
+    ///
+    /// \brief  Gets VRAM access corresponding to the command taking into account limitations.
+    ///
+    /// \author Runik
+    /// \date   21/12/2020
+    ///
+    /// \param  command     The access command.
+    /// \param  reduction   The current screen reduction.
+    ///
+    /// \returns    Number of VRAM access for the command.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getVramBitmapReads(const VramTiming& bank_a0, const VramTiming& bank_a1,
+    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command) -> u8;
+    ///
+    /// \brief  Gets VRAM bitmap reads
+    ///
+    /// \author Runik
+    /// \date   22/12/2020
+    ///
+    /// \param  bank_a0 VRAM bank a0.
+    /// \param  bank_a1 VRAM bank a1.
+    /// \param  bank_b0 VRAM bank b0.
+    /// \param  bank_b1 VRAM bank b1.
+    /// \param  command The VRAM access command.
+    ///
+    /// \returns    The VRAM bitmap reads.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getVramBitmapReads(const VramTiming&       bank_a0,
+                            const VramTiming&       bank_a1,
+                            const VramTiming&       bank_b0,
+                            const VramTiming&       bank_b1,
+                            const VramAccessCommand command) -> u8;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getVramPatternNameDataReads(const VramTiming& bank_a0, const VramTiming& bank_a1,
+    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command) -> u8;
+    ///
+    /// \brief  Gets VRAM pattern name data reads
+    ///
+    /// \author Runik
+    /// \date   22/12/2020
+    ///
+    /// \param  bank_a0 VRAM bank a0.
+    /// \param  bank_a1 VRAM bank a1.
+    /// \param  bank_b0 VRAM bank b0.
+    /// \param  bank_b1 VRAM bank b1.
+    /// \param  command The VRAM access command.
+    ///
+    /// \returns    The VRAM pattern name data reads.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getVramPatternNameDataReads(const VramTiming&       bank_a0,
+                                     const VramTiming&       bank_a1,
+                                     const VramTiming&       bank_b0,
+                                     const VramTiming&       bank_b1,
+                                     const VramAccessCommand command) -> u8;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getVramCharacterPatternDataReads(const VramTiming& bank_a0, const VramTiming& bank_a1,
+    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command,
+    ///                                          const ReductionSetting  reduction) -> u8;
+    ///
+    /// \brief  Gets VRAM character pattern data reads
+    ///
+    /// \author Runik
+    /// \date   22/12/2020
+    ///
+    /// \param  bank_a0 VRAM bank a0.
+    /// \param  bank_a1 VRAM bank a1.
+    /// \param  bank_b0 VRAM bank b0.
+    /// \param  bank_b1 VRAM bank b1.
+    /// \param  command The VRAM access command.
+    /// \param  reduction Reduction setting of current screen.
+    /// \param  is_screen_mode_normal True if current screen is in normal mode.
+    ///
+    /// \returns    The VRAM character pattern data reads.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
+                                          const VramTiming&       bank_a1,
+                                          const VramTiming&       bank_b0,
+                                          const VramTiming&       bank_b1,
+                                          const VramAccessCommand command,
+                                          const ReductionSetting  reduction,
+                                          const bool              is_screen_mode_normal) -> u8;
+
     EmulatorContext* emulator_context_; ///< Emulator context object.
 
     AddressToNameMap address_to_name_; ///< Link between a register address and its name.
@@ -291,13 +388,6 @@ class Vdp2 {
 
     u16 timer_0_counter_{}; ///< Timer 0 counter.
     u16 timer_1_counter_{}; ///< Timer 1 counter.
-
-    using VramTiming = std::array<bool, vram_timing_size>;
-
-    VramTiming a0_{false, false, false, false, false, false, false, false};
-    VramTiming a1_{false, false, false, false, false, false, false, false};
-    VramTiming b0_{false, false, false, false, false, false, false, false};
-    VramTiming b1_{false, false, false, false, false, false, false, false};
 
     // VDP2 registers
     TvScreenMode                                    tvmd_;
@@ -447,9 +537,9 @@ class Vdp2 {
 }; // namespace saturnin::video
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto calculateVramCharacterPatternReadAccessNumber(ReductionSetting r, CharacterColorNumber3bits ccn) -> u8;
+/// \fn auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3bits ccn) -> VramAccessNumber;
 ///
-/// \brief  Calculates the VRAM character/bitmap pattern read access number
+/// \brief  Calculates the required VRAM character/bitmap pattern reads to display a screen.
 ///
 /// \author Runik
 /// \date   10/08/2020
@@ -457,25 +547,25 @@ class Vdp2 {
 /// \param  r   The reduction setting.
 /// \param  ccn The character color number.
 ///
-/// \returns    The calculated VRAM character pattern read access number.
+/// \returns    The required VRAM character pattern reads.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto calculateVramCharacterPatternReadAccessNumber(ReductionSetting r, CharacterColorNumber3bits ccn) -> u8;
+auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3bits ccn) -> VramAccessNumber;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto calculateVramPatternNameReadAccessNumber(ReductionSetting r) -> u8;
+/// \fn auto calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
 ///
-/// \brief  Calculates the VRAM pattern name read access number.
+/// \brief  Calculates the required VRAM pattern name reads to display a screen.
 ///
 /// \author Runik
 /// \date   11/08/2020
 ///
 /// \param  r   Reduction setting of the plane.
 ///
-/// \returns    The calculated VRAM pattern name read access number.
+/// \returns    The required VRAM pattern name reads.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto calculateVramPatternNameReadAccessNumber(ReductionSetting r) -> u8;
+auto calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
@@ -492,4 +582,54 @@ auto calculateVramPatternNameReadAccessNumber(ReductionSetting r) -> u8;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand;
+///
+/// \brief  Gets the Pattern Name command corresponding to the Character Pattern command
+///
+/// \author Runik
+/// \date   23/12/2020
+///
+/// \param  character_pattern   Character pattern command.
+///
+/// \returns    Pattern name command.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void setPatternNameAccess(const VramTiming& bank, const VramAccessCommand pattern, std::array<bool, 8>& pnd_access);
+///
+/// \brief  Sets the pattern name accesses for the given bank.
+///
+/// \author Runik
+/// \date   23/12/2020
+///
+/// \param          bank        The bank to check.
+/// \param          pattern     Pattern name data used.
+/// \param [in,out] pnd_access  Sets true for the index of the pattern name data found in the
+///                             bank.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void setPatternNameAccess(const VramTiming& bank, const VramAccessCommand pattern, std::array<bool, 8>& pnd_access);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void setCharacterPatternLimitations(const bool                 is_screen_mode_normal,
+///                                         const std::array<bool, 8>& pnd_access,
+///                                         std::array<bool, 8>& allowed_cpd_timing);
+///
+/// \brief  Sets character pattern limitations.
+///
+/// \author Runik
+/// \date   26/12/2020
+///
+/// \param          is_screen_mode_normal   True when the TV screen mode is normal.
+/// \param          pnd_access              True when the pattern name data is used.
+/// \param [in,out] allowed_cpd_timing      Sets true for the allowed character pattern timings.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void setCharacterPatternLimitations(const bool                 is_screen_mode_normal,
+                                    const std::array<bool, 8>& pnd_access,
+                                    std::array<bool, 8>&       allowed_cpd_timing);
 } // namespace saturnin::video
