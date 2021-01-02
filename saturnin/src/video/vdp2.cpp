@@ -1176,10 +1176,6 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
                                             const VramAccessCommand command,
                                             const ReductionSetting  reduction,
                                             const bool              is_screen_mode_normal) -> u8 {
-    // If reduction = 1, observe selection limits when CPD read access >= 2.
-    // If reduction = 1/2 or 1/4, the behavior isn't clear from the docs ... I'll just
-    // observe selection limits for every access.
-
     // From the command we must use the linked Pattern Name Data. The limitations are based on the PND read position.
     // Step 1 : find PND reads for the current command
     const auto pnd       = getPatternNameFromCharacterPattern(command);
@@ -1195,6 +1191,8 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
     }
 
     // If there's no reduction, observe selection limits when CPD read access >= 2.
+    // If reduction = 1/2 or 1/4, the behavior isn't clear from the docs ... I'll just
+    // observe selection limits for every access.
     auto are_limitations_applied = bool{true};
     if (reduction == ReductionSetting::none) {
         auto unlimited_cpd_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
@@ -1206,36 +1204,49 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
         if (unlimited_cpd_reads < 2) are_limitations_applied = false;
     }
 
-    // Step 2 : apply selection limits on accessed timings
-    constexpr auto allowed_cpd_timing_size = u8{8};
-    auto allowed_cpd_timing = std::array<bool, allowed_cpd_timing_size>{false, false, false, false, false, false, false, false};
-    setCharacterPatternLimitations(is_screen_mode_normal, pnd_timing_access, allowed_cpd_timing);
+    VramTiming checked_bank_a0 = {bank_a0};
+    VramTiming checked_bank_a1 = {bank_a1};
+    VramTiming checked_bank_b0 = {bank_b0};
+    VramTiming checked_bank_b1 = {bank_b1};
 
-    // Step 3 : get the reads
-    // First access not available are changed to no access
-    VramTiming limited_bank_a0 = {bank_a0};
-    VramTiming limited_bank_a1 = {bank_a1};
-    VramTiming limited_bank_b0 = {bank_b0};
-    VramTiming limited_bank_b1 = {bank_b1};
+    if (are_limitations_applied) {
+        // Step 2 : apply selection limits on accessed timings
+        constexpr auto allowed_cpd_timing_size = u8{8};
+        auto           allowed_cpd_timing
+            = std::array<bool, allowed_cpd_timing_size>{false, false, false, false, false, false, false, false};
+        setCharacterPatternLimitations(is_screen_mode_normal, pnd_timing_access, allowed_cpd_timing);
 
-    auto it = std::find(allowed_cpd_timing.begin(), allowed_cpd_timing.end(), false);
-    while (it != allowed_cpd_timing.end()) {
-        limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-        limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-        if (!is_screen_mode_normal) {
-            limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+        // Step 3 : get the reads
+        // First access not available are changed to no access
+        VramTiming limited_bank_a0 = {bank_a0};
+        VramTiming limited_bank_b0 = {bank_b0};
+        VramTiming limited_bank_a1 = {bank_a1};
+        VramTiming limited_bank_b1 = {bank_b1};
+
+        auto it = std::find(allowed_cpd_timing.begin(), allowed_cpd_timing.end(), false);
+        while (it != allowed_cpd_timing.end()) {
+            limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            if (!is_screen_mode_normal) {
+                limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+                limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            }
+            ++it;
+            it = std::find(it, allowed_cpd_timing.end(), false);
         }
-        ++it;
-        it = std::find(it, allowed_cpd_timing.end(), false);
+        checked_bank_a0 = {limited_bank_a0};
+        checked_bank_b0 = {limited_bank_b0};
+        if (!is_screen_mode_normal) {
+            checked_bank_a1 = {limited_bank_a1};
+            checked_bank_b1 = {limited_bank_b1};
+        }
     }
-
     // Counting cpd access
-    auto cpd_reads = std::count(limited_bank_a0.begin(), limited_bank_a0.end(), command);
-    cpd_reads += std::count(limited_bank_b0.begin(), limited_bank_b0.end(), command);
+    auto cpd_reads = std::count(checked_bank_a0.begin(), checked_bank_a0.end(), command);
+    cpd_reads += std::count(checked_bank_b0.begin(), checked_bank_b0.end(), command);
     if (!is_screen_mode_normal) {
-        cpd_reads += std::count(limited_bank_a1.begin(), limited_bank_a1.end(), command);
-        cpd_reads += std::count(limited_bank_b1.begin(), limited_bank_b1.end(), command);
+        cpd_reads += std::count(checked_bank_a1.begin(), checked_bank_a1.end(), command);
+        cpd_reads += std::count(checked_bank_b1.begin(), checked_bank_b1.end(), command);
     }
 
     return static_cast<u8>(cpd_reads);
