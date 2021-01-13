@@ -19,7 +19,10 @@
     <ClCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-	  <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>saturnin/src/pch.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/MP4 %(AdditionalOptions)</AdditionalOptions>  
     </ClCompile>
     <PostBuildEvent>
       <Command>

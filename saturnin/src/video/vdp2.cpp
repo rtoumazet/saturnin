@@ -926,32 +926,24 @@ void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& 
 
 auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // First check to ensure scroll screen must be displayed. If the screen cannot display, no vram access will be performed.
+
+    // For normal scroll screens (NBG0 to NBG3) :
+    // - in cell display format, required image data is pattern name data and character pattern data
+    // - in bitmap format, required image data is bitmap pattern data (same as character pattern data)
+    //
+    // Pattern name data (PND) read access during 1 cycle must be set to a maximum of 2 banks, one being either VRAM-A0 or
+    // VRAM-B0, the other being VRAM-A1 or VRAM-B1.
+    // When the VRAM is not divided in 2 partitions, VRAM-A0 is used as VRAM-A and VRAM-B0 as VRAM-B.
+    // Selectable timing in normal mode, :
+    // - TO-T7 in bank VRAM-A0 or VRAM-B0, TO-T7 in bank VRAM-A1 or VRAM-B1 (case where both banks are splitted)
+    // - TO-T7 in bank VRAM-A or VRAM-B (case where no bank is splitted)
+    // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
+
     switch (s) {
         case ScrollScreen::nbg0: {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
-
-            // For normal scroll screens (NBG0 to NBG3) :
-            // - in cell display format, required image data is pattern name data and character pattern data
-            // - in bitmap format, required image data is bitmap pattern data (same as character pattern data)
-            //
-            // Pattern name data (PND) read access during 1 cycle must be set to a maximum of 2 banks, one being either VRAM-A0 or
-            // VRAM-B0, the other being VRAM-A1 or VRAM-B1.
-            // When the VRAM is not divided in 2 partitions, VRAM-A0 is used as VRAM-A and VRAM-B0 as VRAM-B.
-            // Selectable timing in normal mode, :
-            // - TO-T7 in bank VRAM-A0 or VRAM-B0, TO-T7 in bank VRAM-A1 or VRAM-B1 (case where both banks are splitted)
-            // - TO-T7 in bank VRAM-A or VRAM-B (case where no bank is splitted)
-            // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
-            //
-            // Character Pattern data (CPD) read access during 1 cycle
-            // - PND access in T0 for NBG0 or NBG1 -> CPD can select any timing without limits, access number must be the same as
-            // the conditions.
-            // - When reduction setting is 1, all CPD read access must observe selection limits if CPD read access is 2 or
-            // greater.
-            // - When reduction setting is 1/2 or 1/4, the required access number when the reduction setting is 1 (one time for 16
-            // colors and two times for 256) must observe selection limits through one time PND read access.
-            // -
 
             // Pattern name data reads depend on the reduction setting of the screen
             const auto reduction = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg0),
@@ -976,6 +968,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
                     = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
                 const auto current_cpd_reads
                     = getVramAccessByCommand(VramAccessCommand::nbg0_character_pattern_data_read, reduction);
+                if (current_cpd_reads < required_cpd_reads) { return false; }
             }
 
             break;
@@ -984,52 +977,122 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
+            // Pattern name data reads depend on the reduction setting of the screen
+            const auto reduction = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg1),
+                                                       zmctl_.get(ReductionEnable::zoom_half_nbg1));
+
+            // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
+            if (chctla_.get(CharacterControlA::bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
+                // Bitmap format needs only bitmap pattern data.
+                const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg1);
+                const auto required_bpd_reads
+                    = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
+                const auto current_bdp_reads
+                    = getVramAccessByCommand(VramAccessCommand::nbg1_character_pattern_data_read, reduction);
+                if (current_bdp_reads < required_bpd_reads) { return false; }
+            } else {
+                // Character format needs character pattern data (cpd) and pattern name data (pnd).
+                const auto required_pnd_reads = util::toUnderlying(calculateRequiredVramPatternNameReads(reduction));
+                const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg1_pattern_name_read, reduction);
+
+                const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg1);
+                const auto required_cpd_reads
+                    = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
+                const auto current_cpd_reads
+                    = getVramAccessByCommand(VramAccessCommand::nbg1_character_pattern_data_read, reduction);
+                if (current_cpd_reads < required_cpd_reads) { return false; }
+            }
+
             break;
         }
         case ScrollScreen::nbg2: {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg2) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
+
+            if (isScreenDisplayLimitedByReduction(s)) { return false; }
+
+            const auto reduction = ReductionSetting::none;
+
+            // Character format needs character pattern data (cpd) and pattern name data (pnd).
+            const auto required_pnd_reads = util::toUnderlying(calculateRequiredVramPatternNameReads(reduction));
+            const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg2_pattern_name_read, reduction);
+
+            const auto color_number = chctla_.get(CharacterControlB::character_color_number_nbg2);
+            const auto required_cpd_reads
+                = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
+            const auto current_cpd_reads = getVramAccessByCommand(VramAccessCommand::nbg2_character_pattern_data_read, reduction);
+            if (current_cpd_reads < required_cpd_reads) { return false; }
+
             break;
         }
         case ScrollScreen::nbg3: {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg3) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
+            if (isScreenDisplayLimitedByReduction(s)) { return false; }
+
+            const auto reduction = ReductionSetting::none;
+
+            // Character format needs character pattern data (cpd) and pattern name data (pnd).
+            const auto required_pnd_reads = util::toUnderlying(calculateRequiredVramPatternNameReads(reduction));
+            const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg3_pattern_name_read, reduction);
+
+            const auto color_number = chctla_.get(CharacterControlB::character_color_number_nbg3);
+            const auto required_cpd_reads
+                = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
+            const auto current_cpd_reads = getVramAccessByCommand(VramAccessCommand::nbg3_character_pattern_data_read, reduction);
+            if (current_cpd_reads < required_cpd_reads) { return false; }
             break;
         }
         case ScrollScreen::rbg0: {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
+            core::Log::warning("unimplemented", core::tr("VDP2 RBG0 display"));
             break;
         }
         case ScrollScreen::rbg1: {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
+            core::Log::warning("unimplemented", core::tr("VDP2 RBG1 display"));
             break;
         }
     }
-
-    // 8 timings (T0 to T7) are available for each bank in normal mode during 1 display cycle, only 4 (T0 to T3) in hires
-    // or exclusive monitor mode.
-
-    // Pattern name data read during 1 cycle can access 2 banks max, one being A0 or B0, the other being A1 or B1.
-
-    // ReductionEnable zmctl_
-
-    // 1) Find allowed timings for current background configuration
-    // 2) Check VRAM registers against allowed timings -> if there's a correspondance, background can be displayed
-
     return true;
 }
 
-void Vdp2::setVramTimingLimitations() {
-    if (chctla_.get(CharacterControlA::bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
-        // Bitmap format needs only bitmap pattern data.
-    } else {
+auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool {
+    switch (s) {
+        case ScrollScreen::nbg2: {
+            const auto reduction    = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg0),
+                                                       zmctl_.get(ReductionEnable::zoom_half_nbg0));
+            const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg0);
+
+            if ((reduction == ReductionSetting::up_to_one_quarter) && (color_number == CharacterColorNumber3bits::palette_16)) {
+                return true;
+            }
+            if ((reduction == ReductionSetting::up_to_one_half) && (color_number == CharacterColorNumber3bits::palette_256)) {
+                return true;
+            }
+            break;
+        }
+        case ScrollScreen::nbg3: {
+            const auto reduction    = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg1),
+                                                       zmctl_.get(ReductionEnable::zoom_half_nbg1));
+            const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg1);
+
+            if ((reduction == ReductionSetting::up_to_one_quarter) && (color_number == CharacterColorNumber2Bits::palette_16)) {
+                return true;
+            }
+            if ((reduction == ReductionSetting::up_to_one_half) && (color_number == CharacterColorNumber2Bits::palette_256)) {
+                return true;
+            }
+            break;
+        }
     }
+    return false;
 }
 
 auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8 {
@@ -1079,25 +1142,18 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
         case VramAccessCommand::nbg0_character_pattern_data_read: {
             if (chctla_.get(CharacterControlA::bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
-            } else {
-                // :TODO:
-                //
             }
-            break;
+            return getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
         }
         case VramAccessCommand::nbg1_character_pattern_data_read: {
             if (chctla_.get(CharacterControlA::bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
-            } else {
-                // :TODO:
             }
-            break;
+            return getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
         }
-        case VramAccessCommand::nbg2_character_pattern_data_read: {
-            break;
-        }
+        case VramAccessCommand::nbg2_character_pattern_data_read:
         case VramAccessCommand::nbg3_character_pattern_data_read: {
-            break;
+            return getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
         }
         case VramAccessCommand::nbg0_pattern_name_read:
         case VramAccessCommand::nbg1_pattern_name_read:
@@ -1107,7 +1163,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
         }
         case VramAccessCommand::nbg0_vertical_cell_scroll_table_data_read:
         case VramAccessCommand::nbg1_vertical_cell_scroll_table_data_read: {
-            // :TODO:
+            core::Log::warning("unimplemented", core::tr("VDP2 vertical cell scroll table data read"));
             break;
         }
         case VramAccessCommand::cpu_read_write: {
@@ -1115,7 +1171,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
         }
     }
 
-    constexpr auto not_found = u8{0xff};
+    constexpr auto not_found = u8{0x0};
     return not_found;
 }
 
@@ -1204,10 +1260,10 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
         if (unlimited_cpd_reads < 2) are_limitations_applied = false;
     }
 
-    VramTiming checked_bank_a0 = {bank_a0};
-    VramTiming checked_bank_a1 = {bank_a1};
-    VramTiming checked_bank_b0 = {bank_b0};
-    VramTiming checked_bank_b1 = {bank_b1};
+    VramTiming limited_bank_a0 = {bank_a0};
+    VramTiming limited_bank_b0 = {bank_b0};
+    VramTiming limited_bank_a1 = {bank_a1};
+    VramTiming limited_bank_b1 = {bank_b1};
 
     if (are_limitations_applied) {
         // Step 2 : apply selection limits on accessed timings
@@ -1218,11 +1274,6 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 
         // Step 3 : get the reads
         // First access not available are changed to no access
-        VramTiming limited_bank_a0 = {bank_a0};
-        VramTiming limited_bank_b0 = {bank_b0};
-        VramTiming limited_bank_a1 = {bank_a1};
-        VramTiming limited_bank_b1 = {bank_b1};
-
         auto it = std::find(allowed_cpd_timing.begin(), allowed_cpd_timing.end(), false);
         while (it != allowed_cpd_timing.end()) {
             limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
@@ -1234,19 +1285,13 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
             ++it;
             it = std::find(it, allowed_cpd_timing.end(), false);
         }
-        checked_bank_a0 = {limited_bank_a0};
-        checked_bank_b0 = {limited_bank_b0};
-        if (!is_screen_mode_normal) {
-            checked_bank_a1 = {limited_bank_a1};
-            checked_bank_b1 = {limited_bank_b1};
-        }
     }
     // Counting cpd access
-    auto cpd_reads = std::count(checked_bank_a0.begin(), checked_bank_a0.end(), command);
-    cpd_reads += std::count(checked_bank_b0.begin(), checked_bank_b0.end(), command);
+    auto cpd_reads = std::count(limited_bank_a0.begin(), limited_bank_a0.end(), command);
+    cpd_reads += std::count(limited_bank_b0.begin(), limited_bank_b0.end(), command);
     if (!is_screen_mode_normal) {
-        cpd_reads += std::count(checked_bank_a1.begin(), checked_bank_a1.end(), command);
-        cpd_reads += std::count(checked_bank_b1.begin(), checked_bank_b1.end(), command);
+        cpd_reads += std::count(limited_bank_a1.begin(), limited_bank_a1.end(), command);
+        cpd_reads += std::count(limited_bank_b1.begin(), limited_bank_b1.end(), command);
     }
 
     return static_cast<u8>(cpd_reads);
@@ -1297,6 +1342,60 @@ auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterCol
         case CharacterColorNumber3bits::rgb_16m:
             switch (r) {
                 case ReductionSetting::none: return VramAccessNumber::eight;
+                default: return VramAccessNumber::none;
+            }
+            break;
+    }
+
+    return VramAccessNumber::none;
+}
+
+auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2Bits ccn) -> VramAccessNumber {
+    switch (ccn) {
+        case CharacterColorNumber2Bits::palette_16:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::one;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
+            }
+            break;
+        case CharacterColorNumber2Bits::palette_256:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+        case CharacterColorNumber2Bits::palette_2048:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+        case CharacterColorNumber2Bits::rgb_32k:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+    }
+
+    return VramAccessNumber::none;
+}
+
+auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1Bit ccn) -> VramAccessNumber {
+    switch (ccn) {
+        case CharacterColorNumber1Bit::palette_16:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::one;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
+            }
+            break;
+        case CharacterColorNumber1Bit::palette_256:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;

@@ -265,15 +265,19 @@ class Vdp2 {
     auto isScreenDisplayed(ScrollScreen s) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::setVramTimingLimitations();
+    /// \fn auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool;
     ///
-    /// \brief  Sets VRAM timing limitations.
+    /// \brief  Query if reduction setting prevents scroll screen 's' to be displayed
     ///
     /// \author Runik
-    /// \date   21/08/2020
+    /// \date   13/01/2021
+    ///
+    /// \param  s   A ScrollScreen to process.
+    ///
+    /// \returns    True if reduction prevents the scroll screen to be displayed.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void setVramTimingLimitations();
+    auto isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8;
@@ -551,6 +555,38 @@ class Vdp2 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3bits ccn) -> VramAccessNumber;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2bits ccn) -> VramAccessNumber;
+///
+/// \brief  Calculates the required VRAM character/bitmap pattern reads to display a screen.
+///
+/// \author Runik
+/// \date   12/01/2021
+///
+/// \param  r   The reduction setting.
+/// \param  ccn The character color number.
+///
+/// \returns    The required VRAM character pattern reads.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2Bits ccn) -> VramAccessNumber;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1bit ccn) -> VramAccessNumber;
+///
+/// \brief  Calculates the required VRAM character/bitmap pattern reads to display a screen.
+///
+/// \author Runik
+/// \date   12/01/2021
+///
+/// \param  r   The reduction setting.
+/// \param  ccn The character color number.
+///
+/// \returns    The required VRAM character pattern reads.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1Bit ccn) -> VramAccessNumber;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn auto calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
