@@ -56,7 +56,7 @@ class Scu;
 class Smpc;
 //@}
 
-static const std::string saturnin_version{"1.00"};
+static const std::string saturnin_version{"0.5.0"};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  EmulatorContext
