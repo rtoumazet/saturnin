@@ -26,6 +26,14 @@
 #pragma once
 
 #include <saturnin/src/pch.h>
+#include <array>     // array
+#include <map>       // map
+#include <string>    // string
+#include <tuple>     //tuple
+#include <vector>    // vector
+#include <Windows.h> // VK constants
+#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/emulator_enums.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/utilities.h> // toUnderlying

@@ -25,7 +25,9 @@
 
 #pragma once
 #include <saturnin/src/pch.h>
-//#include <saturnin/src/scu_registers.h> // InterruptMask, InterruptEnable
+#include <string> // string
+#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/scu_registers.h> // InterruptMask, InterruptEnable
 
 namespace saturnin::core {
 

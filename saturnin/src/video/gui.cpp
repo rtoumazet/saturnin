@@ -21,6 +21,9 @@
 #include <saturnin/src/video/gui.h>
 #include <imgui.h>
 #include <saturnin/src/config.h>
+#include <saturnin/src/emulator_enums.h> // EmulationStatus
+//#include <saturnin/src/locale.h>         // tr
+#include <saturnin/src/log.h> // Log
 #include <saturnin/src/sh2.h> // Sh2
 #include <saturnin/src/sh2_instructions.h>
 #include <saturnin/src/smpc.h>                        // SaturnDigitalPad, PeripheralKey
@@ -978,9 +981,9 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         ImGui::Separator();
 
         const auto callstack_mask = std::string{"{:#010x}"};
-        for (auto i = current_sh2->callstack().rbegin(); i != current_sh2->callstack().rend(); ++i) {
-            ImGui::TextUnformatted(fmt::format(callstack_mask, (*i).call_address).c_str());
-        }
+        std::for_each(current_sh2->callstack().rbegin(), current_sh2->callstack().rend(), [&](const auto& item) {
+            ImGui::TextUnformatted(fmt::format(callstack_mask, item.call_address).c_str());
+        });
 
         ImGui::EndChild();
     }

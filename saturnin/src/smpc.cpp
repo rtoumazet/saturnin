@@ -19,8 +19,12 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/smpc.h>
+#include <date/date.h>
+#include <map>    // map
+#include <string> // string
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_context.h>
+#include <saturnin/src/locale.h>
 #include <saturnin/src/sh2.h>
 #include <saturnin/src/sound/scsp.h>
 

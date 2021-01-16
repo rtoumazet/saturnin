@@ -17,6 +17,7 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/log.h>
 #include <filesystem>
 #include <iostream>

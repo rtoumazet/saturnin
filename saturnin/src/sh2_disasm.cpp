@@ -19,6 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/sh2_disasm.h>
+#include <fmt/format.h>
 #include <saturnin/src/sh2_instructions.h>
 
 namespace saturnin::sh2 {

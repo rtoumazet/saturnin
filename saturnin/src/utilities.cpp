@@ -18,6 +18,8 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/utilities.h>
+#include <windows.h>
+#include <sstream> // istringstream
 
 namespace saturnin::utilities {
 

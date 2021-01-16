@@ -27,6 +27,11 @@
 
 #pragma once
 #include <saturnin/src/pch.h>
+#include <memory> // unique_ptr, make_unique
+#include <string> // string
+#include <thread> // thread
+#include <saturnin/src/emulator_enums.h>
+#include <saturnin/src/stv_definitions.h>
 
 // Forward declarations
 namespace saturnin::cdrom {

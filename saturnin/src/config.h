@@ -23,7 +23,15 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+
 #include <saturnin/src/pch.h>
+#pragma warning(disable : 4275) // libconfig specific warning disable
+#include <libconfig.h++>
+#include <any>                        // any
+#include <map>                        // map
+#include <optional>                   // optional
+#include <string>                     // string
+#include <vector>                     // vector
 #include <saturnin/src/memory.h>      // RomLoad, RomType
 #include <saturnin/src/smpc.h>        // for AreaCode, PeripheralKey, PortStatus
 #include <saturnin/src/utilities.h>   // toUnderlying

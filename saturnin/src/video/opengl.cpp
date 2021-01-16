@@ -19,11 +19,17 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/opengl.h>
+#include <windows.h>  // removes C4005 warning
+#include <fstream>    // ifstream
+#include <filesystem> // filesystem
+#include <lodepng.h>
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>
 #include <GLFW/glfw3.h>
 #include <saturnin/src/config.h>
+//#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/log.h>
 #include <saturnin/src/video/gui.h>
 
 namespace saturnin::video {

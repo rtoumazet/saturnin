@@ -19,6 +19,10 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/cdrom/spti.h>
+#include <ntddscsi.h>
+#include <ntddcdrm.h>
+#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/log.h>    // Log
 #include <saturnin/src/utilities.h>
 #include <saturnin/src/cdrom/cdrom.h>
 #include <saturnin/src/cdrom/scsi.h>

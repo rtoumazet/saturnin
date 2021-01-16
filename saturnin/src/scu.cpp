@@ -20,8 +20,9 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/emulator_context.h>
+#include <saturnin/src/locale.h>
 #include <saturnin/src/memory.h>
-//#include <saturnin/src/scu_registers.h>
+#include <saturnin/src/scu_registers.h>
 #include <saturnin/src/sh2.h>
 #include <saturnin/src/utilities.h>
 
@@ -173,7 +174,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         case timer_1_set_data_register: t1s_.set(bits_0_31, data); return;
         case timer_1_mode_register:
             t1md_.set(bits_0_31, data);
-            if (isTimer1Enabled()) { Log::warning("scu", "Timer 1 enabled"); }
+            if (isTimer1Enabled()) { Log::warning("scu", tr("Timer 1 enabled")); }
             return;
             //        case dma_status_register:
             //            // DMA registers write
@@ -234,7 +235,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                     Log::debug("scu", "A-Bus transfer");
 
                     switch (getScuRegion(read_address)) {
-                        case ScuRegion::unknown: Log::warning("scu", "Unknown SCU region : {}", read_address); break;
+                        case ScuRegion::unknown: Log::warning("scu", tr("Unknown SCU region : {}"), read_address); break;
                         case ScuRegion::a_bus_cs2: break;
                         default: read_address_add = 4;
                     }
@@ -276,7 +277,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                     Log::debug("scu", "B-Bus transfer");
 
                     switch (getScuRegion(read_address)) {
-                        case ScuRegion::unknown: Log::warning("scu", "Unknown SCU region : {}", read_address); break;
+                        case ScuRegion::unknown: Log::warning("scu", tr("Unknown SCU region : {}"), read_address); break;
                         case ScuRegion::a_bus_cs2: break;
                         default: read_address_add = 4;
                     }
@@ -308,7 +309,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                     Log::debug("scu", "CPU-Bus or DSP-Bus transfer");
 
                     switch (getScuRegion(read_address)) {
-                        case ScuRegion::unknown: Log::warning("scu", "Unknown SCU region : {}", read_address); break;
+                        case ScuRegion::unknown: Log::warning("scu", tr("Unknown SCU region : {}"), read_address); break;
                         case ScuRegion::a_bus_cs2: break;
                         default: read_address_add = 4;
                     }
@@ -328,7 +329,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 
                         ++byte_counter;
                     }
-                default: Log::warning("scu", "Unknown DMA bus ! : {}", dc.write_address); break;
+                default: Log::warning("scu", tr("Unknown DMA bus ! : {}"), dc.write_address); break;
             }
 
             if (dc.read_address_update == ReadAddressUpdate::update) { read_address += long_counter * read_address_add; }
@@ -387,7 +388,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                         Log::debug("scu", "A-Bus transfer");
 
                         switch (getScuRegion(read_address)) {
-                            case ScuRegion::unknown: Log::warning("scu", "Unknown SCU region : {}", read_address); break;
+                            case ScuRegion::unknown: Log::warning("scu", tr("Unknown SCU region : {}"), read_address); break;
                             case ScuRegion::a_bus_cs2: break;
                             default: read_address_add = 4;
                         }
@@ -429,7 +430,7 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                         Log::debug("scu", "B-Bus transfer");
 
                         switch (getScuRegion(read_address)) {
-                            case ScuRegion::unknown: Log::warning("scu", "Unknown SCU region : {}", read_address); break;
+                            case ScuRegion::unknown: Log::warning("scu", tr("Unknown SCU region : {}"), read_address); break;
                             case ScuRegion::a_bus_cs2: break;
                             default: read_address_add = 4;
                         }

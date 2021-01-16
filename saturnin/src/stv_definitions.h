@@ -25,6 +25,11 @@
 
 #pragma once
 
+#include <array>
+//#include <cstdint> // uint8_t
+#include <string> // string
+#include <saturnin/src/emulator_defs.h>
+
 namespace saturnin::core {
 
 enum class Rom_stv : u8 {

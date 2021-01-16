@@ -26,6 +26,8 @@
 
 #include <saturnin/src/pch.h>
 #include <imgui.h>
+#include <string>
+#include <vector>
 
 namespace ImGui {
 

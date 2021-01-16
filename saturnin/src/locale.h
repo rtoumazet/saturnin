@@ -24,14 +24,15 @@
 
 #pragma once
 
-#pragma warning(push)
-#pragma warning(disable : 4267)
-#include <spirit_po/spirit_po.hpp>
-#pragma warning(pop)
+#include <saturnin/src/pch.h>
+//#pragma warning(push)
+//#pragma warning(disable : 4267)
+//#include <spirit_po/spirit_po.hpp>
+//#pragma warning(pop)
 
 namespace spirit_po {
 using default_catalog = catalog<>;
-}
+} // namespace spirit_po
 
 namespace saturnin::core {
 

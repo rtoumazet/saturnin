@@ -27,6 +27,9 @@
 
 #pragma once
 
+#include <bitset>
+#include <cstdint>
+
 namespace saturnin {
 
 using u8   = std::uint8_t;

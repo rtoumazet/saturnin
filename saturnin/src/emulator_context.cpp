@@ -20,12 +20,19 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/emulator_context.h>
 
+#include <windows.h> // removes C4005 warning
 #include <GLFW/glfw3.h>
+#include <iostream>
+#include <future>
+#include <chrono>
 #include <saturnin/src/config.h>
+//#include <saturnin/src/locale.h>
+#include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
-//#include <saturnin/src/scu_registers.h>
+#include <saturnin/src/scu_registers.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/sh2_instructions.h>
+#include <saturnin/src/sh2_registers.h>
 #include <saturnin/src/sh2.h>
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/cdrom/cdrom.h>

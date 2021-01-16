@@ -24,6 +24,11 @@
 #pragma once
 
 #include <saturnin/src/pch.h>
+#include <array>      // array
+#include <functional> // function
+#include <string>     // string
+#include <windows.h>
+#include <saturnin/src/emulator_defs.h>
 
 namespace saturnin::cdrom {
 

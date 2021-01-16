@@ -26,6 +26,8 @@
 #pragma once
 
 #include <saturnin/src/pch.h>
+#include <string>
+#include <saturnin/src/emulator_defs.h>
 
 namespace saturnin::sh2 {
 

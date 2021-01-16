@@ -25,6 +25,10 @@
 #pragma once
 
 #include <saturnin/src/pch.h>
+#include <windows.h>
+#include <string>
+#include <vector>
+#include <saturnin/src/emulator_defs.h>
 
 //#include <scsidefs.h>
 //#include <wnaspi32.h>

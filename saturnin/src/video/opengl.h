@@ -26,7 +26,11 @@
 #pragma once
 
 #include <saturnin/src/pch.h>
+#include <windows.h> // removes C4005 warning
 #include <imgui.h>
+#include <map>    // map
+#include <string> // string
+#include <saturnin/src/emulator_defs.h>
 
 // Forward declarations
 namespace saturnin::core {

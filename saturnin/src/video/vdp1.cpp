@@ -19,12 +19,14 @@
 
 #include <saturnin/src/pch.h>
 #define GLFW_INCLUDE_NONE
+#include <windows.h> // removes C4005 warning
 #include <glbinding/gl21/gl.h>
 #include <glbinding/gl21ext/gl.h>
 #include <glbinding/glbinding.h>
 #include <GLFW/glfw3.h>
 #include <saturnin/src/emulator_context.h>
-//#include <saturnin/src/scu_registers.h> // StartingFactorSelect
+#include <saturnin/src/interrupt_sources.h>
+#include <saturnin/src/scu_registers.h> // StartingFactorSelect
 #include <saturnin/src/video/vdp1.h>
 
 using namespace gl21;

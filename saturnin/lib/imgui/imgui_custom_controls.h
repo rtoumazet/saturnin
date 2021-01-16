@@ -24,7 +24,9 @@
 
 #pragma once
 
-#include "../../src/pch.h"
+#include <saturnin/src/pch.h>
+#include <string>
+#include <vector>
 #include <imgui.h>
 #include <saturnin/src/smpc.h> // PeripheralKey
 

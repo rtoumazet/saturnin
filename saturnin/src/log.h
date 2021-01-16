@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <saturnin/src/pch.h>
 #include <iosfwd> // ostringstream
 #include <map>    // map
 #include <string> // string
@@ -34,7 +35,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/ostream_sink.h>
-// NOLINTNEXTLINE(modernize-deprecated-headers)
+// NOLINTNEXTLINE(modernize - deprecated - headers)
 #include <saturnin/src/locale.h> // tr
 
 namespace saturnin::core {

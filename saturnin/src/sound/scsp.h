@@ -26,6 +26,7 @@
 #pragma once
 
 #include <saturnin/src/pch.h>
+#include <saturnin/src/log.h>
 
 // Forward declarations
 namespace saturnin::core {

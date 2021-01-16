@@ -19,9 +19,14 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/memory.h>
+#include <filesystem> // filesystem
+#include <fstream>    // ifstream
+#include <sstream>    // stringstream
 #include <GLFW/glfw3.h>
+#include <libzippp/libzippp.h>
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_context.h>
+#include <saturnin/src/locale.h> // NOLINT(modernize-deprecated-headers)
 #include <saturnin/src/sh2.h>
 #include <saturnin/src/cdrom/cdrom.h>
 #include <saturnin/src/video/vdp2.h>

@@ -26,6 +26,11 @@
 #pragma once
 
 #include <saturnin/src/pch.h>
+#include <array>                        // array
+#include <chrono>                       // duration
+#include <saturnin/src/emulator_defs.h> // u8, u16, u32
+//#include <saturnin/src/locale.h>        // tr
+#include <saturnin/src/log.h> // Log
 #include <saturnin/src/video/vdp2_registers.h>
 
 // Forward declarations
@@ -103,7 +108,24 @@ enum class ReductionSetting { none, up_to_one_half, up_to_one_quarter };
 /// \brief  Number of VRAM access.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VramAccessNumber : u8 { none = 0xff, one = 1, two = 2, four = 4, eight = 8 };
+enum class VramAccessNumber : u8 { none = 0, one = 1, two = 2, four = 4, eight = 8 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct NormalScrollScreenStatus
+///
+/// \brief  Status of a normal scroll screen.
+///
+/// \author Runik
+/// \date   14/01/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct NormalScrollScreenStatus {
+    bool         is_display_enabled{};         ///< True when displayed.
+    bool         is_transparency_code_valid{}; ///< True when transparency code is valid.
+    BitmapEnable format{};                     ///< Cell or bitmap.
+};
+
+struct RotationScrollScreenStatus {};
 
 class Vdp2 {
   public:

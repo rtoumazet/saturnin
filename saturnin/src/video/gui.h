@@ -25,7 +25,9 @@
 
 #pragma once
 #include <saturnin/src/pch.h>
+#include <vector>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
+#include <saturnin/src/emulator_defs.h>    // s32, u32
 
 namespace video = saturnin::video;
 
