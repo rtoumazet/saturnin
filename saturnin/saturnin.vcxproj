@@ -129,9 +129,7 @@
       <PreprocessorDefinitions>__SCL_SECURE_NO_WARNINGS;IMGUI_USER_CONFIG="$(ProjectDir)src\video\imgui_wrapper.h";IMGUI_IMPL_OPENGL_LOADER_CUSTOM="$(ProjectDir)lib\imgui\imgui_loader.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <PostBuildEvent />
     <Link />
@@ -156,8 +154,6 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <ShowIncludes>false</ShowIncludes>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link />
     <Link>
@@ -184,8 +180,6 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ShowIncludes>false</ShowIncludes>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -211,8 +205,6 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;IMGUI_USER_CONFIG="$(ProjectDir)src\video\imgui_wrapper.h";IMGUI_IMPL_OPENGL_LOADER_CUSTOM="$(ProjectDir)lib\imgui\imgui_loader.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <OptimizeReferences>true</OptimizeReferences>
@@ -281,14 +273,10 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\scu.cpp" />
     <ClCompile Include="src\sh2.cpp" />
@@ -336,12 +324,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClInclude Include="src\locale.h" />
     <ClInclude Include="src\log.h" />
     <ClInclude Include="src\memory.h" />
-    <ClInclude Include="src\pch.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\scu.h" />
     <ClInclude Include="src\scu_registers.h" />
     <ClInclude Include="src\sh2.h" />
