@@ -19,8 +19,9 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
-#include <saturnin/src/locale.h>           // tr
-#include <saturnin/src/log.h>              // Log
+#include <istream>
+#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/log.h>    // Log
 
 namespace core = saturnin::core;
 

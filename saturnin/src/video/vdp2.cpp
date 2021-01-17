@@ -19,6 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp2.h>
+#include <istream>
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/interrupt_sources.h>

@@ -22,7 +22,9 @@
 #include <windows.h>  // removes C4005 warning
 #include <fstream>    // ifstream
 #include <filesystem> // filesystem
+#include <iostream>   // cout
 #include <lodepng.h>
+#include <sstream> // stringstream
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>

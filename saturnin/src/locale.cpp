@@ -21,6 +21,7 @@
 #include <saturnin/src/locale.h> // NOLINT(modernize-deprecated-headers)
 #include <fstream>               // ifstream
 #include <string>
+#include <saturnin/lib/spiritless_po/include/spiritless_po/spiritless_po.h>
 
 namespace saturnin::core {
 
@@ -29,18 +30,22 @@ auto Locale::getInstance() -> Locale& {
     return instance;
 }
 
-auto Locale::catalog() -> spirit_po::default_catalog* { return cat_.get(); };
+auto Locale::catalog() -> spiritless_po::Catalog* { return cat_.get(); };
 
 auto Locale::initialize(const std::string& country = "") -> bool { // NOLINT(readability-convert-member-functions-to-static)
-    auto ifs     = std::ifstream("./lang/" + country + "/saturnin.po");
-    auto po_file = std::string{std::istreambuf_iterator<char>{ifs}, std::istreambuf_iterator<char>()};
+    auto filename = std::string("./lang/" + country + "/saturnin.po");
+    auto ifs      = std::ifstream(filename);
 
-    cat_ = std::make_unique<spirit_po::default_catalog>(spirit_po::catalog<>::from_range(po_file));
+    cat_ = std::make_unique<spiritless_po::Catalog>();
+    if (!cat_->Add(ifs)) {
+        for (const auto& s : cat_->GetError()) {
+            // cerr << argv[ii + 1] << ": " << s << endl;
+        }
+    }
+
     return true;
 }
 
-// auto tr(const std::string& str) -> std::string { return Locale::getInstance().catalog()->gettext_str(str); }
-
-auto tr(const std::string& str) -> const char* { return Locale::getInstance().catalog()->gettext(str.c_str()); }
+auto tr(const std::string& str) -> const std::string { return Locale::getInstance().catalog()->gettext(str); }
 
 }; // namespace saturnin::core

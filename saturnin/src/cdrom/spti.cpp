@@ -19,6 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/cdrom/spti.h>
+#include <istream>
 #include <ntddscsi.h>
 #include <ntddcdrm.h>
 #include <saturnin/src/locale.h> // tr

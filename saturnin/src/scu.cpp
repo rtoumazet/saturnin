@@ -19,6 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/scu.h>
+#include <istream>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/locale.h>
 #include <saturnin/src/memory.h>
@@ -875,7 +876,7 @@ void Scu::dmaTest() {
     // activateDma();
 
     while (!dma_queue_.empty()) {
-        std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
+        // std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
         dma_queue_.pop();
     }
 }

@@ -20,7 +20,8 @@
 #include <saturnin/src/pch.h>
 #define GLFW_INCLUDE_NONE
 #include <saturnin/src/video/opengl_modern.h>
-#include <array>  // array
+#include <array> // array
+#include <istream>
 #include <vector> // vector
 #include <glbinding/glbinding.h>
 #include <glbinding/gl/gl.h>

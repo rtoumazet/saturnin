@@ -21,6 +21,7 @@
 #include <saturnin/src/log.h>
 #include <filesystem>
 #include <iostream>
+#include <sstream>
 
 namespace fs = std::filesystem;
 

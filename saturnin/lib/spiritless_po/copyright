@@ -1,0 +1,23 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: spiritless_po
+Upstream-Contact: ooyooxei+gh@gmail.com
+Source: https://github.com/oo13/spiritless_po
+
+Files: *
+Copyright: © 2019 OOTA, Masato
+License: GPL-3+
+Comment: Inspired by spirit_po (https://github.com/cbeck88/spirit-po), but nothing derived from it.
+
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ The full text of the GNU General Public License version 3 can be found in
+ `./gpl-3.0.txt'.

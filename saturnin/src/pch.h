@@ -73,10 +73,10 @@
 //#include <spdlog/sinks/stdout_color_sinks.h>
 //#include <spdlog/sinks/ostream_sink.h>
 
-#pragma warning(push)
-#pragma warning(disable : 4267)
-#include <spirit_po/spirit_po.hpp>
-#pragma warning(pop)
+//#pragma warning(push)
+//#pragma warning(disable : 4267)
+//#include <spirit_po/spirit_po.hpp>
+//#pragma warning(pop)
 
 // Project headers
 //#include <saturnin/src/emulator_defs.h>

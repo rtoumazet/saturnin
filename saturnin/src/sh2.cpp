@@ -18,6 +18,7 @@
 //
 
 #include <saturnin/src/pch.h>
+#include <istream>
 #include <saturnin/src/sh2.h>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/interrupt_controller.h> //Interrupt

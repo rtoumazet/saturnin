@@ -20,6 +20,7 @@
 #include <saturnin/src/pch.h>
 #define GLFW_INCLUDE_NONE
 #include <windows.h> // removes C4005 warning
+#include <istream>
 #include <glbinding/gl21/gl.h>
 #include <glbinding/gl21ext/gl.h>
 #include <glbinding/glbinding.h>

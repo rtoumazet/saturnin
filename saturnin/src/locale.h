@@ -25,15 +25,18 @@
 #pragma once
 
 #include <saturnin/src/pch.h>
+#include <memory>
+#include <string>
 //#pragma warning(push)
 //#pragma warning(disable : 4267)
 //#include <spirit_po/spirit_po.hpp>
 //#pragma warning(pop)
+//#include <saturnin/lib/spiritless_po/include/spiritless_po/spiritless_po.h>
 
-namespace spirit_po {
-using default_catalog = catalog<>;
-} // namespace spirit_po
-
+// Forward declaration
+namespace spiritless_po {
+class Catalog;
+}
 namespace saturnin::core {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +86,18 @@ class Locale {
 
     auto initialize(const std::string& country) -> bool;
 
-    auto catalog() -> spirit_po::default_catalog*;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Locale::catalog() -> spiritless_po::Catalog*;
+    ///
+    /// \brief  Gets the catalog
+    ///
+    /// \author Runik
+    /// \date   17/01/2021
+    ///
+    /// \returns    Null if it fails, else a pointer to a spiritless_po::Catalog.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto catalog() -> spiritless_po::Catalog*;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,12 +111,12 @@ class Locale {
 
     Locale() = default;
 
-    std::unique_ptr<spirit_po::default_catalog> cat_; ///< Catalog of translated strings
+    std::unique_ptr<spiritless_po::Catalog> cat_; ///< Catalog of translated strings
 
 }; // class Locale
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto tr(const std::string& str) -> std::string;
+/// \fn auto tr(const std::string& str) -> const std::string;
 ///
 /// \brief  Translates the given string.
 ///
@@ -111,11 +125,9 @@ class Locale {
 ///
 /// \param  str The string to translate.
 ///
-/// \return The translated string.
+/// \returns    The translated string.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// auto tr(const std::string& str) -> std::string;
-
-auto tr(const std::string& str) -> const char*;
+auto tr(const std::string& str) -> const std::string;
 
 }; // namespace saturnin::core

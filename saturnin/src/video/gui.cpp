@@ -20,6 +20,7 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/gui.h>
 #include <imgui.h>
+#include <istream>
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_enums.h> // EmulationStatus
 //#include <saturnin/src/locale.h>         // tr
@@ -107,8 +108,8 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
 
         auto popup_flags = ImGuiWindowFlags{ImGuiWindowFlags_NoMove};
         if (ImGui::BeginPopup("file_popup", popup_flags)) {
-            ImGui::MenuItem(tr("Load ST-V rom"), nullptr, &show_load_stv);
-            ImGui::MenuItem(tr("Load binary file"), nullptr, &show_load_binary);
+            ImGui::MenuItem(tr("Load ST-V rom").c_str(), nullptr, &show_load_stv);
+            ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary);
 
             ImGui::EndPopup();
         }
@@ -129,8 +130,8 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
                 }
 
                 if (ImGui::BeginPopup("debug_popup", ImGuiWindowFlags_NoMove)) {
-                    ImGui::MenuItem(tr("SH2"), nullptr, &show_debug_sh2);
-                    ImGui::MenuItem(tr("Memory editor"), nullptr, &show_debug_memory);
+                    ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
+                    ImGui::MenuItem(tr("Memory editor").c_str(), nullptr, &show_debug_memory);
 
                     ImGui::EndPopup();
                 }
@@ -240,9 +241,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
     constexpr auto second_column_offset = u8{150};
     // General header
-    if (ImGui::CollapsingHeader(tr("General"))) {
+    if (ImGui::CollapsingHeader(tr("General").c_str())) {
         // Hardware mode
-        ImGui::TextUnformatted(tr("Hardware mode"));
+        ImGui::TextUnformatted(tr("Hardware mode").c_str());
         ImGui::SameLine(second_column_offset);
 
         std::string hm   = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
@@ -253,7 +254,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
             if (hm != std::nullopt) {
                 state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
             } else {
-                Log::warning("config", tr("Unknown hardware mode ..."));
+                Log::warning("config", tr("Unknown hardware mode ...").c_str());
             }
         }
         ImGui::SameLine();
@@ -262,12 +263,12 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
             if (hm != std::nullopt) {
                 state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
             } else {
-                Log::warning("config", tr("Unknown hardware mode ..."));
+                Log::warning("config", tr("Unknown hardware mode ...").c_str());
             }
         }
 
         // Language
-        ImGui::TextUnformatted(tr("Language"));
+        ImGui::TextUnformatted(tr("Language").c_str());
         ImGui::SameLine(second_column_offset);
 
         static auto locales = core::Config::listAvailableLanguages();
@@ -279,7 +280,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         }
 
         // Area code
-        ImGui::TextUnformatted(tr("Area code"));
+        ImGui::TextUnformatted(tr("Area code").c_str());
         ImGui::SameLine(second_column_offset);
 
         static auto codes      = state.config()->listAreaCodes();
@@ -292,9 +293,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     }
 
     // Rendering header
-    if (ImGui::CollapsingHeader(tr("Rendering"))) {
+    if (ImGui::CollapsingHeader(tr("Rendering").c_str())) {
         // TV standard
-        ImGui::TextUnformatted(tr("TV standard"));
+        ImGui::TextUnformatted(tr("TV standard").c_str());
         ImGui::SameLine(second_column_offset);
 
         std::string ts       = state.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
@@ -305,7 +306,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
             if (key != std::nullopt) {
                 state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
             } else {
-                Log::warning("config", tr("Unknown TV standard ..."));
+                Log::warning("config", tr("Unknown TV standard ...").c_str());
             }
         }
         ImGui::SameLine();
@@ -314,12 +315,12 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
             if (key != std::nullopt) {
                 state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
             } else {
-                Log::warning("config", tr("Unknown TV standard ..."));
+                Log::warning("config", tr("Unknown TV standard ...").c_str());
             }
         }
 
         // Legacy opengl
-        ImGui::TextUnformatted(tr("Legacy OpenGL"));
+        ImGui::TextUnformatted(tr("Legacy OpenGL").c_str());
         ImGui::SameLine(second_column_offset);
 
         static bool is_legacy         = state.config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
@@ -331,9 +332,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     }
 
     // Paths header
-    if (ImGui::CollapsingHeader(tr("Paths"))) {
+    if (ImGui::CollapsingHeader(tr("Paths").c_str())) {
         // Saturn bios
-        ImGui::TextUnformatted(tr("Saturn bios"));
+        ImGui::TextUnformatted(tr("Saturn bios").c_str());
         ImGui::SameLine(second_column_offset);
 
         constexpr auto string_size = u8{255};
@@ -343,7 +344,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         }
 
         // ST-V bios
-        ImGui::TextUnformatted(tr("ST-V bios"));
+        ImGui::TextUnformatted(tr("ST-V bios").c_str());
         ImGui::SameLine(second_column_offset);
         auto bios_stv = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_bios_stv), string_size);
         if (ImGui::InputText("##bios_stv", bios_stv.data(), bios_stv.capacity())) {
@@ -351,7 +352,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
         }
 
         // ST-V roms
-        ImGui::TextUnformatted(tr("ST-V roms"));
+        ImGui::TextUnformatted(tr("ST-V roms").c_str());
         ImGui::SameLine(second_column_offset);
         auto roms_stv = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_roms_stv), string_size);
         if (ImGui::InputText("##roms_stv", roms_stv.data(), roms_stv.capacity())) {
@@ -362,9 +363,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     }
 
     // CD-ROM header
-    if (ImGui::CollapsingHeader(tr("CD-Rom"))) {
+    if (ImGui::CollapsingHeader(tr("CD-Rom").c_str())) {
         // Drive
-        ImGui::TextUnformatted(tr("Drive"));
+        ImGui::TextUnformatted(tr("Drive").c_str());
         ImGui::SameLine(second_column_offset);
 
         std::string drive        = state.config()->readValue(core::AccessKeys::cfg_cdrom_drive);
@@ -386,7 +387,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
         // Access method
         // For now ASPI isn't supported, SPTI is used in every case
-        ImGui::TextUnformatted(tr("Access method"));
+        ImGui::TextUnformatted(tr("Access method").c_str());
         ImGui::SameLine(second_column_offset);
 
         std::string access_method = state.config()->readValue(core::AccessKeys::cfg_cdrom_access_method);
@@ -396,7 +397,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
             if (key != std::nullopt) {
                 state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
             } else {
-                Log::warning("config", tr("Unknown drive access method ..."));
+                Log::warning("config", tr("Unknown drive access method ...").c_str());
             }
         }
         ImGui::SameLine();
@@ -405,7 +406,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
             if (key != std::nullopt) {
                 state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
             } else {
-                Log::warning("config", tr("Unknown drive access method ..."));
+                Log::warning("config", tr("Unknown drive access method ...").c_str());
             }
         }
 
@@ -413,9 +414,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     }
 
     // Sound header
-    if (ImGui::CollapsingHeader(tr("Sound"))) {
+    if (ImGui::CollapsingHeader(tr("Sound").c_str())) {
         // Sound disabled
-        ImGui::TextUnformatted(tr("Sound disabled"));
+        ImGui::TextUnformatted(tr("Sound disabled").c_str());
         ImGui::SameLine(second_column_offset);
 
         static bool disabled = state.config()->readValue(core::AccessKeys::cfg_sound_disabled);
@@ -423,7 +424,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     }
 
     // Peripheral header
-    if (ImGui::CollapsingHeader(tr("Peripherals"))) {
+    if (ImGui::CollapsingHeader(tr("Peripherals").c_str())) {
         static const auto keys{core::Smpc::listAvailableKeys()};
 
         auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
@@ -446,9 +447,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
-                    ImGui::CenteredText(tr("Player 1"));
+                    ImGui::CenteredText(tr("Player 1").c_str());
 
-                    ImGui::TextUnformatted(tr("Connection"));
+                    ImGui::TextUnformatted(tr("Connection").c_str());
                     ImGui::SameLine(second_column_offset);
                     static auto connections = state.config()->listPeripheralConnections();
                     std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
@@ -460,55 +461,55 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                                                    connections[index_connection]);
                     }
 
-                    ImGui::TextUnformatted(tr("Left"));
+                    ImGui::TextUnformatted(tr("Left").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.direction_left, "direction_left");
 
-                    ImGui::TextUnformatted(tr("Right"));
+                    ImGui::TextUnformatted(tr("Right").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.direction_right, "direction_right");
 
-                    ImGui::TextUnformatted(tr("Up"));
+                    ImGui::TextUnformatted(tr("Up").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.direction_up, "direction_up");
 
-                    ImGui::TextUnformatted(tr("Down"));
+                    ImGui::TextUnformatted(tr("Down").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.direction_down, "direction_down");
 
-                    ImGui::TextUnformatted(tr("Left shoulder"));
+                    ImGui::TextUnformatted(tr("Left shoulder").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.button_shoulder_left, "button_left_shoulder");
 
-                    ImGui::TextUnformatted(tr("Right shoulder"));
+                    ImGui::TextUnformatted(tr("Right shoulder").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.button_shoulder_right, "button_right_shoulder");
 
-                    ImGui::TextUnformatted(tr("Button A"));
+                    ImGui::TextUnformatted(tr("Button A").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.button_a, "button_a");
 
-                    ImGui::TextUnformatted(tr("Button B"));
+                    ImGui::TextUnformatted(tr("Button B").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.button_b, "button_b");
 
-                    ImGui::TextUnformatted(tr("Button C"));
+                    ImGui::TextUnformatted(tr("Button C").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.button_c, "button_c");
 
-                    ImGui::TextUnformatted(tr("Button X"));
+                    ImGui::TextUnformatted(tr("Button X").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.button_x, "button_x");
 
-                    ImGui::TextUnformatted(tr("Button Y"));
+                    ImGui::TextUnformatted(tr("Button Y").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.button_y, "button_y");
 
-                    ImGui::TextUnformatted(tr("Button Z"));
+                    ImGui::TextUnformatted(tr("Button Z").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.button_z, "button_z");
 
-                    ImGui::TextUnformatted(tr("Button Start"));
+                    ImGui::TextUnformatted(tr("Button Start").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad.button_start, "button_start");
 
@@ -530,9 +531,9 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                                       window_flags);
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
-                    ImGui::CenteredText(tr("Player 2"));
+                    ImGui::CenteredText(tr("Player 2").c_str());
 
-                    ImGui::TextUnformatted(tr("Connection"));
+                    ImGui::TextUnformatted(tr("Connection").c_str());
                     ImGui::SameLine(second_column_offset);
                     static auto connections = state.config()->listPeripheralConnections();
                     std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
@@ -544,55 +545,55 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                                                    connections[index_connection]);
                     }
 
-                    ImGui::TextUnformatted(tr("Left"));
+                    ImGui::TextUnformatted(tr("Left").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.direction_left, "direction_left");
 
-                    ImGui::TextUnformatted(tr("Right"));
+                    ImGui::TextUnformatted(tr("Right").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.direction_right, "direction_right");
 
-                    ImGui::TextUnformatted(tr("Up"));
+                    ImGui::TextUnformatted(tr("Up").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.direction_up, "direction_up");
 
-                    ImGui::TextUnformatted(tr("Down"));
+                    ImGui::TextUnformatted(tr("Down").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.direction_down, "direction_down");
 
-                    ImGui::TextUnformatted(tr("Left shoulder"));
+                    ImGui::TextUnformatted(tr("Left shoulder").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_shoulder_left, "button_left_shoulder");
 
-                    ImGui::TextUnformatted(tr("Right shoulder"));
+                    ImGui::TextUnformatted(tr("Right shoulder").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_shoulder_right, "button_right_shoulder");
 
-                    ImGui::TextUnformatted(tr("Button A"));
+                    ImGui::TextUnformatted(tr("Button A").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_a, "button_a");
 
-                    ImGui::TextUnformatted(tr("Button B"));
+                    ImGui::TextUnformatted(tr("Button B").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_b, "button_b");
 
-                    ImGui::TextUnformatted(tr("Button C"));
+                    ImGui::TextUnformatted(tr("Button C").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_c, "button_c");
 
-                    ImGui::TextUnformatted(tr("Button X"));
+                    ImGui::TextUnformatted(tr("Button X").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_x, "button_x");
 
-                    ImGui::TextUnformatted(tr("Button Y"));
+                    ImGui::TextUnformatted(tr("Button Y").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_y, "button_y");
 
-                    ImGui::TextUnformatted(tr("Button Z"));
+                    ImGui::TextUnformatted(tr("Button Z").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_z, "button_z");
 
-                    ImGui::TextUnformatted(tr("Button Start"));
+                    ImGui::TextUnformatted(tr("Button Start").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, pad_p2.button_start, "button_start");
 
@@ -613,29 +614,29 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     constexpr auto v_size = u16{160};
                     ImGui::BeginChild("ChildStvBoard", ImVec2(h_size, v_size), true, window_flags);
 
-                    ImGui::CenteredText(tr("Board"));
+                    ImGui::CenteredText(tr("Board").c_str());
 
-                    ImGui::TextUnformatted(tr("Service switch"));
+                    ImGui::TextUnformatted(tr("Service switch").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, board.service_switch, "service_switch");
 
-                    ImGui::TextUnformatted(tr("Test switch"));
+                    ImGui::TextUnformatted(tr("Test switch").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, board.test_switch, "test_switch");
 
-                    ImGui::TextUnformatted(tr("Player 1 coin switch"));
+                    ImGui::TextUnformatted(tr("Player 1 coin switch").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, board.p1_coin_switch, "p1_coin_switch");
 
-                    ImGui::TextUnformatted(tr("Player 2 coin switch"));
+                    ImGui::TextUnformatted(tr("Player 2 coin switch").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, board.p2_coin_switch, "p2_coin_switch");
 
-                    ImGui::TextUnformatted(tr("Player 1 start"));
+                    ImGui::TextUnformatted(tr("Player 1 start").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, board.p1_start, "p1_start");
 
-                    ImGui::TextUnformatted(tr("Player 2 start"));
+                    ImGui::TextUnformatted(tr("Player 2 start").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, board.p2_start, "p2_start");
 
@@ -658,37 +659,37 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
-                    ImGui::CenteredText(tr("Player 1"));
+                    ImGui::CenteredText(tr("Player 1").c_str());
 
-                    ImGui::TextUnformatted(tr("Left"));
+                    ImGui::TextUnformatted(tr("Left").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
 
-                    ImGui::TextUnformatted(tr("Right"));
+                    ImGui::TextUnformatted(tr("Right").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
 
-                    ImGui::TextUnformatted(tr("Up"));
+                    ImGui::TextUnformatted(tr("Up").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
 
-                    ImGui::TextUnformatted(tr("Down"));
+                    ImGui::TextUnformatted(tr("Down").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
 
-                    ImGui::TextUnformatted(tr("Button 1"));
+                    ImGui::TextUnformatted(tr("Button 1").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
 
-                    ImGui::TextUnformatted(tr("Button 2"));
+                    ImGui::TextUnformatted(tr("Button 2").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
 
-                    ImGui::TextUnformatted(tr("Button 3"));
+                    ImGui::TextUnformatted(tr("Button 3").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
 
-                    ImGui::TextUnformatted(tr("Button 4"));
+                    ImGui::TextUnformatted(tr("Button 4").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
 
@@ -711,37 +712,37 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
-                    ImGui::CenteredText(tr("Player 2"));
+                    ImGui::CenteredText(tr("Player 2").c_str());
 
-                    ImGui::TextUnformatted(tr("Left"));
+                    ImGui::TextUnformatted(tr("Left").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
 
-                    ImGui::TextUnformatted(tr("Right"));
+                    ImGui::TextUnformatted(tr("Right").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
 
-                    ImGui::TextUnformatted(tr("Up"));
+                    ImGui::TextUnformatted(tr("Up").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
 
-                    ImGui::TextUnformatted(tr("Down"));
+                    ImGui::TextUnformatted(tr("Down").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
 
-                    ImGui::TextUnformatted(tr("Button 1"));
+                    ImGui::TextUnformatted(tr("Button 1").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
 
-                    ImGui::TextUnformatted(tr("Button 2"));
+                    ImGui::TextUnformatted(tr("Button 2").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
 
-                    ImGui::TextUnformatted(tr("Button 3"));
+                    ImGui::TextUnformatted(tr("Button 3").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
 
-                    ImGui::TextUnformatted(tr("Button 4"));
+                    ImGui::TextUnformatted(tr("Button 4").c_str());
                     ImGui::SameLine(second_column_offset);
                     ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
 
@@ -832,12 +833,12 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
 
     static auto sh2_type   = Sh2Type{Sh2Type::master};
     static auto current_pc = u32{state.slaveSh2()->getRegister(Sh2Register::pc)};
-    if (ImGui::RadioButton(tr("Master"), sh2_type == Sh2Type::master)) {
+    if (ImGui::RadioButton(tr("Master").c_str(), sh2_type == Sh2Type::master)) {
         sh2_type = Sh2Type::master;
         //        current_pc = state.masterSh2()->getRegister(Sh2Register::pc);
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton(tr("Slave"), sh2_type == Sh2Type::slave)) {
+    if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) {
         sh2_type = Sh2Type::slave;
         // current_pc = state.slaveSh2()->getRegister(Sh2Register::pc);
     };
@@ -874,7 +875,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         const auto child_size = ImVec2(300, 240);
         ImGui::BeginChild("ChildRegisters", child_size, true, window_flags);
 
-        ImGui::TextDisabled(tr("General registers"));
+        ImGui::TextDisabled(tr("General registers").c_str());
         ImGui::Separator();
 
         const auto mask = std::string{"R{:<2d} = {:#010x}"};
@@ -905,9 +906,9 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         ImGui::Separator();
 
         ImGui::Columns(2);
-        ImGui::TextDisabled(tr("System registers"));
+        ImGui::TextDisabled(tr("System registers").c_str());
         ImGui::NextColumn();
-        ImGui::TextDisabled(tr("Control registers"));
+        ImGui::TextDisabled(tr("Control registers").c_str());
 
         ImGui::Columns(1);
         ImGui::Separator();
@@ -935,7 +936,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         const auto child_size = ImVec2(330, 240);
         ImGui::BeginChild("ChildDisassembly", child_size, true, window_flags);
 
-        ImGui::TextDisabled(tr("Disassembly"));
+        ImGui::TextDisabled(tr("Disassembly").c_str());
         ImGui::Separator();
 
         ImGui::Columns(2);
@@ -977,7 +978,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         const auto child_size = ImVec2(330, 100);
         ImGui::BeginChild("ChildCallstack", child_size, true, window_flags);
 
-        ImGui::TextDisabled(tr("Callstack"));
+        ImGui::TextDisabled(tr("Callstack").c_str());
         ImGui::Separator();
 
         const auto callstack_mask = std::string{"{:#010x}"};
@@ -997,11 +998,11 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 
     auto window_flags
         = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
-    ImGui::Begin(tr("Memory debug"), opened, window_flags);
+    ImGui::Begin(tr("Memory debug").c_str(), opened, window_flags);
 
     static auto current_area = MemoryMapArea::rom;
 
-    if (ImGui::BeginCombo(tr("Memory area"), state.memory()->memory_map_[current_area].c_str())) {
+    if (ImGui::BeginCombo(tr("Memory area").c_str(), state.memory()->memory_map_[current_area].c_str())) {
         for (const auto& [k, v] : state.memory()->memory_map_) {
             const auto is_selected = bool{current_area == k};
             if (ImGui::Selectable(v.c_str(), is_selected)) { current_area = k; }

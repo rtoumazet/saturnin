@@ -31,7 +31,6 @@ Saturnin is a Sega Saturn emulator
     * libzippp (zip wrapper)
     * lodepng (png format handling)
     * spdlog (logging + string formatting)
-    * spirit-po (translations)
 
 ### Contribution guidelines ###
 
