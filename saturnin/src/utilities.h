@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include <saturnin/src/pch.h>
 #include <algorithm>                    // count
 #include <string>                       // string
 #include <type_traits>                  // underlying_type_t

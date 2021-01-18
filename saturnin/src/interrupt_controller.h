@@ -24,7 +24,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include <saturnin/src/pch.h>
+
 #include <string> // string
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/scu_registers.h> // InterruptMask, InterruptEnable

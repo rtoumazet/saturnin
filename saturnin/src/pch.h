@@ -81,7 +81,7 @@
 // Project headers
 //#include <saturnin/src/emulator_defs.h>
 //#include <saturnin/src/emulator_enums.h>
-//#include <saturnin/src/locale.h>
+#include <saturnin/src/locale.h>
 //#include <saturnin/src/log.h>
 //#include <saturnin/src/stv_definitions.h>
 //#include <saturnin/src/scu_registers.h>

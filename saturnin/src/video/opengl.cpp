@@ -30,7 +30,7 @@
 #include <glbinding-aux/ContextInfo.h>
 #include <GLFW/glfw3.h>
 #include <saturnin/src/config.h>
-//#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/locale.h> // tr
 #include <saturnin/src/log.h>
 #include <saturnin/src/video/gui.h>
 

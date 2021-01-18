@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include <saturnin/src/pch.h>
 #include <queue>  // priority_queue
 #include <vector> // vector
 #include <saturnin/src/emulator_defs.h>

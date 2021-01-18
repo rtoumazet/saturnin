@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include <saturnin/src/pch.h>
 #include <array>  // array
 #include <vector> // vector
 #include <saturnin/src/emulator_defs.h>

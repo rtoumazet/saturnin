@@ -24,14 +24,8 @@
 
 #pragma once
 
-#include <saturnin/src/pch.h>
 #include <memory>
 #include <string>
-//#pragma warning(push)
-//#pragma warning(disable : 4267)
-//#include <spirit_po/spirit_po.hpp>
-//#pragma warning(pop)
-//#include <saturnin/lib/spiritless_po/include/spiritless_po/spiritless_po.h>
 
 // Forward declaration
 namespace spiritless_po {

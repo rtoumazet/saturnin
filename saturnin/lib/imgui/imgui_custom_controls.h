@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include <saturnin/src/pch.h>
 #include <string>
 #include <vector>
 #include <imgui.h>

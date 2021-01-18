@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include <saturnin/src/pch.h>
 #include <array>  // array
 #include <chrono> // duration
 #include <vector>

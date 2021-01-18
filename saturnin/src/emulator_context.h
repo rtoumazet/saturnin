@@ -26,7 +26,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include <saturnin/src/pch.h>
+
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
 #include <thread> // thread

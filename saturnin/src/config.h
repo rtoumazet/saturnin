@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include <saturnin/src/pch.h>
 #pragma warning(disable : 4275) // libconfig specific warning disable
 #include <libconfig.h++>
 #include <any>                        // any

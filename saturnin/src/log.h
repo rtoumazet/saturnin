@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include <saturnin/src/pch.h>
 #include <iosfwd> // ostringstream
 #include <map>    // map
 #include <string> // string

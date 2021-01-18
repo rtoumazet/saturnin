@@ -32,7 +32,7 @@
 #include <imgui.h>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/log.h>
-//#include <saturnin/src/locale.h>
+#include <saturnin/src/locale.h>
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/opengl.h>
 #include <saturnin/lib/imgui/imgui_impl_glfw.h>
