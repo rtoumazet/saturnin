@@ -27,28 +27,28 @@
 #pragma once
 
 // STL
-//#include <any>
-//#include <array>
-//#include <algorithm>
-//#include <bitset>
-//#include <chrono>
-//#include <cstdint>
-//#include <date/date.h>
-//#include <filesystem>
-//#include <fstream>
-//#include <functional>
-////#include <future> // test if still needed
-//#include <iostream>
-//#include <map>
-//#include <memory>
-//#include <optional>
-//#include <queue>
-//#include <sstream>
-//#include <string>
-//#include <thread>
-//#include <tuple>
-//#include <type_traits>
-//#include <vector>
+#include <any>
+#include <array>
+#include <algorithm>
+#include <bitset>
+#include <chrono>
+#include <cstdint>
+#include <date/date.h>
+#include <filesystem>
+#include <fstream>
+#include <functional>
+//#include <future> // test if still needed
+#include <iostream>
+#include <map>
+#include <memory>
+#include <optional>
+#include <queue>
+#include <sstream>
+#include <string>
+#include <thread>
+#include <tuple>
+#include <type_traits>
+#include <vector>
 
 //// Windows API
 //#define NOMINMAX
@@ -81,7 +81,7 @@
 // Project headers
 //#include <saturnin/src/emulator_defs.h>
 //#include <saturnin/src/emulator_enums.h>
-#include <saturnin/src/locale.h>
+//#include <saturnin/src/locale.h>
 //#include <saturnin/src/log.h>
 //#include <saturnin/src/stv_definitions.h>
 //#include <saturnin/src/scu_registers.h>
