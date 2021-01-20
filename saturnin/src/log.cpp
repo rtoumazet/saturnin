@@ -48,6 +48,7 @@ auto Log::initialize() -> bool {
                                                         "opengl",
                                                         "exception",
                                                         "smpc",
+                                                        "scsp",
                                                         "unimplemented"};
     for (auto& n : loggers_names) {
         createLogger(n, sink_list);
