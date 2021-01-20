@@ -18,22 +18,25 @@
 //
 
 #include <saturnin/src/pch.h>
-#define GLFW_INCLUDE_NONE
 #include <saturnin/src/video/opengl_legacy.h>
 #include <windows.h> // removes C4005 warning
 #include <istream>
+
 #include <glbinding/gl21/gl.h>
 #include <glbinding/gl21ext/gl.h>
 #include <glbinding/glbinding.h>
-#include <GLFW/glfw3.h>
+
 #include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/locale.h>
 #include <saturnin/src/log.h>
 #include <saturnin/src/video/gui.h> // buildGui
 #include <saturnin/src/video/opengl.h>
-#include <saturnin/lib/imgui/imgui_impl_glfw.h>
-#include <saturnin/lib/imgui/imgui_impl_opengl2.h>
 
 using namespace gl21;
 using namespace gl21ext;
@@ -223,7 +226,7 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
     // ImGui::StyleColorsClassic();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL2_Init();
+    ImGui_ImplOpenGL3_Init();
 
     // Load Fonts
     // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
@@ -241,7 +244,7 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
         glfwPollEvents();
-        ImGui_ImplOpenGL2_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         // glfwSetFramebufferSizeCallback(window, opengl.framebufferSizeCallback );
@@ -260,14 +263,14 @@ auto runLegacyOpengl(core::EmulatorContext& state) -> s32 {
 
         ImGui::Render();
 
-        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwMakeContextCurrent(window);
         glfwSwapBuffers(window);
     }
 
     // Cleanup
-    ImGui_ImplOpenGL2_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 

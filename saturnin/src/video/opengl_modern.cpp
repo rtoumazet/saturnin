@@ -18,25 +18,29 @@
 //
 
 #include <saturnin/src/pch.h>
-#define GLFW_INCLUDE_NONE
 #include <saturnin/src/video/opengl_modern.h>
 #include <array> // array
 #include <istream>
 #include <vector> // vector
+
 #include <glbinding/glbinding.h>
 #include <glbinding/gl/gl.h>
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <imgui.h>
+
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/log.h>
 #include <saturnin/src/locale.h>
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/opengl.h>
-#include <saturnin/lib/imgui/imgui_impl_glfw.h>
-#include <saturnin/lib/imgui/imgui_impl_opengl3.h>
 
 using namespace gl;
 

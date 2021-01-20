@@ -222,24 +222,6 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="lib\imgui\imgui_custom_controls.cpp" />
-    <ClCompile Include="lib\imgui\imgui_impl_glfw.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_impl_opengl2.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_impl_opengl3.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\cdrom\aspi.cpp" />
     <ClCompile Include="src\cdrom\cdrom.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -306,9 +288,6 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imgui_custom_controls.h" />
-    <ClInclude Include="lib\imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="lib\imgui\imgui_impl_opengl2.h" />
-    <ClInclude Include="lib\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="lib\imgui\imgui_loader.h" />
     <ClInclude Include="lib\imgui\imgui_memory_editor.h" />
     <ClInclude Include="src\cdrom\aspi.h" />
