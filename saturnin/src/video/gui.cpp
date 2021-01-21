@@ -19,7 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/gui.h>
-#include <imgui.h>
+//#include <imgui.h>
 #include <istream>
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_enums.h> // EmulationStatus
@@ -71,8 +71,9 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
     auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_NoDecoration};
     window_flags |= ImGuiWindowFlags_NoMove;
 
-    const auto window_pos = ImVec2(0, 0);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
+    const auto pos_x = float{ImGui::GetMainViewport()->Pos.x};
+    const auto pos_y = float{ImGui::GetMainViewport()->Pos.y};
+    ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Once);
 
     auto window = glfwGetCurrentContext();
     auto width  = s32{};
@@ -102,7 +103,9 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
         // File icon
         ImGui::ImageButton(opengl.getIconTexture(video::IconId::file), button_size);
         if (ImGui::IsItemClicked()) {
-            ImGui::SetNextWindowPos(ImVec2(0, 40));
+            const auto mouse_coords = getMouseClickCoordinates(state);
+            ImGui::SetNextWindowPos(mouse_coords, ImGuiCond_Once);
+            // ImGui::SetNextWindowPos(ImVec2(0, 40));
             ImGui::OpenPopup("file_popup");
         }
 
@@ -186,7 +189,9 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
 
 void showRenderingWindow(video::Opengl& opengl, const u32 width, const u32 height) {
     constexpr auto offset = float{40};
-    ImGui::SetNextWindowPos(ImVec2(0, 0 + offset), ImGuiCond_Once);
+    const auto     pos_x  = float{ImGui::GetMainViewport()->Pos.x};
+    const auto     pos_y  = float{ImGui::GetMainViewport()->Pos.y + offset};
+    ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Once);
 
     const auto window_size = ImVec2(static_cast<float>(width), static_cast<float>(height + offset));
     ImGui::SetNextWindowSize(window_size);
@@ -233,7 +238,10 @@ void showStvWindow(bool* opened) {
 
 void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     static auto reset_rendering = bool{}; // used to check if rendering has to be reset after changing the option
-    // ImGui::SetNextWindowSize(ImVec2(600, 300));
+
+    const auto mouse_coords = getMouseClickCoordinates(state);
+    ImGui::SetNextWindowPos(mouse_coords, ImGuiCond_Once);
+
     constexpr auto item_width = s8{-10};
     ImGui::Begin("Options", opened);
     ImGui::PushItemWidth(item_width);
@@ -805,9 +813,9 @@ void showLogWindow(bool* opened) {
     auto height = s32{};
     glfwGetWindowSize(window, &width, &height);
 
-    const auto v_pos{(float)height - window_size.y};
-    const auto window_pos = ImVec2(0, v_pos);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
+    const auto pos_x = float{ImGui::GetMainViewport()->Pos.x};
+    const auto pos_y = float{ImGui::GetMainViewport()->Pos.y + static_cast<float>(height)};
+    ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Once);
 
     ImGui::Begin("Log", opened, window_flags);
 
@@ -1053,5 +1061,18 @@ void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t 
                                          ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
                                          ImVec2(0, 1),
                                          ImVec2(1, 0));
+}
+
+auto getMouseClickCoordinates(core::EmulatorContext& state) -> ImVec2 {
+    double cursor_pos_x, cursor_pos_y;
+    glfwGetCursorPos(state.openglWindow(), &cursor_pos_x, &cursor_pos_y);
+
+    int window_pos_x, window_pos_y;
+    glfwGetWindowPos(state.openglWindow(), &window_pos_x, &window_pos_y);
+
+    const auto pos_x = window_pos_x + static_cast<float>(cursor_pos_x);
+    const auto pos_y = window_pos_y + static_cast<float>(cursor_pos_y);
+
+    return ImVec2(pos_x, pos_y);
 }
 } // namespace saturnin::gui

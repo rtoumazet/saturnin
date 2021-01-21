@@ -26,12 +26,13 @@
 #pragma once
 
 #include <vector>
+#include <imgui.h>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>    // s32, u32
 
 namespace video = saturnin::video;
 
-// Forward declaration
+// Forward declarations
 namespace saturnin::video {
 class Opengl;
 }
@@ -179,5 +180,20 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u3
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void addTextureToDrawList(s32 texture, u32 width, u32 height);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto getMouseClickCoordinates(core::EmulatorContext& state) -> ImVec2;
+///
+/// \brief  Gets mouse click coordinates in the ImGui coordinate
+///
+/// \author Runik
+/// \date   21/01/2021
+///
+/// \param [in,out] state   The emulator context.
+///
+/// \returns    The mouse click coordinates.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto getMouseClickCoordinates(core::EmulatorContext& state) -> ImVec2;
 
 } // namespace saturnin::gui

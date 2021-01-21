@@ -2,7 +2,7 @@ date
 glbinding
 glfw3
 glm
-imgui
+imgui[docking-experimental,glfw-binding,opengl3-glbinding-binding]
 libconfig
 libzip
 libzippp
