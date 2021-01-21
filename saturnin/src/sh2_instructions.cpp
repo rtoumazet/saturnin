@@ -122,7 +122,7 @@ auto isInstructionIllegal(const u16 inst) -> bool {
 
 void badOpcode(Sh2& s) {
     const auto type = std::string{(s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave"};
-    Log::error("Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
+    Log::error("sh2", "Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
 
     s.emulatorContext()->emulationStatus(core::EmulationStatus::stopped);
 }
