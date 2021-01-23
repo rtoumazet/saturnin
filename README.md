@@ -11,7 +11,7 @@ Saturnin is a Sega Saturn emulator
 
 * Dependencies 
 
-    They are handled using vcpkg. You'll find in **./saturnin/lib/vcpkg** everything necessary to build the libraries used by Saturnin.
+    They are handled using [vcpkg](https://github.com/Microsoft/vcpkg). You'll find in **./saturnin/lib/vcpkg** everything necessary to build the libraries used by Saturnin.
     
     Follow these steps:
     
