@@ -6,12 +6,12 @@ Saturnin is a Sega Saturn emulator
 	
 	Before doing anything after cloning the repository, remove template extensions from properties files in the **./props** directory.
 
-    After that, you must update user macros from properties sheets inside VS2019 to set up your directories. To do so, open the Property Manager first 
+    Next, you must update user macros from properties sheets inside VS2019 to set up your directories. To do so, open the Property Manager first 
     ( **View** | **Property Manager** ), then update the **solution** sheet macros according to your setup.
 
 * Dependencies 
 
-    They are handled using vcpkg. You'll find in **./saturnin/lib/vcpkg** everything necessary to build the libraries used by Saturnin.
+    They are handled using [vcpkg](https://github.com/Microsoft/vcpkg). You'll find in **./saturnin/lib/vcpkg** everything necessary to build the libraries used by Saturnin.
     
     Follow these steps:
     
