@@ -26,13 +26,21 @@
 #include <lodepng.h>
 #include <sstream> // stringstream
 #include <glbinding/glbinding.h>
+#include <glbinding/gl/gl.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <saturnin/src/config.h>
 #include <saturnin/src/locale.h> // tr
 #include <saturnin/src/log.h>
 #include <saturnin/src/video/gui.h>
+#include <saturnin/src/video/opengl_legacy.h>
+#include <saturnin/src/video/opengl_modern.h>
+
+using namespace gl;
 
 namespace saturnin::video {
 
@@ -251,6 +259,137 @@ auto isModernOpenglCapable() -> bool {
 void windowCloseCallback(GLFWwindow* window) {
     auto state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
     state->renderingStatus(core::RenderingStatus::stopped);
+}
+
+auto runOpengl(core::EmulatorContext& state) -> s32 {
+    const bool is_legacy_opengl = state.config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
+
+    // Setup window
+    glfwSetErrorCallback(error_callback);
+    if (glfwInit() == GLFW_FALSE) { return EXIT_FAILURE; }
+
+    // Decide GL+GLSL versions
+#if __APPLE__
+    // GL 3.2 + GLSL 150
+    const char* glsl_version = "#version 150";
+    if (!is_legacy_opengl) {
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           // Required on Mac
+    }
+#else
+    // GL 3.0 + GLSL 130
+    const char* glsl_version = "#version 130";
+    if (!is_legacy_opengl) {
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE,
+                       GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
+        // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
+    }
+#endif
+    std::string window_title = fmt::format(core::tr("Saturnin {0} - Modern rendering"), core::saturnin_version);
+
+    constexpr auto h_window_size = minimum_viewport_width;
+    constexpr auto v_window_size = h_window_size;
+    const auto     window        = glfwCreateWindow(h_window_size, v_window_size, window_title.c_str(), nullptr, nullptr);
+    if (window == nullptr) { return EXIT_FAILURE; }
+
+    state.openglWindow(window);
+
+    glfwSetWindowCloseCallback(window, windowCloseCallback);
+
+    glfwSetWindowUserPointer(window, static_cast<void*>(&state));
+
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1); // Enable vsync
+
+    glbinding::initialize(glfwGetProcAddress);
+
+    // Setup Dear ImGui binding
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    auto io = ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    (void)io;
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    (is_legacy_opengl) ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
+
+    // Setup style
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsClassic();
+
+    // Load Fonts
+    // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
+    // ImGuiIO& io = ImGui::GetIO();
+    // io.Fonts->AddFontDefault();
+    // io.Fonts->AddFontFromFileTTF("../../extra_fonts/Cousine-Regular.ttf", 15.0f);
+    // io.Fonts->AddFontFromFileTTF("../../extra_fonts/DroidSans.ttf", 16.0f);
+    // io.Fonts->AddFontFromFileTTF("../../extra_fonts/Roboto-Medium.ttf", 16.0f);
+    // io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
+    // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+
+    const auto clear_color = ImVec4{0.45f, 0.55f, 0.60f, 1.00f};
+
+    std::unique_ptr<Opengl> opengl = nullptr;
+    if (is_legacy_opengl) {
+        auto legacy = std::make_unique<OpenglLegacy>(state.config());
+        opengl      = std::move(legacy);
+    } else {
+        auto modern = std::make_unique<OpenglModern>(state.config());
+        opengl      = std::move(modern);
+    }
+
+    // Main loop
+    while (glfwWindowShouldClose(window) == GLFW_FALSE) {
+        glfwPollEvents();
+
+        // Start the ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // Rendering
+        auto display_w = s32{};
+        auto display_h = s32{};
+        glfwMakeContextCurrent(window);
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        gui::buildGui(state, *opengl, display_w, display_h);
+
+        if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Update and Render additional Platform Windows
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
+
+        glfwMakeContextCurrent(window);
+        glfwSwapBuffers(window);
+    }
+
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+
+    return EXIT_SUCCESS;
 }
 
 }; // namespace saturnin::video

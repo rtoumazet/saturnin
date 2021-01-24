@@ -111,19 +111,4 @@ class OpenglLegacy : public Opengl {
     void deleteTexture() const final;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn s32 runLegacyOpengl(core::EmulatorContext& config);
-///
-/// \brief  Executes OpenGL code in legacy mode.
-///
-/// \author Runik
-/// \date   03/04/2018
-///
-/// \param [in,out] config  A reference to the configuration object.
-///
-/// \return An int32_t.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-auto runLegacyOpengl(EmulatorContext& state) -> s32;
-
 }; // namespace saturnin::video

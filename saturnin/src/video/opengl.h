@@ -34,12 +34,15 @@
 // Forward declarations
 namespace saturnin::core {
 class Config;
-}
+class EmulatorContext;
+} // namespace saturnin::core
 struct GLFWwindow;
 
 namespace saturnin::video {
 
 using saturnin::core::Config;
+
+constexpr auto minimum_viewport_width = u16{700};
 
 enum class IconId { play, pause, stop, step_into, step_over, step_out, config, file, debug };
 
@@ -221,5 +224,20 @@ auto isModernOpenglCapable() -> bool;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void windowCloseCallback(GLFWwindow* window);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto runOpengl(EmulatorContext& state) -> s32;
+///
+/// \brief  Executes OpenGL code.
+///
+/// \author Runik
+/// \date   03/04/2018
+///
+/// \param [in,out] state   A reference to the configuration object.
+///
+/// \returns    An int32_t.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto runOpengl(core::EmulatorContext& state) -> s32;
 
 }; // namespace saturnin::video

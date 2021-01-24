@@ -104,7 +104,8 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
         ImGui::ImageButton(opengl.getIconTexture(video::IconId::file), button_size);
         if (ImGui::IsItemClicked()) {
             const auto mouse_coords = getMouseClickCoordinates(state);
-            ImGui::SetNextWindowPos(mouse_coords, ImGuiCond_Once);
+            const auto window_pos   = ImVec2(static_cast<float>(mouse_coords.x), static_cast<float>(mouse_coords.y));
+            ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
             // ImGui::SetNextWindowPos(ImVec2(0, 40));
             ImGui::OpenPopup("file_popup");
         }
@@ -240,7 +241,8 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     static auto reset_rendering = bool{}; // used to check if rendering has to be reset after changing the option
 
     const auto mouse_coords = getMouseClickCoordinates(state);
-    ImGui::SetNextWindowPos(mouse_coords, ImGuiCond_Once);
+    const auto window_pos   = ImVec2(static_cast<float>(mouse_coords.x), static_cast<float>(mouse_coords.y));
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
 
     constexpr auto item_width = s8{-10};
     ImGui::Begin("Options", opened);
@@ -1063,16 +1065,16 @@ void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t 
                                          ImVec2(1, 0));
 }
 
-auto getMouseClickCoordinates(core::EmulatorContext& state) -> ImVec2 {
+auto getMouseClickCoordinates(core::EmulatorContext& state) -> Coord {
     double cursor_pos_x, cursor_pos_y;
     glfwGetCursorPos(state.openglWindow(), &cursor_pos_x, &cursor_pos_y);
 
-    int window_pos_x, window_pos_y;
+    s32 window_pos_x, window_pos_y;
     glfwGetWindowPos(state.openglWindow(), &window_pos_x, &window_pos_y);
 
-    const auto pos_x = window_pos_x + static_cast<float>(cursor_pos_x);
-    const auto pos_y = window_pos_y + static_cast<float>(cursor_pos_y);
+    const auto pos_x = window_pos_x + static_cast<s32>(cursor_pos_x);
+    const auto pos_y = window_pos_y + static_cast<s32>(cursor_pos_y);
 
-    return ImVec2(pos_x, pos_y);
+    return Coord(pos_x, pos_y);
 }
 } // namespace saturnin::gui

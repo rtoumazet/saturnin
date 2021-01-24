@@ -39,8 +39,6 @@
 #include <saturnin/src/cdrom/scsi.h>
 #include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/video/opengl.h>
-#include <saturnin/src/video/opengl_legacy.h>
-#include <saturnin/src/video/opengl_modern.h>
 #include <saturnin/src/video/vdp2.h>
 
 namespace cdrom = saturnin::cdrom;
@@ -200,10 +198,7 @@ void EmulatorContext::emulationMainThread() {
     }
 }
 
-void EmulatorContext::startInterface() {
-    bool is_legacy_opengl = this->config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
-    (is_legacy_opengl) ? video::runLegacyOpengl(*this) : video::runModernOpengl(*this);
-}
+void EmulatorContext::startInterface() { video::runOpengl(*this); }
 
 void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
 

@@ -26,9 +26,8 @@
 #pragma once
 
 #include <vector>
-#include <imgui.h>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
-#include <saturnin/src/emulator_defs.h>    // s32, u32
+#include <saturnin/src/emulator_defs.h>    // s32, u32, Coord
 
 namespace video = saturnin::video;
 
@@ -182,7 +181,7 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u3
 void addTextureToDrawList(s32 texture, u32 width, u32 height);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto getMouseClickCoordinates(core::EmulatorContext& state) -> ImVec2;
+/// \fn auto getMouseClickCoordinates(core::EmulatorContext& state) -> Coord;
 ///
 /// \brief  Gets mouse click coordinates in the ImGui coordinate
 ///
@@ -194,6 +193,6 @@ void addTextureToDrawList(s32 texture, u32 width, u32 height);
 /// \returns    The mouse click coordinates.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto getMouseClickCoordinates(core::EmulatorContext& state) -> ImVec2;
+auto getMouseClickCoordinates(core::EmulatorContext& state) -> Coord;
 
 } // namespace saturnin::gui

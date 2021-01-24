@@ -253,4 +253,26 @@ const auto bits_0_15  = BitRange<u16>{0, 15};  ///< Defines the lower 16 bits ra
 const auto bits_16_31 = BitRange<u16>{16, 31}; ///< Defines the upper 16 bits range of the bitset.
 const auto bits_0_31  = BitRange<u32>{0, 31};  ///< Defines the 32 bits range of the bitset.
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct Coord
+///
+/// \brief  A coordinate in space.
+///
+/// \author Runik
+/// \date   21/01/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct Coord {
+    u32 x;
+    u32 y;
+    Coord() {
+        x = 0;
+        y = 0;
+    }
+    Coord(u32 _x, u32 _y) {
+        x = _x;
+        y = _y;
+    }
+};
+
 }; // namespace saturnin

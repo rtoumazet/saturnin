@@ -139,21 +139,6 @@ class OpenglModern final : public Opengl {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto runModernOpengl(core::EmulatorContext& config) -> s32;
-///
-/// \brief  Executes OpenGL code in modern mode (3.3+).
-///
-/// \author Runik
-/// \date   03/04/2018
-///
-/// \param [in,out] config  A reference to the configuration object.
-///
-/// \return An int32_t.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-auto runModernOpengl(EmulatorContext& state) -> s32;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void checkShaderCompilation(const u32 shader);
 ///
 /// \brief  Checks shader compilation and displays errors when detected.
