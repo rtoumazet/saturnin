@@ -188,24 +188,30 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
     ImGui::PopStyleVar(5);
 } // namespace saturnin::gui
 
-void showRenderingWindow(video::Opengl& opengl, const u32 width, const u32 height) {
-    constexpr auto offset = float{40};
-    const auto     pos_x  = float{ImGui::GetMainViewport()->Pos.x};
-    const auto     pos_y  = float{ImGui::GetMainViewport()->Pos.y + offset};
-    ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Once);
+void showRenderingWindow(video::Opengl& opengl) {
+    // The rendering window is stretched to fill the area of the main window minus the core window.
+    auto window = glfwGetCurrentContext();
+    auto width  = s32{};
+    auto height = s32{};
+    glfwGetWindowSize(window, &width, &height);
 
-    const auto window_size = ImVec2(static_cast<float>(width), static_cast<float>(height + offset));
+    const auto pos_x = float{ImGui::GetMainViewport()->Pos.x};
+    const auto pos_y = float{ImGui::GetMainViewport()->Pos.y + core_window_height};
+    ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Always);
+
+    const auto window_size = ImVec2(static_cast<float>(width), static_cast<float>(height + core_window_height));
     ImGui::SetNextWindowSize(window_size);
+
+    // ImGuiWindowClass
+    // ImGui::SetNextWindowClass();
+    ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
-    auto flags = ImGuiWindowFlags{ImGuiWindowFlags_NoResize};
-    flags |= ImGuiWindowFlags_NoScrollbar;
-    flags |= ImGuiWindowFlags_NoCollapse;
-    flags |= ImGuiWindowFlags_NoSavedSettings;
-    flags |= ImGuiWindowFlags_NoFocusOnAppearing;
-    flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+    auto flags = ImGuiWindowFlags{ImGuiWindowFlags_NoSavedSettings};
+    flags |= ImGuiWindowFlags_NoDecoration;
+    flags |= ImGuiWindowFlags_NoMove;
 
     ImGui::Begin("Video rendering", nullptr, flags);
 
@@ -1049,9 +1055,7 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 width, const u32 height) {
     showCoreWindow(state, opengl);
 
-    constexpr auto window_width  = u16{320};
-    constexpr auto window_height = u16{200};
-    showRenderingWindow(opengl, window_width, window_height);
+    showRenderingWindow(opengl);
 
     if (show_demo) { showImguiDemoWindow(show_demo); }
     if (show_log) { showLogWindow(&show_log); }

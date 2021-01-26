@@ -38,6 +38,8 @@ class Opengl;
 
 namespace saturnin::gui {
 
+constexpr auto core_window_height = u8{40};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showImguiDemoWindow(bool show_window);
 ///
@@ -66,7 +68,7 @@ void showImguiDemoWindow(bool show_window);
 void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showRenderingWindow(video::Opengl& opengl, u32 width, u32 height);
+/// \fn void showRenderingWindow(video::Opengl& opengl);
 ///
 /// \brief  Displays the rendering window.
 ///
@@ -74,11 +76,9 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl);
 /// \date   24/10/2019
 ///
 /// \param [in,out] opengl  The opengl object.
-/// \param          width   Width of the rendering window.
-/// \param          height  Height of the rendering window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showRenderingWindow(video::Opengl& opengl, u32 width, u32 height);
+void showRenderingWindow(video::Opengl& opengl);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showStvWindow(bool* opened);

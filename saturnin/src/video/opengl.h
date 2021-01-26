@@ -42,7 +42,8 @@ namespace saturnin::video {
 
 using saturnin::core::Config;
 
-constexpr auto minimum_viewport_width = u16{700};
+constexpr auto minimum_viewport_width  = u16{700};
+constexpr auto minimum_viewport_height = u16{525};
 
 enum class IconId { play, pause, stop, step_into, step_over, step_out, config, file, debug };
 
@@ -220,7 +221,7 @@ auto isModernOpenglCapable() -> bool;
 /// \author Runik
 /// \date   13/10/2018
 ///
-/// \param [in,out] window  If non-null, the window.
+/// \param [in,out] window  If non-null, a pointer to the GLFW window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void windowCloseCallback(GLFWwindow* window);
@@ -239,5 +240,37 @@ void windowCloseCallback(GLFWwindow* window);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto runOpengl(core::EmulatorContext& state) -> s32;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void updateMainWindowSizeAndRatio(GLFWwindow* window, u32 width, u32 height);
+///
+/// \brief  Updates the main window size and ratio aspect.
+///
+/// \author Runik
+/// \date   24/01/2021
+///
+/// \param [in,out] window  If non-null, a pointer to the GLFW window.
+/// \param          width   The new window width.
+/// \param          height  The new window height.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void updateMainWindowSizeAndRatio(GLFWwindow* window, u32 width, u32 height);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto createMainWindow(u32 width, u32 height, std::string title) -> GLFWwindow*;
+///
+/// \brief  Creates the main window.
+///
+/// \author Runik
+/// \date   25/01/2021
+///
+/// \param  width   The window's width.
+/// \param  height  The window's height.
+/// \param  title   The window's title.
+///
+/// \returns    Null if it fails, else the new main window.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto createMainWindow(u32 width, u32 height, std::string title) -> GLFWwindow*;
 
 }; // namespace saturnin::video

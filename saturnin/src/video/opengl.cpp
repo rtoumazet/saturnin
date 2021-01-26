@@ -289,12 +289,14 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
     }
 #endif
-    std::string window_title = fmt::format(core::tr("Saturnin {0} - Modern rendering"), core::saturnin_version);
+    const std::string_view rendering_mode = (is_legacy_opengl) ? core::tr("Legacy") : core::tr("Modern");
+    const std::string      window_title
+        = fmt::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
-    constexpr auto h_window_size = minimum_viewport_width;
-    constexpr auto v_window_size = h_window_size;
-    const auto     window        = glfwCreateWindow(h_window_size, v_window_size, window_title.c_str(), nullptr, nullptr);
+    const auto window = createMainWindow(minimum_viewport_width, minimum_viewport_height, window_title);
     if (window == nullptr) { return EXIT_FAILURE; }
+
+    updateMainWindowSizeAndRatio(window, minimum_viewport_width, minimum_viewport_height);
 
     state.openglWindow(window);
 
@@ -314,6 +316,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     ImGui::CreateContext();
     auto io = ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     (void)io;
+    //io.ConfigViewportDecorations
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
@@ -337,6 +340,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     const auto clear_color = ImVec4{0.45f, 0.55f, 0.60f, 1.00f};
 
+    // Getting the right rendering context
     std::unique_ptr<Opengl> opengl = nullptr;
     if (is_legacy_opengl) {
         auto legacy = std::make_unique<OpenglLegacy>(state.config());
@@ -392,4 +396,15 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     return EXIT_SUCCESS;
 }
 
+void updateMainWindowSizeAndRatio(GLFWwindow* window, const u32 width, const u32 height) {
+    const auto total_height = u32{height + gui::core_window_height};
+
+    glfwSetWindowAspectRatio(window, width, total_height);
+    glfwSetWindowSizeLimits(window, width, total_height, GLFW_DONT_CARE, GLFW_DONT_CARE);
+}
+
+auto createMainWindow(const u32 width, const u32 height, const std::string title) -> GLFWwindow* {
+    const auto total_height = u32{height + gui::core_window_height};
+    return glfwCreateWindow(width, total_height, title.c_str(), nullptr, nullptr);
+}
 }; // namespace saturnin::video
