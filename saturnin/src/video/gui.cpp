@@ -202,12 +202,10 @@ void showRenderingWindow(video::Opengl& opengl) {
     const auto window_size = ImVec2(static_cast<float>(width), static_cast<float>(height + core_window_height));
     ImGui::SetNextWindowSize(window_size);
 
-    // ImGuiWindowClass
-    // ImGui::SetNextWindowClass();
     ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
-    // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
     auto flags = ImGuiWindowFlags{ImGuiWindowFlags_NoSavedSettings};
     flags |= ImGuiWindowFlags_NoDecoration;
@@ -229,8 +227,8 @@ void showRenderingWindow(video::Opengl& opengl) {
 
     ImGui::End();
     ImGui::PopStyleVar();
-    // ImGui::PopStyleVar();
-    // ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
 }
 
 void showStvWindow(bool* opened) {
