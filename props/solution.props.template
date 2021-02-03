@@ -8,7 +8,9 @@
     <OutDir>$(BuildRootDir)$(ProjectName)\exe\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(BuildRootDir)$(ProjectName)\obj\$(Configuration)\</IntDir>
 	<IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
-	<LinkIncremental>true</LinkIncremental>									   
+    <LinkIncremental>
+    </LinkIncremental>
+    <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
@@ -19,10 +21,9 @@
     <ClCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>saturnin/src/pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/MP4 %(AdditionalOptions)</AdditionalOptions>  
     </ClCompile>
     <PostBuildEvent>
       <Command>
