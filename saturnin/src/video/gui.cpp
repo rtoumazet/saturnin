@@ -91,9 +91,12 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 
-    ImGui::PushStyleColor(ImGuiCol_Button, ImColor(180, 180, 180, 102).Value);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(110, 110, 110, 255).Value);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor(51, 51, 51, 255).Value);
+    const auto color_button         = ImColor(180, 180, 180, 102);
+    const auto color_button_hovered = ImColor(110, 110, 110, 255);
+    const auto color_button_active  = ImColor(51, 51, 51, 255);
+    ImGui::PushStyleColor(ImGuiCol_Button, color_button.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color_button_hovered.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, color_button_active.Value);
 
     ImGui::Begin("Core", &show_window, window_flags);
 
@@ -104,9 +107,8 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
         ImGui::ImageButton(opengl.getIconTexture(video::IconId::file), button_size);
         if (ImGui::IsItemClicked()) {
             const auto mouse_coords = getMouseClickCoordinates(state);
-            const auto window_pos   = ImVec2(static_cast<float>(mouse_coords.x), static_cast<float>(mouse_coords.y));
+            const auto window_pos   = ImVec2(mouse_coords.x, mouse_coords.y);
             ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
-            // ImGui::SetNextWindowPos(ImVec2(0, 40));
             ImGui::OpenPopup("file_popup");
         }
 
@@ -129,7 +131,10 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
             case core::EmulationStatus::reset: {
                 ImGui::ImageButton(opengl.getIconTexture(video::IconId::debug), button_size);
                 if (ImGui::IsItemClicked()) {
-                    ImGui::SetNextWindowPos(ImVec2(40, 40));
+                    const auto mouse_coords = getMouseClickCoordinates(state);
+                    const auto window_pos   = ImVec2(mouse_coords.x, mouse_coords.y);
+                    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
+
                     ImGui::OpenPopup("debug_popup");
                 }
 
@@ -155,7 +160,8 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
         if (show_options) { showOptionsWindow(state, &show_options); }
     }
 
-    ImGui::SameLine((static_cast<float>(width - 120)) / 2);
+    const auto centered_offset = float{(static_cast<float>(width - 120)) / 2};
+    ImGui::SameLine(centered_offset);
 
     {
         // Play icon
@@ -184,8 +190,11 @@ void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl) {
 
     ImGui::End();
 
-    ImGui::PopStyleColor(3);
-    ImGui::PopStyleVar(5);
+    constexpr auto style_color_number = u32{3};
+    ImGui::PopStyleColor(style_color_number);
+
+    constexpr auto style_var_number = u32{5};
+    ImGui::PopStyleVar(style_var_number);
 } // namespace saturnin::gui
 
 void showRenderingWindow(video::Opengl& opengl) {
@@ -218,12 +227,14 @@ void showRenderingWindow(video::Opengl& opengl) {
         opengl.updateTextureSize(width, height);
     }
 
-    opengl.preRender();
+    // opengl.preRender();
 
-    opengl.render();
+    // opengl.render();
+    // if (opengl.texture() != 0) { gui::addTextureToDrawList(opengl.texture(), width, height); }
+
+    // opengl.postRender();
+    opengl.displayFramebuffer();
     if (opengl.texture() != 0) { gui::addTextureToDrawList(opengl.texture(), width, height); }
-
-    opengl.postRender();
 
     ImGui::End();
     ImGui::PopStyleVar();
@@ -245,7 +256,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
     static auto reset_rendering = bool{}; // used to check if rendering has to be reset after changing the option
 
     const auto mouse_coords = getMouseClickCoordinates(state);
-    const auto window_pos   = ImVec2(static_cast<float>(mouse_coords.x), static_cast<float>(mouse_coords.y));
+    const auto window_pos   = ImVec2(mouse_coords.x, mouse_coords.y);
     ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
 
     constexpr auto item_width = s8{-10};
@@ -461,7 +472,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
-                    ImGui::CenteredText(tr("Player 1").c_str());
+                    ImGui::CenteredText(tr("Player 1"));
 
                     ImGui::TextUnformatted(tr("Connection").c_str());
                     ImGui::SameLine(second_column_offset);
@@ -545,7 +556,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                                       window_flags);
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
-                    ImGui::CenteredText(tr("Player 2").c_str());
+                    ImGui::CenteredText(tr("Player 2"));
 
                     ImGui::TextUnformatted(tr("Connection").c_str());
                     ImGui::SameLine(second_column_offset);
@@ -628,7 +639,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
                     constexpr auto v_size = u16{160};
                     ImGui::BeginChild("ChildStvBoard", ImVec2(h_size, v_size), true, window_flags);
 
-                    ImGui::CenteredText(tr("Board").c_str());
+                    ImGui::CenteredText(tr("Board"));
 
                     ImGui::TextUnformatted(tr("Service switch").c_str());
                     ImGui::SameLine(second_column_offset);
@@ -673,7 +684,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
-                    ImGui::CenteredText(tr("Player 1").c_str());
+                    ImGui::CenteredText(tr("Player 1"));
 
                     ImGui::TextUnformatted(tr("Left").c_str());
                     ImGui::SameLine(second_column_offset);
@@ -726,7 +737,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
 
                     ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
 
-                    ImGui::CenteredText(tr("Player 2").c_str());
+                    ImGui::CenteredText(tr("Player 2"));
 
                     ImGui::TextUnformatted(tr("Left").c_str());
                     ImGui::SameLine(second_column_offset);
@@ -957,7 +968,9 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
         ImGui::SetColumnWidth(0, 305.0f);
         ImGui::SetColumnWidth(1, 25.0f);
 
-        for (u32 i = (current_pc - 6); i < (current_pc + 20); i += 2) {
+        const auto lower_bound = u32{current_pc - 6};
+        const auto upper_bound = u32{current_pc + 20};
+        for (u32 i = lower_bound; i < upper_bound; i += 2) {
             const auto opcode = state.memory()->read<u16>(i);
             if (i == current_pc) {
                 ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), sh2::disasm(i, opcode).c_str());
@@ -984,7 +997,8 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
     }
 
     ImGui::NewLine();
-    ImGui::SameLine(304);
+    constexpr auto line_offset = float{304};
+    ImGui::SameLine(line_offset);
 
     {
         // Callstack
@@ -1050,7 +1064,7 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
-void buildGui(core::EmulatorContext& state, video::Opengl& opengl, const u32 width, const u32 height) {
+void buildGui(core::EmulatorContext& state, video::Opengl& opengl) {
     showCoreWindow(state, opengl);
 
     showRenderingWindow(opengl);
@@ -1068,15 +1082,17 @@ void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t 
 }
 
 auto getMouseClickCoordinates(core::EmulatorContext& state) -> Coord {
-    double cursor_pos_x, cursor_pos_y;
-    glfwGetCursorPos(state.openglWindow(), &cursor_pos_x, &cursor_pos_y);
+    auto x_pos_cursor = double{};
+    auto y_pos_cursor = double{};
+    glfwGetCursorPos(state.openglWindow(), &x_pos_cursor, &y_pos_cursor);
 
-    s32 window_pos_x, window_pos_y;
-    glfwGetWindowPos(state.openglWindow(), &window_pos_x, &window_pos_y);
+    auto x_pos_window = s32{};
+    auto y_pos_window = s32{};
+    glfwGetWindowPos(state.openglWindow(), &x_pos_window, &y_pos_window);
 
-    const auto pos_x = window_pos_x + static_cast<s32>(cursor_pos_x);
-    const auto pos_y = window_pos_y + static_cast<s32>(cursor_pos_y);
+    const auto x_pos = x_pos_cursor + x_pos_window;
+    const auto y_pos = y_pos_cursor + y_pos_window;
 
-    return Coord(pos_x, pos_y);
+    return Coord{static_cast<float>(x_pos), static_cast<float>(y_pos)};
 }
 } // namespace saturnin::gui

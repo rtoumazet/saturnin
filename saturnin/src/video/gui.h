@@ -150,7 +150,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
 void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u32 height);
+/// \fn void buildGui(core::EmulatorContext& state, video::Opengl& opengl);
 ///
 /// \brief  Builds a graphical user interface.
 ///
@@ -159,11 +159,9 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
 ///
 /// \param [in,out] state   The emulator context.
 /// \param [in,out] opengl  The opengl object.
-/// \param          width   Width of the rendering window.
-/// \param          height  Height of the rendering window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void buildGui(core::EmulatorContext& state, video::Opengl& opengl, u32 width, u32 height);
+void buildGui(core::EmulatorContext& state, video::Opengl& opengl);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void addTextureToDrawList(int32_t texture, uint32_t width, uint32_t height);
