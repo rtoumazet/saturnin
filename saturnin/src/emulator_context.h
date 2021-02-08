@@ -44,14 +44,16 @@ namespace saturnin::sound {
 class Scsp;
 }
 namespace saturnin::video {
+class Opengl;
+class Vdp1;
 class Vdp2;
-}
+} // namespace saturnin::video
 
 struct GLFWwindow;
 
 namespace saturnin::core {
 
-/// \name Class declarations.
+/// \name Forward class declarations.
 /// Used to speed up build time as the .h files are included in the .cpp
 ///
 //@{
@@ -151,6 +153,7 @@ class EmulatorContext {
     auto smpc() -> Smpc*;
     auto scsp() -> sound::Scsp*;
     auto cdrom() -> cdrom::Cdrom*;
+    auto vdp1() -> video::Vdp1*;
     auto vdp2() -> video::Vdp2*;
     //@}
 
@@ -283,6 +286,17 @@ class EmulatorContext {
 
     [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::onVblankIn();
+    ///
+    /// \brief  Handles everything that needs to be done on VBlankIn.
+    ///
+    /// \author Runik
+    /// \date   29/01/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void onVblankIn();
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::emulationMainThread();
@@ -303,6 +317,7 @@ class EmulatorContext {
     std::unique_ptr<Smpc>         smpc_;       ///< SMPC object
     std::unique_ptr<sound::Scsp>  scsp_;       ///< SCSP object
     std::unique_ptr<cdrom::Cdrom> cdrom_;      ///< CDROM object
+    std::unique_ptr<video::Vdp1>  vdp1_;       ///< Vdp1 object
     std::unique_ptr<video::Vdp2>  vdp2_;       ///< Vdp2 object
 
     HardwareMode    hardware_mode_{HardwareMode::saturn};        ///< Hardware mode

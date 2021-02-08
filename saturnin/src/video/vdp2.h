@@ -48,6 +48,9 @@ using micro   = std::chrono::duration<double, std::micro>;
 constexpr auto vram_timing_size = u8{8};
 using VramTiming                = std::array<VramAccessCommand, vram_timing_size>;
 
+constexpr auto saturn_framebuffer_width  = u16{2048};
+constexpr auto saturn_framebuffer_height = u16{2048};
+
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
 //  Vertical resolution :
@@ -223,6 +226,30 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void calculateDisplayDuration();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::populateRenderData();
+    ///
+    /// \brief  Populates data from the VDP2 memory before backend rendering.
+    ///
+    /// \author Runik
+    /// \date   29/01/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void populateRenderData();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>&;
+    ///
+    /// \brief  Returns the vertexes to render.
+    ///
+    /// \author Runik
+    /// \date   03/02/2021
+    ///
+    /// \returns    A reference to a std::vector&lt;Vertex&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getRenderVertexes() const -> const std::vector<Vertex>&;
 
   private:
     /// \name Vdp2 registers accessors
@@ -413,6 +440,8 @@ class Vdp2 {
 
     u16 timer_0_counter_{}; ///< Timer 0 counter.
     u16 timer_1_counter_{}; ///< Timer 1 counter.
+
+    std::vector<Vertex> render_vertexes_; ///< Contains all the geometry vertexes (VDP1 & VDP2).
 
     // VDP2 registers
     TvScreenMode                                    tvmd_;

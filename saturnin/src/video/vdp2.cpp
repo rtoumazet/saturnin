@@ -60,8 +60,9 @@ void Vdp2::run(const u8 cycles) {
             tvmd_.set(TvScreenMode::display, Display::not_displayed);
 
             Log::debug("vdp2", tr("VBlankIn interrupt request"));
-            emulator_context_->scu()->generateInterrupt(interrupt_source::v_blank_in);
-            emulator_context_->scu()->sendStartFactor(StartingFactorSelect::v_blank_in);
+            // emulator_context_->scu()->generateInterrupt(interrupt_source::v_blank_in);
+            // emulator_context_->scu()->sendStartFactor(StartingFactorSelect::v_blank_in);
+            emulator_context_->onVblankIn();
         }
     }
 
@@ -1298,6 +1299,21 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 
     return static_cast<u8>(cpd_reads);
 };
+
+void Vdp2::populateRenderData() {
+    if (isScreenDisplayed(ScrollScreen::nbg3)) {
+        render_vertexes_.clear();
+        // render_vertexes_.emplace_back(Vertex(-0.5, -0.5));
+        // render_vertexes_.emplace_back(Vertex{-0.5, 0.5});
+        // render_vertexes_.emplace_back(Vertex{0.5, 0.5});
+        // render_vertexes_.emplace_back(Vertex{0.5, -0.5});
+    }
+    if (isScreenDisplayed(ScrollScreen::nbg2)) { core::Log::debug("vdp2", core::tr("NBG2 displayed")); }
+    if (isScreenDisplayed(ScrollScreen::nbg1)) { core::Log::debug("vdp2", core::tr("NBG1 displayed")); }
+    if (isScreenDisplayed(ScrollScreen::nbg0)) { core::Log::debug("vdp2", core::tr("NBG0 displayed")); }
+}
+
+auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; };
 
 auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
     if (zq == ZoomQuarter::up_to_one_quarter) { return ReductionSetting::up_to_one_quarter; }

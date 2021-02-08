@@ -77,6 +77,17 @@ class Vdp1 {
 
     void run(u8 cycles);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp1::populateRenderData();
+    ///
+    /// \brief  Populates data from the VDP1 memory before backend rendering.
+    ///
+    /// \author Runik
+    /// \date   29/01/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void populateRenderData();
+
     template<typename T>
     void writeRegisters(const u32 addr, const T data) {
         core::Log::warning("vdp1", core::tr("{}bits register write {:#0x}"), sizeof(T) * number_of_bits_8, addr);

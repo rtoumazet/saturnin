@@ -100,11 +100,6 @@ class OpenglModern final : public Opengl {
 
     void postRender() final;
 
-    void updateTextureSize(u32 width, u32 height) final;
-
-  protected:
-    [[nodiscard]] auto generateTextureFromVector(u32 width, u32 height, const std::vector<u8>& data) const -> u32 final;
-
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn [[nodiscard]] auto OpenglModern::generateEmptyTexture(u32 width, u32 height) const -> u32 final;
@@ -132,7 +127,7 @@ class OpenglModern final : public Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     void bindTextureToFbo() const final;
 
-    void deleteTexture() const override;
+    u32 saturn_framebuffer_{}; ///< Framebuffer object used as Saturn's framebuffer. Will be rendered to a texture.
 
     u32 program_shader_;
     u32 vao_;

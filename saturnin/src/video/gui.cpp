@@ -222,10 +222,10 @@ void showRenderingWindow(video::Opengl& opengl) {
 
     ImGui::Begin("Video rendering", nullptr, flags);
 
-    if (opengl.isWindowResized(width, height)) {
-        // opengl.initializeTexture(width, height);
-        opengl.updateTextureSize(width, height);
-    }
+    // if (opengl.isWindowResized(width, height)) {
+    //    // opengl.initializeTexture(width, height);
+    //    opengl.updateTextureSize(width, height);
+    //}
 
     // opengl.preRender();
 
@@ -234,7 +234,7 @@ void showRenderingWindow(video::Opengl& opengl) {
 
     // opengl.postRender();
     opengl.displayFramebuffer();
-    if (opengl.texture() != 0) { gui::addTextureToDrawList(opengl.texture(), width, height); }
+    if (opengl.renderingTexture() != 0) { gui::addTextureToDrawList(opengl.renderingTexture(), width, height); }
 
     ImGui::End();
     ImGui::PopStyleVar();

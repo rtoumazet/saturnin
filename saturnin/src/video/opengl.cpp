@@ -49,30 +49,17 @@ using core::tr;
 
 Opengl::Opengl(core::Config* config) {
     config_ = config;
-    // bool is_legacy = config->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
 
-    // iconsTextureId = generateIconsTexture();
+    if (!generateUiIcons()) { Log::warning("opengl", tr("Could not generate textures for UI icons !")); }
+}
+
+void Opengl::displayFramebuffer() {
+    preRender();
+    render();
+    postRender();
 }
 
 auto Opengl::config() const -> Config* { return config_; }
-
-auto Opengl::isWindowResized(const u32 new_width, const u32 new_height) const -> bool {
-    return (new_width != current_texture_width_ || new_height != current_texture_height_);
-}
-
-void Opengl::initializeTexture(const u32 width, const u32 height) {
-    deleteTexture();
-    this->texture_ = generateEmptyTexture(width, height);
-    setTextureDimension(width, height);
-
-    // New texture is attached to the fbo
-    bindTextureToFbo();
-}
-
-void Opengl::setTextureDimension(const u32 width, const u32 height) {
-    current_texture_width_  = width;
-    current_texture_height_ = height;
-};
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
@@ -205,29 +192,20 @@ auto Opengl::loadIcons(std::vector<uint8_t>& image) -> u32 {
     return 0;
 }
 
-/* static */
-auto Opengl::generateIconsTexture() -> u32 {
-    // uint32_t width{};
-    // uint32_t height{};
-    // std::vector<uint8_t> icons_raw_data(icons_png, icons_png + sizeof(icons_png));
-    // std::vector<uint8_t> icons_decoded;
+auto Opengl::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const -> u32 {
+    glEnable(GL_TEXTURE_2D);
 
-    // uint32_t error = lodepng::decode(icons_decoded, width, height, icons_raw_data);
-    // if (error != 0) {
-    //    std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
-    //    //return false;
-    //}
+    auto texture = u32{};
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
 
-    // glEnable(GL_TEXTURE_2D);
-    // uint32_t texId;
-    // glGenTextures(1, &texId);
-    // glBindTexture(GL_TEXTURE_2D, texId);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &icons_decoded[0]);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-    // return texI
-    return 0;
+    return texture;
 }
 
 auto isModernOpenglCapable() -> bool {
@@ -289,8 +267,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
     }
 #endif
-    const std::string_view rendering_mode = (is_legacy_opengl) ? core::tr("Legacy") : core::tr("Modern");
-    const std::string      window_title
+    const std::string rendering_mode = (is_legacy_opengl) ? core::tr("Legacy") : core::tr("Modern");
+    const std::string window_title
         = fmt::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
     const auto window = createMainWindow(minimum_viewport_width, minimum_viewport_height, window_title);
@@ -316,7 +294,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     ImGui::CreateContext();
     auto io = ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     (void)io;
-    //io.ConfigViewportDecorations
+    // io.ConfigViewportDecorations
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
@@ -352,6 +330,12 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
+        // Poll and handle events (inputs, window resize, etc.)
+        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+
         glfwPollEvents();
 
         // Start the ImGui frame
@@ -368,11 +352,17 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        gui::buildGui(state, *opengl, display_w, display_h);
+        gui::buildGui(state, *opengl);
 
         if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
 
         ImGui::Render();
+        // auto display_w = s32{};
+        // auto display_h = s32{};
+        // glfwGetFramebufferSize(window, &display_w, &display_h);
+        // glViewport(0, 0, display_w, display_h);
+        // glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        // glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
@@ -381,7 +371,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
             ImGui::RenderPlatformWindowsDefault();
         }
 
-        glfwMakeContextCurrent(window);
+        // glfwMakeContextCurrent(window);
         glfwSwapBuffers(window);
     }
 

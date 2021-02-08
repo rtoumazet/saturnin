@@ -39,6 +39,7 @@
 #include <saturnin/src/cdrom/scsi.h>
 #include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/video/opengl.h>
+#include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2.h>
 
 namespace cdrom = saturnin::cdrom;
@@ -51,6 +52,7 @@ using cdrom::Cdrom;
 using sh2::Sh2;
 using sh2::Sh2Type;
 using sound::Scsp;
+using video::Vdp1;
 using video::Vdp2;
 
 EmulatorContext::EmulatorContext() {
@@ -62,6 +64,7 @@ EmulatorContext::EmulatorContext() {
     smpc_       = std::make_unique<Smpc>(this);
     scsp_       = std::make_unique<Scsp>(this);
     cdrom_      = std::make_unique<Cdrom>(this);
+    vdp1_       = std::make_unique<Vdp1>(this);
     vdp2_       = std::make_unique<Vdp2>(this);
 }
 
@@ -75,6 +78,7 @@ auto EmulatorContext::scu() -> Scu* { return scu_.get(); };
 auto EmulatorContext::smpc() -> Smpc* { return smpc_.get(); };
 auto EmulatorContext::scsp() -> Scsp* { return scsp_.get(); };
 auto EmulatorContext::cdrom() -> Cdrom* { return cdrom_.get(); };
+auto EmulatorContext::vdp1() -> Vdp1* { return vdp1_.get(); };
 auto EmulatorContext::vdp2() -> Vdp2* { return vdp2_.get(); };
 
 auto EmulatorContext::initialize() -> bool {
@@ -169,6 +173,13 @@ void EmulatorContext::stopEmulation() {
 
 void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
 
+void EmulatorContext::onVblankIn() {
+    scu()->generateInterrupt(interrupt_source::v_blank_in);
+    scu()->sendStartFactor(StartingFactorSelect::v_blank_in);
+    vdp1()->populateRenderData();
+    vdp2()->populateRenderData();
+}
+
 void EmulatorContext::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
@@ -181,6 +192,7 @@ void EmulatorContext::emulationMainThread() {
         slaveSh2()->powerOnReset();
         smpc()->initialize();
         cdrom()->initialize();
+        vdp1()->initialize();
         vdp2()->initialize();
 
         while (emulationStatus() == EmulationStatus::running) {
@@ -188,6 +200,7 @@ void EmulatorContext::emulationMainThread() {
                 const auto cycles = masterSh2()->run();
                 if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
                 smpc()->run(cycles);
+                vdp1()->run(cycles);
                 vdp2()->run(cycles);
                 cdrom()->run(cycles);
             }

@@ -51,7 +51,7 @@ void OpenglLegacy::initialize() {
     auto       display_w = s32{};
     auto       display_h = s32{};
     glfwGetFramebufferSize(window, &display_w, &display_h);
-    initializeTexture(display_w, display_h);
+    // initializeTexture(display_w, display_h);
 
     glGenFramebuffersEXT(1, &fbo_);
     bindTextureToFbo();
@@ -60,28 +60,19 @@ void OpenglLegacy::initialize() {
         Log::error("opengl", tr("Could not initialize framebuffer object !"));
         throw std::runtime_error("Opengl error !");
     }
-
-    if (!generateUiIcons()) { Log::warning("opengl", tr("Could not generate textures for UI icons !")); }
 }
 
 void OpenglLegacy::shutdown() {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     glDeleteFramebuffersEXT(1, &fbo_);
-    glDeleteTextures(1, &texture_);
+    // glDeleteTextures(1, &texture_);
+    const auto texture = renderingTexture();
+    glDeleteTextures(1, &texture);
 }
-
-// void OpenglLegacy::initializeTexture(const u32 width, const u32 height) {
-//    if (texture_ != 0) glDeleteTextures(1, &texture_);
-//    this->texture_ = generateEmptyTexture(width, height);
-//    setTextureDimension(width, height);
-//
-//    // New texture is attached to the fbo
-//    bindTextureToFbo();
-//}
 
 void OpenglLegacy::preRender() {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-    glViewport(0, 0, current_texture_width_, current_texture_height_);
+    // glViewport(0, 0, current_texture_width_, current_texture_height_);
 
     glClear(GL_COLOR_BUFFER_BIT);
 };
@@ -122,11 +113,6 @@ void OpenglLegacy::render() {
 
 void OpenglLegacy::postRender() { glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); };
 
-void OpenglLegacy::updateTextureSize(const u32 width, const u32 height) {
-    initializeTexture(width, height);
-    // setTextureDimension(width, height);
-}
-
 auto OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
     auto texture = u32{};
     glGenTextures(1, &texture);
@@ -140,27 +126,7 @@ auto OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const
 
 void OpenglLegacy::bindTextureToFbo() const {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture_, 0);
-}
-
-void OpenglLegacy::deleteTexture() const {
-    if (texture_ != 0) { glDeleteTextures(1, &texture_); }
-}
-
-u32 OpenglLegacy::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const {
-    glEnable(GL_TEXTURE_2D);
-
-    auto texture = u32{};
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-    return texture;
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, renderingTexture(), 0);
 }
 
 static void error_callback(int error, const char* description) {

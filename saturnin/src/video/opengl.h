@@ -60,16 +60,21 @@ class Opengl {
     virtual ~Opengl()                     = default;
     //@}
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::displayFramebuffer();
+    ///
+    /// \brief  Displays the framebuffer content (VDP1 + VDP2)
+    ///
+    /// \author Runik
+    /// \date   27/01/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void displayFramebuffer();
+
     //@{
     // Abstract functions
-    virtual void               initialize()                                             = 0;
-    virtual void               shutdown()                                               = 0;
-    virtual void               preRender()                                              = 0;
-    virtual void               render()                                                 = 0;
-    virtual void               postRender()                                             = 0;
     [[nodiscard]] virtual auto generateEmptyTexture(u32 width, u32 height) const -> u32 = 0;
-    virtual void               updateTextureSize(u32 width, u32 height)                 = 0;
-    virtual void               deleteTexture() const                                    = 0;
+    // virtual void               updateTextureSize(u32 width, u32 height)                 = 0;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,22 +88,20 @@ class Opengl {
 
     virtual void bindTextureToFbo() const = 0;
 
-    [[nodiscard]] auto texture() const -> u32 { return this->texture_; };
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn [[nodiscard]] auto Opengl::isWindowResized(const u32 new_width, const u32 new_height) const -> bool;
+    /// \fn auto Opengl::texture() const -> u32
     ///
-    /// \brief  Checks if the window size has changed.
+    /// \brief  Gets the texture
     ///
     /// \author Runik
-    /// \date   18/10/2019
+    /// \date   06/02/2021
     ///
-    /// \return True if the window has been resized.
+    /// \returns    An u32.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] auto isWindowResized(u32 new_width, u32 new_height) const -> bool;
+    [[nodiscard]] auto renderingTexture() const -> const u32 { return this->rendering_texture_; };
 
-    void initializeTexture(u32 width, u32 height);
+    void renderingTexture(u32 texture) { this->rendering_texture_ = texture; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::generateTextureFromFile(const std::string& filename) const -> u32;
@@ -134,10 +137,6 @@ class Opengl {
 
     static auto loadIcons(std::vector<uint8_t>& image) -> u32;
 
-    static auto generateIconsTexture() -> u32;
-
-    uptr iconsTextureId; ///< Texture id storing data for UI icons
-
   protected:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn [[nodiscard]] auto Opengl::config() const -> Config*;
@@ -152,7 +151,7 @@ class Opengl {
 
     [[nodiscard]] auto config() const -> Config*;
 
-    void setTextureDimension(u32 width, u32 height);
+    // void setTextureDimension(u32 width, u32 height);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn virtual auto Opengl::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const
@@ -170,7 +169,19 @@ class Opengl {
     /// \returns    The id of the generated texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] virtual auto generateTextureFromVector(u32 width, u32 height, const std::vector<u8>& data) const -> u32 = 0;
+    [[nodiscard]] virtual auto generateTextureFromVector(u32 width, u32 height, const std::vector<u8>& data) const -> u32;
+
+    u32 fbo_{}; ///< Framebuffer Object used for rendering to texture.
+
+  private:
+    //@{
+    // Abstract functions
+    virtual void initialize() = 0;
+    virtual void shutdown()   = 0;
+    virtual void preRender()  = 0;
+    virtual void render()     = 0;
+    virtual void postRender() = 0;
+    //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::generateUiIcons() -> bool;
@@ -185,18 +196,13 @@ class Opengl {
 
     auto generateUiIcons() -> bool;
 
-    std::map<IconId, u32> icons_map_;
-
-    u32 fbo_{};     ///< Framebuffer Object used for rendering to texture.
-    u32 texture_{}; ///< Destination texture for render to texture.
-
-    u32 current_texture_width_{};  ///< Width of the texture
-    u32 current_texture_height_{}; ///< Height of the texture
-
-  private:
     // uint32_t      program_shader_;
     // uint32_t      vao_;
     core::Config* config_; ///< Configuration object
+
+    u32 rendering_texture_{}; ///< Destination texture for render to texture.
+
+    std::map<IconId, u32> icons_map_; ///< The icons map.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

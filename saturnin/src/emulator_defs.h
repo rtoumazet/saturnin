@@ -263,16 +263,21 @@ const auto bits_0_31  = BitRange<u32>{0, 31};  ///< Defines the 32 bits range of
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Coord {
-    u32 x;
-    u32 y;
-    Coord() {
-        x = 0;
-        y = 0;
-    }
-    Coord(u32 _x, u32 _y) {
-        x = _x;
-        y = _y;
-    }
+    float x;
+    float y;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct Vertex
+///
+/// \brief  A vertex.
+///
+/// \author Runik
+/// \date   01/02/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct Vertex {
+    u16 x; ///< Horizontal coordinate.
+    u16 y; ///< Vertical coordinate.
+};
 }; // namespace saturnin

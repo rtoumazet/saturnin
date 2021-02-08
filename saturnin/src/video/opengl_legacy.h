@@ -67,18 +67,11 @@ class OpenglLegacy : public Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     void shutdown() final;
 
-    // void initializeTexture(const u32 width, const u32 height);
-
     void preRender() final;
 
     void render() final;
 
     void postRender() final;
-
-    void updateTextureSize(u32 width, u32 height) final;
-
-  protected:
-    [[nodiscard]] u32 generateTextureFromVector(u32 width, u32 height, const std::vector<u8>& data) const final;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,8 +100,6 @@ class OpenglLegacy : public Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void bindTextureToFbo() const final;
-
-    void deleteTexture() const final;
 };
 
 }; // namespace saturnin::video
