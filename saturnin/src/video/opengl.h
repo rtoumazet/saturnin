@@ -37,6 +37,7 @@ class Config;
 class EmulatorContext;
 } // namespace saturnin::core
 struct GLFWwindow;
+struct GLFWimage;
 
 namespace saturnin::video {
 
@@ -278,5 +279,20 @@ void updateMainWindowSizeAndRatio(GLFWwindow* window, u32 width, u32 height);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto createMainWindow(u32 width, u32 height, std::string title) -> GLFWwindow*;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto loadPngImage(const char* filename) -> GLFWimage;
+///
+/// \brief  Loads PNG image
+///
+/// \author Runik
+/// \date   08/02/2021
+///
+/// \param  filename    Filename of the file.
+///
+/// \returns    The PNG image.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto loadPngImage(const char* filename) -> GLFWimage;
 
 }; // namespace saturnin::video

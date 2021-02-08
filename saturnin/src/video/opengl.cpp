@@ -287,6 +287,11 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
+    // const auto icon  = loadPngImage("saturnin-ico.png");
+    auto icons = std::array<GLFWimage, 3>{
+        {loadPngImage("saturnin-ico-16.png"), loadPngImage("saturnin-ico-32.png"), loadPngImage("saturnin-ico-48.png")}};
+    glfwSetWindowIcon(window, 3, icons.data());
+
     glbinding::initialize(glfwGetProcAddress);
 
     // Setup Dear ImGui binding
@@ -396,5 +401,21 @@ void updateMainWindowSizeAndRatio(GLFWwindow* window, const u32 width, const u32
 auto createMainWindow(const u32 width, const u32 height, const std::string title) -> GLFWwindow* {
     const auto total_height = u32{height + gui::core_window_height};
     return glfwCreateWindow(width, total_height, title.c_str(), nullptr, nullptr);
+}
+
+auto loadPngImage(const char* filename) -> GLFWimage {
+    const auto full_path{std::filesystem::current_path() / "res" / filename};
+    auto       image  = GLFWimage{};
+    auto       width  = u32{};
+    auto       height = u32{};
+    const auto error  = lodepng_decode32_file(&(image.pixels), &width, &height, full_path.string().c_str());
+    if (error != 0) {
+        Log::warning("opengl", lodepng_error_text(error));
+        return image;
+    }
+    image.width  = width;
+    image.height = height;
+
+    return image;
 }
 }; // namespace saturnin::video
