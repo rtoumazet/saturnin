@@ -59,6 +59,8 @@ void Opengl::displayFramebuffer() {
     postRender();
 }
 
+void Opengl::updateScreenResolution(){};
+
 auto Opengl::config() const -> Config* { return config_; }
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
@@ -271,14 +273,13 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const std::string window_title
         = fmt::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
-    const auto window = createMainWindow(minimum_viewport_width, minimum_viewport_height, window_title);
+    const auto window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
     if (window == nullptr) { return EXIT_FAILURE; }
-
-    updateMainWindowSizeAndRatio(window, minimum_viewport_width, minimum_viewport_height);
 
     state.openglWindow(window);
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
+    glfwSetWindowSizeCallback(window, windowSizeCallback);
 
     glfwSetWindowUserPointer(window, static_cast<void*>(&state));
 
@@ -287,7 +288,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
-    // const auto icon  = loadPngImage("saturnin-ico.png");
     auto icons = std::array<GLFWimage, 3>{
         {loadPngImage("saturnin-ico-16.png"), loadPngImage("saturnin-ico-32.png"), loadPngImage("saturnin-ico-48.png")}};
     glfwSetWindowIcon(window, 3, icons.data());
@@ -332,6 +332,9 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         auto modern = std::make_unique<OpenglModern>(state.config());
         opengl      = std::move(modern);
     }
+    state.opengl(opengl.get());
+
+    updateMainWindowSizeAndRatio(window, minimum_window_width, minimum_window_height);
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
@@ -357,7 +360,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        gui::buildGui(state, *opengl);
+        gui::buildGui(state);
 
         if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
 
@@ -392,15 +395,31 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 }
 
 void updateMainWindowSizeAndRatio(GLFWwindow* window, const u32 width, const u32 height) {
-    const auto total_height = u32{height + gui::core_window_height};
+    const auto menu_height  = static_cast<u32>(ImGui::GetFrameHeight());
+    const auto total_height = u32{height + menu_height};
 
-    glfwSetWindowAspectRatio(window, width, total_height);
+    // glfwSetWindowAspectRatio(window, width, total_height);
+
+    // const auto mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+    // window_width  = mode->width;
+    // window_height = mode->height;
+
     glfwSetWindowSizeLimits(window, width, total_height, GLFW_DONT_CARE, GLFW_DONT_CARE);
 }
 
 auto createMainWindow(const u32 width, const u32 height, const std::string title) -> GLFWwindow* {
-    const auto total_height = u32{height + gui::core_window_height};
-    return glfwCreateWindow(width, total_height, title.c_str(), nullptr, nullptr);
+    // const auto         monitor = glfwGetPrimaryMonitor();
+    // const GLFWvidmode* mode    = glfwGetVideoMode(monitor);
+
+    // glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+    // glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+    // glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+    // glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+    return glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+
+    // return glfwCreateWindow(mode->width, mode->height, title.c_str(), monitor, nullptr);
 }
 
 auto loadPngImage(const char* filename) -> GLFWimage {
@@ -418,4 +437,12 @@ auto loadPngImage(const char* filename) -> GLFWimage {
 
     return image;
 }
+
+void windowSizeCallback(GLFWwindow* window, int width, int height) {
+    const auto state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
+
+    state->opengl()->onWindowResize(width, height);
+    Log::warning("opengl", "Window was resized: {} {}", width, height);
+}
+
 }; // namespace saturnin::video

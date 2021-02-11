@@ -54,44 +54,41 @@ constexpr auto core_window_height = u8{40};
 void showImguiDemoWindow(bool show_window);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl);
+/// \fn void showMainMenu(core::EmulatorContext& state);
 ///
-/// \brief  Displays the core window.
+/// \brief  Shows the main menu in the main window
 ///
 /// \author Runik
-/// \date   24/10/2019
+/// \date   10/02/2021
 ///
 /// \param [in,out] state   The emulator context.
-/// \param [in,out] opengl  The opengl object.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showCoreWindow(core::EmulatorContext& state, video::Opengl& opengl);
+void showMainMenu(core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showRenderingWindow(video::Opengl& opengl);
+/// \fn void showRenderingWindow(core::EmulatorContext& state);
 ///
 /// \brief  Displays the rendering window.
 ///
 /// \author Runik
 /// \date   24/10/2019
 ///
-/// \param [in,out] opengl  The opengl object.
+/// \param [in,out] state   The emulator context.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showRenderingWindow(video::Opengl& opengl);
+void showRenderingWindow(core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showStvWindow(bool* opened);
+/// \fn void showStvWindow();
 ///
 /// \brief  Displays the ST-V games choice window.
 ///
 /// \author Runik
 /// \date   24/10/2019
-///
-/// \param [in,out] opened  True to display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showStvWindow(bool* opened);
+void showStvWindow();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showOptionsWindow(core::EmulatorContext& state, bool* opened);
@@ -121,7 +118,7 @@ void showOptionsWindow(core::EmulatorContext& state, bool* opened);
 void showLogWindow(bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, bool* opened);
+/// \fn void showSh2DebugWindow(core::EmulatorContext& state, bool* opened);
 ///
 /// \brief  Displays the debug window for both SH2.
 ///
@@ -129,11 +126,10 @@ void showLogWindow(bool* opened);
 /// \date   06/04/2020
 ///
 /// \param [in,out] state   The emulator context.
-/// \param [in,out] opengl  The opengl.
 /// \param [in,out] opened  True will display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, bool* opened);
+void showSh2DebugWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
@@ -150,7 +146,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, video::Opengl& opengl, boo
 void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void buildGui(core::EmulatorContext& state, video::Opengl& opengl);
+/// \fn void buildGui(core::EmulatorContext& state);
 ///
 /// \brief  Builds a graphical user interface.
 ///
@@ -158,10 +154,9 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
 /// \date   24/10/2019
 ///
 /// \param [in,out] state   The emulator context.
-/// \param [in,out] opengl  The opengl object.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void buildGui(core::EmulatorContext& state, video::Opengl& opengl);
+void buildGui(core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void addTextureToDrawList(int32_t texture, uint32_t width, uint32_t height);
@@ -179,18 +174,33 @@ void buildGui(core::EmulatorContext& state, video::Opengl& opengl);
 void addTextureToDrawList(s32 texture, u32 width, u32 height);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto getMouseClickCoordinates(core::EmulatorContext& state) -> Coord;
+/// \fn auto getMouseCoordinates(core::EmulatorContext& state) -> Coord;
 ///
-/// \brief  Gets mouse click coordinates in the ImGui coordinate
+/// \brief  Returns mouse coordinates in the ImGui window
 ///
 /// \author Runik
 /// \date   21/01/2021
 ///
 /// \param [in,out] state   The emulator context.
 ///
-/// \returns    The mouse click coordinates.
+/// \returns    The mouse coordinates.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto getMouseClickCoordinates(core::EmulatorContext& state) -> Coord;
+auto getMouseCoordinates(core::EmulatorContext& state) -> Coord;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto isMainMenuDisplayed(core::EmulatorContext& state)-> bool;
+///
+/// \brief  Query if the main menu has to be displayed.
+///
+/// \author Runik
+/// \date   11/02/2021
+///
+/// \param [in,out] state   The emulator context.
+///
+/// \returns    True if the main menu has to be displayed.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto isMainMenuDisplayed(core::EmulatorContext& state) -> bool;
 
 } // namespace saturnin::gui

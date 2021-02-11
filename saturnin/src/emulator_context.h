@@ -155,6 +155,7 @@ class EmulatorContext {
     auto cdrom() -> cdrom::Cdrom*;
     auto vdp1() -> video::Vdp1*;
     auto vdp2() -> video::Vdp2*;
+    auto opengl() -> video::Opengl*;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -297,6 +298,19 @@ class EmulatorContext {
 
     void onVblankIn();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void EmulatorContext::opengl(video::Opengl* opengl);
+    ///
+    /// \brief  Sets the Opengl object.
+    ///
+    /// \author Runik
+    /// \date   08/02/2021
+    ///
+    /// \param [in,out] opengl  The first parameter.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void opengl(video::Opengl* opengl);
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::emulationMainThread();
@@ -319,6 +333,7 @@ class EmulatorContext {
     std::unique_ptr<cdrom::Cdrom> cdrom_;      ///< CDROM object
     std::unique_ptr<video::Vdp1>  vdp1_;       ///< Vdp1 object
     std::unique_ptr<video::Vdp2>  vdp2_;       ///< Vdp2 object
+    video::Opengl*                opengl_;     ///< Opengl object
 
     HardwareMode    hardware_mode_{HardwareMode::saturn};        ///< Hardware mode
     EmulationStatus emulation_status_{EmulationStatus::stopped}; ///< Emulation status

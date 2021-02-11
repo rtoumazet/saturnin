@@ -52,6 +52,7 @@ using cdrom::Cdrom;
 using sh2::Sh2;
 using sh2::Sh2Type;
 using sound::Scsp;
+using video::Opengl;
 using video::Vdp1;
 using video::Vdp2;
 
@@ -66,6 +67,7 @@ EmulatorContext::EmulatorContext() {
     cdrom_      = std::make_unique<Cdrom>(this);
     vdp1_       = std::make_unique<Vdp1>(this);
     vdp2_       = std::make_unique<Vdp2>(this);
+    opengl_     = nullptr; // Will be set later
 }
 
 EmulatorContext::~EmulatorContext() = default;
@@ -80,6 +82,7 @@ auto EmulatorContext::scsp() -> Scsp* { return scsp_.get(); };
 auto EmulatorContext::cdrom() -> Cdrom* { return cdrom_.get(); };
 auto EmulatorContext::vdp1() -> Vdp1* { return vdp1_.get(); };
 auto EmulatorContext::vdp2() -> Vdp2* { return vdp2_.get(); };
+auto EmulatorContext::opengl() -> Opengl* { return opengl_; };
 
 auto EmulatorContext::initialize() -> bool {
     Log::initialize();
@@ -216,5 +219,7 @@ void EmulatorContext::startInterface() { video::runOpengl(*this); }
 void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
 
 auto EmulatorContext::openglWindow() const -> GLFWwindow* { return opengl_window_; }
+
+void EmulatorContext::opengl(video::Opengl* opengl) { opengl_ = opengl; };
 
 } // namespace saturnin::core

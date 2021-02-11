@@ -43,8 +43,8 @@ namespace saturnin::video {
 
 using saturnin::core::Config;
 
-constexpr auto minimum_viewport_width  = u16{700};
-constexpr auto minimum_viewport_height = u16{525};
+constexpr auto minimum_window_width  = u16{320};
+constexpr auto minimum_window_height = u16{224};
 
 enum class IconId { play, pause, stop, step_into, step_over, step_out, config, file, debug };
 
@@ -138,6 +138,39 @@ class Opengl {
 
     static auto loadIcons(std::vector<uint8_t>& image) -> u32;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn virtual void Opengl::onWindowResize(u16 width, u16 height) = 0;
+    ///
+    /// \brief  Actions executed on window resize.
+    ///
+    /// \author Runik
+    /// \date   08/02/2021
+    ///
+    /// \param  width   The new window width.
+    /// \param  height  The new window height.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    virtual void onWindowResize(u16 width, u16 height) = 0;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::updateScreenResolution();
+    ///
+    /// \brief  Updates the screen resolution
+    ///
+    /// \author Runik
+    /// \date   10/02/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void updateScreenResolution();
+
+    //@{
+    // Getters / Setters
+    void saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
+    auto saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
+    void hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
+    auto hostScreenResolution() const -> ScreenResolution { return host_screen_resolution_; };
+    //@}
+
   protected:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn [[nodiscard]] auto Opengl::config() const -> Config*;
@@ -204,6 +237,9 @@ class Opengl {
     u32 rendering_texture_{}; ///< Destination texture for render to texture.
 
     std::map<IconId, u32> icons_map_; ///< The icons map.
+
+    ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
+    ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,6 +268,21 @@ auto isModernOpenglCapable() -> bool;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void windowCloseCallback(GLFWwindow* window);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void windowSizeCallback(GLFWwindow* window, int width, int height);
+///
+/// \brief  Callback, called when the window is resized.
+///
+/// \author Runik
+/// \date   08/02/2021
+///
+/// \param [in,out] window  If non-null, a pointer to the GLFW window..
+/// \param          width   The width.
+/// \param          height  The height.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void windowSizeCallback(GLFWwindow* window, int width, int height);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn auto runOpengl(EmulatorContext& state) -> s32;

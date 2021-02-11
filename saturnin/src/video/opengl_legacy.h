@@ -73,6 +73,8 @@ class OpenglLegacy : public Opengl {
 
     void postRender() final;
 
+    void onWindowResize(u16 width, u16 height) final;
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn [[nodiscard]] auto OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const -> u32 final;

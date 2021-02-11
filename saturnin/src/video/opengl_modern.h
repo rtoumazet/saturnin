@@ -100,6 +100,8 @@ class OpenglModern final : public Opengl {
 
     void postRender() final;
 
+    void onWindowResize(u16 width, u16 height) final;
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn [[nodiscard]] auto OpenglModern::generateEmptyTexture(u32 width, u32 height) const -> u32 final;

@@ -93,6 +93,8 @@ void OpenglModern::initialize() {
     program_shader_              = createProgramShader(vertex_shader, fragment_shader);
     const auto shaders_to_delete = std::vector<uint32_t>{vertex_shader, fragment_shader};
     deleteShaders(shaders_to_delete);
+
+    glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
 }
 
 void OpenglModern::shutdown() {
@@ -201,13 +203,13 @@ void OpenglModern::setupTriangle() {
     //     0.5f, -0.5f, 0.0f,
     //};
         constexpr std::array<u16, 18> vertices = {
-        0, -50, 0, // 0
-        0,   0, 0, // 1
-        50,  0, 0, // 2
+        0,  0,  0, // 0
+        0,  200, 0, // 1
+        50, 200, 0, // 2
 
-         0, -50, 0, // 0
-         50,  0, 0, // 2
-         50, -50, 0,  // 3
+        0,  0, 0, // 0
+        50, 200, 0, // 2
+        50, 0, 0,  // 3
     };
     /* clang-format on */
 
@@ -247,11 +249,16 @@ void OpenglModern::drawTriangle() {
     auto       window_height = s32{};
     glfwGetWindowSize(window, &window_width, &window_height);
 
-    const auto translation_amount = static_cast<float>(gui::core_window_height) * static_cast<float>(saturn_framebuffer_height)
-                                    / static_cast<float>(window_height);
+    const auto translation_amount
+        = ImGui::GetFrameHeight() * static_cast<float>(saturn_framebuffer_height) / static_cast<float>(window_height);
 
-    const auto projection  = glm::mat4{glm::ortho(-1024.0f, 1024.0f, 1024.0f, -1024.0f)};
-    const auto proj_matrix = glm::mat4{glm::translate(projection, glm::vec3(0.0f, translation_amount, 0.0f))};
+    const auto projection = glm::mat4{glm::ortho(-1024.0f, 1024.0f, -1024.0f, 1024.0f)}; // Setting the orthogonal projection
+    // const auto proj_matrix = glm::mat4{glm::translate(projection, glm::vec3(0.0f, translation_amount, 0.0f))};
+    const auto proj_matrix = glm::mat4{glm::translate(projection, glm::vec3(-1024.0f, -1024.0f + translation_amount, 0.0f))};
+    // const auto proj_matrix = glm::mat4{
+    //    glm::translate(projection,
+    //                   glm::vec3(-1024.0f, -1024.0f, 0.0f))}; // Putting the center of the framebuffer to the lower left corner
+    // const auto proj_matrix = projection;
 
     const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
@@ -268,7 +275,9 @@ void OpenglModern::preRender() {
     glfwGetWindowSize(window, &display_w, &display_h);
     const auto aspect_ratio = static_cast<float>(display_w) / static_cast<float>(display_h);
 
-    glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height * aspect_ratio);
+    const auto height = float{saturn_framebuffer_height * aspect_ratio};
+    // glViewport(0, 0, saturn_framebuffer_width, static_cast<u16>(height));
+    // glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
 
     gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -280,6 +289,12 @@ void OpenglModern::render() {
 };
 
 void OpenglModern::postRender() { glBindFramebuffer(GL_FRAMEBUFFER, 0); };
+
+void OpenglModern::onWindowResize(u16 width, u16 height){
+    // const auto aspect_ratio  = static_cast<float>(width) / static_cast<float>(height);
+    // const auto window_height = float{saturn_framebuffer_height * aspect_ratio};
+    // glViewport(0, 0, saturn_framebuffer_width, static_cast<u16>(window_height));
+};
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
