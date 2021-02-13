@@ -67,6 +67,37 @@ void showImguiDemoWindow(const bool show_window) {
     }
 }
 
+void showCoreWindow(core::EmulatorContext& state) {
+    auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_MenuBar};
+    window_flags |= ImGuiWindowFlags_NoCollapse;
+    window_flags |= ImGuiWindowFlags_NoResize;
+
+    const auto pos_x = float{ImGui::GetMainViewport()->Pos.x + ImGui::GetMainViewport()->Size.x};
+    const auto pos_y = float{ImGui::GetMainViewport()->Pos.y};
+    ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Once);
+    const auto size = ImVec2(275, 80);
+    ImGui::SetNextWindowSize(size);
+
+    ImGui::Begin(tr("Core").c_str(), nullptr, window_flags);
+
+    showMainMenu(state);
+
+    const auto button_width = ImVec2(80, 0);
+    const auto label_run    = icon_play + tr("Run");
+    if (ImGui::Button(label_run.c_str(), button_width)) { state.startEmulation(); }
+    ImGui::SameLine();
+    const auto label_pause = icon_pause + tr("Pause");
+    if (ImGui::Button(label_pause.c_str(), button_width)) { state.pauseEmulation(); }
+    ImGui::SameLine();
+    const auto label_stop = icon_stop + tr("Stop");
+    if (ImGui::Button(label_stop.c_str(), button_width)) {
+        state.stopEmulation();
+        show_debug_sh2 = false;
+    }
+
+    ImGui::End();
+}
+
 auto isMainMenuDisplayed(core::EmulatorContext& state) -> bool {
     // When the emulator is paused or stopped, the main menu is displayed without restrictions.
     // When it's running, the main menu is displayed when the mouse cursor hovers the area where the menu should be.
@@ -129,12 +160,13 @@ void showMainMenu(core::EmulatorContext& state) {
         if (show_options) { showOptionsWindow(state, &show_options); }
 
         // Buttons
-        if (ImGui::SmallButton(tr("Play").c_str())) { state.startEmulation(); }
-        if (ImGui::SmallButton(tr("Pause").c_str())) { state.pauseEmulation(); }
-        if (ImGui::SmallButton(tr("Stop").c_str())) {
-            state.stopEmulation();
-            show_debug_sh2 = false;
-        }
+        ImGui::SameLine(200);
+        // if (ImGui::SmallButton(icon_play)) { state.startEmulation(); }
+        // if (ImGui::SmallButton(icon_pause)) { state.pauseEmulation(); }
+        // if (ImGui::SmallButton(icon_stop)) {
+        //    state.stopEmulation();
+        //    show_debug_sh2 = false;
+        //}
 
         ImGui::EndMenuBar();
     }
@@ -177,7 +209,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
     state.opengl()->displayFramebuffer();
     if (state.opengl()->renderingTexture() != 0) { gui::addTextureToDrawList(state.opengl()->renderingTexture(), width, height); }
 
-    showMainMenu(state);
+    // showMainMenu(state);
 
     ImGui::End();
     ImGui::PopStyleVar();
@@ -792,7 +824,7 @@ void showLogWindow(bool* opened) {
 }
 
 void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(650, 420);
+    const auto window_size = ImVec2(670, 440);
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings
@@ -801,15 +833,9 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
     static auto sh2_type   = Sh2Type{Sh2Type::master};
     static auto current_pc = u32{state.slaveSh2()->getRegister(Sh2Register::pc)};
-    if (ImGui::RadioButton(tr("Master").c_str(), sh2_type == Sh2Type::master)) {
-        sh2_type = Sh2Type::master;
-        //        current_pc = state.masterSh2()->getRegister(Sh2Register::pc);
-    }
+    if (ImGui::RadioButton(tr("Master").c_str(), sh2_type == Sh2Type::master)) { sh2_type = Sh2Type::master; }
     ImGui::SameLine();
-    if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) {
-        sh2_type = Sh2Type::slave;
-        // current_pc = state.slaveSh2()->getRegister(Sh2Register::pc);
-    };
+    if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) { sh2_type = Sh2Type::slave; };
 
     sh2::Sh2* current_sh2{nullptr};
     switch (sh2_type) {
@@ -823,24 +849,20 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
     {
         // Debug buttons
-        const ImVec2 button_size(30, 30);
-        if (ImGui::ImageButton(state.opengl()->getIconTexture(video::IconId::step_into), button_size)) {
-            state.debugStatus(core::DebugStatus::step_into);
-        }
+        const auto button_width    = ImVec2(90, 0);
+        const auto label_step_into = icon_step_into + tr("Step into");
+        if (ImGui::Button(label_step_into.c_str(), button_width)) { state.debugStatus(core::DebugStatus::step_into); }
         ImGui::SameLine();
-        ImGui::PushButtonRepeat(true);
-        if (ImGui::ImageButton(state.opengl()->getIconTexture(video::IconId::step_over), button_size)) {
-            state.debugStatus(core::DebugStatus::step_over);
-        }
+        const auto label_step_over = icon_step_over + tr("Step over");
+        if (ImGui::Button(label_step_over.c_str(), button_width)) { state.debugStatus(core::DebugStatus::step_over); }
         ImGui::SameLine();
-        if (ImGui::ImageButton(state.opengl()->getIconTexture(video::IconId::step_out), button_size)) {
-            state.debugStatus(core::DebugStatus::step_out);
-        }
+        const auto label_step_out = icon_step_out + tr("Step out");
+        if (ImGui::Button(label_step_out.c_str(), button_width)) { state.debugStatus(core::DebugStatus::step_out); }
     }
 
     {
         // General registers
-        const auto child_size = ImVec2(300, 240);
+        const auto child_size = ImVec2(300, 270);
         ImGui::BeginChild("ChildRegisters", child_size, true, window_flags);
 
         ImGui::TextDisabled(tr("General registers").c_str());
@@ -898,18 +920,18 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
         ImGui::EndChild();
     }
-    ImGui::SameLine();
+    ImGui::SameLine(ImGui::GetWindowWidth() / 2);
     {
         // Disassembly
-        const auto child_size = ImVec2(330, 240);
+        const auto child_size = ImVec2(330, 270);
         ImGui::BeginChild("ChildDisassembly", child_size, true, window_flags);
 
         ImGui::TextDisabled(tr("Disassembly").c_str());
         ImGui::Separator();
 
         ImGui::Columns(2);
-        ImGui::SetColumnWidth(0, 305.0f);
-        ImGui::SetColumnWidth(1, 25.0f);
+        ImGui::SetColumnWidth(0, 300.0f);
+        ImGui::SetColumnWidth(1, 30.0f);
 
         const auto lower_bound = u32{current_pc - 6};
         const auto upper_bound = u32{current_pc + 20};
@@ -938,10 +960,9 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
         ImGui::EndChild();
     }
-
     ImGui::NewLine();
-    constexpr auto line_offset = float{304};
-    ImGui::SameLine(line_offset);
+
+    ImGui::SameLine(ImGui::GetWindowWidth() / 2);
 
     {
         // Callstack
@@ -1008,7 +1029,7 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void buildGui(core::EmulatorContext& state) {
-    // showCoreWindow(state);
+    showCoreWindow(state);
 
     showRenderingWindow(state);
 

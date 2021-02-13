@@ -47,11 +47,7 @@ namespace saturnin::video {
 using core::Log;
 using core::tr;
 
-Opengl::Opengl(core::Config* config) {
-    config_ = config;
-
-    if (!generateUiIcons()) { Log::warning("opengl", tr("Could not generate textures for UI icons !")); }
-}
+Opengl::Opengl(core::Config* config) { config_ = config; }
 
 void Opengl::displayFramebuffer() {
     preRender();
@@ -109,24 +105,6 @@ auto Opengl::generateTextureFromFile(const std::string& filename) const -> u32 {
     return texture;
 };
 
-auto Opengl::generateUiIcons() -> bool {
-    icons_map_.emplace(IconId::play, generateTextureFromFile("icon-play.png"));
-    icons_map_.emplace(IconId::pause, generateTextureFromFile("icon-pause.png"));
-    icons_map_.emplace(IconId::stop, generateTextureFromFile("icon-stop.png"));
-    icons_map_.emplace(IconId::config, generateTextureFromFile("icon-config.png"));
-    icons_map_.emplace(IconId::step_into, generateTextureFromFile("icon-step-into.png"));
-    icons_map_.emplace(IconId::step_over, generateTextureFromFile("icon-step-over.png"));
-    icons_map_.emplace(IconId::step_out, generateTextureFromFile("icon-step-out.png"));
-    icons_map_.emplace(IconId::file, generateTextureFromFile("icon-file.png"));
-    icons_map_.emplace(IconId::debug, generateTextureFromFile("icon-debug.png"));
-
-    return true;
-}
-
-auto Opengl::getIconTexture(const IconId id) -> ImTextureID {
-    return reinterpret_cast<ImTextureID>(static_cast<uptr>(icons_map_[id]));
-}
-
 /* static */
 auto Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool {
     // Load file and decode image.
@@ -163,35 +141,6 @@ auto Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<u
     // glObjectLabel(GL_TEXTURE, iconsTextureId, -1, "Example Texture");
 
     return true;
-}
-
-/* static */
-auto Opengl::loadIcons(std::vector<uint8_t>& image) -> u32 {
-    // Opengl.loadPngImage("D:/Dev/Sources/VS2017/saturnin-vs2017/saturnin/res/icons.png");
-    // std::vector<uint8_t> icons_vector(icons_png, icons_png + sizeof(icons_png));
-    // return loadPngImage(icons_vector, image);
-
-    // "F" texture
-    // uint8_t texture[] = {
-    //    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0x0F,0xFF,0xFF,0x0F,0xFF,0xFF,0x0F,0xFF,0xFF,0x0F,0xFF,0xFF,0x0F,0xFF,0xFF,0x0F,0xFF,0xFF,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0x0F,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0x0F,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0x0F,0xFF,0xFF,0x0F,0xFF,0xFF,0x0F,0xFF,0xFF,0x0F,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0x0F,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0x0F,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-    //};
-    // glEnable(GL_TEXTURE_2D);
-
-    // glGenTextures(1, &iconsTextureId);
-    // glBindTexture(GL_TEXTURE_2D, iconsTextureId);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // glTexImage2D(GL_TEXTURE_2D, 0, 4, 0x8, 0x8, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
-
-    // return iconsTextureId;
-    return 0;
 }
 
 auto Opengl::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const -> u32 {
@@ -297,8 +246,9 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    auto io = ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    (void)io;
+
+    auto flags = ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    (void)flags;
     // io.ConfigViewportDecorations
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
@@ -320,6 +270,17 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // io.Fonts->AddFontFromFileTTF("../../extra_fonts/Roboto-Medium.ttf", 16.0f);
     // io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+
+    ImGuiIO&                            io           = ImGui::GetIO();
+    ImFont*                             font         = io.Fonts->AddFontDefault();
+    static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe907, 0}; // Will not be copied by AddFont* so keep in scope.
+    ImFontConfig                        config;
+    config.MergeMode = true;
+    const auto font_path{std::filesystem::current_path() / "res" / "saturnin-icons.ttf"};
+    const auto glyph_offset = ImVec2(0, 2);
+    config.GlyphOffset      = glyph_offset;
+    io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), 13.0f, &config, icons_ranges.data());
+    io.Fonts->Build();
 
     const auto clear_color = ImVec4{0.45f, 0.55f, 0.60f, 1.00f};
 

@@ -38,7 +38,14 @@ class Opengl;
 
 namespace saturnin::gui {
 
-constexpr auto core_window_height = u8{40};
+constexpr auto icon_debug     = "\xEE\xA4\x80 ";
+constexpr auto icon_step_into = "\xEE\xA4\x81 ";
+constexpr auto icon_step_out  = "\xEE\xA4\x82 ";
+constexpr auto icon_step_over = "\xEE\xA4\x83 ";
+constexpr auto icon_config    = "\xEE\xA4\x84 ";
+constexpr auto icon_play      = "\xEE\xA4\x85 ";
+constexpr auto icon_pause     = "\xEE\xA4\x86 ";
+constexpr auto icon_stop      = "\xEE\xA4\x87 ";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showImguiDemoWindow(bool show_window);
@@ -52,6 +59,19 @@ constexpr auto core_window_height = u8{40};
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void showImguiDemoWindow(bool show_window);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void showCoreWindow(core::EmulatorContext& state);
+///
+/// \brief  Displays the core window.
+///
+/// \author Runik
+/// \date   24/10/2019
+///
+/// \param [in,out] state   The emulator context.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void showCoreWindow(core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showMainMenu(core::EmulatorContext& state);

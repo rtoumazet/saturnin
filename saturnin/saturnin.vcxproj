@@ -165,7 +165,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <PostBuildEvent>
       <Command>xcopy $(MSBuildProjectDirectory)\stv\*.* $(LocalDebuggerWorkingDirectory)stv\ /Y
 xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ /Y /S
-xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ /Y</Command>
+xcopy $(MSBuildProjectDirectory)\res\*.ttf $(LocalDebuggerWorkingDirectory)res\ /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

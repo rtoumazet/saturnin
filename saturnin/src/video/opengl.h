@@ -46,8 +46,6 @@ using saturnin::core::Config;
 constexpr auto minimum_window_width  = u16{320};
 constexpr auto minimum_window_height = u16{224};
 
-enum class IconId { play, pause, stop, step_into, step_over, step_out, config, file, debug };
-
 class Opengl {
   public:
     //@{
@@ -119,24 +117,7 @@ class Opengl {
 
     [[nodiscard]] auto generateTextureFromFile(const std::string& filename) const -> u32;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getIconTexture(IconId id) -> ImTextureID;
-    ///
-    /// \brief  Gets the texture id of the IconId.
-    ///
-    /// \author Runik
-    /// \date   22/04/2020
-    ///
-    /// \param  id  The icon identifier.
-    ///
-    /// \returns    The icon texture id.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    [[nodiscard]] auto getIconTexture(IconId id) -> ImTextureID;
-
     static auto loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool;
-
-    static auto loadIcons(std::vector<uint8_t>& image) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn virtual void Opengl::onWindowResize(u16 width, u16 height) = 0;
@@ -217,26 +198,11 @@ class Opengl {
     virtual void postRender() = 0;
     //@}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::generateUiIcons() -> bool;
-    ///
-    /// \brief  Generates the user interface icons.
-    ///
-    /// \author Runik
-    /// \date   22/04/2020
-    ///
-    /// \returns    True if it succeeds.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto generateUiIcons() -> bool;
-
     // uint32_t      program_shader_;
     // uint32_t      vao_;
     core::Config* config_; ///< Configuration object
 
     u32 rendering_texture_{}; ///< Destination texture for render to texture.
-
-    std::map<IconId, u32> icons_map_; ///< The icons map.
 
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
