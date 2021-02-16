@@ -93,8 +93,6 @@ void OpenglModern::initialize() {
     program_shader_              = createProgramShader(vertex_shader, fragment_shader);
     const auto shaders_to_delete = std::vector<uint32_t>{vertex_shader, fragment_shader};
     deleteShaders(shaders_to_delete);
-
-    glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
 }
 
 void OpenglModern::shutdown() {
@@ -204,13 +202,23 @@ void OpenglModern::setupTriangle() {
     //};
         constexpr std::array<u16, 18> vertices = {
         0,  0,  0, // 0
-        0,  200, 0, // 1
-        50, 200, 0, // 2
+        0,  224, 0, // 1
+        320, 224, 0, // 2
 
         0,  0, 0, // 0
-        50, 200, 0, // 2
-        50, 0, 0,  // 3
+        320, 224, 0, // 2
+        320, 0, 0,  // 3
     };
+
+    //        constexpr std::array<u16, 18> vertices = {
+    //    0,  0,  0, // 0
+    //    0,  150, 0, // 1
+    //    150, 150, 0, // 2
+
+    //    0,  0, 0, // 0
+    //    150, 150, 0, // 2
+    //    150, 0, 0,  // 3
+    //};
     /* clang-format on */
 
     glGenVertexArrays(1, &vao_);
@@ -241,24 +249,36 @@ void OpenglModern::drawTriangle() {
     glBindVertexArray(vao_); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep
                              // things a bit more organized
 
-    // Main display window consists of the core window (40 pixels of height) and the rendering window.
-    // The rendering context needs to be translated on the y axis of the core window height in order to have the (0,0) point
-    // centered.
-    const auto window        = glfwGetCurrentContext();
-    auto       window_width  = s32{};
-    auto       window_height = s32{};
-    glfwGetWindowSize(window, &window_width, &window_height);
+    const auto host_res     = hostScreenResolution();
+    const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
+    const auto saturn_res   = saturnScreenResolution();
+    const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
 
-    const auto translation_amount
-        = ImGui::GetFrameHeight() * static_cast<float>(saturn_framebuffer_height) / static_cast<float>(window_height);
+    auto projection = glm::mat4{};
+    auto view       = glm::mat4{1.0f};
 
-    const auto projection = glm::mat4{glm::ortho(-1024.0f, 1024.0f, -1024.0f, 1024.0f)}; // Setting the orthogonal projection
-    // const auto proj_matrix = glm::mat4{glm::translate(projection, glm::vec3(0.0f, translation_amount, 0.0f))};
-    const auto proj_matrix = glm::mat4{glm::translate(projection, glm::vec3(-1024.0f, -1024.0f + translation_amount, 0.0f))};
-    // const auto proj_matrix = glm::mat4{
-    //    glm::translate(projection,
-    //                   glm::vec3(-1024.0f, -1024.0f, 0.0f))}; // Putting the center of the framebuffer to the lower left corner
-    // const auto proj_matrix = projection;
+    if (host_ratio >= saturn_ratio) {
+        // Pillarbox display (wide viewport), use full height
+        projection = glm::mat4{
+            glm::ortho(0.0f, host_ratio / saturn_ratio * saturn_res.width, 0.0f, static_cast<float>(saturn_res.height))};
+
+        // Centering the viewport
+        const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
+        const auto amount     = static_cast<float>(empty_zone) / host_res.width;
+        view                  = glm::translate(view, glm::vec3(amount, 0.0f, 0.0f));
+
+    } else {
+        // Letterbox display (tall viewport) use full width
+        projection = glm::mat4{
+            glm::ortho(0.f, static_cast<float>(saturn_res.width), 0.f, saturn_ratio / host_ratio * saturn_res.height)};
+
+        // Centering the viewport
+        const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
+        const auto amount     = static_cast<float>(empty_zone) / host_res.height;
+        view                  = glm::translate(view, glm::vec3(0.0f, amount, 0.0f));
+    }
+
+    const auto proj_matrix = view * projection;
 
     const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
@@ -269,15 +289,8 @@ void OpenglModern::drawTriangle() {
 void OpenglModern::preRender() {
     glBindFramebuffer(GL_FRAMEBUFFER, saturn_framebuffer_);
 
-    const auto window    = glfwGetCurrentContext();
-    auto       display_w = s32{};
-    auto       display_h = s32{};
-    glfwGetWindowSize(window, &display_w, &display_h);
-    const auto aspect_ratio = static_cast<float>(display_w) / static_cast<float>(display_h);
-
-    const auto height = float{saturn_framebuffer_height * aspect_ratio};
-    // glViewport(0, 0, saturn_framebuffer_width, static_cast<u16>(height));
-    // glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
+    // Viewport is the entire Saturn framebuffer
+    glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
 
     gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -288,12 +301,16 @@ void OpenglModern::render() {
     this->drawTriangle();
 };
 
-void OpenglModern::postRender() { glBindFramebuffer(GL_FRAMEBUFFER, 0); };
+void OpenglModern::postRender() {
+    // Framebuffer is released
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+};
 
-void OpenglModern::onWindowResize(u16 width, u16 height){
+void OpenglModern::onWindowResize(u16 width, u16 height) {
     // const auto aspect_ratio  = static_cast<float>(width) / static_cast<float>(height);
     // const auto window_height = float{saturn_framebuffer_height * aspect_ratio};
     // glViewport(0, 0, saturn_framebuffer_width, static_cast<u16>(window_height));
+    hostScreenResolution({width, height});
 };
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }

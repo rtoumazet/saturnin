@@ -43,8 +43,8 @@ namespace saturnin::video {
 
 using saturnin::core::Config;
 
-constexpr auto minimum_window_width  = u16{320};
-constexpr auto minimum_window_height = u16{224};
+constexpr auto minimum_window_width  = u16{512};
+constexpr auto minimum_window_height = u16{512};
 
 class Opengl {
   public:

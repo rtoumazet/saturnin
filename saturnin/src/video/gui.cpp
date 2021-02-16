@@ -202,7 +202,6 @@ void showRenderingWindow(core::EmulatorContext& state) {
     auto flags = ImGuiWindowFlags{ImGuiWindowFlags_NoSavedSettings};
     flags |= ImGuiWindowFlags_NoDecoration;
     flags |= ImGuiWindowFlags_NoMove;
-    flags |= ImGuiWindowFlags_MenuBar;
 
     ImGui::Begin("Video rendering", nullptr, flags);
 

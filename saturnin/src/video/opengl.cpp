@@ -271,6 +271,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
+    // Adding glyphs that will be used as images in text
     ImGuiIO&                            io           = ImGui::GetIO();
     ImFont*                             font         = io.Fonts->AddFontDefault();
     static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe907, 0}; // Will not be copied by AddFont* so keep in scope.
@@ -296,6 +297,9 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     state.opengl(opengl.get());
 
     updateMainWindowSizeAndRatio(window, minimum_window_width, minimum_window_height);
+
+    opengl->saturnScreenResolution(ScreenResolution{320, 224});
+    opengl->hostScreenResolution(ScreenResolution{minimum_window_width, minimum_window_height});
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
@@ -356,17 +360,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 }
 
 void updateMainWindowSizeAndRatio(GLFWwindow* window, const u32 width, const u32 height) {
-    const auto menu_height  = static_cast<u32>(ImGui::GetFrameHeight());
-    const auto total_height = u32{height + menu_height};
-
-    // glfwSetWindowAspectRatio(window, width, total_height);
-
-    // const auto mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-    // window_width  = mode->width;
-    // window_height = mode->height;
-
-    glfwSetWindowSizeLimits(window, width, total_height, GLFW_DONT_CARE, GLFW_DONT_CARE);
+    glfwSetWindowSizeLimits(window, width, height, GLFW_DONT_CARE, GLFW_DONT_CARE);
 }
 
 auto createMainWindow(const u32 width, const u32 height, const std::string title) -> GLFWwindow* {
