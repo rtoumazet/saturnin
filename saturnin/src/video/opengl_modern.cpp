@@ -51,16 +51,8 @@ using core::Log;
 using core::tr;
 
 void OpenglModern::initialize() {
-    // const auto window    = glfwGetCurrentContext();
-    // auto       display_w = s32{};
-    // auto       display_h = s32{};
-    // glfwGetFramebufferSize(window, &display_w, &display_h);
-    // initializeTexture(display_w, display_h);
-
-    // glGenFramebuffers(1, &fbo_);
     glGenFramebuffers(1, &saturn_framebuffer_);
     glBindFramebuffer(GL_FRAMEBUFFER, saturn_framebuffer_);
-    // bindTextureToFbo();
 
     // Creating a texture for the color buffer
     auto texture = u32{};
@@ -91,41 +83,34 @@ void OpenglModern::initialize() {
     const auto vertex_shader     = createVertexShader();
     const auto fragment_shader   = createFragmentShader();
     program_shader_              = createProgramShader(vertex_shader, fragment_shader);
-    const auto shaders_to_delete = std::vector<uint32_t>{vertex_shader, fragment_shader};
+    const auto shaders_to_delete = std::vector<u32>{vertex_shader, fragment_shader};
     deleteShaders(shaders_to_delete);
 }
 
 void OpenglModern::shutdown() {
     glDeleteProgram(program_shader_);
-    // glDeleteFramebuffers(1, &fbo_);
     glDeleteFramebuffers(1, &saturn_framebuffer_);
     const auto texture = renderingTexture();
     glDeleteTextures(1, &texture);
 }
 
-auto OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-
-    auto texture = u32{};
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    // gl::GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-    const auto draw_buffers = std::array<GLenum, 1>{GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, draw_buffers.data()); // "1" is the size of DrawBuffers
-
-    return texture;
-}
-
-void OpenglModern::bindTextureToFbo() const {
-    // glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-    glBindFramebuffer(GL_FRAMEBUFFER, saturn_framebuffer_);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderingTexture(), 0);
-}
+// auto OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
+//    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+//
+//    auto texture = u32{};
+//    glGenTextures(1, &texture);
+//    glBindTexture(GL_TEXTURE_2D, texture);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+//    // gl::GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+//    const auto draw_buffers = std::array<GLenum, 1>{GL_COLOR_ATTACHMENT0};
+//    glDrawBuffers(1, draw_buffers.data()); // "1" is the size of DrawBuffers
+//
+//    return texture;
+//}
 
 /* static */
 auto OpenglModern::createVertexShader() -> u32 {
@@ -190,17 +175,8 @@ void OpenglModern::deleteShaders(std::vector<u32> shaders) {
 }
 
 void OpenglModern::setupTriangle() {
-    // constexpr std::array<float, 9> vertices = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
     /* clang-format off */ 
-    //    constexpr std::array<float, 18> vertices = {
-    //    -0.5f, -0.5f, 0.0f,
-    //    -0.5f,  0.5f, 0.0f,
-    //     0.5f,  0.5f, 0.0f,
-    //    -0.5f, -0.5f, 0.0f,
-    //     0.5f,  0.5f, 0.0f,
-    //     0.5f, -0.5f, 0.0f,
-    //};
-        constexpr std::array<u16, 18> vertices = {
+    constexpr std::array<u16, 18> vertices = {
         0,  0,  0, // 0
         0,  224, 0, // 1
         320, 224, 0, // 2
@@ -210,15 +186,6 @@ void OpenglModern::setupTriangle() {
         320, 0, 0,  // 3
     };
 
-    //        constexpr std::array<u16, 18> vertices = {
-    //    0,  0,  0, // 0
-    //    0,  150, 0, // 1
-    //    150, 150, 0, // 2
-
-    //    0,  0, 0, // 0
-    //    150, 150, 0, // 2
-    //    150, 0, 0,  // 3
-    //};
     /* clang-format on */
 
     glGenVertexArrays(1, &vao_);
@@ -230,8 +197,6 @@ void OpenglModern::setupTriangle() {
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 
-    // glVertexAttribPointer(0, 3, GLenum::GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    // glVertexAttribPointer(0, 3, GLenum::GL_FLOAT, GL_FALSE, 0, nullptr);
     glVertexAttribPointer(0, 3, GLenum::GL_SHORT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
@@ -306,51 +271,9 @@ void OpenglModern::postRender() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 };
 
-void OpenglModern::onWindowResize(u16 width, u16 height) {
-    // const auto aspect_ratio  = static_cast<float>(width) / static_cast<float>(height);
-    // const auto window_height = float{saturn_framebuffer_height * aspect_ratio};
-    // glViewport(0, 0, saturn_framebuffer_width, static_cast<u16>(window_height));
-    hostScreenResolution({width, height});
-};
-
-static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
-
-void checkShaderCompilation(const u32 shader) {
-    auto success = GLboolean{};
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    auto length = s32{};
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-    if (success == GL_FALSE) {
-        auto v = std::vector<char>(length);
-        glGetShaderInfoLog(shader, length, nullptr, v.data());
-        const auto info = std::string(v.begin(), v.end());
-
-        auto type        = GLenum{};
-        auto shader_type = std::string{};
-        glGetShaderiv(shader, GL_SHADER_TYPE, &type);
-        switch (type) {
-            case GL_VERTEX_SHADER: shader_type = "Vertex shader"; break;
-            case GL_FRAGMENT_SHADER: shader_type = "Fragment shader"; break;
-            default: shader_type = "Unknown shader"; break;
-        }
-        Log::error("opengl", "{} compilation failed : {}", shader_type, info);
-        throw std::runtime_error("Opengl error !");
-    }
+static void error_callback(int error, const char* description) {
+    Log::error("opengl", "Error {}: {}", error, description);
+    throw std::runtime_error("Opengl error !");
 }
 
-void checkProgramCompilation(const u32 program) {
-    auto success = GLboolean{};
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-    auto length = s32{};
-    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
-
-    if (success == GL_FALSE) {
-        auto v = std::vector<char>(length);
-        glGetProgramInfoLog(program, length, nullptr, v.data());
-        const auto info = std::string(v.begin(), v.end());
-
-        Log::error("opengl", "Shader program link failed : {}", info);
-        throw std::runtime_error("Opengl error !");
-    }
-}
 }; // namespace saturnin::video

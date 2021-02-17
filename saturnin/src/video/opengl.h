@@ -72,20 +72,9 @@ class Opengl {
 
     //@{
     // Abstract functions
-    [[nodiscard]] virtual auto generateEmptyTexture(u32 width, u32 height) const -> u32 = 0;
+    //[[nodiscard]] virtual auto generateEmptyTexture(u32 width, u32 height) const -> u32 = 0;
     // virtual void               updateTextureSize(u32 width, u32 height)                 = 0;
     //@}
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 OpenglLegacy::bindTextureToFbo() const abstract;
-    ///
-    /// \brief  Binds the internal texture to the internal fbo.
-    ///
-    /// \author Runik
-    /// \date   18/10/2019
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    virtual void bindTextureToFbo() const = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::texture() const -> u32
@@ -131,7 +120,7 @@ class Opengl {
     /// \param  height  The new window height.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    virtual void onWindowResize(u16 width, u16 height) = 0;
+    virtual void onWindowResize(u16 width, u16 height);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::updateScreenResolution();
@@ -311,5 +300,31 @@ auto createMainWindow(u32 width, u32 height, std::string title) -> GLFWwindow*;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto loadPngImage(const char* filename) -> GLFWimage;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void checkShaderCompilation(const u32 shader);
+///
+/// \brief  Checks shader compilation and displays errors when detected.
+///
+/// \author Runik
+/// \date   22/10/2019
+///
+/// \param  shader  The shader to check.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void checkShaderCompilation(u32 shader);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void checkProgramCompilation(const u32 program);
+///
+/// \brief  Checks program compilation and displays errors when detected.
+///
+/// \author Runik
+/// \date   22/10/2019
+///
+/// \param  program The program to check.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void checkProgramCompilation(u32 program);
 
 }; // namespace saturnin::video

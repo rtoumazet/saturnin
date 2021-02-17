@@ -44,7 +44,7 @@ static bool show_load_binary  = false;
 static bool show_debug_sh2    = false;
 static bool show_debug_memory = false;
 static bool show_options      = false;
-static bool show_demo         = true;
+static bool show_demo         = false;
 static bool show_log          = true;
 
 using core::Log;

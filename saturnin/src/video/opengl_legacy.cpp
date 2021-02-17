@@ -32,6 +32,10 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/locale.h>
 #include <saturnin/src/log.h>
@@ -47,89 +51,210 @@ using core::Log;
 using core::tr;
 
 void OpenglLegacy::initialize() {
-    const auto window    = glfwGetCurrentContext();
-    auto       display_w = s32{};
-    auto       display_h = s32{};
-    glfwGetFramebufferSize(window, &display_w, &display_h);
-    // initializeTexture(display_w, display_h);
+    // const auto window    = glfwGetCurrentContext();
+    // auto       display_w = s32{};
+    // auto       display_h = s32{};
+    // glfwGetFramebufferSize(window, &display_w, &display_h);
 
-    glGenFramebuffersEXT(1, &fbo_);
-    bindTextureToFbo();
+    glGenFramebuffersEXT(1, &saturn_framebuffer_);
+    glBindFramebuffer(GL_FRAMEBUFFER, saturn_framebuffer_);
+
+    // Creating a texture for the color buffer
+    auto texture = u32{};
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 2048, 2048);
+
+    // No need for mipmaps, they are turned off
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Attaching the color texture to the fbo
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
+
+    static const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
+
+    renderingTexture(texture);
+
     const auto status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
+    if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE_EXT) {
         Log::error("opengl", tr("Could not initialize framebuffer object !"));
         throw std::runtime_error("Opengl error !");
     }
+
+    const auto vertex_shader     = createVertexShader();
+    const auto fragment_shader   = createFragmentShader();
+    program_shader_              = createProgramShader(vertex_shader, fragment_shader);
+    const auto shaders_to_delete = std::vector<u32>{vertex_shader, fragment_shader};
+    deleteShaders(shaders_to_delete);
 }
 
 void OpenglLegacy::shutdown() {
+    glDeleteProgram(program_shader_);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    glDeleteFramebuffersEXT(1, &fbo_);
-    // glDeleteTextures(1, &texture_);
+    glDeleteFramebuffersEXT(1, &saturn_framebuffer_);
     const auto texture = renderingTexture();
     glDeleteTextures(1, &texture);
 }
 
-void OpenglLegacy::preRender() {
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-    // glViewport(0, 0, current_texture_width_, current_texture_height_);
+/* static */
+auto OpenglLegacy::createVertexShader() -> u32 {
+    const char* vertex_shader_source = R"(
+        #version 120
 
+        attribute vec2 position;
+        uniform mat4 proj_matrix;
+
+        void main() {
+            gl_Position = proj_matrix * vec4(position, 0.0, 1.0);
+        }
+    )";
+
+    const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
+    glCompileShader(vertex_shader);
+    checkShaderCompilation(vertex_shader);
+
+    return vertex_shader;
+}
+/* static */
+auto OpenglLegacy::createFragmentShader() -> u32 {
+    const char* fragment_shader_source = R"(
+        #version 120
+        
+        void main()
+        {
+            gl_FragColor  = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+        } 
+    )";
+
+    const auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
+    glCompileShader(fragment_shader);
+
+    checkShaderCompilation(fragment_shader);
+
+    return fragment_shader;
+}
+
+/* static */
+auto OpenglLegacy::createProgramShader(const u32 vertex_shader, const u32 fragment_shader) -> u32 {
+    const auto shader_program = glCreateProgram();
+
+    glAttachShader(shader_program, vertex_shader);
+    glAttachShader(shader_program, fragment_shader);
+    glLinkProgram(shader_program);
+    checkProgramCompilation(shader_program);
+
+    return shader_program;
+}
+
+/* static */
+void OpenglLegacy::deleteShaders(std::vector<u32> shaders) {
+    for (auto shader : shaders) {
+        glDeleteShader(shader);
+    }
+}
+
+void OpenglLegacy::setupTriangle() {
+    /* clang-format off */ 
+    constexpr std::array<u16, 18> vertices = {
+        0,  0,  0, // 0
+        0,  224, 0, // 1
+        320, 224, 0, // 2
+
+        0,  0, 0, // 0
+        320, 224, 0, // 2
+        320, 0, 0,  // 3
+    };
+
+    /* clang-format on */
+
+    glGenVertexArrays(1, &vao_);
+    auto vertex_buffer = u32{};
+    glGenBuffers(1, &vertex_buffer);
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(vao_);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GLenum::GL_SHORT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
+
+    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer
+    // object so afterwards we can safely unbind
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying
+    // other VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly
+    // necessary.
+    glBindVertexArray(0);
+}
+void OpenglLegacy::drawTriangle() {
+    glUseProgram(program_shader_);
+    glBindVertexArray(vao_); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep
+                             // things a bit more organized
+
+    const auto host_res     = hostScreenResolution();
+    const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
+    const auto saturn_res   = saturnScreenResolution();
+    const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
+
+    auto projection = glm::mat4{};
+    auto view       = glm::mat4{1.0f};
+
+    if (host_ratio >= saturn_ratio) {
+        // Pillarbox display (wide viewport), use full height
+        projection = glm::mat4{
+            glm::ortho(0.0f, host_ratio / saturn_ratio * saturn_res.width, 0.0f, static_cast<float>(saturn_res.height))};
+
+        // Centering the viewport
+        const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
+        const auto amount     = static_cast<float>(empty_zone) / host_res.width;
+        view                  = glm::translate(view, glm::vec3(amount, 0.0f, 0.0f));
+
+    } else {
+        // Letterbox display (tall viewport) use full width
+        projection = glm::mat4{
+            glm::ortho(0.f, static_cast<float>(saturn_res.width), 0.f, saturn_ratio / host_ratio * saturn_res.height)};
+
+        // Centering the viewport
+        const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
+        const auto amount     = static_cast<float>(empty_zone) / host_res.height;
+        view                  = glm::translate(view, glm::vec3(0.0f, amount, 0.0f));
+    }
+
+    const auto proj_matrix = view * projection;
+
+    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void OpenglLegacy::preRender() {
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, saturn_framebuffer_);
+
+    // Viewport is the entire Saturn framebuffer
+    glViewport(0, 0, 2048, 2048);
+
+    gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 };
 
 void OpenglLegacy::render() {
-    static auto i = float{0};
-    glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 0.0f);
-    glRotatef(i, 0.0f, 0.0f, 1.0f);
-
-    //    glBegin(GL_TRIANGLES);
-    constexpr auto red   = float{1.0f};
-    constexpr auto green = float{0.5f};
-    constexpr auto blue  = float{0.2f};
-    constexpr auto alpha = float{1.0f};
-    glColor4f(red, green, blue, alpha);
-
-    constexpr auto verts = std::array<float, 9>{-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
-
-    // activate and specify pointer to vertex array
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, verts.data());
-
-    // draw a cube
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<s32>(verts.size()));
-
-    // deactivate vertex arrays after drawing
-    glDisableClientState(GL_VERTEX_ARRAY);
-
-    // glVertex3f(-0.5f, -0.5f, 0.0f);
-    // glVertex3f(0.5f, -0.5f, 0.0f);
-    // glVertex3f(0.0f, 0.5f, 0.0f);
-    //   glEnd();
-
-    glPopMatrix();
-    ++i;
+    this->setupTriangle();
+    this->drawTriangle();
 };
 
-void OpenglLegacy::postRender() { glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); };
-
-void OpenglLegacy::onWindowResize(u16 width, u16 height){};
-
-auto OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
-    auto texture = u32{};
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-    return texture;
-}
-
-void OpenglLegacy::bindTextureToFbo() const {
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, renderingTexture(), 0);
-}
+void OpenglLegacy::postRender() {
+    // Framebuffer is released
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+};
 
 static void error_callback(int error, const char* description) {
     Log::error("opengl", "Error {}: {}", error, description);

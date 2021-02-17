@@ -100,8 +100,6 @@ class OpenglModern final : public Opengl {
 
     void postRender() final;
 
-    void onWindowResize(u16 width, u16 height) final;
-
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn [[nodiscard]] auto OpenglModern::generateEmptyTexture(u32 width, u32 height) const -> u32 final;
@@ -117,48 +115,12 @@ class OpenglModern final : public Opengl {
     /// \return The empty texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] auto generateEmptyTexture(u32 width, u32 height) const -> u32 final;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void OpenglLegacy::bindTextureToFbo() const final;
-    ///
-    /// \brief  Binds the internal texture to the internal fbo.
-    ///
-    /// \author Runik
-    /// \date   18/10/2019
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void bindTextureToFbo() const final;
+    //[[nodiscard]] auto generateEmptyTexture(u32 width, u32 height) const -> u32 final;
 
     u32 saturn_framebuffer_{}; ///< Framebuffer object used as Saturn's framebuffer. Will be rendered to a texture.
 
     u32 program_shader_;
     u32 vao_;
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void checkShaderCompilation(const u32 shader);
-///
-/// \brief  Checks shader compilation and displays errors when detected.
-///
-/// \author Runik
-/// \date   22/10/2019
-///
-/// \param  shader  The shader to check.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void checkShaderCompilation(u32 shader);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void checkProgramCompilation(const u32 program);
-///
-/// \brief  Checks program compilation and displays errors when detected.
-///
-/// \author Runik
-/// \date   22/10/2019
-///
-/// \param  program The program to check.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void checkProgramCompilation(u32 program);
 
 }; // namespace saturnin::video

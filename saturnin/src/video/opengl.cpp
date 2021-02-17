@@ -159,6 +159,8 @@ auto Opengl::generateTextureFromVector(const u32 width, const u32 height, const 
     return texture;
 }
 
+void Opengl::onWindowResize(u16 width, u16 height) { hostScreenResolution({width, height}); };
+
 auto isModernOpenglCapable() -> bool {
     if (glfwInit() == GLFW_FALSE) { return false; }
 
@@ -398,6 +400,45 @@ void windowSizeCallback(GLFWwindow* window, int width, int height) {
 
     state->opengl()->onWindowResize(width, height);
     Log::warning("opengl", "Window was resized: {} {}", width, height);
+}
+
+void checkShaderCompilation(const u32 shader) {
+    auto success = GLboolean{};
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    auto length = s32{};
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+    if (success == GL_FALSE) {
+        auto v = std::vector<char>(length);
+        glGetShaderInfoLog(shader, length, nullptr, v.data());
+        const auto info = std::string(v.begin(), v.end());
+
+        auto type        = GLenum{};
+        auto shader_type = std::string{};
+        glGetShaderiv(shader, GL_SHADER_TYPE, &type);
+        switch (type) {
+            case GL_VERTEX_SHADER: shader_type = "Vertex shader"; break;
+            case GL_FRAGMENT_SHADER: shader_type = "Fragment shader"; break;
+            default: shader_type = "Unknown shader"; break;
+        }
+        Log::error("opengl", "{} compilation failed : {}", shader_type, info);
+        throw std::runtime_error("Opengl error !");
+    }
+}
+
+void checkProgramCompilation(const u32 program) {
+    auto success = GLboolean{};
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    auto length = s32{};
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+
+    if (success == GL_FALSE) {
+        auto v = std::vector<char>(length);
+        glGetProgramInfoLog(program, length, nullptr, v.data());
+        const auto info = std::string(v.begin(), v.end());
+
+        Log::error("opengl", "Shader program link failed : {}", info);
+        throw std::runtime_error("Opengl error !");
+    }
 }
 
 }; // namespace saturnin::video

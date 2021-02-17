@@ -47,6 +47,33 @@ class OpenglLegacy : public Opengl {
     ~OpenglLegacy() final { shutdown(); };
     //@}
 
+    static auto createVertexShader() -> u32;
+    static auto createFragmentShader() -> u32;
+    static auto createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
+    static void deleteShaders(std::vector<u32> shaders);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::setupTriangle();
+    ///
+    /// \brief  Sets up the triangle using shaders using modern OpenGL.
+    ///
+    /// \author Runik
+    /// \date   12/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void setupTriangle();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::drawTriangle();
+    ///
+    /// \brief  Draws a triangle using modern OpenGL.
+    ///
+    /// \author Runik
+    /// \date   12/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void drawTriangle();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void initialize() final;
     ///
@@ -73,35 +100,11 @@ class OpenglLegacy : public Opengl {
 
     void postRender() final;
 
-    void onWindowResize(u16 width, u16 height) final;
-
   private:
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn [[nodiscard]] auto OpenglLegacy::generateEmptyTexture(const u32 width, const u32 height) const -> u32 final;
-    ///
-    /// \brief  Generates an empty texture.
-    ///
-    /// \author Runik
-    /// \date   17/10/2019
-    ///
-    /// \param  width   Width of the generated texture.
-    /// \param  height  Height of the generated texture.
-    ///
-    /// \return The empty texture.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    u32 saturn_framebuffer_{}; ///< Framebuffer object used as Saturn's framebuffer. Will be rendered to a texture.
 
-    [[nodiscard]] auto generateEmptyTexture(u32 width, u32 height) const -> u32 final;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn u32 OpenglLegacy::bindTextureToFbo() const final;
-    ///
-    /// \brief  Binds the internal texture to the internal fbo.
-    ///
-    /// \author Runik
-    /// \date   18/10/2019
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void bindTextureToFbo() const final;
+    u32 program_shader_;
+    u32 vao_;
 };
 
 }; // namespace saturnin::video
