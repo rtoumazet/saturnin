@@ -49,7 +49,27 @@ using core::tr;
 
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
-void Opengl::displayFramebuffer() {
+void Opengl::displayFramebuffer(core::EmulatorContext& state) {
+    vertexes_.clear();
+    // vertexes_.reserve(state.vdp2()->getRenderVertexes().size() / 4); // Will have to be changed as some vertexes are not quad
+    // for (const auto& v : state.vdp2()->getRenderVertexes()) {
+    //    vertexes_.emplace_back(v.x);
+    //    vertexes_.emplace_back(v.y);
+    //}
+    if (!state.vdp2()->getRenderVertexes().empty()) {
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].x);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].y);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1].x);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1].y);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].x);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].y);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].x);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].y);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].x);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].y);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3].x);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3].y);
+    }
     preRender();
     render();
     postRender();
@@ -366,17 +386,7 @@ void updateMainWindowSizeAndRatio(GLFWwindow* window, const u32 width, const u32
 }
 
 auto createMainWindow(const u32 width, const u32 height, const std::string title) -> GLFWwindow* {
-    // const auto         monitor = glfwGetPrimaryMonitor();
-    // const GLFWvidmode* mode    = glfwGetVideoMode(monitor);
-
-    // glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-    // glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-    // glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-    // glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
     return glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
-
-    // return glfwCreateWindow(mode->width, mode->height, title.c_str(), monitor, nullptr);
 }
 
 auto loadPngImage(const char* filename) -> GLFWimage {

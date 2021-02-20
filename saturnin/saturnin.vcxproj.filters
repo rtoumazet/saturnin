@@ -102,6 +102,9 @@
     <ClCompile Include="src\pch.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\base_rendering_part.cpp">
+      <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -220,6 +223,9 @@
     </ClInclude>
     <ClInclude Include="src\video\vdp1_registers.h">
       <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\base_rendering_part.h">
+      <Filter>Fichiers sources\video</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

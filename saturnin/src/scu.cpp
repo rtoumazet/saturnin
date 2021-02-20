@@ -920,4 +920,21 @@ auto Scu::getTimer0CompareValue() -> u32 { return t0c_.get(Timer0CompareRegister
 
 auto Scu::isTimer1Enabled() -> bool { return (t1md_.get(Timer1ModeRegister::timer_enable) == TimerEnable::timer_operation_on); };
 
+void Scu::onVblankIn() {
+    generateInterrupt(interrupt_source::v_blank_in);
+    sendStartFactor(StartingFactorSelect::v_blank_in);
+};
+void Scu::onVblankOut() {
+    generateInterrupt(interrupt_source::v_blank_out);
+    sendStartFactor(StartingFactorSelect::v_blank_out);
+};
+void Scu::onHblankIn() {
+    generateInterrupt(interrupt_source::h_blank_in);
+    sendStartFactor(StartingFactorSelect::h_blank_in);
+};
+void Scu::onTimer0() {
+    generateInterrupt(interrupt_source::timer_0);
+    sendStartFactor(StartingFactorSelect::timer_0);
+};
+
 } // namespace saturnin::core

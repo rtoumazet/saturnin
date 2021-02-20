@@ -60,21 +60,17 @@ class Opengl {
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::displayFramebuffer();
+    /// \fn void Opengl::displayFramebuffer(core::EmulatorContext& state);
     ///
     /// \brief  Displays the framebuffer content (VDP1 + VDP2)
     ///
     /// \author Runik
     /// \date   27/01/2021
+    ///
+    /// \param [in,out] state   The state.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void displayFramebuffer();
-
-    //@{
-    // Abstract functions
-    //[[nodiscard]] virtual auto generateEmptyTexture(u32 width, u32 height) const -> u32 = 0;
-    // virtual void               updateTextureSize(u32 width, u32 height)                 = 0;
-    //@}
+    void displayFramebuffer(core::EmulatorContext& state);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::texture() const -> u32
@@ -145,7 +141,7 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn [[nodiscard]] auto Opengl::config() const -> Config*;
     ///
-    /// \brief  Returns the Configobject.
+    /// \brief  Returns the Config object.
     ///
     /// \author Runik
     /// \date   12/10/2019
@@ -175,7 +171,8 @@ class Opengl {
 
     [[nodiscard]] virtual auto generateTextureFromVector(u32 width, u32 height, const std::vector<u8>& data) const -> u32;
 
-    u32 fbo_{}; ///< Framebuffer Object used for rendering to texture.
+    u32              fbo_{};    ///< Framebuffer Object used for rendering to texture.
+    std::vector<s16> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display
 
   private:
     //@{
@@ -187,14 +184,14 @@ class Opengl {
     virtual void postRender() = 0;
     //@}
 
-    // uint32_t      program_shader_;
-    // uint32_t      vao_;
     core::Config* config_; ///< Configuration object
 
     u32 rendering_texture_{}; ///< Destination texture for render to texture.
 
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
+
+    // std::vector<s16> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

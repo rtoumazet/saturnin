@@ -78,15 +78,15 @@ class Vdp1 {
     void run(u8 cycles);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp1::populateRenderData();
+    /// \fn void Vdp1::onVblankIn();
     ///
-    /// \brief  Populates data from the VDP1 memory before backend rendering.
+    /// \brief  Handles everything that needs to be done on VBlankIn.
     ///
     /// \author Runik
-    /// \date   29/01/2021
+    /// \date   19/02/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void populateRenderData();
+    void onVblankIn();
 
     template<typename T>
     void writeRegisters(const u32 addr, const T data) {
@@ -140,6 +140,28 @@ class Vdp1 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto intializeFramebuffer() -> bool;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp1::populateRenderData();
+    ///
+    /// \brief  Populates data from the VDP1 memory before backend rendering.
+    ///
+    /// \author Runik
+    /// \date   29/01/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void populateRenderData();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp1::updateResolution();
+    ///
+    /// \brief  Updates VDP1 resolution by reading internal registers.
+    ///
+    /// \author Runik
+    /// \date   20/02/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void updateResolution();
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
 

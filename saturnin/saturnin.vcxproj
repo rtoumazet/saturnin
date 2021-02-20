@@ -267,6 +267,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClCompile Include="src\sh2_instructions.cpp" />
     <ClCompile Include="src\smpc.cpp" />
     <ClCompile Include="src\utilities.cpp" />
+    <ClCompile Include="src\video\base_rendering_part.cpp" />
     <ClCompile Include="src\video\gui.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -281,6 +282,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClCompile Include="src\video\vdp1.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClInclude Include="src\video\base_rendering_part.h" />
     <ClInclude Include="src\video\vdp1_registers.h" />
     <ClCompile Include="src\video\vdp2.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>

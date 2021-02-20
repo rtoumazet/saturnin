@@ -21,9 +21,9 @@
 #include <saturnin/src/video/vdp2.h>
 #include <istream>
 #include <saturnin/src/config.h>
-#include <saturnin/src/emulator_context.h>
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/scu_registers.h>
+#include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2_registers.h>
 
 namespace saturnin::video {
@@ -56,13 +56,14 @@ void Vdp2::run(const u8 cycles) {
             // Entering vertical blanking
             is_vblank_current_ = true;
             tvstat_.set(ScreenStatus::vertical_blank_flag, VerticalBlankFlag::during_vertical_retrace);
-
             tvmd_.set(TvScreenMode::display, Display::not_displayed);
 
             Log::debug("vdp2", tr("VBlankIn interrupt request"));
-            // emulator_context_->scu()->generateInterrupt(interrupt_source::v_blank_in);
-            // emulator_context_->scu()->sendStartFactor(StartingFactorSelect::v_blank_in);
-            emulator_context_->onVblankIn();
+
+            vdp1()->onVblankIn();
+            this->onVblankIn();
+
+            scu()->onVblankIn();
         }
     }
 
@@ -79,8 +80,7 @@ void Vdp2::run(const u8 cycles) {
         tvmd_.set(TvScreenMode::display, Display::displayed);
 
         Log::debug("vdp2", tr("VBlankOut interrupt request"));
-        emulator_context_->scu()->generateInterrupt(interrupt_source::v_blank_out);
-        emulator_context_->scu()->sendStartFactor(StartingFactorSelect::v_blank_out);
+        scu()->onVblankOut();
 
         timer_0_counter_ = 0;
 
@@ -95,16 +95,11 @@ void Vdp2::run(const u8 cycles) {
             is_hblank_current_ = true;
             tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_retrace);
 
-            // Log::debug("vdp2", tr("HBlankIn interrupt request"));
-            emulator_context_->scu()->generateInterrupt(interrupt_source::h_blank_in);
-            emulator_context_->scu()->sendStartFactor(StartingFactorSelect::h_blank_in);
+            scu()->onHblankIn();
 
             timer_0_counter_++;
 
-            if (timer_0_counter_ == emulator_context_->scu()->getTimer0CompareValue()) {
-                emulator_context_->scu()->generateInterrupt(interrupt_source::timer_0);
-                emulator_context_->scu()->sendStartFactor(StartingFactorSelect::timer_0);
-            }
+            if (timer_0_counter_ == scu()->getTimer0CompareValue()) { scu()->onTimer0(); }
         }
     }
 
@@ -1303,7 +1298,21 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 void Vdp2::populateRenderData() {
     if (isScreenDisplayed(ScrollScreen::nbg3)) {
         render_vertexes_.clear();
-        // render_vertexes_.emplace_back(Vertex(-0.5, -0.5));
+        // constexpr std::array<u16, 18> vertices = {
+        //    0,  0,  0, // 0
+        //    0,  224, 0, // 1
+        //    320, 224, 0, // 2
+
+        //    0,  0, 0, // 0
+        //    320, 224, 0, // 2
+        //    320, 0, 0,  // 3
+        //};
+
+        render_vertexes_.emplace_back(Vertex{0, 0});
+        render_vertexes_.emplace_back(Vertex{0, 224});
+        render_vertexes_.emplace_back(Vertex{320, 224});
+        render_vertexes_.emplace_back(Vertex{320, 0});
+
         // render_vertexes_.emplace_back(Vertex{-0.5, 0.5});
         // render_vertexes_.emplace_back(Vertex{0.5, 0.5});
         // render_vertexes_.emplace_back(Vertex{0.5, -0.5});
@@ -1313,7 +1322,14 @@ void Vdp2::populateRenderData() {
     if (isScreenDisplayed(ScrollScreen::nbg0)) { core::Log::debug("vdp2", core::tr("NBG0 displayed")); }
 }
 
+void Vdp2::onVblankIn() {
+    updateResolution();
+    populateRenderData();
+}
+
 auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; };
+
+void Vdp2::updateResolution(){};
 
 auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
     if (zq == ZoomQuarter::up_to_one_quarter) { return ReductionSetting::up_to_one_quarter; }

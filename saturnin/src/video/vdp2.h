@@ -25,19 +25,23 @@
 
 #pragma once
 
-#include <array>                        // array
-#include <chrono>                       // duration
-#include <saturnin/src/emulator_defs.h> // u8, u16, u32
-#include <saturnin/src/locale.h>        // tr
-#include <saturnin/src/log.h>           // Log
+#include <array>                           // array
+#include <chrono>                          // duration
+#include <saturnin/src/emulator_context.h> // EmulatorContext
+#include <saturnin/src/emulator_defs.h>    // u8, u16, u32
+#include <saturnin/src/locale.h>           // tr
+#include <saturnin/src/log.h>              // Log
 #include <saturnin/src/video/vdp2_registers.h>
 
 // Forward declarations
 namespace saturnin::core {
-class EmulatorContext;
-}
+// class EmulatorContext;
+class Scu;
+} // namespace saturnin::core
 
 namespace saturnin::video {
+
+class Vdp1;
 
 using saturnin::core::EmulatorContext;
 using AddressToNameMap = std::map<u32, std::string>;
@@ -228,15 +232,15 @@ class Vdp2 {
     void calculateDisplayDuration();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::populateRenderData();
+    /// \fn void Vdp2::onVblankIn();
     ///
-    /// \brief  Populates data from the VDP2 memory before backend rendering.
+    /// \brief  Handles everything that needs to be done on VBlankIn.
     ///
     /// \author Runik
-    /// \date   29/01/2021
+    /// \date   19/02/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void populateRenderData();
+    void onVblankIn();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>&;
@@ -419,6 +423,34 @@ class Vdp2 {
                                           const VramAccessCommand command,
                                           const ReductionSetting  reduction,
                                           const bool              is_screen_mode_normal) -> u8;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::populateRenderData();
+    ///
+    /// \brief  Populates data from the VDP2 memory before backend rendering.
+    ///
+    /// \author Runik
+    /// \date   29/01/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void populateRenderData();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::updateResolution();
+    ///
+    /// \brief  Updates VDP2 resolution by reading internal registers.
+    ///
+    /// \author Runik
+    /// \date   20/02/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void updateResolution();
+
+    //@{
+    // Modules accessors
+    [[nodiscard]] auto scu() const -> core::Scu* { return emulator_context_->scu(); };
+    [[nodiscard]] auto vdp1() const -> Vdp1* { return emulator_context_->vdp1(); };
+    //@}
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
 

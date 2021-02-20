@@ -57,6 +57,11 @@ auto Vdp1::intializeFramebuffer() -> bool {
 
 void Vdp1::run(const u8 cycles) {}
 
+void Vdp1::onVblankIn() {
+    updateResolution();
+    populateRenderData();
+}
+
 void Vdp1::populateRenderData() {}
 
 auto Vdp1::read16(const u32 addr) const -> u16 {

@@ -94,24 +94,6 @@ void OpenglModern::shutdown() {
     glDeleteTextures(1, &texture);
 }
 
-// auto OpenglModern::generateEmptyTexture(const u32 width, const u32 height) const -> u32 {
-//    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-//
-//    auto texture = u32{};
-//    glGenTextures(1, &texture);
-//    glBindTexture(GL_TEXTURE_2D, texture);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-//    // gl::GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-//    const auto draw_buffers = std::array<GLenum, 1>{GL_COLOR_ATTACHMENT0};
-//    glDrawBuffers(1, draw_buffers.data()); // "1" is the size of DrawBuffers
-//
-//    return texture;
-//}
-
 /* static */
 auto OpenglModern::createVertexShader() -> u32 {
     const char* vertex_shader_source = R"(
@@ -176,14 +158,23 @@ void OpenglModern::deleteShaders(std::vector<u32> shaders) {
 
 void OpenglModern::setupTriangle() {
     /* clang-format off */ 
-    constexpr std::array<u16, 18> vertices = {
-        0,  0,  0, // 0
-        0,  224, 0, // 1
-        320, 224, 0, // 2
+    //constexpr std::array<u16, 18> vertices = {
+    //    0,  0,  0, // 0
+    //    0,  224, 0, // 1
+    //    320, 224, 0, // 2
 
-        0,  0, 0, // 0
-        320, 224, 0, // 2
-        320, 0, 0,  // 3
+    //    0,  0, 0, // 0
+    //    320, 224, 0, // 2
+    //    320, 0, 0,  // 3
+    //};
+    constexpr std::array<u16, 12> vertices = {
+        0,  0,   // 0
+        0,  224, // 1
+        320, 224, // 2
+
+        0,  0, // 0
+        320, 224, // 2
+        320, 0,   // 3
     };
 
     /* clang-format on */
@@ -195,9 +186,10 @@ void OpenglModern::setupTriangle() {
     glBindVertexArray(vao_);
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GLenum::GL_SHORT, GL_FALSE, 0, nullptr);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(decltype(vertexes_)::value_type) * vertexes_.size(), vertexes_.data(), GL_STATIC_DRAW);
+    ;
+    glVertexAttribPointer(0, 2, GLenum::GL_UNSIGNED_SHORT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer
@@ -248,7 +240,7 @@ void OpenglModern::drawTriangle() {
     const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, 12);
 }
 
 void OpenglModern::preRender() {

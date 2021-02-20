@@ -205,7 +205,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
 
     ImGui::Begin("Video rendering", nullptr, flags);
 
-    state.opengl()->displayFramebuffer();
+    state.opengl()->displayFramebuffer(state);
     if (state.opengl()->renderingTexture() != 0) { gui::addTextureToDrawList(state.opengl()->renderingTexture(), width, height); }
 
     // showMainMenu(state);

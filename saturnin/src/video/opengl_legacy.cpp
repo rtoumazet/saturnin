@@ -51,11 +51,6 @@ using core::Log;
 using core::tr;
 
 void OpenglLegacy::initialize() {
-    // const auto window    = glfwGetCurrentContext();
-    // auto       display_w = s32{};
-    // auto       display_h = s32{};
-    // glfwGetFramebufferSize(window, &display_w, &display_h);
-
     glGenFramebuffersEXT(1, &saturn_framebuffer_);
     glBindFramebuffer(GL_FRAMEBUFFER, saturn_framebuffer_);
 

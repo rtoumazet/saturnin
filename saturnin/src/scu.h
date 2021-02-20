@@ -302,6 +302,14 @@ class Scu {
 
     auto isTimer1Enabled() -> bool;
 
+    /// \name Functions handling various interrupt events
+    //@{
+    void onVblankIn();
+    void onVblankOut();
+    void onHblankIn();
+    void onTimer0();
+    //@}
+
     void dmaTest();
 
     /// \name Context objects accessors

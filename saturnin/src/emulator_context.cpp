@@ -176,13 +176,6 @@ void EmulatorContext::stopEmulation() {
 
 void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
 
-void EmulatorContext::onVblankIn() {
-    scu()->generateInterrupt(interrupt_source::v_blank_in);
-    scu()->sendStartFactor(StartingFactorSelect::v_blank_in);
-    vdp1()->populateRenderData();
-    vdp2()->populateRenderData();
-}
-
 void EmulatorContext::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
