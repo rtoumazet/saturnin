@@ -62,6 +62,8 @@ void Vdp1::onVblankIn() {
     populateRenderData();
 }
 
+void Vdp1::updateResolution(){};
+
 void Vdp1::populateRenderData() {}
 
 auto Vdp1::read16(const u32 addr) const -> u16 {
