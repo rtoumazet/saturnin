@@ -44,7 +44,7 @@ static bool show_load_binary  = false;
 static bool show_debug_sh2    = false;
 static bool show_debug_memory = false;
 static bool show_options      = false;
-static bool show_demo         = false;
+static bool show_demo         = true;
 static bool show_log          = true;
 
 using core::Log;
@@ -98,29 +98,6 @@ void showCoreWindow(core::EmulatorContext& state) {
     ImGui::End();
 }
 
-auto isMainMenuDisplayed(core::EmulatorContext& state) -> bool {
-    // When the emulator is paused or stopped, the main menu is displayed without restrictions.
-    // When it's running, the main menu is displayed when the mouse cursor hovers the area where the menu should be.
-    const auto mouse_coords = getMouseCoordinates(state);
-    const auto menu_height  = ImGui::GetFrameHeight();
-
-    const auto x_pos_min = ImGui::GetMainViewport()->Pos.x;
-    const auto x_pos_max = ImGui::GetMainViewport()->Pos.x + ImGui::GetMainViewport()->Size.y;
-    const auto y_pos_min = ImGui::GetMainViewport()->Pos.y;
-    const auto y_pos_max = ImGui::GetMainViewport()->Pos.y + menu_height;
-
-    auto show_menu = bool{false};
-
-    if (state.emulationStatus() == core::EmulationStatus::running) {
-        if ((x_pos_min <= mouse_coords.x) && (mouse_coords.x <= x_pos_max)) {
-            if ((y_pos_min <= mouse_coords.y) && (mouse_coords.y <= y_pos_max)) { show_menu = true; }
-        }
-    } else {
-        show_menu = true;
-    }
-    return show_menu;
-}
-
 void showMainMenu(core::EmulatorContext& state) {
     auto a = ImGui::GetFrameHeight();
     if (ImGui::BeginMenuBar()) {
@@ -156,26 +133,590 @@ void showMainMenu(core::EmulatorContext& state) {
         }
 
         // Options
-        ImGui::MenuItem(tr("Options").c_str(), nullptr, &show_options);
-        if (show_options) { showOptionsWindow(state, &show_options); }
+        // ImGui::MenuItem(tr("Options").c_str(), nullptr, &show_options);
+        // if (show_options) { showOptionsWindow(state, &show_options); }
 
-        // Buttons
-        ImGui::SameLine(200);
-        // if (ImGui::SmallButton(icon_play)) { state.startEmulation(); }
-        // if (ImGui::SmallButton(icon_pause)) { state.pauseEmulation(); }
-        // if (ImGui::SmallButton(icon_stop)) {
-        //    state.stopEmulation();
-        //    show_debug_sh2 = false;
-        //}
+        if (ImGui::BeginMenu(tr("Options").c_str())) {
+            enum class Header : u8 { general = 0, rendering = 1, path = 2, cd_rom = 3, sound = 4, peripherals = 5, none = 255 };
+            using HeaderMap                = std::map<const Header, const std::string>;
+            const auto  headers            = HeaderMap{{Header::general, tr("General")},
+                                           {Header::rendering, tr("Rendering")},
+                                           {Header::path, tr("Paths")},
+                                           {Header::cd_rom, tr("CD-Rom")},
+                                           {Header::sound, ("Sound")},
+                                           {Header::peripherals, tr("Peripherals")}};
+            static auto last_opened_header = Header::none;
+            auto        setHeaderState     = [](const Header header) {
+                const auto state = (last_opened_header == header) ? true : false;
+                ImGui::SetNextItemOpen(state);
+            };
+
+            static auto    reset_rendering      = bool{}; // used to check if rendering has to be reset after changing the option
+            constexpr auto second_column_offset = u8{150};
+            // General header
+            setHeaderState(Header::general);
+            if (ImGui::CollapsingHeader(headers.at(Header::general).c_str())) {
+                last_opened_header = Header::general;
+                // Hardware mode
+                ImGui::TextUnformatted(tr("Hardware mode").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                std::string hm   = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
+                static auto mode = int{util::toUnderlying(state.config()->getHardwareMode(hm))};
+
+                if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::HardwareMode::saturn))) {
+                    const auto hm = state.config()->getHardwareModeKey(core::HardwareMode::saturn);
+                    if (hm != std::nullopt) {
+                        state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
+                    } else {
+                        Log::warning("config", tr("Unknown hardware mode ...").c_str());
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::HardwareMode::stv))) {
+                    const auto hm = state.config()->getHardwareModeKey(core::HardwareMode::stv);
+                    if (hm != std::nullopt) {
+                        state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
+                    } else {
+                        Log::warning("config", tr("Unknown hardware mode ...").c_str());
+                    }
+                }
+
+                // Language
+                ImGui::TextUnformatted(tr("Language").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                static auto locales = core::Config::listAvailableLanguages();
+                std::string l       = state.config()->readValue(core::AccessKeys::cfg_global_language);
+                const auto  it      = std::find_if(locales.begin(), locales.end(), [&l](std::string& str) { return l == str; });
+                static auto index   = static_cast<s32>(it - locales.begin());
+                if (ImGui::Combo("##language", &index, locales)) {
+                    state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
+                }
+
+                // Area code
+                ImGui::TextUnformatted(tr("Area code").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                static auto codes      = state.config()->listAreaCodes();
+                std::string c          = state.config()->readValue(core::AccessKeys::cfg_global_area_code);
+                const auto  it_code    = std::find_if(codes.begin(), codes.end(), [&c](std::string& str) { return c == str; });
+                static auto index_code = static_cast<s32>(it_code - codes.begin());
+                if (ImGui::Combo("##area_code", &index_code, codes)) {
+                    state.config()->writeValue(core::AccessKeys::cfg_global_area_code, codes[index_code]);
+                }
+            }
+
+            // Rendering header
+            setHeaderState(Header::rendering);
+            if (ImGui::CollapsingHeader(headers.at(Header::rendering).c_str())) {
+                last_opened_header = Header::rendering;
+                // TV standard
+                ImGui::TextUnformatted(tr("TV standard").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                std::string ts       = state.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+                static auto standard = int{util::toUnderlying(state.config()->getTvStandard(ts))};
+
+                if (ImGui::RadioButton("PAL", &standard, util::toUnderlying(video::TvStandard::pal))) {
+                    const auto key = state.config()->getTvStandardKey(video::TvStandard::pal);
+                    if (key != std::nullopt) {
+                        state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
+                    } else {
+                        Log::warning("config", tr("Unknown TV standard ...").c_str());
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::RadioButton("NTSC", &standard, util::toUnderlying(video::TvStandard::ntsc))) {
+                    const auto key = state.config()->getTvStandardKey(video::TvStandard::ntsc);
+                    if (key != std::nullopt) {
+                        state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
+                    } else {
+                        Log::warning("config", tr("Unknown TV standard ...").c_str());
+                    }
+                }
+
+                // Legacy opengl
+                ImGui::TextUnformatted(tr("Legacy OpenGL").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                static bool is_legacy         = state.config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
+                const auto  initial_rendering = bool{is_legacy};
+                if (ImGui::Checkbox("", &is_legacy)) {
+                    state.config()->writeValue(core::AccessKeys::cfg_rendering_legacy_opengl, is_legacy);
+                    if (initial_rendering != is_legacy) { reset_rendering = true; }
+                }
+            }
+
+            // Paths header
+            setHeaderState(Header::path);
+            if (ImGui::CollapsingHeader(headers.at(Header::path).c_str())) {
+                last_opened_header = Header::path;
+                // Saturn bios
+                ImGui::TextUnformatted(tr("Saturn bios").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                constexpr auto string_size = u8{255};
+                auto           bios_saturn
+                    = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_bios_saturn), string_size);
+                if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
+                    state.config()->writeValue(core::AccessKeys::cfg_paths_bios_saturn, bios_saturn.data());
+                }
+
+                // ST-V bios
+                ImGui::TextUnformatted(tr("ST-V bios").c_str());
+                ImGui::SameLine(second_column_offset);
+                auto bios_stv
+                    = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_bios_stv), string_size);
+                if (ImGui::InputText("##bios_stv", bios_stv.data(), bios_stv.capacity())) {
+                    state.config()->writeValue(core::AccessKeys::cfg_paths_bios_stv, bios_stv.data());
+                }
+
+                // ST-V roms
+                ImGui::TextUnformatted(tr("ST-V roms").c_str());
+                ImGui::SameLine(second_column_offset);
+                auto roms_stv
+                    = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_roms_stv), string_size);
+                if (ImGui::InputText("##roms_stv", roms_stv.data(), roms_stv.capacity())) {
+                    state.config()->writeValue(core::AccessKeys::cfg_paths_roms_stv, roms_stv.data());
+                }
+
+                ImGui::Separator();
+            }
+
+            // CD-ROM header
+            setHeaderState(Header::cd_rom);
+            if (ImGui::CollapsingHeader(headers.at(Header::cd_rom).c_str())) {
+                last_opened_header = Header::cd_rom;
+                // Drive
+                ImGui::TextUnformatted(tr("Drive").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                std::string drive        = state.config()->readValue(core::AccessKeys::cfg_cdrom_drive);
+                static auto current_item = int{};
+                const auto  drive_parts  = util::explode(drive, ':');
+                if (drive_parts.size() == 3) {
+                    current_item = cdrom::Cdrom::getDriveIndice(std::stoi(drive_parts[0]),
+                                                                std::stoi(drive_parts[1]),
+                                                                std::stoi(drive_parts[2]));
+                }
+
+                if (ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list)) {
+                    auto value = std::to_string(cdrom::Cdrom::di_list[current_item].path);
+                    value += ':';
+                    value += std::to_string(cdrom::Cdrom::di_list[current_item].target);
+                    value += ':';
+                    value += std::to_string(cdrom::Cdrom::di_list[current_item].lun);
+                    state.config()->writeValue(core::AccessKeys::cfg_cdrom_drive, value);
+                }
+
+                // Access method
+                // For now ASPI isn't supported, SPTI is used in every case
+                ImGui::TextUnformatted(tr("Access method").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                std::string access_method = state.config()->readValue(core::AccessKeys::cfg_cdrom_access_method);
+                static auto method        = int{util::toUnderlying(state.config()->getCdromAccess(access_method))};
+                if (ImGui::RadioButton("SPTI", &method, util::toUnderlying(cdrom::CdromAccessMethod::spti))) {
+                    const auto key = state.config()->getCdromAccessKey(cdrom::CdromAccessMethod::spti);
+                    if (key != std::nullopt) {
+                        state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
+                    } else {
+                        Log::warning("config", tr("Unknown drive access method ...").c_str());
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::RadioButton("ASPI", &method, util::toUnderlying(cdrom::CdromAccessMethod::aspi))) {
+                    const auto key = state.config()->getCdromAccessKey(cdrom::CdromAccessMethod::aspi);
+                    if (key != std::nullopt) {
+                        state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
+                    } else {
+                        Log::warning("config", tr("Unknown drive access method ...").c_str());
+                    }
+                }
+
+                // CD-Rom system ID
+            }
+
+            // Sound header
+            setHeaderState(Header::sound);
+            if (ImGui::CollapsingHeader(headers.at(Header::sound).c_str())) {
+                last_opened_header = Header::sound;
+                // Sound disabled
+                ImGui::TextUnformatted(tr("Sound disabled").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                static bool disabled = state.config()->readValue(core::AccessKeys::cfg_sound_disabled);
+                if (ImGui::Checkbox("", &disabled)) {
+                    state.config()->writeValue(core::AccessKeys::cfg_sound_disabled, disabled);
+                }
+            }
+
+            // Peripheral header
+            setHeaderState(Header::peripherals);
+            if (ImGui::CollapsingHeader(headers.at(Header::peripherals).c_str())) {
+                last_opened_header = Header::peripherals;
+                static const auto keys{core::Smpc::listAvailableKeys()};
+                auto              tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
+                if (ImGui::BeginTabBar("PeripheralTabBar", tab_bar_flags)) {
+                    auto           window_flags      = ImGuiWindowFlags{ImGuiWindowFlags_None};
+                    constexpr auto rounding          = float{5.0f};
+                    constexpr auto child_width_ratio = float{0.5f};
+                    constexpr auto child_width       = u16{260};
+                    constexpr auto child_height      = u16{280};
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, rounding);
+                    if (ImGui::BeginTabItem("Saturn")) {
+                        {
+                            //**** Saturn Player 1 ****//
+                            static auto pad = SaturnDigitalPad{};
+                            pad.fromConfig(
+                                state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_1));
+
+                            ImGui::BeginChild("ChildSaturnPlayer1", ImVec2(child_width, child_height), true, window_flags);
+
+                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+
+                            ImGui::CenteredText(tr("Player 1"));
+
+                            ImGui::TextUnformatted(tr("Connection").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            static auto connections = state.config()->listPeripheralConnections();
+                            std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
+                            const auto  it_connection    = std::find_if(connections.begin(),
+                                                                    connections.end(),
+                                                                    [&c](std::string& str) { return c == str; });
+                            static auto index_connection = static_cast<s32>(it_connection - connections.begin());
+                            if (ImGui::Combo("##peripheral_connection_1", &index_connection, connections)) {
+                                state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
+                                                           connections[index_connection]);
+                            }
+
+                            ImGui::TextUnformatted(tr("Left").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.direction_left, "direction_left");
+
+                            ImGui::TextUnformatted(tr("Right").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.direction_right, "direction_right");
+
+                            ImGui::TextUnformatted(tr("Up").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.direction_up, "direction_up");
+
+                            ImGui::TextUnformatted(tr("Down").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.direction_down, "direction_down");
+
+                            ImGui::TextUnformatted(tr("Left shoulder").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.button_shoulder_left, "button_left_shoulder");
+
+                            ImGui::TextUnformatted(tr("Right shoulder").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.button_shoulder_right, "button_right_shoulder");
+
+                            ImGui::TextUnformatted(tr("Button A").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.button_a, "button_a");
+
+                            ImGui::TextUnformatted(tr("Button B").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.button_b, "button_b");
+
+                            ImGui::TextUnformatted(tr("Button C").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.button_c, "button_c");
+
+                            ImGui::TextUnformatted(tr("Button X").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.button_x, "button_x");
+
+                            ImGui::TextUnformatted(tr("Button Y").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.button_y, "button_y");
+
+                            ImGui::TextUnformatted(tr("Button Z").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.button_z, "button_z");
+
+                            ImGui::TextUnformatted(tr("Button Start").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad.button_start, "button_start");
+
+                            state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1,
+                                                       pad.toConfig(PeripheralLayout::current_layout));
+
+                            ImGui::EndChild();
+                        }
+                        ImGui::SameLine();
+                        {
+                            //**** Saturn Player 2 ****//
+                            static auto pad_p2 = SaturnDigitalPad{};
+                            pad_p2.fromConfig(
+                                state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_2));
+
+                            ImGui::BeginChild("ChildSaturnPlayer2", ImVec2(child_width, child_height), true, window_flags);
+                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+
+                            ImGui::CenteredText(tr("Player 2"));
+
+                            ImGui::TextUnformatted(tr("Connection").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            static auto connections = state.config()->listPeripheralConnections();
+                            std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
+                            const auto  it_connection    = std::find_if(connections.begin(),
+                                                                    connections.end(),
+                                                                    [&c](std::string& str) { return c == str; });
+                            static auto index_connection = static_cast<s32>(it_connection - connections.begin());
+                            if (ImGui::Combo("##peripheral_connection_2", &index_connection, connections)) {
+                                state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
+                                                           connections[index_connection]);
+                            }
+
+                            ImGui::TextUnformatted(tr("Left").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.direction_left, "direction_left");
+
+                            ImGui::TextUnformatted(tr("Right").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.direction_right, "direction_right");
+
+                            ImGui::TextUnformatted(tr("Up").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.direction_up, "direction_up");
+
+                            ImGui::TextUnformatted(tr("Down").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.direction_down, "direction_down");
+
+                            ImGui::TextUnformatted(tr("Left shoulder").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.button_shoulder_left, "button_left_shoulder");
+
+                            ImGui::TextUnformatted(tr("Right shoulder").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.button_shoulder_right, "button_right_shoulder");
+
+                            ImGui::TextUnformatted(tr("Button A").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.button_a, "button_a");
+
+                            ImGui::TextUnformatted(tr("Button B").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.button_b, "button_b");
+
+                            ImGui::TextUnformatted(tr("Button C").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.button_c, "button_c");
+
+                            ImGui::TextUnformatted(tr("Button X").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.button_x, "button_x");
+
+                            ImGui::TextUnformatted(tr("Button Y").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.button_y, "button_y");
+
+                            ImGui::TextUnformatted(tr("Button Z").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.button_z, "button_z");
+
+                            ImGui::TextUnformatted(tr("Button Start").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, pad_p2.button_start, "button_start");
+
+                            state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_2,
+                                                       pad_p2.toConfig(PeripheralLayout::current_layout));
+
+                            ImGui::EndChild();
+                        }
+                        ImGui::EndTabItem();
+                    }
+                    if (ImGui::BeginTabItem("ST-V")) {
+                        {
+                            //**** ST-V Board ****//
+                            static auto board = StvBoardControls{};
+                            board.fromConfig(
+                                state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_board));
+
+                            constexpr auto h_size = u16{0};
+                            constexpr auto v_size = u16{160};
+                            ImGui::BeginChild("ChildStvBoard", ImVec2(h_size, v_size), true, window_flags);
+
+                            ImGui::CenteredText(tr("Board"));
+
+                            ImGui::TextUnformatted(tr("Service switch").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, board.service_switch, "service_switch");
+
+                            ImGui::TextUnformatted(tr("Test switch").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, board.test_switch, "test_switch");
+
+                            ImGui::TextUnformatted(tr("Player 1 coin switch").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, board.p1_coin_switch, "p1_coin_switch");
+
+                            ImGui::TextUnformatted(tr("Player 2 coin switch").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, board.p2_coin_switch, "p2_coin_switch");
+
+                            ImGui::TextUnformatted(tr("Player 1 start").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, board.p1_start, "p1_start");
+
+                            ImGui::TextUnformatted(tr("Player 2 start").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, board.p2_start, "p2_start");
+
+                            state.config()->writeValue(core::AccessKeys::cfg_controls_stv_board,
+                                                       board.toConfig(PeripheralLayout::current_layout));
+
+                            ImGui::EndChild();
+                        }
+
+                        {
+                            //**** ST-V Player 1 ****//
+                            static auto controls = StvPlayerControls{};
+                            controls.fromConfig(
+                                state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
+
+                            constexpr auto child_height = u16{220};
+                            ImGui::BeginChild("ChildStvPlayer1", ImVec2(child_width, child_height), true, window_flags);
+
+                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+
+                            ImGui::CenteredText(tr("Player 1"));
+
+                            ImGui::TextUnformatted(tr("Left").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
+
+                            ImGui::TextUnformatted(tr("Right").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
+
+                            ImGui::TextUnformatted(tr("Up").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
+
+                            ImGui::TextUnformatted(tr("Down").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
+
+                            ImGui::TextUnformatted(tr("Button 1").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
+
+                            ImGui::TextUnformatted(tr("Button 2").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
+
+                            ImGui::TextUnformatted(tr("Button 3").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
+
+                            ImGui::TextUnformatted(tr("Button 4").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
+
+                            state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_1,
+                                                       controls.toConfig(PeripheralLayout::current_layout));
+
+                            ImGui::EndChild();
+                        }
+                        ImGui::SameLine();
+                        {
+                            //**** ST-V Player 2 ****//
+                            static auto controls = StvPlayerControls{};
+                            controls.fromConfig(
+                                state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
+
+                            constexpr auto child_height = u16{220};
+                            ImGui::BeginChild("ChildStvPlayer2", ImVec2(child_width, child_height), true, window_flags);
+
+                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+
+                            ImGui::CenteredText(tr("Player 2"));
+
+                            ImGui::TextUnformatted(tr("Left").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
+
+                            ImGui::TextUnformatted(tr("Right").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
+
+                            ImGui::TextUnformatted(tr("Up").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
+
+                            ImGui::TextUnformatted(tr("Down").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
+
+                            ImGui::TextUnformatted(tr("Button 1").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
+
+                            ImGui::TextUnformatted(tr("Button 2").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
+
+                            ImGui::TextUnformatted(tr("Button 3").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
+
+                            ImGui::TextUnformatted(tr("Button 4").c_str());
+                            ImGui::SameLine(second_column_offset);
+                            ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
+
+                            state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_2,
+                                                       controls.toConfig(PeripheralLayout::current_layout));
+
+                            ImGui::EndChild();
+                        }
+
+                        ImGui::EndTabItem();
+                    }
+                    ImGui::EndTabBar();
+                    ImGui::PopStyleVar();
+                }
+                // ImGui::PopItemWidth();
+            }
+            static auto counter        = u16{};
+            static auto status_message = std::string{};
+            if (ImGui::Button("Save")) {
+                state.config()->writeFile();
+                state.smpc()->initializePeripheralMappings();
+
+                // Updating global state variables
+                std::string hm = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
+                state.hardwareMode(state.config()->getHardwareMode(hm));
+
+                status_message                   = tr("Configuration saved.");
+                constexpr auto frames_per_second = u8{60};
+                constexpr auto number_of_seconds = u8{5};
+                counter                          = number_of_seconds * frames_per_second;
+
+                if (reset_rendering) {
+                    state.renderingStatus(core::RenderingStatus::reset);
+                    reset_rendering = false;
+                }
+            }
+
+            if (counter > 0) {
+                --counter;
+            } else {
+                status_message.clear();
+            }
+
+            ImGui::TextUnformatted(status_message.c_str());
+            ImGui::EndMenu();
+        }
 
         ImGui::EndMenuBar();
     }
-    //}
-    // ImGui::Text("Mouse : {%f} {%f}", mouse_coords.x, mouse_coords.y);
-
-    // const auto pos_x = float{ImGui::GetMainViewport()->Pos.x};
-    // const auto pos_y = float{ImGui::GetMainViewport()->Pos.y};
-    // ImGui::Text("Main viewport : {%f} {%f}", pos_x, pos_y);
 }
 
 void showRenderingWindow(core::EmulatorContext& state) {
@@ -224,571 +765,6 @@ void showStvWindow() {
     ImGui::BeginChild("ST-V window");
     ImGui::Combo("", &listbox_item_current, files);
     ImGui::EndChild();
-}
-
-void showOptionsWindow(core::EmulatorContext& state, bool* opened) {
-    static auto reset_rendering = bool{}; // used to check if rendering has to be reset after changing the option
-
-    const auto mouse_coords = getMouseCoordinates(state);
-    const auto window_pos   = ImVec2(mouse_coords.x, mouse_coords.y);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once);
-
-    constexpr auto item_width = s8{-10};
-    ImGui::Begin("Options", opened);
-    ImGui::PushItemWidth(item_width);
-    ImGui::Spacing();
-
-    constexpr auto second_column_offset = u8{150};
-    // General header
-    if (ImGui::CollapsingHeader(tr("General").c_str())) {
-        // Hardware mode
-        ImGui::TextUnformatted(tr("Hardware mode").c_str());
-        ImGui::SameLine(second_column_offset);
-
-        std::string hm   = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
-        static auto mode = int{util::toUnderlying(state.config()->getHardwareMode(hm))};
-
-        if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::HardwareMode::saturn))) {
-            const auto hm = state.config()->getHardwareModeKey(core::HardwareMode::saturn);
-            if (hm != std::nullopt) {
-                state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
-            } else {
-                Log::warning("config", tr("Unknown hardware mode ...").c_str());
-            }
-        }
-        ImGui::SameLine();
-        if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::HardwareMode::stv))) {
-            const auto hm = state.config()->getHardwareModeKey(core::HardwareMode::stv);
-            if (hm != std::nullopt) {
-                state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
-            } else {
-                Log::warning("config", tr("Unknown hardware mode ...").c_str());
-            }
-        }
-
-        // Language
-        ImGui::TextUnformatted(tr("Language").c_str());
-        ImGui::SameLine(second_column_offset);
-
-        static auto locales = core::Config::listAvailableLanguages();
-        std::string l       = state.config()->readValue(core::AccessKeys::cfg_global_language);
-        const auto  it      = std::find_if(locales.begin(), locales.end(), [&l](std::string& str) { return l == str; });
-        static auto index   = static_cast<s32>(it - locales.begin());
-        if (ImGui::Combo("##language", &index, locales)) {
-            state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
-        }
-
-        // Area code
-        ImGui::TextUnformatted(tr("Area code").c_str());
-        ImGui::SameLine(second_column_offset);
-
-        static auto codes      = state.config()->listAreaCodes();
-        std::string c          = state.config()->readValue(core::AccessKeys::cfg_global_area_code);
-        const auto  it_code    = std::find_if(codes.begin(), codes.end(), [&c](std::string& str) { return c == str; });
-        static auto index_code = static_cast<s32>(it_code - codes.begin());
-        if (ImGui::Combo("##area_code", &index_code, codes)) {
-            state.config()->writeValue(core::AccessKeys::cfg_global_area_code, codes[index_code]);
-        }
-    }
-
-    // Rendering header
-    if (ImGui::CollapsingHeader(tr("Rendering").c_str())) {
-        // TV standard
-        ImGui::TextUnformatted(tr("TV standard").c_str());
-        ImGui::SameLine(second_column_offset);
-
-        std::string ts       = state.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-        static auto standard = int{util::toUnderlying(state.config()->getTvStandard(ts))};
-
-        if (ImGui::RadioButton("PAL", &standard, util::toUnderlying(video::TvStandard::pal))) {
-            const auto key = state.config()->getTvStandardKey(video::TvStandard::pal);
-            if (key != std::nullopt) {
-                state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
-            } else {
-                Log::warning("config", tr("Unknown TV standard ...").c_str());
-            }
-        }
-        ImGui::SameLine();
-        if (ImGui::RadioButton("NTSC", &standard, util::toUnderlying(video::TvStandard::ntsc))) {
-            const auto key = state.config()->getTvStandardKey(video::TvStandard::ntsc);
-            if (key != std::nullopt) {
-                state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
-            } else {
-                Log::warning("config", tr("Unknown TV standard ...").c_str());
-            }
-        }
-
-        // Legacy opengl
-        ImGui::TextUnformatted(tr("Legacy OpenGL").c_str());
-        ImGui::SameLine(second_column_offset);
-
-        static bool is_legacy         = state.config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
-        const auto  initial_rendering = bool{is_legacy};
-        if (ImGui::Checkbox("", &is_legacy)) {
-            state.config()->writeValue(core::AccessKeys::cfg_rendering_legacy_opengl, is_legacy);
-            if (initial_rendering != is_legacy) { reset_rendering = true; }
-        }
-    }
-
-    // Paths header
-    if (ImGui::CollapsingHeader(tr("Paths").c_str())) {
-        // Saturn bios
-        ImGui::TextUnformatted(tr("Saturn bios").c_str());
-        ImGui::SameLine(second_column_offset);
-
-        constexpr auto string_size = u8{255};
-        auto bios_saturn = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_bios_saturn), string_size);
-        if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
-            state.config()->writeValue(core::AccessKeys::cfg_paths_bios_saturn, bios_saturn.data());
-        }
-
-        // ST-V bios
-        ImGui::TextUnformatted(tr("ST-V bios").c_str());
-        ImGui::SameLine(second_column_offset);
-        auto bios_stv = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_bios_stv), string_size);
-        if (ImGui::InputText("##bios_stv", bios_stv.data(), bios_stv.capacity())) {
-            state.config()->writeValue(core::AccessKeys::cfg_paths_bios_stv, bios_stv.data());
-        }
-
-        // ST-V roms
-        ImGui::TextUnformatted(tr("ST-V roms").c_str());
-        ImGui::SameLine(second_column_offset);
-        auto roms_stv = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_roms_stv), string_size);
-        if (ImGui::InputText("##roms_stv", roms_stv.data(), roms_stv.capacity())) {
-            state.config()->writeValue(core::AccessKeys::cfg_paths_roms_stv, roms_stv.data());
-        }
-
-        ImGui::Separator();
-    }
-
-    // CD-ROM header
-    if (ImGui::CollapsingHeader(tr("CD-Rom").c_str())) {
-        // Drive
-        ImGui::TextUnformatted(tr("Drive").c_str());
-        ImGui::SameLine(second_column_offset);
-
-        std::string drive        = state.config()->readValue(core::AccessKeys::cfg_cdrom_drive);
-        static auto current_item = int{};
-        const auto  drive_parts  = util::explode(drive, ':');
-        if (drive_parts.size() == 3) {
-            current_item
-                = cdrom::Cdrom::getDriveIndice(std::stoi(drive_parts[0]), std::stoi(drive_parts[1]), std::stoi(drive_parts[2]));
-        }
-
-        if (ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list)) {
-            auto value = std::to_string(cdrom::Cdrom::di_list[current_item].path);
-            value += ':';
-            value += std::to_string(cdrom::Cdrom::di_list[current_item].target);
-            value += ':';
-            value += std::to_string(cdrom::Cdrom::di_list[current_item].lun);
-            state.config()->writeValue(core::AccessKeys::cfg_cdrom_drive, value);
-        }
-
-        // Access method
-        // For now ASPI isn't supported, SPTI is used in every case
-        ImGui::TextUnformatted(tr("Access method").c_str());
-        ImGui::SameLine(second_column_offset);
-
-        std::string access_method = state.config()->readValue(core::AccessKeys::cfg_cdrom_access_method);
-        static auto method        = int{util::toUnderlying(state.config()->getCdromAccess(access_method))};
-        if (ImGui::RadioButton("SPTI", &method, util::toUnderlying(cdrom::CdromAccessMethod::spti))) {
-            const auto key = state.config()->getCdromAccessKey(cdrom::CdromAccessMethod::spti);
-            if (key != std::nullopt) {
-                state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
-            } else {
-                Log::warning("config", tr("Unknown drive access method ...").c_str());
-            }
-        }
-        ImGui::SameLine();
-        if (ImGui::RadioButton("ASPI", &method, util::toUnderlying(cdrom::CdromAccessMethod::aspi))) {
-            const auto key = state.config()->getCdromAccessKey(cdrom::CdromAccessMethod::aspi);
-            if (key != std::nullopt) {
-                state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
-            } else {
-                Log::warning("config", tr("Unknown drive access method ...").c_str());
-            }
-        }
-
-        // CD-Rom system ID
-    }
-
-    // Sound header
-    if (ImGui::CollapsingHeader(tr("Sound").c_str())) {
-        // Sound disabled
-        ImGui::TextUnformatted(tr("Sound disabled").c_str());
-        ImGui::SameLine(second_column_offset);
-
-        static bool disabled = state.config()->readValue(core::AccessKeys::cfg_sound_disabled);
-        if (ImGui::Checkbox("", &disabled)) { state.config()->writeValue(core::AccessKeys::cfg_sound_disabled, disabled); }
-    }
-
-    // Peripheral header
-    if (ImGui::CollapsingHeader(tr("Peripherals").c_str())) {
-        static const auto keys{core::Smpc::listAvailableKeys()};
-
-        auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
-        if (ImGui::BeginTabBar("PeripheralTabBar", tab_bar_flags)) {
-            auto           window_flags      = ImGuiWindowFlags{ImGuiWindowFlags_None};
-            constexpr auto rounding          = float{5.0f};
-            constexpr auto child_width_ratio = float{0.5f};
-            constexpr auto child_height      = u16{280};
-            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, rounding);
-            if (ImGui::BeginTabItem("Saturn")) {
-                {
-                    //**** Saturn Player 1 ****//
-                    static auto pad = SaturnDigitalPad{};
-                    pad.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_1));
-
-                    ImGui::BeginChild("ChildSaturnPlayer1",
-                                      ImVec2(ImGui::GetWindowContentRegionWidth() * child_width_ratio, child_height),
-                                      true,
-                                      window_flags);
-
-                    ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
-
-                    ImGui::CenteredText(tr("Player 1"));
-
-                    ImGui::TextUnformatted(tr("Connection").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    static auto connections = state.config()->listPeripheralConnections();
-                    std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
-                    const auto  it_connection
-                        = std::find_if(connections.begin(), connections.end(), [&c](std::string& str) { return c == str; });
-                    static auto index_connection = static_cast<s32>(it_connection - connections.begin());
-                    if (ImGui::Combo("##peripheral_connection_1", &index_connection, connections)) {
-                        state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
-                                                   connections[index_connection]);
-                    }
-
-                    ImGui::TextUnformatted(tr("Left").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.direction_left, "direction_left");
-
-                    ImGui::TextUnformatted(tr("Right").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.direction_right, "direction_right");
-
-                    ImGui::TextUnformatted(tr("Up").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.direction_up, "direction_up");
-
-                    ImGui::TextUnformatted(tr("Down").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.direction_down, "direction_down");
-
-                    ImGui::TextUnformatted(tr("Left shoulder").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.button_shoulder_left, "button_left_shoulder");
-
-                    ImGui::TextUnformatted(tr("Right shoulder").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.button_shoulder_right, "button_right_shoulder");
-
-                    ImGui::TextUnformatted(tr("Button A").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.button_a, "button_a");
-
-                    ImGui::TextUnformatted(tr("Button B").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.button_b, "button_b");
-
-                    ImGui::TextUnformatted(tr("Button C").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.button_c, "button_c");
-
-                    ImGui::TextUnformatted(tr("Button X").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.button_x, "button_x");
-
-                    ImGui::TextUnformatted(tr("Button Y").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.button_y, "button_y");
-
-                    ImGui::TextUnformatted(tr("Button Z").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.button_z, "button_z");
-
-                    ImGui::TextUnformatted(tr("Button Start").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad.button_start, "button_start");
-
-                    state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1,
-                                               pad.toConfig(PeripheralLayout::current_layout));
-
-                    ImGui::EndChild();
-                }
-                ImGui::SameLine();
-                {
-                    //**** Saturn Player 2 ****//
-                    static auto pad_p2 = SaturnDigitalPad{};
-                    pad_p2.fromConfig(
-                        state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_2));
-
-                    ImGui::BeginChild("ChildSaturnPlayer2",
-                                      ImVec2(ImGui::GetWindowContentRegionWidth() * child_width_ratio, child_height),
-                                      true,
-                                      window_flags);
-                    ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
-
-                    ImGui::CenteredText(tr("Player 2"));
-
-                    ImGui::TextUnformatted(tr("Connection").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    static auto connections = state.config()->listPeripheralConnections();
-                    std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
-                    const auto  it_connection
-                        = std::find_if(connections.begin(), connections.end(), [&c](std::string& str) { return c == str; });
-                    static auto index_connection = static_cast<s32>(it_connection - connections.begin());
-                    if (ImGui::Combo("##peripheral_connection_2", &index_connection, connections)) {
-                        state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
-                                                   connections[index_connection]);
-                    }
-
-                    ImGui::TextUnformatted(tr("Left").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.direction_left, "direction_left");
-
-                    ImGui::TextUnformatted(tr("Right").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.direction_right, "direction_right");
-
-                    ImGui::TextUnformatted(tr("Up").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.direction_up, "direction_up");
-
-                    ImGui::TextUnformatted(tr("Down").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.direction_down, "direction_down");
-
-                    ImGui::TextUnformatted(tr("Left shoulder").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.button_shoulder_left, "button_left_shoulder");
-
-                    ImGui::TextUnformatted(tr("Right shoulder").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.button_shoulder_right, "button_right_shoulder");
-
-                    ImGui::TextUnformatted(tr("Button A").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.button_a, "button_a");
-
-                    ImGui::TextUnformatted(tr("Button B").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.button_b, "button_b");
-
-                    ImGui::TextUnformatted(tr("Button C").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.button_c, "button_c");
-
-                    ImGui::TextUnformatted(tr("Button X").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.button_x, "button_x");
-
-                    ImGui::TextUnformatted(tr("Button Y").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.button_y, "button_y");
-
-                    ImGui::TextUnformatted(tr("Button Z").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.button_z, "button_z");
-
-                    ImGui::TextUnformatted(tr("Button Start").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, pad_p2.button_start, "button_start");
-
-                    state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_2,
-                                               pad_p2.toConfig(PeripheralLayout::current_layout));
-
-                    ImGui::EndChild();
-                }
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("ST-V")) {
-                {
-                    //**** ST-V Board ****//
-                    static auto board = StvBoardControls{};
-                    board.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_board));
-
-                    constexpr auto h_size = u16{0};
-                    constexpr auto v_size = u16{160};
-                    ImGui::BeginChild("ChildStvBoard", ImVec2(h_size, v_size), true, window_flags);
-
-                    ImGui::CenteredText(tr("Board"));
-
-                    ImGui::TextUnformatted(tr("Service switch").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, board.service_switch, "service_switch");
-
-                    ImGui::TextUnformatted(tr("Test switch").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, board.test_switch, "test_switch");
-
-                    ImGui::TextUnformatted(tr("Player 1 coin switch").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, board.p1_coin_switch, "p1_coin_switch");
-
-                    ImGui::TextUnformatted(tr("Player 2 coin switch").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, board.p2_coin_switch, "p2_coin_switch");
-
-                    ImGui::TextUnformatted(tr("Player 1 start").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, board.p1_start, "p1_start");
-
-                    ImGui::TextUnformatted(tr("Player 2 start").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, board.p2_start, "p2_start");
-
-                    state.config()->writeValue(core::AccessKeys::cfg_controls_stv_board,
-                                               board.toConfig(PeripheralLayout::current_layout));
-
-                    ImGui::EndChild();
-                }
-
-                {
-                    //**** ST-V Player 1 ****//
-                    static auto controls = StvPlayerControls{};
-                    controls.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
-
-                    constexpr auto child_height = u16{220};
-                    ImGui::BeginChild("ChildStvPlayer1",
-                                      ImVec2(ImGui::GetWindowContentRegionWidth() * child_width_ratio, child_height),
-                                      true,
-                                      window_flags);
-
-                    ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
-
-                    ImGui::CenteredText(tr("Player 1"));
-
-                    ImGui::TextUnformatted(tr("Left").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
-
-                    ImGui::TextUnformatted(tr("Right").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
-
-                    ImGui::TextUnformatted(tr("Up").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
-
-                    ImGui::TextUnformatted(tr("Down").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
-
-                    ImGui::TextUnformatted(tr("Button 1").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
-
-                    ImGui::TextUnformatted(tr("Button 2").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
-
-                    ImGui::TextUnformatted(tr("Button 3").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
-
-                    ImGui::TextUnformatted(tr("Button 4").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
-
-                    state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_1,
-                                               controls.toConfig(PeripheralLayout::current_layout));
-
-                    ImGui::EndChild();
-                }
-                ImGui::SameLine();
-                {
-                    //**** ST-V Player 2 ****//
-                    static auto controls = StvPlayerControls{};
-                    controls.fromConfig(state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
-
-                    constexpr auto child_height = u16{220};
-                    ImGui::BeginChild("ChildStvPlayer2",
-                                      ImVec2(ImGui::GetWindowContentRegionWidth() * child_width_ratio, child_height),
-                                      true,
-                                      window_flags);
-
-                    ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
-
-                    ImGui::CenteredText(tr("Player 2"));
-
-                    ImGui::TextUnformatted(tr("Left").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
-
-                    ImGui::TextUnformatted(tr("Right").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
-
-                    ImGui::TextUnformatted(tr("Up").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
-
-                    ImGui::TextUnformatted(tr("Down").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
-
-                    ImGui::TextUnformatted(tr("Button 1").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
-
-                    ImGui::TextUnformatted(tr("Button 2").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
-
-                    ImGui::TextUnformatted(tr("Button 3").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
-
-                    ImGui::TextUnformatted(tr("Button 4").c_str());
-                    ImGui::SameLine(second_column_offset);
-                    ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
-
-                    state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_2,
-                                               controls.toConfig(PeripheralLayout::current_layout));
-
-                    ImGui::EndChild();
-                }
-
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
-            ImGui::PopStyleVar();
-        }
-        ImGui::PopItemWidth();
-    }
-
-    static auto counter        = u16{};
-    static auto status_message = std::string{};
-    if (ImGui::Button("Save")) {
-        state.config()->writeFile();
-        state.smpc()->initializePeripheralMappings();
-
-        // Updating global state variables
-        std::string hm = state.config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
-        state.hardwareMode(state.config()->getHardwareMode(hm));
-
-        status_message                   = tr("Configuration saved.");
-        constexpr auto frames_per_second = u8{60};
-        constexpr auto number_of_seconds = u8{5};
-        counter                          = number_of_seconds * frames_per_second;
-
-        if (reset_rendering) {
-            state.renderingStatus(core::RenderingStatus::reset);
-            reset_rendering = false;
-        }
-    }
-
-    if (counter > 0) {
-        --counter;
-    } else {
-        status_message.clear();
-    }
-
-    ImGui::TextUnformatted(status_message.c_str());
-
-    ImGui::End();
 }
 
 void showLogWindow(bool* opened) {

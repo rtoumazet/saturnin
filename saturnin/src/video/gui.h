@@ -111,20 +111,6 @@ void showRenderingWindow(core::EmulatorContext& state);
 void showStvWindow();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showOptionsWindow(core::EmulatorContext& state, bool* opened);
-///
-/// \brief  Displays the options window.
-///
-/// \author Runik
-/// \date   24/10/2019
-///
-/// \param [in,out] state   The emulator context.
-/// \param [in,out] opened  True to display the window.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void showOptionsWindow(core::EmulatorContext& state, bool* opened);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showLogWindow(bool* opened);
 ///
 /// \brief  Displays the log window.
@@ -207,20 +193,5 @@ void addTextureToDrawList(s32 texture, u32 width, u32 height);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto getMouseCoordinates(core::EmulatorContext& state) -> Coord;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto isMainMenuDisplayed(core::EmulatorContext& state)-> bool;
-///
-/// \brief  Query if the main menu has to be displayed.
-///
-/// \author Runik
-/// \date   11/02/2021
-///
-/// \param [in,out] state   The emulator context.
-///
-/// \returns    True if the main menu has to be displayed.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-auto isMainMenuDisplayed(core::EmulatorContext& state) -> bool;
 
 } // namespace saturnin::gui
