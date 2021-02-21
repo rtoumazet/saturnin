@@ -320,7 +320,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     updateMainWindowSizeAndRatio(window, minimum_window_width, minimum_window_height);
 
-    opengl->saturnScreenResolution(ScreenResolution{320, 224});
+    // opengl->saturnScreenResolution(ScreenResolution{320, 224});
     opengl->hostScreenResolution(ScreenResolution{minimum_window_width, minimum_window_height});
 
     // Main loop

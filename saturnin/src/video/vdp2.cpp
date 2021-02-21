@@ -23,6 +23,7 @@
 #include <saturnin/src/config.h>
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/scu_registers.h>
+#include <saturnin/src/video/opengl.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2_registers.h>
 
@@ -40,12 +41,21 @@ using core::tr;
 void Vdp2::initialize() {
     initializeRegisterNameMap();
 
+    tv_screen_status_.horizontal_res = horizontal_res_320;
+
     const std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (emulator_context_->config()->getTvStandard(ts)) {
-        case video::TvStandard::pal: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard); break;
-        case video::TvStandard::ntsc: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard); break;
+        case video::TvStandard::pal:
+            tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard);
+            tv_screen_status_.vertical_res = vertical_res_256;
+            break;
+        case video::TvStandard::ntsc:
+            tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard);
+            tv_screen_status_.vertical_res = vertical_res_224;
+            break;
         default: Log::warning("vdp2", tr("Unknown TV standard"));
     }
+    emulator_context_->opengl()->saturnScreenResolution({tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res});
     calculateDisplayDuration();
 }
 
@@ -1329,7 +1339,174 @@ void Vdp2::onVblankIn() {
 
 auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; };
 
-void Vdp2::updateResolution(){};
+void Vdp2::updateResolution() {
+    tv_screen_status_.is_picture_displayed = (tvmd_.get(TvScreenMode::display) == Display::displayed) ? true : false;
+    tv_screen_status_.border_color_mode    = tvmd_.get(TvScreenMode::border_color_mode);
+    tv_screen_status_.interlace_mode       = tvmd_.get(TvScreenMode::interlace_mode);
+
+    switch (tvmd_.get(TvScreenMode::horizontal_resolution)) {
+        case HorizontalResolution::normal_320:
+            tv_screen_status_.horizontal_res = horizontal_res_320;
+            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_224;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_224;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_240;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_240;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_256;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_256;
+                        break;
+                }
+            } else {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_448;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_448;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_480;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_480;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_512;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_512;
+                        break;
+                }
+            }
+
+            break;
+        case HorizontalResolution::normal_352:
+            tv_screen_status_.horizontal_res = horizontal_res_352;
+            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_224;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_224;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_240;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_240;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_256;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_256;
+                        break;
+                }
+            } else {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_448;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_448;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_480;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_480;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_512;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_512;
+                        break;
+                }
+            }
+
+            break;
+        case HorizontalResolution::hi_res_640:
+            tv_screen_status_.horizontal_res = horizontal_res_640;
+            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_224;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_224;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_240;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_240;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_256;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_256;
+                        break;
+                }
+            } else {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_448;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_448;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_480;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_480;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_512;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_512;
+                        break;
+                }
+            }
+            break;
+        case HorizontalResolution::hi_res_704:
+            tv_screen_status_.horizontal_res = horizontal_res_704;
+            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_224;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_224;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_240;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_240;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_256;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_256;
+                        break;
+                }
+            } else {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_448;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_448;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_480;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_480;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_512;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_512;
+                        break;
+                }
+            }
+            break;
+        case HorizontalResolution::exclusive_normal_320:
+            tv_screen_status_.horizontal_res = horizontal_res_320;
+            tv_screen_status_.vertical_res   = vertical_res_480;
+            tv_screen_status_.screen_mode    = ScreenMode::exclusive_320_480;
+            break;
+        case HorizontalResolution::exclusive_normal_352:
+            tv_screen_status_.horizontal_res = horizontal_res_352;
+            tv_screen_status_.vertical_res   = vertical_res_480;
+            tv_screen_status_.screen_mode    = ScreenMode::exclusive_352_480;
+            break;
+        case HorizontalResolution::exclusive_hi_res_640:
+            tv_screen_status_.horizontal_res = horizontal_res_640;
+            tv_screen_status_.vertical_res   = vertical_res_480;
+            tv_screen_status_.screen_mode    = ScreenMode::exclusive_640_480;
+            break;
+        case HorizontalResolution::exclusive_hi_res_704:
+            tv_screen_status_.horizontal_res = horizontal_res_704;
+            tv_screen_status_.vertical_res   = vertical_res_480;
+            tv_screen_status_.screen_mode    = ScreenMode::exclusive_704_480;
+            break;
+    }
+
+    emulator_context_->opengl()->saturnScreenResolution({tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res});
+};
 
 auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
     if (zq == ZoomQuarter::up_to_one_quarter) { return ReductionSetting::up_to_one_quarter; }

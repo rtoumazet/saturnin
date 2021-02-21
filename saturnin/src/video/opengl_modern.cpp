@@ -211,6 +211,9 @@ void OpenglModern::drawTriangle() {
     const auto saturn_res   = saturnScreenResolution();
     const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
 
+    // If the Saturn resolution isn't set yet, calculation is aborted
+    if ((saturn_res.height == 0) || (saturn_res.width == 0)) return;
+
     auto projection = glm::mat4{};
     auto view       = glm::mat4{1.0f};
 

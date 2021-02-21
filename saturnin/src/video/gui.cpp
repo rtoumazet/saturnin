@@ -41,10 +41,11 @@ namespace saturnin::gui {
 
 // static bool show_load_stv     = false;
 static bool show_load_binary  = false;
-static bool show_debug_sh2    = false;
 static bool show_debug_memory = false;
+static bool show_debug_sh2    = false;
+static bool show_debug_vdp2   = false;
 static bool show_options      = false;
-static bool show_demo         = true;
+static bool show_demo         = false;
 static bool show_log          = true;
 
 using core::Log;
@@ -122,8 +123,9 @@ void showMainMenu(core::EmulatorContext& state) {
             case core::EmulationStatus::running:
             case core::EmulationStatus::reset: {
                 if (ImGui::BeginMenu(tr("Debug").c_str())) {
-                    ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
                     ImGui::MenuItem(tr("Memory editor").c_str(), nullptr, &show_debug_memory);
+                    ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
+                    ImGui::MenuItem(tr("VDP2").c_str(), nullptr, &show_debug_vdp2);
                     ImGui::EndMenu();
                 }
 
@@ -1001,6 +1003,50 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
     }
 
     ImGui::End();
+}
+
+void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
+    // const auto window_size = ImVec2(600, 320);
+    // ImGui::SetNextWindowSize(window_size);
+
+    // auto window_flags
+    //    = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
+    // ImGui::Begin(tr("Memory debug").c_str(), opened, window_flags);
+
+    // static auto current_area = MemoryMapArea::rom;
+
+    // if (ImGui::BeginCombo(tr("Memory area").c_str(), state.memory()->memory_map_[current_area].c_str())) {
+    //    for (const auto& [k, v] : state.memory()->memory_map_) {
+    //        const auto is_selected = bool{current_area == k};
+    //        if (ImGui::Selectable(v.c_str(), is_selected)) { current_area = k; }
+    //        if (is_selected) { ImGui::SetItemDefaultFocus(); }
+    //    }
+
+    //    ImGui::EndCombo();
+    //}
+
+    // switch (current_area) {
+    //    case MemoryMapArea::vdp2_registers:
+    //        for (auto const& r : state.memory()->vdp2()->getRegisters()) {
+    //            const auto mask = std::string{"{:#010x} {:<35} : {:#06x}"};
+
+    //            ImGui::TextUnformatted(
+    //                fmt::format(mask, r.first, r.second, state.memory()->vdp2()->readRegisters<u16>(r.first)).c_str());
+    //            // r.first
+    //        }
+    //        break;
+    //    case MemoryMapArea::cd_block:
+    //        for (auto const& r : state.memory()->cdrom()->getRegisters()) {
+    //            ImGui::TextUnformatted(r.c_str());
+    //        }
+    //        break;
+    //    default:
+    //        auto        area_data = state.memory()->getMemoryMapAreaData(current_area);
+    //        static auto editor    = MemoryEditor{}; // store your state somewhere
+    //        editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
+    //}
+
+    // ImGui::End();
 }
 
 void buildGui(core::EmulatorContext& state) {

@@ -55,6 +55,17 @@ using VramTiming                = std::array<VramAccessCommand, vram_timing_size
 constexpr auto saturn_framebuffer_width  = u16{2048};
 constexpr auto saturn_framebuffer_height = u16{2048};
 
+constexpr auto horizontal_res_320 = u16{320};
+constexpr auto horizontal_res_352 = u16{352};
+constexpr auto horizontal_res_640 = u16{640};
+constexpr auto horizontal_res_704 = u16{704};
+constexpr auto vertical_res_224   = u16{224};
+constexpr auto vertical_res_240   = u16{240};
+constexpr auto vertical_res_256   = u16{256};
+constexpr auto vertical_res_448   = u16{448};
+constexpr auto vertical_res_480   = u16{480};
+constexpr auto vertical_res_512   = u16{512};
+
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
 //  Vertical resolution :
@@ -101,6 +112,44 @@ enum class ColorCount {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ScreenMode
+///
+/// \brief  Values that represent TV screen modes.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ScreenMode {
+    unknown,
+    normal_320_224,
+    normal_320_240,
+    normal_320_256,
+    normal_320_448,
+    normal_320_480,
+    normal_320_512,
+    normal_352_224,
+    normal_352_240,
+    normal_352_256,
+    normal_352_448,
+    normal_352_480,
+    normal_352_512,
+    hi_res_640_224,
+    hi_res_640_240,
+    hi_res_640_256,
+    hi_res_640_448,
+    hi_res_640_480,
+    hi_res_640_512,
+    hi_res_704_224,
+    hi_res_704_240,
+    hi_res_704_256,
+    hi_res_704_448,
+    hi_res_704_480,
+    hi_res_704_512,
+    exclusive_320_480,
+    exclusive_352_480,
+    exclusive_640_480,
+    exclusive_704_480,
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ReductionSetting
 ///
 /// \brief  Values that represent normal scroll screen reduction.
@@ -115,6 +164,24 @@ enum class ReductionSetting { none, up_to_one_half, up_to_one_quarter };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class VramAccessNumber : u8 { none = 0, one = 1, two = 2, four = 4, eight = 8 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct TvScreenStatus
+///
+/// \brief  The TV screen status.
+///
+/// \author Runik
+/// \date   21/02/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct TvScreenStatus {
+    bool            is_picture_displayed{false};
+    BorderColorMode border_color_mode{BorderColorMode::displays_black};
+    InterlaceMode   interlace_mode{InterlaceMode::non_interlace};
+    ScreenMode      screen_mode{ScreenMode::unknown};
+    u16             horizontal_res{};
+    u16             vertical_res{};
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct NormalScrollScreenStatus
@@ -472,6 +539,8 @@ class Vdp2 {
 
     u16 timer_0_counter_{}; ///< Timer 0 counter.
     u16 timer_1_counter_{}; ///< Timer 1 counter.
+
+    TvScreenStatus tv_screen_status_; ///< The TV screen status.
 
     std::vector<Vertex> render_vertexes_; ///< Contains all the geometry vertexes (VDP1 & VDP2).
 

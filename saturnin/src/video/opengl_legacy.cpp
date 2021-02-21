@@ -199,6 +199,9 @@ void OpenglLegacy::drawTriangle() {
     const auto saturn_res   = saturnScreenResolution();
     const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
 
+    // If the Saturn resolution isn't set yet, calculation is aborted
+    if ((saturn_res.height == 0) || (saturn_res.width == 0)) return;
+
     auto projection = glm::mat4{};
     auto view       = glm::mat4{1.0f};
 
@@ -219,8 +222,10 @@ void OpenglLegacy::drawTriangle() {
 
         // Centering the viewport
         const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
-        const auto amount     = static_cast<float>(empty_zone) / host_res.height;
-        view                  = glm::translate(view, glm::vec3(0.0f, amount, 0.0f));
+        // const auto empty_zone = 0x9a;
+        const auto amount = static_cast<float>(empty_zone) / host_res.height;
+        view              = glm::translate(view, glm::vec3(0.0f, amount, 0.0f));
+        // ImGui::Text("Empty zone {%x}", empty_zone);
     }
 
     const auto proj_matrix = view * projection;
