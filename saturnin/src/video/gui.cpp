@@ -129,8 +129,9 @@ void showMainMenu(core::EmulatorContext& state) {
                     ImGui::EndMenu();
                 }
 
-                if (show_debug_sh2) { showSh2DebugWindow(state, &show_debug_sh2); };
                 if (show_debug_memory) { showMemoryDebugWindow(state, &show_debug_memory); };
+                if (show_debug_sh2) { showSh2DebugWindow(state, &show_debug_sh2); };
+                if (show_debug_vdp2) { showVdp2DebugWindow(state, &show_debug_vdp2); };
             }
         }
 
@@ -367,7 +368,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     constexpr auto child_width       = u16{260};
                     constexpr auto child_height      = u16{280};
                     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, rounding);
-                    if (ImGui::BeginTabItem("Saturn")) {
+                    if (ImGui::BeginTabItem(tr("Saturn").c_str())) {
                         {
                             //**** Saturn Player 1 ****//
                             static auto pad = SaturnDigitalPad{};
@@ -534,7 +535,7 @@ void showMainMenu(core::EmulatorContext& state) {
                         }
                         ImGui::EndTabItem();
                     }
-                    if (ImGui::BeginTabItem("ST-V")) {
+                    if (ImGui::BeginTabItem(tr("ST-V").c_str())) {
                         {
                             //**** ST-V Board ****//
                             static auto board = StvBoardControls{};
@@ -1006,47 +1007,24 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
-    // const auto window_size = ImVec2(600, 320);
-    // ImGui::SetNextWindowSize(window_size);
+    const auto window_size = ImVec2(600, 320);
+    ImGui::SetNextWindowSize(window_size);
 
-    // auto window_flags
-    //    = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
-    // ImGui::Begin(tr("Memory debug").c_str(), opened, window_flags);
+    auto window_flags
+        = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
+    ImGui::Begin(tr("VDP2 debug").c_str(), opened, window_flags);
 
-    // static auto current_area = MemoryMapArea::rom;
+    auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
+    if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {
+        if (ImGui::BeginTabItem(tr("Global").c_str())) {
+            ImGui::Text(state.vdp2()->debugResolutionString().c_str());
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem(tr("VRAM access").c_str())) { ImGui::EndTabItem(); }
+        ImGui::EndTabBar();
+    }
 
-    // if (ImGui::BeginCombo(tr("Memory area").c_str(), state.memory()->memory_map_[current_area].c_str())) {
-    //    for (const auto& [k, v] : state.memory()->memory_map_) {
-    //        const auto is_selected = bool{current_area == k};
-    //        if (ImGui::Selectable(v.c_str(), is_selected)) { current_area = k; }
-    //        if (is_selected) { ImGui::SetItemDefaultFocus(); }
-    //    }
-
-    //    ImGui::EndCombo();
-    //}
-
-    // switch (current_area) {
-    //    case MemoryMapArea::vdp2_registers:
-    //        for (auto const& r : state.memory()->vdp2()->getRegisters()) {
-    //            const auto mask = std::string{"{:#010x} {:<35} : {:#06x}"};
-
-    //            ImGui::TextUnformatted(
-    //                fmt::format(mask, r.first, r.second, state.memory()->vdp2()->readRegisters<u16>(r.first)).c_str());
-    //            // r.first
-    //        }
-    //        break;
-    //    case MemoryMapArea::cd_block:
-    //        for (auto const& r : state.memory()->cdrom()->getRegisters()) {
-    //            ImGui::TextUnformatted(r.c_str());
-    //        }
-    //        break;
-    //    default:
-    //        auto        area_data = state.memory()->getMemoryMapAreaData(current_area);
-    //        static auto editor    = MemoryEditor{}; // store your state somewhere
-    //        editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
-    //}
-
-    // ImGui::End();
+    ImGui::End();
 }
 
 void buildGui(core::EmulatorContext& state) {

@@ -1337,7 +1337,14 @@ void Vdp2::onVblankIn() {
     populateRenderData();
 }
 
-auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; };
+auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; }
+
+auto Vdp2::debugResolutionString() const -> const std::string {
+    //   return std::string{
+    //        fmt::format(tr("Resolution : {%d} {%d} - {%s}"), tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res,
+    //        "")};
+    return "";
+}
 
 void Vdp2::updateResolution() {
     tv_screen_status_.is_picture_displayed = (tvmd_.get(TvScreenMode::display) == Display::displayed) ? true : false;

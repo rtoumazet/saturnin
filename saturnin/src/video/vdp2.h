@@ -322,6 +322,19 @@ class Vdp2 {
 
     auto getRenderVertexes() const -> const std::vector<Vertex>&;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::debugResolutionString() const -> const std::string;
+    ///
+    /// \brief  Returns a formatted string with current resolution setting
+    ///
+    /// \author Runik
+    /// \date   22/02/2021
+    ///
+    /// \returns    The resolution string.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto debugResolutionString() const -> const std::string;
+
   private:
     /// \name Vdp2 registers accessors
     //@{
