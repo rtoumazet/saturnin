@@ -1017,7 +1017,8 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
     auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
     if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {
         if (ImGui::BeginTabItem(tr("Global").c_str())) {
-            ImGui::Text(state.vdp2()->debugResolutionString().c_str());
+            ImGui::Text(state.vdp2()->getDebugResolution().c_str());
+            ImGui::Text(state.vdp2()->getDebugInterlaceMode().c_str());
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem(tr("VRAM access").c_str())) { ImGui::EndTabItem(); }

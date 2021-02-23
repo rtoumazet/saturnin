@@ -182,23 +182,42 @@ struct TvScreenStatus {
     u16             horizontal_res{};
     u16             vertical_res{};
 };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct ScrollScreenStatus
+///
+/// \brief  Status of a scroll screen, base for NBG and RBG.
+///
+/// \author Runik
+/// \date   23/02/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+struct ScrollScreenStatus {
+    bool         is_display_enabled{};               ///< True when displayed.
+    bool         is_display_enabled_dirty{};         ///< True when displayed state was changed.
+    bool         is_transparency_code_valid{};       ///< True when transparency code is valid.
+    bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
+    BitmapEnable format{};                           ///< Cell or bitmap.
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct NormalScrollScreenStatus
 ///
-/// \brief  Status of a normal scroll screen.
+/// \brief  Status of a normal scroll screen (NBG).
 ///
 /// \author Runik
 /// \date   14/01/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct NormalScrollScreenStatus {
-    bool         is_display_enabled{};         ///< True when displayed.
-    bool         is_transparency_code_valid{}; ///< True when transparency code is valid.
-    BitmapEnable format{};                     ///< Cell or bitmap.
-};
+struct NormalScrollScreenStatus : ScrollScreenStatus {};
 
-struct RotationScrollScreenStatus {};
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct RotationScrollScreenStatus
+///
+/// \brief  Status of a rotation scroll screen (RBG).
+///
+/// \author Runik
+/// \date   23/02/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+struct RotationScrollScreenStatus : ScrollScreenStatus {};
 
 class Vdp2 {
   public:
@@ -322,19 +341,11 @@ class Vdp2 {
 
     auto getRenderVertexes() const -> const std::vector<Vertex>&;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::debugResolutionString() const -> const std::string;
-    ///
-    /// \brief  Returns a formatted string with current resolution setting
-    ///
-    /// \author Runik
-    /// \date   22/02/2021
-    ///
-    /// \returns    The resolution string.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto debugResolutionString() const -> const std::string;
-
+    /// \name Various Vdp2 debug functions
+    //@{
+    auto getDebugResolution() const -> const std::string;
+    auto getDebugInterlaceMode() const -> const std::string;
+    //@}
   private:
     /// \name Vdp2 registers accessors
     //@{
@@ -556,6 +567,9 @@ class Vdp2 {
     TvScreenStatus tv_screen_status_; ///< The TV screen status.
 
     std::vector<Vertex> render_vertexes_; ///< Contains all the geometry vertexes (VDP1 & VDP2).
+
+    std::array<NormalScrollScreenStatus, 4>   nbg_; ///< The Normal Backgrounds.
+    std::array<RotationScrollScreenStatus, 2> rbg_; ///< The Rotation Backgrounds.
 
     // VDP2 registers
     TvScreenMode                                    tvmd_;

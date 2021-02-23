@@ -23,6 +23,7 @@
 #include <saturnin/src/config.h>
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/scu_registers.h>
+#include <saturnin/src/utilities.h> // toUnderlying
 #include <saturnin/src/video/opengl.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2_registers.h>
@@ -41,21 +42,12 @@ using core::tr;
 void Vdp2::initialize() {
     initializeRegisterNameMap();
 
-    tv_screen_status_.horizontal_res = horizontal_res_320;
-
     const std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (emulator_context_->config()->getTvStandard(ts)) {
-        case video::TvStandard::pal:
-            tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard);
-            tv_screen_status_.vertical_res = vertical_res_256;
-            break;
-        case video::TvStandard::ntsc:
-            tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard);
-            tv_screen_status_.vertical_res = vertical_res_224;
-            break;
+        case video::TvStandard::pal: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard); break;
+        case video::TvStandard::ntsc: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard); break;
         default: Log::warning("vdp2", tr("Unknown TV standard"));
     }
-    emulator_context_->opengl()->saturnScreenResolution({tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res});
     calculateDisplayDuration();
 }
 
@@ -948,6 +940,15 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
 
     switch (s) {
+        case ScrollScreen::nbg0:
+        case ScrollScreen::nbg1:
+        case ScrollScreen::nbg2:
+        case ScrollScreen::nbg3: nbg_[util::toUnderlying(s)].is_display_enabled = false; break;
+        case ScrollScreen::rbg0:
+        case ScrollScreen::rbg1: rbg_[util::toUnderlying(s)].is_display_enabled = false; break;
+    }
+
+    switch (s) {
         case ScrollScreen::nbg0: {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
@@ -978,7 +979,6 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
                     = getVramAccessByCommand(VramAccessCommand::nbg0_character_pattern_data_read, reduction);
                 if (current_cpd_reads < required_cpd_reads) { return false; }
             }
-
             break;
         }
         case ScrollScreen::nbg1: {
@@ -1067,6 +1067,15 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             core::Log::warning("unimplemented", core::tr("VDP2 RBG1 display"));
             break;
         }
+    }
+
+    switch (s) {
+        case ScrollScreen::nbg0:
+        case ScrollScreen::nbg1:
+        case ScrollScreen::nbg2:
+        case ScrollScreen::nbg3: nbg_[util::toUnderlying(s)].is_display_enabled = true; break;
+        case ScrollScreen::rbg0:
+        case ScrollScreen::rbg1: rbg_[util::toUnderlying(s)].is_display_enabled = true; break;
     }
     return true;
 }
@@ -1339,11 +1348,55 @@ void Vdp2::onVblankIn() {
 
 auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; }
 
-auto Vdp2::debugResolutionString() const -> const std::string {
-    //   return std::string{
-    //        fmt::format(tr("Resolution : {%d} {%d} - {%s}"), tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res,
-    //        "")};
-    return "";
+auto Vdp2::getDebugResolution() const -> const std::string {
+    if (tv_screen_status_.screen_mode == ScreenMode::unknown) return tr("Resolution : not set");
+
+    auto screen_mode = std::string{};
+    switch (tv_screen_status_.screen_mode) {
+        case ScreenMode::normal_320_224:
+        case ScreenMode::normal_320_240:
+        case ScreenMode::normal_320_256:
+        case ScreenMode::normal_320_448:
+        case ScreenMode::normal_320_480:
+        case ScreenMode::normal_320_512: screen_mode = tr("Normal Graphic A"); break;
+        case ScreenMode::normal_352_224:
+        case ScreenMode::normal_352_240:
+        case ScreenMode::normal_352_256:
+        case ScreenMode::normal_352_448:
+        case ScreenMode::normal_352_480:
+        case ScreenMode::normal_352_512: screen_mode = tr("Normal Graphic B"); break;
+        case ScreenMode::hi_res_640_224:
+        case ScreenMode::hi_res_640_240:
+        case ScreenMode::hi_res_640_256:
+        case ScreenMode::hi_res_640_448:
+        case ScreenMode::hi_res_640_480:
+        case ScreenMode::hi_res_640_512: screen_mode = tr("Hi-Res Graphic A"); break;
+        case ScreenMode::hi_res_704_224:
+        case ScreenMode::hi_res_704_240:
+        case ScreenMode::hi_res_704_256:
+        case ScreenMode::hi_res_704_448:
+        case ScreenMode::hi_res_704_480:
+        case ScreenMode::hi_res_704_512: screen_mode = tr("Hi-Res Graphic B"); break;
+        case ScreenMode::exclusive_320_480: screen_mode = tr("Exclusive Normal Graphic A"); break;
+        case ScreenMode::exclusive_352_480: screen_mode = tr("Exclusive Normal Graphic B"); break;
+        case ScreenMode::exclusive_640_480: screen_mode = tr("Exclusive Hi-Res Graphic A"); break;
+        case ScreenMode::exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
+    }
+    return fmt::format(tr("Resolution : {:d}x{:d} - {:s}"),
+                       tv_screen_status_.horizontal_res,
+                       tv_screen_status_.vertical_res,
+                       screen_mode);
+}
+
+auto Vdp2::getDebugInterlaceMode() const -> const std::string {
+    auto mode = std::string{};
+    switch (tv_screen_status_.interlace_mode) {
+        case InterlaceMode::non_interlace: mode = tr("non interlace"); break;
+        case InterlaceMode::single_density: mode = tr("single density"); break;
+        case InterlaceMode::double_density: mode = tr("double density"); break;
+    }
+
+    return fmt::format(tr("Interlace mode : {}"), mode);
 }
 
 void Vdp2::updateResolution() {
