@@ -39,6 +39,14 @@ using core::Log;
 using core::StartingFactorSelect;
 using core::tr;
 
+using ScrollScreenIndex   = std::unordered_map<ScrollScreen, u8>;
+const auto scroll_screens = ScrollScreenIndex{{ScrollScreen::nbg0, 0},
+                                              {ScrollScreen::nbg1, 1},
+                                              {ScrollScreen::nbg2, 2},
+                                              {ScrollScreen::nbg3, 3},
+                                              {ScrollScreen::rbg0, 0},
+                                              {ScrollScreen::rbg1, 1}};
+
 void Vdp2::initialize() {
     initializeRegisterNameMap();
 
@@ -115,6 +123,7 @@ void Vdp2::run(const u8 cycles) {
     // Yet to implement : H Counter, V Counter, Timer 1
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::read16(const u32 addr) const -> u16 {
     switch (addr) {
         case tv_screen_mode: return tvmd_.toU16();
@@ -146,7 +155,7 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case pattern_name_control_nbg2: return pncn2_.toU16();
         case pattern_name_control_nbg3: return pncn3_.toU16();
         case pattern_name_control_rbg0: return pncnr_.toU16();
-        case plane_size: return pnsz_.toU16();
+        case plane_size: return plsz_.toU16();
         case map_offset_n: return mpofn_.toU16();
         case map_offset_r: return mpofr_.toU16();
         case map_nbg0_plane_a_b: return mpabn0_.toU16();
@@ -268,6 +277,7 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
     return 0;
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write16(const u32 addr, const u16 data) {
     switch (addr) {
         case tv_screen_mode: tvmd_.set(bits_0_15, data); break;
@@ -298,7 +308,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case pattern_name_control_nbg2: pncn2_.set(bits_0_15, data); break;
         case pattern_name_control_nbg3: pncn3_.set(bits_0_15, data); break;
         case pattern_name_control_rbg0: pncnr_.set(bits_0_15, data); break;
-        case plane_size: pnsz_.set(bits_0_15, data); break;
+        case plane_size: plsz_.set(bits_0_15, data); break;
         case map_offset_n: mpofn_.set(bits_0_15, data); break;
         case map_offset_r: mpofr_.set(bits_0_15, data); break;
         case map_nbg0_plane_a_b: mpabn0_.set(bits_0_15, data); break;
@@ -417,6 +427,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
     }
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write32(const u32 addr, const u32 data) {
     const auto h = u16{(data >> displacement_16)};
     const auto l = u16{(data & bitmask_FFFF)};
@@ -463,7 +474,7 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             break;
         case pattern_name_control_rbg0:
             pncnr_.set(bits_0_15, h);
-            pnsz_.set(bits_0_15, l);
+            plsz_.set(bits_0_15, l);
             break;
         case map_offset_n:
             mpofn_.set(bits_0_15, h);
@@ -943,9 +954,9 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
         case ScrollScreen::nbg0:
         case ScrollScreen::nbg1:
         case ScrollScreen::nbg2:
-        case ScrollScreen::nbg3: nbg_[util::toUnderlying(s)].is_display_enabled = false; break;
+        case ScrollScreen::nbg3: nbg_[scroll_screens.at(s)].is_display_enabled = false; break;
         case ScrollScreen::rbg0:
-        case ScrollScreen::rbg1: rbg_[util::toUnderlying(s)].is_display_enabled = false; break;
+        case ScrollScreen::rbg1: rbg_[scroll_screens.at(s)].is_display_enabled = false; break;
     }
 
     switch (s) {
@@ -1073,16 +1084,18 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
         case ScrollScreen::nbg0:
         case ScrollScreen::nbg1:
         case ScrollScreen::nbg2:
-        case ScrollScreen::nbg3: nbg_[util::toUnderlying(s)].is_display_enabled = true; break;
+        case ScrollScreen::nbg3: nbg_[scroll_screens.at(s)].is_display_enabled = true; break;
         case ScrollScreen::rbg0:
-        case ScrollScreen::rbg1: rbg_[util::toUnderlying(s)].is_display_enabled = true; break;
+        case ScrollScreen::rbg1: rbg_[scroll_screens.at(s)].is_display_enabled = true; break;
     }
     return true;
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool {
     switch (s) {
         case ScrollScreen::nbg2: {
+            // The following "this" prevents Clang Tidy to consider current function as a static candidate
             const auto reduction    = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg0),
                                                        zmctl_.get(ReductionEnable::zoom_half_nbg0));
             const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg0);
@@ -1112,6 +1125,7 @@ auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool {
     return false;
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8 {
     constexpr auto vram_timing_size = u8{8};
     using VramTiming                = std::array<VramAccessCommand, vram_timing_size>;
@@ -1192,6 +1206,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
     return not_found;
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::getVramBitmapReads(const VramTiming&       bank_a0,
                               const VramTiming&       bank_a1,
                               const VramTiming&       bank_b0,
@@ -1208,6 +1223,7 @@ auto Vdp2::getVramBitmapReads(const VramTiming&       bank_a0,
     return static_cast<u8>(bitmap_reads);
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::getVramPatternNameDataReads(const VramTiming&       bank_a0,
                                        const VramTiming&       bank_a1,
                                        const VramTiming&       bank_b0,
@@ -1314,33 +1330,6 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
     return static_cast<u8>(cpd_reads);
 };
 
-void Vdp2::populateRenderData() {
-    if (isScreenDisplayed(ScrollScreen::nbg3)) {
-        render_vertexes_.clear();
-        // constexpr std::array<u16, 18> vertices = {
-        //    0,  0,  0, // 0
-        //    0,  224, 0, // 1
-        //    320, 224, 0, // 2
-
-        //    0,  0, 0, // 0
-        //    320, 224, 0, // 2
-        //    320, 0, 0,  // 3
-        //};
-
-        render_vertexes_.emplace_back(Vertex{0, 0});
-        render_vertexes_.emplace_back(Vertex{0, 224});
-        render_vertexes_.emplace_back(Vertex{320, 224});
-        render_vertexes_.emplace_back(Vertex{320, 0});
-
-        // render_vertexes_.emplace_back(Vertex{-0.5, 0.5});
-        // render_vertexes_.emplace_back(Vertex{0.5, 0.5});
-        // render_vertexes_.emplace_back(Vertex{0.5, -0.5});
-    }
-    if (isScreenDisplayed(ScrollScreen::nbg2)) { core::Log::debug("vdp2", core::tr("NBG2 displayed")); }
-    if (isScreenDisplayed(ScrollScreen::nbg1)) { core::Log::debug("vdp2", core::tr("NBG1 displayed")); }
-    if (isScreenDisplayed(ScrollScreen::nbg0)) { core::Log::debug("vdp2", core::tr("NBG0 displayed")); }
-}
-
 void Vdp2::onVblankIn() {
     updateResolution();
     populateRenderData();
@@ -1348,55 +1337,80 @@ void Vdp2::onVblankIn() {
 
 auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; }
 
-auto Vdp2::getDebugResolution() const -> const std::string {
-    if (tv_screen_status_.screen_mode == ScreenMode::unknown) return tr("Resolution : not set");
+auto Vdp2::getDebugGlobal() const -> const std::vector<LabelValue> {
+    auto values = std::vector<LabelValue>{};
 
-    auto screen_mode = std::string{};
-    switch (tv_screen_status_.screen_mode) {
-        case ScreenMode::normal_320_224:
-        case ScreenMode::normal_320_240:
-        case ScreenMode::normal_320_256:
-        case ScreenMode::normal_320_448:
-        case ScreenMode::normal_320_480:
-        case ScreenMode::normal_320_512: screen_mode = tr("Normal Graphic A"); break;
-        case ScreenMode::normal_352_224:
-        case ScreenMode::normal_352_240:
-        case ScreenMode::normal_352_256:
-        case ScreenMode::normal_352_448:
-        case ScreenMode::normal_352_480:
-        case ScreenMode::normal_352_512: screen_mode = tr("Normal Graphic B"); break;
-        case ScreenMode::hi_res_640_224:
-        case ScreenMode::hi_res_640_240:
-        case ScreenMode::hi_res_640_256:
-        case ScreenMode::hi_res_640_448:
-        case ScreenMode::hi_res_640_480:
-        case ScreenMode::hi_res_640_512: screen_mode = tr("Hi-Res Graphic A"); break;
-        case ScreenMode::hi_res_704_224:
-        case ScreenMode::hi_res_704_240:
-        case ScreenMode::hi_res_704_256:
-        case ScreenMode::hi_res_704_448:
-        case ScreenMode::hi_res_704_480:
-        case ScreenMode::hi_res_704_512: screen_mode = tr("Hi-Res Graphic B"); break;
-        case ScreenMode::exclusive_320_480: screen_mode = tr("Exclusive Normal Graphic A"); break;
-        case ScreenMode::exclusive_352_480: screen_mode = tr("Exclusive Normal Graphic B"); break;
-        case ScreenMode::exclusive_640_480: screen_mode = tr("Exclusive Hi-Res Graphic A"); break;
-        case ScreenMode::exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
-    }
-    return fmt::format(tr("Resolution : {:d}x{:d} - {:s}"),
-                       tv_screen_status_.horizontal_res,
-                       tv_screen_status_.vertical_res,
-                       screen_mode);
-}
-
-auto Vdp2::getDebugInterlaceMode() const -> const std::string {
-    auto mode = std::string{};
-    switch (tv_screen_status_.interlace_mode) {
-        case InterlaceMode::non_interlace: mode = tr("non interlace"); break;
-        case InterlaceMode::single_density: mode = tr("single density"); break;
-        case InterlaceMode::double_density: mode = tr("double density"); break;
+    { // Resolution
+        if (tv_screen_status_.screen_mode == ScreenMode::unknown) {
+            values.emplace_back(tr("Resolution"), tr("not set"));
+        } else {
+            auto screen_mode = std::string{};
+            switch (tv_screen_status_.screen_mode) {
+                case ScreenMode::normal_320_224:
+                case ScreenMode::normal_320_240:
+                case ScreenMode::normal_320_256:
+                case ScreenMode::normal_320_448:
+                case ScreenMode::normal_320_480:
+                case ScreenMode::normal_320_512: screen_mode = tr("Normal Graphic A"); break;
+                case ScreenMode::normal_352_224:
+                case ScreenMode::normal_352_240:
+                case ScreenMode::normal_352_256:
+                case ScreenMode::normal_352_448:
+                case ScreenMode::normal_352_480:
+                case ScreenMode::normal_352_512: screen_mode = tr("Normal Graphic B"); break;
+                case ScreenMode::hi_res_640_224:
+                case ScreenMode::hi_res_640_240:
+                case ScreenMode::hi_res_640_256:
+                case ScreenMode::hi_res_640_448:
+                case ScreenMode::hi_res_640_480:
+                case ScreenMode::hi_res_640_512: screen_mode = tr("Hi-Res Graphic A"); break;
+                case ScreenMode::hi_res_704_224:
+                case ScreenMode::hi_res_704_240:
+                case ScreenMode::hi_res_704_256:
+                case ScreenMode::hi_res_704_448:
+                case ScreenMode::hi_res_704_480:
+                case ScreenMode::hi_res_704_512: screen_mode = tr("Hi-Res Graphic B"); break;
+                case ScreenMode::exclusive_320_480: screen_mode = tr("Exclusive Normal Graphic A"); break;
+                case ScreenMode::exclusive_352_480: screen_mode = tr("Exclusive Normal Graphic B"); break;
+                case ScreenMode::exclusive_640_480: screen_mode = tr("Exclusive Hi-Res Graphic A"); break;
+                case ScreenMode::exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
+            }
+            values.emplace_back(
+                tr("Resolution"),
+                fmt::format("{:d}x{:d} - {:s}", tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res, screen_mode));
+        }
     }
 
-    return fmt::format(tr("Interlace mode : {}"), mode);
+    { // Interlace mode
+        auto mode = std::string{};
+        switch (tv_screen_status_.interlace_mode) {
+            case InterlaceMode::non_interlace: mode = tr("Non interlace"); break;
+            case InterlaceMode::single_density: mode = tr("Single density"); break;
+            case InterlaceMode::double_density: mode = tr("Double density"); break;
+        }
+        values.emplace_back(tr("Interlace mode"), mode);
+    }
+
+    { // Screen display enable
+
+        auto nbgDisplayStatus = [&](const ScrollScreen s) {
+            const auto& nbg = (nbg_[scroll_screens.at(s)].is_display_enabled) ? tr("Can display") : tr("Cannot display");
+            values.emplace_back(fmt::format("NBG{}", scroll_screens.at(s)), nbg);
+        };
+        nbgDisplayStatus(ScrollScreen::nbg0);
+        nbgDisplayStatus(ScrollScreen::nbg1);
+        nbgDisplayStatus(ScrollScreen::nbg2);
+        nbgDisplayStatus(ScrollScreen::nbg3);
+
+        auto rbgDisplayStatus = [&](const ScrollScreen s) {
+            const auto& rbg = (rbg_[scroll_screens.at(s)].is_display_enabled) ? tr("Can display") : tr("Cannot display");
+            values.emplace_back(fmt::format("RBG{}", scroll_screens.at(s)), rbg);
+        };
+        rbgDisplayStatus(ScrollScreen::rbg0);
+        rbgDisplayStatus(ScrollScreen::rbg1);
+    }
+
+    return values;
 }
 
 void Vdp2::updateResolution() {
@@ -1568,6 +1582,259 @@ void Vdp2::updateResolution() {
     emulator_context_->opengl()->saturnScreenResolution({tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res});
 };
 
+void Vdp2::populateRenderData() {
+    if (isScreenDisplayed(ScrollScreen::rbg1)) { core::Log::debug("vdp2", core::tr("RGB1 displayed")); }
+    if (isScreenDisplayed(ScrollScreen::rbg0)) { core::Log::debug("vdp2", core::tr("RGB0 displayed")); }
+
+    auto is_nbg_displayed = !rbg_[scroll_screens.at(ScrollScreen::rbg0)].is_display_enabled
+                            || !rbg_[scroll_screens.at(ScrollScreen::rbg1)].is_display_enabled;
+
+    if (is_nbg_displayed) {
+        if (isScreenDisplayed(ScrollScreen::nbg3)) {
+            render_vertexes_.clear();
+            // constexpr std::array<u16, 18> vertices = {
+            //    0,  0,  0, // 0
+            //    0,  224, 0, // 1
+            //    320, 224, 0, // 2
+
+            //    0,  0, 0, // 0
+            //    320, 224, 0, // 2
+            //    320, 0, 0,  // 3
+            //};
+
+            render_vertexes_.emplace_back(Vertex{0, 0});
+            render_vertexes_.emplace_back(Vertex{0, 224});
+            render_vertexes_.emplace_back(Vertex{320, 224});
+            render_vertexes_.emplace_back(Vertex{320, 0});
+
+            // render_vertexes_.emplace_back(Vertex{-0.5, 0.5});
+            // render_vertexes_.emplace_back(Vertex{0.5, 0.5});
+            // render_vertexes_.emplace_back(Vertex{0.5, -0.5});
+        }
+        if (isScreenDisplayed(ScrollScreen::nbg2)) { core::Log::debug("vdp2", core::tr("NBG2 displayed")); }
+        if (isScreenDisplayed(ScrollScreen::nbg1)) { core::Log::debug("vdp2", core::tr("NBG1 displayed")); }
+        if (isScreenDisplayed(ScrollScreen::nbg0)) { core::Log::debug("vdp2", core::tr("NBG0 displayed")); }
+    }
+}
+
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+void Vdp2::initializeScrollScreen(const ScrollScreen s) {
+    constexpr auto map_size_nbg = u8{4};
+    constexpr auto map_size_rbg = u8{16};
+    const auto     index        = scroll_screens.at(s);
+    switch (s) {
+        case ScrollScreen::nbg0:
+            nbg_[index].map_size       = map_size_nbg;
+            nbg_[index].debug_map_size = "2x2";
+            nbg_[index].map_offset     = mpofn_.get(MapOffsetNbg::map_offset_nbg0);
+            // Plane size (1x1 or 2x1 or 2x2) + Pattern Name Data size (1 or 2 words) + Character Size (1x1 or 2x2 cells)
+            nbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_a));
+            nbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_b));
+            nbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneCD::plane_c));
+            nbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneCD::plane_d));
+            break;
+        case ScrollScreen::nbg1:
+            nbg_[index].map_size              = map_size_nbg;
+            nbg_[index].debug_map_size        = "2x2";
+            nbg_[index].map_offset            = mpofn_.get(MapOffsetNbg::map_offset_nbg1);
+            nbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_a));
+            nbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_b));
+            nbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneCD::plane_c));
+            nbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneCD::plane_d));
+            break;
+        case ScrollScreen::nbg2:
+            nbg_[index].map_size              = map_size_nbg;
+            nbg_[index].debug_map_size        = "2x2";
+            nbg_[index].map_offset            = mpofn_.get(MapOffsetNbg::map_offset_nbg2);
+            nbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_a));
+            nbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_b));
+            nbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneCD::plane_c));
+            nbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneCD::plane_d));
+            break;
+
+        case ScrollScreen::nbg3:
+            nbg_[index].map_size              = map_size_nbg;
+            nbg_[index].debug_map_size        = "2x2";
+            nbg_[index].map_offset            = mpofn_.get(MapOffsetNbg::map_offset_nbg3);
+            nbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_a));
+            nbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_b));
+            nbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneCD::plane_c));
+            nbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneCD::plane_d));
+            break;
+
+        case ScrollScreen::rbg0:
+            rbg_[index].map_size              = map_size_rbg;
+            rbg_[index].debug_map_size        = "4x4";
+            rbg_[index].map_offset            = mpofr_.get(MapOffsetRbg::map_offset_rpa);
+            rbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_a));
+            rbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_b));
+            rbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneCD::plane_c));
+            rbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneCD::plane_d));
+            rbg_[index].plane_e_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneEF::plane_e));
+            rbg_[index].plane_f_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneEF::plane_f));
+            rbg_[index].plane_g_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneGH::plane_g));
+            rbg_[index].plane_h_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneGH::plane_h));
+            rbg_[index].plane_i_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneIJ::plane_i));
+            rbg_[index].plane_j_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneIJ::plane_j));
+            rbg_[index].plane_k_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneKL::plane_k));
+            rbg_[index].plane_l_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneKL::plane_l));
+            rbg_[index].plane_m_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneMN::plane_m));
+            rbg_[index].plane_n_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneMN::plane_n));
+            rbg_[index].plane_o_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneOP::plane_o));
+            rbg_[index].plane_p_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneOP::plane_p));
+            break;
+
+        case ScrollScreen::rbg1:
+            rbg_[index].map_size              = map_size_rbg;
+            rbg_[index].debug_map_size        = "4x4";
+            rbg_[index].map_offset            = mpofr_.get(MapOffsetRbg::map_offset_rpb);
+            rbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_a));
+            rbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_b));
+            rbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneCD::plane_c));
+            rbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneCD::plane_d));
+            rbg_[index].plane_e_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneEF::plane_e));
+            rbg_[index].plane_f_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneEF::plane_f));
+            rbg_[index].plane_g_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneGH::plane_g));
+            rbg_[index].plane_h_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneGH::plane_h));
+            rbg_[index].plane_i_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneIJ::plane_i));
+            rbg_[index].plane_j_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneIJ::plane_j));
+            rbg_[index].plane_k_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneKL::plane_k));
+            rbg_[index].plane_l_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneKL::plane_l));
+            rbg_[index].plane_m_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneMN::plane_m));
+            rbg_[index].plane_n_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneMN::plane_n));
+            rbg_[index].plane_o_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneOP::plane_o));
+            rbg_[index].plane_p_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneOP::plane_p));
+            break;
+    }
+}
+
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) -> u32 {
+    constexpr auto vram_start_address = u32{0x25e00000};
+    constexpr auto multiplier_800     = u32{0x800};
+    constexpr auto multiplier_1000    = u32{0x1000};
+    constexpr auto multiplier_2000    = u32{0x2000};
+    constexpr auto multiplier_4000    = u32{0x4000};
+    constexpr auto multiplier_8000    = u32{0x8000};
+    constexpr auto multiplier_10000   = u32{0x10000};
+
+    const auto index                  = scroll_screens.at(s);
+    const auto is_vram_size_4mb       = (vrsize_.get(VramSizeRegister::vram_size) == VramSize::size_4_mbits);
+    auto       plane_size             = PlaneSize{};
+    auto       pattern_name_data_size = PatternNameDataSize{};
+    auto       character_size         = CharacterSize{};
+    auto       start_address          = u32{nbg_[index].map_offset << displacement_6 | map_addr};
+
+    switch (s) {
+        case ScrollScreen::nbg0:
+            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_nbg0);
+            pattern_name_data_size = pncn0_.get(PatternNameControlNbg0::pattern_name_data_size);
+            character_size         = chctla_.get(CharacterControlA::character_size_nbg0);
+            break;
+        case ScrollScreen::nbg1:
+            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_nbg1);
+            pattern_name_data_size = pncn1_.get(PatternNameControlNbg1::pattern_name_data_size);
+            character_size         = chctla_.get(CharacterControlA::character_size_nbg1);
+            break;
+        case ScrollScreen::nbg2:
+            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_nbg2);
+            pattern_name_data_size = pncn2_.get(PatternNameControlNbg2::pattern_name_data_size);
+            character_size         = chctlb_.get(CharacterControlB::character_size_nbg2);
+            break;
+        case ScrollScreen::nbg3:
+            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_nbg3);
+            pattern_name_data_size = pncn3_.get(PatternNameControlNbg3::pattern_name_data_size);
+            character_size         = chctlb_.get(CharacterControlB::character_size_nbg3);
+            break;
+        case ScrollScreen::rbg0:
+            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_rpa);
+            pattern_name_data_size = pncnr_.get(PatternNameControlRbg0::pattern_name_data_size);
+            character_size         = chctlb_.get(CharacterControlB::character_size_rbg0);
+            break;
+        case ScrollScreen::rbg1:
+            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_rpb);
+            pattern_name_data_size = pncn0_.get(PatternNameControlNbg0::pattern_name_data_size);
+            character_size         = chctla_.get(CharacterControlA::character_size_nbg0);
+            break;
+    }
+
+    auto mask       = u32{};
+    auto multiplier = u32{};
+    switch (plane_size) {
+        case PlaneSize::size_1_by_1:
+            if (pattern_name_data_size == PatternNameDataSize::one_word) {
+                if (character_size == CharacterSize::one_by_one) {
+                    mask       = (is_vram_size_4mb) ? u16{0x003f} : u16{0x007f};
+                    multiplier = multiplier_2000;
+                } else {
+                    // CharacterSize::two_by_two
+                    mask       = (is_vram_size_4mb) ? u16{0x00ff} : u16{0x01ff};
+                    multiplier = multiplier_800;
+                }
+            } else {
+                // PatternNameDataSize::two_words
+                if (character_size == CharacterSize::one_by_one) {
+                    mask       = (is_vram_size_4mb) ? u16{0x001f} : u16{0x003f};
+                    multiplier = multiplier_4000;
+                } else {
+                    // CharacterSize::two_by_two
+                    mask       = (is_vram_size_4mb) ? u16{0x007f} : u16{0x00ff};
+                    multiplier = multiplier_1000;
+                }
+            }
+            return vram_start_address + (start_address & mask) * multiplier;
+            break;
+        case PlaneSize::size_2_by_1:
+            if (pattern_name_data_size == PatternNameDataSize::one_word) {
+                if (character_size == CharacterSize::one_by_one) {
+                    mask       = (is_vram_size_4mb) ? u16{0x003e} : u16{0x007e};
+                    multiplier = multiplier_4000;
+                } else {
+                    // CharacterSize::two_by_two
+                    mask       = (is_vram_size_4mb) ? u16{0x00fe} : u16{0x01fe};
+                    multiplier = multiplier_1000;
+                }
+            } else {
+                // PatternNameDataSize::two_words
+                if (character_size == CharacterSize::one_by_one) {
+                    mask       = (is_vram_size_4mb) ? u16{0x001e} : u16{0x003e};
+                    multiplier = multiplier_8000;
+                } else {
+                    // CharacterSize::two_by_two
+                    mask       = (is_vram_size_4mb) ? u16{0x007e} : u16{0x00fe};
+                    multiplier = multiplier_2000;
+                }
+            }
+            return vram_start_address + ((start_address & mask) >> 1) * multiplier;
+            break;
+        case PlaneSize::size_2_by_2:
+            if (pattern_name_data_size == PatternNameDataSize::one_word) {
+                if (character_size == CharacterSize::one_by_one) {
+                    mask       = (is_vram_size_4mb) ? u16{0x003c} : u16{0x007c};
+                    multiplier = multiplier_8000;
+                } else {
+                    // CharacterSize::two_by_two
+                    mask       = (is_vram_size_4mb) ? u16{0x00fc} : u16{0x01fc};
+                    multiplier = multiplier_2000;
+                }
+            } else {
+                // PatternNameDataSize::two_words
+                if (character_size == CharacterSize::one_by_one) {
+                    mask       = (is_vram_size_4mb) ? u16{0x001c} : u16{0x003c};
+                    multiplier = multiplier_10000;
+                } else {
+                    // CharacterSize::two_by_two
+                    mask       = (is_vram_size_4mb) ? u16{0x007c} : u16{0x00fc};
+                    multiplier = multiplier_4000;
+                }
+            }
+            return vram_start_address + ((start_address & mask) >> 2) * multiplier;
+            break;
+    }
+    Log::warning("vdp2", tr("Plane start address wasn't properly calculated"));
+    return 0;
+}
+
 auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
     if (zq == ZoomQuarter::up_to_one_quarter) { return ReductionSetting::up_to_one_quarter; }
     if (zh == ZoomHalf::up_to_one_half) { return ReductionSetting::up_to_one_half; }
@@ -1693,7 +1960,9 @@ auto getPatternNameFromCharacterPattern(const VramAccessCommand character_patter
     return VramAccessCommand::no_access;
 }
 
-void setPatternNameAccess(const VramTiming& bank, const VramAccessCommand pattern, std::array<bool, 8>& pnd_access) {
+void setPatternNameAccess(const VramTiming&                   bank,
+                          const VramAccessCommand             pattern,
+                          std::array<bool, vram_timing_size>& pnd_access) {
     auto it = std::find(bank.begin(), bank.end(), pattern);
     while (it != bank.end()) {
         pnd_access[std::distance(bank.begin(), it)] = true;
@@ -1702,9 +1971,9 @@ void setPatternNameAccess(const VramTiming& bank, const VramAccessCommand patter
     }
 }
 
-void setCharacterPatternLimitations(const bool                 is_screen_mode_normal,
-                                    const std::array<bool, 8>& pnd_access,
-                                    std::array<bool, 8>&       allowed_cpd_timing) {
+void setCharacterPatternLimitations(const bool                                is_screen_mode_normal,
+                                    const std::array<bool, vram_timing_size>& pnd_access,
+                                    std::array<bool, vram_timing_size>&       allowed_cpd_timing) {
     constexpr auto t0 = u8{0};
     constexpr auto t1 = u8{1};
     constexpr auto t2 = u8{2};

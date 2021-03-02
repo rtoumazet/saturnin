@@ -1017,8 +1017,16 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
     auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
     if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {
         if (ImGui::BeginTabItem(tr("Global").c_str())) {
-            ImGui::Text(state.vdp2()->getDebugResolution().c_str());
-            ImGui::Text(state.vdp2()->getDebugInterlaceMode().c_str());
+            constexpr auto column_offset{150};
+            for (const auto& [label, value] : state.vdp2()->getDebugGlobal()) {
+                // std::cout << key << " has value " << value << std::endl;
+                ImGui::Text(label.c_str());
+                ImGui::SameLine(column_offset);
+                ImGui::Text(": ");
+                ImGui::SameLine();
+                ImGui::Text(value.c_str());
+            }
+
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem(tr("VRAM access").c_str())) { ImGui::EndTabItem(); }

@@ -196,6 +196,20 @@ struct ScrollScreenStatus {
     bool         is_transparency_code_valid{};       ///< True when transparency code is valid.
     bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
     BitmapEnable format{};                           ///< Cell or bitmap.
+
+    u8 map_size{};   ///< Size of the map (2*2 for NBG / 4*4 for RBG)
+    u8 map_offset{}; ///< The map offset
+
+    u32 plane_a_start_address{};
+    u32 plane_b_start_address{};
+    u32 plane_c_start_address{};
+    u32 plane_d_start_address{};
+
+    //{@
+    // Various debug strings
+    std::string debug_map_size{};
+
+    //@}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +231,20 @@ struct NormalScrollScreenStatus : ScrollScreenStatus {};
 /// \author Runik
 /// \date   23/02/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-struct RotationScrollScreenStatus : ScrollScreenStatus {};
+struct RotationScrollScreenStatus : ScrollScreenStatus {
+    u32 plane_e_start_address{};
+    u32 plane_f_start_address{};
+    u32 plane_g_start_address{};
+    u32 plane_h_start_address{};
+    u32 plane_i_start_address{};
+    u32 plane_j_start_address{};
+    u32 plane_k_start_address{};
+    u32 plane_l_start_address{};
+    u32 plane_m_start_address{};
+    u32 plane_n_start_address{};
+    u32 plane_o_start_address{};
+    u32 plane_p_start_address{};
+};
 
 class Vdp2 {
   public:
@@ -343,8 +370,7 @@ class Vdp2 {
 
     /// \name Various Vdp2 debug functions
     //@{
-    auto getDebugResolution() const -> const std::string;
-    auto getDebugInterlaceMode() const -> const std::string;
+    auto getDebugGlobal() const -> const std::vector<LabelValue>;
     //@}
   private:
     /// \name Vdp2 registers accessors
@@ -537,6 +563,35 @@ class Vdp2 {
 
     void updateResolution();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::initializeScrollScreen(const ScrollScreen s);
+    ///
+    /// \brief  Initializes the scroll screen data.
+    ///
+    /// \author Runik
+    /// \date   28/02/2021
+    ///
+    /// \param  s   A ScrollScreen to process.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initializeScrollScreen(const ScrollScreen s);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) -> u32;
+    ///
+    /// \brief  Calculates the plane start address
+    ///
+    /// \author Runik
+    /// \date   28/02/2021
+    ///
+    /// \param  s           The ScrollScreen to process.
+    /// \param  map_addr    The map address.
+    ///
+    /// \returns    The calculated plane start address.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) -> u32;
+
     //@{
     // Modules accessors
     [[nodiscard]] auto scu() const -> core::Scu* { return emulator_context_->scu(); };
@@ -601,7 +656,7 @@ class Vdp2 {
     PatternNameControlNbg2                          pncn2_;
     PatternNameControlNbg3                          pncn3_;
     PatternNameControlRbg0                          pncnr_;
-    PlaneSizeRegister                               pnsz_;
+    PlaneSizeRegister                               plsz_;
     MapOffsetNbg                                    mpofn_;
     MapOffsetRbg                                    mpofr_;
     MapNbg0PlaneAB                                  mpabn0_;
@@ -813,7 +868,8 @@ auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
 auto getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void setPatternNameAccess(const VramTiming& bank, const VramAccessCommand pattern, std::array<bool, 8>& pnd_access);
+/// \fn void setPatternNameAccess(const VramTiming& bank, const VramAccessCommand pattern, std::array<bool, vram_timing_size>&
+/// pnd_access);
 ///
 /// \brief  Sets the pattern name accesses for the given bank.
 ///
@@ -826,12 +882,13 @@ auto getPatternNameFromCharacterPattern(const VramAccessCommand character_patter
 ///                             bank.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void setPatternNameAccess(const VramTiming& bank, const VramAccessCommand pattern, std::array<bool, 8>& pnd_access);
+void setPatternNameAccess(const VramTiming&                   bank,
+                          const VramAccessCommand             pattern,
+                          std::array<bool, vram_timing_size>& pnd_access);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void setCharacterPatternLimitations(const bool                 is_screen_mode_normal,
-///                                         const std::array<bool, 8>& pnd_access,
-///                                         std::array<bool, 8>& allowed_cpd_timing);
+/// \fn void setCharacterPatternLimitations(const bool is_screen_mode_normal, const std::array<bool, vram_timing_size>&
+/// pnd_access, std::array<bool, vram_timing_size>& allowed_cpd_timing);
 ///
 /// \brief  Sets character pattern limitations.
 ///
@@ -843,7 +900,7 @@ void setPatternNameAccess(const VramTiming& bank, const VramAccessCommand patter
 /// \param [in,out] allowed_cpd_timing      Sets true for the allowed character pattern timings.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void setCharacterPatternLimitations(const bool                 is_screen_mode_normal,
-                                    const std::array<bool, 8>& pnd_access,
-                                    std::array<bool, 8>&       allowed_cpd_timing);
+void setCharacterPatternLimitations(const bool                                is_screen_mode_normal,
+                                    const std::array<bool, vram_timing_size>& pnd_access,
+                                    std::array<bool, vram_timing_size>&       allowed_cpd_timing);
 } // namespace saturnin::video

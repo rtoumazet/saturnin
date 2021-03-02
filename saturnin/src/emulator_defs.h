@@ -42,6 +42,8 @@ using s16  = std::int16_t;
 using s32  = std::int32_t;
 using s64  = std::int64_t;
 
+using LabelValue = std::pair<std::string, std::string>;
+
 constexpr auto register_size = u8{32};
 
 constexpr auto number_of_bits_32 = u8{32};
@@ -49,6 +51,7 @@ constexpr auto number_of_bits_16 = u8{16};
 constexpr auto number_of_bits_8  = u8{8};
 
 constexpr auto displacement_4  = u8{4};
+constexpr auto displacement_6  = u8{6};
 constexpr auto displacement_8  = u8{8};
 constexpr auto displacement_12 = u8{12};
 constexpr auto displacement_16 = u8{16};
