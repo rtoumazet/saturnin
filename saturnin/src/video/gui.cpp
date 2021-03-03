@@ -986,30 +986,6 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 
     switch (current_area) {
         case MemoryMapArea::vdp2_registers: {
-            static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
-            constexpr auto         columns_number = u8{3};
-            if (ImGui::BeginTable("vdp2_registers_table", columns_number, flags)) {
-                ImGui::TableSetupColumn(tr("Address").c_str());
-                ImGui::TableSetupColumn(tr("Description").c_str());
-                ImGui::TableSetupColumn(tr("Value").c_str());
-                ImGui::TableHeadersRow();
-
-                const auto& registers = state.memory()->vdp2()->getRegisters();
-                for (const auto& [address, desc] : registers) {
-                    ImGui::TableNextRow();
-                    auto column_index = u8{0};
-                    ImGui::TableSetColumnIndex(column_index++);
-                    ImGui::TextUnformatted(fmt::format("{:#010x}", address).c_str());
-
-                    ImGui::TableSetColumnIndex(column_index++);
-                    ImGui::Text(desc.c_str());
-
-                    ImGui::TableSetColumnIndex(column_index);
-                    ImGui::TextUnformatted(fmt::format("{:#06x}", state.memory()->vdp2()->readRegisters<u16>(address)).c_str());
-                }
-                ImGui::EndTable();
-            }
-
             break;
         }
         case MemoryMapArea::cd_block:
@@ -1027,7 +1003,7 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(600, 320);
+    const auto window_size = ImVec2(610, 320);
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags
@@ -1049,7 +1025,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem(tr("VRAM").c_str())) {
+        if (ImGui::BeginTabItem(tr("VRAM access").c_str())) {
             static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
             if (ImGui::BeginTable("vram_access", video::vram_timing_size + 1, flags)) {
                 ImGui::TableSetupColumn("Bank");
@@ -1082,6 +1058,33 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                         ImGui::SameLine();
                         ImGui::HelpMarker(command_desc.second.c_str());
                     }
+                }
+                ImGui::EndTable();
+            }
+
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem(tr("Registers").c_str())) {
+            static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
+            constexpr auto         columns_number = u8{3};
+            if (ImGui::BeginTable("vdp2_registers_table", columns_number, flags)) {
+                ImGui::TableSetupColumn(tr("Address").c_str());
+                ImGui::TableSetupColumn(tr("Description").c_str());
+                ImGui::TableSetupColumn(tr("Value").c_str());
+                ImGui::TableHeadersRow();
+
+                const auto& registers = state.memory()->vdp2()->getRegisters();
+                for (const auto& [address, desc] : registers) {
+                    ImGui::TableNextRow();
+                    auto column_index = u8{0};
+                    ImGui::TableSetColumnIndex(column_index++);
+                    ImGui::TextUnformatted(fmt::format("{:#010x}", address).c_str());
+
+                    ImGui::TableSetColumnIndex(column_index++);
+                    ImGui::Text(desc.c_str());
+
+                    ImGui::TableSetColumnIndex(column_index);
+                    ImGui::TextUnformatted(fmt::format("{:#06x}", state.memory()->vdp2()->readRegisters<u16>(address)).c_str());
                 }
                 ImGui::EndTable();
             }
