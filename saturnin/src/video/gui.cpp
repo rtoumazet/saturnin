@@ -47,7 +47,7 @@ static bool show_debug_memory = false;
 static bool show_debug_sh2    = false;
 static bool show_debug_vdp2   = false;
 static bool show_options      = false;
-static bool show_demo         = false;
+static bool show_demo         = true;
 static bool show_log          = true;
 
 using core::Log;
@@ -965,7 +965,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(600, 320);
+    const auto window_size = ImVec2(610, 320);
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags
@@ -985,15 +985,33 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
     }
 
     switch (current_area) {
-        case MemoryMapArea::vdp2_registers:
-            for (auto const& r : state.memory()->vdp2()->getRegisters()) {
-                const auto mask = std::string{"{:#010x} {:<35} : {:#06x}"};
+        case MemoryMapArea::vdp2_registers: {
+            static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
+            constexpr auto         columns_number = u8{3};
+            if (ImGui::BeginTable("vdp2_registers_table", columns_number, flags)) {
+                ImGui::TableSetupColumn(tr("Address").c_str());
+                ImGui::TableSetupColumn(tr("Description").c_str());
+                ImGui::TableSetupColumn(tr("Value").c_str());
+                ImGui::TableHeadersRow();
 
-                ImGui::TextUnformatted(
-                    fmt::format(mask, r.first, r.second, state.memory()->vdp2()->readRegisters<u16>(r.first)).c_str());
-                // r.first
+                const auto& registers = state.memory()->vdp2()->getRegisters();
+                for (const auto& [address, desc] : registers) {
+                    ImGui::TableNextRow();
+                    auto column_index = u8{0};
+                    ImGui::TableSetColumnIndex(column_index++);
+                    ImGui::TextUnformatted(fmt::format("{:#010x}", address).c_str());
+
+                    ImGui::TableSetColumnIndex(column_index++);
+                    ImGui::Text(desc.c_str());
+
+                    ImGui::TableSetColumnIndex(column_index);
+                    ImGui::TextUnformatted(fmt::format("{:#06x}", state.memory()->vdp2()->readRegisters<u16>(address)).c_str());
+                }
+                ImGui::EndTable();
             }
+
             break;
+        }
         case MemoryMapArea::cd_block:
             for (auto const& r : state.memory()->cdrom()->getRegisters()) {
                 ImGui::TextUnformatted(r.c_str());
