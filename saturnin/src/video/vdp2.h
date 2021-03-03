@@ -49,8 +49,13 @@ using AddressToNameMap = std::map<u32, std::string>;
 using seconds = std::chrono::duration<double>;
 using micro   = std::chrono::duration<double, std::micro>;
 
-constexpr auto vram_timing_size = u8{8};
-using VramTiming                = std::array<VramAccessCommand, vram_timing_size>;
+constexpr auto vram_banks_number  = u8{4};
+constexpr auto vram_bank_a0_index = u8{0};
+constexpr auto vram_bank_a1_index = u8{1};
+constexpr auto vram_bank_b0_index = u8{2};
+constexpr auto vram_bank_b1_index = u8{3};
+constexpr auto vram_timing_size   = u8{8};
+using VramTiming                  = std::array<VramAccessCommand, vram_timing_size>;
 
 constexpr auto saturn_framebuffer_width  = u16{2048};
 constexpr auto saturn_framebuffer_height = u16{2048};
@@ -370,7 +375,13 @@ class Vdp2 {
 
     /// \name Various Vdp2 debug functions
     //@{
-    auto getDebugGlobal() const -> const std::vector<LabelValue>;
+    auto getDebugGlobalMainData() const -> const std::vector<LabelValue>;
+    auto getDebugVramMainData() -> const std::vector<LabelValue>;
+    auto getDebugVramBanks() -> const std::vector<VramTiming>;
+    auto getDebugVramBanksUsed() -> const std::array<bool, vram_banks_number>;
+    auto getDebugVramBanksName() -> const std::vector<std::string>;
+    auto getDebugVramCommandDescription(const VramAccessCommand command) -> const LabelValue;
+
     //@}
   private:
     /// \name Vdp2 registers accessors

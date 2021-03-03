@@ -31,11 +31,13 @@
 #include <saturnin/src/utilities.h>                   // stringToVector
 #include <saturnin/src/cdrom/scsi.h>                  // ScsiDriveInfo
 #include <saturnin/src/video/opengl.h>                // Opengl
+#include <saturnin/src/video/vdp2.h>                  // vram_timing_size
 #include <saturnin/lib/imgui/imgui_custom_controls.h> // peripheralKeyCombo
 #include <saturnin/lib/imgui/imgui_memory_editor.h>   // MemoryEditor
 
 namespace util  = saturnin::utilities;
 namespace cdrom = saturnin::cdrom;
+namespace video = saturnin::video;
 
 namespace saturnin::gui {
 
@@ -150,7 +152,7 @@ void showMainMenu(core::EmulatorContext& state) {
                                            {Header::peripherals, tr("Peripherals")}};
             static auto last_opened_header = Header::none;
             auto        setHeaderState     = [](const Header header) {
-                const auto state = (last_opened_header == header) ? true : false;
+                const auto state = (last_opened_header == header);
                 ImGui::SetNextItemOpen(state);
             };
 
@@ -1018,8 +1020,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
     if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {
         if (ImGui::BeginTabItem(tr("Global").c_str())) {
             constexpr auto column_offset{150};
-            for (const auto& [label, value] : state.vdp2()->getDebugGlobal()) {
-                // std::cout << key << " has value " << value << std::endl;
+            for (const auto& [label, value] : state.vdp2()->getDebugGlobalMainData()) {
                 ImGui::Text(label.c_str());
                 ImGui::SameLine(column_offset);
                 ImGui::Text(": ");
@@ -1029,7 +1030,46 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem(tr("VRAM access").c_str())) { ImGui::EndTabItem(); }
+
+        if (ImGui::BeginTabItem(tr("VRAM").c_str())) {
+            static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+            if (ImGui::BeginTable("vram_access", video::vram_timing_size + 1, flags)) {
+                ImGui::TableSetupColumn("Bank");
+                ImGui::TableSetupColumn("T0");
+                ImGui::TableSetupColumn("T1");
+                ImGui::TableSetupColumn("T2");
+                ImGui::TableSetupColumn("T3");
+                ImGui::TableSetupColumn("T4");
+                ImGui::TableSetupColumn("T5");
+                ImGui::TableSetupColumn("T6");
+                ImGui::TableSetupColumn("T7");
+                ImGui::TableHeadersRow();
+
+                const auto banks      = state.vdp2()->getDebugVramBanks();
+                const auto banks_used = state.vdp2()->getDebugVramBanksUsed();
+                const auto banks_name = state.vdp2()->getDebugVramBanksName();
+
+                for (u8 row = 0; row < banks.size(); ++row) {
+                    ImGui::TableNextRow();
+                    for (u8 column = 0; column < video::vram_timing_size + 1; ++column) {
+                        ImGui::TableSetColumnIndex(column);
+                        if (column == 0) {
+                            ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
+                            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
+                            ImGui::Text(banks_name[row].c_str());
+                            continue;
+                        };
+                        const auto command_desc = state.vdp2()->getDebugVramCommandDescription(banks[row][column - 1]);
+                        ImGui::Text(command_desc.first.c_str());
+                        ImGui::SameLine();
+                        ImGui::HelpMarker(command_desc.second.c_str());
+                    }
+                }
+                ImGui::EndTable();
+            }
+
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
 

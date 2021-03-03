@@ -1337,7 +1337,7 @@ void Vdp2::onVblankIn() {
 
 auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; }
 
-auto Vdp2::getDebugGlobal() const -> const std::vector<LabelValue> {
+auto Vdp2::getDebugGlobalMainData() const -> const std::vector<LabelValue> {
     auto values = std::vector<LabelValue>{};
 
     { // Resolution
@@ -1411,6 +1411,127 @@ auto Vdp2::getDebugGlobal() const -> const std::vector<LabelValue> {
     }
 
     return values;
+}
+
+auto Vdp2::getDebugVramBanks() -> const std::vector<VramTiming> {
+    auto is_normal_mode = (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_320);
+    is_normal_mode |= (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_352);
+
+    const auto banks_used = getDebugVramBanksUsed();
+    auto       banks      = std::vector<VramTiming>{};
+
+    const VramTiming bank_a0 = {cyca0l_.get(VramCyclePatternBankA0Lower::t0),
+                                cyca0l_.get(VramCyclePatternBankA0Lower::t1),
+                                cyca0l_.get(VramCyclePatternBankA0Lower::t2),
+                                cyca0l_.get(VramCyclePatternBankA0Lower::t3),
+                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t4) : VramAccessCommand::no_access,
+                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t5) : VramAccessCommand::no_access,
+                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t6) : VramAccessCommand::no_access,
+                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t7) : VramAccessCommand::no_access};
+    banks.emplace_back(bank_a0);
+
+    if (banks_used[vram_bank_a1_index]) {
+        const VramTiming bank_a1 = {cyca1l_.get(VramCyclePatternBankA1Lower::t0),
+                                    cyca1l_.get(VramCyclePatternBankA1Lower::t1),
+                                    cyca1l_.get(VramCyclePatternBankA1Lower::t2),
+                                    cyca1l_.get(VramCyclePatternBankA1Lower::t3),
+                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t4) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t5) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t6) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t7) : VramAccessCommand::no_access};
+        banks.emplace_back(bank_a1);
+    }
+
+    const VramTiming bank_b0 = {cycb0l_.get(VramCyclePatternBankB0Lower::t0),
+                                cycb0l_.get(VramCyclePatternBankB0Lower::t1),
+                                cycb0l_.get(VramCyclePatternBankB0Lower::t2),
+                                cycb0l_.get(VramCyclePatternBankB0Lower::t3),
+                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t4) : VramAccessCommand::no_access,
+                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t5) : VramAccessCommand::no_access,
+                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t6) : VramAccessCommand::no_access,
+                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t7) : VramAccessCommand::no_access};
+    banks.emplace_back(bank_b0);
+
+    if (banks_used[vram_bank_a1_index]) {
+        const VramTiming bank_b1 = {cycb1l_.get(VramCyclePatternBankB1Lower::t0),
+                                    cycb1l_.get(VramCyclePatternBankB1Lower::t1),
+                                    cycb1l_.get(VramCyclePatternBankB1Lower::t2),
+                                    cycb1l_.get(VramCyclePatternBankB1Lower::t3),
+                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t4) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t5) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t6) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t7) : VramAccessCommand::no_access};
+        banks.emplace_back(bank_b1);
+    }
+    return banks;
+}
+auto Vdp2::getDebugVramMainData() -> const std::vector<LabelValue> {
+    auto values = std::vector<LabelValue>{};
+
+    const auto banks_used   = getDebugVramBanksUsed();
+    const auto addBankValue = [&](const std::string& bank_name, const u8 bank_index) {
+        if (banks_used[bank_index]) {
+            values.emplace_back(bank_name, tr("2 banks"));
+        } else {
+            values.emplace_back(bank_name, tr("1 bank"));
+        }
+    };
+    addBankValue("VRAM-A", vram_bank_a1_index);
+    addBankValue("VRAM-B", vram_bank_b1_index);
+
+    return values;
+}
+
+auto Vdp2::getDebugVramCommandDescription(const VramAccessCommand command) -> const LabelValue {
+    using VramCommandsDescription                = std::map<VramAccessCommand, LabelValue>;
+    static const auto vram_commands_descriptions = VramCommandsDescription{
+        {VramAccessCommand::nbg0_pattern_name_read, {"N0PN", tr("NBG0 Pattern Name Data Read")}},
+        {VramAccessCommand::nbg1_pattern_name_read, {"N1PN", tr("NBG1 Pattern Name Data Read")}},
+        {VramAccessCommand::nbg2_pattern_name_read, {"N2PN", tr("NBG2 Pattern Name Data Read")}},
+        {VramAccessCommand::nbg3_pattern_name_read, {"N3PN", tr("NBG3 Pattern Name Data Read")}},
+        {VramAccessCommand::nbg0_character_pattern_data_read, {"N0CG", tr("NBG0 Character Pattern Data Read")}},
+        {VramAccessCommand::nbg1_character_pattern_data_read, {"N1CG", tr("NBG1 Character Pattern Data Read")}},
+        {VramAccessCommand::nbg2_character_pattern_data_read, {"N2CG", tr("NBG2 Character Pattern Data Read")}},
+        {VramAccessCommand::nbg3_character_pattern_data_read, {"N3CG", tr("NBG3 Character Pattern Data Read")}},
+        {VramAccessCommand::setting_not_allowed_1, {"XXX", tr("Setting not allowed")}},
+        {VramAccessCommand::setting_not_allowed_2, {"XXX", tr("Setting not allowed")}},
+        {VramAccessCommand::setting_not_allowed_3, {"XXX", tr("Setting not allowed")}},
+        {VramAccessCommand::setting_not_allowed_4, {"XXX", tr("Setting not allowed")}},
+        {VramAccessCommand::nbg0_vertical_cell_scroll_table_data_read, {"N0CE", tr("NBG0 Vertical Cell Scroll Table Data Read")}},
+        {VramAccessCommand::nbg1_vertical_cell_scroll_table_data_read, {"N1CE", tr("NBG1 Vertical Cell Scroll Table Data Read")}},
+        {VramAccessCommand::cpu_read_write, {"CPU", tr("CPU Read/Write")}},
+        {VramAccessCommand::no_access, {"NA", tr("No Access")}}};
+
+    return vram_commands_descriptions.at(command);
+}
+
+auto Vdp2::getDebugVramBanksUsed() -> const std::array<bool, vram_banks_number> {
+    // Bank A/A0 and B/B0 are always used
+    auto banks = std::array<bool, vram_banks_number>{true, false, true, false};
+    if (ramctl_.get(RamControl::vram_a_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_a1_index] = true; }
+    if (ramctl_.get(RamControl::vram_b_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_b1_index] = true; }
+
+    return banks;
+}
+
+auto Vdp2::getDebugVramBanksName() -> const std::vector<std::string> {
+    const auto banks_used = getDebugVramBanksUsed();
+    auto       banks_name = std::vector<std::string>{};
+
+    if (!banks_used[video::vram_bank_a1_index]) {
+        banks_name.emplace_back("VRAM-A");
+    } else {
+        banks_name.emplace_back("VRAM-A0");
+        banks_name.emplace_back("VRAM-A1");
+    }
+    if (!banks_used[video::vram_bank_b1_index]) {
+        banks_name.emplace_back("VRAM-B");
+    } else {
+        banks_name.emplace_back("VRAM-B0");
+        banks_name.emplace_back("VRAM-B1");
+    }
+
+    return banks_name;
 }
 
 void Vdp2::updateResolution() {
@@ -1586,8 +1707,8 @@ void Vdp2::populateRenderData() {
     if (isScreenDisplayed(ScrollScreen::rbg1)) { core::Log::debug("vdp2", core::tr("RGB1 displayed")); }
     if (isScreenDisplayed(ScrollScreen::rbg0)) { core::Log::debug("vdp2", core::tr("RGB0 displayed")); }
 
-    auto is_nbg_displayed = !rbg_[scroll_screens.at(ScrollScreen::rbg0)].is_display_enabled
-                            || !rbg_[scroll_screens.at(ScrollScreen::rbg1)].is_display_enabled;
+    auto is_nbg_displayed = !(rbg_[scroll_screens.at(ScrollScreen::rbg0)].is_display_enabled
+                              && rbg_[scroll_screens.at(ScrollScreen::rbg1)].is_display_enabled);
 
     if (is_nbg_displayed) {
         if (isScreenDisplayed(ScrollScreen::nbg3)) {
@@ -1710,13 +1831,12 @@ void Vdp2::initializeScrollScreen(const ScrollScreen s) {
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) -> u32 {
-    constexpr auto vram_start_address = u32{0x25e00000};
-    constexpr auto multiplier_800     = u32{0x800};
-    constexpr auto multiplier_1000    = u32{0x1000};
-    constexpr auto multiplier_2000    = u32{0x2000};
-    constexpr auto multiplier_4000    = u32{0x4000};
-    constexpr auto multiplier_8000    = u32{0x8000};
-    constexpr auto multiplier_10000   = u32{0x10000};
+    constexpr auto multiplier_800   = u32{0x800};
+    constexpr auto multiplier_1000  = u32{0x1000};
+    constexpr auto multiplier_2000  = u32{0x2000};
+    constexpr auto multiplier_4000  = u32{0x4000};
+    constexpr auto multiplier_8000  = u32{0x8000};
+    constexpr auto multiplier_10000 = u32{0x10000};
 
     const auto index                  = scroll_screens.at(s);
     const auto is_vram_size_4mb       = (vrsize_.get(VramSizeRegister::vram_size) == VramSize::size_4_mbits);
@@ -1758,8 +1878,9 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             break;
     }
 
-    auto mask       = u32{};
-    auto multiplier = u32{};
+    constexpr auto vram_start_address = u32{0x25e00000};
+    auto           mask               = u32{};
+    auto           multiplier         = u32{};
     switch (plane_size) {
         case PlaneSize::size_1_by_1:
             if (pattern_name_data_size == PatternNameDataSize::one_word) {

@@ -100,4 +100,17 @@ void CenteredText(const std::string& text) {
     ImGui::Text(text.c_str());
 }
 
+// Helper to display a little (?) mark which shows a tooltip when hovered.
+// In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
+void HelpMarker(const std::string& desc, const bool with_question_mark) {
+    if (with_question_mark) { ImGui::TextDisabled("(?)"); }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc.c_str());
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+
 } // namespace ImGui

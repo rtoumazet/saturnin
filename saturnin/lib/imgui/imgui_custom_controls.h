@@ -93,4 +93,18 @@ void peripheralKeyCombo(const std::vector<saturnin::core::PeripheralKey>& keys,
 
 void CenteredText(const std::string& text);
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void HelpMarker(const std::string& desc, const bool with_question_mark = false);
+///
+/// \brief  Helper to display a tooltip when hovered.
+///
+/// \author Runik
+/// \date   03/03/2021
+///
+/// \param  desc                The description.
+/// \param  with_question_mark  (Optional) When true the tooltip will be displayed over a question mark.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void HelpMarker(const std::string& desc, const bool with_question_mark = false);
+
 } // namespace ImGui
