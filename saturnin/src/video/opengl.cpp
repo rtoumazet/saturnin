@@ -294,8 +294,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
     // Adding glyphs that will be used as images in text
-    ImGuiIO&                            io           = ImGui::GetIO();
-    ImFont*                             font         = io.Fonts->AddFontDefault();
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontDefault();
     static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe907, 0}; // Will not be copied by AddFont* so keep in scope.
     ImFontConfig                        config;
     config.MergeMode = true;

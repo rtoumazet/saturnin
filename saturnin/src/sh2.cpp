@@ -64,7 +64,7 @@ constexpr auto transfer_byte_size_2  = u8{0x2};
 constexpr auto transfer_byte_size_4  = u8{0x4};
 constexpr auto transfer_byte_size_16 = u8{0x10};
 
-Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : sh2_type_(st), emulator_context_(ec) { reset(); }
+Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : emulator_context_(ec), sh2_type_(st) { reset(); }
 
 auto Sh2::memory() const -> core::Memory* { return emulator_context_->memory(); }
 
@@ -831,8 +831,8 @@ void Sh2::start64bitsDivision() {
 void Sh2::runInterruptController() {
     if (!is_interrupted_) {
         if (!pending_interrupts_.empty()) {
-            const auto interrupt_mask = sr_.get(StatusRegister::i);
-            const auto interrupt      = pending_interrupts_.front();
+            const auto  interrupt_mask = sr_.get(StatusRegister::i);
+            const auto& interrupt      = pending_interrupts_.front();
             if ((interrupt.level > interrupt_mask) || interrupt == is::nmi) {
                 Log::debug("sh2",
                            "{} SH2 interrupt request {:#0x} {:#0x}, PC={:#0x}",
@@ -895,7 +895,7 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
 void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
     const auto elapsed_cycles    = u32{frt_elapsed_cycles_ + cycles_to_run};
     const auto counter_increment = u32{elapsed_cycles / frt_clock_divisor_};
-    const auto cycles_remainder  = u32{elapsed_cycles % frt_clock_divisor_};
+    // const auto cycles_remainder  = u32{elapsed_cycles % frt_clock_divisor_};
 
     if (counter_increment > 0) {
         const auto old_frc     = u32{frt_frc_.get(bits_0_31)};

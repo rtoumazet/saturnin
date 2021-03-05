@@ -35,6 +35,10 @@
 #include <saturnin/lib/imgui/imgui_custom_controls.h> // peripheralKeyCombo
 #include <saturnin/lib/imgui/imgui_memory_editor.h>   // MemoryEditor
 
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wformat-security" // warning: format string is not a string literal
+#endif
+
 namespace util  = saturnin::utilities;
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
@@ -46,7 +50,6 @@ static bool show_load_binary  = false;
 static bool show_debug_memory = false;
 static bool show_debug_sh2    = false;
 static bool show_debug_vdp2   = false;
-static bool show_options      = false;
 static bool show_demo         = true;
 static bool show_log          = true;
 
@@ -102,7 +105,6 @@ void showCoreWindow(core::EmulatorContext& state) {
 }
 
 void showMainMenu(core::EmulatorContext& state) {
-    auto a = ImGui::GetFrameHeight();
     if (ImGui::BeginMenuBar()) {
         // File
         if (ImGui::BeginMenu(tr("File").c_str())) {
@@ -135,11 +137,8 @@ void showMainMenu(core::EmulatorContext& state) {
                 if (show_debug_sh2) { showSh2DebugWindow(state, &show_debug_sh2); };
                 if (show_debug_vdp2) { showVdp2DebugWindow(state, &show_debug_vdp2); };
             }
+            default: break;
         }
-
-        // Options
-        // ImGui::MenuItem(tr("Options").c_str(), nullptr, &show_options);
-        // if (show_options) { showOptionsWindow(state, &show_options); }
 
         if (ImGui::BeginMenu(tr("Options").c_str())) {
             enum class Header : u8 { general = 0, rendering = 1, path = 2, cd_rom = 3, sound = 4, peripherals = 5, none = 255 };
@@ -364,11 +363,10 @@ void showMainMenu(core::EmulatorContext& state) {
                 static const auto keys{core::Smpc::listAvailableKeys()};
                 auto              tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
                 if (ImGui::BeginTabBar("PeripheralTabBar", tab_bar_flags)) {
-                    auto           window_flags      = ImGuiWindowFlags{ImGuiWindowFlags_None};
-                    constexpr auto rounding          = float{5.0f};
-                    constexpr auto child_width_ratio = float{0.5f};
-                    constexpr auto child_width       = u16{260};
-                    constexpr auto child_height      = u16{280};
+                    auto           window_flags = ImGuiWindowFlags{ImGuiWindowFlags_None};
+                    constexpr auto rounding     = float{5.0f};
+                    constexpr auto child_width  = u16{260};
+                    constexpr auto child_height = u16{280};
                     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, rounding);
                     if (ImGui::BeginTabItem(tr("Saturn").c_str())) {
                         {
@@ -821,6 +819,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
     switch (sh2_type) {
         case Sh2Type::master: current_sh2 = state.masterSh2(); break;
         case Sh2Type::slave: current_sh2 = state.slaveSh2(); break;
+        default: break;
     }
 
     current_pc = current_sh2->getRegister(Sh2Register::pc);
@@ -1015,11 +1014,11 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
         if (ImGui::BeginTabItem(tr("Global").c_str())) {
             constexpr auto column_offset{150};
             for (const auto& [label, value] : state.vdp2()->getDebugGlobalMainData()) {
-                ImGui::Text(label.c_str());
+                ImGui::TextUnformatted(label.c_str());
                 ImGui::SameLine(column_offset);
                 ImGui::Text(": ");
                 ImGui::SameLine();
-                ImGui::Text(value.c_str());
+                ImGui::TextUnformatted(value.c_str());
             }
 
             ImGui::EndTabItem();
@@ -1039,8 +1038,8 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::TableSetupColumn("T7");
                 ImGui::TableHeadersRow();
 
-                const auto banks      = state.vdp2()->getDebugVramBanks();
-                const auto banks_used = state.vdp2()->getDebugVramBanksUsed();
+                const auto banks = state.vdp2()->getDebugVramBanks();
+                // const auto banks_used = state.vdp2()->getDebugVramBanksUsed();
                 const auto banks_name = state.vdp2()->getDebugVramBanksName();
 
                 for (u8 row = 0; row < banks.size(); ++row) {
@@ -1050,11 +1049,11 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                         if (column == 0) {
                             ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
                             ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
-                            ImGui::Text(banks_name[row].c_str());
+                            ImGui::TextUnformatted(banks_name[row].c_str());
                             continue;
                         };
                         const auto command_desc = state.vdp2()->getDebugVramCommandDescription(banks[row][column - 1]);
-                        ImGui::Text(command_desc.first.c_str());
+                        ImGui::TextUnformatted(command_desc.first.c_str());
                         ImGui::SameLine();
                         ImGui::HelpMarker(command_desc.second.c_str());
                     }
@@ -1081,7 +1080,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::TextUnformatted(fmt::format("{:#010x}", address).c_str());
 
                     ImGui::TableSetColumnIndex(column_index++);
-                    ImGui::Text(desc.c_str());
+                    ImGui::TextUnformatted(desc.c_str());
 
                     ImGui::TableSetColumnIndex(column_index);
                     ImGui::TextUnformatted(fmt::format("{:#06x}", state.memory()->vdp2()->readRegisters<u16>(address)).c_str());

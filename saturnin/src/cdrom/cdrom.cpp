@@ -2243,13 +2243,13 @@ void Cdrom::reset() {
 
     hirq_mask_reg_.set();
 
-    constexpr auto cr1_default = u8{'C'};
+    constexpr auto cr1_default = u8{0x43}; // 'C'
     cr1_.set(CommandRegister::lower_8_bits, cr1_default);
-    constexpr auto cr2_default = u16{'DB'};
+    constexpr auto cr2_default = u16{0x4442}; // 'DB'
     cr2_.set(CommandRegister::all_bits, cr2_default);
-    constexpr auto cr3_default = u16{'LO'};
+    constexpr auto cr3_default = u16{0x4C4F}; // 'LO'
     cr3_.set(CommandRegister::all_bits, cr3_default);
-    constexpr auto cr4_default = u16{'CK'};
+    constexpr auto cr4_default = u16{0x434B}; // 'CK'
     cr4_.set(CommandRegister::all_bits, cr4_default);
 
     cd_drive_status_    = CdDriveStatus::no_disc_inserted;

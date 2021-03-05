@@ -1366,6 +1366,7 @@ void rts(Sh2& s) {
             if (s.subroutineDepth() == s.callstack().size()) { s.emulatorContext()->debugStatus(core::DebugStatus::paused); }
             break;
         }
+        default: break;
     }
 
     s.pc_             = s.pr_;
@@ -1771,6 +1772,7 @@ void execute(Sh2& s) {
             s.emulatorContext()->debugStatus(core::DebugStatus::paused);
             break;
         }
+        default: break;
     }
 
     opcodes_lut[s.current_opcode_](s);

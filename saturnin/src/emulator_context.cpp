@@ -115,6 +115,7 @@ void EmulatorContext::startEmulation() {
             if (emulation_main_thread_.joinable()) { emulation_main_thread_.detach(); }
             break;
         }
+        default: break;
     }
 
     // static std::thread emu_thread;

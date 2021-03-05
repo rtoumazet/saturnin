@@ -70,7 +70,7 @@ void OpenglLegacy::initialize() {
     // Attaching the color texture to the fbo
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
 
-    static const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
+    // static const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
 
     renderingTexture(texture);
 
@@ -256,9 +256,9 @@ void OpenglLegacy::postRender() {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 };
 
-static void error_callback(int error, const char* description) {
-    Log::error("opengl", "Error {}: {}", error, description);
-    throw std::runtime_error("Opengl error !");
-}
+// static void error_callback(int error, const char* description) {
+//    Log::error("opengl", "Error {}: {}", error, description);
+//    throw std::runtime_error("Opengl error !");
+//}
 
 }; // namespace saturnin::video

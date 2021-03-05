@@ -662,7 +662,7 @@ void Smpc::getPeripheralData() {
     switch (sr_.get(StatusRegister::port_1_mode)) {
         case PortMode::mode_0_byte: break; // no data returned
         case PortMode::mode_15_byte:
-        case PortMode::mode_255_byte:
+        case PortMode::mode_255_byte: {
             // no difference between 15 byte and 255 byte for now
             auto port_1_data = PortData{};
             switch (port_1_status_) {
@@ -687,12 +687,15 @@ void Smpc::getPeripheralData() {
                 }
             }
             break;
+        }
+        default: Log::warning("smpc", tr("Port Status reserved"));
     }
 
     switch (sr_.get(StatusRegister::port_2_mode)) {
         case PortMode::mode_0_byte: break; // no data returned
         case PortMode::mode_15_byte:
         case PortMode::mode_255_byte: // no difference between 15 byte and 255 byte for now
+        {
             auto port_2_data = PortData{};
             switch (port_2_status_) {
                 case PortStatus::not_connected: {
@@ -715,6 +718,8 @@ void Smpc::getPeripheralData() {
                 }
             }
             break;
+        }
+        default: Log::warning("smpc", tr("Port Status reserved"));
     }
 
     // Checking if there's more data to send than existing OREG registers
@@ -747,7 +752,7 @@ auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData
 
     const auto p1 = getSaturnPeripheralMapping().player_1;
     switch (id) {
-        case SaturnPeripheralId::saturn_standard_pad:
+        case SaturnPeripheralId::saturn_standard_pad: {
             auto first_data = SaturnStandardPad1stData{};
             first_data.set();
             if (isKeyPressed(p1.direction_right, openglWindow())) { first_data.reset(SaturnStandardPad1stData::direction_right); }
@@ -773,6 +778,10 @@ auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData
             }
             peripheral_data.peripheral_data_table.push_back(second_data);
             break;
+        }
+        default: {
+            Log::warning("smpc", tr("Peripheral not implemented"));
+        }
     }
 
     return peripheral_data;

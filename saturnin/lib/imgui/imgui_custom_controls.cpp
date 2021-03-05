@@ -97,7 +97,7 @@ void CenteredText(const std::string& text) {
     auto           size  = ImGui::CalcTextSize(text.c_str());
     constexpr auto ratio = float{0.5f};
     ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * ratio - size.x / 2);
-    ImGui::Text(text.c_str());
+    ImGui::TextUnformatted(text.c_str());
 }
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.

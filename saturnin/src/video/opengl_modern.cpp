@@ -266,9 +266,9 @@ void OpenglModern::postRender() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 };
 
-static void error_callback(int error, const char* description) {
-    Log::error("opengl", "Error {}: {}", error, description);
-    throw std::runtime_error("Opengl error !");
-}
+// static void error_callback(int error, const char* description) {
+//    Log::error("opengl", "Error {}: {}", error, description);
+//    throw std::runtime_error("Opengl error !");
+//}
 
 }; // namespace saturnin::video

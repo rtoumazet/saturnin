@@ -38,14 +38,14 @@ auto Locale::initialize(const std::string& country = "") -> bool { // NOLINT(rea
 
     cat_ = std::make_unique<spiritless_po::Catalog>();
     if (!cat_->Add(ifs)) {
-        for (const auto& s : cat_->GetError()) {
-            // cerr << argv[ii + 1] << ": " << s << endl;
-        }
+        // for (const auto& s : cat_->GetError()) {
+        //    cerr << argv[ii + 1] << ": " << s << endl;
+        //}
     }
 
     return true;
 }
 
-auto tr(const std::string& str) -> const std::string { return Locale::getInstance().catalog()->gettext(str); }
+auto tr(const std::string& str) -> std::string { return Locale::getInstance().catalog()->gettext(str); }
 
 }; // namespace saturnin::core

@@ -487,8 +487,8 @@ auto Memory::getMemoryMapAreaData(const MemoryMapArea area) -> std::tuple<u8*, s
         case MemoryMapArea::scu: return std::make_tuple(scu_.data(), scu_.size(), scu_address.start);
         case MemoryMapArea::workram_high:
             return std::make_tuple(workram_high_.data(), workram_high_.size(), workram_high_address.start);
+        default: return std::make_tuple(nullptr, 0, 0);
     }
-    return std::make_tuple(nullptr, 0, 0);
 };
 
 auto Memory::config() const -> Config* { return emulator_context_->config(); };

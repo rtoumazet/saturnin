@@ -17,8 +17,6 @@
 // limitations under the License.
 //
 
-#pragma once
-
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/imgui_wrapper.h>
 
