@@ -202,19 +202,18 @@ struct ScrollScreenStatus {
     bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
     BitmapEnable format{};                           ///< Cell or bitmap.
 
-    u8 map_size{};   ///< Size of the map (2*2 for NBG / 4*4 for RBG)
-    u8 map_offset{}; ///< The map offset
+    u8  map_size{};               ///< Size of the map (2*2 for NBG / 4*4 for RBG)
+    u8  map_offset{};             ///< The map offset
+    u8  plane_size{};             ///< Size of the plane (1*1, 2*1 or 2*2 pages)
+    u16 page_size{};              ///< Size of the page / pattern name table
+    u8  pattern_name_data_size{}; ///< Size of the pattern name data (1 or 2 words)
+    u8  character_pattern_size{}; ///< Size of the character pattern (1*1 or 2*2 cells)
+    u8  cell_size{};              ///< Size of the cell (8*8 dots)
 
     u32 plane_a_start_address{};
     u32 plane_b_start_address{};
     u32 plane_c_start_address{};
     u32 plane_d_start_address{};
-
-    //{@
-    // Various debug strings
-    std::string debug_map_size{};
-
-    //@}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -375,12 +374,13 @@ class Vdp2 {
 
     /// \name Various Vdp2 debug functions
     //@{
-    auto getDebugGlobalMainData() const -> const std::vector<LabelValue>;
-    auto getDebugVramMainData() -> const std::vector<LabelValue>;
-    auto getDebugVramBanks() -> const std::vector<VramTiming>;
-    auto getDebugVramBanksUsed() -> const std::array<bool, vram_banks_number>;
-    auto getDebugVramBanksName() -> const std::vector<std::string>;
-    auto getDebugVramCommandDescription(const VramAccessCommand command) -> const LabelValue;
+    auto        getDebugGlobalMainData() const -> const std::vector<LabelValue>;
+    auto        getDebugVramMainData() -> const std::vector<LabelValue>;
+    auto        getDebugVramBanks() -> const std::vector<VramTiming>;
+    auto        getDebugVramBanksUsed() -> std::array<bool, vram_banks_number>;
+    auto        getDebugVramBanksName() -> const std::vector<std::string>;
+    static auto getDebugVramCommandDescription(const VramAccessCommand command) -> LabelValue;
+    auto        getDebugScrollScreenData(const ScrollScreen s) -> const std::vector<LabelValue>;
 
     //@}
   private:
@@ -575,9 +575,9 @@ class Vdp2 {
     void updateResolution();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::initializeScrollScreen(const ScrollScreen s);
+    /// \fn void Vdp2::updateScrollScreenStatus(const ScrollScreen s);
     ///
-    /// \brief  Initializes the scroll screen data.
+    /// \brief  Updates the scroll screen data.
     ///
     /// \author Runik
     /// \date   28/02/2021
@@ -585,7 +585,7 @@ class Vdp2 {
     /// \param  s   A ScrollScreen to process.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeScrollScreen(const ScrollScreen s);
+    void updateScrollScreenStatus(const ScrollScreen s);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) -> u32;
@@ -666,7 +666,7 @@ class Vdp2 {
     PatternNameControlNbg1                          pncn1_;
     PatternNameControlNbg2                          pncn2_;
     PatternNameControlNbg3                          pncn3_;
-    PatternNameControlRbg0                          pncnr_;
+    PatternNameControlRbg0                          pncr_;
     PlaneSizeRegister                               plsz_;
     MapOffsetNbg                                    mpofn_;
     MapOffsetRbg                                    mpofr_;

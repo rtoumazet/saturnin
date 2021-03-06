@@ -70,7 +70,7 @@ void OpenglModern::initialize() {
     // Attaching the color texture to the fbo
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
 
-    static const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
+    // static const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
 
     renderingTexture(texture);
 
@@ -167,15 +167,15 @@ void OpenglModern::setupTriangle() {
     //    320, 224, 0, // 2
     //    320, 0, 0,  // 3
     //};
-    constexpr std::array<u16, 12> vertices = {
-        0,  0,   // 0
-        0,  224, // 1
-        320, 224, // 2
+    //constexpr std::array<u16, 12> vertices = {
+    //    0,  0,   // 0
+    //    0,  224, // 1
+    //    320, 224, // 2
 
-        0,  0, // 0
-        320, 224, // 2
-        320, 0,   // 3
-    };
+    //    0,  0, // 0
+    //    320, 224, // 2
+    //    320, 0,   // 3
+    //};
 
     /* clang-format on */
 

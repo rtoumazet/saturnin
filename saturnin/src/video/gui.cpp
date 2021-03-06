@@ -1090,6 +1090,35 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem(tr("Scroll Screens").c_str())) {
+            using video::ScrollScreen;
+            using ScrollScreenName    = std::unordered_map<ScrollScreen, std::string>;
+            const auto scroll_screens = ScrollScreenName{{ScrollScreen::nbg0, "NBG0"},
+                                                         {ScrollScreen::nbg1, "NBG1"},
+                                                         {ScrollScreen::nbg2, "NBG2"},
+                                                         {ScrollScreen::nbg3, "NBG3"},
+                                                         {ScrollScreen::rbg0, "RBG0"},
+                                                         {ScrollScreen::rbg1, "RBG1"}};
+
+            static auto current_screen = ScrollScreen::nbg0;
+            const auto  flags          = ImGuiComboFlags{ImGuiComboFlags_None};
+            ImGui::PushItemWidth(100);
+            if (ImGui::BeginCombo("##scroll_screen", scroll_screens.at(current_screen).c_str(), flags)) {
+                for (const auto& [key, name] : scroll_screens) {
+                    const auto is_selected = bool{current_screen == key};
+                    if (ImGui::Selectable(name.c_str(), is_selected)) { current_screen = key; }
+                    if (is_selected) { ImGui::SetItemDefaultFocus(); }
+                }
+
+                ImGui::EndCombo();
+            }
+            ImGui::PopItemWidth();
+            ImGui::TextUnformatted(
+                fmt::format(tr("Size : {:#08x}"), state.vdp2()->getDebugScrollScreenSize(current_screen)).c_str());
+
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 
