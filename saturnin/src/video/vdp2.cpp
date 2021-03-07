@@ -38,14 +38,15 @@ using core::EmulatorContext;
 using core::Log;
 using core::StartingFactorSelect;
 using core::tr;
+using util::toUnderlying;
 
 using ScrollScreenIndex   = std::unordered_map<ScrollScreen, u8>;
-const auto scroll_screens = ScrollScreenIndex{{ScrollScreen::nbg0, 0},
-                                              {ScrollScreen::nbg1, 1},
-                                              {ScrollScreen::nbg2, 2},
-                                              {ScrollScreen::nbg3, 3},
-                                              {ScrollScreen::rbg0, 0},
-                                              {ScrollScreen::rbg1, 1}};
+const auto screen_indexes = ScrollScreenIndex{{ScrollScreen::nbg0, toUnderlying(ScrollScreen::nbg0)},
+                                              {ScrollScreen::nbg1, toUnderlying(ScrollScreen::nbg1)},
+                                              {ScrollScreen::nbg2, toUnderlying(ScrollScreen::nbg2)},
+                                              {ScrollScreen::nbg3, toUnderlying(ScrollScreen::nbg3)},
+                                              {ScrollScreen::rbg0, toUnderlying(ScrollScreen::rbg0)},
+                                              {ScrollScreen::rbg1, toUnderlying(ScrollScreen::rbg1)}};
 
 void Vdp2::initialize() {
     initializeRegisterNameMap();
@@ -950,14 +951,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // - TO-T7 in bank VRAM-A or VRAM-B (case where no bank is splitted)
     // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
 
-    switch (s) {
-        case ScrollScreen::nbg0:
-        case ScrollScreen::nbg1:
-        case ScrollScreen::nbg2:
-        case ScrollScreen::nbg3: nbg_[scroll_screens.at(s)].is_display_enabled = false; break;
-        case ScrollScreen::rbg0:
-        case ScrollScreen::rbg1: rbg_[scroll_screens.at(s)].is_display_enabled = false; break;
-    }
+    bg_[util::toUnderlying(s)].is_display_enabled = false;
 
     switch (s) {
         case ScrollScreen::nbg0: {
@@ -1084,14 +1078,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
         }
     }
 
-    switch (s) {
-        case ScrollScreen::nbg0:
-        case ScrollScreen::nbg1:
-        case ScrollScreen::nbg2:
-        case ScrollScreen::nbg3: nbg_[scroll_screens.at(s)].is_display_enabled = true; break;
-        case ScrollScreen::rbg0:
-        case ScrollScreen::rbg1: rbg_[scroll_screens.at(s)].is_display_enabled = true; break;
-    }
+    bg_[util::toUnderlying(s)].is_display_enabled = true;
     return true;
 }
 
@@ -1401,8 +1388,9 @@ auto Vdp2::getDebugGlobalMainData() const -> const std::vector<LabelValue> {
     { // Screen display enable
 
         auto nbgDisplayStatus = [&](const ScrollScreen s) {
-            const auto& nbg = (nbg_[scroll_screens.at(s)].is_display_enabled) ? tr("Can display") : tr("Cannot display");
-            values.emplace_back(fmt::format("NBG{}", scroll_screens.at(s)), nbg);
+            const auto  index = screen_indexes.at(s);
+            const auto& nbg   = (bg_[index].is_display_enabled) ? tr("Can display") : tr("Cannot display");
+            values.emplace_back(fmt::format("NBG{}", index), nbg);
         };
         nbgDisplayStatus(ScrollScreen::nbg0);
         nbgDisplayStatus(ScrollScreen::nbg1);
@@ -1410,8 +1398,9 @@ auto Vdp2::getDebugGlobalMainData() const -> const std::vector<LabelValue> {
         nbgDisplayStatus(ScrollScreen::nbg3);
 
         auto rbgDisplayStatus = [&](const ScrollScreen s) {
-            const auto& rbg = (rbg_[scroll_screens.at(s)].is_display_enabled) ? tr("Can display") : tr("Cannot display");
-            values.emplace_back(fmt::format("RBG{}", scroll_screens.at(s)), rbg);
+            const auto  index = screen_indexes.at(s);
+            const auto& rbg   = (bg_[index].is_display_enabled) ? tr("Can display") : tr("Cannot display");
+            values.emplace_back(fmt::format("RBG{}", index), rbg);
         };
         rbgDisplayStatus(ScrollScreen::rbg0);
         rbgDisplayStatus(ScrollScreen::rbg1);
@@ -1513,28 +1502,24 @@ auto Vdp2::getDebugVramCommandDescription(const VramAccessCommand command) -> La
     return vram_commands_descriptions.at(command);
 }
 
-auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> const std::vector<LabelValue> {
+auto Vdp2::getDebugScrollScreenData(const ScrollScreenStatus& rbg) -> const std::vector<LabelValue> {
     auto values = std::vector<LabelValue>{};
-    // switch (s) {
-    //    case ScrollScreen::nbg0:
-    //    case ScrollScreen::nbg1:
-    //    case ScrollScreen::nbg2:
-    //    case ScrollScreen::nbg3: {
-    //        const auto& nbg = nbg_[scroll_screens.at(s)];
-    //        return nbg.page_size * nbg.plane_size * nbg.map_size;
-    //    }
-    //    case ScrollScreen::rbg0:
-    //    case ScrollScreen::rbg1: {
-    //        const auto& rbg = rbg_[scroll_screens.at(s)];
-    //        return rbg.page_size * rbg.plane_size * rbg.map_size;
-    //    }
-    //}
-    //// Scroll size
-    //
+
+    // Scroll size
+    // const auto size = rbg.page_size * rbg.plane_size * rbg.map_size;
+    // values.emplace_back(tr("Total scroll size"), size);
+
+    // using video::ScrollScreenStatus;
+    // using ScrollScreenValue         = std::unordered_map<ScrollScreen, ScrollScreenStatus*>;
+    // const auto scroll_screen_values = ScrollScreenValue{{ScrollScreen::nbg0, &nbg_[0]}};
+    //                                                    {ScrollScreen::nbg1, &nbg_[1]},
+    //                                                    {ScrollScreen::nbg2, &nbg_[2]},
+    //                                                    {ScrollScreen::nbg3, &nbg_[3]},
+    //                                                    {ScrollScreen::rbg0, &rbg_[0]},
+    //                                                    {ScrollScreen::rbg1, &rbg_[1]}};
 
     return values;
 }
-
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::getDebugVramBanksUsed() -> std::array<bool, vram_banks_number> {
     // Bank A/A0 and B/B0 are always used
@@ -1746,8 +1731,8 @@ void Vdp2::populateRenderData() {
     if (isScreenDisplayed(ScrollScreen::rbg1)) { core::Log::debug("vdp2", core::tr("RGB1 displayed")); }
     if (isScreenDisplayed(ScrollScreen::rbg0)) { core::Log::debug("vdp2", core::tr("RGB0 displayed")); }
 
-    auto is_nbg_displayed = !(rbg_[scroll_screens.at(ScrollScreen::rbg0)].is_display_enabled
-                              && rbg_[scroll_screens.at(ScrollScreen::rbg1)].is_display_enabled);
+    auto is_nbg_displayed = !(bg_[util::toUnderlying(ScrollScreen::rbg0)].is_display_enabled
+                              && bg_[util::toUnderlying(ScrollScreen::rbg1)].is_display_enabled);
 
     if (is_nbg_displayed) {
         if (isScreenDisplayed(ScrollScreen::nbg3)) {
@@ -1779,7 +1764,7 @@ void Vdp2::populateRenderData() {
 void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     constexpr auto map_size_nbg = u8{2 * 2};
     constexpr auto map_size_rbg = u8{4 * 4};
-    const auto     index        = scroll_screens.at(s);
+    const auto     index        = screen_indexes.at(s);
 
     const auto getPlaneSize = [](const PlaneSize sz) -> u8 {
         switch (sz) {
@@ -1825,186 +1810,185 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     switch (s) {
         case ScrollScreen::nbg0:
             // Map
-            nbg_[index].map_size   = map_size_nbg;
-            nbg_[index].map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg0);
+            bg_[index].map_size   = map_size_nbg;
+            bg_[index].map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg0);
 
             // Plane
-            nbg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg0));
-            nbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_a));
-            nbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_b));
-            nbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneCD::plane_c));
-            nbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneCD::plane_d));
+            bg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg0));
+            bg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_a));
+            bg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_b));
+            bg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneCD::plane_c));
+            bg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneCD::plane_d));
 
             // Page
-            nbg_[index].page_size = getPageSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size),
-                                                chctla_.get(CharacterControlA::character_size_nbg0));
+            bg_[index].page_size = getPageSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size),
+                                               chctla_.get(CharacterControlA::character_size_nbg0));
 
             // Pattern name data
-            nbg_[index].pattern_name_data_size
+            bg_[index].pattern_name_data_size
                 = getPatternNameDataSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size));
 
             // Character pattern
-            nbg_[index].character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
+            bg_[index].character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
 
             // Cell
-            nbg_[index].cell_size = 8 * 8;
+            bg_[index].cell_size = 8 * 8;
             break;
         case ScrollScreen::nbg1:
             // Map
-            nbg_[index].map_size   = map_size_nbg;
-            nbg_[index].map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg1);
+            bg_[index].map_size   = map_size_nbg;
+            bg_[index].map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg1);
 
             // Plane
-            nbg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg1));
-            nbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_a));
-            nbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_b));
-            nbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneCD::plane_c));
-            nbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneCD::plane_d));
+            bg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg1));
+            bg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_a));
+            bg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_b));
+            bg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneCD::plane_c));
+            bg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneCD::plane_d));
 
             // Page
-            nbg_[index].page_size = getPageSize(pncn1_.get(PatternNameControlNbg1::pattern_name_data_size),
-                                                chctla_.get(CharacterControlA::character_size_nbg1));
+            bg_[index].page_size = getPageSize(pncn1_.get(PatternNameControlNbg1::pattern_name_data_size),
+                                               chctla_.get(CharacterControlA::character_size_nbg1));
 
             // Pattern name data
-            nbg_[index].pattern_name_data_size
+            bg_[index].pattern_name_data_size
                 = getPatternNameDataSize(pncn1_.get(PatternNameControlNbg1::pattern_name_data_size));
 
             // Character pattern
-            nbg_[index].character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg1));
+            bg_[index].character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg1));
 
             // Cell
-            nbg_[index].cell_size = 8 * 8;
+            bg_[index].cell_size = 8 * 8;
             break;
         case ScrollScreen::nbg2:
             // Map
-            nbg_[index].map_size   = map_size_nbg;
-            nbg_[index].map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg2);
+            bg_[index].map_size   = map_size_nbg;
+            bg_[index].map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg2);
 
             // Plane
-            nbg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg2));
-            nbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_a));
-            nbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_b));
-            nbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneCD::plane_c));
-            nbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneCD::plane_d));
+            bg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg2));
+            bg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_a));
+            bg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_b));
+            bg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneCD::plane_c));
+            bg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneCD::plane_d));
 
             // Page
-            nbg_[index].page_size = getPageSize(pncn2_.get(PatternNameControlNbg2::pattern_name_data_size),
-                                                chctlb_.get(CharacterControlB::character_size_nbg2));
+            bg_[index].page_size = getPageSize(pncn2_.get(PatternNameControlNbg2::pattern_name_data_size),
+                                               chctlb_.get(CharacterControlB::character_size_nbg2));
 
             // Pattern name data
-            nbg_[index].pattern_name_data_size
+            bg_[index].pattern_name_data_size
                 = getPatternNameDataSize(pncn2_.get(PatternNameControlNbg2::pattern_name_data_size));
 
             // Character pattern
-            nbg_[index].character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg2));
+            bg_[index].character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg2));
 
             // Cell
-            nbg_[index].cell_size = 8 * 8;
+            bg_[index].cell_size = 8 * 8;
             break;
 
         case ScrollScreen::nbg3:
             // Map
-            nbg_[index].map_size   = map_size_nbg;
-            nbg_[index].map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg3);
+            bg_[index].map_size   = map_size_nbg;
+            bg_[index].map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg3);
 
             // Plane
-            nbg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg3));
-            nbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_a));
-            nbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_b));
-            nbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneCD::plane_c));
-            nbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneCD::plane_d));
+            bg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg3));
+            bg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_a));
+            bg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_b));
+            bg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneCD::plane_c));
+            bg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneCD::plane_d));
 
             // Page
-            nbg_[index].page_size = getPageSize(pncn3_.get(PatternNameControlNbg3::pattern_name_data_size),
-                                                chctlb_.get(CharacterControlB::character_size_nbg3));
+            bg_[index].page_size = getPageSize(pncn3_.get(PatternNameControlNbg3::pattern_name_data_size),
+                                               chctlb_.get(CharacterControlB::character_size_nbg3));
 
             // Pattern name data
-            nbg_[index].pattern_name_data_size
+            bg_[index].pattern_name_data_size
                 = getPatternNameDataSize(pncn3_.get(PatternNameControlNbg3::pattern_name_data_size));
 
             // Character pattern
-            nbg_[index].character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg3));
+            bg_[index].character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg3));
 
             // Cell
-            nbg_[index].cell_size = 8 * 8;
+            bg_[index].cell_size = 8 * 8;
             break;
 
         case ScrollScreen::rbg0:
             // Map
-            rbg_[index].map_size   = map_size_rbg;
-            rbg_[index].map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpa);
+            bg_[index].map_size   = map_size_rbg;
+            bg_[index].map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpa);
 
             // Plane
-            rbg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_rpa));
-            rbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_a));
-            rbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_b));
-            rbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneCD::plane_c));
-            rbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneCD::plane_d));
-            rbg_[index].plane_e_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneEF::plane_e));
-            rbg_[index].plane_f_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneEF::plane_f));
-            rbg_[index].plane_g_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneGH::plane_g));
-            rbg_[index].plane_h_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneGH::plane_h));
-            rbg_[index].plane_i_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneIJ::plane_i));
-            rbg_[index].plane_j_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneIJ::plane_j));
-            rbg_[index].plane_k_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneKL::plane_k));
-            rbg_[index].plane_l_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneKL::plane_l));
-            rbg_[index].plane_m_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneMN::plane_m));
-            rbg_[index].plane_n_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneMN::plane_n));
-            rbg_[index].plane_o_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneOP::plane_o));
-            rbg_[index].plane_p_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneOP::plane_p));
+            bg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_rpa));
+            bg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_a));
+            bg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_b));
+            bg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneCD::plane_c));
+            bg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneCD::plane_d));
+            bg_[index].plane_e_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneEF::plane_e));
+            bg_[index].plane_f_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneEF::plane_f));
+            bg_[index].plane_g_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneGH::plane_g));
+            bg_[index].plane_h_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneGH::plane_h));
+            bg_[index].plane_i_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneIJ::plane_i));
+            bg_[index].plane_j_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneIJ::plane_j));
+            bg_[index].plane_k_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneKL::plane_k));
+            bg_[index].plane_l_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneKL::plane_l));
+            bg_[index].plane_m_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneMN::plane_m));
+            bg_[index].plane_n_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneMN::plane_n));
+            bg_[index].plane_o_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneOP::plane_o));
+            bg_[index].plane_p_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneOP::plane_p));
 
             // Page
-            rbg_[index].page_size = getPageSize(pncr_.get(PatternNameControlRbg0::pattern_name_data_size),
-                                                chctlb_.get(CharacterControlB::character_size_rbg0));
+            bg_[index].page_size = getPageSize(pncr_.get(PatternNameControlRbg0::pattern_name_data_size),
+                                               chctlb_.get(CharacterControlB::character_size_rbg0));
 
             // Pattern name data
-            rbg_[index].pattern_name_data_size
-                = getPatternNameDataSize(pncr_.get(PatternNameControlRbg0::pattern_name_data_size));
+            bg_[index].pattern_name_data_size = getPatternNameDataSize(pncr_.get(PatternNameControlRbg0::pattern_name_data_size));
 
             // Character pattern
-            rbg_[index].character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_rbg0));
+            bg_[index].character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_rbg0));
 
             // Cell
-            rbg_[index].cell_size = 8 * 8;
+            bg_[index].cell_size = 8 * 8;
             break;
 
         case ScrollScreen::rbg1:
             // Map
-            rbg_[index].map_size   = map_size_rbg;
-            rbg_[index].map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpb);
+            bg_[index].map_size   = map_size_rbg;
+            bg_[index].map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpb);
 
             // Plane
-            rbg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_rpb));
-            rbg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_a));
-            rbg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_b));
-            rbg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneCD::plane_c));
-            rbg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneCD::plane_d));
-            rbg_[index].plane_e_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneEF::plane_e));
-            rbg_[index].plane_f_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneEF::plane_f));
-            rbg_[index].plane_g_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneGH::plane_g));
-            rbg_[index].plane_h_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneGH::plane_h));
-            rbg_[index].plane_i_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneIJ::plane_i));
-            rbg_[index].plane_j_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneIJ::plane_j));
-            rbg_[index].plane_k_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneKL::plane_k));
-            rbg_[index].plane_l_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneKL::plane_l));
-            rbg_[index].plane_m_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneMN::plane_m));
-            rbg_[index].plane_n_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneMN::plane_n));
-            rbg_[index].plane_o_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneOP::plane_o));
-            rbg_[index].plane_p_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneOP::plane_p));
+            bg_[index].plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_rpb));
+            bg_[index].plane_a_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_a));
+            bg_[index].plane_b_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_b));
+            bg_[index].plane_c_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneCD::plane_c));
+            bg_[index].plane_d_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneCD::plane_d));
+            bg_[index].plane_e_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneEF::plane_e));
+            bg_[index].plane_f_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneEF::plane_f));
+            bg_[index].plane_g_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneGH::plane_g));
+            bg_[index].plane_h_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneGH::plane_h));
+            bg_[index].plane_i_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneIJ::plane_i));
+            bg_[index].plane_j_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneIJ::plane_j));
+            bg_[index].plane_k_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneKL::plane_k));
+            bg_[index].plane_l_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneKL::plane_l));
+            bg_[index].plane_m_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneMN::plane_m));
+            bg_[index].plane_n_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneMN::plane_n));
+            bg_[index].plane_o_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneOP::plane_o));
+            bg_[index].plane_p_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneOP::plane_p));
 
             // Page
-            rbg_[index].page_size = getPageSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size),
-                                                chctla_.get(CharacterControlA::character_size_nbg0));
+            bg_[index].page_size = getPageSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size),
+                                               chctla_.get(CharacterControlA::character_size_nbg0));
 
             // Pattern name data
-            rbg_[index].pattern_name_data_size
+            bg_[index].pattern_name_data_size
                 = getPatternNameDataSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size));
 
             // Character pattern
-            rbg_[index].character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
+            bg_[index].character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
 
             // Cell
-            rbg_[index].cell_size = 8 * 8;
+            bg_[index].cell_size = 8 * 8;
             break;
     }
 }
@@ -2018,12 +2002,12 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     constexpr auto multiplier_8000  = u32{0x8000};
     constexpr auto multiplier_10000 = u32{0x10000};
 
-    const auto index                  = scroll_screens.at(s);
+    const auto index                  = screen_indexes.at(s);
     const auto is_vram_size_4mb       = (vrsize_.get(VramSizeRegister::vram_size) == VramSize::size_4_mbits);
     auto       plane_size             = PlaneSize{};
     auto       pattern_name_data_size = PatternNameDataSize{};
     auto       character_size         = CharacterSize{};
-    auto       start_address          = u32{nbg_[index].map_offset << displacement_6 | map_addr};
+    auto       start_address          = u32{bg_[index].map_offset << displacement_6 | map_addr};
 
     switch (s) {
         case ScrollScreen::nbg0:

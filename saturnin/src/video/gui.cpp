@@ -1113,8 +1113,27 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::EndCombo();
             }
             ImGui::PopItemWidth();
-            ImGui::TextUnformatted(
-                fmt::format(tr("Size : {:#08x}"), state.vdp2()->getDebugScrollScreenSize(current_screen)).c_str());
+
+            // constexpr auto column_offset{150};
+            // using video::ScrollScreenStatus;
+            // using ScrollScreenValue = std::unordered_map<ScrollScreen, std::unique_ptr<ScrollScreenStatus>>;
+            // const auto scroll_screen_values
+            //    = ScrollScreenValue{{ScrollScreen::nbg0, std::make_unique<ScrollScreenStatus>(nbg_[0])},
+            //                        {ScrollScreen::nbg1, "NBG1"},
+            //                        {ScrollScreen::nbg2, "NBG2"},
+            //                        {ScrollScreen::nbg3, "NBG3"},
+            //                        {ScrollScreen::rbg0, "RBG0"},
+            //                        {ScrollScreen::rbg1, "RBG1"}};
+            // for (const auto& [label, value] : state.vdp2()->getDebugScrollScreenData()) {
+            //    ImGui::TextUnformatted(label.c_str());
+            //    ImGui::SameLine(column_offset);
+            //    ImGui::Text(": ");
+            //    ImGui::SameLine();
+            //    ImGui::TextUnformatted(value.c_str());
+            //}
+
+            // ImGui::TextUnformatted(
+            //    fmt::format(tr("Size : {:#08x}"), state.vdp2()->getDebugScrollScreenData(current_screen)).c_str());
 
             ImGui::EndTabItem();
         }

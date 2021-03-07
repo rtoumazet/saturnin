@@ -101,7 +101,7 @@ enum class TvStandard : s8 {
 /// \brief  Scroll screens.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ScrollScreen { nbg0, nbg1, nbg2, nbg3, rbg0, rbg1 };
+enum class ScrollScreen { nbg0 = 0, nbg1 = 1, nbg2 = 2, nbg3 = 3, rbg0 = 4, rbg1 = 5 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ColorCount
@@ -214,28 +214,8 @@ struct ScrollScreenStatus {
     u32 plane_b_start_address{};
     u32 plane_c_start_address{};
     u32 plane_d_start_address{};
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct NormalScrollScreenStatus
-///
-/// \brief  Status of a normal scroll screen (NBG).
-///
-/// \author Runik
-/// \date   14/01/2021
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct NormalScrollScreenStatus : ScrollScreenStatus {};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct RotationScrollScreenStatus
-///
-/// \brief  Status of a rotation scroll screen (RBG).
-///
-/// \author Runik
-/// \date   23/02/2021
-////////////////////////////////////////////////////////////////////////////////////////////////////
-struct RotationScrollScreenStatus : ScrollScreenStatus {
+    // Rotation specifics
     u32 plane_e_start_address{};
     u32 plane_f_start_address{};
     u32 plane_g_start_address{};
@@ -380,7 +360,7 @@ class Vdp2 {
     auto        getDebugVramBanksUsed() -> std::array<bool, vram_banks_number>;
     auto        getDebugVramBanksName() -> const std::vector<std::string>;
     static auto getDebugVramCommandDescription(const VramAccessCommand command) -> LabelValue;
-    auto        getDebugScrollScreenData(const ScrollScreen s) -> const std::vector<LabelValue>;
+    auto        getDebugScrollScreenData(const ScrollScreenStatus& rbg) -> const std::vector<LabelValue>;
 
     //@}
   private:
@@ -634,8 +614,7 @@ class Vdp2 {
 
     std::vector<Vertex> render_vertexes_; ///< Contains all the geometry vertexes (VDP1 & VDP2).
 
-    std::array<NormalScrollScreenStatus, 4>   nbg_; ///< The Normal Backgrounds.
-    std::array<RotationScrollScreenStatus, 2> rbg_; ///< The Rotation Backgrounds.
+    std::array<ScrollScreenStatus, 6> bg_; ///< The Normal Backgrounds.
 
     // VDP2 registers
     TvScreenMode                                    tvmd_;
