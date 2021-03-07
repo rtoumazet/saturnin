@@ -354,13 +354,13 @@ class Vdp2 {
 
     /// \name Various Vdp2 debug functions
     //@{
-    auto        getDebugGlobalMainData() const -> const std::vector<LabelValue>;
-    auto        getDebugVramMainData() -> const std::vector<LabelValue>;
-    auto        getDebugVramBanks() -> const std::vector<VramTiming>;
+    auto        getDebugGlobalMainData() const -> std::vector<LabelValue>;
+    auto        getDebugVramMainData() -> std::vector<LabelValue>;
+    auto        getDebugVramBanks() -> std::vector<VramTiming>;
     auto        getDebugVramBanksUsed() -> std::array<bool, vram_banks_number>;
-    auto        getDebugVramBanksName() -> const std::vector<std::string>;
+    auto        getDebugVramBanksName() -> std::vector<std::string>;
     static auto getDebugVramCommandDescription(const VramAccessCommand command) -> LabelValue;
-    auto        getDebugScrollScreenData(const ScrollScreenStatus& rbg) -> const std::vector<LabelValue>;
+    auto        getDebugScrollScreenData(const ScrollScreen s) -> std::vector<LabelValue>;
 
     //@}
   private:
