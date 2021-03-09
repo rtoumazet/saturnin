@@ -50,7 +50,7 @@ static bool show_load_binary  = false;
 static bool show_debug_memory = false;
 static bool show_debug_sh2    = false;
 static bool show_debug_vdp2   = false;
-static bool show_demo         = true;
+static bool show_demo         = false;
 static bool show_log          = true;
 
 using core::Log;
@@ -1015,10 +1015,12 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
             constexpr auto column_offset{150};
             for (const auto& [label, value] : state.vdp2()->getDebugGlobalMainData()) {
                 ImGui::TextUnformatted(label.c_str());
-                ImGui::SameLine(column_offset);
-                ImGui::Text(": ");
-                ImGui::SameLine();
-                ImGui::TextUnformatted(value.c_str());
+                if (value.has_value()) {
+                    ImGui::SameLine(column_offset);
+                    ImGui::Text(": ");
+                    ImGui::SameLine();
+                    ImGui::TextUnformatted((*value).c_str());
+                }
             }
 
             ImGui::EndTabItem();
@@ -1054,8 +1056,10 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                         };
                         const auto command_desc = state.vdp2()->getDebugVramCommandDescription(banks[row][column - 1]);
                         ImGui::TextUnformatted(command_desc.first.c_str());
-                        ImGui::SameLine();
-                        ImGui::HelpMarker(command_desc.second.c_str());
+                        if (command_desc.second.has_value()) {
+                            ImGui::SameLine();
+                            ImGui::HelpMarker(command_desc.second.value().c_str());
+                        }
                     }
                 }
                 ImGui::EndTable();
@@ -1114,27 +1118,29 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
             }
             ImGui::PopItemWidth();
 
-            constexpr auto column_offset{150};
-            // using video::ScrollScreenStatus;
-            // using ScrollScreenValue = std::unordered_map<ScrollScreen, std::unique_ptr<ScrollScreenStatus>>;
-            // const auto scroll_screen_values
-            //    = ScrollScreenValue{{ScrollScreen::nbg0, std::make_unique<ScrollScreenStatus>(nbg_[0])},
-            //                        {ScrollScreen::nbg1, "NBG1"},
-            //                        {ScrollScreen::nbg2, "NBG2"},
-            //                        {ScrollScreen::nbg3, "NBG3"},
-            //                        {ScrollScreen::rbg0, "RBG0"},
-            //                        {ScrollScreen::rbg1, "RBG1"}};
-            for (const auto& [label, value] : state.vdp2()->getDebugScrollScreenData(current_screen)) {
-                ImGui::TextUnformatted(label.c_str());
-                ImGui::SameLine(column_offset);
-                ImGui::Text(": ");
-                ImGui::SameLine();
-                ImGui::TextUnformatted(value.c_str());
+            const auto& screen_data = state.vdp2()->getDebugScrollScreenData(current_screen);
+            if (screen_data.has_value()) {
+                static ImGuiTableFlags table_flags
+                    = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
+                constexpr auto columns_number = u8{2};
+                if (ImGui::BeginTable("scroll_screen_table", columns_number, table_flags)) {
+                    for (const auto& [label, value] : *screen_data) {
+                        ImGui::TableNextRow();
+                        auto column_index = u8{0};
+                        ImGui::TableSetColumnIndex(column_index++);
+                        ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
+
+                        ImGui::TextUnformatted(label.c_str());
+
+                        ImGui::TableSetColumnIndex(column_index++);
+                        if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
+                    }
+                    ImGui::EndTable();
+                }
+            } else {
+                ImGui::TextUnformatted(tr("Screen is not displayed").c_str());
             }
-
-            // ImGui::TextUnformatted(
-            //    fmt::format(tr("Size : {:#08x}"), state.vdp2()->getDebugScrollScreenData(current_screen)).c_str());
-
             ImGui::EndTabItem();
         }
 

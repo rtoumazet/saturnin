@@ -40,14 +40,6 @@ using core::StartingFactorSelect;
 using core::tr;
 using util::toUnderlying;
 
-using ScrollScreenIndex   = std::unordered_map<ScrollScreen, u8>;
-const auto screen_indexes = ScrollScreenIndex{{ScrollScreen::nbg0, toUnderlying(ScrollScreen::nbg0)},
-                                              {ScrollScreen::nbg1, toUnderlying(ScrollScreen::nbg1)},
-                                              {ScrollScreen::nbg2, toUnderlying(ScrollScreen::nbg2)},
-                                              {ScrollScreen::nbg3, toUnderlying(ScrollScreen::nbg3)},
-                                              {ScrollScreen::rbg0, toUnderlying(ScrollScreen::rbg0)},
-                                              {ScrollScreen::rbg1, toUnderlying(ScrollScreen::rbg1)}};
-
 void Vdp2::initialize() {
     initializeRegisterNameMap();
 
@@ -951,7 +943,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // - TO-T7 in bank VRAM-A or VRAM-B (case where no bank is splitted)
     // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
 
-    bg_[screen_indexes.at(s)].is_display_enabled = false;
+    getScreen(s).is_display_enabled = false;
 
     switch (s) {
         case ScrollScreen::nbg0: {
@@ -1078,7 +1070,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
         }
     }
 
-    bg_[screen_indexes.at(s)].is_display_enabled = true;
+    getScreen(s).is_display_enabled = true;
     return true;
 }
 
@@ -1250,84 +1242,16 @@ auto Vdp2::getVramPatternNameDataReads(const VramTiming&       bank_a0,
     return static_cast<u8>(pnd_reads);
 }
 
-auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
-                                            const VramTiming&       bank_a1,
-                                            const VramTiming&       bank_b0,
-                                            const VramTiming&       bank_b1,
-                                            const VramAccessCommand command,
-                                            const ReductionSetting  reduction,
-                                            const bool              is_screen_mode_normal) -> u8 {
-    // From the command we must use the linked Pattern Name Data. The limitations are based on the PND read position.
-    // Step 1 : find PND reads for the current command
-    // const auto pnd = getPatternNameFromCharacterPattern(command);
-    // const auto pnd_reads = getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, pnd);
-
-    constexpr auto pnd_access_size   = u8{8};
-    auto           pnd_timing_access = std::array<bool, pnd_access_size>{false, false, false, false, false, false, false, false};
-    setPatternNameAccess(bank_a0, command, pnd_timing_access);
-    setPatternNameAccess(bank_b0, command, pnd_timing_access);
-    if (!is_screen_mode_normal) {
-        setPatternNameAccess(bank_a1, command, pnd_timing_access);
-        setPatternNameAccess(bank_b1, command, pnd_timing_access);
-    }
-
-    // If there's no reduction, observe selection limits when CPD read access >= 2.
-    // If reduction = 1/2 or 1/4, the behavior isn't clear from the docs ... I'll just
-    // observe selection limits for every access.
-    auto are_limitations_applied = bool{true};
-    if (reduction == ReductionSetting::none) {
-        auto unlimited_cpd_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
-        unlimited_cpd_reads += std::count(bank_b0.begin(), bank_b0.end(), command);
-        if (!is_screen_mode_normal) {
-            unlimited_cpd_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
-            unlimited_cpd_reads += std::count(bank_b1.begin(), bank_b1.end(), command);
-        }
-        if (unlimited_cpd_reads < 2) are_limitations_applied = false;
-    }
-
-    VramTiming limited_bank_a0 = {bank_a0};
-    VramTiming limited_bank_b0 = {bank_b0};
-    VramTiming limited_bank_a1 = {bank_a1};
-    VramTiming limited_bank_b1 = {bank_b1};
-
-    if (are_limitations_applied) {
-        // Step 2 : apply selection limits on accessed timings
-        constexpr auto allowed_cpd_timing_size = u8{8};
-        auto           allowed_cpd_timing
-            = std::array<bool, allowed_cpd_timing_size>{false, false, false, false, false, false, false, false};
-        setCharacterPatternLimitations(is_screen_mode_normal, pnd_timing_access, allowed_cpd_timing);
-
-        // Step 3 : get the reads
-        // First access not available are changed to no access
-        auto it = std::find(allowed_cpd_timing.begin(), allowed_cpd_timing.end(), false);
-        while (it != allowed_cpd_timing.end()) {
-            limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            if (!is_screen_mode_normal) {
-                limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-                limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            }
-            ++it;
-            it = std::find(it, allowed_cpd_timing.end(), false);
-        }
-    }
-    // Counting cpd access
-    auto cpd_reads = std::count(limited_bank_a0.begin(), limited_bank_a0.end(), command);
-    cpd_reads += std::count(limited_bank_b0.begin(), limited_bank_b0.end(), command);
-    if (!is_screen_mode_normal) {
-        cpd_reads += std::count(limited_bank_a1.begin(), limited_bank_a1.end(), command);
-        cpd_reads += std::count(limited_bank_b1.begin(), limited_bank_b1.end(), command);
-    }
-
-    return static_cast<u8>(cpd_reads);
-};
-
 void Vdp2::onVblankIn() {
     updateResolution();
     populateRenderData();
 }
 
 auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; }
+
+//----------------------------------------------------------------------
+// Debug functions
+//----------------------------------------------------------------------
 
 auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
     auto values = std::vector<LabelValue>{};
@@ -1388,9 +1312,8 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
     { // Screen display enable
 
         auto nbgDisplayStatus = [&](const ScrollScreen s) {
-            const auto  index = screen_indexes.at(s);
-            const auto& nbg   = (bg_[index].is_display_enabled) ? tr("Can display") : tr("Cannot display");
-            values.emplace_back(fmt::format("NBG{}", index), nbg);
+            const auto& nbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
+            values.emplace_back(fmt::format("NBG{}", toUnderlying(s)), nbg);
         };
         nbgDisplayStatus(ScrollScreen::nbg0);
         nbgDisplayStatus(ScrollScreen::nbg1);
@@ -1398,9 +1321,8 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
         nbgDisplayStatus(ScrollScreen::nbg3);
 
         auto rbgDisplayStatus = [&](const ScrollScreen s) {
-            const auto  index = screen_indexes.at(s);
-            const auto& rbg   = (bg_[index].is_display_enabled) ? tr("Can display") : tr("Cannot display");
-            values.emplace_back(fmt::format("RBG{}", index), rbg);
+            const auto& rbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
+            values.emplace_back(fmt::format("RBG{}", toUnderlying(s)), rbg);
         };
         rbgDisplayStatus(ScrollScreen::rbg0);
         rbgDisplayStatus(ScrollScreen::rbg1);
@@ -1532,29 +1454,77 @@ auto Vdp2::getDebugVramBanksName() -> std::vector<std::string> {
     return banks_name;
 }
 
-auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::vector<LabelValue> {
-    auto values = std::vector<LabelValue>{};
+auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>> {
+    auto        values = std::vector<LabelValue>{};
+    const auto& screen = getScreen(s);
 
-    const auto& screen = bg_[screen_indexes.at(s)];
-    // const auto index = screen_indexes.at(s);
+    if (!screen.is_display_enabled) {
+        // values.emplace_back(tr("Screen is not displayed"), std::nullopt);
+        return std::nullopt;
+    }
+
     // Scroll size
     const auto size = screen.page_size * screen.plane_size * screen.map_size;
-    values.emplace_back(tr("Total screen size"), fmt::format("{:x}", size));
+    values.emplace_back(tr("Total screen size"), fmt::format("{:#x}", size));
 
-    // using video::ScrollScreenStatus;
-    // using ScrollScreenValue         = std::unordered_map<ScrollScreen, ScrollScreenStatus*>;
-    // const auto scroll_screen_values = ScrollScreenValue{{ScrollScreen::nbg0, &nbg_[0]}};
-    //                                                    {ScrollScreen::nbg1, &nbg_[1]},
-    //                                                    {ScrollScreen::nbg2, &nbg_[2]},
-    //                                                    {ScrollScreen::nbg3, &nbg_[3]},
-    //                                                    {ScrollScreen::rbg0, &rbg_[0]},
-    //                                                    {ScrollScreen::rbg1, &rbg_[1]}};
+    // Map size
+    const auto mapSize = [](const ScrollScreen s) {
+        switch (s) {
+            case ScrollScreen::rbg0:
+            case ScrollScreen::rbg1: return tr("4x4 planes");
+            default: return tr("2x2 planes");
+        }
+    };
+    values.emplace_back(tr("Map size"), mapSize(s));
+
+    // Plane size
+    const auto planeSize = [](const ScrollScreenStatus s) {
+        switch (s.plane_size) {
+            case 1: return tr("1x1 page");
+            case 2: return tr("2x1 pages");
+            case 4: return tr("2x2 pages");
+            default: return tr("Unknown");
+        }
+    };
+    values.emplace_back(tr("Plane size"), planeSize(screen));
+
+    // Pattern Name Data size
+    const auto& pnd_size = screen.pattern_name_data_size == 1 ? tr("1 word") : tr("2 words");
+    values.emplace_back(tr("Pattern Name Data size"), pnd_size);
+
+    // Character Pattern size
+    const auto& cp_size = screen.character_pattern_size == 1 ? tr("1x1 cell") : tr("2x2 cells");
+    values.emplace_back(tr("Character Pattern size"), cp_size);
+
+    // Cell size
+    values.emplace_back(tr("Cell size"), tr("8x8 dots"));
+
+    // Plane start address
+    values.emplace_back(tr("Plane A start address"), fmt::format("{:#010x}", screen.plane_a_start_address));
+    values.emplace_back(tr("Plane B start address"), fmt::format("{:#010x}", screen.plane_b_start_address));
+    values.emplace_back(tr("Plane C start address"), fmt::format("{:#010x}", screen.plane_c_start_address));
+    values.emplace_back(tr("Plane D start address"), fmt::format("{:#010x}", screen.plane_d_start_address));
+    std::array<ScrollScreen, 2> rotation_screens = {ScrollScreen::rbg0, ScrollScreen::rbg1};
+    if (std::any_of(rotation_screens.begin(), rotation_screens.end(), [&s](const ScrollScreen rss) { return rss == s; })) {
+        values.emplace_back(tr("Plane E start address"), fmt::format("{:#010x}", screen.plane_e_start_address));
+        values.emplace_back(tr("Plane F start address"), fmt::format("{:#010x}", screen.plane_f_start_address));
+        values.emplace_back(tr("Plane G start address"), fmt::format("{:#010x}", screen.plane_g_start_address));
+        values.emplace_back(tr("Plane H start address"), fmt::format("{:#010x}", screen.plane_h_start_address));
+        values.emplace_back(tr("Plane I start address"), fmt::format("{:#010x}", screen.plane_i_start_address));
+        values.emplace_back(tr("Plane J start address"), fmt::format("{:#010x}", screen.plane_j_start_address));
+        values.emplace_back(tr("Plane K start address"), fmt::format("{:#010x}", screen.plane_k_start_address));
+        values.emplace_back(tr("Plane L start address"), fmt::format("{:#010x}", screen.plane_l_start_address));
+        values.emplace_back(tr("Plane M start address"), fmt::format("{:#010x}", screen.plane_m_start_address));
+        values.emplace_back(tr("Plane N start address"), fmt::format("{:#010x}", screen.plane_n_start_address));
+        values.emplace_back(tr("Plane O start address"), fmt::format("{:#010x}", screen.plane_o_start_address));
+        values.emplace_back(tr("Plane P start address"), fmt::format("{:#010x}", screen.plane_p_start_address));
+    }
 
     return values;
 }
 
 void Vdp2::updateResolution() {
-    tv_screen_status_.is_picture_displayed = (tvmd_.get(TvScreenMode::display) == Display::displayed) ? true : false;
+    tv_screen_status_.is_picture_displayed = (tvmd_.get(TvScreenMode::display) == Display::displayed);
     tv_screen_status_.border_color_mode    = tvmd_.get(TvScreenMode::border_color_mode);
     tv_screen_status_.interlace_mode       = tvmd_.get(TvScreenMode::interlace_mode);
 
@@ -1734,8 +1704,8 @@ void Vdp2::populateRenderData() {
     if (isScreenDisplayed(ScrollScreen::rbg1)) { core::Log::debug("vdp2", core::tr("RGB1 displayed")); }
     if (isScreenDisplayed(ScrollScreen::rbg0)) { core::Log::debug("vdp2", core::tr("RGB0 displayed")); }
 
-    auto is_nbg_displayed = !(bg_[util::toUnderlying(ScrollScreen::rbg0)].is_display_enabled
-                              && bg_[util::toUnderlying(ScrollScreen::rbg1)].is_display_enabled);
+    auto is_nbg_displayed
+        = !(getScreen(ScrollScreen::rbg0).is_display_enabled && getScreen(ScrollScreen::rbg1).is_display_enabled);
 
     if (is_nbg_displayed) {
         if (isScreenDisplayed(ScrollScreen::nbg3)) {
@@ -1763,10 +1733,14 @@ void Vdp2::populateRenderData() {
     }
 }
 
+auto Vdp2::getScreen(const ScrollScreen s) -> ScrollScreenStatus& { return bg_[util::toUnderlying(s)]; };
+auto Vdp2::getScreen(const ScrollScreen s) const -> const ScrollScreenStatus& { return bg_[util::toUnderlying(s)]; };
+
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     constexpr auto map_size_nbg = u8{2 * 2};
     constexpr auto map_size_rbg = u8{4 * 4};
+    constexpr auto cell_size    = u8{8 * 8};
 
     const auto getPlaneSize = [](const PlaneSize sz) -> u8 {
         switch (sz) {
@@ -1809,7 +1783,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return (ch_sz == CharacterSize::one_by_one) ? boundary_2_words_1_by_1_cell : boundary_2_words_2_by_2_cells;
     };
 
-    auto& screen = bg_[screen_indexes.at(s)];
+    auto& screen = getScreen(s);
 
     switch (s) {
         case ScrollScreen::nbg0:
@@ -1835,7 +1809,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
 
             // Cell
-            screen.cell_size = 8 * 8;
+            screen.cell_size = cell_size;
             break;
         case ScrollScreen::nbg1:
             // Map
@@ -1860,7 +1834,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg1));
 
             // Cell
-            screen.cell_size = 8 * 8;
+            screen.cell_size = cell_size;
             break;
         case ScrollScreen::nbg2:
             // Map
@@ -1885,7 +1859,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg2));
 
             // Cell
-            screen.cell_size = 8 * 8;
+            screen.cell_size = cell_size;
             break;
 
         case ScrollScreen::nbg3:
@@ -1911,7 +1885,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg3));
 
             // Cell
-            screen.cell_size = 8 * 8;
+            screen.cell_size = cell_size;
             break;
 
         case ScrollScreen::rbg0:
@@ -1949,7 +1923,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_rbg0));
 
             // Cell
-            screen.cell_size = 8 * 8;
+            screen.cell_size = cell_size;
             break;
 
         case ScrollScreen::rbg1:
@@ -1987,7 +1961,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
 
             // Cell
-            screen.cell_size = 8 * 8;
+            screen.cell_size = cell_size;
             break;
     }
 }
@@ -2001,12 +1975,12 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     constexpr auto multiplier_8000  = u32{0x8000};
     constexpr auto multiplier_10000 = u32{0x10000};
 
-    const auto index                  = screen_indexes.at(s);
+    auto&      screen                 = getScreen(s);
     const auto is_vram_size_4mb       = (vrsize_.get(VramSizeRegister::vram_size) == VramSize::size_4_mbits);
     auto       plane_size             = PlaneSize{};
     auto       pattern_name_data_size = PatternNameDataSize{};
     auto       character_size         = CharacterSize{};
-    auto       start_address          = u32{bg_[index].map_offset << displacement_6 | map_addr};
+    auto       start_address          = u32{screen.map_offset << displacement_6 | map_addr};
 
     switch (s) {
         case ScrollScreen::nbg0:
@@ -2141,6 +2115,10 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
         default: Log::warning("vdp2", tr("Plane start address wasn't properly calculated")); return 0;
     }
 }
+
+//----------------------------------------------------------------------
+// VRAM access free functions
+//----------------------------------------------------------------------
 
 auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
     if (zq == ZoomQuarter::up_to_one_quarter) { return ReductionSetting::up_to_one_quarter; }
@@ -2389,5 +2367,77 @@ void setCharacterPatternLimitations(const bool                                is
         it = std::find(it, pnd_access.end(), true);
     }
 }
+
+auto getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
+                                      const VramTiming&       bank_a1,
+                                      const VramTiming&       bank_b0,
+                                      const VramTiming&       bank_b1,
+                                      const VramAccessCommand command,
+                                      const ReductionSetting  reduction,
+                                      const bool              is_screen_mode_normal) -> u8 {
+    // From the command we must use the linked Pattern Name Data. The limitations are based on the PND read position.
+    // Step 1 : find PND reads for the current command
+    // const auto pnd = getPatternNameFromCharacterPattern(command);
+    // const auto pnd_reads = getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, pnd);
+
+    constexpr auto pnd_access_size   = u8{8};
+    auto           pnd_timing_access = std::array<bool, pnd_access_size>{false, false, false, false, false, false, false, false};
+    setPatternNameAccess(bank_a0, command, pnd_timing_access);
+    setPatternNameAccess(bank_b0, command, pnd_timing_access);
+    if (!is_screen_mode_normal) {
+        setPatternNameAccess(bank_a1, command, pnd_timing_access);
+        setPatternNameAccess(bank_b1, command, pnd_timing_access);
+    }
+
+    // If there's no reduction, observe selection limits when CPD read access >= 2.
+    // If reduction = 1/2 or 1/4, the behavior isn't clear from the docs ... I'll just
+    // observe selection limits for every access.
+    auto are_limitations_applied = bool{true};
+    if (reduction == ReductionSetting::none) {
+        auto unlimited_cpd_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
+        unlimited_cpd_reads += std::count(bank_b0.begin(), bank_b0.end(), command);
+        if (!is_screen_mode_normal) {
+            unlimited_cpd_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
+            unlimited_cpd_reads += std::count(bank_b1.begin(), bank_b1.end(), command);
+        }
+        if (unlimited_cpd_reads < 2) { are_limitations_applied = false; }
+    }
+
+    VramTiming limited_bank_a0 = {bank_a0};
+    VramTiming limited_bank_b0 = {bank_b0};
+    VramTiming limited_bank_a1 = {bank_a1};
+    VramTiming limited_bank_b1 = {bank_b1};
+
+    if (are_limitations_applied) {
+        // Step 2 : apply selection limits on accessed timings
+        constexpr auto allowed_cpd_timing_size = u8{8};
+        auto           allowed_cpd_timing
+            = std::array<bool, allowed_cpd_timing_size>{false, false, false, false, false, false, false, false};
+        setCharacterPatternLimitations(is_screen_mode_normal, pnd_timing_access, allowed_cpd_timing);
+
+        // Step 3 : get the reads
+        // First access not available are changed to no access
+        auto it = std::find(allowed_cpd_timing.begin(), allowed_cpd_timing.end(), false);
+        while (it != allowed_cpd_timing.end()) {
+            limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            if (!is_screen_mode_normal) {
+                limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+                limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            }
+            ++it;
+            it = std::find(it, allowed_cpd_timing.end(), false);
+        }
+    }
+    // Counting cpd access
+    auto cpd_reads = std::count(limited_bank_a0.begin(), limited_bank_a0.end(), command);
+    cpd_reads += std::count(limited_bank_b0.begin(), limited_bank_b0.end(), command);
+    if (!is_screen_mode_normal) {
+        cpd_reads += std::count(limited_bank_a1.begin(), limited_bank_a1.end(), command);
+        cpd_reads += std::count(limited_bank_b1.begin(), limited_bank_b1.end(), command);
+    }
+
+    return static_cast<u8>(cpd_reads);
+};
 
 } // namespace saturnin::video

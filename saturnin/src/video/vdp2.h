@@ -360,7 +360,7 @@ class Vdp2 {
     auto        getDebugVramBanksUsed() -> std::array<bool, vram_banks_number>;
     auto        getDebugVramBanksName() -> std::vector<std::string>;
     static auto getDebugVramCommandDescription(const VramAccessCommand command) -> LabelValue;
-    auto        getDebugScrollScreenData(const ScrollScreen s) -> std::vector<LabelValue>;
+    auto        getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>>;
 
     //@}
   private:
@@ -504,35 +504,6 @@ class Vdp2 {
                                      const VramAccessCommand command) -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::getVramCharacterPatternDataReads(const VramTiming& bank_a0, const VramTiming& bank_a1,
-    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command,
-    ///                                          const ReductionSetting  reduction) -> u8;
-    ///
-    /// \brief  Gets VRAM character pattern data reads
-    ///
-    /// \author Runik
-    /// \date   22/12/2020
-    ///
-    /// \param  bank_a0 VRAM bank a0.
-    /// \param  bank_a1 VRAM bank a1.
-    /// \param  bank_b0 VRAM bank b0.
-    /// \param  bank_b1 VRAM bank b1.
-    /// \param  command The VRAM access command.
-    /// \param  reduction Reduction setting of current screen.
-    /// \param  is_screen_mode_normal True if current screen is in normal mode.
-    ///
-    /// \returns    The VRAM character pattern data reads.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
-                                          const VramTiming&       bank_a1,
-                                          const VramTiming&       bank_b0,
-                                          const VramTiming&       bank_b1,
-                                          const VramAccessCommand command,
-                                          const ReductionSetting  reduction,
-                                          const bool              is_screen_mode_normal) -> u8;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::populateRenderData();
     ///
     /// \brief  Populates data from the VDP2 memory before backend rendering.
@@ -582,6 +553,22 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) -> u32;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getScreen(const ScrollScreen s) -> ScrollScreenStatus*;
+    ///
+    /// \brief  Gets the screen status of the screen.
+    ///
+    /// \author Runik
+    /// \date   09/03/2021
+    ///
+    /// \param  s   A ScrollScreen to process.
+    ///
+    /// \returns    The screen status.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getScreen(const ScrollScreen s) -> ScrollScreenStatus&;
+    auto getScreen(const ScrollScreen s) const -> const ScrollScreenStatus&;
 
     //@{
     // Modules accessors
@@ -893,4 +880,33 @@ void setPatternNameAccess(const VramTiming&                   bank,
 void setCharacterPatternLimitations(const bool                                is_screen_mode_normal,
                                     const std::array<bool, vram_timing_size>& pnd_access,
                                     std::array<bool, vram_timing_size>&       allowed_cpd_timing);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto getVramCharacterPatternDataReads(const VramTiming& bank_a0, const VramTiming& bank_a1,
+///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command,
+///     const ReductionSetting reduction, const bool is_screen_mode_normal) -> u8;
+///
+/// \brief  Gets VRAM character pattern data reads
+///
+/// \author Runik
+/// \date   22/12/2020
+///
+/// \param  bank_a0                 VRAM bank a0.
+/// \param  bank_a1                 VRAM bank a1.
+/// \param  bank_b0                 VRAM bank b0.
+/// \param  bank_b1                 VRAM bank b1.
+/// \param  command                 The VRAM access command.
+/// \param  reduction               Reduction setting of current screen.
+/// \param  is_screen_mode_normal   True if current screen is in normal mode.
+///
+/// \returns    The VRAM character pattern data reads.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
+                                      const VramTiming&       bank_a1,
+                                      const VramTiming&       bank_b0,
+                                      const VramTiming&       bank_b1,
+                                      const VramAccessCommand command,
+                                      const ReductionSetting  reduction,
+                                      const bool              is_screen_mode_normal) -> u8;
 } // namespace saturnin::video
