@@ -40,6 +40,10 @@ using core::StartingFactorSelect;
 using core::tr;
 using util::toUnderlying;
 
+//--------------------------------------------------------------------------------------------------------------
+// PUBLIC section
+//--------------------------------------------------------------------------------------------------------------
+
 void Vdp2::initialize() {
     initializeRegisterNameMap();
 
@@ -115,6 +119,380 @@ void Vdp2::run(const u8 cycles) {
 
     // Yet to implement : H Counter, V Counter, Timer 1
 }
+
+auto Vdp2::getRegisters() const -> const AddressToNameMap& { return address_to_name_; };
+
+void Vdp2::onSystemClockUpdate() { calculateDisplayDuration(); }
+
+void Vdp2::calculateDisplayDuration() {
+    // - A full frame vertical resolution is :
+    //      - 262.5 lines for NTSC
+    //      - 312.5 for PAL
+
+    constexpr auto lines_nb_224 = u16{224};
+    constexpr auto lines_nb_240 = u16{240};
+    constexpr auto lines_nb_256 = u16{256};
+
+    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    switch (emulator_context_->config()->getTvStandard(ts)) {
+        case video::TvStandard::pal: {
+            constexpr auto frame_duration = seconds{1.0 / 50.0};
+            cycles_per_frame_             = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
+
+            constexpr auto total_lines   = u16{313};
+            auto           visible_lines = u16{};
+            switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
+                case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
+                case VerticalResolution::lines_nb_256: visible_lines = lines_nb_256; break;
+                default: core::Log::warning("vdp2", core::tr("Unknown PAL vertical resolution."));
+            }
+            const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
+            cycles_per_vblank_      = vblank_lines * cycles_per_frame_ / total_lines;
+            cycles_per_vactive_     = cycles_per_frame_ - cycles_per_vblank_;
+
+            constexpr auto pal_total_line_duration = micro{64};
+            constexpr auto pal_hblank_duration     = micro{12};
+            calculateLineDuration(pal_total_line_duration, pal_hblank_duration);
+
+            // constexpr auto total_line_duration{nano(64)};
+            // constexpr auto hblank_duration{nano(12)};
+            // constexpr auto active_line_duration{total_line_duration - hblank_duration};
+            // cycles_per_hblank_  = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
+            // cycles_per_hactive_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
+            // cycles_per_line_    = cycles_per_hactive_ + cycles_per_hblank_;
+            break;
+        }
+        case video::TvStandard::ntsc: {
+            constexpr auto frame_duration = seconds{1.0 / 60.0};
+            cycles_per_frame_             = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
+
+            constexpr auto total_lines   = u16{263};
+            auto           visible_lines = u16{};
+            switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
+                case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
+                default: core::Log::warning("vdp2", core::tr("Unknown NTSC vertical resolution."));
+            }
+            const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
+            cycles_per_vblank_      = vblank_lines * cycles_per_frame_ / total_lines;
+            cycles_per_vactive_     = cycles_per_frame_ - cycles_per_vblank_;
+
+            constexpr auto ntsc_total_line_duration = micro{63.5};
+            constexpr auto ntsc_hblank_duration     = micro{10.9};
+            calculateLineDuration(ntsc_total_line_duration, ntsc_hblank_duration);
+            break;
+        }
+        default: {
+            core::Log::warning("vdp2", core::tr("Undefined TV standard."));
+        }
+    }
+}
+
+void Vdp2::onVblankIn() {
+    updateResolution();
+    populateRenderData();
+}
+
+auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; }
+
+//--------------------------------------------------------------------------------------------------------------
+// DEBUG methods
+//--------------------------------------------------------------------------------------------------------------
+
+auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
+    auto values = std::vector<LabelValue>{};
+
+    { // Resolution
+        if (tv_screen_status_.screen_mode == ScreenMode::unknown) {
+            values.emplace_back(tr("Resolution"), tr("Not set"));
+        } else {
+            auto screen_mode = std::string{};
+            switch (tv_screen_status_.screen_mode) {
+                case ScreenMode::normal_320_224:
+                case ScreenMode::normal_320_240:
+                case ScreenMode::normal_320_256:
+                case ScreenMode::normal_320_448:
+                case ScreenMode::normal_320_480:
+                case ScreenMode::normal_320_512: screen_mode = tr("Normal Graphic A"); break;
+                case ScreenMode::normal_352_224:
+                case ScreenMode::normal_352_240:
+                case ScreenMode::normal_352_256:
+                case ScreenMode::normal_352_448:
+                case ScreenMode::normal_352_480:
+                case ScreenMode::normal_352_512: screen_mode = tr("Normal Graphic B"); break;
+                case ScreenMode::hi_res_640_224:
+                case ScreenMode::hi_res_640_240:
+                case ScreenMode::hi_res_640_256:
+                case ScreenMode::hi_res_640_448:
+                case ScreenMode::hi_res_640_480:
+                case ScreenMode::hi_res_640_512: screen_mode = tr("Hi-Res Graphic A"); break;
+                case ScreenMode::hi_res_704_224:
+                case ScreenMode::hi_res_704_240:
+                case ScreenMode::hi_res_704_256:
+                case ScreenMode::hi_res_704_448:
+                case ScreenMode::hi_res_704_480:
+                case ScreenMode::hi_res_704_512: screen_mode = tr("Hi-Res Graphic B"); break;
+                case ScreenMode::exclusive_320_480: screen_mode = tr("Exclusive Normal Graphic A"); break;
+                case ScreenMode::exclusive_352_480: screen_mode = tr("Exclusive Normal Graphic B"); break;
+                case ScreenMode::exclusive_640_480: screen_mode = tr("Exclusive Hi-Res Graphic A"); break;
+                case ScreenMode::exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
+                default: screen_mode = tr("Unknown");
+            }
+            values.emplace_back(
+                tr("Resolution"),
+                fmt::format("{:d}x{:d} - {:s}", tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res, screen_mode));
+        }
+    }
+
+    { // Interlace mode
+        auto mode = std::string{};
+        switch (tv_screen_status_.interlace_mode) {
+            case InterlaceMode::non_interlace: mode = tr("Non interlace"); break;
+            case InterlaceMode::single_density: mode = tr("Single density"); break;
+            case InterlaceMode::double_density: mode = tr("Double density"); break;
+            default: mode = tr("Not allowed"); break;
+        }
+        values.emplace_back(tr("Interlace mode"), mode);
+    }
+
+    { // Screen display enable
+
+        auto nbgDisplayStatus = [&](const ScrollScreen s) {
+            const auto& nbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
+            values.emplace_back(fmt::format("NBG{}", toUnderlying(s)), nbg);
+        };
+        nbgDisplayStatus(ScrollScreen::nbg0);
+        nbgDisplayStatus(ScrollScreen::nbg1);
+        nbgDisplayStatus(ScrollScreen::nbg2);
+        nbgDisplayStatus(ScrollScreen::nbg3);
+
+        auto rbgDisplayStatus = [&](const ScrollScreen s) {
+            const auto& rbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
+            values.emplace_back(fmt::format("RBG{}", toUnderlying(s)), rbg);
+        };
+        rbgDisplayStatus(ScrollScreen::rbg0);
+        rbgDisplayStatus(ScrollScreen::rbg1);
+    }
+
+    return values;
+}
+
+auto Vdp2::getDebugVramMainData() -> std::vector<LabelValue> {
+    auto values = std::vector<LabelValue>{};
+
+    const auto banks_used   = getDebugVramBanksUsed();
+    const auto addBankValue = [&](const std::string& bank_name, const u8 bank_index) {
+        if (banks_used[bank_index]) {
+            values.emplace_back(bank_name, tr("2 banks"));
+        } else {
+            values.emplace_back(bank_name, tr("1 bank"));
+        }
+    };
+    addBankValue("VRAM-A", vram_bank_a1_index);
+    addBankValue("VRAM-B", vram_bank_b1_index);
+
+    return values;
+}
+
+auto Vdp2::getDebugVramBanks() -> std::vector<VramTiming> {
+    auto is_normal_mode = (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_320);
+    is_normal_mode |= (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_352);
+
+    const auto banks_used = getDebugVramBanksUsed();
+    auto       banks      = std::vector<VramTiming>{};
+
+    const VramTiming bank_a0 = {cyca0l_.get(VramCyclePatternBankA0Lower::t0),
+                                cyca0l_.get(VramCyclePatternBankA0Lower::t1),
+                                cyca0l_.get(VramCyclePatternBankA0Lower::t2),
+                                cyca0l_.get(VramCyclePatternBankA0Lower::t3),
+                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t4) : VramAccessCommand::no_access,
+                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t5) : VramAccessCommand::no_access,
+                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t6) : VramAccessCommand::no_access,
+                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t7) : VramAccessCommand::no_access};
+    banks.emplace_back(bank_a0);
+
+    if (banks_used[vram_bank_a1_index]) {
+        const VramTiming bank_a1 = {cyca1l_.get(VramCyclePatternBankA1Lower::t0),
+                                    cyca1l_.get(VramCyclePatternBankA1Lower::t1),
+                                    cyca1l_.get(VramCyclePatternBankA1Lower::t2),
+                                    cyca1l_.get(VramCyclePatternBankA1Lower::t3),
+                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t4) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t5) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t6) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t7) : VramAccessCommand::no_access};
+        banks.emplace_back(bank_a1);
+    }
+
+    const VramTiming bank_b0 = {cycb0l_.get(VramCyclePatternBankB0Lower::t0),
+                                cycb0l_.get(VramCyclePatternBankB0Lower::t1),
+                                cycb0l_.get(VramCyclePatternBankB0Lower::t2),
+                                cycb0l_.get(VramCyclePatternBankB0Lower::t3),
+                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t4) : VramAccessCommand::no_access,
+                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t5) : VramAccessCommand::no_access,
+                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t6) : VramAccessCommand::no_access,
+                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t7) : VramAccessCommand::no_access};
+    banks.emplace_back(bank_b0);
+
+    if (banks_used[vram_bank_a1_index]) {
+        const VramTiming bank_b1 = {cycb1l_.get(VramCyclePatternBankB1Lower::t0),
+                                    cycb1l_.get(VramCyclePatternBankB1Lower::t1),
+                                    cycb1l_.get(VramCyclePatternBankB1Lower::t2),
+                                    cycb1l_.get(VramCyclePatternBankB1Lower::t3),
+                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t4) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t5) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t6) : VramAccessCommand::no_access,
+                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t7) : VramAccessCommand::no_access};
+        banks.emplace_back(bank_b1);
+    }
+    return banks;
+}
+
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+auto Vdp2::getDebugVramBanksUsed() -> std::array<bool, vram_banks_number> {
+    // Bank A/A0 and B/B0 are always used
+    auto banks = std::array<bool, vram_banks_number>{true, false, true, false};
+    if (ramctl_.get(RamControl::vram_a_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_a1_index] = true; }
+    if (ramctl_.get(RamControl::vram_b_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_b1_index] = true; }
+
+    return banks;
+}
+
+auto Vdp2::getDebugVramBanksName() -> std::vector<std::string> {
+    const auto banks_used = getDebugVramBanksUsed();
+    auto       banks_name = std::vector<std::string>{};
+
+    if (!banks_used[video::vram_bank_a1_index]) {
+        banks_name.emplace_back("VRAM-A");
+    } else {
+        banks_name.emplace_back("VRAM-A0");
+        banks_name.emplace_back("VRAM-A1");
+    }
+    if (!banks_used[video::vram_bank_b1_index]) {
+        banks_name.emplace_back("VRAM-B");
+    } else {
+        banks_name.emplace_back("VRAM-B0");
+        banks_name.emplace_back("VRAM-B1");
+    }
+
+    return banks_name;
+}
+
+// static
+auto Vdp2::getDebugVramCommandDescription(const VramAccessCommand command) -> LabelValue {
+    using VramCommandsDescription         = std::map<VramAccessCommand, LabelValue>;
+    const auto vram_commands_descriptions = VramCommandsDescription{
+        {VramAccessCommand::nbg0_pattern_name_read, {"N0PN", tr("NBG0 Pattern Name Data Read")}},
+        {VramAccessCommand::nbg1_pattern_name_read, {"N1PN", tr("NBG1 Pattern Name Data Read")}},
+        {VramAccessCommand::nbg2_pattern_name_read, {"N2PN", tr("NBG2 Pattern Name Data Read")}},
+        {VramAccessCommand::nbg3_pattern_name_read, {"N3PN", tr("NBG3 Pattern Name Data Read")}},
+        {VramAccessCommand::nbg0_character_pattern_data_read, {"N0CG", tr("NBG0 Character Pattern Data Read")}},
+        {VramAccessCommand::nbg1_character_pattern_data_read, {"N1CG", tr("NBG1 Character Pattern Data Read")}},
+        {VramAccessCommand::nbg2_character_pattern_data_read, {"N2CG", tr("NBG2 Character Pattern Data Read")}},
+        {VramAccessCommand::nbg3_character_pattern_data_read, {"N3CG", tr("NBG3 Character Pattern Data Read")}},
+        {VramAccessCommand::setting_not_allowed_1, {"XXX", tr("Setting not allowed")}},
+        {VramAccessCommand::setting_not_allowed_2, {"XXX", tr("Setting not allowed")}},
+        {VramAccessCommand::setting_not_allowed_3, {"XXX", tr("Setting not allowed")}},
+        {VramAccessCommand::setting_not_allowed_4, {"XXX", tr("Setting not allowed")}},
+        {VramAccessCommand::nbg0_vertical_cell_scroll_table_data_read, {"N0CE", tr("NBG0 Vertical Cell Scroll Table Data Read")}},
+        {VramAccessCommand::nbg1_vertical_cell_scroll_table_data_read, {"N1CE", tr("NBG1 Vertical Cell Scroll Table Data Read")}},
+        {VramAccessCommand::cpu_read_write, {"CPU", tr("CPU Read/Write")}},
+        {VramAccessCommand::no_access, {"NA", tr("No Access")}}};
+
+    return vram_commands_descriptions.at(command);
+}
+
+auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>> {
+    auto        values = std::vector<LabelValue>{};
+    const auto& screen = getScreen(s);
+
+    if (!screen.is_display_enabled) {
+        // values.emplace_back(tr("Screen is not displayed"), std::nullopt);
+        return std::nullopt;
+    }
+
+    // Scroll size
+    const auto size = screen.page_size * screen.plane_size * screen.map_size;
+    values.emplace_back(tr("Total screen size"), fmt::format("{:#x}", size));
+
+    // Map size
+    const auto mapSize = [](const ScrollScreen s) {
+        switch (s) {
+            case ScrollScreen::rbg0:
+            case ScrollScreen::rbg1: return tr("4x4 planes");
+            default: return tr("2x2 planes");
+        }
+    };
+    values.emplace_back(tr("Map size"), mapSize(s));
+
+    // Plane size
+    const auto planeSize = [](const ScrollScreenStatus s) {
+        switch (s.plane_size) {
+            case 1: return tr("1x1 page");
+            case 2: return tr("2x1 pages");
+            case 4: return tr("2x2 pages");
+            default: return tr("Unknown");
+        }
+    };
+    values.emplace_back(tr("Plane size"), planeSize(screen));
+
+    // Pattern Name Data size
+    const auto& pnd_size = screen.pattern_name_data_size == 1 ? tr("1 word") : tr("2 words");
+    values.emplace_back(tr("Pattern Name Data size"), pnd_size);
+
+    // Character Pattern size
+    const auto& cp_size = screen.character_pattern_size == 1 ? tr("1x1 cell") : tr("2x2 cells");
+    values.emplace_back(tr("Character Pattern size"), cp_size);
+
+    // Character Pattern color number
+    const auto colorNumber = [](const ColorCount c) {
+        switch (c) {
+            case ColorCount::cannot_display: return tr("Cannot display");
+            case ColorCount::not_allowed: return tr("Not allowed");
+            case ColorCount::palette_16: return tr("Palette (16 colors)");
+            case ColorCount::palette_256: return tr("Palette (256 colors)");
+            case ColorCount::palette_2048: return tr("Palette (2048 colors)");
+            case ColorCount::rgb_32k: return tr("RGB (32K colors)");
+            case ColorCount::rgb_16m: return tr("RGB (16M colors)");
+            default: return tr("Not set");
+        }
+    };
+    values.emplace_back(tr("Character color number"), colorNumber(screen.character_color_number));
+
+    // Cell size
+    values.emplace_back(tr("Cell size"), tr("8x8 dots"));
+
+    // Plane start address
+    values.emplace_back(tr("Plane A start address"), fmt::format("{:#010x}", screen.plane_a_start_address));
+    values.emplace_back(tr("Plane B start address"), fmt::format("{:#010x}", screen.plane_b_start_address));
+    values.emplace_back(tr("Plane C start address"), fmt::format("{:#010x}", screen.plane_c_start_address));
+    values.emplace_back(tr("Plane D start address"), fmt::format("{:#010x}", screen.plane_d_start_address));
+    std::array<ScrollScreen, 2> rotation_screens = {ScrollScreen::rbg0, ScrollScreen::rbg1};
+    if (std::any_of(rotation_screens.begin(), rotation_screens.end(), [&s](const ScrollScreen rss) { return rss == s; })) {
+        values.emplace_back(tr("Plane E start address"), fmt::format("{:#010x}", screen.plane_e_start_address));
+        values.emplace_back(tr("Plane F start address"), fmt::format("{:#010x}", screen.plane_f_start_address));
+        values.emplace_back(tr("Plane G start address"), fmt::format("{:#010x}", screen.plane_g_start_address));
+        values.emplace_back(tr("Plane H start address"), fmt::format("{:#010x}", screen.plane_h_start_address));
+        values.emplace_back(tr("Plane I start address"), fmt::format("{:#010x}", screen.plane_i_start_address));
+        values.emplace_back(tr("Plane J start address"), fmt::format("{:#010x}", screen.plane_j_start_address));
+        values.emplace_back(tr("Plane K start address"), fmt::format("{:#010x}", screen.plane_k_start_address));
+        values.emplace_back(tr("Plane L start address"), fmt::format("{:#010x}", screen.plane_l_start_address));
+        values.emplace_back(tr("Plane M start address"), fmt::format("{:#010x}", screen.plane_m_start_address));
+        values.emplace_back(tr("Plane N start address"), fmt::format("{:#010x}", screen.plane_n_start_address));
+        values.emplace_back(tr("Plane O start address"), fmt::format("{:#010x}", screen.plane_o_start_address));
+        values.emplace_back(tr("Plane P start address"), fmt::format("{:#010x}", screen.plane_p_start_address));
+    }
+
+    return values;
+}
+
+//--------------------------------------------------------------------------------------------------------------
+// PRIVATE section
+//--------------------------------------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------------------------------
+// MEMORY ACCESS methods
+//--------------------------------------------------------------------------------------------------------------
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::read16(const u32 addr) const -> u16 {
@@ -701,7 +1079,11 @@ void Vdp2::write32(const u32 addr, const u32 data) {
     }
 }
 
-auto Vdp2::getRegisters() const -> const AddressToNameMap& { return address_to_name_; };
+//--------------------------------------------------------------------------------------------------------------
+// MISC methods
+//--------------------------------------------------------------------------------------------------------------
+
+void Vdp2::reset() {}
 
 void Vdp2::addToRegisterNameMap(const u32 addr, const std::string& name) {
     address_to_name_.insert(AddressToNameMap::value_type(addr, name));
@@ -854,79 +1236,201 @@ void Vdp2::initializeRegisterNameMap() {
     addToRegisterNameMap(color_offset_b_blue, "Color Offset B (Blue)");
 }
 
-void Vdp2::onSystemClockUpdate() { calculateDisplayDuration(); }
-
-void Vdp2::calculateDisplayDuration() {
-    // - A full frame vertical resolution is :
-    //      - 262.5 lines for NTSC
-    //      - 312.5 for PAL
-
-    constexpr auto lines_nb_224 = u16{224};
-    constexpr auto lines_nb_240 = u16{240};
-    constexpr auto lines_nb_256 = u16{256};
-
-    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-    switch (emulator_context_->config()->getTvStandard(ts)) {
-        case video::TvStandard::pal: {
-            constexpr auto frame_duration = seconds{1.0 / 50.0};
-            cycles_per_frame_             = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
-
-            constexpr auto total_lines   = u16{313};
-            auto           visible_lines = u16{};
-            switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
-                case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
-                case VerticalResolution::lines_nb_256: visible_lines = lines_nb_256; break;
-                default: core::Log::warning("vdp2", core::tr("Unknown PAL vertical resolution."));
-            }
-            const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
-            cycles_per_vblank_      = vblank_lines * cycles_per_frame_ / total_lines;
-            cycles_per_vactive_     = cycles_per_frame_ - cycles_per_vblank_;
-
-            constexpr auto pal_total_line_duration = micro{64};
-            constexpr auto pal_hblank_duration     = micro{12};
-            calculateLineDuration(pal_total_line_duration, pal_hblank_duration);
-
-            // constexpr auto total_line_duration{nano(64)};
-            // constexpr auto hblank_duration{nano(12)};
-            // constexpr auto active_line_duration{total_line_duration - hblank_duration};
-            // cycles_per_hblank_  = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
-            // cycles_per_hactive_ = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
-            // cycles_per_line_    = cycles_per_hactive_ + cycles_per_hblank_;
-            break;
-        }
-        case video::TvStandard::ntsc: {
-            constexpr auto frame_duration = seconds{1.0 / 60.0};
-            cycles_per_frame_             = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
-
-            constexpr auto total_lines   = u16{263};
-            auto           visible_lines = u16{};
-            switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
-                case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
-                default: core::Log::warning("vdp2", core::tr("Unknown NTSC vertical resolution."));
-            }
-            const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
-            cycles_per_vblank_      = vblank_lines * cycles_per_frame_ / total_lines;
-            cycles_per_vactive_     = cycles_per_frame_ - cycles_per_vblank_;
-
-            constexpr auto ntsc_total_line_duration = micro{63.5};
-            constexpr auto ntsc_hblank_duration     = micro{10.9};
-            calculateLineDuration(ntsc_total_line_duration, ntsc_hblank_duration);
-            break;
-        }
-        default: {
-            core::Log::warning("vdp2", core::tr("Undefined TV standard."));
-        }
-    }
-}
-
 void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& hblank_duration) {
     const auto active_line_duration = micro{total_line_duration - hblank_duration};
     cycles_per_hblank_              = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
     cycles_per_hactive_             = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
     cycles_per_line_                = cycles_per_hactive_ + cycles_per_hblank_;
 }
+
+void Vdp2::updateResolution() {
+    tv_screen_status_.is_picture_displayed = (tvmd_.get(TvScreenMode::display) == Display::displayed);
+    tv_screen_status_.border_color_mode    = tvmd_.get(TvScreenMode::border_color_mode);
+    tv_screen_status_.interlace_mode       = tvmd_.get(TvScreenMode::interlace_mode);
+
+    switch (tvmd_.get(TvScreenMode::horizontal_resolution)) {
+        case HorizontalResolution::normal_320:
+            tv_screen_status_.horizontal_res   = horizontal_res_320;
+            tv_screen_status_.screen_mode_type = ScreenModeType::normal;
+            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_224;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_224;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_240;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_240;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_256;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_256;
+                        break;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                }
+            } else {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_448;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_448;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_480;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_480;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_512;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_512;
+                        break;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                }
+            }
+
+            break;
+        case HorizontalResolution::normal_352:
+            tv_screen_status_.horizontal_res   = horizontal_res_352;
+            tv_screen_status_.screen_mode_type = ScreenModeType::normal;
+            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_224;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_224;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_240;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_240;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_256;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_256;
+                        break;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                }
+            } else {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_448;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_448;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_480;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_480;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_512;
+                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_512;
+                        break;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                }
+            }
+
+            break;
+        case HorizontalResolution::hi_res_640:
+            tv_screen_status_.horizontal_res   = horizontal_res_640;
+            tv_screen_status_.screen_mode_type = ScreenModeType::hi_res;
+            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_224;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_224;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_240;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_240;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_256;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_256;
+                        break;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                }
+            } else {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_448;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_448;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_480;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_480;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_512;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_512;
+                        break;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                }
+            }
+            break;
+        case HorizontalResolution::hi_res_704:
+            tv_screen_status_.horizontal_res   = horizontal_res_704;
+            tv_screen_status_.screen_mode_type = ScreenModeType::hi_res;
+            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_224;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_224;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_240;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_240;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_256;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_256;
+                        break;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                }
+            } else {
+                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                    case VerticalResolution::lines_nb_224:
+                        tv_screen_status_.vertical_res = vertical_res_448;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_448;
+                        break;
+                    case VerticalResolution::lines_nb_240:
+                        tv_screen_status_.vertical_res = vertical_res_480;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_480;
+                        break;
+                    case VerticalResolution::lines_nb_256:
+                        tv_screen_status_.vertical_res = vertical_res_512;
+                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_512;
+                        break;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                }
+            }
+            break;
+        case HorizontalResolution::exclusive_normal_320:
+            tv_screen_status_.horizontal_res   = horizontal_res_320;
+            tv_screen_status_.vertical_res     = vertical_res_480;
+            tv_screen_status_.screen_mode      = ScreenMode::exclusive_320_480;
+            tv_screen_status_.screen_mode_type = ScreenModeType::exclusive;
+            break;
+        case HorizontalResolution::exclusive_normal_352:
+            tv_screen_status_.horizontal_res   = horizontal_res_352;
+            tv_screen_status_.vertical_res     = vertical_res_480;
+            tv_screen_status_.screen_mode      = ScreenMode::exclusive_352_480;
+            tv_screen_status_.screen_mode_type = ScreenModeType::exclusive;
+            break;
+        case HorizontalResolution::exclusive_hi_res_640:
+            tv_screen_status_.horizontal_res   = horizontal_res_640;
+            tv_screen_status_.vertical_res     = vertical_res_480;
+            tv_screen_status_.screen_mode      = ScreenMode::exclusive_640_480;
+            tv_screen_status_.screen_mode_type = ScreenModeType::exclusive;
+            break;
+        case HorizontalResolution::exclusive_hi_res_704:
+            tv_screen_status_.horizontal_res   = horizontal_res_704;
+            tv_screen_status_.vertical_res     = vertical_res_480;
+            tv_screen_status_.screen_mode      = ScreenMode::exclusive_704_480;
+            tv_screen_status_.screen_mode_type = ScreenModeType::exclusive;
+            break;
+    }
+
+    emulator_context_->opengl()->saturnScreenResolution({tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res});
+};
+
+//--------------------------------------------------------------------------------------------------------------
+// VRAM CYCLES methods
+//--------------------------------------------------------------------------------------------------------------
 
 auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // First check to ensure scroll screen must be displayed. If the screen cannot display, no vram access will be performed.
@@ -1242,467 +1746,342 @@ auto Vdp2::getVramPatternNameDataReads(const VramTiming&       bank_a0,
     return static_cast<u8>(pnd_reads);
 }
 
-void Vdp2::onVblankIn() {
-    updateResolution();
-    populateRenderData();
-}
-
-auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; }
-
-//----------------------------------------------------------------------
-// Debug functions
-//----------------------------------------------------------------------
-
-auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
-    auto values = std::vector<LabelValue>{};
-
-    { // Resolution
-        if (tv_screen_status_.screen_mode == ScreenMode::unknown) {
-            values.emplace_back(tr("Resolution"), tr("Not set"));
-        } else {
-            auto screen_mode = std::string{};
-            switch (tv_screen_status_.screen_mode) {
-                case ScreenMode::normal_320_224:
-                case ScreenMode::normal_320_240:
-                case ScreenMode::normal_320_256:
-                case ScreenMode::normal_320_448:
-                case ScreenMode::normal_320_480:
-                case ScreenMode::normal_320_512: screen_mode = tr("Normal Graphic A"); break;
-                case ScreenMode::normal_352_224:
-                case ScreenMode::normal_352_240:
-                case ScreenMode::normal_352_256:
-                case ScreenMode::normal_352_448:
-                case ScreenMode::normal_352_480:
-                case ScreenMode::normal_352_512: screen_mode = tr("Normal Graphic B"); break;
-                case ScreenMode::hi_res_640_224:
-                case ScreenMode::hi_res_640_240:
-                case ScreenMode::hi_res_640_256:
-                case ScreenMode::hi_res_640_448:
-                case ScreenMode::hi_res_640_480:
-                case ScreenMode::hi_res_640_512: screen_mode = tr("Hi-Res Graphic A"); break;
-                case ScreenMode::hi_res_704_224:
-                case ScreenMode::hi_res_704_240:
-                case ScreenMode::hi_res_704_256:
-                case ScreenMode::hi_res_704_448:
-                case ScreenMode::hi_res_704_480:
-                case ScreenMode::hi_res_704_512: screen_mode = tr("Hi-Res Graphic B"); break;
-                case ScreenMode::exclusive_320_480: screen_mode = tr("Exclusive Normal Graphic A"); break;
-                case ScreenMode::exclusive_352_480: screen_mode = tr("Exclusive Normal Graphic B"); break;
-                case ScreenMode::exclusive_640_480: screen_mode = tr("Exclusive Hi-Res Graphic A"); break;
-                case ScreenMode::exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
-                default: screen_mode = tr("Unknown");
-            }
-            values.emplace_back(
-                tr("Resolution"),
-                fmt::format("{:d}x{:d} - {:s}", tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res, screen_mode));
-        }
-    }
-
-    { // Interlace mode
-        auto mode = std::string{};
-        switch (tv_screen_status_.interlace_mode) {
-            case InterlaceMode::non_interlace: mode = tr("Non interlace"); break;
-            case InterlaceMode::single_density: mode = tr("Single density"); break;
-            case InterlaceMode::double_density: mode = tr("Double density"); break;
-            default: mode = tr("Not allowed"); break;
-        }
-        values.emplace_back(tr("Interlace mode"), mode);
-    }
-
-    { // Screen display enable
-
-        auto nbgDisplayStatus = [&](const ScrollScreen s) {
-            const auto& nbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
-            values.emplace_back(fmt::format("NBG{}", toUnderlying(s)), nbg);
-        };
-        nbgDisplayStatus(ScrollScreen::nbg0);
-        nbgDisplayStatus(ScrollScreen::nbg1);
-        nbgDisplayStatus(ScrollScreen::nbg2);
-        nbgDisplayStatus(ScrollScreen::nbg3);
-
-        auto rbgDisplayStatus = [&](const ScrollScreen s) {
-            const auto& rbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
-            values.emplace_back(fmt::format("RBG{}", toUnderlying(s)), rbg);
-        };
-        rbgDisplayStatus(ScrollScreen::rbg0);
-        rbgDisplayStatus(ScrollScreen::rbg1);
-    }
-
-    return values;
-}
-
-auto Vdp2::getDebugVramBanks() -> std::vector<VramTiming> {
-    auto is_normal_mode = (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_320);
-    is_normal_mode |= (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_352);
-
-    const auto banks_used = getDebugVramBanksUsed();
-    auto       banks      = std::vector<VramTiming>{};
-
-    const VramTiming bank_a0 = {cyca0l_.get(VramCyclePatternBankA0Lower::t0),
-                                cyca0l_.get(VramCyclePatternBankA0Lower::t1),
-                                cyca0l_.get(VramCyclePatternBankA0Lower::t2),
-                                cyca0l_.get(VramCyclePatternBankA0Lower::t3),
-                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t4) : VramAccessCommand::no_access,
-                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t5) : VramAccessCommand::no_access,
-                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t6) : VramAccessCommand::no_access,
-                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t7) : VramAccessCommand::no_access};
-    banks.emplace_back(bank_a0);
-
-    if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_a1 = {cyca1l_.get(VramCyclePatternBankA1Lower::t0),
-                                    cyca1l_.get(VramCyclePatternBankA1Lower::t1),
-                                    cyca1l_.get(VramCyclePatternBankA1Lower::t2),
-                                    cyca1l_.get(VramCyclePatternBankA1Lower::t3),
-                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t4) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t5) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t6) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t7) : VramAccessCommand::no_access};
-        banks.emplace_back(bank_a1);
-    }
-
-    const VramTiming bank_b0 = {cycb0l_.get(VramCyclePatternBankB0Lower::t0),
-                                cycb0l_.get(VramCyclePatternBankB0Lower::t1),
-                                cycb0l_.get(VramCyclePatternBankB0Lower::t2),
-                                cycb0l_.get(VramCyclePatternBankB0Lower::t3),
-                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t4) : VramAccessCommand::no_access,
-                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t5) : VramAccessCommand::no_access,
-                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t6) : VramAccessCommand::no_access,
-                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t7) : VramAccessCommand::no_access};
-    banks.emplace_back(bank_b0);
-
-    if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_b1 = {cycb1l_.get(VramCyclePatternBankB1Lower::t0),
-                                    cycb1l_.get(VramCyclePatternBankB1Lower::t1),
-                                    cycb1l_.get(VramCyclePatternBankB1Lower::t2),
-                                    cycb1l_.get(VramCyclePatternBankB1Lower::t3),
-                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t4) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t5) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t6) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t7) : VramAccessCommand::no_access};
-        banks.emplace_back(bank_b1);
-    }
-    return banks;
-}
-auto Vdp2::getDebugVramMainData() -> std::vector<LabelValue> {
-    auto values = std::vector<LabelValue>{};
-
-    const auto banks_used   = getDebugVramBanksUsed();
-    const auto addBankValue = [&](const std::string& bank_name, const u8 bank_index) {
-        if (banks_used[bank_index]) {
-            values.emplace_back(bank_name, tr("2 banks"));
-        } else {
-            values.emplace_back(bank_name, tr("1 bank"));
-        }
-    };
-    addBankValue("VRAM-A", vram_bank_a1_index);
-    addBankValue("VRAM-B", vram_bank_b1_index);
-
-    return values;
-}
-
-/* static */
-auto Vdp2::getDebugVramCommandDescription(const VramAccessCommand command) -> LabelValue {
-    using VramCommandsDescription         = std::map<VramAccessCommand, LabelValue>;
-    const auto vram_commands_descriptions = VramCommandsDescription{
-        {VramAccessCommand::nbg0_pattern_name_read, {"N0PN", tr("NBG0 Pattern Name Data Read")}},
-        {VramAccessCommand::nbg1_pattern_name_read, {"N1PN", tr("NBG1 Pattern Name Data Read")}},
-        {VramAccessCommand::nbg2_pattern_name_read, {"N2PN", tr("NBG2 Pattern Name Data Read")}},
-        {VramAccessCommand::nbg3_pattern_name_read, {"N3PN", tr("NBG3 Pattern Name Data Read")}},
-        {VramAccessCommand::nbg0_character_pattern_data_read, {"N0CG", tr("NBG0 Character Pattern Data Read")}},
-        {VramAccessCommand::nbg1_character_pattern_data_read, {"N1CG", tr("NBG1 Character Pattern Data Read")}},
-        {VramAccessCommand::nbg2_character_pattern_data_read, {"N2CG", tr("NBG2 Character Pattern Data Read")}},
-        {VramAccessCommand::nbg3_character_pattern_data_read, {"N3CG", tr("NBG3 Character Pattern Data Read")}},
-        {VramAccessCommand::setting_not_allowed_1, {"XXX", tr("Setting not allowed")}},
-        {VramAccessCommand::setting_not_allowed_2, {"XXX", tr("Setting not allowed")}},
-        {VramAccessCommand::setting_not_allowed_3, {"XXX", tr("Setting not allowed")}},
-        {VramAccessCommand::setting_not_allowed_4, {"XXX", tr("Setting not allowed")}},
-        {VramAccessCommand::nbg0_vertical_cell_scroll_table_data_read, {"N0CE", tr("NBG0 Vertical Cell Scroll Table Data Read")}},
-        {VramAccessCommand::nbg1_vertical_cell_scroll_table_data_read, {"N1CE", tr("NBG1 Vertical Cell Scroll Table Data Read")}},
-        {VramAccessCommand::cpu_read_write, {"CPU", tr("CPU Read/Write")}},
-        {VramAccessCommand::no_access, {"NA", tr("No Access")}}};
-
-    return vram_commands_descriptions.at(command);
-}
-
-// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::getDebugVramBanksUsed() -> std::array<bool, vram_banks_number> {
-    // Bank A/A0 and B/B0 are always used
-    auto banks = std::array<bool, vram_banks_number>{true, false, true, false};
-    if (ramctl_.get(RamControl::vram_a_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_a1_index] = true; }
-    if (ramctl_.get(RamControl::vram_b_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_b1_index] = true; }
-
-    return banks;
-}
-
-auto Vdp2::getDebugVramBanksName() -> std::vector<std::string> {
-    const auto banks_used = getDebugVramBanksUsed();
-    auto       banks_name = std::vector<std::string>{};
-
-    if (!banks_used[video::vram_bank_a1_index]) {
-        banks_name.emplace_back("VRAM-A");
-    } else {
-        banks_name.emplace_back("VRAM-A0");
-        banks_name.emplace_back("VRAM-A1");
-    }
-    if (!banks_used[video::vram_bank_b1_index]) {
-        banks_name.emplace_back("VRAM-B");
-    } else {
-        banks_name.emplace_back("VRAM-B0");
-        banks_name.emplace_back("VRAM-B1");
-    }
-
-    return banks_name;
-}
-
-auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>> {
-    auto        values = std::vector<LabelValue>{};
-    const auto& screen = getScreen(s);
-
-    if (!screen.is_display_enabled) {
-        // values.emplace_back(tr("Screen is not displayed"), std::nullopt);
-        return std::nullopt;
-    }
-
-    // Scroll size
-    const auto size = screen.page_size * screen.plane_size * screen.map_size;
-    values.emplace_back(tr("Total screen size"), fmt::format("{:#x}", size));
-
-    // Map size
-    const auto mapSize = [](const ScrollScreen s) {
-        switch (s) {
-            case ScrollScreen::rbg0:
-            case ScrollScreen::rbg1: return tr("4x4 planes");
-            default: return tr("2x2 planes");
-        }
-    };
-    values.emplace_back(tr("Map size"), mapSize(s));
-
-    // Plane size
-    const auto planeSize = [](const ScrollScreenStatus s) {
-        switch (s.plane_size) {
-            case 1: return tr("1x1 page");
-            case 2: return tr("2x1 pages");
-            case 4: return tr("2x2 pages");
-            default: return tr("Unknown");
-        }
-    };
-    values.emplace_back(tr("Plane size"), planeSize(screen));
-
-    // Pattern Name Data size
-    const auto& pnd_size = screen.pattern_name_data_size == 1 ? tr("1 word") : tr("2 words");
-    values.emplace_back(tr("Pattern Name Data size"), pnd_size);
-
-    // Character Pattern size
-    const auto& cp_size = screen.character_pattern_size == 1 ? tr("1x1 cell") : tr("2x2 cells");
-    values.emplace_back(tr("Character Pattern size"), cp_size);
-
-    // Cell size
-    values.emplace_back(tr("Cell size"), tr("8x8 dots"));
-
-    // Plane start address
-    values.emplace_back(tr("Plane A start address"), fmt::format("{:#010x}", screen.plane_a_start_address));
-    values.emplace_back(tr("Plane B start address"), fmt::format("{:#010x}", screen.plane_b_start_address));
-    values.emplace_back(tr("Plane C start address"), fmt::format("{:#010x}", screen.plane_c_start_address));
-    values.emplace_back(tr("Plane D start address"), fmt::format("{:#010x}", screen.plane_d_start_address));
-    std::array<ScrollScreen, 2> rotation_screens = {ScrollScreen::rbg0, ScrollScreen::rbg1};
-    if (std::any_of(rotation_screens.begin(), rotation_screens.end(), [&s](const ScrollScreen rss) { return rss == s; })) {
-        values.emplace_back(tr("Plane E start address"), fmt::format("{:#010x}", screen.plane_e_start_address));
-        values.emplace_back(tr("Plane F start address"), fmt::format("{:#010x}", screen.plane_f_start_address));
-        values.emplace_back(tr("Plane G start address"), fmt::format("{:#010x}", screen.plane_g_start_address));
-        values.emplace_back(tr("Plane H start address"), fmt::format("{:#010x}", screen.plane_h_start_address));
-        values.emplace_back(tr("Plane I start address"), fmt::format("{:#010x}", screen.plane_i_start_address));
-        values.emplace_back(tr("Plane J start address"), fmt::format("{:#010x}", screen.plane_j_start_address));
-        values.emplace_back(tr("Plane K start address"), fmt::format("{:#010x}", screen.plane_k_start_address));
-        values.emplace_back(tr("Plane L start address"), fmt::format("{:#010x}", screen.plane_l_start_address));
-        values.emplace_back(tr("Plane M start address"), fmt::format("{:#010x}", screen.plane_m_start_address));
-        values.emplace_back(tr("Plane N start address"), fmt::format("{:#010x}", screen.plane_n_start_address));
-        values.emplace_back(tr("Plane O start address"), fmt::format("{:#010x}", screen.plane_o_start_address));
-        values.emplace_back(tr("Plane P start address"), fmt::format("{:#010x}", screen.plane_p_start_address));
-    }
-
-    return values;
-}
-
-void Vdp2::updateResolution() {
-    tv_screen_status_.is_picture_displayed = (tvmd_.get(TvScreenMode::display) == Display::displayed);
-    tv_screen_status_.border_color_mode    = tvmd_.get(TvScreenMode::border_color_mode);
-    tv_screen_status_.interlace_mode       = tvmd_.get(TvScreenMode::interlace_mode);
-
-    switch (tvmd_.get(TvScreenMode::horizontal_resolution)) {
-        case HorizontalResolution::normal_320:
-            tv_screen_status_.horizontal_res = horizontal_res_320;
-            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
-                        tv_screen_status_.vertical_res = vertical_res_224;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_224;
-                        break;
-                    case VerticalResolution::lines_nb_240:
-                        tv_screen_status_.vertical_res = vertical_res_240;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_240;
-                        break;
-                    case VerticalResolution::lines_nb_256:
-                        tv_screen_status_.vertical_res = vertical_res_256;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_256;
-                        break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
-                }
-            } else {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
-                        tv_screen_status_.vertical_res = vertical_res_448;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_448;
-                        break;
-                    case VerticalResolution::lines_nb_240:
-                        tv_screen_status_.vertical_res = vertical_res_480;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_480;
-                        break;
-                    case VerticalResolution::lines_nb_256:
-                        tv_screen_status_.vertical_res = vertical_res_512;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_320_512;
-                        break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
-                }
-            }
-
-            break;
-        case HorizontalResolution::normal_352:
-            tv_screen_status_.horizontal_res = horizontal_res_352;
-            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
-                        tv_screen_status_.vertical_res = vertical_res_224;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_224;
-                        break;
-                    case VerticalResolution::lines_nb_240:
-                        tv_screen_status_.vertical_res = vertical_res_240;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_240;
-                        break;
-                    case VerticalResolution::lines_nb_256:
-                        tv_screen_status_.vertical_res = vertical_res_256;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_256;
-                        break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
-                }
-            } else {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
-                        tv_screen_status_.vertical_res = vertical_res_448;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_448;
-                        break;
-                    case VerticalResolution::lines_nb_240:
-                        tv_screen_status_.vertical_res = vertical_res_480;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_480;
-                        break;
-                    case VerticalResolution::lines_nb_256:
-                        tv_screen_status_.vertical_res = vertical_res_512;
-                        tv_screen_status_.screen_mode  = ScreenMode::normal_352_512;
-                        break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
-                }
-            }
-
-            break;
-        case HorizontalResolution::hi_res_640:
-            tv_screen_status_.horizontal_res = horizontal_res_640;
-            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
-                        tv_screen_status_.vertical_res = vertical_res_224;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_224;
-                        break;
-                    case VerticalResolution::lines_nb_240:
-                        tv_screen_status_.vertical_res = vertical_res_240;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_240;
-                        break;
-                    case VerticalResolution::lines_nb_256:
-                        tv_screen_status_.vertical_res = vertical_res_256;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_256;
-                        break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
-                }
-            } else {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
-                        tv_screen_status_.vertical_res = vertical_res_448;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_448;
-                        break;
-                    case VerticalResolution::lines_nb_240:
-                        tv_screen_status_.vertical_res = vertical_res_480;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_480;
-                        break;
-                    case VerticalResolution::lines_nb_256:
-                        tv_screen_status_.vertical_res = vertical_res_512;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_512;
-                        break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
-                }
-            }
-            break;
-        case HorizontalResolution::hi_res_704:
-            tv_screen_status_.horizontal_res = horizontal_res_704;
-            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
-                        tv_screen_status_.vertical_res = vertical_res_224;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_224;
-                        break;
-                    case VerticalResolution::lines_nb_240:
-                        tv_screen_status_.vertical_res = vertical_res_240;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_240;
-                        break;
-                    case VerticalResolution::lines_nb_256:
-                        tv_screen_status_.vertical_res = vertical_res_256;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_256;
-                        break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
-                }
-            } else {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
-                        tv_screen_status_.vertical_res = vertical_res_448;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_448;
-                        break;
-                    case VerticalResolution::lines_nb_240:
-                        tv_screen_status_.vertical_res = vertical_res_480;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_480;
-                        break;
-                    case VerticalResolution::lines_nb_256:
-                        tv_screen_status_.vertical_res = vertical_res_512;
-                        tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_512;
-                        break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
-                }
-            }
-            break;
-        case HorizontalResolution::exclusive_normal_320:
-            tv_screen_status_.horizontal_res = horizontal_res_320;
-            tv_screen_status_.vertical_res   = vertical_res_480;
-            tv_screen_status_.screen_mode    = ScreenMode::exclusive_320_480;
-            break;
-        case HorizontalResolution::exclusive_normal_352:
-            tv_screen_status_.horizontal_res = horizontal_res_352;
-            tv_screen_status_.vertical_res   = vertical_res_480;
-            tv_screen_status_.screen_mode    = ScreenMode::exclusive_352_480;
-            break;
-        case HorizontalResolution::exclusive_hi_res_640:
-            tv_screen_status_.horizontal_res = horizontal_res_640;
-            tv_screen_status_.vertical_res   = vertical_res_480;
-            tv_screen_status_.screen_mode    = ScreenMode::exclusive_640_480;
-            break;
-        case HorizontalResolution::exclusive_hi_res_704:
-            tv_screen_status_.horizontal_res = horizontal_res_704;
-            tv_screen_status_.vertical_res   = vertical_res_480;
-            tv_screen_status_.screen_mode    = ScreenMode::exclusive_704_480;
-            break;
-    }
-
-    emulator_context_->opengl()->saturnScreenResolution({tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res});
+// static
+auto Vdp2::getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
+    if (zq == ZoomQuarter::up_to_one_quarter) { return ReductionSetting::up_to_one_quarter; }
+    if (zh == ZoomHalf::up_to_one_half) { return ReductionSetting::up_to_one_half; }
+    return ReductionSetting::none;
 };
 
+// static
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3bits ccn) -> VramAccessNumber {
+    switch (ccn) {
+        case CharacterColorNumber3bits::palette_16:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::one;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
+            }
+            break;
+        case CharacterColorNumber3bits::palette_256:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+        case CharacterColorNumber3bits::palette_2048:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+        case CharacterColorNumber3bits::rgb_32k:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+        case CharacterColorNumber3bits::rgb_16m:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::eight;
+                default: return VramAccessNumber::none;
+            }
+            break;
+    }
+
+    return VramAccessNumber::none;
+}
+
+// static
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2Bits ccn) -> VramAccessNumber {
+    switch (ccn) {
+        case CharacterColorNumber2Bits::palette_16:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::one;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
+            }
+            break;
+        case CharacterColorNumber2Bits::palette_256:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+        case CharacterColorNumber2Bits::palette_2048:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+        case CharacterColorNumber2Bits::rgb_32k:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+    }
+
+    return VramAccessNumber::none;
+}
+
+// static
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1Bit ccn) -> VramAccessNumber {
+    switch (ccn) {
+        case CharacterColorNumber1Bit::palette_16:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::one;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
+            }
+            break;
+        case CharacterColorNumber1Bit::palette_256:
+            switch (r) {
+                case ReductionSetting::none: return VramAccessNumber::two;
+                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
+                default: return VramAccessNumber::none;
+            }
+            break;
+    }
+
+    return VramAccessNumber::none;
+}
+
+// static
+auto Vdp2::calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber {
+    switch (r) {
+        case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
+        case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
+        default: return VramAccessNumber::one;
+    }
+};
+
+// static
+auto Vdp2::getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand {
+    switch (character_pattern) {
+        case VramAccessCommand::nbg0_character_pattern_data_read: {
+            return VramAccessCommand::nbg0_pattern_name_read;
+        }
+        case VramAccessCommand::nbg1_character_pattern_data_read: {
+            return VramAccessCommand::nbg1_pattern_name_read;
+        }
+        case VramAccessCommand::nbg2_character_pattern_data_read: {
+            return VramAccessCommand::nbg2_pattern_name_read;
+        }
+        case VramAccessCommand::nbg3_character_pattern_data_read: {
+            return VramAccessCommand::nbg3_pattern_name_read;
+        }
+        default: return VramAccessCommand::no_access;
+    }
+}
+
+// static
+void Vdp2::setPatternNameAccess(const VramTiming&                   bank,
+                                const VramAccessCommand             pattern,
+                                std::array<bool, vram_timing_size>& pnd_access) {
+    auto it = std::find(bank.begin(), bank.end(), pattern);
+    while (it != bank.end()) {
+        pnd_access[std::distance(bank.begin(), it)] = true;
+        ++it;
+        it = std::find(it, bank.end(), pattern);
+    }
+}
+
+// static
+void Vdp2::setCharacterPatternLimitations(const bool                                is_screen_mode_normal,
+                                          const std::array<bool, vram_timing_size>& pnd_access,
+                                          std::array<bool, vram_timing_size>&       allowed_cpd_timing) {
+    constexpr auto t0 = u8{0};
+    constexpr auto t1 = u8{1};
+    constexpr auto t2 = u8{2};
+    constexpr auto t3 = u8{3};
+    constexpr auto t4 = u8{4};
+    constexpr auto t5 = u8{5};
+    constexpr auto t6 = u8{6};
+    constexpr auto t7 = u8{7};
+
+    // For each pnd access set, allowed timing is set for cpd
+    auto it = std::find(pnd_access.begin(), pnd_access.end(), true);
+    while (it != pnd_access.end()) {
+        switch (std::distance(pnd_access.begin(), it)) {
+            case t0: {
+                if (is_screen_mode_normal) {
+                    allowed_cpd_timing[t0] = true;
+                    allowed_cpd_timing[t1] = true;
+                    allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t4] = true;
+                    allowed_cpd_timing[t5] = true;
+                    allowed_cpd_timing[t6] = true;
+                    allowed_cpd_timing[t7] = true;
+                } else {
+                    allowed_cpd_timing[t0] = true;
+                    allowed_cpd_timing[t1] = true;
+                    allowed_cpd_timing[t2] = true;
+                }
+                break;
+            }
+            case t1: {
+                if (is_screen_mode_normal) {
+                    allowed_cpd_timing[t0] = true;
+                    allowed_cpd_timing[t1] = true;
+                    allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t3] = true;
+                    allowed_cpd_timing[t5] = true;
+                    allowed_cpd_timing[t6] = true;
+                    allowed_cpd_timing[t7] = true;
+                } else {
+                    allowed_cpd_timing[t1] = true;
+                    allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t3] = true;
+                }
+                break;
+            }
+            case t2: {
+                if (is_screen_mode_normal) {
+                    allowed_cpd_timing[t0] = true;
+                    allowed_cpd_timing[t1] = true;
+                    allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t3] = true;
+                    allowed_cpd_timing[t6] = true;
+                    allowed_cpd_timing[t7] = true;
+                } else {
+                    allowed_cpd_timing[t0] = true;
+                    allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t3] = true;
+                }
+                break;
+            }
+            case t3: {
+                if (is_screen_mode_normal) {
+                    allowed_cpd_timing[t0] = true;
+                    allowed_cpd_timing[t1] = true;
+                    allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t3] = true;
+                    allowed_cpd_timing[t7] = true;
+                } else {
+                    allowed_cpd_timing[t0] = true;
+                    allowed_cpd_timing[t1] = true;
+                    allowed_cpd_timing[t3] = true;
+                }
+                break;
+            }
+            case t4: {
+                if (is_screen_mode_normal) {
+                    allowed_cpd_timing[t0] = true;
+                    allowed_cpd_timing[t1] = true;
+                    allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t3] = true;
+                }
+                break;
+            }
+            case t5: {
+                if (is_screen_mode_normal) {
+                    allowed_cpd_timing[t1] = true;
+                    allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t3] = true;
+                }
+                break;
+            }
+            case t6: {
+                if (is_screen_mode_normal) {
+                    allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t3] = true;
+                }
+                break;
+            }
+            case t7: {
+                if (is_screen_mode_normal) { allowed_cpd_timing[t3] = true; }
+                break;
+            }
+        }
+
+        ++it;
+        it = std::find(it, pnd_access.end(), true);
+    }
+}
+
+// static
+auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
+                                            const VramTiming&       bank_a1,
+                                            const VramTiming&       bank_b0,
+                                            const VramTiming&       bank_b1,
+                                            const VramAccessCommand command,
+                                            const ReductionSetting  reduction,
+                                            const bool              is_screen_mode_normal) -> u8 {
+    // From the command we must use the linked Pattern Name Data. The limitations are based on the PND read position.
+    // Step 1 : find PND reads for the current command
+    // const auto pnd = getPatternNameFromCharacterPattern(command);
+    // const auto pnd_reads = getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, pnd);
+
+    constexpr auto pnd_access_size   = u8{8};
+    auto           pnd_timing_access = std::array<bool, pnd_access_size>{false, false, false, false, false, false, false, false};
+    setPatternNameAccess(bank_a0, command, pnd_timing_access);
+    setPatternNameAccess(bank_b0, command, pnd_timing_access);
+    if (!is_screen_mode_normal) {
+        setPatternNameAccess(bank_a1, command, pnd_timing_access);
+        setPatternNameAccess(bank_b1, command, pnd_timing_access);
+    }
+
+    // If there's no reduction, observe selection limits when CPD read access >= 2.
+    // If reduction = 1/2 or 1/4, the behavior isn't clear from the docs ... I'll just
+    // observe selection limits for every access.
+    auto are_limitations_applied = bool{true};
+    if (reduction == ReductionSetting::none) {
+        auto unlimited_cpd_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
+        unlimited_cpd_reads += std::count(bank_b0.begin(), bank_b0.end(), command);
+        if (!is_screen_mode_normal) {
+            unlimited_cpd_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
+            unlimited_cpd_reads += std::count(bank_b1.begin(), bank_b1.end(), command);
+        }
+        if (unlimited_cpd_reads < 2) { are_limitations_applied = false; }
+    }
+
+    VramTiming limited_bank_a0 = {bank_a0};
+    VramTiming limited_bank_b0 = {bank_b0};
+    VramTiming limited_bank_a1 = {bank_a1};
+    VramTiming limited_bank_b1 = {bank_b1};
+
+    if (are_limitations_applied) {
+        // Step 2 : apply selection limits on accessed timings
+        constexpr auto allowed_cpd_timing_size = u8{8};
+        auto           allowed_cpd_timing
+            = std::array<bool, allowed_cpd_timing_size>{false, false, false, false, false, false, false, false};
+        setCharacterPatternLimitations(is_screen_mode_normal, pnd_timing_access, allowed_cpd_timing);
+
+        // Step 3 : get the reads
+        // First access not available are changed to no access
+        auto it = std::find(allowed_cpd_timing.begin(), allowed_cpd_timing.end(), false);
+        while (it != allowed_cpd_timing.end()) {
+            limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            if (!is_screen_mode_normal) {
+                limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+                limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            }
+            ++it;
+            it = std::find(it, allowed_cpd_timing.end(), false);
+        }
+    }
+    // Counting cpd access
+    auto cpd_reads = std::count(limited_bank_a0.begin(), limited_bank_a0.end(), command);
+    cpd_reads += std::count(limited_bank_b0.begin(), limited_bank_b0.end(), command);
+    if (!is_screen_mode_normal) {
+        cpd_reads += std::count(limited_bank_a1.begin(), limited_bank_a1.end(), command);
+        cpd_reads += std::count(limited_bank_b1.begin(), limited_bank_b1.end(), command);
+    }
+
+    return static_cast<u8>(cpd_reads);
+};
+
+//--------------------------------------------------------------------------------------------------------------
+// DISPLAY methods
+//--------------------------------------------------------------------------------------------------------------
+
 void Vdp2::populateRenderData() {
-    if (isScreenDisplayed(ScrollScreen::rbg1)) { core::Log::debug("vdp2", core::tr("RGB1 displayed")); }
-    if (isScreenDisplayed(ScrollScreen::rbg0)) { core::Log::debug("vdp2", core::tr("RGB0 displayed")); }
+    if (isScreenDisplayed(ScrollScreen::rbg1)) { updateScrollScreenStatus(ScrollScreen::rbg1); }
+    if (isScreenDisplayed(ScrollScreen::rbg0)) { updateScrollScreenStatus(ScrollScreen::rbg0); }
 
     auto is_nbg_displayed
         = !(getScreen(ScrollScreen::rbg0).is_display_enabled && getScreen(ScrollScreen::rbg1).is_display_enabled);
@@ -1727,14 +2106,11 @@ void Vdp2::populateRenderData() {
 
             updateScrollScreenStatus(ScrollScreen::nbg3);
         }
-        if (isScreenDisplayed(ScrollScreen::nbg2)) { core::Log::debug("vdp2", core::tr("NBG2 displayed")); }
-        if (isScreenDisplayed(ScrollScreen::nbg1)) { core::Log::debug("vdp2", core::tr("NBG1 displayed")); }
-        if (isScreenDisplayed(ScrollScreen::nbg0)) { core::Log::debug("vdp2", core::tr("NBG0 displayed")); }
+        if (isScreenDisplayed(ScrollScreen::nbg2)) { updateScrollScreenStatus(ScrollScreen::nbg2); }
+        if (isScreenDisplayed(ScrollScreen::nbg1)) { updateScrollScreenStatus(ScrollScreen::nbg1); }
+        if (isScreenDisplayed(ScrollScreen::nbg0)) { updateScrollScreenStatus(ScrollScreen::nbg0); }
     }
 }
-
-auto Vdp2::getScreen(const ScrollScreen s) -> ScrollScreenStatus& { return bg_[util::toUnderlying(s)]; };
-auto Vdp2::getScreen(const ScrollScreen s) const -> const ScrollScreenStatus& { return bg_[util::toUnderlying(s)]; };
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
@@ -1762,6 +2138,50 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         }
     };
 
+    const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3bits c, const ScreenModeType t) -> ColorCount {
+        switch (c) {
+            case CharacterColorNumber3bits::palette_16: return ColorCount::palette_16;
+            case CharacterColorNumber3bits::palette_256: return ColorCount::palette_256;
+            case CharacterColorNumber3bits::palette_2048: return ColorCount::palette_2048;
+            case CharacterColorNumber3bits::rgb_32k: {
+                return (t == ScreenModeType::normal) ? ColorCount::rgb_32k : ColorCount::not_allowed;
+            }
+            case CharacterColorNumber3bits::rgb_16m: return ColorCount::rgb_16m;
+            default: return ColorCount::not_allowed;
+        }
+    };
+    const auto getCharacterColorNumber2Bits = [](const CharacterColorNumber2Bits c, const ScreenModeType t) -> ColorCount {
+        switch (c) {
+            case CharacterColorNumber2Bits::palette_16: return ColorCount::palette_16;
+            case CharacterColorNumber2Bits::palette_256: return ColorCount::palette_256;
+            case CharacterColorNumber2Bits::palette_2048: return ColorCount::palette_2048;
+            case CharacterColorNumber2Bits::rgb_32k: {
+                return (t == ScreenModeType::exclusive) ? ColorCount::rgb_16m : ColorCount::rgb_32k;
+            }
+            default: return ColorCount::not_allowed;
+        }
+    };
+    const auto getCharacterColorNumber1Bit = [](const CharacterColorNumber1Bit c) -> ColorCount {
+        switch (c) {
+            case CharacterColorNumber1Bit::palette_16: return ColorCount::palette_16;
+            case CharacterColorNumber1Bit::palette_256: return ColorCount::palette_256;
+            default: return ColorCount::not_allowed;
+        }
+    };
+    const auto getCharacterColorNumberRbg0 = [](const CharacterColorNumber3bits c, const ScreenModeType t) -> ColorCount {
+        if (t == ScreenModeType::exclusive) { return ColorCount::cannot_display; }
+
+        switch (c) {
+            case CharacterColorNumber3bits::palette_16: return ColorCount::palette_16;
+            case CharacterColorNumber3bits::palette_256: return ColorCount::palette_256;
+            case CharacterColorNumber3bits::palette_2048: return ColorCount::palette_2048;
+            case CharacterColorNumber3bits::rgb_32k: return ColorCount::rgb_32k;
+            case CharacterColorNumber3bits::rgb_16m: {
+                return (t == ScreenModeType::normal) ? ColorCount::rgb_16m : ColorCount::not_allowed;
+            }
+            default: return ColorCount::not_allowed;
+        }
+    };
     const auto getPatternNameDataSize = [](const PatternNameDataSize sz) -> u8 {
         switch (sz) {
             case PatternNameDataSize::one_word: return 1;
@@ -1807,6 +2227,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
+            screen.character_color_number
+                = getCharacterColorNumber3Bits(chctla_.get(CharacterControlA::character_color_number_nbg0),
+                                               tv_screen_status_.screen_mode_type);
 
             // Cell
             screen.cell_size = cell_size;
@@ -1832,6 +2255,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg1));
+            screen.character_color_number
+                = getCharacterColorNumber2Bits(chctla_.get(CharacterControlA::character_color_number_nbg1),
+                                               tv_screen_status_.screen_mode_type);
 
             // Cell
             screen.cell_size = cell_size;
@@ -1857,6 +2283,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg2));
+            screen.character_color_number
+                = getCharacterColorNumber1Bit(chctlb_.get(CharacterControlB::character_color_number_nbg2));
 
             // Cell
             screen.cell_size = cell_size;
@@ -1883,6 +2311,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg3));
+            screen.character_color_number
+                = getCharacterColorNumber1Bit(chctlb_.get(CharacterControlB::character_color_number_nbg3));
 
             // Cell
             screen.cell_size = cell_size;
@@ -1921,6 +2351,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_rbg0));
+            screen.character_color_number
+                = getCharacterColorNumberRbg0(chctlb_.get(CharacterControlB::character_color_number_rbg0),
+                                              tv_screen_status_.screen_mode_type);
 
             // Cell
             screen.cell_size = cell_size;
@@ -1959,6 +2392,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
+            screen.character_color_number
+                = getCharacterColorNumber3Bits(chctla_.get(CharacterControlA::character_color_number_nbg0),
+                                               tv_screen_status_.screen_mode_type);
 
             // Cell
             screen.cell_size = cell_size;
@@ -2116,328 +2552,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     }
 }
 
-//----------------------------------------------------------------------
-// VRAM access free functions
-//----------------------------------------------------------------------
-
-auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
-    if (zq == ZoomQuarter::up_to_one_quarter) { return ReductionSetting::up_to_one_quarter; }
-    if (zh == ZoomHalf::up_to_one_half) { return ReductionSetting::up_to_one_half; }
-    return ReductionSetting::none;
-};
-
-auto calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber {
-    switch (r) {
-        case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
-        case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
-        default: return VramAccessNumber::one;
-    }
-};
-
-auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3bits ccn) -> VramAccessNumber {
-    switch (ccn) {
-        case CharacterColorNumber3bits::palette_16:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::one;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
-            }
-            break;
-        case CharacterColorNumber3bits::palette_256:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case CharacterColorNumber3bits::palette_2048:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case CharacterColorNumber3bits::rgb_32k:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case CharacterColorNumber3bits::rgb_16m:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::eight;
-                default: return VramAccessNumber::none;
-            }
-            break;
-    }
-
-    return VramAccessNumber::none;
-}
-
-auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2Bits ccn) -> VramAccessNumber {
-    switch (ccn) {
-        case CharacterColorNumber2Bits::palette_16:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::one;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
-            }
-            break;
-        case CharacterColorNumber2Bits::palette_256:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case CharacterColorNumber2Bits::palette_2048:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case CharacterColorNumber2Bits::rgb_32k:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-    }
-
-    return VramAccessNumber::none;
-}
-
-auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1Bit ccn) -> VramAccessNumber {
-    switch (ccn) {
-        case CharacterColorNumber1Bit::palette_16:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::one;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
-            }
-            break;
-        case CharacterColorNumber1Bit::palette_256:
-            switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-    }
-
-    return VramAccessNumber::none;
-}
-
-auto getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand {
-    switch (character_pattern) {
-        case VramAccessCommand::nbg0_character_pattern_data_read: {
-            return VramAccessCommand::nbg0_pattern_name_read;
-        }
-        case VramAccessCommand::nbg1_character_pattern_data_read: {
-            return VramAccessCommand::nbg1_pattern_name_read;
-        }
-        case VramAccessCommand::nbg2_character_pattern_data_read: {
-            return VramAccessCommand::nbg2_pattern_name_read;
-        }
-        case VramAccessCommand::nbg3_character_pattern_data_read: {
-            return VramAccessCommand::nbg3_pattern_name_read;
-        }
-        default: return VramAccessCommand::no_access;
-    }
-}
-
-void setPatternNameAccess(const VramTiming&                   bank,
-                          const VramAccessCommand             pattern,
-                          std::array<bool, vram_timing_size>& pnd_access) {
-    auto it = std::find(bank.begin(), bank.end(), pattern);
-    while (it != bank.end()) {
-        pnd_access[std::distance(bank.begin(), it)] = true;
-        ++it;
-        it = std::find(it, bank.end(), pattern);
-    }
-}
-
-void setCharacterPatternLimitations(const bool                                is_screen_mode_normal,
-                                    const std::array<bool, vram_timing_size>& pnd_access,
-                                    std::array<bool, vram_timing_size>&       allowed_cpd_timing) {
-    constexpr auto t0 = u8{0};
-    constexpr auto t1 = u8{1};
-    constexpr auto t2 = u8{2};
-    constexpr auto t3 = u8{3};
-    constexpr auto t4 = u8{4};
-    constexpr auto t5 = u8{5};
-    constexpr auto t6 = u8{6};
-    constexpr auto t7 = u8{7};
-
-    // For each pnd access set, allowed timing is set for cpd
-    auto it = std::find(pnd_access.begin(), pnd_access.end(), true);
-    while (it != pnd_access.end()) {
-        switch (std::distance(pnd_access.begin(), it)) {
-            case t0: {
-                if (is_screen_mode_normal) {
-                    allowed_cpd_timing[t0] = true;
-                    allowed_cpd_timing[t1] = true;
-                    allowed_cpd_timing[t2] = true;
-                    allowed_cpd_timing[t4] = true;
-                    allowed_cpd_timing[t5] = true;
-                    allowed_cpd_timing[t6] = true;
-                    allowed_cpd_timing[t7] = true;
-                } else {
-                    allowed_cpd_timing[t0] = true;
-                    allowed_cpd_timing[t1] = true;
-                    allowed_cpd_timing[t2] = true;
-                }
-                break;
-            }
-            case t1: {
-                if (is_screen_mode_normal) {
-                    allowed_cpd_timing[t0] = true;
-                    allowed_cpd_timing[t1] = true;
-                    allowed_cpd_timing[t2] = true;
-                    allowed_cpd_timing[t3] = true;
-                    allowed_cpd_timing[t5] = true;
-                    allowed_cpd_timing[t6] = true;
-                    allowed_cpd_timing[t7] = true;
-                } else {
-                    allowed_cpd_timing[t1] = true;
-                    allowed_cpd_timing[t2] = true;
-                    allowed_cpd_timing[t3] = true;
-                }
-                break;
-            }
-            case t2: {
-                if (is_screen_mode_normal) {
-                    allowed_cpd_timing[t0] = true;
-                    allowed_cpd_timing[t1] = true;
-                    allowed_cpd_timing[t2] = true;
-                    allowed_cpd_timing[t3] = true;
-                    allowed_cpd_timing[t6] = true;
-                    allowed_cpd_timing[t7] = true;
-                } else {
-                    allowed_cpd_timing[t0] = true;
-                    allowed_cpd_timing[t2] = true;
-                    allowed_cpd_timing[t3] = true;
-                }
-                break;
-            }
-            case t3: {
-                if (is_screen_mode_normal) {
-                    allowed_cpd_timing[t0] = true;
-                    allowed_cpd_timing[t1] = true;
-                    allowed_cpd_timing[t2] = true;
-                    allowed_cpd_timing[t3] = true;
-                    allowed_cpd_timing[t7] = true;
-                } else {
-                    allowed_cpd_timing[t0] = true;
-                    allowed_cpd_timing[t1] = true;
-                    allowed_cpd_timing[t3] = true;
-                }
-                break;
-            }
-            case t4: {
-                if (is_screen_mode_normal) {
-                    allowed_cpd_timing[t0] = true;
-                    allowed_cpd_timing[t1] = true;
-                    allowed_cpd_timing[t2] = true;
-                    allowed_cpd_timing[t3] = true;
-                }
-                break;
-            }
-            case t5: {
-                if (is_screen_mode_normal) {
-                    allowed_cpd_timing[t1] = true;
-                    allowed_cpd_timing[t2] = true;
-                    allowed_cpd_timing[t3] = true;
-                }
-                break;
-            }
-            case t6: {
-                if (is_screen_mode_normal) {
-                    allowed_cpd_timing[t2] = true;
-                    allowed_cpd_timing[t3] = true;
-                }
-                break;
-            }
-            case t7: {
-                if (is_screen_mode_normal) { allowed_cpd_timing[t3] = true; }
-                break;
-            }
-        }
-
-        ++it;
-        it = std::find(it, pnd_access.end(), true);
-    }
-}
-
-auto getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
-                                      const VramTiming&       bank_a1,
-                                      const VramTiming&       bank_b0,
-                                      const VramTiming&       bank_b1,
-                                      const VramAccessCommand command,
-                                      const ReductionSetting  reduction,
-                                      const bool              is_screen_mode_normal) -> u8 {
-    // From the command we must use the linked Pattern Name Data. The limitations are based on the PND read position.
-    // Step 1 : find PND reads for the current command
-    // const auto pnd = getPatternNameFromCharacterPattern(command);
-    // const auto pnd_reads = getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, pnd);
-
-    constexpr auto pnd_access_size   = u8{8};
-    auto           pnd_timing_access = std::array<bool, pnd_access_size>{false, false, false, false, false, false, false, false};
-    setPatternNameAccess(bank_a0, command, pnd_timing_access);
-    setPatternNameAccess(bank_b0, command, pnd_timing_access);
-    if (!is_screen_mode_normal) {
-        setPatternNameAccess(bank_a1, command, pnd_timing_access);
-        setPatternNameAccess(bank_b1, command, pnd_timing_access);
-    }
-
-    // If there's no reduction, observe selection limits when CPD read access >= 2.
-    // If reduction = 1/2 or 1/4, the behavior isn't clear from the docs ... I'll just
-    // observe selection limits for every access.
-    auto are_limitations_applied = bool{true};
-    if (reduction == ReductionSetting::none) {
-        auto unlimited_cpd_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
-        unlimited_cpd_reads += std::count(bank_b0.begin(), bank_b0.end(), command);
-        if (!is_screen_mode_normal) {
-            unlimited_cpd_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
-            unlimited_cpd_reads += std::count(bank_b1.begin(), bank_b1.end(), command);
-        }
-        if (unlimited_cpd_reads < 2) { are_limitations_applied = false; }
-    }
-
-    VramTiming limited_bank_a0 = {bank_a0};
-    VramTiming limited_bank_b0 = {bank_b0};
-    VramTiming limited_bank_a1 = {bank_a1};
-    VramTiming limited_bank_b1 = {bank_b1};
-
-    if (are_limitations_applied) {
-        // Step 2 : apply selection limits on accessed timings
-        constexpr auto allowed_cpd_timing_size = u8{8};
-        auto           allowed_cpd_timing
-            = std::array<bool, allowed_cpd_timing_size>{false, false, false, false, false, false, false, false};
-        setCharacterPatternLimitations(is_screen_mode_normal, pnd_timing_access, allowed_cpd_timing);
-
-        // Step 3 : get the reads
-        // First access not available are changed to no access
-        auto it = std::find(allowed_cpd_timing.begin(), allowed_cpd_timing.end(), false);
-        while (it != allowed_cpd_timing.end()) {
-            limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            if (!is_screen_mode_normal) {
-                limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-                limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            }
-            ++it;
-            it = std::find(it, allowed_cpd_timing.end(), false);
-        }
-    }
-    // Counting cpd access
-    auto cpd_reads = std::count(limited_bank_a0.begin(), limited_bank_a0.end(), command);
-    cpd_reads += std::count(limited_bank_b0.begin(), limited_bank_b0.end(), command);
-    if (!is_screen_mode_normal) {
-        cpd_reads += std::count(limited_bank_a1.begin(), limited_bank_a1.end(), command);
-        cpd_reads += std::count(limited_bank_b1.begin(), limited_bank_b1.end(), command);
-    }
-
-    return static_cast<u8>(cpd_reads);
-};
+auto Vdp2::getScreen(const ScrollScreen s) -> ScrollScreenStatus& { return bg_[util::toUnderlying(s)]; };
+auto Vdp2::getScreen(const ScrollScreen s) const -> const ScrollScreenStatus& { return bg_[util::toUnderlying(s)]; };
 
 } // namespace saturnin::video
