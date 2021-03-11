@@ -736,6 +736,22 @@ class Vdp2 {
     void populateRenderData();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool;
+    ///
+    /// \brief  Determine if the scroll screen can be displayed, based on others scroll screens
+    ///         configuration
+    ///
+    /// \author Runik
+    /// \date   11/03/2021
+    ///
+    /// \param  s   A ScrollScreen to process.
+    ///
+    /// \returns    True the scroll screen can be displayed, false if not.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::updateScrollScreenStatus(const ScrollScreen s);
     ///
     /// \brief  Updates the scroll screen data.

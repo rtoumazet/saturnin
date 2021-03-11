@@ -789,7 +789,6 @@ void showLogWindow(bool* opened) {
 
     ImGui::Begin("Log", opened, window_flags);
 
-    // const auto stream = Log::getStream();
     const auto stream = Log::getRingbuffer();
     ImGui::TextUnformatted(stream.c_str());
 

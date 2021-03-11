@@ -467,7 +467,7 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     values.emplace_back(tr("Plane B start address"), fmt::format("{:#010x}", screen.plane_b_start_address));
     values.emplace_back(tr("Plane C start address"), fmt::format("{:#010x}", screen.plane_c_start_address));
     values.emplace_back(tr("Plane D start address"), fmt::format("{:#010x}", screen.plane_d_start_address));
-    std::array<ScrollScreen, 2> rotation_screens = {ScrollScreen::rbg0, ScrollScreen::rbg1};
+    const auto rotation_screens = std::array{ScrollScreen::rbg0, ScrollScreen::rbg1};
     if (std::any_of(rotation_screens.begin(), rotation_screens.end(), [&s](const ScrollScreen rss) { return rss == s; })) {
         values.emplace_back(tr("Plane E start address"), fmt::format("{:#010x}", screen.plane_e_start_address));
         values.emplace_back(tr("Plane F start address"), fmt::format("{:#010x}", screen.plane_f_start_address));
@@ -2015,8 +2015,7 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
     // const auto pnd = getPatternNameFromCharacterPattern(command);
     // const auto pnd_reads = getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, pnd);
 
-    constexpr auto pnd_access_size   = u8{8};
-    auto           pnd_timing_access = std::array<bool, pnd_access_size>{false, false, false, false, false, false, false, false};
+    auto pnd_timing_access = std::array{false, false, false, false, false, false, false, false};
     setPatternNameAccess(bank_a0, command, pnd_timing_access);
     setPatternNameAccess(bank_b0, command, pnd_timing_access);
     if (!is_screen_mode_normal) {
@@ -2045,9 +2044,7 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 
     if (are_limitations_applied) {
         // Step 2 : apply selection limits on accessed timings
-        constexpr auto allowed_cpd_timing_size = u8{8};
-        auto           allowed_cpd_timing
-            = std::array<bool, allowed_cpd_timing_size>{false, false, false, false, false, false, false, false};
+        auto allowed_cpd_timing = std::array{false, false, false, false, false, false, false, false};
         setCharacterPatternLimitations(is_screen_mode_normal, pnd_timing_access, allowed_cpd_timing);
 
         // Step 3 : get the reads
@@ -2087,28 +2084,59 @@ void Vdp2::populateRenderData() {
         = !(getScreen(ScrollScreen::rbg0).is_display_enabled && getScreen(ScrollScreen::rbg1).is_display_enabled);
 
     if (is_nbg_displayed) {
-        if (isScreenDisplayed(ScrollScreen::nbg3)) {
-            render_vertexes_.clear();
-            // constexpr std::array<u16, 18> vertices = {
-            //    0,  0,  0, // 0
-            //    0,  224, 0, // 1
-            //    320, 224, 0, // 2
-
-            //    0,  0, 0, // 0
-            //    320, 224, 0, // 2
-            //    320, 0, 0,  // 3
-            //};
-
-            render_vertexes_.emplace_back(Vertex{0, 0});
-            render_vertexes_.emplace_back(Vertex{0, 224});
-            render_vertexes_.emplace_back(Vertex{320, 224});
-            render_vertexes_.emplace_back(Vertex{320, 0});
-
-            updateScrollScreenStatus(ScrollScreen::nbg3);
-        }
-        if (isScreenDisplayed(ScrollScreen::nbg2)) { updateScrollScreenStatus(ScrollScreen::nbg2); }
-        if (isScreenDisplayed(ScrollScreen::nbg1)) { updateScrollScreenStatus(ScrollScreen::nbg1); }
         if (isScreenDisplayed(ScrollScreen::nbg0)) { updateScrollScreenStatus(ScrollScreen::nbg0); }
+        if (canScrollScreenBeDisplayed(ScrollScreen::nbg1)) {
+            if (isScreenDisplayed(ScrollScreen::nbg1)) { updateScrollScreenStatus(ScrollScreen::nbg1); }
+        }
+        if (canScrollScreenBeDisplayed(ScrollScreen::nbg2)) {
+            if (isScreenDisplayed(ScrollScreen::nbg2)) { updateScrollScreenStatus(ScrollScreen::nbg2); }
+        }
+
+        if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
+            if (isScreenDisplayed(ScrollScreen::nbg3)) {
+                render_vertexes_.clear();
+                // constexpr std::array<u16, 18> vertices = {
+                //    0,  0,  0, // 0
+                //    0,  224, 0, // 1
+                //    320, 224, 0, // 2
+
+                //    0,  0, 0, // 0
+                //    320, 224, 0, // 2
+                //    320, 0, 0,  // 3
+                //};
+
+                render_vertexes_.emplace_back(Vertex{0, 0});
+                render_vertexes_.emplace_back(Vertex{0, 224});
+                render_vertexes_.emplace_back(Vertex{320, 224});
+                render_vertexes_.emplace_back(Vertex{320, 0});
+
+                updateScrollScreenStatus(ScrollScreen::nbg3);
+            }
+        }
+    }
+}
+
+auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
+    const auto nbg0_color_nb = getScreen(ScrollScreen::nbg0).character_color_number;
+    const auto nbg1_color_nb = getScreen(ScrollScreen::nbg1).character_color_number;
+    switch (s) {
+        case ScrollScreen::nbg1: {
+            return (nbg0_color_nb != ColorCount::rgb_16m);
+        }
+        case ScrollScreen::nbg2: {
+            const auto colors_preventing_display = std::array{ColorCount::palette_2048, ColorCount::rgb_32k, ColorCount::rgb_16m};
+            return std::none_of(colors_preventing_display.begin(),
+                                colors_preventing_display.end(),
+                                [&nbg0_color_nb](const ColorCount cc) { return cc == nbg0_color_nb; });
+        }
+        case ScrollScreen::nbg3: {
+            if (nbg0_color_nb == ColorCount::rgb_16m) { return false; }
+            const auto colors_preventing_display = std::array{ColorCount::palette_2048, ColorCount::rgb_32k};
+            return std::none_of(colors_preventing_display.begin(),
+                                colors_preventing_display.end(),
+                                [&nbg1_color_nb](const ColorCount cc) { return cc == nbg1_color_nb; });
+        }
+        default: return true;
     }
 }
 
