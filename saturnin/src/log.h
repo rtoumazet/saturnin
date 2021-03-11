@@ -34,6 +34,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/ostream_sink.h>
+#include <spdlog/sinks/ringbuffer_sink.h>
 // NOLINTNEXTLINE(modernize - deprecated - headers)
 #include <saturnin/src/locale.h> // tr
 
@@ -219,17 +220,17 @@ class Log {
     static auto createConsoleSink() -> std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Log::createStreamSink() -> std::shared_ptr<spdlog::sinks::ostream_sink_mt>;
+    /// \fn static auto Log::createRingbufferSink() -> std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt>;
     ///
-    /// \brief  Creates a ostream sink.
+    /// \brief  Creates ringbuffer sink.
     ///
     /// \author Runik
-    /// \date   12/04/2020
+    /// \date   10/03/2021
     ///
-    /// \returns    The new stream sink.
+    /// \returns    The new ringbuffer sink.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto createStreamSink() -> std::shared_ptr<spdlog::sinks::ostream_sink_mt>;
+    static auto createRingbufferSink() -> std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Log::createLogger(const std::string& logger_name, const
@@ -257,17 +258,6 @@ class Log {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static void createConsole();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Log::createStream();
-    ///
-    /// \brief  Creates the stream logger, will be displayed in the gui.
-    ///
-    /// \author Runik
-    /// \date   12/04/2020
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static void createStream();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Log::removeFile(const std::string& path);
@@ -305,22 +295,22 @@ class Log {
     static void dumpBacktraceToConsole();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Log::getStream() -> std::string;
+    /// \fn static auto Log::getRingbuffer() -> std::string;
     ///
-    /// \brief  Gets the stream of logged messages
+    /// \brief  Gets the ringbuffer content
     ///
     /// \author Runik
-    /// \date   14/04/2020
+    /// \date   11/03/2021
     ///
-    /// \returns    A string containing every logged message.
+    /// \returns    The ringbuffer content.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getStream() -> std::string;
+    static auto getRingbuffer() -> std::string;
 
   private:
-    static std::ostringstream oss_;
     static std::map<std::string, std::shared_ptr<spdlog::logger>>
-        loggers_; ///< Map containing all the loggers used in the program
+                                                              loggers_; ///< Map containing all the loggers used in the program
+    static std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt> ringbuffer_sink_; ///< The ringbuffer sink
 };
 
 }; // namespace saturnin::core

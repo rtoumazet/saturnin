@@ -22,20 +22,24 @@
 #include <filesystem>
 #include <iostream>
 #include <sstream>
+#include <saturnin/src/emulator_defs.h>
 
 namespace fs = std::filesystem;
 
 namespace saturnin::core {
-std::ostringstream                                     Log::oss_;
-std::map<std::string, std::shared_ptr<spdlog::logger>> Log::loggers_;
 
-/* static */
+constexpr auto max_messages = u16{500};
+
+std::map<std::string, std::shared_ptr<spdlog::logger>> Log::loggers_;
+std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt>     Log::ringbuffer_sink_;
+
+// static //
 auto Log::initialize() -> bool {
     createConsole();
     auto file_sink   = createFileSink("logs/saturnin.log");
-    auto stream_sink = createStreamSink();
+    ringbuffer_sink_ = createRingbufferSink();
 
-    spdlog::sinks_init_list sink_list = {file_sink, stream_sink};
+    spdlog::sinks_init_list sink_list = {file_sink, ringbuffer_sink_};
 
     const auto loggers_names = std::vector<std::string>{"cdrom",
                                                         "config",
@@ -62,27 +66,25 @@ auto Log::initialize() -> bool {
     return true;
 }
 
-/* static */
+// static //
 auto Log::createFileSink(const std::string& logger_path) -> std::shared_ptr<spdlog::sinks::basic_file_sink_mt> {
     removeFile(logger_path);
 
     return std::make_shared<spdlog::sinks::basic_file_sink_mt>(logger_path);
 }
 
-/* static */
+// static //
 auto Log::createConsoleSink() -> std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> {
     return std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
 }
 
-/* static */
-auto Log::createStreamSink() -> std::shared_ptr<spdlog::sinks::ostream_sink_mt> {
-    return std::make_shared<spdlog::sinks::ostream_sink_mt>(oss_);
+// static //
+auto Log::createRingbufferSink() -> std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt> {
+    return std::make_shared<spdlog::sinks::ringbuffer_sink_mt>(max_messages);
 }
 
-/* static */
-// void Log::createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink) {
+// static //
 void Log::createLogger(const std::string& logger_name, const spdlog::sinks_init_list& sinks_list) {
-    // auto        logger  = std::make_shared<spdlog::logger>(logger_name, sink);
     auto       logger  = std::make_shared<spdlog::logger>(logger_name, sinks_list.begin(), sinks_list.end());
     const auto pattern = std::string{"[%X][%n][%l] %v"};
     logger->set_pattern(pattern);
@@ -90,7 +92,7 @@ void Log::createLogger(const std::string& logger_name, const spdlog::sinks_init_
     spdlog::register_logger(logger);
 }
 
-/* static */
+// static //
 void Log::createConsole() {
     auto       console = spdlog::stdout_color_mt("console");
     const auto pattern = std::string{"[%X][%l] %v"};
@@ -99,16 +101,15 @@ void Log::createConsole() {
     // no need to register the console as it already exists
 }
 
-/* static */
-void Log::createStream() {
-    auto ostream_sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss_);
-    auto logger       = std::make_shared<spdlog::logger>("stream", ostream_sink);
+// static //
+auto Log::getRingbuffer() -> std::string {
+    const auto& msg_buffer = ringbuffer_sink_->last_formatted();
+    auto        oss        = std::ostringstream{};
+    std::copy(msg_buffer.begin(), msg_buffer.end(), std::ostream_iterator<std::string>(oss));
+    return oss.str();
 }
 
-/* static */
-auto Log::getStream() -> std::string { return oss_.str(); }
-
-/* static */
+// static //
 void Log::removeFile(const std::string& path) {
     auto full_path = fs::current_path() / path;
     full_path.make_preferred();
@@ -116,14 +117,14 @@ void Log::removeFile(const std::string& path) {
     fs::remove(full_path);
 }
 
-/* static */
+// static //
 void Log::flush() {
     for (auto const& l : loggers_) {
         l.second->flush();
     }
 }
 
-/* static */
+// static //
 void Log::dumpBacktraceToConsole() { core::Log::loggers_.at("console")->dump_backtrace(); }
 
 } // namespace saturnin::core
