@@ -191,6 +191,7 @@ void Vdp2::calculateDisplayDuration() {
 
 void Vdp2::onVblankIn() {
     updateResolution();
+    updateRamStatus();
     populateRenderData();
 }
 
@@ -204,7 +205,7 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
     auto values = std::vector<LabelValue>{};
 
     { // Resolution
-        if (tv_screen_status_.screen_mode == ScreenMode::unknown) {
+        if (tv_screen_status_.screen_mode == ScreenMode::not_set) {
             values.emplace_back(tr("Resolution"), tr("Not set"));
         } else {
             auto screen_mode = std::string{};
@@ -278,10 +279,69 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
     return values;
 }
 
-auto Vdp2::getDebugVramMainData() -> std::vector<LabelValue> {
+auto Vdp2::getDebugRamMainData() -> std::vector<LabelValue> {
     auto values = std::vector<LabelValue>{};
 
-    const auto banks_used   = getDebugVramBanksUsed();
+    const auto getVramSize = [](const VramSize sz) {
+        switch (sz) {
+            case VramSize::size_4_mbits: return tr("4 mbits");
+            case VramSize::size_8_mbits: return tr("8 mbits");
+            default: return tr("Not set");
+        }
+    };
+    values.emplace_back(tr("VRAM size"), getVramSize(ram_status_.vram_size));
+
+    const auto getVramMode = [](const VramMode mode) {
+        switch (mode) {
+            case VramMode::no_partition: return tr("No partition");
+            case VramMode::partition_in_2_banks: return tr("Partition in 2 banks");
+            default: return tr("Not set");
+        }
+    };
+    values.emplace_back(tr("VRAM A mode"), getVramMode(ram_status_.vram_a_mode));
+    values.emplace_back(tr("VRAM B mode"), getVramMode(ram_status_.vram_b_mode));
+
+    const auto getColorRamMode = [](const ColorRamMode mode) {
+        switch (mode) {
+            case ColorRamMode::mode_0_rgb_5_bits_1024_colors: return tr("Mode 0 (RGB 5 bits, 1024 colors) ");
+            case ColorRamMode::mode_1_rgb_5_bits_2048_colors: return tr("Mode 1 (RGB 5 bits, 2048 colors) ");
+            case ColorRamMode::mode_2_rgb_8_bits_1024_colors: return tr("Mode 2 (RGB 8 bits, 1024 colors) ");
+            case ColorRamMode::setting_not_allowed: return tr("Setting not allowed");
+            default: return tr("Not set");
+        }
+    };
+    values.emplace_back(tr("Color RAM mode"), getColorRamMode(ram_status_.color_ram_mode));
+
+    const auto getCoefficientTable = [](const CoefficientTableStorage cts) {
+        switch (cts) {
+            case CoefficientTableStorage::stored_in_color_ram: return tr("Stored in color RAM");
+            case CoefficientTableStorage::stored_in_vram: return tr("Stored in VRAM");
+            default: return tr("Not set");
+        }
+    };
+    values.emplace_back(tr("Coefficient table"), getCoefficientTable(ram_status_.coefficient_table_storage));
+
+    const auto getRotationBankSelect = [](const RotationDataBankSelect rdbs) {
+        switch (rdbs) {
+            case RotationDataBankSelect::not_used: return tr("Not used as RBG0 RAM");
+            case RotationDataBankSelect::used_as_rbg0_character_pattern_table:
+                return tr("Used for RBG0 Character Pattern table (or Bitmap Pattern)");
+            case RotationDataBankSelect::used_as_rbg0_coefficient_table: return tr("Used for RBG0 Coefficient table");
+            case RotationDataBankSelect::used_as_rbg0_pattern_name_table: return tr("Used for RBG0 Pattern Name table");
+            default: return tr("Not set");
+        }
+    };
+    values.emplace_back(tr("VRAM A0 rotation data bank select"), getRotationBankSelect(ram_status_.vram_a0_rotation_bank_select));
+    values.emplace_back(tr("VRAM A1 rotation data bank select"), getRotationBankSelect(ram_status_.vram_a1_rotation_bank_select));
+    values.emplace_back(tr("VRAM B0 rotation data bank select"), getRotationBankSelect(ram_status_.vram_b0_rotation_bank_select));
+    values.emplace_back(tr("VRAM B1 rotation data bank select"), getRotationBankSelect(ram_status_.vram_b1_rotation_bank_select));
+    return values;
+}
+
+auto Vdp2::getDebugVramAccessMainData() -> std::vector<LabelValue> {
+    auto values = std::vector<LabelValue>{};
+
+    const auto banks_used   = getDebugVramAccessBanksUsed();
     const auto addBankValue = [&](const std::string& bank_name, const u8 bank_index) {
         if (banks_used[bank_index]) {
             values.emplace_back(bank_name, tr("2 banks"));
@@ -295,11 +355,11 @@ auto Vdp2::getDebugVramMainData() -> std::vector<LabelValue> {
     return values;
 }
 
-auto Vdp2::getDebugVramBanks() -> std::vector<VramTiming> {
+auto Vdp2::getDebugVramAccessBanks() -> std::vector<VramTiming> {
     auto is_normal_mode = (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_320);
     is_normal_mode |= (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_352);
 
-    const auto banks_used = getDebugVramBanksUsed();
+    const auto banks_used = getDebugVramAccessBanksUsed();
     auto       banks      = std::vector<VramTiming>{};
 
     const VramTiming bank_a0 = {cyca0l_.get(VramCyclePatternBankA0Lower::t0),
@@ -349,17 +409,17 @@ auto Vdp2::getDebugVramBanks() -> std::vector<VramTiming> {
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::getDebugVramBanksUsed() -> std::array<bool, vram_banks_number> {
+auto Vdp2::getDebugVramAccessBanksUsed() -> std::array<bool, vram_banks_number> {
     // Bank A/A0 and B/B0 are always used
-    auto banks = std::array<bool, vram_banks_number>{true, false, true, false};
+    auto banks = std::array{true, false, true, false};
     if (ramctl_.get(RamControl::vram_a_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_a1_index] = true; }
     if (ramctl_.get(RamControl::vram_b_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_b1_index] = true; }
 
     return banks;
 }
 
-auto Vdp2::getDebugVramBanksName() -> std::vector<std::string> {
-    const auto banks_used = getDebugVramBanksUsed();
+auto Vdp2::getDebugVramAccessBanksName() -> std::vector<std::string> {
+    const auto banks_used = getDebugVramAccessBanksUsed();
     auto       banks_name = std::vector<std::string>{};
 
     if (!banks_used[video::vram_bank_a1_index]) {
@@ -379,7 +439,7 @@ auto Vdp2::getDebugVramBanksName() -> std::vector<std::string> {
 }
 
 // static
-auto Vdp2::getDebugVramCommandDescription(const VramAccessCommand command) -> LabelValue {
+auto Vdp2::getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue {
     using VramCommandsDescription         = std::map<VramAccessCommand, LabelValue>;
     const auto vram_commands_descriptions = VramCommandsDescription{
         {VramAccessCommand::nbg0_pattern_name_read, {"N0PN", tr("NBG0 Pattern Name Data Read")}},
@@ -410,6 +470,46 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
         // values.emplace_back(tr("Screen is not displayed"), std::nullopt);
         return std::nullopt;
     }
+
+    const auto colorNumber = [](const ColorCount c) {
+        switch (c) {
+            case ColorCount::cannot_display: return tr("Cannot display");
+            case ColorCount::not_allowed: return tr("Not allowed");
+            case ColorCount::palette_16: return tr("Palette (16 colors)");
+            case ColorCount::palette_256: return tr("Palette (256 colors)");
+            case ColorCount::palette_2048: return tr("Palette (2048 colors)");
+            case ColorCount::rgb_32k: return tr("RGB (32K colors)");
+            case ColorCount::rgb_16m: return tr("RGB (16M colors)");
+            default: return tr("Not set");
+        }
+    };
+
+    if (screen.format == ScrollScreenFormat::bitmap) {
+        // Format
+        values.emplace_back(tr("Format"), tr("Bitmap"));
+
+        // Bitmap color number
+        values.emplace_back(tr("Bitmap color number"), colorNumber(screen.character_color_number));
+
+        // Bitmap size
+        const auto bitmapSize = [](const BitmapSize sz) {
+            switch (sz) {
+                case BitmapSize::size_512_by_256: return tr("512 H x 256 V dots");
+                case BitmapSize::size_512_by_512: return tr("512 H x 512 V dots");
+                case BitmapSize::size_1024_by_256: return tr("1024 H x 256 V dots");
+                case BitmapSize::size_1024_by_512: return tr("1024 H x 512 V dots");
+                default: return tr("Not set");
+            }
+        };
+        values.emplace_back(tr("Bitmap size"), bitmapSize(screen.bitmap_size));
+
+        values.emplace_back(tr("Bitmap start address"), fmt::format("{:#x}", screen.bitmap_start_address));
+
+        return values;
+    }
+
+    // Format
+    values.emplace_back(tr("Format"), tr("Cell"));
 
     // Scroll size
     const auto size = screen.page_size * screen.plane_size * screen.map_size;
@@ -445,18 +545,6 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     values.emplace_back(tr("Character Pattern size"), cp_size);
 
     // Character Pattern color number
-    const auto colorNumber = [](const ColorCount c) {
-        switch (c) {
-            case ColorCount::cannot_display: return tr("Cannot display");
-            case ColorCount::not_allowed: return tr("Not allowed");
-            case ColorCount::palette_16: return tr("Palette (16 colors)");
-            case ColorCount::palette_256: return tr("Palette (256 colors)");
-            case ColorCount::palette_2048: return tr("Palette (2048 colors)");
-            case ColorCount::rgb_32k: return tr("RGB (32K colors)");
-            case ColorCount::rgb_16m: return tr("RGB (16M colors)");
-            default: return tr("Not set");
-        }
-    };
     values.emplace_back(tr("Character color number"), colorNumber(screen.character_color_number));
 
     // Cell size
@@ -1266,7 +1354,7 @@ void Vdp2::updateResolution() {
                         tv_screen_status_.vertical_res = vertical_res_256;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_256;
                         break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
                 switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
@@ -1282,7 +1370,7 @@ void Vdp2::updateResolution() {
                         tv_screen_status_.vertical_res = vertical_res_512;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_512;
                         break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             }
 
@@ -1304,7 +1392,7 @@ void Vdp2::updateResolution() {
                         tv_screen_status_.vertical_res = vertical_res_256;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_256;
                         break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
                 switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
@@ -1320,7 +1408,7 @@ void Vdp2::updateResolution() {
                         tv_screen_status_.vertical_res = vertical_res_512;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_512;
                         break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             }
 
@@ -1342,7 +1430,7 @@ void Vdp2::updateResolution() {
                         tv_screen_status_.vertical_res = vertical_res_256;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_256;
                         break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
                 switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
@@ -1358,7 +1446,7 @@ void Vdp2::updateResolution() {
                         tv_screen_status_.vertical_res = vertical_res_512;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_512;
                         break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             }
             break;
@@ -1379,7 +1467,7 @@ void Vdp2::updateResolution() {
                         tv_screen_status_.vertical_res = vertical_res_256;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_256;
                         break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
                 switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
@@ -1395,7 +1483,7 @@ void Vdp2::updateResolution() {
                         tv_screen_status_.vertical_res = vertical_res_512;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_512;
                         break;
-                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::unknown;
+                    default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             }
             break;
@@ -1428,8 +1516,20 @@ void Vdp2::updateResolution() {
     emulator_context_->opengl()->saturnScreenResolution({tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res});
 };
 
+void Vdp2::updateRamStatus() {
+    ram_status_.vram_size                    = vrsize_.get(VramSizeRegister::vram_size);
+    ram_status_.vram_a_mode                  = ramctl_.get(RamControl::vram_a_mode);
+    ram_status_.vram_b_mode                  = ramctl_.get(RamControl::vram_b_mode);
+    ram_status_.color_ram_mode               = ramctl_.get(RamControl::color_ram_mode);
+    ram_status_.coefficient_table_storage    = ramctl_.get(RamControl::coefficient_table_storage);
+    ram_status_.vram_a0_rotation_bank_select = ramctl_.get(RamControl::vram_a0_rotation_bank_select);
+    ram_status_.vram_a1_rotation_bank_select = ramctl_.get(RamControl::vram_a1_rotation_bank_select);
+    ram_status_.vram_b0_rotation_bank_select = ramctl_.get(RamControl::vram_b0_rotation_bank_select);
+    ram_status_.vram_b1_rotation_bank_select = ramctl_.get(RamControl::vram_b1_rotation_bank_select);
+}
+
 //--------------------------------------------------------------------------------------------------------------
-// VRAM CYCLES methods
+// VRAM CYCLE PATTERNS methods
 //--------------------------------------------------------------------------------------------------------------
 
 auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
@@ -2085,6 +2185,8 @@ void Vdp2::populateRenderData() {
 
     if (is_nbg_displayed) {
         if (isScreenDisplayed(ScrollScreen::nbg0)) { updateScrollScreenStatus(ScrollScreen::nbg0); }
+
+        getScreen(ScrollScreen::nbg1).is_display_enabled = false;
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg1)) {
             if (isScreenDisplayed(ScrollScreen::nbg1)) { updateScrollScreenStatus(ScrollScreen::nbg1); }
         }
@@ -2158,7 +2260,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         }
     };
 
-    const auto getCharacterPatternSize = [](const CharacterSize sz) -> u8 {
+    const auto getCharacterPatternSize = [](const CharacterSize sz) {
         switch (sz) {
             case CharacterSize::one_by_one: return 1 * 1;
             case CharacterSize::two_by_two: return 2 * 2;
@@ -2166,7 +2268,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         }
     };
 
-    const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3bits c, const ScreenModeType t) -> ColorCount {
+    const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3bits c, const ScreenModeType t) {
         switch (c) {
             case CharacterColorNumber3bits::palette_16: return ColorCount::palette_16;
             case CharacterColorNumber3bits::palette_256: return ColorCount::palette_256;
@@ -2178,7 +2280,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             default: return ColorCount::not_allowed;
         }
     };
-    const auto getCharacterColorNumber2Bits = [](const CharacterColorNumber2Bits c, const ScreenModeType t) -> ColorCount {
+    const auto getCharacterColorNumber2Bits = [](const CharacterColorNumber2Bits c, const ScreenModeType t) {
         switch (c) {
             case CharacterColorNumber2Bits::palette_16: return ColorCount::palette_16;
             case CharacterColorNumber2Bits::palette_256: return ColorCount::palette_256;
@@ -2189,14 +2291,14 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             default: return ColorCount::not_allowed;
         }
     };
-    const auto getCharacterColorNumber1Bit = [](const CharacterColorNumber1Bit c) -> ColorCount {
+    const auto getCharacterColorNumber1Bit = [](const CharacterColorNumber1Bit c) {
         switch (c) {
             case CharacterColorNumber1Bit::palette_16: return ColorCount::palette_16;
             case CharacterColorNumber1Bit::palette_256: return ColorCount::palette_256;
             default: return ColorCount::not_allowed;
         }
     };
-    const auto getCharacterColorNumberRbg0 = [](const CharacterColorNumber3bits c, const ScreenModeType t) -> ColorCount {
+    const auto getCharacterColorNumberRbg0 = [](const CharacterColorNumber3bits c, const ScreenModeType t) {
         if (t == ScreenModeType::exclusive) { return ColorCount::cannot_display; }
 
         switch (c) {
@@ -2210,7 +2312,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             default: return ColorCount::not_allowed;
         }
     };
-    const auto getPatternNameDataSize = [](const PatternNameDataSize sz) -> u8 {
+    const auto getPatternNameDataSize = [](const PatternNameDataSize sz) {
         switch (sz) {
             case PatternNameDataSize::one_word: return 1;
             case PatternNameDataSize::two_words: return 2;
@@ -2218,7 +2320,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         }
     };
 
-    const auto getPageSize = [](const PatternNameDataSize pnd_sz, const CharacterSize ch_sz) -> u16 {
+    const auto getPageSize = [](const PatternNameDataSize pnd_sz, const CharacterSize ch_sz) {
         constexpr auto boundary_1_word_1_by_1_cell  = u16{0x2000};
         constexpr auto boundary_1_word_2_by_2_cells = u16{0x800};
         if (pnd_sz == PatternNameDataSize::one_word) {
@@ -2229,6 +2331,25 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         constexpr auto boundary_2_words_1_by_1_cell  = u16{0x4000};
         constexpr auto boundary_2_words_2_by_2_cells = u16{0x100};
         return (ch_sz == CharacterSize::one_by_one) ? boundary_2_words_1_by_1_cell : boundary_2_words_2_by_2_cells;
+    };
+
+    const auto getScrollScreenFormat = [](const BitmapEnable be) {
+        return (be == BitmapEnable::cell_format) ? ScrollScreenFormat::cell : ScrollScreenFormat::bitmap;
+    };
+
+    const auto getBitmapSize = [](const BitmapSize2Bits sz) {
+        switch (sz) {
+            case BitmapSize2Bits::size_512_by_256: return BitmapSize::size_512_by_256;
+            case BitmapSize2Bits::size_512_by_512: return BitmapSize::size_512_by_512;
+            case BitmapSize2Bits::size_1024_by_256: return BitmapSize::size_1024_by_256;
+            case BitmapSize2Bits::size_1024_by_512: return BitmapSize::size_1024_by_512;
+            default: return BitmapSize::not_set;
+        }
+    };
+
+    const auto getBitmapStartAddress = [](const u8 map_offset) {
+        constexpr auto boundary = u32{0x20000};
+        return vram_start_address + map_offset * boundary;
     };
 
     auto& screen = getScreen(s);
@@ -2258,6 +2379,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_color_number
                 = getCharacterColorNumber3Bits(chctla_.get(CharacterControlA::character_color_number_nbg0),
                                                tv_screen_status_.screen_mode_type);
+            screen.format               = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg0));
+            screen.bitmap_size          = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg0));
+            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
 
             // Cell
             screen.cell_size = cell_size;
@@ -2286,6 +2410,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_color_number
                 = getCharacterColorNumber2Bits(chctla_.get(CharacterControlA::character_color_number_nbg1),
                                                tv_screen_status_.screen_mode_type);
+            screen.format               = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg1));
+            screen.bitmap_size          = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg1));
+            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
 
             // Cell
             screen.cell_size = cell_size;
@@ -2313,6 +2440,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg2));
             screen.character_color_number
                 = getCharacterColorNumber1Bit(chctlb_.get(CharacterControlB::character_color_number_nbg2));
+            screen.bitmap_size          = BitmapSize::not_set;
+            screen.bitmap_start_address = 0;
 
             // Cell
             screen.cell_size = cell_size;
@@ -2341,6 +2470,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg3));
             screen.character_color_number
                 = getCharacterColorNumber1Bit(chctlb_.get(CharacterControlB::character_color_number_nbg3));
+            screen.bitmap_size          = BitmapSize::not_set;
+            screen.bitmap_start_address = 0;
 
             // Cell
             screen.cell_size = cell_size;
@@ -2382,6 +2513,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_color_number
                 = getCharacterColorNumberRbg0(chctlb_.get(CharacterControlB::character_color_number_rbg0),
                                               tv_screen_status_.screen_mode_type);
+            screen.format      = getScrollScreenFormat(chctlb_.get(CharacterControlB::bitmap_enable_rbg0));
+            screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(chctlb_.get(CharacterControlB::bitmap_size_rbg0)));
+            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
 
             // Cell
             screen.cell_size = cell_size;
@@ -2423,6 +2557,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.character_color_number
                 = getCharacterColorNumber3Bits(chctla_.get(CharacterControlA::character_color_number_nbg0),
                                                tv_screen_status_.screen_mode_type);
+            screen.bitmap_size          = BitmapSize::not_set;
+            screen.bitmap_start_address = 0;
 
             // Cell
             screen.cell_size = cell_size;
@@ -2479,9 +2615,8 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             break;
     }
 
-    constexpr auto vram_start_address = u32{0x25e00000};
-    auto           mask               = u32{};
-    auto           multiplier         = u32{};
+    auto mask       = u32{};
+    auto multiplier = u32{};
     switch (plane_size) {
         case PlaneSize::size_1_by_1:
             if (pattern_name_data_size == PatternNameDataSize::one_word) {

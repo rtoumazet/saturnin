@@ -71,6 +71,8 @@ constexpr auto vertical_res_448   = u16{448};
 constexpr auto vertical_res_480   = u16{480};
 constexpr auto vertical_res_512   = u16{512};
 
+constexpr auto vram_start_address = u32{0x25e00000};
+
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
 //  Vertical resolution :
@@ -121,13 +123,32 @@ enum class ColorCount {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ScrollScreenFormat
+///
+/// \brief  Values that represent scroll screen formats
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ScrollScreenFormat {
+    cell,  ///< An enum constant representing the cell format.
+    bitmap ///< An enum constant representing the bitmap format.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   BitmapSize
+///
+/// \brief  Values that represent bitmap sizes
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class BitmapSize { size_512_by_256, size_512_by_512, size_1024_by_256, size_1024_by_512, not_set };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ScreenMode
 ///
 /// \brief  Values that represent TV screen modes.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ScreenMode {
-    unknown,
+    not_set,
     normal_320_224,
     normal_320_240,
     normal_320_256,
@@ -164,7 +185,7 @@ enum class ScreenMode {
 /// \brief  Values that represent TV screen mode types
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ScreenModeType { unknown, normal, hi_res, exclusive };
+enum class ScreenModeType { not_set, normal, hi_res, exclusive };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ReductionSetting
@@ -195,11 +216,33 @@ struct TvScreenStatus {
     bool            is_picture_displayed{false};
     BorderColorMode border_color_mode{BorderColorMode::displays_black};
     InterlaceMode   interlace_mode{InterlaceMode::non_interlace};
-    ScreenMode      screen_mode{ScreenMode::unknown};
-    ScreenModeType  screen_mode_type{ScreenModeType::unknown};
+    ScreenMode      screen_mode{ScreenMode::not_set};
+    ScreenModeType  screen_mode_type{ScreenModeType::not_set};
     u16             horizontal_res{};
     u16             vertical_res{};
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct RamStatus
+///
+/// \brief  The RAM status.
+///
+/// \author Runik
+/// \date   12/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct RamStatus {
+    VramSize                vram_size{VramSize::not_set};
+    VramMode                vram_a_mode{VramMode::no_partition};
+    VramMode                vram_b_mode{VramMode::no_partition};
+    ColorRamMode            color_ram_mode{ColorRamMode::not_set};
+    CoefficientTableStorage coefficient_table_storage{CoefficientTableStorage::not_set};
+    RotationDataBankSelect  vram_a0_rotation_bank_select{RotationDataBankSelect::not_used};
+    RotationDataBankSelect  vram_a1_rotation_bank_select{RotationDataBankSelect::not_used};
+    RotationDataBankSelect  vram_b0_rotation_bank_select{RotationDataBankSelect::not_used};
+    RotationDataBankSelect  vram_b1_rotation_bank_select{RotationDataBankSelect::not_used};
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct ScrollScreenStatus
 ///
@@ -209,11 +252,14 @@ struct TvScreenStatus {
 /// \date   23/02/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScrollScreenStatus {
-    bool         is_display_enabled{};               ///< True when displayed.
-    bool         is_display_enabled_dirty{};         ///< True when displayed state was changed.
-    bool         is_transparency_code_valid{};       ///< True when transparency code is valid.
-    bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
-    BitmapEnable format{};                           ///< Cell or bitmap.
+    bool is_display_enabled{};               ///< True when displayed.
+    bool is_display_enabled_dirty{};         ///< True when displayed state was changed.
+    bool is_transparency_code_valid{};       ///< True when transparency code is valid.
+    bool is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
+
+    ScrollScreenFormat format{ScrollScreenFormat::cell};            ///< Cell or bitmap.
+    BitmapSize         bitmap_size{BitmapSize::not_set};            ///< Size of the bitmap
+    ColorCount         character_color_number{ColorCount::not_set}; ///< Color number
 
     u8  map_size{};               ///< Size of the map (2*2 for NBG / 4*4 for RBG)
     u8  map_offset{};             ///< The map offset
@@ -223,26 +269,26 @@ struct ScrollScreenStatus {
     u8  character_pattern_size{}; ///< Size of the character pattern (1*1 or 2*2 cells)
     u8  cell_size{};              ///< Size of the cell (8*8 dots)
 
-    u32 plane_a_start_address{};
-    u32 plane_b_start_address{};
-    u32 plane_c_start_address{};
-    u32 plane_d_start_address{};
+    u32 bitmap_start_address{0}; ///< The bitmap start address
 
-    ColorCount character_color_number{ColorCount::not_set};
+    u32 plane_a_start_address{}; ///< The plane A start address
+    u32 plane_b_start_address{}; ///< The plane B start address
+    u32 plane_c_start_address{}; ///< The plane C start address
+    u32 plane_d_start_address{}; ///< The plane D start address
 
     // Rotation specifics
-    u32 plane_e_start_address{};
-    u32 plane_f_start_address{};
-    u32 plane_g_start_address{};
-    u32 plane_h_start_address{};
-    u32 plane_i_start_address{};
-    u32 plane_j_start_address{};
-    u32 plane_k_start_address{};
-    u32 plane_l_start_address{};
-    u32 plane_m_start_address{};
-    u32 plane_n_start_address{};
-    u32 plane_o_start_address{};
-    u32 plane_p_start_address{};
+    u32 plane_e_start_address{}; ///< The plane E start address
+    u32 plane_f_start_address{}; ///< The plane F start address
+    u32 plane_g_start_address{}; ///< The plane G start address
+    u32 plane_h_start_address{}; ///< The plane H start address
+    u32 plane_i_start_address{}; ///< The plane I start address
+    u32 plane_j_start_address{}; ///< The plane J start address
+    u32 plane_k_start_address{}; ///< The plane K start address
+    u32 plane_l_start_address{}; ///< The plane L start address
+    u32 plane_m_start_address{}; ///< The plane M start address
+    u32 plane_n_start_address{}; ///< The plane N start address
+    u32 plane_o_start_address{}; ///< The plane O start address
+    u32 plane_p_start_address{}; ///< The plane P start address
 };
 
 class Vdp2 {
@@ -374,11 +420,12 @@ class Vdp2 {
     /// \name Various Vdp2 debug functions
     //@{
     auto        getDebugGlobalMainData() const -> std::vector<LabelValue>;
-    auto        getDebugVramMainData() -> std::vector<LabelValue>;
-    auto        getDebugVramBanks() -> std::vector<VramTiming>;
-    auto        getDebugVramBanksUsed() -> std::array<bool, vram_banks_number>;
-    auto        getDebugVramBanksName() -> std::vector<std::string>;
-    static auto getDebugVramCommandDescription(const VramAccessCommand command) -> LabelValue;
+    auto        getDebugRamMainData() -> std::vector<LabelValue>;
+    auto        getDebugVramAccessMainData() -> std::vector<LabelValue>;
+    auto        getDebugVramAccessBanks() -> std::vector<VramTiming>;
+    auto        getDebugVramAccessBanksUsed() -> std::array<bool, vram_banks_number>;
+    auto        getDebugVramAccessBanksName() -> std::vector<std::string>;
+    static auto getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue;
     auto        getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>>;
 
     //@}
@@ -458,6 +505,17 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void updateResolution();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::updateRamStatus();
+    ///
+    /// \brief  Updates the RAM status
+    ///
+    /// \author Runik
+    /// \date   12/03/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void updateRamStatus();
 
     //--------------------------------------------------------------------------------------------------------------
     // VRAM CYCLES methods
@@ -824,6 +882,7 @@ class Vdp2 {
     u16 timer_1_counter_{}; ///< Timer 1 counter.
 
     TvScreenStatus tv_screen_status_; ///< The TV screen status.
+    RamStatus      ram_status_;       ///< The RAM status
 
     std::vector<Vertex> render_vertexes_; ///< Contains all the geometry vertexes (VDP1 & VDP2).
 
