@@ -1013,17 +1013,45 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
     auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
     if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {
         if (ImGui::BeginTabItem(tr("Global").c_str())) {
-            constexpr auto column_offset{150};
-            for (const auto& [label, value] : state.vdp2()->getDebugGlobalMainData()) {
-                ImGui::TextUnformatted(label.c_str());
-                if (value.has_value()) {
-                    ImGui::SameLine(column_offset);
-                    ImGui::Text(": ");
-                    ImGui::SameLine();
-                    ImGui::TextUnformatted((*value).c_str());
+            static ImGuiTableFlags table_flags    = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit;
+            constexpr auto         columns_number = u8{2};
+            if (ImGui::BeginTable("global_table", columns_number, table_flags)) {
+                for (const auto& [label, value] : state.vdp2()->getDebugGlobalMainData()) {
+                    ImGui::TableNextRow();
+                    auto column_index = u8{0};
+                    ImGui::TableSetColumnIndex(column_index++);
+                    ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
+
+                    ImGui::TextUnformatted(label.c_str());
+
+                    ImGui::TableSetColumnIndex(column_index++);
+                    if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
                 }
+                ImGui::EndTable();
             }
 
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem(tr("RAM").c_str())) {
+            static ImGuiTableFlags table_flags    = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit;
+            constexpr auto         columns_number = u8{2};
+            if (ImGui::BeginTable("ram_table", columns_number, table_flags)) {
+                for (const auto& [label, value] : state.vdp2()->getDebugRamMainData()) {
+                    ImGui::TableNextRow();
+                    auto column_index = u8{0};
+                    ImGui::TableSetColumnIndex(column_index++);
+                    ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
+
+                    ImGui::TextUnformatted(label.c_str());
+
+                    ImGui::TableSetColumnIndex(column_index++);
+                    if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
+                }
+                ImGui::EndTable();
+            }
             ImGui::EndTabItem();
         }
 
@@ -1041,9 +1069,9 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::TableSetupColumn("T7");
                 ImGui::TableHeadersRow();
 
-                const auto banks = state.vdp2()->getDebugVramBanks();
+                const auto banks = state.vdp2()->getDebugVramAccessBanks();
                 // const auto banks_used = state.vdp2()->getDebugVramBanksUsed();
-                const auto banks_name = state.vdp2()->getDebugVramBanksName();
+                const auto banks_name = state.vdp2()->getDebugVramAccessBanksName();
 
                 for (u8 row = 0; row < banks.size(); ++row) {
                     ImGui::TableNextRow();
@@ -1055,7 +1083,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                             ImGui::TextUnformatted(banks_name[row].c_str());
                             continue;
                         };
-                        const auto command_desc = state.vdp2()->getDebugVramCommandDescription(banks[row][column - 1]);
+                        const auto command_desc = state.vdp2()->getDebugVramAccessCommandDescription(banks[row][column - 1]);
                         ImGui::TextUnformatted(command_desc.first.c_str());
                         if (command_desc.second.has_value()) {
                             ImGui::SameLine();
@@ -1121,9 +1149,8 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
             const auto& screen_data = state.vdp2()->getDebugScrollScreenData(current_screen);
             if (screen_data.has_value()) {
-                static ImGuiTableFlags table_flags
-                    = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
-                constexpr auto columns_number = u8{2};
+                static ImGuiTableFlags table_flags    = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit;
+                constexpr auto         columns_number = u8{2};
                 if (ImGui::BeginTable("scroll_screen_table", columns_number, table_flags)) {
                     for (const auto& [label, value] : *screen_data) {
                         ImGui::TableNextRow();

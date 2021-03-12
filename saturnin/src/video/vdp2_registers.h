@@ -367,6 +367,7 @@ class ScreenStatus : public Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class VramSize : u8 {
+    not_set,          ///< Not set.
     size_4_mbits = 0, ///< 4 Mbit.
     size_8_mbits = 1  ///< 8 Mbit.
 };
@@ -436,6 +437,7 @@ class Reserve : public Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CoefficientTableStorage : u8 {
+    not_set,                 ///< Not set.
     stored_in_vram      = 0, ///< Coefficient table is stored in VRAM.
     stored_in_color_ram = 1  ///< Coefficient table is stored in color RAM.
 };
@@ -449,7 +451,9 @@ enum class CoefficientTableStorage : u8 {
 enum class ColorRamMode : u8 {
     mode_0_rgb_5_bits_1024_colors = 0b00, ///< RGB each 5 bits, 1024 colors settings.
     mode_1_rgb_5_bits_2048_colors = 0b01, ///< RGB each 5 bits, 2048 colors settings.
-    mode_2_rgb_8_bits_1024_colors = 0b10  ///< RGB each 8 bits, 1024 colors settings.
+    mode_2_rgb_8_bits_1024_colors = 0b10, ///< RGB each 8 bits, 1024 colors settings.
+    setting_not_allowed           = 0b11, ///< Setting not allowed.
+    not_set                               ///< Not set.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -461,6 +465,13 @@ enum class ColorRamMode : u8 {
 enum class VramMode : u8 {
     no_partition         = 0, ///< Do not partition in 2 banks.
     partition_in_2_banks = 1  ///< Partition in 2 banks.
+};
+
+enum class RotationDataBankSelect : u8 {
+    not_used                             = 0b00, ///< VRAM not used as RBG0 RAM.
+    used_as_rbg0_coefficient_table       = 0b01, ///< VRAM used as RBG0 coefficient table.
+    used_as_rbg0_pattern_name_table      = 0b10, ///< VRAM used as RBG0 Pattern Name table.
+    used_as_rbg0_character_pattern_table = 0b11  ///< VRAM used as RBG0 Character Pattern table (or Bitmap Pattern)
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -475,10 +486,14 @@ enum class VramMode : u8 {
 class RamControl : public Register {
   public:
     using Register::Register;
-    inline static const auto coefficient_table_storage = BitRange<CoefficientTableStorage>{15}; ///< Defines CRKTE bit.
-    inline static const auto color_ram_mode            = BitRange<ColorRamMode>{12, 13};        ///< Defines CRMDx bits.
-    inline static const auto vram_b_mode               = BitRange<VramMode>{9};                 ///< Defines VRBMD bit.
-    inline static const auto vram_a_mode               = BitRange<VramMode>{8};                 ///< Defines VRAMD bit.
+    inline static const auto coefficient_table_storage    = BitRange<CoefficientTableStorage>{15};  ///< Defines CRKTE bit.
+    inline static const auto color_ram_mode               = BitRange<ColorRamMode>{12, 13};         ///< Defines CRMDx bits.
+    inline static const auto vram_b_mode                  = BitRange<VramMode>{9};                  ///< Defines VRBMD bit.
+    inline static const auto vram_a_mode                  = BitRange<VramMode>{8};                  ///< Defines VRAMD bit.
+    inline static const auto vram_a0_rotation_bank_select = BitRange<RotationDataBankSelect>{0, 1}; ///< Defines RDBSA0x bits.
+    inline static const auto vram_a1_rotation_bank_select = BitRange<RotationDataBankSelect>{2, 3}; ///< Defines RDBSA1x bits.
+    inline static const auto vram_b0_rotation_bank_select = BitRange<RotationDataBankSelect>{4, 5}; ///< Defines RDBSB0x bits.
+    inline static const auto vram_b1_rotation_bank_select = BitRange<RotationDataBankSelect>{6, 7}; ///< Defines RDBSB1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
