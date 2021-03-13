@@ -258,18 +258,28 @@ struct ScrollScreenStatus {
     bool is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
 
     ScrollScreenFormat format{ScrollScreenFormat::cell};            ///< Cell or bitmap.
-    BitmapSize         bitmap_size{BitmapSize::not_set};            ///< Size of the bitmap
     ColorCount         character_color_number{ColorCount::not_set}; ///< Color number
 
-    u8  map_size{};               ///< Size of the map (2*2 for NBG / 4*4 for RBG)
-    u8  map_offset{};             ///< The map offset
-    u8  plane_size{};             ///< Size of the plane (1*1, 2*1 or 2*2 pages)
-    u16 page_size{};              ///< Size of the page / pattern name table
-    u8  pattern_name_data_size{}; ///< Size of the pattern name data (1 or 2 words)
-    u8  character_pattern_size{}; ///< Size of the character pattern (1*1 or 2*2 cells)
-    u8  cell_size{};              ///< Size of the cell (8*8 dots)
+    // Bitmap
+    BitmapSize bitmap_size{BitmapSize::not_set};   ///< Size of the bitmap.
+    u8         bitmap_palette_number{0};           ///< The bitmap palette number.
+    u8         bitmap_special_priority{};          ///< Bitmap special priority bit
+    u8         bitmap_special_color_calculation{}; ///< Bitmap special color calculation bit
+    u32        bitmap_start_address{0};            ///< The bitmap start address.
 
-    u32 bitmap_start_address{0}; ///< The bitmap start address
+    // Cell
+    u8                            map_size{};               ///< Size of the map (2*2 for NBG / 4*4 for RBG)
+    u8                            map_offset{};             ///< The map offset
+    u8                            plane_size{};             ///< Size of the plane (1*1, 2*1 or 2*2 pages)
+    u16                           page_size{};              ///< Size of the page / pattern name table
+    u8                            pattern_name_data_size{}; ///< Size of the pattern name data (1 or 2 words)
+    CharacterNumberSupplementMode character_number_supplement_mode{CharacterNumberSupplementMode::not_set};
+    u8                            special_priority{};               ///< Special priority bit
+    u8                            special_color_calculation{};      ///< Special color calculation bit
+    u8                            supplementary_palette_number{};   ///< Supplementary palette number bit
+    u8                            supplementary_character_number{}; ///< Supplementary character number bit
+    u8                            character_pattern_size{};         ///< Size of the character pattern (1*1 or 2*2 cells)
+    u8                            cell_size{};                      ///< Size of the cell (8*8 dots)
 
     u32 plane_a_start_address{}; ///< The plane A start address
     u32 plane_b_start_address{}; ///< The plane B start address

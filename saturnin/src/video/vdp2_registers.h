@@ -938,6 +938,7 @@ enum class PatternNameDataSize : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CharacterNumberSupplementMode : u8 {
+    not_set, ///< Not set.
     character_number_10_bits
     = 0b0, ///< Character number in pattern name data is 10 bits. Flip function can be selected in character units.
     character_number_12_bits = 0b1 ///< Character number in pattern name data is 12 bits. Flip function cannot be used.
@@ -957,6 +958,7 @@ class PatternNameControlNbg0 : public Register {
     using Register::Register;
     inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N0PNB bit.
     inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N0CNSM bit.
+    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines N0SPR bit.
     inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N0SCC bit.
     inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N0SPLTx bits.
     inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N0SCNx bits.
@@ -976,6 +978,7 @@ class PatternNameControlNbg1 : public Register {
     using Register::Register;
     inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N1PNB bit.
     inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N1CNSM bit.
+    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines N1SPR bit.
     inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N1SCC bit.
     inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N1SPLTx bits.
     inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N1SCNx bits.
@@ -995,6 +998,7 @@ class PatternNameControlNbg2 : public Register {
     using Register::Register;
     inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N2PNB bit.
     inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N2CNSM bit.
+    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines N2SPR bit.
     inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N2SCC bit.
     inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N2SPLTx bits.
     inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N2SCNx bits.
@@ -1014,6 +1018,7 @@ class PatternNameControlNbg3 : public Register {
     using Register::Register;
     inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N3PNB bit.
     inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N3CNSM bit.
+    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines N3SPR bit.
     inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N3SCC bit.
     inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N3SPLTx bits.
     inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N3SCNx bits.
@@ -1033,6 +1038,7 @@ class PatternNameControlRbg0 : public Register {
     using Register::Register;
     inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines R0PNB bit.
     inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines R0CNSM bit.
+    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines R0SPR bit.
     inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines R0SCC bit.
     inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines R0SPLTx bits.
     inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines R0SCNx bits.

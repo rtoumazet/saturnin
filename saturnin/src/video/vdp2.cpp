@@ -466,20 +466,17 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     auto        values = std::vector<LabelValue>{};
     const auto& screen = getScreen(s);
 
-    if (!screen.is_display_enabled) {
-        // values.emplace_back(tr("Screen is not displayed"), std::nullopt);
-        return std::nullopt;
-    }
+    if (!screen.is_display_enabled) { return std::nullopt; }
 
     const auto colorNumber = [](const ColorCount c) {
         switch (c) {
             case ColorCount::cannot_display: return tr("Cannot display");
             case ColorCount::not_allowed: return tr("Not allowed");
-            case ColorCount::palette_16: return tr("Palette (16 colors)");
-            case ColorCount::palette_256: return tr("Palette (256 colors)");
-            case ColorCount::palette_2048: return tr("Palette (2048 colors)");
-            case ColorCount::rgb_32k: return tr("RGB (32K colors)");
-            case ColorCount::rgb_16m: return tr("RGB (16M colors)");
+            case ColorCount::palette_16: return tr("16 colors (palette)");
+            case ColorCount::palette_256: return tr("256 colors (palette)");
+            case ColorCount::palette_2048: return tr("2048 colors (palette)");
+            case ColorCount::rgb_32k: return tr("32K colors (RGB)");
+            case ColorCount::rgb_16m: return tr("16M colors (RGB)");
             default: return tr("Not set");
         }
     };
@@ -502,9 +499,11 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
             }
         };
         values.emplace_back(tr("Bitmap size"), bitmapSize(screen.bitmap_size));
-
+        values.emplace_back(tr("Bitmap palette number"), fmt::format("{:#x}", screen.bitmap_palette_number));
+        values.emplace_back(tr("Bitmap special priority bit"), fmt::format("{:#x}", screen.bitmap_special_priority));
+        values.emplace_back(tr("Bitmap special color calculation bit"),
+                            fmt::format("{:#x}", screen.bitmap_special_color_calculation));
         values.emplace_back(tr("Bitmap start address"), fmt::format("{:#x}", screen.bitmap_start_address));
-
         return values;
     }
 
@@ -539,6 +538,20 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     // Pattern Name Data size
     const auto& pnd_size = screen.pattern_name_data_size == 1 ? tr("1 word") : tr("2 words");
     values.emplace_back(tr("Pattern Name Data size"), pnd_size);
+
+    if (screen.pattern_name_data_size == 1) {
+        // Character number supplement mode
+        const auto& character_mode
+            = (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits)
+                  ? tr("10 bits, can flip")
+                  : tr("12 bits, cannot flip");
+        values.emplace_back(tr("Character number supplement mode"), character_mode);
+        values.emplace_back(tr("Special priority bit"), fmt::format("{:#x}", screen.special_priority));
+        values.emplace_back(tr("Special color calculation bit"), fmt::format("{:#x}", screen.special_color_calculation));
+        values.emplace_back(tr("Supplementary palette number bit"), fmt::format("{:#x}", screen.supplementary_palette_number));
+        values.emplace_back(tr("Supplementary character number bit"),
+                            fmt::format("{:#x}", screen.supplementary_character_number));
+    }
 
     // Character Pattern size
     const auto& cp_size = screen.character_pattern_size == 1 ? tr("1x1 cell") : tr("2x2 cells");
@@ -2209,8 +2222,8 @@ void Vdp2::populateRenderData() {
 
                 render_vertexes_.emplace_back(Vertex{0, 0});
                 render_vertexes_.emplace_back(Vertex{0, 224});
-                render_vertexes_.emplace_back(Vertex{320, 224});
-                render_vertexes_.emplace_back(Vertex{320, 0});
+                render_vertexes_.emplace_back(Vertex{352, 224});
+                render_vertexes_.emplace_back(Vertex{352, 0});
 
                 updateScrollScreenStatus(ScrollScreen::nbg3);
             }
@@ -2329,7 +2342,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
         // The other case is 2 words.
         constexpr auto boundary_2_words_1_by_1_cell  = u16{0x4000};
-        constexpr auto boundary_2_words_2_by_2_cells = u16{0x100};
+        constexpr auto boundary_2_words_2_by_2_cells = u16{0x1000};
         return (ch_sz == CharacterSize::one_by_one) ? boundary_2_words_1_by_1_cell : boundary_2_words_2_by_2_cells;
     };
 
@@ -2373,18 +2386,29 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Pattern name data
             screen.pattern_name_data_size = getPatternNameDataSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size));
+            screen.character_number_supplement_mode = pncn0_.get(PatternNameControlNbg0::character_number_mode);
+            screen.special_priority                 = pncn0_.get(PatternNameControlNbg0::special_priority);
+            screen.special_color_calculation        = pncn0_.get(PatternNameControlNbg0::special_color_calculation);
+            screen.supplementary_palette_number     = pncn0_.get(PatternNameControlNbg0::supplementary_palette_number);
+            screen.supplementary_character_number   = pncn0_.get(PatternNameControlNbg0::supplementary_character_number);
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
             screen.character_color_number
                 = getCharacterColorNumber3Bits(chctla_.get(CharacterControlA::character_color_number_nbg0),
                                                tv_screen_status_.screen_mode_type);
-            screen.format               = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg0));
-            screen.bitmap_size          = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg0));
-            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
+            screen.format = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg0));
 
             // Cell
             screen.cell_size = cell_size;
+
+            // Bitmap
+            screen.bitmap_size                      = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg0));
+            screen.bitmap_palette_number            = bmpna_.get(BitmapPaletteNumberA::bitmap_palette_number_nbg0);
+            screen.bitmap_special_priority          = bmpna_.get(BitmapPaletteNumberA::bitmap_special_priority_nbg0);
+            screen.bitmap_special_color_calculation = bmpna_.get(BitmapPaletteNumberA::bitmap_special_color_calculation_nbg0);
+            screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
+
             break;
         case ScrollScreen::nbg1:
             // Map
@@ -2404,18 +2428,29 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Pattern name data
             screen.pattern_name_data_size = getPatternNameDataSize(pncn1_.get(PatternNameControlNbg1::pattern_name_data_size));
+            screen.character_number_supplement_mode = pncn1_.get(PatternNameControlNbg1::character_number_mode);
+            screen.special_priority                 = pncn1_.get(PatternNameControlNbg1::special_priority);
+            screen.special_color_calculation        = pncn1_.get(PatternNameControlNbg1::special_color_calculation);
+            screen.supplementary_palette_number     = pncn1_.get(PatternNameControlNbg1::supplementary_palette_number);
+            screen.supplementary_character_number   = pncn1_.get(PatternNameControlNbg1::supplementary_character_number);
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg1));
             screen.character_color_number
                 = getCharacterColorNumber2Bits(chctla_.get(CharacterControlA::character_color_number_nbg1),
                                                tv_screen_status_.screen_mode_type);
-            screen.format               = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg1));
-            screen.bitmap_size          = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg1));
-            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
+            screen.format = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg1));
 
             // Cell
             screen.cell_size = cell_size;
+
+            // Bitmap
+            screen.bitmap_size                      = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg1));
+            screen.bitmap_palette_number            = bmpna_.get(BitmapPaletteNumberA::bitmap_palette_number_nbg1);
+            screen.bitmap_special_priority          = bmpna_.get(BitmapPaletteNumberA::bitmap_special_priority_nbg1);
+            screen.bitmap_special_color_calculation = bmpna_.get(BitmapPaletteNumberA::bitmap_special_color_calculation_nbg1);
+            screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
+
             break;
         case ScrollScreen::nbg2:
             // Map
@@ -2435,6 +2470,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Pattern name data
             screen.pattern_name_data_size = getPatternNameDataSize(pncn2_.get(PatternNameControlNbg2::pattern_name_data_size));
+            screen.character_number_supplement_mode = pncn2_.get(PatternNameControlNbg2::character_number_mode);
+            screen.special_priority                 = pncn2_.get(PatternNameControlNbg2::special_priority);
+            screen.special_color_calculation        = pncn2_.get(PatternNameControlNbg2::special_color_calculation);
+            screen.supplementary_palette_number     = pncn2_.get(PatternNameControlNbg2::supplementary_palette_number);
+            screen.supplementary_character_number   = pncn2_.get(PatternNameControlNbg2::supplementary_character_number);
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg2));
@@ -2465,6 +2505,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Pattern name data
             screen.pattern_name_data_size = getPatternNameDataSize(pncn3_.get(PatternNameControlNbg3::pattern_name_data_size));
+            screen.character_number_supplement_mode = pncn3_.get(PatternNameControlNbg3::character_number_mode);
+            screen.special_priority                 = pncn3_.get(PatternNameControlNbg3::special_priority);
+            screen.special_color_calculation        = pncn3_.get(PatternNameControlNbg3::special_color_calculation);
+            screen.supplementary_palette_number     = pncn3_.get(PatternNameControlNbg3::supplementary_palette_number);
+            screen.supplementary_character_number   = pncn3_.get(PatternNameControlNbg3::supplementary_character_number);
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg3));
@@ -2507,18 +2552,28 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Pattern name data
             screen.pattern_name_data_size = getPatternNameDataSize(pncr_.get(PatternNameControlRbg0::pattern_name_data_size));
+            screen.character_number_supplement_mode = pncr_.get(PatternNameControlRbg0::character_number_mode);
+            screen.special_priority                 = pncr_.get(PatternNameControlRbg0::special_priority);
+            screen.special_color_calculation        = pncr_.get(PatternNameControlRbg0::special_color_calculation);
+            screen.supplementary_palette_number     = pncr_.get(PatternNameControlRbg0::supplementary_palette_number);
+            screen.supplementary_character_number   = pncr_.get(PatternNameControlRbg0::supplementary_character_number);
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_rbg0));
             screen.character_color_number
                 = getCharacterColorNumberRbg0(chctlb_.get(CharacterControlB::character_color_number_rbg0),
                                               tv_screen_status_.screen_mode_type);
-            screen.format      = getScrollScreenFormat(chctlb_.get(CharacterControlB::bitmap_enable_rbg0));
-            screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(chctlb_.get(CharacterControlB::bitmap_size_rbg0)));
-            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
+            screen.format = getScrollScreenFormat(chctlb_.get(CharacterControlB::bitmap_enable_rbg0));
 
             // Cell
             screen.cell_size = cell_size;
+
+            // Bitmap
+            screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(chctlb_.get(CharacterControlB::bitmap_size_rbg0)));
+            screen.bitmap_palette_number            = bmpnb_.get(BitmapPaletteNumberB::bitmap_palette_number_rbg0);
+            screen.bitmap_special_priority          = bmpnb_.get(BitmapPaletteNumberB::bitmap_special_priority_rbg0);
+            screen.bitmap_special_color_calculation = bmpnb_.get(BitmapPaletteNumberB::bitmap_special_color_calculation_rbg0);
+            screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
             break;
 
         case ScrollScreen::rbg1:
@@ -2551,6 +2606,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Pattern name data
             screen.pattern_name_data_size = getPatternNameDataSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size));
+            screen.character_number_supplement_mode = pncn0_.get(PatternNameControlNbg0::character_number_mode);
+            screen.special_priority                 = pncn0_.get(PatternNameControlNbg0::special_priority);
+            screen.special_color_calculation        = pncn0_.get(PatternNameControlNbg0::special_color_calculation);
+            screen.supplementary_palette_number     = pncn0_.get(PatternNameControlNbg0::supplementary_palette_number);
+            screen.supplementary_character_number   = pncn0_.get(PatternNameControlNbg0::supplementary_character_number);
 
             // Character pattern
             screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
