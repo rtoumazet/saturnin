@@ -227,6 +227,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClCompile Include="src\cdrom\cdrom.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\video\vdp2_part.cpp" />
     <ClInclude Include="src\cdrom\cdrom_registers.h" />
     <ClCompile Include="src\cdrom\scsi.cpp" />
     <ClCompile Include="src\cdrom\spti.cpp">
@@ -326,6 +327,7 @@ xcopy $(MSBuildProjectDirectory)\res\*.png $(LocalDebuggerWorkingDirectory)res\ 
     <ClInclude Include="src\video\opengl_modern.h" />
     <ClInclude Include="src\video\vdp1.h" />
     <ClInclude Include="src\video\vdp2.h" />
+    <ClInclude Include="src\video\vdp2_part.h" />
     <ClInclude Include="src\video\vdp2_registers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

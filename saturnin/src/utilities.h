@@ -26,6 +26,7 @@
 #pragma once
 
 #include <algorithm>                    // count
+#include <functional>                   // hash
 #include <string>                       // string
 #include <type_traits>                  // underlying_type_t
 #include <vector>                       // vector
@@ -130,5 +131,27 @@ auto explode(std::string const& s, char delim) -> std::vector<std::string>;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto dec2bcd(u16 dec) -> u32;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<typename T, typename... Rest> void hashCombine(std::size_t& seed, const T& v, Rest... rest)
+///
+/// \brief  Hash combine
+///          Usage :
+///         std::size_t h=0;
+///         hashCombine(h, obj1, obj2, obj3);
+///
+/// \tparam T       Generic type parameter.
+/// \tparam Rest    Type of the REST.
+/// \param [in,out] seed    The seed.
+/// \param          v       A T to process.
+/// \param          rest    Variable arguments providing the REST.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T, typename... Rest>
+void hashCombine(std::size_t& seed, const T& v, Rest... rest) {
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    (hashCombine(seed, rest), ...);
+};
 
 } // namespace saturnin::utilities

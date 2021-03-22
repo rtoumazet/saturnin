@@ -20,6 +20,8 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp2.h>
 #include <istream>
+#include <set>
+#include <unordered_set>
 #include <saturnin/src/config.h>
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/scu_registers.h>
@@ -46,6 +48,7 @@ using util::toUnderlying;
 
 void Vdp2::initialize() {
     initializeRegisterNameMap();
+    computePrecalculatedData();
 
     const std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (emulator_context_->config()->getTvStandard(ts)) {
@@ -270,7 +273,7 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
 
         auto rbgDisplayStatus = [&](const ScrollScreen s) {
             const auto& rbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
-            values.emplace_back(fmt::format("RBG{}", toUnderlying(s)), rbg);
+            values.emplace_back(fmt::format("RBG{}", toUnderlying(s) - 4), rbg);
         };
         rbgDisplayStatus(ScrollScreen::rbg0);
         rbgDisplayStatus(ScrollScreen::rbg1);
@@ -511,8 +514,8 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     values.emplace_back(tr("Format"), tr("Cell"));
 
     // Scroll size
-    const auto size = screen.page_size * screen.plane_size * screen.map_size;
-    values.emplace_back(tr("Total screen size"), fmt::format("{:#x}", size));
+    // const auto size = screen.page_size * screen.plane_size * screen.map_size;
+    // values.emplace_back(tr("Total screen size"), fmt::format("{:#x}", size));
 
     // Map size
     const auto mapSize = [](const ScrollScreen s) {
@@ -527,19 +530,19 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     // Plane size
     const auto planeSize = [](const ScrollScreenStatus s) {
         switch (s.plane_size) {
-            case 1: return tr("1x1 page");
-            case 2: return tr("2x1 pages");
-            case 4: return tr("2x2 pages");
+            case PlaneSize::size_1_by_1: return tr("1x1 page");
+            case PlaneSize::size_2_by_1: return tr("2x1 pages");
+            case PlaneSize::size_2_by_2: return tr("2x2 pages");
             default: return tr("Unknown");
         }
     };
     values.emplace_back(tr("Plane size"), planeSize(screen));
 
     // Pattern Name Data size
-    const auto& pnd_size = screen.pattern_name_data_size == 1 ? tr("1 word") : tr("2 words");
+    const auto& pnd_size = screen.pattern_name_data_size == PatternNameDataSize::one_word ? tr("1 word") : tr("2 words");
     values.emplace_back(tr("Pattern Name Data size"), pnd_size);
 
-    if (screen.pattern_name_data_size == 1) {
+    if (screen.pattern_name_data_size == PatternNameDataSize::one_word) {
         // Character number supplement mode
         const auto& character_mode
             = (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits)
@@ -554,11 +557,14 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     }
 
     // Character Pattern size
-    const auto& cp_size = screen.character_pattern_size == 1 ? tr("1x1 cell") : tr("2x2 cells");
+    const auto& cp_size = screen.character_pattern_size == CharacterSize::one_by_one ? tr("1x1 cell") : tr("2x2 cells");
     values.emplace_back(tr("Character Pattern size"), cp_size);
 
     // Character Pattern color number
     values.emplace_back(tr("Character color number"), colorNumber(screen.character_color_number));
+
+    // Color RAM offset
+    values.emplace_back(tr("Color RAM address offset"), fmt::format("{:#x}", screen.color_ram_address_offset));
 
     // Cell size
     values.emplace_back(tr("Cell size"), tr("8x8 dots"));
@@ -1335,6 +1341,22 @@ void Vdp2::initializeRegisterNameMap() {
     addToRegisterNameMap(color_offset_b_red, "Color Offset B (Red)");
     addToRegisterNameMap(color_offset_b_green, "Color Offset B (Green)");
     addToRegisterNameMap(color_offset_b_blue, "Color Offset B (Blue)");
+}
+
+void Vdp2::computePrecalculatedData() {
+    // Modulo values used for 1 cell character pattern positioning
+    constexpr auto modulo_64_number = u8{64};
+    pre_calculated_modulo_64_.reserve(modulo_64_number); // the extra element allocation is harmless
+    for (u32 i = 1; i < modulo_64_number; ++i) {         // value 0 isn't added
+        pre_calculated_modulo_64_.emplace_back(i * modulo_64_number);
+    }
+
+    // Modulo values used for 4 cells character pattern positioning
+    constexpr auto modulo_32_number = u8{32};
+    pre_calculated_modulo_32_.reserve(modulo_32_number); // the extra element allocation is harmless
+    for (u32 i = 1; i < modulo_32_number; ++i) {         // value 0 isn't added
+        pre_calculated_modulo_32_.emplace_back(i * modulo_32_number);
+    }
 }
 
 void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& hblank_duration) {
@@ -2190,42 +2212,48 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 //--------------------------------------------------------------------------------------------------------------
 
 void Vdp2::populateRenderData() {
-    if (isScreenDisplayed(ScrollScreen::rbg1)) { updateScrollScreenStatus(ScrollScreen::rbg1); }
-    if (isScreenDisplayed(ScrollScreen::rbg0)) { updateScrollScreenStatus(ScrollScreen::rbg0); }
+    if (isScreenDisplayed(ScrollScreen::rbg1)) {
+        updateScrollScreenStatus(ScrollScreen::rbg1);
+        readScrollScreenData(ScrollScreen::rbg1);
+    }
+    if (isScreenDisplayed(ScrollScreen::rbg0)) {
+        updateScrollScreenStatus(ScrollScreen::rbg0);
+        readScrollScreenData(ScrollScreen::rbg0);
+    }
 
     auto is_nbg_displayed
         = !(getScreen(ScrollScreen::rbg0).is_display_enabled && getScreen(ScrollScreen::rbg1).is_display_enabled);
 
     if (is_nbg_displayed) {
-        if (isScreenDisplayed(ScrollScreen::nbg0)) { updateScrollScreenStatus(ScrollScreen::nbg0); }
+        if (isScreenDisplayed(ScrollScreen::nbg0)) {
+            updateScrollScreenStatus(ScrollScreen::nbg0);
+            readScrollScreenData(ScrollScreen::nbg0);
+        }
 
         getScreen(ScrollScreen::nbg1).is_display_enabled = false;
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg1)) {
-            if (isScreenDisplayed(ScrollScreen::nbg1)) { updateScrollScreenStatus(ScrollScreen::nbg1); }
+            if (isScreenDisplayed(ScrollScreen::nbg1)) {
+                updateScrollScreenStatus(ScrollScreen::nbg1);
+                readScrollScreenData(ScrollScreen::nbg1);
+            }
         }
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg2)) {
-            if (isScreenDisplayed(ScrollScreen::nbg2)) { updateScrollScreenStatus(ScrollScreen::nbg2); }
+            if (isScreenDisplayed(ScrollScreen::nbg2)) {
+                updateScrollScreenStatus(ScrollScreen::nbg2);
+                readScrollScreenData(ScrollScreen::nbg2);
+            }
         }
 
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
             if (isScreenDisplayed(ScrollScreen::nbg3)) {
                 render_vertexes_.clear();
-                // constexpr std::array<u16, 18> vertices = {
-                //    0,  0,  0, // 0
-                //    0,  224, 0, // 1
-                //    320, 224, 0, // 2
-
-                //    0,  0, 0, // 0
-                //    320, 224, 0, // 2
-                //    320, 0, 0,  // 3
-                //};
-
                 render_vertexes_.emplace_back(Vertex{0, 0});
                 render_vertexes_.emplace_back(Vertex{0, 224});
                 render_vertexes_.emplace_back(Vertex{352, 224});
                 render_vertexes_.emplace_back(Vertex{352, 0});
 
                 updateScrollScreenStatus(ScrollScreen::nbg3);
+                readScrollScreenData(ScrollScreen::nbg3);
             }
         }
     }
@@ -2261,26 +2289,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     constexpr auto map_size_rbg = u8{4 * 4};
     constexpr auto cell_size    = u8{8 * 8};
 
-    const auto getPlaneSize = [](const PlaneSize sz) -> u8 {
-        switch (sz) {
-            case PlaneSize::size_1_by_1: return 1 * 1;
-            case PlaneSize::size_2_by_1: return 2 * 1;
-            case PlaneSize::size_2_by_2: return 2 * 2;
-            default: {
-                Log::warning("vdp2", "Invalid plane size !");
-                return 0;
-            }
-        }
+    const auto getColorRamAddressOffset = [&](const u8 register_offset) {
+        const auto offset = (ram_status_.color_ram_mode == ColorRamMode::mode_1_rgb_5_bits_2048_colors) ? register_offset
+                                                                                                        : register_offset & 0x3;
+        return (offset << displacement_8);
     };
-
-    const auto getCharacterPatternSize = [](const CharacterSize sz) {
-        switch (sz) {
-            case CharacterSize::one_by_one: return 1 * 1;
-            case CharacterSize::two_by_two: return 2 * 2;
-            default: return 0; // can't happen
-        }
-    };
-
     const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3bits c, const ScreenModeType t) {
         switch (c) {
             case CharacterColorNumber3bits::palette_16: return ColorCount::palette_16;
@@ -2325,14 +2338,19 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             default: return ColorCount::not_allowed;
         }
     };
-    const auto getPatternNameDataSize = [](const PatternNameDataSize sz) {
-        switch (sz) {
-            case PatternNameDataSize::one_word: return 1;
-            case PatternNameDataSize::two_words: return 2;
-            default: return 0; // can't happen
+    const auto getDotSize = [](const ColorCount cc) {
+        const auto dot_size_4  = u8{4};
+        const auto dot_size_8  = u8{8};
+        const auto dot_size_16 = u8{16};
+        const auto dot_size_32 = u8{32};
+        switch (cc) {
+            case ColorCount::palette_16: return dot_size_4;
+            case ColorCount::palette_256: return dot_size_8;
+            case ColorCount::palette_2048: return dot_size_16;
+            case ColorCount::rgb_32k: return dot_size_16;
+            default: return dot_size_32;
         }
     };
-
     const auto getPageSize = [](const PatternNameDataSize pnd_sz, const CharacterSize ch_sz) {
         constexpr auto boundary_1_word_1_by_1_cell  = u16{0x2000};
         constexpr auto boundary_1_word_2_by_2_cells = u16{0x800};
@@ -2369,12 +2387,16 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
     switch (s) {
         case ScrollScreen::nbg0:
+            // Color RAM
+            screen.color_ram_address_offset
+                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg0));
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg0);
 
             // Plane
-            screen.plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg0));
+            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_nbg0);
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_a));
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_b));
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneCD::plane_c));
@@ -2385,7 +2407,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                            chctla_.get(CharacterControlA::character_size_nbg0));
 
             // Pattern name data
-            screen.pattern_name_data_size = getPatternNameDataSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size));
+            screen.pattern_name_data_size           = pncn0_.get(PatternNameControlNbg0::pattern_name_data_size);
             screen.character_number_supplement_mode = pncn0_.get(PatternNameControlNbg0::character_number_mode);
             screen.special_priority                 = pncn0_.get(PatternNameControlNbg0::special_priority);
             screen.special_color_calculation        = pncn0_.get(PatternNameControlNbg0::special_color_calculation);
@@ -2393,14 +2415,14 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn0_.get(PatternNameControlNbg0::supplementary_character_number);
 
             // Character pattern
-            screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
+            screen.character_pattern_size = chctla_.get(CharacterControlA::character_size_nbg0);
             screen.character_color_number
                 = getCharacterColorNumber3Bits(chctla_.get(CharacterControlA::character_color_number_nbg0),
                                                tv_screen_status_.screen_mode_type);
             screen.format = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg0));
 
             // Cell
-            screen.cell_size = cell_size;
+            screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
             screen.bitmap_size                      = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg0));
@@ -2411,12 +2433,16 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             break;
         case ScrollScreen::nbg1:
+            // Color RAM
+            screen.color_ram_address_offset
+                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg1));
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg1);
 
             // Plane
-            screen.plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg1));
+            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_nbg1);
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_a));
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_b));
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneCD::plane_c));
@@ -2427,7 +2453,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                            chctla_.get(CharacterControlA::character_size_nbg1));
 
             // Pattern name data
-            screen.pattern_name_data_size = getPatternNameDataSize(pncn1_.get(PatternNameControlNbg1::pattern_name_data_size));
+            screen.pattern_name_data_size           = pncn1_.get(PatternNameControlNbg1::pattern_name_data_size);
             screen.character_number_supplement_mode = pncn1_.get(PatternNameControlNbg1::character_number_mode);
             screen.special_priority                 = pncn1_.get(PatternNameControlNbg1::special_priority);
             screen.special_color_calculation        = pncn1_.get(PatternNameControlNbg1::special_color_calculation);
@@ -2435,14 +2461,14 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn1_.get(PatternNameControlNbg1::supplementary_character_number);
 
             // Character pattern
-            screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg1));
+            screen.character_pattern_size = chctla_.get(CharacterControlA::character_size_nbg1);
             screen.character_color_number
                 = getCharacterColorNumber2Bits(chctla_.get(CharacterControlA::character_color_number_nbg1),
                                                tv_screen_status_.screen_mode_type);
             screen.format = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg1));
 
             // Cell
-            screen.cell_size = cell_size;
+            screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
             screen.bitmap_size                      = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg1));
@@ -2453,12 +2479,16 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             break;
         case ScrollScreen::nbg2:
+            // Color RAM
+            screen.color_ram_address_offset
+                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg2));
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg2);
 
             // Plane
-            screen.plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg2));
+            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_nbg2);
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_a));
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_b));
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneCD::plane_c));
@@ -2469,7 +2499,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                            chctlb_.get(CharacterControlB::character_size_nbg2));
 
             // Pattern name data
-            screen.pattern_name_data_size = getPatternNameDataSize(pncn2_.get(PatternNameControlNbg2::pattern_name_data_size));
+            screen.pattern_name_data_size           = pncn2_.get(PatternNameControlNbg2::pattern_name_data_size);
             screen.character_number_supplement_mode = pncn2_.get(PatternNameControlNbg2::character_number_mode);
             screen.special_priority                 = pncn2_.get(PatternNameControlNbg2::special_priority);
             screen.special_color_calculation        = pncn2_.get(PatternNameControlNbg2::special_color_calculation);
@@ -2477,23 +2507,27 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn2_.get(PatternNameControlNbg2::supplementary_character_number);
 
             // Character pattern
-            screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg2));
+            screen.character_pattern_size = chctlb_.get(CharacterControlB::character_size_nbg2);
             screen.character_color_number
                 = getCharacterColorNumber1Bit(chctlb_.get(CharacterControlB::character_color_number_nbg2));
             screen.bitmap_size          = BitmapSize::not_set;
             screen.bitmap_start_address = 0;
 
             // Cell
-            screen.cell_size = cell_size;
+            screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
             break;
 
         case ScrollScreen::nbg3:
+            // Color RAM
+            screen.color_ram_address_offset
+                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg3));
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg3);
 
             // Plane
-            screen.plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_nbg3));
+            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_nbg3);
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_a));
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_b));
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneCD::plane_c));
@@ -2504,7 +2538,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                            chctlb_.get(CharacterControlB::character_size_nbg3));
 
             // Pattern name data
-            screen.pattern_name_data_size = getPatternNameDataSize(pncn3_.get(PatternNameControlNbg3::pattern_name_data_size));
+            screen.pattern_name_data_size           = pncn3_.get(PatternNameControlNbg3::pattern_name_data_size);
             screen.character_number_supplement_mode = pncn3_.get(PatternNameControlNbg3::character_number_mode);
             screen.special_priority                 = pncn3_.get(PatternNameControlNbg3::special_priority);
             screen.special_color_calculation        = pncn3_.get(PatternNameControlNbg3::special_color_calculation);
@@ -2512,23 +2546,27 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn3_.get(PatternNameControlNbg3::supplementary_character_number);
 
             // Character pattern
-            screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_nbg3));
+            screen.character_pattern_size = chctlb_.get(CharacterControlB::character_size_nbg3);
             screen.character_color_number
                 = getCharacterColorNumber1Bit(chctlb_.get(CharacterControlB::character_color_number_nbg3));
             screen.bitmap_size          = BitmapSize::not_set;
             screen.bitmap_start_address = 0;
 
             // Cell
-            screen.cell_size = cell_size;
+            screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
             break;
 
         case ScrollScreen::rbg0:
+            // Color RAM
+            screen.color_ram_address_offset
+                = getColorRamAddressOffset(craofb_.get(ColorRamAddressOffsetB::color_ram_address_offset_rbg0));
+
             // Map
             screen.map_size   = map_size_rbg;
             screen.map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpa);
 
             // Plane
-            screen.plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_rpa));
+            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_rpa);
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_a));
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_b));
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneCD::plane_c));
@@ -2551,7 +2589,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                            chctlb_.get(CharacterControlB::character_size_rbg0));
 
             // Pattern name data
-            screen.pattern_name_data_size = getPatternNameDataSize(pncr_.get(PatternNameControlRbg0::pattern_name_data_size));
+            screen.pattern_name_data_size           = pncr_.get(PatternNameControlRbg0::pattern_name_data_size);
             screen.character_number_supplement_mode = pncr_.get(PatternNameControlRbg0::character_number_mode);
             screen.special_priority                 = pncr_.get(PatternNameControlRbg0::special_priority);
             screen.special_color_calculation        = pncr_.get(PatternNameControlRbg0::special_color_calculation);
@@ -2559,14 +2597,14 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncr_.get(PatternNameControlRbg0::supplementary_character_number);
 
             // Character pattern
-            screen.character_pattern_size = getCharacterPatternSize(chctlb_.get(CharacterControlB::character_size_rbg0));
+            screen.character_pattern_size = chctlb_.get(CharacterControlB::character_size_rbg0);
             screen.character_color_number
                 = getCharacterColorNumberRbg0(chctlb_.get(CharacterControlB::character_color_number_rbg0),
                                               tv_screen_status_.screen_mode_type);
             screen.format = getScrollScreenFormat(chctlb_.get(CharacterControlB::bitmap_enable_rbg0));
 
             // Cell
-            screen.cell_size = cell_size;
+            screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
             screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(chctlb_.get(CharacterControlB::bitmap_size_rbg0)));
@@ -2577,12 +2615,16 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             break;
 
         case ScrollScreen::rbg1:
+            // Color RAM
+            screen.color_ram_address_offset
+                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg0));
+
             // Map
             screen.map_size   = map_size_rbg;
             screen.map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpb);
 
             // Plane
-            screen.plane_size            = getPlaneSize(plsz_.get(PlaneSizeRegister::plane_size_rpb));
+            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_rpb);
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_a));
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_b));
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneCD::plane_c));
@@ -2605,7 +2647,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                            chctla_.get(CharacterControlA::character_size_nbg0));
 
             // Pattern name data
-            screen.pattern_name_data_size = getPatternNameDataSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size));
+            screen.pattern_name_data_size           = pncn0_.get(PatternNameControlNbg0::pattern_name_data_size);
             screen.character_number_supplement_mode = pncn0_.get(PatternNameControlNbg0::character_number_mode);
             screen.special_priority                 = pncn0_.get(PatternNameControlNbg0::special_priority);
             screen.special_color_calculation        = pncn0_.get(PatternNameControlNbg0::special_color_calculation);
@@ -2613,7 +2655,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn0_.get(PatternNameControlNbg0::supplementary_character_number);
 
             // Character pattern
-            screen.character_pattern_size = getCharacterPatternSize(chctla_.get(CharacterControlA::character_size_nbg0));
+            screen.character_pattern_size = chctla_.get(CharacterControlA::character_size_nbg0);
             screen.character_color_number
                 = getCharacterColorNumber3Bits(chctla_.get(CharacterControlA::character_color_number_nbg0),
                                                tv_screen_status_.screen_mode_type);
@@ -2621,9 +2663,26 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_start_address = 0;
 
             // Cell
-            screen.cell_size = cell_size;
+            screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
             break;
     }
+
+    // Position calculation helpers
+    constexpr auto cells_nb_64             = u16{64};
+    constexpr auto cells_nb_128            = u16{128};
+    screen.character_pattern_screen_offset = [](const CharacterSize sz) {
+        return (sz == CharacterSize::one_by_one) ? ScreenOffset{1, 1} : ScreenOffset{2, 2};
+    }(screen.character_pattern_size);
+    screen.page_screen_offset  = {cells_nb_64, cells_nb_64};
+    screen.plane_screen_offset = [&](const PlaneSize sz) {
+        switch (sz) {
+            case PlaneSize::size_1_by_1: return ScreenOffset{cells_nb_64, cells_nb_64};
+            case PlaneSize::size_2_by_1: return ScreenOffset{cells_nb_128, cells_nb_64};
+            case PlaneSize::size_2_by_2: return ScreenOffset{cells_nb_128, cells_nb_128};
+            default: Log::warning("vdp2", tr("Plane screen offset wasn't properly calculated"));
+        }
+        return ScreenOffset{0, 0};
+    }(screen.plane_size);
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -2777,5 +2836,398 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
 
 auto Vdp2::getScreen(const ScrollScreen s) -> ScrollScreenStatus& { return bg_[util::toUnderlying(s)]; };
 auto Vdp2::getScreen(const ScrollScreen s) const -> const ScrollScreenStatus& { return bg_[util::toUnderlying(s)]; };
+
+void Vdp2::readScrollScreenData(const ScrollScreen s) {
+    const auto& screen = getScreen(s);
+    if (screen.format == ScrollScreenFormat::cell) {
+        // Using a set to prevent calculating same address data multiple times
+        auto unique_addresses = std::unordered_set<u32>{};
+        auto start_addresses  = std::vector<std::pair<u32, ScreenOffset>>{};
+
+        const auto addUniquePlane = [&](const u32 address, const ScreenOffset& offset) {
+            if (unique_addresses.insert(address).second) { start_addresses.emplace_back(address, offset); }
+        };
+
+        const auto offset_x         = screen.plane_screen_offset.x;
+        const auto offset_y         = screen.plane_screen_offset.y;
+        const auto rotation_screens = std::array{ScrollScreen::rbg0, ScrollScreen::rbg1};
+        if (std::none_of(rotation_screens.begin(), rotation_screens.end(), [&s](const ScrollScreen rss) { return rss == s; })) {
+            // For NBG
+            addUniquePlane(screen.plane_a_start_address, ScreenOffset{0, 0});
+            addUniquePlane(screen.plane_b_start_address, ScreenOffset{offset_x, 0});
+            addUniquePlane(screen.plane_c_start_address, ScreenOffset{0, offset_y});
+            addUniquePlane(screen.plane_d_start_address, ScreenOffset{offset_x, offset_y});
+        } else {
+            // For RBG
+            addUniquePlane(screen.plane_a_start_address, ScreenOffset{0, 0});
+            addUniquePlane(screen.plane_b_start_address, ScreenOffset{offset_x, 0});
+            addUniquePlane(screen.plane_c_start_address, ScreenOffset{offset_x * 2, 0});
+            addUniquePlane(screen.plane_d_start_address, ScreenOffset{offset_x * 3, 0});
+            addUniquePlane(screen.plane_e_start_address, ScreenOffset{0, offset_y});
+            addUniquePlane(screen.plane_f_start_address, ScreenOffset{offset_x, offset_y});
+            addUniquePlane(screen.plane_g_start_address, ScreenOffset{offset_x * 2, offset_y});
+            addUniquePlane(screen.plane_h_start_address, ScreenOffset{offset_x * 3, offset_y});
+            addUniquePlane(screen.plane_i_start_address, ScreenOffset{0, offset_y * 2});
+            addUniquePlane(screen.plane_j_start_address, ScreenOffset{offset_x, offset_y * 2});
+            addUniquePlane(screen.plane_k_start_address, ScreenOffset{offset_x * 2, offset_y * 2});
+            addUniquePlane(screen.plane_l_start_address, ScreenOffset{offset_x * 3, offset_y * 2});
+            addUniquePlane(screen.plane_m_start_address, ScreenOffset{0, offset_y * 3});
+            addUniquePlane(screen.plane_n_start_address, ScreenOffset{offset_x, offset_y * 3});
+            addUniquePlane(screen.plane_o_start_address, ScreenOffset{offset_x * 2, offset_y * 3});
+            addUniquePlane(screen.plane_p_start_address, ScreenOffset{offset_x * 3, offset_y * 3});
+        }
+
+        // Unique addresses are handled
+        for (const auto& [addr, offset] : start_addresses) {
+            readPlaneData(screen, addr, offset);
+        }
+    } else { // ScrollScreenFormat::bitmap
+    }
+}
+
+void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset) {
+    auto page_start_address = plane_address;
+    switch (screen.plane_size) {
+        case PlaneSize::size_1_by_1: readPageData(screen, page_start_address, plane_offset); break;
+        case PlaneSize::size_2_by_1:
+            readPageData(screen, page_start_address, plane_offset);
+            page_start_address += screen.page_size;
+            readPageData(screen, page_start_address, ScreenOffset{plane_offset.x + screen.page_screen_offset.x, plane_offset.y});
+            break;
+        case PlaneSize::size_2_by_2: {
+            readPageData(screen, page_start_address, plane_offset);
+            page_start_address += screen.page_size;
+            readPageData(screen, page_start_address, ScreenOffset{plane_offset.x + screen.page_screen_offset.x, plane_offset.y});
+            page_start_address += screen.page_size;
+            readPageData(screen, page_start_address, ScreenOffset{plane_offset.x, plane_offset.y + screen.page_screen_offset.y});
+            page_start_address += screen.page_size;
+            readPageData(
+                screen,
+                page_start_address,
+                ScreenOffset{plane_offset.x + screen.page_screen_offset.x, plane_offset.y + screen.page_screen_offset.y});
+
+            break;
+        }
+        default: Log::warning("vdp2", tr("Plane size invalid !"));
+    }
+}
+
+void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address, const ScreenOffset& page_offset) {
+    // one lambda is declared for each pattern name data configuration.
+    auto getPatternNameData2Words = [](const u32 data, const ScrollScreenStatus&) {
+        auto pattern_name_data                      = PatternNameData{};
+        auto reg                                    = PatternNameData2Words{data};
+        pattern_name_data.character_number          = reg.get(PatternNameData2Words::character_number);
+        pattern_name_data.palette_number            = reg.get(PatternNameData2Words::palette_number);
+        pattern_name_data.special_color_calculation = reg.get(PatternNameData2Words::special_color_calculation);
+        pattern_name_data.special_priority          = reg.get(PatternNameData2Words::special_priority);
+        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData2Words::horizontal_flip);
+        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData2Words::vertical_flip);
+        return pattern_name_data;
+    };
+
+    const auto getPatternNameData1Word1Cell16Colors10Bits = [](const u32 data, const ScrollScreenStatus& screen) {
+        auto pattern_name_data = PatternNameData{};
+        auto reg               = PatternNameData1Word1Cell16Colors10Bits{data};
+
+        constexpr auto cn_disp             = u8{10};
+        pattern_name_data.character_number = (screen.supplementary_character_number << cn_disp);
+        pattern_name_data.character_number |= reg.get(PatternNameData1Word1Cell16Colors10Bits::character_number);
+
+        constexpr auto pn_disp           = u8{4};
+        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+        pattern_name_data.palette_number |= reg.get(PatternNameData1Word1Cell16Colors10Bits::palette_number);
+
+        pattern_name_data.special_color_calculation = screen.special_color_calculation;
+        pattern_name_data.special_priority          = screen.special_priority;
+        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word1Cell16Colors10Bits::horizontal_flip);
+        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word1Cell16Colors10Bits::vertical_flip);
+
+        return pattern_name_data;
+    };
+
+    const auto getPatternNameData1Word1Cell16Colors12Bits = [](const u32 data, const ScrollScreenStatus& screen) {
+        auto pattern_name_data = PatternNameData{};
+        auto reg               = PatternNameData1Word1Cell16Colors12Bits{data};
+
+        constexpr auto cn_disp             = u8{12};
+        pattern_name_data.character_number = (screen.supplementary_character_number << cn_disp);
+        pattern_name_data.character_number |= reg.get(PatternNameData1Word1Cell16Colors12Bits::character_number);
+
+        constexpr auto pn_disp           = u8{4};
+        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+        pattern_name_data.palette_number |= reg.get(PatternNameData1Word1Cell16Colors12Bits::palette_number);
+
+        pattern_name_data.special_color_calculation = screen.special_color_calculation;
+        pattern_name_data.special_priority          = screen.special_priority;
+        pattern_name_data.is_horizontally_flipped   = false;
+        pattern_name_data.is_vertically_flipped     = false;
+
+        return pattern_name_data;
+    };
+
+    const auto getPatternNameData1Word1CellOver16Colors10Bits = [](const u32 data, const ScrollScreenStatus& screen) {
+        auto pattern_name_data = PatternNameData{};
+        auto reg               = PatternNameData1Word1CellOver16Colors10Bits{data};
+
+        constexpr auto cn_disp             = u8{10};
+        pattern_name_data.character_number = (reg.get(PatternNameData1Word1CellOver16Colors10Bits::palette_number) << cn_disp);
+        pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors10Bits::character_number);
+
+        constexpr auto pn_disp           = u8{4};
+        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+
+        pattern_name_data.special_color_calculation = screen.special_color_calculation;
+        pattern_name_data.special_priority          = screen.special_priority;
+        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word1CellOver16Colors10Bits::horizontal_flip);
+        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word1CellOver16Colors10Bits::vertical_flip);
+
+        return pattern_name_data;
+    };
+
+    const auto getPatternNameData1Word1CellOver16Colors12Bits = [](const u32 data, const ScrollScreenStatus& screen) {
+        auto pattern_name_data = PatternNameData{};
+        auto reg               = PatternNameData1Word1CellOver16Colors12Bits{data};
+
+        constexpr auto cn_disp             = u8{12};
+        pattern_name_data.character_number = (screen.supplementary_character_number << cn_disp);
+        pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors12Bits::character_number);
+
+        constexpr auto pn_disp           = u8{4};
+        pattern_name_data.palette_number = (reg.get(PatternNameData1Word1CellOver16Colors12Bits::palette_number) << pn_disp);
+
+        pattern_name_data.special_color_calculation = screen.special_color_calculation;
+        pattern_name_data.special_priority          = screen.special_priority;
+        pattern_name_data.is_horizontally_flipped   = false;
+        pattern_name_data.is_vertically_flipped     = false;
+
+        return pattern_name_data;
+    };
+
+    const auto getPatternNameData1Word4Cells16Colors10Bits = [](const u32 data, const ScrollScreenStatus& screen) {
+        auto pattern_name_data = PatternNameData{};
+        auto reg               = PatternNameData1Word4Cells16Colors10Bits{data};
+
+        constexpr auto cn_disp_1           = u8{10};
+        constexpr auto cn_mask_1           = u8{0x1C};
+        pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
+        constexpr auto cn_disp_2           = u8{2};
+        pattern_name_data.character_number |= (reg.get(PatternNameData1Word4Cells16Colors10Bits::character_number) << cn_disp_2);
+        constexpr auto cn_mask_2 = u8{0x3};
+        pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+
+        constexpr auto pn_disp           = u8{4};
+        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+        pattern_name_data.palette_number |= reg.get(PatternNameData1Word4Cells16Colors10Bits::palette_number);
+
+        pattern_name_data.special_color_calculation = screen.special_color_calculation;
+        pattern_name_data.special_priority          = screen.special_priority;
+        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word4Cells16Colors10Bits::horizontal_flip);
+        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word4Cells16Colors10Bits::vertical_flip);
+
+        return pattern_name_data;
+    };
+
+    const auto getPatternNameData1Word4Cells16Colors12Bits = [](const u32 data, const ScrollScreenStatus& screen) {
+        auto pattern_name_data = PatternNameData{};
+        auto reg               = PatternNameData1Word4Cells16Colors12Bits{data};
+
+        constexpr auto cn_disp_1           = u8{10};
+        constexpr auto cn_mask_1           = u8{0x10};
+        pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
+        constexpr auto cn_disp_2           = u8{2};
+        pattern_name_data.character_number |= (reg.get(PatternNameData1Word4Cells16Colors12Bits::character_number) << cn_disp_2);
+        constexpr auto cn_mask_2 = u8{0x3};
+        pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+
+        constexpr auto pn_disp           = u8{4};
+        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+        pattern_name_data.palette_number |= reg.get(PatternNameData1Word4Cells16Colors12Bits::palette_number);
+
+        pattern_name_data.special_color_calculation = screen.special_color_calculation;
+        pattern_name_data.special_priority          = screen.special_priority;
+        pattern_name_data.is_horizontally_flipped   = false;
+        pattern_name_data.is_vertically_flipped     = false;
+
+        return pattern_name_data;
+    };
+
+    const auto getPatternNameData1Word4CellsOver16Colors10Bits = [](const u32 data, const ScrollScreenStatus& screen) {
+        auto pattern_name_data = PatternNameData{};
+        auto reg               = PatternNameData1Word4CellsOver16Colors10Bits{data};
+
+        constexpr auto cn_disp_1           = u8{10};
+        constexpr auto cn_mask_1           = u8{0x1C};
+        pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
+        constexpr auto cn_disp_2           = u8{2};
+        pattern_name_data.character_number
+            |= (reg.get(PatternNameData1Word4CellsOver16Colors10Bits::character_number) << cn_disp_2);
+        constexpr auto cn_mask_2 = u8{0x3};
+        pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+
+        constexpr auto pn_disp           = u8{4};
+        pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors10Bits::palette_number) << pn_disp);
+
+        pattern_name_data.special_color_calculation = screen.special_color_calculation;
+        pattern_name_data.special_priority          = screen.special_priority;
+        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word4CellsOver16Colors10Bits::horizontal_flip);
+        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word4CellsOver16Colors10Bits::vertical_flip);
+
+        return pattern_name_data;
+    };
+
+    const auto getPatternNameData1Word4CellsOver16Colors12Bits = [](const u32 data, const ScrollScreenStatus& screen) {
+        auto pattern_name_data = PatternNameData{};
+        auto reg               = PatternNameData1Word4CellsOver16Colors12Bits{data};
+
+        constexpr auto cn_disp_1           = u8{10};
+        constexpr auto cn_mask_1           = u8{0x10};
+        pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
+        constexpr auto cn_disp_2           = u8{2};
+        pattern_name_data.character_number
+            |= (reg.get(PatternNameData1Word4CellsOver16Colors12Bits::character_number) << cn_disp_2);
+        constexpr auto cn_mask_2 = u8{0x3};
+        pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+
+        constexpr auto pn_disp           = u8{4};
+        pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors12Bits::palette_number) << pn_disp);
+
+        pattern_name_data.special_color_calculation = screen.special_color_calculation;
+        pattern_name_data.special_priority          = screen.special_priority;
+        pattern_name_data.is_horizontally_flipped   = false;
+        pattern_name_data.is_vertically_flipped     = false;
+
+        return pattern_name_data;
+    };
+
+    // Choosing the lambda corresponding to current configuration
+    using PatterNameDataFunc = PatternNameData (*)(const u32, const ScrollScreenStatus&);
+
+    enum class PatternNameDataEnum {
+        two_words,
+        one_word_1_cell_16_colors_10_bits,
+        one_word_1_cell_16_colors_12_bits,
+        one_word_1_cell_over_16_colors_10_bits,
+        one_word_1_cell_over_16_colors_12_bits,
+        one_word_4_cells_16_colors_10_bits,
+        one_word_4_cells_16_colors_12_bits,
+        one_word_4_cells_over_16_colors_10_bits,
+        one_word_4_cells_over_16_colors_12_bits
+    };
+    auto current_pnd_config = PatternNameDataEnum{};
+
+    if (screen.pattern_name_data_size == PatternNameDataSize::two_words) {
+        current_pnd_config = PatternNameDataEnum::two_words;
+    } else {
+        if (screen.character_pattern_size == CharacterSize::one_by_one) {
+            if (screen.character_color_number == ColorCount::palette_16) {
+                if (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits) {
+                    current_pnd_config = PatternNameDataEnum::one_word_1_cell_16_colors_10_bits;
+                } else { // CharacterNumberSupplementMode::character_number_12_bits
+                    current_pnd_config = PatternNameDataEnum::one_word_1_cell_16_colors_12_bits;
+                }
+            } else { // Over 16 colors
+                if (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits) {
+                    current_pnd_config = PatternNameDataEnum::one_word_1_cell_over_16_colors_10_bits;
+                } else { // CharacterNumberSupplementMode::character_number_12_bits
+                    current_pnd_config = PatternNameDataEnum::one_word_1_cell_over_16_colors_12_bits;
+                }
+            }
+        } else { // CharacterSize::two_by_two
+            if (screen.character_color_number == ColorCount::palette_16) {
+                if (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits) {
+                    current_pnd_config = PatternNameDataEnum::one_word_4_cells_16_colors_10_bits;
+                } else { // CharacterNumberSupplementMode::character_number_12_bits
+                    current_pnd_config = PatternNameDataEnum::one_word_4_cells_16_colors_12_bits;
+                }
+            } else { // Over 16 colors
+                if (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits) {
+                    current_pnd_config = PatternNameDataEnum::one_word_4_cells_over_16_colors_10_bits;
+                } else { // CharacterNumberSupplementMode::character_number_12_bits
+                    current_pnd_config = PatternNameDataEnum::one_word_4_cells_over_16_colors_12_bits;
+                }
+            }
+        }
+    }
+
+    // Assigning the current configuration lambda to a function pointer
+    auto readPatternNameData = PatterNameDataFunc();
+    switch (current_pnd_config) {
+        case PatternNameDataEnum::two_words: readPatternNameData = (getPatternNameData2Words); break;
+        case PatternNameDataEnum::one_word_1_cell_16_colors_10_bits:
+            readPatternNameData = (getPatternNameData1Word1Cell16Colors10Bits);
+            break;
+        case PatternNameDataEnum::one_word_1_cell_16_colors_12_bits:
+            readPatternNameData = (getPatternNameData1Word1Cell16Colors12Bits);
+            break;
+        case PatternNameDataEnum::one_word_1_cell_over_16_colors_10_bits:
+            readPatternNameData = (getPatternNameData1Word1CellOver16Colors10Bits);
+            break;
+        case PatternNameDataEnum::one_word_1_cell_over_16_colors_12_bits:
+            readPatternNameData = (getPatternNameData1Word1CellOver16Colors12Bits);
+            break;
+        case PatternNameDataEnum::one_word_4_cells_16_colors_10_bits:
+            readPatternNameData = (getPatternNameData1Word4Cells16Colors10Bits);
+            break;
+        case PatternNameDataEnum::one_word_4_cells_16_colors_12_bits:
+            readPatternNameData = (getPatternNameData1Word4Cells16Colors12Bits);
+            break;
+        case PatternNameDataEnum::one_word_4_cells_over_16_colors_10_bits:
+            readPatternNameData = (getPatternNameData1Word4CellsOver16Colors10Bits);
+            break;
+        case PatternNameDataEnum::one_word_4_cells_over_16_colors_12_bits:
+            readPatternNameData = (getPatternNameData1Word4CellsOver16Colors12Bits);
+            break;
+    }
+
+    const auto cp_number   = (screen.character_pattern_size == CharacterSize::one_by_one) ? u32{64 * 64} : u32{32 * 32};
+    const auto cp_width    = (screen.character_pattern_size == CharacterSize::one_by_one) ? u32{1} : u32{2};
+    const auto cp_height   = cp_width;
+    const auto pnd_size    = (screen.pattern_name_data_size == PatternNameDataSize::one_word) ? 1 : 2;
+    auto       pnd_address = page_address;
+    auto       cp_offset   = page_offset;
+
+    // Choosing the right precalculated modulo check function
+    const auto& modulo_values
+        = (screen.character_pattern_size == CharacterSize::one_by_one) ? pre_calculated_modulo_64_ : pre_calculated_modulo_32_;
+
+    const auto isEndOfRowReached = [](const std::vector<u32>& modulos, const u32 val) {
+        // Value 0 isn't added to the vector.
+        return std::any_of(modulos.begin(), modulos.end(), [&](const u32 m) { return m == val; });
+    };
+    // auto row_index = u8{};
+    for (u32 i = 0; i < cp_number; ++i) {
+        const auto raw_data = (pnd_size == 1) ? memory()->read<u16>(pnd_address) : memory()->read<u32>(pnd_address);
+        const auto pn_data  = readPatternNameData(raw_data, screen);
+
+        if (isEndOfRowReached(modulo_values, i)) {
+            cp_offset.x = page_offset.x;
+            cp_offset.y += cp_height;
+        }
+
+        readCharacterPattern(screen, pn_data, cp_offset);
+
+        cp_offset.x += cp_width;
+        pnd_address += pnd_size;
+    }
+}
+
+void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd, const ScreenOffset& cp_offset) {
+    // Log::info("vdp2", "({},{})", cp_offset.x, cp_offset.y);
+    if (screen.character_pattern_size == CharacterSize::one_by_one) {
+        readCell(screen, pnd, pnd.character_number);
+    } else { // CharacterSize::two_by_two
+        const auto cell_number  = u32{4};
+        auto       cell_address = pnd.character_number;
+        for (u32 i = 0; i < cell_number; ++i) {
+            readCell(screen, pnd, cell_address);
+            cell_address += screen.cell_size;
+        }
+    }
+}
+
+void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address) {
+    // memory()->vdp2_cram_[10];
+}
 
 } // namespace saturnin::video

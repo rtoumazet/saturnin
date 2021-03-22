@@ -31,11 +31,13 @@
 #include <saturnin/src/emulator_defs.h>    // u8, u16, u32
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
+#include <saturnin/src/video/vdp2_part.h>  // ScrollScreenPos
 #include <saturnin/src/video/vdp2_registers.h>
 
 // Forward declarations
 namespace saturnin::core {
 // class EmulatorContext;
+class Memory;
 class Scu;
 } // namespace saturnin::core
 
@@ -258,7 +260,8 @@ struct ScrollScreenStatus {
     bool is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
 
     ScrollScreenFormat format{ScrollScreenFormat::cell};            ///< Cell or bitmap.
-    ColorCount         character_color_number{ColorCount::not_set}; ///< Color number
+    ColorCount         character_color_number{ColorCount::not_set}; ///< Color number.
+    u16                color_ram_address_offset{};                  ///< The color ram address offset.
 
     // Bitmap
     BitmapSize bitmap_size{BitmapSize::not_set};   ///< Size of the bitmap.
@@ -268,18 +271,25 @@ struct ScrollScreenStatus {
     u32        bitmap_start_address{0};            ///< The bitmap start address.
 
     // Cell
-    u8                            map_size{};               ///< Size of the map (2*2 for NBG / 4*4 for RBG)
-    u8                            map_offset{};             ///< The map offset
-    u8                            plane_size{};             ///< Size of the plane (1*1, 2*1 or 2*2 pages)
-    u16                           page_size{};              ///< Size of the page / pattern name table
-    u8                            pattern_name_data_size{}; ///< Size of the pattern name data (1 or 2 words)
-    CharacterNumberSupplementMode character_number_supplement_mode{CharacterNumberSupplementMode::not_set};
+    u8                            map_size{};                     ///< Size of the map (2*2 for NBG / 4*4 for RBG)
+    u8                            map_offset{};                   ///< The map offset
+    PlaneSize                     plane_size{PlaneSize::not_set}; ///< Size of the plane (1*1, 2*1 or 2*2 pages)
+    u16                           page_size{};                    ///< Size of the page / pattern name table
+    PatternNameDataSize           pattern_name_data_size{};       ///< Size of the pattern name data (1 or 2 words)
+    CharacterNumberSupplementMode character_number_supplement_mode{CharacterNumberSupplementMode::not_set}; ///< 10 bits/12 bits
     u8                            special_priority{};               ///< Special priority bit
     u8                            special_color_calculation{};      ///< Special color calculation bit
     u8                            supplementary_palette_number{};   ///< Supplementary palette number bit
     u8                            supplementary_character_number{}; ///< Supplementary character number bit
-    u8                            character_pattern_size{};         ///< Size of the character pattern (1*1 or 2*2 cells)
-    u8                            cell_size{};                      ///< Size of the cell (8*8 dots)
+    CharacterSize                 character_pattern_size{};         ///< Size of the character pattern (1*1 or 2*2 cells)
+    u16                           cell_size{};                      ///< Size of the cell (8*8 dots)
+
+    // Positioning variables
+    ScreenOffset plane_screen_offset{};             ///< Offset of one plane.
+    ScreenOffset page_screen_offset{};              ///< Offset of one page.
+    ScreenOffset character_pattern_screen_offset{}; ///< Offset of one character pattern.
+    ScreenOffset cell_screen_offset{8, 8};          ///< Offset of one cell.
+    ScreenPos    current_cell_pos{};                ///< The current cell position.
 
     u32 plane_a_start_address{}; ///< The plane A start address
     u32 plane_b_start_address{}; ///< The plane B start address
@@ -299,6 +309,180 @@ struct ScrollScreenStatus {
     u32 plane_n_start_address{}; ///< The plane N start address
     u32 plane_o_start_address{}; ///< The plane O start address
     u32 plane_p_start_address{}; ///< The plane P start address
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct PatternNameData
+///
+/// \brief  Pattern name data.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct PatternNameData {
+    u16  character_number;
+    u8   palette_number;
+    u8   special_priority;
+    u8   special_color_calculation;
+    bool is_vertically_flipped;
+    bool is_horizontally_flipped;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PatternNameData2Words
+///
+/// \brief  Pattern Name Data - 2 words configuration.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PatternNameData2Words : public Register {
+  public:
+    using Register::Register;
+    inline static const auto vertical_flip             = BitRange<bool>{31};   ///< Defines the vertical flip bit.
+    inline static const auto horizontal_flip           = BitRange<bool>{30};   ///< Defines the horizontal flip bit.
+    inline static const auto special_priority          = BitRange<u8>{29};     ///< Defines the special priority bit.
+    inline static const auto special_color_calculation = BitRange<u8>{28};     ///< Defines the special color calculation bit.
+    inline static const auto palette_number            = BitRange<u8>{16, 22}; ///< Defines the palette number.
+    inline static const auto character_number          = BitRange<u16>{0, 14}; ///< Defines the character number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PatternNameData1Word1Cell16Colors10Bits
+///
+/// \brief  Pattern Name Data - 1 word, 1 cell, 16 colors, 10 bits configuration.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PatternNameData1Word1Cell16Colors10Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto vertical_flip    = BitRange<bool>{11};   ///< Defines the vertical flip bit.
+    inline static const auto horizontal_flip  = BitRange<bool>{10};   ///< Defines the horizontal flip bit.
+    inline static const auto palette_number   = BitRange<u8>{12, 15}; ///< Defines the palette number.
+    inline static const auto character_number = BitRange<u16>{0, 9};  ///< Defines the character number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PatternNameData1Word1Cell16Colors12Bits
+///
+/// \brief  Pattern Name Data - 1 word, 1 cell, 16 colors, 12 bits configuration.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PatternNameData1Word1Cell16Colors12Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto palette_number   = BitRange<u8>{12, 15}; ///< Defines the palette number.
+    inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PatternNameData1Word1CellOver16Colors10Bits
+///
+/// \brief  Pattern Name Data - 1 word, 1 cell, over 16 colors, 10 bits configuration.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PatternNameData1Word1CellOver16Colors10Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto vertical_flip    = BitRange<bool>{11};   ///< Defines the vertical flip bit.
+    inline static const auto horizontal_flip  = BitRange<bool>{10};   ///< Defines the horizontal flip bit.
+    inline static const auto palette_number   = BitRange<u8>{12, 14}; ///< Defines the palette number.
+    inline static const auto character_number = BitRange<u16>{0, 9};  ///< Defines the character number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PatternNameData1Word1CellOver16Colors12Bits
+///
+/// \brief  Pattern Name Data - 1 word, 1 cell, over 16 colors, 10 bits configuration.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PatternNameData1Word1CellOver16Colors12Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto palette_number   = BitRange<u8>{12, 14}; ///< Defines the palette number.
+    inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PatternNameData1Word4Cells16Colors10Bits
+///
+/// \brief  Pattern Name Data - 1 word, 4 cells, 16 colors, 10 bits configuration.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PatternNameData1Word4Cells16Colors10Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto vertical_flip    = BitRange<bool>{11};   ///< Defines the vertical flip bit.
+    inline static const auto horizontal_flip  = BitRange<bool>{10};   ///< Defines the horizontal flip bit.
+    inline static const auto palette_number   = BitRange<u8>{12, 15}; ///< Defines the palette number.
+    inline static const auto character_number = BitRange<u16>{0, 9};  ///< Defines the character number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PatternNameData1Word4Cells16Colors12Bits
+///
+/// \brief  Pattern Name Data - 1 word, 4 cells, 16 colors, 12 bits configuration.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PatternNameData1Word4Cells16Colors12Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto palette_number   = BitRange<u8>{12, 15}; ///< Defines the palette number.
+    inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PatternNameData1Word4CellsOver16Colors10Bits
+///
+/// \brief  Pattern Name Data - 1 word, 4 cells, over 16 colors, 10 bits configuration.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PatternNameData1Word4CellsOver16Colors10Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto vertical_flip    = BitRange<bool>{11};   ///< Defines the vertical flip bit.
+    inline static const auto horizontal_flip  = BitRange<bool>{10};   ///< Defines the horizontal flip bit.
+    inline static const auto palette_number   = BitRange<u8>{12, 14}; ///< Defines the palette number.
+    inline static const auto character_number = BitRange<u16>{0, 9};  ///< Defines the character number.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  PatternNameData1Word4CellsOver16Colors12Bits
+///
+/// \brief  Pattern Name Data - 1 word, 4 cells, 16 colors, 12 bits configuration.
+///
+/// \author Runik
+/// \date   15/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class PatternNameData1Word4CellsOver16Colors12Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto palette_number   = BitRange<u8>{12, 14}; ///< Defines the palette number.
+    inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
 };
 
 class Vdp2 {
@@ -490,6 +674,17 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void initializeRegisterNameMap();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::computePrecalculatedData();
+    ///
+    /// \brief  Computes the precalculated data
+    ///
+    /// \author Runik
+    /// \date   21/03/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void computePrecalculatedData();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& hblank_duration);
@@ -864,10 +1059,83 @@ class Vdp2 {
     auto getScreen(const ScrollScreen s) -> ScrollScreenStatus&;
     auto getScreen(const ScrollScreen s) const -> const ScrollScreenStatus&;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::readScrollScreenData(const ScrollScreen s);
+    ///
+    /// \brief  Reads scroll screen data in VRAM
+    ///
+    /// \author Runik
+    /// \date   13/03/2021
+    ///
+    /// \param  s   A ScrollScreen to process.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void readScrollScreenData(const ScrollScreen s);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset);
+    ///
+    /// \brief  Reads plane data.
+    ///
+    /// \author Runik
+    /// \date   13/03/2021
+    ///
+    /// \param  screen          Current scroll screen status.
+    /// \param  plane_address   The plane address.
+    /// \param  plane_offset    The plane offset.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address, const ScreenOffset& page_offset);
+    ///
+    /// \brief  Reads page data.
+    ///
+    /// \author Runik
+    /// \date   14/03/2021
+    ///
+    /// \param  screen          Current scroll screen status.
+    /// \param  page_address    The page address.
+    /// \param  page_offset     The page offset.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void readPageData(const ScrollScreenStatus& screen, const u32 page_address, const ScreenOffset& page_offset);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd);
+    ///
+    /// \brief  Reads a character pattern
+    ///
+    /// \author Runik
+    /// \date   14/03/2021
+    ///
+    /// \param  screen  Current scroll screen status.
+    /// \param  pnd     The pattern name data.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd, const ScreenOffset& cp_offset);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address);
+    ///
+    /// \brief  Reads a cell
+    ///
+    /// \author Runik
+    /// \date   14/03/2021
+    ///
+    /// \param  screen          Current scroll screen status.
+    /// \param  pnd             The pattern name data.
+    /// \param  cell_address    The cell address.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address);
+
     //@{
     // Modules accessors
     [[nodiscard]] auto scu() const -> core::Scu* { return emulator_context_->scu(); };
     [[nodiscard]] auto vdp1() const -> Vdp1* { return emulator_context_->vdp1(); };
+    [[nodiscard]] auto memory() const -> core::Memory* { return emulator_context_->memory(); };
     //@}
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
@@ -897,6 +1165,10 @@ class Vdp2 {
     std::vector<Vertex> render_vertexes_; ///< Contains all the geometry vertexes (VDP1 & VDP2).
 
     std::array<ScrollScreenStatus, 6> bg_; ///< The Normal Backgrounds.
+
+    // Pre calculated modulo values used for character patterns positionning
+    std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
+    std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
     // VDP2 registers
     TvScreenMode                                    tvmd_;

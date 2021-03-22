@@ -367,9 +367,9 @@ class ScreenStatus : public Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class VramSize : u8 {
-    not_set,          ///< Not set.
-    size_4_mbits = 0, ///< 4 Mbit.
-    size_8_mbits = 1  ///< 8 Mbit.
+    not_set      = 0xFF, ///< Not set.
+    size_4_mbits = 0,    ///< 4 Mbit.
+    size_8_mbits = 1     ///< 8 Mbit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -437,9 +437,9 @@ class Reserve : public Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CoefficientTableStorage : u8 {
-    not_set,                 ///< Not set.
-    stored_in_vram      = 0, ///< Coefficient table is stored in VRAM.
-    stored_in_color_ram = 1  ///< Coefficient table is stored in color RAM.
+    not_set             = 0xFF, ///< Not set.
+    stored_in_vram      = 0,    ///< Coefficient table is stored in VRAM.
+    stored_in_color_ram = 1     ///< Coefficient table is stored in color RAM.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -453,7 +453,7 @@ enum class ColorRamMode : u8 {
     mode_1_rgb_5_bits_2048_colors = 0b01, ///< RGB each 5 bits, 2048 colors settings.
     mode_2_rgb_8_bits_1024_colors = 0b10, ///< RGB each 8 bits, 1024 colors settings.
     setting_not_allowed           = 0b11, ///< Setting not allowed.
-    not_set                               ///< Not set.
+    not_set                       = 0xFF  ///< Not set.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -927,8 +927,9 @@ class BitmapPaletteNumberB : public Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PatternNameDataSize : u8 {
-    two_words = 0b0, ///< 2 Words.
-    one_word  = 0b1  ///< 1 Word.
+    not_set   = 0xFF, ///< Not set
+    two_words = 0b0,  ///< 2 Words.
+    one_word  = 0b1   ///< 1 Word.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -938,7 +939,7 @@ enum class PatternNameDataSize : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CharacterNumberSupplementMode : u8 {
-    not_set, ///< Not set.
+    not_set = 0xFF, ///< Not set.
     character_number_10_bits
     = 0b0, ///< Character number in pattern name data is 10 bits. Flip function can be selected in character units.
     character_number_12_bits = 0b1 ///< Character number in pattern name data is 12 bits. Flip function cannot be used.
@@ -1051,6 +1052,7 @@ class PatternNameControlRbg0 : public Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PlaneSize : u8 {
+    not_set     = 0xFF, ///< Not set.
     size_1_by_1 = 0b00, ///< 1 H Page x 1 V Page.
     size_2_by_1 = 0b01, ///< 2 H Page x 1 V Page.
     invalid     = 0b10, ///< Invalid (Do not set).
@@ -2357,6 +2359,10 @@ class ShadowControl : public Register {
 class ColorRamAddressOffsetA : public Register {
   public:
     using Register::Register;
+    inline static const auto color_ram_address_offset_nbg3 = BitRange<u8>{12, 14}; ///< Defines N3CAOSx bits.
+    inline static const auto color_ram_address_offset_nbg2 = BitRange<u8>{8, 10};  ///< Defines N2CAOSx bits.
+    inline static const auto color_ram_address_offset_nbg1 = BitRange<u8>{4, 6};   ///< Defines N1CAOSx bits.
+    inline static const auto color_ram_address_offset_nbg0 = BitRange<u8>{0, 2};   ///< Defines N0CAOSx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2371,6 +2377,8 @@ class ColorRamAddressOffsetA : public Register {
 class ColorRamAddressOffsetB : public Register {
   public:
     using Register::Register;
+    inline static const auto color_ram_address_offset_sprite = BitRange<u8>{4, 6}; ///< Defines SPCAOSx bits.
+    inline static const auto color_ram_address_offset_rbg0   = BitRange<u8>{0, 2}; ///< Defines R0CAOSx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -35,7 +35,7 @@ namespace saturnin::video {
 /// \brief  Values that represent part types
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PartType { unknown, vdp1, vdp2 };
+enum class PartType { not_set, vdp1, vdp2 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  BaseRenderingPart
@@ -59,7 +59,7 @@ class BaseRenderingPart {
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto BaseRenderingPart::globalOrder() -> const u32
+    /// \fn static auto BaseRenderingPart::getGlobalOrder() -> const u32
     ///
     /// \brief  Returns current global order value, which is incremented after being returned.
     ///
@@ -69,10 +69,10 @@ class BaseRenderingPart {
     /// \returns    A const u32.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto globalOrder() -> const u32 { return global_order_++; }
+    static auto getGlobalOrder() -> const u32 { return global_order_++; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void BaseRenderingPart::resetGlobalOrder()
+    /// \fn static void BaseRenderingPart::resetGlobalOrder()
     ///
     /// \brief  Resets global order value.
     ///
@@ -80,10 +80,34 @@ class BaseRenderingPart {
     /// \date   17/02/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void resetGlobalOrder() { global_order_ = 0; }
+    static void resetGlobalOrder() { global_order_ = 0; }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn virtual void BaseRenderingPart::renderPart() = 0;
+    ///
+    /// \brief  Renders the current part.
+    ///
+    /// \author Runik
+    /// \date   18/03/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    virtual void renderPart() = 0;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void BaseRenderingPart::setPartType(const PartType p);
+    ///
+    /// \brief  Sets the part type.
+    ///
+    /// \author Runik
+    /// \date   18/03/2021
+    ///
+    /// \param  p   A PartType.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void setPartType(const PartType p);
 
   private:
-    PartType          part_type_{PartType::unknown}; ///< Type of the part.
+    PartType          part_type_{PartType::not_set}; ///< Type of the part.
     u8                priority_{0};                  ///< Priority of the part.
     u32               order_{0};                     ///< Creation order for the same priority parts (mostly used for VDP1 parts).
     static inline u32 global_order_{0};              ///< Static variable used to get the current part order.

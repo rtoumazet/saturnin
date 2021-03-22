@@ -105,6 +105,9 @@
     <ClCompile Include="src\video\base_rendering_part.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\vdp2_part.cpp">
+      <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -225,6 +228,9 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="src\video\base_rendering_part.h">
+      <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\vdp2_part.h">
       <Filter>Fichiers sources\video</Filter>
     </ClInclude>
   </ItemGroup>

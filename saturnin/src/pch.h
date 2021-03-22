@@ -43,11 +43,13 @@
 #include <memory>
 #include <optional>
 #include <queue>
+#include <set>
 #include <sstream>
 #include <string>
 #include <thread>
 #include <tuple>
 #include <type_traits>
+#include <unordered_set>
 #include <vector>
 
 //// Windows API
