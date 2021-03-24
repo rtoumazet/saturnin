@@ -2914,7 +2914,7 @@ void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_addre
 
 void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address, const ScreenOffset& page_offset) {
     // one lambda is declared for each pattern name data configuration.
-    auto getPatternNameData2Words = [](const u32 data, const ScrollScreenStatus&) {
+    auto getPatternNameData2Words = [](const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) {
         auto pattern_name_data                      = PatternNameData{};
         auto reg                                    = PatternNameData2Words{data};
         pattern_name_data.character_number          = reg.get(PatternNameData2Words::character_number);
@@ -2950,8 +2950,9 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
         auto pattern_name_data = PatternNameData{};
         auto reg               = PatternNameData1Word1Cell16Colors12Bits{data};
 
-        constexpr auto cn_disp             = u8{12};
-        pattern_name_data.character_number = (screen.supplementary_character_number << cn_disp);
+        constexpr auto cn_disp             = u8{10};
+        constexpr auto cn_mask             = u8{0x1C};
+        pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
         pattern_name_data.character_number |= reg.get(PatternNameData1Word1Cell16Colors12Bits::character_number);
 
         constexpr auto pn_disp           = u8{4};
@@ -2989,8 +2990,9 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
         auto pattern_name_data = PatternNameData{};
         auto reg               = PatternNameData1Word1CellOver16Colors12Bits{data};
 
-        constexpr auto cn_disp             = u8{12};
-        pattern_name_data.character_number = (screen.supplementary_character_number << cn_disp);
+        constexpr auto cn_disp             = u8{10};
+        constexpr auto cn_mask             = u8{0x1C};
+        pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
         pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors12Bits::character_number);
 
         constexpr auto pn_disp           = u8{4};
@@ -3183,7 +3185,7 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
     const auto cp_number   = (screen.character_pattern_size == CharacterSize::one_by_one) ? u32{64 * 64} : u32{32 * 32};
     const auto cp_width    = (screen.character_pattern_size == CharacterSize::one_by_one) ? u32{1} : u32{2};
     const auto cp_height   = cp_width;
-    const auto pnd_size    = (screen.pattern_name_data_size == PatternNameDataSize::one_word) ? 1 : 2;
+    const auto pnd_size    = (screen.pattern_name_data_size == PatternNameDataSize::one_word) ? 2 : 4;
     auto       pnd_address = page_address;
     auto       cp_offset   = page_offset;
 
@@ -3195,10 +3197,14 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
         // Value 0 isn't added to the vector.
         return std::any_of(modulos.begin(), modulos.end(), [&](const u32 m) { return m == val; });
     };
-    // auto row_index = u8{};
+
+    const auto character_number_mask
+        = (ram_status_.vram_size == VramSize::size_4_mbits) ? bitmask_vdp2_vram_4mb : bitmask_vdp2_vram_8mb;
+
     for (u32 i = 0; i < cp_number; ++i) {
-        const auto raw_data = (pnd_size == 1) ? memory()->read<u16>(pnd_address) : memory()->read<u32>(pnd_address);
-        const auto pn_data  = readPatternNameData(raw_data, screen);
+        const auto raw_data = (pnd_size == 2) ? memory()->read<u16>(pnd_address) : memory()->read<u32>(pnd_address);
+        auto       pn_data  = readPatternNameData(raw_data, screen);
+        pn_data.character_number &= character_number_mask;
 
         if (isEndOfRowReached(modulo_values, i)) {
             cp_offset.x = page_offset.x;
@@ -3213,21 +3219,80 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
 }
 
 void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd, const ScreenOffset& cp_offset) {
-    // Log::info("vdp2", "({},{})", cp_offset.x, cp_offset.y);
+    constexpr auto character_pattern_boundary = u8{0x20};
+    const auto     character_number_address   = pnd.character_number * character_pattern_boundary;
     if (screen.character_pattern_size == CharacterSize::one_by_one) {
-        readCell(screen, pnd, pnd.character_number);
+        readCell(screen, pnd, character_number_address, cp_offset);
     } else { // CharacterSize::two_by_two
-        const auto cell_number  = u32{4};
-        auto       cell_address = pnd.character_number;
+
+        const auto pnd_offset           = (screen.pattern_name_data_size == PatternNameDataSize::one_word) ? 2 : 4;
+        auto       current_cell_address = character_number_address;
+        auto       cells_address        = std::vector<u32>{};
+
+        const auto cell_number = u32{4};
         for (u32 i = 0; i < cell_number; ++i) {
-            readCell(screen, pnd, cell_address);
-            cell_address += screen.cell_size;
+            cells_address.emplace_back(current_cell_address);
+            current_cell_address += pnd_offset;
+        }
+
+        const auto readCells = [&](const std::array<u8, cell_number>& cells_pos) {
+            auto cell_offset = cp_offset;
+            readCell(screen, pnd, cells_address[cells_pos[0]], cell_offset);
+            cell_offset.x++;
+            readCell(screen, pnd, cells_address[cells_pos[1]], cell_offset);
+            cell_offset.x = cp_offset.x;
+            cell_offset.y++;
+            readCell(screen, pnd, cells_address[cells_pos[2]], cell_offset);
+            cell_offset.x++;
+            readCell(screen, pnd, cells_address[cells_pos[3]], cell_offset);
+        };
+
+        // Depending on the inversion, cells have to be read in a different order.
+        // Flipping itself will be done while rendering.
+        if (!pnd.is_horizontally_flipped && !pnd.is_vertically_flipped) {
+            // Cells layout
+            //  |0|1|
+            //  |2|3|
+            readCells({0, 1, 2, 3});
+            return;
+        }
+        if (pnd.is_horizontally_flipped && pnd.is_vertically_flipped) {
+            // Cells layout
+            // |3|2|
+            // |1|0|
+            readCells({3, 2, 1, 0});
+            return;
+        }
+
+        if (pnd.is_horizontally_flipped) {
+            // Cells layout
+            // |1|0|
+            // |3|2|
+            readCells({1, 0, 3, 2});
+            return;
+        }
+        if (pnd.is_vertically_flipped) {
+            // Cells layout
+            // |2|3|
+            // |0|1|
+            readCells({2, 3, 0, 1});
+            return;
         }
     }
 }
 
-void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address) {
+void Vdp2::readCell(const ScrollScreenStatus& screen,
+                    const PatternNameData&    pnd,
+                    const u32                 cell_address,
+                    const ScreenOffset&       cell_offset) {
     // memory()->vdp2_cram_[10];
+    // screen.
+    // Log::info("vdp2", "({},{})", cell_offset.x, cell_offset.y);
+    Log::info("vdp2", "(Cell address : {:#x})", cell_address);
+    constexpr auto dots_per_cell = u8{64};
+    for (int i = 0; i < dots_per_cell; ++i) {}
+
+    // 4 bits ->
 }
 
 } // namespace saturnin::video

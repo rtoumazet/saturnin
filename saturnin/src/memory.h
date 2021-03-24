@@ -596,7 +596,7 @@ auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
 /// \fn template<typename T, typename U, size_t N> void rawWrite(std::array<U, N>& arr, const u32 addr, const T value)
 ///
 /// \brief  Writes a value to an array. Maps 8, 16 and 32 to u8, uint16_t and u32, respectively.
-///         Usage : writ<u32>(memory, 0, 0x12345678);
+///         Usage : write<u32>(memory, 0, 0x12345678);
 ///         Don't forget to use the related mask against the address value not to be off bounds ...
 ///
 /// \author Runik

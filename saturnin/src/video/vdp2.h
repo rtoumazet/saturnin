@@ -285,11 +285,11 @@ struct ScrollScreenStatus {
     u16                           cell_size{};                      ///< Size of the cell (8*8 dots)
 
     // Positioning variables
-    ScreenOffset plane_screen_offset{};             ///< Offset of one plane.
-    ScreenOffset page_screen_offset{};              ///< Offset of one page.
-    ScreenOffset character_pattern_screen_offset{}; ///< Offset of one character pattern.
-    ScreenOffset cell_screen_offset{8, 8};          ///< Offset of one cell.
-    ScreenPos    current_cell_pos{};                ///< The current cell position.
+    ScreenOffset plane_screen_offset{};             ///< Offset of one plane in cell units.
+    ScreenOffset page_screen_offset{};              ///< Offset of one page in cell units.
+    ScreenOffset character_pattern_screen_offset{}; ///< Offset of one character pattern in cell units.
+    ScreenOffset cell_screen_offset{8, 8};          ///< Offset of one cell in cell units.
+    // ScreenPos    current_cell_pos{};                ///< The current cell position.
 
     u32 plane_a_start_address{}; ///< The plane A start address
     u32 plane_b_start_address{}; ///< The plane B start address
@@ -1082,7 +1082,7 @@ class Vdp2 {
     ///
     /// \param  screen          Current scroll screen status.
     /// \param  plane_address   The plane address.
-    /// \param  plane_offset    The plane offset.
+    /// \param  plane_offset    The plane offset in cell units.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset);
@@ -1097,27 +1097,30 @@ class Vdp2 {
     ///
     /// \param  screen          Current scroll screen status.
     /// \param  page_address    The page address.
-    /// \param  page_offset     The page offset.
+    /// \param  page_offset     The page offset in cell units.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void readPageData(const ScrollScreenStatus& screen, const u32 page_address, const ScreenOffset& page_offset);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd);
+    /// \fn void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd, const ScreenOffset&
+    /// cp_offset);
     ///
     /// \brief  Reads a character pattern
     ///
     /// \author Runik
     /// \date   14/03/2021
     ///
-    /// \param  screen  Current scroll screen status.
-    /// \param  pnd     The pattern name data.
+    /// \param  screen      Current scroll screen status.
+    /// \param  pnd         The pattern name data.
+    /// \param  cp_offset   The character pattern offset in cell units.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd, const ScreenOffset& cp_offset);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address);
+    /// \fn void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
+    /// ScreenOffset& cell_offset);
     ///
     /// \brief  Reads a cell
     ///
@@ -1127,9 +1130,13 @@ class Vdp2 {
     /// \param  screen          Current scroll screen status.
     /// \param  pnd             The pattern name data.
     /// \param  cell_address    The cell address.
+    /// \param  cell_offset     The cell offset, in cell units.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address);
+    void readCell(const ScrollScreenStatus& screen,
+                  const PatternNameData&    pnd,
+                  const u32                 cell_address,
+                  const ScreenOffset&       cell_offset);
 
     //@{
     // Modules accessors
