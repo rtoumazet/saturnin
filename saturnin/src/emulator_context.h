@@ -1,5 +1,5 @@
 //
-// EmulatorContext.h
+// emulator_context.h
 // Saturnin
 //
 // Copyright (c) 2018 Renaud Toumazet
@@ -18,7 +18,7 @@
 //
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \file	EmulatorContext.h
+/// \file	emulator_context.h
 ///
 /// \brief	Emulator context struct.
 ///

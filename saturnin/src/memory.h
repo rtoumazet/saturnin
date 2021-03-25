@@ -520,7 +520,7 @@ class Memory {
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
 
-    /// \Memory handlers
+    /// Memory handlers
     //@{
     ReadHandler<u8>   read_8_handler_;
     ReadHandler<u16>  read_16_handler_;

@@ -1,19 +1,12 @@
 
 *.props
-.vs/saturnin/v15/.suo
-.vs/saturnin/v15/Browse.VC.db
-.vs/saturnin/v15/Browse.VC.opendb
+.vs/*
 *.ipch
 saturnin/lib/vcpkg/vcpkg.cfg
-.vs/saturnin/v16/Browse.VC.db
-.vs/saturnin/v16/Browse.VC.opendb
-.vs/saturnin/v16/.suo
-.vs/ProjectSettings.json
-.vs/slnx.sqlite
-.vs/VSWorkspaceState.json
 saturnin/compile_commands.json
 *.db-wal
 *.db-shm
 saturnin/src/cdrom/.clang-tidy.cpt_backup
 saturnin/src/.clang-tidy.cpt_backup
 *.tmp
+saturnin/doxygen/generated/*
