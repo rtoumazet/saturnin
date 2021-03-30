@@ -86,7 +86,8 @@ constexpr auto vdp1_ram_memory_mask         = u32{0x7FFFF};
 constexpr auto vdp1_framebuffer_memory_mask = u32{0x3FFFF};
 constexpr auto vdp1_registers_memory_mask   = u32{0x1F};
 constexpr auto vdp2_vram_memory_mask        = u32{0x7FFFF};
-constexpr auto vdp2_cram_memory_mask        = u32{0xFFF};
+constexpr auto vdp2_cram_32Kb_memory_mask   = u32{0xFFF};
+constexpr auto vdp2_cram_16Kb_memory_mask   = u32{0x7FF};
 constexpr auto vdp2_registers_memory_mask   = u32{0x1FF};
 constexpr auto scu_memory_mask              = u32{0xFF};
 constexpr auto workram_high_memory_mask     = u32{0xFFFFF};
@@ -253,6 +254,7 @@ class Memory {
     HardwareMode HardwareMode_{HardwareMode::saturn}; ///< Current hardware mode
 
     bool vdp2_cram_was_accessed_{false}; ///< true when VDP2 color ram was accessed
+    u32  vdp2_cram_memory_mask_{0xFFF};  ///< Will be updated depending on color RAM configuration
 
     sh2::Sh2Type sh2_in_operation_; ///< Which SH2 is in operation
     // bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
@@ -1261,7 +1263,7 @@ struct writeVdp2Vram {
 template<typename T>
 struct readVdp2Cram {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.vdp2_cram_, addr & vdp2_cram_memory_mask); };
+        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.vdp2_cram_, addr & m.vdp2_cram_memory_mask_); };
     }
 };
 
@@ -1280,7 +1282,7 @@ template<typename T>
 struct writeVdp2Cram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp2_cram_, addr & vdp2_cram_memory_mask, data);
+            rawWrite<T>(m.vdp2_cram_, addr & m.vdp2_cram_memory_mask_, data);
             m.vdp2_cram_was_accessed_ = true;
         };
     }

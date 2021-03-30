@@ -74,6 +74,7 @@ constexpr auto vertical_res_480   = u16{480};
 constexpr auto vertical_res_512   = u16{512};
 
 constexpr auto vram_start_address = u32{0x25e00000};
+constexpr auto cram_start_address = u32{0x25f00000};
 
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
@@ -206,6 +207,24 @@ enum class ReductionSetting { none, up_to_one_half, up_to_one_quarter };
 enum class VramAccessNumber : u8 { none = 0, one = 1, two = 2, four = 4, eight = 8 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PatternNameDataEnum
+///
+/// \brief  Values that represent the different pattern name data configurations.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PatternNameDataEnum {
+    two_words,
+    one_word_1_cell_16_colors_10_bits,
+    one_word_1_cell_16_colors_12_bits,
+    one_word_1_cell_over_16_colors_10_bits,
+    one_word_1_cell_over_16_colors_12_bits,
+    one_word_4_cells_16_colors_10_bits,
+    one_word_4_cells_16_colors_12_bits,
+    one_word_4_cells_over_16_colors_10_bits,
+    one_word_4_cells_over_16_colors_12_bits
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct TvScreenStatus
 ///
 /// \brief  The TV screen status.
@@ -327,6 +346,32 @@ struct PatternNameData {
     u8   special_color_calculation;
     bool is_vertically_flipped;
     bool is_horizontally_flipped;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct Color
+///
+/// \brief  A color defined by its components.
+///
+/// \author Runik
+/// \date   25/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct Color {
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 a{0xFF};
+    Color(const u16 raw_data) {
+        r = (raw_data & 0x1F) << 3;
+        g = (raw_data & 0x3E0) >> 2;
+        b = (raw_data & 0x7C00) >> 7;
+    };
+    Color(const u32 raw_data) {
+        r = (raw_data & 0x0000FF);
+        g = (raw_data & 0x00FF00) >> 8;
+        b = (raw_data & 0xFF0000) >> 16;
+    };
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -485,10 +530,32 @@ class PatternNameData1Word4CellsOver16Colors12Bits : public Register {
     inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Dots4Bits
+///
+/// \brief  32 bits register splitted in 4 bits dots components.
+///
+/// \author Runik
+/// \date   26/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Dots4Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto dot_0 = BitRange<u8>{28, 31};
+    inline static const auto dot_1 = BitRange<u8>{24, 27};
+    inline static const auto dot_2 = BitRange<u8>{20, 23};
+    inline static const auto dot_3 = BitRange<u8>{16, 19};
+    inline static const auto dot_4 = BitRange<u8>{12, 15};
+    inline static const auto dot_5 = BitRange<u8>{8, 11};
+    inline static const auto dot_6 = BitRange<u8>{4, 7};
+    inline static const auto dot_7 = BitRange<u8>{0, 3};
+};
+
 class Vdp2 {
   public:
-    //@{
-    // Constructors / Destructors
+    ///@{
+    /// Constructors / Destructors
     Vdp2() = delete;
     Vdp2(EmulatorContext* ec) : emulator_context_(ec){};
     Vdp2(const Vdp2&) = delete;
@@ -496,7 +563,7 @@ class Vdp2 {
     auto operator=(const Vdp2&) & -> Vdp2& = delete;
     auto operator=(Vdp2&&) & -> Vdp2& = delete;
     ~Vdp2()                           = default;
-    //@}
+    ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::initialize();
@@ -611,8 +678,8 @@ class Vdp2 {
     // DEBUG methods
     //--------------------------------------------------------------------------------------------------------------
 
+    ///@{
     /// \name Various Vdp2 debug functions
-    //@{
     auto        getDebugGlobalMainData() const -> std::vector<LabelValue>;
     auto        getDebugRamMainData() -> std::vector<LabelValue>;
     auto        getDebugVramAccessMainData() -> std::vector<LabelValue>;
@@ -621,19 +688,19 @@ class Vdp2 {
     auto        getDebugVramAccessBanksName() -> std::vector<std::string>;
     static auto getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue;
     auto        getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>>;
+    ///@}
 
-    //@}
   private:
     //--------------------------------------------------------------------------------------------------------------
     // MEMORY ACCESS methods
     //--------------------------------------------------------------------------------------------------------------
 
-    /// \name Vdp2 registers accessors
-    //@{
+    ///@{
+    ///  \name Vdp2 registers accessors
     [[nodiscard]] auto read16(u32 addr) const -> u16;
     void               write16(u32 addr, u16 data);
     void               write32(u32 addr, u32 data);
-    //@}
+    ///@}
 
     //--------------------------------------------------------------------------------------------------------------
     // MISC methods
@@ -1138,12 +1205,52 @@ class Vdp2 {
                   const u32                 cell_address,
                   const ScreenOffset&       cell_offset);
 
-    //@{
-    // Modules accessors
+    template<typename T>
+    auto readColor(const u32 color_address) -> const Color {
+        return Color(memory()->read<T>(color_address));
+    };
+
+    template<typename T>
+    void
+        readPalette16Dot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen, const u8 palette_number, const u8 dot) {
+        const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (palette_number + dot) * sizeof(T)};
+        auto       color         = readColor<T>(color_address);
+        if (!dot && screen.is_transparency_code_valid) color.a = 0;
+
+        texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
+    };
+
+    template<typename T>
+    void read16ColorsCellData(std::vector<u8>&          texture_data,
+                              const ScrollScreenStatus& screen,
+                              const u8                  palette_number,
+                              const u32                 cell_address) {
+        constexpr auto row_offset      = u8{4};
+        auto           current_address = vram_start_address + cell_address;
+        for (u32 i = 0; i < 8; ++i) {
+            auto row = Dots4Bits(memory()->read<u32>(current_address += row_offset));
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_0));
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_1));
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_2));
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_3));
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_4));
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_5));
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_6));
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_7));
+        }
+    }
+
+    Color read256ColorsData();
+    Color read2048ColorsData();
+    Color read32KColorsData();
+    Color read16MColorsData();
+
+    ///@{
+    /// \name Internal modules accessors
     [[nodiscard]] auto scu() const -> core::Scu* { return emulator_context_->scu(); };
     [[nodiscard]] auto vdp1() const -> Vdp1* { return emulator_context_->vdp1(); };
     [[nodiscard]] auto memory() const -> core::Memory* { return emulator_context_->memory(); };
-    //@}
+    ///@}
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
 
@@ -1177,7 +1284,8 @@ class Vdp2 {
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
-    // VDP2 registers
+    ///@{
+    /// \name VDP2 registers
     TvScreenMode                                    tvmd_;
     ExternalSignalEnable                            exten_;
     ScreenStatus                                    tvstat_;
@@ -1322,6 +1430,20 @@ class Vdp2 {
     ColorOffsetBRed                                 cobr_;
     ColorOffsetBGreen                               cobg_;
     ColorOffsetBBlue                                cobb_;
+    ///@}
 };
+
+///@{
+/// \name Pattern Name Data access functions.
+auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> const PatternNameData;
+auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
+auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
+auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
+auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
+auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
+auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
+auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
+auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
+///@}
 
 } // namespace saturnin::video

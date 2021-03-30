@@ -41,15 +41,15 @@ namespace saturnin::video {
 
 class Vdp2Part : public BaseRenderingPart {
   public:
-    //@{
-    // Constructors / Destructors
-    Vdp2Part() { setPartType(PartType::vdp2); };
+    ///@{
+    /// Constructors / Destructors
+    Vdp2Part() { setVdpType(VdpType::vdp2); };
     Vdp2Part(const Vdp2Part&) = delete;
     Vdp2Part(Vdp2Part&&)      = delete;
     auto operator=(const Vdp2Part&) & -> Vdp2Part& = delete;
     auto operator=(Vdp2Part&&) & -> Vdp2Part& = delete;
     virtual ~Vdp2Part()                       = default;
-    //@}
+    ///@}
 
   private:
     ScreenPos scroll_screen_pos_{};       ///< Position in the scroll screen.

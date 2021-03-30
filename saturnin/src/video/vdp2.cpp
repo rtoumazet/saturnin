@@ -1556,6 +1556,9 @@ void Vdp2::updateRamStatus() {
     ram_status_.vram_a_mode                  = ramctl_.get(RamControl::vram_a_mode);
     ram_status_.vram_b_mode                  = ramctl_.get(RamControl::vram_b_mode);
     ram_status_.color_ram_mode               = ramctl_.get(RamControl::color_ram_mode);
+    memory()->vdp2_cram_memory_mask_         = (ram_status_.color_ram_mode == ColorRamMode::mode_1_rgb_5_bits_2048_colors)
+                                                   ? core::vdp2_cram_32Kb_memory_mask
+                                                   : core::vdp2_cram_16Kb_memory_mask;
     ram_status_.coefficient_table_storage    = ramctl_.get(RamControl::coefficient_table_storage);
     ram_status_.vram_a0_rotation_bank_select = ramctl_.get(RamControl::vram_a0_rotation_bank_select);
     ram_status_.vram_a1_rotation_bank_select = ramctl_.get(RamControl::vram_a1_rotation_bank_select);
@@ -2391,6 +2394,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset
                 = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg0));
 
+            // Transparency
+            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg0)
+                                                 == TransparentDisplayEnable::transparency_code_valid);
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg0);
@@ -2437,6 +2444,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset
                 = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg1));
 
+            // Transparency
+            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg1)
+                                                 == TransparentDisplayEnable::transparency_code_valid);
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg1);
@@ -2483,6 +2493,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset
                 = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg2));
 
+            // Transparency
+            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg2)
+                                                 == TransparentDisplayEnable::transparency_code_valid);
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg2);
@@ -2522,6 +2536,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset
                 = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg3));
 
+            // Transparency
+            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg3)
+                                                 == TransparentDisplayEnable::transparency_code_valid);
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg3);
@@ -2561,6 +2578,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset
                 = getColorRamAddressOffset(craofb_.get(ColorRamAddressOffsetB::color_ram_address_offset_rbg0));
 
+            // Transparency
+            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_rbg0)
+                                                 == TransparentDisplayEnable::transparency_code_valid);
             // Map
             screen.map_size   = map_size_rbg;
             screen.map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpa);
@@ -2619,6 +2639,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset
                 = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg0));
 
+            // Transparency
+            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg0)
+                                                 == TransparentDisplayEnable::transparency_code_valid);
             // Map
             screen.map_size   = map_size_rbg;
             screen.map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpb);
@@ -2913,210 +2936,8 @@ void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_addre
 }
 
 void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address, const ScreenOffset& page_offset) {
-    // one lambda is declared for each pattern name data configuration.
-    auto getPatternNameData2Words = [](const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) {
-        auto pattern_name_data                      = PatternNameData{};
-        auto reg                                    = PatternNameData2Words{data};
-        pattern_name_data.character_number          = reg.get(PatternNameData2Words::character_number);
-        pattern_name_data.palette_number            = reg.get(PatternNameData2Words::palette_number);
-        pattern_name_data.special_color_calculation = reg.get(PatternNameData2Words::special_color_calculation);
-        pattern_name_data.special_priority          = reg.get(PatternNameData2Words::special_priority);
-        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData2Words::horizontal_flip);
-        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData2Words::vertical_flip);
-        return pattern_name_data;
-    };
-
-    const auto getPatternNameData1Word1Cell16Colors10Bits = [](const u32 data, const ScrollScreenStatus& screen) {
-        auto pattern_name_data = PatternNameData{};
-        auto reg               = PatternNameData1Word1Cell16Colors10Bits{data};
-
-        constexpr auto cn_disp             = u8{10};
-        pattern_name_data.character_number = (screen.supplementary_character_number << cn_disp);
-        pattern_name_data.character_number |= reg.get(PatternNameData1Word1Cell16Colors10Bits::character_number);
-
-        constexpr auto pn_disp           = u8{4};
-        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-        pattern_name_data.palette_number |= reg.get(PatternNameData1Word1Cell16Colors10Bits::palette_number);
-
-        pattern_name_data.special_color_calculation = screen.special_color_calculation;
-        pattern_name_data.special_priority          = screen.special_priority;
-        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word1Cell16Colors10Bits::horizontal_flip);
-        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word1Cell16Colors10Bits::vertical_flip);
-
-        return pattern_name_data;
-    };
-
-    const auto getPatternNameData1Word1Cell16Colors12Bits = [](const u32 data, const ScrollScreenStatus& screen) {
-        auto pattern_name_data = PatternNameData{};
-        auto reg               = PatternNameData1Word1Cell16Colors12Bits{data};
-
-        constexpr auto cn_disp             = u8{10};
-        constexpr auto cn_mask             = u8{0x1C};
-        pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
-        pattern_name_data.character_number |= reg.get(PatternNameData1Word1Cell16Colors12Bits::character_number);
-
-        constexpr auto pn_disp           = u8{4};
-        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-        pattern_name_data.palette_number |= reg.get(PatternNameData1Word1Cell16Colors12Bits::palette_number);
-
-        pattern_name_data.special_color_calculation = screen.special_color_calculation;
-        pattern_name_data.special_priority          = screen.special_priority;
-        pattern_name_data.is_horizontally_flipped   = false;
-        pattern_name_data.is_vertically_flipped     = false;
-
-        return pattern_name_data;
-    };
-
-    const auto getPatternNameData1Word1CellOver16Colors10Bits = [](const u32 data, const ScrollScreenStatus& screen) {
-        auto pattern_name_data = PatternNameData{};
-        auto reg               = PatternNameData1Word1CellOver16Colors10Bits{data};
-
-        constexpr auto cn_disp             = u8{10};
-        pattern_name_data.character_number = (reg.get(PatternNameData1Word1CellOver16Colors10Bits::palette_number) << cn_disp);
-        pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors10Bits::character_number);
-
-        constexpr auto pn_disp           = u8{4};
-        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-
-        pattern_name_data.special_color_calculation = screen.special_color_calculation;
-        pattern_name_data.special_priority          = screen.special_priority;
-        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word1CellOver16Colors10Bits::horizontal_flip);
-        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word1CellOver16Colors10Bits::vertical_flip);
-
-        return pattern_name_data;
-    };
-
-    const auto getPatternNameData1Word1CellOver16Colors12Bits = [](const u32 data, const ScrollScreenStatus& screen) {
-        auto pattern_name_data = PatternNameData{};
-        auto reg               = PatternNameData1Word1CellOver16Colors12Bits{data};
-
-        constexpr auto cn_disp             = u8{10};
-        constexpr auto cn_mask             = u8{0x1C};
-        pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
-        pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors12Bits::character_number);
-
-        constexpr auto pn_disp           = u8{4};
-        pattern_name_data.palette_number = (reg.get(PatternNameData1Word1CellOver16Colors12Bits::palette_number) << pn_disp);
-
-        pattern_name_data.special_color_calculation = screen.special_color_calculation;
-        pattern_name_data.special_priority          = screen.special_priority;
-        pattern_name_data.is_horizontally_flipped   = false;
-        pattern_name_data.is_vertically_flipped     = false;
-
-        return pattern_name_data;
-    };
-
-    const auto getPatternNameData1Word4Cells16Colors10Bits = [](const u32 data, const ScrollScreenStatus& screen) {
-        auto pattern_name_data = PatternNameData{};
-        auto reg               = PatternNameData1Word4Cells16Colors10Bits{data};
-
-        constexpr auto cn_disp_1           = u8{10};
-        constexpr auto cn_mask_1           = u8{0x1C};
-        pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
-        constexpr auto cn_disp_2           = u8{2};
-        pattern_name_data.character_number |= (reg.get(PatternNameData1Word4Cells16Colors10Bits::character_number) << cn_disp_2);
-        constexpr auto cn_mask_2 = u8{0x3};
-        pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
-
-        constexpr auto pn_disp           = u8{4};
-        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-        pattern_name_data.palette_number |= reg.get(PatternNameData1Word4Cells16Colors10Bits::palette_number);
-
-        pattern_name_data.special_color_calculation = screen.special_color_calculation;
-        pattern_name_data.special_priority          = screen.special_priority;
-        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word4Cells16Colors10Bits::horizontal_flip);
-        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word4Cells16Colors10Bits::vertical_flip);
-
-        return pattern_name_data;
-    };
-
-    const auto getPatternNameData1Word4Cells16Colors12Bits = [](const u32 data, const ScrollScreenStatus& screen) {
-        auto pattern_name_data = PatternNameData{};
-        auto reg               = PatternNameData1Word4Cells16Colors12Bits{data};
-
-        constexpr auto cn_disp_1           = u8{10};
-        constexpr auto cn_mask_1           = u8{0x10};
-        pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
-        constexpr auto cn_disp_2           = u8{2};
-        pattern_name_data.character_number |= (reg.get(PatternNameData1Word4Cells16Colors12Bits::character_number) << cn_disp_2);
-        constexpr auto cn_mask_2 = u8{0x3};
-        pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
-
-        constexpr auto pn_disp           = u8{4};
-        pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-        pattern_name_data.palette_number |= reg.get(PatternNameData1Word4Cells16Colors12Bits::palette_number);
-
-        pattern_name_data.special_color_calculation = screen.special_color_calculation;
-        pattern_name_data.special_priority          = screen.special_priority;
-        pattern_name_data.is_horizontally_flipped   = false;
-        pattern_name_data.is_vertically_flipped     = false;
-
-        return pattern_name_data;
-    };
-
-    const auto getPatternNameData1Word4CellsOver16Colors10Bits = [](const u32 data, const ScrollScreenStatus& screen) {
-        auto pattern_name_data = PatternNameData{};
-        auto reg               = PatternNameData1Word4CellsOver16Colors10Bits{data};
-
-        constexpr auto cn_disp_1           = u8{10};
-        constexpr auto cn_mask_1           = u8{0x1C};
-        pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
-        constexpr auto cn_disp_2           = u8{2};
-        pattern_name_data.character_number
-            |= (reg.get(PatternNameData1Word4CellsOver16Colors10Bits::character_number) << cn_disp_2);
-        constexpr auto cn_mask_2 = u8{0x3};
-        pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
-
-        constexpr auto pn_disp           = u8{4};
-        pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors10Bits::palette_number) << pn_disp);
-
-        pattern_name_data.special_color_calculation = screen.special_color_calculation;
-        pattern_name_data.special_priority          = screen.special_priority;
-        pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word4CellsOver16Colors10Bits::horizontal_flip);
-        pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word4CellsOver16Colors10Bits::vertical_flip);
-
-        return pattern_name_data;
-    };
-
-    const auto getPatternNameData1Word4CellsOver16Colors12Bits = [](const u32 data, const ScrollScreenStatus& screen) {
-        auto pattern_name_data = PatternNameData{};
-        auto reg               = PatternNameData1Word4CellsOver16Colors12Bits{data};
-
-        constexpr auto cn_disp_1           = u8{10};
-        constexpr auto cn_mask_1           = u8{0x10};
-        pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
-        constexpr auto cn_disp_2           = u8{2};
-        pattern_name_data.character_number
-            |= (reg.get(PatternNameData1Word4CellsOver16Colors12Bits::character_number) << cn_disp_2);
-        constexpr auto cn_mask_2 = u8{0x3};
-        pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
-
-        constexpr auto pn_disp           = u8{4};
-        pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors12Bits::palette_number) << pn_disp);
-
-        pattern_name_data.special_color_calculation = screen.special_color_calculation;
-        pattern_name_data.special_priority          = screen.special_priority;
-        pattern_name_data.is_horizontally_flipped   = false;
-        pattern_name_data.is_vertically_flipped     = false;
-
-        return pattern_name_data;
-    };
-
-    // Choosing the lambda corresponding to current configuration
-    using PatterNameDataFunc = PatternNameData (*)(const u32, const ScrollScreenStatus&);
-
-    enum class PatternNameDataEnum {
-        two_words,
-        one_word_1_cell_16_colors_10_bits,
-        one_word_1_cell_16_colors_12_bits,
-        one_word_1_cell_over_16_colors_10_bits,
-        one_word_1_cell_over_16_colors_12_bits,
-        one_word_4_cells_16_colors_10_bits,
-        one_word_4_cells_16_colors_12_bits,
-        one_word_4_cells_over_16_colors_10_bits,
-        one_word_4_cells_over_16_colors_12_bits
-    };
-    auto current_pnd_config = PatternNameDataEnum{};
+    // Getting the right function depending on the pattern name data configuration.
+    static auto current_pnd_config = PatternNameDataEnum{};
 
     if (screen.pattern_name_data_size == PatternNameDataSize::two_words) {
         current_pnd_config = PatternNameDataEnum::two_words;
@@ -3152,33 +2973,37 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
         }
     }
 
-    // Assigning the current configuration lambda to a function pointer
+    // Assigning the current configuration function to a function pointer
+    // Not using std::function here because of the performance cost.
+    using PatterNameDataFunc = PatternNameData (*)(const u32, const ScrollScreenStatus&);
     auto readPatternNameData = PatterNameDataFunc();
     switch (current_pnd_config) {
-        case PatternNameDataEnum::two_words: readPatternNameData = (getPatternNameData2Words); break;
+        case PatternNameDataEnum::two_words:
+            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData2Words);
+            break;
         case PatternNameDataEnum::one_word_1_cell_16_colors_10_bits:
-            readPatternNameData = (getPatternNameData1Word1Cell16Colors10Bits);
+            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1Cell16Colors10Bits);
             break;
         case PatternNameDataEnum::one_word_1_cell_16_colors_12_bits:
-            readPatternNameData = (getPatternNameData1Word1Cell16Colors12Bits);
+            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1Cell16Colors12Bits);
             break;
         case PatternNameDataEnum::one_word_1_cell_over_16_colors_10_bits:
-            readPatternNameData = (getPatternNameData1Word1CellOver16Colors10Bits);
+            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1CellOver16Colors10Bits);
             break;
         case PatternNameDataEnum::one_word_1_cell_over_16_colors_12_bits:
-            readPatternNameData = (getPatternNameData1Word1CellOver16Colors12Bits);
+            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1CellOver16Colors12Bits);
             break;
         case PatternNameDataEnum::one_word_4_cells_16_colors_10_bits:
-            readPatternNameData = (getPatternNameData1Word4Cells16Colors10Bits);
+            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4Cells16Colors10Bits);
             break;
         case PatternNameDataEnum::one_word_4_cells_16_colors_12_bits:
-            readPatternNameData = (getPatternNameData1Word4Cells16Colors12Bits);
+            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4Cells16Colors12Bits);
             break;
         case PatternNameDataEnum::one_word_4_cells_over_16_colors_10_bits:
-            readPatternNameData = (getPatternNameData1Word4CellsOver16Colors10Bits);
+            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4CellsOver16Colors10Bits);
             break;
         case PatternNameDataEnum::one_word_4_cells_over_16_colors_12_bits:
-            readPatternNameData = (getPatternNameData1Word4CellsOver16Colors12Bits);
+            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4CellsOver16Colors12Bits);
             break;
     }
 
@@ -3285,14 +3110,238 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                     const PatternNameData&    pnd,
                     const u32                 cell_address,
                     const ScreenOffset&       cell_offset) {
-    // memory()->vdp2_cram_[10];
-    // screen.
-    // Log::info("vdp2", "({},{})", cell_offset.x, cell_offset.y);
-    Log::info("vdp2", "(Cell address : {:#x})", cell_address);
-    constexpr auto dots_per_cell = u8{64};
-    for (int i = 0; i < dots_per_cell; ++i) {}
+    constexpr auto  texture_size = 8 * 8 * 4;
+    std::vector<u8> texture_data;
+    texture_data.reserve(texture_size);
 
-    // 4 bits ->
+    if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+        // 32 bits access to color RAM
+        switch (screen.character_color_number) {
+            case ColorCount::palette_16: {
+                read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+                break;
+            }
+            case ColorCount::palette_256: {
+                break;
+            }
+            case ColorCount::palette_2048: {
+                break;
+            }
+            case ColorCount::rgb_32k: {
+                break;
+            }
+            case ColorCount::rgb_16m: {
+                break;
+            }
+        }
+    } else {
+        // 16 bits access to color RAM
+        switch (screen.character_color_number) {
+            case ColorCount::palette_16: {
+                read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                break;
+            }
+            case ColorCount::palette_256: {
+                break;
+            }
+            case ColorCount::palette_2048: {
+                break;
+            }
+            case ColorCount::rgb_32k: {
+                break;
+            }
+            case ColorCount::rgb_16m: {
+                break;
+            }
+        }
+    }
+    Log::info("vdp2", "(Cell address : {:#x})", cell_address);
 }
+
+auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> const PatternNameData {
+    auto pattern_name_data                      = PatternNameData{};
+    auto reg                                    = PatternNameData2Words{data};
+    pattern_name_data.character_number          = reg.get(PatternNameData2Words::character_number);
+    pattern_name_data.palette_number            = reg.get(PatternNameData2Words::palette_number);
+    pattern_name_data.special_color_calculation = reg.get(PatternNameData2Words::special_color_calculation);
+    pattern_name_data.special_priority          = reg.get(PatternNameData2Words::special_priority);
+    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData2Words::horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData2Words::vertical_flip);
+    return pattern_name_data;
+};
+
+auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+    auto pattern_name_data = PatternNameData{};
+    auto reg               = PatternNameData1Word1Cell16Colors10Bits{data};
+
+    constexpr auto cn_disp             = u8{10};
+    pattern_name_data.character_number = (screen.supplementary_character_number << cn_disp);
+    pattern_name_data.character_number |= reg.get(PatternNameData1Word1Cell16Colors10Bits::character_number);
+
+    constexpr auto pn_disp           = u8{4};
+    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+    pattern_name_data.palette_number |= reg.get(PatternNameData1Word1Cell16Colors10Bits::palette_number);
+
+    pattern_name_data.special_color_calculation = screen.special_color_calculation;
+    pattern_name_data.special_priority          = screen.special_priority;
+    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word1Cell16Colors10Bits::horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word1Cell16Colors10Bits::vertical_flip);
+
+    return pattern_name_data;
+};
+
+auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+    auto pattern_name_data = PatternNameData{};
+    auto reg               = PatternNameData1Word1Cell16Colors12Bits{data};
+
+    constexpr auto cn_disp             = u8{10};
+    constexpr auto cn_mask             = u8{0x1C};
+    pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
+    pattern_name_data.character_number |= reg.get(PatternNameData1Word1Cell16Colors12Bits::character_number);
+
+    constexpr auto pn_disp           = u8{4};
+    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+    pattern_name_data.palette_number |= reg.get(PatternNameData1Word1Cell16Colors12Bits::palette_number);
+
+    pattern_name_data.special_color_calculation = screen.special_color_calculation;
+    pattern_name_data.special_priority          = screen.special_priority;
+    pattern_name_data.is_horizontally_flipped   = false;
+    pattern_name_data.is_vertically_flipped     = false;
+
+    return pattern_name_data;
+};
+
+auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+    auto pattern_name_data = PatternNameData{};
+    auto reg               = PatternNameData1Word1CellOver16Colors10Bits{data};
+
+    constexpr auto cn_disp             = u8{10};
+    pattern_name_data.character_number = (reg.get(PatternNameData1Word1CellOver16Colors10Bits::palette_number) << cn_disp);
+    pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors10Bits::character_number);
+
+    constexpr auto pn_disp           = u8{4};
+    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+
+    pattern_name_data.special_color_calculation = screen.special_color_calculation;
+    pattern_name_data.special_priority          = screen.special_priority;
+    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word1CellOver16Colors10Bits::horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word1CellOver16Colors10Bits::vertical_flip);
+
+    return pattern_name_data;
+};
+
+auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+    auto pattern_name_data = PatternNameData{};
+    auto reg               = PatternNameData1Word1CellOver16Colors12Bits{data};
+
+    constexpr auto cn_disp             = u8{10};
+    constexpr auto cn_mask             = u8{0x1C};
+    pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
+    pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors12Bits::character_number);
+
+    constexpr auto pn_disp           = u8{4};
+    pattern_name_data.palette_number = (reg.get(PatternNameData1Word1CellOver16Colors12Bits::palette_number) << pn_disp);
+
+    pattern_name_data.special_color_calculation = screen.special_color_calculation;
+    pattern_name_data.special_priority          = screen.special_priority;
+    pattern_name_data.is_horizontally_flipped   = false;
+    pattern_name_data.is_vertically_flipped     = false;
+
+    return pattern_name_data;
+};
+
+auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+    auto pattern_name_data = PatternNameData{};
+    auto reg               = PatternNameData1Word4Cells16Colors10Bits{data};
+
+    constexpr auto cn_disp_1           = u8{10};
+    constexpr auto cn_mask_1           = u8{0x1C};
+    pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
+    constexpr auto cn_disp_2           = u8{2};
+    pattern_name_data.character_number |= (reg.get(PatternNameData1Word4Cells16Colors10Bits::character_number) << cn_disp_2);
+    constexpr auto cn_mask_2 = u8{0x3};
+    pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+
+    constexpr auto pn_disp           = u8{4};
+    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+    pattern_name_data.palette_number |= reg.get(PatternNameData1Word4Cells16Colors10Bits::palette_number);
+
+    pattern_name_data.special_color_calculation = screen.special_color_calculation;
+    pattern_name_data.special_priority          = screen.special_priority;
+    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word4Cells16Colors10Bits::horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word4Cells16Colors10Bits::vertical_flip);
+
+    return pattern_name_data;
+};
+
+auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+    auto pattern_name_data = PatternNameData{};
+    auto reg               = PatternNameData1Word4Cells16Colors12Bits{data};
+
+    constexpr auto cn_disp_1           = u8{10};
+    constexpr auto cn_mask_1           = u8{0x10};
+    pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
+    constexpr auto cn_disp_2           = u8{2};
+    pattern_name_data.character_number |= (reg.get(PatternNameData1Word4Cells16Colors12Bits::character_number) << cn_disp_2);
+    constexpr auto cn_mask_2 = u8{0x3};
+    pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+
+    constexpr auto pn_disp           = u8{4};
+    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+    pattern_name_data.palette_number |= reg.get(PatternNameData1Word4Cells16Colors12Bits::palette_number);
+
+    pattern_name_data.special_color_calculation = screen.special_color_calculation;
+    pattern_name_data.special_priority          = screen.special_priority;
+    pattern_name_data.is_horizontally_flipped   = false;
+    pattern_name_data.is_vertically_flipped     = false;
+
+    return pattern_name_data;
+};
+
+auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+    auto pattern_name_data = PatternNameData{};
+    auto reg               = PatternNameData1Word4CellsOver16Colors10Bits{data};
+
+    constexpr auto cn_disp_1           = u8{10};
+    constexpr auto cn_mask_1           = u8{0x1C};
+    pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
+    constexpr auto cn_disp_2           = u8{2};
+    pattern_name_data.character_number |= (reg.get(PatternNameData1Word4CellsOver16Colors10Bits::character_number) << cn_disp_2);
+    constexpr auto cn_mask_2 = u8{0x3};
+    pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+
+    constexpr auto pn_disp           = u8{4};
+    pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors10Bits::palette_number) << pn_disp);
+
+    pattern_name_data.special_color_calculation = screen.special_color_calculation;
+    pattern_name_data.special_priority          = screen.special_priority;
+    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word4CellsOver16Colors10Bits::horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word4CellsOver16Colors10Bits::vertical_flip);
+
+    return pattern_name_data;
+};
+
+auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+    auto pattern_name_data = PatternNameData{};
+    auto reg               = PatternNameData1Word4CellsOver16Colors12Bits{data};
+
+    constexpr auto cn_disp_1           = u8{10};
+    constexpr auto cn_mask_1           = u8{0x10};
+    pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
+    constexpr auto cn_disp_2           = u8{2};
+    pattern_name_data.character_number |= (reg.get(PatternNameData1Word4CellsOver16Colors12Bits::character_number) << cn_disp_2);
+    constexpr auto cn_mask_2 = u8{0x3};
+    pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+
+    constexpr auto pn_disp           = u8{4};
+    pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors12Bits::palette_number) << pn_disp);
+
+    pattern_name_data.special_color_calculation = screen.special_color_calculation;
+    pattern_name_data.special_priority          = screen.special_priority;
+    pattern_name_data.is_horizontally_flipped   = false;
+    pattern_name_data.is_vertically_flipped     = false;
+
+    return pattern_name_data;
+};
 
 } // namespace saturnin::video

@@ -30,12 +30,12 @@
 namespace saturnin::video {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PartType
+/// \enum   VdpType
 ///
-/// \brief  Values that represent part types
+/// \brief  Values that represent VDP types
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PartType { not_set, vdp1, vdp2 };
+enum class VdpType { not_set, vdp1, vdp2 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  BaseRenderingPart
@@ -48,15 +48,15 @@ enum class PartType { not_set, vdp1, vdp2 };
 
 class BaseRenderingPart {
   public:
-    //@{
-    // Constructors / Destructors
+    ///@{
+    /// Constructors / Destructors
     BaseRenderingPart()                         = default;
     BaseRenderingPart(const BaseRenderingPart&) = delete;
     BaseRenderingPart(BaseRenderingPart&&)      = delete;
     auto operator=(const BaseRenderingPart&) & -> BaseRenderingPart& = delete;
     auto operator=(BaseRenderingPart&&) & -> BaseRenderingPart& = delete;
     virtual ~BaseRenderingPart()                                = default;
-    //@}
+    ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto BaseRenderingPart::getGlobalOrder() -> const u32
@@ -94,22 +94,22 @@ class BaseRenderingPart {
     virtual void renderPart() = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void BaseRenderingPart::setPartType(const PartType p);
+    /// \fn void BaseRenderingPart::setPartType(const VdpType p);
     ///
     /// \brief  Sets the part type.
     ///
     /// \author Runik
     /// \date   18/03/2021
     ///
-    /// \param  p   A PartType.
+    /// \param  p   A VdpType.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void setPartType(const PartType p);
+    void setVdpType(const VdpType p);
 
   private:
-    PartType          part_type_{PartType::not_set}; ///< Type of the part.
-    u8                priority_{0};                  ///< Priority of the part.
-    u32               order_{0};                     ///< Creation order for the same priority parts (mostly used for VDP1 parts).
-    static inline u32 global_order_{0};              ///< Static variable used to get the current part order.
+    VdpType           vdp_type_{VdpType::not_set}; ///< Type of the part.
+    u8                priority_{0};                ///< Priority of the part.
+    u32               order_{0};                   ///< Creation order for the same priority parts (mostly used for VDP1 parts).
+    static inline u32 global_order_{0};            ///< Static variable used to get the current part order.
 };
 } // namespace saturnin::video
