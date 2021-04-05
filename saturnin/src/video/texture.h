@@ -37,7 +37,12 @@ class Texture {
     ///@{
     /// Constructors / Destructors
     Texture() = delete;
-    Texture(const VdpType vp, const u32 address, const ColorCount color_count) { calculateKey(vp, address, color_count); };
+    Texture(const VdpType    vp,
+            const u32        address,
+            const ColorCount color_count,
+            std::vector<u8>& texture,
+            const u16        width,
+            const u16        height);
     Texture(const Texture&) = default;
     Texture(Texture&&)      = default;
     auto operator=(const Texture&) & -> Texture& = default;
@@ -59,7 +64,7 @@ class Texture {
     auto getKey() const -> const size_t { return key_; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Texture::storeTexture(const Texture&& t);
+    /// \fn static auto Texture::storeTexture(const Texture&& t) -> size_t;
     ///
     /// \brief  Stores a texture, replacing the existing one if any.
     ///
@@ -67,9 +72,26 @@ class Texture {
     /// \date   29/03/2021
     ///
     /// \param  t   A Texture to store.
+    ///
+    /// \returns    The key of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void storeTexture(const Texture&& t);
+    static auto storeTexture(const Texture&& t) -> size_t;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static auto Texture::getTexture(const size_t key) -> Texture&;
+    ///
+    /// \brief  Gets a texture
+    ///
+    /// \author Runik
+    /// \date   04/04/2021
+    ///
+    /// \param  key Key of the texture.
+    ///
+    /// \returns    The texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto getTexture(const size_t key) -> Texture&;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::doesTextureExist(const Texture& t) -> bool;
@@ -85,6 +107,10 @@ class Texture {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static auto doesTextureExist(const Texture& t) -> bool;
+
+    u16             width_{};  ///< The texture width.
+    u16             height_{}; ///< The texture height.
+    std::vector<u8> data_{};   ///< Raw texture data.
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,12 +131,12 @@ class Texture {
     static std::map<size_t, Texture> texture_storage_; ///< The texture storage
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
-    u16     width_{};                    ///< The texture width.
-    u16     height_{};                   ///< The texture height.
-    bool    is_discarded{false};         ///< True if the texture is discarded.
-    size_t  key_{};                      ///< The key of the part.
+    // u16     width_{};                    ///< The texture width.
+    // u16     height_{};                   ///< The texture height.
+    bool   is_discarded{false}; ///< True if the texture is discarded.
+    size_t key_{};              ///< The key of the part.
 
-    std::vector<u8> data_{}; ///< Raw texture data.
+    // std::vector<u8> data_{}; ///< Raw texture data.
 
     u32 api_handle_{}; ///< Handle to the graphics API.
 };

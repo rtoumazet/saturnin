@@ -25,11 +25,36 @@ namespace util = saturnin::utilities;
 
 namespace saturnin::video {
 
+using core::Log;
+using core::tr;
+
 std::map<size_t, Texture> Texture::texture_storage_;
 
-void Texture::storeTexture(const Texture&& t) {
+Texture::Texture(const VdpType    vp,
+                 const u32        address,
+                 const ColorCount color_count,
+                 std::vector<u8>& texture,
+                 const u16        width,
+                 const u16        height) :
+    width_(width),
+    height_(height) {
+    calculateKey(vp, address, color_count);
+    data_ = std::move(texture);
+};
+
+// static //
+auto Texture::storeTexture(const Texture&& t) -> size_t {
     texture_storage_.erase(t.getKey());
     texture_storage_.emplace(t.getKey(), t);
+    return t.getKey();
+}
+
+// static //
+auto Texture::getTexture(const size_t key) -> Texture& {
+    const auto it = texture_storage_.find(key);
+    if (it != texture_storage_.end()) { return it->second; }
+    Log::error("texture", tr("Texture with key {:#x} wasn't found ..."), key);
+    throw std::runtime_error("Texture error !");
 }
 
 // static //

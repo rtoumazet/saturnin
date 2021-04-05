@@ -57,18 +57,24 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     //    vertexes_.emplace_back(v.y);
     //}
     if (!state.vdp2()->getRenderVertexes().empty()) {
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].x);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].y);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1].x);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1].y);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].x);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].y);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].x);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].y);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].x);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].y);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3].x);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3].y);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].x);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].y);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1].x);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1].y);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].x);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].y);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].x);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].y);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].x);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].y);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3].x);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3].y);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0]);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1]);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2]);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0]);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2]);
+        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3]);
     }
     preRender();
     render();

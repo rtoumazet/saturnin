@@ -19,5 +19,22 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp2_part.h>
+#include <saturnin/src/video/vdp2.h> // PatternNameData
 
-namespace saturnin::video {}
+namespace saturnin::video {
+
+Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos&& pos, size_t texture_key) {
+    setVdpType(VdpType::vdp2);
+    scroll_screen_pos_       = std::move(pos);
+    character_number_        = pnd.character_number;
+    palette_number_          = pnd.palette_number;
+    is_horizontally_flipped_ = pnd.is_horizontally_flipped;
+    is_vertically_flipped_   = pnd.is_vertically_flipped;
+    texture_key_             = texture_key;
+};
+
+void Vdp2Part::renderPart(){};
+
+void Vdp2Part::displayCell(const u32 x, const u32 y) {}
+
+} // namespace saturnin::video

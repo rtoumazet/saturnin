@@ -53,6 +53,7 @@ auto Log::initialize() -> bool {
                                                         "exception",
                                                         "smpc",
                                                         "scsp",
+                                                        "texture",
                                                         "unimplemented"};
     for (auto& n : loggers_names) {
         createLogger(n, sink_list);

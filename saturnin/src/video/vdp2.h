@@ -18,7 +18,7 @@
 //
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \file	vdp1.h
+/// \file	vdp2.h
 ///
 /// \brief	Declares the Vdp2 class and related functions.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -689,7 +689,7 @@ class Vdp2 {
     static auto getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue;
     auto        getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>>;
     ///@}
-
+    std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
   private:
     //--------------------------------------------------------------------------------------------------------------
     // MEMORY ACCESS methods
@@ -1205,10 +1205,34 @@ class Vdp2 {
                   const u32                 cell_address,
                   const ScreenOffset&       cell_offset);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> auto Vdp2::readColor(const u32 color_address) -> const Color
+    ///
+    /// \brief  Reads a color
+    ///
+    /// \tparam T   u32 for 32 bits color, u16 for 16 bits colors.
+    /// \param  color_address   The color address.
+    ///
+    /// \returns    The color read.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     template<typename T>
     auto readColor(const u32 color_address) -> const Color {
         return Color(memory()->read<T>(color_address));
     };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> void Vdp2::readPalette16Dot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen,
+    /// const u8 palette_number, const u8 dot)
+    ///
+    /// \brief  Reads palette 16 dot
+    ///
+    /// \tparam T   Generic type parameter.
+    /// \param [in,out] texture_data    Raw texture data.
+    /// \param          screen          Current scroll screen status.
+    /// \param          palette_number  The palette number.
+    /// \param          dot             The dot to read.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
     void
@@ -1278,11 +1302,13 @@ class Vdp2 {
 
     std::vector<Vertex> render_vertexes_; ///< Contains all the geometry vertexes (VDP1 & VDP2).
 
-    std::array<ScrollScreenStatus, 6> bg_; ///< The Normal Backgrounds.
+    std::array<ScrollScreenStatus, 6> bg_; ///< The backgrounds status.
 
     // Pre calculated modulo values used for character patterns positionning
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
+
+    // std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
 
     ///@{
     /// \name VDP2 registers

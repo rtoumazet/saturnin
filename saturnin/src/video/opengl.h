@@ -48,8 +48,8 @@ constexpr auto minimum_window_height = u16{512};
 
 class Opengl {
   public:
-    //@{
-    // Constructors / Destructors
+    ///@{
+    /// Constructors / Destructors
     Opengl() = delete;
     Opengl(core::Config* config);
     Opengl(const Opengl&) = delete;
@@ -57,7 +57,7 @@ class Opengl {
     auto operator=(const Opengl&) & -> Opengl& = delete;
     auto operator=(Opengl&&) & -> Opengl& = delete;
     virtual ~Opengl()                     = default;
-    //@}
+    ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::displayFramebuffer(core::EmulatorContext& state);
@@ -171,8 +171,8 @@ class Opengl {
 
     [[nodiscard]] virtual auto generateTextureFromVector(u32 width, u32 height, const std::vector<u8>& data) const -> u32;
 
-    u32              fbo_{};    ///< Framebuffer Object used for rendering to texture.
-    std::vector<s16> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display
+    u32                 fbo_{};    ///< Framebuffer Object used for rendering to texture.
+    std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display
 
   private:
     //@{

@@ -27,6 +27,7 @@
 #include <saturnin/src/scu_registers.h>
 #include <saturnin/src/utilities.h> // toUnderlying
 #include <saturnin/src/video/opengl.h>
+#include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2_registers.h>
 
@@ -2250,10 +2251,36 @@ void Vdp2::populateRenderData() {
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
             if (isScreenDisplayed(ScrollScreen::nbg3)) {
                 render_vertexes_.clear();
-                render_vertexes_.emplace_back(Vertex{0, 0});
-                render_vertexes_.emplace_back(Vertex{0, 224});
-                render_vertexes_.emplace_back(Vertex{352, 224});
-                render_vertexes_.emplace_back(Vertex{352, 0});
+                render_vertexes_.emplace_back(Vertex{0, 0, 0, 0, 0, 0, 0.0, 1.0});
+                render_vertexes_.emplace_back(Vertex{0, 224, 0, 0, 0, 0, 0.0, 0.0});
+                render_vertexes_.emplace_back(Vertex{352, 224, 0, 0, 0, 0, 1.0, 0.0});
+                render_vertexes_.emplace_back(Vertex{352, 0, 0, 0, 0, 0, 1.0, 1.0});
+
+                auto pnd                      = PatternNameData{};
+                pnd.character_number          = 0;
+                pnd.is_horizontally_flipped   = false;
+                pnd.is_vertically_flipped     = false;
+                pnd.palette_number            = 0;
+                pnd.special_color_calculation = 0;
+                pnd.special_priority          = 0;
+
+                auto texture = std::vector<u8>(
+                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                     0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                     0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                     0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+
+                const auto key = Texture::storeTexture(Texture(VdpType::vdp2, 0, ColorCount::palette_16, texture, 8, 8));
+                auto       p   = Vdp2Part(pnd, ScreenPos{0, 0}, key);
+                vdp2_parts_[3].clear();
+                vdp2_parts_[3].push_back(std::move(p));
 
                 updateScrollScreenStatus(ScrollScreen::nbg3);
                 readScrollScreenData(ScrollScreen::nbg3);
@@ -3133,6 +3160,9 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
             case ColorCount::rgb_16m: {
                 break;
             }
+            default: {
+                Log::warning("vdp2", tr("Character color number invalid !"));
+            }
         }
     } else {
         // 16 bits access to color RAM
@@ -3152,6 +3182,9 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
             }
             case ColorCount::rgb_16m: {
                 break;
+            }
+            default: {
+                Log::warning("vdp2", tr("Character color number invalid !"));
             }
         }
     }

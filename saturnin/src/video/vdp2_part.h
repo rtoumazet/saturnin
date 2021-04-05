@@ -30,6 +30,8 @@
 
 namespace saturnin::video {
 
+struct PatternNameData;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Vdp2Part
 ///
@@ -39,24 +41,41 @@ namespace saturnin::video {
 /// \date   18/03/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Vdp2Part : public BaseRenderingPart {
+class Vdp2Part final : public BaseRenderingPart {
   public:
     ///@{
     /// Constructors / Destructors
-    Vdp2Part() { setVdpType(VdpType::vdp2); };
-    Vdp2Part(const Vdp2Part&) = delete;
-    Vdp2Part(Vdp2Part&&)      = delete;
-    auto operator=(const Vdp2Part&) & -> Vdp2Part& = delete;
-    auto operator=(Vdp2Part&&) & -> Vdp2Part& = delete;
-    virtual ~Vdp2Part()                       = default;
+    Vdp2Part(const PatternNameData& pnd, ScreenPos&& pos, size_t texture_key);
+    Vdp2Part(const Vdp2Part&) = default;
+    Vdp2Part(Vdp2Part&&)      = default;
+    auto operator=(const Vdp2Part&) & -> Vdp2Part& = default;
+    auto operator=(Vdp2Part&&) & -> Vdp2Part& = default;
+    ~Vdp2Part()                               = default;
     ///@}
+
+    void renderPart() override;
+
+    void displayCell(const u32 x, const u32 y);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto final::getTextureKey() const -> const size_t
+    ///
+    /// \brief  Gets texture key
+    ///
+    /// \author Runik
+    /// \date   04/04/2021
+    ///
+    /// \returns    The texture key.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getTextureKey() const -> const size_t { return texture_key_; };
 
   private:
     ScreenPos scroll_screen_pos_{};       ///< Position in the scroll screen.
-    u32       character_number_{};        ///< The character number.
-    u32       palette_number_{};          ///< The palette number.
-    u32       color_address_{};           ///< The color address.
+    u16       character_number_{};        ///< The character number.
+    u8        palette_number_{};          ///< The palette number.
     bool      is_horizontally_flipped_{}; ///< True if the part is horizontally flipped.
     bool      is_vertically_flipped_{};   ///< True if the part is vertically flipped.
+    size_t    texture_key_{};             ///< Link to the texture.
 };
 } // namespace saturnin::video

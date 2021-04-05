@@ -41,6 +41,7 @@
 #include <saturnin/src/locale.h>
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/opengl.h>
+#include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp2.h>
 
 using namespace gl;
@@ -99,11 +100,16 @@ auto OpenglModern::createVertexShader() -> u32 {
     const char* vertex_shader_source = R"(
         #version 330 core
 
-        in vec2 position;
+        layout (location = 0) in vec2 vtx_position;
+        layout (location = 1) in vec2 vtx_tex_coord;
         uniform mat4 proj_matrix;
 
+        out vec2 frg_tex_coord;
+
         void main() {
-            gl_Position = proj_matrix * vec4(position, 0.0, 1.0);
+            gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
+            //frg_tex_coord = vec2(vtx_tex_coord.x, vtx_tex_coord.y);
+            frg_tex_coord = vec2(vtx_tex_coord);
         }
     )";
 
@@ -119,12 +125,17 @@ auto OpenglModern::createFragmentShader() -> u32 {
     const char* fragment_shader_source = R"(
         #version 330 core
         
-        out vec4 color;
+        in vec2 frg_tex_coord;
+
+        //out vec4 color;
+        out vec4 frg_color;
+
+        uniform sampler2D texture1;
         
         void main()
         {
             //color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-            color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+            frg_color = texture(texture1, frg_tex_coord);
         } 
     )";
 
@@ -157,28 +168,6 @@ void OpenglModern::deleteShaders(std::vector<u32> shaders) {
 }
 
 void OpenglModern::setupTriangle() {
-    /* clang-format off */ 
-    //constexpr std::array<u16, 18> vertices = {
-    //    0,  0,  0, // 0
-    //    0,  224, 0, // 1
-    //    320, 224, 0, // 2
-
-    //    0,  0, 0, // 0
-    //    320, 224, 0, // 2
-    //    320, 0, 0,  // 3
-    //};
-    //constexpr std::array<u16, 12> vertices = {
-    //    0,  0,   // 0
-    //    0,  224, // 1
-    //    320, 224, // 2
-
-    //    0,  0, // 0
-    //    320, 224, // 2
-    //    320, 0,   // 3
-    //};
-
-    /* clang-format on */
-
     glGenVertexArrays(1, &vao_);
     auto vertex_buffer = u32{};
     glGenBuffers(1, &vertex_buffer);
@@ -188,20 +177,59 @@ void OpenglModern::setupTriangle() {
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, sizeof(decltype(vertexes_)::value_type) * vertexes_.size(), vertexes_.data(), GL_STATIC_DRAW);
-    ;
-    glVertexAttribPointer(0, 2, GLenum::GL_UNSIGNED_SHORT, GL_FALSE, 0, nullptr);
+
+    // position
+    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, 16, 0);
     glEnableVertexAttribArray(0);
+
+    // texture coords
+    auto stride = GLint(2 * sizeof(s16) + 4 * sizeof(u8) + 2 * sizeof(float));
+    auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
+    glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(1);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer
     // object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GLenum::GL_ARRAY_BUFFER, 0);
 
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying
     // other VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly
     // necessary.
     glBindVertexArray(0);
+
+    // Texture
+    // auto texture = u32{};
+    glGenTextures(1, &texture_);
+    glBindTexture(GLenum::GL_TEXTURE_2D,
+                  texture_); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+
+    // set the texture wrapping parameters
+    glTexParameteri(GLenum::GL_TEXTURE_2D,
+                    GLenum::GL_TEXTURE_WRAP_S,
+                    GLenum::GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_LINEAR);
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_LINEAR);
+    auto window = glfwGetCurrentContext();
+    auto state  = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
+    if (!state->vdp2()->vdp2_parts_[3].empty()) {
+        auto  key = state->vdp2()->vdp2_parts_[3][0].getTextureKey();
+        auto& tex = Texture::getTexture(key);
+
+        glTexImage2D(GLenum::GL_TEXTURE_2D,
+                     0,
+                     GLenum::GL_RGB,
+                     tex.width_,
+                     tex.height_,
+                     0,
+                     GLenum::GL_RGB,
+                     GLenum::GL_UNSIGNED_BYTE,
+                     tex.data_.data());
+    }
 }
 void OpenglModern::drawTriangle() {
+    glBindTexture(GL_TEXTURE_2D, texture_);
     glUseProgram(program_shader_);
     glBindVertexArray(vao_); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep
                              // things a bit more organized

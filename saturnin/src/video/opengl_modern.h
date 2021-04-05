@@ -121,6 +121,7 @@ class OpenglModern final : public Opengl {
 
     u32 program_shader_;
     u32 vao_;
+    u32 texture_;
 };
 
 }; // namespace saturnin::video

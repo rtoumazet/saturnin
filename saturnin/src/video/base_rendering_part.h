@@ -51,10 +51,10 @@ class BaseRenderingPart {
     ///@{
     /// Constructors / Destructors
     BaseRenderingPart()                         = default;
-    BaseRenderingPart(const BaseRenderingPart&) = delete;
-    BaseRenderingPart(BaseRenderingPart&&)      = delete;
-    auto operator=(const BaseRenderingPart&) & -> BaseRenderingPart& = delete;
-    auto operator=(BaseRenderingPart&&) & -> BaseRenderingPart& = delete;
+    BaseRenderingPart(const BaseRenderingPart&) = default;
+    BaseRenderingPart(BaseRenderingPart&&)      = default;
+    auto operator=(const BaseRenderingPart&) & -> BaseRenderingPart& = default;
+    auto operator=(BaseRenderingPart&&) & -> BaseRenderingPart& = default;
     virtual ~BaseRenderingPart()                                = default;
     ///@}
 
@@ -104,7 +104,7 @@ class BaseRenderingPart {
     /// \param  p   A VdpType.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void setVdpType(const VdpType p);
+    void setVdpType(const VdpType p) { vdp_type_ = p; };
 
   private:
     VdpType           vdp_type_{VdpType::not_set}; ///< Type of the part.
