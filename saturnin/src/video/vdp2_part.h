@@ -55,7 +55,7 @@ class Vdp2Part final : public BaseRenderingPart {
 
     void renderPart() override;
 
-    void displayCell(const u32 x, const u32 y);
+    void displayCell();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto final::getTextureKey() const -> const size_t

@@ -108,10 +108,6 @@ class Texture {
 
     static auto doesTextureExist(const Texture& t) -> bool;
 
-    u16             width_{};  ///< The texture width.
-    u16             height_{}; ///< The texture height.
-    std::vector<u8> data_{};   ///< Raw texture data.
-
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Texture::calculateKey(const VdpType vp, const u32 address, const ColorCount color_count);
@@ -131,12 +127,12 @@ class Texture {
     static std::map<size_t, Texture> texture_storage_; ///< The texture storage
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
-    // u16     width_{};                    ///< The texture width.
-    // u16     height_{};                   ///< The texture height.
-    bool   is_discarded{false}; ///< True if the texture is discarded.
-    size_t key_{};              ///< The key of the part.
+    u16     width_{};                    ///< The texture width.
+    u16     height_{};                   ///< The texture height.
+    bool    is_discarded{false};         ///< True if the texture is discarded.
+    size_t  key_{};                      ///< The key of the part.
 
-    // std::vector<u8> data_{}; ///< Raw texture data.
+    std::vector<u8> raw_data_{}; ///< Raw texture data.
 
     u32 api_handle_{}; ///< Handle to the graphics API.
 };

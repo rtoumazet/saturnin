@@ -199,34 +199,34 @@ void OpenglModern::setupTriangle() {
 
     // Texture
     // auto texture = u32{};
-    glGenTextures(1, &texture_);
-    glBindTexture(GLenum::GL_TEXTURE_2D,
-                  texture_); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // glGenTextures(1, &texture_);
+    // glBindTexture(GLenum::GL_TEXTURE_2D,
+    //              texture_); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
 
-    // set the texture wrapping parameters
-    glTexParameteri(GLenum::GL_TEXTURE_2D,
-                    GLenum::GL_TEXTURE_WRAP_S,
-                    GLenum::GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_LINEAR);
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_LINEAR);
-    auto window = glfwGetCurrentContext();
-    auto state  = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
-    if (!state->vdp2()->vdp2_parts_[3].empty()) {
-        auto  key = state->vdp2()->vdp2_parts_[3][0].getTextureKey();
-        auto& tex = Texture::getTexture(key);
+    //// set the texture wrapping parameters
+    // glTexParameteri(GLenum::GL_TEXTURE_2D,
+    //                GLenum::GL_TEXTURE_WRAP_S,
+    //                GLenum::GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+    //// set texture filtering parameters
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
+    // auto window = glfwGetCurrentContext();
+    // auto state  = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
+    // if (!state->vdp2()->vdp2_parts_[3].empty()) {
+    //    auto  key = state->vdp2()->vdp2_parts_[3][0].getTextureKey();
+    //    auto& tex = Texture::getTexture(key);
 
-        glTexImage2D(GLenum::GL_TEXTURE_2D,
-                     0,
-                     GLenum::GL_RGB,
-                     tex.width_,
-                     tex.height_,
-                     0,
-                     GLenum::GL_RGB,
-                     GLenum::GL_UNSIGNED_BYTE,
-                     tex.data_.data());
-    }
+    //    glTexImage2D(GLenum::GL_TEXTURE_2D,
+    //                 0,
+    //                 GLenum::GL_RGB,
+    //                 tex.width_,
+    //                 tex.height_,
+    //                 0,
+    //                 GLenum::GL_RGB,
+    //                 GLenum::GL_UNSIGNED_BYTE,
+    //                 tex.data_.data());
+    //}
 }
 void OpenglModern::drawTriangle() {
     glBindTexture(GL_TEXTURE_2D, texture_);

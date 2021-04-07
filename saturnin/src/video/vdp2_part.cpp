@@ -33,8 +33,37 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos&& pos, size_t texture_k
     texture_key_             = texture_key;
 };
 
-void Vdp2Part::renderPart(){};
+void Vdp2Part::renderPart() { displayCell(); };
 
-void Vdp2Part::displayCell(const u32 x, const u32 y) {}
+void Vdp2Part::displayCell() {
+    // glGenTextures(1, &texture_);
+    // glBindTexture(GLenum::GL_TEXTURE_2D,
+    //              texture_); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+
+    //// set the texture wrapping parameters
+    // glTexParameteri(GLenum::GL_TEXTURE_2D,
+    //                GLenum::GL_TEXTURE_WRAP_S,
+    //                GLenum::GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+    //// set texture filtering parameters
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
+    // auto window = glfwGetCurrentContext();
+    // auto state  = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
+    // if (!state->vdp2()->vdp2_parts_[3].empty()) {
+    //    auto  key = state->vdp2()->vdp2_parts_[3][0].getTextureKey();
+    //    auto& tex = Texture::getTexture(key);
+
+    //    glTexImage2D(GLenum::GL_TEXTURE_2D,
+    //                 0,
+    //                 GLenum::GL_RGB,
+    //                 tex.width_,
+    //                 tex.height_,
+    //                 0,
+    //                 GLenum::GL_RGB,
+    //                 GLenum::GL_UNSIGNED_BYTE,
+    //                 tex.data_.data());
+    //}
+}
 
 } // namespace saturnin::video

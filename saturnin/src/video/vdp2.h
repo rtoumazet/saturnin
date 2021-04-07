@@ -273,10 +273,11 @@ struct RamStatus {
 /// \date   23/02/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScrollScreenStatus {
-    bool is_display_enabled{};               ///< True when displayed.
-    bool is_display_enabled_dirty{};         ///< True when displayed state was changed.
-    bool is_transparency_code_valid{};       ///< True when transparency code is valid.
-    bool is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
+    ScrollScreen scroll_screen{};                    ///< The scroll screen value
+    bool         is_display_enabled{};               ///< True when displayed.
+    bool         is_display_enabled_dirty{};         ///< True when displayed state was changed.
+    bool         is_transparency_code_valid{};       ///< True when transparency code is valid.
+    bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
 
     ScrollScreenFormat format{ScrollScreenFormat::cell};            ///< Cell or bitmap.
     ColorCount         character_color_number{ColorCount::not_set}; ///< Color number.
@@ -308,7 +309,6 @@ struct ScrollScreenStatus {
     ScreenOffset page_screen_offset{};              ///< Offset of one page in cell units.
     ScreenOffset character_pattern_screen_offset{}; ///< Offset of one character pattern in cell units.
     ScreenOffset cell_screen_offset{8, 8};          ///< Offset of one cell in cell units.
-    // ScreenPos    current_cell_pos{};                ///< The current cell position.
 
     u32 plane_a_start_address{}; ///< The plane A start address
     u32 plane_b_start_address{}; ///< The plane B start address
@@ -1225,7 +1225,7 @@ class Vdp2 {
     /// \fn template<typename T> void Vdp2::readPalette16Dot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen,
     /// const u8 palette_number, const u8 dot)
     ///
-    /// \brief  Reads palette 16 dot
+    /// \brief  Reads one dot in 16 colors palette format.
     ///
     /// \tparam T   Generic type parameter.
     /// \param [in,out] texture_data    Raw texture data.
@@ -1243,6 +1243,19 @@ class Vdp2 {
 
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
     };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> void saturnin::video::Vdp2::read16ColorsCellData(std::vector<u8>& texture_data, const
+    /// ScrollScreenStatus& screen, const u8 palette_number, const u32 cell_address)
+    ///
+    /// \brief  Reads one cell data in 16 colors palette format.
+    ///
+    /// \tparam T   Generic type parameter.
+    /// \param [in,out] texture_data    Raw texture data.
+    /// \param          screen          Current scroll screen status.
+    /// \param          palette_number  The palette number.
+    /// \param          cell_address    The cell address.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
     void read16ColorsCellData(std::vector<u8>&          texture_data,
@@ -1461,15 +1474,15 @@ class Vdp2 {
 
 ///@{
 /// \name Pattern Name Data access functions.
-auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> const PatternNameData;
-auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
-auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
-auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
-auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
-auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
-auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
-auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
-auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData;
+auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> PatternNameData;
+auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData;
+auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData;
+auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData;
+auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData;
+auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData;
+auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData;
+auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData;
+auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData;
 ///@}
 
 } // namespace saturnin::video

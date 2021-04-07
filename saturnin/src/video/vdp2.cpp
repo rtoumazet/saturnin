@@ -2250,37 +2250,37 @@ void Vdp2::populateRenderData() {
 
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
             if (isScreenDisplayed(ScrollScreen::nbg3)) {
-                render_vertexes_.clear();
-                render_vertexes_.emplace_back(Vertex{0, 0, 0, 0, 0, 0, 0.0, 1.0});
-                render_vertexes_.emplace_back(Vertex{0, 224, 0, 0, 0, 0, 0.0, 0.0});
-                render_vertexes_.emplace_back(Vertex{352, 224, 0, 0, 0, 0, 1.0, 0.0});
-                render_vertexes_.emplace_back(Vertex{352, 0, 0, 0, 0, 0, 1.0, 1.0});
+                // render_vertexes_.clear();
+                // render_vertexes_.emplace_back(Vertex{0, 0, 0, 0, 0, 0, 0.0, 1.0});
+                // render_vertexes_.emplace_back(Vertex{0, 224, 0, 0, 0, 0, 0.0, 0.0});
+                // render_vertexes_.emplace_back(Vertex{352, 224, 0, 0, 0, 0, 1.0, 0.0});
+                // render_vertexes_.emplace_back(Vertex{352, 0, 0, 0, 0, 0, 1.0, 1.0});
 
-                auto pnd                      = PatternNameData{};
-                pnd.character_number          = 0;
-                pnd.is_horizontally_flipped   = false;
-                pnd.is_vertically_flipped     = false;
-                pnd.palette_number            = 0;
-                pnd.special_color_calculation = 0;
-                pnd.special_priority          = 0;
+                // auto pnd                      = PatternNameData{};
+                // pnd.character_number          = 0;
+                // pnd.is_horizontally_flipped   = false;
+                // pnd.is_vertically_flipped     = false;
+                // pnd.palette_number            = 0;
+                // pnd.special_color_calculation = 0;
+                // pnd.special_priority          = 0;
 
-                auto texture = std::vector<u8>(
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-                     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-                     0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+                // auto texture = std::vector<u8>(
+                //    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                //     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                //     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
+                //     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                //     0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                //     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                //     0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
+                //     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                //     0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                //     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                //     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
 
-                const auto key = Texture::storeTexture(Texture(VdpType::vdp2, 0, ColorCount::palette_16, texture, 8, 8));
-                auto       p   = Vdp2Part(pnd, ScreenPos{0, 0}, key);
-                vdp2_parts_[3].clear();
-                vdp2_parts_[3].push_back(std::move(p));
+                // const auto key = Texture::storeTexture(Texture(VdpType::vdp2, 0, ColorCount::palette_16, texture, 8, 8));
+                // auto       p   = Vdp2Part(pnd, ScreenPos{0, 0}, key);
+                // vdp2_parts_[3].clear();
+                // vdp2_parts_[3].push_back(std::move(p));
 
                 updateScrollScreenStatus(ScrollScreen::nbg3);
                 readScrollScreenData(ScrollScreen::nbg3);
@@ -2413,7 +2413,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return vram_start_address + map_offset * boundary;
     };
 
-    auto& screen = getScreen(s);
+    auto& screen         = getScreen(s);
+    screen.scroll_screen = s;
 
     switch (s) {
         case ScrollScreen::nbg0:
@@ -2911,20 +2912,24 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
             // For RBG
             addUniquePlane(screen.plane_a_start_address, ScreenOffset{0, 0});
             addUniquePlane(screen.plane_b_start_address, ScreenOffset{offset_x, 0});
-            addUniquePlane(screen.plane_c_start_address, ScreenOffset{offset_x * 2, 0});
-            addUniquePlane(screen.plane_d_start_address, ScreenOffset{offset_x * 3, 0});
+            addUniquePlane(screen.plane_c_start_address, ScreenOffset{static_cast<u16>(offset_x * 2), 0});
+            addUniquePlane(screen.plane_d_start_address, ScreenOffset{static_cast<u16>(offset_x * 3), 0});
             addUniquePlane(screen.plane_e_start_address, ScreenOffset{0, offset_y});
             addUniquePlane(screen.plane_f_start_address, ScreenOffset{offset_x, offset_y});
-            addUniquePlane(screen.plane_g_start_address, ScreenOffset{offset_x * 2, offset_y});
-            addUniquePlane(screen.plane_h_start_address, ScreenOffset{offset_x * 3, offset_y});
-            addUniquePlane(screen.plane_i_start_address, ScreenOffset{0, offset_y * 2});
-            addUniquePlane(screen.plane_j_start_address, ScreenOffset{offset_x, offset_y * 2});
-            addUniquePlane(screen.plane_k_start_address, ScreenOffset{offset_x * 2, offset_y * 2});
-            addUniquePlane(screen.plane_l_start_address, ScreenOffset{offset_x * 3, offset_y * 2});
-            addUniquePlane(screen.plane_m_start_address, ScreenOffset{0, offset_y * 3});
-            addUniquePlane(screen.plane_n_start_address, ScreenOffset{offset_x, offset_y * 3});
-            addUniquePlane(screen.plane_o_start_address, ScreenOffset{offset_x * 2, offset_y * 3});
-            addUniquePlane(screen.plane_p_start_address, ScreenOffset{offset_x * 3, offset_y * 3});
+            addUniquePlane(screen.plane_g_start_address, ScreenOffset{static_cast<u16>(offset_x * 2), offset_y});
+            addUniquePlane(screen.plane_h_start_address, ScreenOffset{static_cast<u16>(offset_x * 3), offset_y});
+            addUniquePlane(screen.plane_i_start_address, ScreenOffset{0, static_cast<u16>(offset_y * 2)});
+            addUniquePlane(screen.plane_j_start_address, ScreenOffset{offset_x, static_cast<u16>(offset_y * 2)});
+            addUniquePlane(screen.plane_k_start_address,
+                           ScreenOffset{static_cast<u16>(offset_x * 2), static_cast<u16>(offset_y * 2)});
+            addUniquePlane(screen.plane_l_start_address,
+                           ScreenOffset{static_cast<u16>(offset_x * 3), static_cast<u16>(offset_y * 2)});
+            addUniquePlane(screen.plane_m_start_address, ScreenOffset{0, static_cast<u16>(offset_y * 3)});
+            addUniquePlane(screen.plane_n_start_address, ScreenOffset{offset_x, static_cast<u16>(offset_y * 3)});
+            addUniquePlane(screen.plane_o_start_address,
+                           ScreenOffset{static_cast<u16>(offset_x * 2), static_cast<u16>(offset_y * 3)});
+            addUniquePlane(screen.plane_p_start_address,
+                           ScreenOffset{static_cast<u16>(offset_x * 3), static_cast<u16>(offset_y * 3)});
         }
 
         // Unique addresses are handled
@@ -2939,22 +2944,23 @@ void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_addre
     auto page_start_address = plane_address;
     switch (screen.plane_size) {
         case PlaneSize::size_1_by_1: readPageData(screen, page_start_address, plane_offset); break;
-        case PlaneSize::size_2_by_1:
+        case PlaneSize::size_2_by_1: {
             readPageData(screen, page_start_address, plane_offset);
             page_start_address += screen.page_size;
-            readPageData(screen, page_start_address, ScreenOffset{plane_offset.x + screen.page_screen_offset.x, plane_offset.y});
+            const auto page_offset_x = static_cast<u16>(plane_offset.x + screen.page_screen_offset.x);
+            readPageData(screen, page_start_address, ScreenOffset{page_offset_x, plane_offset.y});
             break;
+        }
         case PlaneSize::size_2_by_2: {
             readPageData(screen, page_start_address, plane_offset);
             page_start_address += screen.page_size;
-            readPageData(screen, page_start_address, ScreenOffset{plane_offset.x + screen.page_screen_offset.x, plane_offset.y});
+            const auto page_offset_x = static_cast<u16>(plane_offset.x + screen.page_screen_offset.x);
+            readPageData(screen, page_start_address, ScreenOffset{page_offset_x, plane_offset.y});
             page_start_address += screen.page_size;
-            readPageData(screen, page_start_address, ScreenOffset{plane_offset.x, plane_offset.y + screen.page_screen_offset.y});
+            const auto page_offset_y = static_cast<u16>(plane_offset.y + screen.page_screen_offset.y);
+            readPageData(screen, page_start_address, ScreenOffset{plane_offset.x, page_offset_y});
             page_start_address += screen.page_size;
-            readPageData(
-                screen,
-                page_start_address,
-                ScreenOffset{plane_offset.x + screen.page_screen_offset.x, plane_offset.y + screen.page_screen_offset.y});
+            readPageData(screen, page_start_address, ScreenOffset{page_offset_x, page_offset_y});
 
             break;
         }
@@ -3146,6 +3152,10 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
         switch (screen.character_color_number) {
             case ColorCount::palette_16: {
                 read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+                const auto key
+                    = Texture::storeTexture(Texture(VdpType::vdp2, cell_address, ColorCount::palette_16, texture_data, 8, 8));
+                auto p = Vdp2Part(pnd, ScreenPos{static_cast<u16>(cell_offset.x * 8), static_cast<u16>(cell_offset.y * 8)}, key);
+                vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
                 break;
             }
             case ColorCount::palette_256: {
@@ -3191,7 +3201,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     Log::info("vdp2", "(Cell address : {:#x})", cell_address);
 }
 
-auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> const PatternNameData {
+auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data                      = PatternNameData{};
     auto reg                                    = PatternNameData2Words{data};
     pattern_name_data.character_number          = reg.get(PatternNameData2Words::character_number);
@@ -3203,7 +3213,7 @@ auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScree
     return pattern_name_data;
 };
 
-auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word1Cell16Colors10Bits{data};
 
@@ -3223,7 +3233,7 @@ auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScre
     return pattern_name_data;
 };
 
-auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word1Cell16Colors12Bits{data};
 
@@ -3244,7 +3254,7 @@ auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScre
     return pattern_name_data;
 };
 
-auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word1CellOver16Colors10Bits{data};
 
@@ -3263,7 +3273,7 @@ auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const Scroll
     return pattern_name_data;
 };
 
-auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word1CellOver16Colors12Bits{data};
 
@@ -3283,7 +3293,7 @@ auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const Scroll
     return pattern_name_data;
 };
 
-auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word4Cells16Colors10Bits{data};
 
@@ -3307,7 +3317,7 @@ auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScr
     return pattern_name_data;
 };
 
-auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word4Cells16Colors12Bits{data};
 
@@ -3331,7 +3341,7 @@ auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScr
     return pattern_name_data;
 };
 
-auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word4CellsOver16Colors10Bits{data};
 
@@ -3354,7 +3364,7 @@ auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const Scrol
     return pattern_name_data;
 };
 
-auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> const PatternNameData {
+auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word4CellsOver16Colors12Bits{data};
 
