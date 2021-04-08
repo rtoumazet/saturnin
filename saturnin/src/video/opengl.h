@@ -56,8 +56,14 @@ class Opengl {
     Opengl(Opengl&&)      = delete;
     auto operator=(const Opengl&) & -> Opengl& = delete;
     auto operator=(Opengl&&) & -> Opengl& = delete;
-    virtual ~Opengl()                     = default;
+    ~Opengl();
     ///@}
+
+    void initialize();
+    void shutdown();
+    void preRender();
+    void render();
+    void postRender();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::displayFramebuffer(core::EmulatorContext& state);
@@ -116,7 +122,7 @@ class Opengl {
     /// \param  height  The new window height.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    virtual void onWindowResize(u16 width, u16 height);
+    void onWindowResize(u16 width, u16 height);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::updateScreenResolution();
@@ -129,13 +135,40 @@ class Opengl {
 
     void updateScreenResolution();
 
-    //@{
-    // Getters / Setters
+    ///@{
+    /// Getters / Setters
     void saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
     auto saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
     void hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
     auto hostScreenResolution() const -> ScreenResolution { return host_screen_resolution_; };
-    //@}
+    ///@}
+
+    auto createVertexShader() -> u32;
+    auto createFragmentShader() -> u32;
+    auto createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
+    void deleteShaders(std::vector<u32> shaders);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::setupTriangle();
+    ///
+    /// \brief  Sets up the triangle using shaders using modern OpenGL.
+    ///
+    /// \author Runik
+    /// \date   12/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void setupTriangle();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::drawTriangle();
+    ///
+    /// \brief  Draws a triangle using modern OpenGL.
+    ///
+    /// \author Runik
+    /// \date   12/10/2019
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void drawTriangle();
 
   protected:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,19 +210,22 @@ class Opengl {
   private:
     //@{
     // Abstract functions
-    virtual void initialize() = 0;
-    virtual void shutdown()   = 0;
-    virtual void preRender()  = 0;
-    virtual void render()     = 0;
-    virtual void postRender() = 0;
+
     //@}
 
     core::Config* config_; ///< Configuration object
 
-    u32 rendering_texture_{}; ///< Destination texture for render to texture.
+    u32  rendering_texture_{}; ///< Destination texture for render to texture.
+    bool is_legacy_opengl_{};  ///< True if rendering in legacy opengl.
 
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
+
+    u32 saturn_framebuffer_{}; ///< Framebuffer object used as Saturn's framebuffer. Will be rendered to a texture.
+
+    u32 program_shader_;
+    u32 vao_;
+    u32 texture_;
 
     // std::vector<s16> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display.
 };

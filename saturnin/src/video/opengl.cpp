@@ -26,9 +26,16 @@
 #include <lodepng.h>
 #include <sstream> // stringstream
 #include <glbinding/glbinding.h>
-#include <glbinding/gl/gl.h>
+//#include <glbinding/gl/gl.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>
+#include <glbinding/gl21/gl.h>
+#include <glbinding/gl21ext/gl.h>
+#include <glbinding/gl33core/gl.h>
+#include <glbinding/gl33ext/gl.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #define GLFW_INCLUDE_NONE
@@ -37,17 +44,115 @@
 #include <saturnin/src/locale.h> // tr
 #include <saturnin/src/log.h>
 #include <saturnin/src/video/gui.h>
-#include <saturnin/src/video/opengl_legacy.h>
-#include <saturnin/src/video/opengl_modern.h>
+#include <saturnin/src/video/texture.h>
 
-using namespace gl;
+// using namespace gl;
+using namespace gl21;
+using namespace gl21ext;
+
+using namespace std::string_literals; // enables s-suffix for std::string literals
 
 namespace saturnin::video {
 
 using core::Log;
 using core::tr;
 
-Opengl::Opengl(core::Config* config) { config_ = config; }
+Opengl::Opengl(core::Config* config) {
+    config_           = config;
+    is_legacy_opengl_ = config_->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
+    initialize();
+}
+
+Opengl::~Opengl() { shutdown(); }
+
+void Opengl::initialize() {
+    if (is_legacy_opengl_) {
+        glGenFramebuffersEXT(1, &saturn_framebuffer_);
+    } else {
+        gl33core::glGenFramebuffers(1, &saturn_framebuffer_);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, saturn_framebuffer_);
+
+    // Creating a texture for the color buffer
+    auto texture = u32{};
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 2048, 2048);
+
+    // No need for mipmaps, they are turned off
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Attaching the color texture to the fbo
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
+
+    // static const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
+
+    renderingTexture(texture);
+
+    if (is_legacy_opengl_) {
+        const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
+        if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE_EXT) {
+            Log::error("opengl", tr("Could not initialize framebuffer object !"));
+            throw std::runtime_error("Opengl error !");
+        }
+    } else {
+        const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
+        if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
+            Log::error("opengl", tr("Could not initialize framebuffer object !"));
+            throw std::runtime_error("Opengl error !");
+        }
+    }
+    const auto vertex_shader     = createVertexShader();
+    const auto fragment_shader   = createFragmentShader();
+    program_shader_              = createProgramShader(vertex_shader, fragment_shader);
+    const auto shaders_to_delete = std::vector<u32>{vertex_shader, fragment_shader};
+    deleteShaders(shaders_to_delete);
+}
+
+void Opengl::shutdown() {
+    glDeleteProgram(program_shader_);
+    if (is_legacy_opengl_) {
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        glDeleteFramebuffersEXT(1, &saturn_framebuffer_);
+    } else {
+        gl33core::glDeleteProgram(program_shader_);
+        gl33core::glDeleteFramebuffers(1, &saturn_framebuffer_);
+    }
+    const auto texture = renderingTexture();
+    glDeleteTextures(1, &texture);
+}
+
+void Opengl::preRender() {
+    if (is_legacy_opengl_) {
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, saturn_framebuffer_);
+    } else {
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, saturn_framebuffer_);
+    }
+
+    // Viewport is the entire Saturn framebuffer
+    glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
+
+    gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+};
+
+void Opengl::render() {
+    this->setupTriangle();
+    this->drawTriangle();
+};
+
+void Opengl::postRender() {
+    // Framebuffer is released
+    if (is_legacy_opengl_) {
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    } else {
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+};
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     vertexes_.clear();
@@ -82,6 +187,211 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 }
 
 void Opengl::updateScreenResolution(){};
+
+auto Opengl::createVertexShader() -> u32 {
+    auto vertex_shader_source = std::string{};
+    if (is_legacy_opengl_) {
+        vertex_shader_source = R"(
+        #version 120
+
+        attribute vec2 position;
+        uniform mat4 proj_matrix;
+
+        void main() {
+            gl_Position = proj_matrix * vec4(position, 0.0, 1.0);
+        }
+    )"s;
+    } else {
+        vertex_shader_source = R"(
+        #version 330 core
+
+        layout (location = 0) in vec2 vtx_position;
+        layout (location = 1) in vec2 vtx_tex_coord;
+        uniform mat4 proj_matrix;
+
+        out vec2 frg_tex_coord;
+
+        void main() {
+            gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
+            //frg_tex_coord = vec2(vtx_tex_coord.x, vtx_tex_coord.y);
+            frg_tex_coord = vec2(vtx_tex_coord);
+        }
+    )"s;
+    }
+    const auto vertex_shader            = glCreateShader(GL_VERTEX_SHADER);
+    auto       vertex_shader_source_tmp = vertex_shader_source.c_str();
+    glShaderSource(vertex_shader, 1, &vertex_shader_source_tmp, nullptr);
+    glCompileShader(vertex_shader);
+    checkShaderCompilation(vertex_shader);
+
+    return vertex_shader;
+}
+
+auto Opengl::createFragmentShader() -> u32 {
+    auto fragment_shader_source = std::string{};
+    if (is_legacy_opengl_) {
+        fragment_shader_source = R"(
+        #version 120
+        
+        void main()
+        {
+            gl_FragColor  = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+        } 
+    )"s;
+    } else {
+        fragment_shader_source = R"(
+        #version 330 core
+        
+        in vec2 frg_tex_coord;
+
+        //out vec4 color;
+        out vec4 frg_color;
+
+        uniform sampler2D texture1;
+        
+        void main()
+        {
+            //color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+            frg_color = texture(texture1, frg_tex_coord);
+        } 
+    )"s;
+    }
+
+    const auto fragment_shader            = glCreateShader(GL_FRAGMENT_SHADER);
+    auto       fragment_shader_source_tmp = fragment_shader_source.c_str();
+    glShaderSource(fragment_shader, 1, &fragment_shader_source_tmp, nullptr);
+    glCompileShader(fragment_shader);
+
+    checkShaderCompilation(fragment_shader);
+
+    return fragment_shader;
+}
+
+auto Opengl::createProgramShader(const u32 vertex_shader, const u32 fragment_shader) -> u32 {
+    const auto shader_program = glCreateProgram();
+
+    glAttachShader(shader_program, vertex_shader);
+    glAttachShader(shader_program, fragment_shader);
+    glLinkProgram(shader_program);
+    checkProgramCompilation(shader_program);
+
+    return shader_program;
+}
+
+void Opengl::deleteShaders(std::vector<u32> shaders) {
+    for (auto shader : shaders) {
+        glDeleteShader(shader);
+    }
+}
+
+void Opengl::setupTriangle() {
+    glGenVertexArrays(1, &vao_);
+    auto vertex_buffer = u32{};
+    glGenBuffers(1, &vertex_buffer);
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(vao_);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(decltype(vertexes_)::value_type) * vertexes_.size(), vertexes_.data(), GL_STATIC_DRAW);
+
+    // position
+    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, 16, 0);
+    glEnableVertexAttribArray(0);
+
+    // texture coords
+    auto stride = GLint(2 * sizeof(s16) + 4 * sizeof(u8) + 2 * sizeof(float));
+    auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
+    glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(1);
+
+    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer
+    // object so afterwards we can safely unbind
+    glBindBuffer(GLenum::GL_ARRAY_BUFFER, 0);
+
+    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying
+    // other VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly
+    // necessary.
+    glBindVertexArray(0);
+
+    //********************************************************//
+    // Texture
+    auto texture = u32{};
+    glGenTextures(1, &texture_);
+    glBindTexture(GLenum::GL_TEXTURE_2D,
+                  texture_); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+
+    // set the texture wrapping parameters
+    glTexParameteri(GLenum::GL_TEXTURE_2D,
+                    GLenum::GL_TEXTURE_WRAP_S,
+                    GLenum::GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
+    auto window = glfwGetCurrentContext();
+    auto state  = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
+    if (!state->vdp2()->vdp2_parts_[3].empty()) {
+        auto  key = state->vdp2()->vdp2_parts_[3][0].getTextureKey();
+        auto& tex = Texture::getTexture(key);
+
+        glTexImage2D(GLenum::GL_TEXTURE_2D,
+                     0,
+                     GLenum::GL_RGB,
+                     tex.width_,
+                     tex.height_,
+                     0,
+                     GLenum::GL_RGB,
+                     GLenum::GL_UNSIGNED_BYTE,
+                     tex.raw_data_.data());
+    }
+    //********************************************************//
+}
+void Opengl::drawTriangle() {
+    glBindTexture(GL_TEXTURE_2D, texture_);
+    glUseProgram(program_shader_);
+    glBindVertexArray(vao_); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep
+                             // things a bit more organized
+
+    const auto host_res     = hostScreenResolution();
+    const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
+    const auto saturn_res   = saturnScreenResolution();
+    const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
+
+    // If the Saturn resolution isn't set yet, calculation is aborted
+    if ((saturn_res.height == 0) || (saturn_res.width == 0)) return;
+
+    auto projection = glm::mat4{};
+    auto view       = glm::mat4{1.0f};
+
+    if (host_ratio >= saturn_ratio) {
+        // Pillarbox display (wide viewport), use full height
+        projection = glm::mat4{
+            glm::ortho(0.0f, host_ratio / saturn_ratio * saturn_res.width, 0.0f, static_cast<float>(saturn_res.height))};
+
+        // Centering the viewport
+        const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
+        const auto amount     = static_cast<float>(empty_zone) / host_res.width;
+        view                  = glm::translate(view, glm::vec3(amount, 0.0f, 0.0f));
+
+    } else {
+        // Letterbox display (tall viewport) use full width
+        projection = glm::mat4{
+            glm::ortho(0.f, static_cast<float>(saturn_res.width), 0.f, saturn_ratio / host_ratio * saturn_res.height)};
+
+        // Centering the viewport
+        const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
+        const auto amount     = static_cast<float>(empty_zone) / host_res.height;
+        view                  = glm::translate(view, glm::vec3(0.0f, amount, 0.0f));
+    }
+
+    const auto proj_matrix = view * projection;
+
+    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+    glDrawArrays(GL_TRIANGLES, 0, 12);
+}
 
 auto Opengl::config() const -> Config* { return config_; }
 
@@ -314,14 +624,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const auto clear_color = ImVec4{0.45f, 0.55f, 0.60f, 1.00f};
 
     // Getting the right rendering context
-    std::unique_ptr<Opengl> opengl = nullptr;
-    if (is_legacy_opengl) {
-        auto legacy = std::make_unique<OpenglLegacy>(state.config());
-        opengl      = std::move(legacy);
-    } else {
-        auto modern = std::make_unique<OpenglModern>(state.config());
-        opengl      = std::move(modern);
-    }
+    auto opengl = std::make_unique<Opengl>(state.config());
     state.opengl(opengl.get());
 
     updateMainWindowSizeAndRatio(window, minimum_window_width, minimum_window_height);

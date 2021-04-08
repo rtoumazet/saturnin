@@ -78,12 +78,6 @@
     <ClCompile Include="lib\imgui\imgui_custom_controls.cpp">
       <Filter>Fichiers sources\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\video\opengl_legacy.cpp">
-      <Filter>Fichiers sources\video</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\opengl_modern.cpp">
-      <Filter>Fichiers sources\video</Filter>
-    </ClCompile>
     <ClCompile Include="src\video\opengl.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
@@ -187,12 +181,6 @@
     </ClInclude>
     <ClInclude Include="lib\imgui\imgui_custom_controls.h">
       <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\opengl_legacy.h">
-      <Filter>Fichiers sources\video</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\opengl_modern.h">
-      <Filter>Fichiers sources\video</Filter>
     </ClInclude>
     <ClInclude Include="src\video\opengl.h">
       <Filter>Fichiers sources\video</Filter>
