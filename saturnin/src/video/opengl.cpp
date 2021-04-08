@@ -106,6 +106,7 @@ void Opengl::initialize() {
             throw std::runtime_error("Opengl error !");
         }
     }
+    initializeShaders();
     const auto vertex_shader     = createVertexShader();
     const auto fragment_shader   = createFragmentShader();
     program_shader_              = createProgramShader(vertex_shader, fragment_shader);
@@ -154,6 +155,60 @@ void Opengl::postRender() {
     }
 };
 
+void Opengl::initializeShaders() {
+    shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderName::vertex}, R"(
+        #version 120
+
+        attribute vec2 vtx_position;
+        uniform mat4 proj_matrix;
+
+        void main() {
+            gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
+        }
+    )");
+
+    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderName::vertex}, R"(
+        #version 330 core
+
+        layout (location = 0) in vec2 vtx_position;
+        layout (location = 1) in vec2 vtx_tex_coord;
+        uniform mat4 proj_matrix;
+
+        out vec2 frg_tex_coord;
+
+        void main() {
+            gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
+            frg_tex_coord = vec2(vtx_tex_coord);
+        }
+    )");
+
+    shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderName::fragment}, R"(
+        #version 120
+        
+        void main()
+        {
+            gl_FragColor  = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+        }
+    )");
+
+    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderName::fragment}, R"(
+        #version 330 core
+        
+        in vec2 frg_tex_coord;
+
+        //out vec4 color;
+        out vec4 frg_color;
+
+        uniform sampler2D texture1;
+        
+        void main()
+        {
+            //color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+            frg_color = texture(texture1, frg_tex_coord);
+        } 
+    )");
+}
+
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     vertexes_.clear();
     // vertexes_.reserve(state.vdp2()->getRenderVertexes().size() / 4); // Will have to be changed as some vertexes are not quad
@@ -189,38 +244,9 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 void Opengl::updateScreenResolution(){};
 
 auto Opengl::createVertexShader() -> u32 {
-    auto vertex_shader_source = std::string{};
-    if (is_legacy_opengl_) {
-        vertex_shader_source = R"(
-        #version 120
-
-        attribute vec2 position;
-        uniform mat4 proj_matrix;
-
-        void main() {
-            gl_Position = proj_matrix * vec4(position, 0.0, 1.0);
-        }
-    )"s;
-    } else {
-        vertex_shader_source = R"(
-        #version 330 core
-
-        layout (location = 0) in vec2 vtx_position;
-        layout (location = 1) in vec2 vtx_tex_coord;
-        uniform mat4 proj_matrix;
-
-        out vec2 frg_tex_coord;
-
-        void main() {
-            gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-            //frg_tex_coord = vec2(vtx_tex_coord.x, vtx_tex_coord.y);
-            frg_tex_coord = vec2(vtx_tex_coord);
-        }
-    )"s;
-    }
-    const auto vertex_shader            = glCreateShader(GL_VERTEX_SHADER);
-    auto       vertex_shader_source_tmp = vertex_shader_source.c_str();
-    glShaderSource(vertex_shader, 1, &vertex_shader_source_tmp, nullptr);
+    const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    auto       source        = getShaderSource(ShaderName::vertex);
+    glShaderSource(vertex_shader, 1, &source, nullptr);
     glCompileShader(vertex_shader);
     checkShaderCompilation(vertex_shader);
 
@@ -228,38 +254,9 @@ auto Opengl::createVertexShader() -> u32 {
 }
 
 auto Opengl::createFragmentShader() -> u32 {
-    auto fragment_shader_source = std::string{};
-    if (is_legacy_opengl_) {
-        fragment_shader_source = R"(
-        #version 120
-        
-        void main()
-        {
-            gl_FragColor  = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-        } 
-    )"s;
-    } else {
-        fragment_shader_source = R"(
-        #version 330 core
-        
-        in vec2 frg_tex_coord;
-
-        //out vec4 color;
-        out vec4 frg_color;
-
-        uniform sampler2D texture1;
-        
-        void main()
-        {
-            //color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-            frg_color = texture(texture1, frg_tex_coord);
-        } 
-    )"s;
-    }
-
-    const auto fragment_shader            = glCreateShader(GL_FRAGMENT_SHADER);
-    auto       fragment_shader_source_tmp = fragment_shader_source.c_str();
-    glShaderSource(fragment_shader, 1, &fragment_shader_source_tmp, nullptr);
+    const auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    auto       source          = getShaderSource(ShaderName::fragment);
+    glShaderSource(fragment_shader, 1, &source, nullptr);
     glCompileShader(fragment_shader);
 
     checkShaderCompilation(fragment_shader);
@@ -414,6 +411,11 @@ auto Opengl::generateTextureFromVector(const u32 width, const u32 height, const 
 }
 
 void Opengl::onWindowResize(u16 width, u16 height) { hostScreenResolution({width, height}); };
+
+auto Opengl::getShaderSource(const ShaderName name) -> const char* {
+    const auto glsl_version = (is_legacy_opengl_) ? GlslVersion::glsl_120 : GlslVersion::glsl_330;
+    return shaders_list_[{glsl_version, name}];
+}
 
 auto isModernOpenglCapable() -> bool {
     if (glfwInit() == GLFW_FALSE) { return false; }

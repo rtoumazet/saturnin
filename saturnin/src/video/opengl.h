@@ -46,6 +46,11 @@ using saturnin::core::Config;
 constexpr auto minimum_window_width  = u16{512};
 constexpr auto minimum_window_height = u16{512};
 
+enum class ShaderName { vertex, fragment };
+enum class GlslVersion { glsl_120, glsl_330 };
+
+using ShadersList = std::map<std::pair<GlslVersion, ShaderName>, const char*>;
+
 class Opengl {
   public:
     ///@{
@@ -59,11 +64,71 @@ class Opengl {
     ~Opengl();
     ///@}
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::initialize();
+    ///
+    /// \brief  Initializes this object
+    ///
+    /// \author Runik
+    /// \date   08/04/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void initialize();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::shutdown();
+    ///
+    /// \brief  Shuts down this object and frees any resources it is using
+    ///
+    /// \author Runik
+    /// \date   08/04/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void shutdown();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::preRender();
+    ///
+    /// \brief  Processing done before rendering.
+    ///
+    /// \author Runik
+    /// \date   08/04/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void preRender();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::render();
+    ///
+    /// \brief  Rendering of data.
+    ///
+    /// \author Runik
+    /// \date   08/04/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void render();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::postRender();
+    ///
+    /// \brief  Processing done after rendering.
+    ///
+    /// \author Runik
+    /// \date   08/04/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void postRender();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::initializeShaders();
+    ///
+    /// \brief  Initializes the shaders.
+    ///
+    /// \author Runik
+    /// \date   08/04/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initializeShaders();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::displayFramebuffer(core::EmulatorContext& state);
@@ -92,21 +157,6 @@ class Opengl {
     [[nodiscard]] auto renderingTexture() const -> const u32 { return this->rendering_texture_; };
 
     void renderingTexture(u32 texture) { this->rendering_texture_ = texture; };
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::generateTextureFromFile(const std::string& filename) const -> u32;
-    ///
-    /// \brief  Generates a texture from a png file located in the ./res directory.
-    ///
-    /// \author Runik
-    /// \date   22/04/2020
-    ///
-    /// \param  filename    Name of the file to generate the texture from.
-    ///
-    /// \returns    The id of the generated texture.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //[[nodiscard]] auto generateTextureFromFile(const std::string& filename) const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn virtual void Opengl::onWindowResize(u16 width, u16 height) = 0;
@@ -206,10 +256,20 @@ class Opengl {
     std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display
 
   private:
-    //@{
-    // Abstract functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::getShaderSource(const ShaderName sn) -> const char*;
+    ///
+    /// \brief  Gets the shader source depending on the configuration
+    ///
+    /// \author Runik
+    /// \date   08/04/2021
+    ///
+    /// \param  sn  The shader name.
+    ///
+    /// \returns    Null if it fails, else the shader source.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //@}
+    auto getShaderSource(const ShaderName sn) -> const char*;
 
     core::Config* config_; ///< Configuration object
 
@@ -224,6 +284,8 @@ class Opengl {
     u32 program_shader_;
     u32 vao_;
     u32 texture_;
+
+    ShadersList shaders_list_;
 
     // std::vector<s16> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display.
 };
