@@ -106,9 +106,7 @@ class Opengl {
     /// \returns    The id of the generated texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] auto generateTextureFromFile(const std::string& filename) const -> u32;
-
-    static auto loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool;
+    //[[nodiscard]] auto generateTextureFromFile(const std::string& filename) const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn virtual void Opengl::onWindowResize(u16 width, u16 height) = 0;

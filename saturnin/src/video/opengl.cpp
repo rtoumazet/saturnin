@@ -397,88 +397,6 @@ auto Opengl::config() const -> Config* { return config_; }
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
-auto Opengl::generateTextureFromFile(const std::string& filename) const -> u32 {
-    const auto full_path{std::filesystem::current_path() / "res" / filename};
-
-    auto input_file = std::ifstream(full_path, std::ios::binary);
-    if (!input_file) {
-        Log::warning("opengl", tr("Image res/{} not found !"), filename);
-        return 0;
-    }
-
-    auto buffer = std::stringstream{};
-    buffer << input_file.rdbuf();
-    input_file.close();
-
-    const auto str         = buffer.str();
-    auto       source_data = std::vector<u8>{};
-    source_data.reserve(str.size());
-
-    for (const auto s : str) {
-        source_data.emplace_back(s);
-    }
-
-    auto       width        = u32{};
-    auto       height       = u32{};
-    auto       decoded_data = std::vector<u8>{};
-    const auto error        = lodepng::decode(decoded_data, width, height, source_data, LCT_RGBA);
-
-    // If there's an error, display it.
-    if (error != 0) {
-        Log::warning("opengl", lodepng_error_text(error));
-        return 0;
-    }
-
-    // glEnable(GL_TEXTURE_2D);
-
-    auto texture = generateTextureFromVector(width, height, decoded_data);
-    // glGenTextures(1, &texture);
-    // glBindTexture(GL_TEXTURE_2D, texture);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, decoded_data.data());
-
-    return texture;
-};
-
-/* static */
-auto Opengl::loadPngImage(const std::vector<uint8_t>& source_data, std::vector<uint8_t>& image) -> bool {
-    // Load file and decode image.
-    auto       width  = u32{};
-    auto       height = u32{};
-    const auto error  = lodepng::decode(image, width, height, source_data, LCT_RGBA);
-
-    // If there's an error, display it.
-    if (error != 0) {
-        std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
-        return false;
-    }
-
-    //// "F" texture
-    // uint8_t texture[] = {
-    //    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    //    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-    //};
-    // glEnable(GL_TEXTURE_2D);
-    //
-    // glGenTextures(1, &iconsTextureId);
-    // glBindTexture(GL_TEXTURE_2D, iconsTextureId);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // glTexImage2D(GL_TEXTURE_2D, 0, 4, 0x8, 0x8, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
-
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, source_data.data());
-    // glObjectLabel(GL_TEXTURE, iconsTextureId, -1, "Example Texture");
-
-    return true;
-}
-
 auto Opengl::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const -> u32 {
     glEnable(GL_TEXTURE_2D);
 
@@ -680,6 +598,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     }
 
     // Cleanup
+    state.stopEmulation();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
