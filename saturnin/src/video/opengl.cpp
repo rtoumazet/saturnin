@@ -160,10 +160,13 @@ void Opengl::initializeShaders() {
         #version 120
 
         attribute vec2 vtx_position;
+        attribute vec2 vtx_tex_coord;
+        varying vec2   frg_tex_coord;
         uniform mat4 proj_matrix;
 
         void main() {
             gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
+            frg_tex_coord = vtx_tex_coord;
         }
     )");
 
@@ -185,9 +188,14 @@ void Opengl::initializeShaders() {
     shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderName::fragment}, R"(
         #version 120
         
+        varying vec4 frg_color;
+        varying vec2 frg_tex_coord;
+
+        uniform sampler2D texture1;
+
         void main()
         {
-            gl_FragColor  = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+            gl_FragColor = texture2D(texture1,frg_tex_coord);
         }
     )");
 
@@ -196,14 +204,12 @@ void Opengl::initializeShaders() {
         
         in vec2 frg_tex_coord;
 
-        //out vec4 color;
         out vec4 frg_color;
 
         uniform sampler2D texture1;
         
         void main()
         {
-            //color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
             frg_color = texture(texture1, frg_tex_coord);
         } 
     )");
