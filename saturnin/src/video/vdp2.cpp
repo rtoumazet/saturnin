@@ -2250,13 +2250,21 @@ void Vdp2::populateRenderData() {
 
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
             if (isScreenDisplayed(ScrollScreen::nbg3)) {
-                
                 //*******************************************************************************************************************//
                 render_vertexes_.clear();
-                render_vertexes_.emplace_back(Vertex{0, 0, 0, 0, 0, 0, 0.0, 1.0});
-                render_vertexes_.emplace_back(Vertex{0, 224, 0, 0, 0, 0, 0.0, 0.0});
-                render_vertexes_.emplace_back(Vertex{352, 224, 0, 0, 0, 0, 1.0, 0.0});
-                render_vertexes_.emplace_back(Vertex{352, 0, 0, 0, 0, 0, 1.0, 1.0});
+                // render_vertexes_.emplace_back(Vertex{0, 0, 0, 0, 0, 0, 0.0, 1.0});
+                // render_vertexes_.emplace_back(Vertex{0, 224, 0, 0, 0, 0, 0.0, 0.0});
+                // render_vertexes_.emplace_back(Vertex{352, 224, 0, 0, 0, 0, 1.0, 0.0});
+                // render_vertexes_.emplace_back(Vertex{352, 0, 0, 0, 0, 0, 1.0, 1.0});
+                render_vertexes_.emplace_back(Vertex{0, 0, 0, 0, 0, 0, 0.0, 1.0}); // lower left
+                render_vertexes_.emplace_back(Vertex{8, 0, 0, 0, 0, 0, 1.0, 1.0}); // lower right
+                render_vertexes_.emplace_back(Vertex{8, 8, 0, 0, 0, 0, 1.0, 0.0}); // upper right
+                render_vertexes_.emplace_back(Vertex{0, 8, 0, 0, 0, 0, 0.0, 0.0}); // upper left
+
+                render_vertexes_.emplace_back(Vertex{8, 0, 0, 0, 0, 0, 0.0, 0.0});  // lower left
+                render_vertexes_.emplace_back(Vertex{16, 0, 0, 0, 0, 0, 1.0, 0.0}); // lower right
+                render_vertexes_.emplace_back(Vertex{16, 8, 0, 0, 0, 0, 1.0, 1.0}); // upper right
+                render_vertexes_.emplace_back(Vertex{8, 8, 0, 0, 0, 0, 0.0, 1.0});  // upper left
 
                 auto pnd                      = PatternNameData{};
                 pnd.character_number          = 0;
@@ -3146,7 +3154,9 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                     const PatternNameData&    pnd,
                     const u32                 cell_address,
                     const ScreenOffset&       cell_offset) {
-    constexpr auto  texture_size = 8 * 8 * 4;
+    constexpr auto  texture_width  = u16{8};
+    constexpr auto  texture_height = u16{8};
+    constexpr auto  texture_size   = texture_width * texture_height * 4;
     std::vector<u8> texture_data;
     texture_data.reserve(texture_size);
 
@@ -3155,9 +3165,12 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
         switch (screen.character_color_number) {
             case ColorCount::palette_16: {
                 read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
-                const auto key
-                    = Texture::storeTexture(Texture(VdpType::vdp2, cell_address, ColorCount::palette_16, texture_data, 8, 8));
-                auto p = Vdp2Part(pnd, ScreenPos{static_cast<u16>(cell_offset.x * 8), static_cast<u16>(cell_offset.y * 8)}, key);
+                const auto key = Texture::storeTexture(
+                    Texture(VdpType::vdp2, cell_address, ColorCount::palette_16, texture_data, texture_width, texture_height));
+                auto p = Vdp2Part(
+                    pnd,
+                    ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)},
+                    key);
                 vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
                 break;
             }
@@ -3201,7 +3214,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
             }
         }
     }
-    Log::info("vdp2", "(Cell address : {:#x})", cell_address);
+    // Log::info("vdp2", "(Cell address : {:#x})", cell_address);
 }
 
 auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> PatternNameData {

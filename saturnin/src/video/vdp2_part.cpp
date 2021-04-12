@@ -31,39 +31,20 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos&& pos, size_t texture_k
     is_horizontally_flipped_ = pnd.is_horizontally_flipped;
     is_vertically_flipped_   = pnd.is_vertically_flipped;
     texture_key_             = texture_key;
+
+    // Vdp2 parts are 8*8 pixels squares
+    constexpr auto cell_width  = u8{8};
+    constexpr auto cell_height = u8{8};
+    const auto     pos_x       = static_cast<s16>(pos.x);
+    const auto     pos_y       = static_cast<s16>(pos.y);
+    part_vertexes_.emplace_back(Vertex{pos_x, pos_y, 0, 0, 0, 0, 0.0, 1.0});                            // lower left
+    part_vertexes_.emplace_back(Vertex{pos_x + cell_width, pos_y, 0, 0, 0, 0, 1.0, 1.0});               // lower right
+    part_vertexes_.emplace_back(Vertex{pos_x + cell_width, pos_y + cell_height, 0, 0, 0, 0, 1.0, 0.0}); // upper right
+    part_vertexes_.emplace_back(Vertex{pos_x, pos_y + cell_height, 0, 0, 0, 0, 0.0, 0.0});              // upper left
 };
 
 void Vdp2Part::renderPart() { displayCell(); };
 
-void Vdp2Part::displayCell() {
-    // glGenTextures(1, &texture_);
-    // glBindTexture(GLenum::GL_TEXTURE_2D,
-    //              texture_); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-    //// set the texture wrapping parameters
-    // glTexParameteri(GLenum::GL_TEXTURE_2D,
-    //                GLenum::GL_TEXTURE_WRAP_S,
-    //                GLenum::GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
-    //// set texture filtering parameters
-    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
-    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
-    // auto window = glfwGetCurrentContext();
-    // auto state  = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
-    // if (!state->vdp2()->vdp2_parts_[3].empty()) {
-    //    auto  key = state->vdp2()->vdp2_parts_[3][0].getTextureKey();
-    //    auto& tex = Texture::getTexture(key);
-
-    //    glTexImage2D(GLenum::GL_TEXTURE_2D,
-    //                 0,
-    //                 GLenum::GL_RGB,
-    //                 tex.width_,
-    //                 tex.height_,
-    //                 0,
-    //                 GLenum::GL_RGB,
-    //                 GLenum::GL_UNSIGNED_BYTE,
-    //                 tex.data_.data());
-    //}
-}
+void Vdp2Part::displayCell() {}
 
 } // namespace saturnin::video

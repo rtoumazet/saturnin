@@ -29,6 +29,7 @@
 #include <imgui.h>
 #include <map>    // map
 #include <string> // string
+#include <glm/mat4x4.hpp>
 #include <saturnin/src/emulator_defs.h>
 
 // Forward declarations
@@ -144,7 +145,7 @@ class Opengl {
     void displayFramebuffer(core::EmulatorContext& state);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::texture() const -> u32
+    /// \fn auto Opengl::getRenderingTexture() const -> const u32
     ///
     /// \brief  Gets the texture
     ///
@@ -154,12 +155,12 @@ class Opengl {
     /// \returns    An u32.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] auto renderingTexture() const -> const u32 { return this->rendering_texture_; };
+    [[nodiscard]] auto getRenderingTexture() const -> const u32 { return this->rendering_texture_; };
 
     void renderingTexture(u32 texture) { this->rendering_texture_ = texture; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn virtual void Opengl::onWindowResize(u16 width, u16 height) = 0;
+    /// \fn void Opengl::onWindowResize(const u16 width, const u16 height);
     ///
     /// \brief  Actions executed on window resize.
     ///
@@ -170,7 +171,7 @@ class Opengl {
     /// \param  height  The new window height.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void onWindowResize(u16 width, u16 height);
+    void onWindowResize(const u16 width, const u16 height);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::updateScreenResolution();
@@ -218,43 +219,6 @@ class Opengl {
 
     void drawTriangle();
 
-  protected:
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn [[nodiscard]] auto Opengl::config() const -> Config*;
-    ///
-    /// \brief  Returns the Config object.
-    ///
-    /// \author Runik
-    /// \date   12/10/2019
-    ///
-    /// \return The Config object.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    [[nodiscard]] auto config() const -> Config*;
-
-    // void setTextureDimension(u32 width, u32 height);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn virtual auto Opengl::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const
-    /// -> u32 = 0;
-    ///
-    /// \brief  Generates a texture from a vector.
-    ///
-    /// \author Runik
-    /// \date   22/04/2020
-    ///
-    /// \param  width   Width of the texture.
-    /// \param  height  Height of the texture.
-    /// \param  data    Texture data.
-    ///
-    /// \returns    The id of the generated texture.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    [[nodiscard]] virtual auto generateTextureFromVector(u32 width, u32 height, const std::vector<u8>& data) const -> u32;
-
-    u32                 fbo_{};    ///< Framebuffer Object used for rendering to texture.
-    std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display
-
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderName sn) -> const char*;
@@ -271,6 +235,37 @@ class Opengl {
 
     auto getShaderSource(const ShaderName sn) -> const char*;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn virtual auto Opengl::generateTexture(u32 width, u32 height, const std::vector<u8>& data) const -> u32;
+    ///
+    /// \brief  Generates a texture from a vector.
+    ///
+    /// \author Runik
+    /// \date   22/04/2020
+    ///
+    /// \param  width   Width of the texture.
+    /// \param  height  Height of the texture.
+    /// \param  data    Texture data.
+    ///
+    /// \returns    The id of the generated texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    [[nodiscard]] auto generateTexture(u32 width, u32 height, const std::vector<u8>& data) const -> u32;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4;
+    ///
+    /// \brief  Calculates the display viewport matrix, adding letterbox or pillarbox when the display isn't exactly like the
+    /// Saturn resolution.
+    ///
+    /// \author Runik
+    /// \date   10/04/2021
+    ///
+    /// \returns    The calculated display viewport matrix.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto calculateDisplayViewportMatrix() -> glm::highp_mat4;
+
     core::Config* config_; ///< Configuration object
 
     u32  rendering_texture_{}; ///< Destination texture for render to texture.
@@ -281,8 +276,11 @@ class Opengl {
 
     u32 saturn_framebuffer_{}; ///< Framebuffer object used as Saturn's framebuffer. Will be rendered to a texture.
 
-    u32 program_shader_;
-    u32 vao_;
+    u32                 program_shader_;
+    u32                 vao_;
+    u32                 fbo_{};    ///< Framebuffer Object used for rendering to texture.
+    std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display
+
     u32 texture_;
 
     ShadersList shaders_list_;

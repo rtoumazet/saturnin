@@ -750,7 +750,9 @@ void showRenderingWindow(core::EmulatorContext& state) {
     ImGui::Begin("Video rendering", nullptr, flags);
 
     state.opengl()->displayFramebuffer(state);
-    if (state.opengl()->renderingTexture() != 0) { gui::addTextureToDrawList(state.opengl()->renderingTexture(), width, height); }
+    if (state.opengl()->getRenderingTexture() != 0) {
+        gui::addTextureToDrawList(state.opengl()->getRenderingTexture(), width, height);
+    }
 
     // showMainMenu(state);
 
@@ -1191,8 +1193,8 @@ void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t 
     ImGui::GetWindowDrawList()->AddImage((ImTextureID)(intptr_t)texture,
                                          ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
                                          ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
-                                         ImVec2(0, 1),
-                                         ImVec2(1, 0));
+                                         ImVec2(0, 0),
+                                         ImVec2(1, 1));
 }
 
 auto getMouseCoordinates(core::EmulatorContext& state) -> Coord {

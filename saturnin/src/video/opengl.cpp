@@ -123,7 +123,7 @@ void Opengl::shutdown() {
         gl33core::glDeleteProgram(program_shader_);
         gl33core::glDeleteFramebuffers(1, &saturn_framebuffer_);
     }
-    const auto texture = renderingTexture();
+    const auto texture = getRenderingTexture();
     glDeleteTextures(1, &texture);
 }
 
@@ -223,29 +223,20 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     //    vertexes_.emplace_back(v.y);
     //}
     if (!state.vdp2()->getRenderVertexes().empty()) {
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].x);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].y);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1].x);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1].y);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].x);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].y);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].x);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0].y);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].x);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2].y);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3].x);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3].y);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0]);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1]);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2]);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0]);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2]);
-        vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3]);
+        vertexes_ = std::move(state.vdp2()->getRenderVertexes());
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0]);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1]);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2]);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0]);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2]);
+        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3]);
     }
     preRender();
     render();
     postRender();
 }
+
+void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); };
 
 void Opengl::updateScreenResolution(){};
 
@@ -291,18 +282,29 @@ void Opengl::setupTriangle() {
     glGenVertexArrays(1, &vao_);
     auto vertex_buffer = u32{};
     glGenBuffers(1, &vertex_buffer);
+
+    // Declaring the buffer that will contain the indices
+    auto vertex_indices_buffer = u32{};
+    glGenBuffers(1, &vertex_indices_buffer);
+
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(vao_);
 
+    // vertex buffer data
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, sizeof(decltype(vertexes_)::value_type) * vertexes_.size(), vertexes_.data(), GL_STATIC_DRAW);
 
-    // position
+    // vertex indices data, a quad will be split in 2 triangles using it
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_indices_buffer);
+    // const std::array<u8, 12> vertex_indices{0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7};
+    const auto vertex_indices = std::vector<u8>{0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7};
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertex_indices.size(), vertex_indices.data(), GL_STATIC_DRAW);
+
+    // position pointer
     glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, 16, 0);
     glEnableVertexAttribArray(0);
 
-    // texture coords
+    // texture coords pointer
     auto stride = GLint(2 * sizeof(s16) + 4 * sizeof(u8) + 2 * sizeof(float));
     auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
     glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid*>(offset));
@@ -310,59 +312,90 @@ void Opengl::setupTriangle() {
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer
     // object so afterwards we can safely unbind
-    glBindBuffer(GLenum::GL_ARRAY_BUFFER, 0);
+    // glBindBuffer(GLenum::GL_ARRAY_BUFFER, 0);
 
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying
     // other VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly
     // necessary.
     glBindVertexArray(0);
 
-    //********************************************************//
-    // Texture
-    auto texture = u32{};
-    glGenTextures(1, &texture_);
-    glBindTexture(GLenum::GL_TEXTURE_2D,
-                  texture_); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-    // set the texture wrapping parameters
-    glTexParameteri(GLenum::GL_TEXTURE_2D,
-                    GLenum::GL_TEXTURE_WRAP_S,
-                    GLenum::GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
     auto window = glfwGetCurrentContext();
     auto state  = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
     if (!state->vdp2()->vdp2_parts_[3].empty()) {
         auto  key = state->vdp2()->vdp2_parts_[3][0].getTextureKey();
         auto& tex = Texture::getTexture(key);
-
-        glTexImage2D(GLenum::GL_TEXTURE_2D,
-                     0,
-                     GLenum::GL_RGB,
-                     tex.width_,
-                     tex.height_,
-                     0,
-                     GLenum::GL_RGB,
-                     GLenum::GL_UNSIGNED_BYTE,
-                     tex.raw_data_.data());
+        texture_  = generateTexture(tex.width_, tex.height_, tex.raw_data_);
     }
+
     //********************************************************//
 }
 void Opengl::drawTriangle() {
     glBindTexture(GL_TEXTURE_2D, texture_);
     glUseProgram(program_shader_);
-    glBindVertexArray(vao_); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep
-                             // things a bit more organized
+    glBindVertexArray(vao_); // binding the global Vertex Array Object
 
+    const auto proj_matrix = calculateDisplayViewportMatrix();
+
+    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+    // glDrawArrays(GL_TRIANGLES, 0, 6);
+    // static bool test   = false;
+    // int         indice = (6 * sizeof(u8)) * test;
+    // test               = !test;
+
+    // 0,1,2  0, 2, 3 i=0
+    // 4,5,6  4, 6, 7 i=1
+    // 8,9,10 8,10,11 i=2
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (void*)(6 * sizeof(u8)));
+}
+
+static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
+
+auto Opengl::getShaderSource(const ShaderName name) -> const char* {
+    const auto glsl_version = (is_legacy_opengl_) ? GlslVersion::glsl_120 : GlslVersion::glsl_330;
+    return shaders_list_[{glsl_version, name}];
+}
+
+auto Opengl::generateTexture(const u32 width, const u32 height, const std::vector<u8>& data) const -> u32 {
+    auto texture = u32{};
+    glGenTextures(1, &texture);
+    glBindTexture(GLenum::GL_TEXTURE_2D, texture);
+
+    // set the texture wrapping parameters
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+
+    // set texture filtering parameters
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
+
+    // disable mipmaps
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glTexImage2D(GLenum::GL_TEXTURE_2D,
+                 0,
+                 GLenum::GL_RGB,
+                 width,
+                 height,
+                 0,
+                 GLenum::GL_RGB,
+                 GLenum::GL_UNSIGNED_BYTE,
+                 data.data());
+
+    return texture;
+}
+
+auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4 {
     const auto host_res     = hostScreenResolution();
     const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
     const auto saturn_res   = saturnScreenResolution();
     const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
 
     // If the Saturn resolution isn't set yet, calculation is aborted
-    if ((saturn_res.height == 0) || (saturn_res.width == 0)) return;
+    if ((saturn_res.height == 0) || (saturn_res.width == 0)) return glm::mat4{};
 
     auto projection = glm::mat4{};
     auto view       = glm::mat4{1.0f};
@@ -388,39 +421,7 @@ void Opengl::drawTriangle() {
         view                  = glm::translate(view, glm::vec3(0.0f, amount, 0.0f));
     }
 
-    const auto proj_matrix = view * projection;
-
-    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
-    glDrawArrays(GL_TRIANGLES, 0, 12);
-}
-
-auto Opengl::config() const -> Config* { return config_; }
-
-static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
-
-auto Opengl::generateTextureFromVector(const u32 width, const u32 height, const std::vector<u8>& data) const -> u32 {
-    glEnable(GL_TEXTURE_2D);
-
-    auto texture = u32{};
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-    return texture;
-}
-
-void Opengl::onWindowResize(u16 width, u16 height) { hostScreenResolution({width, height}); };
-
-auto Opengl::getShaderSource(const ShaderName name) -> const char* {
-    const auto glsl_version = (is_legacy_opengl_) ? GlslVersion::glsl_120 : GlslVersion::glsl_330;
-    return shaders_list_[{glsl_version, name}];
+    return view * projection;
 }
 
 auto isModernOpenglCapable() -> bool {
