@@ -192,10 +192,10 @@ class Opengl {
     auto hostScreenResolution() const -> ScreenResolution { return host_screen_resolution_; };
     ///@}
 
-    auto createVertexShader() -> u32;
-    auto createFragmentShader() -> u32;
-    auto createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
-    void deleteShaders(std::vector<u32> shaders);
+    auto        createVertexShader() -> u32;
+    auto        createFragmentShader() -> u32;
+    static auto createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
+    static void deleteShaders(std::vector<u32> shaders);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::setupTriangle();
@@ -221,22 +221,22 @@ class Opengl {
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getShaderSource(const ShaderName sn) -> const char*;
+    /// \fn auto Opengl::getShaderSource(const ShaderName name) -> const char*;
     ///
     /// \brief  Gets the shader source depending on the configuration
     ///
     /// \author Runik
     /// \date   08/04/2021
     ///
-    /// \param  sn  The shader name.
+    /// \param  name    The shader name.
     ///
     /// \returns    Null if it fails, else the shader source.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getShaderSource(const ShaderName sn) -> const char*;
+    auto getShaderSource(const ShaderName name) -> const char*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn virtual auto Opengl::generateTexture(u32 width, u32 height, const std::vector<u8>& data) const -> u32;
+    /// \fn static auto Opengl::generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
     ///
     /// \brief  Generates a texture from a vector.
     ///
@@ -250,7 +250,7 @@ class Opengl {
     /// \returns    The id of the generated texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] auto generateTexture(u32 width, u32 height, const std::vector<u8>& data) const -> u32;
+    [[nodiscard]] static auto generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4;
@@ -323,7 +323,7 @@ void windowCloseCallback(GLFWwindow* window);
 /// \author Runik
 /// \date   08/02/2021
 ///
-/// \param [in,out] window  If non-null, a pointer to the GLFW window..
+/// \param [in,out] window  If non-null, a pointer to the GLFW window.
 /// \param          width   The width.
 /// \param          height  The height.
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -77,7 +77,7 @@ void Opengl::initialize() {
     auto texture = u32{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 2048, 2048);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, saturn_framebuffer_width, saturn_framebuffer_height);
 
     // No need for mipmaps, they are turned off
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -217,19 +217,18 @@ void Opengl::initializeShaders() {
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     vertexes_.clear();
-    // vertexes_.reserve(state.vdp2()->getRenderVertexes().size() / 4); // Will have to be changed as some vertexes are not quad
-    // for (const auto& v : state.vdp2()->getRenderVertexes()) {
-    //    vertexes_.emplace_back(v.x);
-    //    vertexes_.emplace_back(v.y);
-    //}
-    if (!state.vdp2()->getRenderVertexes().empty()) {
-        vertexes_ = std::move(state.vdp2()->getRenderVertexes());
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0]);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[1]);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2]);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[0]);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[2]);
-        // vertexes_.emplace_back(state.vdp2()->getRenderVertexes()[3]);
+    const auto vdp2_vertexes = state.vdp2()->getRenderVertexes();
+    if (!vdp2_vertexes.empty()) {
+        auto size = vdp2_vertexes.size() / 4; // getting the number of quads in the vector
+        vertexes_.reserve(size);
+        for (int i = 0; i < size; ++i) {
+            vertexes_.emplace_back(vdp2_vertexes[i * 4 + 0]);
+            vertexes_.emplace_back(vdp2_vertexes[std::move(i * 4 + 1)]);
+            vertexes_.emplace_back(vdp2_vertexes[i * 4 + 2]);
+            vertexes_.emplace_back(vdp2_vertexes[std::move(i * 4 + 0)]);
+            vertexes_.emplace_back(vdp2_vertexes[std::move(i * 4 + 2)]);
+            vertexes_.emplace_back(vdp2_vertexes[std::move(i * 4 + 3)]);
+        }
     }
     preRender();
     render();
@@ -261,6 +260,7 @@ auto Opengl::createFragmentShader() -> u32 {
     return fragment_shader;
 }
 
+// static
 auto Opengl::createProgramShader(const u32 vertex_shader, const u32 fragment_shader) -> u32 {
     const auto shader_program = glCreateProgram();
 
@@ -272,6 +272,7 @@ auto Opengl::createProgramShader(const u32 vertex_shader, const u32 fragment_sha
     return shader_program;
 }
 
+// static
 void Opengl::deleteShaders(std::vector<u32> shaders) {
     for (auto shader : shaders) {
         glDeleteShader(shader);
@@ -292,22 +293,15 @@ void Opengl::setupTriangle() {
 
     // vertex buffer data
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(decltype(vertexes_)::value_type) * vertexes_.size(), vertexes_.data(), GL_STATIC_DRAW);
-
-    // vertex indices data, a quad will be split in 2 triangles using it
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_indices_buffer);
-    // const std::array<u8, 12> vertex_indices{0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7};
-    const auto vertex_indices = std::vector<u8>{0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7};
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertex_indices.size(), vertex_indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes_.size(), vertexes_.data(), GL_STATIC_DRAW);
 
     // position pointer
-    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, 16, 0);
-    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
+    glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
 
     // texture coords pointer
-    auto stride = GLint(2 * sizeof(s16) + 4 * sizeof(u8) + 2 * sizeof(float));
     auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
-    glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid*>(offset));
+    glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
     glEnableVertexAttribArray(1);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer
@@ -317,7 +311,7 @@ void Opengl::setupTriangle() {
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying
     // other VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly
     // necessary.
-    glBindVertexArray(0);
+    // glBindVertexArray(0);
 
     auto window = glfwGetCurrentContext();
     auto state  = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
@@ -339,17 +333,7 @@ void Opengl::drawTriangle() {
     const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
-    // static bool test   = false;
-    // int         indice = (6 * sizeof(u8)) * test;
-    // test               = !test;
-
-    // 0,1,2  0, 2, 3 i=0
-    // 4,5,6  4, 6, 7 i=1
-    // 8,9,10 8,10,11 i=2
-
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (void*)(6 * sizeof(u8)));
+    glDrawArrays(GL_TRIANGLES, 0, vertexes_.size());
 }
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
@@ -359,7 +343,8 @@ auto Opengl::getShaderSource(const ShaderName name) -> const char* {
     return shaders_list_[{glsl_version, name}];
 }
 
-auto Opengl::generateTexture(const u32 width, const u32 height, const std::vector<u8>& data) const -> u32 {
+// static
+auto Opengl::generateTexture(const u32 width, const u32 height, const std::vector<u8>& data) -> u32 {
     auto texture = u32{};
     glGenTextures(1, &texture);
     glBindTexture(GLenum::GL_TEXTURE_2D, texture);
@@ -395,7 +380,7 @@ auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4 {
     const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
 
     // If the Saturn resolution isn't set yet, calculation is aborted
-    if ((saturn_res.height == 0) || (saturn_res.width == 0)) return glm::mat4{};
+    if ((saturn_res.height == 0) || (saturn_res.width == 0)) { return glm::mat4{}; }
 
     auto projection = glm::mat4{};
     auto view       = glm::mat4{1.0f};
@@ -452,7 +437,13 @@ auto isModernOpenglCapable() -> bool {
 
 void windowCloseCallback(GLFWwindow* window) {
     auto state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
-    state->renderingStatus(core::RenderingStatus::stopped);
+    state->stopEmulation();
+
+    // Adding a delay to allow the thread to finish cleanly.
+    using namespace std::this_thread;     // sleep_for
+    using namespace std::chrono_literals; // ms
+    const auto time_to_sleep = 20ms;
+    sleep_for(time_to_sleep);
 }
 
 auto runOpengl(core::EmulatorContext& state) -> s32 {
@@ -543,9 +534,10 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     ImFontConfig                        config;
     config.MergeMode = true;
     const auto font_path{std::filesystem::current_path() / "res" / "saturnin-icons.ttf"};
-    const auto glyph_offset = ImVec2(0, 2);
-    config.GlyphOffset      = glyph_offset;
-    io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), 13.0f, &config, icons_ranges.data());
+    const auto glyph_offset  = ImVec2(0, 2);
+    config.GlyphOffset       = glyph_offset;
+    constexpr auto font_size = 13.0f;
+    io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), font_size, &config, icons_ranges.data());
     io.Fonts->Build();
 
     const auto clear_color = ImVec4{0.45f, 0.55f, 0.60f, 1.00f};
@@ -561,14 +553,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-
-        glfwPollEvents();
-
         // Start the ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -597,13 +581,21 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        if ((ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) == true) {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
 
         // glfwMakeContextCurrent(window);
         glfwSwapBuffers(window);
+
+        // Poll and handle events (inputs, window resize, etc.)
+        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+
+        glfwPollEvents();
     }
 
     // Cleanup

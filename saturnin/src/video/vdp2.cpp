@@ -2266,6 +2266,11 @@ void Vdp2::populateRenderData() {
                 render_vertexes_.emplace_back(Vertex{16, 8, 0, 0, 0, 0, 1.0, 1.0}); // upper right
                 render_vertexes_.emplace_back(Vertex{8, 8, 0, 0, 0, 0, 0.0, 1.0});  // upper left
 
+                render_vertexes_.emplace_back(Vertex{16, 0, 0, 0, 0, 0, 0.0, 0.0}); // lower left
+                render_vertexes_.emplace_back(Vertex{24, 0, 0, 0, 0, 0, 1.0, 0.0}); // lower right
+                render_vertexes_.emplace_back(Vertex{24, 8, 0, 0, 0, 0, 1.0, 1.0}); // upper right
+                render_vertexes_.emplace_back(Vertex{16, 8, 0, 0, 0, 0, 0.0, 1.0}); // upper left
+
                 auto pnd                      = PatternNameData{};
                 pnd.character_number          = 0;
                 pnd.is_horizontally_flipped   = false;
