@@ -333,7 +333,7 @@ void Opengl::drawTriangle() {
     const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
-    glDrawArrays(GL_TRIANGLES, 0, vertexes_.size());
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<s32>(vertexes_.size()));
 }
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
@@ -581,7 +581,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
-        if ((ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) == true) {
+        if ((ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) > 0) {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
