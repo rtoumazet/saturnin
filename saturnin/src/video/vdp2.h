@@ -967,7 +967,7 @@ class Vdp2 {
     static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1Bit ccn) -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
+    /// \fn static auto Vdp2::calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
     ///
     /// \brief  Calculates the required VRAM pattern name reads to display a screen.
     ///
@@ -979,7 +979,7 @@ class Vdp2 {
     /// \returns    The required VRAM pattern name reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
+    static auto calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Vdp2::getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand;

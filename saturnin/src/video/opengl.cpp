@@ -244,7 +244,6 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
             textures_list.emplace_back(t.apiHandle());
         }
     }
-    // render();
     renderBatch(DrawType::textured_polygon, draw_list, textures_list);
     postRender();
     // state.notifyRenderingDone();

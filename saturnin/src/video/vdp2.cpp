@@ -2287,11 +2287,28 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     constexpr auto cell_size    = u8{8 * 8};
 
     const auto getColorRamAddressOffset = [&](const u8 register_offset) {
-        // const auto offset = (ram_status_.color_ram_mode == ColorRamMode::mode_1_rgb_5_bits_2048_colors) ? register_offset << 1
-        //                                                                                                : register_offset & 0x3;
-        // return (offset << displacement_8);
-        return (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) ? register_offset * 0x400
-                                                                                           : register_offset * 0x200;
+        constexpr auto color_size_2_bytes = u8{2};
+        constexpr auto color_size_4_bytes = u8{4};
+        auto           color_size         = u8{};
+        constexpr auto mask_2_bits        = u8{0x3};
+        constexpr auto mask_3_bits        = u8{0x7};
+        auto           register_mask      = u8{};
+        switch (ram_status_.color_ram_mode) {
+            case ColorRamMode::mode_0_rgb_5_bits_1024_colors:
+                color_size    = color_size_2_bytes;
+                register_mask = mask_2_bits;
+                break;
+            case ColorRamMode::mode_1_rgb_5_bits_2048_colors:
+                color_size    = color_size_2_bytes;
+                register_mask = mask_3_bits;
+                break;
+            case ColorRamMode::mode_2_rgb_8_bits_1024_colors:
+                color_size    = color_size_4_bytes;
+                register_mask = mask_2_bits;
+                break;
+            default: core::Log::warning("vdp2", core::tr("Can't calculate color RAM address offset."));
+        }
+        return ((register_offset & register_mask) << displacement_8) * color_size;
     };
     const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3bits c, const ScreenModeType t) {
         switch (c) {
