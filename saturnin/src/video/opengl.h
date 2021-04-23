@@ -50,6 +50,13 @@ constexpr auto minimum_window_height = u16{512};
 enum class ShaderName { vertex, fragment };
 enum class GlslVersion { glsl_120, glsl_330 };
 
+enum class DrawType {
+    textured_polygon, // VDP2 cells, normal/scaled/distorted sprites
+    non_textured_polygon,
+    polyline,
+    line
+};
+
 using ShadersList = std::map<std::pair<GlslVersion, ShaderName>, const char*>;
 
 class Opengl {
@@ -63,6 +70,14 @@ class Opengl {
     auto operator=(const Opengl&) & -> Opengl& = delete;
     auto operator=(Opengl&&) & -> Opengl& = delete;
     ~Opengl();
+    ///@}
+
+    ///@{
+    /// Accessors / Mutators
+    [[nodiscard]] auto renderedTexture() const { return rendered_texture_; };
+    void               renderedTexture(u32 texture) { rendered_texture_ = texture; };
+    [[nodiscard]] auto mainContext() const { return main_context_; };
+    void               mainContext(GLFWwindow* context) { main_context_ = context; };
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,17 +114,6 @@ class Opengl {
     void preRender();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::render();
-    ///
-    /// \brief  Rendering of data.
-    ///
-    /// \author Runik
-    /// \date   08/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void render();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::postRender();
     ///
     /// \brief  Processing done after rendering.
@@ -143,21 +147,6 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void displayFramebuffer(core::EmulatorContext& state);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getRenderingTexture() const -> const u32
-    ///
-    /// \brief  Gets the texture
-    ///
-    /// \author Runik
-    /// \date   06/02/2021
-    ///
-    /// \returns    An u32.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    [[nodiscard]] auto getRenderingTexture() const -> const u32 { return this->rendering_texture_; };
-
-    void renderingTexture(u32 texture) { this->rendering_texture_ = texture; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::onWindowResize(const u16 width, const u16 height);
@@ -198,26 +187,50 @@ class Opengl {
     static void deleteShaders(std::vector<u32> shaders);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::setupTriangle();
+    /// \fn static auto Opengl::generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
     ///
-    /// \brief  Sets up the triangle using shaders using modern OpenGL.
-    ///
-    /// \author Runik
-    /// \date   12/10/2019
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void setupTriangle();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::drawTriangle();
-    ///
-    /// \brief  Draws a triangle using modern OpenGL.
+    /// \brief  Generates a texture from a vector.
     ///
     /// \author Runik
-    /// \date   12/10/2019
+    /// \date   22/04/2020
+    ///
+    /// \param  width   Width of the texture.
+    /// \param  height  Height of the texture.
+    /// \param  data    Texture data.
+    ///
+    /// \returns    The OpenGL id of the generated texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void drawTriangle();
+    [[nodiscard]] static auto generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Opengl::deleteTexture(const u32 texture);
+    ///
+    /// \brief  Deletes the texture described by key on the GPU.
+    ///
+    /// \author Runik
+    /// \date   14/04/2021
+    ///
+    /// \param  texture The OpenGL texture identifier.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void deleteTexture(const u32 texture);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_list, const std::vector<u32>&
+    /// textures_list);
+    ///
+    /// \brief  Renders a batch of vertexes of the specified type.
+    ///
+    /// \author Runik
+    /// \date   16/04/2021
+    ///
+    /// \param  type            The type of data to draw.
+    /// \param  draw_list       The vertexes to draw.
+    /// \param  textures_list   List of textures.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void renderBatch(const DrawType type, const std::vector<Vertex>& draw_list, const std::vector<u32>& textures_list);
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,23 +249,6 @@ class Opengl {
     auto getShaderSource(const ShaderName name) -> const char*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Opengl::generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
-    ///
-    /// \brief  Generates a texture from a vector.
-    ///
-    /// \author Runik
-    /// \date   22/04/2020
-    ///
-    /// \param  width   Width of the texture.
-    /// \param  height  Height of the texture.
-    /// \param  data    Texture data.
-    ///
-    /// \returns    The id of the generated texture.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    [[nodiscard]] static auto generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4;
     ///
     /// \brief  Calculates the display viewport matrix, adding letterbox or pillarbox when the display isn't exactly like the
@@ -266,10 +262,26 @@ class Opengl {
 
     auto calculateDisplayViewportMatrix() -> glm::highp_mat4;
 
-    core::Config* config_; ///< Configuration object
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::initializeVao(const std::vector<Vertex>& vertexes) -> u32;
+    ///
+    /// \brief  Initializes the vao based on the vertexes.
+    ///
+    /// \author Runik
+    /// \date   16/04/2021
+    ///
+    /// \param  vertexes    The vertexes.
+    ///
+    /// \returns    The generated VAO id.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32  rendering_texture_{}; ///< Destination texture for render to texture.
-    bool is_legacy_opengl_{};  ///< True if rendering in legacy opengl.
+    auto initializeVao(const std::vector<Vertex>& vertexes) -> u32;
+
+    core::Config* config_;       ///< Configuration object.
+    GLFWwindow*   main_context_; ///< Context for the app
+
+    u32  rendered_texture_{}; ///< Destination texture for render to texture.
+    bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
@@ -280,8 +292,6 @@ class Opengl {
     u32                 vao_;
     u32                 fbo_{};    ///< Framebuffer Object used for rendering to texture.
     std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display
-
-    u32 texture_;
 
     ShadersList shaders_list_;
 

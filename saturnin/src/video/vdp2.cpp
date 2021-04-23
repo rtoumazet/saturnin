@@ -199,8 +199,6 @@ void Vdp2::onVblankIn() {
     populateRenderData();
 }
 
-auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>& { return render_vertexes_; }
-
 //--------------------------------------------------------------------------------------------------------------
 // DEBUG methods
 //--------------------------------------------------------------------------------------------------------------
@@ -1553,13 +1551,13 @@ void Vdp2::updateResolution() {
 };
 
 void Vdp2::updateRamStatus() {
-    ram_status_.vram_size                    = vrsize_.get(VramSizeRegister::vram_size);
-    ram_status_.vram_a_mode                  = ramctl_.get(RamControl::vram_a_mode);
-    ram_status_.vram_b_mode                  = ramctl_.get(RamControl::vram_b_mode);
-    ram_status_.color_ram_mode               = ramctl_.get(RamControl::color_ram_mode);
-    memory()->vdp2_cram_memory_mask_         = (ram_status_.color_ram_mode == ColorRamMode::mode_1_rgb_5_bits_2048_colors)
-                                                   ? core::vdp2_cram_32Kb_memory_mask
-                                                   : core::vdp2_cram_16Kb_memory_mask;
+    ram_status_.vram_size      = vrsize_.get(VramSizeRegister::vram_size);
+    ram_status_.vram_a_mode    = ramctl_.get(RamControl::vram_a_mode);
+    ram_status_.vram_b_mode    = ramctl_.get(RamControl::vram_b_mode);
+    ram_status_.color_ram_mode = ramctl_.get(RamControl::color_ram_mode);
+    // memory()->vdp2_cram_memory_mask_         = (ram_status_.color_ram_mode == ColorRamMode::mode_1_rgb_5_bits_2048_colors)
+    //                                               ? core::vdp2_cram_32Kb_memory_mask
+    //                                               : core::vdp2_cram_16Kb_memory_mask;
     ram_status_.coefficient_table_storage    = ramctl_.get(RamControl::coefficient_table_storage);
     ram_status_.vram_a0_rotation_bank_select = ramctl_.get(RamControl::vram_a0_rotation_bank_select);
     ram_status_.vram_a1_rotation_bank_select = ramctl_.get(RamControl::vram_a1_rotation_bank_select);
@@ -2250,59 +2248,12 @@ void Vdp2::populateRenderData() {
 
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
             if (isScreenDisplayed(ScrollScreen::nbg3)) {
-                //*******************************************************************************************************************//
-                render_vertexes_.clear();
-                // render_vertexes_.emplace_back(Vertex{0, 0, 0, 0, 0, 0, 0.0, 1.0});
-                // render_vertexes_.emplace_back(Vertex{0, 224, 0, 0, 0, 0, 0.0, 0.0});
-                // render_vertexes_.emplace_back(Vertex{352, 224, 0, 0, 0, 0, 1.0, 0.0});
-                // render_vertexes_.emplace_back(Vertex{352, 0, 0, 0, 0, 0, 1.0, 1.0});
-                render_vertexes_.emplace_back(Vertex{0, 0, 0, 0, 0, 0, 0.0, 1.0}); // lower left
-                render_vertexes_.emplace_back(Vertex{8, 0, 0, 0, 0, 0, 1.0, 1.0}); // lower right
-                render_vertexes_.emplace_back(Vertex{8, 8, 0, 0, 0, 0, 1.0, 0.0}); // upper right
-                render_vertexes_.emplace_back(Vertex{0, 8, 0, 0, 0, 0, 0.0, 0.0}); // upper left
-
-                render_vertexes_.emplace_back(Vertex{8, 0, 0, 0, 0, 0, 0.0, 0.0});  // lower left
-                render_vertexes_.emplace_back(Vertex{16, 0, 0, 0, 0, 0, 1.0, 0.0}); // lower right
-                render_vertexes_.emplace_back(Vertex{16, 8, 0, 0, 0, 0, 1.0, 1.0}); // upper right
-                render_vertexes_.emplace_back(Vertex{8, 8, 0, 0, 0, 0, 0.0, 1.0});  // upper left
-
-                render_vertexes_.emplace_back(Vertex{16, 0, 0, 0, 0, 0, 0.0, 0.0}); // lower left
-                render_vertexes_.emplace_back(Vertex{24, 0, 0, 0, 0, 0, 1.0, 0.0}); // lower right
-                render_vertexes_.emplace_back(Vertex{24, 8, 0, 0, 0, 0, 1.0, 1.0}); // upper right
-                render_vertexes_.emplace_back(Vertex{16, 8, 0, 0, 0, 0, 0.0, 1.0}); // upper left
-
-                auto pnd                      = PatternNameData{};
-                pnd.character_number          = 0;
-                pnd.is_horizontally_flipped   = false;
-                pnd.is_vertically_flipped     = false;
-                pnd.palette_number            = 0;
-                pnd.special_color_calculation = 0;
-                pnd.special_priority          = 0;
-
-                auto texture = std::vector<u8>(
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-                     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-                     0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
-
-                const auto key = Texture::storeTexture(Texture(VdpType::vdp2, 0, ColorCount::palette_16, texture, 8, 8));
-                auto       p   = Vdp2Part(pnd, ScreenPos{0, 0}, key);
-                vdp2_parts_[3].clear();
-                vdp2_parts_[3].push_back(std::move(p));
-                //**********************************************************************************************************************//
-
                 updateScrollScreenStatus(ScrollScreen::nbg3);
                 readScrollScreenData(ScrollScreen::nbg3);
             }
         }
     }
+    emulator_context_->notifyRenderingDone();
 }
 
 auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
@@ -2336,9 +2287,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     constexpr auto cell_size    = u8{8 * 8};
 
     const auto getColorRamAddressOffset = [&](const u8 register_offset) {
-        const auto offset = (ram_status_.color_ram_mode == ColorRamMode::mode_1_rgb_5_bits_2048_colors) ? register_offset
-                                                                                                        : register_offset & 0x3;
-        return (offset << displacement_8);
+        // const auto offset = (ram_status_.color_ram_mode == ColorRamMode::mode_1_rgb_5_bits_2048_colors) ? register_offset << 1
+        //                                                                                                : register_offset & 0x3;
+        // return (offset << displacement_8);
+        return (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) ? register_offset * 0x400
+                                                                                           : register_offset * 0x200;
     };
     const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3bits c, const ScreenModeType t) {
         switch (c) {
@@ -2906,6 +2859,8 @@ auto Vdp2::getScreen(const ScrollScreen s) const -> const ScrollScreenStatus& { 
 
 void Vdp2::readScrollScreenData(const ScrollScreen s) {
     const auto& screen = getScreen(s);
+    vdp2_parts_[util::toUnderlying(s)].clear();
+
     if (screen.format == ScrollScreenFormat::cell) {
         // Using a set to prevent calculating same address data multiple times
         auto unique_addresses = std::unordered_set<u32>{};
@@ -3077,7 +3032,8 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
 
     for (u32 i = 0; i < cp_number; ++i) {
         const auto raw_data = (pnd_size == 2) ? memory()->read<u16>(pnd_address) : memory()->read<u32>(pnd_address);
-        auto       pn_data  = readPatternNameData(raw_data, screen);
+        // if (raw_data != 0x0) __debugbreak();
+        auto pn_data = readPatternNameData(raw_data, screen);
         pn_data.character_number &= character_number_mask;
 
         if (isEndOfRowReached(modulo_values, i)) {
@@ -3094,7 +3050,8 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
 
 void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd, const ScreenOffset& cp_offset) {
     constexpr auto character_pattern_boundary = u8{0x20};
-    const auto     character_number_address   = pnd.character_number * character_pattern_boundary;
+    // if (pnd.character_number != 0x3000) __debugbreak();
+    const auto character_number_address = pnd.character_number * character_pattern_boundary;
     if (screen.character_pattern_size == CharacterSize::one_by_one) {
         readCell(screen, pnd, character_number_address, cp_offset);
     } else { // CharacterSize::two_by_two
@@ -3164,62 +3121,81 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     constexpr auto  texture_size   = texture_width * texture_height * 4;
     std::vector<u8> texture_data;
     texture_data.reserve(texture_size);
+    const auto key = Texture::calculateKey(VdpType::vdp2, cell_address, screen.character_color_number);
 
-    if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
-        // 32 bits access to color RAM
-        switch (screen.character_color_number) {
-            case ColorCount::palette_16: {
-                read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
-                const auto key = Texture::storeTexture(
-                    Texture(VdpType::vdp2, cell_address, ColorCount::palette_16, texture_data, texture_width, texture_height));
-                auto p = Vdp2Part(
-                    pnd,
-                    ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)},
-                    key);
-                vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
-                break;
+    if (!Texture::isTextureStored(key)) {
+        if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+            // 32 bits access to color RAM
+            switch (screen.character_color_number) {
+                case ColorCount::palette_16: {
+                    read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+                    break;
+                }
+                case ColorCount::palette_256: {
+                    break;
+                }
+                case ColorCount::palette_2048: {
+                    break;
+                }
+                case ColorCount::rgb_32k: {
+                    break;
+                }
+                case ColorCount::rgb_16m: {
+                    break;
+                }
+                default: {
+                    Log::warning("vdp2", tr("Character color number invalid !"));
+                }
             }
-            case ColorCount::palette_256: {
-                break;
-            }
-            case ColorCount::palette_2048: {
-                break;
-            }
-            case ColorCount::rgb_32k: {
-                break;
-            }
-            case ColorCount::rgb_16m: {
-                break;
-            }
-            default: {
-                Log::warning("vdp2", tr("Character color number invalid !"));
-            }
-        }
-    } else {
-        // 16 bits access to color RAM
-        switch (screen.character_color_number) {
-            case ColorCount::palette_16: {
-                read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
-                break;
-            }
-            case ColorCount::palette_256: {
-                break;
-            }
-            case ColorCount::palette_2048: {
-                break;
-            }
-            case ColorCount::rgb_32k: {
-                break;
-            }
-            case ColorCount::rgb_16m: {
-                break;
-            }
-            default: {
-                Log::warning("vdp2", tr("Character color number invalid !"));
+        } else {
+            // 16 bits access to color RAM
+            switch (screen.character_color_number) {
+                case ColorCount::palette_16: {
+                    read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                    break;
+                }
+                case ColorCount::palette_256: {
+                    // read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                    break;
+                }
+                case ColorCount::palette_2048: {
+                    break;
+                }
+                case ColorCount::rgb_32k: {
+                    break;
+                }
+                case ColorCount::rgb_16m: {
+                    break;
+                }
+                default: {
+                    Log::warning("vdp2", tr("Character color number invalid !"));
+                }
             }
         }
     }
-    // Log::info("vdp2", "(Cell address : {:#x})", cell_address);
+    saveCell(screen, pnd, cell_address, cell_offset, texture_data, key);
+    // Log::info("vdp2", "(Cell address : {:#x},{:#x})", cell_offset.x, cell_offset.y);
+}
+
+void Vdp2::saveCell(const ScrollScreenStatus& screen,
+                    const PatternNameData&    pnd,
+                    const u32                 cell_address,
+                    const ScreenOffset&       cell_offset,
+                    std::vector<u8>&          texture_data,
+                    const size_t              key) {
+    constexpr auto texture_width  = u16{8};
+    constexpr auto texture_height = u16{8};
+
+    if (!Texture::isTextureStored(key)) {
+        Texture::storeTexture(
+            Texture(VdpType::vdp2, cell_address, screen.character_color_number, texture_data, texture_width, texture_height));
+    }
+    auto p
+        = Vdp2Part(pnd,
+                   ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)},
+                   key);
+    // if (pnd.character_number == 0xdddd) __debugbreak();
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
 }
 
 auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> PatternNameData {

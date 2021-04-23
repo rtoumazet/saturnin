@@ -50,33 +50,34 @@ class Texture {
     ~Texture()                              = default;
     ///@}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Texture::getKey() const -> const size_t
-    ///
-    /// \brief  Gets the key of the texture.
-    ///
-    /// \author Runik
-    /// \date   29/03/2021
-    ///
-    /// \returns    The key.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///@{
+    /// Accessors / Mutators
+    auto key() const { return key_; }
+    auto apiHandle() const { return api_handle_; }
+    void apiHandle(const u32 h) { api_handle_ = h; }
+    auto width() const { return width_; }
+    auto height() const { return height_; }
+    auto rawData() const -> const std::vector<u8>& { return raw_data_; }
+    auto isDiscarded() const { return is_discarded_; }
+    void isDiscarded(const bool discarded) { is_discarded_ = discarded; }
+    auto deleteOnGpu() const { return delete_on_gpu_; }
+    void deleteOnGpu(const bool d) { delete_on_gpu_ = d; }
+    ///@}
 
-    auto getKey() const -> const size_t { return key_; }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::storeTexture(const Texture&& t) -> size_t;
+    /// \fn static auto Texture::storeTexture(Texture&& t) -> size_t;
     ///
     /// \brief  Stores a texture, replacing the existing one if any.
     ///
     /// \author Runik
     /// \date   29/03/2021
     ///
-    /// \param  t   A Texture to store.
+    /// \param [in,out] t   A Texture to store.
     ///
     /// \returns    The key of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto storeTexture(const Texture&& t) -> size_t;
+    static auto storeTexture(Texture&& t) -> size_t;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::getTexture(const size_t key) -> Texture&;
@@ -94,27 +95,22 @@ class Texture {
     static auto getTexture(const size_t key) -> Texture&;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::doesTextureExist(const Texture& t) -> bool;
+    /// \fn static auto Texture::isTextureStored(const size_t key) -> bool;
     ///
     /// \brief  Checks if the texture exists.
     ///
     /// \author Runik
     /// \date   29/03/2021
     ///
-    /// \param  t   A Texture to check.
+    /// \param  key Key of the texture to check.
     ///
-    /// \returns    True if the texture already exists.
+    /// \returns    True if the texture is alreadystored.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto doesTextureExist(const Texture& t) -> bool;
+    static auto isTextureStored(const size_t key) -> bool;
 
-    u16             width_{};    ///< The texture width.
-    u16             height_{};   ///< The texture height.
-    std::vector<u8> raw_data_{}; ///< Raw texture data.
-
-  private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Texture::calculateKey(const VdpType vp, const u32 address, const ColorCount color_count);
+    /// \fn static auto Texture::calculateKey(const VdpType vp, const u32 address, const ColorCount color_count) -> size_t;
     ///
     /// \brief  Calculates the texture key that will be used in the storage.
     ///
@@ -124,21 +120,30 @@ class Texture {
     /// \param  vp          The type of VDP texture.
     /// \param  address     The address.
     /// \param  color_count Number of colors.
+    ///
+    /// \returns    The calculated key.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void calculateKey(const VdpType vp, const u32 address, const ColorCount color_count);
+    static auto calculateKey(const VdpType vp, const u32 address, const ColorCount color_count) -> size_t;
 
+    static auto deleteTexturesOnGpu() {
+        for (auto& t : texture_storage_) {
+            t.second.api_handle_ = 0;
+        }
+    }
+
+  private:
     static std::map<size_t, Texture> texture_storage_; ///< The texture storage
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
-    // u16     width_{};                    ///< The texture width.
-    // u16     height_{};                   ///< The texture height.
-    bool   is_discarded{false}; ///< True if the texture is discarded.
-    size_t key_{};              ///< The key of the part.
+    u16     width_{};                    ///< The texture width.
+    u16     height_{};                   ///< The texture height.
+    bool    is_discarded_{false};        ///< True if the texture is discarded.
+    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.
+    size_t  key_{};                      ///< The key of the part.
+    u32     api_handle_{};               ///< Handle to the graphics API.
 
-    // std::vector<u8> raw_data_{}; ///< Raw texture data.
-
-    u32 api_handle_{}; ///< Handle to the graphics API.
+    std::vector<u8> raw_data_{}; ///< Raw texture data.
 };
 
 } // namespace saturnin::video

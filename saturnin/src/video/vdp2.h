@@ -31,6 +31,7 @@
 #include <saturnin/src/emulator_defs.h>    // u8, u16, u32
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
+#include <saturnin/src/utilities.h>        // toUnderlying
 #include <saturnin/src/video/vdp2_part.h>  // ScrollScreenPos
 #include <saturnin/src/video/vdp2_registers.h>
 
@@ -552,6 +553,15 @@ class Dots4Bits : public Register {
     inline static const auto dot_7 = BitRange<u8>{0, 3};
 };
 
+class Dots8Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto dot_0 = BitRange<u8>{24, 31};
+    inline static const auto dot_1 = BitRange<u8>{16, 23};
+    inline static const auto dot_2 = BitRange<u8>{8, 15};
+    inline static const auto dot_3 = BitRange<u8>{0, 7};
+};
+
 class Vdp2 {
   public:
     ///@{
@@ -662,17 +672,19 @@ class Vdp2 {
     void onVblankIn();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::getRenderVertexes() const -> const std::vector<Vertex>&;
+    /// \fn auto Vdp2::vdp2Parts(const ScrollScreen s) -> const std::vector<Vdp2Part>&
     ///
-    /// \brief  Returns the vertexes to render.
+    /// \brief  Returns the VDP2 parts of a scroll screen.
     ///
     /// \author Runik
-    /// \date   03/02/2021
+    /// \date   15/04/2021
     ///
-    /// \returns    A reference to a std::vector&lt;Vertex&gt;
+    /// \param  s   A ScrollScreen.
+    ///
+    /// \returns    A reference to a const std::vector&lt;Vdp2Part&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getRenderVertexes() const -> const std::vector<Vertex>&;
+    auto vdp2Parts(const ScrollScreen s) -> const std::vector<Vdp2Part>& { return vdp2_parts_[utilities::toUnderlying(s)]; }
 
     //--------------------------------------------------------------------------------------------------------------
     // DEBUG methods
@@ -689,7 +701,7 @@ class Vdp2 {
     static auto getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue;
     auto        getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>>;
     ///@}
-    std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
+
   private:
     //--------------------------------------------------------------------------------------------------------------
     // MEMORY ACCESS methods
@@ -1206,6 +1218,30 @@ class Vdp2 {
                   const ScreenOffset&       cell_offset);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
+    /// ScreenOffset& cell_offset, std::vector<u8>& texture_data, const size_t key);
+    ///
+    /// \brief  Saves a cell to the parts vector
+    ///
+    /// \author Runik
+    /// \date   14/04/2021
+    ///
+    /// \param          screen          Current scroll screen status.
+    /// \param          pnd             The pattern name data.
+    /// \param          cell_address    The cell address.
+    /// \param          cell_offset     The cell offset in cell units.
+    /// \param [in,out] texture_data    Texture raw data.
+    /// \param          key             Texture key.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void saveCell(const ScrollScreenStatus& screen,
+                  const PatternNameData&    pnd,
+                  const u32                 cell_address,
+                  const ScreenOffset&       cell_offset,
+                  std::vector<u8>&          texture_data,
+                  const size_t              key);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> auto Vdp2::readColor(const u32 color_address) -> const Color
     ///
     /// \brief  Reads a color
@@ -1244,6 +1280,18 @@ class Vdp2 {
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
     };
 
+    // template<typename T>
+    // void readPalette256Dot(std::vector<u8>&          texture_data,
+    //                       const ScrollScreenStatus& screen,
+    //                       const u8                  palette_number,
+    //                       const u8                  dot) {
+    //    const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (palette_number + dot) *
+    //    sizeof(T)}; auto       color         = readColor<T>(color_address); if (!dot && screen.is_transparency_code_valid)
+    //    color.a = 0;
+
+    //    texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
+    //};
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void saturnin::video::Vdp2::read16ColorsCellData(std::vector<u8>& texture_data, const
     /// ScrollScreenStatus& screen, const u8 palette_number, const u32 cell_address)
@@ -1264,20 +1312,44 @@ class Vdp2 {
                               const u32                 cell_address) {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
+        constexpr auto palette_disp    = u8{4};
+        const auto     palette         = palette_number << palette_disp;
         for (u32 i = 0; i < 8; ++i) {
-            auto row = Dots4Bits(memory()->read<u32>(current_address += row_offset));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_0));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_1));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_2));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_3));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_4));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_5));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_6));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_7));
+            auto row = Dots4Bits(memory()->read<u32>(current_address));
+            readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_0));
+            readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_1));
+            readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_2));
+            readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_3));
+            readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_4));
+            readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_5));
+            readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_6));
+            readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_7));
+            current_address += row_offset;
         }
+        // std::reverse(texture_data.begin(), texture_data.end());
     }
 
-    Color read256ColorsData();
+    // template<typename T>
+    // void read256ColorsCellData(std::vector<u8>&          texture_data,
+    //                           const ScrollScreenStatus& screen,
+    //                           const u8                  palette_number,
+    //                           const u32                 cell_address) {
+    //    constexpr auto row_offset      = u8{8};
+    //    auto           current_address = vram_start_address + cell_address;
+    //    for (u32 i = 0; i < 8; ++i) {
+    //        auto row = Dots8Bits(memory()->read<u32>(current_address += row_offset));
+    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
+    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
+    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
+    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
+    //        row = Dots8Bits(memory()->read<u32>(current_address += row_offset));
+    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
+    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
+    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
+    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
+    //    }
+    //}
+
     Color read2048ColorsData();
     Color read32KColorsData();
     Color read16MColorsData();
@@ -1313,15 +1385,13 @@ class Vdp2 {
     TvScreenStatus tv_screen_status_; ///< The TV screen status.
     RamStatus      ram_status_;       ///< The RAM status
 
-    std::vector<Vertex> render_vertexes_; ///< Contains all the geometry vertexes (VDP1 & VDP2).
-
     std::array<ScrollScreenStatus, 6> bg_; ///< The backgrounds status.
 
     // Pre calculated modulo values used for character patterns positionning
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
-    // std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
+    std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
 
     ///@{
     /// \name VDP2 registers

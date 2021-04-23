@@ -53,12 +53,25 @@ class Vdp2Part final : public BaseRenderingPart {
     ~Vdp2Part()                               = default;
     ///@}
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2Part::partVertexes() const -> const std::vector<Vertex>&
+    ///
+    /// \brief  Vertexes of the part.
+    ///
+    /// \author Runik
+    /// \date   15/04/2021
+    ///
+    /// \returns    A reference to a std::vector&lt;Vertex&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto partVertexes() const -> const std::vector<Vertex>& { return part_vertexes_; }
+
     void renderPart() override;
 
     void displayCell();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto final::getTextureKey() const -> const size_t
+    /// \fn auto Vdp2Part::getTextureKey() const -> const size_t
     ///
     /// \brief  Gets texture key
     ///

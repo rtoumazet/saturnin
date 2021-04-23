@@ -29,6 +29,8 @@
 
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
+#include <mutex>
+#include <condition_variable>
 #include <thread> // thread
 #include <saturnin/src/emulator_enums.h>
 #include <saturnin/src/stv_definitions.h>
@@ -300,6 +302,10 @@ class EmulatorContext {
 
     void opengl(video::Opengl* opengl);
 
+    void waitUntilRenderingDone();
+
+    void notifyRenderingDone();
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::emulationMainThread();
@@ -339,7 +345,10 @@ class EmulatorContext {
 
     Rom_stv stv_rom_{Rom_stv::none}; ///< Current ST-V ROM loaded.
 
-    std::thread emulation_main_thread_; ///< The emulation main thread.
+    std::thread             emulation_main_thread_; ///< The emulation main thread.
+    std::mutex              rendering_mutex_;
+    std::condition_variable rendering_condition_variable_;
+    bool                    is_rendering_done_;
 
     GLFWwindow* opengl_window_; ///< The OpenGL window.
 };

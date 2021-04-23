@@ -19,6 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/texture.h>
+#include <saturnin/src/video/opengl.h>
 #include <saturnin/src/utilities.h> // hashCombine
 
 namespace util = saturnin::utilities;
@@ -36,17 +37,17 @@ Texture::Texture(const VdpType    vp,
                  std::vector<u8>& texture,
                  const u16        width,
                  const u16        height) :
-    width_(width),
-    height_(height) {
-    calculateKey(vp, address, color_count);
+    vdp_type_(vp),
+    width_(width), height_(height) {
+    key_      = calculateKey(vp, address, color_count);
     raw_data_ = std::move(texture);
 };
 
 // static //
-auto Texture::storeTexture(const Texture&& t) -> size_t {
-    texture_storage_.erase(t.getKey());
-    texture_storage_.emplace(t.getKey(), t);
-    return t.getKey();
+auto Texture::storeTexture(Texture&& t) -> size_t {
+    texture_storage_.erase(t.key());
+    texture_storage_.emplace(t.key(), t);
+    return t.key();
 }
 
 // static //
@@ -58,13 +59,15 @@ auto Texture::getTexture(const size_t key) -> Texture& {
 }
 
 // static //
-auto Texture::doesTextureExist(const Texture& t) -> bool {
-    if (texture_storage_.find(t.getKey()) != texture_storage_.end()) { return true; }
+auto Texture::isTextureStored(const size_t key) -> bool {
+    if (texture_storage_.find(key) != texture_storage_.end()) { return true; }
     return false;
 }
 
-void Texture::calculateKey(const VdpType vp, const u32 address, const ColorCount color_count) {
-    key_ = 0;
-    util::hashCombine(key_, vp, address, color_count);
+// static
+auto Texture::calculateKey(const VdpType vp, const u32 address, const ColorCount color_count) -> size_t {
+    auto key = size_t{0};
+    util::hashCombine(key, vp, address, color_count);
+    return key;
 }
 } // namespace saturnin::video

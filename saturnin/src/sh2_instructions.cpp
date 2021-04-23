@@ -1776,6 +1776,8 @@ void execute(Sh2& s) {
     }
 
     opcodes_lut[s.current_opcode_](s);
+    // if (s.r_[4] == 0x25f00800) s.emulatorContext()->debugStatus(core::DebugStatus::paused);
+    // if (s.pc_ == 0x6018c7e) s.emulatorContext()->debugStatus(core::DebugStatus::paused);
 }
 
 auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }

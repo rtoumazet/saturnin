@@ -77,7 +77,16 @@ void Opengl::initialize() {
     auto texture = u32{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, saturn_framebuffer_width, saturn_framebuffer_height);
+    // glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, saturn_framebuffer_width, saturn_framebuffer_height);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA8,
+                 saturn_framebuffer_width,
+                 saturn_framebuffer_height,
+                 0,
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 0);
 
     // No need for mipmaps, they are turned off
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -91,7 +100,7 @@ void Opengl::initialize() {
 
     // static const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
 
-    renderingTexture(texture);
+    renderedTexture(texture);
 
     if (is_legacy_opengl_) {
         const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
@@ -123,7 +132,7 @@ void Opengl::shutdown() {
         gl33core::glDeleteProgram(program_shader_);
         gl33core::glDeleteFramebuffers(1, &saturn_framebuffer_);
     }
-    const auto texture = getRenderingTexture();
+    const auto texture = renderedTexture();
     glDeleteTextures(1, &texture);
 }
 
@@ -139,11 +148,9 @@ void Opengl::preRender() {
 
     gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-};
 
-void Opengl::render() {
-    this->setupTriangle();
-    this->drawTriangle();
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 };
 
 void Opengl::postRender() {
@@ -216,23 +223,31 @@ void Opengl::initializeShaders() {
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
-    vertexes_.clear();
-    const auto vdp2_vertexes = state.vdp2()->getRenderVertexes();
-    if (!vdp2_vertexes.empty()) {
-        auto size = vdp2_vertexes.size() / 4; // getting the number of quads in the vector
-        vertexes_.reserve(size);
-        for (int i = 0; i < size; ++i) {
-            vertexes_.emplace_back(vdp2_vertexes[i * 4 + 0]);
-            vertexes_.emplace_back(vdp2_vertexes[std::move(i * 4 + 1)]);
-            vertexes_.emplace_back(vdp2_vertexes[i * 4 + 2]);
-            vertexes_.emplace_back(vdp2_vertexes[std::move(i * 4 + 0)]);
-            vertexes_.emplace_back(vdp2_vertexes[std::move(i * 4 + 2)]);
-            vertexes_.emplace_back(vdp2_vertexes[std::move(i * 4 + 3)]);
+    preRender();
+    Texture::deleteTexturesOnGpu();
+    const auto vdp2_parts    = state.vdp2()->vdp2Parts(ScrollScreen::nbg3);
+    const auto vertex_nb     = (4 * vdp2_parts.size());
+    auto       draw_list     = std::vector<Vertex>{};
+    auto       textures_list = std::vector<u32>{};
+    if (!vdp2_parts.empty()) {
+        draw_list.reserve(vertex_nb);
+        for (u32 i = 0; i < vdp2_parts.size(); ++i) {
+            const auto& part_vertexes = vdp2_parts[i].partVertexes();
+            draw_list.insert(std::end(draw_list), std::begin(part_vertexes), std::end(part_vertexes));
+            // Texture should have been created in the texture pool, checking if it exists on the GPU
+            auto& t = Texture::getTexture(vdp2_parts[i].getTextureKey());
+            if (t.apiHandle() == 0) {
+                // Creation / replacement of the texture on the GPU
+                // deleteTexture(t.apiHandle());
+                t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+            }
+            textures_list.emplace_back(t.apiHandle());
         }
     }
-    preRender();
-    render();
+    // render();
+    renderBatch(DrawType::textured_polygon, draw_list, textures_list);
     postRender();
+    // state.notifyRenderingDone();
 }
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); };
@@ -279,74 +294,11 @@ void Opengl::deleteShaders(std::vector<u32> shaders) {
     }
 }
 
-void Opengl::setupTriangle() {
-    glGenVertexArrays(1, &vao_);
-    auto vertex_buffer = u32{};
-    glGenBuffers(1, &vertex_buffer);
-
-    // Declaring the buffer that will contain the indices
-    auto vertex_indices_buffer = u32{};
-    glGenBuffers(1, &vertex_indices_buffer);
-
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(vao_);
-
-    // vertex buffer data
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes_.size(), vertexes_.data(), GL_STATIC_DRAW);
-
-    // position pointer
-    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
-    glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
-
-    // texture coords pointer
-    auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
-    glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
-    glEnableVertexAttribArray(1);
-
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer
-    // object so afterwards we can safely unbind
-    // glBindBuffer(GLenum::GL_ARRAY_BUFFER, 0);
-
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying
-    // other VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly
-    // necessary.
-    // glBindVertexArray(0);
-
-    auto window = glfwGetCurrentContext();
-    auto state  = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
-    if (!state->vdp2()->vdp2_parts_[3].empty()) {
-        auto  key = state->vdp2()->vdp2_parts_[3][0].getTextureKey();
-        auto& tex = Texture::getTexture(key);
-        texture_  = generateTexture(tex.width_, tex.height_, tex.raw_data_);
-    }
-
-    //********************************************************//
-}
-void Opengl::drawTriangle() {
-    glBindTexture(GL_TEXTURE_2D, texture_);
-    glUseProgram(program_shader_);
-    glBindVertexArray(vao_); // binding the global Vertex Array Object
-
-    const auto proj_matrix = calculateDisplayViewportMatrix();
-
-    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<s32>(vertexes_.size()));
-}
-
-static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
-
-auto Opengl::getShaderSource(const ShaderName name) -> const char* {
-    const auto glsl_version = (is_legacy_opengl_) ? GlslVersion::glsl_120 : GlslVersion::glsl_330;
-    return shaders_list_[{glsl_version, name}];
-}
-
 // static
 auto Opengl::generateTexture(const u32 width, const u32 height, const std::vector<u8>& data) -> u32 {
     auto texture = u32{};
     glGenTextures(1, &texture);
+    glActiveTexture(GLenum::GL_TEXTURE0);
     glBindTexture(GLenum::GL_TEXTURE_2D, texture);
 
     // set the texture wrapping parameters
@@ -362,15 +314,77 @@ auto Opengl::generateTexture(const u32 width, const u32 height, const std::vecto
 
     glTexImage2D(GLenum::GL_TEXTURE_2D,
                  0,
-                 GLenum::GL_RGB,
+                 GLenum::GL_RGBA,
                  width,
                  height,
                  0,
-                 GLenum::GL_RGB,
+                 GLenum::GL_RGBA,
                  GLenum::GL_UNSIGNED_BYTE,
                  data.data());
 
     return texture;
+}
+
+// static
+void Opengl::deleteTexture(const u32 texture) { glDeleteTextures(1, &texture); }
+
+void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_list, const std::vector<u32>& textures_list) {
+    switch (type) {
+        case DrawType::textured_polygon: {
+            constexpr auto vertexes_per_quad      = u8{4};
+            constexpr auto vertexes_per_triangles = u32{6};
+            auto           vertexes               = std::vector<Vertex>{};
+            auto           elements_nb            = draw_list.size() / vertexes_per_quad;
+            const auto     vertexes_nb            = elements_nb * vertexes_per_triangles;
+            if (!draw_list.empty()) {
+                vertexes.reserve(vertexes_nb);
+                for (u32 i = 0; i < draw_list.size(); i += 4) {
+                    // Transforming one quad in 2 triangles
+                    vertexes.emplace_back(draw_list[i + 0]);
+                    vertexes.emplace_back(draw_list[i + 1]);
+                    vertexes.emplace_back(draw_list[i + 2]);
+                    vertexes.emplace_back(draw_list[i + 0]);
+                    vertexes.emplace_back(draw_list[i + 2]);
+                    vertexes.emplace_back(draw_list[i + 3]);
+                }
+            }
+            // Creating the VAO
+            auto vao = initializeVao(vertexes);
+            glUseProgram(program_shader_);
+            glBindVertexArray(vao); // binding VAO
+            glActiveTexture(GLenum::GL_TEXTURE0);
+
+            // Calculating the ortho projection matrix and sending it to the shader
+            const auto proj_matrix     = calculateDisplayViewportMatrix();
+            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+            // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
+            auto texture_index = u32{};
+            for (u32 i = 0; i < vertexes.size(); i += vertexes_per_triangles) {
+                glBindTexture(GL_TEXTURE_2D, textures_list.at(texture_index));
+                glDrawArrays(GL_TRIANGLES, i, vertexes_per_triangles);
+                ++texture_index;
+            }
+            break;
+        }
+        case DrawType::non_textured_polygon: {
+            break;
+        }
+        case DrawType::polyline: {
+            break;
+        }
+        case DrawType::line: {
+            break;
+        }
+    }
+}
+
+static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
+
+auto Opengl::getShaderSource(const ShaderName name) -> const char* {
+    const auto glsl_version = (is_legacy_opengl_) ? GlslVersion::glsl_120 : GlslVersion::glsl_330;
+    return shaders_list_[{glsl_version, name}];
 }
 
 auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4 {
@@ -407,6 +421,34 @@ auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4 {
     }
 
     return view * projection;
+}
+
+auto Opengl::initializeVao(const std::vector<Vertex>& vertexes) -> u32 {
+    // Creating the VAO
+    auto vao = u32{};
+    glGenVertexArrays(1, &vao);
+
+    // Creating the vertex buffer
+    auto vertex_buffer = u32{};
+    glGenBuffers(1, &vertex_buffer);
+
+    // Binding the VAO
+    glBindVertexArray(vao);
+
+    // Declaring vertex buffer data, and sending it to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+    // position pointer
+    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
+    glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
+
+    // texture coords pointer
+    auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
+    glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(1);
+
+    return vao;
 }
 
 auto isModernOpenglCapable() -> bool {
@@ -478,24 +520,23 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const std::string window_title
         = fmt::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
-    const auto window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
-    if (window == nullptr) { return EXIT_FAILURE; }
+    const auto main_window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
+    if (main_window == nullptr) { return EXIT_FAILURE; }
+    state.openglWindow(main_window);
 
-    state.openglWindow(window);
+    glfwSetWindowCloseCallback(main_window, windowCloseCallback);
+    glfwSetWindowSizeCallback(main_window, windowSizeCallback);
 
-    glfwSetWindowCloseCallback(window, windowCloseCallback);
-    glfwSetWindowSizeCallback(window, windowSizeCallback);
+    glfwSetWindowUserPointer(main_window, static_cast<void*>(&state));
 
-    glfwSetWindowUserPointer(window, static_cast<void*>(&state));
+    glfwSetInputMode(main_window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
-
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(main_window);
     glfwSwapInterval(1); // Enable vsync
 
     auto icons = std::array<GLFWimage, 3>{
         {loadPngImage("saturnin-ico-16.png"), loadPngImage("saturnin-ico-32.png"), loadPngImage("saturnin-ico-48.png")}};
-    glfwSetWindowIcon(window, 3, icons.data());
+    glfwSetWindowIcon(main_window, 3, icons.data());
 
     glbinding::initialize(glfwGetProcAddress);
 
@@ -510,7 +551,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
 
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplGlfw_InitForOpenGL(main_window, true);
     (is_legacy_opengl) ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Setup style
@@ -545,14 +586,15 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // Getting the right rendering context
     auto opengl = std::make_unique<Opengl>(state.config());
     state.opengl(opengl.get());
+    opengl->mainContext(main_window);
 
-    updateMainWindowSizeAndRatio(window, minimum_window_width, minimum_window_height);
+    updateMainWindowSizeAndRatio(main_window, minimum_window_width, minimum_window_height);
 
     // opengl->saturnScreenResolution(ScreenResolution{320, 224});
     opengl->hostScreenResolution(ScreenResolution{minimum_window_width, minimum_window_height});
 
     // Main loop
-    while (glfwWindowShouldClose(window) == GLFW_FALSE) {
+    while (glfwWindowShouldClose(main_window) == GLFW_FALSE) {
         // Start the ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -561,15 +603,14 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         // Rendering
         auto display_w = s32{};
         auto display_h = s32{};
-        glfwMakeContextCurrent(window);
-        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glfwMakeContextCurrent(main_window);
+        glfwGetFramebufferSize(main_window, &display_w, &display_h);
 
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
         gui::buildGui(state);
-
-        if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
+        if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(main_window, GLFW_TRUE); }
 
         ImGui::Render();
         // auto display_w = s32{};
@@ -587,7 +628,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         }
 
         // glfwMakeContextCurrent(window);
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(main_window);
 
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -604,7 +645,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(main_window);
     glfwTerminate();
 
     return EXIT_SUCCESS;

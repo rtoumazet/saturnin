@@ -200,6 +200,8 @@ void EmulatorContext::emulationMainThread() {
                 vdp1()->run(cycles);
                 vdp2()->run(cycles);
                 cdrom()->run(cycles);
+            } else {
+                notifyRenderingDone();
             }
         }
         Log::info("main", tr("Emulation main thread finished"));
@@ -215,5 +217,18 @@ void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window
 auto EmulatorContext::openglWindow() const -> GLFWwindow* { return opengl_window_; }
 
 void EmulatorContext::opengl(video::Opengl* opengl) { opengl_ = opengl; };
+
+void EmulatorContext::waitUntilRenderingDone() {
+    is_rendering_done_ = false; // Reset the condition
+    if (emulationStatus() != EmulationStatus::running) { is_rendering_done_ = true; }
+    std::unique_lock<std::mutex> mlock(rendering_mutex_);                             // Acquiring the lock
+    rendering_condition_variable_.wait(mlock, [this] { return is_rendering_done_; }); // Waiting for the signal
+}
+
+void EmulatorContext::notifyRenderingDone() {
+    std::lock_guard<std::mutex> guard(rendering_mutex_); // Lock the mutex
+    is_rendering_done_ = true;                           // Set the flag to true, means rendering is done
+    rendering_condition_variable_.notify_one();          // Notify the condition variable
+}
 
 } // namespace saturnin::core
