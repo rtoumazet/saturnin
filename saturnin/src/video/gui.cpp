@@ -750,7 +750,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
 
     ImGui::Begin("Video rendering", nullptr, flags);
 
-    state.waitUntilRenderingDone();
+    // state.waitUntilRenderingDone();
     state.opengl()->displayFramebuffer(state);
     if (state.opengl()->renderedTexture() != 0) { gui::addTextureToDrawList(state.opengl()->renderedTexture(), width, height); }
 

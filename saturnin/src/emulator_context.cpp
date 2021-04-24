@@ -181,6 +181,9 @@ void EmulatorContext::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
 
+        opengl()->initializeRenderingContext();
+        opengl()->makeRenderingContextCurrent();
+
         memory()->initialize();
         memory()->loadBios(hardware_mode_);
 
@@ -200,10 +203,11 @@ void EmulatorContext::emulationMainThread() {
                 vdp1()->run(cycles);
                 vdp2()->run(cycles);
                 cdrom()->run(cycles);
-            } else {
-                notifyRenderingDone();
+                //} else {
+                //    notifyRenderingDone();
             }
         }
+        opengl()->shutdownRenderingContext();
         Log::info("main", tr("Emulation main thread finished"));
     } catch (const std::exception& e) { Log::error("exception", e.what()); } catch (...) {
         Log::error("exception", tr("Uncaught exception !"));

@@ -76,8 +76,10 @@ class Opengl {
     /// Accessors / Mutators
     [[nodiscard]] auto renderedTexture() const { return rendered_texture_; };
     void               renderedTexture(u32 texture) { rendered_texture_ = texture; };
-    [[nodiscard]] auto mainContext() const { return main_context_; };
-    void               mainContext(GLFWwindow* context) { main_context_ = context; };
+    [[nodiscard]] auto ihmRenderingContext() const { return ihm_rendering_context_; };
+    void               ihmRenderingContext(GLFWwindow* context) { ihm_rendering_context_ = context; };
+    [[nodiscard]] auto emulatorRenderingContext() const { return emulator_rendering_context_; };
+    void               emulatorRenderingContext(GLFWwindow* context) { emulator_rendering_context_ = context; };
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,6 +234,12 @@ class Opengl {
 
     void renderBatch(const DrawType type, const std::vector<Vertex>& draw_list, const std::vector<u32>& textures_list);
 
+    void initializeRenderingContext();
+
+    void shutdownRenderingContext();
+
+    void makeRenderingContextCurrent();
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderName name) -> const char*;
@@ -277,8 +285,9 @@ class Opengl {
 
     auto initializeVao(const std::vector<Vertex>& vertexes) -> u32;
 
-    core::Config* config_;       ///< Configuration object.
-    GLFWwindow*   main_context_; ///< Context for the app
+    core::Config* config_;                     ///< Configuration object.
+    GLFWwindow*   ihm_rendering_context_;      ///< Context used for IHM rendering.
+    GLFWwindow*   emulator_rendering_context_; ///< Context used for the emulator rendering.
 
     u32  rendered_texture_{}; ///< Destination texture for render to texture.
     bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.

@@ -379,6 +379,18 @@ void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_li
     }
 }
 
+void Opengl::initializeRenderingContext() {
+    if (ihmRenderingContext() == nullptr) core::Log::error("opengl", core::tr("Could not initialize rendering context."));
+
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, ihmRenderingContext());
+    emulatorRenderingContext(render_window);
+}
+
+void Opengl::shutdownRenderingContext() { glfwDestroyWindow(emulatorRenderingContext()); }
+
+void Opengl::makeRenderingContextCurrent() { glfwMakeContextCurrent(emulatorRenderingContext()); }
+
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
 auto Opengl::getShaderSource(const ShaderName name) -> const char* {
@@ -523,6 +535,9 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     if (main_window == nullptr) { return EXIT_FAILURE; }
     state.openglWindow(main_window);
 
+    // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    // const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, main_window);
+
     glfwSetWindowCloseCallback(main_window, windowCloseCallback);
     glfwSetWindowSizeCallback(main_window, windowSizeCallback);
 
@@ -585,7 +600,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // Getting the right rendering context
     auto opengl = std::make_unique<Opengl>(state.config());
     state.opengl(opengl.get());
-    opengl->mainContext(main_window);
+    opengl->ihmRenderingContext(main_window);
+    // opengl->emulatorRenderingContext(render_window);
 
     updateMainWindowSizeAndRatio(main_window, minimum_window_width, minimum_window_height);
 
@@ -644,6 +660,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
+    // glfwDestroyWindow(render_window);
     glfwDestroyWindow(main_window);
     glfwTerminate();
 
