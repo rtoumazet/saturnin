@@ -75,6 +75,8 @@ void Vdp2::run(const u8 cycles) {
             this->onVblankIn();
 
             scu()->onVblankIn();
+
+            emulator_context_->opengl()->displayFramebuffer(*emulator_context_);
         }
     }
 

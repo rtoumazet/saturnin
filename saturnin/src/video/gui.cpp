@@ -724,18 +724,15 @@ void showMainMenu(core::EmulatorContext& state) {
 
 void showRenderingWindow(core::EmulatorContext& state) {
     // The rendering window is stretched to fill the area of the main window minus the core window.
-    glfwMakeContextCurrent(state.openglWindow());
-    // auto window = glfwGetCurrentContext();
+    // glfwMakeContextCurrent(state.openglWindow());
     auto width  = s32{};
     auto height = s32{};
     glfwGetWindowSize(state.openglWindow(), &width, &height);
 
     const auto pos_x = float{ImGui::GetMainViewport()->Pos.x};
-    // const auto pos_y = float{ImGui::GetMainViewport()->Pos.y + core_window_height};
     const auto pos_y = float{ImGui::GetMainViewport()->Pos.y};
     ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Always);
 
-    // const auto window_size = ImVec2(static_cast<float>(width), static_cast<float>(height + core_window_height));
     const auto window_size = ImVec2(static_cast<float>(width), static_cast<float>(height));
     ImGui::SetNextWindowSize(window_size);
 
@@ -751,10 +748,9 @@ void showRenderingWindow(core::EmulatorContext& state) {
     ImGui::Begin("Video rendering", nullptr, flags);
 
     // state.waitUntilRenderingDone();
-    state.opengl()->displayFramebuffer(state);
-    if (state.opengl()->renderedTexture() != 0) { gui::addTextureToDrawList(state.opengl()->renderedTexture(), width, height); }
+    // state.opengl()->displayFramebuffer(state);
 
-    // showMainMenu(state);
+    if (state.opengl()->areFbosInitialized()) { gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height); }
 
     ImGui::End();
     ImGui::PopStyleVar();

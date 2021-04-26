@@ -67,7 +67,7 @@ EmulatorContext::EmulatorContext() {
     cdrom_      = std::make_unique<Cdrom>(this);
     vdp1_       = std::make_unique<Vdp1>(this);
     vdp2_       = std::make_unique<Vdp2>(this);
-    opengl_     = nullptr; // Will be set later
+    opengl_     = std::make_unique<Opengl>(config_.get());
 }
 
 EmulatorContext::~EmulatorContext() = default;
@@ -82,7 +82,7 @@ auto EmulatorContext::scsp() -> Scsp* { return scsp_.get(); };
 auto EmulatorContext::cdrom() -> Cdrom* { return cdrom_.get(); };
 auto EmulatorContext::vdp1() -> Vdp1* { return vdp1_.get(); };
 auto EmulatorContext::vdp2() -> Vdp2* { return vdp2_.get(); };
-auto EmulatorContext::opengl() -> Opengl* { return opengl_; };
+auto EmulatorContext::opengl() -> Opengl* { return opengl_.get(); };
 
 auto EmulatorContext::initialize() -> bool {
     Log::initialize();
@@ -181,8 +181,7 @@ void EmulatorContext::emulationMainThread() {
     try {
         Log::info("main", tr("Emulation main thread started"));
 
-        opengl()->initializeRenderingContext();
-        opengl()->makeRenderingContextCurrent();
+        opengl()->initialize(openglWindow());
 
         memory()->initialize();
         memory()->loadBios(hardware_mode_);
@@ -220,7 +219,7 @@ void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window
 
 auto EmulatorContext::openglWindow() const -> GLFWwindow* { return opengl_window_; }
 
-void EmulatorContext::opengl(video::Opengl* opengl) { opengl_ = opengl; };
+// void EmulatorContext::opengl(video::Opengl* opengl) { opengl_ = opengl; };
 
 void EmulatorContext::waitUntilRenderingDone() {
     is_rendering_done_ = false; // Reset the condition

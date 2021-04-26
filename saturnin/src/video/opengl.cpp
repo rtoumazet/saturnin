@@ -60,61 +60,20 @@ using core::tr;
 Opengl::Opengl(core::Config* config) {
     config_           = config;
     is_legacy_opengl_ = config_->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
-    initialize();
+    // initialize();
 }
 
 Opengl::~Opengl() { shutdown(); }
 
-void Opengl::initialize() {
-    if (is_legacy_opengl_) {
-        glGenFramebuffersEXT(1, &saturn_framebuffer_);
-    } else {
-        gl33core::glGenFramebuffers(1, &saturn_framebuffer_);
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER, saturn_framebuffer_);
+void Opengl::initialize(GLFWwindow* gui_context) {
+    guiRenderingContext(gui_context);
+    initializeRenderingContext();
+    makeRenderingContextCurrent();
+    hostScreenResolution(ScreenResolution{video::minimum_window_width, video::minimum_window_height});
 
-    // Creating a texture for the color buffer
-    auto texture = u32{};
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    // glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, saturn_framebuffer_width, saturn_framebuffer_height);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA8,
-                 saturn_framebuffer_width,
-                 saturn_framebuffer_height,
-                 0,
-                 GL_RGBA,
-                 GL_UNSIGNED_BYTE,
-                 0);
+    glbinding::initialize(glfwGetProcAddress);
 
-    // No need for mipmaps, they are turned off
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Attaching the color texture to the fbo
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
-
-    // static const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
-
-    renderedTexture(texture);
-
-    if (is_legacy_opengl_) {
-        const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
-        if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE_EXT) {
-            Log::error("opengl", tr("Could not initialize framebuffer object !"));
-            throw std::runtime_error("Opengl error !");
-        }
-    } else {
-        const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
-        if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
-            Log::error("opengl", tr("Could not initialize framebuffer object !"));
-            throw std::runtime_error("Opengl error !");
-        }
-    }
+    initializeFbos();
     initializeShaders();
     const auto vertex_shader     = createVertexShader();
     const auto fragment_shader   = createFragmentShader();
@@ -127,20 +86,26 @@ void Opengl::shutdown() {
     glDeleteProgram(program_shader_);
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        glDeleteFramebuffersEXT(1, &saturn_framebuffer_);
+        for (auto f : fbos_) {
+            glDeleteFramebuffersEXT(1, &f);
+        }
     } else {
-        gl33core::glDeleteProgram(program_shader_);
-        gl33core::glDeleteFramebuffers(1, &saturn_framebuffer_);
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+        for (auto f : fbos_) {
+            gl33core::glDeleteFramebuffers(1, &f);
+        }
     }
-    const auto texture = renderedTexture();
-    glDeleteTextures(1, &texture);
+    for (auto t : fbo_textures_) {
+        glDeleteTextures(1, &t);
+    }
 }
 
 void Opengl::preRender() {
+    const auto current_index = 1 - displayed_texture_index_; // toggles the value
     if (is_legacy_opengl_) {
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, saturn_framebuffer_);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbos_[current_index]);
     } else {
-        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, saturn_framebuffer_);
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbos_[current_index]);
     }
 
     // Viewport is the entire Saturn framebuffer
@@ -160,6 +125,7 @@ void Opengl::postRender() {
     } else {
         gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
+    displayed_texture_index_ = 1 - displayed_texture_index_; // toggles the value
 };
 
 void Opengl::initializeShaders() {
@@ -308,9 +274,6 @@ auto Opengl::generateTexture(const u32 width, const u32 height, const std::vecto
     glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
     glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
 
-    // disable mipmaps
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
     glTexImage2D(GLenum::GL_TEXTURE_2D,
                  0,
                  GLenum::GL_RGBA,
@@ -380,10 +343,10 @@ void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_li
 }
 
 void Opengl::initializeRenderingContext() {
-    if (ihmRenderingContext() == nullptr) core::Log::error("opengl", core::tr("Could not initialize rendering context."));
+    if (guiRenderingContext() == nullptr) core::Log::error("opengl", core::tr("Could not initialize rendering context."));
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, ihmRenderingContext());
+    const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, guiRenderingContext());
     emulatorRenderingContext(render_window);
 }
 
@@ -462,6 +425,65 @@ auto Opengl::initializeVao(const std::vector<Vertex>& vertexes) -> u32 {
     return vao;
 }
 
+void Opengl::initializeFbos() {
+    // 2 FBOs are generated. One will be used as the last complete rendering by the GUI while the other will be rendered to.
+    constexpr auto fbos_number = u8{2};
+    // std::mutex                  mutex; // Will prevent using the fbos from the GUI thread while they're not yet initialized.
+    // std::lock_guard<std::mutex> guard(mutex);
+    for (int i = 0; i < fbos_number; ++i) {
+        auto fbo     = u32{};
+        auto texture = u32{};
+        if (is_legacy_opengl_) {
+            glGenFramebuffersEXT(1, &fbo);
+        } else {
+            gl33core::glGenFramebuffers(1, &fbo);
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+        // Creating a texture for the color buffer
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_RGBA8,
+                     saturn_framebuffer_width,
+                     saturn_framebuffer_height,
+                     0,
+                     GL_RGBA,
+                     GL_UNSIGNED_BYTE,
+                     0);
+
+        // No need for mipmaps, they are turned off
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Attaching the color texture to the fbo
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
+
+        if (is_legacy_opengl_) {
+            const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
+            if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE_EXT) {
+                Log::error("opengl", tr("Could not initialize framebuffer object !"));
+                throw std::runtime_error("Opengl error !");
+            }
+        } else {
+            const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
+            if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
+                Log::error("opengl", tr("Could not initialize framebuffer object !"));
+                throw std::runtime_error("Opengl error !");
+            }
+        }
+        fbos_.emplace_back(fbo);
+        fbo_textures_.emplace_back(texture);
+    }
+
+    displayedTexture(index_0); // Setting the texture of first fbo used.
+    glBindFramebuffer(GL_FRAMEBUFFER, fbos_[index_0]);
+}
+
 auto isModernOpenglCapable() -> bool {
     if (glfwInit() == GLFW_FALSE) { return false; }
 
@@ -531,26 +553,26 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const std::string window_title
         = fmt::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
-    const auto main_window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
-    if (main_window == nullptr) { return EXIT_FAILURE; }
-    state.openglWindow(main_window);
+    const auto ihm_window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
+    if (ihm_window == nullptr) { return EXIT_FAILURE; }
+    state.openglWindow(ihm_window);
 
     // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    // const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, main_window);
+    // const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, ihm_window);
 
-    glfwSetWindowCloseCallback(main_window, windowCloseCallback);
-    glfwSetWindowSizeCallback(main_window, windowSizeCallback);
+    glfwSetWindowCloseCallback(ihm_window, windowCloseCallback);
+    glfwSetWindowSizeCallback(ihm_window, windowSizeCallback);
 
-    glfwSetWindowUserPointer(main_window, static_cast<void*>(&state));
+    glfwSetWindowUserPointer(ihm_window, static_cast<void*>(&state));
 
-    glfwSetInputMode(main_window, GLFW_STICKY_KEYS, GLFW_TRUE);
+    glfwSetInputMode(ihm_window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
-    glfwMakeContextCurrent(main_window);
+    glfwMakeContextCurrent(ihm_window);
     glfwSwapInterval(1); // Enable vsync
 
     auto icons = std::array<GLFWimage, 3>{
         {loadPngImage("saturnin-ico-16.png"), loadPngImage("saturnin-ico-32.png"), loadPngImage("saturnin-ico-48.png")}};
-    glfwSetWindowIcon(main_window, 3, icons.data());
+    glfwSetWindowIcon(ihm_window, 3, icons.data());
 
     glbinding::initialize(glfwGetProcAddress);
 
@@ -565,7 +587,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
 
-    ImGui_ImplGlfw_InitForOpenGL(main_window, true);
+    ImGui_ImplGlfw_InitForOpenGL(ihm_window, true);
     (is_legacy_opengl) ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Setup style
@@ -598,18 +620,17 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const auto clear_color = ImVec4{0.45f, 0.55f, 0.60f, 1.00f};
 
     // Getting the right rendering context
-    auto opengl = std::make_unique<Opengl>(state.config());
-    state.opengl(opengl.get());
-    opengl->ihmRenderingContext(main_window);
-    // opengl->emulatorRenderingContext(render_window);
+    // auto opengl = std::make_unique<Opengl>(state.config());
+    // state.opengl(opengl.get());
+    // opengl->ihmRenderingContext(ihm_window);
+    // opengl->initializeRenderingContext();
 
-    updateMainWindowSizeAndRatio(main_window, minimum_window_width, minimum_window_height);
+    updateMainWindowSizeAndRatio(ihm_window, minimum_window_width, minimum_window_height);
 
-    // opengl->saturnScreenResolution(ScreenResolution{320, 224});
-    opengl->hostScreenResolution(ScreenResolution{minimum_window_width, minimum_window_height});
+    // opengl->hostScreenResolution(ScreenResolution{minimum_window_width, minimum_window_height});
 
     // Main loop
-    while (glfwWindowShouldClose(main_window) == GLFW_FALSE) {
+    while (glfwWindowShouldClose(ihm_window) == GLFW_FALSE) {
         // Start the ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -618,22 +639,16 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         // Rendering
         auto display_w = s32{};
         auto display_h = s32{};
-        glfwMakeContextCurrent(main_window);
-        glfwGetFramebufferSize(main_window, &display_w, &display_h);
+        glfwMakeContextCurrent(ihm_window);
+        glfwGetFramebufferSize(ihm_window, &display_w, &display_h);
 
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
         gui::buildGui(state);
-        if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(main_window, GLFW_TRUE); }
+        if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(ihm_window, GLFW_TRUE); }
 
         ImGui::Render();
-        // auto display_w = s32{};
-        // auto display_h = s32{};
-        // glfwGetFramebufferSize(window, &display_w, &display_h);
-        // glViewport(0, 0, display_w, display_h);
-        // glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        // glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
@@ -642,8 +657,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
             ImGui::RenderPlatformWindowsDefault();
         }
 
-        // glfwMakeContextCurrent(window);
-        glfwSwapBuffers(main_window);
+        glfwSwapBuffers(ihm_window);
 
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -660,8 +674,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    // glfwDestroyWindow(render_window);
-    glfwDestroyWindow(main_window);
+    // opengl->shutdownRenderingContext();
+    glfwDestroyWindow(ihm_window);
     glfwTerminate();
 
     return EXIT_SUCCESS;

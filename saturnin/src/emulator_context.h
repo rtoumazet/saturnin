@@ -27,6 +27,7 @@
 
 #pragma once
 
+#include <atomic> // atomic
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
 #include <mutex>
@@ -300,7 +301,7 @@ class EmulatorContext {
     /// \param [in,out] opengl  The first parameter.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void opengl(video::Opengl* opengl);
+    // void opengl(video::Opengl* opengl);
 
     void waitUntilRenderingDone();
 
@@ -318,17 +319,17 @@ class EmulatorContext {
 
     void emulationMainThread();
 
-    std::unique_ptr<Config>       config_;     ///< Configuration object
-    std::unique_ptr<Memory>       memory_;     ///< Memory object
-    std::unique_ptr<sh2::Sh2>     master_sh2_; ///< Master SH2 object
-    std::unique_ptr<sh2::Sh2>     slave_sh2_;  ///< Slave SH2 object
-    std::unique_ptr<Scu>          scu_;        ///< SCU object
-    std::unique_ptr<Smpc>         smpc_;       ///< SMPC object
-    std::unique_ptr<sound::Scsp>  scsp_;       ///< SCSP object
-    std::unique_ptr<cdrom::Cdrom> cdrom_;      ///< CDROM object
-    std::unique_ptr<video::Vdp1>  vdp1_;       ///< Vdp1 object
-    std::unique_ptr<video::Vdp2>  vdp2_;       ///< Vdp2 object
-    video::Opengl*                opengl_;     ///< Opengl object
+    std::unique_ptr<Config>        config_;     ///< Configuration object
+    std::unique_ptr<Memory>        memory_;     ///< Memory object
+    std::unique_ptr<sh2::Sh2>      master_sh2_; ///< Master SH2 object
+    std::unique_ptr<sh2::Sh2>      slave_sh2_;  ///< Slave SH2 object
+    std::unique_ptr<Scu>           scu_;        ///< SCU object
+    std::unique_ptr<Smpc>          smpc_;       ///< SMPC object
+    std::unique_ptr<sound::Scsp>   scsp_;       ///< SCSP object
+    std::unique_ptr<cdrom::Cdrom>  cdrom_;      ///< CDROM object
+    std::unique_ptr<video::Vdp1>   vdp1_;       ///< Vdp1 object
+    std::unique_ptr<video::Vdp2>   vdp2_;       ///< Vdp2 object
+    std::unique_ptr<video::Opengl> opengl_;     ///< Opengl object
 
     HardwareMode    hardware_mode_{HardwareMode::saturn};        ///< Hardware mode
     EmulationStatus emulation_status_{EmulationStatus::stopped}; ///< Emulation status
@@ -349,6 +350,7 @@ class EmulatorContext {
     std::mutex              rendering_mutex_;
     std::condition_variable rendering_condition_variable_;
     bool                    is_rendering_done_;
+    std::atomic<bool>       is_rendering_in_progress_{false};
 
     GLFWwindow* opengl_window_; ///< The OpenGL window.
 };

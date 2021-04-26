@@ -74,24 +74,26 @@ class Opengl {
 
     ///@{
     /// Accessors / Mutators
-    [[nodiscard]] auto renderedTexture() const { return rendered_texture_; };
-    void               renderedTexture(u32 texture) { rendered_texture_ = texture; };
-    [[nodiscard]] auto ihmRenderingContext() const { return ihm_rendering_context_; };
-    void               ihmRenderingContext(GLFWwindow* context) { ihm_rendering_context_ = context; };
+    [[nodiscard]] auto displayedTexture() const { return fbo_textures_[displayed_texture_index_]; };
+    void               displayedTexture(u32 index) { displayed_texture_index_ = index; };
+    [[nodiscard]] auto guiRenderingContext() const { return gui_rendering_context_; };
+    void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
     [[nodiscard]] auto emulatorRenderingContext() const { return emulator_rendering_context_; };
     void               emulatorRenderingContext(GLFWwindow* context) { emulator_rendering_context_ = context; };
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::initialize();
+    /// \fn void Opengl::initialize(GLFWwindow* gui_context);
     ///
     /// \brief  Initializes this object
     ///
     /// \author Runik
     /// \date   08/04/2021
+    ///
+    /// \param [in,out] gui_context If non-null, context for the graphical user interface.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initialize();
+    void initialize(GLFWwindow* gui_context);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::shutdown();
@@ -240,6 +242,8 @@ class Opengl {
 
     void makeRenderingContextCurrent();
 
+    auto areFbosInitialized() { return !fbos_.empty(); }
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderName name) -> const char*;
@@ -285,12 +289,25 @@ class Opengl {
 
     auto initializeVao(const std::vector<Vertex>& vertexes) -> u32;
 
-    core::Config* config_;                     ///< Configuration object.
-    GLFWwindow*   ihm_rendering_context_;      ///< Context used for IHM rendering.
-    GLFWwindow*   emulator_rendering_context_; ///< Context used for the emulator rendering.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::initializeFbos();
+    ///
+    /// \brief  Initializes the framebuffer objects.
+    ///
+    /// \author Runik
+    /// \date   25/04/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    u32  rendered_texture_{}; ///< Destination texture for render to texture.
-    bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
+    void initializeFbos();
+
+    core::Config* config_;                     ///< Configuration object.
+    GLFWwindow*   gui_rendering_context_;      ///< Context used for GUI rendering.
+    GLFWwindow*   emulator_rendering_context_; ///< Context used for  emulator rendering.
+
+    u32              displayed_texture_index_{}; ///< Index of complete texture displayed by the GUI, will be one of fbo_texture.
+    std::vector<u32> fbos_;                      ///< The framebuffer objects used for rendering.
+    std::vector<u32> fbo_textures_;              ///< The textures used by the framebuffer objects.
+    bool             is_legacy_opengl_{};        ///< True if rendering in legacy opengl.
 
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
