@@ -350,7 +350,7 @@ void Opengl::initializeRenderingContext() {
     emulatorRenderingContext(render_window);
 }
 
-void Opengl::shutdownRenderingContext() { glfwDestroyWindow(emulatorRenderingContext()); }
+void Opengl::destroyRenderingContext() { glfwDestroyWindow(emulatorRenderingContext()); }
 
 void Opengl::makeRenderingContextCurrent() { glfwMakeContextCurrent(emulatorRenderingContext()); }
 

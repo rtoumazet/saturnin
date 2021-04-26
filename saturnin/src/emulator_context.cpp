@@ -206,7 +206,7 @@ void EmulatorContext::emulationMainThread() {
                 //    notifyRenderingDone();
             }
         }
-        opengl()->shutdownRenderingContext();
+        opengl()->destroyRenderingContext();
         Log::info("main", tr("Emulation main thread finished"));
     } catch (const std::exception& e) { Log::error("exception", e.what()); } catch (...) {
         Log::error("exception", tr("Uncaught exception !"));
