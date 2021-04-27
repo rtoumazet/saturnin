@@ -80,6 +80,9 @@ class Opengl {
     void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
     [[nodiscard]] auto emulatorRenderingContext() const { return emulator_rendering_context_; };
     void               emulatorRenderingContext(GLFWwindow* context) { emulator_rendering_context_ = context; };
+    [[nodiscard]] auto fps() const { return fps_; };
+    void               fps(std::string fps) { fps_ = fps; };
+
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -363,7 +366,7 @@ class Opengl {
     auto calculateDisplayViewportMatrix() -> glm::highp_mat4;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::initializeVao(const std::vector<Vertex>& vertexes) -> u32;
+    /// \fn static auto Opengl::initializeVao(const std::vector<Vertex>& vertexes) -> u32;
     ///
     /// \brief  Initializes the vao based on the vertexes.
     ///
@@ -375,7 +378,7 @@ class Opengl {
     /// \returns    The generated VAO id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto initializeVao(const std::vector<Vertex>& vertexes) -> u32;
+    static auto initializeVao(const std::vector<Vertex>& vertexes) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::initializeFbos();
@@ -387,6 +390,8 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void initializeFbos();
+
+    void calculateFps();
 
     core::Config* config_;                     ///< Configuration object.
     GLFWwindow*   gui_rendering_context_;      ///< Context used for GUI rendering.
@@ -400,16 +405,12 @@ class Opengl {
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    u32 saturn_framebuffer_{}; ///< Framebuffer object used as Saturn's framebuffer. Will be rendered to a texture.
-
-    u32                 program_shader_;
-    u32                 vao_;
-    u32                 fbo_{};    ///< Framebuffer Object used for rendering to texture.
     std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display
 
-    ShadersList shaders_list_;
+    u32         program_shader_; ///< The program shader.
+    ShadersList shaders_list_;   ///< List of shaders.
 
-    // std::vector<s16> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display.
+    std::string fps_; ///< The frames per second.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

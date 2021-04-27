@@ -197,7 +197,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     auto       textures_list = std::vector<u32>{};
     if (!vdp2_parts.empty()) {
         draw_list.reserve(vertex_nb);
-        for (u32 i = 0; i < vdp2_parts.size(); ++i) {
+        for (u32 i = 0; i < vdp2_parts.size(); ++i) { // NOLINT: i is needed in the loop
             const auto& part_vertexes = vdp2_parts[i].partVertexes();
             draw_list.insert(std::end(draw_list), std::begin(part_vertexes), std::end(part_vertexes));
             // Texture should have been created in the texture pool, checking if it exists on the GPU
@@ -213,6 +213,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     renderBatch(DrawType::textured_polygon, draw_list, textures_list);
     postRender();
     // state.notifyRenderingDone();
+    calculateFps();
 }
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); };
@@ -343,7 +344,7 @@ void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_li
 }
 
 void Opengl::initializeRenderingContext() {
-    if (guiRenderingContext() == nullptr) core::Log::error("opengl", core::tr("Could not initialize rendering context."));
+    if (guiRenderingContext() == nullptr) { core::Log::error("opengl", core::tr("Could not initialize rendering context.")); }
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, guiRenderingContext());
@@ -397,6 +398,7 @@ auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4 {
     return view * projection;
 }
 
+// static
 auto Opengl::initializeVao(const std::vector<Vertex>& vertexes) -> u32 {
     // Creating the VAO
     auto vao = u32{};
@@ -451,7 +453,7 @@ void Opengl::initializeFbos() {
                      0,
                      GL_RGBA,
                      GL_UNSIGNED_BYTE,
-                     0);
+                     nullptr);
 
         // No need for mipmaps, they are turned off
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -482,6 +484,29 @@ void Opengl::initializeFbos() {
 
     displayedTexture(index_0); // Setting the texture of first fbo used.
     glBindFramebuffer(GL_FRAMEBUFFER, fbos_[index_0]);
+}
+
+void Opengl::calculateFps() {
+    using namespace std::literals::chrono_literals;
+    static auto time_elapsed = micro{0};
+    static auto frames_count = u8{0};
+    ++frames_count;
+    static auto previous_frame_start   = std::chrono::steady_clock::time_point{};
+    const auto  current_frame_start    = std::chrono::steady_clock::now();
+    const auto  current_frame_duration = std::chrono::duration_cast<micro>(current_frame_start - previous_frame_start);
+
+    time_elapsed += current_frame_duration;
+
+    if (time_elapsed > 1s) {
+        std::string ts         = config_->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+        const auto  standard   = config_->getTvStandard(ts);
+        const auto  max_frames = (standard == TvStandard::pal) ? 50 : 60;
+
+        fps_                 = fmt::format("{:d} / {}", frames_count, max_frames);
+        previous_frame_start = current_frame_start;
+        frames_count         = u8{0};
+        time_elapsed         = micro{0};
+    }
 }
 
 auto isModernOpenglCapable() -> bool {
