@@ -34,12 +34,13 @@ std::map<size_t, Texture> Texture::texture_storage_;
 Texture::Texture(const VdpType    vp,
                  const u32        address,
                  const ColorCount color_count,
+                 const u16        palette_number,
                  std::vector<u8>& texture,
                  const u16        width,
                  const u16        height) :
     vdp_type_(vp),
     width_(width), height_(height) {
-    key_      = calculateKey(vp, address, color_count);
+    key_      = calculateKey(vp, address, color_count, palette_number);
     raw_data_ = std::move(texture);
 };
 
@@ -65,9 +66,10 @@ auto Texture::isTextureStored(const size_t key) -> bool {
 }
 
 // static
-auto Texture::calculateKey(const VdpType vp, const u32 address, const ColorCount color_count) -> size_t {
+auto Texture::calculateKey(const VdpType vp, const u32 address, const ColorCount color_count, const u16 palette_number)
+    -> size_t {
     auto key = size_t{0};
-    util::hashCombine(key, vp, address, color_count);
+    util::hashCombine(key, vp, address, color_count, palette_number);
     return key;
 }
 } // namespace saturnin::video

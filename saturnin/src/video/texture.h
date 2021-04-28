@@ -40,6 +40,7 @@ class Texture {
     Texture(const VdpType    vp,
             const u32        address,
             const ColorCount color_count,
+            const u16        palette_number,
             std::vector<u8>& texture,
             const u16        width,
             const u16        height);
@@ -110,21 +111,24 @@ class Texture {
     static auto isTextureStored(const size_t key) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::calculateKey(const VdpType vp, const u32 address, const ColorCount color_count) -> size_t;
+    /// \fn static auto Texture::calculateKey(const VdpType vp, const u32 address, const ColorCount color_count, const u16
+    /// palette_number) -> size_t;
     ///
     /// \brief  Calculates the texture key that will be used in the storage.
     ///
     /// \author Runik
     /// \date   29/03/2021
     ///
-    /// \param  vp          The type of VDP texture.
-    /// \param  address     The address.
-    /// \param  color_count Number of colors.
+    /// \param  vp              The type of VDP texture.
+    /// \param  address         The address.
+    /// \param  color_count     Number of colors.
+    /// \param  palette_number  Palette number.
     ///
     /// \returns    The calculated key.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateKey(const VdpType vp, const u32 address, const ColorCount color_count) -> size_t;
+    static auto calculateKey(const VdpType vp, const u32 address, const ColorCount color_count, const u16 palette_number)
+        -> size_t;
 
     static auto deleteTexturesOnGpu() {
         for (auto& t : texture_storage_) {

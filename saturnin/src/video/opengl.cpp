@@ -504,7 +504,7 @@ void Opengl::calculateFps() {
 
         fps_                 = fmt::format("{:d} / {}", frames_count, max_frames);
         previous_frame_start = current_frame_start;
-        frames_count         = u8{0};
+        frames_count         = 0;
         time_elapsed         = micro{0};
     }
 }

@@ -3140,7 +3140,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     constexpr auto  texture_size   = texture_width * texture_height * 4;
     std::vector<u8> texture_data;
     texture_data.reserve(texture_size);
-    const auto key = Texture::calculateKey(VdpType::vdp2, cell_address, screen.character_color_number);
+    const auto key = Texture::calculateKey(VdpType::vdp2, cell_address, screen.character_color_number, pnd.palette_number);
 
     if (!Texture::isTextureStored(key)) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
@@ -3206,8 +3206,13 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     constexpr auto texture_height = u16{8};
 
     if (!Texture::isTextureStored(key)) {
-        Texture::storeTexture(
-            Texture(VdpType::vdp2, cell_address, screen.character_color_number, texture_data, texture_width, texture_height));
+        Texture::storeTexture(Texture(VdpType::vdp2,
+                                      cell_address,
+                                      screen.character_color_number,
+                                      pnd.palette_number,
+                                      texture_data,
+                                      texture_width,
+                                      texture_height));
     }
     auto p
         = Vdp2Part(pnd,
