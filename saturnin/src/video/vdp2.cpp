@@ -3151,7 +3151,6 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                     break;
                 }
                 case ColorCount::palette_256: {
-                    read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
                     break;
                 }
                 case ColorCount::palette_2048: {
@@ -3175,7 +3174,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                     break;
                 }
                 case ColorCount::palette_256: {
-                    read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                    // read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
                     break;
                 }
                 case ColorCount::palette_2048: {

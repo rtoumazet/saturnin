@@ -35,8 +35,7 @@
 // Forward declarations
 namespace saturnin::core {
 class EmulatorContext;
-class Smpc;
-} // namespace saturnin::core
+}
 namespace saturnin::cdrom {
 struct ScsiDriveInfo;
 struct ScsiToc;
@@ -46,6 +45,30 @@ using saturnin::core::EmulatorContext;
 using milli = std::chrono::duration<double, std::milli>;
 
 namespace saturnin::cdrom {
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CdDriveStatus
+///
+/// \brief  Values that represent CD drive status
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CdDriveStatus : u8 {
+    busy                = 0x00,
+    paused              = 0x01,
+    standby             = 0x02,
+    playing             = 0x03,
+    seeking             = 0x04,
+    scanning            = 0x05,
+    drive_is_open       = 0x06,
+    no_disc_inserted    = 0x07,
+    retrying            = 0x08,
+    error               = 0x09,
+    fatal_error         = 0x0a,
+    periodical_response = 0x20,
+    transfer_request    = 0x40,
+    waiting             = 0x80,
+    command_rejected    = 0xff
+};
 
 /// \name Local memory registers
 //@{
@@ -59,20 +82,20 @@ constexpr auto LOCAL_TOC_DATA_PTR   = u32{0x98000}; ///< TOC data pointer.
 constexpr auto LOCAL_FETCH_DATA_PTR = u32{0x18000}; ///< Fetch data pointer.
 //@}
 
-///// \name Status flags
-////@{
-// constexpr auto CMOK = u16{0x0001}; ///< System ready for a new command / System processing the last command.
-// constexpr auto DRDY = u16{0x0002}; ///< Data transfer setup (complete/not setup).
-// constexpr auto CSCT = u16{0x0004}; ///< Sector status (stored / discarded).
-// constexpr auto BFUL = u16{0x0008}; ///< CD buffer status (full / not full).
-// constexpr auto PEND = u16{0x0010}; ///< CD play status.
-// constexpr auto DCHG = u16{0x0020}; ///< Disk change status (changed/not changed).
-// constexpr auto ESEL = u16{0x0040}; ///< Soft reset or selector status (finished or not).
-// constexpr auto EHST = u16{0x0080}; ///< Host I/O status (finished or not).
-// constexpr auto ECPY = u16{0x0100}; ///< Sector copy or move status (finished or not).
-// constexpr auto EFLS = u16{0x0200}; ///< CD block file system status (finished or not).
-// constexpr auto SCDQ = u16{0x0400}; ///< Subcode Q decoding for current sector (decoded/not completed).
-////@{
+/// \name Status flags
+//@{
+constexpr auto CMOK = u16{0x0001}; ///< System ready for a new command / System processing the last command.
+constexpr auto DRDY = u16{0x0002}; ///< Data transfer setup (complete/not setup).
+constexpr auto CSCT = u16{0x0004}; ///< Sector status (stored / discarded).
+constexpr auto BFUL = u16{0x0008}; ///< CD buffer status (full / not full).
+constexpr auto PEND = u16{0x0010}; ///< CD play status.
+constexpr auto DCHG = u16{0x0020}; ///< Disk change status (changed/not changed).
+constexpr auto ESEL = u16{0x0040}; ///< Soft reset or selector status (finished or not).
+constexpr auto EHST = u16{0x0080}; ///< Host I/O status (finished or not).
+constexpr auto ECPY = u16{0x0100}; ///< Sector copy or move status (finished or not).
+constexpr auto EFLS = u16{0x0200}; ///< CD block file system status (finished or not).
+constexpr auto SCDQ = u16{0x0400}; ///< Subcode Q decoding for current sector (decoded/not completed).
+//@{
 
 /// \name CD type flags
 //@{
@@ -322,16 +345,17 @@ class Cdrom {
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // void SetCdDriveStatus(u8 value);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Cdrom::executeCommand();
-    ///
-    /// \brief  Executes the configured CD block command.
-    ///
-    /// \author Runik
-    /// \date   28/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void executeCommand();
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void ExecuteCdBlockCommand(std::u16 value)
+    /////
+    ///// \brief	Executes the CD block command.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    /////
+    ///// \param	value	Value of the command to execute.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void ExecuteCdBlockCommand(u16 value);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void RefreshPeriod()
@@ -448,9 +472,6 @@ class Cdrom {
 
     auto getRegisters() -> std::vector<std::string>;
 
-    //--------------------------------------------------------------------------------------------------------------
-    // PRIVATE section
-    //--------------------------------------------------------------------------------------------------------------
   private:
     /// \name CD block memory accessors
     //@{
@@ -474,22 +495,17 @@ class Cdrom {
     void reset();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Cdrom::calculatePeriodicResponseDuration() -> u32;
+    /// \fn auto Cdrom::calculatePeriodicResponsePeriod()-> u32;
     ///
-    /// \brief  Calculates the periodic response duration, depending on the current SH2 clock and the
-    ///         drive speed
+    /// \brief  Calculates the periodic response period, depending on the current SH2 clock and the drive speed
     ///
     /// \author Runik
     /// \date   05/07/2020
     ///
-    /// \returns    The calculated periodic response duration.
+    /// \returns    The calculated periodic response period.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculatePeriodicResponseDuration() -> u32;
-
-    //--------------------------------------------------------------------------------------------------------------
-    // CDBLOCK COMMANDS methods
-    //--------------------------------------------------------------------------------------------------------------
+    auto calculatePeriodicResponsePeriod() -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn    void Cdrom::sendStatus();
@@ -501,17 +517,6 @@ class Cdrom {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void sendStatus();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Cdrom::getHardwareInfo();
-    ///
-    /// \brief  Gets hardware information.
-    ///
-    /// \author Runik
-    /// \date   29/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void getHardwareInfo();
 
     //::std::vector<DirFileInfos> filesOnCD; ///< File list present on CD.
 
@@ -671,17 +676,25 @@ class Cdrom {
     // bool writingCRRegs{}; ///< Prevents from executing periodic response while a command is written in CR register.
     // bool firstReading{};  ///< Prevents from executing periodic response before initialisation string is read in CR registers.
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///// \fn	void UpdatePeriod()
+    /////
+    ///// \brief	Updates the drive period.
+    /////
+    ///// \author	Runik
+    ///// \date	01/03/2010
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // void UpdatePeriod();
+    // u32  counter{};             ///< Counter.
+    // u32  executedCommands{};    ///< Number of commands executed.
+    // u32  executedCommandsMax{}; ///< Number max of commands executed during periodic response.
+
     ///// \name Current parameters for transfer from host to CD block
     ////@{
     // u32 sectorNumInBufferPut{};
     // u32 posInSectorPut{};
     // u32 numOfSectorToPut{};
     //@}
-
-    ///@{
-    /// \name Internal modules accessors
-    [[nodiscard]] auto smpc() const -> core::Smpc*;
-    ///@}
 
     EmulatorContext* emulator_context_; ///< Emulator context object.
 
@@ -692,16 +705,14 @@ class Cdrom {
     CommandRegister    cr3_;             ///< Command register 3.
     CommandRegister    cr4_;             ///< Command register 4.
 
-    u16  elapsed_cycles_;                      ///< The elapsed cycles
-    bool is_command_being_initialized_{false}; ///< True if a command is being initialized, ie command registers are written
-    bool is_initialization_done_{false};       ///< Prevents writing to command registers while init string hasn't been read
+    u16  elapsed_cycles_;                ///< The elapsed cycles
+    bool is_command_running_{false};     ///< True if a command is being executed, ie command registers are written
+    bool is_initialization_done_{false}; ///< Prevents writing to command registers while init string hasn't been read
 
     CdDriveStatus   cd_drive_status_;
     CdDrivePlayMode cd_drive_play_mode_;
 
-    u8  max_number_of_commands_{};     ///< The maximum number of executable commands by the cd block.
-    u8  executed_commands_{};          ///< Number of commands executed.
-    u32 periodic_response_duration_{}; ///< Periodic response duration.
+    u8 max_number_of_commands_{}; ///< The maximum number of executable commands by the cd block
 };
 
 } // namespace saturnin::cdrom
