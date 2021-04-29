@@ -1280,17 +1280,17 @@ class Vdp2 {
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
     };
 
-    // template<typename T>
-    // void readPalette256Dot(std::vector<u8>&          texture_data,
-    //                       const ScrollScreenStatus& screen,
-    //                       const u8                  palette_number,
-    //                       const u8                  dot) {
-    //    const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (palette_number + dot) *
-    //    sizeof(T)}; auto       color         = readColor<T>(color_address); if (!dot && screen.is_transparency_code_valid)
-    //    color.a = 0;
+    template<typename T>
+    void readPalette256Dot(std::vector<u8>&          texture_data,
+                           const ScrollScreenStatus& screen,
+                           const u8                  palette_number,
+                           const u8                  dot) {
+        const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (palette_number + dot) * sizeof(T)};
+        auto       color         = readColor<T>(color_address);
+        if (!dot && screen.is_transparency_code_valid) color.a = 0;
 
-    //    texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
-    //};
+        texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
+    };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void saturnin::video::Vdp2::read16ColorsCellData(std::vector<u8>& texture_data, const
@@ -1329,26 +1329,28 @@ class Vdp2 {
         // std::reverse(texture_data.begin(), texture_data.end());
     }
 
-    // template<typename T>
-    // void read256ColorsCellData(std::vector<u8>&          texture_data,
-    //                           const ScrollScreenStatus& screen,
-    //                           const u8                  palette_number,
-    //                           const u32                 cell_address) {
-    //    constexpr auto row_offset      = u8{8};
-    //    auto           current_address = vram_start_address + cell_address;
-    //    for (u32 i = 0; i < 8; ++i) {
-    //        auto row = Dots8Bits(memory()->read<u32>(current_address += row_offset));
-    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
-    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
-    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
-    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
-    //        row = Dots8Bits(memory()->read<u32>(current_address += row_offset));
-    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
-    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
-    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
-    //        readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
-    //    }
-    //}
+    template<typename T>
+    void read256ColorsCellData(std::vector<u8>&          texture_data,
+                               const ScrollScreenStatus& screen,
+                               const u8                  palette_number,
+                               const u32                 cell_address) {
+        constexpr auto row_offset      = u8{8};
+        auto           current_address = vram_start_address + cell_address;
+        constexpr auto palette_disp    = u8{8};
+        const auto     palette         = palette_number << palette_disp;
+        for (u32 i = 0; i < 8; ++i) {
+            auto row = Dots8Bits(memory()->read<u32>(current_address += row_offset));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
+            row = Dots8Bits(memory()->read<u32>(current_address += row_offset));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
+        }
+    }
 
     Color read2048ColorsData();
     Color read32KColorsData();
