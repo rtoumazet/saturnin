@@ -212,12 +212,6 @@
     <ClInclude Include="src\pch.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
-    <ClInclude Include="src\cdrom\cdrom_registers.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\vdp1_registers.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="src\video\base_rendering_part.h">
       <Filter>Fichiers sources\video</Filter>
     </ClInclude>
@@ -226,6 +220,12 @@
     </ClInclude>
     <ClInclude Include="src\video\texture.h">
       <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\vdp1_registers.h">
+      <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cdrom\cdrom_registers.h">
+      <Filter>Fichiers sources\cdrom</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

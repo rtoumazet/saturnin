@@ -953,8 +953,8 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::TextDisabled(tr("Callstack").c_str());
         ImGui::Separator();
 
-        const auto  callstack_mask = std::string{"{:#010x}"};
-        const auto& callstack      = current_sh2->callstack();
+        const auto callstack_mask = std::string{"{:#010x}"};
+        const auto callstack      = current_sh2->callstack();
         std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
             ImGui::TextUnformatted(fmt::format(callstack_mask, item.call_address).c_str());
         });
