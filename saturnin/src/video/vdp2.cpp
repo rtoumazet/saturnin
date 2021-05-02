@@ -51,8 +51,8 @@ void Vdp2::initialize() {
     initializeRegisterNameMap();
     computePrecalculatedData();
 
-    const std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-    switch (emulator_context_->config()->getTvStandard(ts)) {
+    const std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    switch (modules_.config()->getTvStandard(ts)) {
         case video::TvStandard::pal: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard); break;
         case video::TvStandard::ntsc: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard); break;
         default: Log::warning("vdp2", tr("Unknown TV standard"));
@@ -71,12 +71,12 @@ void Vdp2::run(const u8 cycles) {
 
             Log::debug("vdp2", tr("VBlankIn interrupt request"));
 
-            vdp1()->onVblankIn();
+            modules_.vdp1()->onVblankIn();
             this->onVblankIn();
 
-            scu()->onVblankIn();
+            modules_.scu()->onVblankIn();
 
-            emulator_context_->opengl()->displayFramebuffer(*emulator_context_);
+            modules_.opengl()->displayFramebuffer(*(modules_.context()));
         }
     }
 
@@ -93,7 +93,7 @@ void Vdp2::run(const u8 cycles) {
         tvmd_.set(TvScreenMode::display, Display::displayed);
 
         Log::debug("vdp2", tr("VBlankOut interrupt request"));
-        scu()->onVblankOut();
+        modules_.scu()->onVblankOut();
 
         timer_0_counter_ = 0;
 
@@ -108,11 +108,11 @@ void Vdp2::run(const u8 cycles) {
             is_hblank_current_ = true;
             tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_retrace);
 
-            scu()->onHblankIn();
+            modules_.scu()->onHblankIn();
 
             timer_0_counter_++;
 
-            if (timer_0_counter_ == scu()->getTimer0CompareValue()) { scu()->onTimer0(); }
+            if (timer_0_counter_ == modules_.scu()->getTimer0CompareValue()) { modules_.scu()->onTimer0(); }
         }
     }
 
@@ -139,11 +139,11 @@ void Vdp2::calculateDisplayDuration() {
     constexpr auto lines_nb_240 = u16{240};
     constexpr auto lines_nb_256 = u16{256};
 
-    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-    switch (emulator_context_->config()->getTvStandard(ts)) {
+    std::string ts = modules_.context()->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    switch (modules_.context()->config()->getTvStandard(ts)) {
         case video::TvStandard::pal: {
             constexpr auto frame_duration = seconds{1.0 / 50.0};
-            cycles_per_frame_             = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
+            cycles_per_frame_             = modules_.smpc()->calculateCyclesNumber(frame_duration);
 
             constexpr auto total_lines   = u16{313};
             auto           visible_lines = u16{};
@@ -171,7 +171,7 @@ void Vdp2::calculateDisplayDuration() {
         }
         case video::TvStandard::ntsc: {
             constexpr auto frame_duration = seconds{1.0 / 60.0};
-            cycles_per_frame_             = emulator_context_->smpc()->calculateCyclesNumber(frame_duration);
+            cycles_per_frame_             = modules_.smpc()->calculateCyclesNumber(frame_duration);
 
             constexpr auto total_lines   = u16{263};
             auto           visible_lines = u16{};
@@ -1362,8 +1362,8 @@ void Vdp2::computePrecalculatedData() {
 
 void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& hblank_duration) {
     const auto active_line_duration = micro{total_line_duration - hblank_duration};
-    cycles_per_hblank_              = emulator_context_->smpc()->calculateCyclesNumber(hblank_duration);
-    cycles_per_hactive_             = emulator_context_->smpc()->calculateCyclesNumber(active_line_duration);
+    cycles_per_hblank_              = modules_.smpc()->calculateCyclesNumber(hblank_duration);
+    cycles_per_hactive_             = modules_.smpc()->calculateCyclesNumber(active_line_duration);
     cycles_per_line_                = cycles_per_hactive_ + cycles_per_hblank_;
 }
 
@@ -1549,7 +1549,7 @@ void Vdp2::updateResolution() {
             break;
     }
 
-    emulator_context_->opengl()->saturnScreenResolution({tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res});
+    modules_.opengl()->saturnScreenResolution({tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res});
 };
 
 void Vdp2::updateRamStatus() {
@@ -2255,7 +2255,7 @@ void Vdp2::populateRenderData() {
             }
         }
     }
-    emulator_context_->notifyRenderingDone();
+    modules_.context()->notifyRenderingDone();
 }
 
 auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
@@ -3050,7 +3050,8 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
         = (ram_status_.vram_size == VramSize::size_4_mbits) ? bitmask_vdp2_vram_4mb : bitmask_vdp2_vram_8mb;
 
     for (u32 i = 0; i < cp_number; ++i) {
-        const auto raw_data = (pnd_size == 2) ? memory()->read<u16>(pnd_address) : memory()->read<u32>(pnd_address);
+        const auto raw_data
+            = (pnd_size == 2) ? modules_.memory()->read<u16>(pnd_address) : modules_.memory()->read<u32>(pnd_address);
         // if (raw_data != 0x0) __debugbreak();
         auto pn_data = readPatternNameData(raw_data, screen);
         pn_data.character_number &= character_number_mask;

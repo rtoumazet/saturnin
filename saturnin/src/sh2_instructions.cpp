@@ -57,11 +57,11 @@ void delaySlot(Sh2& s, const u32 addr) {
     if (addr != ignored_delay_slot_address) { // Delay slot isn't detected after the Power On Reset (to prevent the "illegal
                                               // instruction slot")
 
-        s.current_opcode_ = s.memory()->read<u16>(addr);
+        s.current_opcode_ = s.modules_.memory()->read<u16>(addr);
 
         if (isInstructionIllegal(s.current_opcode_)) {
             Log::error("sh2", "Illegal instruction slot");
-            s.emulatorContext()->emulationStatus(core::EmulationStatus::stopped);
+            s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
         } else {
             // Delay slot instruction execution
             execute(s);
@@ -124,7 +124,7 @@ void badOpcode(Sh2& s) {
     const auto type = std::string{(s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave"};
     Log::error("sh2", "Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
 
-    s.emulatorContext()->emulationStatus(core::EmulationStatus::stopped);
+    s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
 }
 
 void add(Sh2& s) {
@@ -198,9 +198,9 @@ void andi(Sh2& s) {
 void andm(Sh2& s) {
     //(R0 + GBR) & imm -> (R0 + GBR)
 
-    auto temp = u32{s.memory()->read<u8>(s.gbr_ + s.r_[0])};
+    auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
     temp &= (bitmask_000000FF & x0nn(s));
-    s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
+    s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
 }
@@ -677,7 +677,7 @@ void ldcvbr(Sh2& s) {
 
 void ldcmsr(Sh2& s) {
     // (Rm) -> SR, Rm + 4 -> Rm
-    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.memory()->read<u32>(s.r_[xn00(s)]) & sr_bitmask));
+    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.modules_.memory()->read<u32>(s.r_[xn00(s)]) & sr_bitmask));
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -686,7 +686,7 @@ void ldcmsr(Sh2& s) {
 
 void ldcmgbr(Sh2& s) {
     // (Rm) -> GBR, Rm + 4 -> Rm
-    s.gbr_ = s.memory()->read<u32>(s.r_[xn00(s)]);
+    s.gbr_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -695,7 +695,7 @@ void ldcmgbr(Sh2& s) {
 
 void ldcmvbr(Sh2& s) {
     // (Rm) -> VBR, Rm + 4 -> Rm
-    s.vbr_ = s.memory()->read<u32>(s.r_[xn00(s)]);
+    s.vbr_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -728,7 +728,7 @@ void ldspr(Sh2& s) {
 
 void ldsmmach(Sh2& s) {
     //(Rm) -> MACH, Rm + 4 -> Rm
-    s.mach_ = s.memory()->read<u32>(s.r_[xn00(s)]);
+    s.mach_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -737,7 +737,7 @@ void ldsmmach(Sh2& s) {
 
 void ldsmmacl(Sh2& s) {
     //(Rm) -> MACL, Rm + 4 -> Rm
-    s.macl_ = s.memory()->read<u32>(s.r_[xn00(s)]);
+    s.macl_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -746,7 +746,7 @@ void ldsmmacl(Sh2& s) {
 
 void ldsmpr(Sh2& s) {
     //(Rm) -> PR, Rm + 4 -> Rm
-    s.pr_ = s.memory()->read<u32>(s.r_[xn00(s)]);
+    s.pr_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -757,9 +757,9 @@ void mac(Sh2& s) {
     // Signed operation, (Rn)*(Rm) + MAC -> MAC
     // Arranged using SH4 manual
 
-    const auto src_n = s64{static_cast<s64>(static_cast<s32>(s.memory()->read<u32>(s.r_[xn00(s)])))};
+    const auto src_n = s64{static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[xn00(s)])))};
     s.r_[xn00(s)] += 4;
-    const auto src_m = s64{static_cast<s64>(static_cast<s32>(s.memory()->read<u32>(s.r_[x0n0(s)])))};
+    const auto src_m = s64{static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[x0n0(s)])))};
     s.r_[x0n0(s)] += 4;
 
     const auto mul = s64{src_m * src_n};
@@ -784,9 +784,9 @@ void macw(Sh2& s) {
     // Signed operation, (Rn) * (Rm) + MAC -> MAC
     // Arranged using SH4 manual
 
-    const auto src_n = s64{static_cast<s64>(static_cast<s32>(s.memory()->read<u32>(s.r_[xn00(s)])))};
+    const auto src_n = s64{static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[xn00(s)])))};
     s.r_[xn00(s)] += 2;
-    const auto src_m = s64{static_cast<s64>(static_cast<s32>(s.memory()->read<u32>(s.r_[x0n0(s)])))};
+    const auto src_m = s64{static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[x0n0(s)])))};
     s.r_[x0n0(s)] += 2;
 
     const auto mul = s64{src_m * src_n};
@@ -830,7 +830,7 @@ void mov(Sh2& s) {
 
 void movbs(Sh2& s) {
     // Rm -> (Rn)
-    s.memory()->write<u8>(s.r_[xn00(s)], static_cast<u8>(s.r_[x0n0(s)]));
+    s.modules_.memory()->write<u8>(s.r_[xn00(s)], static_cast<u8>(s.r_[x0n0(s)]));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -838,7 +838,7 @@ void movbs(Sh2& s) {
 
 void movws(Sh2& s) {
     // Rm -> (Rn)
-    s.memory()->write<u16>(s.r_[xn00(s)], static_cast<u16>(s.r_[x0n0(s)]));
+    s.modules_.memory()->write<u16>(s.r_[xn00(s)], static_cast<u16>(s.r_[x0n0(s)]));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -846,7 +846,7 @@ void movws(Sh2& s) {
 
 void movls(Sh2& s) {
     // Rm -> (Rn)
-    s.memory()->write<u32>(s.r_[xn00(s)], s.r_[x0n0(s)]);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.r_[x0n0(s)]);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -854,7 +854,7 @@ void movls(Sh2& s) {
 
 void movbl(Sh2& s) {
     // (Rm) -> sign extension -> Rn
-    s.r_[xn00(s)] = s.memory()->read<u8>(s.r_[x0n0(s)]);
+    s.r_[xn00(s)] = s.modules_.memory()->read<u8>(s.r_[x0n0(s)]);
     if ((s.r_[xn00(s)] & sign_bit_8_mask) == 0) {
         s.r_[xn00(s)] &= bitmask_000000FF;
     } else {
@@ -866,7 +866,7 @@ void movbl(Sh2& s) {
 
 void movwl(Sh2& s) {
     // (Rm) -> sign extension -> Rn
-    s.r_[xn00(s)] = s.memory()->read<u16>(s.r_[x0n0(s)]);
+    s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.r_[x0n0(s)]);
     if ((s.r_[xn00(s)] & sign_bit_16_mask) == 0) {
         s.r_[xn00(s)] &= bitmask_0000FFFF;
     } else {
@@ -878,7 +878,7 @@ void movwl(Sh2& s) {
 
 void movll(Sh2& s) {
     // (Rm) -> Rn
-    s.r_[xn00(s)] = s.memory()->read<u32>(s.r_[x0n0(s)]);
+    s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[x0n0(s)]);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -886,7 +886,7 @@ void movll(Sh2& s) {
 
 void movbm(Sh2& s) {
     // Rn - 1 -> Rn, Rm -> (Rn)
-    s.memory()->write<u8>(s.r_[xn00(s)] - 1, static_cast<u8>(s.r_[x0n0(s)]));
+    s.modules_.memory()->write<u8>(s.r_[xn00(s)] - 1, static_cast<u8>(s.r_[x0n0(s)]));
     s.r_[xn00(s)] -= 1;
 
     s.pc_ += 2;
@@ -895,7 +895,7 @@ void movbm(Sh2& s) {
 
 void movwm(Sh2& s) {
     // Rn - 2 -> Rn, Rm -> (Rn)
-    s.memory()->write<u16>(s.r_[xn00(s)] - 2, static_cast<u16>(s.r_[x0n0(s)]));
+    s.modules_.memory()->write<u16>(s.r_[xn00(s)] - 2, static_cast<u16>(s.r_[x0n0(s)]));
     s.r_[xn00(s)] -= 2;
 
     s.pc_ += 2;
@@ -904,7 +904,7 @@ void movwm(Sh2& s) {
 
 void movlm(Sh2& s) {
     // Rn - 4 -> Rn, Rm -> (Rn)
-    s.memory()->write<u32>(s.r_[xn00(s)] - 4, s.r_[x0n0(s)]);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)] - 4, s.r_[x0n0(s)]);
     s.r_[xn00(s)] -= 4;
 
     s.pc_ += 2;
@@ -913,7 +913,7 @@ void movlm(Sh2& s) {
 
 void movbp(Sh2& s) {
     // (Rm) -> sign extension -> Rn, Rm + 1 -> Rm
-    s.r_[xn00(s)] = s.memory()->read<u8>(s.r_[x0n0(s)]);
+    s.r_[xn00(s)] = s.modules_.memory()->read<u8>(s.r_[x0n0(s)]);
     if ((s.r_[xn00(s)] & sign_bit_8_mask) == 0) {
         s.r_[xn00(s)] &= bitmask_000000FF;
     } else {
@@ -926,7 +926,7 @@ void movbp(Sh2& s) {
 
 void movwp(Sh2& s) {
     // (Rm) -> sign extension -> Rn, Rm + 2 -> Rm
-    s.r_[xn00(s)] = s.memory()->read<u16>(s.r_[x0n0(s)]);
+    s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.r_[x0n0(s)]);
     if ((s.r_[xn00(s)] & sign_bit_16_mask) == 0) {
         s.r_[xn00(s)] &= bitmask_0000FFFF;
     } else {
@@ -939,7 +939,7 @@ void movwp(Sh2& s) {
 
 void movlp(Sh2& s) {
     // (Rm) -> Rn, Rm + 4 -> Rm
-    s.r_[xn00(s)] = s.memory()->read<u32>(s.r_[x0n0(s)]);
+    s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[x0n0(s)]);
     if (xn00(s) != x0n0(s)) { s.r_[x0n0(s)] += 4; }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -947,7 +947,7 @@ void movlp(Sh2& s) {
 
 void movbs0(Sh2& s) {
     // Rm -> (R0 + Rn)
-    s.memory()->write<u8>(s.r_[xn00(s)] + s.r_[0], static_cast<u8>(s.r_[x0n0(s)]));
+    s.modules_.memory()->write<u8>(s.r_[xn00(s)] + s.r_[0], static_cast<u8>(s.r_[x0n0(s)]));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -955,7 +955,7 @@ void movbs0(Sh2& s) {
 
 void movws0(Sh2& s) {
     // Rm -> (R0 + Rn)
-    s.memory()->write<u16>(s.r_[xn00(s)] + s.r_[0], static_cast<uint16_t>(s.r_[x0n0(s)]));
+    s.modules_.memory()->write<u16>(s.r_[xn00(s)] + s.r_[0], static_cast<uint16_t>(s.r_[x0n0(s)]));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -963,7 +963,7 @@ void movws0(Sh2& s) {
 
 void movls0(Sh2& s) {
     // Rm -> (R0 + Rn)
-    s.memory()->write<u32>(s.r_[xn00(s)] + s.r_[0], s.r_[x0n0(s)]);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)] + s.r_[0], s.r_[x0n0(s)]);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -971,7 +971,7 @@ void movls0(Sh2& s) {
 
 void movbl0(Sh2& s) {
     // (R0 + Rm) -> sign extension -> Rn
-    s.r_[xn00(s)] = s.memory()->read<u8>(s.r_[x0n0(s)] + s.r_[0]);
+    s.r_[xn00(s)] = s.modules_.memory()->read<u8>(s.r_[x0n0(s)] + s.r_[0]);
     if ((s.r_[xn00(s)] & sign_bit_8_mask) == 0) {
         s.r_[xn00(s)] &= bitmask_000000FF;
     } else {
@@ -983,7 +983,7 @@ void movbl0(Sh2& s) {
 
 void movwl0(Sh2& s) {
     // (R0 + Rm) -> sign extension -> Rn
-    s.r_[xn00(s)] = s.memory()->read<u16>(s.r_[x0n0(s)] + s.r_[0]);
+    s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.r_[x0n0(s)] + s.r_[0]);
     if ((s.r_[xn00(s)] & sign_bit_16_mask) == 0) {
         s.r_[xn00(s)] &= bitmask_0000FFFF;
     } else {
@@ -995,7 +995,7 @@ void movwl0(Sh2& s) {
 
 void movll0(Sh2& s) {
     // (R0 + Rm) -> Rn
-    s.r_[xn00(s)] = s.memory()->read<u32>(s.r_[x0n0(s)] + s.r_[0]);
+    s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[x0n0(s)] + s.r_[0]);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1015,7 +1015,7 @@ void movi(Sh2& s) {
 void movwi(Sh2& s) {
     //(disp * 2 + PC) -> sign extension -> Rn
     auto disp     = u32{(bitmask_000000FF & x0nn(s))};
-    s.r_[xn00(s)] = s.memory()->read<u16>(s.pc_ + (disp << 1) + 4); // + 4 added
+    s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.pc_ + (disp << 1) + 4); // + 4 added
     if ((s.r_[xn00(s)] & sign_bit_16_mask) == 0) {
         s.r_[xn00(s)] &= bitmask_0000FFFF;
     } else {
@@ -1028,7 +1028,7 @@ void movwi(Sh2& s) {
 void movli(Sh2& s) {
     //(disp * 4 + PC) -> Rn
     auto disp     = u32{(bitmask_000000FF & x0nn(s))};
-    s.r_[xn00(s)] = s.memory()->read<u32>((s.pc_ & bitmask_FFFFFFFC) + (disp << 2) + 4); // + 4 added
+    s.r_[xn00(s)] = s.modules_.memory()->read<u32>((s.pc_ & bitmask_FFFFFFFC) + (disp << 2) + 4); // + 4 added
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1037,7 +1037,7 @@ void movli(Sh2& s) {
 void movblg(Sh2& s) {
     //(disp + GBR) -> sign extension -> R0
     auto disp = u32{(bitmask_000000FF & x0nn(s))};
-    s.r_[0]   = s.memory()->read<u8>(s.gbr_ + disp);
+    s.r_[0]   = s.modules_.memory()->read<u8>(s.gbr_ + disp);
     if ((s.r_[0] & sign_bit_8_mask) == 0) {
         s.r_[0] &= bitmask_000000FF;
     } else {
@@ -1050,7 +1050,7 @@ void movblg(Sh2& s) {
 void movwlg(Sh2& s) {
     // (disp *2 + BGR) -> sign extension -> R0
     auto disp = u32{(bitmask_000000FF & x0nn(s))};
-    s.r_[0]   = s.memory()->read<u16>(s.gbr_ + (disp << 1));
+    s.r_[0]   = s.modules_.memory()->read<u16>(s.gbr_ + (disp << 1));
     if ((s.r_[0] & sign_bit_16_mask) == 0) {
         s.r_[0] &= bitmask_0000FFFF;
     } else {
@@ -1063,7 +1063,7 @@ void movwlg(Sh2& s) {
 void movllg(Sh2& s) {
     // (disp *4 + GBR) -> R0
     auto disp = u32{(bitmask_000000FF & x0nn(s))};
-    s.r_[0]   = s.memory()->read<u32>(s.gbr_ + (disp << 2));
+    s.r_[0]   = s.modules_.memory()->read<u32>(s.gbr_ + (disp << 2));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1072,7 +1072,7 @@ void movllg(Sh2& s) {
 void movbsg(Sh2& s) {
     // R0 -> (disp + GBR)
     auto disp = u32{(bitmask_000000FF & x0nn(s))};
-    s.memory()->write<u8>(s.gbr_ + disp, static_cast<u8>(s.r_[0]));
+    s.modules_.memory()->write<u8>(s.gbr_ + disp, static_cast<u8>(s.r_[0]));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1081,7 +1081,7 @@ void movbsg(Sh2& s) {
 void movwsg(Sh2& s) {
     // R0 -> (disp *2 + GBR)
     auto disp = u32{(bitmask_000000FF & x0nn(s))};
-    s.memory()->write<u16>(s.gbr_ + (disp << 1), static_cast<u16>(s.r_[0]));
+    s.modules_.memory()->write<u16>(s.gbr_ + (disp << 1), static_cast<u16>(s.r_[0]));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1090,7 +1090,7 @@ void movwsg(Sh2& s) {
 void movlsg(Sh2& s) {
     // R0 -> (disp *4 + GBR)
     auto disp = u32{(bitmask_000000FF & x0nn(s))};
-    s.memory()->write<u32>(s.gbr_ + (disp << 2), s.r_[0]);
+    s.modules_.memory()->write<u32>(s.gbr_ + (disp << 2), s.r_[0]);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1099,7 +1099,7 @@ void movlsg(Sh2& s) {
 inline void movbs4(Sh2& s) {
     // R0 -> (disp + Rn)
     auto disp = u32{(bitmask_0000000F & x00n(s))};
-    s.memory()->write<u8>(s.r_[x0n0(s)] + disp, static_cast<u8>(s.r_[0]));
+    s.modules_.memory()->write<u8>(s.r_[x0n0(s)] + disp, static_cast<u8>(s.r_[0]));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1108,7 +1108,7 @@ inline void movbs4(Sh2& s) {
 void movws4(Sh2& s) {
     // R0 -> (disp *2 + Rn)
     auto disp = u32{(bitmask_0000000F & x00n(s))};
-    s.memory()->write<u16>(s.r_[x0n0(s)] + (disp << 1), static_cast<u16>(s.r_[0]));
+    s.modules_.memory()->write<u16>(s.r_[x0n0(s)] + (disp << 1), static_cast<u16>(s.r_[0]));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1117,7 +1117,7 @@ void movws4(Sh2& s) {
 void movls4(Sh2& s) {
     // Rm -> (disp *4 + Rn)
     auto disp = u32{(bitmask_0000000F & x00n(s))};
-    s.memory()->write<u32>(s.r_[xn00(s)] + (disp << 2), s.r_[x0n0(s)]);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)] + (disp << 2), s.r_[x0n0(s)]);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1126,7 +1126,7 @@ void movls4(Sh2& s) {
 void movbl4(Sh2& s) {
     // (disp + Rm)-> sign extension ->R0
     auto disp = u32{bitmask_0000000F & x00n(s)};
-    s.r_[0]   = s.memory()->read<u8>(s.r_[x0n0(s)] + disp);
+    s.r_[0]   = s.modules_.memory()->read<u8>(s.r_[x0n0(s)] + disp);
     if ((s.r_[0] & sign_bit_8_mask) == 0) {
         s.r_[0] &= bitmask_000000FF;
     } else {
@@ -1139,7 +1139,7 @@ void movbl4(Sh2& s) {
 void movwl4(Sh2& s) {
     // (disp *2 + Rm)-> sign extension ->R0
     auto disp = u32{bitmask_0000000F & x00n(s)};
-    s.r_[0]   = s.memory()->read<u16>(s.r_[x0n0(s)] + (disp << 1));
+    s.r_[0]   = s.modules_.memory()->read<u16>(s.r_[x0n0(s)] + (disp << 1));
     if ((s.r_[0] & sign_bit_16_mask) == 0) {
         s.r_[0] &= bitmask_0000FFFF;
     } else {
@@ -1152,7 +1152,7 @@ void movwl4(Sh2& s) {
 void movll4(Sh2& s) {
     // (disp *4 +Rm) -> Rn
     auto disp     = u32{bitmask_0000000F & x00n(s)};
-    s.r_[xn00(s)] = s.memory()->read<u32>(s.r_[x0n0(s)] + (disp << 2));
+    s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[x0n0(s)] + (disp << 2));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1248,9 +1248,9 @@ void ori(Sh2& s) {
 
 void orm(Sh2& s) {
     // (R0 + GBR) | imm -> (R0 + GBR)
-    auto temp = u32{s.memory()->read<u8>(s.gbr_ + s.r_[0])};
+    auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
     temp |= (bitmask_000000FF & x0nn(s));
-    s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
+    s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -1317,16 +1317,17 @@ void rte(Sh2& s) {
     // Stack -> PC/SR
     // Fixed
     delaySlot(s, s.pc_ + 2);
-    s.pc_ = s.memory()->read<u32>(s.r_[sp_register_index]);
+    s.pc_ = s.modules_.memory()->read<u32>(s.r_[sp_register_index]);
     s.r_[sp_register_index] += 4;
-    s.sr_.set(StatusRegister::all_bits, static_cast<u16>(s.memory()->read<u16>(s.r_[sp_register_index] + 2) & sr_bitmask));
+    s.sr_.set(StatusRegister::all_bits,
+              static_cast<u16>(s.modules_.memory()->read<u16>(s.r_[sp_register_index] + 2) & sr_bitmask));
     s.r_[sp_register_index] += 4;
     s.cycles_elapsed_ = 4;
 
     if (s.is_interrupted_) {
         // Current sh2 is interrupted, we get back to regular flow
         if (s.sh2_type_ == Sh2Type::master) {
-            s.scu()->clearInterruptFlag(s.current_interrupt_);
+            s.modules_.scu()->clearInterruptFlag(s.current_interrupt_);
             Log::debug("sh2", "*** Back from interrupt ***");
             switch (s.current_interrupt_.vector) {
                 case is::vector_v_blank_in: Log::debug("sh2", "VBlank-In interrupt routine finished"); break;
@@ -1360,10 +1361,10 @@ void rts(Sh2& s) {
     delaySlot(s, s.pc_ + 2);
 
     s.popFromCallstack();
-    switch (s.emulatorContext()->debugStatus()) {
+    switch (s.modules_.context()->debugStatus()) {
         case core::DebugStatus::step_out:
         case core::DebugStatus::wait_end_of_routine: {
-            if (s.subroutineDepth() == s.callstack().size()) { s.emulatorContext()->debugStatus(core::DebugStatus::paused); }
+            if (s.subroutineDepth() == s.callstack().size()) { s.modules_.context()->debugStatus(core::DebugStatus::paused); }
             break;
         }
         default: break;
@@ -1516,7 +1517,7 @@ void stcvbr(Sh2& s) {
 void stcmsr(Sh2& s) {
     // Rn-4 -> Rn, SR -> (Rn)
     s.r_[xn00(s)] -= 4;
-    s.memory()->write<u32>(s.r_[xn00(s)], s.sr_.get(StatusRegister::all_bits));
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.sr_.get(StatusRegister::all_bits));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -1525,7 +1526,7 @@ void stcmsr(Sh2& s) {
 void stcmgbr(Sh2& s) {
     // Rn-4 -> Rn, GBR -> (Rn)
     s.r_[xn00(s)] -= 4;
-    s.memory()->write<u32>(s.r_[xn00(s)], s.gbr_);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.gbr_);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -1534,7 +1535,7 @@ void stcmgbr(Sh2& s) {
 void stcmvbr(Sh2& s) {
     // Rn-4 -> Rn, VBR -> (Rn)
     s.r_[xn00(s)] -= 4;
-    s.memory()->write<u32>(s.r_[xn00(s)], s.vbr_);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.vbr_);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -1567,7 +1568,7 @@ void stspr(Sh2& s) {
 void stsmmach(Sh2& s) {
     // Rn - :4 -> Rn, MACH -> (Rn)
     s.r_[xn00(s)] -= 4;
-    s.memory()->write<u32>(s.r_[xn00(s)], s.mach_);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.mach_);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1576,7 +1577,7 @@ void stsmmach(Sh2& s) {
 void stsmmacl(Sh2& s) {
     // Rn - :4 -> Rn, MACL -> (Rn)
     s.r_[xn00(s)] -= 4;
-    s.memory()->write<u32>(s.r_[xn00(s)], s.macl_);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.macl_);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1585,7 +1586,7 @@ void stsmmacl(Sh2& s) {
 void stsmpr(Sh2& s) {
     // Rn - :4 -> Rn, PR -> (Rn)
     s.r_[xn00(s)] -= 4;
-    s.memory()->write<u32>(s.r_[xn00(s)], s.pr_);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.pr_);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1651,10 +1652,10 @@ void swapw(Sh2& s) {
 
 void tas(Sh2& s) {
     // If (Rn) = 0, 1 -> T, 1 -> MSB of (Rn)
-    auto temp = u32{s.memory()->read<u8>(s.r_[xn00(s)])};
+    auto temp = u32{s.modules_.memory()->read<u8>(s.r_[xn00(s)])};
     (temp == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
     temp |= sign_bit_8_mask;
-    s.memory()->write<u8>(s.r_[xn00(s)], static_cast<u8>(temp));
+    s.modules_.memory()->write<u8>(s.r_[xn00(s)], static_cast<u8>(temp));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 4;
@@ -1664,11 +1665,11 @@ void trapa(Sh2& s) {
     // PC/SR -> stack, (imm*4 + VBR) -> PC
     const auto imm = u32{(bitmask_000000FF & x0nn(s))};
     s.r_[sp_register_index] -= 4;
-    s.memory()->write<u32>(s.r_[sp_register_index], s.sr_.get(StatusRegister::all_bits));
+    s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.sr_.get(StatusRegister::all_bits));
     s.r_[sp_register_index] -= 4;
-    s.memory()->write<u32>(s.r_[sp_register_index], s.pc_ + 2);
+    s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.pc_ + 2);
 
-    s.pc_             = s.memory()->read<u32>(s.vbr_ + (imm << 2));
+    s.pc_             = s.modules_.memory()->read<u32>(s.vbr_ + (imm << 2));
     s.cycles_elapsed_ = 8; // NOLINT(readability-magic-numbers)
 }
 
@@ -1690,7 +1691,7 @@ void tsti(Sh2& s) {
 
 void tstm(Sh2& s) {
     // (R0 + GBR) & imm, if result is 0, 1 -> T
-    auto temp = u32{s.memory()->read<u8>(s.gbr_ + s.r_[0])};
+    auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
     temp &= (bitmask_000000FF & x0nn(s));
     (temp == 0) ? s.sr_.set(StatusRegister::t) : s.sr_.reset(StatusRegister::t);
 
@@ -1716,9 +1717,9 @@ void xori(Sh2& s) {
 
 void xorm(Sh2& s) {
     // (R0 + GBR)^imm -> (R0 + GBR)
-    auto temp = u32{s.memory()->read<u8>(s.gbr_ + s.r_[0])};
+    auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
     temp ^= (bitmask_000000FF & x0nn(s));
-    s.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
+    s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -1757,19 +1758,19 @@ void initializeOpcodesLut() {
 }
 
 void execute(Sh2& s) {
-    switch (s.emulatorContext()->debugStatus()) {
+    switch (s.modules_.context()->debugStatus()) {
         case core::DebugStatus::step_over: {
             if (!calls_subroutine_lut[s.current_opcode_]) {
                 //
-                s.emulatorContext()->debugStatus(core::DebugStatus::paused);
+                s.modules_.context()->debugStatus(core::DebugStatus::paused);
             } else {
-                s.emulatorContext()->debugStatus(core::DebugStatus::wait_end_of_routine);
+                s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
                 s.initializeSubroutineDepth();
             }
             break;
         }
         case core::DebugStatus::step_into: {
-            s.emulatorContext()->debugStatus(core::DebugStatus::paused);
+            s.modules_.context()->debugStatus(core::DebugStatus::paused);
             break;
         }
         default: break;

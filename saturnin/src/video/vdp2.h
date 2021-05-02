@@ -29,6 +29,7 @@
 #include <chrono>                          // duration
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>    // u8, u16, u32
+#include <saturnin/src/emulator_modules.h> // EmulatorModules
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
 #include <saturnin/src/utilities.h>        // toUnderlying
@@ -37,7 +38,6 @@
 
 // Forward declarations
 namespace saturnin::core {
-// class EmulatorContext;
 class Memory;
 class Scu;
 } // namespace saturnin::core
@@ -47,6 +47,7 @@ namespace saturnin::video {
 class Vdp1;
 
 using saturnin::core::EmulatorContext;
+using saturnin::core::EmulatorModules;
 using AddressToNameMap = std::map<u32, std::string>;
 
 using seconds = std::chrono::duration<double>;
@@ -567,7 +568,7 @@ class Vdp2 {
     ///@{
     /// Constructors / Destructors
     Vdp2() = delete;
-    Vdp2(EmulatorContext* ec) : emulator_context_(ec){};
+    Vdp2(EmulatorContext* ec) : modules_(ec){};
     Vdp2(const Vdp2&) = delete;
     Vdp2(Vdp2&&)      = delete;
     auto operator=(const Vdp2&) & -> Vdp2& = delete;
@@ -1254,7 +1255,7 @@ class Vdp2 {
 
     template<typename T>
     auto readColor(const u32 color_address) -> const Color {
-        return Color(memory()->read<T>(color_address));
+        return Color(modules_.memory()->read<T>(color_address));
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1315,7 +1316,7 @@ class Vdp2 {
         constexpr auto palette_disp    = u8{4};
         const auto     palette         = palette_number << palette_disp;
         for (u32 i = 0; i < 8; ++i) {
-            auto row = Dots4Bits(memory()->read<u32>(current_address));
+            auto row = Dots4Bits(modules_.memory()->read<u32>(current_address));
             readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_0));
             readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_1));
             readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_2));
@@ -1339,12 +1340,12 @@ class Vdp2 {
         constexpr auto palette_disp    = u8{8};
         const auto     palette         = palette_number << palette_disp;
         for (u32 i = 0; i < 8; ++i) {
-            auto row = Dots8Bits(memory()->read<u32>(current_address += row_offset));
+            auto row = Dots8Bits(modules_.memory()->read<u32>(current_address += row_offset));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
-            row = Dots8Bits(memory()->read<u32>(current_address += row_offset));
+            row = Dots8Bits(modules_.memory()->read<u32>(current_address += row_offset));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
@@ -1356,14 +1357,7 @@ class Vdp2 {
     Color read32KColorsData();
     Color read16MColorsData();
 
-    ///@{
-    /// \name Internal modules accessors
-    [[nodiscard]] auto scu() const -> core::Scu* { return emulator_context_->scu(); };
-    [[nodiscard]] auto vdp1() const -> Vdp1* { return emulator_context_->vdp1(); };
-    [[nodiscard]] auto memory() const -> core::Memory* { return emulator_context_->memory(); };
-    ///@}
-
-    EmulatorContext* emulator_context_; ///< Emulator context object.
+    EmulatorModules modules_;
 
     AddressToNameMap address_to_name_; ///< Link between a register address and its name.
 

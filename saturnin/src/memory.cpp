@@ -29,6 +29,7 @@
 #include <saturnin/src/locale.h> // NOLINT(modernize-deprecated-headers)
 #include <saturnin/src/sh2.h>
 #include <saturnin/src/cdrom/cdrom.h>
+#include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/video/vdp2.h>
 
 namespace lzpp = libzippp;
@@ -76,7 +77,7 @@ auto Memory::loadRom(const std::string& zip_name,
                      const u8           times_mirrored,
                      const RomType      rom_type) -> bool {
     const auto zip      = std::string{zip_name + ".zip"};
-    auto       rom_path = fs::path{config()->readValue(AccessKeys::cfg_paths_roms_stv).c_str()};
+    auto       rom_path = fs::path{modules_.config()->readValue(AccessKeys::cfg_paths_roms_stv).c_str()};
     rom_path /= zip;
     // rom_path += "\\" + zip_name + ".zip";
 
@@ -159,8 +160,8 @@ void Memory::loadBios(const HardwareMode mode) {
     Log::info("memory", tr("Loading bios"));
     auto bios_path = std::string{};
     switch (mode) {
-        case HardwareMode::saturn: bios_path = config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
-        case HardwareMode::stv: bios_path = config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
+        case HardwareMode::saturn: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
+        case HardwareMode::stv: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
         default: {
             Log::error("memory", tr("Unknown hardware mode"));
             throw std::runtime_error("Config error !");
@@ -214,9 +215,9 @@ auto Memory::loadStvGame(const std::string& config_filename) -> bool {
         const std::string rom_name       = files[i][0];
         const auto        load_address   = u32{files[i][1]};
         const auto        load_size      = u32{files[i][2]};
-        const auto        rom_load       = config()->getRomLoad(files[i][3]);
+        const auto        rom_load       = modules_.config()->getRomLoad(files[i][3]);
         const auto        times_mirrored = u32{files[i][4]};
-        const auto        rom_type       = config()->getRomType(files[i][5]);
+        const auto        rom_type       = modules_.config()->getRomType(files[i][5]);
         if (!this->loadRom(zip_name, rom_name, &this->cart_[load_address], load_size, rom_load, times_mirrored, rom_type)) {
             return false;
         }
@@ -460,9 +461,9 @@ auto Memory::isStvProtectionEnabled() const -> bool {
     return cart_[relative_addr] == 0x1;
 }
 
-void Memory::sendFrtInterruptToMaster() const { masterSh2()->sendInterruptCaptureSignal(); }
+void Memory::sendFrtInterruptToMaster() const { modules_.masterSh2()->sendInterruptCaptureSignal(); }
 
-void Memory::sendFrtInterruptToSlave() const { slaveSh2()->sendInterruptCaptureSignal(); }
+void Memory::sendFrtInterruptToSlave() const { modules_.slaveSh2()->sendInterruptCaptureSignal(); }
 
 auto Memory::getMemoryMapAreaData(const MemoryMapArea area) -> std::tuple<u8*, size_t, u32> const {
     switch (area) {
@@ -490,22 +491,6 @@ auto Memory::getMemoryMapAreaData(const MemoryMapArea area) -> std::tuple<u8*, s
         default: return std::make_tuple(nullptr, 0, 0);
     }
 };
-
-auto Memory::config() const -> Config* { return emulator_context_->config(); };
-
-auto Memory::masterSh2() const -> sh2::Sh2* { return emulator_context_->masterSh2(); };
-
-auto Memory::slaveSh2() const -> sh2::Sh2* { return emulator_context_->slaveSh2(); };
-
-auto Memory::scu() const -> Scu* { return emulator_context_->scu(); };
-
-auto Memory::smpc() const -> Smpc* { return emulator_context_->smpc(); };
-
-auto Memory::openglWindow() const -> GLFWwindow* { return emulator_context_->openglWindow(); };
-
-auto Memory::cdrom() const -> cdrom::Cdrom* { return emulator_context_->cdrom(); };
-
-auto Memory::vdp2() const -> video::Vdp2* { return emulator_context_->vdp2(); };
 
 void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad RomLoad) {
     if (times_mirrored > 0) {

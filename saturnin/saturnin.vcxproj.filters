@@ -105,6 +105,12 @@
     <ClCompile Include="src\video\texture.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
+    <ClCompile Include="src\sound\scsp.cpp">
+      <Filter>Fichiers sources\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="src\emulator_modules.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -226,6 +232,9 @@
     </ClInclude>
     <ClInclude Include="src\cdrom\cdrom_registers.h">
       <Filter>Fichiers sources\cdrom</Filter>
+    </ClInclude>
+    <ClInclude Include="src\emulator_modules.h">
+      <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

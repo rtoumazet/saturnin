@@ -29,6 +29,7 @@
 #include <vector> // vector
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/interrupt_sources.h>
+#include <saturnin/src/emulator_modules.h>
 
 namespace is = saturnin::core::interrupt_source;
 
@@ -38,8 +39,7 @@ class Sh2;
 enum class Sh2Type;
 } // namespace saturnin::sh2
 
-namespace saturnin {
-namespace core {
+namespace saturnin::core {
 
 // Forward declarations
 class Memory;
@@ -314,8 +314,8 @@ class Scu {
 
     /// \name Context objects accessors
     //@{
-    [[nodiscard]] auto emulatorContext() const -> EmulatorContext*;
-    [[nodiscard]] auto memory() const -> Memory*;
+    //[[nodiscard]] auto emulatorContext() const -> EmulatorContext*;
+    //[[nodiscard]] auto memory() const -> Memory*;
     //@}
 
   private:
@@ -523,7 +523,7 @@ class Scu {
 
     void activateDma();
 
-    EmulatorContext* emulator_context_; ///< Pointer to the emulator context object.
+    EmulatorModules modules_;
 
     //{@
     // Scu memory registers
@@ -553,5 +553,4 @@ class Scu {
     //@}
 };
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::core

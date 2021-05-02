@@ -2278,15 +2278,15 @@ auto Cdrom::calculatePeriodicResponseDuration() -> u32 {
     switch (cd_drive_play_mode_) {
         case CdDrivePlayMode::standard_play_speed:
             max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::standard_play_speed);
-            return smpc()->calculateCyclesNumber(periodic_response_period_standard);
+            return modules_.smpc()->calculateCyclesNumber(periodic_response_period_standard);
 
         case CdDrivePlayMode::double_play_speed:
             max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::double_play_speed);
-            return smpc()->calculateCyclesNumber(periodic_response_period_double);
+            return modules_.smpc()->calculateCyclesNumber(periodic_response_period_double);
 
         case CdDrivePlayMode::standby:
             max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::standby);
-            return smpc()->calculateCyclesNumber(periodic_response_period_standby);
+            return modules_.smpc()->calculateCyclesNumber(periodic_response_period_standby);
         default: Log::warning("cdrom", "Unknown play mode"); return 0;
     }
 }
@@ -2332,7 +2332,5 @@ void Cdrom::getHardwareInfo() {
 
     Log::debug("cdrom", "Get Hardware Info executed");
 }
-
-auto Cdrom::smpc() const -> core::Smpc* { return emulator_context_->smpc(); };
 
 } // namespace saturnin::cdrom

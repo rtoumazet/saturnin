@@ -27,25 +27,28 @@
 
 #include <array>                        // array
 #include <saturnin/src/emulator_defs.h> // u8, u16, u32
-#include <saturnin/src/locale.h>        // tr
-#include <saturnin/src/log.h>           // Log
+#include <saturnin/src/emulator_modules.h>
+#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/log.h>    // Log
 #include <saturnin/src/video/vdp1_registers.h>
 
 // Forward declarations
 namespace saturnin::core {
 class EmulatorContext;
-}
+class EmulatorModules;
+} // namespace saturnin::core
 
 namespace saturnin::video {
 
 using saturnin::core::EmulatorContext;
+using saturnin::core::EmulatorModules;
 
 class Vdp1 {
   public:
     //@{
     // Constructors / Destructors
     Vdp1() = delete;
-    Vdp1(EmulatorContext* ec) : emulator_context_(ec){};
+    Vdp1(EmulatorContext* ec) : modules_(ec){};
     Vdp1(const Vdp1&) = delete;
     Vdp1(Vdp1&&)      = delete;
     auto operator=(const Vdp1&) & -> Vdp1& = delete;
@@ -163,7 +166,7 @@ class Vdp1 {
 
     void updateResolution();
 
-    EmulatorContext* emulator_context_; ///< Emulator context object.
+    EmulatorModules modules_;
 
     // VDP1 registers
     TvModeSelection                tvmr_;

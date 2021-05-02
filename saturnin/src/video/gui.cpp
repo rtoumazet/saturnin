@@ -990,7 +990,7 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
             break;
         }
         case MemoryMapArea::cd_block:
-            for (auto const& r : state.memory()->cdrom()->getRegisters()) {
+            for (auto const& r : state.cdrom()->getRegisters()) {
                 ImGui::TextUnformatted(r.c_str());
             }
             break;
@@ -1106,7 +1106,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::TableSetupColumn(tr("Value").c_str());
                 ImGui::TableHeadersRow();
 
-                const auto& registers = state.memory()->vdp2()->getRegisters();
+                const auto& registers = state.vdp2()->getRegisters();
                 for (const auto& [address, desc] : registers) {
                     ImGui::TableNextRow();
                     auto column_index = u8{0};
@@ -1117,7 +1117,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::TextUnformatted(desc.c_str());
 
                     ImGui::TableSetColumnIndex(column_index);
-                    ImGui::TextUnformatted(fmt::format("{:#06x}", state.memory()->vdp2()->readRegisters<u16>(address)).c_str());
+                    ImGui::TextUnformatted(fmt::format("{:#06x}", state.vdp2()->readRegisters<u16>(address)).c_str());
                 }
                 ImGui::EndTable();
             }

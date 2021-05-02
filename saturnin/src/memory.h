@@ -33,6 +33,7 @@
 #include <Windows.h> // VK constants
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/emulator_enums.h>
+#include <saturnin/src/emulator_modules.h> // EmulatorModules
 #include <saturnin/src/scu.h>
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/utilities.h> // toUnderlying
@@ -49,6 +50,10 @@ namespace sh2 = saturnin::sh2;
 
 namespace saturnin::video {
 class Vdp2;
+}
+
+namespace saturnin::sound {
+class Scsp;
 }
 
 namespace util = saturnin::utilities;
@@ -202,7 +207,7 @@ class Memory {
     //@{
     // Constructors / Destructors
     Memory() = delete;
-    Memory(EmulatorContext* ec) : emulator_context_(ec){};
+    Memory(EmulatorContext* ec) : modules_(ec){};
     Memory(const Memory&) = delete;
     Memory(Memory&&)      = delete;
     auto operator=(const Memory&) & -> Memory& = delete;
@@ -424,15 +429,17 @@ class Memory {
 
     /// \name Context objects accessors
     //@{
-    [[nodiscard]] auto masterSh2() const -> sh2::Sh2*;
-    [[nodiscard]] auto slaveSh2() const -> sh2::Sh2*;
-    [[nodiscard]] auto scu() const -> Scu*;
-    [[nodiscard]] auto config() const -> Config*;
-    [[nodiscard]] auto smpc() const -> Smpc*;
-    [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
-    [[nodiscard]] auto cdrom() const -> cdrom::Cdrom*;
-    [[nodiscard]] auto vdp2() const -> video::Vdp2*;
+    //[[nodiscard]] auto masterSh2() const -> sh2::Sh2*;
+    //[[nodiscard]] auto slaveSh2() const -> sh2::Sh2*;
+    //[[nodiscard]] auto scu() const -> Scu*;
+    //[[nodiscard]] auto config() const -> Config*;
+    //[[nodiscard]] auto smpc() const -> Smpc*;
+    //[[nodiscard]] auto openglWindow() const -> GLFWwindow*;
+    //[[nodiscard]] auto cdrom() const -> cdrom::Cdrom*;
+    //[[nodiscard]] auto vdp2() const -> video::Vdp2*;
+    //[[nodiscard]] auto scsp() const -> sound::Scsp*;
     //@}
+    EmulatorModules modules_;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -517,8 +524,6 @@ class Memory {
     auto initializeHandlers(const AddressRange& ar) {
         (initializeHandler<T>(ar, OpType<T>{}), ...);
     }
-
-    EmulatorContext* emulator_context_; ///< Emulator context object.
 
     /// Memory handlers
     //@{
@@ -710,7 +715,7 @@ struct readSmpc<uint8_t> {
         return [](const Memory& m, const u32 addr) -> u8 {
             // Log::warning("memory", core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
             // return 0;
-            return m.smpc()->read(addr);
+            return m.modules_.smpc()->read(addr);
         };
     }
 };
@@ -740,7 +745,7 @@ struct writeSmpc {
 template<>
 struct writeSmpc<uint8_t> {
     operator Memory::WriteType<u8>() const {
-        return [](Memory& m, const u32 addr, const u8 data) { m.smpc()->write(addr, data); };
+        return [](Memory& m, const u32 addr, const u8 data) { m.modules_.smpc()->write(addr, data); };
     }
 };
 
@@ -843,43 +848,81 @@ struct readStvIo<u8> {
             auto data = u8{};
             switch (addr & bitmask_00FFFFFF) {
                 case stv_io_port_a: {
-                    const auto p1 = m.smpc()->getStvPeripheralMapping().player_1;
-                    if (isKeyPressed(p1.button_1, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_1); }
-                    if (isKeyPressed(p1.button_2, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_2); }
-                    if (isKeyPressed(p1.button_3, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_3); }
-                    if (isKeyPressed(p1.button_4, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_4); }
-                    if (isKeyPressed(p1.direction_down, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::down); }
-                    if (isKeyPressed(p1.direction_up, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::up); }
-                    if (isKeyPressed(p1.direction_right, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::right); }
-                    if (isKeyPressed(p1.direction_left, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::left); }
+                    const auto p1 = m.modules_.smpc()->getStvPeripheralMapping().player_1;
+                    if (isKeyPressed(p1.button_1, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::button_1);
+                    }
+                    if (isKeyPressed(p1.button_2, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::button_2);
+                    }
+                    if (isKeyPressed(p1.button_3, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::button_3);
+                    }
+                    if (isKeyPressed(p1.button_4, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::button_4);
+                    }
+                    if (isKeyPressed(p1.direction_down, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::down);
+                    }
+                    if (isKeyPressed(p1.direction_up, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::up);
+                    }
+                    if (isKeyPressed(p1.direction_right, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::right);
+                    }
+                    if (isKeyPressed(p1.direction_left, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::left);
+                    }
                     break;
                 }
                 case stv_io_port_b: {
-                    const auto p2 = m.smpc()->getStvPeripheralMapping().player_2;
-                    if (isKeyPressed(p2.button_1, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_1); }
-                    if (isKeyPressed(p2.button_2, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_2); }
-                    if (isKeyPressed(p2.button_3, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_3); }
-                    if (isKeyPressed(p2.button_4, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::button_4); }
-                    if (isKeyPressed(p2.direction_down, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::down); }
-                    if (isKeyPressed(p2.direction_up, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::up); }
-                    if (isKeyPressed(p2.direction_right, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::right); }
-                    if (isKeyPressed(p2.direction_left, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::left); }
+                    const auto p2 = m.modules_.smpc()->getStvPeripheralMapping().player_2;
+                    if (isKeyPressed(p2.button_1, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::button_1);
+                    }
+                    if (isKeyPressed(p2.button_2, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::button_2);
+                    }
+                    if (isKeyPressed(p2.button_3, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::button_3);
+                    }
+                    if (isKeyPressed(p2.button_4, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::button_4);
+                    }
+                    if (isKeyPressed(p2.direction_down, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::down);
+                    }
+                    if (isKeyPressed(p2.direction_up, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::up);
+                    }
+                    if (isKeyPressed(p2.direction_right, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::right);
+                    }
+                    if (isKeyPressed(p2.direction_left, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::left);
+                    }
                     break;
                 }
                 case stv_io_port_c: {
-                    const auto board = m.smpc()->getStvPeripheralMapping().board_controls;
-                    if (isKeyPressed(board.p1_coin_switch, m.openglWindow())) {
+                    const auto board = m.modules_.smpc()->getStvPeripheralMapping().board_controls;
+                    if (isKeyPressed(board.p1_coin_switch, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::coin_switch_player1);
                     }
-                    if (isKeyPressed(board.p2_coin_switch, m.openglWindow())) {
+                    if (isKeyPressed(board.p2_coin_switch, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::coin_switch_player2);
                     }
-                    if (isKeyPressed(board.test_switch, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::test_switch); }
-                    if (isKeyPressed(board.service_switch, m.openglWindow())) {
+                    if (isKeyPressed(board.test_switch, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::test_switch);
+                    }
+                    if (isKeyPressed(board.service_switch, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::service_switch);
                     }
-                    if (isKeyPressed(board.p1_start, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::start_player1); }
-                    if (isKeyPressed(board.p2_start, m.openglWindow())) { data |= util::toUnderlying(StvIOPort::start_player2); }
+                    if (isKeyPressed(board.p1_start, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::start_player1);
+                    }
+                    if (isKeyPressed(board.p2_start, m.modules_.context()->openglWindow())) {
+                        data |= util::toUnderlying(StvIOPort::start_player2);
+                    }
                     break;
                 }
                 case stv_io_port_d: {
@@ -1020,7 +1063,7 @@ struct writeCart<u8> {
 template<typename T>
 struct readCdBlock {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.cdrom()->readRegisters<T>(addr); };
+        return [](const Memory& m, const u32 addr) -> T { return m.modules_.cdrom()->readRegisters<T>(addr); };
     }
 };
 
@@ -1038,7 +1081,7 @@ struct readCdBlock {
 template<typename T>
 struct writeCdBlock {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { m.cdrom()->writeRegisters<T>(addr, data); };
+        return [](Memory& m, const u32 addr, const T data) { m.modules_.cdrom()->writeRegisters<T>(addr, data); };
     }
 };
 
@@ -1056,13 +1099,7 @@ struct writeCdBlock {
 template<typename T>
 struct readScsp {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T {
-            Log::warning("memory",
-                         core::tr("Read ({}) needs to be handled through SCSP {:#0x}"),
-                         sizeof(T) * number_of_bits_8,
-                         addr);
-            return 0;
-        };
+        return [](const Memory& m, const u32 addr) -> T { return m.modules_.scsp()->read<T>(addr); };
     }
 };
 
@@ -1080,13 +1117,7 @@ struct readScsp {
 template<typename T>
 struct writeScsp {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) {
-            Log::warning("memory",
-                         core::tr("Write ({}) needs to be handled through SCSP {:#0x} : {:#x}"),
-                         sizeof(T) * number_of_bits_8,
-                         addr,
-                         data);
-        };
+        return [](Memory& m, const u32 addr, const T data) { m.modules_.scsp()->write<T>(addr, data); };
     }
 };
 
@@ -1300,7 +1331,7 @@ struct writeVdp2Cram {
 template<typename T>
 struct readVdp2Registers {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.vdp2()->readRegisters<T>(addr); };
+        return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp2()->readRegisters<T>(addr); };
     }
 };
 
@@ -1319,7 +1350,7 @@ template<typename T>
 struct writeVdp2Registers {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            m.vdp2()->writeRegisters(addr, data);
+            m.modules_.vdp2()->writeRegisters(addr, data);
             // :TODO: handle bitmap update
         };
     }
@@ -1347,7 +1378,7 @@ struct readScu {
 template<>
 struct readScu<u32> {
     operator Memory::ReadType<u32>() const {
-        return [](const Memory& m, const u32 addr) -> u32 { return m.scu()->read32(addr); };
+        return [](const Memory& m, const u32 addr) -> u32 { return m.modules_.scu()->read32(addr); };
     }
 };
 
@@ -1373,7 +1404,7 @@ struct writeScu {
 template<>
 struct writeScu<u32> {
     operator Memory::WriteType<u32>() const {
-        return [](Memory& m, const u32 addr, const u32 data) { return m.scu()->write32(addr, data); };
+        return [](Memory& m, const u32 addr, const u32 data) { return m.modules_.scu()->write32(addr, data); };
     }
 };
 
@@ -1429,8 +1460,8 @@ template<typename T>
 struct readSh2Registers {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) { return m.masterSh2()->readRegisters<T>(addr); }
-            return m.slaveSh2()->readRegisters<T>(addr);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readRegisters<T>(addr); }
+            return m.modules_.slaveSh2()->readRegisters<T>(addr);
         };
     }
 };
@@ -1450,8 +1481,8 @@ template<typename T>
 struct writeSh2Registers {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.masterSh2()->writeRegisters<T>(addr, data); }
-            return m.slaveSh2()->writeRegisters<T>(addr, data);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeRegisters<T>(addr, data); }
+            return m.modules_.slaveSh2()->writeRegisters<T>(addr, data);
         };
     }
 };
@@ -1529,8 +1560,8 @@ template<typename T>
 struct readCacheAddresses {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) { return m.masterSh2()->readCacheAddresses<T>(addr); }
-            return m.slaveSh2()->readCacheAddresses<T>(addr);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheAddresses<T>(addr); }
+            return m.modules_.slaveSh2()->readCacheAddresses<T>(addr);
         };
     }
 };
@@ -1550,8 +1581,8 @@ template<typename T>
 struct writeCacheAddresses {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.masterSh2()->writeCacheAddresses<T>(addr, data); }
-            return m.slaveSh2()->writeCacheAddresses<T>(addr, data);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheAddresses<T>(addr, data); }
+            return m.modules_.slaveSh2()->writeCacheAddresses<T>(addr, data);
         };
     }
 };
@@ -1571,8 +1602,8 @@ template<typename T>
 struct readCacheData {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) { return m.masterSh2()->readCacheData<T>(addr); }
-            return m.slaveSh2()->readCacheData<T>(addr);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheData<T>(addr); }
+            return m.modules_.slaveSh2()->readCacheData<T>(addr);
         };
     }
 };
@@ -1592,8 +1623,8 @@ template<typename T>
 struct writeCacheData {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.masterSh2()->writeCacheData<T>(addr, data); }
-            return m.slaveSh2()->writeCacheData<T>(addr, data);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheData<T>(addr, data); }
+            return m.modules_.slaveSh2()->writeCacheData<T>(addr, data);
         };
     }
 };

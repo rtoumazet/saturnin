@@ -33,6 +33,7 @@
 #include <windows.h>    // Removes C4005 warning
 #include <GLFW/glfw3.h> // Keyboard handling
 #include <saturnin/src/smpc_registers.h>
+#include <saturnin/src/emulator_modules.h>
 
 namespace saturnin::core {
 
@@ -399,7 +400,7 @@ class Smpc {
     //@{
     // Constructors / Destructors
     Smpc() = delete;
-    Smpc(EmulatorContext* ec) : emulator_context_(ec) { reset(); };
+    Smpc(EmulatorContext* ec) : modules_(ec) { reset(); };
     Smpc(const Smpc&) = delete;
     Smpc(Smpc&&)      = delete;
     auto operator=(const Smpc&) & -> Smpc& = delete;
@@ -599,7 +600,7 @@ class Smpc {
 
     void executeIntback();
 
-    EmulatorContext* emulator_context_; ///< Context of the emulator
+    EmulatorModules modules_;
 
     //@{
     // Internal registers

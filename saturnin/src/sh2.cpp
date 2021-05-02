@@ -64,13 +64,7 @@ constexpr auto transfer_byte_size_2  = u8{0x2};
 constexpr auto transfer_byte_size_4  = u8{0x4};
 constexpr auto transfer_byte_size_16 = u8{0x10};
 
-Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : emulator_context_(ec), sh2_type_(st) { reset(); }
-
-auto Sh2::memory() const -> core::Memory* { return emulator_context_->memory(); }
-
-auto Sh2::scu() const -> Scu* { return emulator_context_->scu(); }
-
-auto Sh2::emulatorContext() -> core::EmulatorContext* { return emulator_context_; }
+Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : modules_(ec), sh2_type_(st) { reset(); }
 
 auto Sh2::readRegisters8(const u32 addr) -> u8 {
     switch (addr) {
@@ -728,8 +722,8 @@ void Sh2::initializeOnChipRegisters() {
 }
 
 void Sh2::powerOnReset() {
-    pc_                   = memory()->read<u32>(pc_start_vector);
-    r_[sp_register_index] = memory()->read<u32>(sp_start_vector);
+    pc_                   = modules_.memory()->read<u32>(pc_start_vector);
+    r_[sp_register_index] = modules_.memory()->read<u32>(sp_start_vector);
     vbr_                  = 0;
     sr_.reset();
     gbr_  = 0;
@@ -844,8 +838,8 @@ void Sh2::runInterruptController() {
                 is_level_interrupted_[interrupt.level] = false;
 
                 // SR and PC are saved to the stack.
-                memory()->write(r_[sp_register_index] - sr_stack_offset, sr_.toU32());
-                memory()->write(r_[sp_register_index] - pc_stack_offset, pc_);
+                modules_.memory()->write(r_[sp_register_index] - sr_stack_offset, sr_.toU32());
+                modules_.memory()->write(r_[sp_register_index] - pc_stack_offset, pc_);
 
                 r_[sp_register_index] = r_[sp_register_index] - displacement_8; // Stack pointer is updated.
 
@@ -860,7 +854,7 @@ void Sh2::runInterruptController() {
                                interrupt.name,
                                pc_);
                 }
-                pc_ = memory()->read<u32>(interrupt.vector * 4 + vbr_);
+                pc_ = modules_.memory()->read<u32>(interrupt.vector * 4 + vbr_);
 
                 pending_interrupts_.pop_front(); // Interrupt is removed from the list.
             }
@@ -1052,25 +1046,28 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                 auto transfer_size = u8{};
                 switch (conf.chcr.get(DmaChannelControlRegister::transfer_size)) {
                     case TransferSize::one_byte_unit:
-                        memory()->write<u8>(destination, memory()->read<u8>(source));
+                        modules_.memory()->write<u8>(destination, modules_.memory()->read<u8>(source));
                         transfer_size = transfer_byte_size_1;
                         --counter;
                         break;
                     case TransferSize::two_byte_unit:
-                        memory()->write<u16>(destination, memory()->read<u16>(source));
+                        modules_.memory()->write<u16>(destination, modules_.memory()->read<u16>(source));
                         transfer_size = transfer_byte_size_2;
                         --counter;
                         break;
                     case TransferSize::four_byte_unit:
-                        memory()->write<u32>(destination, memory()->read<u32>(source));
+                        modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
                         transfer_size = transfer_byte_size_4;
                         --counter;
                         break;
                     case TransferSize::sixteen_byte_unit:
-                        memory()->write<u32>(destination, memory()->read<u32>(source));
-                        memory()->write<u32>(destination + displacement_4, memory()->read<u32>(source + displacement_4));
-                        memory()->write<u32>(destination + displacement_8, memory()->read<u32>(source + displacement_8));
-                        memory()->write<u32>(destination + displacement_12, memory()->read<u32>(source + displacement_12));
+                        modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
+                        modules_.memory()->write<u32>(destination + displacement_4,
+                                                      modules_.memory()->read<u32>(source + displacement_4));
+                        modules_.memory()->write<u32>(destination + displacement_8,
+                                                      modules_.memory()->read<u32>(source + displacement_8));
+                        modules_.memory()->write<u32>(destination + displacement_12,
+                                                      modules_.memory()->read<u32>(source + displacement_12));
                         transfer_size = transfer_byte_size_16;
                         counter -= 4;
                         break;
@@ -1170,9 +1167,9 @@ void Sh2::sendInterruptCaptureSignal() {
 }
 
 auto Sh2::run() -> u8 {
-    memory()->sh2_in_operation_ = sh2_type_;
+    modules_.memory()->sh2_in_operation_ = sh2_type_;
     runInterruptController();
-    current_opcode_ = memory()->read<u16>(pc_);
+    current_opcode_ = modules_.memory()->read<u16>(pc_);
     execute(*this);
     runDivisionUnit(cycles_elapsed_);
     runFreeRunningTimer(cycles_elapsed_);

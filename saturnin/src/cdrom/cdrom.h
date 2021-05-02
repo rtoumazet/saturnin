@@ -30,11 +30,13 @@
 #include <vector>
 #include <string>
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/cdrom/cdrom_registers.h>
 
 // Forward declarations
 namespace saturnin::core {
 class EmulatorContext;
+class EmulatorModules;
 class Smpc;
 } // namespace saturnin::core
 namespace saturnin::cdrom {
@@ -43,6 +45,7 @@ struct ScsiToc;
 } // namespace saturnin::cdrom
 
 using saturnin::core::EmulatorContext;
+using saturnin::core::EmulatorModules;
 using milli = std::chrono::duration<double, std::milli>;
 
 namespace saturnin::cdrom {
@@ -257,7 +260,7 @@ class Cdrom {
     //@{
     // Constructors / Destructors
     Cdrom() = delete;
-    Cdrom(EmulatorContext* ec) : emulator_context_(ec){};
+    Cdrom(EmulatorContext* ec) : modules_(ec){};
     Cdrom(const Cdrom&) = delete;
     Cdrom(Cdrom&&)      = delete;
     auto operator=(const Cdrom&) & -> Cdrom& = delete;
@@ -678,12 +681,7 @@ class Cdrom {
     // u32 numOfSectorToPut{};
     //@}
 
-    ///@{
-    /// \name Internal modules accessors
-    [[nodiscard]] auto smpc() const -> core::Smpc*;
-    ///@}
-
-    EmulatorContext* emulator_context_; ///< Emulator context object.
+    EmulatorModules modules_;
 
     HirqStatusRegister hirq_status_reg_; ///< HIrq status register.
     HirqMaskRegister   hirq_mask_reg_;   ///< HIrq mask register.

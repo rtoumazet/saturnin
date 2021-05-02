@@ -36,7 +36,7 @@ namespace saturnin::core {
 // Access to Workram L not possible
 // During DMA operation A -> B or B -> A, no CPU access to A-Bus
 
-Scu::Scu(EmulatorContext* ec) : emulator_context_(ec) { initializeRegisters(); };
+Scu::Scu(EmulatorContext* ec) : modules_(ec) { initializeRegisters(); };
 
 auto Scu::read32(const u32 addr) const -> u32 {
     switch (addr) {
@@ -76,9 +76,9 @@ auto Scu::read32(const u32 addr) const -> u32 {
         case level_2_dma_transfer_byte_number: return d2c_.toU32();
         case interrupt_status_register: return interrupt_status_register_.toU32();
         case interrupt_mask_register: return interrupt_mask_register_.toU32();
-        default: return rawRead<u32>(memory()->scu_, addr & scu_memory_mask);
+        default: return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
     }
-    return rawRead<u32>(memory()->scu_, addr & scu_memory_mask);
+    return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
 };
 
 void Scu::write32(const u32 addr, const u32 data) {
@@ -185,7 +185,7 @@ void Scu::write32(const u32 addr, const u32 data) {
     }
 
     // if(address==0x25FE00A0) DebugBreak();
-    rawWrite<u32>(memory()->scu_, addr & scu_memory_mask, data);
+    rawWrite<u32>(modules_.memory()->scu_, addr & scu_memory_mask, data);
 };
 
 void Scu::executeDma(const DmaConfiguration& dc) {
@@ -258,9 +258,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                     }
 
                     while (byte_counter < dc.transfer_byte_number) {
-                        data = memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
-                                                  + long_counter * read_address_add);
-                        memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
+                        data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                                                           + long_counter * read_address_add);
+                        modules_.memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
 
                         ++read_offset;
 
@@ -286,9 +286,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                     auto write_offset = u32{};
 
                     while (byte_counter < dc.transfer_byte_number) {
-                        data = memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
-                                                  + long_counter * read_address_add);
-                        memory()->write<u8>(write_address + write_offset + word_counter * write_address_add, data);
+                        data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                                                           + long_counter * read_address_add);
+                        modules_.memory()->write<u8>(write_address + write_offset + word_counter * write_address_add, data);
 
                         ++read_offset;
                         ++write_offset;
@@ -317,9 +317,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                     write_address_add = 4;
 
                     while (byte_counter < dc.transfer_byte_number) {
-                        data = memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
-                                                  + long_counter * read_address_add);
-                        memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
+                        data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                                                           + long_counter * read_address_add);
+                        modules_.memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
 
                         ++read_offset;
 
@@ -368,9 +368,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
 
             auto is_transfer_done = bool{false};
             while (!is_transfer_done) {
-                read_address  = memory()->read<u32>(execute_address_storage_buffer + displacement_8);
-                write_address = memory()->read<u32>(execute_address_storage_buffer + displacement_4);
-                count         = memory()->read<u32>(execute_address_storage_buffer);
+                read_address  = modules_.memory()->read<u32>(execute_address_storage_buffer + displacement_8);
+                write_address = modules_.memory()->read<u32>(execute_address_storage_buffer + displacement_4);
+                count         = modules_.memory()->read<u32>(execute_address_storage_buffer);
                 if (count == 0) { count = max_transfer_byte_number; }
 
                 Log::debug("scu", "Read address : ", read_address);
@@ -411,9 +411,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                         }
 
                         while (byte_counter < count) {
-                            data = memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
-                                                      + long_counter * read_address_add);
-                            memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
+                            data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                                                               + long_counter * read_address_add);
+                            modules_.memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
 
                             ++read_offset;
 
@@ -439,9 +439,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                         u32 write_offset{};
 
                         while (byte_counter < count) {
-                            data = memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
-                                                      + long_counter * read_address_add);
-                            memory()->write<u8>(write_address + write_offset + word_counter * write_address_add, data);
+                            data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                                                               + long_counter * read_address_add);
+                            modules_.memory()->write<u8>(write_address + write_offset + word_counter * write_address_add, data);
 
                             ++read_offset;
                             ++write_offset;
@@ -470,9 +470,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                         write_address_add = 4;
 
                         while (byte_counter < count) {
-                            data = memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
-                                                      + long_counter * read_address_add);
-                            memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
+                            data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                                                               + long_counter * read_address_add);
+                            modules_.memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
 
                             ++read_offset;
 
@@ -532,15 +532,15 @@ void Scu::generateInterrupt(const Interrupt& i) {
         if (!isInterruptMasked(i)) {
             if (!isInterruptExecuting(i)) {
                 setInterruptStatusRegister(i);
-                memory()->masterSh2()->sendInterrupt(i);
+                modules_.masterSh2()->sendInterrupt(i);
 
-                if (emulatorContext()->smpc()->isSlaveSh2On()) {
+                if (modules_.smpc()->isSlaveSh2On()) {
                     switch (i.vector) {
                         case is::vector_nmi:
                         case is::vector_frt_input_capture:
-                        case is::vector_frt_input_capture2: memory()->slaveSh2()->sendInterrupt(i); break;
-                        case is::vector_v_blank_in: memory()->slaveSh2()->sendInterrupt(is::v_blank_in_slave); break;
-                        case is::vector_h_blank_in: memory()->slaveSh2()->sendInterrupt(is::h_blank_in_slave); break;
+                        case is::vector_frt_input_capture2: modules_.slaveSh2()->sendInterrupt(i); break;
+                        case is::vector_v_blank_in: modules_.slaveSh2()->sendInterrupt(is::v_blank_in_slave); break;
+                        case is::vector_h_blank_in: modules_.slaveSh2()->sendInterrupt(is::h_blank_in_slave); break;
                     }
                 }
             }
@@ -552,7 +552,7 @@ auto Scu::isInterruptMasked(const Interrupt& i) -> bool {
     switch (i) {
         case is::vector_nmi: return true; // NMI interrupt is always accepted
         case is::vector_system_manager:
-            if (emulatorContext()->hardwareMode() == HardwareMode::stv) { return true; }
+            if (modules_.context()->hardwareMode() == HardwareMode::stv) { return true; }
             return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
         case is::vector_v_blank_in:
         case is::vector_v_blank_out:
@@ -627,13 +627,13 @@ void Scu::initializeRegisters() {
     d0md_.set(bits_0_31, mode_default_value);
     d1md_.set(bits_0_31, mode_default_value);
     d2md_.set(bits_0_31, mode_default_value);
-    rawWrite<u32>(memory()->scu_, dma_forced_stop & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, (dma_status_register)&scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dma_forced_stop & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, (dma_status_register)&scu_memory_mask, 0x00000000);
 
     // DSP
-    rawWrite<u32>(memory()->scu_, dsp_program_control_port & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, dsp_data_ram_address_port & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, dsp_data_ram_data_port & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dsp_program_control_port & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dsp_data_ram_address_port & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dsp_data_ram_data_port & scu_memory_mask, 0x00000000);
 
     // Timer
     t1md_.reset();
@@ -644,14 +644,14 @@ void Scu::initializeRegisters() {
     interrupt_status_register_.reset();
 
     // A-BUS control
-    rawWrite<u32>(memory()->scu_, a_bus_interrupt_acknowledge & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, a_bus_set_register & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, (a_bus_set_register + 4) & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, a_bus_refresh_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, a_bus_interrupt_acknowledge & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, a_bus_set_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, (a_bus_set_register + 4) & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, a_bus_refresh_register & scu_memory_mask, 0x00000000);
 
     // SCU control
-    rawWrite<u32>(memory()->scu_, scu_sdram_select_register & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(memory()->scu_, scu_version_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, scu_sdram_select_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, scu_version_register & scu_memory_mask, 0x00000000);
 
     // d0en = 0;
     // d1en = 0;
@@ -880,10 +880,6 @@ void Scu::dmaTest() {
         dma_queue_.pop();
     }
 }
-
-auto Scu::emulatorContext() const -> EmulatorContext* { return emulator_context_; }
-
-auto Scu::memory() const -> Memory* { return emulator_context_->memory(); };
 
 void Scu::sendDmaEndInterrupt(const DmaLevel l) {
     switch (l) {

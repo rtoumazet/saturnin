@@ -328,18 +328,18 @@ void Smpc::reset() {
     }
 
     // System clock is 320 at reset.
-    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-    switch (emulator_context_->config()->getTvStandard(ts)) {
+    std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    switch (modules_.config()->getTvStandard(ts)) {
         case video::TvStandard::pal: clock_ = SystemClock::pal_320; break;
         case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
         default: Log::warning("smpc", tr("Could not set system clock !")); clock_ = SystemClock::not_set;
     }
 
-    std::string p1c = emulator_context_->config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
-    port_1_status_  = emulator_context_->config()->configToPortStatus(p1c);
+    std::string p1c = modules_.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
+    port_1_status_  = modules_.config()->configToPortStatus(p1c);
 
-    std::string p2c = emulator_context_->config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
-    port_2_status_  = emulator_context_->config()->configToPortStatus(p2c);
+    std::string p2c = modules_.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
+    port_2_status_  = modules_.config()->configToPortStatus(p2c);
 }
 
 auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 {
@@ -394,7 +394,7 @@ void Smpc::setCommandDuration() {
 }
 
 void Smpc::executeCommand() {
-    std::string ts = emulator_context_->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     auto        command{comreg_.get(CommandRegister::smpc_command)};
     switch (command) {
         case SmpcCommand::master_sh2_on:
@@ -405,7 +405,7 @@ void Smpc::executeCommand() {
             break;
         case SmpcCommand::slave_sh2_on:
             is_slave_sh2_on_ = true;
-            emulator_context_->slaveSh2()->powerOnReset();
+            modules_.slaveSh2()->powerOnReset();
             Log::debug("smpc", tr("-=Slave SH2 ON=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
@@ -418,8 +418,8 @@ void Smpc::executeCommand() {
             break;
         case SmpcCommand::sound_on:
             is_sound_on_ = true;
-            emulator_context_->scsp()->reset();
-            emulator_context_->scsp()->setSound(true);
+            modules_.scsp()->reset();
+            modules_.scsp()->setSound(true);
             Log::debug("smpc", tr("-=Sound ON=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
@@ -444,8 +444,8 @@ void Smpc::executeCommand() {
             sf_.reset();
             break;
         case SmpcCommand::reset_entire_system:
-            emulator_context_->masterSh2()->powerOnReset();
-            emulator_context_->slaveSh2()->powerOnReset();
+            modules_.masterSh2()->powerOnReset();
+            modules_.slaveSh2()->powerOnReset();
             // emulator_context_->scsp()->reset();
             Log::debug("smpc", tr("-=Reset Entire System=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
@@ -459,7 +459,7 @@ void Smpc::executeCommand() {
             // -> CD block kept
             // -> Work RAM kept
             // -> VRAM emptied
-            switch (emulator_context_->config()->getTvStandard(ts)) {
+            switch (modules_.config()->getTvStandard(ts)) {
                 case video::TvStandard::pal:
                     clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::pal_320 : SystemClock::pal_352;
                     break;
@@ -468,9 +468,9 @@ void Smpc::executeCommand() {
                 default: Log::warning("smpc", tr("Could not set system clock !")); clock_ = SystemClock::not_set;
             }
             is_slave_sh2_on_ = false;
-            emulator_context_->slaveSh2()->powerOnReset();
-            emulator_context_->cdrom()->refreshPeriod();
-            emulator_context_->vdp2()->onSystemClockUpdate();
+            modules_.slaveSh2()->powerOnReset();
+            modules_.cdrom()->refreshPeriod();
+            modules_.vdp2()->onSystemClockUpdate();
             if (command == SmpcCommand::clock_change_320) {
                 is_horizontal_res_352 = false;
                 Log::debug("smpc", tr("-=Clock Change 320 Mode=- command executed"));
@@ -483,7 +483,7 @@ void Smpc::executeCommand() {
             sf_.reset();
             break;
         case SmpcCommand::nmi_request:
-            emulator_context_->scu()->generateInterrupt(interrupt_source::nmi);
+            modules_.scu()->generateInterrupt(interrupt_source::nmi);
             Log::debug("smpc", tr("-=NMI Request=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
@@ -591,8 +591,8 @@ void Smpc::getStatus() {
     oreg_[index_7].set(OutputRegister::all_bits, rtc.getSeconds());
     oreg_[index_8].reset(); // No cartridge code handling for now
 
-    std::string ac = emulator_context_->config()->readValue(core::AccessKeys::cfg_global_area_code);
-    oreg_[index_9].set(OutputRegister::all_bits, util::toUnderlying(emulator_context_->config()->getAreaCode(ac)));
+    std::string ac = modules_.config()->readValue(core::AccessKeys::cfg_global_area_code);
+    oreg_[index_9].set(OutputRegister::all_bits, util::toUnderlying(modules_.config()->getAreaCode(ac)));
 
     oreg_[index_10][bit_7] = false;
     oreg_[index_10][bit_6] = is_horizontal_res_352;
@@ -614,7 +614,7 @@ void Smpc::getStatus() {
     oreg_[index_31].reset();
 
     Log::debug("smpc", tr("Interrupt request"));
-    emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
+    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
 };
 
 void Smpc::getPeripheralData() {
@@ -741,7 +741,7 @@ void Smpc::getPeripheralData() {
     }
 
     Log::debug("smpc", tr("Interrupt request"));
-    emulator_context_->scu()->generateInterrupt(interrupt_source::system_manager);
+    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
 } // namespace saturnin::core
 
 auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData {
@@ -790,7 +790,7 @@ auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData
 auto Smpc::read(const u32 addr) -> u8 {
     switch (addr) {
         case status_register:
-            if (emulator_context_->hardwareMode() == HardwareMode::stv) {
+            if (modules_.context()->hardwareMode() == HardwareMode::stv) {
                 constexpr auto default_stv_data = u8{0xcf};
                 return default_stv_data;
             }
@@ -829,7 +829,7 @@ auto Smpc::read(const u32 addr) -> u8 {
         case output_register_30: return oreg_[index_30].get(OutputRegister::all_bits);
         case output_register_31: return oreg_[index_31].get(OutputRegister::all_bits);
         case port_data_register_1:
-            if (emulator_context_->hardwareMode() == HardwareMode::stv) {
+            if (modules_.context()->hardwareMode() == HardwareMode::stv) {
                 constexpr auto default_stv_data = u8{0xff};
                 return default_stv_data;
             }
@@ -867,19 +867,19 @@ void Smpc::write(const u32 addr, const u8 data) {
         case input_register_6: ireg_[index_6].set(InputRegister::all_bits, data); break;
         case port_data_register_1: pdr1_.set(PortDataRegister::all_bits, data); break;
         case port_data_register_2:
-            if (emulator_context_->hardwareMode() == HardwareMode::stv) {
+            if (modules_.context()->hardwareMode() == HardwareMode::stv) {
                 constexpr auto sound_status = u8{0x10};
                 if ((data & sound_status) > 0) {
                     Log::debug("smpc", tr("-=Sound OFF=-"));
 
                     is_sound_on_ = false;
-                    emulator_context_->scsp()->setSound(false);
+                    modules_.scsp()->setSound(false);
                 } else {
                     Log::debug("smpc", tr("-=Sound ON=-"));
 
                     is_sound_on_ = true;
-                    emulator_context_->scsp()->reset();
-                    emulator_context_->scsp()->setSound(true);
+                    modules_.scsp()->reset();
+                    modules_.scsp()->setSound(true);
                 }
             }
             pdr2_.set(PortDataRegister::all_bits, data);
@@ -903,15 +903,13 @@ auto Smpc::listAvailableKeys() -> std::vector<PeripheralKey> {
 
 void Smpc::initializePeripheralMappings() {
     saturn_mapping_.player_1.fromConfig(
-        emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_1));
+        modules_.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_1));
     saturn_mapping_.player_2.fromConfig(
-        emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_2));
+        modules_.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_2));
     stv_mapping_.board_controls.fromConfig(
-        emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_board));
-    stv_mapping_.player_1.fromConfig(
-        emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
-    stv_mapping_.player_2.fromConfig(
-        emulator_context_->config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
+        modules_.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_board));
+    stv_mapping_.player_1.fromConfig(modules_.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
+    stv_mapping_.player_2.fromConfig(modules_.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
 }
 
 auto Smpc::getSaturnPeripheralMapping() -> SaturnPeripheralMapping { return saturn_mapping_; }
@@ -930,7 +928,7 @@ void Smpc::run(const s8 cycles) {
     }
 }
 
-auto Smpc::openglWindow() const -> GLFWwindow* { return emulator_context_->openglWindow(); };
+auto Smpc::openglWindow() const -> GLFWwindow* { return modules_.context()->openglWindow(); };
 
 auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout[pk]; }
 

@@ -28,6 +28,7 @@
 #include <array>  // array
 #include <vector> // vector
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/sh2_registers.h>
@@ -37,6 +38,7 @@
 // Forward declarations
 namespace saturnin::core {
 class EmulatorContext;
+class EmulatorModules;
 class Scu;
 struct Interrupt;
 } // namespace saturnin::core
@@ -44,6 +46,7 @@ struct Interrupt;
 namespace saturnin::sh2 {
 
 using saturnin::core::EmulatorContext;
+using saturnin::core::EmulatorModules;
 using saturnin::core::Interrupt;
 using saturnin::core::Log;
 using saturnin::core::Memory;
@@ -458,6 +461,8 @@ class Sh2 {
 
     auto subroutineDepth() -> size_t { return step_over_subroutine_depth_; };
 
+    EmulatorModules modules_; ///< Modules of the emulator
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Sh2::readRegisters8(u32 addr) -> u8;
@@ -693,45 +698,6 @@ class Sh2 {
 
     void runFreeRunningTimer(u8 cycles_to_run);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::memory() const -> Memory*;
-    ///
-    /// \brief  Returns the memory object.
-    ///
-    /// \author Runik
-    /// \date   09/02/2019
-    ///
-    /// \return SCU memory array.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    [[nodiscard]] auto memory() const -> Memory*;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::scu() const -> Scu*;
-    ///
-    /// \brief  Returns the SCU object.
-    ///
-    /// \author Runik
-    /// \date   10/02/2019
-    ///
-    /// \return The SCU object.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    [[nodiscard]] auto scu() const -> Scu*;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  auto Sh2::emultaorContext() const -> EmulatorContext*;
-    ///
-    /// \brief  Returns the EmulatorContext object.
-    ///
-    /// \author Runik
-    /// \date   23/09/2019
-    ///
-    /// \return The EmulatorContext object.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto emulatorContext() -> EmulatorContext*;
-
     friend auto xn00(Sh2& s) -> u16;
     friend auto x0n0(Sh2& s) -> u16;
     friend auto x00n(Sh2& s) -> u16;
@@ -886,8 +852,6 @@ class Sh2 {
     friend void delaySlot(Sh2& s, u32 addr);
     friend void badOpcode(Sh2& s);
     friend void execute(Sh2& s);
-
-    EmulatorContext* emulator_context_; ///< Context of the emulator
 
     std::array<u8, cache_address_size>   cache_addresses_; ///< Cache addresses (1KB).
     std::array<u8, cache_data_size>      cache_data_;      ///< Cache data (4KB).
