@@ -40,22 +40,10 @@ Scu::Scu(EmulatorContext* ec) : modules_(ec) { initializeRegisters(); };
 
 auto Scu::read32(const u32 addr) const -> u32 {
     switch (addr) {
-        case dsp_program_control_port:
-            Log::debug("scu", "DSP - Program Control Port read");
-            // data = current_DSP_program_control_port_;
-            break;
-        case dsp_program_ram_dataport:
-            Log::debug("scu", "DSP - Program Dataport read");
-            // data = current_DSP_program_dataport_;
-            break;
-        case dsp_data_ram_address_port:
-            Log::debug("scu", "DSP - Data RAM Address Port read");
-            // data = current_DSP_data_ram_address_port_;
-            break;
-        case dsp_data_ram_data_port:
-            Log::debug("scu", "DSP - Data RAM Dataport read");
-            // data = current_DSP_data_ram_dataport_;
-            break;
+        case dsp_program_control_port: return ppaf_.toU32();
+        case dsp_program_ram_dataport: return ppd_.toU32();
+        case dsp_data_ram_address_port: return ppa_.toU32();
+        case dsp_data_ram_data_port: return pdd_.toU32();
         case level_0_dma_enable_register: return d0en_.toU32();
         case level_1_dma_enable_register: return d1en_.toU32();
         case level_2_dma_enable_register: return d2en_.toU32();
@@ -86,40 +74,44 @@ void Scu::write32(const u32 addr, const u32 data) {
     //    uint32_t temp = 0;
     //
     switch (addr) {
-        //        case dsp_program_control_port:
-        //            current_DSP_program_control_port_ = data;
-        //            if (current_DSP_program_control_port_&DSP_T0) {
-        //                // D0 Bus DMA execution
-        //
-        //            }
-        //            if (current_DSP_program_control_port_&DSP_EX) {
-        //#ifdef _DEBUGEMU
-        //                std::ostringstream oss;
-        //                oss << "DSP program execution started at address : " << showbase << hex <<
-        //                static_cast<uint32_t>((current_DSP_program_control_port_ & DSP_P)); EmuState::pLog->ScuDsp(oss.str());
-        //#endif
-        //                PC_ = static_cast<uint8_t>((current_DSP_program_control_port_ & DSP_P));
-        //                DSPProgramDisasm(PC_);
-        //                current_DSP_program_control_port_ &= ~DSP_EX; // DSP interception
-        //                SetISTFlag(0x45); // DSP interrupt flag
-        //            }
-        //            break;
-        //        case dsp_program_ram_dataport:
-        //            index = static_cast<uint8_t>((current_DSP_program_control_port_ & DSP_P));
-        //
-        //            RawWrite32(pProgramRam_, index, data);
-        //            index++;
-        //            current_DSP_program_control_port_ &= 0xFFFFFF00;
-        //            current_DSP_program_control_port_ |= static_cast<uint8_t>(index);
-        //
-        //            current_DSP_program_dataport_ = data;
-        //            break;
-        //        case dsp_data_ram_address_port:
-        //            current_DSP_data_ram_address_port_ = static_cast<uint8_t>(data);
-        //            break;
-        //        case dsp_data_ram_data_port:
-        //            current_DSP_data_ram_dataport_ = data;
-        //            break;
+        case dsp_program_control_port: {
+            if (ppaf_.get(DspProgramControlPort::d0_bus_dma_execution) == D0BusDmaExecution::dma_is_executing) {
+                Log::warning("unimplemented", "SCU DSP - D0 Bus DMA execution");
+            }
+
+            // if (current_DSP_program_control_port_ & DSP_EX) {
+            if (ppaf_.get(DspProgramControlPort::program_execute_control) == ProgramExecuteControl::program_execution_begins) {
+                Log::warning("unimplemented", "SCU DSP - Program execution");
+                //#ifdef _DEBUGEMU
+                //                std::ostringstream oss;
+                //                oss << "DSP program execution started at address : " << showbase << hex <<
+                //                static_cast<uint32_t>((current_DSP_program_control_port_ & DSP_P));
+                //                EmuState::pLog->ScuDsp(oss.str());
+                //#endif
+                //                PC_ = static_cast<uint8_t>((current_DSP_program_control_port_ & DSP_P));
+                //                DSPProgramDisasm(PC_);
+                ppaf_.reset(DspProgramControlPort::program_execute_control); // DSP interception
+                setInterruptStatusRegister(interrupt_source::dsp_end);       // DSP interrupt flag
+            }
+
+            break;
+        }
+        case dsp_program_ram_dataport: {
+            auto index = ppaf_.get(DspProgramControlPort::program_ram_address);
+            rawWrite(program_ram_, index * 4, data);
+            ++index;
+            ppaf_.set(DspProgramControlPort::program_ram_address, index);
+            ppd_.set(bits_0_31, data);
+            return;
+        }
+        case dsp_data_ram_address_port: {
+            ppa_.set(bits_0_31, data);
+            return;
+        }
+        case dsp_data_ram_data_port: {
+            pdd_.set(bits_0_31, data);
+            return;
+        }
         case level_0_dma_enable_register: {
             d0en_.set(bits_0_31, data);
             if (d0en_.get(DmaEnableRegister::dma_enable) == DmaEnable::enabled) {
@@ -214,14 +206,14 @@ void Scu::executeDma(const DmaConfiguration& dc) {
             Log::debug("scu", "Address add : ", read_address_add);
 
             switch (dc.write_add_value) {
-                case WriteAddressAddValue::add_0: write_address_add = address_add_0;
-                case WriteAddressAddValue::add_2: write_address_add = address_add_2;
-                case WriteAddressAddValue::add_4: write_address_add = address_add_4;
-                case WriteAddressAddValue::add_8: write_address_add = address_add_8;
-                case WriteAddressAddValue::add_16: write_address_add = address_add_16;
-                case WriteAddressAddValue::add_32: write_address_add = address_add_32;
-                case WriteAddressAddValue::add_64: write_address_add = address_add_64;
-                case WriteAddressAddValue::add_128: write_address_add = address_add_128;
+                case WriteAddressAddValue::add_0: write_address_add = address_add_0; break;
+                case WriteAddressAddValue::add_2: write_address_add = address_add_2; break;
+                case WriteAddressAddValue::add_4: write_address_add = address_add_4; break;
+                case WriteAddressAddValue::add_8: write_address_add = address_add_8; break;
+                case WriteAddressAddValue::add_16: write_address_add = address_add_16; break;
+                case WriteAddressAddValue::add_32: write_address_add = address_add_32; break;
+                case WriteAddressAddValue::add_64: write_address_add = address_add_64; break;
+                case WriteAddressAddValue::add_128: write_address_add = address_add_128; break;
             }
 
             auto byte_counter = u32{};
@@ -351,14 +343,14 @@ void Scu::executeDma(const DmaConfiguration& dc) {
             auto read_address_add  = static_cast<u8>((dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0);
             auto write_address_add = u8{0};
             switch (dc.write_add_value) {
-                case WriteAddressAddValue::add_0: write_address_add = address_add_0;
-                case WriteAddressAddValue::add_2: write_address_add = address_add_2;
-                case WriteAddressAddValue::add_4: write_address_add = address_add_4;
-                case WriteAddressAddValue::add_8: write_address_add = address_add_8;
-                case WriteAddressAddValue::add_16: write_address_add = address_add_16;
-                case WriteAddressAddValue::add_32: write_address_add = address_add_32;
-                case WriteAddressAddValue::add_64: write_address_add = address_add_64;
-                case WriteAddressAddValue::add_128: write_address_add = address_add_128;
+                case WriteAddressAddValue::add_0: write_address_add = address_add_0; break;
+                case WriteAddressAddValue::add_2: write_address_add = address_add_2; break;
+                case WriteAddressAddValue::add_4: write_address_add = address_add_4; break;
+                case WriteAddressAddValue::add_8: write_address_add = address_add_8; break;
+                case WriteAddressAddValue::add_16: write_address_add = address_add_16; break;
+                case WriteAddressAddValue::add_32: write_address_add = address_add_32; break;
+                case WriteAddressAddValue::add_64: write_address_add = address_add_64; break;
+                case WriteAddressAddValue::add_128: write_address_add = address_add_128; break;
             }
 
             auto write_address = u32{};

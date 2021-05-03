@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <array>  // array
 #include <queue>  // priority_queue
 #include <vector> // vector
 #include <saturnin/src/emulator_defs.h>
@@ -46,6 +47,9 @@ class Memory;
 class EmulatorContext;
 
 constexpr auto indirect_dma_end_code = u32{0x80000000};
+constexpr auto program_ram_size      = u16{256 * 32 * 4}; ///< 256 words of 32 bits.
+constexpr auto data_ram_size         = u16{64 * 32 * 4};  ///< 64 words of 32 bits.
+constexpr auto data_ram_number       = u8{4};             ///< Number of data RAM.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   DmaLevel
@@ -525,6 +529,9 @@ class Scu {
 
     EmulatorModules modules_;
 
+    std::array<u8, program_ram_size>                           program_ram_; ///< DSP Program RAM.
+    std::array<std::array<u8, data_ram_size>, data_ram_number> data_ram_;    ///< DSP Data RAM.
+
     //{@
     // Scu memory registers
     DmaEnableRegister                   d0en_;
@@ -550,6 +557,10 @@ class Scu {
     Timer0CompareRegister               t0c_;
     Timer1SetDataRegister               t1s_;
     Timer1ModeRegister                  t1md_;
+    DspProgramControlPort               ppaf_;
+    DspProgramDataPort                  ppd_;
+    DspDataRamAddressPort               ppa_;
+    DspDataRamDataPort                  pdd_;
     //@}
 };
 
