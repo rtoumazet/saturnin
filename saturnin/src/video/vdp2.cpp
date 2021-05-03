@@ -1587,6 +1587,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
 
     getScreen(s).is_display_enabled = false;
+    if (getScreen(s).priority_number == 0) return false;
 
     switch (s) {
         case ScrollScreen::nbg0: {
@@ -2414,6 +2415,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg0)
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
+            // Priority
+            screen.priority_number = prina_.get(PriorityNumberA::nbg0);
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg0);
@@ -2463,6 +2467,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Transparency
             screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg1)
                                                  == TransparentDisplayEnable::transparency_code_valid);
+            // Priority
+            screen.priority_number = prina_.get(PriorityNumberA::nbg1);
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg1);
@@ -2513,6 +2520,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg2)
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
+            // Priority
+            screen.priority_number = prina_.get(PriorityNumberB::nbg2);
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg2);
@@ -2555,6 +2565,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Transparency
             screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg3)
                                                  == TransparentDisplayEnable::transparency_code_valid);
+
+            // Priority
+            screen.priority_number = prina_.get(PriorityNumberB::nbg3);
+
             // Map
             screen.map_size   = map_size_nbg;
             screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg3);
@@ -2597,6 +2611,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Transparency
             screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_rbg0)
                                                  == TransparentDisplayEnable::transparency_code_valid);
+
+            // Priority
+            screen.priority_number = prina_.get(PriorityNumberA::nbg0);
+
             // Map
             screen.map_size   = map_size_rbg;
             screen.map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpa);
@@ -2658,6 +2676,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Transparency
             screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg0)
                                                  == TransparentDisplayEnable::transparency_code_valid);
+
+            // Priority
+            screen.priority_number = prina_.get(PriorityNumberR::rbg0);
+
             // Map
             screen.map_size   = map_size_rbg;
             screen.map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpb);

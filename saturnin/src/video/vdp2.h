@@ -284,6 +284,7 @@ struct ScrollScreenStatus {
     ScrollScreenFormat format{ScrollScreenFormat::cell};            ///< Cell or bitmap.
     ColorCount         character_color_number{ColorCount::not_set}; ///< Color number.
     u16                color_ram_address_offset{};                  ///< The color ram address offset.
+    u8                 priority_number{};                           ///< The priority number.
 
     // Bitmap
     BitmapSize bitmap_size{BitmapSize::not_set};   ///< Size of the bitmap.
