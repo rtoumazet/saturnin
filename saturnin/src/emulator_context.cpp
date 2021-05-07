@@ -166,6 +166,8 @@ void EmulatorContext::startEmulation() {
     // sh2::OutputCompareInterruptBEnable::interrupt_request_enabled) {
     //    Log::info("main", "enabled");
     //}
+    // u8  tmp[4] = {0x12, 0x34, 0x56, 0x78};
+    // u32 tmp2   = *(unsigned long*)&tmp;
 
     // TESTING //
 }
@@ -193,6 +195,7 @@ void EmulatorContext::emulationMainThread() {
         cdrom()->initialize();
         vdp1()->initialize();
         vdp2()->initialize();
+        scsp()->initialize();
 
         while (emulationStatus() == EmulationStatus::running) {
             if (debugStatus() != DebugStatus::paused) {
@@ -202,6 +205,7 @@ void EmulatorContext::emulationMainThread() {
                 vdp1()->run(cycles);
                 vdp2()->run(cycles);
                 cdrom()->run(cycles);
+                scsp()->run(cycles);
                 //} else {
                 //    notifyRenderingDone();
             }

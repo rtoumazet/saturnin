@@ -472,18 +472,11 @@ class Smpc {
 
     void initialize();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Smpc::isSlaveSh2On() -> bool
-    ///
-    /// \brief  Query if the slave SH2 is on
-    ///
-    /// \author Runik
-    /// \date   10/04/2020
-    ///
-    /// \returns    True if the slave SH2 is on.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    /// \name SMPC status accessors
+    ///@{
     auto isSlaveSh2On() -> bool { return is_slave_sh2_on_; };
+    auto isSoundOn() -> bool { return is_sound_on_; };
+    ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::run(s8 cycles);
@@ -503,17 +496,30 @@ class Smpc {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
     ///
-    /// \brief  Calculates the number of cycles needed for the duration.
+    /// \brief  Calculates the number of cycles needed for the duration specified.
     ///
     /// \author Runik
     /// \date   06/01/2020
     ///
     /// \param  d   duration.
     ///
-    /// \return The number of cycles needed for the duration.
+    /// \return The number of cycles needed for the duration specified.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Smpc::getSystemClock() -> u32;
+    ///
+    /// \brief  Gets current system clock.
+    ///
+    /// \author Runik
+    /// \date   07/05/2021
+    ///
+    /// \returns    The system clock in Hz.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getSystemClock() -> u32;
 
   private:
     static constexpr u8 input_registers_number{7};

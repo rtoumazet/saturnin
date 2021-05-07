@@ -34,12 +34,12 @@ class EmulatorModules {
   public:
     ///@{
     /// Constructors / Destructors
-    EmulatorModules() = delete;
+    EmulatorModules() = default;
     EmulatorModules(EmulatorContext* ec) : context_(ec){};
     EmulatorModules(const EmulatorModules&) = delete;
     EmulatorModules(EmulatorModules&&)      = delete;
     auto operator=(const EmulatorModules&) & -> EmulatorModules& = delete;
-    auto operator=(EmulatorModules&&) & -> EmulatorModules& = delete;
+    auto operator=(EmulatorModules&&) & -> EmulatorModules& = default;
     ~EmulatorModules()                                      = default;
     ///@}
 

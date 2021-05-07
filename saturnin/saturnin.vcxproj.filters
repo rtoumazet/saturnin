@@ -25,6 +25,12 @@
     <Filter Include="Fichiers sources\sound">
       <UniqueIdentifier>{21d89d54-af4d-4724-80f3-db85910ca877}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\sound\musashi">
+      <UniqueIdentifier>{972a1891-49ec-4bd0-a4c8-ab37693438a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\sound\scsp_stef">
+      <UniqueIdentifier>{bb4c3faf-bf95-48bc-b06f-b62ba4cfac69}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\config.cpp">
@@ -110,6 +116,24 @@
     </ClCompile>
     <ClCompile Include="src\emulator_modules.cpp">
       <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\musashi\m68kcpu.c">
+      <Filter>Fichiers sources\sound\musashi</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\musashi\m68kopac.c">
+      <Filter>Fichiers sources\sound\musashi</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\musashi\m68kopdm.c">
+      <Filter>Fichiers sources\sound\musashi</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\musashi\m68kopnz.c">
+      <Filter>Fichiers sources\sound\musashi</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\musashi\m68kops.c">
+      <Filter>Fichiers sources\sound\musashi</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\scsp_stef\scsp_stef.c">
+      <Filter>Fichiers sources\sound\scsp_stef</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,6 +259,21 @@
     </ClInclude>
     <ClInclude Include="src\emulator_modules.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\musashi\m68k.h">
+      <Filter>Fichiers sources\sound\musashi</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\musashi\m68kconf.h">
+      <Filter>Fichiers sources\sound\musashi</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\musashi\m68kcpu.h">
+      <Filter>Fichiers sources\sound\musashi</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\musashi\m68kops.h">
+      <Filter>Fichiers sources\sound\musashi</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\scsp_stef\scsp_stef.h">
+      <Filter>Fichiers sources\sound\scsp_stef</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

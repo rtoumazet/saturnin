@@ -348,6 +348,8 @@ auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 
     return static_cast<u32>(d / cycle_duration);
 }
 
+auto Smpc::getSystemClock() -> u32 { return util::toUnderlying(clock_); }
+
 void Smpc::setCommandDuration() {
     using micro = std::chrono::duration<double, std::micro>;
     using milli = std::chrono::duration<double, std::milli>;
@@ -360,33 +362,28 @@ void Smpc::setCommandDuration() {
         case SmpcCommand::nmi_request:
         case SmpcCommand::reset_enable:
         case SmpcCommand::reset_disable: {
-            constexpr auto duration{micro(30)};
-            intback_remaining_cycles_ = calculateCyclesNumber(duration);
+            intback_remaining_cycles_ = calculateCyclesNumber(micro(30));
             break;
         }
         case SmpcCommand::cd_on:
         case SmpcCommand::cd_off:
         case SmpcCommand::smpc_memory_setting: {
-            constexpr auto duration{micro(40)};
-            intback_remaining_cycles_ = calculateCyclesNumber(duration);
+            intback_remaining_cycles_ = calculateCyclesNumber(micro(40));
             break;
         }
         case SmpcCommand::reset_entire_system:
         case SmpcCommand::clock_change_320:
         case SmpcCommand::clock_change_352: {
             // Alpha is fixed to 0
-            constexpr auto duration{milli(100)};
-            intback_remaining_cycles_ = calculateCyclesNumber(duration);
+            intback_remaining_cycles_ = calculateCyclesNumber(milli(100));
             break;
         }
         case SmpcCommand::time_setting: {
-            constexpr auto duration{micro(70)};
-            intback_remaining_cycles_ = calculateCyclesNumber(duration);
+            intback_remaining_cycles_ = calculateCyclesNumber(micro(70));
             break;
         }
         case SmpcCommand::interrupt_back: {
-            constexpr auto duration{milli(320)};
-            intback_remaining_cycles_ = calculateCyclesNumber(duration);
+            intback_remaining_cycles_ = calculateCyclesNumber(milli(320));
             break;
         }
         default: break;
@@ -419,7 +416,6 @@ void Smpc::executeCommand() {
         case SmpcCommand::sound_on:
             is_sound_on_ = true;
             modules_.scsp()->reset();
-            modules_.scsp()->setSound(true);
             Log::debug("smpc", tr("-=Sound ON=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
@@ -873,13 +869,11 @@ void Smpc::write(const u32 addr, const u8 data) {
                     Log::debug("smpc", tr("-=Sound OFF=-"));
 
                     is_sound_on_ = false;
-                    modules_.scsp()->setSound(false);
                 } else {
                     Log::debug("smpc", tr("-=Sound ON=-"));
 
                     is_sound_on_ = true;
                     modules_.scsp()->reset();
-                    modules_.scsp()->setSound(true);
                 }
             }
             pdr2_.set(PortDataRegister::all_bits, data);

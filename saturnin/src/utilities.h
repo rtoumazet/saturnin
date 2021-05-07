@@ -154,4 +154,50 @@ void hashCombine(std::size_t& seed, const T& v, Rest... rest) {
     (hashCombine(seed, rest), ...);
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template <typename T> T swap_endian(T u)
+///
+/// \brief  Template to swap data. Usage : swap_endianness<type>(value)
+///
+/// \author Runik
+/// \date   27/09/2013
+///
+/// \tparam T   Generic type parameter.
+/// \param  u   The T to process.
+///
+/// \return A T.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+T swap_endianness(T u) {
+    union {
+        T      u;
+        int8_t u8[sizeof(T)];
+    } source, dest;
+
+    source.u = u;
+
+    for (size_t k = 0; k < sizeof(T); k++)
+        dest.u8[k] = source.u8[sizeof(T) - k - 1];
+
+    return dest.u;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn inline u32 swap_words(const u32 param)
+///
+/// \brief  Swap words in a long.
+///
+/// \author Runik
+/// \date   07/05/2021
+///
+/// \param  param   The number to swap.
+///
+/// \returns    An u32.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline u32 swap_words(const u32 param) {
+    return (param & bitmask_FFFF0000) >> displacement_16 | (param & bitmask_0000FFFF) << displacement_16;
+}
+
 } // namespace saturnin::utilities
