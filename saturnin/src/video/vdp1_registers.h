@@ -390,4 +390,329 @@ class ModeStatus : public Register {
     inline static const BitRange<BitDepthSelection>         tvm_bit_depth_selection{0};          ///< Defines TVM bit 0.
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   EndBit
+///
+/// \brief  END bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class EndBit : u8 {
+    command_selection_valid = 0, ///< Command selection valid.
+    draw_ended              = 1  ///< Draw end command
+};
+
+enum class JumpSelect : u8 {
+    jump_next   = 0b000, ///< Automatically jumps to next table after this table is processed (CMDLINK is ignored).
+    jump_assign = 0b001, ///< Jumps to CMDLINK table after this table is processed.
+    jump_call   = 0b010, ///< CMDLINK table receives subroutine call after this table is processed.
+    jump_return = 0b011, ///< Returns to main routine after this table is processed.
+    skip_next   = 0b100, ///< Jumps to next table without processing this table (CMDLINK is ignored).
+    skip_assign = 0b101, ///< Jumps to CMDLINK table without processing this table.
+    skip_call   = 0b110, ///< CMDLINK table receives subroutine call without processing this table.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ZoomPoint
+///
+/// \brief  ZP bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ZoomPoint : u8 {
+    two_coordinates = 0b0000, ///< Specifies two coordinates.
+    upper_left      = 0b0101, ///< Upper left.
+    upper_center    = 0b0110, ///< Upper center.
+    upper_right     = 0b0111, ///< Upper right.
+    center_left     = 0b1001, ///< Center left.
+    center_center   = 0b1010, ///< Center center.
+    center_right    = 0b1011, ///< Center right.
+    lower_left      = 0b1101, ///< Lower left.
+    lower_center    = 0b1110, ///< Lower center.
+    lower_right     = 0b1111  ///< Lower right.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CharacterReadDirection
+///
+/// \brief  Dir bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CharacterReadDirection : u8 {
+    not_inverted = 0b00, ///< Not inverted.
+    h_invertion  = 0b01, ///< Inverted horizontally.
+    v_invertion  = 0b10, ///< Inverted vertically.
+    vh_invertion = 0b11, ///< Inverted vertically and horizontally.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   CommandSelect
+///
+/// \brief  Comm bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class CommandSelect : u8 {
+    normal_sprite_draw    = 0b0000, ///< Normal sprite draw command.
+    scaled_sprite_draw    = 0b0001, ///< Scaled sprite draw command.
+    distorted_sprite_draw = 0b0010, ///< Distorted sprite draw command.
+    polygon_draw          = 0b0100, ///< Polygon draw command.
+    polyline_draw         = 0b0101, ///< Polyline draw command.
+    line_draw             = 0b0110, ///< Line draw command.
+    user_clipping         = 0b1000, ///< User clipping coordinates set command.
+    system_clipping       = 0b1001, ///< System clipping coordinates set command.
+    local_coordinate      = 0b1010  ///< Local coordinate set command.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CmdCtrl
+///
+/// \brief  Control Words.
+///
+/// \author Runik
+/// \date   08/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CmdCtrl : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<EndBit>                 end_bit{15};                    ///< END bit.
+    inline static const BitRange<JumpSelect>             jump_select{12, 14};            ///< JS bits.
+    inline static const BitRange<ZoomPoint>              zoom_point{8, 11};              ///< ZP bits.
+    inline static const BitRange<CharacterReadDirection> character_read_direction{4, 5}; ///< Dir bits.
+    inline static const BitRange<CommandSelect>          command_select{0, 3};           ///< Comm bits.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CmdLink
+///
+/// \brief  Link specification.
+///
+/// \author Runik
+/// \date   08/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CmdLink : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u16> link_specification{0, 15}; ///< Link specification divided by 8.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   MsbOn
+///
+/// \brief  MON bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class MsbOn : u8 {
+    off = 0, ///< MSB is 0 on the framebuffer pixels that should be drawn.
+    on  = 1  ///< MSB is 1 on the framebuffer pixels that should be drawn.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   HighSpeedShrink
+///
+/// \brief  HSS bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class HighSpeedShrink : u8 {
+    disabled = 0, ///< High Speed Shrink is disabled.
+    enabled  = 1  ///< High Speed Shrink is enabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PreClippingDisable
+///
+/// \brief  PCLP bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PreClippingDisable : u8 {
+    pre_clipping    = 0, ///< Pre-clipping with horizontal inversion.
+    no_pre_clipping = 1  ///< No pre-clipping and no horizontal inversion.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   UserClippingEnable
+///
+/// \brief  CLIP bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class UserClippingEnable : u8 {
+    ignored = 0, ///< User clipping coordinates are ignored.
+    enabled = 1  ///< Part is clipped and drawn according to the user clipping coordinates and clipping mode bit.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   UserClippingMode
+///
+/// \brief  CMOD bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class UserClippingMode : u8 {
+    drawing_inside  = 0, ///< Drawing is performed inside the clipping area.
+    drawing_outside = 1  ///< Drawing is performed outside the clipping area.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   MeshEnable
+///
+/// \brief  MESH bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class MeshEnable : u8 {
+    disabled = 0, ///< Draw without mesh processing.
+    enabled  = 1  ///< Draw with mesh processing.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   EndCodeDisable
+///
+/// \brief  ECD bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class EndCodeDisable : u8 {
+    enabled  = 0, ///< End code is enabled.
+    disabled = 1  ///< End code is disabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   TransparentPixelDisable
+///
+/// \brief  SPD bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class TransparentPixelDisable : u8 {
+    enabled  = 0, ///< Transparent pixel is enabled.
+    disabled = 1  ///< Transparent pixel disabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ColorMode
+///
+/// \brief  Color mode bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ColorMode : u8 {
+    mode_0_16_colors_bank   = 0b000, ///< 16 colors, color bank mode, 4 bits per pixel.
+    mode_1_16_colors_lookup = 0b001, ///< 16 colors, lookup table mode, 4 bits per pixel.
+    mode_2_64_colors_bank   = 0b010, ///< 64 colors, color bank mode, 8 bits per pixel.
+    mode_3_128_colors_bank  = 0b011, ///< 128 colors, color bank mode, 8 bits per pixel.
+    mode_4_256_colors_bank  = 0b100, ///< 256 colors, color bank mode, 8 bits per pixel.
+    mode_5_32k_colors_rgb   = 0b101, ///< 32K colors, RGB mode, 16 bits per pixel.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   ColorCalculation
+///
+/// \brief  Color calculation bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class ColorCalculation : u8 {
+    mode_0 = 0b000, ///< Replace.
+    mode_1 = 0b001, ///< Cannot rewrite / Shadow.
+    mode_2 = 0b010, ///< Half-luminance.
+    mode_3 = 0b011, ///< Replace / Half-transparent.
+    mode_4 = 0b100, ///< Gouraud shading.
+    mode_5 = 0b101, ///< Prohibited.
+    mode_6 = 0b110, ///< Gouraud shading + half-luminance.
+    mode_7 = 0b111, ///< Gouraud shading + half-transparent.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CmdPmod
+///
+/// \brief  Draw Mode Word.
+///
+/// \author Runik
+/// \date   08/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CmdPmod : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<MsbOn>                   msb_on{15};                   ///< MON bit.
+    inline static const BitRange<HighSpeedShrink>         high_speed_shrink{12};        ///< HSS bit.
+    inline static const BitRange<PreClippingDisable>      pre_clipping_disable{11};     ///< PCLP bit.
+    inline static const BitRange<UserClippingEnable>      user_clipping_enable{10};     ///< CLIP bit.
+    inline static const BitRange<UserClippingMode>        user_clipping_mode{9};        ///< CMOD bit.
+    inline static const BitRange<MeshEnable>              mesh_enable{8};               ///< MESH bit.
+    inline static const BitRange<EndCodeDisable>          end_code_disable{7};          ///< ECD bit.
+    inline static const BitRange<TransparentPixelDisable> transparent_pixel_disable{6}; ///< SPD bit.
+    inline static const BitRange<ColorMode>               color_mode{3, 5};             ///< Color mode bits.
+    inline static const BitRange<ColorCalculation>        color_calculation{0, 2};      ///< Color calculation bits.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CmdColr
+///
+/// \brief  Color Control Word.
+///
+/// \author Runik
+/// \date   08/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CmdColr : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u16> color_control{0, 15}; ///< Color control divided by 8.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CmdSrca
+///
+/// \brief  Character Address.
+///
+/// \author Runik
+/// \date   08/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CmdSrca : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u16> character_address{0, 15}; ///< Character Address divided by 8.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CmdSize
+///
+/// \brief  Character Size.
+///
+/// \author Runik
+/// \date   08/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CmdSize : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u8> character_size_x{8, 13}; ///< Character Size X divided by 8.
+    inline static const BitRange<u8> character_size_y{0, 7};  ///< Character Size Y.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CmdVertexCoordinate
+///
+/// \brief  Vertex Coordinate data.
+///
+/// \author Runik
+/// \date   08/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CmdVertexCoordinate : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u8> vertex_coordinate{0, 10}; ///< Vertex coordinate (X or Y).
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  CmdGrda
+///
+/// \brief  Gouraud Shading Table.
+///
+/// \author Runik
+/// \date   08/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CmdGrda : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u16> gouraud_shading_table{0, 15}; ///< Gouraud Shading table address divided by 8.
+};
+
 }; // namespace saturnin::video
