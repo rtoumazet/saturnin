@@ -1587,7 +1587,6 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
 
     getScreen(s).is_display_enabled = false;
-    if (getScreen(s).priority_number == 0) return false;
 
     switch (s) {
         case ScrollScreen::nbg0: {
@@ -2219,11 +2218,11 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 void Vdp2::populateRenderData() {
     if (isScreenDisplayed(ScrollScreen::rbg1)) {
         updateScrollScreenStatus(ScrollScreen::rbg1);
-        readScrollScreenData(ScrollScreen::rbg1);
+        if (getScreen(ScrollScreen::rbg1).priority_number != 0) { readScrollScreenData(ScrollScreen::rbg1); }
     }
     if (isScreenDisplayed(ScrollScreen::rbg0)) {
         updateScrollScreenStatus(ScrollScreen::rbg0);
-        readScrollScreenData(ScrollScreen::rbg0);
+        if (getScreen(ScrollScreen::rbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::rbg0); }
     }
 
     auto is_nbg_displayed
@@ -2232,27 +2231,27 @@ void Vdp2::populateRenderData() {
     if (is_nbg_displayed) {
         if (isScreenDisplayed(ScrollScreen::nbg0)) {
             updateScrollScreenStatus(ScrollScreen::nbg0);
-            readScrollScreenData(ScrollScreen::nbg0);
+            if (getScreen(ScrollScreen::nbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg0); }
         }
 
         getScreen(ScrollScreen::nbg1).is_display_enabled = false;
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg1)) {
             if (isScreenDisplayed(ScrollScreen::nbg1)) {
                 updateScrollScreenStatus(ScrollScreen::nbg1);
-                readScrollScreenData(ScrollScreen::nbg1);
+                if (getScreen(ScrollScreen::nbg1).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg1); }
             }
         }
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg2)) {
             if (isScreenDisplayed(ScrollScreen::nbg2)) {
                 updateScrollScreenStatus(ScrollScreen::nbg2);
-                readScrollScreenData(ScrollScreen::nbg2);
+                if (getScreen(ScrollScreen::nbg2).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg2); }
             }
         }
 
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
             if (isScreenDisplayed(ScrollScreen::nbg3)) {
                 updateScrollScreenStatus(ScrollScreen::nbg3);
-                readScrollScreenData(ScrollScreen::nbg3);
+                if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
             }
         }
     }
@@ -2521,7 +2520,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prina_.get(PriorityNumberB::nbg2);
+            screen.priority_number = prinb_.get(PriorityNumberB::nbg2);
 
             // Map
             screen.map_size   = map_size_nbg;
@@ -2567,7 +2566,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prina_.get(PriorityNumberB::nbg3);
+            screen.priority_number = prinb_.get(PriorityNumberB::nbg3);
 
             // Map
             screen.map_size   = map_size_nbg;
