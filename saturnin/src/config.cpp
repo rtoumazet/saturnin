@@ -55,6 +55,16 @@ Config::Config(const std::string& configuration_filename) {
                   {AccessKeys::cfg_controls_stv_board, "controls.stv.board"},
                   {AccessKeys::cfg_controls_stv_player_1, "controls.stv.player_1"},
                   {AccessKeys::cfg_controls_stv_player_2, "controls.stv.player_2"},
+                  {AccessKeys::cfg_log_cdrom, "logs.cdrom"},
+                  {AccessKeys::cfg_log_config, "logs.config"},
+                  {AccessKeys::cfg_log_main, "logs.main"},
+                  {AccessKeys::cfg_log_memory, "logs.memory"},
+                  {AccessKeys::cfg_log_sh2, "logs.sh2"},
+                  {AccessKeys::cfg_log_scsp, "logs.scsp"},
+                  {AccessKeys::cfg_log_scu, "logs.scu"},
+                  {AccessKeys::cfg_log_smpc, "logs.smpc"},
+                  {AccessKeys::cfg_log_vdp1, "logs.vdp1"},
+                  {AccessKeys::cfg_log_vdp2, "logs.vdp2"},
                   {AccessKeys::stv_game_name, "game_name"},
                   {AccessKeys::stv_zip_name, "zip_name"},
                   {AccessKeys::stv_parent_set, "parent_set"},
@@ -76,7 +86,17 @@ Config::Config(const std::string& configuration_filename) {
                      {AccessKeys::cfg_sound_soundcard, std::string("")},
                      {AccessKeys::cfg_sound_disabled, false},
                      {AccessKeys::cfg_controls_saturn_player_1_connection, std::string("DIRECT")},
-                     {AccessKeys::cfg_controls_saturn_player_2_connection, std::string("NONE")}
+                     {AccessKeys::cfg_controls_saturn_player_2_connection, std::string("NONE")},
+                     {AccessKeys::cfg_log_cdrom, std::string("INFO")},
+                     {AccessKeys::cfg_log_config, std::string("INFO")},
+                     {AccessKeys::cfg_log_main, std::string("INFO")},
+                     {AccessKeys::cfg_log_memory, std::string("INFO")},
+                     {AccessKeys::cfg_log_sh2, std::string("INFO")},
+                     {AccessKeys::cfg_log_scsp, std::string("INFO")},
+                     {AccessKeys::cfg_log_scu, std::string("INFO")},
+                     {AccessKeys::cfg_log_smpc, std::string("INFO")},
+                     {AccessKeys::cfg_log_vdp1, std::string("INFO")},
+                     {AccessKeys::cfg_log_vdp2, std::string("INFO")}
 
     };
 
@@ -105,6 +125,8 @@ Config::Config(const std::string& configuration_filename) {
                     {"DIRECT", PortStatus::direct_connection},
                     {"SEGATAP", PortStatus::sega_tap},
                     {"MULTITAP", PortStatus::saturn_6p_multitap}};
+
+    log_level_ = {{"OFF", LogLevel::off}, {"INFO", LogLevel::info}, {"DEBUG", LogLevel::debug}};
 };
 
 void Config::writeFile() { cfg_.writeFile(this->filename_.c_str()); }
@@ -114,7 +136,7 @@ auto Config::readFile() -> bool {
         cfg_.readFile(filename_.c_str());
         return true;
     } catch (const libcfg::FileIOException& fioex) {
-        const auto error = fmt::format("Could not read file {0} : {1}", filename_, fioex.what());
+        const auto error = fmt::format(tr("Could not read file {0} : {1}"), filename_, fioex.what());
         Log::error("config", error);
         return false;
     }
@@ -122,10 +144,21 @@ auto Config::readFile() -> bool {
 
 auto Config::initialize(const bool isModernOpenGlCapable) -> bool {
     if (!readFile()) {
-        std::cout << "Creating configuration file." << std::endl;
+        std::cout << tr("Creating configuration file.") << std::endl;
         this->generateConfigurationTree(isModernOpenGlCapable);
         this->writeFile();
     }
+
+    Log::setLogLevel("cdrom", getLogLevel(readValue(AccessKeys::cfg_log_cdrom)));
+    Log::setLogLevel("config", getLogLevel(readValue(AccessKeys::cfg_log_config)));
+    Log::setLogLevel("main", getLogLevel(readValue(AccessKeys::cfg_log_main)));
+    Log::setLogLevel("memory", getLogLevel(readValue(AccessKeys::cfg_log_memory)));
+    Log::setLogLevel("sh2", getLogLevel(readValue(AccessKeys::cfg_log_sh2)));
+    Log::setLogLevel("scu", getLogLevel(readValue(AccessKeys::cfg_log_scu)));
+    Log::setLogLevel("vdp1", getLogLevel(readValue(AccessKeys::cfg_log_vdp1)));
+    Log::setLogLevel("vdp2", getLogLevel(readValue(AccessKeys::cfg_log_vdp2)));
+    Log::setLogLevel("smpc", getLogLevel(readValue(AccessKeys::cfg_log_smpc)));
+    Log::setLogLevel("scsp", getLogLevel(readValue(AccessKeys::cfg_log_scsp)));
     return true;
 }
 
@@ -149,6 +182,16 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
     add(full_keys_[AccessKeys::cfg_controls_stv_board],                  StvBoardControls().toConfig(PeripheralLayout::default_layout));
     add(full_keys_[AccessKeys::cfg_controls_stv_player_1],               StvPlayerControls().toConfig(PeripheralLayout::default_layout));
     add(full_keys_[AccessKeys::cfg_controls_stv_player_2],               StvPlayerControls().toConfig(PeripheralLayout::empty_layout));
+    add(full_keys_[AccessKeys::cfg_log_cdrom],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_cdrom]));
+    add(full_keys_[AccessKeys::cfg_log_config],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_config]));
+    add(full_keys_[AccessKeys::cfg_log_main],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_main]));
+    add(full_keys_[AccessKeys::cfg_log_memory],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_memory]));
+    add(full_keys_[AccessKeys::cfg_log_scsp],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_scsp]));
+    add(full_keys_[AccessKeys::cfg_log_scu],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_scu]));
+    add(full_keys_[AccessKeys::cfg_log_sh2],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_sh2]));
+    add(full_keys_[AccessKeys::cfg_log_smpc],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_smpc]));
+    add(full_keys_[AccessKeys::cfg_log_vdp1],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_vdp1]));
+    add(full_keys_[AccessKeys::cfg_log_vdp2],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_vdp2]));
     // clang-format on
 }
 
@@ -205,10 +248,24 @@ void Config::createDefault(const AccessKeys& key) {
         case AccessKeys::cfg_sound_soundcard:
         case AccessKeys::cfg_controls_saturn_player_1_connection:
         case AccessKeys::cfg_controls_saturn_player_2_connection:
+        case AccessKeys::cfg_log_cdrom:
+        case AccessKeys::cfg_log_config:
+        case AccessKeys::cfg_log_main:
+        case AccessKeys::cfg_log_memory:
+        case AccessKeys::cfg_log_scsp:
+        case AccessKeys::cfg_log_scu:
+        case AccessKeys::cfg_log_sh2:
+        case AccessKeys::cfg_log_smpc:
+        case AccessKeys::cfg_log_vdp1:
+        case AccessKeys::cfg_log_vdp2: {
             add(full_keys_[key], std::any_cast<const std::string>(default_keys_[key]));
             break;
+        }
         case AccessKeys::cfg_rendering_legacy_opengl:
-        case AccessKeys::cfg_sound_disabled: add(full_keys_[key], std::any_cast<const bool>(default_keys_[key])); break;
+        case AccessKeys::cfg_sound_disabled: {
+            add(full_keys_[key], std::any_cast<const bool>(default_keys_[key]));
+            break;
+        }
         case AccessKeys::cfg_controls_saturn_player_1:
             add(full_keys_[key], SaturnDigitalPad().toConfig(PeripheralLayout::default_layout));
             break;
@@ -229,6 +286,7 @@ void Config::createDefault(const AccessKeys& key) {
             throw std::runtime_error("Config error !");
         }
     }
+    this->writeFile();
 }
 auto Config::readPeripheralConfiguration(const AccessKeys& key) -> std::vector<PeripheralKey> {
     auto        pad_values  = std::vector<PeripheralKey>{};
@@ -275,6 +333,8 @@ auto Config::getAreaCodeKey(const AreaCode value) const -> std::optional<std::st
     return std::nullopt;
 }
 
+auto Config::getLogLevel(const std::string& key) -> LogLevel { return log_level_[key]; }
+
 /* static */
 auto Config::listAvailableLanguages() -> std::vector<std::string> {
     const auto full_path = fs::current_path() / "lang";
@@ -299,6 +359,14 @@ auto Config::listPeripheralConnections() -> std::vector<std::string> {
         connections.push_back(connection.first);
     }
     return connections;
+}
+
+auto Config::listLogLevels() -> std::vector<std::string> {
+    auto levels = std::vector<std::string>{};
+    for (const auto& level : log_level_) {
+        levels.push_back(level.first);
+    }
+    return levels;
 }
 
 auto Config::configToPortStatus(const std::string value) -> PortStatus { return port_status_[value]; }

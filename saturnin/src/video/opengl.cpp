@@ -57,15 +57,13 @@ namespace saturnin::video {
 using core::Log;
 using core::tr;
 
-Opengl::Opengl(core::Config* config) {
-    config_           = config;
-    is_legacy_opengl_ = config_->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
-    // initialize();
-}
+Opengl::Opengl(core::Config* config) { config_ = config; }
 
 Opengl::~Opengl() { shutdown(); }
 
 void Opengl::initialize(GLFWwindow* gui_context) {
+    is_legacy_opengl_ = config_->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
+
     guiRenderingContext(gui_context);
     initializeRenderingContext();
     makeRenderingContextCurrent();

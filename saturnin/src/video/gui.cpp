@@ -141,14 +141,24 @@ void showMainMenu(core::EmulatorContext& state) {
         }
 
         if (ImGui::BeginMenu(tr("Options").c_str())) {
-            enum class Header : u8 { general = 0, rendering = 1, path = 2, cd_rom = 3, sound = 4, peripherals = 5, none = 255 };
+            enum class Header : u8 {
+                general     = 0,
+                rendering   = 1,
+                path        = 2,
+                cd_rom      = 3,
+                sound       = 4,
+                peripherals = 5,
+                logs        = 6,
+                none        = 255
+            };
             using HeaderMap                = std::map<const Header, const std::string>;
             const auto  headers            = HeaderMap{{Header::general, tr("General")},
                                            {Header::rendering, tr("Rendering")},
                                            {Header::path, tr("Paths")},
                                            {Header::cd_rom, tr("CD-Rom")},
                                            {Header::sound, ("Sound")},
-                                           {Header::peripherals, tr("Peripherals")}};
+                                           {Header::peripherals, tr("Peripherals")},
+                                           {Header::logs, tr("Logs")}};
             static auto last_opened_header = Header::none;
             auto        setHeaderState     = [](const Header header) {
                 const auto state = (last_opened_header == header);
@@ -687,6 +697,75 @@ void showMainMenu(core::EmulatorContext& state) {
                 }
                 // ImGui::PopItemWidth();
             }
+
+            // Logs header
+            setHeaderState(Header::logs);
+            if (ImGui::CollapsingHeader(headers.at(Header::logs).c_str())) {
+                last_opened_header = Header::logs;
+                static auto levels = state.config()->listLogLevels();
+
+                const auto setupLog
+                    = [&state](const core::AccessKeys key, const std::string& combo_name, std::vector<std::string> levels) {
+                          const std::string l = state.config()->readValue(key);
+                          const auto        it_level
+                              = std::find_if(levels.begin(), levels.end(), [&l](std::string& str) { return l == str; });
+                          auto index_level = static_cast<s32>(it_level - levels.begin());
+                          if (ImGui::Combo(combo_name.c_str(), &index_level, levels)) {
+                              state.config()->writeValue(key, levels[index_level]);
+                          }
+                      };
+
+                // cdrom
+                ImGui::TextUnformatted(tr("CD-Rom").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_cdrom, "##log_cdrom", levels);
+
+                // config
+                ImGui::TextUnformatted(tr("Config").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_config, "##log_config", levels);
+
+                // main
+                ImGui::TextUnformatted(tr("Main").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_main, "##log_main", levels);
+
+                // memory
+                ImGui::TextUnformatted(tr("Memory").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_memory, "##log_memory", levels);
+
+                // sh2
+                ImGui::TextUnformatted(tr("Sh2").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_sh2, "##log_sh2", levels);
+
+                // scu
+                ImGui::TextUnformatted(tr("Scu").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_scu, "##log_scu", levels);
+
+                // vdp1
+                ImGui::TextUnformatted(tr("Vdp1").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_vdp1, "##log_vdp1", levels);
+
+                // vdp2
+                ImGui::TextUnformatted(tr("Vdp2").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_vdp2, "##log_vdp2", levels);
+
+                // smpc
+                ImGui::TextUnformatted(tr("Smpc").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_smpc, "##log_smpc", levels);
+
+                // scsp
+                ImGui::TextUnformatted(tr("Scsp").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_scsp, "##log_scsp", levels);
+            }
+
             static auto counter        = u16{};
             static auto status_message = std::string{};
             if (ImGui::Button("Save")) {

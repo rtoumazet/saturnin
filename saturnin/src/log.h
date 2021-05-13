@@ -41,6 +41,18 @@
 namespace saturnin::core {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   LogLevel
+///
+/// \brief  Log level values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class LogLevel {
+    info,  ///< Info, minimal logging.
+    debug, ///< Debug, full log.
+    off    ///< Logging is disabled.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Log
 ///
 /// \brief  Handles logging in the emulator. Spdlog wrapper.
@@ -307,8 +319,23 @@ class Log {
 
     static auto getRingbuffer() -> std::string;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Log::setLogLevel(const std::string& logger, const LogLevel level);
+    ///
+    /// \brief  Sets log level of the logger passed as parameter.
+    ///
+    /// \author Runik
+    /// \date   12/05/2021
+    ///
+    /// \param  logger  The logger.
+    /// \param  level   The new level.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void setLogLevel(const std::string& logger, const LogLevel level);
+
   private:
-    static std::map<std::string, std::shared_ptr<spdlog::logger>>
+    static std::map<std::string,
+                    std::shared_ptr<spdlog::logger>>
                                                               loggers_; ///< Map containing all the loggers used in the program
     static std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt> ringbuffer_sink_; ///< The ringbuffer sink
 };

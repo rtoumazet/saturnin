@@ -70,6 +70,16 @@ enum class AccessKeys {
     cfg_controls_stv_board,
     cfg_controls_stv_player_1,
     cfg_controls_stv_player_2,
+    cfg_log_cdrom,
+    cfg_log_config,
+    cfg_log_main,
+    cfg_log_memory,
+    cfg_log_sh2,
+    cfg_log_scu,
+    cfg_log_vdp1,
+    cfg_log_vdp2,
+    cfg_log_smpc,
+    cfg_log_scsp,
     stv_game_name,
     stv_zip_name,
     stv_parent_set,
@@ -88,6 +98,7 @@ using MapCdromAccess  = std::map<const std::string, const cdrom::CdromAccessMeth
 using MapTvStandard   = std::map<const std::string, const video::TvStandard>;        ///< MapHardwareMode alias definition.
 using MapAreaCode     = std::map<const std::string, const AreaCode>;                 ///< MapAreaCode alias definition.
 using MapPortStatus   = std::map<const std::string, const PortStatus>; ///< MapPeripheralConnection alias definition.
+using MapLogLevel     = std::map<const std::string, const LogLevel>;   ///< MapLogLevel alias definition.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Config
@@ -412,6 +423,19 @@ class Config {
     auto listPeripheralConnections() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Config::listLogLevels() -> std::vector<std::string>;
+    ///
+    /// \brief  Returns a vector populated with the different log levels.
+    ///
+    /// \author Runik
+    /// \date   12/05/2021
+    ///
+    /// \returns    A std::vector&lt;std::string&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto listLogLevels() -> std::vector<std::string>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto saturnin::core::Config::configToPortStatus(std::string value) -> PortStatus;
     ///
     /// \brief  Configuration entry to port status
@@ -664,6 +688,21 @@ class Config {
 
     auto getAreaCodeKey(const AreaCode value) const -> std::optional<std::string>;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Config::getLogLevel(const std::string& key) -> LogLevel;
+    ///
+    /// \brief  Returns the log level corresponding to the key.
+    ///
+    /// \author Runik
+    /// \date   12/05/2021
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The log level.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getLogLevel(const std::string& key) -> LogLevel;
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Config::generateConfigurationTree(bool isModernOpenglCapable);
@@ -709,6 +748,7 @@ class Config {
     MapTvStandard tv_standard_; ///< Link between the tv standard string value defined in the config file and the TvStandard type.
     MapAreaCode   area_code_;   ///< Link between the area code string value defined in the config file and the AreaCode type.
     MapPortStatus port_status_; ///< Link between the port status string value defined in the config file and the PortStatus type.
+    MapLogLevel   log_level_;   ///< Link between the log level string value defined in the config file and the LogLevel type.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

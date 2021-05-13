@@ -400,7 +400,7 @@ class Smpc {
     //@{
     // Constructors / Destructors
     Smpc() = delete;
-    Smpc(EmulatorContext* ec) : modules_(ec) { reset(); };
+    Smpc(EmulatorContext* ec) : modules_(ec){};
     Smpc(const Smpc&) = delete;
     Smpc(Smpc&&)      = delete;
     auto operator=(const Smpc&) & -> Smpc& = delete;
