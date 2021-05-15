@@ -746,6 +746,16 @@ void showMainMenu(core::EmulatorContext& state) {
                 ImGui::SameLine(second_column_offset);
                 setupLog(core::AccessKeys::cfg_log_scu, "##log_scu", levels);
 
+                // smpc
+                ImGui::TextUnformatted(tr("Smpc").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_smpc, "##log_smpc", levels);
+
+                // scsp
+                ImGui::TextUnformatted(tr("Scsp").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_scsp, "##log_scsp", levels);
+
                 // vdp1
                 ImGui::TextUnformatted(tr("Vdp1").c_str());
                 ImGui::SameLine(second_column_offset);
@@ -756,15 +766,10 @@ void showMainMenu(core::EmulatorContext& state) {
                 ImGui::SameLine(second_column_offset);
                 setupLog(core::AccessKeys::cfg_log_vdp2, "##log_vdp2", levels);
 
-                // smpc
-                ImGui::TextUnformatted(tr("Smpc").c_str());
+                // unimplemented
+                ImGui::TextUnformatted(tr("Unimplemented").c_str());
                 ImGui::SameLine(second_column_offset);
-                setupLog(core::AccessKeys::cfg_log_smpc, "##log_smpc", levels);
-
-                // scsp
-                ImGui::TextUnformatted(tr("Scsp").c_str());
-                ImGui::SameLine(second_column_offset);
-                setupLog(core::AccessKeys::cfg_log_scsp, "##log_scsp", levels);
+                setupLog(core::AccessKeys::cfg_log_unimplemented, "##log_unimplemented", levels);
             }
 
             static auto counter        = u16{};

@@ -196,6 +196,21 @@ class Log {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename... Args> static inline void Log::unimplemented(const std::string& value, const Args&... args)
+    ///
+    /// \brief  Writes a debug message to the unimplemented logger.
+    ///
+    /// \tparam Args    Type of the arguments.
+    /// \param  value   The value.
+    /// \param  args    Variable arguments providing the arguments.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<typename... Args>
+    static inline void unimplemented(const std::string& value, const Args&... args) {
+        debug(Logger::unimplemented, value, args...);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static inline auto Log::loggerExists(const std::string& logger_name) -> bool
     ///
     /// \brief  Queries if a given logger exists.

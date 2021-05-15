@@ -1,0 +1,149 @@
+//
+// vdp_common.h
+// Saturnin
+//
+// Copyright (c) 2021 Renaud Toumazet
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \file	vdp_common.h
+///
+/// \brief	Declares functions / structs used by both VDPs.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <saturnin/src/emulator_defs.h> // u8, u16, u32
+
+namespace saturnin::video {
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct Color
+///
+/// \brief  A color defined by its components.
+///
+/// \author Runik
+/// \date   25/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct Color {
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 a{0xFF};
+    Color(const u16 raw_data) {
+        r = (raw_data & 0x1F) << 3;
+        g = (raw_data & 0x3E0) >> 2;
+        b = (raw_data & 0x7C00) >> 7;
+    };
+    Color(const u32 raw_data) {
+        r = (raw_data & 0x0000FF);
+        g = (raw_data & 0x00FF00) >> 8;
+        b = (raw_data & 0xFF0000) >> 16;
+    };
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Dots4Bits
+///
+/// \brief  32 bits register splitted in 4 bits dots components.
+///
+/// \author Runik
+/// \date   26/03/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Dots4Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto dot_0 = BitRange<u8>{28, 31};
+    inline static const auto dot_1 = BitRange<u8>{24, 27};
+    inline static const auto dot_2 = BitRange<u8>{20, 23};
+    inline static const auto dot_3 = BitRange<u8>{16, 19};
+    inline static const auto dot_4 = BitRange<u8>{12, 15};
+    inline static const auto dot_5 = BitRange<u8>{8, 11};
+    inline static const auto dot_6 = BitRange<u8>{4, 7};
+    inline static const auto dot_7 = BitRange<u8>{0, 3};
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Dots6Bits
+///
+/// \brief  32 bits register splitted in 6 bits dots components.
+///
+/// \author Runik
+/// \date   15/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Dots6Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto dot_0 = BitRange<u8>{24, 29};
+    inline static const auto dot_1 = BitRange<u8>{16, 21};
+    inline static const auto dot_2 = BitRange<u8>{8, 13};
+    inline static const auto dot_3 = BitRange<u8>{0, 5};
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Dots7Bits
+///
+/// \brief  32 bits register splitted in 7 bits dots components.
+///
+/// \author Runik
+/// \date   15/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Dots7Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto dot_0 = BitRange<u8>{24, 30};
+    inline static const auto dot_1 = BitRange<u8>{16, 22};
+    inline static const auto dot_2 = BitRange<u8>{8, 14};
+    inline static const auto dot_3 = BitRange<u8>{0, 6};
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Dots8Bits
+///
+/// \brief  32 bits register splitted in 8 bits dots components.
+///
+/// \author Runik
+/// \date   15/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Dots8Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto dot_0 = BitRange<u8>{24, 31};
+    inline static const auto dot_1 = BitRange<u8>{16, 23};
+    inline static const auto dot_2 = BitRange<u8>{8, 15};
+    inline static const auto dot_3 = BitRange<u8>{0, 7};
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  Dots16Bits
+///
+/// \brief  32 bits register splitted in 16 bits dots components..
+///
+/// \author Runik
+/// \date   15/05/2021
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Dots16Bits : public Register {
+  public:
+    using Register::Register;
+    inline static const auto dot_0 = BitRange<u8>{16, 31};
+    inline static const auto dot_1 = BitRange<u8>{0, 15};
+};
+} // namespace saturnin::video

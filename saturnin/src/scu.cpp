@@ -76,12 +76,12 @@ void Scu::write32(const u32 addr, const u32 data) {
     switch (addr) {
         case dsp_program_control_port: {
             if (ppaf_.get(DspProgramControlPort::d0_bus_dma_execution) == D0BusDmaExecution::dma_is_executing) {
-                Log::warning(Logger::unimplemented, "SCU DSP - D0 Bus DMA execution");
+                Log::unimplemented("SCU DSP - D0 Bus DMA execution");
             }
 
             // if (current_DSP_program_control_port_ & DSP_EX) {
             if (ppaf_.get(DspProgramControlPort::program_execute_control) == ProgramExecuteControl::program_execution_begins) {
-                Log::warning(Logger::unimplemented, "SCU DSP - Program execution");
+                Log::unimplemented("SCU DSP - Program execution");
                 //#ifdef _DEBUGEMU
                 //                std::ostringstream oss;
                 //                oss << "DSP program execution started at address : " << showbase << hex <<

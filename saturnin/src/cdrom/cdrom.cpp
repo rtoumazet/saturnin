@@ -1527,7 +1527,7 @@ void Cdrom::executeCommand() {
             //			EmuState::pLog->CdBlockWrite("Unknown command : ",CR1>>8);
             //			EmuState::pLog->CdBlockU("Unknown command : ",CR1>>8);
             //			#endif
-            Log::warning(Logger::unimplemented, "Cdblock command {:04x}", cr1_.get(CommandRegister::command));
+            Log::unimplemented("Cdblock command {:04x}", cr1_.get(CommandRegister::command));
             break;
     }
     executed_commands_++;

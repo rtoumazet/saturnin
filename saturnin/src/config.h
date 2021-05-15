@@ -80,6 +80,7 @@ enum class AccessKeys {
     cfg_log_vdp2,
     cfg_log_smpc,
     cfg_log_scsp,
+    cfg_log_unimplemented,
     stv_game_name,
     stv_zip_name,
     stv_parent_set,

@@ -1706,14 +1706,14 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
-            core::Log::warning(Logger::unimplemented, core::tr("VDP2 RBG0 display"));
+            core::Log::unimplemented(core::tr("VDP2 RBG0 display"));
             break;
         }
         case ScrollScreen::rbg1: {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
-            core::Log::warning(Logger::unimplemented, core::tr("VDP2 RBG1 display"));
+            core::Log::unimplemented(core::tr("VDP2 RBG1 display"));
             break;
         }
     }
@@ -1825,7 +1825,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
         }
         case VramAccessCommand::nbg0_vertical_cell_scroll_table_data_read:
         case VramAccessCommand::nbg1_vertical_cell_scroll_table_data_read: {
-            core::Log::warning(Logger::unimplemented, core::tr("VDP2 vertical cell scroll table data read"));
+            core::Log::unimplemented(core::tr("VDP2 vertical cell scroll table data read"));
             break;
         }
         case VramAccessCommand::cpu_read_write: {

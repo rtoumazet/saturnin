@@ -33,7 +33,8 @@
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
 #include <saturnin/src/utilities.h>        // toUnderlying
-#include <saturnin/src/video/vdp2_part.h>  // ScrollScreenPos
+#include <saturnin/src/video/vdp_common.h>
+#include <saturnin/src/video/vdp2_part.h> // ScrollScreenPos
 #include <saturnin/src/video/vdp2_registers.h>
 
 // Forward declarations
@@ -354,32 +355,6 @@ struct PatternNameData {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct Color
-///
-/// \brief  A color defined by its components.
-///
-/// \author Runik
-/// \date   25/03/2021
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct Color {
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 a{0xFF};
-    Color(const u16 raw_data) {
-        r = (raw_data & 0x1F) << 3;
-        g = (raw_data & 0x3E0) >> 2;
-        b = (raw_data & 0x7C00) >> 7;
-    };
-    Color(const u32 raw_data) {
-        r = (raw_data & 0x0000FF);
-        g = (raw_data & 0x00FF00) >> 8;
-        b = (raw_data & 0xFF0000) >> 16;
-    };
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  PatternNameData2Words
 ///
 /// \brief  Pattern Name Data - 2 words configuration.
@@ -535,37 +510,6 @@ class PatternNameData1Word4CellsOver16Colors12Bits : public Register {
     inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Dots4Bits
-///
-/// \brief  32 bits register splitted in 4 bits dots components.
-///
-/// \author Runik
-/// \date   26/03/2021
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class Dots4Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dot_0 = BitRange<u8>{28, 31};
-    inline static const auto dot_1 = BitRange<u8>{24, 27};
-    inline static const auto dot_2 = BitRange<u8>{20, 23};
-    inline static const auto dot_3 = BitRange<u8>{16, 19};
-    inline static const auto dot_4 = BitRange<u8>{12, 15};
-    inline static const auto dot_5 = BitRange<u8>{8, 11};
-    inline static const auto dot_6 = BitRange<u8>{4, 7};
-    inline static const auto dot_7 = BitRange<u8>{0, 3};
-};
-
-class Dots8Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dot_0 = BitRange<u8>{24, 31};
-    inline static const auto dot_1 = BitRange<u8>{16, 23};
-    inline static const auto dot_2 = BitRange<u8>{8, 15};
-    inline static const auto dot_3 = BitRange<u8>{0, 7};
-};
-
 class Vdp2 {
   public:
     ///@{
@@ -715,6 +659,22 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto getColorRamMode() const -> ColorRamMode { return ram_status_.color_ram_mode; }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<typename T> auto Vdp2::readColor(const u32 color_address) -> const Color
+    ///
+    /// \brief  Reads a color
+    ///
+    /// \tparam T   u32 for 32 bits color, u16 for 16 bits colors.
+    /// \param  color_address   The color address.
+    ///
+    /// \returns    The color read.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<typename T>
+    auto readColor(const u32 color_address) -> const Color {
+        return Color(modules_.memory()->read<T>(color_address));
+    };
 
     //--------------------------------------------------------------------------------------------------------------
     // DEBUG methods
@@ -1270,22 +1230,6 @@ class Vdp2 {
                   const ScreenOffset&       cell_offset,
                   std::vector<u8>&          texture_data,
                   const size_t              key);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<typename T> auto Vdp2::readColor(const u32 color_address) -> const Color
-    ///
-    /// \brief  Reads a color
-    ///
-    /// \tparam T   u32 for 32 bits color, u16 for 16 bits colors.
-    /// \param  color_address   The color address.
-    ///
-    /// \returns    The color read.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template<typename T>
-    auto readColor(const u32 color_address) -> const Color {
-        return Color(modules_.memory()->read<T>(color_address));
-    };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Vdp2::readPalette16Dot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen,

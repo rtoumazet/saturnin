@@ -65,6 +65,7 @@ Config::Config(const std::string& configuration_filename) {
                   {AccessKeys::cfg_log_smpc, "logs.smpc"},
                   {AccessKeys::cfg_log_vdp1, "logs.vdp1"},
                   {AccessKeys::cfg_log_vdp2, "logs.vdp2"},
+                  {AccessKeys::cfg_log_unimplemented, "logs.unimplemented"},
                   {AccessKeys::stv_game_name, "game_name"},
                   {AccessKeys::stv_zip_name, "zip_name"},
                   {AccessKeys::stv_parent_set, "parent_set"},
@@ -96,7 +97,8 @@ Config::Config(const std::string& configuration_filename) {
                      {AccessKeys::cfg_log_scu, std::string("INFO")},
                      {AccessKeys::cfg_log_smpc, std::string("INFO")},
                      {AccessKeys::cfg_log_vdp1, std::string("INFO")},
-                     {AccessKeys::cfg_log_vdp2, std::string("INFO")}
+                     {AccessKeys::cfg_log_vdp2, std::string("INFO")},
+                     {AccessKeys::cfg_log_unimplemented, std::string("INFO")}
 
     };
 
@@ -183,6 +185,7 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
     add(full_keys_[AccessKeys::cfg_log_smpc],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_smpc]));
     add(full_keys_[AccessKeys::cfg_log_vdp1],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_vdp1]));
     add(full_keys_[AccessKeys::cfg_log_vdp2],                           std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_vdp2]));
+    add(full_keys_[AccessKeys::cfg_log_unimplemented],                  std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_log_unimplemented]));
     // clang-format on
 }
 
@@ -248,7 +251,8 @@ void Config::createDefault(const AccessKeys& key) {
         case AccessKeys::cfg_log_sh2:
         case AccessKeys::cfg_log_smpc:
         case AccessKeys::cfg_log_vdp1:
-        case AccessKeys::cfg_log_vdp2: {
+        case AccessKeys::cfg_log_vdp2:
+        case AccessKeys::cfg_log_unimplemented: {
             add(full_keys_[key], std::any_cast<const std::string>(default_keys_[key]));
             break;
         }
@@ -329,12 +333,13 @@ void Config::updateLogLevel() {
     Log::setLogLevel("config", getLogLevel(readValue(AccessKeys::cfg_log_config)));
     Log::setLogLevel("main", getLogLevel(readValue(AccessKeys::cfg_log_main)));
     Log::setLogLevel("memory", getLogLevel(readValue(AccessKeys::cfg_log_memory)));
-    Log::setLogLevel("sh2", getLogLevel(readValue(AccessKeys::cfg_log_sh2)));
     Log::setLogLevel("scu", getLogLevel(readValue(AccessKeys::cfg_log_scu)));
+    Log::setLogLevel("scsp", getLogLevel(readValue(AccessKeys::cfg_log_scsp)));
+    Log::setLogLevel("sh2", getLogLevel(readValue(AccessKeys::cfg_log_sh2)));
+    Log::setLogLevel("smpc", getLogLevel(readValue(AccessKeys::cfg_log_smpc)));
     Log::setLogLevel("vdp1", getLogLevel(readValue(AccessKeys::cfg_log_vdp1)));
     Log::setLogLevel("vdp2", getLogLevel(readValue(AccessKeys::cfg_log_vdp2)));
-    Log::setLogLevel("smpc", getLogLevel(readValue(AccessKeys::cfg_log_smpc)));
-    Log::setLogLevel("scsp", getLogLevel(readValue(AccessKeys::cfg_log_scsp)));
+    Log::setLogLevel("unimplemented", getLogLevel(readValue(AccessKeys::cfg_log_unimplemented)));
 }
 
 auto Config::getLogLevel(const std::string& key) -> LogLevel { return log_level_[key]; }
