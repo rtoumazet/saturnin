@@ -30,8 +30,9 @@ namespace saturnin::core {
 
 constexpr auto max_messages = u16{500};
 
-std::map<std::string, std::shared_ptr<spdlog::logger>> Log::loggers_;
-std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt>     Log::ringbuffer_sink_;
+MapLogger                                          Log::loggers_;
+MapLoggerName                                      Log::loggers_names_;
+std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt> Log::ringbuffer_sink_;
 
 // static //
 auto Log::initialize() -> bool {
@@ -60,9 +61,20 @@ auto Log::initialize() -> bool {
     }
     spdlog::flush_every(std::chrono::seconds(3));
 
-    // auto log_file = fs::current_path() / "logs" / "saturnin.log";
-
-    // spdlog::set_level(spdlog::level::debug); // Set global log level to debug
+    loggers_names_ = {{Logger::cdrom, "cdrom"},
+                      {Logger::config, "config"},
+                      {Logger::main, "main"},
+                      {Logger::memory, "memory"},
+                      {Logger::sh2, "sh2"},
+                      {Logger::scu, "scu"},
+                      {Logger::vdp1, "vdp1"},
+                      {Logger::vdp2, "vdp2"},
+                      {Logger::opengl, "opengl"},
+                      {Logger::exception, "exception"},
+                      {Logger::smpc, "smpc"},
+                      {Logger::scsp, "scsp"},
+                      {Logger::texture, "texture"},
+                      {Logger::unimplemented, "unimplemented"}};
 
     return true;
 }

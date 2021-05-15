@@ -50,7 +50,7 @@ namespace sh2 = saturnin::sh2;
 
 namespace saturnin::video {
 class Vdp2;
-}
+} // namespace saturnin::video
 
 namespace saturnin::sound {
 class Scsp;
@@ -641,7 +641,8 @@ template<typename T>
 struct writeDummy {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            Log::warning("memory", fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
+            Log::warning(Logger::memory,
+                         fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
             // assert(false);
         };
     }
@@ -662,7 +663,7 @@ template<typename T>
 struct readDummy {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::warning("memory", fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
+            Log::warning(Logger::memory, fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
             // assert(false);
             return T{};
         };
@@ -702,7 +703,7 @@ template<typename T>
 struct readSmpc {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::warning("memory", core::tr("SMPC read ({}) access {:#0x}"), sizeof(T) * number_of_bits_8, addr);
+            Log::warning(Logger::memory, core::tr("SMPC read ({}) access {:#0x}"), sizeof(T) * number_of_bits_8, addr);
             return rawRead<T>(m.smpc_, addr & smpc_memory_mask);
         };
     }
@@ -713,7 +714,7 @@ template<>
 struct readSmpc<uint8_t> {
     operator Memory::ReadType<u8>() const {
         return [](const Memory& m, const u32 addr) -> u8 {
-            // Log::warning("memory", core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
+            // Log::warning(Logger::memory, core::tr("Read ({}) needs to be handled through SMPC {:#0x}"), 8, addr);
             // return 0;
             return m.modules_.smpc()->read(addr);
         };
@@ -735,7 +736,11 @@ template<typename T>
 struct writeSmpc {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            Log::warning("memory", core::tr("SMPC write ({}) access {:#0x} : {:#x}"), sizeof(T) * number_of_bits_8, addr, data);
+            Log::warning(Logger::memory,
+                         core::tr("SMPC write ({}) access {:#0x} : {:#x}"),
+                         sizeof(T) * number_of_bits_8,
+                         addr,
+                         data);
             // rawWrite<T>(m.smpc_, addr & smpc_memory_mask, data);
         };
     }
@@ -1214,8 +1219,7 @@ struct writeVdp1Framebuffer {
 template<typename T>
 struct readVdp1Registers {
     operator Memory::ReadType<T>() const {
-        return
-            [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.vdp1_registers_, addr & vdp1_registers_memory_mask); };
+        return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp1()->readRegisters<T>(addr); };
     }
 };
 
@@ -1233,9 +1237,7 @@ struct readVdp1Registers {
 template<typename T>
 struct writeVdp1Registers {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp1_registers_, addr & vdp1_registers_memory_mask, data);
-        };
+        return [](Memory& m, const u32 addr, const T data) { m.modules_.vdp1()->writeRegisters<T>(addr, data); };
     }
 };
 
@@ -1503,7 +1505,9 @@ struct writeMasterSh2Frt {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             // m.interrupt_signal_is_sent_from_master_sh2_ = true;
-            Log::warning("memory", core::tr("{}bits write to the master SH2 FRT memory area !"), sizeof(T) * number_of_bits_8);
+            Log::warning(Logger::memory,
+                         core::tr("{}bits write to the master SH2 FRT memory area !"),
+                         sizeof(T) * number_of_bits_8);
         };
     }
 };
@@ -1532,7 +1536,9 @@ struct writeSlaveSh2Frt {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             // m.interrupt_signal_is_sent_from_slave_sh2_ = true;
-            Log::warning("memory", core::tr("{}bits write to the slave SH2 FRT memory area !"), sizeof(T) * number_of_bits_8);
+            Log::warning(Logger::memory,
+                         core::tr("{}bits write to the slave SH2 FRT memory area !"),
+                         sizeof(T) * number_of_bits_8);
         };
     }
 };

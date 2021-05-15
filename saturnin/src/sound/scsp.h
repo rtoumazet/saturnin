@@ -42,6 +42,7 @@ namespace saturnin::sound {
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
 using saturnin::core::Log;
+using saturnin::core::Logger;
 
 class Scsp {
   public:

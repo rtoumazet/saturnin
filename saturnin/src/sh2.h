@@ -49,6 +49,7 @@ using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
 using saturnin::core::Interrupt;
 using saturnin::core::Log;
+using saturnin::core::Logger;
 using saturnin::core::Memory;
 using saturnin::core::Scu;
 
@@ -394,10 +395,10 @@ class Sh2 {
 
     template<typename T>
     static void unmappedAccess(const u32 addr, const T data) {
-        Log::warning("sh2", "Unmapped write access : address :{:#0x} data:{:#0x}", addr, data);
+        Log::warning(Logger::sh2, "Unmapped write access : address :{:#0x} data:{:#0x}", addr, data);
     }
 
-    static void unmappedAccess(const u32 addr) { Log::warning("sh2", "Unmapped read access : address :{:#0x}", addr); }
+    static void unmappedAccess(const u32 addr) { Log::warning(Logger::sh2, "Unmapped read access : address :{:#0x}", addr); }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::addToCallstack(u32 call_addr, u32 return_addr);

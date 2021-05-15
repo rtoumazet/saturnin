@@ -53,6 +53,17 @@ enum class LogLevel {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Logger
+///
+/// \brief  Values that represent the various loggers.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Logger { cdrom, config, main, memory, sh2, scu, vdp1, vdp2, opengl, exception, smpc, scsp, texture, unimplemented };
+
+using MapLogger     = std::map<std::string, std::shared_ptr<spdlog::logger>>; ///< MapLogger alias definition.
+using MapLoggerName = std::map<const Logger, const std::string>;              ///< MapLoggerName alias definition.
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Log
 ///
 /// \brief  Handles logging in the emulator. Spdlog wrapper.
@@ -96,14 +107,15 @@ class Log {
     /// \date   08/02/2018
     ///
     /// \tparam Args    Template arguments.
-    /// \param  logger_name Name of the logger.
+    /// \param  logger  Type of the logger.
     /// \param  value       Text to write.
     /// \param  args        Variable arguments for formatting.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename... Args>
-    static inline void error(const std::string& logger_name, const std::string& value, const Args&... args) {
+    static inline void error(const Logger logger, const std::string& value, const Args&... args) {
         try {
+            const auto& logger_name = loggers_names_[logger];
             if (loggerExists(logger_name)) {
                 loggers_.at(logger_name)->error(value.c_str(), args...);
                 // errors are also logged to console, using original logger name
@@ -123,14 +135,15 @@ class Log {
     /// \date   08/02/2018
     ///
     /// \tparam Args    Template arguments.
-    /// \param  logger_name Name of the logger.
+    /// \param  logger  Type of the logger.
     /// \param  value       Text to write.
     /// \param  args        Variable arguments for formatting.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename... Args>
-    static inline void warning(const std::string& logger_name, const std::string& value, const Args&... args) {
+    static inline void warning(const Logger logger, const std::string& value, const Args&... args) {
         try {
+            const auto& logger_name = loggers_names_[logger];
             if (loggerExists(logger_name)) {
                 loggers_.at(logger_name)->warn(value.c_str(), args...);
                 // warnings are also logged to console, using original logger name
@@ -150,13 +163,14 @@ class Log {
     /// \date   08/02/2018
     ///
     /// \tparam Args    Template arguments.
-    /// \param  logger_name Name of the logger.
+    /// \param  logger  Type of the logger.
     /// \param  value       Text to write.
     /// \param  args        Variable arguments for formatting.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename... Args>
-    static inline void info(const std::string& logger_name, const std::string& value, const Args&... args) {
+    static inline void info(const Logger logger, const std::string& value, const Args&... args) {
+        const auto& logger_name = loggers_names_[logger];
         if (loggerExists(logger_name)) { loggers_.at(logger_name)->info(value.c_str(), args...); }
     }
 
@@ -170,13 +184,14 @@ class Log {
     /// \date   08/02/2018
     ///
     /// \tparam Args    Template arguments.
-    /// \param  logger_name Name of the logger.
+    /// \param  logger  Type of the logger.
     /// \param  value       Text to write.
     /// \param  args        Variable arguments for formatting.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename... Args>
-    static inline void debug(const std::string& logger_name, const std::string& value, const Args&... args) {
+    static inline void debug(const Logger logger, const std::string& value, const Args&... args) {
+        const auto& logger_name = loggers_names_[logger];
         if (loggerExists(logger_name)) { loggers_.at(logger_name)->debug(value.c_str(), args...); }
     }
 
@@ -334,10 +349,8 @@ class Log {
     static void setLogLevel(const std::string& logger, const LogLevel level);
 
   private:
-    static std::map<std::string,
-                    std::shared_ptr<spdlog::logger>>
-                                                              loggers_; ///< Map containing all the loggers used in the program
+    static MapLogger                                          loggers_; ///< Map containing all the loggers used in the program
+    static MapLoggerName                                      loggers_names_; ///< Link between logger enumerator and logger name.
     static std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt> ringbuffer_sink_; ///< The ringbuffer sink
 };
-
 }; // namespace saturnin::core

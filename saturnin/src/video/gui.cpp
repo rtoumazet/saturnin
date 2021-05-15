@@ -54,6 +54,7 @@ static bool show_demo         = false;
 static bool show_log          = true;
 
 using core::Log;
+using core::Logger;
 using core::MemoryMapArea;
 using core::PeripheralKey;
 using core::PeripheralLayout;
@@ -183,7 +184,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (hm != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
                     } else {
-                        Log::warning("config", tr("Unknown hardware mode ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown hardware mode ...").c_str());
                     }
                 }
                 ImGui::SameLine();
@@ -192,7 +193,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (hm != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
                     } else {
-                        Log::warning("config", tr("Unknown hardware mode ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown hardware mode ...").c_str());
                     }
                 }
 
@@ -237,7 +238,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (key != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
                     } else {
-                        Log::warning("config", tr("Unknown TV standard ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown TV standard ...").c_str());
                     }
                 }
                 ImGui::SameLine();
@@ -246,7 +247,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (key != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
                     } else {
-                        Log::warning("config", tr("Unknown TV standard ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown TV standard ...").c_str());
                     }
                 }
 
@@ -336,7 +337,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (key != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
                     } else {
-                        Log::warning("config", tr("Unknown drive access method ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown drive access method ...").c_str());
                     }
                 }
                 ImGui::SameLine();
@@ -345,7 +346,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (key != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
                     } else {
-                        Log::warning("config", tr("Unknown drive access method ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown drive access method ...").c_str());
                     }
                 }
 
@@ -770,6 +771,7 @@ void showMainMenu(core::EmulatorContext& state) {
             static auto status_message = std::string{};
             if (ImGui::Button("Save")) {
                 state.config()->writeFile();
+                state.config()->updateLogLevel();
                 state.smpc()->initializePeripheralMappings();
 
                 // Updating global state variables

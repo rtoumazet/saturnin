@@ -55,6 +55,7 @@ using namespace std::string_literals; // enables s-suffix for std::string litera
 namespace saturnin::video {
 
 using core::Log;
+using core::Logger;
 using core::tr;
 
 Opengl::Opengl(core::Config* config) { config_ = config; }
@@ -342,7 +343,9 @@ void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_li
 }
 
 void Opengl::initializeRenderingContext() {
-    if (guiRenderingContext() == nullptr) { core::Log::error("opengl", core::tr("Could not initialize rendering context.")); }
+    if (guiRenderingContext() == nullptr) {
+        core::Log::error(Logger::opengl, core::tr("Could not initialize rendering context."));
+    }
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, guiRenderingContext());
@@ -466,13 +469,13 @@ void Opengl::initializeFbos() {
         if (is_legacy_opengl_) {
             const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
             if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE_EXT) {
-                Log::error("opengl", tr("Could not initialize framebuffer object !"));
+                Log::error(Logger::opengl, tr("Could not initialize framebuffer object !"));
                 throw std::runtime_error("Opengl error !");
             }
         } else {
             const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
             if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
-                Log::error("opengl", tr("Could not initialize framebuffer object !"));
+                Log::error(Logger::opengl, tr("Could not initialize framebuffer object !"));
                 throw std::runtime_error("Opengl error !");
             }
         }
@@ -528,7 +531,7 @@ auto isModernOpenglCapable() -> bool {
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    Log::info("opengl", "Max version supported : {}", version.toString());
+    Log::info(Logger::opengl, "Max version supported : {}", version.toString());
 
     return (version >= glbinding::Version(3, 3));
 }
@@ -719,7 +722,7 @@ auto loadPngImage(const char* filename) -> GLFWimage {
     auto       height = u32{};
     const auto error  = lodepng_decode32_file(&(image.pixels), &width, &height, full_path.string().c_str());
     if (error != 0) {
-        Log::warning("opengl", lodepng_error_text(error));
+        Log::warning(Logger::opengl, lodepng_error_text(error));
         return image;
     }
     image.width  = width;
@@ -732,7 +735,7 @@ void windowSizeCallback(GLFWwindow* window, int width, int height) {
     const auto state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
 
     state->opengl()->onWindowResize(width, height);
-    Log::warning("opengl", "Window was resized: {} {}", width, height);
+    Log::warning(Logger::opengl, "Window was resized: {} {}", width, height);
 }
 
 void checkShaderCompilation(const u32 shader) {
@@ -753,7 +756,7 @@ void checkShaderCompilation(const u32 shader) {
             case GL_FRAGMENT_SHADER: shader_type = "Fragment shader"; break;
             default: shader_type = "Unknown shader"; break;
         }
-        Log::error("opengl", "{} compilation failed : {}", shader_type, info);
+        Log::error(Logger::opengl, "{} compilation failed : {}", shader_type, info);
         throw std::runtime_error("Opengl error !");
     }
 }
@@ -769,7 +772,7 @@ void checkProgramCompilation(const u32 program) {
         glGetProgramInfoLog(program, length, nullptr, v.data());
         const auto info = std::string(v.begin(), v.end());
 
-        Log::error("opengl", "Shader program link failed : {}", info);
+        Log::error(Logger::opengl, "Shader program link failed : {}", info);
         throw std::runtime_error("Opengl error !");
     }
 }

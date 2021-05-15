@@ -30,6 +30,7 @@
 #include <saturnin/src/sh2.h>
 #include <saturnin/src/cdrom/cdrom.h>
 #include <saturnin/src/sound/scsp.h>
+#include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2.h>
 
 namespace lzpp = libzippp;
@@ -39,6 +40,7 @@ namespace sh2  = saturnin::sh2;
 namespace saturnin::core {
 
 using core::Log;
+using core::Logger;
 using std::copy;
 
 constexpr auto region_cart_address_not_interleaved  = u8{0x40};
@@ -136,7 +138,7 @@ auto Memory::loadRom(const std::string& zip_name,
                     break;
                 }
                 default: {
-                    Log::warning("memory", fmt::format(tr("Unknown rom type while loading {0}.zip"), zip_name));
+                    Log::warning(Logger::memory, fmt::format(tr("Unknown rom type while loading {0}.zip"), zip_name));
                     return false;
                     break;
                 }
@@ -144,26 +146,26 @@ auto Memory::loadRom(const std::string& zip_name,
         } else {
             zf.close();
             const auto str = fmt::format(tr("File '{0}' not found in zip file !"), file_name);
-            Log::warning("memory", str);
+            Log::warning(Logger::memory, str);
             return false;
         }
         zf.close();
     } else {
         const auto str = fmt::format(tr("Zip file '{0}' not found !"), rom_path.string());
-        Log::warning("memory", str);
+        Log::warning(Logger::memory, str);
         return false;
     }
     return true;
 }
 
 void Memory::loadBios(const HardwareMode mode) {
-    Log::info("memory", tr("Loading bios"));
+    Log::info(Logger::memory, tr("Loading bios"));
     auto bios_path = std::string{};
     switch (mode) {
         case HardwareMode::saturn: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
         case HardwareMode::stv: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
         default: {
-            Log::error("memory", tr("Unknown hardware mode"));
+            Log::error(Logger::memory, tr("Unknown hardware mode"));
             throw std::runtime_error("Config error !");
             break;
         }
@@ -194,7 +196,7 @@ void Memory::loadBios(const HardwareMode mode) {
             }
         }
     } else {
-        Log::warning("memory", tr("Bios file not found !"));
+        Log::warning(Logger::memory, tr("Bios file not found !"));
     }
 }
 
@@ -419,7 +421,7 @@ auto Memory::readStvProtection(const u32 addr, u32 data) const -> u32 {
             case 0xf9ff0000:                           // NOLINT(readability-magic-numbers)
             case 0xffbf0000: data = 0x02002000; break; // NOLINT(readability-magic-numbers)
         }
-        Log::debug("memory", "ST-V protection read index: {}, value: {}", stv_protection_offset, data);
+        Log::debug(Logger::memory, "ST-V protection read index: {}, value: {}", stv_protection_offset, data);
     } else {
         stv_protection_offset = 0;
     }
@@ -453,7 +455,7 @@ void Memory::writeStvProtection(const u32 addr, u32 data) {
             // Radiant Silvergun
         case 0x77770000: break; // NOLINT(readability-magic-numbers)
     }
-    Log::debug("memory", fmt::format(core::tr("ST-V offset start: {}"), this->stv_protection_offset_));
+    Log::debug(Logger::memory, fmt::format(core::tr("ST-V offset start: {}"), this->stv_protection_offset_));
 }
 
 auto Memory::isStvProtectionEnabled() const -> bool {

@@ -78,7 +78,7 @@ void Scsp::scspHostInterruptHandler() {
     using namespace saturnin::core::interrupt_source;
     using saturnin::core::StartingFactorSelect;
 
-    Log::debug("scsp", tr("Interrupt request"));
+    Log::debug(Logger::scsp, tr("Interrupt request"));
     external_access_modules_.scu()->generateInterrupt(sound_request);
     external_access_modules_.scu()->sendStartFactor(StartingFactorSelect::sound_req);
 }
@@ -150,7 +150,7 @@ void Scsp::calculateSamplesPerFrame() {
             break;
         }
         default: {
-            Log::warning("scsp", tr("Could not calculate samples number per frame !"));
+            Log::warning(Logger::scsp, tr("Could not calculate samples number per frame !"));
             samples_per_frame_ = 0;
         }
     }

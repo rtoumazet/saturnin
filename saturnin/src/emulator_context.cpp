@@ -157,14 +157,14 @@ void EmulatorContext::startEmulation() {
     //    std::cout << "Version:  " << plugin->version() << std::endl;
     //    plugin->log("test");
 
-    // Log::error("sh2", "Unexpected opcode({} SH2)\nOpcode: {:#06x}\nPC: {:#010x}", "Master", 0x4e73, 0x20000200);
+    // Log::error(Logger::sh2, "Unexpected opcode({} SH2)\nOpcode: {:#06x}\nPC: {:#010x}", "Master", 0x4e73, 0x20000200);
 
     // scu_->dmaTest();
 
     // sh2::TimerInterruptEnableRegister r(0b100);
     // if (r.get(sh2::TimerInterruptEnableRegister::output_compare_interrupt_b_enable) ==
     // sh2::OutputCompareInterruptBEnable::interrupt_request_enabled) {
-    //    Log::info("main", "enabled");
+    //    Log::info(Logger::main, "enabled");
     //}
     // u8  tmp[4] = {0x12, 0x34, 0x56, 0x78};
     // u32 tmp2   = *(unsigned long*)&tmp;
@@ -181,7 +181,7 @@ void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
 
 void EmulatorContext::emulationMainThread() {
     try {
-        Log::info("main", tr("Emulation main thread started"));
+        Log::info(Logger::main, tr("Emulation main thread started"));
 
         opengl()->initialize(openglWindow());
 
@@ -211,9 +211,9 @@ void EmulatorContext::emulationMainThread() {
             }
         }
         opengl()->destroyRenderingContext();
-        Log::info("main", tr("Emulation main thread finished"));
-    } catch (const std::exception& e) { Log::error("exception", e.what()); } catch (...) {
-        Log::error("exception", tr("Uncaught exception !"));
+        Log::info(Logger::main, tr("Emulation main thread finished"));
+    } catch (const std::exception& e) { Log::error(Logger::exception, e.what()); } catch (...) {
+        Log::error(Logger::exception, tr("Uncaught exception !"));
     }
 }
 

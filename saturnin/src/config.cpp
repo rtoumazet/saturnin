@@ -137,7 +137,7 @@ auto Config::readFile() -> bool {
         return true;
     } catch (const libcfg::FileIOException& fioex) {
         const auto error = fmt::format(tr("Could not read file {0} : {1}"), filename_, fioex.what());
-        Log::error("config", error);
+        Log::error(Logger::config, error);
         return false;
     }
 }
@@ -149,16 +149,7 @@ auto Config::initialize(const bool isModernOpenGlCapable) -> bool {
         this->writeFile();
     }
 
-    Log::setLogLevel("cdrom", getLogLevel(readValue(AccessKeys::cfg_log_cdrom)));
-    Log::setLogLevel("config", getLogLevel(readValue(AccessKeys::cfg_log_config)));
-    Log::setLogLevel("main", getLogLevel(readValue(AccessKeys::cfg_log_main)));
-    Log::setLogLevel("memory", getLogLevel(readValue(AccessKeys::cfg_log_memory)));
-    Log::setLogLevel("sh2", getLogLevel(readValue(AccessKeys::cfg_log_sh2)));
-    Log::setLogLevel("scu", getLogLevel(readValue(AccessKeys::cfg_log_scu)));
-    Log::setLogLevel("vdp1", getLogLevel(readValue(AccessKeys::cfg_log_vdp1)));
-    Log::setLogLevel("vdp2", getLogLevel(readValue(AccessKeys::cfg_log_vdp2)));
-    Log::setLogLevel("smpc", getLogLevel(readValue(AccessKeys::cfg_log_smpc)));
-    Log::setLogLevel("scsp", getLogLevel(readValue(AccessKeys::cfg_log_scsp)));
+    updateLogLevel();
     return true;
 }
 
@@ -227,7 +218,7 @@ auto Config::readValue(const AccessKeys& value) -> libcfg::Setting& {
         return cfg_.lookup(full_keys_[value]);
     } catch (const libcfg::SettingNotFoundException& e) {
         const auto error = fmt::format(tr("Setting '{0}' not found !"), e.getPath());
-        Log::error("config", error);
+        Log::error(Logger::config, error);
         throw std::runtime_error("Config error !");
     }
 }
@@ -282,7 +273,7 @@ void Config::createDefault(const AccessKeys& key) {
             add(full_keys_[key], StvPlayerControls().toConfig(PeripheralLayout::empty_layout));
             break;
         default: {
-            Log::error("config", tr("Undefined default value '{}'!"), full_keys_[key]);
+            Log::error(Logger::config, tr("Undefined default value '{}'!"), full_keys_[key]);
             throw std::runtime_error("Config error !");
         }
     }
@@ -333,6 +324,19 @@ auto Config::getAreaCodeKey(const AreaCode value) const -> std::optional<std::st
     return std::nullopt;
 }
 
+void Config::updateLogLevel() {
+    Log::setLogLevel("cdrom", getLogLevel(readValue(AccessKeys::cfg_log_cdrom)));
+    Log::setLogLevel("config", getLogLevel(readValue(AccessKeys::cfg_log_config)));
+    Log::setLogLevel("main", getLogLevel(readValue(AccessKeys::cfg_log_main)));
+    Log::setLogLevel("memory", getLogLevel(readValue(AccessKeys::cfg_log_memory)));
+    Log::setLogLevel("sh2", getLogLevel(readValue(AccessKeys::cfg_log_sh2)));
+    Log::setLogLevel("scu", getLogLevel(readValue(AccessKeys::cfg_log_scu)));
+    Log::setLogLevel("vdp1", getLogLevel(readValue(AccessKeys::cfg_log_vdp1)));
+    Log::setLogLevel("vdp2", getLogLevel(readValue(AccessKeys::cfg_log_vdp2)));
+    Log::setLogLevel("smpc", getLogLevel(readValue(AccessKeys::cfg_log_smpc)));
+    Log::setLogLevel("scsp", getLogLevel(readValue(AccessKeys::cfg_log_scsp)));
+}
+
 auto Config::getLogLevel(const std::string& key) -> LogLevel { return log_level_[key]; }
 
 /* static */
@@ -373,7 +377,7 @@ auto Config::configToPortStatus(const std::string value) -> PortStatus { return 
 
 void logError(const std::string& error, const std::string& path) {
     const auto str = fmt::format(error, path);
-    Log::error("config", str);
+    Log::error(Logger::config, str);
 };
 
 }; // namespace saturnin::core

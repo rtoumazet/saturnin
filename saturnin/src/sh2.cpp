@@ -32,6 +32,7 @@ namespace is = saturnin::core::interrupt_source;
 namespace saturnin::sh2 {
 
 using core::Log;
+using core::Logger;
 
 // Masks constants
 constexpr auto allow_bsc_write_mask = u32{0xA55A0000};
@@ -306,7 +307,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         // 8. Cache //
         //////////////
         case cache_control_register:
-            Log::debug("sh2", "CCR byte write: {}", data);
+            Log::debug(Logger::sh2, "CCR byte write: {}", data);
 
             cache_ccr_.set(bits_0_7, data);
             if (cache_ccr_.get(CacheControlRegister::cache_purge) == CachePurge::cache_purge) {
@@ -361,7 +362,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
                     frt_clock_divisor_ = frt_clock_divisor_128;
                     frt_mask_          = frt_clock_divisor_mask_128;
                     break;
-                case FrtClockSelect::external: Log::warning("sh2", "FRT - External clock not implemented"); break;
+                case FrtClockSelect::external: Log::warning(Logger::sh2, "FRT - External clock not implemented"); break;
             }
             break;
         case timer_output_compare_control_register:
@@ -394,7 +395,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
 
         case standby_control_register:
             sbycr_.set(bits_0_7, data);
-            Log::warning("sh2", "PWR - Standby control register write {:#0x}", data);
+            Log::warning(Logger::sh2, "PWR - Standby control register write {:#0x}", data);
             break;
 
         default: unmappedAccess(addr, data); break;
@@ -425,13 +426,13 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
                 case NmiEdgeDetection::falling:
                     if ((intc_icr_.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high)
                         && (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low)) {
-                        Log::warning("sh2", "Falling edge NMI, not implemented !");
+                        Log::warning(Logger::sh2, "Falling edge NMI, not implemented !");
                     }
                     break;
                 case NmiEdgeDetection::rising:
                     if ((intc_icr_.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low)
                         && (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high)) {
-                        Log::warning("sh2", "Rising edge NMI, not implemented !");
+                        Log::warning(Logger::sh2, "Rising edge NMI, not implemented !");
                     }
                     break;
             }
@@ -741,7 +742,7 @@ void Sh2::powerOnReset() {
 
 void Sh2::start32bitsDivision() {
     // 32/32 division
-    Log::debug("sh2", "32/32 division");
+    Log::debug(Logger::sh2, "32/32 division");
 
     // DVDNT is copied in DVDNTL and DVDNTH
     divu_dvdntl_.set(bits_0_31, divu_dvdnt_.toU32());
@@ -754,7 +755,7 @@ void Sh2::start32bitsDivision() {
     }
     const auto dvsr = static_cast<s32>(divu_dvsr_.toU32());
 
-    Log::debug("sh2", "Dividend : {}, divisor : {}", dvdnt, dvsr);
+    Log::debug(Logger::sh2, "Dividend : {}, divisor : {}", dvdnt, dvsr);
 
     divu_quot_ = 0;
     divu_rem_  = 0;
@@ -783,7 +784,7 @@ void Sh2::start32bitsDivision() {
 }
 
 void Sh2::start64bitsDivision() {
-    Log::debug("sh2", "64/32 division");
+    Log::debug(Logger::sh2, "64/32 division");
 
     const auto dvdntl = static_cast<s32>(divu_dvdntl_.toU32());
     const auto dvdnth = static_cast<s32>(divu_dvdnth_.toU32());
@@ -791,7 +792,7 @@ void Sh2::start64bitsDivision() {
 
     const auto dividend = (static_cast<s64>(dvdnth) << number_of_bits_32) | dvdntl;
 
-    Log::debug("sh2", "Dividend : {}, divisor : {}", dividend, dvsr);
+    Log::debug(Logger::sh2, "Dividend : {}, divisor : {}", dividend, dvsr);
 
     // auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
     auto quotient  = s64{};
@@ -828,7 +829,7 @@ void Sh2::runInterruptController() {
             const auto  interrupt_mask = sr_.get(StatusRegister::i);
             const auto& interrupt      = pending_interrupts_.front();
             if ((interrupt.level > interrupt_mask) || interrupt == is::nmi) {
-                Log::debug("sh2",
+                Log::debug(Logger::sh2,
                            "{} SH2 interrupt request {:#0x} {:#0x}, PC={:#0x}",
                            sh2_type_name_.at(sh2_type_),
                            interrupt.vector,
@@ -848,7 +849,7 @@ void Sh2::runInterruptController() {
                 if (interrupt != is::nmi) {
                     is_interrupted_    = true; // Entering interrupt mode.
                     current_interrupt_ = interrupt;
-                    Log::debug("sh2",
+                    Log::debug(Logger::sh2,
                                "{} SH2 {} interrupt routine started, pc={:#0x}",
                                sh2_type_name_.at(sh2_type_),
                                interrupt.name,
@@ -868,7 +869,7 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
         // auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
         if (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) {
             if (divu_dvcr_.get(DivisionControlRegister::interrupt_enable) == core::InterruptEnable::enabled) {
-                Log::debug("sh2", "DIVU - Sending division overflow interrupt");
+                Log::debug(Logger::sh2, "DIVU - Sending division overflow interrupt");
                 is::sh2_division_overflow.vector = intc_vcrdiv_.get(VectorNumberSettingRegisterDiv::divu_interrupt_vector);
                 is::sh2_division_overflow.level  = intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::divu_level);
                 sendInterrupt(is::sh2_division_overflow);
@@ -903,7 +904,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
             frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::timer_overflow_flag);
             if (frt_tier_.get(TimerInterruptEnableRegister::timer_overflow_interrupt_enable)
                 == TimerOverflowInterruptEnable::interrupt_request_enabled) {
-                Log::debug("sh2", "FRT - Sending overflow interrupt");
+                Log::debug(Logger::sh2, "FRT - Sending overflow interrupt");
                 is::sh2_frt_overflow_flag_set.vector = intc_vcrd_.get(VectorNumberSettingRegisterD::frt_overflow_vector);
                 is::sh2_frt_overflow_flag_set.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
                 sendInterrupt(is::sh2_frt_overflow_flag_set);
@@ -916,7 +917,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
             frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::output_compare_flag_a);
             if (frt_tier_.get(TimerInterruptEnableRegister::output_compare_interrupt_a_enable)
                 == OutputCompareInterruptAEnable::interrupt_request_enabled) {
-                Log::debug("sh2", "FRT - OCRA match");
+                Log::debug(Logger::sh2, "FRT - OCRA match");
                 is::sh2_frt_output_compare_flag_a_set.vector
                     = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_output_compare_vector);
                 is::sh2_frt_output_compare_flag_a_set.level = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
@@ -933,7 +934,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
             frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::output_compare_flag_b);
             if (frt_tier_.get(TimerInterruptEnableRegister::output_compare_interrupt_b_enable)
                 == OutputCompareInterruptBEnable::interrupt_request_enabled) {
-                Log::debug("sh2", "FRT - OCRB match");
+                Log::debug(Logger::sh2, "FRT - OCRB match");
                 is::sh2_frt_output_compare_flag_b_set.vector
                     = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_output_compare_vector);
                 is::sh2_frt_output_compare_flag_b_set.level = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
@@ -1022,7 +1023,7 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
             conf.chcr        = dmac_chcr1_;
             conf.interrupt   = is::sh2_dma_1_transfer_end;
             break;
-        default: Log::warning("sh2", "DMAC - Unknown DMA channel");
+        default: Log::warning(Logger::sh2, "DMAC - Unknown DMA channel");
     }
     return conf;
 }
@@ -1031,16 +1032,16 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
     if (dmaStartConditionsAreSatisfied(conf.channel)) {
         const auto channel_number = static_cast<u8>((conf.channel == DmaChannel::channel_0) ? 0 : 1);
         if (conf.chcr.get(DmaChannelControlRegister::auto_request_mode) == AutoRequestMode::module_request) {
-            Log::warning("sh2", "DMAC - Channel {} module request not implemented !", channel_number);
+            Log::warning(Logger::sh2, "DMAC - Channel {} module request not implemented !", channel_number);
         } else {
             auto counter     = u32{conf.counter};
             auto source      = u32{conf.source};
             auto destination = u32{conf.destination};
-            Log::debug("sh2", "DMAC - Channel {} transfer", channel_number);
-            Log::debug("sh2", "PC={:#0x}", pc_);
-            Log::debug("sh2", "Source:{:#0x}", source);
-            Log::debug("sh2", "Destination:{:#0x}", destination);
-            Log::debug("sh2", "Count:{:#0x}", counter);
+            Log::debug(Logger::sh2, "DMAC - Channel {} transfer", channel_number);
+            Log::debug(Logger::sh2, "PC={:#0x}", pc_);
+            Log::debug(Logger::sh2, "Source:{:#0x}", source);
+            Log::debug(Logger::sh2, "Destination:{:#0x}", destination);
+            Log::debug(Logger::sh2, "Count:{:#0x}", counter);
 
             while (counter > 0) {
                 auto transfer_size = u8{};
@@ -1077,14 +1078,14 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                     case SourceAddressMode::fixed: break;
                     case SourceAddressMode::incremented: source += transfer_size; break;
                     case SourceAddressMode::decremented: source -= transfer_size; break;
-                    case SourceAddressMode::reserved: Log::warning("sh2", "Reserved source address mode used !");
+                    case SourceAddressMode::reserved: Log::warning(Logger::sh2, "Reserved source address mode used !");
                 }
 
                 switch (conf.chcr.get(DmaChannelControlRegister::destination_address_mode)) {
                     case DestinationAddressMode::fixed: break;
                     case DestinationAddressMode::incremented: destination += transfer_size; break;
                     case DestinationAddressMode::decremented: destination -= transfer_size; break;
-                    case DestinationAddressMode::reserved: Log::warning("sh2", "Reserved destination address mode used !");
+                    case DestinationAddressMode::reserved: Log::warning(Logger::sh2, "Reserved destination address mode used !");
                 }
             }
 
@@ -1101,11 +1102,11 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                     dmac_dar1_.set(bits_0_31, destination);
                     dmac_chcr1_.set(DmaChannelControlRegister::transfer_end_flag);
                     break;
-                case DmaChannel::channel_unknown: Log::warning("sh2", "Unknown DMA channel used !");
+                case DmaChannel::channel_unknown: Log::warning(Logger::sh2, "Unknown DMA channel used !");
             }
 
             if (conf.chcr.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
-                Log::debug("sh2", "DMAC - Sending DMA channel {} transfer end interrupt.", channel_number);
+                Log::debug(Logger::sh2, "DMAC - Sending DMA channel {} transfer end interrupt.", channel_number);
                 conf.interrupt.vector = intc_vcrc_.get(VectorNumberSettingRegisterDma::dma_transfert_end_vector);
                 conf.interrupt.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterA::dmac_level);
                 sendInterrupt(conf.interrupt);
@@ -1133,11 +1134,11 @@ void Sh2::sendInterrupt(const core::Interrupt& i) { // NOLINT(readability-conver
                 pending_interrupts_.sort();
                 pending_interrupts_.reverse();
 
-                Log::debug("sh2", "{} SH2 interrupt pending : {:#0x}", sh2_type_name_.at(sh2_type_), i.vector);
+                Log::debug(Logger::sh2, "{} SH2 interrupt pending : {:#0x}", sh2_type_name_.at(sh2_type_), i.vector);
             }
         } else {
             // Max number of pending interrupts reached, nothing is added
-            Log::debug("sh2", "Maximum number of pending interrupts reached");
+            Log::debug(Logger::sh2, "Maximum number of pending interrupts reached");
 
             // When the interrupt is NMI, the lower priority interrupt is removed
             if (i.vector == is::vector_nmi) {
@@ -1148,7 +1149,7 @@ void Sh2::sendInterrupt(const core::Interrupt& i) { // NOLINT(readability-conver
                 pending_interrupts_.sort();
                 pending_interrupts_.reverse();
 
-                Log::debug("sh2", "NMI interrupt forced");
+                Log::debug(Logger::sh2, "NMI interrupt forced");
             }
         }
     }

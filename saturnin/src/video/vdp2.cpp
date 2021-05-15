@@ -39,6 +39,7 @@ using namespace vdp2_register_address;
 using core::Config;
 using core::EmulatorContext;
 using core::Log;
+using core::Logger;
 using core::StartingFactorSelect;
 using core::tr;
 using util::toUnderlying;
@@ -55,7 +56,7 @@ void Vdp2::initialize() {
     switch (modules_.config()->getTvStandard(ts)) {
         case video::TvStandard::pal: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard); break;
         case video::TvStandard::ntsc: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard); break;
-        default: Log::warning("vdp2", tr("Unknown TV standard"));
+        default: Log::warning(Logger::vdp2, tr("Unknown TV standard"));
     }
     calculateDisplayDuration();
 }
@@ -69,7 +70,7 @@ void Vdp2::run(const u8 cycles) {
             tvstat_.set(ScreenStatus::vertical_blank_flag, VerticalBlankFlag::during_vertical_retrace);
             tvmd_.set(TvScreenMode::display, Display::not_displayed);
 
-            Log::debug("vdp2", tr("VBlankIn interrupt request"));
+            Log::debug(Logger::vdp2, tr("VBlankIn interrupt request"));
 
             modules_.vdp1()->onVblankIn();
             this->onVblankIn();
@@ -92,7 +93,7 @@ void Vdp2::run(const u8 cycles) {
 
         tvmd_.set(TvScreenMode::display, Display::displayed);
 
-        Log::debug("vdp2", tr("VBlankOut interrupt request"));
+        Log::debug(Logger::vdp2, tr("VBlankOut interrupt request"));
         modules_.scu()->onVblankOut();
 
         timer_0_counter_ = 0;
@@ -151,7 +152,7 @@ void Vdp2::calculateDisplayDuration() {
                 case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
                 case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
                 case VerticalResolution::lines_nb_256: visible_lines = lines_nb_256; break;
-                default: core::Log::warning("vdp2", core::tr("Unknown PAL vertical resolution."));
+                default: core::Log::warning(Logger::vdp2, core::tr("Unknown PAL vertical resolution."));
             }
             const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
             cycles_per_vblank_      = vblank_lines * cycles_per_frame_ / total_lines;
@@ -178,7 +179,7 @@ void Vdp2::calculateDisplayDuration() {
             switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
                 case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
                 case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
-                default: core::Log::warning("vdp2", core::tr("Unknown NTSC vertical resolution."));
+                default: core::Log::warning(Logger::vdp2, core::tr("Unknown NTSC vertical resolution."));
             }
             const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
             cycles_per_vblank_      = vblank_lines * cycles_per_frame_ / total_lines;
@@ -190,7 +191,7 @@ void Vdp2::calculateDisplayDuration() {
             break;
         }
         default: {
-            core::Log::warning("vdp2", core::tr("Undefined TV standard."));
+            core::Log::warning(Logger::vdp2, core::tr("Undefined TV standard."));
         }
     }
 }
@@ -199,6 +200,10 @@ void Vdp2::onVblankIn() {
     updateResolution();
     updateRamStatus();
     populateRenderData();
+}
+
+auto Vdp2::getSpriteColorAddressOffset() -> u16 {
+    return getColorRamAddressOffset(craofb_.get(ColorRamAddressOffsetB::color_ram_address_offset_sprite));
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -750,7 +755,7 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case color_offset_b_green: return cobg_.toU16();
         case color_offset_b_blue: return cobb_.toU16();
 
-        default: core::Log::warning("vdp2", core::tr("Unimplemented register read {:#010x}"), addr);
+        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register read {:#010x}"), addr);
     }
 
     return 0;
@@ -902,7 +907,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case color_offset_b_red: cobr_.set(bits_0_15, data); break;
         case color_offset_b_green: cobg_.set(bits_0_15, data); break;
         case color_offset_b_blue: cobb_.set(bits_0_15, data); break;
-        default: core::Log::warning("vdp2", core::tr("Unimplemented register write {:#010x}"), addr);
+        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write {:#010x}"), addr);
     }
 }
 
@@ -1183,7 +1188,7 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             cobg_.set(bits_0_15, h);
             cobb_.set(bits_0_15, l);
             break;
-        default: core::Log::warning("vdp2", core::tr("Unimplemented register write {:#010x}"), addr);
+        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write {:#010x}"), addr);
     }
 }
 
@@ -1701,14 +1706,14 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
-            core::Log::warning("unimplemented", core::tr("VDP2 RBG0 display"));
+            core::Log::warning(Logger::unimplemented, core::tr("VDP2 RBG0 display"));
             break;
         }
         case ScrollScreen::rbg1: {
             if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
-            core::Log::warning("unimplemented", core::tr("VDP2 RBG1 display"));
+            core::Log::warning(Logger::unimplemented, core::tr("VDP2 RBG1 display"));
             break;
         }
     }
@@ -1820,13 +1825,13 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
         }
         case VramAccessCommand::nbg0_vertical_cell_scroll_table_data_read:
         case VramAccessCommand::nbg1_vertical_cell_scroll_table_data_read: {
-            core::Log::warning("unimplemented", core::tr("VDP2 vertical cell scroll table data read"));
+            core::Log::warning(Logger::unimplemented, core::tr("VDP2 vertical cell scroll table data read"));
             break;
         }
         case VramAccessCommand::cpu_read_write: {
             break;
         }
-        default: core::Log::warning("vdp2", core::tr("VDP2 VRAM access command not allowed"));
+        default: core::Log::warning(Logger::vdp2, core::tr("VDP2 VRAM access command not allowed"));
     }
 
     constexpr auto not_found = u8{0x0};
@@ -2288,30 +2293,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     constexpr auto map_size_rbg = u8{4 * 4};
     constexpr auto cell_size    = u8{8 * 8};
 
-    const auto getColorRamAddressOffset = [&](const u8 register_offset) {
-        constexpr auto color_size_2_bytes = u8{2};
-        constexpr auto color_size_4_bytes = u8{4};
-        auto           color_size         = u8{};
-        constexpr auto mask_2_bits        = u8{0x3};
-        constexpr auto mask_3_bits        = u8{0x7};
-        auto           register_mask      = u8{};
-        switch (ram_status_.color_ram_mode) {
-            case ColorRamMode::mode_0_rgb_5_bits_1024_colors:
-                color_size    = color_size_2_bytes;
-                register_mask = mask_2_bits;
-                break;
-            case ColorRamMode::mode_1_rgb_5_bits_2048_colors:
-                color_size    = color_size_2_bytes;
-                register_mask = mask_3_bits;
-                break;
-            case ColorRamMode::mode_2_rgb_8_bits_1024_colors:
-                color_size    = color_size_4_bytes;
-                register_mask = mask_2_bits;
-                break;
-            default: core::Log::warning("vdp2", core::tr("Can't calculate color RAM address offset."));
-        }
-        return ((register_offset & register_mask) << displacement_8) * color_size;
-    };
     const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3bits c, const ScreenModeType t) {
         switch (c) {
             case CharacterColorNumber3bits::palette_16: return ColorCount::palette_16;
@@ -2739,7 +2720,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             case PlaneSize::size_1_by_1: return ScreenOffset{cells_nb_64, cells_nb_64};
             case PlaneSize::size_2_by_1: return ScreenOffset{cells_nb_128, cells_nb_64};
             case PlaneSize::size_2_by_2: return ScreenOffset{cells_nb_128, cells_nb_128};
-            default: Log::warning("vdp2", tr("Plane screen offset wasn't properly calculated"));
+            default: Log::warning(Logger::vdp2, tr("Plane screen offset wasn't properly calculated"));
         }
         return ScreenOffset{0, 0};
     }(screen.plane_size);
@@ -2890,7 +2871,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             }
             return vram_start_address + ((start_address & mask) >> 2) * multiplier;
             break;
-        default: Log::warning("vdp2", tr("Plane start address wasn't properly calculated")); return 0;
+        default: Log::warning(Logger::vdp2, tr("Plane start address wasn't properly calculated")); return 0;
     }
 }
 
@@ -2975,7 +2956,7 @@ void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_addre
 
             break;
         }
-        default: Log::warning("vdp2", tr("Plane size invalid !"));
+        default: Log::warning(Logger::vdp2, tr("Plane size invalid !"));
     }
 }
 
@@ -3162,7 +3143,8 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     constexpr auto  texture_size   = texture_width * texture_height * 4;
     std::vector<u8> texture_data;
     texture_data.reserve(texture_size);
-    const auto key = Texture::calculateKey(VdpType::vdp2, cell_address, screen.character_color_number, pnd.palette_number);
+    const auto key
+        = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
 
     if (!Texture::isTextureStored(key)) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
@@ -3186,7 +3168,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                     break;
                 }
                 default: {
-                    Log::warning("vdp2", tr("Character color number invalid !"));
+                    Log::warning(Logger::vdp2, tr("Character color number invalid !"));
                 }
             }
         } else {
@@ -3210,7 +3192,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                     break;
                 }
                 default: {
-                    Log::warning("vdp2", tr("Character color number invalid !"));
+                    Log::warning(Logger::vdp2, tr("Character color number invalid !"));
                 }
             }
         }
@@ -3231,7 +3213,7 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     if (!Texture::isTextureStored(key)) {
         Texture::storeTexture(Texture(VdpType::vdp2,
                                       cell_address,
-                                      screen.character_color_number,
+                                      toUnderlying(screen.character_color_number),
                                       pnd.palette_number,
                                       texture_data,
                                       texture_width,
@@ -3244,6 +3226,31 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     // if (pnd.character_number == 0xdddd) __debugbreak();
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
 }
+
+auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {
+    constexpr auto color_size_2_bytes = u8{2};
+    constexpr auto color_size_4_bytes = u8{4};
+    auto           color_size         = u8{};
+    constexpr auto mask_2_bits        = u8{0x3};
+    constexpr auto mask_3_bits        = u8{0x7};
+    auto           register_mask      = u8{};
+    switch (ram_status_.color_ram_mode) {
+        case ColorRamMode::mode_0_rgb_5_bits_1024_colors:
+            color_size    = color_size_2_bytes;
+            register_mask = mask_2_bits;
+            break;
+        case ColorRamMode::mode_1_rgb_5_bits_2048_colors:
+            color_size    = color_size_2_bytes;
+            register_mask = mask_3_bits;
+            break;
+        case ColorRamMode::mode_2_rgb_8_bits_1024_colors:
+            color_size    = color_size_4_bytes;
+            register_mask = mask_2_bits;
+            break;
+        default: core::Log::warning(Logger::vdp2, core::tr("Can't calculate color RAM address offset."));
+    }
+    return ((register_offset & register_mask) << displacement_8) * color_size;
+};
 
 auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data                      = PatternNameData{};

@@ -689,19 +689,15 @@ class Config {
     auto getAreaCodeKey(const AreaCode value) const -> std::optional<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::getLogLevel(const std::string& key) -> LogLevel;
+    /// \fn void Config::updateLogLevel();
     ///
-    /// \brief  Returns the log level corresponding to the key.
+    /// \brief  Updates the log level of the various loggers.
     ///
     /// \author Runik
-    /// \date   12/05/2021
-    ///
-    /// \param  key The key.
-    ///
-    /// \returns    The log level.
+    /// \date   13/05/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getLogLevel(const std::string& key) -> LogLevel;
+    void updateLogLevel();
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -732,6 +728,21 @@ class Config {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static auto addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Config::getLogLevel(const std::string& key) -> LogLevel;
+    ///
+    /// \brief  Returns the log level corresponding to the key.
+    ///
+    /// \author Runik
+    /// \date   12/05/2021
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The log level.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getLogLevel(const std::string& key) -> LogLevel;
 
     std::string filename_; ///< Name of the configuration file used
 

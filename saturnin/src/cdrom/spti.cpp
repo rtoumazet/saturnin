@@ -33,6 +33,7 @@ namespace util = saturnin::utilities;
 namespace saturnin::cdrom {
 
 using core::Log;
+using core::Logger;
 using core::tr;
 
 /* static */
@@ -131,7 +132,7 @@ auto Spti::readOneSector(const uint32_t& fad) -> std::string {
                         reinterpret_cast<LPDWORD>(&dummy),
                         nullptr)
         == 0) {
-        Log::warning("cdrom", tr("Drive isn't accessible"));
+        Log::warning(Logger::cdrom, tr("Drive isn't accessible"));
 
     } else {
         if (DeviceIoControl(drive_handle,
@@ -143,7 +144,7 @@ auto Spti::readOneSector(const uint32_t& fad) -> std::string {
                             reinterpret_cast<LPDWORD>(&dummy),
                             nullptr)
             == 0) {
-            Log::warning("cdrom", util::getLastErrorMessage());
+            Log::warning(Logger::cdrom, util::getLastErrorMessage());
         }
     }
 
@@ -192,7 +193,7 @@ void Spti::inquiry(const HANDLE& h, ScsiDriveInfo& di) {
                         reinterpret_cast<LPDWORD>(&dummy),
                         nullptr)
         == 0) {
-        Log::warning("cdrom", util::getLastErrorMessage());
+        Log::warning(Logger::cdrom, util::getLastErrorMessage());
 
     } else {
         const auto     temp      = std::string(output_buffer.begin(), output_buffer.end());

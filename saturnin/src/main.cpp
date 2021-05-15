@@ -27,20 +27,21 @@ namespace core = saturnin::core;
 
 using core::EmulatorContext;
 using core::Log;
+using core::Logger;
 using core::tr;
 
 auto main(int argc, char* argv[]) -> int {
     try {
         auto state = EmulatorContext{};
         if (!state.initialize()) {
-            Log::error("main", tr("Could not initialize the program ..."));
+            Log::error(Logger::main, tr("Could not initialize the program ..."));
             throw std::runtime_error("Main error !");
         }
 
         state.startInterface();
         state.stopEmulation();
         std::exit(EXIT_SUCCESS);
-    } catch (const std::runtime_error& e) { Log::error("exception", e.what()); } catch (const std::exception& e) {
-        Log::error("exception", e.what());
-    } catch (...) { Log::error("exception", tr("Uncaught exception !")); }
+    } catch (const std::runtime_error& e) { Log::error(Logger::exception, e.what()); } catch (const std::exception& e) {
+        Log::error(Logger::exception, e.what());
+    } catch (...) { Log::error(Logger::exception, tr("Uncaught exception !")); }
 };

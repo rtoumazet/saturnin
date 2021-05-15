@@ -36,9 +36,9 @@ class EmulatorModules {
     /// Constructors / Destructors
     EmulatorModules() = default;
     EmulatorModules(EmulatorContext* ec) : context_(ec){};
-    EmulatorModules(const EmulatorModules&) = delete;
-    EmulatorModules(EmulatorModules&&)      = delete;
-    auto operator=(const EmulatorModules&) & -> EmulatorModules& = delete;
+    EmulatorModules(const EmulatorModules&) = default;
+    EmulatorModules(EmulatorModules&&)      = default;
+    auto operator=(const EmulatorModules&) & -> EmulatorModules& = default;
     auto operator=(EmulatorModules&&) & -> EmulatorModules& = default;
     ~EmulatorModules()                                      = default;
     ///@}

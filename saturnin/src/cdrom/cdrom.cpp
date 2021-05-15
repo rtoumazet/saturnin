@@ -31,6 +31,7 @@
 namespace saturnin::cdrom {
 
 using core::Log;
+using core::Logger;
 using core::tr;
 
 // Static variables initialization
@@ -1526,7 +1527,7 @@ void Cdrom::executeCommand() {
             //			EmuState::pLog->CdBlockWrite("Unknown command : ",CR1>>8);
             //			EmuState::pLog->CdBlockU("Unknown command : ",CR1>>8);
             //			#endif
-            Log::warning("unimplemented", "Cdblock command {:04x}", cr1_.get(CommandRegister::command));
+            Log::warning(Logger::unimplemented, "Cdblock command {:04x}", cr1_.get(CommandRegister::command));
             break;
     }
     executed_commands_++;
@@ -1842,7 +1843,7 @@ void Cdrom::executeCommand() {
 //
 
 void Cdrom::initialize() {
-    Log::info("cdrom", tr("CD-ROM initialization"));
+    Log::info(Logger::cdrom, tr("CD-ROM initialization"));
     reset();
 }
 
@@ -1872,7 +1873,7 @@ auto Cdrom::read8(const u32 addr) const -> u8 {
             //			}
             break;
 
-        default: Log::warning("cdrom", "Unmapped access {:#010x}", addr); return 0;
+        default: Log::warning(Logger::cdrom, "Unmapped access {:#010x}", addr); return 0;
     }
 
     return 0;
@@ -1881,7 +1882,7 @@ auto Cdrom::read8(const u32 addr) const -> u8 {
 auto Cdrom::read16(const u32 addr) -> u16 {
     switch (addr) {
         case hirq_register_address:
-            Log::debug("cdrom", "HIrqReg={:#06x}", hirq_status_reg_.toU32());
+            Log::debug(Logger::cdrom, "HIrqReg={:#06x}", hirq_status_reg_.toU32());
             return hirq_status_reg_.toU32();
         case hirq_mask_register_address: return hirq_mask_reg_.toU32();
         case command_register_1_address: return cr1_.toU32();
@@ -1904,7 +1905,7 @@ auto Cdrom::read16(const u32 addr) -> u16 {
             //				return data;
             //			}
             //			break;
-        default: Log::warning("cdrom", "Unmapped access {:#010x}", addr); return 0;
+        default: Log::warning(Logger::cdrom, "Unmapped access {:#010x}", addr); return 0;
     }
     return 0;
 }
@@ -1936,12 +1937,14 @@ auto Cdrom::read32(const u32 addr) const -> u32 {
             //			}
             break;
 
-        default: Log::warning("cdrom", "Unmapped access {:#010x}", addr); return 0;
+        default: Log::warning(Logger::cdrom, "Unmapped access {:#010x}", addr); return 0;
     }
     return 0;
 }
 
-void Cdrom::write8(const u32 addr, const u8 data) { Log::warning("cdrom", "Unmapped write access {:#010x} {:#04x}", addr, data); }
+void Cdrom::write8(const u32 addr, const u8 data) {
+    Log::warning(Logger::cdrom, "Unmapped write access {:#010x} {:#04x}", addr, data);
+}
 
 void Cdrom::write16(const u32 addr, const u16 data) {
     switch (addr) {
@@ -1964,7 +1967,7 @@ void Cdrom::write16(const u32 addr, const u16 data) {
             is_command_being_initialized_ = false;
             executeCommand();
             break;
-        default: Log::warning("cdrom", "Unmapped write access {:#010x} {:#04x}", addr, data); break;
+        default: Log::warning(Logger::cdrom, "Unmapped write access {:#010x} {:#04x}", addr, data); break;
     }
 }
 
@@ -2022,7 +2025,7 @@ void Cdrom::write32(const u32 addr, const u32 data) {
             //				}
             //			}
             break;
-        default: Log::warning("cdrom", "Unmapped write access {:#010x} {:#04x}", addr, data); break;
+        default: Log::warning(Logger::cdrom, "Unmapped write access {:#010x} {:#04x}", addr, data); break;
     }
 }
 
@@ -2032,7 +2035,7 @@ void Cdrom::run(const u8 cycles) {
 
     elapsed_cycles_ -= cycles;
     if (elapsed_cycles_ <= 0) {
-        Log::debug("cdrom", "Sending periodic response");
+        Log::debug(Logger::cdrom, "Sending periodic response");
         executed_commands_ = 0;
 
         hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
@@ -2287,7 +2290,7 @@ auto Cdrom::calculatePeriodicResponseDuration() -> u32 {
         case CdDrivePlayMode::standby:
             max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::standby);
             return modules_.smpc()->calculateCyclesNumber(periodic_response_period_standby);
-        default: Log::warning("cdrom", "Unknown play mode"); return 0;
+        default: Log::warning(Logger::cdrom, "Unknown play mode"); return 0;
     }
 }
 
@@ -2330,7 +2333,7 @@ void Cdrom::getHardwareInfo() {
 
     hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
 
-    Log::debug("cdrom", "Get Hardware Info executed");
+    Log::debug(Logger::cdrom, "Get Hardware Info executed");
 }
 
 } // namespace saturnin::cdrom

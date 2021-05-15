@@ -192,7 +192,7 @@ auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) -> std::vector<Pe
 void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
     constexpr auto param_number = u8{13};
     if (config.size() != param_number) {
-        Log::warning("smpc", tr("Incorrect Saturn pad data"));
+        Log::warning(Logger::smpc, tr("Incorrect Saturn pad data"));
         const auto v   = SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout);
         auto       pad = SaturnDigitalPad{};
         pad.fromConfig(v);
@@ -250,7 +250,7 @@ auto StvPlayerControls::toConfig(const PeripheralLayout layout) -> std::vector<P
 void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
     constexpr auto param_number = u8{8};
     if (config.size() != param_number) {
-        Log::warning("smpc", tr("Incorrect ST-V player control data"));
+        Log::warning(Logger::smpc, tr("Incorrect ST-V player control data"));
         const auto v       = StvPlayerControls().toConfig(PeripheralLayout::empty_layout);
         auto       control = StvPlayerControls{};
         control.fromConfig(v);
@@ -291,7 +291,7 @@ auto StvBoardControls::toConfig(const PeripheralLayout layout) -> std::vector<Pe
 void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
     constexpr auto param_number = u8{6};
     if (config.size() != param_number) {
-        Log::warning("smpc", tr("Incorrect ST-V board control data"));
+        Log::warning(Logger::smpc, tr("Incorrect ST-V board control data"));
         const auto v       = StvBoardControls().toConfig(PeripheralLayout::empty_layout);
         auto       control = StvBoardControls{};
         control.fromConfig(v);
@@ -332,7 +332,7 @@ void Smpc::reset() {
     switch (modules_.config()->getTvStandard(ts)) {
         case video::TvStandard::pal: clock_ = SystemClock::pal_320; break;
         case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
-        default: Log::warning("smpc", tr("Could not set system clock !")); clock_ = SystemClock::not_set;
+        default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = SystemClock::not_set;
     }
 
     std::string p1c = modules_.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
@@ -396,46 +396,46 @@ void Smpc::executeCommand() {
     switch (command) {
         case SmpcCommand::master_sh2_on:
             is_master_sh2_on_ = true;
-            Log::debug("smpc", tr("-=Master SH2 ON=- command executed"));
+            Log::debug(Logger::smpc, tr("-=Master SH2 ON=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::slave_sh2_on:
             is_slave_sh2_on_ = true;
             modules_.slaveSh2()->powerOnReset();
-            Log::debug("smpc", tr("-=Slave SH2 ON=- command executed"));
+            Log::debug(Logger::smpc, tr("-=Slave SH2 ON=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::slave_sh2_off:
             is_slave_sh2_on_ = false;
-            Log::debug("smpc", tr("-=Slave SH2 OFF=- command executed"));
+            Log::debug(Logger::smpc, tr("-=Slave SH2 OFF=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::sound_on:
             is_sound_on_ = true;
             modules_.scsp()->reset();
-            Log::debug("smpc", tr("-=Sound ON=- command executed"));
+            Log::debug(Logger::smpc, tr("-=Sound ON=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::sound_off:
             is_sound_on_ = false;
             // emulator_context_->scsp()->setSound(false);
-            Log::debug("smpc", tr("-=Sound OFF=- command executed"));
+            Log::debug(Logger::smpc, tr("-=Sound OFF=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::cd_on:
             is_cd_on = true;
-            Log::debug("smpc", tr("-=CD ON=- command executed"));
+            Log::debug(Logger::smpc, tr("-=CD ON=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::cd_off:
             is_cd_on = false;
-            Log::debug("smpc", tr("-=CD OFF=- command executed"));
+            Log::debug(Logger::smpc, tr("-=CD OFF=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
@@ -443,7 +443,7 @@ void Smpc::executeCommand() {
             modules_.masterSh2()->powerOnReset();
             modules_.slaveSh2()->powerOnReset();
             // emulator_context_->scsp()->reset();
-            Log::debug("smpc", tr("-=Reset Entire System=- command executed"));
+            Log::debug(Logger::smpc, tr("-=Reset Entire System=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
@@ -461,7 +461,7 @@ void Smpc::executeCommand() {
                     break;
                 case video::TvStandard::ntsc:
                     clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::ntsc_320 : SystemClock::ntsc_352;
-                default: Log::warning("smpc", tr("Could not set system clock !")); clock_ = SystemClock::not_set;
+                default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = SystemClock::not_set;
             }
             is_slave_sh2_on_ = false;
             modules_.slaveSh2()->powerOnReset();
@@ -469,30 +469,30 @@ void Smpc::executeCommand() {
             modules_.vdp2()->onSystemClockUpdate();
             if (command == SmpcCommand::clock_change_320) {
                 is_horizontal_res_352 = false;
-                Log::debug("smpc", tr("-=Clock Change 320 Mode=- command executed"));
+                Log::debug(Logger::smpc, tr("-=Clock Change 320 Mode=- command executed"));
             }
             if (command == SmpcCommand::clock_change_352) {
                 is_horizontal_res_352 = true;
-                Log::debug("smpc", tr("-=Clock Change 352 Mode=- command executed"));
+                Log::debug(Logger::smpc, tr("-=Clock Change 352 Mode=- command executed"));
             }
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::nmi_request:
             modules_.scu()->generateInterrupt(interrupt_source::nmi);
-            Log::debug("smpc", tr("-=NMI Request=- command executed"));
+            Log::debug(Logger::smpc, tr("-=NMI Request=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::reset_enable:
             is_soft_reset_allowed_ = true;
-            Log::debug("smpc", tr("-=Reset Enable=- command executed"));
+            Log::debug(Logger::smpc, tr("-=Reset Enable=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::reset_disable:
             is_soft_reset_allowed_ = false;
-            Log::debug("smpc", tr("-=Reset Disable=- command executed"));
+            Log::debug(Logger::smpc, tr("-=Reset Disable=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
@@ -504,23 +504,23 @@ void Smpc::executeCommand() {
             for (u8 i = 0; i < 4; ++i) {
                 smem_[i] = ireg_[i].get(InputRegister::all_bits);
             }
-            Log::debug("smpc", tr("-=SMPC Memory Setting=- command executed"));
+            Log::debug(Logger::smpc, tr("-=SMPC Memory Setting=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::time_setting:
-            Log::debug("smpc", tr("-=Time Setting=- command executed"));
+            Log::debug(Logger::smpc, tr("-=Time Setting=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
-        default: Log::warning("smpc", tr("Unknown SMPC command '{}'"), util::toUnderlying(command));
+        default: Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), util::toUnderlying(command));
     }
 }
 
 void Smpc::executeIntback() {
     auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
     if (is_break_requested) {
-        Log::debug("smpc", tr("INTBACK break request"));
+        Log::debug(Logger::smpc, tr("INTBACK break request"));
         sf_.reset();
         return;
     }
@@ -528,13 +528,13 @@ void Smpc::executeIntback() {
     auto is_continue_requested
         = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
     if (is_continue_requested) {
-        Log::debug("smpc", tr("INTBACK continue request"));
+        Log::debug(Logger::smpc, tr("INTBACK continue request"));
         next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
         getPeripheralData();
         return;
     }
 
-    Log::debug("smpc", tr("INTBACK started"));
+    Log::debug(Logger::smpc, tr("INTBACK started"));
     oreg_[index_31].reset();
     next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
     auto is_status_returned
@@ -556,7 +556,7 @@ void Smpc::executeIntback() {
 };
 
 void Smpc::getStatus() {
-    Log::debug("smpc", tr("INTBACK returning status data"));
+    Log::debug(Logger::smpc, tr("INTBACK returning status data"));
     sr_.reset();
     sr_[bit_7] = false;
     sr_[bit_6] = true;
@@ -609,12 +609,12 @@ void Smpc::getStatus() {
 
     oreg_[index_31].reset();
 
-    Log::debug("smpc", tr("Interrupt request"));
+    Log::debug(Logger::smpc, tr("Interrupt request"));
     modules_.scu()->generateInterrupt(interrupt_source::system_manager);
 };
 
 void Smpc::getPeripheralData() {
-    Log::debug("smpc", tr("INTBACK returning peripheral data"));
+    Log::debug(Logger::smpc, tr("INTBACK returning peripheral data"));
 
     // SMPC Peripheral result :
     // [SR]
@@ -679,12 +679,12 @@ void Smpc::getPeripheralData() {
                     break;
                 }
                 default: {
-                    Log::warning("smpc", tr("Port Status not implemented"));
+                    Log::warning(Logger::smpc, tr("Port Status not implemented"));
                 }
             }
             break;
         }
-        default: Log::warning("smpc", tr("Port Status reserved"));
+        default: Log::warning(Logger::smpc, tr("Port Status reserved"));
     }
 
     switch (sr_.get(StatusRegister::port_2_mode)) {
@@ -710,12 +710,12 @@ void Smpc::getPeripheralData() {
                     break;
                 }
                 default: {
-                    Log::warning("smpc", tr("Port Status not implemented"));
+                    Log::warning(Logger::smpc, tr("Port Status not implemented"));
                 }
             }
             break;
         }
-        default: Log::warning("smpc", tr("Port Status reserved"));
+        default: Log::warning(Logger::smpc, tr("Port Status reserved"));
     }
 
     // Checking if there's more data to send than existing OREG registers
@@ -736,7 +736,7 @@ void Smpc::getPeripheralData() {
         sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
     }
 
-    Log::debug("smpc", tr("Interrupt request"));
+    Log::debug(Logger::smpc, tr("Interrupt request"));
     modules_.scu()->generateInterrupt(interrupt_source::system_manager);
 } // namespace saturnin::core
 
@@ -776,7 +776,7 @@ auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData
             break;
         }
         default: {
-            Log::warning("smpc", tr("Peripheral not implemented"));
+            Log::warning(Logger::smpc, tr("Peripheral not implemented"));
         }
     }
 
@@ -866,11 +866,11 @@ void Smpc::write(const u32 addr, const u8 data) {
             if (modules_.context()->hardwareMode() == HardwareMode::stv) {
                 constexpr auto sound_status = u8{0x10};
                 if ((data & sound_status) > 0) {
-                    Log::debug("smpc", tr("-=Sound OFF=-"));
+                    Log::debug(Logger::smpc, tr("-=Sound OFF=-"));
 
                     is_sound_on_ = false;
                 } else {
-                    Log::debug("smpc", tr("-=Sound ON=-"));
+                    Log::debug(Logger::smpc, tr("-=Sound ON=-"));
 
                     is_sound_on_ = true;
                     modules_.scsp()->reset();
@@ -911,7 +911,7 @@ auto Smpc::getSaturnPeripheralMapping() -> SaturnPeripheralMapping { return satu
 auto Smpc::getStvPeripheralMapping() -> StvPeripheralMapping { return stv_mapping_; }
 
 void Smpc::initialize() {
-    Log::info("smpc", tr("SMPC initialization"));
+    Log::info(Logger::smpc, tr("SMPC initialization"));
     reset();
 }
 

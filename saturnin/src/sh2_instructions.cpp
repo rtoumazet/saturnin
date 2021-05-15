@@ -34,6 +34,7 @@ namespace is = saturnin::core::interrupt_source;
 namespace saturnin::sh2 {
 
 using core::Log;
+using core::Logger;
 
 constexpr u32 ignored_delay_slot_address{0x20000202};
 constexpr u32 sr_bitmask{0x3f3};
@@ -60,7 +61,7 @@ void delaySlot(Sh2& s, const u32 addr) {
         s.current_opcode_ = s.modules_.memory()->read<u16>(addr);
 
         if (isInstructionIllegal(s.current_opcode_)) {
-            Log::error("sh2", "Illegal instruction slot");
+            Log::error(Logger::sh2, "Illegal instruction slot");
             s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
         } else {
             // Delay slot instruction execution
@@ -122,7 +123,7 @@ auto isInstructionIllegal(const u16 inst) -> bool {
 
 void badOpcode(Sh2& s) {
     const auto type = std::string{(s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave"};
-    Log::error("sh2", "Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
+    Log::error(Logger::sh2, "Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
 
     s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
 }
@@ -1328,25 +1329,25 @@ void rte(Sh2& s) {
         // Current sh2 is interrupted, we get back to regular flow
         if (s.sh2_type_ == Sh2Type::master) {
             s.modules_.scu()->clearInterruptFlag(s.current_interrupt_);
-            Log::debug("sh2", "*** Back from interrupt ***");
+            Log::debug(Logger::sh2, "*** Back from interrupt ***");
             switch (s.current_interrupt_.vector) {
-                case is::vector_v_blank_in: Log::debug("sh2", "VBlank-In interrupt routine finished"); break;
-                case is::vector_v_blank_out: Log::debug("sh2", "VBlank-Out interrupt routine finished"); break;
-                case is::vector_h_blank_in: Log::debug("sh2", "HBlank-In interrupt routine finished"); break;
-                case is::vector_timer_0: Log::debug("sh2", "Timer 0 interrupt routine finished"); break;
-                case is::vector_timer_1: Log::debug("sh2", "Timer 1 interrupt routine finished"); break;
-                case is::vector_dsp_end: Log::debug("sh2", "DSP End interrupt routine finished"); break;
-                case is::vector_sound_request: Log::debug("sh2", "Sound Request interrupt routine finished"); break;
-                case is::vector_system_manager: Log::debug("sh2", "System Manager interrupt routine finished"); break;
-                case is::vector_pad_interrupt: Log::debug("sh2", "Pad interrupt routine finished"); break;
-                case is::vector_level_2_dma_end: Log::debug("sh2", "Level 2 DMA End interrupt routine finished"); break;
-                case is::vector_level_1_dma_end: Log::debug("sh2", "Level 1 DMA End interrupt routine finished"); break;
-                case is::vector_level_0_dma_end: Log::debug("sh2", "Level 0 DMA End interrupt routine finished"); break;
-                case is::vector_dma_illegal: Log::debug("sh2", "DMA Illegal interrupt routine finished"); break;
-                case is::vector_sprite_draw_end: Log::debug("sh2", "Sprite Draw End interrupt routine finished"); break;
+                case is::vector_v_blank_in: Log::debug(Logger::sh2, "VBlank-In interrupt routine finished"); break;
+                case is::vector_v_blank_out: Log::debug(Logger::sh2, "VBlank-Out interrupt routine finished"); break;
+                case is::vector_h_blank_in: Log::debug(Logger::sh2, "HBlank-In interrupt routine finished"); break;
+                case is::vector_timer_0: Log::debug(Logger::sh2, "Timer 0 interrupt routine finished"); break;
+                case is::vector_timer_1: Log::debug(Logger::sh2, "Timer 1 interrupt routine finished"); break;
+                case is::vector_dsp_end: Log::debug(Logger::sh2, "DSP End interrupt routine finished"); break;
+                case is::vector_sound_request: Log::debug(Logger::sh2, "Sound Request interrupt routine finished"); break;
+                case is::vector_system_manager: Log::debug(Logger::sh2, "System Manager interrupt routine finished"); break;
+                case is::vector_pad_interrupt: Log::debug(Logger::sh2, "Pad interrupt routine finished"); break;
+                case is::vector_level_2_dma_end: Log::debug(Logger::sh2, "Level 2 DMA End interrupt routine finished"); break;
+                case is::vector_level_1_dma_end: Log::debug(Logger::sh2, "Level 1 DMA End interrupt routine finished"); break;
+                case is::vector_level_0_dma_end: Log::debug(Logger::sh2, "Level 0 DMA End interrupt routine finished"); break;
+                case is::vector_dma_illegal: Log::debug(Logger::sh2, "DMA Illegal interrupt routine finished"); break;
+                case is::vector_sprite_draw_end: Log::debug(Logger::sh2, "Sprite Draw End interrupt routine finished"); break;
             }
 
-            Log::debug("sh2", "Level:{:#0x}", s.current_interrupt_.level);
+            Log::debug(Logger::sh2, "Level:{:#0x}", s.current_interrupt_.level);
         }
 
         s.is_interrupted_                                   = false;

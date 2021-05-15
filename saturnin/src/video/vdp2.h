@@ -48,6 +48,8 @@ class Vdp1;
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
+using saturnin::core::Log;
+using saturnin::core::Logger;
 using AddressToNameMap = std::map<u32, std::string>;
 
 using seconds = std::chrono::duration<double>;
@@ -603,7 +605,7 @@ class Vdp2 {
 
     template<typename T>
     void writeRegisters(const u32 addr, const T data) {
-        core::Log::warning("vdp2", core::tr("{}bits register write {:#0x}"), sizeof(T) * number_of_bits_8, addr);
+        core::Log::warning(Logger::vdp2, core::tr("{}bits register write {:#0x}"), sizeof(T) * number_of_bits_8, addr);
     }
 
     // 16 bits specialization
@@ -618,7 +620,7 @@ class Vdp2 {
     }
     template<typename T>
     auto readRegisters(const u32 addr) -> T {
-        core::Log::warning("vdp2", core::tr("{}bits register read {:#0x}"), sizeof(T) * number_of_bits_8, addr);
+        core::Log::warning(Logger::vdp2, core::tr("{}bits register read {:#0x}"), sizeof(T) * number_of_bits_8, addr);
         return 0;
     }
     // 16 bits specialization
@@ -687,6 +689,32 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto vdp2Parts(const ScrollScreen s) -> const std::vector<Vdp2Part>& { return vdp2_parts_[utilities::toUnderlying(s)]; }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getSpriteColorAddressOffset() const -> u16;
+    ///
+    /// \brief  Gets the color address offset of sprites.
+    ///
+    /// \author Runik
+    /// \date   14/05/2021
+    ///
+    /// \returns    The sprite color address offset.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getSpriteColorAddressOffset() -> u16;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getColorRamMode() const -> ColorRamMode
+    ///
+    /// \brief  Gets current color RAM mode.
+    ///
+    /// \author Runik
+    /// \date   14/05/2021
+    ///
+    /// \returns    The color ram mode.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getColorRamMode() const -> ColorRamMode { return ram_status_.color_ram_mode; }
 
     //--------------------------------------------------------------------------------------------------------------
     // DEBUG methods
@@ -1357,6 +1385,21 @@ class Vdp2 {
     Color read2048ColorsData();
     Color read32KColorsData();
     Color read16MColorsData();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn const auto Vdp2::getColorRamAddressOffset(const u8 register_offset);
+    ///
+    /// \brief  Gets color ram address offset
+    ///
+    /// \author Runik
+    /// \date   14/05/2021
+    ///
+    /// \param  register_offset The register offset.
+    ///
+    /// \returns    The color ram address offset.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getColorRamAddressOffset(const u8 register_offset) -> u16;
 
     EmulatorModules modules_;
 
