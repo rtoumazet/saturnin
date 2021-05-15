@@ -356,6 +356,7 @@
     <ClCompile Include="src\emulator_modules.cpp" />
     <ClCompile Include="src\sound\scsp.cpp" />
     <ClCompile Include="src\video\texture.cpp" />
+    <ClCompile Include="src\video\vdp1_part.cpp" />
     <ClCompile Include="src\video\vdp2_part.cpp" />
     <ClInclude Include="lib\musashi\m68k.h" />
     <ClInclude Include="lib\musashi\m68kconf.h" />
@@ -431,11 +432,13 @@
     <ClInclude Include="src\emulator_modules.h" />
     <ClInclude Include="src\video\base_rendering_part.h" />
     <ClInclude Include="src\video\texture.h" />
+    <ClInclude Include="src\video\vdp1_part.h" />
     <ClInclude Include="src\video\vdp1_registers.h" />
     <ClCompile Include="src\video\vdp2.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClInclude Include="src\video\vdp_common.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imgui_custom_controls.h" />

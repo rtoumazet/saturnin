@@ -409,6 +409,7 @@ enum class JumpSelect : u8 {
     skip_next   = 0b100, ///< Jumps to next table without processing this table (CMDLINK is ignored).
     skip_assign = 0b101, ///< Jumps to CMDLINK table without processing this table.
     skip_call   = 0b110, ///< CMDLINK table receives subroutine call without processing this table.
+    skip_return = 0b111, ///< Returns to main routine without processing this table.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -579,8 +580,8 @@ enum class EndCodeDisable : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransparentPixelDisable : u8 {
-    enabled  = 0, ///< Transparent pixel is enabled.
-    disabled = 1  ///< Transparent pixel disabled.
+    transparent_pixel_enabled  = 0, ///< Transparent pixel is enabled.
+    transparent_pixel_disabled = 1  ///< Transparent pixel disabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

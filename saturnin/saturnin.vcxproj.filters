@@ -135,6 +135,9 @@
     <ClCompile Include="lib\scsp_stef\scsp_stef.c">
       <Filter>Fichiers sources\sound\scsp_stef</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\vdp1_part.cpp">
+      <Filter>Fichiers sources\video</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -274,6 +277,12 @@
     </ClInclude>
     <ClInclude Include="lib\scsp_stef\scsp_stef.h">
       <Filter>Fichiers sources\sound\scsp_stef</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\vdp1_part.h">
+      <Filter>Fichiers sources\video</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\vdp_common.h">
+      <Filter>Fichiers sources\video</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

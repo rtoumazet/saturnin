@@ -31,6 +31,7 @@
 #include <saturnin/src/locale.h> // tr
 #include <saturnin/src/log.h>    // Log
 #include <saturnin/src/video/vdp1_registers.h>
+#include <saturnin/src/video/vdp1_part.h> // Vdp1Part
 
 // Forward declarations
 namespace saturnin::core {
@@ -42,6 +43,10 @@ namespace saturnin::video {
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
+
+constexpr auto vdp1_ram_start_address = u32{0x25c00000};
+constexpr auto table_size             = u8{0x20};
+constexpr auto address_multiplier     = u8{8};
 
 class Vdp1 {
   public:
@@ -93,7 +98,7 @@ class Vdp1 {
 
     template<typename T>
     void writeRegisters(const u32 addr, const T data) {
-        core::Log::warning("vdp1", core::tr("{}bits register write {:#0x}"), sizeof(T) * number_of_bits_8, addr);
+        core::Log::warning(Logger::vdp1, core::tr("{}bits register write {:#0x}"), sizeof(T) * number_of_bits_8, addr);
     }
 
     // 16 bits specialization
@@ -104,7 +109,7 @@ class Vdp1 {
 
     template<typename T>
     auto readRegisters(const u32 addr) -> T {
-        core::Log::warning("vdp1", core::tr("{}bits register read {:#0x}"), sizeof(T) * number_of_bits_8, addr);
+        core::Log::warning(Logger::vdp1, core::tr("{}bits register read {:#0x}"), sizeof(T) * number_of_bits_8, addr);
         return 0;
     }
     // 16 bits specialization
@@ -113,8 +118,34 @@ class Vdp1 {
         return read16(addr);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp1::vdp2() -> const Vdp2*
+    ///
+    /// \brief  Pointer to the VDP2 module, will be used by VDP1 parts.
+    ///
+    /// \author Runik
+    /// \date   14/05/2021
+    ///
+    /// \returns    A const pointer to Vdp2.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto vdp2() -> const Vdp2* { return modules_.vdp2(); }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp1::getColorRamAddressOffset() -> u16
+    ///
+    /// \brief  Gets color ram address offset for the sprites.
+    ///
+    /// \author Runik
+    /// \date   14/05/2021
+    ///
+    /// \returns    The color ram address offset.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getColorRamAddressOffset() -> u16 { return color_ram_address_offset_; }
+
   private:
-    /// \name Vdp2 registers accessors
+    /// \name Vdp1 registers accessors
     //@{
     void               write16(u32 addr, u16 data);
     [[nodiscard]] auto read16(u32 addr) const -> u16;
@@ -182,6 +213,9 @@ class Vdp1 {
     ModeStatus                     modr_;
 
     std::array<u32, 2> framebuffer_; ///< Framebuffers texture id.
+
+    std::vector<Vdp1Part> vdp1_parts_;               ///< Storage of vdp1 rendering parts .
+    u16                   color_ram_address_offset_; ///< The color ram address offset.
 };
 
 } // namespace saturnin::video
