@@ -2091,7 +2091,7 @@ void Vdp2::setCharacterPatternLimitations(const bool                            
                     allowed_cpd_timing[t6] = true;
                     allowed_cpd_timing[t7] = true;
                 } else {
-                    allowed_cpd_timing[t0] = true;
+                    // Cf sattech #37
                     allowed_cpd_timing[t2] = true;
                     allowed_cpd_timing[t3] = true;
                 }
@@ -2105,8 +2105,7 @@ void Vdp2::setCharacterPatternLimitations(const bool                            
                     allowed_cpd_timing[t3] = true;
                     allowed_cpd_timing[t7] = true;
                 } else {
-                    allowed_cpd_timing[t0] = true;
-                    allowed_cpd_timing[t1] = true;
+                    // Cf sattech #37
                     allowed_cpd_timing[t3] = true;
                 }
                 break;
