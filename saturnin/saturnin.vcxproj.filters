@@ -197,9 +197,6 @@
     <ClInclude Include="src\interrupt_sources.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
-    <ClInclude Include="src\scu.h">
-      <Filter>Fichiers sources</Filter>
-    </ClInclude>
     <ClInclude Include="src\scu_registers.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>

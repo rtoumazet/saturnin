@@ -144,6 +144,8 @@ class Vdp1 {
 
     auto getColorRamAddressOffset() -> u16 { return color_ram_address_offset_; }
 
+    auto vdp1Parts() -> const std::vector<Vdp1Part>& { return vdp1_parts_; }
+
   private:
     /// \name Vdp1 registers accessors
     //@{

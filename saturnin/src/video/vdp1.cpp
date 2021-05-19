@@ -95,113 +95,121 @@ void Vdp1::onVblankIn() {
 void Vdp1::updateResolution() { color_ram_address_offset_ = modules_.vdp2()->getSpriteColorAddressOffset(); };
 
 void Vdp1::populateRenderData() {
-    constexpr auto top_address     = u32{}; // Using relative address, is 0x25c00000 in the address map.
-    auto           current_address = top_address;
-    auto           return_address  = u32{};
-    auto           cmdctrl         = CmdCtrl{rawRead<u16>(modules_.memory()->vdp1_vram_, current_address + cmdctrl_offset)};
-    auto           cmdlink         = CmdLink{rawRead<u16>(modules_.memory()->vdp1_vram_, current_address + cmdlink_offset)};
-
-    Vdp1Part::SetLocalCoordinates(0, 0); // Local coordinates are reset.
+    auto current_table_address = vdp1_ram_start_address;
+    auto next_table_address    = current_table_address;
+    auto return_address        = u32{};
+    auto cmdctrl               = CmdCtrl{modules_.memory()->read<u16>(current_table_address + cmdctrl_offset)};
+    auto cmdlink               = CmdLink{modules_.memory()->read<u16>(current_table_address + cmdlink_offset)};
+    auto skip_table            = false;
 
     while (cmdctrl.get(CmdCtrl::end_bit) == EndBit::command_selection_valid) {
+        skip_table = false;
         switch (cmdctrl.get(CmdCtrl::jump_select)) {
             case JumpSelect::jump_next: {
                 Log::debug(Logger::vdp1, tr("Jump next"));
-                current_address += table_size;
+                next_table_address += table_size;
                 break;
             }
             case JumpSelect::jump_assign: {
                 Log::debug(Logger::vdp1, tr("Jump assign"));
-                current_address = cmdlink.toU16() * address_multiplier;
+                next_table_address = cmdlink.toU16() * address_multiplier;
                 break;
             }
             case JumpSelect::jump_call: {
                 Log::debug(Logger::vdp1, tr("Jump call"));
-                current_address = cmdlink.toU16() * address_multiplier;
-                return_address  = current_address + table_size;
+                next_table_address = cmdlink.toU16() * address_multiplier;
+                return_address     = current_table_address + table_size;
                 break;
             }
             case JumpSelect::jump_return: {
                 Log::debug(Logger::vdp1, tr("Jump return"));
-                current_address = return_address;
-                return_address  = 0;
+                next_table_address = return_address;
+                return_address     = 0;
                 break;
             }
             case JumpSelect::skip_next: {
                 Log::debug(Logger::vdp1, tr("Skip next"));
-                current_address += table_size;
-                continue;
+                next_table_address += table_size;
+                skip_table = true;
+                break;
             }
             case JumpSelect::skip_assign: {
                 Log::debug(Logger::vdp1, tr("Skip assign"));
-                current_address = cmdlink.toU16() * address_multiplier;
-                continue;
+                next_table_address = cmdlink.toU16() * address_multiplier;
+                skip_table         = true;
+                break;
             }
             case JumpSelect::skip_call: {
                 Log::debug(Logger::vdp1, tr("Skip call"));
-                current_address = cmdlink.toU16() * address_multiplier;
-                return_address  = current_address + table_size;
-                continue;
+                next_table_address = cmdlink.toU16() * address_multiplier;
+                return_address     = current_table_address + table_size;
+                skip_table         = true;
+                break;
             }
             case JumpSelect::skip_return: {
                 Log::debug(Logger::vdp1, tr("Skip return"));
-                current_address = return_address;
-                return_address  = 0;
-                continue;
+                next_table_address = return_address;
+                return_address     = 0;
+                skip_table         = true;
+                break;
             }
         }
 
-        switch (cmdctrl.get(CmdCtrl::command_select)) {
-            case CommandSelect::system_clipping: {
-                Log::unimplemented(tr("Vdp1 command - System clipping coordinate set"));
-                break;
-            }
-            case CommandSelect::user_clipping: {
-                Log::unimplemented(tr("Vpd1 command - User clipping coordinate set"));
-                break;
-            }
-            case CommandSelect::local_coordinate: {
-                Log::debug(Logger::vdp1, tr("Command - Local coordinate set"));
-                vdp1_parts_.emplace_back(Vdp1Part(modules_, current_address, cmdctrl, cmdlink));
-                break;
-            }
-            case CommandSelect::normal_sprite_draw: {
-                Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));
-                vdp1_parts_.emplace_back(Vdp1Part(modules_, current_address, cmdctrl, cmdlink));
-                break;
-            }
-            case CommandSelect::scaled_sprite_draw: {
-                Log::debug(Logger::vdp1, tr("Command - Scaled sprite draw"));
-                vdp1_parts_.emplace_back(Vdp1Part(modules_, current_address, cmdctrl, cmdlink));
-                break;
-            }
-            case CommandSelect::distorted_sprite_draw: {
-                Log::debug(Logger::vdp1, tr("Command - Distorted sprite draw"));
-                vdp1_parts_.emplace_back(Vdp1Part(modules_, current_address, cmdctrl, cmdlink));
-                break;
-            }
-            case CommandSelect::polygon_draw: {
-                Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
-                vdp1_parts_.emplace_back(Vdp1Part(modules_, current_address, cmdctrl, cmdlink));
-                break;
-            }
-            case CommandSelect::polyline_draw: {
-                Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
-                vdp1_parts_.emplace_back(Vdp1Part(modules_, current_address, cmdctrl, cmdlink));
-                break;
-            }
-            case CommandSelect::line_draw: {
-                Log::debug(Logger::vdp1, tr("Command - Line draw"));
-                vdp1_parts_.emplace_back(Vdp1Part(modules_, current_address, cmdctrl, cmdlink));
-                break;
-            }
-            default: {
-                Log::warning(Logger::vdp1, tr("Unknown command"));
+        if (!skip_table) {
+            switch (cmdctrl.get(CmdCtrl::command_select)) {
+                case CommandSelect::system_clipping: {
+                    Log::unimplemented(tr("Vdp1 command - System clipping coordinate set"));
+                    break;
+                }
+                case CommandSelect::user_clipping: {
+                    Log::unimplemented(tr("Vpd1 command - User clipping coordinate set"));
+                    break;
+                }
+                case CommandSelect::local_coordinate: {
+                    vdp1_parts_.emplace_back(Vdp1Part(modules_, DrawType::not_drawable, current_table_address, cmdctrl, cmdlink));
+                    break;
+                }
+                case CommandSelect::normal_sprite_draw: {
+                    Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));
+                    vdp1_parts_.emplace_back(
+                        Vdp1Part(modules_, DrawType::textured_polygon, current_table_address, cmdctrl, cmdlink));
+                    break;
+                }
+                case CommandSelect::scaled_sprite_draw: {
+                    Log::debug(Logger::vdp1, tr("Command - Scaled sprite draw"));
+                    vdp1_parts_.emplace_back(
+                        Vdp1Part(modules_, DrawType::textured_polygon, current_table_address, cmdctrl, cmdlink));
+                    break;
+                }
+                case CommandSelect::distorted_sprite_draw: {
+                    Log::debug(Logger::vdp1, tr("Command - Distorted sprite draw"));
+                    vdp1_parts_.emplace_back(
+                        Vdp1Part(modules_, DrawType::textured_polygon, current_table_address, cmdctrl, cmdlink));
+                    break;
+                }
+                case CommandSelect::polygon_draw: {
+                    vdp1_parts_.emplace_back(
+                        Vdp1Part(modules_, DrawType::non_textured_polygon, current_table_address, cmdctrl, cmdlink));
+                    break;
+                }
+                case CommandSelect::polyline_draw: {
+                    Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
+                    vdp1_parts_.emplace_back(Vdp1Part(modules_, DrawType::polyline, current_table_address, cmdctrl, cmdlink));
+                    break;
+                }
+                case CommandSelect::line_draw: {
+                    Log::debug(Logger::vdp1, tr("Command - Line draw"));
+                    vdp1_parts_.emplace_back(Vdp1Part(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink));
+                    break;
+                }
+                default: {
+                    Log::warning(Logger::vdp1, tr("Unknown command"));
+                }
             }
         }
-
-        cmdctrl = CmdCtrl{rawRead<u16>(modules_.memory()->vdp1_vram_, current_address + cmdctrl_offset)};
-        cmdlink = CmdLink{rawRead<u16>(modules_.memory()->vdp1_vram_, current_address + cmdlink_offset)};
+        cmdctrl               = CmdCtrl{modules_.memory()->read<u16>(next_table_address + cmdctrl_offset)};
+        cmdlink               = CmdLink{modules_.memory()->read<u16>(next_table_address + cmdlink_offset)};
+        current_table_address = next_table_address;
     }
 
     Log::debug(Logger::vdp1, tr("-= Draw End command =-"));

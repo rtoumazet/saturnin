@@ -42,6 +42,7 @@ constexpr u32 current_operation_command_address  = {0x25d00014};
 constexpr u32 mode_status                        = {0x25d00016};
 }; // namespace vdp1_register_address
 
+constexpr auto coordinate_mask = u16{0x03FF};
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   VBlankEraseWriteEnable
 ///
@@ -698,7 +699,11 @@ class CmdSize : public Register {
 class CmdVertexCoordinate : public Register {
   public:
     using Register::Register;
-    inline static const BitRange<u8> vertex_coordinate{0, 10}; ///< Vertex coordinate (X or Y).
+    inline static const BitRange<u16> vertex_coordinate{0, 15}; ///< Vertex coordinate (X or Y).
+    [[nodiscard]] inline auto         twoCmp() const -> s16 {
+        return (register_value[10] == 1) ? -static_cast<s16>((~register_value.to_ulong() + 1) & coordinate_mask)
+                                                 : static_cast<s16>(register_value.to_ulong() & coordinate_mask);
+    };
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

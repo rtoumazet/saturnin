@@ -42,6 +42,9 @@ struct GLFWimage;
 
 namespace saturnin::video {
 
+// Forward declaration
+enum class DrawType;
+
 using saturnin::core::Config;
 
 constexpr auto minimum_window_width  = u16{512};
@@ -49,13 +52,6 @@ constexpr auto minimum_window_height = u16{512};
 
 enum class ShaderName { vertex, fragment };
 enum class GlslVersion { glsl_120, glsl_330 };
-
-enum class DrawType {
-    textured_polygon, // VDP2 cells, normal/scaled/distorted sprites
-    non_textured_polygon,
-    polyline,
-    line
-};
 
 using ShadersList = std::map<std::pair<GlslVersion, ShaderName>, const char*>;
 

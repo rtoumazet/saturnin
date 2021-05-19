@@ -45,6 +45,8 @@
 #include <saturnin/src/log.h>
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/texture.h>
+#include <saturnin/src/video/vdp_common.h>
+#include <saturnin/src/video/vdp1.h>
 
 // using namespace gl;
 using namespace gl21;
@@ -191,7 +193,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     preRender();
     Texture::deleteTexturesOnGpu();
     const auto vdp2_parts    = state.vdp2()->vdp2Parts(ScrollScreen::nbg3);
-    const auto vertex_nb     = (4 * vdp2_parts.size());
+    auto       vertex_nb     = (4 * vdp2_parts.size());
     auto       draw_list     = std::vector<Vertex>{};
     auto       textures_list = std::vector<u32>{};
     if (!vdp2_parts.empty()) {
@@ -210,6 +212,18 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         }
     }
     renderBatch(DrawType::textured_polygon, draw_list, textures_list);
+
+    const auto vdp1_parts = state.vdp1()->vdp1Parts();
+    vertex_nb             = (4 * vdp1_parts.size());
+    if (!vdp1_parts.empty()) {
+        draw_list.clear();
+        draw_list.reserve(vertex_nb);
+        for (u32 i = 0; i < vdp1_parts.size(); ++i) { // NOLINT: i is needed in the loop
+            draw_list.insert(std::end(draw_list), std::begin(vdp1_parts[i].vertexes_), std::end(vdp1_parts[i].vertexes_));
+        }
+    }
+    renderBatch(DrawType::non_textured_polygon, draw_list, textures_list);
+
     postRender();
     // state.notifyRenderingDone();
     calculateFps();
@@ -331,6 +345,42 @@ void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_li
             break;
         }
         case DrawType::non_textured_polygon: {
+            constexpr auto vertexes_per_quad      = u8{4};
+            constexpr auto vertexes_per_triangles = u32{6};
+            auto           vertexes               = std::vector<Vertex>{};
+            auto           elements_nb            = draw_list.size() / vertexes_per_quad;
+            const auto     vertexes_nb            = elements_nb * vertexes_per_triangles;
+            if (!draw_list.empty()) {
+                vertexes.reserve(vertexes_nb);
+                for (u32 i = 0; i < draw_list.size(); i += 4) {
+                    // Transforming one quad in 2 triangles
+                    vertexes.emplace_back(draw_list[i + 0]);
+                    vertexes.emplace_back(draw_list[i + 1]);
+                    vertexes.emplace_back(draw_list[i + 2]);
+                    vertexes.emplace_back(draw_list[i + 0]);
+                    vertexes.emplace_back(draw_list[i + 2]);
+                    vertexes.emplace_back(draw_list[i + 3]);
+                }
+            }
+            // Creating the VAO
+            auto vao = initializeVao(vertexes);
+            glUseProgram(program_shader_);
+            glBindVertexArray(vao); // binding VAO
+            // glActiveTexture(GLenum::GL_TEXTURE0);
+
+            // Calculating the ortho projection matrix and sending it to the shader
+            const auto proj_matrix     = calculateDisplayViewportMatrix();
+            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+            // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
+            auto texture_index = u32{};
+            for (u32 i = 0; i < vertexes.size(); i += vertexes_per_triangles) {
+                // glBindTexture(GL_TEXTURE_2D, textures_list.at(texture_index));
+                glDrawArrays(GL_TRIANGLES, i, vertexes_per_triangles);
+                //++texture_index;
+            }
+
             break;
         }
         case DrawType::polyline: {

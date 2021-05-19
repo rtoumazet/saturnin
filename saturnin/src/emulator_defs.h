@@ -229,6 +229,7 @@ class Register {
 
     inline auto operator<<=(const u8 size) -> std::bitset<register_size>& { return register_value <<= size; };
     inline auto operator>>=(const u8 size) -> std::bitset<register_size>& { return register_value >>= size; };
+    inline auto operator~() const noexcept -> std::bitset<register_size> { return ~register_value; };
 
     template<typename T>
     inline void reset(const BitRange<T>& r) {

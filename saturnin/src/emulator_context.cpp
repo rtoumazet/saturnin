@@ -40,6 +40,7 @@
 #include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/video/opengl.h>
 #include <saturnin/src/video/vdp1.h>
+#include <saturnin/src/video/vdp1_registers.h>
 #include <saturnin/src/video/vdp2.h>
 
 namespace cdrom = saturnin::cdrom;
@@ -168,7 +169,10 @@ void EmulatorContext::startEmulation() {
     //}
     // u8  tmp[4] = {0x12, 0x34, 0x56, 0x78};
     // u32 tmp2   = *(unsigned long*)&tmp;
-
+    // video::CmdVertexCoordinate tst{0x1234};
+    // auto                       b = tst.twoCompl();
+    // video::CmdVertexCoordinate tst2{0x8234};
+    // auto                       b2 = tst2.twoCompl();
     // TESTING //
 }
 

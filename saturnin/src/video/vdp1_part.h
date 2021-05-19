@@ -73,7 +73,11 @@ class Vdp1Part final : public BaseRenderingPart {
   public:
     ///@{
     /// Constructors / Destructors
-    Vdp1Part(EmulatorModules& modules, const u32 table_address, const CmdCtrl& cmdctrl, const CmdLink& cmdlink);
+    Vdp1Part(EmulatorModules& modules,
+             const DrawType   type,
+             const u32        table_address,
+             const CmdCtrl&   cmdctrl,
+             const CmdLink&   cmdlink);
     Vdp1Part(const Vdp1Part&) = default;
     Vdp1Part(Vdp1Part&&)      = default;
     auto operator=(const Vdp1Part&) & -> Vdp1Part& = default;
@@ -83,7 +87,19 @@ class Vdp1Part final : public BaseRenderingPart {
 
     void renderPart(){};
 
-    static void SetLocalCoordinates(const u16 x, const u16 y);
+    static void SetLocalCoordinates(const s16 x, const s16 y);
+
+    ///@{
+    /// \name  Calculated coordinates.
+    auto calculatedXA() -> const s16;
+    auto calculatedYA() -> const s16;
+    auto calculatedXB() -> const s16;
+    auto calculatedYB() -> const s16;
+    auto calculatedXC() -> const s16;
+    auto calculatedYC() -> const s16;
+    auto calculatedXD() -> const s16;
+    auto calculatedYD() -> const s16;
+    ///@}
 
     ///@{
     /// \name  Part registers
@@ -103,6 +119,8 @@ class Vdp1Part final : public BaseRenderingPart {
     CmdVertexCoordinate cmdyd_;   ///< Vertex coordinate data.
     CmdGrda             cmdgrda_; ///< Gouraud shading table.
                                   ///@}
+
+    std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes of the part.
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +151,7 @@ class Vdp1Part final : public BaseRenderingPart {
     void generatePartData(const EmulatorModules& modules);
 
     EmulatorModules modules_;
+    DrawType        type_{DrawType::undefined};
 
     ///@{
     static s16 local_coordinate_x_; ///< Horizontal local coordinate.

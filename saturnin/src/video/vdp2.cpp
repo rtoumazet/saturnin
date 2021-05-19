@@ -1674,7 +1674,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg2_pattern_name_read, reduction);
             if (current_pnd_reads < required_pnd_reads) { return false; }
 
-            const auto color_number = chctla_.get(CharacterControlB::character_color_number_nbg2);
+            const auto color_number = chctlb_.get(CharacterControlB::character_color_number_nbg2);
             const auto required_cpd_reads
                 = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
             const auto current_cpd_reads = getVramAccessByCommand(VramAccessCommand::nbg2_character_pattern_data_read, reduction);
@@ -1695,7 +1695,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg3_pattern_name_read, reduction);
             if (current_pnd_reads < required_pnd_reads) { return false; }
 
-            const auto color_number = chctla_.get(CharacterControlB::character_color_number_nbg3);
+            const auto color_number = chctlb_.get(CharacterControlB::character_color_number_nbg3);
             const auto required_cpd_reads
                 = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
             const auto current_cpd_reads = getVramAccessByCommand(VramAccessCommand::nbg3_character_pattern_data_read, reduction);
@@ -1805,17 +1805,51 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
             if (chctla_.get(CharacterControlA::bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
-            return getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
+            const auto cp_size = chctla_.get(CharacterControlA::character_size_nbg0);
+            return getVramCharacterPatternDataReads(bank_a0,
+                                                    bank_a1,
+                                                    bank_b0,
+                                                    bank_b1,
+                                                    command,
+                                                    reduction,
+                                                    is_normal_mode,
+                                                    (cp_size == CharacterSize::two_by_two));
         }
         case VramAccessCommand::nbg1_character_pattern_data_read: {
             if (chctla_.get(CharacterControlA::bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
-            return getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
+            const auto cp_size = chctla_.get(CharacterControlA::character_size_nbg1);
+            return getVramCharacterPatternDataReads(bank_a0,
+                                                    bank_a1,
+                                                    bank_b0,
+                                                    bank_b1,
+                                                    command,
+                                                    reduction,
+                                                    is_normal_mode,
+                                                    (cp_size == CharacterSize::two_by_two));
         }
-        case VramAccessCommand::nbg2_character_pattern_data_read:
+        case VramAccessCommand::nbg2_character_pattern_data_read: {
+            const auto cp_size = chctlb_.get(CharacterControlB::character_size_nbg2);
+            return getVramCharacterPatternDataReads(bank_a0,
+                                                    bank_a1,
+                                                    bank_b0,
+                                                    bank_b1,
+                                                    command,
+                                                    reduction,
+                                                    is_normal_mode,
+                                                    (cp_size == CharacterSize::two_by_two));
+        }
         case VramAccessCommand::nbg3_character_pattern_data_read: {
-            return getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
+            const auto cp_size = chctlb_.get(CharacterControlB::character_size_nbg3);
+            return getVramCharacterPatternDataReads(bank_a0,
+                                                    bank_a1,
+                                                    bank_b0,
+                                                    bank_b1,
+                                                    command,
+                                                    reduction,
+                                                    is_normal_mode,
+                                                    (cp_size == CharacterSize::two_by_two));
         }
         case VramAccessCommand::nbg0_pattern_name_read:
         case VramAccessCommand::nbg1_pattern_name_read:
@@ -2035,6 +2069,7 @@ void Vdp2::setPatternNameAccess(const VramTiming&                   bank,
 
 // static
 void Vdp2::setCharacterPatternLimitations(const bool                                is_screen_mode_normal,
+                                          const bool                                is_character_pattern_2_by_2,
                                           const std::array<bool, vram_timing_size>& pnd_access,
                                           std::array<bool, vram_timing_size>&       allowed_cpd_timing) {
     constexpr auto t0 = u8{0};
@@ -2091,7 +2126,9 @@ void Vdp2::setCharacterPatternLimitations(const bool                            
                     allowed_cpd_timing[t6] = true;
                     allowed_cpd_timing[t7] = true;
                 } else {
-                    // Cf sattech #37
+                    // Sattech #37 states that accessing t2 in high res mode while using 2*2 character pattern restricts access to
+                    // t2 and t3
+                    if (!is_character_pattern_2_by_2) { allowed_cpd_timing[t0] = true; }
                     allowed_cpd_timing[t2] = true;
                     allowed_cpd_timing[t3] = true;
                 }
@@ -2105,7 +2142,12 @@ void Vdp2::setCharacterPatternLimitations(const bool                            
                     allowed_cpd_timing[t3] = true;
                     allowed_cpd_timing[t7] = true;
                 } else {
-                    // Cf sattech #37
+                    // Sattech #37 states that accessing t3 in high res mode while using 2*2 character pattern restricts access to
+                    // t3
+                    if (!is_character_pattern_2_by_2) {
+                        allowed_cpd_timing[t0] = true;
+                        allowed_cpd_timing[t1] = true;
+                    }
                     allowed_cpd_timing[t3] = true;
                 }
                 break;
@@ -2152,7 +2194,8 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
                                             const VramTiming&       bank_b1,
                                             const VramAccessCommand command,
                                             const ReductionSetting  reduction,
-                                            const bool              is_screen_mode_normal) -> u8 {
+                                            const bool              is_screen_mode_normal,
+                                            const bool              is_using_cp_4_by_4) -> u8 {
     // From the command we must use the linked Pattern Name Data. The limitations are based on the PND read position.
     // Step 1 : find PND reads for the current command
     // const auto pnd = getPatternNameFromCharacterPattern(command);
@@ -2161,10 +2204,8 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
     auto pnd_timing_access = std::array{false, false, false, false, false, false, false, false};
     setPatternNameAccess(bank_a0, command, pnd_timing_access);
     setPatternNameAccess(bank_b0, command, pnd_timing_access);
-    if (!is_screen_mode_normal) {
-        setPatternNameAccess(bank_a1, command, pnd_timing_access);
-        setPatternNameAccess(bank_b1, command, pnd_timing_access);
-    }
+    setPatternNameAccess(bank_a1, command, pnd_timing_access);
+    setPatternNameAccess(bank_b1, command, pnd_timing_access);
 
     // If there's no reduction, observe selection limits when CPD read access >= 2.
     // If reduction = 1/2 or 1/4, the behavior isn't clear from the docs ... I'll just
@@ -2173,10 +2214,8 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
     if (reduction == ReductionSetting::none) {
         auto unlimited_cpd_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
         unlimited_cpd_reads += std::count(bank_b0.begin(), bank_b0.end(), command);
-        if (!is_screen_mode_normal) {
-            unlimited_cpd_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
-            unlimited_cpd_reads += std::count(bank_b1.begin(), bank_b1.end(), command);
-        }
+        unlimited_cpd_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
+        unlimited_cpd_reads += std::count(bank_b1.begin(), bank_b1.end(), command);
         if (unlimited_cpd_reads < 2) { are_limitations_applied = false; }
     }
 
@@ -2187,8 +2226,10 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 
     if (are_limitations_applied) {
         // Step 2 : apply selection limits on accessed timings
+        // Some more restrictions can be applied when displaying NBG screens in high res when using 2*2 CP (cf sattechs #37 for
+        // details)
         auto allowed_cpd_timing = std::array{false, false, false, false, false, false, false, false};
-        setCharacterPatternLimitations(is_screen_mode_normal, pnd_timing_access, allowed_cpd_timing);
+        setCharacterPatternLimitations(is_screen_mode_normal, is_using_cp_4_by_4, pnd_timing_access, allowed_cpd_timing);
 
         // Step 3 : get the reads
         // First access not available are changed to no access
@@ -2196,10 +2237,8 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
         while (it != allowed_cpd_timing.end()) {
             limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
             limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            if (!is_screen_mode_normal) {
-                limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-                limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            }
+            limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
             ++it;
             it = std::find(it, allowed_cpd_timing.end(), false);
         }
@@ -2207,10 +2246,8 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
     // Counting cpd access
     auto cpd_reads = std::count(limited_bank_a0.begin(), limited_bank_a0.end(), command);
     cpd_reads += std::count(limited_bank_b0.begin(), limited_bank_b0.end(), command);
-    if (!is_screen_mode_normal) {
-        cpd_reads += std::count(limited_bank_a1.begin(), limited_bank_a1.end(), command);
-        cpd_reads += std::count(limited_bank_b1.begin(), limited_bank_b1.end(), command);
-    }
+    cpd_reads += std::count(limited_bank_a1.begin(), limited_bank_a1.end(), command);
+    cpd_reads += std::count(limited_bank_b1.begin(), limited_bank_b1.end(), command);
 
     return static_cast<u8>(cpd_reads);
 };

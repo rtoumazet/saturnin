@@ -22,6 +22,7 @@
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/emulator_modules.h>
+#include <saturnin/src/locale.h> // tr
 #include <saturnin/src/memory.h>
 #include <saturnin/src/utilities.h>
 
@@ -30,6 +31,7 @@ namespace saturnin::video {
 using core::EmulatorModules;
 using core::rawRead;
 using core::rawWrite;
+using core::tr;
 using utilities::toUnderlying;
 
 constexpr auto vdp1_vram_start_address = u32{0x25C00000};
@@ -37,7 +39,12 @@ constexpr auto vdp1_vram_start_address = u32{0x25C00000};
 s16 Vdp1Part::local_coordinate_x_;
 s16 Vdp1Part::local_coordinate_y_;
 
-Vdp1Part::Vdp1Part(EmulatorModules& modules, const u32 table_address, const CmdCtrl& cmdctrl, const CmdLink& cmdlink) {
+Vdp1Part::Vdp1Part(EmulatorModules& modules,
+                   const DrawType   type,
+                   const u32        table_address,
+                   const CmdCtrl&   cmdctrl,
+                   const CmdLink&   cmdlink) :
+    type_(type) {
     setVdpType(VdpType::vdp1);
     cmdctrl_ = std::move(cmdctrl);
     cmdlink_ = std::move(cmdlink);
@@ -63,7 +70,6 @@ void Vdp1Part::readParameters(Memory* m, const u32 address) {
         case CommandSelect::local_coordinate: {
             cmdxa_ = m->read<u16>(address + cmdxa_offset);
             cmdya_ = m->read<u16>(address + cmdya_offset);
-            SetLocalCoordinates(cmdxa_.toU16(), cmdya_.toU16());
             break;
         }
         case CommandSelect::normal_sprite_draw: {
@@ -132,7 +138,7 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             break;
         }
         case CommandSelect::local_coordinate: {
-            SetLocalCoordinates(cmdxa_.toU16(), cmdya_.toU16());
+            SetLocalCoordinates(cmdxa_.twoCmp(), cmdya_.twoCmp());
             break;
         }
         case CommandSelect::normal_sprite_draw: {
@@ -146,6 +152,7 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             break;
         }
         case CommandSelect::polygon_draw: {
+            polygonDraw(modules, *this);
             break;
         }
         case CommandSelect::polyline_draw: {
@@ -157,11 +164,42 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
     }
 }
 
-void Vdp1Part::SetLocalCoordinates(const u16 x, const u16 y) {
+void Vdp1Part::SetLocalCoordinates(const s16 x, const s16 y) {
+    Log::debug(Logger::vdp1, tr("Command - Local coordinate set"));
+    Log::debug(Logger::vdp1, tr("Local coordinates are now ({},{})"), x, y);
     Vdp1Part::local_coordinate_x_ = x;
     Vdp1Part::local_coordinate_y_ = y;
 }
+
+auto Vdp1Part::calculatedXA() -> const s16 { return cmdxa_.twoCmp() + local_coordinate_x_; }
+auto Vdp1Part::calculatedYA() -> const s16 { return cmdya_.twoCmp() + local_coordinate_y_; }
+auto Vdp1Part::calculatedXB() -> const s16 { return cmdxb_.twoCmp() + local_coordinate_x_; }
+auto Vdp1Part::calculatedYB() -> const s16 { return cmdyb_.twoCmp() + local_coordinate_y_; }
+auto Vdp1Part::calculatedXC() -> const s16 { return cmdxc_.twoCmp() + local_coordinate_x_; }
+auto Vdp1Part::calculatedYC() -> const s16 { return cmdyc_.twoCmp() + local_coordinate_y_; }
+auto Vdp1Part::calculatedXD() -> const s16 { return cmdxd_.twoCmp() + local_coordinate_x_; }
+auto Vdp1Part::calculatedYD() -> const s16 { return cmdyd_.twoCmp() + local_coordinate_y_; }
+
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) { loadTextureData(modules, part); }
+
+void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
+    Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
+    Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
+    Log::debug(Logger::vdp1, "Vertex B ({},{})", part.calculatedXB(), part.calculatedYB());
+    Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
+    Log::debug(Logger::vdp1, "Vertex D ({},{})", part.calculatedXD(), part.calculatedYD());
+
+    auto color = Color(part.cmdcolr_.get(CmdColr::color_control));
+
+    part.vertexes_.emplace_back(
+        Vertex{{part.calculatedXA(), part.calculatedYA()}, {color.r, color.g, color.b, color.a}, {0.0, 0.0}}); // lower left
+    part.vertexes_.emplace_back(
+        Vertex{{part.calculatedXB(), part.calculatedYB()}, {color.r, color.g, color.b, color.a}, {1.0, 0.0}}); // lower right
+    part.vertexes_.emplace_back(
+        Vertex{{part.calculatedXC(), part.calculatedYC()}, {color.r, color.g, color.b, color.a}, {1.0, 1.0}}); // upper right
+    part.vertexes_.emplace_back(
+        Vertex{{part.calculatedXD(), part.calculatedYD()}, {color.r, color.g, color.b, color.a}, {0.0, 1.0}}); // upper left
+}
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
     const auto      color_ram_address_offset = modules.vdp1()->getColorRamAddressOffset();

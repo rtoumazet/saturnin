@@ -1014,12 +1014,14 @@ class Vdp2 {
     /// \author Runik
     /// \date   26/12/2020
     ///
-    /// \param          is_screen_mode_normal   True when the TV screen mode is normal.
-    /// \param          pnd_access              True when the pattern name data is used.
-    /// \param [in,out] allowed_cpd_timing      Sets true for the allowed character pattern timings.
+    /// \param          is_screen_mode_normal       True when the TV screen mode is normal.
+    /// \param          is_character_pattern_2_by_2 True when the character pattern is 2 by 2.
+    /// \param          pnd_access                  True when the pattern name data is used.
+    /// \param [in,out] allowed_cpd_timing          Sets true for the allowed character pattern timings.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static void setCharacterPatternLimitations(const bool                                is_screen_mode_normal,
+                                               const bool                                is_character_pattern_2_by_2,
                                                const std::array<bool, vram_timing_size>& pnd_access,
                                                std::array<bool, vram_timing_size>&       allowed_cpd_timing);
 
@@ -1040,6 +1042,7 @@ class Vdp2 {
     /// \param  command                 The VRAM access command.
     /// \param  reduction               Reduction setting of current screen.
     /// \param  is_screen_mode_normal   True if current screen is in normal mode.
+    /// \param  is_using_2_by_2_cp      True if current screen uses 2 by 2 character patterns.
     ///
     /// \returns    The VRAM character pattern data reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1050,7 +1053,8 @@ class Vdp2 {
                                                  const VramTiming&       bank_b1,
                                                  const VramAccessCommand command,
                                                  const ReductionSetting  reduction,
-                                                 const bool              is_screen_mode_normal) -> u8;
+                                                 const bool              is_screen_mode_normal,
+                                                 const bool              is_using_2_by_2_cp) -> u8;
 
     //--------------------------------------------------------------------------------------------------------------
     // DISPLAY methods
