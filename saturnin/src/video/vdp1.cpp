@@ -101,6 +101,7 @@ void Vdp1::populateRenderData() {
     auto cmdctrl               = CmdCtrl{modules_.memory()->read<u16>(current_table_address + cmdctrl_offset)};
     auto cmdlink               = CmdLink{modules_.memory()->read<u16>(current_table_address + cmdlink_offset)};
     auto skip_table            = false;
+    vdp1_parts_.clear();
 
     while (cmdctrl.get(CmdCtrl::end_bit) == EndBit::command_selection_valid) {
         skip_table = false;

@@ -26,16 +26,9 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/video/vdp_common.h>
 
 namespace saturnin::video {
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   VdpType
-///
-/// \brief  Values that represent VDP types
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class VdpType { not_set, vdp1, vdp2 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  BaseRenderingPart
@@ -93,23 +86,26 @@ class BaseRenderingPart {
 
     virtual void renderPart() = 0;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void BaseRenderingPart::setPartType(const VdpType p);
-    ///
-    /// \brief  Sets the part type.
-    ///
-    /// \author Runik
-    /// \date   18/03/2021
-    ///
-    /// \param  p   A VdpType.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///@{
+    /// Accessors / Mutators
+    void               vdpType(const VdpType p) { vdp_type_ = p; };
+    [[nodiscard]] auto vdpType() const -> const VdpType { return vdp_type_; };
+    void               drawType(const DrawType d) { draw_type_ = d; };
+    [[nodiscard]] auto drawType() const -> const DrawType { return draw_type_; };
+    void               priority(const u8 p) { priority_ = p; };
+    [[nodiscard]] auto priority() const -> const u8 { return priority_; };
+    void               textureKey(const size_t k) { texture_key_ = k; };
+    [[nodiscard]] auto textureKey() const -> const size_t { return texture_key_; };
+    ///@}
 
-    void setVdpType(const VdpType p) { vdp_type_ = p; };
+    std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes of the part.
 
   private:
-    VdpType           vdp_type_{VdpType::not_set}; ///< Type of the part.
-    u8                priority_{0};                ///< Priority of the part.
-    u32               order_{0};                   ///< Creation order for the same priority parts (mostly used for VDP1 parts).
-    static inline u32 global_order_{0};            ///< Static variable used to get the current part order.
+    VdpType           vdp_type_{VdpType::not_set};     ///< Type of the part.
+    DrawType          draw_type_{DrawType::undefined}; ///< Type of the draw
+    u8                priority_{0};                    ///< Priority of the part.
+    u32               order_{0};        ///< Creation order for the same priority parts (mostly used for VDP1 parts).
+    static inline u32 global_order_{0}; ///< Static variable used to get the current part order.
+    size_t            texture_key_{};   ///< Link to the texture.
 };
 } // namespace saturnin::video

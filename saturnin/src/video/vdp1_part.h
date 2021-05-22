@@ -120,8 +120,6 @@ class Vdp1Part final : public BaseRenderingPart {
     CmdGrda             cmdgrda_; ///< Gouraud shading table.
                                   ///@}
 
-    std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes of the part.
-
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void final::readParameters(Memory* m, const u32 address);
@@ -151,11 +149,11 @@ class Vdp1Part final : public BaseRenderingPart {
     void generatePartData(const EmulatorModules& modules);
 
     EmulatorModules modules_;
-    DrawType        type_{DrawType::undefined};
 
     ///@{
-    static s16 local_coordinate_x_; ///< Horizontal local coordinate.
-    static s16 local_coordinate_y_; ///< Vertical local coordinate.
+    /// Local coordinates
+    static s16 local_coordinate_x_;
+    static s16 local_coordinate_y_;
     ///@}
 };
 

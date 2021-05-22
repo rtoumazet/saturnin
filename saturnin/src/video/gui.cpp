@@ -836,7 +836,10 @@ void showRenderingWindow(core::EmulatorContext& state) {
     // state.waitUntilRenderingDone();
     // state.opengl()->displayFramebuffer(state);
 
-    if (state.opengl()->areFbosInitialized()) { gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height); }
+    if (state.opengl()->areFbosInitialized()) {
+        if (state.opengl()->isThereSomethingToRender()) { state.opengl()->render(); }
+        gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height);
+    }
     ImGui::Text("%s", state.opengl()->fps().c_str());
     // const auto mask = std::string{"{:#f}"};
     // ImGui::TextUnformatted(fmt::format(mask, state.opengl()->fps());

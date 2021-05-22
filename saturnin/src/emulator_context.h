@@ -30,8 +30,8 @@
 #include <atomic> // atomic
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
-#include <mutex>
-#include <condition_variable>
+
+//#include <condition_variable>
 #include <thread> // thread
 #include <saturnin/src/emulator_enums.h>
 #include <saturnin/src/stv_definitions.h>
@@ -47,6 +47,7 @@ namespace saturnin::sound {
 class Scsp;
 }
 namespace saturnin::video {
+class BaseRenderingPart;
 class Opengl;
 class Vdp1;
 class Vdp2;
@@ -290,23 +291,6 @@ class EmulatorContext {
 
     [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void EmulatorContext::opengl(video::Opengl* opengl);
-    ///
-    /// \brief  Sets the Opengl object.
-    ///
-    /// \author Runik
-    /// \date   08/02/2021
-    ///
-    /// \param [in,out] opengl  The first parameter.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // void opengl(video::Opengl* opengl);
-
-    void waitUntilRenderingDone();
-
-    void notifyRenderingDone();
-
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::emulationMainThread();
@@ -346,11 +330,7 @@ class EmulatorContext {
 
     Rom_stv stv_rom_{Rom_stv::none}; ///< Current ST-V ROM loaded.
 
-    std::thread             emulation_main_thread_; ///< The emulation main thread.
-    std::mutex              rendering_mutex_;
-    std::condition_variable rendering_condition_variable_;
-    bool                    is_rendering_done_;
-    std::atomic<bool>       is_rendering_in_progress_{false};
+    std::thread emulation_main_thread_; ///< The emulation main thread.
 
     GLFWwindow* opengl_window_; ///< The OpenGL window.
 };

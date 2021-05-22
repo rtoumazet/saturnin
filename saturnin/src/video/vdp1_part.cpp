@@ -43,9 +43,9 @@ Vdp1Part::Vdp1Part(EmulatorModules& modules,
                    const DrawType   type,
                    const u32        table_address,
                    const CmdCtrl&   cmdctrl,
-                   const CmdLink&   cmdlink) :
-    type_(type) {
-    setVdpType(VdpType::vdp1);
+                   const CmdLink&   cmdlink) {
+    vdpType(VdpType::vdp1);
+    drawType(type);
     cmdctrl_ = std::move(cmdctrl);
     cmdlink_ = std::move(cmdlink);
     readParameters(modules.memory(), table_address);

@@ -24,13 +24,14 @@
 namespace saturnin::video {
 
 Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos&& pos, size_t texture_key) {
-    setVdpType(VdpType::vdp2);
+    vdpType(VdpType::vdp2);
+    drawType(DrawType::textured_polygon);
     scroll_screen_pos_       = std::move(pos);
     character_number_        = pnd.character_number;
     palette_number_          = pnd.palette_number;
     is_horizontally_flipped_ = pnd.is_horizontally_flipped;
     is_vertically_flipped_   = pnd.is_vertically_flipped;
-    texture_key_             = texture_key;
+    textureKey(texture_key);
 
     // Vdp2 parts are 8*8 pixels squares
     constexpr auto cell_width   = u8{8};
@@ -39,10 +40,10 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos&& pos, size_t texture_k
     const auto     pos_x_width  = static_cast<s16>(pos_x + cell_width);
     const auto     pos_y        = static_cast<s16>(pos.y);
     const auto     pos_y_height = static_cast<s16>(pos.y + cell_height);
-    part_vertexes_.emplace_back(Vertex{{pos_x, pos_y}, {0, 0, 0, 0}, {0.0, 0.0}});              // lower left
-    part_vertexes_.emplace_back(Vertex{{pos_x_width, pos_y}, {0, 0, 0, 0}, {1.0, 0.0}});        // lower right
-    part_vertexes_.emplace_back(Vertex{{pos_x_width, pos_y_height}, {0, 0, 0, 0}, {1.0, 1.0}}); // upper right
-    part_vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0, 0, 0, 0}, {0.0, 1.0}});       // upper left
+    vertexes_.emplace_back(Vertex{{pos_x, pos_y}, {0, 0, 0, 0}, {0.0, 0.0}});              // lower left
+    vertexes_.emplace_back(Vertex{{pos_x_width, pos_y}, {0, 0, 0, 0}, {1.0, 0.0}});        // lower right
+    vertexes_.emplace_back(Vertex{{pos_x_width, pos_y_height}, {0, 0, 0, 0}, {1.0, 1.0}}); // upper right
+    vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0, 0, 0, 0}, {0.0, 1.0}});       // upper left
 };
 
 void Vdp2Part::renderPart() { displayCell(); };

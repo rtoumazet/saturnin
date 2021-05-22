@@ -47,6 +47,7 @@
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp1.h>
+#include <saturnin/src/video/base_rendering_part.h>
 
 // using namespace gl;
 using namespace gl21;
@@ -68,8 +69,8 @@ void Opengl::initialize(GLFWwindow* gui_context) {
     is_legacy_opengl_ = config_->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
 
     guiRenderingContext(gui_context);
-    initializeRenderingContext();
-    makeRenderingContextCurrent();
+    // initializeRenderingContext();
+    // makeRenderingContextCurrent();
     hostScreenResolution(ScreenResolution{video::minimum_window_width, video::minimum_window_height});
 
     glbinding::initialize(glfwGetProcAddress);
@@ -190,48 +191,155 @@ void Opengl::initializeShaders() {
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
+    std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
+
+    const auto addVdp2PartsToList = [&](const ScrollScreen s) {
+        const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
+        if (!vdp2_parts.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_parts.size());
+            for (auto&& p : vdp2_parts) {
+                parts_list.push_back(std::make_unique<Vdp2Part>(p));
+            }
+        }
+    };
+
+    const auto addVdp1PartsToList = [&]() {
+        const auto& vdp1_parts = state.vdp1()->vdp1Parts();
+        if (!vdp1_parts.empty()) {
+            parts_list.reserve(parts_list.size() + vdp1_parts.size());
+            for (auto&& p : vdp1_parts) {
+                parts_list.push_back(std::make_unique<Vdp1Part>(p));
+            }
+        }
+    };
+
+    addVdp2PartsToList(ScrollScreen::nbg0);
+    addVdp2PartsToList(ScrollScreen::nbg1);
+    addVdp2PartsToList(ScrollScreen::nbg2);
+    addVdp2PartsToList(ScrollScreen::nbg3);
+    addVdp2PartsToList(ScrollScreen::rbg0);
+    addVdp2PartsToList(ScrollScreen::rbg1);
+    addVdp1PartsToList();
+
+    // :TODO: Ordering needs to be done depending on priorities
+
+    {
+        std::lock_guard<std::mutex> lock(parts_list_mutex_);
+        // If the destination vector isn't empty, it means rendering isn't finished.
+        // In that case current frame data is dropped.
+        if (parts_list_.empty()) { parts_list_ = std::move(parts_list); }
+    }
+}
+
+void Opengl::render() {
+    std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
+
     preRender();
     Texture::deleteTexturesOnGpu();
-    const auto vdp2_parts    = state.vdp2()->vdp2Parts(ScrollScreen::nbg3);
-    auto       vertex_nb     = (4 * vdp2_parts.size());
-    auto       draw_list     = std::vector<Vertex>{};
-    auto       textures_list = std::vector<u32>{};
-    if (!vdp2_parts.empty()) {
-        draw_list.reserve(vertex_nb);
-        for (u32 i = 0; i < vdp2_parts.size(); ++i) { // NOLINT: i is needed in the loop
-            const auto& part_vertexes = vdp2_parts[i].partVertexes();
-            draw_list.insert(std::end(draw_list), std::begin(part_vertexes), std::end(part_vertexes));
-            // Texture should have been created in the texture pool, checking if it exists on the GPU
-            auto& t = Texture::getTexture(vdp2_parts[i].getTextureKey());
-            if (t.apiHandle() == 0) {
-                // Creation / replacement of the texture on the GPU
-                // deleteTexture(t.apiHandle());
-                t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-            }
-            textures_list.emplace_back(t.apiHandle());
-        }
-    }
-    renderBatch(DrawType::textured_polygon, draw_list, textures_list);
 
-    const auto vdp1_parts = state.vdp1()->vdp1Parts();
-    vertex_nb             = (4 * vdp1_parts.size());
-    if (!vdp1_parts.empty()) {
-        draw_list.clear();
-        draw_list.reserve(vertex_nb);
-        for (u32 i = 0; i < vdp1_parts.size(); ++i) { // NOLINT: i is needed in the loop
-            draw_list.insert(std::end(draw_list), std::begin(vdp1_parts[i].vertexes_), std::end(vdp1_parts[i].vertexes_));
+    {
+        std::lock_guard<std::mutex> lock(parts_list_mutex_);
+        if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
+    }
+
+    if (!parts_list.empty()) {
+        constexpr auto vertexes_per_quad             = u8{4};
+        constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
+        for (const auto& part : parts_list) {
+            if (part->vertexes_.empty()) continue;
+
+            switch (part->drawType()) {
+                case DrawType::textured_polygon: {
+                    // Quad is tessellated into 2 triangles, using a texture
+
+                    auto vertexes = std::vector<Vertex>{};
+
+                    vertexes.reserve(vertexes_per_tessellated_quad);
+                    // Transforming one quad in 2 triangles
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[1]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[3]);
+
+                    // Creating the VAO
+                    auto vao = initializeVao(vertexes);
+                    glUseProgram(program_shader_);
+                    glBindVertexArray(vao); // binding VAO
+                    glActiveTexture(GLenum::GL_TEXTURE0);
+
+                    // Calculating the ortho projection matrix and sending it to the shader
+                    const auto proj_matrix     = calculateDisplayViewportMatrix();
+                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+                    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+                    // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
+                    auto& t = Texture::getTexture(part->textureKey());
+                    if (t.apiHandle() == 0) {
+                        // Creation / replacement of the texture on the GPU
+                        // deleteTexture(t.apiHandle());
+                        t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+                    }
+
+                    glBindTexture(GL_TEXTURE_2D, t.apiHandle());
+                    glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+                    glDeleteVertexArrays(1, &vao);
+                    break;
+                }
+                // case DrawType::non_textured_polygon: {
+                //    // Quad is tessellated into 2 triangles, using color
+                //    auto vertexes = std::vector<Vertex>{};
+
+                //    vertexes.reserve(vertexes_per_tessellated_quad);
+                //    // Transforming one quad in 2 triangles
+                //    vertexes.emplace_back(part->vertexes_[0]);
+                //    vertexes.emplace_back(part->vertexes_[1]);
+                //    vertexes.emplace_back(part->vertexes_[2]);
+                //    vertexes.emplace_back(part->vertexes_[0]);
+                //    vertexes.emplace_back(part->vertexes_[2]);
+                //    vertexes.emplace_back(part->vertexes_[3]);
+
+                //    // Creating the VAO
+                //    auto vao = initializeVao(vertexes);
+                //    glUseProgram(program_shader_);
+                //    glBindVertexArray(vao); // binding VAO
+                //    // glActiveTexture(GLenum::GL_TEXTURE0);
+
+                //    // Calculating the ortho projection matrix and sending it to the shader
+                //    const auto proj_matrix     = calculateDisplayViewportMatrix();
+                //    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+                //    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+                //    // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
+                //    glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+                //    glDeleteVertexArrays(1, &vao);
+                //    break;
+                //}
+                case DrawType::polyline: {
+                    // Quad is drawn using LINE_LOOP (4 vertexes)
+                    break;
+                }
+                case DrawType::line: {
+                    // Single line (2 vertexes)
+                    break;
+                }
+            }
         }
     }
-    renderBatch(DrawType::non_textured_polygon, draw_list, textures_list);
 
     postRender();
-    // state.notifyRenderingDone();
     calculateFps();
 }
 
-void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); };
+auto Opengl::isThereSomethingToRender() -> const bool {
+    std::lock_guard<std::mutex> lock(parts_list_mutex_);
+    return !parts_list_.empty();
+}
 
-void Opengl::updateScreenResolution(){};
+void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
+
+void Opengl::updateScreenResolution() {}
 
 auto Opengl::createVertexShader() -> u32 {
     const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -305,106 +413,105 @@ auto Opengl::generateTexture(const u32 width, const u32 height, const std::vecto
 void Opengl::deleteTexture(const u32 texture) { glDeleteTextures(1, &texture); }
 
 void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_list, const std::vector<u32>& textures_list) {
-    switch (type) {
-        case DrawType::textured_polygon: {
-            constexpr auto vertexes_per_quad      = u8{4};
-            constexpr auto vertexes_per_triangles = u32{6};
-            auto           vertexes               = std::vector<Vertex>{};
-            auto           elements_nb            = draw_list.size() / vertexes_per_quad;
-            const auto     vertexes_nb            = elements_nb * vertexes_per_triangles;
-            if (!draw_list.empty()) {
-                vertexes.reserve(vertexes_nb);
-                for (u32 i = 0; i < draw_list.size(); i += 4) {
-                    // Transforming one quad in 2 triangles
-                    vertexes.emplace_back(draw_list[i + 0]);
-                    vertexes.emplace_back(draw_list[i + 1]);
-                    vertexes.emplace_back(draw_list[i + 2]);
-                    vertexes.emplace_back(draw_list[i + 0]);
-                    vertexes.emplace_back(draw_list[i + 2]);
-                    vertexes.emplace_back(draw_list[i + 3]);
-                }
-            }
-            // Creating the VAO
-            auto vao = initializeVao(vertexes);
-            glUseProgram(program_shader_);
-            glBindVertexArray(vao); // binding VAO
-            glActiveTexture(GLenum::GL_TEXTURE0);
+    // switch (type) {
+    //    case DrawType::textured_polygon: {
+    //        constexpr auto vertexes_per_quad      = u8{4};
+    //        constexpr auto vertexes_per_triangles = u32{6};
+    //        auto           vertexes               = std::vector<Vertex>{};
+    //        auto           elements_nb            = draw_list.size() / vertexes_per_quad;
+    //        const auto     vertexes_nb            = elements_nb * vertexes_per_triangles;
+    //        if (!draw_list.empty()) {
+    //            vertexes.reserve(vertexes_nb);
+    //            for (u32 i = 0; i < draw_list.size(); i += 4) {
+    //                // Transforming one quad in 2 triangles
+    //                vertexes.emplace_back(draw_list[i + 0]);
+    //                vertexes.emplace_back(draw_list[i + 1]);
+    //                vertexes.emplace_back(draw_list[i + 2]);
+    //                vertexes.emplace_back(draw_list[i + 0]);
+    //                vertexes.emplace_back(draw_list[i + 2]);
+    //                vertexes.emplace_back(draw_list[i + 3]);
+    //            }
+    //        }
+    //        // Creating the VAO
+    //        auto vao = initializeVao(vertexes);
+    //        glUseProgram(program_shader_);
+    //        glBindVertexArray(vao); // binding VAO
+    //        glActiveTexture(GLenum::GL_TEXTURE0);
 
-            // Calculating the ortho projection matrix and sending it to the shader
-            const auto proj_matrix     = calculateDisplayViewportMatrix();
-            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+    //        // Calculating the ortho projection matrix and sending it to the shader
+    //        const auto proj_matrix     = calculateDisplayViewportMatrix();
+    //        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+    //        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
-            // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-            auto texture_index = u32{};
-            for (u32 i = 0; i < vertexes.size(); i += vertexes_per_triangles) {
-                glBindTexture(GL_TEXTURE_2D, textures_list.at(texture_index));
-                glDrawArrays(GL_TRIANGLES, i, vertexes_per_triangles);
-                ++texture_index;
-            }
-            break;
-        }
-        case DrawType::non_textured_polygon: {
-            constexpr auto vertexes_per_quad      = u8{4};
-            constexpr auto vertexes_per_triangles = u32{6};
-            auto           vertexes               = std::vector<Vertex>{};
-            auto           elements_nb            = draw_list.size() / vertexes_per_quad;
-            const auto     vertexes_nb            = elements_nb * vertexes_per_triangles;
-            if (!draw_list.empty()) {
-                vertexes.reserve(vertexes_nb);
-                for (u32 i = 0; i < draw_list.size(); i += 4) {
-                    // Transforming one quad in 2 triangles
-                    vertexes.emplace_back(draw_list[i + 0]);
-                    vertexes.emplace_back(draw_list[i + 1]);
-                    vertexes.emplace_back(draw_list[i + 2]);
-                    vertexes.emplace_back(draw_list[i + 0]);
-                    vertexes.emplace_back(draw_list[i + 2]);
-                    vertexes.emplace_back(draw_list[i + 3]);
-                }
-            }
-            // Creating the VAO
-            auto vao = initializeVao(vertexes);
-            glUseProgram(program_shader_);
-            glBindVertexArray(vao); // binding VAO
-            // glActiveTexture(GLenum::GL_TEXTURE0);
+    //        // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
+    //        auto texture_index = u32{};
+    //        for (u32 i = 0; i < vertexes.size(); i += vertexes_per_triangles) {
+    //            glBindTexture(GL_TEXTURE_2D, textures_list.at(texture_index));
+    //            glDrawArrays(GL_TRIANGLES, i, vertexes_per_triangles);
+    //            ++texture_index;
+    //        }
+    //        break;
+    //    }
+    //    case DrawType::non_textured_polygon: {
+    //        constexpr auto vertexes_per_quad      = u8{4};
+    //        constexpr auto vertexes_per_triangles = u32{6};
+    //        auto           vertexes               = std::vector<Vertex>{};
+    //        auto           elements_nb            = draw_list.size() / vertexes_per_quad;
+    //        const auto     vertexes_nb            = elements_nb * vertexes_per_triangles;
+    //        if (!draw_list.empty()) {
+    //            vertexes.reserve(vertexes_nb);
+    //            for (u32 i = 0; i < draw_list.size(); i += 4) {
+    //                // Transforming one quad in 2 triangles
+    //                vertexes.emplace_back(draw_list[i + 0]);
+    //                vertexes.emplace_back(draw_list[i + 1]);
+    //                vertexes.emplace_back(draw_list[i + 2]);
+    //                vertexes.emplace_back(draw_list[i + 0]);
+    //                vertexes.emplace_back(draw_list[i + 2]);
+    //                vertexes.emplace_back(draw_list[i + 3]);
+    //            }
+    //        }
+    //        // Creating the VAO
+    //        auto vao = initializeVao(vertexes);
+    //        glUseProgram(program_shader_);
+    //        glBindVertexArray(vao); // binding VAO
+    //        // glActiveTexture(GLenum::GL_TEXTURE0);
 
-            // Calculating the ortho projection matrix and sending it to the shader
-            const auto proj_matrix     = calculateDisplayViewportMatrix();
-            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+    //        // Calculating the ortho projection matrix and sending it to the shader
+    //        const auto proj_matrix     = calculateDisplayViewportMatrix();
+    //        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+    //        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
-            // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-            auto texture_index = u32{};
-            for (u32 i = 0; i < vertexes.size(); i += vertexes_per_triangles) {
-                // glBindTexture(GL_TEXTURE_2D, textures_list.at(texture_index));
-                glDrawArrays(GL_TRIANGLES, i, vertexes_per_triangles);
-                //++texture_index;
-            }
+    //        // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
+    //        for (u32 i = 0; i < vertexes.size(); i += vertexes_per_triangles) {
+    //            // glBindTexture(GL_TEXTURE_2D, textures_list.at(texture_index));
+    //            glDrawArrays(GL_TRIANGLES, i, vertexes_per_triangles);
+    //            //++texture_index;
+    //        }
 
-            break;
-        }
-        case DrawType::polyline: {
-            break;
-        }
-        case DrawType::line: {
-            break;
-        }
-    }
+    //        break;
+    //    }
+    //    case DrawType::polyline: {
+    //        break;
+    //    }
+    //    case DrawType::line: {
+    //        break;
+    //    }
+    //}
 }
 
-void Opengl::initializeRenderingContext() {
-    if (guiRenderingContext() == nullptr) {
-        core::Log::error(Logger::opengl, core::tr("Could not initialize rendering context."));
-    }
+// void Opengl::initializeRenderingContext() {
+//    if (guiRenderingContext() == nullptr) {
+//        core::Log::error(Logger::opengl, core::tr("Could not initialize rendering context."));
+//    }
+//
+//    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+//    const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, guiRenderingContext());
+//    emulatorRenderingContext(render_window);
+//}
 
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, guiRenderingContext());
-    emulatorRenderingContext(render_window);
-}
+// void Opengl::destroyRenderingContext() { glfwDestroyWindow(emulatorRenderingContext()); }
 
-void Opengl::destroyRenderingContext() { glfwDestroyWindow(emulatorRenderingContext()); }
-
-void Opengl::makeRenderingContextCurrent() { glfwMakeContextCurrent(emulatorRenderingContext()); }
+// void Opengl::makeRenderingContextCurrent() { glfwMakeContextCurrent(emulatorRenderingContext()); }
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
@@ -704,6 +811,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     updateMainWindowSizeAndRatio(ihm_window, minimum_window_width, minimum_window_height);
 
     // opengl->hostScreenResolution(ScreenResolution{minimum_window_width, minimum_window_height});
+
+    state.opengl()->initialize(ihm_window);
 
     // Main loop
     while (glfwWindowShouldClose(ihm_window) == GLFW_FALSE) {

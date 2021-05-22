@@ -28,6 +28,7 @@
 #include <windows.h> // removes C4005 warning
 #include <imgui.h>
 #include <map>    // map
+#include <mutex>  // mutex
 #include <string> // string
 #include <glm/mat4x4.hpp>
 #include <saturnin/src/emulator_defs.h>
@@ -44,6 +45,7 @@ namespace saturnin::video {
 
 // Forward declaration
 enum class DrawType;
+class BaseRenderingPart;
 
 using saturnin::core::Config;
 
@@ -74,8 +76,8 @@ class Opengl {
     void               displayedTexture(u32 index) { displayed_texture_index_ = index; };
     [[nodiscard]] auto guiRenderingContext() const { return gui_rendering_context_; };
     void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
-    [[nodiscard]] auto emulatorRenderingContext() const { return emulator_rendering_context_; };
-    void               emulatorRenderingContext(GLFWwindow* context) { emulator_rendering_context_ = context; };
+    //[[nodiscard]] auto emulatorRenderingContext() const { return emulator_rendering_context_; };
+    // void               emulatorRenderingContext(GLFWwindow* context) { emulator_rendering_context_ = context; };
     [[nodiscard]] auto fps() const { return fps_; };
     void               fps(std::string fps) { fps_ = fps; };
 
@@ -294,7 +296,7 @@ class Opengl {
     /// \date   26/04/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeRenderingContext();
+    // void initializeRenderingContext();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::destroyRenderingContext();
@@ -305,7 +307,7 @@ class Opengl {
     /// \date   26/04/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void destroyRenderingContext();
+    // void destroyRenderingContext();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::makeRenderingContextCurrent();
@@ -316,7 +318,7 @@ class Opengl {
     /// \date   26/04/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void makeRenderingContextCurrent();
+    // void makeRenderingContextCurrent();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::areFbosInitialized() ->bool
@@ -330,6 +332,19 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto areFbosInitialized() -> bool { return !fbos_.empty(); }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::render();
+    ///
+    /// \brief  Renders data if available
+    ///
+    /// \author Runik
+    /// \date   21/05/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void render();
+
+    auto isThereSomethingToRender() -> const bool;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -389,9 +404,9 @@ class Opengl {
 
     void calculateFps();
 
-    core::Config* config_;                     ///< Configuration object.
-    GLFWwindow*   gui_rendering_context_;      ///< Context used for GUI rendering.
-    GLFWwindow*   emulator_rendering_context_; ///< Context used for  emulator rendering.
+    core::Config* config_;                ///< Configuration object.
+    GLFWwindow*   gui_rendering_context_; ///< Context used for GUI rendering.
+    // GLFWwindow*   emulator_rendering_context_; ///< Context used for  emulator rendering.
 
     u32              displayed_texture_index_{}; ///< Index of complete texture displayed by the GUI, will be one of fbo_texture.
     std::vector<u32> fbos_;                      ///< The framebuffer objects used for rendering.
@@ -401,7 +416,9 @@ class Opengl {
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes ready to be used in a buffer array for display
+    std::vector<std::unique_ptr<video::BaseRenderingPart>> ///< List of parts
+               parts_list_;                                // Will have to be moved to the platform agnostic renderer.
+    std::mutex parts_list_mutex_; ///< Prevents rendering thread to use the list while it's being processed.
 
     u32         program_shader_; ///< The program shader.
     ShadersList shaders_list_;   ///< List of shaders.

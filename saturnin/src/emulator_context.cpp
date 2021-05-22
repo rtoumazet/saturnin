@@ -42,6 +42,7 @@
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp1_registers.h>
 #include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/video/base_rendering_part.h>
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
@@ -53,6 +54,7 @@ using cdrom::Cdrom;
 using sh2::Sh2;
 using sh2::Sh2Type;
 using sound::Scsp;
+using video::BaseRenderingPart;
 using video::Opengl;
 using video::Vdp1;
 using video::Vdp2;
@@ -187,7 +189,7 @@ void EmulatorContext::emulationMainThread() {
     try {
         Log::info(Logger::main, tr("Emulation main thread started"));
 
-        opengl()->initialize(openglWindow());
+        // opengl()->initialize(openglWindow());
 
         memory()->initialize();
         memory()->loadBios(hardware_mode_);
@@ -214,7 +216,7 @@ void EmulatorContext::emulationMainThread() {
                 //    notifyRenderingDone();
             }
         }
-        opengl()->destroyRenderingContext();
+        // opengl()->destroyRenderingContext();
         Log::info(Logger::main, tr("Emulation main thread finished"));
     } catch (const std::exception& e) { Log::error(Logger::exception, e.what()); } catch (...) {
         Log::error(Logger::exception, tr("Uncaught exception !"));
@@ -226,20 +228,5 @@ void EmulatorContext::startInterface() { video::runOpengl(*this); }
 void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
 
 auto EmulatorContext::openglWindow() const -> GLFWwindow* { return opengl_window_; }
-
-// void EmulatorContext::opengl(video::Opengl* opengl) { opengl_ = opengl; };
-
-void EmulatorContext::waitUntilRenderingDone() {
-    is_rendering_done_ = false; // Reset the condition
-    if (emulationStatus() != EmulationStatus::running) { is_rendering_done_ = true; }
-    std::unique_lock<std::mutex> mlock(rendering_mutex_);                             // Acquiring the lock
-    rendering_condition_variable_.wait(mlock, [this] { return is_rendering_done_; }); // Waiting for the signal
-}
-
-void EmulatorContext::notifyRenderingDone() {
-    std::lock_guard<std::mutex> guard(rendering_mutex_); // Lock the mutex
-    is_rendering_done_ = true;                           // Set the flag to true, means rendering is done
-    rendering_condition_variable_.notify_one();          // Notify the condition variable
-}
 
 } // namespace saturnin::core

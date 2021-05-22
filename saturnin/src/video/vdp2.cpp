@@ -2296,7 +2296,7 @@ void Vdp2::populateRenderData() {
             }
         }
     }
-    modules_.context()->notifyRenderingDone();
+    // modules_.context()->notifyRenderingDone();
 }
 
 auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
@@ -2809,6 +2809,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             pattern_name_data_size = pncn0_.get(PatternNameControlNbg0::pattern_name_data_size);
             character_size         = chctla_.get(CharacterControlA::character_size_nbg0);
             break;
+        default: break;
     }
 
     auto mask       = u32{};
