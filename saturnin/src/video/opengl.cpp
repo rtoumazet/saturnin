@@ -77,15 +77,15 @@ void Opengl::initialize(GLFWwindow* gui_context) {
 
     initializeFbos();
     initializeShaders();
-    const auto vertex_shader     = createVertexShader();
-    const auto fragment_shader   = createFragmentShader();
-    program_shader_              = createProgramShader(vertex_shader, fragment_shader);
+    const auto vertex_shader     = createVertexShader(ShaderName::textured);
+    const auto fragment_shader   = createFragmentShader(ShaderName::textured);
+    program_shader_textured_     = createProgramShader(vertex_shader, fragment_shader);
     const auto shaders_to_delete = std::vector<u32>{vertex_shader, fragment_shader};
     deleteShaders(shaders_to_delete);
 }
 
 void Opengl::shutdown() {
-    glDeleteProgram(program_shader_);
+    glDeleteProgram(program_shader_textured_);
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         for (auto f : fbos_) {
@@ -131,7 +131,7 @@ void Opengl::postRender() {
 };
 
 void Opengl::initializeShaders() {
-    shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderName::vertex}, R"(
+    shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::vertex, ShaderName::textured}, R"(
         #version 120
 
         attribute vec2 vtx_position;
@@ -145,7 +145,7 @@ void Opengl::initializeShaders() {
         }
     )");
 
-    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderName::vertex}, R"(
+    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::vertex, ShaderName::textured}, R"(
         #version 330 core
 
         layout (location = 0) in vec2 vtx_position;
@@ -160,7 +160,7 @@ void Opengl::initializeShaders() {
         }
     )");
 
-    shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderName::fragment}, R"(
+    shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::textured}, R"(
         #version 120
         
         varying vec4 frg_color;
@@ -174,7 +174,7 @@ void Opengl::initializeShaders() {
         }
     )");
 
-    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderName::fragment}, R"(
+    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::fragment, ShaderName::textured}, R"(
         #version 330 core
         
         in vec2 frg_tex_coord;
@@ -254,9 +254,8 @@ void Opengl::render() {
         // Binding the VAO
         glBindVertexArray(vao);
 
-        // Declaring vertex buffer data, and sending it to the GPU
+        // Declaring vertex buffer data
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-        // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
         // position pointer
         glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
@@ -287,14 +286,15 @@ void Opengl::render() {
 
                     // Creating the VAO
                     // auto vao = initializeVao(vertexes);
-                    glUseProgram(program_shader_);
-                    // glBindVertexArray(vao); // binding VAO
+                    glUseProgram(program_shader_textured_);
+                    glBindVertexArray(vao); // binding VAO
+                    // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
                     glActiveTexture(GLenum::GL_TEXTURE0);
 
                     // Calculating the ortho projection matrix and sending it to the shader
                     const auto proj_matrix     = calculateDisplayViewportMatrix();
-                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_textured_, "proj_matrix");
                     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
@@ -365,9 +365,9 @@ void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResol
 
 void Opengl::updateScreenResolution() {}
 
-auto Opengl::createVertexShader() -> u32 {
+auto Opengl::createVertexShader(const ShaderName name) -> u32 {
     const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    auto       source        = getShaderSource(ShaderName::vertex);
+    auto       source        = getShaderSource(ShaderType::vertex, name);
     glShaderSource(vertex_shader, 1, &source, nullptr);
     glCompileShader(vertex_shader);
     checkShaderCompilation(vertex_shader);
@@ -375,9 +375,9 @@ auto Opengl::createVertexShader() -> u32 {
     return vertex_shader;
 }
 
-auto Opengl::createFragmentShader() -> u32 {
+auto Opengl::createFragmentShader(const ShaderName name) -> u32 {
     const auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    auto       source          = getShaderSource(ShaderName::fragment);
+    auto       source          = getShaderSource(ShaderType::fragment, name);
     glShaderSource(fragment_shader, 1, &source, nullptr);
     glCompileShader(fragment_shader);
 
@@ -436,112 +436,11 @@ auto Opengl::generateTexture(const u32 width, const u32 height, const std::vecto
 // static
 void Opengl::deleteTexture(const u32 texture) { glDeleteTextures(1, &texture); }
 
-void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_list, const std::vector<u32>& textures_list) {
-    // switch (type) {
-    //    case DrawType::textured_polygon: {
-    //        constexpr auto vertexes_per_quad      = u8{4};
-    //        constexpr auto vertexes_per_triangles = u32{6};
-    //        auto           vertexes               = std::vector<Vertex>{};
-    //        auto           elements_nb            = draw_list.size() / vertexes_per_quad;
-    //        const auto     vertexes_nb            = elements_nb * vertexes_per_triangles;
-    //        if (!draw_list.empty()) {
-    //            vertexes.reserve(vertexes_nb);
-    //            for (u32 i = 0; i < draw_list.size(); i += 4) {
-    //                // Transforming one quad in 2 triangles
-    //                vertexes.emplace_back(draw_list[i + 0]);
-    //                vertexes.emplace_back(draw_list[i + 1]);
-    //                vertexes.emplace_back(draw_list[i + 2]);
-    //                vertexes.emplace_back(draw_list[i + 0]);
-    //                vertexes.emplace_back(draw_list[i + 2]);
-    //                vertexes.emplace_back(draw_list[i + 3]);
-    //            }
-    //        }
-    //        // Creating the VAO
-    //        auto vao = initializeVao(vertexes);
-    //        glUseProgram(program_shader_);
-    //        glBindVertexArray(vao); // binding VAO
-    //        glActiveTexture(GLenum::GL_TEXTURE0);
-
-    //        // Calculating the ortho projection matrix and sending it to the shader
-    //        const auto proj_matrix     = calculateDisplayViewportMatrix();
-    //        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-    //        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
-    //        // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-    //        auto texture_index = u32{};
-    //        for (u32 i = 0; i < vertexes.size(); i += vertexes_per_triangles) {
-    //            glBindTexture(GL_TEXTURE_2D, textures_list.at(texture_index));
-    //            glDrawArrays(GL_TRIANGLES, i, vertexes_per_triangles);
-    //            ++texture_index;
-    //        }
-    //        break;
-    //    }
-    //    case DrawType::non_textured_polygon: {
-    //        constexpr auto vertexes_per_quad      = u8{4};
-    //        constexpr auto vertexes_per_triangles = u32{6};
-    //        auto           vertexes               = std::vector<Vertex>{};
-    //        auto           elements_nb            = draw_list.size() / vertexes_per_quad;
-    //        const auto     vertexes_nb            = elements_nb * vertexes_per_triangles;
-    //        if (!draw_list.empty()) {
-    //            vertexes.reserve(vertexes_nb);
-    //            for (u32 i = 0; i < draw_list.size(); i += 4) {
-    //                // Transforming one quad in 2 triangles
-    //                vertexes.emplace_back(draw_list[i + 0]);
-    //                vertexes.emplace_back(draw_list[i + 1]);
-    //                vertexes.emplace_back(draw_list[i + 2]);
-    //                vertexes.emplace_back(draw_list[i + 0]);
-    //                vertexes.emplace_back(draw_list[i + 2]);
-    //                vertexes.emplace_back(draw_list[i + 3]);
-    //            }
-    //        }
-    //        // Creating the VAO
-    //        auto vao = initializeVao(vertexes);
-    //        glUseProgram(program_shader_);
-    //        glBindVertexArray(vao); // binding VAO
-    //        // glActiveTexture(GLenum::GL_TEXTURE0);
-
-    //        // Calculating the ortho projection matrix and sending it to the shader
-    //        const auto proj_matrix     = calculateDisplayViewportMatrix();
-    //        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-    //        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
-    //        // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-    //        for (u32 i = 0; i < vertexes.size(); i += vertexes_per_triangles) {
-    //            // glBindTexture(GL_TEXTURE_2D, textures_list.at(texture_index));
-    //            glDrawArrays(GL_TRIANGLES, i, vertexes_per_triangles);
-    //            //++texture_index;
-    //        }
-
-    //        break;
-    //    }
-    //    case DrawType::polyline: {
-    //        break;
-    //    }
-    //    case DrawType::line: {
-    //        break;
-    //    }
-    //}
-}
-
-// void Opengl::initializeRenderingContext() {
-//    if (guiRenderingContext() == nullptr) {
-//        core::Log::error(Logger::opengl, core::tr("Could not initialize rendering context."));
-//    }
-//
-//    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-//    const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, guiRenderingContext());
-//    emulatorRenderingContext(render_window);
-//}
-
-// void Opengl::destroyRenderingContext() { glfwDestroyWindow(emulatorRenderingContext()); }
-
-// void Opengl::makeRenderingContextCurrent() { glfwMakeContextCurrent(emulatorRenderingContext()); }
-
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
-auto Opengl::getShaderSource(const ShaderName name) -> const char* {
+auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char* {
     const auto glsl_version = (is_legacy_opengl_) ? GlslVersion::glsl_120 : GlslVersion::glsl_330;
-    return shaders_list_[{glsl_version, name}];
+    return shaders_list_[{glsl_version, type, name}];
 }
 
 auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4 {
@@ -679,11 +578,14 @@ void Opengl::calculateFps() {
 
     time_elapsed += current_frame_duration;
 
-    if (time_elapsed > 1s) {
-        std::string ts         = config_->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-        const auto  standard   = config_->getTvStandard(ts);
-        const auto  max_frames = (standard == TvStandard::pal) ? 50 : 60;
+    static auto max_frames = 0;
 
+    if (time_elapsed > 1s) {
+        if (max_frames == 0) {
+            std::string ts       = config_->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+            const auto  standard = config_->getTvStandard(ts);
+            max_frames           = (standard == TvStandard::pal) ? 50 : 60;
+        }
         fps_                 = fmt::format("{:d} / {}", frames_count, max_frames);
         previous_frame_start = current_frame_start;
         frames_count         = 0;

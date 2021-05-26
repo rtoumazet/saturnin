@@ -30,6 +30,7 @@
 #include <map>    // map
 #include <mutex>  // mutex
 #include <string> // string
+#include <tuple>  // tuple
 #include <glm/mat4x4.hpp>
 #include <saturnin/src/emulator_defs.h>
 
@@ -52,10 +53,13 @@ using saturnin::core::Config;
 constexpr auto minimum_window_width  = u16{512};
 constexpr auto minimum_window_height = u16{512};
 
-enum class ShaderName { vertex, fragment };
+enum class ShaderName { textured, default };
+enum class ShaderType { vertex, fragment };
 enum class GlslVersion { glsl_120, glsl_330 };
 
-using ShadersList = std::map<std::pair<GlslVersion, ShaderName>, const char*>;
+using ShaderKey = std::tuple<GlslVersion, ShaderType, ShaderName>;
+// using ShadersList  = std::map<std::pair<GlslVersion, ShaderName>, const char*>;
+using ShadersList = std::map<ShaderKey, const char*>;
 
 class Opengl {
   public:
@@ -73,11 +77,9 @@ class Opengl {
     ///@{
     /// Accessors / Mutators
     [[nodiscard]] auto displayedTexture() const { return fbo_textures_[displayed_texture_index_]; };
-    void               displayedTexture(u32 index) { displayed_texture_index_ = index; };
+    void               displayedTexture(const u32 index) { displayed_texture_index_ = index; };
     [[nodiscard]] auto guiRenderingContext() const { return gui_rendering_context_; };
     void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
-    //[[nodiscard]] auto emulatorRenderingContext() const { return emulator_rendering_context_; };
-    // void               emulatorRenderingContext(GLFWwindow* context) { emulator_rendering_context_ = context; };
     [[nodiscard]] auto fps() const { return fps_; };
     void               fps(std::string fps) { fps_ = fps; };
 
@@ -187,30 +189,34 @@ class Opengl {
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::createVertexShader() -> u32;
+    /// \fn auto Opengl::createVertexShader(const ShaderName name) -> u32;
     ///
     /// \brief  Creates a vertex shader.
     ///
     /// \author Runik
     /// \date   26/04/2021
     ///
+    /// \param  name    The vertex shader name.
+    ///
     /// \returns    The vertex shader id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto createVertexShader() -> u32;
+    auto createVertexShader(const ShaderName name) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::createFragmentShader() -> u32;
+    /// \fn auto Opengl::createFragmentShader(const ShaderName name) -> u32;
     ///
     /// \brief  Creates a fragment shader.
     ///
     /// \author Runik
     /// \date   26/04/2021
     ///
+    /// \param  name    The fragment shader name.
+    ///
     /// \returns    The fragment shader id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto createFragmentShader() -> u32;
+    auto createFragmentShader(const ShaderName name) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Opengl::createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
@@ -272,55 +278,6 @@ class Opengl {
     static void deleteTexture(const u32 texture);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::renderBatch(const DrawType type, const std::vector<Vertex>& draw_list, const std::vector<u32>&
-    /// textures_list);
-    ///
-    /// \brief  Renders a batch of vertexes of the specified type.
-    ///
-    /// \author Runik
-    /// \date   16/04/2021
-    ///
-    /// \param  type            The type of data to draw.
-    /// \param  draw_list       The vertexes to draw.
-    /// \param  textures_list   List of textures.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void renderBatch(const DrawType type, const std::vector<Vertex>& draw_list, const std::vector<u32>& textures_list);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::initializeRenderingContext();
-    ///
-    /// \brief  Initializes the rendering context.
-    ///
-    /// \author Runik
-    /// \date   26/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // void initializeRenderingContext();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::destroyRenderingContext();
-    ///
-    /// \brief  Destroys the rendering context.
-    ///
-    /// \author Runik
-    /// \date   26/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // void destroyRenderingContext();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::makeRenderingContextCurrent();
-    ///
-    /// \brief  Makes rendering context current.
-    ///
-    /// \author Runik
-    /// \date   26/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // void makeRenderingContextCurrent();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::areFbosInitialized() ->bool
     ///
     /// \brief  Are framebuffer objects initialized.
@@ -348,19 +305,20 @@ class Opengl {
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getShaderSource(const ShaderName name) -> const char*;
+    /// \fn auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
     ///
     /// \brief  Gets the shader source depending on the configuration
     ///
     /// \author Runik
     /// \date   08/04/2021
     ///
+    /// \param  type    The shader type.
     /// \param  name    The shader name.
     ///
     /// \returns    Null if it fails, else the shader source.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getShaderSource(const ShaderName name) -> const char*;
+    auto getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4;
@@ -420,8 +378,9 @@ class Opengl {
                parts_list_;                                // Will have to be moved to the platform agnostic renderer.
     std::mutex parts_list_mutex_; ///< Prevents rendering thread to use the list while it's being processed.
 
-    u32         program_shader_; ///< The program shader.
-    ShadersList shaders_list_;   ///< List of shaders.
+    u32         program_shader_textured_; ///< Program shader for textured parts.
+    u32         program_shader_default_;  ///< Program shader for everything but textured parts.
+    ShadersList shaders_list_;            ///< List of shaders.
 
     std::string fps_; ///< The frames per second.
 };
