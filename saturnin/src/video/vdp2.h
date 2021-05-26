@@ -1312,21 +1312,23 @@ class Vdp2 {
                                const ScrollScreenStatus& screen,
                                const u8                  palette_number,
                                const u32                 cell_address) {
-        constexpr auto row_offset      = u8{8};
+        constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
         constexpr auto palette_disp    = u8{8};
         const auto     palette         = palette_number << palette_disp;
         for (u32 i = 0; i < 8; ++i) {
-            auto row = Dots8Bits(modules_.memory()->read<u32>(current_address += row_offset));
+            auto row = Dots8Bits(modules_.memory()->read<u32>(current_address));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
-            row = Dots8Bits(modules_.memory()->read<u32>(current_address += row_offset));
+            current_address += row_offset;
+            row = Dots8Bits(modules_.memory()->read<u32>(current_address));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
+            current_address += row_offset;
         }
     }
 
