@@ -131,7 +131,7 @@ class Texture {
 
     static auto deleteTexturesOnGpu() {
         for (auto& t : texture_storage_) {
-            t.second.api_handle_ = 0;
+            t.second.delete_on_gpu_ = true;
         }
     }
 

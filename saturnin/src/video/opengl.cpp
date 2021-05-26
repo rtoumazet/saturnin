@@ -235,8 +235,6 @@ void Opengl::render() {
     std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
 
     preRender();
-    Texture::deleteTexturesOnGpu();
-
     {
         std::lock_guard<std::mutex> lock(parts_list_mutex_);
         if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
@@ -245,6 +243,30 @@ void Opengl::render() {
     if (!parts_list.empty()) {
         constexpr auto vertexes_per_quad             = u8{4};
         constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
+
+        auto vao = u32{};
+        glGenVertexArrays(1, &vao);
+
+        // Creating the vertex buffer
+        auto vertex_buffer = u32{};
+        glGenBuffers(1, &vertex_buffer);
+
+        // Binding the VAO
+        glBindVertexArray(vao);
+
+        // Declaring vertex buffer data, and sending it to the GPU
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+        // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+        // position pointer
+        glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
+        glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
+
+        // texture coords pointer
+        auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
+        glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+        glEnableVertexAttribArray(1);
+
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) continue;
 
@@ -264,9 +286,10 @@ void Opengl::render() {
                     vertexes.emplace_back(part->vertexes_[3]);
 
                     // Creating the VAO
-                    auto vao = initializeVao(vertexes);
+                    // auto vao = initializeVao(vertexes);
                     glUseProgram(program_shader_);
-                    glBindVertexArray(vao); // binding VAO
+                    // glBindVertexArray(vao); // binding VAO
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
                     glActiveTexture(GLenum::GL_TEXTURE0);
 
                     // Calculating the ortho projection matrix and sending it to the shader
@@ -276,15 +299,14 @@ void Opengl::render() {
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
                     auto& t = Texture::getTexture(part->textureKey());
-                    if (t.apiHandle() == 0) {
+                    if (t.deleteOnGpu() || t.apiHandle() == 0) {
                         // Creation / replacement of the texture on the GPU
-                        // deleteTexture(t.apiHandle());
+                        if (t.deleteOnGpu()) { deleteTexture(t.apiHandle()); }
                         t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
                     }
 
                     glBindTexture(GL_TEXTURE_2D, t.apiHandle());
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
-                    glDeleteVertexArrays(1, &vao);
                     break;
                 }
                 // case DrawType::non_textured_polygon: {
@@ -326,6 +348,8 @@ void Opengl::render() {
                 }
             }
         }
+        glDeleteBuffers(1, &vertex_buffer);
+        glDeleteVertexArrays(1, &vao);
     }
 
     postRender();

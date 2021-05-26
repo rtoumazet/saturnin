@@ -159,11 +159,11 @@ void Vdp1::populateRenderData() {
         if (!skip_table) {
             switch (cmdctrl.get(CmdCtrl::command_select)) {
                 case CommandSelect::system_clipping: {
-                    Log::unimplemented(tr("Vdp1 command - System clipping coordinate set"));
+                    Log::unimplemented(tr("VDP1 command - System clipping coordinate set"));
                     break;
                 }
                 case CommandSelect::user_clipping: {
-                    Log::unimplemented(tr("Vpd1 command - User clipping coordinate set"));
+                    Log::unimplemented(tr("VDP1 command - User clipping coordinate set"));
                     break;
                 }
                 case CommandSelect::local_coordinate: {
