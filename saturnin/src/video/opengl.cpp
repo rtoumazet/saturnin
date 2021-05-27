@@ -79,11 +79,11 @@ void Opengl::initialize(GLFWwindow* gui_context) {
     const auto fragment_textured = createFragmentShader(ShaderName::textured);
     program_shader_textured_     = createProgramShader(vertex_textured, fragment_textured);
 
-    const auto vertex_default   = createVertexShader(ShaderName::simple);
-    const auto fragment_default = createFragmentShader(ShaderName::simple);
-    program_shader_default_     = createProgramShader(vertex_default, fragment_default);
+    const auto vertex_simple   = createVertexShader(ShaderName::simple);
+    const auto fragment_simple = createFragmentShader(ShaderName::simple);
+    program_shader_simple_     = createProgramShader(vertex_simple, fragment_simple);
 
-    const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured, vertex_default, fragment_default};
+    const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured, vertex_simple, fragment_simple};
     deleteShaders(shaders_to_delete);
 }
 
@@ -313,10 +313,6 @@ void Opengl::render() {
         const auto     vao_ids_array           = std::array<u32, elements_nb>{vao_textured, vao_simple};
         const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer_textured, vertex_buffer_simple};
 
-        // constexpr auto elements_nb             = u8{1};
-        // const auto     vao_ids_array           = std::array<u32, elements_nb>{vao_textured};
-        // const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer_textured};
-
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) continue;
 
@@ -335,11 +331,9 @@ void Opengl::render() {
                     vertexes.emplace_back(part->vertexes_[2]);
                     vertexes.emplace_back(part->vertexes_[3]);
 
-                    // Creating the VAO
-                    // auto vao = initializeVao(vertexes);
                     glUseProgram(program_shader_textured_);
-                    glBindVertexArray(vao_textured); // binding VAO
-                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_textured);
+                    glBindVertexArray(vao_textured);                       // binding VAO
+                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_textured); // binding vertex buffer
 
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
@@ -362,35 +356,35 @@ void Opengl::render() {
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
                 }
-                // case DrawType::non_textured_polygon: {
-                //    // Quad is tessellated into 2 triangles, using color
-                //    auto vertexes = std::vector<Vertex>{};
+                case DrawType::non_textured_polygon: {
+                    // Quad is tessellated into 2 triangles, using color
+                    auto vertexes = std::vector<Vertex>{};
 
-                //    vertexes.reserve(vertexes_per_tessellated_quad);
-                //    // Transforming one quad in 2 triangles
-                //    vertexes.emplace_back(part->vertexes_[0]);
-                //    vertexes.emplace_back(part->vertexes_[1]);
-                //    vertexes.emplace_back(part->vertexes_[2]);
-                //    vertexes.emplace_back(part->vertexes_[0]);
-                //    vertexes.emplace_back(part->vertexes_[2]);
-                //    vertexes.emplace_back(part->vertexes_[3]);
+                    vertexes.reserve(vertexes_per_tessellated_quad);
+                    // Transforming one quad in 2 triangles
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[1]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[3]);
 
-                //    // Creating the VAO
-                //    auto vao = initializeVao(vertexes);
-                //    glUseProgram(program_shader_);
-                //    glBindVertexArray(vao); // binding VAO
-                //    // glActiveTexture(GLenum::GL_TEXTURE0);
+                    glUseProgram(program_shader_simple_);
+                    glBindVertexArray(vao_simple);                       // binding VAO
+                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_simple); // binding vertex buffer
 
-                //    // Calculating the ortho projection matrix and sending it to the shader
-                //    const auto proj_matrix     = calculateDisplayViewportMatrix();
-                //    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-                //    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+                    // Sending vertex buffer data to the GPU
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-                //    // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-                //    glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
-                //    glDeleteVertexArrays(1, &vao);
-                //    break;
-                //}
+                    // Calculating the ortho projection matrix and sending it to the shader
+                    const auto proj_matrix     = calculateDisplayViewportMatrix();
+                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_simple_, "proj_matrix");
+                    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+                    // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
+                    glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+                    break;
+                }
                 case DrawType::polyline: {
                     // Quad is drawn using LINE_LOOP (4 vertexes)
                     break;

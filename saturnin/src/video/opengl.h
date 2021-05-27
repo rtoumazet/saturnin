@@ -379,7 +379,7 @@ class Opengl {
     std::mutex parts_list_mutex_; ///< Prevents rendering thread to use the list while it's being processed.
 
     u32         program_shader_textured_; ///< Program shader for textured parts.
-    u32         program_shader_default_;  ///< Program shader for everything but textured parts.
+    u32         program_shader_simple_;   ///< Program shader for everything but textured parts.
     ShadersList shaders_list_;            ///< List of shaders.
 
     std::string fps_; ///< The frames per second.
@@ -394,7 +394,7 @@ class Opengl {
 /// \author Runik
 /// \date   24/12/2017
 ///
-/// \return True if the video car can render modern OpenGL .
+/// \return True if the video card can render modern OpenGL .
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto isModernOpenglCapable() -> bool;
