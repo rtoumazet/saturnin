@@ -53,7 +53,7 @@ using saturnin::core::Config;
 constexpr auto minimum_window_width  = u16{512};
 constexpr auto minimum_window_height = u16{512};
 
-enum class ShaderName { textured, default };
+enum class ShaderName { textured, simple };
 enum class ShaderType { vertex, fragment };
 enum class GlslVersion { glsl_120, glsl_330 };
 
@@ -335,19 +335,19 @@ class Opengl {
     auto calculateDisplayViewportMatrix() -> glm::highp_mat4;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Opengl::initializeVao(const std::vector<Vertex>& vertexes) -> u32;
+    /// \fn static auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32>;
     ///
-    /// \brief  Initializes the vao based on the vertexes.
+    /// \brief  Initializes a vao.
     ///
     /// \author Runik
     /// \date   16/04/2021
     ///
-    /// \param  vertexes    The vertexes.
+    /// \param  name    Name of the related shader.
     ///
-    /// \returns    The generated VAO id.
+    /// \returns    The generated VAO id and the vertex buffer id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto initializeVao(const std::vector<Vertex>& vertexes) -> u32;
+    static auto initializeVao(const ShaderName name) -> std::tuple<u32, u32>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::initializeFbos();

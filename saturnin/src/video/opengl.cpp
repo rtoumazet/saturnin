@@ -69,18 +69,21 @@ void Opengl::initialize(GLFWwindow* gui_context) {
     is_legacy_opengl_ = config_->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
 
     guiRenderingContext(gui_context);
-    // initializeRenderingContext();
-    // makeRenderingContextCurrent();
     hostScreenResolution(ScreenResolution{video::minimum_window_width, video::minimum_window_height});
 
     glbinding::initialize(glfwGetProcAddress);
 
     initializeFbos();
     initializeShaders();
-    const auto vertex_shader     = createVertexShader(ShaderName::textured);
-    const auto fragment_shader   = createFragmentShader(ShaderName::textured);
-    program_shader_textured_     = createProgramShader(vertex_shader, fragment_shader);
-    const auto shaders_to_delete = std::vector<u32>{vertex_shader, fragment_shader};
+    const auto vertex_textured   = createVertexShader(ShaderName::textured);
+    const auto fragment_textured = createFragmentShader(ShaderName::textured);
+    program_shader_textured_     = createProgramShader(vertex_textured, fragment_textured);
+
+    const auto vertex_default   = createVertexShader(ShaderName::simple);
+    const auto fragment_default = createFragmentShader(ShaderName::simple);
+    program_shader_default_     = createProgramShader(vertex_default, fragment_default);
+
+    const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured, vertex_default, fragment_default};
     deleteShaders(shaders_to_delete);
 }
 
@@ -131,6 +134,9 @@ void Opengl::postRender() {
 };
 
 void Opengl::initializeShaders() {
+    //-----------------------------
+    // Vertex shaders
+    //-----------------------------
     shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::vertex, ShaderName::textured}, R"(
         #version 120
 
@@ -160,6 +166,39 @@ void Opengl::initializeShaders() {
         }
     )");
 
+    shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::vertex, ShaderName::simple}, R"(
+        #version 120
+
+        attribute vec2 vtx_position;
+        attribute vec4 vtx_color;
+        varying vec4   frg_color;
+        uniform mat4 proj_matrix;
+
+        void main() {
+            gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
+            frg_color = vtx_color;
+        }
+    )");
+
+    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::vertex, ShaderName::simple}, R"(
+        #version 330 core
+
+        layout (location = 0) in vec2 vtx_position;
+        layout (location = 1) in vec4 vtx_color;
+        uniform mat4 proj_matrix;
+
+        out vec4 frg_color;
+
+        void main() {
+            gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
+            frg_color = vec4(vtx_color);
+        }
+    )");
+
+    //-----------------------------
+    // Fragment shaders
+    //-----------------------------
+
     shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::textured}, R"(
         #version 120
         
@@ -186,6 +225,29 @@ void Opengl::initializeShaders() {
         void main()
         {
             frg_color = texture(texture1, frg_tex_coord);
+        } 
+    )");
+
+    shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::simple}, R"(
+        #version 120
+        
+        varying vec4 frg_color;
+
+        void main()
+        {
+            gl_FragColor = frg_color;
+        }
+    )");
+
+    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::fragment, ShaderName::simple}, R"(
+        #version 330 core
+        
+        in vec4 frg_color;
+        out vec4 out_color;
+
+        void main()
+        {
+            out_color = frg_color;
         } 
     )");
 }
@@ -241,30 +303,19 @@ void Opengl::render() {
     }
 
     if (!parts_list.empty()) {
-        constexpr auto vertexes_per_quad             = u8{4};
+        // constexpr auto vertexes_per_quad             = u8{4};
         constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
 
-        auto vao = u32{};
-        glGenVertexArrays(1, &vao);
+        const auto [vao_textured, vertex_buffer_textured] = initializeVao(ShaderName::textured);
+        const auto [vao_simple, vertex_buffer_simple]     = initializeVao(ShaderName::simple);
 
-        // Creating the vertex buffer
-        auto vertex_buffer = u32{};
-        glGenBuffers(1, &vertex_buffer);
+        constexpr auto elements_nb             = u8{2};
+        const auto     vao_ids_array           = std::array<u32, elements_nb>{vao_textured, vao_simple};
+        const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer_textured, vertex_buffer_simple};
 
-        // Binding the VAO
-        glBindVertexArray(vao);
-
-        // Declaring vertex buffer data
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-
-        // position pointer
-        glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
-        glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
-
-        // texture coords pointer
-        auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
-        glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
-        glEnableVertexAttribArray(1);
+        // constexpr auto elements_nb             = u8{1};
+        // const auto     vao_ids_array           = std::array<u32, elements_nb>{vao_textured};
+        // const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer_textured};
 
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) continue;
@@ -287,7 +338,9 @@ void Opengl::render() {
                     // Creating the VAO
                     // auto vao = initializeVao(vertexes);
                     glUseProgram(program_shader_textured_);
-                    glBindVertexArray(vao); // binding VAO
+                    glBindVertexArray(vao_textured); // binding VAO
+                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_textured);
+
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
                     glActiveTexture(GLenum::GL_TEXTURE0);
@@ -346,10 +399,14 @@ void Opengl::render() {
                     // Single line (2 vertexes)
                     break;
                 }
+                default: {
+                    break;
+                }
             }
         }
-        glDeleteBuffers(1, &vertex_buffer);
-        glDeleteVertexArrays(1, &vao);
+
+        glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
+        glDeleteVertexArrays(elements_nb, vao_ids_array.data());
     }
 
     postRender();
@@ -480,8 +537,7 @@ auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4 {
 }
 
 // static
-auto Opengl::initializeVao(const std::vector<Vertex>& vertexes) -> u32 {
-    // Creating the VAO
+auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
     auto vao = u32{};
     glGenVertexArrays(1, &vao);
 
@@ -492,20 +548,36 @@ auto Opengl::initializeVao(const std::vector<Vertex>& vertexes) -> u32 {
     // Binding the VAO
     glBindVertexArray(vao);
 
-    // Declaring vertex buffer data, and sending it to the GPU
+    //// Declaring vertex buffer data
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-    // position pointer
-    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
-    glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
+    switch (name) {
+        case ShaderName::simple: {
+            // position pointer
+            glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
+            glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
 
-    // texture coords pointer
-    auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
-    glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
-    glEnableVertexAttribArray(1);
+            // color pointer
+            auto offset = GLintptr(2 * sizeof(s16));
+            glVertexAttribPointer(1, 4, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+            glEnableVertexAttribArray(1);
+            break;
+        }
+        case ShaderName::textured: {
+            // position pointer
+            glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
+            glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
 
-    return vao;
+            // texture coords pointer
+            auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
+            glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+            glEnableVertexAttribArray(1);
+
+            break;
+        }
+    }
+    glBindVertexArray(0);
+    return std::make_tuple(vao, vertex_buffer);
 }
 
 void Opengl::initializeFbos() {
