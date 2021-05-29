@@ -281,5 +281,8 @@
     <ClInclude Include="src\video\vdp_common.h">
       <Filter>Fichiers sources\video</Filter>
     </ClInclude>
+    <ClInclude Include="src\scu.h">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

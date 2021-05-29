@@ -200,10 +200,10 @@ void Scu::executeDma(const DmaConfiguration& dc) {
             auto read_address_add  = static_cast<u8>((dc.read_add_value == ReadAddressAddValue::add_4) ? 4 : 0);
             auto write_address_add = u8{0};
 
-            Log::debug(Logger::scu, "Read address : ", read_address);
-            Log::debug(Logger::scu, "Write address : ", write_address);
-            Log::debug(Logger::scu, "Size : ", count);
-            Log::debug(Logger::scu, "Address add : ", read_address_add);
+            Log::debug(Logger::scu, "Read address : {:#x}", read_address);
+            Log::debug(Logger::scu, "Write address : {:#x}", write_address);
+            Log::debug(Logger::scu, "Size : {:#x}", count);
+            Log::debug(Logger::scu, "Address add : {:#x}", read_address_add);
 
             switch (dc.write_add_value) {
                 case WriteAddressAddValue::add_0: write_address_add = address_add_0; break;
@@ -365,9 +365,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                 count         = modules_.memory()->read<u32>(execute_address_storage_buffer);
                 if (count == 0) { count = max_transfer_byte_number; }
 
-                Log::debug(Logger::scu, "Read address : ", read_address);
-                Log::debug(Logger::scu, "Write address : ", write_address);
-                Log::debug(Logger::scu, "Size : ", count);
+                Log::debug(Logger::scu, "Read address : {:#x}", read_address);
+                Log::debug(Logger::scu, "Write address : {:#x}", write_address);
+                Log::debug(Logger::scu, "Size : {:#x}", count);
 
                 auto byte_counter = u32{};
                 auto word_counter = u32{};
