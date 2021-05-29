@@ -50,7 +50,7 @@ static bool show_load_binary  = false;
 static bool show_debug_memory = false;
 static bool show_debug_sh2    = false;
 static bool show_debug_vdp2   = false;
-static bool show_demo         = false;
+static bool show_demo         = true;
 static bool show_log          = true;
 
 using core::Log;
@@ -895,12 +895,14 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
     const auto window_size = ImVec2(670, 440);
     ImGui::SetNextWindowSize(window_size);
 
-    auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings
-                                         | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar};
+    auto window_flags
+        = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse
+                           | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse};
     ImGui::Begin("Sh2 debug", opened, window_flags);
 
     static auto sh2_type   = Sh2Type{Sh2Type::master};
     static auto current_pc = u32{state.slaveSh2()->getRegister(Sh2Register::pc)};
+    static auto local_pc   = u32{};
     if (ImGui::RadioButton(tr("Master").c_str(), sh2_type == Sh2Type::master)) { sh2_type = Sh2Type::master; }
     ImGui::SameLine();
     if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) { sh2_type = Sh2Type::slave; };
@@ -912,7 +914,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         default: break;
     }
 
-    current_pc = current_sh2->getRegister(Sh2Register::pc);
+    current_pc = (local_pc != 0) ? local_pc : current_sh2->getRegister(Sh2Register::pc);
 
     ImGui::SameLine(ImGui::GetWindowWidth() / 2);
 
@@ -920,13 +922,22 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         // Debug buttons
         const auto button_width    = ImVec2(90, 0);
         const auto label_step_into = icon_step_into + tr("Step into");
-        if (ImGui::Button(label_step_into.c_str(), button_width)) { state.debugStatus(core::DebugStatus::step_into); }
+        if (ImGui::Button(label_step_into.c_str(), button_width)) {
+            local_pc = 0;
+            state.debugStatus(core::DebugStatus::step_into);
+        }
         ImGui::SameLine();
         const auto label_step_over = icon_step_over + tr("Step over");
-        if (ImGui::Button(label_step_over.c_str(), button_width)) { state.debugStatus(core::DebugStatus::step_over); }
+        if (ImGui::Button(label_step_over.c_str(), button_width)) {
+            local_pc = 0;
+            state.debugStatus(core::DebugStatus::step_over);
+        }
         ImGui::SameLine();
         const auto label_step_out = icon_step_out + tr("Step out");
-        if (ImGui::Button(label_step_out.c_str(), button_width)) { state.debugStatus(core::DebugStatus::step_out); }
+        if (ImGui::Button(label_step_out.c_str(), button_width)) {
+            local_pc = 0;
+            state.debugStatus(core::DebugStatus::step_out);
+        }
     }
 
     {
@@ -934,102 +945,147 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         const auto child_size = ImVec2(300, 270);
         ImGui::BeginChild("ChildRegisters", child_size, true, window_flags);
 
-        ImGui::TextDisabled(tr("General registers").c_str());
-        ImGui::Separator();
+        // ImGui::TextDisabled(tr("General registers").c_str());
+        // ImGui::Separator();
 
         const auto mask = std::string{"R{:<2d} = {:#010x}"};
         auto       i    = u8{};
 
-        ImGui::Columns(2);
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r0)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r1)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r2)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r3)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r4)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r5)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r6)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r7)).c_str());
+        static ImGuiTableFlags table_flags    = ImGuiTableFlags_SizingStretchSame;
+        constexpr auto         columns_number = u8{2};
+        if (ImGui::BeginTable("general_registers", columns_number, table_flags)) {
+            ImGui::TableSetupColumn(tr("General registers").c_str());
+            ImGui::TableHeadersRow();
 
-        ImGui::NextColumn();
+            const auto addGeneralRegisters = [&](u32 index, const Sh2Register reg1, const Sh2Register reg2) {
+                constexpr auto offset = u8{8};
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextUnformatted(fmt::format(mask, index, current_sh2->getRegister(reg1)).c_str());
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextUnformatted(fmt::format(mask, index + offset, current_sh2->getRegister(reg2)).c_str());
+            };
 
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r8)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r9)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r10)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r11)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r12)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r13)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r14)).c_str());
-        ImGui::TextUnformatted(fmt::format(mask, i++, current_sh2->getRegister(Sh2Register::r15)).c_str());
+            addGeneralRegisters(i++, Sh2Register::r0, Sh2Register::r8);
+            addGeneralRegisters(i++, Sh2Register::r1, Sh2Register::r9);
+            addGeneralRegisters(i++, Sh2Register::r2, Sh2Register::r10);
+            addGeneralRegisters(i++, Sh2Register::r3, Sh2Register::r11);
+            addGeneralRegisters(i++, Sh2Register::r4, Sh2Register::r12);
+            addGeneralRegisters(i++, Sh2Register::r5, Sh2Register::r13);
+            addGeneralRegisters(i++, Sh2Register::r6, Sh2Register::r14);
+            addGeneralRegisters(i++, Sh2Register::r7, Sh2Register::r15);
 
-        ImGui::Columns(1);
-        ImGui::Separator();
-
-        ImGui::Columns(2);
-        ImGui::TextDisabled(tr("System registers").c_str());
-        ImGui::NextColumn();
-        ImGui::TextDisabled(tr("Control registers").c_str());
-
-        ImGui::Columns(1);
-        ImGui::Separator();
-
-        ImGui::Columns(2);
-        const auto system_mask = std::string{"{:<4} = {:#010x}"};
-        ImGui::TextUnformatted(fmt::format(system_mask, "MACH", current_sh2->getRegister(Sh2Register::mach)).c_str());
-        ImGui::TextUnformatted(fmt::format(system_mask, "MACL", current_sh2->getRegister(Sh2Register::macl)).c_str());
-        ImGui::TextUnformatted(fmt::format(system_mask, "PR", current_sh2->getRegister(Sh2Register::pr)).c_str());
-        ImGui::TextUnformatted(fmt::format(system_mask, "PC", current_sh2->getRegister(Sh2Register::pc)).c_str());
-
-        ImGui::NextColumn();
+            ImGui::EndTable();
+        }
 
         // ImGui::Separator();
-        const auto control_mask = std::string{"{:<3} = {:#010x}"};
-        ImGui::TextUnformatted(fmt::format(control_mask, "VBR", current_sh2->getRegister(Sh2Register::vbr)).c_str());
-        ImGui::TextUnformatted(fmt::format(control_mask, "GBR", current_sh2->getRegister(Sh2Register::gbr)).c_str());
-        ImGui::TextUnformatted(fmt::format(control_mask, "SR", current_sh2->getRegister(Sh2Register::sr)).c_str());
+        ImGui::NewLine();
 
+        // System & Control registers
+        if (ImGui::BeginTable("system_registers", 2, table_flags)) {
+            ImGui::TableSetupColumn(tr("System registers").c_str());
+            ImGui::TableSetupColumn(tr("Control registers").c_str());
+            ImGui::TableHeadersRow();
+
+            const auto system_mask  = std::string{"{:<4} = {:#010x}"};
+            const auto control_mask = std::string{"{:<3} = {:#010x}"};
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::TextUnformatted(fmt::format(system_mask, "MACH", current_sh2->getRegister(Sh2Register::mach)).c_str());
+            ImGui::TableSetColumnIndex(1);
+            ImGui::TextUnformatted(fmt::format(control_mask, "VBR", current_sh2->getRegister(Sh2Register::vbr)).c_str());
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::TextUnformatted(fmt::format(system_mask, "MACL", current_sh2->getRegister(Sh2Register::macl)).c_str());
+            ImGui::TableSetColumnIndex(1);
+            ImGui::TextUnformatted(fmt::format(control_mask, "GBR", current_sh2->getRegister(Sh2Register::gbr)).c_str());
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::TextUnformatted(fmt::format(system_mask, "PR", current_sh2->getRegister(Sh2Register::pr)).c_str());
+            ImGui::TableSetColumnIndex(1);
+            ImGui::TextUnformatted(fmt::format(control_mask, "SR", current_sh2->getRegister(Sh2Register::sr)).c_str());
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::TextUnformatted(fmt::format(system_mask, "PC", current_sh2->getRegister(Sh2Register::pc)).c_str());
+
+            ImGui::EndTable();
+        }
         ImGui::EndChild();
     }
+
     ImGui::SameLine(ImGui::GetWindowWidth() / 2);
     {
         // Disassembly
+
         const auto child_size = ImVec2(330, 270);
         ImGui::BeginChild("ChildDisassembly", child_size, true, window_flags);
 
-        ImGui::TextDisabled(tr("Disassembly").c_str());
-        ImGui::Separator();
+        if (ImGui::BeginTable("disassembly", 1, ImGuiTableFlags_SizingFixedFit, ImVec2(285.f, 0.f))) {
+            ImGui::TableSetupColumn(tr("Disassembly").c_str());
+            ImGui::TableHeadersRow();
 
-        ImGui::Columns(2);
-        ImGui::SetColumnWidth(0, 300.0f);
-        ImGui::SetColumnWidth(1, 30.0f);
+            const auto lower_bound = u32{current_pc - 6};
+            const auto upper_bound = u32{current_pc + 20};
+            for (u32 i = lower_bound; i < upper_bound; i += 2) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
 
-        const auto lower_bound = u32{current_pc - 6};
-        const auto upper_bound = u32{current_pc + 20};
-        for (u32 i = lower_bound; i < upper_bound; i += 2) {
-            const auto opcode = state.memory()->read<u16>(i);
-            if (i == current_pc) {
-                ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), sh2::disasm(i, opcode).c_str());
-            } else {
-                ImGui::TextUnformatted(sh2::disasm(i, opcode).c_str());
+                const auto opcode = state.memory()->read<u16>(i);
+                if (i == current_pc) {
+                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), sh2::disasm(i, opcode).c_str());
+                } else {
+                    ImGui::TextUnformatted(sh2::disasm(i, opcode).c_str());
+                }
             }
+
+            ImGui::EndTable();
         }
 
-        ImGui::NextColumn();
+        ImGui::SameLine();
 
-        ImGui::NewLine();
-        ImGui::NewLine();
-        ImGui::NewLine();
-        ImGui::NewLine();
-        ImGui::NewLine();
-        ImGui::PushButtonRepeat(true);
-        if (ImGui::ArrowButton("##up", ImGuiDir_Up)) {
-            if (current_pc > 0) { current_pc -= 2; }
+        if (ImGui::BeginTable("disassembly_buttons", 1, ImGuiTableFlags_SizingStretchProp)) {
+            constexpr auto row_height = 110.f;
+            ImGui::TableNextRow(ImGuiTableRowFlags_None, row_height);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::PushButtonRepeat(true);
+            if (ImGui::ArrowButton("##up", ImGuiDir_Up)) {
+                if (local_pc == 0) { local_pc = current_pc; };
+                local_pc -= 2;
+                // if (current_pc > 0) { current_pc -= 2; }
+            }
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            if (ImGui::ArrowButton("##down", ImGuiDir_Down)) {
+                if (local_pc == 0) { local_pc = current_pc; };
+                local_pc += 2;
+            }
+            ImGui::PopButtonRepeat();
+
+            ImGui::EndTable();
         }
-        if (ImGui::ArrowButton("##down", ImGuiDir_Down)) { current_pc += 2; }
-        ImGui::PopButtonRepeat();
 
         ImGui::EndChild();
     }
-    ImGui::NewLine();
+
+    {
+        // Breakpoints
+        const auto child_size = ImVec2(300, 100);
+        ImGui::BeginChild("ChildBreakpoints", child_size, true, window_flags);
+
+        if (ImGui::BeginTable("breakpoints", 1, ImGuiTableFlags_SizingFixedFit)) {
+            ImGui::TableSetupColumn(tr("Breakpoints").c_str());
+            ImGui::TableHeadersRow();
+
+            ImGui::EndTable();
+        }
+
+        ImGui::EndChild();
+    }
 
     ImGui::SameLine(ImGui::GetWindowWidth() / 2);
 
@@ -1039,14 +1095,21 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         const auto child_size = ImVec2(330, 100);
         ImGui::BeginChild("ChildCallstack", child_size, true, window_flags);
 
-        ImGui::TextDisabled(tr("Callstack").c_str());
-        ImGui::Separator();
+        if (ImGui::BeginTable("callstack", 1, ImGuiTableFlags_SizingFixedFit + ImGuiTableFlags_ScrollY, ImVec2(0.0f, 95.f))) {
+            ImGui::TableSetupColumn(tr("Callstack").c_str());
+            ImGui::TableSetupScrollFreeze(0, 1);
+            ImGui::TableHeadersRow();
 
-        const auto callstack_mask = std::string{"{:#010x}"};
-        const auto callstack      = current_sh2->callstack();
-        std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
-            ImGui::TextUnformatted(fmt::format(callstack_mask, item.call_address).c_str());
-        });
+            const auto callstack_mask = std::string{"{:#010x}"};
+            const auto callstack      = current_sh2->callstack();
+            std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextUnformatted(fmt::format(callstack_mask, item.call_address).c_str());
+            });
+
+            ImGui::EndTable();
+        }
 
         ImGui::EndChild();
     }
