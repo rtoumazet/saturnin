@@ -113,4 +113,24 @@ void HelpMarker(const std::string& desc, const bool with_question_mark) {
     }
 }
 
+void ChildWindowHeader(const std::string& label) {
+    const auto pos  = ImGui::GetWindowPos();
+    const auto size = ImGui::GetWindowSize();
+    ImGui::GetWindowDrawList()->AddRectFilled(pos,
+                                              ImVec2(pos.x + size.x, pos.y + 15.f),
+                                              ImGui::GetColorU32(ImGuiCol_TableHeaderBg, 255),
+                                              5.f,
+                                              ImDrawCornerFlags_Top);
+    ImGui::AlignTextToFramePadding();
+    ImGui::SameLine(3.0f);
+    ImGui::Text("%s", label.c_str());
+}
+
+void TextPadding(float amount) {
+    ImGui::AlignTextToFramePadding();
+    auto cursor_pos = ImGui::GetCursorPos();
+    cursor_pos.x += 3.f;
+    ImGui::SetCursorPos(cursor_pos);
+}
+
 } // namespace ImGui

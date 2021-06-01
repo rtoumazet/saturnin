@@ -73,6 +73,8 @@ constexpr auto frt_clock_divisor_128      = u8{128};
 constexpr auto frt_clock_divisor_mask_8   = u8{0b00000111};
 constexpr auto frt_clock_divisor_mask_32  = u8{0b00011111};
 constexpr auto frt_clock_divisor_mask_128 = u8{0b01111111};
+
+constexpr auto breakpoints_number = u8{5};
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   Sh2Type
 ///
@@ -461,6 +463,12 @@ class Sh2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto subroutineDepth() -> size_t { return step_over_subroutine_depth_; };
+
+    ///@{
+    /// Breakpoints accessors
+    [[nodiscard]] void breakpoint(const u8 index, const u32 addr) { breakpoints_[index] = addr; };
+    [[nodiscard]] auto breakpoint(const u8 index) const -> u32 { return breakpoints_[index]; };
+    ///@}
 
     EmulatorModules modules_; ///< Modules of the emulator
 
@@ -989,8 +997,9 @@ class Sh2 {
     StandbyControlRegister sbycr_;
     //@}
 
-    std::vector<CallstackItem> callstack_;                    ///< Callstack of the processor
-    size_t                     step_over_subroutine_depth_{}; ///< Subroutine depth, used with DebugStatus::step_over
+    std::vector<CallstackItem>          callstack_;                    ///< Callstack of the processor
+    size_t                              step_over_subroutine_depth_{}; ///< Subroutine depth, used with DebugStatus::step_over
+    std::array<u32, breakpoints_number> breakpoints_;                  ///< Breakpoints on current CPU program counter.
 
     bool is_nmi_registered_{false}; ///< True if a Non Maskable Interrupt is registered
 };

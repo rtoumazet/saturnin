@@ -892,13 +892,18 @@ void showLogWindow(bool* opened) {
 }
 
 void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(670, 440);
+    const auto window_size = ImVec2(670, 465);
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags
         = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse
                            | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse};
+
     ImGui::Begin("Sh2 debug", opened, window_flags);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(5, 2));
 
     static auto sh2_type   = Sh2Type{Sh2Type::master};
     static auto current_pc = u32{state.slaveSh2()->getRegister(Sh2Register::pc)};
@@ -944,19 +949,13 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         // General registers
         const auto child_size = ImVec2(300, 270);
         ImGui::BeginChild("ChildRegisters", child_size, true, window_flags);
-
-        // ImGui::TextDisabled(tr("General registers").c_str());
-        // ImGui::Separator();
-
+        ImGui::ChildWindowHeader(tr("General registers"));
         const auto mask = std::string{"R{:<2d} = {:#010x}"};
         auto       i    = u8{};
 
-        static ImGuiTableFlags table_flags    = ImGuiTableFlags_SizingStretchSame;
+        static ImGuiTableFlags table_flags    = ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_PadOuterX;
         constexpr auto         columns_number = u8{2};
         if (ImGui::BeginTable("general_registers", columns_number, table_flags)) {
-            ImGui::TableSetupColumn(tr("General registers").c_str());
-            ImGui::TableHeadersRow();
-
             const auto addGeneralRegisters = [&](u32 index, const Sh2Register reg1, const Sh2Register reg2) {
                 constexpr auto offset = u8{8};
                 ImGui::TableNextRow();
@@ -978,13 +977,13 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
             ImGui::EndTable();
         }
 
-        // ImGui::Separator();
         ImGui::NewLine();
 
         // System & Control registers
         if (ImGui::BeginTable("system_registers", 2, table_flags)) {
             ImGui::TableSetupColumn(tr("System registers").c_str());
             ImGui::TableSetupColumn(tr("Control registers").c_str());
+
             ImGui::TableHeadersRow();
 
             const auto system_mask  = std::string{"{:<4} = {:#010x}"};
@@ -1023,11 +1022,12 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
         const auto child_size = ImVec2(330, 270);
         ImGui::BeginChild("ChildDisassembly", child_size, true, window_flags);
+        ImGui::ChildWindowHeader(tr("Disassembly"));
 
-        if (ImGui::BeginTable("disassembly", 1, ImGuiTableFlags_SizingFixedFit, ImVec2(285.f, 0.f))) {
-            ImGui::TableSetupColumn(tr("Disassembly").c_str());
-            ImGui::TableHeadersRow();
-
+        if (ImGui::BeginTable("disassembly",
+                              1,
+                              ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_PadOuterX,
+                              ImVec2(285.f, 0.f))) {
             const auto lower_bound = u32{current_pc - 6};
             const auto upper_bound = u32{current_pc + 20};
             for (u32 i = lower_bound; i < upper_bound; i += 2) {
@@ -1056,7 +1056,6 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
             if (ImGui::ArrowButton("##up", ImGuiDir_Up)) {
                 if (local_pc == 0) { local_pc = current_pc; };
                 local_pc -= 2;
-                // if (current_pc > 0) { current_pc -= 2; }
             }
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
@@ -1065,25 +1064,50 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 local_pc += 2;
             }
             ImGui::PopButtonRepeat();
-
             ImGui::EndTable();
         }
-
         ImGui::EndChild();
     }
 
     {
         // Breakpoints
-        const auto child_size = ImVec2(300, 100);
+        const auto child_size = ImVec2(300, 135);
         ImGui::BeginChild("ChildBreakpoints", child_size, true, window_flags);
 
-        if (ImGui::BeginTable("breakpoints", 1, ImGuiTableFlags_SizingFixedFit)) {
-            ImGui::TableSetupColumn(tr("Breakpoints").c_str());
-            ImGui::TableHeadersRow();
+        ImGui::ChildWindowHeader(tr("Breakpoints"));
+        if (ImGui::BeginTable("breakpoints",
+                              1,
+                              ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_PadOuterX,
+                              ImVec2(0.0f, 95.f))) {
+            constexpr auto                                         input_size = u8{9};
+            std::array<std::vector<char>, sh2::breakpoints_number> bp_input;
+            for (u32 i = 0; i < sh2::breakpoints_number; ++i) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::AlignTextToFramePadding();
+                ImGui::TextUnformatted("0x");
+                ImGui::SameLine();
+                auto cursor_pos = ImGui::GetCursorPos();
+                cursor_pos.x -= 8.f;
+                ImGui::SetCursorPos(cursor_pos);
 
+                if (current_sh2->breakpoint(i) == 0) {
+                    bp_input[i] = util::stringToVector(std::string{""}, input_size);
+                } else {
+                    bp_input[i] = util::stringToVector(fmt::format("{:x}", current_sh2->breakpoint(i)), input_size);
+                }
+
+                if (ImGui::InputText(fmt::format("##bp{:d}", i).c_str(),
+                                     bp_input[i].data(),
+                                     bp_input[i].capacity(),
+                                     ImGuiInputTextFlags_CharsHexadecimal)) {
+                    try {
+                        current_sh2->breakpoint(i, std::stoi(bp_input[i].data(), nullptr, 16));
+                    } catch (std::exception const& e) { Log::warning(Logger::exception, e.what()); }
+                }
+            }
             ImGui::EndTable();
         }
-
         ImGui::EndChild();
     }
 
@@ -1092,14 +1116,14 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
     {
         // Callstack
 
-        const auto child_size = ImVec2(330, 100);
+        const auto child_size = ImVec2(330, 135);
         ImGui::BeginChild("ChildCallstack", child_size, true, window_flags);
+        ImGui::ChildWindowHeader(tr("Callstack"));
 
-        if (ImGui::BeginTable("callstack", 1, ImGuiTableFlags_SizingFixedFit + ImGuiTableFlags_ScrollY, ImVec2(0.0f, 95.f))) {
-            ImGui::TableSetupColumn(tr("Callstack").c_str());
-            ImGui::TableSetupScrollFreeze(0, 1);
-            ImGui::TableHeadersRow();
-
+        if (ImGui::BeginTable("callstack",
+                              1,
+                              ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_ScrollY | ImGuiTableFlags_PadOuterX,
+                              ImVec2(0.0f, 135.f))) {
             const auto callstack_mask = std::string{"{:#010x}"};
             const auto callstack      = current_sh2->callstack();
             std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
@@ -1110,9 +1134,12 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
             ImGui::EndTable();
         }
-
         ImGui::EndChild();
     }
+
+    ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
 
     ImGui::End();
 }

@@ -1778,8 +1778,13 @@ void execute(Sh2& s) {
     }
 
     opcodes_lut[s.current_opcode_](s);
-    // if (s.r_[4] == 0x25f00800) s.emulatorContext()->debugStatus(core::DebugStatus::paused);
-    // if (s.pc_ == 0x6018c7e) s.emulatorContext()->debugStatus(core::DebugStatus::paused);
+
+    if (std::any_of(s.breakpoints_.begin(), s.breakpoints_.end(), [&s](const u32 bp) {
+            return s.getRegister(Sh2Register::pc) == bp;
+        })) {
+        s.modules_.context()->debugStatus(core::DebugStatus::paused);
+        Log::info(Logger::sh2, core::tr("Breakpoint reached !"));
+    }
 }
 
 auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }
