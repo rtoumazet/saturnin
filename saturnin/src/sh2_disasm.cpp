@@ -293,7 +293,12 @@ auto movws4_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} MOV.W R0,@({:#x},R{:d})", pc, opcode, x000n(opcode) * 2, x00n0(opcode));
 };
 auto movls4_d(const u32 pc, const u16 opcode) -> std::string {
-    return fmt::format("{:#010x} {:#06x} MOV.L R{:d},@({:#x}R{:d})", pc, opcode, x00n0(opcode), x000n(opcode) * 4, x0n00(opcode));
+    return fmt::format("{:#010x} {:#06x} MOV.L R{:d},@({:#x},R{:d})",
+                       pc,
+                       opcode,
+                       x00n0(opcode),
+                       x000n(opcode) * 4,
+                       x0n00(opcode));
 };
 auto movbl4_d(const u32 pc, const u16 opcode) -> std::string {
     return fmt::format("{:#010x} {:#06x} MOV.B @({:#x},R{:d}),R0", pc, opcode, x000n(opcode), x00n0(opcode));
