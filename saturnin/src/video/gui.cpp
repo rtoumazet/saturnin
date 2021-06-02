@@ -1102,7 +1102,11 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
                                      bp_input[i].capacity(),
                                      ImGuiInputTextFlags_CharsHexadecimal)) {
                     try {
-                        current_sh2->breakpoint(i, std::stoi(bp_input[i].data(), nullptr, 16));
+                        // stoi converts implicitly to string before converting. Doing the conversion before hand allows
+                        // to handle the empty string case.
+                        const auto str        = std::string(bp_input[i].data());
+                        const auto conv_input = (str.size() == 0) ? 0 : std::stoi(str, nullptr, 16);
+                        current_sh2->breakpoint(i, conv_input);
                     } catch (std::exception const& e) { Log::warning(Logger::exception, e.what()); }
                 }
             }
