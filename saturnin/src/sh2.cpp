@@ -727,6 +727,7 @@ void Sh2::powerOnReset() {
     r_[sp_register_index] = modules_.memory()->read<u32>(sp_start_vector);
     vbr_                  = 0;
     sr_.reset();
+    sr_.set(StatusRegister::i);
     gbr_  = 0;
     mach_ = 0;
     macl_ = 0;
