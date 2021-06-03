@@ -652,7 +652,7 @@ void Smpc::getPeripheralData() {
     sr_.set(StatusRegister::port_1_mode, ireg_[index_1].get(InputRegister::ireg1_port_1_mode));
 
     for (u32 i = 0; i < output_registers_number; ++i) {
-        oreg_[i] = u32_max;
+        oreg_[i] = 0;
     }
 
     switch (sr_.get(StatusRegister::port_1_mode)) {
@@ -664,6 +664,9 @@ void Smpc::getPeripheralData() {
             switch (port_1_status_) {
                 case PortStatus::not_connected: {
                     full_peripheral_data_table_.emplace_back(util::toUnderlying(port_1_status_));
+                    full_peripheral_data_table_.emplace_back(u8_max);
+                    full_peripheral_data_table_.emplace_back(u8_max);
+                    full_peripheral_data_table_.emplace_back(u8_max);
                     break;
                 }
                 case PortStatus::direct_connection: {
@@ -672,6 +675,7 @@ void Smpc::getPeripheralData() {
 
                     const auto local_data_size
                         = u8{(pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size};
+                    full_peripheral_data_table_.emplace_back(local_data_size);
                     full_peripheral_data_table_.reserve(full_peripheral_data_table_.size() + local_data_size);
                     full_peripheral_data_table_.insert(std::end(full_peripheral_data_table_),
                                                        std::begin(pad_data.peripheral_data_table),
@@ -696,6 +700,9 @@ void Smpc::getPeripheralData() {
             switch (port_2_status_) {
                 case PortStatus::not_connected: {
                     full_peripheral_data_table_.emplace_back(util::toUnderlying(port_2_status_));
+                    full_peripheral_data_table_.emplace_back(u8_max);
+                    full_peripheral_data_table_.emplace_back(u8_max);
+                    full_peripheral_data_table_.emplace_back(u8_max);
                     break;
                 }
                 case PortStatus::direct_connection: {
@@ -854,7 +861,7 @@ void Smpc::write(const u32 addr, const u8 data) {
             setCommandDuration();
             break;
         case status_flag: sf_.set(StatusFlag::sf, data); break;
-        case input_register_0: break;
+        case input_register_0: ireg_[index_0].set(InputRegister::all_bits, data); break;
         case input_register_1: ireg_[index_1].set(InputRegister::all_bits, data); break;
         case input_register_2: ireg_[index_2].set(InputRegister::all_bits, data); break;
         case input_register_3: ireg_[index_3].set(InputRegister::all_bits, data); break;
