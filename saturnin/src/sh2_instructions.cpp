@@ -552,9 +552,9 @@ void dmuls(Sh2& s) {
     // With sign, Rn * Rm -> MACH,MACL
 
     // Arranged using SH4 manual
-    const auto result = s64{static_cast<s64>(s.r_[x0n0(s)]) * static_cast<s64>(s.r_[xn00(s)])};
-    s.mach_           = static_cast<s32>(result >> displacement_32);
-    s.macl_           = static_cast<u32>(result & u32_max);
+    const auto result = static_cast<s64>(static_cast<s32>(s.r_[x0n0(s)])) * static_cast<s32>(s.r_[xn00(s)]);
+    s.mach_           = result >> displacement_32;
+    s.macl_           = static_cast<u32>(result);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -1785,6 +1785,13 @@ void execute(Sh2& s) {
         s.modules_.context()->debugStatus(core::DebugStatus::paused);
         Log::info(Logger::sh2, core::tr("Breakpoint reached !"));
     }
+    // Log::info(Logger::sh2, "{:x}", s.getRegister(Sh2Register::pc));
+    // if (s.getRegister(Sh2Register::mach) == 0x0000FFFF) {
+    //    //    // if (s.getRegister(Sh2Register::pc) < 0x4bc0 || s.getRegister(Sh2Register::pc) >= 0x4bd0) {
+    //    s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    //    Log::info(Logger::sh2, core::tr("Breakpoint reached !"));
+    //    //    //}
+    //}
 }
 
 auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }
