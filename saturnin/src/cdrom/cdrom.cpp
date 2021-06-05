@@ -2079,7 +2079,7 @@ void Cdrom::run(const u8 cycles) {
         if (is_command_being_initialized_) { return; }
 
         sendStatus();
-        cr1_.set(CommandRegister::status, CdDriveStatus::periodical_response);
+        cr1_ |= (utilities::toUnderlying(CdDriveStatus::periodical_response) << displacement_8);
 
         // periodic response timing is the same as SCDQ update timing
         hirq_status_reg_.set(HirqStatusRegister::scdq, Scdq::subcode_q_decoded);
@@ -2273,6 +2273,7 @@ void Cdrom::reset() {
     cd_drive_play_mode_ = CdDrivePlayMode::standby;
 
     periodic_response_duration_ = calculatePeriodicResponseDuration();
+    elapsed_cycles_             = periodic_response_duration_;
 }
 
 auto Cdrom::calculatePeriodicResponseDuration() -> u32 {

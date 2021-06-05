@@ -690,7 +690,7 @@ class Cdrom {
     CommandRegister    cr3_;             ///< Command register 3.
     CommandRegister    cr4_;             ///< Command register 4.
 
-    u16  elapsed_cycles_;                      ///< The elapsed cycles
+    s32  elapsed_cycles_;                      ///< The elapsed cycles
     bool is_command_being_initialized_{false}; ///< True if a command is being initialized, ie command registers are written
     bool is_initialization_done_{false};       ///< Prevents writing to command registers while init string hasn't been read
 
