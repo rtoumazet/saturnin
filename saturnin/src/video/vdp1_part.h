@@ -378,7 +378,7 @@ void readColorBankMode16Colors(const EmulatorModules& modules,
     constexpr auto one_read_offset = u8{4}; // in bytes
     auto           current_address = vdp1_ram_start_address + start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) == 0) {
+    if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (8 dots of 4 bits) we must ensure the data read is on 32 bits boundary.
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
@@ -420,7 +420,7 @@ void readLookUpTable16Colors(const EmulatorModules& modules,
     constexpr auto one_read_offset = u8{4};
     auto           current_address = vdp1_ram_start_address + start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) == 0) {
+    if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (8 dots of 4 bits) we must ensure the data read is on 32 bits boundary.
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
@@ -464,7 +464,7 @@ void readColorBankMode64Colors(const EmulatorModules& modules,
     constexpr auto one_read_offset = u8{4}; // in bytes
     auto           current_address = vdp1_ram_start_address + start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) == 0) {
+    if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 6 bits) we must ensure the data read is on 32 bits boundary.
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
@@ -504,7 +504,7 @@ void readColorBankMode128Colors(const EmulatorModules& modules,
     constexpr auto one_read_offset = u8{4}; // in bytes
     auto           current_address = vdp1_ram_start_address + start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) == 0) {
+    if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 7 bits) we must ensure the data read is on 32 bits boundary.
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
@@ -544,7 +544,7 @@ void readColorBankMode256Colors(const EmulatorModules& modules,
     constexpr auto one_read_offset = u8{4}; // in bytes
     auto           current_address = vdp1_ram_start_address + start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) == 0) {
+    if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 8 bits) we must ensure the data read is on 32 bits boundary.
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
@@ -579,7 +579,7 @@ void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_d
     constexpr auto one_read_offset = u8{4}; // in bytes
     auto           current_address = vdp1_ram_start_address + start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) == 0) {
+    if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 8 bits) we must ensure the data read is on 32 bits boundary.
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;

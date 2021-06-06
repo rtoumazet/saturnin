@@ -375,6 +375,7 @@ class Memory {
 
     template<typename T>
     void write(const u32 addr, const T data) {
+        // if (addr == 0x6000248) DebugBreak();
         auto& handler = std::get<WriteHandler<T>&>(std::tie(write_8_handler_, write_16_handler_, write_32_handler_));
         handler[addr >> number_of_bits_16](*this, addr, data);
     }

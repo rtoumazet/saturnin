@@ -149,6 +149,7 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             break;
         }
         case CommandSelect::distorted_sprite_draw: {
+            distortedSpriteDraw(modules, *this);
             break;
         }
         case CommandSelect::polygon_draw: {
@@ -182,9 +183,32 @@ auto Vdp1Part::calculatedYD() -> const s16 { return cmdyd_.twoCmp() + local_coor
 
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) { loadTextureData(modules, part); }
 
+void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
+    Log::debug(Logger::vdp1, tr("Command - Distorted sprite draw"));
+    Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
+    Log::debug(Logger::vdp1, "Vertex B ({},{})", part.calculatedXB(), part.calculatedYB());
+    Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
+    Log::debug(Logger::vdp1, "Vertex D ({},{})", part.calculatedXD(), part.calculatedYD());
+
+    loadTextureData(modules, part);
+
+    auto color = Color{u16{}};
+
+    part.vertexes_.emplace_back(
+        Vertex{{part.calculatedXA(), part.calculatedYA()}, {color.r, color.g, color.b, color.a}, {0.0, 0.0}}); // lower left
+    part.vertexes_.emplace_back(
+        Vertex{{part.calculatedXB(), part.calculatedYB()}, {color.r, color.g, color.b, color.a}, {1.0, 0.0}}); // lower right
+    part.vertexes_.emplace_back(
+        Vertex{{part.calculatedXC(), part.calculatedYC()}, {color.r, color.g, color.b, color.a}, {1.0, 1.0}}); // upper right
+    part.vertexes_.emplace_back(
+        Vertex{{part.calculatedXD(), part.calculatedYD()}, {color.r, color.g, color.b, color.a}, {0.0, 1.0}}); // upper left
+}
+
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
     Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
+    // Log::debug(Logger::vdp1, "XA ({},{})", part.cmdxa_.toU16(), part.cmdxa_.twoCmp());
+
     Log::debug(Logger::vdp1, "Vertex B ({},{})", part.calculatedXB(), part.calculatedYB());
     Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
     Log::debug(Logger::vdp1, "Vertex D ({},{})", part.calculatedXD(), part.calculatedYD());
@@ -199,6 +223,10 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
         Vertex{{part.calculatedXC(), part.calculatedYC()}, {color.r, color.g, color.b, color.a}, {1.0, 1.0}}); // upper right
     part.vertexes_.emplace_back(
         Vertex{{part.calculatedXD(), part.calculatedYD()}, {color.r, color.g, color.b, color.a}, {0.0, 1.0}}); // upper left
+    //part.vertexes_.emplace_back(Vertex{{50, 50}, {color.r, color.g, color.b, color.a}, {0.0, 0.0}});   // lower left
+    //part.vertexes_.emplace_back(Vertex{{100, 50}, {color.r, color.g, color.b, color.a}, {1.0, 0.0}});  // lower right
+    //part.vertexes_.emplace_back(Vertex{{100, 100}, {color.r, color.g, color.b, color.a}, {1.0, 1.0}}); // upper right
+    //part.vertexes_.emplace_back(Vertex{{50, 100}, {color.r, color.g, color.b, color.a}, {0.0, 1.0}});  // upper left
 }
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
@@ -271,7 +299,11 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
                 }
             }
         }
+
+        Texture::storeTexture(
+            Texture(VdpType::vdp1, start_address, toUnderlying(color_mode), 0, texture_data, texture_width, texture_height));
     }
+    part.textureKey(key);
 }
 
 } // namespace saturnin::video

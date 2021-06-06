@@ -235,7 +235,7 @@ void Opengl::initializeShaders() {
 
         void main()
         {
-            gl_FragColor = frg_color;
+            gl_FragColor = vec4(frg_color);
         }
     )");
 
@@ -247,7 +247,7 @@ void Opengl::initializeShaders() {
 
         void main()
         {
-            out_color = frg_color;
+            out_color = vec4(frg_color);
         } 
     )");
 }

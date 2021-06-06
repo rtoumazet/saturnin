@@ -183,7 +183,6 @@ void Vdp1::populateRenderData() {
                     break;
                 }
                 case CommandSelect::distorted_sprite_draw: {
-                    Log::debug(Logger::vdp1, tr("Command - Distorted sprite draw"));
                     vdp1_parts_.emplace_back(
                         Vdp1Part(modules_, DrawType::textured_polygon, current_table_address, cmdctrl, cmdlink));
                     break;
