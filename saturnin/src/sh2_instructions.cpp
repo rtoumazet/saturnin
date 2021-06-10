@@ -1785,11 +1785,19 @@ void execute(Sh2& s) {
         s.modules_.context()->debugStatus(core::DebugStatus::paused);
         Log::info(Logger::sh2, core::tr("Breakpoint reached !"));
     }
+
+    // if (s.divu_opcode_is_stalled_) {
+    //    Log::debug(Logger::sh2, core::tr("DIVU causing SH2 stall for {} cycles"), s.divu_remaining_cycles_);
+    //    s.pc_ -= 2; // One step back in order to re-execute the opcode causing the stall.
+    //    s.cycles_elapsed_         = s.divu_remaining_cycles_;
+    //    s.divu_opcode_is_stalled_ = false;
+    //}
+
     // Log::info(Logger::sh2, "{:x}", s.getRegister(Sh2Register::pc));
-    // if (s.getRegister(Sh2Register::mach) == 0x0000FFFF) {
+    // if (s.getRegister(Sh2Register::r0) == 0x00000810) {
     //    //    // if (s.getRegister(Sh2Register::pc) < 0x4bc0 || s.getRegister(Sh2Register::pc) >= 0x4bd0) {
-    //    s.modules_.context()->debugStatus(core::DebugStatus::paused);
-    //    Log::info(Logger::sh2, core::tr("Breakpoint reached !"));
+    // s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    // Log::info(Logger::sh2, "@{:x}", s.getRegister(Sh2Register::pc));
     //    //    //}
     //}
 }

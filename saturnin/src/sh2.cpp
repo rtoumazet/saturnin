@@ -186,9 +186,14 @@ auto Sh2::readRegisters16(const u32 addr) -> u16 {
         //////////////
         // 10. DIVU //
         //////////////
-        case division_control_register: return divu_dvcr_.get(DivisionControlRegister::upper_16_bits);
-        case division_control_register + 2:
+        case division_control_register: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
+            return divu_dvcr_.get(DivisionControlRegister::upper_16_bits);
+        }
+        case division_control_register + 2: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             return divu_dvcr_.get(DivisionControlRegister::lower_16_bits);
+        }
 
             /////////////
             // 11. FRT //
@@ -247,14 +252,28 @@ auto Sh2::readRegisters32(const u32 addr) -> u32 {
         //////////////
         // 10. DIVU //
         //////////////
-        case divisor_register: return divu_dvsr_.toU32();
-        case dividend_register_l_32_bits: return divu_dvdnt_.toU32();
-        case division_control_register: return divu_dvcr_.toU32();
+        case divisor_register: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
+            return divu_dvsr_.toU32();
+        }
+        case dividend_register_l_32_bits: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
+            return divu_dvdnt_.toU32();
+        }
+        case division_control_register: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
+            return divu_dvcr_.toU32();
+        }
         case dividend_register_l:
-        case dividend_register_l_shadow: return divu_dvdntl_.toU32();
+        case dividend_register_l_shadow: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
+            return divu_dvdntl_.toU32();
+        }
         case dividend_register_h:
-        case dividend_register_h_shadow:
+        case dividend_register_h_shadow: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             return divu_dvdnth_.toU32();
+        }
 
             /////////////
             // 11. FRT //
@@ -478,9 +497,11 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         // 10. DIVU //
         //////////////
         case division_control_register: break; // Read only access
-        case division_control_register + 2:
+        case division_control_register + 2: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             divu_dvcr_.set(DivisionControlRegister::lower_16_bits, static_cast<u16>(data & DivisionControlRegister::access_mask));
             break;
+        }
 
         /////////////
         // 11. FRT //
@@ -601,8 +622,13 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         //////////////
         // 10. DIVU //
         //////////////
-        case divisor_register: divu_dvsr_.set(bits_0_31, data); break;
-        case dividend_register_l_32_bits:
+        case divisor_register: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
+            divu_dvsr_.set(bits_0_31, data);
+            break;
+        }
+        case dividend_register_l_32_bits: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             divu_dvdnt_.set(bits_0_31, data);
 
             // ST-V needs some mirroring
@@ -615,16 +641,25 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
 
             start32bitsDivision();
             break;
-        case division_control_register: divu_dvcr_.set(bits_0_31, data); break;
-        case dividend_register_l:
+        }
+        case division_control_register: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
+            divu_dvcr_.set(bits_0_31, data);
+            break;
+        }
+        case dividend_register_l: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             divu_dvdntl_.set(bits_0_31, data);
             divu_dvdntl_shadow_.set(bits_0_31, data);
 
             start64bitsDivision();
             break;
-        case dividend_register_h:
+        }
+        case dividend_register_h: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             divu_dvdnth_.set(bits_0_31, data);
             break;
+        }
 
             /////////////
             // 11. FRT //
@@ -745,25 +780,31 @@ void Sh2::start32bitsDivision() {
     // 32/32 division
     Log::debug(Logger::sh2, "32/32 division");
 
-    // DVDNT is copied in DVDNTL and DVDNTH
-    divu_dvdntl_.set(bits_0_31, divu_dvdnt_.toU32());
+    // divu_opcode_is_stalled_ = false;
 
-    const auto dvdnt = static_cast<s32>(divu_dvdnt_.toU32());
+    // DVDNT is copied in DVDNTL and DVDNTH
+    divu_dvdntl_ = divu_dvdnt_.toU32();
+
+    const auto dvdnt = divu_dvdnt_.toU32();
     if (dvdnt < 0) {
         divu_dvdnth_.set();
     } else {
         divu_dvdnth_.reset();
     }
-    const auto dvsr = static_cast<s32>(divu_dvsr_.toU32());
+    const auto dvsr = divu_dvsr_.toU32();
 
-    Log::debug(Logger::sh2, "Dividend : {}, divisor : {}", dvdnt, dvsr);
+    // Log::debug(Logger::sh2, "{:#x} / {:#x} -> {:#x},{:#x}", dvdnt, dvsr, pc_);
 
     divu_quot_ = 0;
     divu_rem_  = 0;
     if (divu_dvsr_.any()) {
         divu_quot_ = dvdnt / dvsr;
         divu_rem_  = dvdnt % dvsr;
+        // Log::debug(Logger::sh2, "Quotient : {}, remainder : {}", divu_quot_, divu_rem_);
+        Log::debug(Logger::sh2, "{:#x} / {:#x} -> {:#x},{:#x}", dvdnt, dvsr, divu_quot_, divu_rem_);
     } else {
+        // Log::debug(Logger::sh2, "Overflow detected !");
+        Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dvdnt, dvsr);
         divu_dvcr_.set(DivisionControlRegister::overflow_flag);
     }
 
@@ -772,14 +813,17 @@ void Sh2::start32bitsDivision() {
     const auto is_dvsr_ovf  = bool{(dvsr & sign_bit_32_mask) != 0};
     if (is_dvdnt_ovf && is_dvsr_ovf) {
         if ((divu_quot_ == INT32_MAX) && ((divu_rem_ & sign_bit_32_mask) != 0)) {
+            // Log::debug(Logger::sh2, "Overflow detected !");
+            Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dvdnt, dvsr);
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
         }
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
-    divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow)
-                                 ? divu_overflow_cycles_number
-                                 : divu_normal_cycles_number;
+    // divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow)
+    //                             ? divu_overflow_cycles_number
+    //                             : divu_normal_cycles_number;
+    divu_remaining_cycles_ = 1;
 
     divu_is_running_ = true;
 }
@@ -787,21 +831,27 @@ void Sh2::start32bitsDivision() {
 void Sh2::start64bitsDivision() {
     Log::debug(Logger::sh2, "64/32 division");
 
-    const auto dvdntl = static_cast<s32>(divu_dvdntl_.toU32());
-    const auto dvdnth = static_cast<s32>(divu_dvdnth_.toU32());
-    const auto dvsr   = static_cast<s32>(divu_dvsr_.toU32());
+    // divu_opcode_is_stalled_ = false;
 
-    const auto dividend = (static_cast<s64>(dvdnth) << number_of_bits_32) | dvdntl;
+    const auto dvdntl = divu_dvdntl_.toU32();
+    const auto dvdnth = divu_dvdnth_.toU32();
+    const auto dvsr   = divu_dvsr_.toU32();
 
-    Log::debug(Logger::sh2, "Dividend : {}, divisor : {}", dividend, dvsr);
+    const auto dividend = (static_cast<u64>(dvdnth) << number_of_bits_32) | dvdntl;
+
+    // Log::debug(Logger::sh2, "{} / {} {:x}", dividend, dvsr, pc_);
 
     // auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
-    auto quotient  = s64{};
-    auto remainder = s64{};
+    auto quotient  = u64{};
+    auto remainder = u64{};
     if (divu_dvsr_.any()) {
         quotient  = dividend / dvsr;
         remainder = dividend % dvsr;
+        // Log::debug(Logger::sh2, "Quotient : {}, remainder : {}", quotient, remainder);
+        Log::debug(Logger::sh2, "{:#x} / {:#x} -> {:#x},{:#x} @{:#x}", dividend, dvsr, quotient, remainder, pc_);
     } else {
+        // Log::debug(Logger::sh2, "Overflow detected !");
+        Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dividend, dvsr);
         divu_dvcr_.set(DivisionControlRegister::overflow_flag);
     }
 
@@ -810,14 +860,17 @@ void Sh2::start64bitsDivision() {
     const auto is_dvsr_ovf   = bool{(dvsr & sign_bit_32_mask) != 0};
     if (is_dvdnth_ovf && is_dvsr_ovf) {
         if ((quotient == INT32_MAX) && ((remainder & sign_bit_32_mask) != 0)) {
+            // Log::debug(Logger::sh2, "Overflow detected !");
+            Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dividend, dvsr);
             divu_dvcr_.set(DivisionControlRegister::overflow_flag);
         }
     }
 
     // 39 cycles for regular division, 6 cycles when overflow is detected
-    divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow)
-                                 ? divu_overflow_cycles_number
-                                 : divu_normal_cycles_number;
+    // divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow)
+    //                             ? divu_overflow_cycles_number
+    //                             : divu_normal_cycles_number;
+    divu_remaining_cycles_ = 1;
     divu_quot_             = static_cast<s32>(quotient);
     divu_rem_              = static_cast<s32>(remainder);
 
@@ -877,14 +930,15 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
             }
         } else {
             // Copy in DVDNTL and DVDNTH + ST-V mirroring
-            divu_dvdnt_.set(bits_0_31, static_cast<u32>(divu_quot_));
-            divu_dvdntl_.set(bits_0_31, static_cast<u32>(divu_quot_));
-            divu_dvdntl_shadow_.set(bits_0_31, static_cast<u32>(divu_quot_));
+            divu_dvdnt_         = divu_quot_;
+            divu_dvdntl_        = divu_quot_;
+            divu_dvdntl_shadow_ = divu_quot_;
 
-            divu_dvdnth_.set(bits_0_31, static_cast<u32>(divu_rem_));
-            divu_dvdnth_shadow_.set(bits_0_31, static_cast<u32>(divu_rem_));
+            divu_dvdnth_        = divu_rem_;
+            divu_dvdnth_shadow_ = divu_rem_;
         }
         divu_is_running_ = false;
+        // divu_opcode_is_stalled_ = false;
     }
 }
 

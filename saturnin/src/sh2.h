@@ -942,10 +942,13 @@ class Sh2 {
 
     /// \name DIVU (Division unit)
     //@{
-    bool divu_is_running_{};       ///< True when division unit is in operation
-    u8   divu_remaining_cycles_{}; ///< Remaining cycles to end current division
-    s32  divu_quot_{};             ///< Quotient of the division
-    s32  divu_rem_{};              ///< Remainder of the division
+    bool divu_is_running_{};        ///< True when division unit is in operation
+    bool divu_opcode_is_stalled_{}; ///< True when a division unit register is accessed while the division unit is running ... in
+                                    ///< that case the access postponed until the needed cycles to complete the operation are
+                                    ///< spent.
+    u8  divu_remaining_cycles_{};   ///< Remaining cycles to end current division
+    s32 divu_quot_{};               ///< Quotient of the division
+    s32 divu_rem_{};                ///< Remainder of the division
 
     DivisorRegister         divu_dvsr_;
     DividendRegister32Bits  divu_dvdnt_;
