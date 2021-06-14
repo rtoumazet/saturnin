@@ -617,6 +617,8 @@ enum class ColorCalculation : u8 {
     mode_7 = 0b111, ///< Gouraud shading + half-transparent.
 };
 
+enum class GouraudShading : u8 { disabled = 0, enabled = 1 };
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  CmdPmod
 ///
@@ -639,6 +641,7 @@ class CmdPmod : public Register {
     inline static const BitRange<TransparentPixelDisable> transparent_pixel_disable{6}; ///< SPD bit.
     inline static const BitRange<ColorMode>               color_mode{3, 5};             ///< Color mode bits.
     inline static const BitRange<ColorCalculation>        color_calculation{0, 2};      ///< Color calculation bits.
+    inline static const BitRange<GouraudShading>          gouraud_shading{2};           ///< Gouraud shading bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

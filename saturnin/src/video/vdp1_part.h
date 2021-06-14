@@ -119,6 +119,24 @@ class Vdp1Part final : public BaseRenderingPart {
     CmdVertexCoordinate cmdyd_;   ///< Vertex coordinate data.
     CmdGrda             cmdgrda_; ///< Gouraud shading table.
                                   ///@}
+    ///@{
+    /// Accessors / mutators
+    void debugHeader(const std::string& s) { debug_header_ = s; }
+    auto debugHeader() const -> std::string { return debug_header_; }
+    ///@}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto final::getDebugDetail() -> std::string;
+    ///
+    /// \brief  Returns the debug detail of the current part .
+    ///
+    /// \author Runik
+    /// \date   11/06/2021
+    ///
+    /// \returns    The debug detail of the part.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getDebugDetail() -> std::string;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,6 +173,8 @@ class Vdp1Part final : public BaseRenderingPart {
     static s16 local_coordinate_x_;
     static s16 local_coordinate_y_;
     ///@}
+
+    std::string debug_header_{}; ///< Debug header of the part
 };
 
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part);
@@ -376,7 +396,7 @@ void readColorBankMode16Colors(const EmulatorModules& modules,
                                const u16              color_ram_address_offset,
                                Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4}; // in bytes
-    auto           current_address = vdp1_ram_start_address + start_address;
+    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (8 dots of 4 bits) we must ensure the data read is on 32 bits boundary.
@@ -418,7 +438,7 @@ void readLookUpTable16Colors(const EmulatorModules& modules,
                              const u32              start_address,
                              Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4};
-    auto           current_address = vdp1_ram_start_address + start_address;
+    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (8 dots of 4 bits) we must ensure the data read is on 32 bits boundary.
@@ -462,7 +482,7 @@ void readColorBankMode64Colors(const EmulatorModules& modules,
                                const u16              color_ram_address_offset,
                                Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4}; // in bytes
-    auto           current_address = vdp1_ram_start_address + start_address;
+    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 6 bits) we must ensure the data read is on 32 bits boundary.
@@ -502,7 +522,7 @@ void readColorBankMode128Colors(const EmulatorModules& modules,
                                 const u16              color_ram_address_offset,
                                 Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4}; // in bytes
-    auto           current_address = vdp1_ram_start_address + start_address;
+    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 7 bits) we must ensure the data read is on 32 bits boundary.
@@ -542,7 +562,7 @@ void readColorBankMode256Colors(const EmulatorModules& modules,
                                 const u16              color_ram_address_offset,
                                 Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4}; // in bytes
-    auto           current_address = vdp1_ram_start_address + start_address;
+    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 8 bits) we must ensure the data read is on 32 bits boundary.
@@ -576,19 +596,19 @@ void readColorBankMode256Colors(const EmulatorModules& modules,
 
 template<typename T>
 void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_data, const u32 start_address, Vdp1Part& part) {
-    constexpr auto one_read_offset = u8{4}; // in bytes
-    auto           current_address = vdp1_ram_start_address + start_address;
-    const auto     texture_size    = texture_data.capacity() / 4;
+    constexpr auto one_read_offset_in_bytes = u8{4};
+    const auto     texture_size             = texture_data.capacity();
     if ((texture_size % 4) != 0) {
-        // As we're reading 32 bits of data at a time (4 dots of 8 bits) we must ensure the data read is on 32 bits boundary.
+        // As we're reading 32 bits of data at a time (2 dots of 16 bits) we must ensure the data read is on 32 bits boundary.
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
     }
     if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
         Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
     }
-    for (u32 i = current_address; i < (current_address + texture_size / one_read_offset); i += one_read_offset) {
-        auto row = Dots16Bits(modules.memory()->read<u32>(current_address));
+    const auto max_size = static_cast<u32>(start_address + texture_size);
+    for (u32 i = start_address; i < max_size; i += one_read_offset_in_bytes) {
+        auto row = Dots16Bits(modules.memory()->read<u32>(i));
         readDotRgb<T>(modules, texture_data, part, row.get(Dots16Bits::dot_0));
         readDotRgb<T>(modules, texture_data, part, row.get(Dots16Bits::dot_1));
     }

@@ -92,6 +92,15 @@ void Vdp1::onVblankIn() {
     }
 }
 
+auto Vdp1::getDebugDrawList() const -> std::vector<std::string> {
+    std::vector<std::string> debug_draw_list;
+    for (const auto& p : vdp1_parts_) {
+        debug_draw_list.emplace_back(p.debugHeader());
+    }
+
+    return debug_draw_list;
+}
+
 void Vdp1::updateResolution() { color_ram_address_offset_ = modules_.vdp2()->getSpriteColorAddressOffset(); };
 
 void Vdp1::populateRenderData() {

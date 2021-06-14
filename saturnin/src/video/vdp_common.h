@@ -166,7 +166,7 @@ class Dots8Bits : public Register {
 class Dots16Bits : public Register {
   public:
     using Register::Register;
-    inline static const auto dot_0 = BitRange<u8>{16, 31};
-    inline static const auto dot_1 = BitRange<u8>{0, 15};
+    inline static const auto dot_0 = BitRange<u16>{16, 31};
+    inline static const auto dot_1 = BitRange<u16>{0, 15};
 };
 } // namespace saturnin::video

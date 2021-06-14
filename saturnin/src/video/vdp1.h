@@ -144,7 +144,31 @@ class Vdp1 {
 
     auto getColorRamAddressOffset() -> u16 { return color_ram_address_offset_; }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp1::vdp1Parts() -> const std::vector<Vdp1Part>&
+    ///
+    /// \brief  Returns the current VDP1 draw list.
+    ///
+    /// \author Runik
+    /// \date   11/06/2021
+    ///
+    /// \returns    A reference to a const std::vector&lt;Vdp1Part&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     auto vdp1Parts() -> const std::vector<Vdp1Part>& { return vdp1_parts_; }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp1::getDebugDrawList() const -> std::vector<std::string>;
+    ///
+    /// \brief  Returns the draw list to be used in the debugger.
+    ///
+    /// \author Runik
+    /// \date   11/06/2021
+    ///
+    /// \returns    The draw list.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getDebugDrawList() const -> std::vector<std::string>;
 
   private:
     /// \name Vdp1 registers accessors
