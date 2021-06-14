@@ -31,6 +31,8 @@
 #include <saturnin/src/utilities.h>                   // stringToVector
 #include <saturnin/src/cdrom/scsi.h>                  // ScsiDriveInfo
 #include <saturnin/src/video/opengl.h>                // Opengl
+#include <saturnin/src/video/texture.h>               // Texture
+#include <saturnin/src/video/vdp1.h>                  // Vdp1
 #include <saturnin/src/video/vdp2.h>                  // vram_timing_size
 #include <saturnin/lib/imgui/imgui_custom_controls.h> // peripheralKeyCombo
 #include <saturnin/lib/imgui/imgui_memory_editor.h>   // MemoryEditor
@@ -49,8 +51,9 @@ namespace saturnin::gui {
 static bool show_load_binary  = false;
 static bool show_debug_memory = false;
 static bool show_debug_sh2    = false;
+static bool show_debug_vdp1   = false;
 static bool show_debug_vdp2   = false;
-static bool show_demo         = false;
+static bool show_demo         = true;
 static bool show_log          = true;
 
 using core::Log;
@@ -130,12 +133,14 @@ void showMainMenu(core::EmulatorContext& state) {
                 if (ImGui::BeginMenu(tr("Debug").c_str())) {
                     ImGui::MenuItem(tr("Memory editor").c_str(), nullptr, &show_debug_memory);
                     ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
+                    ImGui::MenuItem(tr("VDP1").c_str(), nullptr, &show_debug_vdp1);
                     ImGui::MenuItem(tr("VDP2").c_str(), nullptr, &show_debug_vdp2);
                     ImGui::EndMenu();
                 }
 
                 if (show_debug_memory) { showMemoryDebugWindow(state, &show_debug_memory); };
                 if (show_debug_sh2) { showSh2DebugWindow(state, &show_debug_sh2); };
+                if (show_debug_vdp1) { showVdp1DebugWindow(state, &show_debug_vdp1); };
                 if (show_debug_vdp2) { showVdp2DebugWindow(state, &show_debug_vdp2); };
             }
             default: break;
@@ -1183,6 +1188,91 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
             editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
     }
 
+    ImGui::End();
+}
+
+void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
+    const auto window_size = ImVec2(810, 320);
+    ImGui::SetNextWindowSize(window_size);
+
+    auto window_flags
+        = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
+    ImGui::Begin(tr("VDP1 debug").c_str(), opened, window_flags);
+
+    if (state.debugStatus() != core::DebugStatus::disabled) {
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(5, 2));
+
+        static int current_part_idx = 0; // Here we/ store our selection data as an index.
+        auto       draw_list        = state.vdp1()->vdp1Parts();
+
+        {
+            // Draw list
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+            const auto child_size = ImVec2(310, 280);
+            ImGui::BeginChild("ChildDrawList", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+
+            // ImGui::ChildWindowHeader(tr("Draw list"));
+            if (ImGui::BeginMenuBar()) {
+                ImGui::TextUnformatted(tr("Draw list").c_str());
+                ImGui::EndMenuBar();
+            }
+            const auto draw_list_size = ImVec2(310, 260);
+            if (ImGui::BeginListBox("##draw_list", draw_list_size)) {
+                for (s32 n = 0; n < draw_list.size(); ++n) {
+                    const bool is_selected = (current_part_idx == n);
+                    if (ImGui::Selectable(fmt::format("{}##{}", draw_list[n].debugHeader(), n).c_str(), is_selected))
+                        current_part_idx = n;
+
+                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                    if (is_selected) { ImGui::SetItemDefaultFocus(); }
+                }
+                ImGui::EndListBox();
+            }
+            ImGui::EndChild();
+            ImGui::PopStyleVar();
+        }
+
+        ImGui::SameLine();
+        {
+            // Part detail
+            const auto child_size = ImVec2(260, 280);
+            ImGui::BeginChild("ChildPartDetail", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+
+            // ImGui::ChildWindowHeader(tr(draw_list[current_part_idx].debugHeader()));
+            if (ImGui::BeginMenuBar()) {
+                ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
+                ImGui::EndMenuBar();
+            }
+            ImGui::TextWrapped(draw_list[current_part_idx].getDebugDetail().c_str());
+            ImGui::EndChild();
+        }
+
+        ImGui::SameLine();
+        {
+            // Texture
+            const auto child_size = ImVec2(200, 220);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+            ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+
+            if (ImGui::BeginMenuBar()) {
+                ImGui::TextUnformatted(tr("Texture").c_str());
+                ImGui::EndMenuBar();
+            }
+
+            if (draw_list[current_part_idx].textureKey() != 0) {
+                const auto tex          = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
+                const auto tex_id       = tex.apiHandle();
+                const auto preview_size = ImVec2(200, 200);
+                ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+            }
+            ImGui::EndChild();
+            ImGui::PopStyleVar();
+        }
+
+        ImGui::PopStyleVar();
+        ImGui::PopStyleVar();
+    }
     ImGui::End();
 }
 
