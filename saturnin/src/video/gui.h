@@ -38,14 +38,15 @@ class Opengl;
 
 namespace saturnin::gui {
 
-constexpr auto icon_debug     = "\xEE\xA4\x80 ";
-constexpr auto icon_step_into = "\xEE\xA4\x81 ";
-constexpr auto icon_step_out  = "\xEE\xA4\x82 ";
-constexpr auto icon_step_over = "\xEE\xA4\x83 ";
-constexpr auto icon_config    = "\xEE\xA4\x84 ";
-constexpr auto icon_play      = "\xEE\xA4\x85 ";
-constexpr auto icon_pause     = "\xEE\xA4\x86 ";
-constexpr auto icon_stop      = "\xEE\xA4\x87 ";
+constexpr auto icon_debug      = "\xEE\xA4\x80 ";
+constexpr auto icon_config     = "\xEE\xA4\x81 ";
+constexpr auto icon_step_into  = "\xEE\xA4\x82 ";
+constexpr auto icon_step_out   = "\xEE\xA4\x83 ";
+constexpr auto icon_step_over  = "\xEE\xA4\x84 ";
+constexpr auto icon_play       = "\xEE\xA4\x85 ";
+constexpr auto icon_pause      = "\xEE\xA4\x86 ";
+constexpr auto icon_stop       = "\xEE\xA4\x87 ";
+constexpr auto icon_next_frame = "\xEE\xA4\x88 ";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showImguiDemoWindow(bool show_window);

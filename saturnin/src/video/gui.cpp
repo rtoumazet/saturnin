@@ -930,11 +930,13 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
     current_pc = (local_pc != 0) ? local_pc : current_sh2->getRegister(Sh2Register::pc);
 
-    ImGui::SameLine(ImGui::GetWindowWidth() / 2);
+    constexpr auto buttons_start_pos = 200;
+    ImGui::SameLine(buttons_start_pos);
 
     {
         // Debug buttons
-        const auto button_width    = ImVec2(90, 0);
+        ImGui::BeginGroup();
+        const auto button_width    = ImVec2(100, 0);
         const auto label_step_into = icon_step_into + tr("Step into");
         if (ImGui::Button(label_step_into.c_str(), button_width)) {
             local_pc = 0;
@@ -953,11 +955,12 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
             state.debugStatus(core::DebugStatus::step_out);
         }
         ImGui::SameLine();
-        const auto label_next_frame = tr("Next frame");
+        const auto label_next_frame = icon_next_frame + tr("Next frame");
         if (ImGui::Button(label_next_frame.c_str(), button_width)) {
             local_pc = 0;
             state.debugStatus(core::DebugStatus::next_frame);
         }
+        ImGui::EndGroup();
     }
 
     {
@@ -1295,39 +1298,43 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::SameLine();
         {
             // Part detail
-            const auto child_size = ImVec2(260, 280);
-            ImGui::BeginChild("ChildPartDetail", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+            if (!draw_list.empty()) {
+                const auto child_size = ImVec2(260, 280);
+                ImGui::BeginChild("ChildPartDetail", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
 
-            if (ImGui::BeginMenuBar()) {
-                ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
-                ImGui::EndMenuBar();
+                if (ImGui::BeginMenuBar()) {
+                    ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
+                    ImGui::EndMenuBar();
+                }
+                ImGui::TextWrapped(draw_list[current_part_idx].getDebugDetail().c_str());
+                // state.vdp1()->partToHighlight(draw_list[current_part_idx]);
+                state.opengl()->partToHighlight(draw_list[current_part_idx]);
+                ImGui::EndChild();
             }
-            ImGui::TextWrapped(draw_list[current_part_idx].getDebugDetail().c_str());
-            // state.vdp1()->partToHighlight(draw_list[current_part_idx]);
-            state.opengl()->partToHighlight(draw_list[current_part_idx]);
-            ImGui::EndChild();
         }
 
         ImGui::SameLine();
         {
             // Texture
-            const auto child_size = ImVec2(200, 220);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-            ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+            if (!draw_list.empty()) {
+                const auto child_size = ImVec2(200, 220);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+                ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
 
-            if (ImGui::BeginMenuBar()) {
-                ImGui::TextUnformatted(tr("Texture").c_str());
-                ImGui::EndMenuBar();
-            }
+                if (ImGui::BeginMenuBar()) {
+                    ImGui::TextUnformatted(tr("Texture").c_str());
+                    ImGui::EndMenuBar();
+                }
 
-            if (draw_list[current_part_idx].textureKey() != 0) {
-                const auto tex          = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
-                const auto tex_id       = tex.apiHandle();
-                const auto preview_size = ImVec2(200, 200);
-                ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                if (draw_list[current_part_idx].textureKey() != 0) {
+                    const auto tex          = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
+                    const auto tex_id       = tex.apiHandle();
+                    const auto preview_size = ImVec2(200, 200);
+                    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleVar();
             }
-            ImGui::EndChild();
-            ImGui::PopStyleVar();
         }
 
         io.WantCaptureKeyboard = false;

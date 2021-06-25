@@ -890,7 +890,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // Adding glyphs that will be used as images in text
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
-    static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe907, 0}; // Will not be copied by AddFont* so keep in scope.
+    static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe908, 0}; // Will not be copied by AddFont* so keep in scope.
     ImFontConfig                        config;
     config.MergeMode = true;
     const auto font_path{std::filesystem::current_path() / "res" / "saturnin-icons.ttf"};
