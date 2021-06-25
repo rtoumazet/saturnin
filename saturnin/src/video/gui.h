@@ -193,7 +193,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened);
 void buildGui(core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void addTextureToDrawList(int32_t texture, uint32_t width, uint32_t height);
+/// \fn void addTextureToDrawList(s32 texture, u32 width, u32 height, u8 alpha);
 ///
 /// \brief  Adds the rendered texture to the draw list.
 ///
@@ -203,9 +203,10 @@ void buildGui(core::EmulatorContext& state);
 /// \param  texture The texture add.
 /// \param  width   Width of the texture.
 /// \param  height  Height of the texture.
+/// \param  alpha   The alpha.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void addTextureToDrawList(s32 texture, u32 width, u32 height);
+void addTextureToDrawList(s32 texture, u32 width, u32 height, u8 alpha);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn auto getMouseCoordinates(core::EmulatorContext& state) -> Coord;

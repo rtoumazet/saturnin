@@ -78,6 +78,9 @@ void Vdp2::run(const u8 cycles) {
             modules_.scu()->onVblankIn();
 
             modules_.opengl()->displayFramebuffer(*(modules_.context()));
+            if (modules_.context()->debugStatus() == core::DebugStatus::next_frame) {
+                modules_.context()->debugStatus(core::DebugStatus::paused);
+            }
         }
     }
 

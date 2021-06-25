@@ -73,6 +73,7 @@ class Vdp1Part final : public BaseRenderingPart {
   public:
     ///@{
     /// Constructors / Destructors
+    Vdp1Part() = default;
     Vdp1Part(EmulatorModules& modules,
              const DrawType   type,
              const u32        table_address,
@@ -103,22 +104,23 @@ class Vdp1Part final : public BaseRenderingPart {
 
     ///@{
     /// \name  Part registers
-    CmdCtrl             cmdctrl_; ///< Control words.
-    CmdLink             cmdlink_; ///< Link specification.
-    CmdPmod             cmdpmod_; ///< Draw mode words.
-    CmdColr             cmdcolr_; ///< Color control word.
-    CmdSrca             cmdsrca_; ///< Character address.
-    CmdSize             cmdsize_; ///< Character size.
-    CmdVertexCoordinate cmdxa_;   ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdya_;   ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdxb_;   ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdyb_;   ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdxc_;   ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdyc_;   ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdxd_;   ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdyd_;   ///< Vertex coordinate data.
-    CmdGrda             cmdgrda_; ///< Gouraud shading table.
-                                  ///@}
+    CmdCtrl             cmdctrl_;       ///< Control words.
+    CmdLink             cmdlink_;       ///< Link specification.
+    CmdPmod             cmdpmod_;       ///< Draw mode words.
+    CmdColr             cmdcolr_;       ///< Color control word.
+    CmdSrca             cmdsrca_;       ///< Character address.
+    CmdSize             cmdsize_;       ///< Character size.
+    CmdVertexCoordinate cmdxa_;         ///< Vertex coordinate data.
+    CmdVertexCoordinate cmdya_;         ///< Vertex coordinate data.
+    CmdVertexCoordinate cmdxb_;         ///< Vertex coordinate data.
+    CmdVertexCoordinate cmdyb_;         ///< Vertex coordinate data.
+    CmdVertexCoordinate cmdxc_;         ///< Vertex coordinate data.
+    CmdVertexCoordinate cmdyc_;         ///< Vertex coordinate data.
+    CmdVertexCoordinate cmdxd_;         ///< Vertex coordinate data.
+    CmdVertexCoordinate cmdyd_;         ///< Vertex coordinate data.
+    CmdGrda             cmdgrda_;       ///< Gouraud shading table.
+    u32                 table_address_; ///< The table address.
+                                        ///@}
     ///@{
     /// Accessors / mutators
     void debugHeader(const std::string& s) { debug_header_ = s; }

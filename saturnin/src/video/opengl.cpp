@@ -275,6 +275,29 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         }
     };
 
+    // const auto addVdp1DebugPartToList = [&]() {
+    //    auto part = state.vdp1()->partToOutline();
+
+    //    if (!part.vertexes_.empty()) {
+    //        part.drawType(DrawType::polyline);
+    //        const auto debug_color  = VertexColor({0xff, 0, 0, 0xff});
+    //        part.vertexes_[0].color = debug_color;
+    //        part.vertexes_[1].color = debug_color;
+    //        part.vertexes_[2].color = debug_color;
+    //        part.vertexes_[3].color = debug_color;
+
+    //        parts_list.push_back(std::make_unique<Vdp1Part>(part));
+
+    //        const auto& vdp1_parts = state.vdp1()->vdp1Parts();
+    //        if (!vdp1_parts.empty()) {
+    //            parts_list.reserve(parts_list.size() + vdp1_parts.size());
+    //            for (auto&& p : vdp1_parts) {
+    //                parts_list.push_back(std::make_unique<Vdp1Part>(p));
+    //            }
+    //        }
+    //    }
+    //};
+
     addVdp2PartsToList(ScrollScreen::nbg0);
     addVdp2PartsToList(ScrollScreen::nbg1);
     addVdp2PartsToList(ScrollScreen::nbg2);
@@ -282,6 +305,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     addVdp2PartsToList(ScrollScreen::rbg0);
     addVdp2PartsToList(ScrollScreen::rbg1);
     addVdp1PartsToList();
+    // addVdp1DebugPartToList();
 
     // :TODO: Ordering needs to be done depending on priorities
 
@@ -303,8 +327,9 @@ void Opengl::render() {
     }
 
     if (!parts_list.empty()) {
-        // constexpr auto vertexes_per_quad             = u8{4};
         constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
+        constexpr auto vertexes_per_polyline         = u32{4};
+        constexpr auto vertexes_per_line             = u32{2};
 
         const auto [vao_textured, vertex_buffer_textured] = initializeVao(ShaderName::textured);
         const auto [vao_simple, vertex_buffer_simple]     = initializeVao(ShaderName::simple);
@@ -312,6 +337,9 @@ void Opengl::render() {
         constexpr auto elements_nb             = u8{2};
         const auto     vao_ids_array           = std::array<u32, elements_nb>{vao_textured, vao_simple};
         const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer_textured, vertex_buffer_simple};
+
+        // Calculating the ortho projection matrix
+        const auto proj_matrix = calculateDisplayViewportMatrix();
 
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) continue;
@@ -339,8 +367,7 @@ void Opengl::render() {
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
                     glActiveTexture(GLenum::GL_TEXTURE0);
 
-                    // Calculating the ortho projection matrix and sending it to the shader
-                    const auto proj_matrix     = calculateDisplayViewportMatrix();
+                    // Sending the ortho projection matrix to the shader
                     const auto uni_proj_matrix = glGetUniformLocation(program_shader_textured_, "proj_matrix");
                     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
@@ -376,8 +403,7 @@ void Opengl::render() {
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-                    // Calculating the ortho projection matrix and sending it to the shader
-                    const auto proj_matrix     = calculateDisplayViewportMatrix();
+                    // Sending the ortho projection matrix to the shader
                     const auto uni_proj_matrix = glGetUniformLocation(program_shader_simple_, "proj_matrix");
                     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
@@ -387,6 +413,26 @@ void Opengl::render() {
                 }
                 case DrawType::polyline: {
                     // Quad is drawn using LINE_LOOP (4 vertexes)
+                    auto vertexes = std::vector<Vertex>{};
+                    vertexes.reserve(vertexes_per_polyline);
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[1]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[3]);
+
+                    glUseProgram(program_shader_simple_);
+                    glBindVertexArray(vao_simple);                       // binding VAO
+                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_simple); // binding vertex buffer
+
+                    // Sending vertex buffer data to the GPU
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+                    // Sending the ortho projection matrix to the shader
+                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_simple_, "proj_matrix");
+                    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+                    // Drawing the list
+                    glDrawArrays(GL_LINE_LOOP, 0, vertexes_per_polyline);
                     break;
                 }
                 case DrawType::line: {
@@ -411,6 +457,68 @@ auto Opengl::isThereSomethingToRender() -> const bool {
     std::lock_guard<std::mutex> lock(parts_list_mutex_);
     return !parts_list_.empty();
 }
+
+void Opengl::renderDebugVertexes() {
+    //----------- Pre render -----------//
+    if (is_legacy_opengl_) {
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbos_[index_2]);
+    } else {
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbos_[index_2]);
+    }
+
+    // Viewport is the entire Saturn framebuffer
+    glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
+
+    gl::glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    //----------- Render -----------------//
+    // Calculating the ortho projection matrix
+    const auto [vao_simple, vertex_buffer_simple] = initializeVao(ShaderName::simple);
+    const auto proj_matrix                        = calculateDisplayViewportMatrix();
+
+    auto part = partToHighlight();
+
+    auto vertexes = std::vector<Vertex>{};
+
+    if (!part.vertexes_.empty()) {
+        const auto debug_color  = VertexColor({0xff, 0, 0, 0xff});
+        part.vertexes_[0].color = debug_color;
+        part.vertexes_[1].color = debug_color;
+        part.vertexes_[2].color = debug_color;
+        part.vertexes_[3].color = debug_color;
+
+        vertexes.reserve(6);
+        vertexes.emplace_back(part.vertexes_[0]);
+        vertexes.emplace_back(part.vertexes_[1]);
+        vertexes.emplace_back(part.vertexes_[2]);
+        vertexes.emplace_back(part.vertexes_[0]);
+        vertexes.emplace_back(part.vertexes_[2]);
+        vertexes.emplace_back(part.vertexes_[3]);
+
+        glUseProgram(program_shader_simple_);
+        glBindVertexArray(vao_simple);                       // binding VAO
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_simple); // binding vertex buffer
+
+        // Sending vertex buffer data to the GPU
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+        // Sending the ortho projection matrix to the shader
+        const auto uni_proj_matrix = glGetUniformLocation(program_shader_simple_, "proj_matrix");
+        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+        // Drawing the list
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+
+    //------ Post render --------//
+    // Framebuffer is released
+    if (is_legacy_opengl_) {
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    } else {
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+};
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
 
@@ -575,10 +683,10 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 }
 
 void Opengl::initializeFbos() {
-    // 2 FBOs are generated. One will be used as the last complete rendering by the GUI while the other will be rendered to.
-    constexpr auto fbos_number = u8{2};
-    // std::mutex                  mutex; // Will prevent using the fbos from the GUI thread while they're not yet initialized.
-    // std::lock_guard<std::mutex> guard(mutex);
+    // 3 FBOs are generated.
+    // One will be used as the last complete rendering by the GUI while the other will be rendered to.
+    // The last one is used as a debug overlay
+    constexpr auto fbos_number = u8{3};
     for (int i = 0; i < fbos_number; ++i) {
         auto fbo     = u32{};
         auto texture = u32{};
@@ -791,8 +899,9 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     constexpr auto font_size = 13.0f;
     io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), font_size, &config, icons_ranges.data());
     io.Fonts->Build();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-    const auto clear_color = ImVec4{0.45f, 0.55f, 0.60f, 1.00f};
+    const auto clear_color = ImVec4{0.0f, 0.0f, 0.0f, 1.00f};
 
     // Getting the right rendering context
     // auto opengl = std::make_unique<Opengl>(state.config());

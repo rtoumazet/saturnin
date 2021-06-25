@@ -843,7 +843,11 @@ void showRenderingWindow(core::EmulatorContext& state) {
 
     if (state.opengl()->areFbosInitialized()) {
         if (state.opengl()->isThereSomethingToRender()) { state.opengl()->render(); }
-        gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height);
+        gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height, 0xff);
+        if (state.debugStatus() != core::DebugStatus::disabled) {
+            state.opengl()->renderDebugVertexes();
+            gui::addTextureToDrawList(state.opengl()->debugTextureOverlay(), width, height, 0x80);
+        }
     }
     ImGui::Text("%s", state.opengl()->fps().c_str());
     // const auto mask = std::string{"{:#f}"};
@@ -947,6 +951,12 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         if (ImGui::Button(label_step_out.c_str(), button_width)) {
             local_pc = 0;
             state.debugStatus(core::DebugStatus::step_out);
+        }
+        ImGui::SameLine();
+        const auto label_next_frame = tr("Next frame");
+        if (ImGui::Button(label_next_frame.c_str(), button_width)) {
+            local_pc = 0;
+            state.debugStatus(core::DebugStatus::next_frame);
         }
     }
 
@@ -1203,8 +1213,11 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(5, 2));
 
-        static int current_part_idx = 0; // Here we/ store our selection data as an index.
+        static int current_part_idx = 0; // Here we store our selection data as an index.
         auto       draw_list        = state.vdp1()->vdp1Parts();
+        ImGuiIO&   io               = ImGui::GetIO();
+        io.WantCaptureKeyboard      = true;
+        // io.KeysDown
 
         {
             // Draw list
@@ -1219,19 +1232,65 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
             }
             const auto draw_list_size = ImVec2(310, 260);
             if (ImGui::BeginListBox("##draw_list", draw_list_size)) {
+                // if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
+                //    if (current_part_idx < draw_list.size() - 1) { ++current_part_idx; }
+                //}
+                // if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
+                //    if (current_part_idx > 0) { --current_part_idx; }
+                //}
+
                 for (s32 n = 0; n < draw_list.size(); ++n) {
                     const bool is_selected = (current_part_idx == n);
-                    if (ImGui::Selectable(fmt::format("{}##{}", draw_list[n].debugHeader(), n).c_str(), is_selected))
+                    if (ImGui::Selectable(fmt::format("{}##{}", draw_list[n].debugHeader(), n).c_str(), is_selected)) {
                         current_part_idx = n;
+                    }
 
                     // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                     if (is_selected) { ImGui::SetItemDefaultFocus(); }
                 }
                 ImGui::EndListBox();
             }
+
             ImGui::EndChild();
             ImGui::PopStyleVar();
         }
+
+        //{
+        //    // Draw list
+        //    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+        //    const auto child_size = ImVec2(310, 280);
+        //    ImGui::BeginChild("ChildDrawList", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+
+        //    // ImGui::ChildWindowHeader(tr("Draw list"));
+        //    if (ImGui::BeginMenuBar()) {
+        //        ImGui::TextUnformatted(tr("Draw list").c_str());
+        //        ImGui::EndMenuBar();
+        //    }
+        //    const auto  draw_list_size = ImVec2(310, 260);
+        //    const char* items[] = {"AAAA",    "BBBB", "CCCC", "DDDD",  "EEEE", "FFFF",  "GGGG",  "HHHH", "IIII",   "JJJJ",
+        //    "KKKK",
+        //                           "LLLLLLL", "MMMM", "NNNN", "OOOOO", "PPP",  "QQQQQ", "RRRRR", "SSSS", "TTTTTT", "UUU"};
+        //    if (ImGui::BeginListBox("##draw_list", draw_list_size)) {
+        //        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
+        //            if (current_part_idx < draw_list.size() - 1) { ++current_part_idx; }
+        //        }
+        //        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
+        //            if (current_part_idx > 0) { --current_part_idx; }
+        //        }
+
+        //        for (s32 n = 0; n < IM_ARRAYSIZE(items); ++n) {
+        //            const bool is_selected = (current_part_idx == n);
+        //            if (ImGui::Selectable(items[n], is_selected)) { current_part_idx = n; }
+
+        //            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+        //            if (is_selected) { ImGui::SetItemDefaultFocus(); }
+        //        }
+        //        ImGui::EndListBox();
+        //    }
+
+        //    ImGui::EndChild();
+        //    ImGui::PopStyleVar();
+        //}
 
         ImGui::SameLine();
         {
@@ -1239,12 +1298,13 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
             const auto child_size = ImVec2(260, 280);
             ImGui::BeginChild("ChildPartDetail", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
 
-            // ImGui::ChildWindowHeader(tr(draw_list[current_part_idx].debugHeader()));
             if (ImGui::BeginMenuBar()) {
                 ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
                 ImGui::EndMenuBar();
             }
             ImGui::TextWrapped(draw_list[current_part_idx].getDebugDetail().c_str());
+            // state.vdp1()->partToHighlight(draw_list[current_part_idx]);
+            state.opengl()->partToHighlight(draw_list[current_part_idx]);
             ImGui::EndChild();
         }
 
@@ -1269,6 +1329,8 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
             ImGui::EndChild();
             ImGui::PopStyleVar();
         }
+
+        io.WantCaptureKeyboard = false;
 
         ImGui::PopStyleVar();
         ImGui::PopStyleVar();
@@ -1461,12 +1523,14 @@ void buildGui(core::EmulatorContext& state) {
     if (show_log) { showLogWindow(&show_log); }
 }
 
-void addTextureToDrawList(int32_t texture, const uint32_t width, const uint32_t height) {
+void addTextureToDrawList(s32 texture, const u32 width, const u32 height, const u8 alpha) {
+    // ImColor(0xff, 0xff, 0xff, alpha);
     ImGui::GetWindowDrawList()->AddImage((ImTextureID)(intptr_t)texture,
                                          ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
                                          ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
                                          ImVec2(0, 0),
-                                         ImVec2(1, 1));
+                                         ImVec2(1, 1),
+                                         ImColor(0xff, 0xff, 0xff, alpha));
 }
 
 auto getMouseCoordinates(core::EmulatorContext& state) -> Coord {

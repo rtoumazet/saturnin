@@ -33,6 +33,7 @@
 #include <tuple>  // tuple
 #include <glm/mat4x4.hpp>
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/video/vdp1_part.h> // Vdp1Part
 
 // Forward declarations
 namespace saturnin::core {
@@ -78,6 +79,7 @@ class Opengl {
     /// Accessors / Mutators
     [[nodiscard]] auto displayedTexture() const { return fbo_textures_[displayed_texture_index_]; };
     void               displayedTexture(const u32 index) { displayed_texture_index_ = index; };
+    [[nodiscard]] auto debugTextureOverlay() const { return fbo_textures_[index_2]; };
     [[nodiscard]] auto guiRenderingContext() const { return gui_rendering_context_; };
     void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
     [[nodiscard]] auto fps() const { return fps_; };
@@ -181,11 +183,13 @@ class Opengl {
     void updateScreenResolution();
 
     ///@{
-    /// Getters / Setters
+    /// Accessors / mutators
     void saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
     auto saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
     void hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
     auto hostScreenResolution() const -> ScreenResolution { return host_screen_resolution_; };
+    void partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
+    auto partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -303,6 +307,17 @@ class Opengl {
 
     auto isThereSomethingToRender() -> const bool;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::renderDebugVertexes();
+    ///
+    /// \brief  Renders the vertexes saved for debugging.
+    ///
+    /// \author Runik
+    /// \date   16/06/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void renderDebugVertexes();
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
@@ -367,7 +382,7 @@ class Opengl {
     // GLFWwindow*   emulator_rendering_context_; ///< Context used for  emulator rendering.
 
     u32              displayed_texture_index_{}; ///< Index of complete texture displayed by the GUI, will be one of fbo_texture.
-    std::vector<u32> fbos_;                      ///< The framebuffer objects used for rendering.
+    std::vector<u32> fbos_;                      ///< The framebuffer objects used for rendering + debug overlay.
     std::vector<u32> fbo_textures_;              ///< The textures used by the framebuffer objects.
     bool             is_legacy_opengl_{};        ///< True if rendering in legacy opengl.
 
@@ -376,7 +391,8 @@ class Opengl {
 
     std::vector<std::unique_ptr<video::BaseRenderingPart>> ///< List of parts
                parts_list_;                                // Will have to be moved to the platform agnostic renderer.
-    std::mutex parts_list_mutex_; ///< Prevents rendering thread to use the list while it's being processed.
+    std::mutex parts_list_mutex_;  ///< Prevents rendering thread to use the list while it's being processed.
+    Vdp1Part   part_to_highlight_; ///< Part that will be highlighted during debug.
 
     u32         program_shader_textured_; ///< Program shader for textured parts.
     u32         program_shader_simple_;   ///< Program shader for everything but textured parts.

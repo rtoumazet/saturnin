@@ -170,6 +170,12 @@ class Vdp1 {
 
     auto getDebugDrawList() const -> std::vector<std::string>;
 
+    ///@{
+    /// Accessors / mutators
+    // void partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
+    // auto partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
+    ///@}
+
   private:
     /// \name Vdp1 registers accessors
     //@{
@@ -241,6 +247,7 @@ class Vdp1 {
     std::array<u32, 2> framebuffer_; ///< Framebuffers texture id.
 
     std::vector<Vdp1Part> vdp1_parts_;               ///< Storage of vdp1 rendering parts .
+    //Vdp1Part              part_to_highlight_;        ///< Part that will be highlighted during debug.
     u16                   color_ram_address_offset_; ///< The color ram address offset.
 };
 

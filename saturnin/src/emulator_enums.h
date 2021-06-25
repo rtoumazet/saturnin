@@ -66,6 +66,6 @@ enum class RenderingStatus { running, reset, stopped };
 /// \brief  Debug status, used when debugging.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DebugStatus { disabled, step_over, step_into, step_out, wait_end_of_routine, paused };
+enum class DebugStatus { disabled, step_over, step_into, step_out, wait_end_of_routine, paused, next_frame };
 
 } // namespace saturnin::core

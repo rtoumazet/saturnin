@@ -705,7 +705,7 @@ class CmdVertexCoordinate : public Register {
     inline static const BitRange<u16> vertex_coordinate{0, 15}; ///< Vertex coordinate (X or Y).
     [[nodiscard]] inline auto         twoCmp() const -> s16 {
         return (register_value[10] == 1) ? -static_cast<s16>((~register_value.to_ulong() + 1) & coordinate_mask)
-                                                 : static_cast<s16>(register_value.to_ulong() & coordinate_mask);
+                                         : static_cast<s16>(register_value.to_ulong() & coordinate_mask);
     };
 };
 

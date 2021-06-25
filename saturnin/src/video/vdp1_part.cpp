@@ -46,8 +46,9 @@ Vdp1Part::Vdp1Part(EmulatorModules& modules,
                    const CmdLink&   cmdlink) {
     vdpType(VdpType::vdp1);
     drawType(type);
-    cmdctrl_ = std::move(cmdctrl);
-    cmdlink_ = std::move(cmdlink);
+    cmdctrl_       = std::move(cmdctrl);
+    cmdlink_       = std::move(cmdlink);
+    table_address_ = table_address;
     readParameters(modules.memory(), table_address);
     generatePartData(modules);
 };
@@ -181,7 +182,7 @@ void Vdp1Part::SetLocalCoordinates(const s16 x, const s16 y) {
 }
 
 auto Vdp1Part::getDebugDetail() -> std::string {
-    auto part_detail = std::string{};
+    auto part_detail = fmt::format("Table address : {:#x}\n", table_address_);
 
     const auto getZoomPoint = [](const ZoomPoint zp) {
         switch (zp) {
