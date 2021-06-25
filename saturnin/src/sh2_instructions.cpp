@@ -758,9 +758,9 @@ void mac(Sh2& s) {
     // Signed operation, (Rn)*(Rm) + MAC -> MAC
     // Arranged using SH4 manual
 
-    const auto src_n = s64{static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[xn00(s)])))};
+    const auto src_n = static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[xn00(s)])));
     s.r_[xn00(s)] += 4;
-    const auto src_m = s64{static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[x0n0(s)])))};
+    const auto src_m = static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[x0n0(s)])));
     s.r_[x0n0(s)] += 4;
 
     const auto mul = s64{src_m * src_n};
@@ -777,6 +777,8 @@ void mac(Sh2& s) {
     s.mach_ = static_cast<u32>(mac >> displacement_32);
     s.macl_ = static_cast<u32>(mac & u32_max);
 
+    Log::debug(Logger::sh2, fmt::format("mac {:#x} * {:#x} = {:#x} {:#x}", (u64)src_m, (u64)src_n, (u32)s.mach_, (u32)s.macl_));
+
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
 }
@@ -785,9 +787,9 @@ void macw(Sh2& s) {
     // Signed operation, (Rn) * (Rm) + MAC -> MAC
     // Arranged using SH4 manual
 
-    const auto src_n = s64{static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[xn00(s)])))};
+    const auto src_n = static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[xn00(s)])));
     s.r_[xn00(s)] += 2;
-    const auto src_m = s64{static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[x0n0(s)])))};
+    const auto src_m = static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[x0n0(s)])));
     s.r_[x0n0(s)] += 2;
 
     const auto mul = s64{src_m * src_n};
@@ -817,6 +819,9 @@ void macw(Sh2& s) {
             s.macl_ = static_cast<u32>(mac & u32_max);
         }
     }
+
+    Log::debug(Logger::sh2, fmt::format("macw {:#x} * {:#x} = {:#x} {:#x}", (u64)src_m, (u64)src_n, (u32)s.mach_, (u32)s.macl_));
+
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
 } // namespace saturnin::sh2
@@ -1800,6 +1805,9 @@ void execute(Sh2& s) {
     // Log::info(Logger::sh2, "@{:x}", s.getRegister(Sh2Register::pc));
     //    //    //}
     //}
+
+    // if (s.getRegister(Sh2Register::r2) == 0x96c05) s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    // if (s.getRegister(Sh2Register::r9) == 0x1159db) s.modules_.context()->debugStatus(core::DebugStatus::paused);
 }
 
 auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }

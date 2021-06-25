@@ -625,6 +625,7 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         case divisor_register: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             divu_dvsr_.set(bits_0_31, data);
+            // if (data == 0x96385) modules_.context()->debugStatus(core::DebugStatus::paused);
             break;
         }
         case dividend_register_l_32_bits: {
@@ -640,6 +641,7 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.set(bits_0_31, u32_max) : divu_dvdnth_.set(bits_0_31, 0x00000000u);
 
             start32bitsDivision();
+            runDivisionUnit(0);
             break;
         }
         case division_control_register: {
@@ -653,6 +655,7 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
             divu_dvdntl_shadow_.set(bits_0_31, data);
 
             start64bitsDivision();
+            runDivisionUnit(0);
             break;
         }
         case dividend_register_h: {
@@ -801,7 +804,7 @@ void Sh2::start32bitsDivision() {
         divu_quot_ = dvdnt / dvsr;
         divu_rem_  = dvdnt % dvsr;
         // Log::debug(Logger::sh2, "Quotient : {}, remainder : {}", divu_quot_, divu_rem_);
-        Log::debug(Logger::sh2, "{:#x} / {:#x} -> {:#x},{:#x}", dvdnt, dvsr, divu_quot_, divu_rem_);
+        Log::debug(Logger::sh2, "{:#x} / {:#x} -> {:#x}, {:#x}", dvdnt, dvsr, divu_quot_, divu_rem_);
     } else {
         // Log::debug(Logger::sh2, "Overflow detected !");
         Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dvdnt, dvsr);
@@ -823,7 +826,7 @@ void Sh2::start32bitsDivision() {
     // divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow)
     //                             ? divu_overflow_cycles_number
     //                             : divu_normal_cycles_number;
-    divu_remaining_cycles_ = 1;
+    divu_remaining_cycles_ = 0;
 
     divu_is_running_ = true;
 }
@@ -839,16 +842,17 @@ void Sh2::start64bitsDivision() {
 
     const auto dividend = (static_cast<u64>(dvdnth) << number_of_bits_32) | dvdntl;
 
+    // if ((dvdntl == 0x3bf20000) && (dvsr == 0x140000)) { modules_.context()->debugStatus(core::DebugStatus::paused); }
     // Log::debug(Logger::sh2, "{} / {} {:x}", dividend, dvsr, pc_);
 
     // auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
-    auto quotient  = u64{};
-    auto remainder = u64{};
+    auto quotient  = s32{};
+    auto remainder = s32{};
     if (divu_dvsr_.any()) {
-        quotient  = dividend / dvsr;
-        remainder = dividend % dvsr;
+        quotient  = (s64)dividend / (s32)dvsr;
+        remainder = (s64)dividend % (s32)dvsr;
         // Log::debug(Logger::sh2, "Quotient : {}, remainder : {}", quotient, remainder);
-        Log::debug(Logger::sh2, "{:#x} / {:#x} -> {:#x},{:#x} @{:#x}", dividend, dvsr, quotient, remainder, pc_);
+        Log::debug(Logger::sh2, "{:#x} / {:#x} -> {:#x}, {:#x}", dividend, dvsr, (u64)quotient, (u64)remainder);
     } else {
         // Log::debug(Logger::sh2, "Overflow detected !");
         Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dividend, dvsr);
@@ -870,7 +874,7 @@ void Sh2::start64bitsDivision() {
     // divu_remaining_cycles_ = (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow)
     //                             ? divu_overflow_cycles_number
     //                             : divu_normal_cycles_number;
-    divu_remaining_cycles_ = 1;
+    divu_remaining_cycles_ = 0;
     divu_quot_             = static_cast<s32>(quotient);
     divu_rem_              = static_cast<s32>(remainder);
 
@@ -928,6 +932,7 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
                 is::sh2_division_overflow.level  = intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::divu_level);
                 sendInterrupt(is::sh2_division_overflow);
             }
+            divu_dvcr_.reset(DivisionControlRegister::overflow_flag);
         } else {
             // Copy in DVDNTL and DVDNTH + ST-V mirroring
             divu_dvdnt_         = divu_quot_;
@@ -936,6 +941,8 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
 
             divu_dvdnth_        = divu_rem_;
             divu_dvdnth_shadow_ = divu_rem_;
+
+            // if (divu_dvdnth_.toU32() == 0x16f0) modules_.context()->debugStatus(core::DebugStatus::paused);
         }
         divu_is_running_ = false;
         // divu_opcode_is_stalled_ = false;
@@ -1227,7 +1234,7 @@ auto Sh2::run() -> u8 {
     runInterruptController();
     current_opcode_ = modules_.memory()->read<u16>(pc_);
     execute(*this);
-    runDivisionUnit(cycles_elapsed_);
+    // runDivisionUnit(cycles_elapsed_);
     runFreeRunningTimer(cycles_elapsed_);
     return cycles_elapsed_;
 }
