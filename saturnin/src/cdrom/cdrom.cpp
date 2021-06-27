@@ -160,20 +160,7 @@ auto Cdrom::getDriveIndice(const s8 path, const s8 target, const s8 lun) -> u8 {
 //
 void Cdrom::executeCommand() {
     switch (cr1_.get(CommandRegister::command)) {
-            //		case 0x0: // Get Status
-            //			// Status(8) | Flags(4) | Rep Cnt(4)
-            //			// Ctrl Addr(8) | Track No(8)
-            //			// Index No(8) | Upper Byte of current FAD (8)
-            //			// Lower word of current FAD
-            //
-            //			HIRQREQ|=CMOK;
-            //			SendStatus();
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get Status=- executed");
-            //			EmuState::pLog->CdBlockWrite("HIRQREQ = 0x",HIRQREQ);
-            //			#endif
-            //			break;
+        case Command::get_status: getStatus(); break;
         case Command::get_hardware_info:
             getHardwareInfo();
             break;
@@ -2318,6 +2305,19 @@ void Cdrom::sendStatus() {
             // CR4 = (uint16_t)FAD;
             break;
     }
+}
+
+void Cdrom::getStatus() {
+    // Status(8) | Flags(4) | Rep Cnt(4)
+    // Ctrl Addr(8) | Track No(8)
+    // Index No(8) | Upper Byte of current FAD (8)
+    // Lower word of current FAD
+
+    sendStatus();
+
+    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+
+    Log::debug(Logger::cdrom, "Get Status executed");
 }
 
 void Cdrom::getHardwareInfo() {
