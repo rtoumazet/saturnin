@@ -551,7 +551,7 @@ void Smpc::executeIntback() {
         }
     } else {
         getPeripheralData();
-        sf_.set();
+        sf_.reset();
     }
 };
 

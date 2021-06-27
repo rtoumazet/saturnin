@@ -777,7 +777,8 @@ void mac(Sh2& s) {
     s.mach_ = static_cast<u32>(mac >> displacement_32);
     s.macl_ = static_cast<u32>(mac & u32_max);
 
-    Log::debug(Logger::sh2, fmt::format("mac {:#x} * {:#x} = {:#x} {:#x}", (u64)src_m, (u64)src_n, (u32)s.mach_, (u32)s.macl_));
+    // Log::debug(Logger::sh2, fmt::format("mac {:#x} * {:#x} = {:#x} {:#x}", (u64)src_m, (u64)src_n, (u32)s.mach_,
+    // (u32)s.macl_));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -820,7 +821,8 @@ void macw(Sh2& s) {
         }
     }
 
-    Log::debug(Logger::sh2, fmt::format("macw {:#x} * {:#x} = {:#x} {:#x}", (u64)src_m, (u64)src_n, (u32)s.mach_, (u32)s.macl_));
+    // Log::debug(Logger::sh2, fmt::format("macw {:#x} * {:#x} = {:#x} {:#x}", (u64)src_m, (u64)src_n, (u32)s.mach_,
+    // (u32)s.macl_));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;

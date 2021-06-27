@@ -53,7 +53,7 @@ static bool show_debug_memory = false;
 static bool show_debug_sh2    = false;
 static bool show_debug_vdp1   = false;
 static bool show_debug_vdp2   = false;
-static bool show_demo         = true;
+static bool show_demo         = false;
 static bool show_log          = true;
 
 using core::Log;

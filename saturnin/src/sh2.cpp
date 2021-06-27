@@ -789,7 +789,7 @@ void Sh2::start32bitsDivision() {
     divu_dvdntl_ = divu_dvdnt_.toU32();
 
     const auto dvdnt = divu_dvdnt_.toU32();
-    if (dvdnt < 0) {
+    if (static_cast<s32>(dvdnt) < 0) {
         divu_dvdnth_.set();
     } else {
         divu_dvdnth_.reset();
