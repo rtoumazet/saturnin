@@ -405,13 +405,12 @@ Gouraud shading table address
             break;
         }
         case CommandSelect::normal_sprite_draw: {
-            // cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            // cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            // cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            // cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            // cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            // cmdya_   = m->read<u16>(address + cmdya_offset);
-            // cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
+            part_detail += fmt::format("Character size {} * {}\n",
+                                       cmdsize_.get(CmdSize::character_size_x) * 8,
+                                       cmdsize_.get(CmdSize::character_size_y));
+            part_detail += getDrawMode(cmdpmod_);
+            part_detail += getGouraudShadingTableAddress();
             break;
         }
         case CommandSelect::scaled_sprite_draw: {
@@ -486,7 +485,26 @@ auto Vdp1Part::calculatedYC() -> const s16 { return cmdyc_.twoCmp() + local_coor
 auto Vdp1Part::calculatedXD() -> const s16 { return cmdxd_.twoCmp() + local_coordinate_x_; }
 auto Vdp1Part::calculatedYD() -> const s16 { return cmdyd_.twoCmp() + local_coordinate_y_; }
 
-void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) { loadTextureData(modules, part); }
+void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
+    Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));
+    Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
+    const auto size_x = s16{part.cmdsize_.get(CmdSize::character_size_x) * 8};
+    const auto size_y = s16{part.cmdsize_.get(CmdSize::character_size_y)};
+
+    Log::debug(Logger::vdp1, "Character size {} * {}", size_x, size_y);
+
+    loadTextureData(modules, part);
+
+    auto           color = Color{u16{}};
+    VertexPosition a{part.calculatedXA(), part.calculatedYA()};
+    VertexPosition b{part.calculatedXA() + size_x, part.calculatedYA()};
+    VertexPosition c{part.calculatedXA() + size_x, part.calculatedYA() + size_y};
+    VertexPosition d{part.calculatedXA(), part.calculatedYA() + size_y};
+    part.vertexes_.emplace_back(Vertex{a, {color.r, color.g, color.b, color.a}, {0.0, 0.0}}); // lower left
+    part.vertexes_.emplace_back(Vertex{b, {color.r, color.g, color.b, color.a}, {1.0, 0.0}}); // lower right
+    part.vertexes_.emplace_back(Vertex{c, {color.r, color.g, color.b, color.a}, {1.0, 1.0}}); // upper right
+    part.vertexes_.emplace_back(Vertex{d, {color.r, color.g, color.b, color.a}, {0.0, 1.0}}); // upper left
+}
 
 void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Distorted sprite draw"));
@@ -512,7 +530,6 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
     Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
-    // Log::debug(Logger::vdp1, "XA ({},{})", part.cmdxa_.toU16(), part.cmdxa_.twoCmp());
 
     Log::debug(Logger::vdp1, "Vertex B ({},{})", part.calculatedXB(), part.calculatedYB());
     Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
