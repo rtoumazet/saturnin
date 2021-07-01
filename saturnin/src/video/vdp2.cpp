@@ -202,6 +202,7 @@ void Vdp2::calculateDisplayDuration() {
 void Vdp2::onVblankIn() {
     updateResolution();
     updateRamStatus();
+    clearRenderData();
     populateRenderData();
 }
 
@@ -578,6 +579,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     // Cell size
     values.emplace_back(tr("Cell size"), tr("8x8 dots"));
 
+    // Priority
+    values.emplace_back(tr("Priority"), fmt::format("{}", screen.priority_number));
+
     // Plane start address
     values.emplace_back(tr("Plane A start address"), fmt::format("{:#010x}", screen.plane_a_start_address));
     values.emplace_back(tr("Plane B start address"), fmt::format("{:#010x}", screen.plane_b_start_address));
@@ -758,7 +762,7 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case color_offset_b_green: return cobg_.toU16();
         case color_offset_b_blue: return cobb_.toU16();
 
-        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register read {:#010x}"), addr);
+        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register read (16) {:#010x}"), addr);
     }
 
     return 0;
@@ -910,7 +914,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case color_offset_b_red: cobr_.set(bits_0_15, data); break;
         case color_offset_b_green: cobg_.set(bits_0_15, data); break;
         case color_offset_b_blue: cobb_.set(bits_0_15, data); break;
-        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write {:#010x}"), addr);
+        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (16) {:#010x}"), addr);
     }
 }
 
@@ -1191,7 +1195,7 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             cobg_.set(bits_0_15, h);
             cobb_.set(bits_0_15, l);
             break;
-        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write {:#010x}"), addr);
+        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (16) {:#010x}"), addr);
     }
 }
 
@@ -2259,6 +2263,15 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 // DISPLAY methods
 //--------------------------------------------------------------------------------------------------------------
 
+void Vdp2::clearRenderData() {
+    vdp2_parts_[util::toUnderlying(ScrollScreen::nbg0)].clear();
+    vdp2_parts_[util::toUnderlying(ScrollScreen::nbg1)].clear();
+    vdp2_parts_[util::toUnderlying(ScrollScreen::nbg2)].clear();
+    vdp2_parts_[util::toUnderlying(ScrollScreen::nbg3)].clear();
+    vdp2_parts_[util::toUnderlying(ScrollScreen::rbg0)].clear();
+    vdp2_parts_[util::toUnderlying(ScrollScreen::rbg1)].clear();
+}
+
 void Vdp2::populateRenderData() {
     if (isScreenDisplayed(ScrollScreen::rbg1)) {
         updateScrollScreenStatus(ScrollScreen::rbg1);
@@ -2299,7 +2312,6 @@ void Vdp2::populateRenderData() {
             }
         }
     }
-    // modules_.context()->notifyRenderingDone();
 }
 
 auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
@@ -3263,6 +3275,7 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
         = Vdp2Part(pnd,
                    ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)},
                    key);
+    p.priority(screen.priority_number);
     // if (pnd.character_number == 0xdddd) __debugbreak();
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
 }
