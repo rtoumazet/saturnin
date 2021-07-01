@@ -120,7 +120,39 @@ void Opengl::preRender() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+    const auto host_res     = hostScreenResolution();
+    const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
+    const auto saturn_res   = saturnScreenResolution();
+    const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
+
+    // Scissor test calculation, to remove from display everything outside the current Saturn resolution.
+    auto scissor_x      = u32{};
+    auto scissor_y      = u32{};
+    auto scissor_width  = u32{};
+    auto scissor_height = u32{};
+
+    if (host_ratio >= saturn_ratio) {
+        // Pillarbox display (wide viewport), use full height
+        const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
+        scissor_x             = empty_zone * saturn_framebuffer_width / host_res.width / 2;
+        scissor_y             = 0;
+        scissor_width         = (host_res.width - empty_zone) * saturn_framebuffer_width / host_res.width;
+        scissor_height        = saturn_framebuffer_height;
+    } else {
+        // Letterbox display (tall viewport) use full width
+        const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
+        scissor_x             = 0;
+        scissor_y             = empty_zone * saturn_framebuffer_height / host_res.height / 2;
+        scissor_width         = saturn_framebuffer_width;
+        scissor_height        = (host_res.height - empty_zone) * saturn_framebuffer_height / host_res.height;
+    }
+
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
 };
 
 void Opengl::postRender() {
@@ -131,6 +163,8 @@ void Opengl::postRender() {
         gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     displayed_texture_index_ = 1 - displayed_texture_index_; // toggles the value
+
+    glDisable(GL_SCISSOR_TEST);
 };
 
 void Opengl::initializeShaders() {
@@ -225,6 +259,7 @@ void Opengl::initializeShaders() {
         void main()
         {
             frg_color = texture(texture1, frg_tex_coord);
+            //frg_color.a = 0.5;
         } 
     )");
 
@@ -275,37 +310,19 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         }
     };
 
-    // const auto addVdp1DebugPartToList = [&]() {
-    //    auto part = state.vdp1()->partToOutline();
-
-    //    if (!part.vertexes_.empty()) {
-    //        part.drawType(DrawType::polyline);
-    //        const auto debug_color  = VertexColor({0xff, 0, 0, 0xff});
-    //        part.vertexes_[0].color = debug_color;
-    //        part.vertexes_[1].color = debug_color;
-    //        part.vertexes_[2].color = debug_color;
-    //        part.vertexes_[3].color = debug_color;
-
-    //        parts_list.push_back(std::make_unique<Vdp1Part>(part));
-
-    //        const auto& vdp1_parts = state.vdp1()->vdp1Parts();
-    //        if (!vdp1_parts.empty()) {
-    //            parts_list.reserve(parts_list.size() + vdp1_parts.size());
-    //            for (auto&& p : vdp1_parts) {
-    //                parts_list.push_back(std::make_unique<Vdp1Part>(p));
-    //            }
-    //        }
-    //    }
-    //};
-
     addVdp2PartsToList(ScrollScreen::nbg0);
     addVdp2PartsToList(ScrollScreen::nbg1);
     addVdp2PartsToList(ScrollScreen::nbg2);
     addVdp2PartsToList(ScrollScreen::nbg3);
     addVdp2PartsToList(ScrollScreen::rbg0);
     addVdp2PartsToList(ScrollScreen::rbg1);
+    std::sort(parts_list.begin(),
+              parts_list.end(),
+              [](const std::unique_ptr<BaseRenderingPart>& a, const std::unique_ptr<BaseRenderingPart>& b) {
+                  return a->priority() < b->priority();
+              });
+
     addVdp1PartsToList();
-    // addVdp1DebugPartToList();
 
     // :TODO: Ordering needs to be done depending on priorities
 
@@ -380,6 +397,8 @@ void Opengl::render() {
                     }
 
                     glBindTexture(GL_TEXTURE_2D, t.apiHandle());
+                    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+                    // glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
                 }
@@ -715,7 +734,8 @@ void Opengl::initializeFbos() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
         // Attaching the color texture to the fbo
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
