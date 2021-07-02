@@ -1348,25 +1348,9 @@ void Cdrom::executeCommand() {
             //			EmuState::pLog->CdBlockWrite("-=Move Sector Data=- executed (UNIMPLEMENTED)");
             //			#endif
             //			break;
-            //		case 0x67: // Get Copy Error
-            //			// Status(8) | Copy error value (8)
-            //			// 0x0000
-            //			// 0x0000
-            //			// 0x0000
-            //
-            //			CR1=cdDriveStatus<<8;
-            //			CR1|=0;
-            //			CR2=0;
-            //			CR3=0;
-            //			CR4=0;
-            //
-            //			//HIRQREQ|=CMOK|ECPY;
-            //			HIRQREQ|=CMOK;
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get Copy Error=- executed");
-            //			#endif
-            //			break;
+        case Command::get_copy_error:
+            getCopyError();
+            break;
             //		case 0x70: // Change Directory
             //			#ifdef _LOGS
             //			EmuState::pLog->CdBlockWrite("-=Change Directory=- executed");
@@ -1461,33 +1445,10 @@ void Cdrom::executeCommand() {
             //			HIRQREQ|=CMOK;
             //			SendStatus();
             //			break;
-            //		case 0x75: // Abort File
-            //			// Status(8) | Flags(4) | Rep Cnt(4)
-            //			// Ctrl Addr(8) | Track No(8)
-            //			// Index No(8) | Upper Byte of curre,t FAD (8)
-            //			// Lower word of current FAD
-            //
-            //			(CdInserted()) ? cdDriveStatus=STAT_PAUSE:cdDriveStatus=STAT_NODISC;
-            //
-            //			HIRQREQ|=CMOK|EFLS;
-            //			SendStatus();
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Abort File=- executed");
-            //			#endif
-            //			break;
-            //		case 0xE1:
-            //			CR1=cdDriveStatus<<8;
-            //			CR2=0x0004;
-            //			CR3=0x0000;
-            //			CR4=0x0000;
-            //
-            //			HIRQREQ|=CMOK;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=E1=- executed");
-            //			#endif
-            //
-            //			break;
+        case Command::abort_file: abortFile(); break;
+        case Command::get_device_authentication_status:
+            getDeviceAuthenticationStatus();
+            break;
             //		case 0xE0:
             //			HIRQREQ|=CMOK|EFLS;
             //			SendStatus();
@@ -1536,14 +1497,14 @@ void Cdrom::executeCommand() {
 //	return cdDriveStatus;
 //}
 //
-// bool CCdRom::CdInserted()
-//{
-//	// verified by trying to read the TOC
-//	bool bReturn = Scsi::readToc(TOCData);
-//	//AspiTOC=(Aspi_TOC*)&TOCData;
-//	AspiTOC=reinterpret_cast<Aspi_TOC*>(&TOCData);
-//	return bReturn;
-//}
+auto Cdrom::isCdInserted() -> bool {
+    // verified by trying to read the TOC
+    // bool bReturn = Scsi::readToc(TOCData);
+    //// AspiTOC=(Aspi_TOC*)&TOCData;
+    // AspiTOC = reinterpret_cast<Aspi_TOC*>(&TOCData);
+    // return bReturn;
+    return false;
+}
 //
 // void CCdRom::InsertCd()
 //{
@@ -2337,4 +2298,49 @@ void Cdrom::getHardwareInfo() {
     Log::debug(Logger::cdrom, "Get Hardware Info executed");
 }
 
+void Cdrom::abortFile() {
+    // Status(8) | Flags(4) | Rep Cnt(4)
+    // Ctrl Addr(8) | Track No(8)
+    // Index No(8) | Upper Byte of curre,t FAD (8)
+    // Lower word of current FAD
+
+    cd_drive_status_ = isCdInserted() ? CdDriveStatus::paused : CdDriveStatus::no_disc_inserted;
+
+    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+    hirq_status_reg_.set(HirqStatusRegister::efls, Efls::file_system_finished);
+
+    sendStatus();
+
+    Log::debug(Logger::cdrom, "Abort File executed");
+}
+
+void Cdrom::getCopyError() {
+    // Status(8) | Copy error value (8)
+    // 0x0000
+    // 0x0000
+    // 0x0000
+
+    cr1_.set(CommandRegister::status, cd_drive_status_);
+    cr1_.set(CommandRegister::lower_8_bits, u8{0});
+    cr2_.set(CommandRegister::all_bits, u16{0x0});
+    cr3_.set(CommandRegister::all_bits, u16{0x0});
+    cr4_.set(CommandRegister::all_bits, u16{0x0});
+
+    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+    hirq_status_reg_.set(HirqStatusRegister::ecpy, Ecpy::sector_copy_or_move_finished);
+
+    Log::debug(Logger::cdrom, "Get Copy Error executed");
+}
+
+void Cdrom::getDeviceAuthenticationStatus() {
+    cr1_.set(CommandRegister::status, cd_drive_status_);
+    cr1_.set(CommandRegister::lower_8_bits, u8{0});
+    cr2_.set(CommandRegister::all_bits, u16{0x0004});
+    cr3_.set(CommandRegister::all_bits, u16{0x0000});
+    cr4_.set(CommandRegister::all_bits, u16{0x0000});
+
+    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+
+    Log::debug(Logger::cdrom, "Get Device Authentication Status executed");
+}
 } // namespace saturnin::cdrom
