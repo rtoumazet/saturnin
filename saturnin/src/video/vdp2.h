@@ -334,6 +334,12 @@ struct ScrollScreenStatus {
     u32 plane_n_start_address{}; ///< The plane N start address
     u32 plane_o_start_address{}; ///< The plane O start address
     u32 plane_p_start_address{}; ///< The plane P start address
+
+    // Srolling data
+    u16 screen_scroll_horizontal_integer{};    ///< Horizontal screen scroll integer part.
+    u8  screen_scroll_horizontal_fractional{}; ///< Horizontal screen scroll fractional part.
+    u16 screen_scroll_vertical_integer{};      ///< Vertical screen scroll vertical integer part.
+    u8  screen_scroll_vertical_fractional{};   ///< Vertical screen scroll fractional part.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

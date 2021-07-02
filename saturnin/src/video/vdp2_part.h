@@ -45,7 +45,7 @@ class Vdp2Part final : public BaseRenderingPart {
   public:
     ///@{
     /// Constructors / Destructors
-    Vdp2Part(const PatternNameData& pnd, ScreenPos&& pos, size_t texture_key);
+    Vdp2Part(const PatternNameData& pnd, ScreenPos& pos, size_t texture_key);
     Vdp2Part(const Vdp2Part&) = default;
     Vdp2Part(Vdp2Part&&)      = default;
     auto operator=(const Vdp2Part&) & -> Vdp2Part& = default;

@@ -1527,6 +1527,7 @@ class MapRotationParameterBPlaneOP : public Register {
 class ScreenScrollValueNbg0HorizontalIntegerPart : public Register {
   public:
     using Register::Register;
+    inline static const auto horizontal_integer = BitRange<u8>{0, 10}; ///< Defines N0SCXIx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1541,6 +1542,7 @@ class ScreenScrollValueNbg0HorizontalIntegerPart : public Register {
 class ScreenScrollValueNbg0HorizontalFractionalPart : public Register {
   public:
     using Register::Register;
+    inline static const auto horizontal_fractional = BitRange<u8>{8, 15}; ///< Defines N0SCXDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1555,6 +1557,7 @@ class ScreenScrollValueNbg0HorizontalFractionalPart : public Register {
 class ScreenScrollValueNbg0VerticalIntegerPart : public Register {
   public:
     using Register::Register;
+    inline static const auto vertical_integer = BitRange<u8>{0, 10}; ///< Defines N0SCYIx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1569,6 +1572,7 @@ class ScreenScrollValueNbg0VerticalIntegerPart : public Register {
 class ScreenScrollValueNbg0VerticalFractionalPart : public Register {
   public:
     using Register::Register;
+    inline static const auto vertical_fractional = BitRange<u8>{8, 15}; ///< Defines N0SCYDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1639,6 +1643,7 @@ class CoordinateIncrementNbg0VerticalFractionalPart : public Register {
 class ScreenScrollValueNbg1HorizontalIntegerPart : public Register {
   public:
     using Register::Register;
+    inline static const auto horizontal_integer = BitRange<u8>{0, 10}; ///< Defines N1SCXIx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1653,6 +1658,7 @@ class ScreenScrollValueNbg1HorizontalIntegerPart : public Register {
 class ScreenScrollValueNbg1HorizontalFractionalPart : public Register {
   public:
     using Register::Register;
+    inline static const auto horizontal_fractional = BitRange<u8>{8, 15}; ///< Defines N1SCXDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1667,6 +1673,7 @@ class ScreenScrollValueNbg1HorizontalFractionalPart : public Register {
 class ScreenScrollValueNbg1VerticalIntegerPart : public Register {
   public:
     using Register::Register;
+    inline static const auto vertical_integer = BitRange<u8>{0, 10}; ///< Defines N1SCYIx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1681,6 +1688,7 @@ class ScreenScrollValueNbg1VerticalIntegerPart : public Register {
 class ScreenScrollValueNbg1VerticalFractionalPart : public Register {
   public:
     using Register::Register;
+    inline static const auto vertical_fractional = BitRange<u8>{8, 15}; ///< Defines N1SCYDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1751,6 +1759,7 @@ class CoordinateIncrementNbg1VerticalFractionalPart : public Register {
 class ScreenScrollValueNbg2Horizontal : public Register {
   public:
     using Register::Register;
+    inline static const auto horizontal = BitRange<u8>{0, 10}; ///< Defines N2SCXx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1765,6 +1774,7 @@ class ScreenScrollValueNbg2Horizontal : public Register {
 class ScreenScrollValueNbg2Vertical : public Register {
   public:
     using Register::Register;
+    inline static const auto vertical = BitRange<u8>{0, 10}; ///< Defines N2SCYx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1779,6 +1789,7 @@ class ScreenScrollValueNbg2Vertical : public Register {
 class ScreenScrollValueNbg3Horizontal : public Register {
   public:
     using Register::Register;
+    inline static const auto horizontal = BitRange<u8>{0, 10}; ///< Defines N3SCXx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1793,6 +1804,7 @@ class ScreenScrollValueNbg3Horizontal : public Register {
 class ScreenScrollValueNbg3Vertical : public Register {
   public:
     using Register::Register;
+    inline static const auto vertical = BitRange<u8>{0, 10}; ///< Defines N3SCYx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

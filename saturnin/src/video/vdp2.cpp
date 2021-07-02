@@ -603,6 +603,25 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
         values.emplace_back(tr("Plane P start address"), fmt::format("{:#010x}", screen.plane_p_start_address));
     }
 
+    // Scrolling
+    switch (s) {
+        case ScrollScreen::nbg0:
+        case ScrollScreen::nbg1:
+            values.emplace_back(tr("Screen scroll"),
+                                fmt::format("x = {}.{}, y = {}.{}",
+                                            screen.screen_scroll_horizontal_integer,
+                                            screen.screen_scroll_horizontal_fractional,
+                                            screen.screen_scroll_vertical_integer,
+                                            screen.screen_scroll_vertical_fractional));
+            break;
+        case ScrollScreen::nbg2:
+        case ScrollScreen::nbg3:
+            values.emplace_back(
+                tr("Screen scroll"),
+                fmt::format("x = {}, y = {}", screen.screen_scroll_horizontal_integer, screen.screen_scroll_vertical_integer));
+            break;
+        default: break;
+    }
     return values;
 }
 
@@ -2489,6 +2508,14 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_special_color_calculation = bmpna_.get(BitmapPaletteNumberA::bitmap_special_color_calculation_nbg0);
             screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
 
+            // Scroll screen
+            screen.screen_scroll_horizontal_integer = scxin0_.get(ScreenScrollValueNbg0HorizontalIntegerPart::horizontal_integer);
+            screen.screen_scroll_horizontal_fractional
+                = scxdn0_.get(ScreenScrollValueNbg0HorizontalFractionalPart::horizontal_fractional);
+            screen.screen_scroll_vertical_integer = scyin0_.get(ScreenScrollValueNbg0VerticalIntegerPart::vertical_integer);
+            screen.screen_scroll_vertical_fractional
+                = scydn0_.get(ScreenScrollValueNbg0VerticalFractionalPart::vertical_fractional);
+
             break;
         case ScrollScreen::nbg1:
             // Color RAM
@@ -2541,6 +2568,14 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_special_color_calculation = bmpna_.get(BitmapPaletteNumberA::bitmap_special_color_calculation_nbg1);
             screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
 
+            // Scroll screen
+            screen.screen_scroll_horizontal_integer = scxin1_.get(ScreenScrollValueNbg1HorizontalIntegerPart::horizontal_integer);
+            screen.screen_scroll_horizontal_fractional
+                = scxdn1_.get(ScreenScrollValueNbg1HorizontalFractionalPart::horizontal_fractional);
+            screen.screen_scroll_vertical_integer = scyin1_.get(ScreenScrollValueNbg1VerticalIntegerPart::vertical_integer);
+            screen.screen_scroll_vertical_fractional
+                = scydn1_.get(ScreenScrollValueNbg1VerticalFractionalPart::vertical_fractional);
+
             break;
         case ScrollScreen::nbg2:
             // Color RAM
@@ -2586,6 +2621,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
+
+            // Scroll screen
+            screen.screen_scroll_horizontal_integer = scxn2_.get(ScreenScrollValueNbg2Horizontal::horizontal);
+            screen.screen_scroll_vertical_integer   = scyn2_.get(ScreenScrollValueNbg2Vertical::vertical);
+
             break;
 
         case ScrollScreen::nbg3:
@@ -2632,6 +2672,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
+
+            // Scroll screen
+            screen.screen_scroll_horizontal_integer = scxn3_.get(ScreenScrollValueNbg3Horizontal::horizontal);
+            screen.screen_scroll_vertical_integer   = scyn3_.get(ScreenScrollValueNbg3Vertical::vertical);
+
             break;
 
         case ScrollScreen::rbg0:
@@ -3271,12 +3316,12 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
                                       texture_width,
                                       texture_height));
     }
-    auto p
-        = Vdp2Part(pnd,
-                   ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)},
-                   key);
+    auto pos = ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)};
+    pos.x -= screen.screen_scroll_horizontal_integer;
+    pos.y -= screen.screen_scroll_vertical_integer;
+
+    auto p = Vdp2Part(pnd, pos, key);
     p.priority(screen.priority_number);
-    // if (pnd.character_number == 0xdddd) __debugbreak();
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
 }
 

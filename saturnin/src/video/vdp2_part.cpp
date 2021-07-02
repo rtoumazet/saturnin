@@ -23,10 +23,10 @@
 
 namespace saturnin::video {
 
-Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos&& pos, size_t texture_key) {
+Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos& pos, size_t texture_key) {
     vdpType(VdpType::vdp2);
     drawType(DrawType::textured_polygon);
-    scroll_screen_pos_       = std::move(pos);
+    scroll_screen_pos_       = pos;
     character_number_        = pnd.character_number;
     palette_number_          = pnd.palette_number;
     is_horizontally_flipped_ = pnd.is_horizontally_flipped;
