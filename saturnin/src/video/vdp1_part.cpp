@@ -299,6 +299,7 @@ Color mode
     RGB
     16 bits/pixel)";
         }
+        return "";
     };
 
     const auto getColorCalculation = [](const ColorCalculation cc) {
@@ -344,6 +345,7 @@ Color calculation
     Mode 7
     Gouraud shading / gouraud shading + half-tranparent)";
         }
+        return "";
     };
 
     const auto getDrawMode = [&getColorMode, &getColorCalculation](CmdPmod& cp) {
