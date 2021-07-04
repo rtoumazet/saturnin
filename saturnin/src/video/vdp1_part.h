@@ -237,7 +237,8 @@ void readDotColorBank16(const EmulatorModules& modules,
 
 template<typename T>
 void readDotLookUpTable16(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot) {
-    const auto color_address = u32{vdp1_vram_start_address + (part.cmdcolr_.toU16() * address_multiplier + dot) * sizeof(T)};
+    // const auto color_address = u32{vdp1_vram_start_address + (part.cmdcolr_.toU16() * address_multiplier + dot) * sizeof(T)};
+    const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.toU16() * address_multiplier + dot * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
@@ -440,7 +441,6 @@ void readLookUpTable16Colors(const EmulatorModules& modules,
                              const u32              start_address,
                              Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4};
-    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (8 dots of 4 bits) we must ensure the data read is on 32 bits boundary.
@@ -450,8 +450,8 @@ void readLookUpTable16Colors(const EmulatorModules& modules,
     if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
         Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
     }
-    for (u32 i = current_address; i < (current_address + texture_size / one_read_offset); i += one_read_offset) {
-        auto row = Dots4Bits(modules.memory()->read<u32>(current_address));
+    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset * 2); i += one_read_offset) {
+        auto row = Dots4Bits(modules.memory()->read<u32>(i));
         readDotLookUpTable16<T>(modules, texture_data, part, row.get(Dots4Bits::dot_0));
         readDotLookUpTable16<T>(modules, texture_data, part, row.get(Dots4Bits::dot_1));
         readDotLookUpTable16<T>(modules, texture_data, part, row.get(Dots4Bits::dot_2));
@@ -615,4 +615,7 @@ void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_d
         readDotRgb<T>(modules, texture_data, part, row.get(Dots16Bits::dot_1));
     }
 }
+
+auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<TextureCoordinates>;
+
 } // namespace saturnin::video

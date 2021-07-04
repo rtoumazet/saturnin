@@ -41,7 +41,9 @@ Texture::Texture(const VdpType    vp,
                  const u16        height) :
     vdp_type_(vp),
     width_(width), height_(height) {
-    key_      = calculateKey(vp, address, color_count, palette_number);
+    key_ = calculateKey(vp, address, color_count, palette_number);
+    // if (key_ == 0xf6d6ea85f4cfd613) DebugBreak();
+    // if (key_ == 0xa57b381a6e5b28d0) DebugBreak();
     raw_data_ = std::move(texture);
 };
 

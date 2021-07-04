@@ -1220,7 +1220,7 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
         auto       draw_list        = state.vdp1()->vdp1Parts();
         ImGuiIO&   io               = ImGui::GetIO();
         io.WantCaptureKeyboard      = true;
-        // io.KeysDown
+        if (draw_list.size() < current_part_idx) current_part_idx = 0;
 
         {
             // Draw list

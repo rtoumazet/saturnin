@@ -252,6 +252,7 @@ Character read direction
 Character read direction
     Vertically inverted)";
         }
+        return "";
     };
 
     const auto getColorMode = [](const ColorMode cm) {
@@ -407,7 +408,8 @@ Gouraud shading table address
             break;
         }
         case CommandSelect::normal_sprite_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
+            part_detail += fmt::format("Vertex A ({}, {})", cmdxa_.twoCmp(), cmdya_.twoCmp());
+            part_detail += fmt::format("{}\n", getCharacterReadDirection(cmdctrl_.get(CmdCtrl::character_read_direction)));
             part_detail += fmt::format("Character size {} * {}\n",
                                        cmdsize_.get(CmdSize::character_size_x) * 8,
                                        cmdsize_.get(CmdSize::character_size_y));
@@ -502,10 +504,45 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     VertexPosition b{part.calculatedXA() + size_x, part.calculatedYA()};
     VertexPosition c{part.calculatedXA() + size_x, part.calculatedYA() + size_y};
     VertexPosition d{part.calculatedXA(), part.calculatedYA() + size_y};
-    part.vertexes_.emplace_back(Vertex{a, {color.r, color.g, color.b, color.a}, {0.0, 0.0}}); // lower left
-    part.vertexes_.emplace_back(Vertex{b, {color.r, color.g, color.b, color.a}, {1.0, 0.0}}); // lower right
-    part.vertexes_.emplace_back(Vertex{c, {color.r, color.g, color.b, color.a}, {1.0, 1.0}}); // upper right
-    part.vertexes_.emplace_back(Vertex{d, {color.r, color.g, color.b, color.a}, {0.0, 1.0}}); // upper left
+
+    const auto coords = getTextureCoordinates(part.cmdctrl_.get(CmdCtrl::character_read_direction));
+    if (coords.size() != 4) {
+        Log::error(Logger::vdp1, tr("VDP1 normal sprite draw coordinates error"));
+        throw std::runtime_error("VDP1 normal sprite draw coordinates error !");
+    }
+    part.vertexes_.emplace_back(Vertex{a, {color.r, color.g, color.b, color.a}, coords[0]}); // lower left
+    part.vertexes_.emplace_back(Vertex{b, {color.r, color.g, color.b, color.a}, coords[1]}); // lower right
+    part.vertexes_.emplace_back(Vertex{c, {color.r, color.g, color.b, color.a}, coords[2]}); // upper right
+    part.vertexes_.emplace_back(Vertex{d, {color.r, color.g, color.b, color.a}, coords[3]}); // upper left
+}
+
+void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
+    Log::debug(Logger::vdp1, tr("Command - Scaled sprite draw"));
+    Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
+    Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
+
+    const auto size_x = s16{part.cmdsize_.get(CmdSize::character_size_x) * 8};
+    const auto size_y = s16{part.cmdsize_.get(CmdSize::character_size_y)};
+
+    Log::debug(Logger::vdp1, "Character size {} * {}", size_x, size_y);
+
+    loadTextureData(modules, part);
+
+    auto           color = Color{u16{}};
+    VertexPosition a{part.calculatedXA(), part.calculatedYA()};
+    VertexPosition b{part.calculatedXA() + size_x, part.calculatedYA()};
+    VertexPosition c{part.calculatedXA() + size_x, part.calculatedYA() + size_y};
+    VertexPosition d{part.calculatedXA(), part.calculatedYA() + size_y};
+
+    const auto coords = getTextureCoordinates(part.cmdctrl_.get(CmdCtrl::character_read_direction));
+    if (coords.size() != 4) {
+        Log::error(Logger::vdp1, tr("VDP1 scaled sprite draw coordinates error"));
+        throw std::runtime_error("VDP1 scaled sprite draw coordinates error !");
+    }
+    part.vertexes_.emplace_back(Vertex{a, {color.r, color.g, color.b, color.a}, coords[0]}); // lower left
+    part.vertexes_.emplace_back(Vertex{b, {color.r, color.g, color.b, color.a}, coords[1]}); // lower right
+    part.vertexes_.emplace_back(Vertex{c, {color.r, color.g, color.b, color.a}, coords[2]}); // upper right
+    part.vertexes_.emplace_back(Vertex{d, {color.r, color.g, color.b, color.a}, coords[3]}); // upper left
 }
 
 void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -532,7 +569,6 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
     Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
-
     Log::debug(Logger::vdp1, "Vertex B ({},{})", part.calculatedXB(), part.calculatedYB());
     Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
     Log::debug(Logger::vdp1, "Vertex D ({},{})", part.calculatedXD(), part.calculatedYD());
@@ -563,6 +599,7 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
     std::vector<u8> texture_data;
     texture_data.reserve(texture_size);
     const auto key = Texture::calculateKey(VdpType::vdp1, start_address, toUnderlying(color_mode));
+    // if (key == 0xa57b381a6e5b28d0) DebugBreak();
     if (!Texture::isTextureStored(key)) {
         if (modules.vdp2()->getColorRamMode() == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
@@ -628,6 +665,40 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
             Texture(VdpType::vdp1, start_address, toUnderlying(color_mode), 0, texture_data, texture_width, texture_height));
     }
     part.textureKey(key);
+}
+
+auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<TextureCoordinates> {
+    auto coords = std::vector<TextureCoordinates>{};
+    switch (crd) {
+        case CharacterReadDirection::h_invertion: {
+            coords.emplace_back(TextureCoordinates{1.0, 0.0}); // lower left
+            coords.emplace_back(TextureCoordinates{0.0, 0.0}); // lower right
+            coords.emplace_back(TextureCoordinates{0.0, 1.0}); // upper right
+            coords.emplace_back(TextureCoordinates{1.0, 1.0}); // upper left
+            break;
+        }
+        case CharacterReadDirection::v_invertion: {
+            coords.emplace_back(TextureCoordinates{0.0, 1.0}); // lower left
+            coords.emplace_back(TextureCoordinates{1.0, 1.0}); // lower right
+            coords.emplace_back(TextureCoordinates{1.0, 0.0}); // upper right
+            coords.emplace_back(TextureCoordinates{0.0, 0.0}); // upper left
+            break;
+        }
+        case CharacterReadDirection::vh_invertion: {
+            coords.emplace_back(TextureCoordinates{1.0, 1.0}); // lower left
+            coords.emplace_back(TextureCoordinates{0.0, 1.0}); // lower right
+            coords.emplace_back(TextureCoordinates{0.0, 0.0}); // upper right
+            coords.emplace_back(TextureCoordinates{0.0, 1.0}); // upper left
+            break;
+        }
+        default: {
+            coords.emplace_back(TextureCoordinates{0.0, 0.0}); // lower left
+            coords.emplace_back(TextureCoordinates{1.0, 0.0}); // lower right
+            coords.emplace_back(TextureCoordinates{1.0, 1.0}); // upper right
+            coords.emplace_back(TextureCoordinates{0.0, 1.0}); // upper left
+        }
+    }
+    return coords;
 }
 
 } // namespace saturnin::video
