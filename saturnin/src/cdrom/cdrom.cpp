@@ -399,126 +399,10 @@ void Cdrom::executeCommand() {
             //			EmuState::pLog->CdBlockWrite("-=Open CD Tray=- executed (UNIMPLEMENTED)");
             //			#endif
             //			break;
-            //		case 0x6: // End Data Transfer
-            //			// Status(8) | Upper byte of word written(8)
-            //			// Lower word of words written(16)
-            //			// 0x0000
-            //			// 0x0000
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("Commande -=End Data Transfer=- exécutée");
-            //			#endif
-            //
-            //			cdDriveStatus &=~STAT_TRNS;
-            //
-            //			CR1=cdDriveStatus<<8;
-            //			CR1|=((bytesTransfered/2)>>16)&0xFF;
-            //			CR2=static_cast<uint16_t>(bytesTransfered/2);
-            //			CR3=0;
-            //			CR4=0;
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("Bytes transfered : 0x",bytesTransfered);
-            //			#endif
-            //
-            //			// data fetching is finished
-            //			// check if sectors must be erased
-            //			if (DeleteSectorDataExecuted)
-            //			{
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("*Deleting sectors in buffer partition n°0x",fetchedBuffer);
-            //				EmuState::pLog->CdBlockWrite("Old buffer size: 0x",bufferPartitions[fetchedBuffer].size);
-            //				EmuState::pLog->CdBlockWrite("Position of sector to delete in buffer: 0x",posOfSectorsToDelete);
-            //				EmuState::pLog->CdBlockWrite("Number of sectors to delete: 0x",numberOfSectorsToDelete);
-            //				#endif
-            //				int32_t oldSize=bufferPartitions[fetchedBuffer].size;
-            //
-            //				for (int32_t i=posOfSectorsToDelete;i<(posOfSectorsToDelete+numberOfSectorsToDelete);i++)
-            //				{
-            //					if (i>MAX_SECTORS)
-            //					{
-            //						#ifdef _LOGS
-            //						EmuState::pLog->CdBlockWrite("End of buffer partition reached");
-            //						#endif
-            //						break;
-            //					}
-            //					if (bufferPartitions[fetchedBuffer].sectors[i])
-            //					{
-            //						#ifdef _LOGS
-            //						EmuState::pLog->CdBlockWrite("Deleting in buffer partition sector n° ",i);
-            //						#endif
-            //						bufferPartitions[fetchedBuffer].sectors[i]->size=0;
-            //						bufferPartitions[fetchedBuffer].sectors[i]=NULL;
-            //						bufferPartitions[fetchedBuffer].size--;
-            //					}
-            //					else break;
-            //				}
-            //
-            //				// we shift the sectors in buffer partition if necessary
-            //				if (numberOfSectorsToDelete<oldSize)
-            //				{
-            //					// we did not erase all the sectors
-            //					// we check if there a hole in buffer partition
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("All sectors haven't been deleted, checking for hole");
-            //					#endif
-            //					int32_t holeStart=0;
-            //					for (;holeStart<MAX_SECTORS;holeStart++)
-            //					{
-            //						if (!bufferPartitions[fetchedBuffer].sectors[holeStart]) break;
-            //					}
-            //					// holeStart contains the position of the hole
-            //					// let's check if the hole is positioned before the end of used sectors
-            //					if (holeStart<bufferPartitions[fetchedBuffer].size)
-            //					{
-            //						EmuState::pLog->CdBlockWrite("There is a hole at sector n°",holeStart);
-            //						// let's get the position of the end of the hole
-            //						int32_t holeEnd=holeStart;
-            //						for (;holeEnd<MAX_SECTORS;holeEnd++)
-            //						{
-            //							if (bufferPartitions[fetchedBuffer].sectors[holeEnd]) break;
-            //						}
-            //						// we shift the sectors
-            //						int32_t i=0;
-            //						//for (i=0;(i+holeEnd)<MAX_SECTORS;i++)
-            //						for (i=0;(i+holeEnd)<(holeEnd+bufferPartitions[fetchedBuffer].size);i++)
-            //						{
-            //							if ((i+holeEnd)>MAX_SECTORS) break;
-            //							bufferPartitions[fetchedBuffer].sectors[holeStart+i]=bufferPartitions[fetchedBuffer].sectors[holeEnd+i];
-            //							#ifdef _LOGS
-            //							EmuState::pLog->CdBlockWrite("Sector n°",holeEnd+i);
-            //							EmuState::pLog->CdBlockWrite("shifted to sector n°",holeStart+i);
-            //							#endif
-            //						}
-            //						for (;i<MAX_SECTORS;i++)
-            //						{
-            //							bufferPartitions[fetchedBuffer].sectors[i]=NULL;
-            //						}
-            //					}
-            //				}
-            //
-            //				DeleteSectorDataExecuted=false;
-            //				// update buffer partition size
-            //				/*bufferPartitions[fetchedBuffer].size=0;
-            //				for (int32_t i=0;i<MAX_SECTORS;i++)
-            //				{
-            //					if (bufferPartitions[fetchedBuffer].sectors[i]) bufferPartitions[fetchedBuffer].size++;
-            //					else break;
-            //				}*/
-            //
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("New buffer size in sectors: 0x",bufferPartitions[fetchedBuffer].size);
-            //				#endif
-            //				// buffer should not be full
-            //				HIRQREQ&=~BFUL;
-            //			}
-            //
-            //			bytesTransfered=0;
-            //
-            //			// flags setup
-            //			HIRQREQ|=CMOK | EHST;
-            //			//HIRQREQ|=DRDY;
-            //			break;
+        case Command::end_data_transfer: {
+            endDataTransfer();
+            break;
+        }
             //		case 0x10: // Play Disc
             //			#ifdef _LOGS
             //			EmuState::pLog->CdBlockWrite("-=Play Disc=- executed");
@@ -2296,6 +2180,135 @@ void Cdrom::getHardwareInfo() {
     hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
 
     Log::debug(Logger::cdrom, "Get Hardware Info executed");
+}
+
+void Cdrom::endDataTransfer() {
+    // Status(8) | Upper byte of word written(8)
+    // Lower word of words written(16)
+    // 0x0000
+    // 0x0000
+
+    //
+    //			cdDriveStatus &=~STAT_TRNS;
+    //
+    //			CR1=cdDriveStatus<<8;
+    //			CR1|=((bytesTransfered/2)>>16)&0xFF;
+    //			CR2=static_cast<uint16_t>(bytesTransfered/2);
+    //			CR3=0;
+    //			CR4=0;
+    //
+    //			#ifdef _LOGS
+    //			EmuState::pLog->CdBlockWrite("Bytes transfered : 0x",bytesTransfered);
+    //			#endif
+    //
+    //			// data fetching is finished
+    //			// check if sectors must be erased
+    //			if (DeleteSectorDataExecuted)
+    //			{
+    //				#ifdef _LOGS
+    //				EmuState::pLog->CdBlockWrite("*Deleting sectors in buffer partition n°0x",fetchedBuffer);
+    //				EmuState::pLog->CdBlockWrite("Old buffer size: 0x",bufferPartitions[fetchedBuffer].size);
+    //				EmuState::pLog->CdBlockWrite("Position of sector to delete in buffer: 0x",posOfSectorsToDelete);
+    //				EmuState::pLog->CdBlockWrite("Number of sectors to delete: 0x",numberOfSectorsToDelete);
+    //				#endif
+    //				int32_t oldSize=bufferPartitions[fetchedBuffer].size;
+    //
+    //				for (int32_t i=posOfSectorsToDelete;i<(posOfSectorsToDelete+numberOfSectorsToDelete);i++)
+    //				{
+    //					if (i>MAX_SECTORS)
+    //					{
+    //						#ifdef _LOGS
+    //						EmuState::pLog->CdBlockWrite("End of buffer partition reached");
+    //						#endif
+    //						break;
+    //					}
+    //					if (bufferPartitions[fetchedBuffer].sectors[i])
+    //					{
+    //						#ifdef _LOGS
+    //						EmuState::pLog->CdBlockWrite("Deleting in buffer partition sector n° ",i);
+    //						#endif
+    //						bufferPartitions[fetchedBuffer].sectors[i]->size=0;
+    //						bufferPartitions[fetchedBuffer].sectors[i]=NULL;
+    //						bufferPartitions[fetchedBuffer].size--;
+    //					}
+    //					else break;
+    //				}
+    //
+    //				// we shift the sectors in buffer partition if necessary
+    //				if (numberOfSectorsToDelete<oldSize)
+    //				{
+    //					// we did not erase all the sectors
+    //					// we check if there a hole in buffer partition
+    //					#ifdef _LOGS
+    //					EmuState::pLog->CdBlockWrite("All sectors haven't been deleted, checking for hole");
+    //					#endif
+    //					int32_t holeStart=0;
+    //					for (;holeStart<MAX_SECTORS;holeStart++)
+    //					{
+    //						if (!bufferPartitions[fetchedBuffer].sectors[holeStart]) break;
+    //					}
+    //					// holeStart contains the position of the hole
+    //					// let's check if the hole is positioned before the end of used sectors
+    //					if (holeStart<bufferPartitions[fetchedBuffer].size)
+    //					{
+    //						EmuState::pLog->CdBlockWrite("There is a hole at sector n°",holeStart);
+    //						// let's get the position of the end of the hole
+    //						int32_t holeEnd=holeStart;
+    //						for (;holeEnd<MAX_SECTORS;holeEnd++)
+    //						{
+    //							if (bufferPartitions[fetchedBuffer].sectors[holeEnd]) break;
+    //						}
+    //						// we shift the sectors
+    //						int32_t i=0;
+    //						//for (i=0;(i+holeEnd)<MAX_SECTORS;i++)
+    //						for (i=0;(i+holeEnd)<(holeEnd+bufferPartitions[fetchedBuffer].size);i++)
+    //						{
+    //							if ((i+holeEnd)>MAX_SECTORS) break;
+    //							bufferPartitions[fetchedBuffer].sectors[holeStart+i]=bufferPartitions[fetchedBuffer].sectors[holeEnd+i];
+    //							#ifdef _LOGS
+    //							EmuState::pLog->CdBlockWrite("Sector n°",holeEnd+i);
+    //							EmuState::pLog->CdBlockWrite("shifted to sector n°",holeStart+i);
+    //							#endif
+    //						}
+    //						for (;i<MAX_SECTORS;i++)
+    //						{
+    //							bufferPartitions[fetchedBuffer].sectors[i]=NULL;
+    //						}
+    //					}
+    //				}
+    //
+    //				DeleteSectorDataExecuted=false;
+    //				// update buffer partition size
+    //				/*bufferPartitions[fetchedBuffer].size=0;
+    //				for (int32_t i=0;i<MAX_SECTORS;i++)
+    //				{
+    //					if (bufferPartitions[fetchedBuffer].sectors[i]) bufferPartitions[fetchedBuffer].size++;
+    //					else break;
+    //				}*/
+    //
+    //				#ifdef _LOGS
+    //				EmuState::pLog->CdBlockWrite("New buffer size in sectors: 0x",bufferPartitions[fetchedBuffer].size);
+    //				#endif
+    //				// buffer should not be full
+    //				HIRQREQ&=~BFUL;
+    //			}
+    //
+    //			bytesTransfered=0;
+    //
+    //			// flags setup
+    //			HIRQREQ|=CMOK | EHST;
+    //			//HIRQREQ|=DRDY;
+
+    cr1_.set(CommandRegister::status, cd_drive_status_);
+    cr1_.set(CommandRegister::lower_8_bits, u8{0});
+    cr2_.set(CommandRegister::all_bits, u16{0x0});
+    cr3_.set(CommandRegister::all_bits, u16{0x0});
+    cr4_.set(CommandRegister::all_bits, u16{0x0});
+
+    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+    hirq_status_reg_.set(HirqStatusRegister::drdy, Drdy::setup_complete);
+
+    Log::debug(Logger::cdrom, "End Data Transfer executed");
 }
 
 void Cdrom::abortFile() {
