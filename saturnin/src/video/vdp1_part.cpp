@@ -150,6 +150,7 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             break;
         }
         case CommandSelect::scaled_sprite_draw: {
+            scaledSpriteDraw(modules, *this);
             debug_header_ = tr("Scaled sprite draw");
             break;
         }
@@ -418,6 +419,8 @@ Gouraud shading table address
             break;
         }
         case CommandSelect::scaled_sprite_draw: {
+            part_detail += getZoomPoint(cmdctrl_.get(CmdCtrl::zoom_point));
+            part_detail += fmt::format("Vertex A ({}, {})", cmdxa_.twoCmp(), cmdya_.twoCmp());
             part_detail += getDrawMode(cmdpmod_);
             // cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
             // cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
@@ -521,28 +524,100 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
     Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
 
-    const auto size_x = s16{part.cmdsize_.get(CmdSize::character_size_x) * 8};
-    const auto size_y = s16{part.cmdsize_.get(CmdSize::character_size_y)};
-
-    Log::debug(Logger::vdp1, "Character size {} * {}", size_x, size_y);
-
     loadTextureData(modules, part);
 
-    auto           color = Color{u16{}};
-    VertexPosition a{part.calculatedXA(), part.calculatedYA()};
-    VertexPosition b{part.calculatedXA() + size_x, part.calculatedYA()};
-    VertexPosition c{part.calculatedXA() + size_x, part.calculatedYA() + size_y};
-    VertexPosition d{part.calculatedXA(), part.calculatedYA() + size_y};
+    std::vector<VertexPosition> vertexes_pos;
+
+    const auto width  = part.cmdxb_.twoCmp();
+    const auto height = part.cmdyb_.twoCmp();
+
+    switch (part.cmdctrl_.get(CmdCtrl::zoom_point)) {
+        case ZoomPoint::two_coordinates: {
+            const auto size_x = s16{part.cmdsize_.get(CmdSize::character_size_x) * 8};
+            const auto size_y = s16{part.cmdsize_.get(CmdSize::character_size_y)};
+            Log::debug(Logger::vdp1, "Character size {} * {}", size_x, size_y);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA() + size_x, part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA() + size_x, part.calculatedYA() + size_y);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + size_y);
+            break;
+        }
+        case ZoomPoint::upper_left: {
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
+            break;
+        }
+        case ZoomPoint::upper_center: {
+            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA());
+            break;
+        }
+        case ZoomPoint::upper_right: {
+            vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA());
+            break;
+        }
+        case ZoomPoint::center_left: {
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height / 2);
+            vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() - height / 2);
+            vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() + height / 2);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + height / 2);
+            break;
+        }
+        case ZoomPoint::center_center: {
+            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() - height / 2);
+            vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() - height / 2);
+            vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() + height / 2);
+            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() + height / 2);
+            break;
+        }
+        case ZoomPoint::center_right: {
+            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() - height / 2);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height / 2);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + height / 2);
+            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() + height / 2);
+            break;
+        }
+        case ZoomPoint::lower_left: {
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height);
+            break;
+        }
+        case ZoomPoint::lower_center: {
+            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() - height);
+            break;
+        }
+        case ZoomPoint::lower_right: {
+            vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA() - height);
+            break;
+        }
+    }
 
     const auto coords = getTextureCoordinates(part.cmdctrl_.get(CmdCtrl::character_read_direction));
     if (coords.size() != 4) {
         Log::error(Logger::vdp1, tr("VDP1 scaled sprite draw coordinates error"));
         throw std::runtime_error("VDP1 scaled sprite draw coordinates error !");
     }
-    part.vertexes_.emplace_back(Vertex{a, {color.r, color.g, color.b, color.a}, coords[0]}); // lower left
-    part.vertexes_.emplace_back(Vertex{b, {color.r, color.g, color.b, color.a}, coords[1]}); // lower right
-    part.vertexes_.emplace_back(Vertex{c, {color.r, color.g, color.b, color.a}, coords[2]}); // upper right
-    part.vertexes_.emplace_back(Vertex{d, {color.r, color.g, color.b, color.a}, coords[3]}); // upper left
+
+    auto color = Color{u16{}};
+    part.vertexes_.emplace_back(Vertex{vertexes_pos[0], {color.r, color.g, color.b, color.a}, coords[0]}); // lower left
+    part.vertexes_.emplace_back(Vertex{vertexes_pos[1], {color.r, color.g, color.b, color.a}, coords[1]}); // lower right
+    part.vertexes_.emplace_back(Vertex{vertexes_pos[2], {color.r, color.g, color.b, color.a}, coords[2]}); // upper right
+    part.vertexes_.emplace_back(Vertex{vertexes_pos[3], {color.r, color.g, color.b, color.a}, coords[3]}); // upper left
 }
 
 void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {

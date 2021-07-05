@@ -399,7 +399,6 @@ void readColorBankMode16Colors(const EmulatorModules& modules,
                                const u16              color_ram_address_offset,
                                Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4}; // in bytes
-    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (8 dots of 4 bits) we must ensure the data read is on 32 bits boundary.
@@ -409,8 +408,8 @@ void readColorBankMode16Colors(const EmulatorModules& modules,
     if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
         Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
     }
-    for (u32 i = current_address; i < (current_address + texture_size / one_read_offset); i += one_read_offset) {
-        auto row = Dots4Bits(modules.memory()->read<u32>(current_address));
+    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
+        auto row = Dots4Bits(modules.memory()->read<u32>(i));
         readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots4Bits::dot_0));
         readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots4Bits::dot_1));
         readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots4Bits::dot_2));
@@ -484,7 +483,6 @@ void readColorBankMode64Colors(const EmulatorModules& modules,
                                const u16              color_ram_address_offset,
                                Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4}; // in bytes
-    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 6 bits) we must ensure the data read is on 32 bits boundary.
@@ -494,8 +492,8 @@ void readColorBankMode64Colors(const EmulatorModules& modules,
     if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
         Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
     }
-    for (u32 i = current_address; i < (current_address + texture_size / one_read_offset); i += one_read_offset) {
-        auto row = Dots6Bits(modules.memory()->read<u32>(current_address));
+    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
+        auto row = Dots6Bits(modules.memory()->read<u32>(i));
         readDotColorBank64<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots6Bits::dot_0));
         readDotColorBank64<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots6Bits::dot_1));
         readDotColorBank64<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots6Bits::dot_2));
@@ -524,7 +522,6 @@ void readColorBankMode128Colors(const EmulatorModules& modules,
                                 const u16              color_ram_address_offset,
                                 Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4}; // in bytes
-    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 7 bits) we must ensure the data read is on 32 bits boundary.
@@ -534,8 +531,8 @@ void readColorBankMode128Colors(const EmulatorModules& modules,
     if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
         Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
     }
-    for (u32 i = current_address; i < (current_address + texture_size / one_read_offset); i += one_read_offset) {
-        auto row = Dots7Bits(modules.memory()->read<u32>(current_address));
+    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
+        auto row = Dots7Bits(modules.memory()->read<u32>(i));
         readDotColorBank128<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots7Bits::dot_0));
         readDotColorBank128<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots7Bits::dot_1));
         readDotColorBank128<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots7Bits::dot_2));
@@ -564,7 +561,6 @@ void readColorBankMode256Colors(const EmulatorModules& modules,
                                 const u16              color_ram_address_offset,
                                 Vdp1Part&              part) {
     constexpr auto one_read_offset = u8{4}; // in bytes
-    auto           current_address = start_address;
     const auto     texture_size    = texture_data.capacity() / 4;
     if ((texture_size % 4) != 0) {
         // As we're reading 32 bits of data at a time (4 dots of 8 bits) we must ensure the data read is on 32 bits boundary.
@@ -574,8 +570,8 @@ void readColorBankMode256Colors(const EmulatorModules& modules,
     if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
         Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
     }
-    for (u32 i = current_address; i < (current_address + texture_size / one_read_offset); i += one_read_offset) {
-        auto row = Dots8Bits(modules.memory()->read<u32>(current_address));
+    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
+        auto row = Dots8Bits(modules.memory()->read<u32>(i));
         readDotColorBank256<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots8Bits::dot_0));
         readDotColorBank256<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots8Bits::dot_1));
         readDotColorBank256<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots8Bits::dot_2));
