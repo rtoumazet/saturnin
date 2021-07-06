@@ -420,7 +420,7 @@ Gouraud shading table address
         }
         case CommandSelect::scaled_sprite_draw: {
             part_detail += getZoomPoint(cmdctrl_.get(CmdCtrl::zoom_point));
-            part_detail += fmt::format("Vertex A ({}, {})", cmdxa_.twoCmp(), cmdya_.twoCmp());
+            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
             part_detail += getDrawMode(cmdpmod_);
             // cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
             // cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
@@ -543,22 +543,22 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
             break;
         }
         case ZoomPoint::upper_left: {
-            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height);
-            vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + height);
+            vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() + height);
             vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
             break;
         }
         case ZoomPoint::upper_center: {
-            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() - height);
-            vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() + height);
+            vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() + height);
             vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA());
             break;
         }
         case ZoomPoint::upper_right: {
-            vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA() - height);
-            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height);
+            vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA() + height);
+            vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + height);
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA());
             break;
