@@ -494,11 +494,8 @@ auto Vdp1Part::calculatedYD() -> const s16 { return cmdyd_.twoCmp() + local_coor
 
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));
-    Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
     const auto size_x = s16{part.cmdsize_.get(CmdSize::character_size_x) * 8};
     const auto size_y = s16{part.cmdsize_.get(CmdSize::character_size_y)};
-
-    Log::debug(Logger::vdp1, "Character size {} * {}", size_x, size_y);
 
     loadTextureData(modules, part);
 
@@ -521,8 +518,6 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
 void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Scaled sprite draw"));
-    Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
-    Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
 
     loadTextureData(modules, part);
 
@@ -622,10 +617,6 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
 void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Distorted sprite draw"));
-    Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
-    Log::debug(Logger::vdp1, "Vertex B ({},{})", part.calculatedXB(), part.calculatedYB());
-    Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
-    Log::debug(Logger::vdp1, "Vertex D ({},{})", part.calculatedXD(), part.calculatedYD());
 
     loadTextureData(modules, part);
 
@@ -643,10 +634,6 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
-    Log::debug(Logger::vdp1, "Vertex A ({},{})", part.calculatedXA(), part.calculatedYA());
-    Log::debug(Logger::vdp1, "Vertex B ({},{})", part.calculatedXB(), part.calculatedYB());
-    Log::debug(Logger::vdp1, "Vertex C ({},{})", part.calculatedXC(), part.calculatedYC());
-    Log::debug(Logger::vdp1, "Vertex D ({},{})", part.calculatedXD(), part.calculatedYD());
 
     auto color = Color(part.cmdcolr_.get(CmdColr::color_control));
 
