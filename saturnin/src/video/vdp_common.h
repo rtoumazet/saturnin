@@ -29,6 +29,8 @@
 
 namespace saturnin::video {
 
+constexpr s8 gouraud_offset = 0x10;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   VdpType
 ///
@@ -76,6 +78,17 @@ struct Color {
         g = (raw_data & 0x00FF00) >> 8;
         b = (raw_data & 0xFF0000) >> 16;
     };
+};
+
+struct Gouraud {
+    s8 r;
+    s8 g;
+    s8 b;
+    Gouraud(const u16 raw_data) {
+        r = (raw_data & 0x1F) - 0x10;
+        g = (raw_data & 0x3E0) >> 5 - 0x10;
+        b = (raw_data & 0x7C00) >> 10 - 0x10;
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

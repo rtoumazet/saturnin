@@ -622,14 +622,24 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     auto color = Color{u16{}};
 
-    part.vertexes_.emplace_back(
-        Vertex{{part.calculatedXA(), part.calculatedYA()}, {color.r, color.g, color.b, color.a}, {0.0, 0.0}}); // lower left
-    part.vertexes_.emplace_back(
-        Vertex{{part.calculatedXB(), part.calculatedYB()}, {color.r, color.g, color.b, color.a}, {1.0, 0.0}}); // lower right
-    part.vertexes_.emplace_back(
-        Vertex{{part.calculatedXC(), part.calculatedYC()}, {color.r, color.g, color.b, color.a}, {1.0, 1.0}}); // upper right
-    part.vertexes_.emplace_back(
-        Vertex{{part.calculatedXD(), part.calculatedYD()}, {color.r, color.g, color.b, color.a}, {0.0, 1.0}}); // upper left
+    const auto grd_table_address = part.cmdgrda_.get(CmdGrda::gouraud_shading_table) * 8;
+    auto       gouraud_a         = Gouraud(modules.memory()->read<u16>(grd_table_address + 0));
+    auto       gouraud_b         = Gouraud(modules.memory()->read<u16>(grd_table_address + 2));
+    auto       gouraud_c         = Gouraud(modules.memory()->read<u16>(grd_table_address + 4));
+    auto       gouraud_d         = Gouraud(modules.memory()->read<u16>(grd_table_address + 6));
+
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
+                                       {gouraud_a.r, gouraud_a.g, gouraud_a.b, gouraud_a.a},
+                                       {0.0, 0.0}}); // lower left
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
+                                       {gouraud_b.r, gouraud_b.g, gouraud_b.b, gouraud_b.a},
+                                       {1.0, 0.0}}); // lower right
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
+                                       {gouraud_c.r, gouraud_c.g, gouraud_c.b, gouraud_c.a},
+                                       {1.0, 1.0}}); // upper right
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
+                                       {gouraud_d.r, gouraud_d.g, gouraud_d.b, gouraud_d.a},
+                                       {0.0, 1.0}}); // upper left
 }
 
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {

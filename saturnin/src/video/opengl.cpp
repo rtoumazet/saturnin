@@ -174,12 +174,15 @@ void Opengl::initializeShaders() {
 
         attribute vec2 vtx_position;
         attribute vec2 vtx_tex_coord;
+        attribute vec4 vtx_grd_color;
         varying vec2   frg_tex_coord;
+        varying vec4   frg_grd_color; 
         uniform mat4 proj_matrix;
 
         void main() {
             gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
             frg_tex_coord = vtx_tex_coord;
+            frg_grd_color = vtx_grd_color;
         }
     )");
 
@@ -188,13 +191,16 @@ void Opengl::initializeShaders() {
 
         layout (location = 0) in vec2 vtx_position;
         layout (location = 1) in vec2 vtx_tex_coord;
+        layout (location = 2) in vec4 vtx_grd_color;
         uniform mat4 proj_matrix;
 
         out vec2 frg_tex_coord;
+        out vec4 frg_grd_color;
 
         void main() {
             gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
             frg_tex_coord = vec2(vtx_tex_coord);
+            frg_grd_color = vec4(vtx_grd_color);
         }
     )");
 
@@ -236,6 +242,7 @@ void Opengl::initializeShaders() {
         
         varying vec4 frg_color;
         varying vec2 frg_tex_coord;
+        varying vec4 frg_grd_color;
 
         uniform sampler2D texture1;
 
@@ -249,14 +256,20 @@ void Opengl::initializeShaders() {
         #version 330 core
         
         in vec2 frg_tex_coord;
+        in vec4 frg_grd_color;
 
         out vec4 frg_color;
 
         uniform sampler2D texture1;
+
+        //vec4 test = vec4(1.0,0.0,0.0,1.0);
         
         void main()
         {
             frg_color = texture(texture1, frg_tex_coord);
+            frg_color.r -= 0.1;
+            frg_color.g -= 0.1;
+            frg_color.b -= 0.1;
             //frg_color.a = 0.5;
         } 
     )");
@@ -686,10 +699,14 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
             glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
 
             // texture coords pointer
-            auto offset = GLintptr(2 * sizeof(s16) + 4 * sizeof(u8));
+            auto offset = GLintptr(2 * sizeof(s16) + 3 * sizeof(s8));
             glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(1);
 
+            // gouraud color pointer
+            auto offset2 = GLintptr(2 * sizeof(s16));
+            glVertexAttribPointer(2, 3, GLenum::GL_BYTE, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset2));
+            glEnableVertexAttribArray(2);
             break;
         }
     }
