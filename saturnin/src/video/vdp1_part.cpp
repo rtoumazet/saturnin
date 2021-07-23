@@ -499,7 +499,8 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     loadTextureData(modules, part);
 
-    auto           color = Color{u16{}};
+    const auto     color   = Color{u16{}};
+    const auto     gouraud = Gouraud{};
     VertexPosition a{part.calculatedXA(), part.calculatedYA()};
     VertexPosition b{part.calculatedXA() + size_x, part.calculatedYA()};
     VertexPosition c{part.calculatedXA() + size_x, part.calculatedYA() + size_y};
@@ -510,10 +511,10 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
         Log::error(Logger::vdp1, tr("VDP1 normal sprite draw coordinates error"));
         throw std::runtime_error("VDP1 normal sprite draw coordinates error !");
     }
-    part.vertexes_.emplace_back(Vertex{a, {color.r, color.g, color.b, color.a}, coords[0]}); // lower left
-    part.vertexes_.emplace_back(Vertex{b, {color.r, color.g, color.b, color.a}, coords[1]}); // lower right
-    part.vertexes_.emplace_back(Vertex{c, {color.r, color.g, color.b, color.a}, coords[2]}); // upper right
-    part.vertexes_.emplace_back(Vertex{d, {color.r, color.g, color.b, color.a}, coords[3]}); // upper left
+    part.vertexes_.emplace_back(Vertex{a, coords[0], {color.r, color.g, color.b, color.a}, gouraud}); // lower left
+    part.vertexes_.emplace_back(Vertex{b, coords[1], {color.r, color.g, color.b, color.a}, gouraud}); // lower right
+    part.vertexes_.emplace_back(Vertex{c, coords[2], {color.r, color.g, color.b, color.a}, gouraud}); // upper right
+    part.vertexes_.emplace_back(Vertex{d, coords[3], {color.r, color.g, color.b, color.a}, gouraud}); // upper left
 }
 
 void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -609,10 +610,10 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     }
 
     auto color = Color{u16{}};
-    part.vertexes_.emplace_back(Vertex{vertexes_pos[0], {color.r, color.g, color.b, color.a}, coords[0]}); // lower left
-    part.vertexes_.emplace_back(Vertex{vertexes_pos[1], {color.r, color.g, color.b, color.a}, coords[1]}); // lower right
-    part.vertexes_.emplace_back(Vertex{vertexes_pos[2], {color.r, color.g, color.b, color.a}, coords[2]}); // upper right
-    part.vertexes_.emplace_back(Vertex{vertexes_pos[3], {color.r, color.g, color.b, color.a}, coords[3]}); // upper left
+    part.vertexes_.emplace_back(Vertex{vertexes_pos[0], coords[0], {color.r, color.g, color.b, color.a}}); // lower left
+    part.vertexes_.emplace_back(Vertex{vertexes_pos[1], coords[1], {color.r, color.g, color.b, color.a}}); // lower right
+    part.vertexes_.emplace_back(Vertex{vertexes_pos[2], coords[2], {color.r, color.g, color.b, color.a}}); // upper right
+    part.vertexes_.emplace_back(Vertex{vertexes_pos[3], coords[3], {color.r, color.g, color.b, color.a}}); // upper left
 }
 
 void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -629,17 +630,21 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     auto       gouraud_d         = Gouraud(modules.memory()->read<u16>(grd_table_address + 6));
 
     part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
-                                       {gouraud_a.r, gouraud_a.g, gouraud_a.b, gouraud_a.a},
-                                       {0.0, 0.0}}); // lower left
+                                       {0.0, 0.0}, // lower left
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_a});
     part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
-                                       {gouraud_b.r, gouraud_b.g, gouraud_b.b, gouraud_b.a},
-                                       {1.0, 0.0}}); // lower right
+                                       {1.0, 0.0}, // lower right
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_b});
     part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
-                                       {gouraud_c.r, gouraud_c.g, gouraud_c.b, gouraud_c.a},
-                                       {1.0, 1.0}}); // upper right
+                                       {1.0, 1.0}, // upper right
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_c});
     part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
-                                       {gouraud_d.r, gouraud_d.g, gouraud_d.b, gouraud_d.a},
-                                       {0.0, 1.0}}); // upper left
+                                       {0.0, 1.0}, // upper left
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_d});
 }
 
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -648,17 +653,13 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     auto color = Color(part.cmdcolr_.get(CmdColr::color_control));
 
     part.vertexes_.emplace_back(
-        Vertex{{part.calculatedXA(), part.calculatedYA()}, {color.r, color.g, color.b, color.a}, {0.0, 0.0}}); // lower left
+        Vertex{{part.calculatedXA(), part.calculatedYA()}, {0.0, 0.0}, {color.r, color.g, color.b, color.a}}); // lower left
     part.vertexes_.emplace_back(
-        Vertex{{part.calculatedXB(), part.calculatedYB()}, {color.r, color.g, color.b, color.a}, {1.0, 0.0}}); // lower right
+        Vertex{{part.calculatedXB(), part.calculatedYB()}, {1.0, 0.0}, {color.r, color.g, color.b, color.a}}); // lower right
     part.vertexes_.emplace_back(
-        Vertex{{part.calculatedXC(), part.calculatedYC()}, {color.r, color.g, color.b, color.a}, {1.0, 1.0}}); // upper right
+        Vertex{{part.calculatedXC(), part.calculatedYC()}, {1.0, 1.0}, {color.r, color.g, color.b, color.a}}); // upper right
     part.vertexes_.emplace_back(
-        Vertex{{part.calculatedXD(), part.calculatedYD()}, {color.r, color.g, color.b, color.a}, {0.0, 1.0}}); // upper left
-    // part.vertexes_.emplace_back(Vertex{{50, 50}, {color.r, color.g, color.b, color.a}, {0.0, 0.0}});   // lower left
-    // part.vertexes_.emplace_back(Vertex{{100, 50}, {color.r, color.g, color.b, color.a}, {1.0, 0.0}});  // lower right
-    // part.vertexes_.emplace_back(Vertex{{100, 100}, {color.r, color.g, color.b, color.a}, {1.0, 1.0}}); // upper right
-    // part.vertexes_.emplace_back(Vertex{{50, 100}, {color.r, color.g, color.b, color.a}, {0.0, 1.0}});  // upper left
+        Vertex{{part.calculatedXD(), part.calculatedYD()}, {0.0, 1.0}, {color.r, color.g, color.b, color.a}}); // upper left
 }
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {

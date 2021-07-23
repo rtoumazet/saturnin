@@ -80,17 +80,6 @@ struct Color {
     };
 };
 
-struct Gouraud {
-    s8 r;
-    s8 g;
-    s8 b;
-    Gouraud(const u16 raw_data) {
-        r = (raw_data & 0x1F) - 0x10;
-        g = (raw_data & 0x3E0) >> 5 - 0x10;
-        b = (raw_data & 0x7C00) >> 10 - 0x10;
-    }
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Dots4Bits
 ///

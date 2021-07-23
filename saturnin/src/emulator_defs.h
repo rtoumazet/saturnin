@@ -316,6 +316,22 @@ struct TextureCoordinates {
     float s, t; ///< Texture coordinates.
 };
 
+struct Gouraud {
+    s8 r;
+    s8 g;
+    s8 b;
+    Gouraud(const u16 raw_data) {
+        r = (raw_data & 0x1F) - 0x10;
+        g = ((raw_data & 0x3E0) >> 5) - 0x10;
+        b = ((raw_data & 0x7C00) >> 10) - 0x10;
+    }
+    Gouraud() {
+        r = 0;
+        g = 0;
+        b = 0;
+    }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct Vertex
 ///
@@ -327,8 +343,9 @@ struct TextureCoordinates {
 
 struct Vertex {
     VertexPosition     pos;        ///< Position in Saturn space.
-    VertexColor        color;      ///< Color.
     TextureCoordinates tex_coords; ///< Texture coordinates.
+    VertexColor        color;      ///< Color.
+    Gouraud            gouraud;    ///< Gouraud color.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

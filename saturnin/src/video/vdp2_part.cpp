@@ -40,10 +40,10 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos& pos, size_t texture_ke
     const auto     pos_x_width  = static_cast<s16>(pos_x + cell_width);
     const auto     pos_y        = static_cast<s16>(pos.y);
     const auto     pos_y_height = static_cast<s16>(pos.y + cell_height);
-    vertexes_.emplace_back(Vertex{{pos_x, pos_y}, {0, 0, 0, 0}, {0.0, 0.0}});              // lower left
-    vertexes_.emplace_back(Vertex{{pos_x_width, pos_y}, {0, 0, 0, 0}, {1.0, 0.0}});        // lower right
-    vertexes_.emplace_back(Vertex{{pos_x_width, pos_y_height}, {0, 0, 0, 0}, {1.0, 1.0}}); // upper right
-    vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0, 0, 0, 0}, {0.0, 1.0}});       // upper left
+    vertexes_.emplace_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
+    vertexes_.emplace_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
+    vertexes_.emplace_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
+    vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
 };
 
 void Vdp2Part::renderPart() { displayCell(); };
