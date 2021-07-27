@@ -77,18 +77,14 @@ void Opengl::initialize(GLFWwindow* gui_context) {
     initializeShaders();
     const auto vertex_textured   = createVertexShader(ShaderName::textured);
     const auto fragment_textured = createFragmentShader(ShaderName::textured);
-    program_shader_textured_     = createProgramShader(vertex_textured, fragment_textured);
+    program_shader_              = createProgramShader(vertex_textured, fragment_textured);
 
-    const auto vertex_simple   = createVertexShader(ShaderName::simple);
-    const auto fragment_simple = createFragmentShader(ShaderName::simple);
-    program_shader_simple_     = createProgramShader(vertex_simple, fragment_simple);
-
-    const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured, vertex_simple, fragment_simple};
+    const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured};
     deleteShaders(shaders_to_delete);
 }
 
 void Opengl::shutdown() {
-    glDeleteProgram(program_shader_textured_);
+    glDeleteProgram(program_shader_);
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         for (auto f : fbos_) {
@@ -191,7 +187,7 @@ void Opengl::initializeShaders() {
 
         layout (location = 0) in vec2 vtx_position;
         layout (location = 1) in vec2 vtx_tex_coord;
-        layout (location = 2) in vec2 vtx_color;
+        layout (location = 2) in vec4 vtx_color;
         layout (location = 3) in vec4 vtx_grd_color;
         uniform mat4 proj_matrix;
 
@@ -202,39 +198,10 @@ void Opengl::initializeShaders() {
         void main() {
             gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
             frg_tex_coord = vec2(vtx_tex_coord);
-            frg_color = vec4(vtx_color);
-            frg_grd_color = vec4(vtx_grd_color);
+            frg_color = vtx_color;
+            frg_grd_color = vtx_grd_color;
         }
     )");
-
-    // shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::vertex, ShaderName::simple}, R"(
-    //    #version 120
-
-    //    attribute vec2 vtx_position;
-    //    attribute vec4 vtx_color;
-    //    varying vec4   frg_color;
-    //    uniform mat4 proj_matrix;
-
-    //    void main() {
-    //        gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-    //        frg_color = vtx_color;
-    //    }
-    //)");
-
-    // shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::vertex, ShaderName::simple}, R"(
-    //    #version 330 core
-
-    //    layout (location = 0) in vec2 vtx_position;
-    //    layout (location = 1) in vec4 vtx_color;
-    //    uniform mat4 proj_matrix;
-
-    //    out vec4 frg_color;
-
-    //    void main() {
-    //        gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-    //        frg_color = vec4(vtx_color);
-    //    }
-    //)");
 
     //-----------------------------
     // Fragment shaders
@@ -277,28 +244,29 @@ void Opengl::initializeShaders() {
         } 
     )");
 
-    shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::simple}, R"(
-        #version 120
-        
-        varying vec4 frg_color;
+    // shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::simple}, R"(
+    //    #version 120
+    //
+    //    varying vec4 frg_color;
 
-        void main()
-        {
-            gl_FragColor = vec4(frg_color);
-        }
-    )");
+    //    void main()
+    //    {
+    //        gl_FragColor = vec4(frg_color);
+    //    }
+    //)");
 
-    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::fragment, ShaderName::simple}, R"(
-        #version 330 core
-        
-        in vec4 frg_color;
-        out vec4 out_color;
+    // shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::fragment, ShaderName::simple}, R"(
+    //    #version 330 core
+    //
+    //    in vec4 frg_color;
+    //    out vec4 out_color;
 
-        void main()
-        {
-            out_color = vec4(frg_color);
-        } 
-    )");
+    //    void main()
+    //    {
+    //        out_color = vec4(frg_color);
+    //    }
+
+    //)");
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
@@ -362,12 +330,11 @@ void Opengl::render() {
         constexpr auto vertexes_per_polyline         = u32{4};
         constexpr auto vertexes_per_line             = u32{2};
 
-        const auto [vao_textured, vertex_buffer_textured] = initializeVao(ShaderName::textured);
-        const auto [vao_simple, vertex_buffer_simple]     = initializeVao(ShaderName::simple);
+        const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
 
         constexpr auto elements_nb             = u8{2};
-        const auto     vao_ids_array           = std::array<u32, elements_nb>{vao_textured, vao_simple};
-        const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer_textured, vertex_buffer_simple};
+        const auto     vao_ids_array           = std::array<u32, elements_nb>{vao};
+        const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
 
         // Calculating the ortho projection matrix
         const auto proj_matrix = calculateDisplayViewportMatrix();
@@ -390,16 +357,16 @@ void Opengl::render() {
                     vertexes.emplace_back(part->vertexes_[2]);
                     vertexes.emplace_back(part->vertexes_[3]);
 
-                    glUseProgram(program_shader_textured_);
-                    glBindVertexArray(vao_textured);                       // binding VAO
-                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_textured); // binding vertex buffer
+                    glUseProgram(program_shader_);
+                    glBindVertexArray(vao);                       // binding VAO
+                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
                     glActiveTexture(GLenum::GL_TEXTURE0);
 
                     // Sending the ortho projection matrix to the shader
-                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_textured_, "proj_matrix");
+                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
                     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
@@ -427,15 +394,15 @@ void Opengl::render() {
                     vertexes.emplace_back(part->vertexes_[2]);
                     vertexes.emplace_back(part->vertexes_[3]);
 
-                    glUseProgram(program_shader_simple_);
-                    glBindVertexArray(vao_simple);                       // binding VAO
-                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_simple); // binding vertex buffer
+                    glUseProgram(program_shader_);
+                    glBindVertexArray(vao);                       // binding VAO
+                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
                     // Sending the ortho projection matrix to the shader
-                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_simple_, "proj_matrix");
+                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
                     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
@@ -451,15 +418,15 @@ void Opengl::render() {
                     vertexes.emplace_back(part->vertexes_[2]);
                     vertexes.emplace_back(part->vertexes_[3]);
 
-                    glUseProgram(program_shader_simple_);
-                    glBindVertexArray(vao_simple);                       // binding VAO
-                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_simple); // binding vertex buffer
+                    glUseProgram(program_shader_);
+                    glBindVertexArray(vao);                       // binding VAO
+                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
                     // Sending the ortho projection matrix to the shader
-                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_simple_, "proj_matrix");
+                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
                     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
                     // Drawing the list
@@ -505,7 +472,7 @@ void Opengl::renderDebugVertexes() {
 
     //----------- Render -----------------//
     // Calculating the ortho projection matrix
-    const auto [vao_simple, vertex_buffer_simple] = initializeVao(ShaderName::simple);
+    const auto [vao_simple, vertex_buffer_simple] = initializeVao(ShaderName::textured);
     const auto proj_matrix                        = calculateDisplayViewportMatrix();
 
     auto part = partToHighlight();
@@ -527,7 +494,7 @@ void Opengl::renderDebugVertexes() {
         vertexes.emplace_back(part.vertexes_[2]);
         vertexes.emplace_back(part.vertexes_[3]);
 
-        glUseProgram(program_shader_simple_);
+        glUseProgram(program_shader_);
         glBindVertexArray(vao_simple);                       // binding VAO
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_simple); // binding vertex buffer
 
@@ -535,7 +502,7 @@ void Opengl::renderDebugVertexes() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
         // Sending the ortho projection matrix to the shader
-        const auto uni_proj_matrix = glGetUniformLocation(program_shader_simple_, "proj_matrix");
+        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
         // Drawing the list
@@ -685,17 +652,17 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
     switch (name) {
-        case ShaderName::simple: {
-            // position pointer
-            glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
-            glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
+        // case ShaderName::simple: {
+        //    // position pointer
+        //    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
+        //    glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
 
-            // color pointer
-            auto offset = GLintptr(2 * sizeof(s16));
-            glVertexAttribPointer(1, 4, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(1);
-            break;
-        }
+        //    // color pointer
+        //    auto offset = GLintptr(2 * sizeof(s16));
+        //    glVertexAttribPointer(1, 4, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+        //    glEnableVertexAttribArray(1);
+        //    break;
+        //}
         case ShaderName::textured: {
             // position pointer
             glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index

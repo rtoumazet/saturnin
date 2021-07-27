@@ -54,12 +54,11 @@ using saturnin::core::Config;
 constexpr auto minimum_window_width  = u16{512};
 constexpr auto minimum_window_height = u16{512};
 
-enum class ShaderName { textured, simple };
+enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
 enum class GlslVersion { glsl_120, glsl_330 };
 
-using ShaderKey = std::tuple<GlslVersion, ShaderType, ShaderName>;
-// using ShadersList  = std::map<std::pair<GlslVersion, ShaderName>, const char*>;
+using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
 
 class Opengl {
@@ -394,9 +393,8 @@ class Opengl {
     std::mutex parts_list_mutex_;  ///< Prevents rendering thread to use the list while it's being processed.
     Vdp1Part   part_to_highlight_; ///< Part that will be highlighted during debug.
 
-    u32         program_shader_textured_; ///< Program shader for textured parts.
-    u32         program_shader_simple_;   ///< Program shader for everything but textured parts.
-    ShadersList shaders_list_;            ///< List of shaders.
+    u32         program_shader_; ///< Program shader used to render parts.
+    ShadersList shaders_list_;   ///< List of shaders.
 
     std::string fps_; ///< The frames per second.
 };
