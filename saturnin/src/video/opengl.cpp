@@ -226,47 +226,29 @@ void Opengl::initializeShaders() {
         #version 330 core
         
         in vec2 frg_tex_coord;
+        in vec4 frg_color;
         in vec4 frg_grd_color;
 
-        out vec4 frg_color;
+        out vec4 out_color;
 
         uniform sampler2D texture1;
+        uniform bool is_texture_used;
 
         //vec4 test = vec4(1.0,0.0,0.0,1.0);
         
         void main()
         {
-            frg_color = texture(texture1, frg_tex_coord);
-            frg_color.r -= 0.1;
-            frg_color.g -= 0.1;
-            frg_color.b -= 0.1;
+            if(is_texture_used){
+                out_color = texture(texture1, frg_tex_coord);
+            }else{
+                out_color = frg_color;
+            }
+            //frg_color.r -= 0.1;
+            //frg_color.g -= 0.1;
+            //frg_color.b -= 0.1;
             //frg_color.a = 0.5;
         } 
     )");
-
-    // shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::simple}, R"(
-    //    #version 120
-    //
-    //    varying vec4 frg_color;
-
-    //    void main()
-    //    {
-    //        gl_FragColor = vec4(frg_color);
-    //    }
-    //)");
-
-    // shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::fragment, ShaderName::simple}, R"(
-    //    #version 330 core
-    //
-    //    in vec4 frg_color;
-    //    out vec4 out_color;
-
-    //    void main()
-    //    {
-    //        out_color = vec4(frg_color);
-    //    }
-
-    //)");
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
@@ -369,6 +351,11 @@ void Opengl::render() {
                     const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
                     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
+                    // Sending the variable to configure the shader to use texture data.
+                    const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+                    const auto is_texture_used = GLboolean(true);
+                    glUniform1i(uni_use_texture, is_texture_used);
+
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
                     auto& t = Texture::getTexture(part->textureKey());
                     if (t.deleteOnGpu() || t.apiHandle() == 0) {
@@ -405,6 +392,11 @@ void Opengl::render() {
                     const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
                     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
+                    // Sending the variable to configure the shader to use color.
+                    const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+                    const auto is_texture_used = GLboolean(false);
+                    glUniform1i(uni_use_texture, is_texture_used);
+
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
@@ -428,6 +420,11 @@ void Opengl::render() {
                     // Sending the ortho projection matrix to the shader
                     const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
                     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+                    // Sending the variable to configure the shader to use color.
+                    const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+                    const auto is_texture_used = GLboolean(false);
+                    glUniform1i(uni_use_texture, is_texture_used);
 
                     // Drawing the list
                     glDrawArrays(GL_LINE_LOOP, 0, vertexes_per_polyline);
@@ -504,6 +501,11 @@ void Opengl::renderDebugVertexes() {
         // Sending the ortho projection matrix to the shader
         const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+        // Sending the variable to configure the shader to use color.
+        const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+        const auto is_texture_used = GLboolean(false);
+        glUniform1i(uni_use_texture, is_texture_used);
 
         // Drawing the list
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -652,17 +654,6 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
     switch (name) {
-        // case ShaderName::simple: {
-        //    // position pointer
-        //    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
-        //    glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
-
-        //    // color pointer
-        //    auto offset = GLintptr(2 * sizeof(s16));
-        //    glVertexAttribPointer(1, 4, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
-        //    glEnableVertexAttribArray(1);
-        //    break;
-        //}
         case ShaderName::textured: {
             // position pointer
             glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
