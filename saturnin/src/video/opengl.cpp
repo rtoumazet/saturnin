@@ -170,15 +170,20 @@ void Opengl::initializeShaders() {
 
         attribute vec2 vtx_position;
         attribute vec2 vtx_tex_coord;
+        attribute vec4 vtx_color;
         attribute vec4 vtx_grd_color;
+        
         varying vec2   frg_tex_coord;
+        varying vec4   frg_color; 
         varying vec4   frg_grd_color; 
+        
         uniform mat4 proj_matrix;
 
         void main() {
-            gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-            frg_tex_coord = vtx_tex_coord;
-            frg_grd_color = vtx_grd_color;
+            gl_Position     = proj_matrix * vec4(vtx_position, 0.0, 1.0);
+            frg_tex_coord   = vec2(vtx_tex_coord);
+            frg_color       = vtx_color;
+            frg_grd_color   = vtx_grd_color;
         }
     )");
 
@@ -189,17 +194,18 @@ void Opengl::initializeShaders() {
         layout (location = 1) in vec2 vtx_tex_coord;
         layout (location = 2) in vec4 vtx_color;
         layout (location = 3) in vec4 vtx_grd_color;
-        uniform mat4 proj_matrix;
 
         out vec2 frg_tex_coord;
         out vec4 frg_color;
         out vec4 frg_grd_color;
 
+        uniform mat4 proj_matrix;
+
         void main() {
-            gl_Position = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-            frg_tex_coord = vec2(vtx_tex_coord);
-            frg_color = vtx_color;
-            frg_grd_color = vtx_grd_color;
+            gl_Position     = proj_matrix * vec4(vtx_position, 0.0, 1.0);
+            frg_tex_coord   = vec2(vtx_tex_coord);
+            frg_color       = vtx_color;
+            frg_grd_color   = vtx_grd_color;
         }
     )");
 
@@ -210,15 +216,20 @@ void Opengl::initializeShaders() {
     shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::textured}, R"(
         #version 120
         
-        varying vec4 frg_color;
         varying vec2 frg_tex_coord;
+        varying vec4 frg_color;
         varying vec4 frg_grd_color;
 
         uniform sampler2D texture1;
+        uniform bool is_texture_used;
 
         void main()
         {
-            gl_FragColor = texture2D(texture1,frg_tex_coord);
+            if(is_texture_used){            
+                gl_FragColor = texture2D(texture1,frg_tex_coord);
+            }else{
+                gl_FragColor = frg_color;
+            }
         }
     )");
 
@@ -243,6 +254,12 @@ void Opengl::initializeShaders() {
             }else{
                 out_color = frg_color;
             }
+            (frg_grd_color.r > 0) ? out_color.r += frg_grd_color.r : out_color.r -= frg_grd_color.r;
+            (frg_grd_color.g > 0) ? out_color.g += frg_grd_color.g : out_color.g -= frg_grd_color.g;
+            (frg_grd_color.b > 0) ? out_color.b += frg_grd_color.b : out_color.b -= frg_grd_color.b;
+            //out_color.r += frg_grd_color.r;
+            //out_color.g += frg_grd_color.g;
+            //out_color.b += frg_grd_color.b;
             //frg_color.r -= 0.1;
             //frg_color.g -= 0.1;
             //frg_color.b -= 0.1;
@@ -671,7 +688,7 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 
             // gouraud color pointer
             offset += GLintptr(sizeof(VertexColor));
-            glVertexAttribPointer(3, 3, GLenum::GL_BYTE, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+            glVertexAttribPointer(3, 3, GLenum::GL_BYTE, GL_TRUE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(3);
             break;
         }
