@@ -554,6 +554,9 @@ void Smpc::executeIntback() {
         getPeripheralData();
         sf_.reset();
     }
+
+    Log::debug(Logger::smpc, tr("Interrupt request"));
+    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
 };
 
 void Smpc::getStatus() {
@@ -609,9 +612,6 @@ void Smpc::getStatus() {
     oreg_[index_15].set(OutputRegister::all_bits, smem_[3]);
 
     oreg_[index_31].reset();
-
-    Log::debug(Logger::smpc, tr("Interrupt request"));
-    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
 };
 
 void Smpc::getPeripheralData() {
@@ -744,8 +744,6 @@ void Smpc::getPeripheralData() {
         sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
     }
 
-    Log::debug(Logger::smpc, tr("Interrupt request"));
-    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
 } // namespace saturnin::core
 
 auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData {
