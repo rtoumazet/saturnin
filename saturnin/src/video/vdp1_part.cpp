@@ -501,8 +501,8 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     loadTextureData(modules, part);
 
-    const auto     color   = Color{u16{}};
-    const auto     gouraud = Gouraud{};
+    const auto     color          = Color{u16{}};
+    const auto     gouraud_values = readGouraudData(modules, part);
     VertexPosition a{part.calculatedXA(), part.calculatedYA()};
     VertexPosition b{static_cast<s16>(part.calculatedXA() + size_x), part.calculatedYA()};
     VertexPosition c{static_cast<s16>(part.calculatedXA() + size_x), static_cast<s16>(part.calculatedYA() + size_y)};
@@ -513,10 +513,10 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
         Log::error(Logger::vdp1, tr("VDP1 normal sprite draw coordinates error"));
         throw std::runtime_error("VDP1 normal sprite draw coordinates error !");
     }
-    part.vertexes_.emplace_back(Vertex{a, coords[0], {color.r, color.g, color.b, color.a}, gouraud}); // lower left
-    part.vertexes_.emplace_back(Vertex{b, coords[1], {color.r, color.g, color.b, color.a}, gouraud}); // lower right
-    part.vertexes_.emplace_back(Vertex{c, coords[2], {color.r, color.g, color.b, color.a}, gouraud}); // upper right
-    part.vertexes_.emplace_back(Vertex{d, coords[3], {color.r, color.g, color.b, color.a}, gouraud}); // upper left
+    part.vertexes_.emplace_back(Vertex{a, coords[0], {color.r, color.g, color.b, color.a}, gouraud_values[0]}); // lower left
+    part.vertexes_.emplace_back(Vertex{b, coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
+    part.vertexes_.emplace_back(Vertex{c, coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
+    part.vertexes_.emplace_back(Vertex{d, coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
 }
 
 void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -611,11 +611,16 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
         throw std::runtime_error("VDP1 scaled sprite draw coordinates error !");
     }
 
-    auto color = Color{u16{}};
-    part.vertexes_.emplace_back(Vertex{vertexes_pos[0], coords[0], {color.r, color.g, color.b, color.a}}); // lower left
-    part.vertexes_.emplace_back(Vertex{vertexes_pos[1], coords[1], {color.r, color.g, color.b, color.a}}); // lower right
-    part.vertexes_.emplace_back(Vertex{vertexes_pos[2], coords[2], {color.r, color.g, color.b, color.a}}); // upper right
-    part.vertexes_.emplace_back(Vertex{vertexes_pos[3], coords[3], {color.r, color.g, color.b, color.a}}); // upper left
+    auto       color          = Color{u16{}};
+    const auto gouraud_values = readGouraudData(modules, part);
+    part.vertexes_.emplace_back(
+        Vertex{vertexes_pos[0], coords[0], {color.r, color.g, color.b, color.a}, gouraud_values[0]}); // lower left
+    part.vertexes_.emplace_back(
+        Vertex{vertexes_pos[1], coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
+    part.vertexes_.emplace_back(
+        Vertex{vertexes_pos[2], coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
+    part.vertexes_.emplace_back(
+        Vertex{vertexes_pos[3], coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
 }
 
 void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -749,11 +754,16 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
 }
 
 auto readGouraudData(const EmulatorModules& modules, Vdp1Part& part) -> std::vector<Gouraud> {
-    const auto     grd_table_address = vdp1_ram_start_address + part.cmdgrda_.get(CmdGrda::gouraud_shading_table) * 8;
-    auto           gouraud_values    = std::vector<Gouraud>{};
-    constexpr auto max_values        = u8{4};
-    for (u8 i = 0; i < max_values; i++) {
-        gouraud_values.emplace_back(Gouraud(modules.memory()->read<u16>(grd_table_address + i * 2)));
+    auto gouraud_values = std::vector<Gouraud>{};
+    if (part.cmdpmod_.get(CmdPmod::gouraud_shading) == GouraudShading::enabled) {
+        const auto grd_table_address = vdp1_ram_start_address + part.cmdgrda_.get(CmdGrda::gouraud_shading_table) * 8;
+
+        constexpr auto max_values = u8{4};
+        for (u8 i = 0; i < max_values; i++) {
+            gouraud_values.emplace_back(Gouraud(modules.memory()->read<u16>(grd_table_address + i * 2)));
+        }
+    } else {
+        gouraud_values = {Gouraud(), Gouraud(), Gouraud(), Gouraud()};
     }
     return gouraud_values;
 }
