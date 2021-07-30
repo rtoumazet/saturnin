@@ -683,7 +683,7 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 
             // color pointer
             offset += GLintptr(sizeof(TextureCoordinates));
-            glVertexAttribPointer(2, 4, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+            glVertexAttribPointer(2, 4, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(2);
 
             // gouraud color pointer

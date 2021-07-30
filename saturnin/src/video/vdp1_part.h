@@ -188,6 +188,8 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part);
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part);
 
+auto readGouraudData(const EmulatorModules& modules, Vdp1Part& part) -> std::vector<Gouraud>;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T> void readDotColorBank16(const EmulatorModules& modules, std::vector<u8>& texture_data, const u16
 /// color_ram_offset, Vdp1Part& vp, const u8 dot)
