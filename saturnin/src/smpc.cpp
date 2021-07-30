@@ -544,6 +544,7 @@ void Smpc::executeIntback() {
         auto is_peripheral_data_returned = bool{ireg_[index_1].get(InputRegister::ireg1_peripheral_data_enable)
                                                 == PeripheralDataEnable::peripheral_data_returned};
         if (is_peripheral_data_returned) {
+            getPeripheralData();
             next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
             sf_.set();
         } else {
