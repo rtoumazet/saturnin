@@ -749,7 +749,7 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
 }
 
 auto readGouraudData(const EmulatorModules& modules, Vdp1Part& part) -> std::vector<Gouraud> {
-    const auto     grd_table_address = part.cmdgrda_.get(CmdGrda::gouraud_shading_table) * 8;
+    const auto     grd_table_address = vdp1_ram_start_address + part.cmdgrda_.get(CmdGrda::gouraud_shading_table) * 8;
     auto           gouraud_values    = std::vector<Gouraud>{};
     constexpr auto max_values        = u8{4};
     for (u8 i = 0; i < max_values; i++) {

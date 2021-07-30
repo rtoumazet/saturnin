@@ -254,16 +254,7 @@ void Opengl::initializeShaders() {
             }else{
                 out_color = frg_color;
             }
-            (frg_grd_color.r > 0) ? out_color.r += frg_grd_color.r : out_color.r -= frg_grd_color.r;
-            (frg_grd_color.g > 0) ? out_color.g += frg_grd_color.g : out_color.g -= frg_grd_color.g;
-            (frg_grd_color.b > 0) ? out_color.b += frg_grd_color.b : out_color.b -= frg_grd_color.b;
-            //out_color.r += frg_grd_color.r;
-            //out_color.g += frg_grd_color.g;
-            //out_color.b += frg_grd_color.b;
-            //frg_color.r -= 0.1;
-            //frg_color.g -= 0.1;
-            //frg_color.b -= 0.1;
-            //frg_color.a = 0.5;
+            out_color.rgb += frg_grd_color.rgb;
         } 
     )");
 }
