@@ -365,14 +365,16 @@ void Opengl::render() {
                     glUniform1i(uni_use_texture, is_texture_used);
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-                    auto& t = Texture::getTexture(part->textureKey());
-                    if (t.deleteOnGpu() || t.apiHandle() == 0) {
-                        // Creation / replacement of the texture on the GPU
-                        if (t.deleteOnGpu()) { deleteTexture(t.apiHandle()); }
-                        t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-                    }
+                    if (Texture::isTextureStored(part->textureKey())) {
+                        auto& t = Texture::getTexture(part->textureKey());
+                        if (t.deleteOnGpu() || t.apiHandle() == 0) {
+                            // Creation / replacement of the texture on the GPU
+                            if (t.deleteOnGpu()) { deleteTexture(t.apiHandle()); }
+                            t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+                        }
 
-                    glBindTexture(GL_TEXTURE_2D, t.apiHandle());
+                        glBindTexture(GL_TEXTURE_2D, t.apiHandle());
+                    }
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
                 }

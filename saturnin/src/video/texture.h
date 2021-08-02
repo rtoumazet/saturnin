@@ -63,6 +63,7 @@ class Texture {
     void isDiscarded(const bool discarded) { is_discarded_ = discarded; }
     auto deleteOnGpu() const { return delete_on_gpu_; }
     void deleteOnGpu(const bool d) { delete_on_gpu_ = d; }
+    auto vdpType() const { return vdp_type_; }
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +135,19 @@ class Texture {
             t.second.delete_on_gpu_ = true;
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Texture::discardTextures(const VdpType t = VdpType::not_set);
+    ///
+    /// \brief  Marks textures in the pool as discarded.
+    ///
+    /// \author Runik
+    /// \date   30/07/2021
+    ///
+    /// \param  t   (Optional) A VdpType textures to discard.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void discardTextures(const VdpType t = VdpType::not_set);
 
   private:
     static std::map<size_t, Texture> texture_storage_; ///< The texture storage

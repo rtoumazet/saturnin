@@ -72,6 +72,7 @@ void Vdp2::run(const u8 cycles) {
 
             Log::debug(Logger::vdp2, tr("VBlankIn interrupt request"));
 
+            Texture::discardTextures(VdpType::vdp1);
             modules_.vdp1()->onVblankIn();
             this->onVblankIn();
 

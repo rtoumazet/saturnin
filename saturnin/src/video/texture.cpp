@@ -74,4 +74,26 @@ auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_c
     util::hashCombine(key, vp, address, color_count, palette_number);
     return key;
 }
+
+// static
+void Texture::discardTextures(const VdpType t) {
+    for (auto& [key, value] : texture_storage_) {
+        switch (t) {
+            case VdpType::not_set: {
+                value.isDiscarded(true);
+                value.deleteOnGpu(true);
+                break;
+            }
+            case VdpType::vdp1:
+            case VdpType::vdp2: {
+                if (value.vdpType() == t) {
+                    value.isDiscarded(true);
+                    value.deleteOnGpu(true);
+                }
+                break;
+            }
+        }
+    }
+}
+
 } // namespace saturnin::video

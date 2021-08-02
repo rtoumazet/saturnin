@@ -310,42 +310,50 @@ Color mode
                 return R"(
 Color calculation
     Mode 0, 
-    Replace)";
+    Replace
+)";
             case ColorCalculation::mode_1:
                 return R"(
 Color calculation 
     Mode 1
-    Cannot rewrite / shadow)";
+    Cannot rewrite / shadow
+)";
             case ColorCalculation::mode_2:
                 return R"(
 Color calculation 
     Mode 2
-    Half-luminance)";
+    Half-luminance
+)";
             case ColorCalculation::mode_3:
                 return R"(
 Color calculation 
     Mode 3
-    Replace / half-transparent)";
+    Replace / half-transparent
+)";
             case ColorCalculation::mode_4:
                 return R"(
 Color calculation 
     Mode 4
-    Gouraud shading)";
+    Gouraud shading
+)";
             case ColorCalculation::mode_5:
                 return R"(
 Color calculation 
     Mode 5
-    Setting prohibited)";
+    Setting prohibited
+)";
             case ColorCalculation::mode_6:
                 return R"(
 Color calculation 
     Mode 6
-    Gouraud shading + half-luminance)";
+    Gouraud shading + half-luminance
+)";
             case ColorCalculation::mode_7:
                 return R"(
 Color calculation 
     Mode 7
-    Gouraud shading / gouraud shading + half-tranparent)";
+    Gouraud shading / gouraud shading + half-tranparent
+)";
         }
         return "";
     };
@@ -416,12 +424,15 @@ Gouraud shading
                                        cmdsize_.get(CmdSize::character_size_y));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
+            part_detail += fmt::format("Texture key : {:#x}", textureKey());
             break;
         }
         case CommandSelect::scaled_sprite_draw: {
             part_detail += getZoomPoint(cmdctrl_.get(CmdCtrl::zoom_point));
             part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
             part_detail += getDrawMode(cmdpmod_);
+            part_detail += getGouraudShadingData();
+            part_detail += fmt::format("Texture key : {:#x}", textureKey());
             // cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
             // cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
             // cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
@@ -442,6 +453,7 @@ Gouraud shading
             part_detail += fmt::format("Vertex D ({}, {})\n", cmdxd_.twoCmp(), cmdyd_.twoCmp());
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
+            part_detail += fmt::format("Texture key : {:#x}", textureKey());
             break;
         }
         case CommandSelect::polygon_draw: {
@@ -686,7 +698,21 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
     texture_data.reserve(texture_size);
     const auto key = Texture::calculateKey(VdpType::vdp1, start_address, toUnderlying(color_mode));
     // if (key == 0xa57b381a6e5b28d0) DebugBreak();
+
+    // Not stored -> load
+    // Stored but discarded -> load
+    // Stored and not discarded -> reuse
+    auto load_texture = bool{false};
     if (!Texture::isTextureStored(key)) {
+        load_texture = true;
+    } else {
+        auto& t = Texture::getTexture(key);
+        if (t.isDiscarded()) {
+            load_texture = true;
+            t.isDiscarded(false);
+        }
+    }
+    if (load_texture) {
         if (modules.vdp2()->getColorRamMode() == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (color_mode) {
