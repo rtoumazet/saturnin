@@ -31,6 +31,7 @@
 #include <saturnin/src/video/vdp1_registers.h>
 #include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/log.h>
+#include <saturnin/src/utilities.h> // toUnderlying
 
 // Forward declarations
 namespace saturnin::core {
@@ -43,6 +44,7 @@ namespace saturnin::video {
 using core::EmulatorModules;
 using core::Log;
 using core::Memory;
+using utilities::toUnderlying;
 
 constexpr auto cmdctrl_offset = u8{0x0};
 constexpr auto cmdlink_offset = u8{0x2};
@@ -210,9 +212,9 @@ void readDotColorBank16(const EmulatorModules& modules,
                         const u16              color_ram_offset,
                         Vdp1Part&              part,
                         const u8               dot) {
-    constexpr auto color_bank_mask = u16{0xFFF0};
+    constexpr auto color_bank_mask = u16{0x0FF0};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + (part.cmdcolr_.toU16() & color_bank_mask + dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.toU16() & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
@@ -272,9 +274,9 @@ void readDotColorBank64(const EmulatorModules& modules,
                         const u16              color_ram_offset,
                         Vdp1Part&              part,
                         const u8               dot) {
-    constexpr auto color_bank_mask = u16{0xFFC0};
+    constexpr auto color_bank_mask = u16{0x0FC0};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + (part.cmdcolr_.toU16() & color_bank_mask + dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.toU16() & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
@@ -306,9 +308,9 @@ void readDotColorBank128(const EmulatorModules& modules,
                          const u16              color_ram_offset,
                          Vdp1Part&              part,
                          const u8               dot) {
-    constexpr auto color_bank_mask = u16{0xFF80};
+    constexpr auto color_bank_mask = u16{0x0F80};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + (part.cmdcolr_.toU16() & color_bank_mask + dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.toU16() & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
@@ -342,7 +344,7 @@ void readDotColorBank256(const EmulatorModules& modules,
                          const u8               dot) {
     constexpr auto color_bank_mask = u16{0xFF00};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + (part.cmdcolr_.toU16() & color_bank_mask + dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.toU16() & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
@@ -407,10 +409,8 @@ void readColorBankMode16Colors(const EmulatorModules& modules,
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
     }
-    if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
-        Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
-    }
-    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
+    checkColorCalculation(part);
+    for (u32 i = start_address; i < (start_address + texture_size); i += one_read_offset) {
         auto row = Dots4Bits(modules.memory()->read<u32>(i));
         readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots4Bits::dot_0));
         readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots4Bits::dot_1));
@@ -448,9 +448,7 @@ void readLookUpTable16Colors(const EmulatorModules& modules,
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
     }
-    if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
-        Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
-    }
+    checkColorCalculation(part);
     for (u32 i = start_address; i < (start_address + texture_size / one_read_offset * 2); i += one_read_offset) {
         auto row = Dots4Bits(modules.memory()->read<u32>(i));
         readDotLookUpTable16<T>(modules, texture_data, part, row.get(Dots4Bits::dot_0));
@@ -491,9 +489,7 @@ void readColorBankMode64Colors(const EmulatorModules& modules,
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
     }
-    if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
-        Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
-    }
+    checkColorCalculation(part);
     for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
         auto row = Dots6Bits(modules.memory()->read<u32>(i));
         readDotColorBank64<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots6Bits::dot_0));
@@ -530,9 +526,7 @@ void readColorBankMode128Colors(const EmulatorModules& modules,
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
     }
-    if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
-        Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
-    }
+    checkColorCalculation(part);
     for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
         auto row = Dots7Bits(modules.memory()->read<u32>(i));
         readDotColorBank128<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots7Bits::dot_0));
@@ -569,10 +563,8 @@ void readColorBankMode256Colors(const EmulatorModules& modules,
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
     }
-    if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
-        Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
-    }
-    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
+    checkColorCalculation(part);
+    for (u32 i = start_address; i < (start_address + texture_size); i += one_read_offset) {
         auto row = Dots8Bits(modules.memory()->read<u32>(i));
         readDotColorBank256<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots8Bits::dot_0));
         readDotColorBank256<T>(modules, texture_data, color_ram_address_offset, part, row.get(Dots8Bits::dot_1));
@@ -603,9 +595,8 @@ void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_d
         Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
         return;
     }
-    if (part.cmdpmod_.get(CmdPmod::color_calculation) != ColorCalculation::mode_0) {
-        Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
-    }
+    checkColorCalculation(part);
+
     const auto max_size = static_cast<u32>(start_address + texture_size);
     for (u32 i = start_address; i < max_size; i += one_read_offset_in_bytes) {
         auto row = Dots16Bits(modules.memory()->read<u32>(i));
@@ -615,5 +606,7 @@ void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_d
 }
 
 auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<TextureCoordinates>;
+
+void checkColorCalculation(Vdp1Part& part);
 
 } // namespace saturnin::video

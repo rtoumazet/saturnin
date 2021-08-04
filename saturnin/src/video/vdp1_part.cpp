@@ -828,4 +828,14 @@ auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<Text
     return coords;
 }
 
+void checkColorCalculation(Vdp1Part& part) {
+    switch (part.cmdpmod_.get(CmdPmod::color_calculation)) {
+        case ColorCalculation::mode_0: break;
+        case ColorCalculation::mode_4: break;
+        default: {
+            Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
+        }
+    }
+}
+
 } // namespace saturnin::video
