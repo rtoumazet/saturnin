@@ -1810,6 +1810,10 @@ void execute(Sh2& s) {
 
     // if (s.getRegister(Sh2Register::r2) == 0x96c05) s.modules_.context()->debugStatus(core::DebugStatus::paused);
     // if (s.getRegister(Sh2Register::r9) == 0x1159db) s.modules_.context()->debugStatus(core::DebugStatus::paused);
+
+    // if (s.modules_.context()->memory()->workram_high_[0x397D4] == 0x03)
+    // s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    // if (s.modules_.context()->memory()->vdp1_vram_[0xc] == 0x03) s.modules_.context()->debugStatus(core::DebugStatus::paused);
 }
 
 auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }

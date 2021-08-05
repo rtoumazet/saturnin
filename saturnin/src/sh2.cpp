@@ -264,17 +264,22 @@ auto Sh2::readRegisters32(const u32 addr) -> u32 {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             return divu_dvcr_.toU32();
         }
-        case dividend_register_l:
-        case dividend_register_l_shadow: {
+        case dividend_register_l: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             return divu_dvdntl_.toU32();
         }
-        case dividend_register_h:
-        case dividend_register_h_shadow: {
+        case dividend_register_l_shadow: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
+            return divu_dvdntl_shadow_.toU32();
+        }
+        case dividend_register_h: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
             return divu_dvdnth_.toU32();
         }
-
+        case dividend_register_h_shadow: {
+            // if (divu_is_running_) divu_opcode_is_stalled_ = true;
+            return divu_dvdnth_shadow_.toU32();
+        }
             /////////////
             // 11. FRT //
             /////////////
@@ -801,8 +806,8 @@ void Sh2::start32bitsDivision() {
     divu_quot_ = 0;
     divu_rem_  = 0;
     if (divu_dvsr_.any()) {
-        divu_quot_ = dvdnt / dvsr;
-        divu_rem_  = dvdnt % dvsr;
+        divu_quot_ = (s32)dvdnt / (s32)dvsr;
+        divu_rem_  = (s32)dvdnt % (s32)dvsr;
         // Log::debug(Logger::sh2, "Quotient : {}, remainder : {}", divu_quot_, divu_rem_);
         Log::debug(Logger::sh2, "{:#x} / {:#x} -> {:#x}, {:#x}", dvdnt, dvsr, divu_quot_, divu_rem_);
     } else {
