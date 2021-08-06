@@ -442,6 +442,29 @@ void Opengl::render() {
                 }
                 case DrawType::line: {
                     // Single line (2 vertexes)
+                    auto vertexes = std::vector<Vertex>{};
+                    vertexes.reserve(vertexes_per_polyline);
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[1]);
+
+                    glUseProgram(program_shader_);
+                    glBindVertexArray(vao);                       // binding VAO
+                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+
+                    // Sending vertex buffer data to the GPU
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+                    // Sending the ortho projection matrix to the shader
+                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+                    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+                    // Sending the variable to configure the shader to use color.
+                    const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+                    const auto is_texture_used = GLboolean(false);
+                    glUniform1i(uni_use_texture, is_texture_used);
+
+                    // Drawing the list
+                    glDrawArrays(GL_LINES, 0, vertexes_per_line);
                     break;
                 }
                 default: {

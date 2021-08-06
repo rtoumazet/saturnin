@@ -180,13 +180,11 @@ void Vdp1::populateRenderData() {
                     break;
                 }
                 case CommandSelect::normal_sprite_draw: {
-                    Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));
                     vdp1_parts_.emplace_back(
                         Vdp1Part(modules_, DrawType::textured_polygon, current_table_address, cmdctrl, cmdlink));
                     break;
                 }
                 case CommandSelect::scaled_sprite_draw: {
-                    Log::debug(Logger::vdp1, tr("Command - Scaled sprite draw"));
                     vdp1_parts_.emplace_back(
                         Vdp1Part(modules_, DrawType::textured_polygon, current_table_address, cmdctrl, cmdlink));
                     break;
@@ -202,12 +200,10 @@ void Vdp1::populateRenderData() {
                     break;
                 }
                 case CommandSelect::polyline_draw: {
-                    Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
                     vdp1_parts_.emplace_back(Vdp1Part(modules_, DrawType::polyline, current_table_address, cmdctrl, cmdlink));
                     break;
                 }
                 case CommandSelect::line_draw: {
-                    Log::debug(Logger::vdp1, tr("Command - Line draw"));
                     vdp1_parts_.emplace_back(Vdp1Part(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink));
                     break;
                 }

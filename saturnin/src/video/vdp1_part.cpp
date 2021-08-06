@@ -467,29 +467,21 @@ Gouraud shading
             break;
         }
         case CommandSelect::polyline_draw: {
-            // cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            // cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            // cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            // cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            // cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            // cmdya_   = m->read<u16>(address + cmdya_offset);
-            // cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            // cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            // cmdxc_   = m->read<u16>(address + cmdxc_offset);
-            // cmdyc_   = m->read<u16>(address + cmdyc_offset);
-            // cmdxd_   = m->read<u16>(address + cmdxd_offset);
-            // cmdyd_   = m->read<u16>(address + cmdyd_offset);
-            // cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
+            part_detail += fmt::format("Vertex B ({}, {})\n", cmdxb_.twoCmp(), cmdyb_.twoCmp());
+            part_detail += fmt::format("Vertex C ({}, {})\n", cmdxc_.twoCmp(), cmdyc_.twoCmp());
+            part_detail += fmt::format("Vertex D ({}, {})\n", cmdxd_.twoCmp(), cmdyd_.twoCmp());
+            auto color = Color(cmdcolr_.get(CmdColr::color_control));
+            part_detail += fmt::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
+            part_detail += getGouraudShadingData();
             break;
         }
         case CommandSelect::line_draw: {
-            // cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            // cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            // cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            // cmdya_   = m->read<u16>(address + cmdya_offset);
-            // cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            // cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            // cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
+            part_detail += fmt::format("Vertex B ({}, {})\n", cmdxb_.twoCmp(), cmdyb_.twoCmp());
+            auto color = Color(cmdcolr_.get(CmdColr::color_control));
+            part_detail += fmt::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
+            part_detail += getGouraudShadingData();
             break;
         }
     }
@@ -685,6 +677,48 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                        {0.0, 1.0},
                                        {color.r, color.g, color.b, color.a},
                                        gouraud_values[3]}); // upper left
+}
+
+void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
+    Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
+
+    auto color = Color(part.cmdcolr_.get(CmdColr::color_control));
+
+    const auto gouraud_values = readGouraudData(modules, part);
+
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
+                                       {0.0, 0.0},
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_values[0]}); // lower left
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
+                                       {1.0, 0.0},
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_values[1]}); // lower right
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
+                                       {1.0, 1.0},
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_values[2]}); // upper right
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
+                                       {0.0, 1.0},
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_values[3]}); // upper left
+}
+
+void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
+    Log::debug(Logger::vdp1, tr("Command - Line draw"));
+
+    auto color = Color(part.cmdcolr_.get(CmdColr::color_control));
+
+    const auto gouraud_values = readGouraudData(modules, part);
+
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
+                                       {0.0, 0.0},
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_values[0]}); // lower left
+    part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
+                                       {1.0, 0.0},
+                                       {color.r, color.g, color.b, color.a},
+                                       gouraud_values[1]}); // lower right
 }
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
