@@ -21,6 +21,7 @@
 #include <saturnin/src/video/gui.h>
 //#include <imgui.h>
 #include <istream>
+#include <filesystem> // path
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_enums.h> // EmulationStatus
 #include <saturnin/src/locale.h>         // tr
@@ -36,11 +37,13 @@
 #include <saturnin/src/video/vdp2.h>                  // vram_timing_size
 #include <saturnin/lib/imgui/imgui_custom_controls.h> // peripheralKeyCombo
 #include <saturnin/lib/imgui/imgui_memory_editor.h>   // MemoryEditor
+#include <saturnin/lib/imgui/imfilebrowser.h>         // imfilebrowser
 
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wformat-security" // warning: format string is not a string literal
 #endif
 
+namespace fs    = std::filesystem;
 namespace util  = saturnin::utilities;
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
@@ -48,13 +51,13 @@ namespace video = saturnin::video;
 namespace saturnin::gui {
 
 // static bool show_load_stv     = false;
-static bool show_load_binary  = false;
-static bool show_debug_memory = false;
-static bool show_debug_sh2    = false;
-static bool show_debug_vdp1   = false;
-static bool show_debug_vdp2   = false;
-static bool show_demo         = false;
-static bool show_log          = true;
+static auto show_load_binary  = false;
+static auto show_debug_memory = false;
+static auto show_debug_sh2    = false;
+static auto show_debug_vdp1   = false;
+static auto show_debug_vdp2   = false;
+static auto show_demo         = false;
+static auto show_log          = true;
 
 using core::Log;
 using core::Logger;
@@ -122,9 +125,11 @@ void showMainMenu(core::EmulatorContext& state) {
                 ImGui::EndChild();
                 ImGui::EndMenu();
             };
-            ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary);
+            if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary)) {}
+
             ImGui::EndMenu();
         }
+        if (show_load_binary) { showBinaryLoadWindow(state, &show_load_binary); };
 
         // Debug
         switch (state.emulationStatus()) {
@@ -271,34 +276,82 @@ void showMainMenu(core::EmulatorContext& state) {
             // Paths header
             setHeaderState(Header::path);
             if (ImGui::CollapsingHeader(headers.at(Header::path).c_str())) {
-                last_opened_header = Header::path;
-                // Saturn bios
-                ImGui::TextUnformatted(tr("Saturn bios").c_str());
-                ImGui::SameLine(second_column_offset);
-
+                last_opened_header         = Header::path;
                 constexpr auto string_size = u8{255};
-                auto           bios_saturn
-                    = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_bios_saturn), string_size);
-                if (ImGui::InputText("##bios_saturn", bios_saturn.data(), bios_saturn.capacity())) {
-                    state.config()->writeValue(core::AccessKeys::cfg_paths_bios_saturn, bios_saturn.data());
+
+                // Saturn bios
+                {
+                    ImGui::TextUnformatted(tr("Saturn bios").c_str());
+                    ImGui::SameLine(second_column_offset);
+
+                    const std::string full_path    = state.config()->readValue(core::AccessKeys::cfg_paths_bios_saturn);
+                    auto              path_for_gui = util::stringToVector(full_path, string_size);
+                    if (ImGui::InputText("##bios_saturn", path_for_gui.data(), path_for_gui.capacity())) {
+                        state.config()->writeValue(core::AccessKeys::cfg_paths_bios_saturn, path_for_gui.data());
+                    }
+
+                    ImGui::SameLine();
+                    static auto select_dialog = ImGui::FileBrowser();
+                    if (ImGui::Button("...##bios_saturn")) {
+                        select_dialog.SetTitle(tr("Select a Saturn bios file ..."));
+                        select_dialog.SetTypeFilters({".bin", ".*"});
+                        select_dialog.SetPwd(fs::path{full_path}.parent_path());
+                        select_dialog.Open();
+                    }
+                    select_dialog.Display();
+
+                    if (select_dialog.HasSelected()) {
+                        state.config()->writeValue(core::AccessKeys::cfg_paths_bios_saturn, select_dialog.GetSelected().string());
+                    }
                 }
 
                 // ST-V bios
-                ImGui::TextUnformatted(tr("ST-V bios").c_str());
-                ImGui::SameLine(second_column_offset);
-                auto bios_stv
-                    = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_bios_stv), string_size);
-                if (ImGui::InputText("##bios_stv", bios_stv.data(), bios_stv.capacity())) {
-                    state.config()->writeValue(core::AccessKeys::cfg_paths_bios_stv, bios_stv.data());
+                {
+                    ImGui::TextUnformatted(tr("ST-V bios").c_str());
+                    ImGui::SameLine(second_column_offset);
+                    const std::string full_path    = state.config()->readValue(core::AccessKeys::cfg_paths_bios_stv);
+                    auto              path_for_gui = util::stringToVector(full_path, string_size);
+                    if (ImGui::InputText("##bios_stv", path_for_gui.data(), path_for_gui.capacity())) {
+                        state.config()->writeValue(core::AccessKeys::cfg_paths_bios_stv, path_for_gui.data());
+                    }
+
+                    ImGui::SameLine();
+                    static auto select_dialog = ImGui::FileBrowser();
+                    if (ImGui::Button("...##bios_stv")) {
+                        select_dialog.SetTitle(tr("Select a ST-V bios file ..."));
+                        select_dialog.SetTypeFilters({".ic8", ".s", ".bin", ".*"});
+                        select_dialog.SetPwd(fs::path{full_path}.parent_path());
+                        select_dialog.Open();
+                    }
+                    select_dialog.Display();
+
+                    if (select_dialog.HasSelected()) {
+                        state.config()->writeValue(core::AccessKeys::cfg_paths_bios_stv, select_dialog.GetSelected().string());
+                    }
                 }
 
                 // ST-V roms
-                ImGui::TextUnformatted(tr("ST-V roms").c_str());
-                ImGui::SameLine(second_column_offset);
-                auto roms_stv
-                    = util::stringToVector(state.config()->readValue(core::AccessKeys::cfg_paths_roms_stv), string_size);
-                if (ImGui::InputText("##roms_stv", roms_stv.data(), roms_stv.capacity())) {
-                    state.config()->writeValue(core::AccessKeys::cfg_paths_roms_stv, roms_stv.data());
+                {
+                    ImGui::TextUnformatted(tr("ST-V roms").c_str());
+                    ImGui::SameLine(second_column_offset);
+                    const std::string full_path    = state.config()->readValue(core::AccessKeys::cfg_paths_roms_stv);
+                    auto              path_for_gui = util::stringToVector(full_path, string_size);
+                    if (ImGui::InputText("##roms_stv", path_for_gui.data(), path_for_gui.capacity())) {
+                        state.config()->writeValue(core::AccessKeys::cfg_paths_roms_stv, path_for_gui.data());
+                    }
+
+                    ImGui::SameLine();
+                    static auto select_dialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_SelectDirectory);
+                    if (ImGui::Button("...##roms_stv")) {
+                        select_dialog.SetTitle(tr("Select the ST-V rom directory ..."));
+                        select_dialog.SetPwd(full_path);
+                        select_dialog.Open();
+                    }
+                    select_dialog.Display();
+
+                    if (select_dialog.HasSelected()) {
+                        state.config()->writeValue(core::AccessKeys::cfg_paths_roms_stv, select_dialog.GetSelected().string());
+                    }
                 }
 
                 ImGui::Separator();
@@ -1521,9 +1574,47 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
+void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened) {
+    const auto window_size = ImVec2(610, 60);
+    ImGui::SetNextWindowSize(window_size);
+
+    auto window_flags
+        = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
+
+    ImGui::Begin(tr("Load binary file").c_str(), opened, window_flags);
+
+    constexpr auto string_size = u8{255};
+    ImGui::TextUnformatted(tr("Binary file").c_str());
+    ImGui::SameLine();
+
+    static auto full_path    = std::string{};
+    auto        path_for_gui = util::stringToVector(full_path, string_size);
+    const auto  flags        = ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_ReadOnly;
+    ImGui::InputText("##binary_file", path_for_gui.data(), path_for_gui.capacity(), flags);
+
+    ImGui::SameLine();
+    static auto select_dialog = ImGui::FileBrowser();
+    if (ImGui::Button("...##binary_file")) {
+        select_dialog.SetTitle(tr("Select a Saturn binary file ..."));
+        select_dialog.SetTypeFilters({".bin", ".*"});
+        select_dialog.Open();
+    }
+    select_dialog.Display();
+
+    if (select_dialog.HasSelected()) { full_path = select_dialog.GetSelected().string(); }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Load")) {
+        state.emulationStatus(core::EmulationStatus::stopped);
+        // state.masterSh2()->
+    }
+
+    ImGui::End();
+}
+
 void buildGui(core::EmulatorContext& state) {
     showCoreWindow(state);
-
     showRenderingWindow(state);
 
     if (show_demo) { showImguiDemoWindow(show_demo); }

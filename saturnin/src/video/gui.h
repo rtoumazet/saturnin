@@ -181,6 +181,20 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened);
 void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened);
+///
+/// \brief  Displays the window to load binary files.
+///
+/// \author Runik
+/// \date   12/08/2021
+///
+/// \param [in,out] state   The emulator state.
+/// \param [in,out] opened  If non-null, true if opened.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void buildGui(core::EmulatorContext& state);
 ///
 /// \brief  Builds a graphical user interface.

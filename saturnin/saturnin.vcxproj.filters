@@ -284,5 +284,8 @@
     <ClInclude Include="src\scu.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
+    <ClInclude Include="lib\imgui\imfilebrowser.h">
+      <Filter>Fichiers sources\imgui</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
