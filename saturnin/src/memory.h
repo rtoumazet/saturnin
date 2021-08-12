@@ -264,6 +264,20 @@ class Memory {
     // bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Memory::loadBinaryFile(const std::string& full_path, const u32 addr);
+    ///
+    /// \brief  Loads a binary file in Saturn memory.
+    ///
+    /// \author Runik
+    /// \date   12/08/2021
+    ///
+    /// \param  full_path   Full path of the filename to load.
+    /// \param  addr        The address to load the data to.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void loadBinaryFile(const std::string& full_path, const u32 addr);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::loadBios(saturnin::core::HardwareMode mode);
     ///
     /// \brief  Loads the BIOS into memory.

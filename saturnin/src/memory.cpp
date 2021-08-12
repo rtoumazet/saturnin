@@ -158,6 +158,23 @@ auto Memory::loadRom(const std::string& zip_name,
     return true;
 }
 
+void Memory::loadBinaryFile(const std::string& full_path, const u32 addr) {
+    Log::info(Logger::memory, tr("Loading binary file"));
+    std::ifstream input_file(full_path, std::ios::binary);
+    if (input_file) {
+        auto buffer = std::stringstream{};
+        buffer << input_file.rdbuf();
+        input_file.close();
+
+        const auto str = buffer.str();
+
+        std::move(str.begin(), str.end(), this->workram_high_.data() + (addr & workram_high_memory_mask));
+
+    } else {
+        Log::warning(Logger::memory, tr("Binary file not found !"));
+    }
+}
+
 void Memory::loadBios(const HardwareMode mode) {
     Log::info(Logger::memory, tr("Loading bios"));
     auto bios_path = std::string{};

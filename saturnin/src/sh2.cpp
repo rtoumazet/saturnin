@@ -766,7 +766,13 @@ void Sh2::initializeOnChipRegisters() {
 }
 
 void Sh2::powerOnReset() {
-    pc_                   = modules_.memory()->read<u32>(pc_start_vector);
+    if (is_binary_file_loaded_) {
+        pc_                    = binary_file_start_address_;
+        is_binary_file_loaded_ = false;
+    } else {
+        pc_ = modules_.memory()->read<u32>(pc_start_vector);
+    }
+
     r_[sp_register_index] = modules_.memory()->read<u32>(sp_start_vector);
     vbr_                  = 0;
     sr_.reset();
@@ -1282,5 +1288,10 @@ void Sh2::popFromCallstack() {
     callstack_.pop_back();
     // if (emulatorContext()->debugStatus() == core::DebugStatus::wait_end_of_routine) { --step_over_subroutine_depth_; }
 };
+
+void Sh2::setBinaryFileStartAddress(const u32 val) {
+    is_binary_file_loaded_     = true;
+    binary_file_start_address_ = val;
+}
 
 } // namespace saturnin::sh2

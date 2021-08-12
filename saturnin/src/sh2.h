@@ -470,6 +470,19 @@ class Sh2 {
     [[nodiscard]] auto breakpoint(const u8 index) const -> u32 { return breakpoints_[index]; };
     ///@}
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Sh2::setBinaryFileStartAddress(const u32 val);
+    ///
+    /// \brief  Sets the start address of the binary file.
+    ///
+    /// \author Runik
+    /// \date   12/08/2021
+    ///
+    /// \param  val The new start address.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void setBinaryFileStartAddress(const u32 val);
+
     EmulatorModules modules_; ///< Modules of the emulator
 
   private:
@@ -883,6 +896,9 @@ class Sh2 {
 
     u8  cycles_elapsed_; ///< CPU cycles used by the last instruction.
     u16 current_opcode_; ///< Opcode to be executed.
+
+    bool is_binary_file_loaded_{false}; ///< True if a binary file has been loaded.
+    u32  binary_file_start_address_{};  ///< Start address of the binary file if any.
 
     /// \name Interrupt management
     //@{

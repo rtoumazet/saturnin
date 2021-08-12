@@ -852,11 +852,7 @@ void showMainMenu(core::EmulatorContext& state) {
                 }
             }
 
-            if (counter > 0) {
-                --counter;
-            } else {
-                status_message.clear();
-            }
+            (counter > 0) ? --counter : status_message.clear();
 
             ImGui::TextUnformatted(status_message.c_str());
             ImGui::EndMenu();
@@ -1607,9 +1603,11 @@ void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened) {
 
     if (ImGui::Button("Load")) {
         state.emulationStatus(core::EmulationStatus::stopped);
-        // state.masterSh2()->
+        state.masterSh2()->setBinaryFileStartAddress(0x6004000);
+        state.masterSh2()->breakpoint(0, 0x6004002);
+        state.memory()->loadBinaryFile(full_path, 0x6004000);
+        Log::info(Logger::main, tr("Binary file loaded."));
     }
-
     ImGui::End();
 }
 
