@@ -579,7 +579,9 @@ void Smpc::getStatus() {
         oreg_[index_0].set(OutputRegister::oreg0_reset_status, ResetStatus::disabled);
     }
 
-    oreg_[index_0].set(OutputRegister::oreg0_set_time, SetTime::set_time);
+    const bool is_time_set    = modules_.config()->readValue(core::AccessKeys::cfg_global_set_time);
+    const auto set_time_value = is_time_set ? SetTime::set_time : SetTime::not_set_time;
+    oreg_[index_0].set(OutputRegister::oreg0_set_time, set_time_value);
 
     auto rtc = getRtcTime();
     oreg_[index_1].set(OutputRegister::all_bits, rtc.getUpperYear());

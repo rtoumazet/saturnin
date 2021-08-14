@@ -54,6 +54,7 @@ enum class AccessKeys {
     cfg_global_language,
     cfg_global_hardware_mode,
     cfg_global_area_code,
+    cfg_global_set_time,
     cfg_rendering_tv_standard,
     cfg_rendering_legacy_opengl,
     cfg_paths_roms_stv,

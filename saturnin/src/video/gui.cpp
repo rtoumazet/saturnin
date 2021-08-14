@@ -230,6 +230,15 @@ void showMainMenu(core::EmulatorContext& state) {
                 if (ImGui::Combo("##area_code", &index_code, codes)) {
                     state.config()->writeValue(core::AccessKeys::cfg_global_area_code, codes[index_code]);
                 }
+
+                // Set time
+                ImGui::TextUnformatted(tr("Set time").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                static bool is_time_set = state.config()->readValue(core::AccessKeys::cfg_global_set_time);
+                if (ImGui::Checkbox("", &is_time_set)) {
+                    state.config()->writeValue(core::AccessKeys::cfg_global_set_time, is_time_set);
+                }
             }
 
             // Rendering header
