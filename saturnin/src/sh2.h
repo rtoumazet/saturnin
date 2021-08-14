@@ -129,12 +129,13 @@ enum class DmaNextTransferPriority {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Sh2DmaConfiguration {
-    DmaChannel                channel;
-    u32                       counter;
-    u32                       source;
-    u32                       destination;
-    DmaChannelControlRegister chcr;
-    Interrupt                 interrupt{is::undefined};
+    DmaChannel                                 channel;
+    u32                                        counter;
+    u32                                        source;
+    u32                                        destination;
+    DmaChannelControlRegister                  chcr;
+    DmaRequestResponseSelectionControlRegister drcr;
+    Interrupt                                  interrupt{is::undefined};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

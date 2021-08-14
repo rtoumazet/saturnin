@@ -1086,6 +1086,7 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
             conf.source      = dmac_sar0_.toU32();
             conf.destination = dmac_dar0_.toU32();
             conf.chcr        = dmac_chcr0_;
+            conf.drcr        = dmac_drcr0_;
             conf.interrupt   = is::sh2_dma_0_transfer_end;
             break;
         case DmaChannel::channel_1:
@@ -1094,6 +1095,7 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
             conf.source      = dmac_sar1_.toU32();
             conf.destination = dmac_dar1_.toU32();
             conf.chcr        = dmac_chcr1_;
+            conf.drcr        = dmac_drcr1_;
             conf.interrupt   = is::sh2_dma_1_transfer_end;
             break;
         default: Log::warning(Logger::sh2, "DMAC - Unknown DMA channel");
@@ -1105,88 +1107,108 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
     if (dmaStartConditionsAreSatisfied(conf.channel)) {
         const auto channel_number = static_cast<u8>((conf.channel == DmaChannel::channel_0) ? 0 : 1);
         if (conf.chcr.get(DmaChannelControlRegister::auto_request_mode) == AutoRequestMode::module_request) {
-            Log::warning(Logger::sh2, "DMAC - Channel {} module request not implemented !", channel_number);
+            switch (conf.drcr.get(DmaRequestResponseSelectionControlRegister::resource_select)) {
+                case ResourceSelect::dreq: {
+                    // External request is immediately executed without waiting for an external signal.
+                    // Not sure how to implement this, could be interesting to check on the console ...
+                    Log::debug(Logger::sh2, "DMAC - Channel {} external request", channel_number);
+                    break;
+                }
+                case ResourceSelect::txi: {
+                    Log::unimplemented("SH2 DMAC - Channel {} SCI transmit request not implemented !", channel_number);
+                    return;
+                }
+                case ResourceSelect::rxi: {
+                    Log::unimplemented("SH2 DMAC - Channel {} SCI receive request not implemented !", channel_number);
+                    return;
+                }
+                default: {
+                    Log::warning(Logger::sh2, "DMAC - Channel {} module request setting prohibited !", channel_number);
+                    return;
+                }
+            }
         } else {
-            auto counter     = u32{conf.counter};
-            auto source      = u32{conf.source};
-            auto destination = u32{conf.destination};
-            Log::debug(Logger::sh2, "DMAC - Channel {} transfer", channel_number);
-            Log::debug(Logger::sh2, "PC={:#0x}", pc_);
-            Log::debug(Logger::sh2, "Source:{:#0x}", source);
-            Log::debug(Logger::sh2, "Destination:{:#0x}", destination);
-            Log::debug(Logger::sh2, "Count:{:#0x}", counter);
+            Log::debug(Logger::sh2, "DMAC - Channel {} auto request", channel_number);
+        }
+        auto counter     = u32{conf.counter};
+        auto source      = u32{conf.source};
+        auto destination = u32{conf.destination};
+        Log::debug(Logger::sh2, "DMAC - Channel {} transfer", channel_number);
+        Log::debug(Logger::sh2, "PC={:#0x}", pc_);
+        Log::debug(Logger::sh2, "Source:{:#0x}", source);
+        Log::debug(Logger::sh2, "Destination:{:#0x}", destination);
+        Log::debug(Logger::sh2, "Count:{:#0x}", counter);
 
-            while (counter > 0) {
-                auto transfer_size = u8{};
-                switch (conf.chcr.get(DmaChannelControlRegister::transfer_size)) {
-                    case TransferSize::one_byte_unit:
-                        modules_.memory()->write<u8>(destination, modules_.memory()->read<u8>(source));
-                        transfer_size = transfer_byte_size_1;
-                        --counter;
-                        break;
-                    case TransferSize::two_byte_unit:
-                        modules_.memory()->write<u16>(destination, modules_.memory()->read<u16>(source));
-                        transfer_size = transfer_byte_size_2;
-                        --counter;
-                        break;
-                    case TransferSize::four_byte_unit:
-                        modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
-                        transfer_size = transfer_byte_size_4;
-                        --counter;
-                        break;
-                    case TransferSize::sixteen_byte_unit:
-                        modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
-                        modules_.memory()->write<u32>(destination + displacement_4,
-                                                      modules_.memory()->read<u32>(source + displacement_4));
-                        modules_.memory()->write<u32>(destination + displacement_8,
-                                                      modules_.memory()->read<u32>(source + displacement_8));
-                        modules_.memory()->write<u32>(destination + displacement_12,
-                                                      modules_.memory()->read<u32>(source + displacement_12));
-                        transfer_size = transfer_byte_size_16;
-                        counter -= 4;
-                        break;
-                }
-
-                switch (conf.chcr.get(DmaChannelControlRegister::source_address_mode)) {
-                    case SourceAddressMode::fixed: break;
-                    case SourceAddressMode::incremented: source += transfer_size; break;
-                    case SourceAddressMode::decremented: source -= transfer_size; break;
-                    case SourceAddressMode::reserved: Log::warning(Logger::sh2, "Reserved source address mode used !");
-                }
-
-                switch (conf.chcr.get(DmaChannelControlRegister::destination_address_mode)) {
-                    case DestinationAddressMode::fixed: break;
-                    case DestinationAddressMode::incremented: destination += transfer_size; break;
-                    case DestinationAddressMode::decremented: destination -= transfer_size; break;
-                    case DestinationAddressMode::reserved: Log::warning(Logger::sh2, "Reserved destination address mode used !");
-                }
+        while (counter > 0) {
+            auto transfer_size = u8{};
+            switch (conf.chcr.get(DmaChannelControlRegister::transfer_size)) {
+                case TransferSize::one_byte_unit:
+                    modules_.memory()->write<u8>(destination, modules_.memory()->read<u8>(source));
+                    transfer_size = transfer_byte_size_1;
+                    --counter;
+                    break;
+                case TransferSize::two_byte_unit:
+                    modules_.memory()->write<u16>(destination, modules_.memory()->read<u16>(source));
+                    transfer_size = transfer_byte_size_2;
+                    --counter;
+                    break;
+                case TransferSize::four_byte_unit:
+                    modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
+                    transfer_size = transfer_byte_size_4;
+                    --counter;
+                    break;
+                case TransferSize::sixteen_byte_unit:
+                    modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
+                    modules_.memory()->write<u32>(destination + displacement_4,
+                                                  modules_.memory()->read<u32>(source + displacement_4));
+                    modules_.memory()->write<u32>(destination + displacement_8,
+                                                  modules_.memory()->read<u32>(source + displacement_8));
+                    modules_.memory()->write<u32>(destination + displacement_12,
+                                                  modules_.memory()->read<u32>(source + displacement_12));
+                    transfer_size = transfer_byte_size_16;
+                    counter -= 4;
+                    break;
             }
 
-            switch (conf.channel) {
-                case DmaChannel::channel_0:
-                    dmac_tcr0_.set(bits_0_31, counter);
-                    dmac_sar0_.set(bits_0_31, source);
-                    dmac_dar0_.set(bits_0_31, destination);
-                    dmac_chcr0_.set(DmaChannelControlRegister::transfer_end_flag);
-                    break;
-                case DmaChannel::channel_1:
-                    dmac_tcr1_.set(bits_0_31, counter);
-                    dmac_sar1_.set(bits_0_31, source);
-                    dmac_dar1_.set(bits_0_31, destination);
-                    dmac_chcr1_.set(DmaChannelControlRegister::transfer_end_flag);
-                    break;
-                case DmaChannel::channel_unknown: Log::warning(Logger::sh2, "Unknown DMA channel used !");
+            switch (conf.chcr.get(DmaChannelControlRegister::source_address_mode)) {
+                case SourceAddressMode::fixed: break;
+                case SourceAddressMode::incremented: source += transfer_size; break;
+                case SourceAddressMode::decremented: source -= transfer_size; break;
+                case SourceAddressMode::reserved: Log::warning(Logger::sh2, "Reserved source address mode used !");
             }
 
-            if (conf.chcr.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
-                Log::debug(Logger::sh2, "DMAC - Sending DMA channel {} transfer end interrupt.", channel_number);
-                conf.interrupt.vector = intc_vcrc_.get(VectorNumberSettingRegisterDma::dma_transfert_end_vector);
-                conf.interrupt.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterA::dmac_level);
-                sendInterrupt(conf.interrupt);
+            switch (conf.chcr.get(DmaChannelControlRegister::destination_address_mode)) {
+                case DestinationAddressMode::fixed: break;
+                case DestinationAddressMode::incremented: destination += transfer_size; break;
+                case DestinationAddressMode::decremented: destination -= transfer_size; break;
+                case DestinationAddressMode::reserved: Log::warning(Logger::sh2, "Reserved destination address mode used !");
             }
         }
+
+        switch (conf.channel) {
+            case DmaChannel::channel_0:
+                dmac_tcr0_.set(bits_0_31, counter);
+                dmac_sar0_.set(bits_0_31, source);
+                dmac_dar0_.set(bits_0_31, destination);
+                dmac_chcr0_.set(DmaChannelControlRegister::transfer_end_flag);
+                break;
+            case DmaChannel::channel_1:
+                dmac_tcr1_.set(bits_0_31, counter);
+                dmac_sar1_.set(bits_0_31, source);
+                dmac_dar1_.set(bits_0_31, destination);
+                dmac_chcr1_.set(DmaChannelControlRegister::transfer_end_flag);
+                break;
+            case DmaChannel::channel_unknown: Log::warning(Logger::sh2, "Unknown DMA channel used !");
+        }
+
+        if (conf.chcr.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
+            Log::debug(Logger::sh2, "DMAC - Sending DMA channel {} transfer end interrupt.", channel_number);
+            conf.interrupt.vector = intc_vcrc_.get(VectorNumberSettingRegisterDma::dma_transfert_end_vector);
+            conf.interrupt.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterA::dmac_level);
+            sendInterrupt(conf.interrupt);
+        }
     };
-}
+} // namespace saturnin::sh2
 
 void Sh2::reset() {
     initializeOnChipRegisters();

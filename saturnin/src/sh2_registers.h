@@ -785,7 +785,7 @@ class DmaChannelControlRegister : public Register {
     inline static const auto interrupt_enable         = BitRange<Sh2DmaInterruptEnable>{2};       ///< Defines IE bit.
     inline static const auto transfer_end_flag        = BitRange<TransferEndFlag>{1};             ///< Defines TE bit.
     inline static const auto dma_enable               = BitRange<Sh2DmaEnable>{0};                ///< Defines DE bit.
-    static constexpr auto    write_mask               = u32{0x000000FF};                          ///< The write mask
+    static constexpr auto    write_mask               = u32{0x0000FFFF};                          ///< The write mask
 };
 
 enum class ResourceSelect : u8 {
