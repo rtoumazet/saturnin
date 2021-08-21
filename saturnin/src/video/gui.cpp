@@ -1234,29 +1234,32 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 
     static auto current_area = MemoryMapArea::rom;
 
-    if (ImGui::BeginCombo(tr("Memory area").c_str(), state.memory()->memory_map_[current_area].c_str())) {
+    auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_FittingPolicyScroll};
+    if (ImGui::BeginTabBar("MemoryDebugTabBar", tab_bar_flags)) {
         for (const auto& [k, v] : state.memory()->memory_map_) {
-            const auto is_selected = bool{current_area == k};
-            if (ImGui::Selectable(v.c_str(), is_selected)) { current_area = k; }
-            if (is_selected) { ImGui::SetItemDefaultFocus(); }
-        }
+            if (ImGui::BeginTabItem(v.c_str())) {
+                current_area = k;
 
-        ImGui::EndCombo();
-    }
-
-    switch (current_area) {
-        case MemoryMapArea::vdp2_registers: {
-            break;
-        }
-        case MemoryMapArea::cd_block:
-            for (auto const& r : state.cdrom()->getRegisters()) {
-                ImGui::TextUnformatted(r.c_str());
+                switch (current_area) {
+                    case MemoryMapArea::vdp2_registers: {
+                        ImGui::TextUnformatted(tr("Check VDP2 debug window").c_str());
+                        break;
+                    }
+                    case MemoryMapArea::cd_block:
+                        for (auto const& r : state.cdrom()->getRegisters()) {
+                            ImGui::TextUnformatted(r.c_str());
+                        }
+                        break;
+                    default:
+                        auto        area_data = state.memory()->getMemoryMapAreaData(current_area);
+                        static auto editor    = MemoryEditor{}; // store your state somewhere
+                        editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
+                }
+                ImGui::EndTabItem();
             }
-            break;
-        default:
-            auto        area_data = state.memory()->getMemoryMapAreaData(current_area);
-            static auto editor    = MemoryEditor{}; // store your state somewhere
-            editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
+        }
+
+        ImGui::EndTabBar();
     }
 
     ImGui::End();
