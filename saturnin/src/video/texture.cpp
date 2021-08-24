@@ -76,24 +76,65 @@ auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_c
 }
 
 // static
-void Texture::discardTextures(const VdpType t) {
+// auto Texture::clearUnusedTextures() -> std::vector<u32> {
+//    std::vector<u32> api_handles;
+//    // for (auto& [key, value] : texture_storage_) {
+//    //    if (value.is_discarded_) {
+//    //        std::vector<u8>().swap(value.raw_data_); // Clears vector data and reallocates.
+//    //        if (value.delete_on_gpu_) { api_handles.push_back(value.api_handle_); }
+//    //    }
+//    //}
+//    for (auto& [key, value] : texture_storage_) {
+//        std::vector<u8>().swap(value.raw_data_); // Clears vector data and reallocates.
+//        if (value.delete_on_gpu_) { api_handles.push_back(value.api_handle_); }
+//    }
+//    texture_storage_.clear();
+//
+//    return api_handles;
+//}
+
+// static
+void Texture::discardCache(const VdpType t) {
     for (auto& [key, value] : texture_storage_) {
-        switch (t) {
-            case VdpType::not_set: {
-                value.isDiscarded(true);
-                value.deleteOnGpu(true);
-                break;
-            }
-            case VdpType::vdp1:
-            case VdpType::vdp2: {
-                if (value.vdpType() == t) {
-                    value.isDiscarded(true);
-                    value.deleteOnGpu(true);
-                }
-                break;
-            }
+        auto discard_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
+        if (discard_elt) {
+            value.isDiscarded(true);
+            value.deleteOnGpu(true);
         }
     }
+}
+
+// static
+void Texture::setCache(const VdpType t) {
+    for (auto& [key, value] : texture_storage_) {
+        auto set_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
+        if (set_elt) { value.isRecentlyUsed(false); }
+    }
+}
+
+// static
+void Texture::cleanCache(const VdpType t) {
+    for (auto iter = texture_storage_.begin(); iter != texture_storage_.end();) {
+        auto is_elt_selected = (t == VdpType::not_set) ? true : ((iter->second.vdpType() == t) ? true : false);
+        if (is_elt_selected) {
+            if (!(iter->second.isRecentlyUsed())) {
+                std::vector<u8>().swap(iter->second.raw_data_); // Allocated texture data is deleted.
+                iter = texture_storage_.erase(iter);
+            } else {
+                ++iter;
+            }
+        } else {
+            ++iter;
+        }
+    }
+}
+
+// static
+void Texture::deleteCache() {
+    for (auto& [key, value] : texture_storage_) {
+        std::vector<u8>().swap(value.raw_data_);
+    }
+    texture_storage_.clear();
 }
 
 } // namespace saturnin::video

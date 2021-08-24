@@ -61,6 +61,8 @@ class Texture {
     auto rawData() const -> const std::vector<u8>& { return raw_data_; }
     auto isDiscarded() const { return is_discarded_; }
     void isDiscarded(const bool discarded) { is_discarded_ = discarded; }
+    auto isRecentlyUsed() const { return is_recently_used_; }
+    void isRecentlyUsed(const bool used) { is_recently_used_ = used; }
     auto deleteOnGpu() const { return delete_on_gpu_; }
     void deleteOnGpu(const bool d) { delete_on_gpu_ = d; }
     auto vdpType() const { return vdp_type_; }
@@ -130,14 +132,27 @@ class Texture {
 
     static auto calculateKey(const VdpType vp, const u32 address, const u8 color_count, const u16 palette_number = 0) -> size_t;
 
-    static auto deleteTexturesOnGpu() {
+    /*static auto deleteTexturesOnGpu() {
         for (auto& t : texture_storage_) {
             t.second.delete_on_gpu_ = true;
         }
-    }
+    }*/
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Texture::discardTextures(const VdpType t = VdpType::not_set);
+    /// \fn static auto clearUnusedTextures() -> std::vector<size_t>;
+    ///
+    /// \brief  Clears the unused textures
+    ///
+    /// \author Runik
+    /// \date   18/08/2021
+    ///
+    /// \returns    A vector containing the handles of the textures on the GPU;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // static auto clearUnusedTextures() -> std::vector<u32>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void discardCache(const VdpType t = VdpType::not_set);
     ///
     /// \brief  Marks textures in the pool as discarded.
     ///
@@ -147,7 +162,44 @@ class Texture {
     /// \param  t   (Optional) A VdpType textures to discard.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void discardTextures(const VdpType t = VdpType::not_set);
+    static void discardCache(const VdpType t = VdpType::not_set);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void setCache(const VdpType t = VdpType::not_set);
+    ///
+    /// \brief  Sets every texture in the cache as unused.
+    ///
+    /// \author Runik
+    /// \date   20/08/2021
+    ///
+    /// \param  t   (Optional) A VdpType to process.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void setCache(const VdpType t = VdpType::not_set);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void cleanCache(const VdpType t = VdpType::not_set);
+    ///
+    /// \brief  Removes unused textures from the cache.
+    ///
+    /// \author Runik
+    /// \date   20/08/2021
+    ///
+    /// \param  t   (Optional) A VdpType to process.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void cleanCache(const VdpType t = VdpType::not_set);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void deleteCache();
+    ///
+    /// \brief  Deletes the cache content.
+    ///
+    /// \author Runik
+    /// \date   20/08/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void deleteCache();
 
   private:
     static std::map<size_t, Texture> texture_storage_; ///< The texture storage
@@ -156,6 +208,7 @@ class Texture {
     u16     width_{};                    ///< The texture width.
     u16     height_{};                   ///< The texture height.
     bool    is_discarded_{false};        ///< True if the texture is discarded.
+    bool    is_recently_used_{true};     ///< True if the texture was used during the current frame.
     bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.
     size_t  key_{};                      ///< The key of the part.
     u32     api_handle_{};               ///< Handle to the graphics API.

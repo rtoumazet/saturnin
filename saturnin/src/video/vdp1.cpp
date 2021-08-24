@@ -30,6 +30,7 @@
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/memory.h>        // rawRead
 #include <saturnin/src/scu_registers.h> // StartingFactorSelect
+#include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp1_part.h>
 #include <saturnin/src/video/vdp2.h>
@@ -75,6 +76,7 @@ auto Vdp1::intializeFramebuffer() -> bool {
 void Vdp1::run(const u8 cycles) {}
 
 void Vdp1::onVblankIn() {
+    Texture::setCache(VdpType::vdp1);
     updateResolution();
 
     switch (ptmr_.get(PlotTrigger::plot_trigger_mode)) {
@@ -90,6 +92,7 @@ void Vdp1::onVblankIn() {
         default: // Nothing
             break;
     }
+    Texture::cleanCache(VdpType::vdp1);
 }
 
 auto Vdp1::getDebugDrawList() const -> std::vector<std::string> {

@@ -745,6 +745,7 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
             load_texture = true;
             t.isDiscarded(false);
         }
+        t.isRecentlyUsed(true);
     }
     if (load_texture) {
         if (modules.vdp2()->getColorRamMode() == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
