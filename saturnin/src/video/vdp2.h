@@ -1163,6 +1163,19 @@ class Vdp2 {
     void readScrollScreenData(const ScrollScreen s);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::readBitmapData(const ScrollScreenStatus& screen);
+    ///
+    /// \brief  Reads bitmap data in VRAM
+    ///
+    /// \author Runik
+    /// \date   15/08/2021
+    ///
+    /// \param  screen  Current scroll screen status.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void readBitmapData(const ScrollScreenStatus& screen);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset);
     ///
     /// \brief  Reads plane data.
@@ -1321,7 +1334,6 @@ class Vdp2 {
             readPalette16Dot<T>(texture_data, screen, palette, row.get(Dots4Bits::dot_7));
             current_address += row_offset;
         }
-        // std::reverse(texture_data.begin(), texture_data.end());
     }
 
     template<typename T>
@@ -1352,6 +1364,52 @@ class Vdp2 {
     Color read2048ColorsData();
     Color read32KColorsData();
     Color read16MColorsData();
+
+    template<typename T>
+    void read256ColorsBitmapData(std::vector<u8>& texture_data, const ScrollScreenStatus& screen) {
+        constexpr auto offset          = u8{4};
+        auto           current_address = screen.bitmap_start_address;
+        const auto     end_address     = current_address + texture_data.capacity() / 4;
+        constexpr auto palette_disp    = u8{8};
+        const auto     palette         = screen.bitmap_palette_number << palette_disp;
+        for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
+            // if (current_address == 0x25e02280) DebugBreak();
+            auto row = Dots8Bits(modules_.memory()->read<u32>(current_address));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_0));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_1));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_3));
+            current_address += offset;
+            row = Dots8Bits(modules_.memory()->read<u32>(current_address));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_0));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_1));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_3));
+            current_address += offset;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::saveBitmap(const ScrollScreenStatus& screen, std::vector<u8>& texture_data, const u16 width, const u16
+    /// height, const size_t key);
+    ///
+    /// \brief  Saves a bitmap to the parts vector.
+    ///
+    /// \author Runik
+    /// \date   17/08/2021
+    ///
+    /// \param          screen          Current scroll screen status.
+    /// \param [in,out] texture_data    Raw texture data.
+    /// \param          width           Bitmap width.
+    /// \param          height          Bitmap height.
+    /// \param          key             Texture key.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void saveBitmap(const ScrollScreenStatus& screen,
+                    std::vector<u8>&          texture_data,
+                    const u16                 width,
+                    const u16                 height,
+                    const size_t              key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn const auto Vdp2::getColorRamAddressOffset(const u8 register_offset);

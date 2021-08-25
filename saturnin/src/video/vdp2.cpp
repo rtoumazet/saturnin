@@ -72,7 +72,11 @@ void Vdp2::run(const u8 cycles) {
 
             Log::debug(Logger::vdp2, tr("VBlankIn interrupt request"));
 
-            Texture::discardTextures(VdpType::vdp1);
+            // if (modules_.memory()->was_vdp2_cram_accessed_) {
+            //    Texture::discardCache();
+            //    modules_.memory()->was_vdp2_cram_accessed_ = false;
+            //}
+
             modules_.vdp1()->onVblankIn();
             this->onVblankIn();
 
@@ -3027,7 +3031,120 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
             readPlaneData(screen, addr, offset);
         }
     } else { // ScrollScreenFormat::bitmap
+        readBitmapData(screen);
     }
+}
+
+void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
+    constexpr auto width_512      = u16{512};
+    constexpr auto width_1024     = u16{1024};
+    constexpr auto height_256     = u16{256};
+    constexpr auto height_512     = u16{512};
+    auto           texture_width  = u16{};
+    auto           texture_height = u16{};
+
+    switch (screen.bitmap_size) {
+        case BitmapSize::size_1024_by_256: {
+            texture_width  = width_1024;
+            texture_height = height_256;
+            break;
+        }
+        case BitmapSize::size_1024_by_512: {
+            texture_width  = width_1024;
+            texture_height = height_512;
+            break;
+        }
+        case BitmapSize::size_512_by_256: {
+            texture_width  = width_512;
+            texture_height = height_256;
+            break;
+        }
+        case BitmapSize::size_512_by_512: {
+            texture_width  = width_512;
+            texture_height = height_512;
+            break;
+        }
+    }
+    const auto      texture_size = texture_width * texture_height * 4;
+    std::vector<u8> texture_data;
+    texture_data.reserve(texture_size);
+    const auto key = Texture::calculateKey(VdpType::vdp2,
+                                           screen.bitmap_start_address,
+                                           toUnderlying(screen.character_color_number),
+                                           screen.bitmap_palette_number);
+
+    // if (!Texture::isTextureStored(key)) {
+    if (Texture::isTextureLoadingNeeded(key)) {
+        if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+            // 32 bits access to color RAM
+            switch (screen.character_color_number) {
+                case ColorCount::palette_16: {
+                    break;
+                }
+                case ColorCount::palette_256: {
+                    read256ColorsBitmapData<u32>(texture_data, screen);
+                    break;
+                }
+                case ColorCount::palette_2048: {
+                    break;
+                }
+                case ColorCount::rgb_32k: {
+                    break;
+                }
+                case ColorCount::rgb_16m: {
+                    break;
+                }
+                default: {
+                    Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+                }
+            }
+        } else {
+            // 16 bits access to color RAM
+            switch (screen.character_color_number) {
+                case ColorCount::palette_16: {
+                    break;
+                }
+                case ColorCount::palette_256: {
+                    read256ColorsBitmapData<u16>(texture_data, screen);
+                    break;
+                }
+                case ColorCount::palette_2048: {
+                    break;
+                }
+                case ColorCount::rgb_32k: {
+                    break;
+                }
+                case ColorCount::rgb_16m: {
+                    break;
+                }
+                default: {
+                    Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+                }
+            }
+        }
+        saveBitmap(screen, texture_data, texture_width, texture_height, key);
+    }
+}
+
+void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
+                      std::vector<u8>&          texture_data,
+                      const u16                 width,
+                      const u16                 height,
+                      const size_t              key) {
+    if (!Texture::isTextureStored(key)) {
+        Texture::storeTexture(Texture(VdpType::vdp2,
+                                      screen.bitmap_start_address,
+                                      toUnderlying(screen.character_color_number),
+                                      screen.bitmap_palette_number,
+                                      texture_data,
+                                      width,
+                                      height));
+    }
+    auto pos = ScreenPos{0, 0};
+
+    auto p = Vdp2Part(key, width, height);
+    p.priority(screen.priority_number);
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
 }
 
 void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset) {
@@ -3244,7 +3361,8 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     const auto key
         = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
 
-    if (!Texture::isTextureStored(key)) {
+    //    if (!Texture::isTextureStored(key)) {
+    if (Texture::isTextureLoadingNeeded(key)) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (screen.character_color_number) {

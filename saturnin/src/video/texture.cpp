@@ -68,6 +68,21 @@ auto Texture::isTextureStored(const size_t key) -> bool {
     return false;
 }
 
+// static //
+auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
+    if (!Texture::isTextureStored(key)) {
+        return true;
+    } else {
+        auto& t = Texture::getTexture(key);
+        if (t.isDiscarded()) {
+            t.isDiscarded(false);
+            return true;
+        }
+        t.isRecentlyUsed(true);
+    }
+    return false;
+}
+
 // static
 auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_count, const u16 palette_number) -> size_t {
     auto key = size_t{0};

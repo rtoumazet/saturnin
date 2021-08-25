@@ -46,6 +46,26 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos& pos, size_t texture_ke
     vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
 };
 
+Vdp2Part::Vdp2Part(size_t texture_key, const u16 texture_width, const u16 texture_height) {
+    vdpType(VdpType::vdp2);
+    drawType(DrawType::textured_polygon);
+    scroll_screen_pos_       = {0, 0};
+    character_number_        = 0;
+    palette_number_          = 0;
+    is_horizontally_flipped_ = false;
+    is_vertically_flipped_   = false;
+    textureKey(texture_key);
+
+    const auto pos_x        = static_cast<s16>(0);
+    const auto pos_x_width  = static_cast<s16>(texture_width);
+    const auto pos_y        = static_cast<s16>(0);
+    const auto pos_y_height = static_cast<s16>(texture_height);
+    vertexes_.emplace_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
+    vertexes_.emplace_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
+    vertexes_.emplace_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
+    vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
+};
+
 void Vdp2Part::renderPart() { displayCell(); };
 
 void Vdp2Part::displayCell() {}

@@ -369,7 +369,10 @@ void Opengl::render() {
                         auto& t = Texture::getTexture(part->textureKey());
                         if (t.deleteOnGpu() || t.apiHandle() == 0) {
                             // Creation / replacement of the texture on the GPU
-                            if (t.deleteOnGpu()) { deleteTexture(t.apiHandle()); }
+                            if (t.deleteOnGpu()) {
+                                deleteTexture(t.apiHandle());
+                                t.deleteOnGpu(false);
+                            }
                             t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
                         }
 

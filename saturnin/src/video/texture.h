@@ -114,6 +114,23 @@ class Texture {
     static auto isTextureStored(const size_t key) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static auto Texture::isTextureLoadingNeeded(const size_t key) -> bool;
+    ///
+    /// \brief  Checks if the texture linked to the key needs to be loaded / reloaded. Not stored ->
+    ///         texture will be loaded. Stored but discarded -> texture will be reloaded. Stored and
+    ///         not discarded -> texture will be reused.
+    ///
+    /// \author Runik
+    /// \date   25/08/2021
+    ///
+    /// \param  key Key of the texture.
+    ///
+    /// \returns    True if texture needs to be loaded.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto isTextureLoadingNeeded(const size_t key) -> bool;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_count, const u16 palette_number
     /// = 0) -> size_t;
     ///

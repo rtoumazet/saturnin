@@ -733,21 +733,7 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
     const auto key = Texture::calculateKey(VdpType::vdp1, start_address, toUnderlying(color_mode));
     // if (key == 0xa57b381a6e5b28d0) DebugBreak();
 
-    // Not stored -> load
-    // Stored but discarded -> load
-    // Stored and not discarded -> reuse
-    auto load_texture = bool{false};
-    if (!Texture::isTextureStored(key)) {
-        load_texture = true;
-    } else {
-        auto& t = Texture::getTexture(key);
-        if (t.isDiscarded()) {
-            load_texture = true;
-            t.isDiscarded(false);
-        }
-        t.isRecentlyUsed(true);
-    }
-    if (load_texture) {
+    if (Texture::isTextureLoadingNeeded(key)) {
         if (modules.vdp2()->getColorRamMode() == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (color_mode) {
