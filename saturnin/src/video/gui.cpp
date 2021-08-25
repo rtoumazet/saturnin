@@ -1290,20 +1290,12 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
             const auto child_size = ImVec2(310, 280);
             ImGui::BeginChild("ChildDrawList", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
 
-            // ImGui::ChildWindowHeader(tr("Draw list"));
             if (ImGui::BeginMenuBar()) {
                 ImGui::TextUnformatted(tr("Draw list").c_str());
                 ImGui::EndMenuBar();
             }
             const auto draw_list_size = ImVec2(310, 260);
             if (ImGui::BeginListBox("##draw_list", draw_list_size)) {
-                // if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
-                //    if (current_part_idx < draw_list.size() - 1) { ++current_part_idx; }
-                //}
-                // if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
-                //    if (current_part_idx > 0) { --current_part_idx; }
-                //}
-
                 for (s32 n = 0; n < draw_list.size(); ++n) {
                     const bool is_selected = (current_part_idx == n);
                     if (ImGui::Selectable(fmt::format("{}##{}", draw_list[n].debugHeader(), n).c_str(),
@@ -1321,43 +1313,6 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
             ImGui::EndChild();
             ImGui::PopStyleVar();
         }
-
-        //{
-        //    // Draw list
-        //    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-        //    const auto child_size = ImVec2(310, 280);
-        //    ImGui::BeginChild("ChildDrawList", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
-
-        //    // ImGui::ChildWindowHeader(tr("Draw list"));
-        //    if (ImGui::BeginMenuBar()) {
-        //        ImGui::TextUnformatted(tr("Draw list").c_str());
-        //        ImGui::EndMenuBar();
-        //    }
-        //    const auto  draw_list_size = ImVec2(310, 260);
-        //    const char* items[] = {"AAAA",    "BBBB", "CCCC", "DDDD",  "EEEE", "FFFF",  "GGGG",  "HHHH", "IIII",   "JJJJ",
-        //    "KKKK",
-        //                           "LLLLLLL", "MMMM", "NNNN", "OOOOO", "PPP",  "QQQQQ", "RRRRR", "SSSS", "TTTTTT", "UUU"};
-        //    if (ImGui::BeginListBox("##draw_list", draw_list_size)) {
-        //        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
-        //            if (current_part_idx < draw_list.size() - 1) { ++current_part_idx; }
-        //        }
-        //        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
-        //            if (current_part_idx > 0) { --current_part_idx; }
-        //        }
-
-        //        for (s32 n = 0; n < IM_ARRAYSIZE(items); ++n) {
-        //            const bool is_selected = (current_part_idx == n);
-        //            if (ImGui::Selectable(items[n], is_selected)) { current_part_idx = n; }
-
-        //            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-        //            if (is_selected) { ImGui::SetItemDefaultFocus(); }
-        //        }
-        //        ImGui::EndListBox();
-        //    }
-
-        //    ImGui::EndChild();
-        //    ImGui::PopStyleVar();
-        //}
 
         ImGui::SameLine();
         {
