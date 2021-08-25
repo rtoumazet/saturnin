@@ -257,7 +257,7 @@ class Memory {
 
     HardwareMode HardwareMode_{HardwareMode::saturn}; ///< Current hardware mode
 
-    bool vdp2_cram_was_accessed_{false}; ///< true when VDP2 color ram was accessed
+    bool was_vdp2_cram_accessed_{false}; ///< true when VDP2 color ram was accessed
 
     sh2::Sh2Type sh2_in_operation_; ///< Which SH2 is in operation
     // bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
@@ -1329,7 +1329,7 @@ struct writeVdp2Cram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             rawWrite<T>(m.vdp2_cram_, addr & vdp2_cram_memory_mask, data);
-            m.vdp2_cram_was_accessed_ = true;
+            m.was_vdp2_cram_accessed_ = true;
         };
     }
 };
