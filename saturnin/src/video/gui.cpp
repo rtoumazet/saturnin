@@ -21,7 +21,8 @@
 #include <saturnin/src/video/gui.h>
 //#include <imgui.h>
 #include <istream>
-#include <filesystem> // path
+#include <filesystem>       // path
+#include <imgui_internal.h> // ImGuiSelectableFlags_SelectOnNav
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_enums.h> // EmulationStatus
 #include <saturnin/src/locale.h>         // tr
@@ -1305,7 +1306,9 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
 
                 for (s32 n = 0; n < draw_list.size(); ++n) {
                     const bool is_selected = (current_part_idx == n);
-                    if (ImGui::Selectable(fmt::format("{}##{}", draw_list[n].debugHeader(), n).c_str(), is_selected)) {
+                    if (ImGui::Selectable(fmt::format("{}##{}", draw_list[n].debugHeader(), n).c_str(),
+                                          is_selected,
+                                          ImGuiSelectableFlags_SelectOnNav)) {
                         current_part_idx = n;
                     }
 
