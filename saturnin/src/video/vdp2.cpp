@@ -3125,8 +3125,8 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                 }
             }
         }
-        saveBitmap(screen, texture_data, texture_width, texture_height, key);
     }
+    saveBitmap(screen, texture_data, texture_width, texture_height, key);
 }
 
 void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
