@@ -275,24 +275,24 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
         values.emplace_back(tr("Interlace mode"), mode);
     }
 
-    { // Screen display enable
+    //{ // Screen display enable
 
-        auto nbgDisplayStatus = [&](const ScrollScreen s) {
-            const auto& nbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
-            values.emplace_back(fmt::format("NBG{}", toUnderlying(s)), nbg);
-        };
-        nbgDisplayStatus(ScrollScreen::nbg0);
-        nbgDisplayStatus(ScrollScreen::nbg1);
-        nbgDisplayStatus(ScrollScreen::nbg2);
-        nbgDisplayStatus(ScrollScreen::nbg3);
+    //    auto nbgDisplayStatus = [&](const ScrollScreen s) {
+    //        const auto& nbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
+    //        values.emplace_back(fmt::format("NBG{}", toUnderlying(s)), nbg);
+    //    };
+    //    nbgDisplayStatus(ScrollScreen::nbg0);
+    //    nbgDisplayStatus(ScrollScreen::nbg1);
+    //    nbgDisplayStatus(ScrollScreen::nbg2);
+    //    nbgDisplayStatus(ScrollScreen::nbg3);
 
-        auto rbgDisplayStatus = [&](const ScrollScreen s) {
-            const auto& rbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
-            values.emplace_back(fmt::format("RBG{}", toUnderlying(s) - 4), rbg);
-        };
-        rbgDisplayStatus(ScrollScreen::rbg0);
-        rbgDisplayStatus(ScrollScreen::rbg1);
-    }
+    //    auto rbgDisplayStatus = [&](const ScrollScreen s) {
+    //        const auto& rbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
+    //        values.emplace_back(fmt::format("RBG{}", toUnderlying(s) - 4), rbg);
+    //    };
+    //    rbgDisplayStatus(ScrollScreen::rbg0);
+    //    rbgDisplayStatus(ScrollScreen::rbg1);
+    //}
 
     return values;
 }
@@ -1222,6 +1222,9 @@ void Vdp2::write32(const u32 addr, const u32 data) {
         default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (16) {:#010x}"), addr);
     }
 }
+
+auto Vdp2::screenInDebug() -> ScrollScreen { return screen_in_debug_; }
+void Vdp2::screenInDebug(const ScrollScreen s) { screen_in_debug_ = s; }
 
 //--------------------------------------------------------------------------------------------------------------
 // MISC methods

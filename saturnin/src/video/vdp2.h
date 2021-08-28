@@ -111,7 +111,7 @@ enum class TvStandard : s8 {
 /// \brief  Scroll screens.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ScrollScreen { nbg0 = 0, nbg1 = 1, nbg2 = 2, nbg3 = 3, rbg0 = 4, rbg1 = 5, total = 6 };
+enum class ScrollScreen { nbg0 = 0, nbg1 = 1, nbg2 = 2, nbg3 = 3, rbg0 = 4, rbg1 = 5, none = -1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ColorCount
@@ -696,6 +696,8 @@ class Vdp2 {
     auto        getDebugVramAccessBanksName() -> std::vector<std::string>;
     static auto getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue;
     auto        getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>>;
+    auto        screenInDebug() -> ScrollScreen;
+    void        screenInDebug(const ScrollScreen s);
     ///@}
 
   private:
@@ -1456,7 +1458,8 @@ class Vdp2 {
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
-    std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
+    std::vector<Vdp2Part> vdp2_parts_[6];                       ///< Storage of rendering parts for each scroll cell.
+    ScrollScreen          screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
 
     ///@{
     /// \name VDP2 registers

@@ -57,7 +57,7 @@ static auto show_debug_memory = false;
 static auto show_debug_sh2    = false;
 static auto show_debug_vdp1   = false;
 static auto show_debug_vdp2   = false;
-static auto show_demo         = false;
+static auto show_demo         = true;
 static auto show_log          = true;
 
 using core::Log;
@@ -1372,6 +1372,15 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
         = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
     ImGui::Begin(tr("VDP2 debug").c_str(), opened, window_flags);
 
+    using video::ScrollScreen;
+    using ScrollScreenName    = std::unordered_map<ScrollScreen, std::string>;
+    const auto scroll_screens = ScrollScreenName{{ScrollScreen::nbg0, "NBG0"},
+                                                 {ScrollScreen::nbg1, "NBG1"},
+                                                 {ScrollScreen::nbg2, "NBG2"},
+                                                 {ScrollScreen::nbg3, "NBG3"},
+                                                 {ScrollScreen::rbg0, "RBG0"},
+                                                 {ScrollScreen::rbg1, "RBG1"}};
+
     auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
     if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {
         if (ImGui::BeginTabItem(tr("Global").c_str())) {
@@ -1390,16 +1399,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::TableSetColumnIndex(column_index++);
                     if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
                 }
-                ImGui::EndTable();
-            }
 
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem(tr("RAM").c_str())) {
-            static ImGuiTableFlags table_flags    = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit;
-            constexpr auto         columns_number = u8{2};
-            if (ImGui::BeginTable("ram_table", columns_number, table_flags)) {
                 for (const auto& [label, value] : state.vdp2()->getDebugRamMainData()) {
                     ImGui::TableNextRow();
                     auto column_index = u8{0};
@@ -1412,8 +1412,10 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::TableSetColumnIndex(column_index++);
                     if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
                 }
+
                 ImGui::EndTable();
             }
+
             ImGui::EndTabItem();
         }
 
@@ -1486,51 +1488,92 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem(tr("Scroll Screens").c_str())) {
-            using video::ScrollScreen;
-            using ScrollScreenName    = std::unordered_map<ScrollScreen, std::string>;
-            const auto scroll_screens = ScrollScreenName{{ScrollScreen::nbg0, "NBG0"},
-                                                         {ScrollScreen::nbg1, "NBG1"},
-                                                         {ScrollScreen::nbg2, "NBG2"},
-                                                         {ScrollScreen::nbg3, "NBG3"},
-                                                         {ScrollScreen::rbg0, "RBG0"},
-                                                         {ScrollScreen::rbg1, "RBG1"}};
-
             static auto current_screen = ScrollScreen::nbg0;
+            state.vdp2()->screenInDebug(current_screen);
+            {
+                // Scroll screens list
+                ImGui::BeginGroup();
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+                const auto style = ImGui::GetStyle();
 
-            auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_FittingPolicyScroll};
-            if (ImGui::BeginTabBar("Vdp2ScrollScreenDebugTabBar", tab_bar_flags)) {
-                for (const auto& [k, v] : scroll_screens) {
-                    if (ImGui::BeginTabItem(v.c_str())) {
-                        current_screen = k;
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_ChildBg]);
+                const auto child_size = ImVec2(70, 265);
+                ImGui::BeginChild("ChildScrollScreen", child_size, true, window_flags);
 
-                        const auto& screen_data = state.vdp2()->getDebugScrollScreenData(current_screen);
-                        if (screen_data.has_value()) {
-                            static ImGuiTableFlags table_flags    = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit;
-                            constexpr auto         columns_number = u8{2};
-                            if (ImGui::BeginTable("scroll_screen_table", columns_number, table_flags)) {
-                                for (const auto& [label, value] : *screen_data) {
-                                    ImGui::TableNextRow();
-                                    auto column_index = u8{0};
-                                    ImGui::TableSetColumnIndex(column_index++);
-                                    ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
-                                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
-
-                                    ImGui::TextUnformatted(label.c_str());
-
-                                    ImGui::TableSetColumnIndex(column_index++);
-                                    if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
-                                }
-                                ImGui::EndTable();
-                            }
-                        } else {
-                            ImGui::TextUnformatted(tr("Screen is not displayed").c_str());
+                const auto scroll_child_size = ImVec2(70, 110);
+                if (ImGui::BeginListBox("##scroll_screen", scroll_child_size)) {
+                    for (const auto& [k, v] : scroll_screens) {
+                        const bool is_selected = (current_screen == k);
+                        if (ImGui::Selectable(v.c_str(), is_selected, ImGuiSelectableFlags_SelectOnNav)) {
+                            current_screen = k;
+                            state.vdp2()->screenInDebug(current_screen);
                         }
 
-                        ImGui::EndTabItem();
+                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                        if (is_selected) { ImGui::SetItemDefaultFocus(); }
                     }
+                }
+                ImGui::EndListBox();
+
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+                ImGui::PopStyleVar();
+
+                ImGui::EndGroup();
+            }
+            ImGui::SameLine();
+
+            ImGui::BeginGroup();
+            if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {
+                if (ImGui::BeginTabItem(tr("Details").c_str())) {
+                    const auto& screen_data = state.vdp2()->getDebugScrollScreenData(current_screen);
+                    if (screen_data.has_value()) {
+                        static ImGuiTableFlags table_flags    = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit;
+                        constexpr auto         columns_number = u8{2};
+                        if (ImGui::BeginTable("scroll_screen_table", columns_number, table_flags)) {
+                            for (const auto& [label, value] : *screen_data) {
+                                ImGui::TableNextRow();
+                                auto column_index = u8{0};
+                                ImGui::TableSetColumnIndex(column_index++);
+                                ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
+                                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
+
+                                ImGui::TextUnformatted(label.c_str());
+
+                                ImGui::TableSetColumnIndex(column_index++);
+                                if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
+                            }
+                            ImGui::EndTable();
+                        }
+                    } else {
+                        ImGui::TextUnformatted(tr("Screen is not displayed").c_str());
+                    }
+
+                    ImGui::EndTabItem();
+                }
+                if (ImGui::BeginTabItem(tr("Viewer").c_str())) {
+                    // current_screen
+                    // if (!draw_list.empty()) {
+                    //    const auto child_size = ImVec2(200, 220);
+                    //    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+                    //    ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags);
+
+                    //    if (draw_list[current_part_idx].textureKey() != 0) {
+                    //        const auto tex          = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
+                    //        const auto tex_id       = tex.apiHandle();
+                    //        const auto preview_size = ImVec2(200, 200);
+                    //        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                    //    }
+                    //    ImGui::EndChild();
+                    //    ImGui::PopStyleVar();
+                    //}
+
+                    ImGui::EndTabItem();
                 }
                 ImGui::EndTabBar();
             }
+            ImGui::EndGroup();
+
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();

@@ -393,6 +393,9 @@ class Opengl {
     std::mutex parts_list_mutex_;  ///< Prevents rendering thread to use the list while it's being processed.
     Vdp1Part   part_to_highlight_; ///< Part that will be highlighted during debug.
 
+    std::vector<std::unique_ptr<video::BaseRenderingPart>> ///< List of parts used to generate textures for debugging
+        parts_list_debug_;                                 // Will have to be moved to the platform agnostic renderer.
+
     u32         program_shader_; ///< Program shader used to render parts.
     ShadersList shaders_list_;   ///< List of shaders.
 

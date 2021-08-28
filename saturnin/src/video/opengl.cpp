@@ -260,7 +260,19 @@ void Opengl::initializeShaders() {
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
-    std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
+    using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
+    PartsList parts_list;
+    PartsList parts_list_debug;
+
+    const auto addVdp2PartsToDebugList = [&](const ScrollScreen s) {
+        const auto vdp2_parts = state.vdp2()->vdp2Parts(s);
+        if (!vdp2_parts.empty()) {
+            parts_list_debug.reserve(parts_list_debug.size() + vdp2_parts.size());
+            for (auto&& p : vdp2_parts) {
+                parts_list_debug.push_back(std::make_unique<Vdp2Part>(p));
+            }
+        }
+    };
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
         const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
@@ -281,6 +293,8 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
             }
         }
     };
+
+    if (state.vdp2()->screenInDebug() != ScrollScreen::none) { addVdp2PartsToDebugList(state.vdp2()->screenInDebug()); }
 
     addVdp2PartsToList(ScrollScreen::nbg0);
     addVdp2PartsToList(ScrollScreen::nbg1);
