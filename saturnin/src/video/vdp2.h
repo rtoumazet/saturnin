@@ -1281,8 +1281,10 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    void
-        readPalette16Dot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen, const u8 palette_number, const u8 dot) {
+    void readPalette16Dot(std::vector<u8>&          texture_data,
+                          const ScrollScreenStatus& screen,
+                          const u16                 palette_number,
+                          const u8                  dot) {
         const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (palette_number + dot) * sizeof(T)};
         auto       color         = readColor<T>(color_address);
         if (!dot && screen.is_transparency_code_valid) color.a = 0;
@@ -1293,10 +1295,13 @@ class Vdp2 {
     template<typename T>
     void readPalette256Dot(std::vector<u8>&          texture_data,
                            const ScrollScreenStatus& screen,
-                           const u8                  palette_number,
+                           const u16                 palette_number,
                            const u8                  dot) {
         const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (palette_number + dot) * sizeof(T)};
         auto       color         = readColor<T>(color_address);
+        // if (screen.format == ScrollScreenFormat::bitmap) {
+        //    if (dot) DebugBreak();
+        //}
         if (!dot && screen.is_transparency_code_valid) color.a = 0;
 
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
@@ -1375,7 +1380,9 @@ class Vdp2 {
         constexpr auto palette_disp    = u8{8};
         const auto     palette         = screen.bitmap_palette_number << palette_disp;
         for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
-            // if (current_address == 0x25e02280) DebugBreak();
+            // if (screen.format == ScrollScreenFormat::bitmap) {
+            //    if (current_address == 0x25E26830) DebugBreak();
+            //}
             auto row = Dots8Bits(modules_.memory()->read<u32>(current_address));
             readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_0));
             readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_1));

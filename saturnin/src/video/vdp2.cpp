@@ -3125,6 +3125,13 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                 }
             }
         }
+        Texture::storeTexture(Texture(VdpType::vdp2,
+                                      screen.bitmap_start_address,
+                                      toUnderlying(screen.character_color_number),
+                                      screen.bitmap_palette_number,
+                                      texture_data,
+                                      texture_width,
+                                      texture_height));
     }
     saveBitmap(screen, texture_data, texture_width, texture_height, key);
 }
@@ -3134,15 +3141,6 @@ void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
                       const u16                 width,
                       const u16                 height,
                       const size_t              key) {
-    if (!Texture::isTextureStored(key)) {
-        Texture::storeTexture(Texture(VdpType::vdp2,
-                                      screen.bitmap_start_address,
-                                      toUnderlying(screen.character_color_number),
-                                      screen.bitmap_palette_number,
-                                      texture_data,
-                                      width,
-                                      height));
-    }
     auto pos = ScreenPos{0, 0};
 
     auto p = Vdp2Part(key, width, height);
@@ -3415,6 +3413,13 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                 }
             }
         }
+        Texture::storeTexture(Texture(VdpType::vdp2,
+                                      cell_address,
+                                      toUnderlying(screen.character_color_number),
+                                      pnd.palette_number,
+                                      texture_data,
+                                      texture_width,
+                                      texture_height));
     }
     saveCell(screen, pnd, cell_address, cell_offset, texture_data, key);
     // Log::info("vdp2", "(Cell address : {:#x},{:#x})", cell_offset.x, cell_offset.y);
@@ -3429,15 +3434,6 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     constexpr auto texture_width  = u16{8};
     constexpr auto texture_height = u16{8};
 
-    if (!Texture::isTextureStored(key)) {
-        Texture::storeTexture(Texture(VdpType::vdp2,
-                                      cell_address,
-                                      toUnderlying(screen.character_color_number),
-                                      pnd.palette_number,
-                                      texture_data,
-                                      texture_width,
-                                      texture_height));
-    }
     auto pos = ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)};
     pos.x -= screen.screen_scroll_horizontal_integer;
     pos.y -= screen.screen_scroll_vertical_integer;
