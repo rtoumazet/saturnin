@@ -145,6 +145,19 @@ class Vdp1 {
     auto getColorRamAddressOffset() -> u16 { return color_ram_address_offset_; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp1::getTvModeSelectionRegister() -> TvModeSelection
+    ///
+    /// \brief  Gets TV mode selection register
+    ///
+    /// \author Runik
+    /// \date   04/09/2021
+    ///
+    /// \returns    The TV mode selection register.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getTvModeSelectionRegister() -> TvModeSelection { return tvmr_; }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::vdp1Parts() -> const std::vector<Vdp1Part>&
     ///
     /// \brief  Returns the current VDP1 draw list.

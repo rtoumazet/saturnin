@@ -705,7 +705,7 @@ class CmdVertexCoordinate : public Register {
     inline static const BitRange<u16> vertex_coordinate{0, 15}; ///< Vertex coordinate (X or Y).
     [[nodiscard]] inline auto         twoCmp() const -> s16 {
         return (register_value[10] == 1) ? -static_cast<s16>((~register_value.to_ulong() + 1) & coordinate_mask)
-                                         : static_cast<s16>(register_value.to_ulong() & coordinate_mask);
+                                                 : static_cast<s16>(register_value.to_ulong() & coordinate_mask);
     };
 };
 
@@ -722,6 +722,76 @@ class CmdGrda : public Register {
   public:
     using Register::Register;
     inline static const BitRange<u16> gouraud_shading_table{0, 15}; ///< Gouraud Shading table address divided by 8.
+};
+
+class SpriteTypeRegister : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u8> type_0_priority_palette{14, 15};  ///< Priority for Type 0 sprites on palette only fb.
+    inline static const BitRange<u8> type_0_priority_mixed{14};        ///< Priority for Type 0 sprites on mixed fb.
+    inline static const BitRange<u8> type_0_color_calculation{11, 13}; ///< Color calculation for Type 0 sprites.
+    inline static const BitRange<u8> type_0_dot_color{0, 10};          ///< Dot color for Type 0 sprites.
+
+    inline static const BitRange<u8> type_1_priority_palette{13, 15};  ///< Priority for Type 1 sprites on palette only fb.
+    inline static const BitRange<u8> type_1_priority_mixed{13, 14};    ///< Priority for Type 1 sprites on mixed fb.
+    inline static const BitRange<u8> type_1_color_calculation{11, 12}; ///< Color calculation for Type 1 sprites.
+    inline static const BitRange<u8> type_1_dot_color{0, 10};          ///< Dot color for Type 1 sprites.
+
+    inline static const BitRange<u8> type_2_priority{14};              ///< Priority for Type 2 sprites.
+    inline static const BitRange<u8> type_2_shadow_palette{15};        ///< Shadow for Type 2 sprites on palette only fb.
+    inline static const BitRange<u8> type_2_color_calculation{11, 13}; ///< Color calculation for Type 2 sprites.
+    inline static const BitRange<u8> type_2_dot_color{0, 10};          ///< Dot color for Type 2 sprites.
+
+    inline static const BitRange<u8> type_3_shadow_palette{15};        ///< Shadow for Type 3 sprites on palette only fb.
+    inline static const BitRange<u8> type_3_priority{13, 14};          ///< Priority for Type 3 sprites.
+    inline static const BitRange<u8> type_3_color_calculation{11, 12}; ///< Color calculation for Type 3 sprites.
+    inline static const BitRange<u8> type_3_dot_color{0, 10};          ///< Dot color for Type 3 sprites.
+
+    inline static const BitRange<u8> type_4_shadow_palette{15};        ///< Shadow for Type 4 sprites on palette only fb.
+    inline static const BitRange<u8> type_4_priority{13, 14};          ///< Priority for Type 4 sprites.
+    inline static const BitRange<u8> type_4_color_calculation{10, 12}; ///< Color calculation for Type 4 sprites.
+    inline static const BitRange<u8> type_4_dot_color{0, 9};           ///< Dot color for Type 4 sprites.
+
+    inline static const BitRange<u8> type_5_shadow_palette{15};    ///< Shadow for Type 5 sprites on palette only fb.
+    inline static const BitRange<u8> type_5_priority{12, 14};      ///< Priority for Type 5 sprites.
+    inline static const BitRange<u8> type_5_color_calculation{11}; ///< Color calculation for Type 5 sprites.
+    inline static const BitRange<u8> type_5_dot_color{0, 10};      ///< Dot color for Type 5 sprites.
+
+    inline static const BitRange<u8> type_6_shadow_palette{15};        ///< Shadow for Type 6 sprites on palette only fb.
+    inline static const BitRange<u8> type_6_priority{12, 14};          ///< Priority for Type 6 sprites.
+    inline static const BitRange<u8> type_6_color_calculation{10, 11}; ///< Color calculation for Type 6 sprites.
+    inline static const BitRange<u8> type_6_dot_color{0, 9};           ///< Dot color for Type 6 sprites.
+
+    inline static const BitRange<u8> type_7_shadow_palette{15};       ///< Shadow for Type 7 sprites on palette only fb.
+    inline static const BitRange<u8> type_7_priority{12, 14};         ///< Priority for Type 7 sprites.
+    inline static const BitRange<u8> type_7_color_calculation{9, 11}; ///< Color calculation for Type 7 sprites.
+    inline static const BitRange<u8> type_7_dot_color{0, 8};          ///< Dot color for Type 7 sprites.
+
+    inline static const BitRange<u8> type_8_priority{7};     ///< Priority for Type 8 sprites.
+    inline static const BitRange<u8> type_8_dot_color{0, 6}; ///< Dot color for Type 8 sprites.
+
+    inline static const BitRange<u8> type_9_priority{7};          ///< Priority for Type 9 sprites.
+    inline static const BitRange<u8> type_9_color_calculation{6}; ///< Color calculation for Type 9 sprites.
+    inline static const BitRange<u8> type_9_dot_color{0, 5};      ///< Dot color for Type 9 sprites.
+
+    inline static const BitRange<u8> type_a_priority{6, 7};  ///< Priority for Type A sprites.
+    inline static const BitRange<u8> type_a_dot_color{0, 5}; ///< Dot color for Type A sprites.
+
+    inline static const BitRange<u8> type_b_color_calculation{6, 7}; ///< Color calculation for Type B sprites.
+    inline static const BitRange<u8> type_b_dot_color{0, 5};         ///< Dot color for Type B sprites.
+
+    inline static const BitRange<u8> type_c_priority{7};     ///< Priority for Type C sprites.
+    inline static const BitRange<u8> type_c_dot_color{0, 7}; ///< Dot color for Type C sprites.
+
+    inline static const BitRange<u8> type_d_priority{7};          ///< Priority for Type D sprites.
+    inline static const BitRange<u8> type_d_color_calculation{6}; ///< Color calculation for Type D sprites.
+    inline static const BitRange<u8> type_d_dot_color{0, 7};      ///< Dot color for Type D sprites.
+
+    inline static const BitRange<u8> type_e_priority{6, 7};  ///< Priority for Type E sprites.
+    inline static const BitRange<u8> type_e_dot_color{0, 7}; ///< Dot color for Type E sprites.
+
+    inline static const BitRange<u8> type_f_color_calculation{6, 7}; ///< Color calculation for Type F sprites.
+    inline static const BitRange<u8> type_f_dot_color{0, 7};         ///< Dot color for Type F sprites.
 };
 
 }; // namespace saturnin::video

@@ -50,6 +50,7 @@ Vdp1Part::Vdp1Part(EmulatorModules& modules,
     cmdlink_       = std::move(cmdlink);
     table_address_ = table_address;
     readParameters(modules.memory(), table_address);
+    calculatePriority(modules);
     generatePartData(modules);
 };
 
@@ -172,6 +173,56 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             debug_header_ = tr("Line draw");
             break;
         }
+    }
+}
+
+void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
+    // Currently VDP1 part priority calculation is based on the first dot of the part.
+    // Actually each dot has its own priority, so this calculation should be done on every dot, but
+    // calculation overhead is too big for now, and you can't have a one pixel granularity using OpenGL.
+    // That will have to be reworked later.
+
+    auto       spctl                    = modules.vdp2()->getSpriteControlRegister();
+    auto       tvmr                     = modules.vdp1()->getTvModeSelectionRegister();
+    const auto sprite_type              = spctl.get(SpriteControl::sprite_type);
+    auto       priority_number_register = u8{};
+    if (tvmr.get(TvModeSelection::tvm_bit_depth_selection) == BitDepthSelection::sixteen_bits_per_pixel) {
+        auto is_data_mixed = spctl.get(SpriteControl::sprite_color_mode) == SpriteColorMode::mixed;
+
+        switch (sprite_type) {
+            case SpriteType::type_0: {
+                break;
+            }
+            case SpriteType::type_1: {
+                break;
+            }
+            case SpriteType::type_2: {
+                break;
+            }
+            case SpriteType::type_3: {
+                break;
+            }
+            case SpriteType::type_4: {
+                break;
+            }
+            case SpriteType::type_5: {
+                break;
+            }
+            case SpriteType::type_6: {
+                break;
+            }
+            case SpriteType::type_7: {
+                break;
+            }
+            default: {
+                Log::warning(Logger::vdp1,
+                             tr("Sprite type is not 16bits in a 16bits framebuffer configuration (Type:{:#x})"),
+                             toUnderlying(sprite_type));
+            }
+        }
+
+    } else {
+        // 8 bits by pixel
     }
 }
 

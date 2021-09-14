@@ -165,10 +165,23 @@ class Vdp1Part final : public BaseRenderingPart {
     /// \author Runik
     /// \date   14/05/2021
     ///
-    /// \param  modules The modules.
+    /// \param  modules The emulator modules.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void generatePartData(const EmulatorModules& modules);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void final::calculatePriority(const EmulatorModules& modules);
+    ///
+    /// \brief  Calculates the priority of the part.
+    ///
+    /// \author Runik
+    /// \date   03/09/2021
+    ///
+    /// \param  modules The emulator modules.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void calculatePriority(const EmulatorModules& modules);
 
     EmulatorModules modules_;
 

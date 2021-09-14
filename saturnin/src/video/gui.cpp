@@ -1552,6 +1552,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::EndTabItem();
                 }
                 if (ImGui::BeginTabItem(tr("Viewer").c_str())) {
+                    if (ImGui::Button(tr("Reload").c_str())) { video::Texture::discardCache(video::VdpType::vdp2); }
                     // current_screen
                     // if (!draw_list.empty()) {
                     //    const auto child_size = ImVec2(200, 220);

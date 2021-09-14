@@ -667,6 +667,19 @@ class Vdp2 {
     auto getColorRamMode() const -> ColorRamMode { return ram_status_.color_ram_mode; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getSpriteControlRegister() const -> SpriteControl
+    ///
+    /// \brief  Gets the Sprite Control register.
+    ///
+    /// \author Runik
+    /// \date   03/09/2021
+    ///
+    /// \returns    The sprite control register.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getSpriteControlRegister() const -> SpriteControl { return spctl_; }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> auto Vdp2::readColor(const u32 color_address) -> const Color
     ///
     /// \brief  Reads a color

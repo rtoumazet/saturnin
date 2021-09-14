@@ -2332,6 +2332,67 @@ class LineWindowTableAddressW1Lower : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SpriteColorCalculationCondition
+///
+/// \brief  SPCCCSx bits values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SpriteColorCalculationCondition : u8 {
+    only_when_priority_is_less_or_equals_condition   = 0b00, ///< (Priority number) <= (Color calculation condition number) only.
+    only_when_priority_equals_condition              = 0b01, ///< (Priority number) = (Color calculation condition number) only.
+    only_when_priority_is_higher_or_equals_condition = 0b10, ///< (Priority number) >= (Color calculation condition number) only.
+    only_when_color_data_msb_is_1                    = 0b11  ///< Only when Color Data MSB is 1.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SpriteColorMode
+///
+/// \brief  SPCLMD bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SpriteColorMode : u8 {
+    only_palette = 0b0, ///< Sprite data is all in palette format.
+    mixed        = 0b1  ///< Sprite data is in palette format and RGB format.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SpriteWindowEnable
+///
+/// \brief  SPWINEN bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SpriteWindowEnable : u8 {
+    does_not_use_sprite_window = 0b0, ///< Does not use sprite window.
+    uses_sprite_window         = 0b1  ///< Uses sprite window.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SpriteType
+///
+/// \brief  SPTYPEx bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SpriteType : u8 {
+    type_0 = 0b0000, ///< Type 0.
+    type_1 = 0b0001, ///< Type 1.
+    type_2 = 0b0010, ///< Type 2.
+    type_3 = 0b0011, ///< Type 3.
+    type_4 = 0b0100, ///< Type 4.
+    type_5 = 0b0101, ///< Type 5.
+    type_6 = 0b0110, ///< Type 6.
+    type_7 = 0b0111, ///< Type 7.
+    type_8 = 0b1000, ///< Type 8.
+    type_9 = 0b1001, ///< Type 9.
+    type_a = 0b1010, ///< Type A.
+    type_b = 0b1011, ///< Type B.
+    type_c = 0b1100, ///< Type C.
+    type_d = 0b1101, ///< Type D.
+    type_e = 0b1110, ///< Type E.
+    type_f = 0b1111  ///< Type F.
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  SpriteControl
 ///
 /// \brief  Sprite Control (SPCTL).
@@ -2343,6 +2404,12 @@ class LineWindowTableAddressW1Lower : public Register {
 class SpriteControl : public Register {
   public:
     using Register::Register;
+    inline static const auto sprite_color_calculation_condition
+        = BitRange<SpriteColorCalculationCondition>{12, 13};                                    ///< Defines SPCCCSx bits.
+    inline static const auto sprite_color_calculation_number = BitRange<u8>{8, 10};             ///< Defines SPCCNx bits.
+    inline static const auto sprite_color_mode               = BitRange<SpriteColorMode>{5};    ///< Defines SPCLMD bit.
+    inline static const auto sprite_window_enable            = BitRange<SpriteWindowEnable>{4}; ///< Defines SPWINEN bit.
+    inline static const auto sprite_type                     = BitRange<SpriteType>{0, 3};      ///< Defines SPTYPEx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
