@@ -302,13 +302,12 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     addVdp2PartsToList(ScrollScreen::nbg3);
     addVdp2PartsToList(ScrollScreen::rbg0);
     addVdp2PartsToList(ScrollScreen::rbg1);
+    addVdp1PartsToList();
     std::sort(parts_list.begin(),
               parts_list.end(),
               [](const std::unique_ptr<BaseRenderingPart>& a, const std::unique_ptr<BaseRenderingPart>& b) {
                   return a->priority() < b->priority();
               });
-
-    addVdp1PartsToList();
 
     // :TODO: Ordering needs to be done depending on priorities
 
@@ -601,6 +600,13 @@ auto Opengl::createProgramShader(const u32 vertex_shader, const u32 fragment_sha
 
     glAttachShader(shader_program, vertex_shader);
     glAttachShader(shader_program, fragment_shader);
+
+    // glBindAttribLocation() calls are only needed for glsl 120 shader as the glsl 330 uses the "location" attribute.
+    glBindAttribLocation(shader_program, 0, "vtx_position");
+    glBindAttribLocation(shader_program, 1, "vtx_tex_coord");
+    glBindAttribLocation(shader_program, 2, "vtx_color");
+    glBindAttribLocation(shader_program, 3, "vtx_grd_color");
+
     glLinkProgram(shader_program);
     checkProgramCompilation(shader_program);
 
