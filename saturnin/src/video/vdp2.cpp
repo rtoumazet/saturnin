@@ -215,6 +215,37 @@ auto Vdp2::getSpriteColorAddressOffset() -> u16 {
     return getColorRamAddressOffset(craofb_.get(ColorRamAddressOffsetB::color_ram_address_offset_sprite));
 }
 
+auto Vdp2::getSpritePriority(const u8 register_number) -> u8 {
+    switch (register_number) {
+        case 0: {
+            return prisa_.get(PriorityNumberSpriteA::sprite_register_0);
+        }
+        case 1: {
+            return prisa_.get(PriorityNumberSpriteA::sprite_register_1);
+        }
+        case 2: {
+            return prisb_.get(PriorityNumberSpriteB::sprite_register_2);
+        }
+        case 3: {
+            return prisb_.get(PriorityNumberSpriteB::sprite_register_3);
+        }
+        case 4: {
+            return prisc_.get(PriorityNumberSpriteC::sprite_register_4);
+        }
+        case 5: {
+            return prisc_.get(PriorityNumberSpriteC::sprite_register_5);
+        }
+        case 6: {
+            return prisd_.get(PriorityNumberSpriteD::sprite_register_6);
+        }
+        case 7: {
+            return prisd_.get(PriorityNumberSpriteD::sprite_register_7);
+        }
+    }
+    core::Log::warning(Logger::vdp2, core::tr("Unknown sprite priority."));
+    return 0;
+}
+
 //--------------------------------------------------------------------------------------------------------------
 // DEBUG methods
 //--------------------------------------------------------------------------------------------------------------

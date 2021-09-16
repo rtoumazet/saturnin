@@ -792,6 +792,8 @@ class SpriteTypeRegister : public Register {
 
     inline static const BitRange<u8> type_f_color_calculation{6, 7}; ///< Color calculation for Type F sprites.
     inline static const BitRange<u8> type_f_dot_color{0, 7};         ///< Dot color for Type F sprites.
+
+    inline static const BitRange<u8> msb{15}; ///< MSB, RGB or palette discriminant.
 };
 
 }; // namespace saturnin::video

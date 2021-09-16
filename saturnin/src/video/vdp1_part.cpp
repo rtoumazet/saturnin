@@ -186,32 +186,47 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     auto       tvmr                     = modules.vdp1()->getTvModeSelectionRegister();
     const auto sprite_type              = spctl.get(SpriteControl::sprite_type);
     auto       priority_number_register = u8{};
+    const auto sprite_type_reg          = SpriteTypeRegister{};
+
     if (tvmr.get(TvModeSelection::tvm_bit_depth_selection) == BitDepthSelection::sixteen_bits_per_pixel) {
-        auto is_data_mixed = spctl.get(SpriteControl::sprite_color_mode) == SpriteColorMode::mixed;
+        const auto is_data_mixed = spctl.get(SpriteControl::sprite_color_mode) == SpriteColorMode::mixed;
 
         switch (sprite_type) {
             case SpriteType::type_0: {
+                auto priority_type
+                    = (is_data_mixed) ? SpriteTypeRegister::type_0_priority_mixed : SpriteTypeRegister::type_0_priority_palette;
+                priority_number_register = getPriorityRegister(modules, priority_type);
                 break;
             }
             case SpriteType::type_1: {
+                auto priority_type
+                    = (is_data_mixed) ? SpriteTypeRegister::type_1_priority_mixed : SpriteTypeRegister::type_1_priority_palette;
+
+                priority_number_register = getPriorityRegister(modules, priority_type);
                 break;
             }
             case SpriteType::type_2: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_2_priority);
                 break;
             }
             case SpriteType::type_3: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_3_priority);
                 break;
             }
             case SpriteType::type_4: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_4_priority);
                 break;
             }
             case SpriteType::type_5: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_5_priority);
                 break;
             }
             case SpriteType::type_6: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_6_priority);
                 break;
             }
             case SpriteType::type_7: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_7_priority);
                 break;
             }
             default: {
@@ -223,6 +238,26 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
 
     } else {
         // 8 bits by pixel
+    }
+
+    priority(modules.vdp2()->getSpritePriority(priority_number_register));
+}
+
+auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> const u8 {
+    const auto color_mode = cmdpmod_.get(CmdPmod::color_mode);
+    switch (color_mode) {
+        case ColorMode::mode_5_32k_colors_rgb: {
+            return 0;
+        }
+        case ColorMode::mode_1_16_colors_lookup: {
+            const auto lut_address = u32{vdp1_ram_start_address + cmdsrca_.toU32() * address_multiplier};
+            auto       reg         = SpriteTypeRegister{modules.memory()->read<u32>(lut_address)};
+            return (reg.get(SpriteTypeRegister::msb) == 1) ? 0 : reg.get(range);
+        }
+        default: {
+            auto reg = SpriteTypeRegister{cmdcolr_.toU32()};
+            return reg.get(range);
+        }
     }
 }
 

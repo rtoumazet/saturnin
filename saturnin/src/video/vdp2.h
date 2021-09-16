@@ -680,6 +680,21 @@ class Vdp2 {
     auto getSpriteControlRegister() const -> SpriteControl { return spctl_; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::getSpritePriority(const u8 register_number) -> u8;
+    ///
+    /// \brief  Gets sprite priority from the register number.
+    ///
+    /// \author Runik
+    /// \date   16/09/2021
+    ///
+    /// \param  register_number The register number.
+    ///
+    /// \returns    The sprite priority.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getSpritePriority(const u8 register_number) -> u8;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> auto Vdp2::readColor(const u32 color_address) -> const Color
     ///
     /// \brief  Reads a color

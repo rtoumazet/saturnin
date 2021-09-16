@@ -2528,6 +2528,8 @@ class SpecialColorCalculationMode : public Register {
 class PriorityNumberSpriteA : public Register {
   public:
     using Register::Register;
+    inline static const auto sprite_register_0 = BitRange<u8>{0, 2};  ///< Defines S0PRINx bits.
+    inline static const auto sprite_register_1 = BitRange<u8>{8, 10}; ///< Defines S1PRINx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2542,6 +2544,8 @@ class PriorityNumberSpriteA : public Register {
 class PriorityNumberSpriteB : public Register {
   public:
     using Register::Register;
+    inline static const auto sprite_register_2 = BitRange<u8>{0, 2};  ///< Defines S2PRINx bits.
+    inline static const auto sprite_register_3 = BitRange<u8>{8, 10}; ///< Defines S3PRINx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2556,6 +2560,8 @@ class PriorityNumberSpriteB : public Register {
 class PriorityNumberSpriteC : public Register {
   public:
     using Register::Register;
+    inline static const auto sprite_register_4 = BitRange<u8>{0, 2};  ///< Defines S4PRINx bits.
+    inline static const auto sprite_register_5 = BitRange<u8>{8, 10}; ///< Defines S5PRINx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2570,6 +2576,8 @@ class PriorityNumberSpriteC : public Register {
 class PriorityNumberSpriteD : public Register {
   public:
     using Register::Register;
+    inline static const auto sprite_register_6 = BitRange<u8>{0, 2};  ///< Defines S6PRINx bits.
+    inline static const auto sprite_register_7 = BitRange<u8>{8, 10}; ///< Defines S7PRINx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
