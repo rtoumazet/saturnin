@@ -182,39 +182,49 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     // calculation overhead is too big for now, and you can't have a one pixel granularity using OpenGL.
     // That will have to be reworked later.
 
-    auto       spctl                    = modules.vdp2()->getSpriteControlRegister();
-    auto       tvmr                     = modules.vdp1()->getTvModeSelectionRegister();
-    const auto sprite_type              = spctl.get(SpriteControl::sprite_type);
-    auto       priority_number_register = u8{};
-    const auto sprite_type_reg          = SpriteTypeRegister{};
+    auto           spctl                    = modules.vdp2()->getSpriteControlRegister();
+    auto           tvmr                     = modules.vdp1()->getTvModeSelectionRegister();
+    const auto     sprite_type              = spctl.get(SpriteControl::sprite_type);
+    auto           priority_number_register = u8{};
+    constexpr auto disp_priority_on_2_bits  = u8{1};
+    constexpr auto disp_priority_on_1_bit   = u8{2};
 
     if (tvmr.get(TvModeSelection::tvm_bit_depth_selection) == BitDepthSelection::sixteen_bits_per_pixel) {
         const auto is_data_mixed = spctl.get(SpriteControl::sprite_color_mode) == SpriteColorMode::mixed;
 
         switch (sprite_type) {
             case SpriteType::type_0: {
-                auto priority_type
-                    = (is_data_mixed) ? SpriteTypeRegister::type_0_priority_mixed : SpriteTypeRegister::type_0_priority_palette;
-                priority_number_register = getPriorityRegister(modules, priority_type);
+                if (is_data_mixed) {
+                    priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_0_priority_mixed);
+                    priority_number_register <<= disp_priority_on_1_bit;
+                } else {
+                    priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_0_priority_palette);
+                    priority_number_register <<= disp_priority_on_2_bits;
+                }
                 break;
             }
             case SpriteType::type_1: {
-                auto priority_type
-                    = (is_data_mixed) ? SpriteTypeRegister::type_1_priority_mixed : SpriteTypeRegister::type_1_priority_palette;
-
-                priority_number_register = getPriorityRegister(modules, priority_type);
+                if (is_data_mixed) {
+                    priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_1_priority_mixed);
+                    priority_number_register <<= disp_priority_on_2_bits;
+                } else {
+                    priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_1_priority_palette);
+                }
                 break;
             }
             case SpriteType::type_2: {
                 priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_2_priority);
+                priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
             case SpriteType::type_3: {
                 priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_3_priority);
+                priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
             case SpriteType::type_4: {
                 priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_4_priority);
+                priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
             case SpriteType::type_5: {
@@ -238,6 +248,53 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
 
     } else {
         // 8 bits by pixel
+        switch (sprite_type) {
+            case SpriteType::type_8: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_8_priority);
+                priority_number_register <<= disp_priority_on_1_bit;
+                break;
+            }
+            case SpriteType::type_9: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_9_priority);
+                priority_number_register <<= disp_priority_on_1_bit;
+                break;
+            }
+            case SpriteType::type_a: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_a_priority);
+                priority_number_register <<= disp_priority_on_2_bits;
+                break;
+            }
+            case SpriteType::type_b: {
+                // No priority bits for this sprite type.
+                priority_number_register = 0;
+                break;
+            }
+            case SpriteType::type_c: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_c_priority);
+                priority_number_register <<= disp_priority_on_1_bit;
+                break;
+            }
+            case SpriteType::type_d: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_d_priority);
+                priority_number_register <<= disp_priority_on_1_bit;
+                break;
+            }
+            case SpriteType::type_e: {
+                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_e_priority);
+                priority_number_register <<= disp_priority_on_2_bits;
+                break;
+            }
+            case SpriteType::type_f: {
+                // No priority bits for this sprite type.
+                priority_number_register = 0;
+                break;
+            }
+            default: {
+                Log::warning(Logger::vdp1,
+                             tr("Sprite type is not 8bits in a 8bits framebuffer configuration (Type:{:#x})"),
+                             toUnderlying(sprite_type));
+            }
+        }
     }
 
     priority(modules.vdp2()->getSpritePriority(priority_number_register));
@@ -575,14 +632,14 @@ Gouraud shading
     return part_detail;
 }
 
-auto Vdp1Part::calculatedXA() -> const s16 { return cmdxa_.twoCmp() + local_coordinate_x_; }
-auto Vdp1Part::calculatedYA() -> const s16 { return cmdya_.twoCmp() + local_coordinate_y_; }
-auto Vdp1Part::calculatedXB() -> const s16 { return cmdxb_.twoCmp() + local_coordinate_x_; }
-auto Vdp1Part::calculatedYB() -> const s16 { return cmdyb_.twoCmp() + local_coordinate_y_; }
-auto Vdp1Part::calculatedXC() -> const s16 { return cmdxc_.twoCmp() + local_coordinate_x_; }
-auto Vdp1Part::calculatedYC() -> const s16 { return cmdyc_.twoCmp() + local_coordinate_y_; }
-auto Vdp1Part::calculatedXD() -> const s16 { return cmdxd_.twoCmp() + local_coordinate_x_; }
-auto Vdp1Part::calculatedYD() -> const s16 { return cmdyd_.twoCmp() + local_coordinate_y_; }
+auto Vdp1Part::calculatedXA() -> s16 { return cmdxa_.twoCmp() + local_coordinate_x_; }
+auto Vdp1Part::calculatedYA() -> s16 { return cmdya_.twoCmp() + local_coordinate_y_; }
+auto Vdp1Part::calculatedXB() -> s16 { return cmdxb_.twoCmp() + local_coordinate_x_; }
+auto Vdp1Part::calculatedYB() -> s16 { return cmdyb_.twoCmp() + local_coordinate_y_; }
+auto Vdp1Part::calculatedXC() -> s16 { return cmdxc_.twoCmp() + local_coordinate_x_; }
+auto Vdp1Part::calculatedYC() -> s16 { return cmdyc_.twoCmp() + local_coordinate_y_; }
+auto Vdp1Part::calculatedXD() -> s16 { return cmdxd_.twoCmp() + local_coordinate_x_; }
+auto Vdp1Part::calculatedYD() -> s16 { return cmdyd_.twoCmp() + local_coordinate_y_; }
 
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));

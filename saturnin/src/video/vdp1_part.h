@@ -94,14 +94,14 @@ class Vdp1Part final : public BaseRenderingPart {
 
     ///@{
     /// \name  Calculated coordinates.
-    auto calculatedXA() -> const s16;
-    auto calculatedYA() -> const s16;
-    auto calculatedXB() -> const s16;
-    auto calculatedYB() -> const s16;
-    auto calculatedXC() -> const s16;
-    auto calculatedYC() -> const s16;
-    auto calculatedXD() -> const s16;
-    auto calculatedYD() -> const s16;
+    auto calculatedXA() -> s16;
+    auto calculatedYA() -> s16;
+    auto calculatedXB() -> s16;
+    auto calculatedYB() -> s16;
+    auto calculatedXC() -> s16;
+    auto calculatedYC() -> s16;
+    auto calculatedXD() -> s16;
+    auto calculatedYD() -> s16;
     ///@}
 
     ///@{
