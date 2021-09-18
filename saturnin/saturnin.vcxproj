@@ -363,6 +363,7 @@
     <ClCompile Include="src\sound\scsp.cpp" />
     <ClCompile Include="src\video\texture.cpp" />
     <ClCompile Include="src\video\vdp1_part.cpp" />
+    <ClCompile Include="src\video\vdp2_debug.cpp" />
     <ClCompile Include="src\video\vdp2_part.cpp" />
     <ClInclude Include="lib\imgui\imfilebrowser.h" />
     <ClInclude Include="lib\musashi\m68k.h" />
