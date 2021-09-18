@@ -800,8 +800,9 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
 
-    auto color = Color(part.cmdcolr_.get(CmdColr::color_control));
-
+    const auto cmdcolr = part.cmdcolr_.get(CmdColr::color_control);
+    auto       color   = Color(cmdcolr);
+    if (!cmdcolr) { color.a = 0; }
     const auto gouraud_values = readGouraudData(modules, part);
 
     part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
@@ -825,7 +826,9 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
 
-    auto color = Color(part.cmdcolr_.get(CmdColr::color_control));
+    const auto cmdcolr = part.cmdcolr_.get(CmdColr::color_control);
+    auto       color   = Color(cmdcolr);
+    if (!cmdcolr) { color.a = 0; }
 
     const auto gouraud_values = readGouraudData(modules, part);
 
@@ -850,7 +853,9 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Line draw"));
 
-    auto color = Color(part.cmdcolr_.get(CmdColr::color_control));
+    const auto cmdcolr = part.cmdcolr_.get(CmdColr::color_control);
+    auto       color   = Color(cmdcolr);
+    if (!cmdcolr) { color.a = 0; }
 
     const auto gouraud_values = readGouraudData(modules, part);
 
