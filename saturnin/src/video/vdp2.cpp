@@ -549,6 +549,7 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
         };
         values.emplace_back(tr("Bitmap size"), bitmapSize(screen.bitmap_size));
         values.emplace_back(tr("Bitmap palette number"), fmt::format("{:#x}", screen.bitmap_palette_number));
+        values.emplace_back(tr("Priority"), fmt::format("{}", screen.priority_number));
         values.emplace_back(tr("Bitmap special priority bit"), fmt::format("{:#x}", screen.bitmap_special_priority));
         values.emplace_back(tr("Bitmap special color calculation bit"),
                             fmt::format("{:#x}", screen.bitmap_special_color_calculation));
@@ -2728,7 +2729,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prina_.get(PriorityNumberA::nbg0);
+            screen.priority_number = prir_.get(PriorityNumberR::rbg0);
 
             // Map
             screen.map_size   = map_size_rbg;
@@ -2793,7 +2794,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prina_.get(PriorityNumberR::rbg0);
+            screen.priority_number = prina_.get(PriorityNumberA::nbg0);
 
             // Map
             screen.map_size   = map_size_rbg;
