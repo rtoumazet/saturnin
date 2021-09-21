@@ -50,9 +50,12 @@ enum class DrawType;
 class BaseRenderingPart;
 
 using saturnin::core::Config;
+using utilities::toUnderlying;
 
 constexpr auto minimum_window_width  = u16{512};
 constexpr auto minimum_window_height = u16{512};
+
+enum class FboIndex : u8 { front_buffer = 0, back_buffer = 1, vdp1_debug_overlay = 2, vdp2_debug_layer = 3 };
 
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
@@ -78,7 +81,7 @@ class Opengl {
     /// Accessors / Mutators
     [[nodiscard]] auto displayedTexture() const { return fbo_textures_[displayed_texture_index_]; };
     void               displayedTexture(const u32 index) { displayed_texture_index_ = index; };
-    [[nodiscard]] auto debugTextureOverlay() const { return fbo_textures_[index_2]; };
+    [[nodiscard]] auto debugTextureOverlay() const { return fbo_textures_[toUnderlying(FboIndex::vdp1_debug_overlay)]; };
     [[nodiscard]] auto guiRenderingContext() const { return gui_rendering_context_; };
     void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
     [[nodiscard]] auto fps() const { return fps_; };
@@ -307,15 +310,27 @@ class Opengl {
     auto isThereSomethingToRender() -> const bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::renderDebugVertexes();
+    /// \fn void Opengl::renderVdp1DebugOverlay();
     ///
-    /// \brief  Renders the vertexes saved for debugging.
+    /// \brief  Renders the vertexes of the vdp1 part currently saved for debugging.
     ///
     /// \author Runik
     /// \date   16/06/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void renderDebugVertexes();
+    void renderVdp1DebugOverlay();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::renderVdp2DebugLayer();
+    ///
+    /// \brief  Renders the vertexes of the vdp2 layer currently selected for display in the debug
+    ///         window.
+    ///
+    /// \author Runik
+    /// \date   16/06/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void renderVdp2DebugLayer();
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////

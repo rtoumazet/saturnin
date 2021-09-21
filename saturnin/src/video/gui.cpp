@@ -904,7 +904,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
         if (state.opengl()->isThereSomethingToRender()) { state.opengl()->render(); }
         gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height, 0xff);
         if (state.debugStatus() != core::DebugStatus::disabled) {
-            state.opengl()->renderDebugVertexes();
+            state.opengl()->renderVdp1DebugOverlay();
             gui::addTextureToDrawList(state.opengl()->debugTextureOverlay(), width, height, 0x80);
         }
     }
