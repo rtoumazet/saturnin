@@ -90,6 +90,9 @@ auto EmulatorContext::opengl() -> Opengl* { return opengl_.get(); };
 auto EmulatorContext::initialize() -> bool {
     Log::initialize();
 
+    // Locale is defaulted to english to handle the case when there's no config file created yet.
+    if (!Locale::getInstance().initialize("en")) { return false; }
+
     if (!this->config()->initialize(video::isModernOpenglCapable())) { return false; }
 
     std::string country = config()->readValue(core::AccessKeys::cfg_global_language);

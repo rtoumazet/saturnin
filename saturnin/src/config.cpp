@@ -162,7 +162,7 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
     add(full_keys_[AccessKeys::cfg_global_language],                     std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_global_language]));
     add(full_keys_[AccessKeys::cfg_global_hardware_mode],                std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_global_hardware_mode]));
     add(full_keys_[AccessKeys::cfg_global_area_code],                    std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_global_area_code]));
-    add(full_keys_[AccessKeys::cfg_global_set_time],                    std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_global_set_time]));
+    add(full_keys_[AccessKeys::cfg_global_set_time],                    std::any_cast<const bool>(default_keys_[AccessKeys::cfg_global_set_time]));
     add(full_keys_[AccessKeys::cfg_rendering_tv_standard],               std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_rendering_tv_standard]));
     add(full_keys_[AccessKeys::cfg_rendering_legacy_opengl],             !isModernOpenglCapable);
     add(full_keys_[AccessKeys::cfg_paths_roms_stv],                      std::any_cast<const std::string&>(default_keys_[AccessKeys::cfg_paths_roms_stv]));

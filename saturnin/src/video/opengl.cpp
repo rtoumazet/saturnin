@@ -827,10 +827,12 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 }
 
 void Opengl::initializeFbos() {
-    // 3 FBOs are generated.
-    // One will be used as the last complete rendering by the GUI while the other will be rendered to.
-    // The last one is used as a debug overlay
-    constexpr auto fbos_number = u8{3};
+    // 4 FBOs are generated.
+    // 0 and 1 are used as front and back buffers : one will be used as the last complete rendering by the GUI while the other
+    // will be rendered to.
+    // 1 is used as the VDP1 debug overlay
+    // 2 is used as the VDP2 debug layer.
+    constexpr auto fbos_number = u8{4};
     for (int i = 0; i < fbos_number; ++i) {
         auto fbo     = u32{};
         auto texture = u32{};
