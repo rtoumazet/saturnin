@@ -172,7 +172,8 @@ void showMainMenu(core::EmulatorContext& state) {
                                            {Header::peripherals, tr("Peripherals")},
                                            {Header::logs, tr("Logs")}};
             static auto last_opened_header = Header::none;
-            auto        setHeaderState     = [](const Header header) {
+            if (last_opened_header == Header::none) last_opened_header = Header::general;
+            auto setHeaderState = [](const Header header) {
                 const auto state = (last_opened_header == header);
                 ImGui::SetNextItemOpen(state);
             };
@@ -1278,10 +1279,10 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(5, 2));
 
-        static int current_part_idx = 0; // Here we store our selection data as an index.
-        auto       draw_list        = state.vdp1()->vdp1Parts();
-        ImGuiIO&   io               = ImGui::GetIO();
-        io.WantCaptureKeyboard      = true;
+        static auto current_part_idx = size_t{}; // Here we store our selection data as an index.
+        auto        draw_list        = state.vdp1()->vdp1Parts();
+        ImGuiIO&    io               = ImGui::GetIO();
+        io.WantCaptureKeyboard       = true;
         if (draw_list.size() < current_part_idx) current_part_idx = 0;
 
         {
@@ -1296,7 +1297,7 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
             }
             const auto draw_list_size = ImVec2(310, 260);
             if (ImGui::BeginListBox("##draw_list", draw_list_size)) {
-                for (s32 n = 0; n < draw_list.size(); ++n) {
+                for (u32 n = 0; n < draw_list.size(); ++n) {
                     const bool is_selected = (current_part_idx == n);
                     if (ImGui::Selectable(fmt::format("{}##{}", draw_list[n].debugHeader(), n).c_str(),
                                           is_selected,
