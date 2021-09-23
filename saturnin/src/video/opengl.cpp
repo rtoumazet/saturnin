@@ -262,17 +262,17 @@ void Opengl::initializeShaders() {
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
     PartsList parts_list;
-    PartsList parts_list_debug;
+    // PartsList parts_list_debug;
 
-    const auto addVdp2PartsToDebugList = [&](const ScrollScreen s) {
-        const auto vdp2_parts = state.vdp2()->vdp2Parts(s);
-        if (!vdp2_parts.empty()) {
-            parts_list_debug.reserve(parts_list_debug.size() + vdp2_parts.size());
-            for (auto&& p : vdp2_parts) {
-                parts_list_debug.push_back(std::make_unique<Vdp2Part>(p));
-            }
-        }
-    };
+    // const auto addVdp2PartsToDebugList = [&](const ScrollScreen s) {
+    //    const auto vdp2_parts = state.vdp2()->vdp2Parts(s);
+    //    if (!vdp2_parts.empty()) {
+    //        parts_list_debug.reserve(parts_list_debug.size() + vdp2_parts.size());
+    //        for (auto&& p : vdp2_parts) {
+    //            parts_list_debug.push_back(std::make_unique<Vdp2Part>(p));
+    //        }
+    //    }
+    //};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
         const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
@@ -294,7 +294,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         }
     };
 
-    if (state.vdp2()->screenInDebug() != ScrollScreen::none) { addVdp2PartsToDebugList(state.vdp2()->screenInDebug()); }
+    // if (state.vdp2()->screenInDebug() != ScrollScreen::none) { addVdp2PartsToDebugList(state.vdp2()->screenInDebug()); }
 
     addVdp2PartsToList(ScrollScreen::nbg0);
     addVdp2PartsToList(ScrollScreen::nbg1);
@@ -567,7 +567,7 @@ void Opengl::renderVdp1DebugOverlay() {
     }
 };
 
-void Opengl::renderVdp2DebugLayer() {
+void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Pre render -----------//
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbos_[toUnderlying(FboIndex::vdp2_debug_layer)]);
@@ -583,8 +583,18 @@ void Opengl::renderVdp2DebugLayer() {
 
     //----------- Render -----------------//
     std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
-    if (!parts_list_debug_.empty()) { parts_list = std::move(parts_list_); }
+    // if (!parts_list_debug_.empty()) { parts_list = std::move(parts_list_debug_); }
+    if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
+        const auto vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
+        if (!vdp2_parts.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_parts.size());
+            for (auto&& p : vdp2_parts) {
+                parts_list.push_back(std::make_unique<Vdp2Part>(p));
+            }
+        }
 
+        // parts_list = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
+    }
     if (!parts_list.empty()) {
         constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
         constexpr auto elements_nb                   = u8{2};

@@ -906,7 +906,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
         gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height, 0xff);
         if (state.debugStatus() != core::DebugStatus::disabled) {
             state.opengl()->renderVdp1DebugOverlay();
-            gui::addTextureToDrawList(state.opengl()->debugTextureOverlay(), width, height, 0x80);
+            gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, 0x80);
         }
     }
     ImGui::Text("%s", state.opengl()->fps().c_str());
@@ -1361,6 +1361,8 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
 
         ImGui::PopStyleVar();
         ImGui::PopStyleVar();
+    } else {
+        ImGui::TextUnformatted(tr("Pause emulation to display debug data ...").c_str());
     }
     ImGui::End();
 }
@@ -1569,6 +1571,30 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     //    ImGui::EndChild();
                     //    ImGui::PopStyleVar();
                     //}
+
+                    const auto child_size = ImVec2(200, 220);
+                    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+                    ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+
+                    // if (ImGui::BeginMenuBar()) {
+                    //    ImGui::TextUnformatted(tr("Texture").c_str());
+                    //    ImGui::EndMenuBar();
+                    //}
+
+                    if (state.debugStatus() != core::DebugStatus::disabled) {
+                        if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
+                            state.opengl()->renderVdp2DebugLayer(state);
+                        }
+                        const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
+                        const auto preview_size = ImVec2(200, 200);
+                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                    } else {
+                        ImGui::TextUnformatted(tr("Pause emulation to display debug data ...").c_str());
+                    }
+
+                    //}
+                    ImGui::EndChild();
+                    ImGui::PopStyleVar();
 
                     ImGui::EndTabItem();
                 }

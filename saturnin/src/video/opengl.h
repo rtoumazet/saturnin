@@ -81,7 +81,8 @@ class Opengl {
     /// Accessors / Mutators
     [[nodiscard]] auto displayedTexture() const { return fbo_textures_[displayed_texture_index_]; };
     void               displayedTexture(const u32 index) { displayed_texture_index_ = index; };
-    [[nodiscard]] auto debugTextureOverlay() const { return fbo_textures_[toUnderlying(FboIndex::vdp1_debug_overlay)]; };
+    [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return fbo_textures_[toUnderlying(FboIndex::vdp1_debug_overlay)]; };
+    [[nodiscard]] auto vdp2DebugLayerTextureId() -> u32 { return fbo_textures_[toUnderlying(FboIndex::vdp2_debug_layer)]; }
     [[nodiscard]] auto guiRenderingContext() const { return gui_rendering_context_; };
     void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
     [[nodiscard]] auto fps() const { return fps_; };
@@ -321,16 +322,18 @@ class Opengl {
     void renderVdp1DebugOverlay();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::renderVdp2DebugLayer();
+    /// \fn void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state);
     ///
     /// \brief  Renders the vertexes of the vdp2 layer currently selected for display in the debug
     ///         window.
     ///
     /// \author Runik
     /// \date   16/06/2021
+    ///
+    /// \param [in,out] state   The emulator state.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void renderVdp2DebugLayer();
+    void renderVdp2DebugLayer(core::EmulatorContext& state);
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
