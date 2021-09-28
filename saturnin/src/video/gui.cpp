@@ -57,7 +57,7 @@ static auto show_debug_memory = false;
 static auto show_debug_sh2    = false;
 static auto show_debug_vdp1   = false;
 static auto show_debug_vdp2   = false;
-static auto show_demo         = false;
+static auto show_demo         = true;
 static auto show_log          = true;
 
 using core::Log;
@@ -1432,6 +1432,17 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
                 ImGui::EndTable();
             }
+
+            {
+                static auto disabled_layers = std::array{false, false, false, false, false, false};
+                const auto  child_size      = ImVec2(580, 40);
+                ImGui::BeginChild("vdp2_disable_layers", child_size, true, window_flags);
+                ImGui::TextUnformatted(tr("Disable layers").c_str());
+                // ImGui::Checkbox()
+
+                ImGui::EndChild();
+            }
+
             if (ImGui::Button(tr("Reload cache").c_str())) { video::Texture::discardCache(video::VdpType::vdp2); }
 
             ImGui::EndTabItem();
@@ -1452,8 +1463,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::TableSetupColumn("T7");
                 ImGui::TableHeadersRow();
 
-                const auto banks = state.vdp2()->getDebugVramAccessBanks();
-                // const auto banks_used = state.vdp2()->getDebugVramBanksUsed();
+                const auto banks      = state.vdp2()->getDebugVramAccessBanks();
                 const auto banks_name = state.vdp2()->getDebugVramAccessBanksName();
 
                 for (u8 row = 0; row < banks.size(); ++row) {
@@ -1543,7 +1553,6 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::EndChild();
                 ImGui::PopStyleColor();
                 ImGui::PopStyleVar();
-
                 ImGui::EndGroup();
             }
             ImGui::SameLine();
@@ -1579,7 +1588,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 if (ImGui::BeginTabItem(tr("Viewer").c_str())) {
                     const auto child_size = ImVec2(500, 520);
                     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                    ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags);
+                    ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
 
                     if (state.debugStatus() != core::DebugStatus::disabled) {
                         if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
