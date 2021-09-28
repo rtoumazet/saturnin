@@ -1368,8 +1368,21 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(610, 320);
-    ImGui::SetNextWindowSize(window_size);
+    enum class Vdp2DebugTab { none, global, vram, registers, scroll_screens };
+    static auto current_tab = Vdp2DebugTab::none;
+    if (current_tab == Vdp2DebugTab::none) current_tab = Vdp2DebugTab::global;
+
+    const auto window_size_global         = ImVec2(610, 300);
+    const auto window_size_vram           = ImVec2(610, 150);
+    const auto window_size_scroll_screens = ImVec2(610, 600);
+    const auto window_size_default        = ImVec2(610, 400);
+
+    switch (current_tab) {
+        case Vdp2DebugTab::global: ImGui::SetNextWindowSize(window_size_global); break;
+        case Vdp2DebugTab::vram: ImGui::SetNextWindowSize(window_size_vram); break;
+        case Vdp2DebugTab::scroll_screens: ImGui::SetNextWindowSize(window_size_scroll_screens); break;
+        default: ImGui::SetNextWindowSize(window_size_default);
+    }
 
     auto window_flags
         = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
@@ -1387,6 +1400,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
     auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
     if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {
         if (ImGui::BeginTabItem(tr("Global").c_str())) {
+            current_tab                           = Vdp2DebugTab::global;
             static ImGuiTableFlags table_flags    = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit;
             constexpr auto         columns_number = u8{2};
             if (ImGui::BeginTable("global_table", columns_number, table_flags)) {
@@ -1418,11 +1432,13 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
                 ImGui::EndTable();
             }
+            if (ImGui::Button(tr("Reload cache").c_str())) { video::Texture::discardCache(video::VdpType::vdp2); }
 
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem(tr("VRAM access").c_str())) {
+            current_tab                  = Vdp2DebugTab::vram;
             static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
             if (ImGui::BeginTable("vram_access", video::vram_timing_size + 1, flags)) {
                 ImGui::TableSetupColumn("Bank");
@@ -1464,6 +1480,10 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem(tr("Registers").c_str())) {
+            current_tab           = Vdp2DebugTab::registers;
+            const auto child_size = ImVec2(600, 380);
+            ImGui::BeginChild("vdp2_registers_child");
+
             static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
             constexpr auto         columns_number = u8{3};
             if (ImGui::BeginTable("vdp2_registers_table", columns_number, flags)) {
@@ -1487,10 +1507,12 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 }
                 ImGui::EndTable();
             }
+            ImGui::EndChild();
 
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem(tr("Scroll Screens").c_str())) {
+            current_tab                = Vdp2DebugTab::scroll_screens;
             static auto current_screen = ScrollScreen::nbg0;
             state.vdp2()->screenInDebug(current_screen);
             {
@@ -1500,7 +1522,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 const auto style = ImGui::GetStyle();
 
                 ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_ChildBg]);
-                const auto child_size = ImVec2(70, 265);
+                const auto child_size = ImVec2(50, 110);
                 ImGui::BeginChild("ChildScrollScreen", child_size, true, window_flags);
 
                 const auto scroll_child_size = ImVec2(70, 110);
@@ -1555,49 +1577,27 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::EndTabItem();
                 }
                 if (ImGui::BeginTabItem(tr("Viewer").c_str())) {
-                    if (ImGui::Button(tr("Reload").c_str())) { video::Texture::discardCache(video::VdpType::vdp2); }
-                    // current_screen
-                    // if (!draw_list.empty()) {
-                    //    const auto child_size = ImVec2(200, 220);
-                    //    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                    //    ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags);
-
-                    //    if (draw_list[current_part_idx].textureKey() != 0) {
-                    //        const auto tex          = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
-                    //        const auto tex_id       = tex.apiHandle();
-                    //        const auto preview_size = ImVec2(200, 200);
-                    //        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
-                    //    }
-                    //    ImGui::EndChild();
-                    //    ImGui::PopStyleVar();
-                    //}
-
-                    const auto child_size = ImVec2(200, 220);
+                    const auto child_size = ImVec2(500, 520);
                     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                    ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
-
-                    // if (ImGui::BeginMenuBar()) {
-                    //    ImGui::TextUnformatted(tr("Texture").c_str());
-                    //    ImGui::EndMenuBar();
-                    //}
+                    ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags);
 
                     if (state.debugStatus() != core::DebugStatus::disabled) {
                         if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
                             state.opengl()->renderVdp2DebugLayer(state);
                         }
                         const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
-                        const auto preview_size = ImVec2(200, 200);
+                        const auto preview_size = ImVec2(500, 500);
                         ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
                     } else {
                         ImGui::TextUnformatted(tr("Pause emulation to display debug data ...").c_str());
                     }
 
-                    //}
                     ImGui::EndChild();
                     ImGui::PopStyleVar();
 
                     ImGui::EndTabItem();
                 }
+
                 ImGui::EndTabBar();
             }
             ImGui::EndGroup();
