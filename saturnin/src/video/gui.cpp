@@ -57,7 +57,7 @@ static auto show_debug_memory = false;
 static auto show_debug_sh2    = false;
 static auto show_debug_vdp1   = false;
 static auto show_debug_vdp2   = false;
-static auto show_demo         = true;
+static auto show_demo         = false;
 static auto show_log          = true;
 
 using core::Log;
@@ -1433,12 +1433,24 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::EndTable();
             }
 
+            ImGui::TextUnformatted(tr("Disable layers").c_str());
+            ImGui::SameLine();
+
             {
                 static auto disabled_layers = std::array{false, false, false, false, false, false};
-                const auto  child_size      = ImVec2(580, 40);
+                const auto  addCheckbox     = [&](const ScrollScreen ss) {
+                    ImGui::Checkbox(scroll_screens.at(ss).c_str(), &disabled_layers[util::toUnderlying(ss)]);
+                    ImGui::SameLine(ImGui::GetCursorPosX() + 50);
+                };
+
+                const auto child_size = ImVec2(475, 40);
                 ImGui::BeginChild("vdp2_disable_layers", child_size, true, window_flags);
-                ImGui::TextUnformatted(tr("Disable layers").c_str());
-                // ImGui::Checkbox()
+                addCheckbox(ScrollScreen::nbg0);
+                addCheckbox(ScrollScreen::nbg1);
+                addCheckbox(ScrollScreen::nbg2);
+                addCheckbox(ScrollScreen::nbg3);
+                addCheckbox(ScrollScreen::rbg0);
+                addCheckbox(ScrollScreen::rbg1);
 
                 ImGui::EndChild();
             }
