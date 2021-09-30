@@ -296,12 +296,12 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 
     // if (state.vdp2()->screenInDebug() != ScrollScreen::none) { addVdp2PartsToDebugList(state.vdp2()->screenInDebug()); }
 
-    addVdp2PartsToList(ScrollScreen::nbg0);
-    addVdp2PartsToList(ScrollScreen::nbg1);
-    addVdp2PartsToList(ScrollScreen::nbg2);
-    addVdp2PartsToList(ScrollScreen::nbg3);
-    addVdp2PartsToList(ScrollScreen::rbg0);
-    addVdp2PartsToList(ScrollScreen::rbg1);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) { addVdp2PartsToList(ScrollScreen::nbg0); };
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) { addVdp2PartsToList(ScrollScreen::nbg1); };
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) { addVdp2PartsToList(ScrollScreen::nbg2); };
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); };
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); };
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); };
     addVdp1PartsToList();
     std::sort(parts_list.begin(),
               parts_list.end(),

@@ -1440,20 +1440,21 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::EndTable();
             }
 
-            ImGui::TextUnformatted(tr("Disable layers").c_str());
-            ImGui::SameLine();
-
             {
                 static auto disabled_layers = std::array{false, false, false, false, false, false};
                 const auto  addCheckbox     = [&](const ScrollScreen ss) {
-                    ImGui::Checkbox(scroll_screens.at(ss).c_str(), &disabled_layers[util::toUnderlying(ss)]);
+                    if (ImGui::Checkbox(scroll_screens.at(ss).c_str(), &disabled_layers[util::toUnderlying(ss)])) {
+                        state.vdp2()->setLayerDisabledState(ss, disabled_layers[util::toUnderlying(ss)]);
+                    };
                     ImGui::SameLine();
                     constexpr auto offset = 20;
                     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
                 };
 
-                const auto child_size = ImVec2(475, 35);
+                const auto child_size = ImVec2(580, 35);
                 ImGui::BeginChild("vdp2_disable_layers", child_size, true, window_flags);
+                ImGui::TextUnformatted(tr("Disable layers").c_str());
+                ImGui::SameLine();
                 addCheckbox(ScrollScreen::nbg0);
                 addCheckbox(ScrollScreen::nbg1);
                 addCheckbox(ScrollScreen::nbg2);
