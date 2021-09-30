@@ -129,6 +129,7 @@ void showMainMenu(core::EmulatorContext& state) {
                 ImGui::EndMenu();
             };
             if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary)) {}
+            if (ImGui::MenuItem(tr("Exit").c_str())) { state.renderingStatus(core::RenderingStatus::stopped); }
 
             ImGui::EndMenu();
         }
