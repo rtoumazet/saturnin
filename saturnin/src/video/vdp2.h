@@ -113,6 +113,8 @@ enum class TvStandard : s8 {
 
 enum class ScrollScreen { nbg0 = 0, nbg1 = 1, nbg2 = 2, nbg3 = 3, rbg0 = 4, rbg1 = 5, none = -1 };
 
+using DisabledScrollScreen = std::unordered_map<ScrollScreen, bool>;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ColorCount
 ///
@@ -726,6 +728,9 @@ class Vdp2 {
     auto        getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>>;
     auto        screenInDebug() -> ScrollScreen;
     void        screenInDebug(const ScrollScreen s);
+    auto        isLayerDisabled(const ScrollScreen s) -> bool;
+    void        setLayerDisabledState(const ScrollScreen s, const bool is_disabled);
+
     ///@}
 
   private:
@@ -1495,6 +1500,7 @@ class Vdp2 {
 
     std::vector<Vdp2Part> vdp2_parts_[6];                       ///< Storage of rendering parts for each scroll cell.
     ScrollScreen          screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
+    DisabledScrollScreen  disabled_scroll_screens_;             ///< Disabling state of scroll screens.
 
     ///@{
     /// \name VDP2 registers

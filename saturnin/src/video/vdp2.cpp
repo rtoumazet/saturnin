@@ -59,6 +59,13 @@ void Vdp2::initialize() {
         default: Log::warning(Logger::vdp2, tr("Unknown TV standard"));
     }
     calculateDisplayDuration();
+
+    disabled_scroll_screens_[ScrollScreen::nbg0] = false;
+    disabled_scroll_screens_[ScrollScreen::nbg1] = false;
+    disabled_scroll_screens_[ScrollScreen::nbg2] = false;
+    disabled_scroll_screens_[ScrollScreen::nbg3] = false;
+    disabled_scroll_screens_[ScrollScreen::rbg0] = false;
+    disabled_scroll_screens_[ScrollScreen::rbg1] = false;
 }
 
 void Vdp2::run(const u8 cycles) {
@@ -2757,7 +2764,7 @@ void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
                       const u16                 width,
                       const u16                 height,
                       const size_t              key) {
-    auto pos = ScreenPos{0, 0};
+    // auto pos = ScreenPos{0, 0};
 
     auto p = Vdp2Part(key, width, height);
     p.priority(screen.priority_number);

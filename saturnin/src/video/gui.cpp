@@ -71,6 +71,7 @@ using core::StvPlayerControls;
 using core::tr;
 using sh2::Sh2Register;
 using sh2::Sh2Type;
+using video::Vdp2;
 
 void showImguiDemoWindow(const bool show_window) {
     // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
@@ -121,7 +122,8 @@ void showMainMenu(core::EmulatorContext& state) {
 
                 static auto listbox_item_current = int{1};
 
-                ImGui::BeginChild("ST-V window", ImVec2(200, 100));
+                const auto child_size = ImVec2(200, 100);
+                ImGui::BeginChild("ST-V window", child_size);
                 ImGui::Combo("", &listbox_item_current, files);
                 ImGui::EndChild();
                 ImGui::EndMenu();
@@ -172,7 +174,7 @@ void showMainMenu(core::EmulatorContext& state) {
                                            {Header::peripherals, tr("Peripherals")},
                                            {Header::logs, tr("Logs")}};
             static auto last_opened_header = Header::none;
-            if (last_opened_header == Header::none) last_opened_header = Header::general;
+            if (last_opened_header == Header::none) { last_opened_header = Header::general; }
             auto setHeaderState = [](const Header header) {
                 const auto state = (last_opened_header == header);
                 ImGui::SetNextItemOpen(state);
@@ -196,7 +198,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (hm != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
                     } else {
-                        Log::warning(Logger::config, tr("Unknown hardware mode ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown hardware mode ..."));
                     }
                 }
                 ImGui::SameLine();
@@ -205,7 +207,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (hm != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
                     } else {
-                        Log::warning(Logger::config, tr("Unknown hardware mode ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown hardware mode ..."));
                     }
                 }
 
@@ -259,7 +261,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (key != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
                     } else {
-                        Log::warning(Logger::config, tr("Unknown TV standard ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown TV standard ..."));
                     }
                 }
                 ImGui::SameLine();
@@ -268,7 +270,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (key != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_rendering_tv_standard, *key);
                     } else {
-                        Log::warning(Logger::config, tr("Unknown TV standard ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown TV standard ..."));
                     }
                 }
 
@@ -406,7 +408,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (key != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
                     } else {
-                        Log::warning(Logger::config, tr("Unknown drive access method ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown drive access method ..."));
                     }
                 }
                 ImGui::SameLine();
@@ -415,7 +417,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     if (key != std::nullopt) {
                         state.config()->writeValue(core::AccessKeys::cfg_cdrom_access_method, *key);
                     } else {
-                        Log::warning(Logger::config, tr("Unknown drive access method ...").c_str());
+                        Log::warning(Logger::config, tr("Unknown drive access method ..."));
                     }
                 }
 
@@ -863,7 +865,11 @@ void showMainMenu(core::EmulatorContext& state) {
                 }
             }
 
-            (counter > 0) ? --counter : status_message.clear();
+            if (counter > 0) {
+                --counter;
+            } else {
+                status_message.clear();
+            }
 
             ImGui::TextUnformatted(status_message.c_str());
             ImGui::EndMenu();
@@ -903,10 +909,12 @@ void showRenderingWindow(core::EmulatorContext& state) {
 
     if (state.opengl()->areFbosInitialized()) {
         if (state.opengl()->isThereSomethingToRender()) { state.opengl()->render(); }
-        gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height, 0xff);
+        const auto alpha = 0xff;
+        gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height, alpha);
         if (state.debugStatus() != core::DebugStatus::disabled) {
             state.opengl()->renderVdp1DebugOverlay();
-            gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, 0x80);
+            const auto overlay_alpha = 0x80;
+            gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
         }
     }
     ImGui::Text("%s", state.opengl()->fps().c_str());
@@ -970,9 +978,11 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
     ImGui::Begin("Sh2 debug", opened, window_flags);
 
-    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+    constexpr auto local_child_rounding = 5.0f;
+    const auto     local_cell_padding   = ImVec2(5, 2);
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, local_child_rounding);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(5, 2));
+    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, local_cell_padding);
 
     static auto sh2_type   = Sh2Type{Sh2Type::master};
     static auto current_pc = u32{state.slaveSh2()->getRegister(Sh2Register::pc)};
@@ -1102,10 +1112,8 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::BeginChild("ChildDisassembly", child_size, true, window_flags);
         ImGui::ChildWindowHeader(tr("Disassembly"));
 
-        if (ImGui::BeginTable("disassembly",
-                              1,
-                              ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_PadOuterX,
-                              ImVec2(285.f, 0.f))) {
+        const auto table_size = ImVec2(285.f, 0.f);
+        if (ImGui::BeginTable("disassembly", 1, ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_PadOuterX, table_size)) {
             const auto lower_bound = u32{current_pc - 6};
             const auto upper_bound = u32{current_pc + 20};
             for (u32 i = lower_bound; i < upper_bound; i += 2) {
@@ -1114,7 +1122,8 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
                 const auto opcode = state.memory()->read<u16>(i);
                 if (i == current_pc) {
-                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), sh2::disasm(i, opcode).c_str());
+                    const auto color = ImVec4(0.5f, 0.5f, 1.0f, 1.0f);
+                    ImGui::TextColored(color, sh2::disasm(i, opcode).c_str());
                 } else {
                     ImGui::TextUnformatted(sh2::disasm(i, opcode).c_str());
                 }
@@ -1153,10 +1162,8 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::BeginChild("ChildBreakpoints", child_size, true, window_flags);
 
         ImGui::ChildWindowHeader(tr("Breakpoints"));
-        if (ImGui::BeginTable("breakpoints",
-                              1,
-                              ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_PadOuterX,
-                              ImVec2(0.0f, 95.f))) {
+        const auto table_size = ImVec2(0.0f, 95.f);
+        if (ImGui::BeginTable("breakpoints", 1, ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_PadOuterX, table_size)) {
             constexpr auto                                         input_size = u8{9};
             std::array<std::vector<char>, sh2::breakpoints_number> bp_input;
             for (u32 i = 0; i < sh2::breakpoints_number; ++i) {
@@ -1165,8 +1172,9 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::AlignTextToFramePadding();
                 ImGui::TextUnformatted("0x");
                 ImGui::SameLine();
-                auto cursor_pos = ImGui::GetCursorPos();
-                cursor_pos.x -= 8.f;
+                constexpr auto x_offset   = 8.f;
+                auto           cursor_pos = ImGui::GetCursorPos();
+                cursor_pos.x -= x_offset;
                 ImGui::SetCursorPos(cursor_pos);
 
                 if (current_sh2->breakpoint(i) == 0) {
@@ -1183,7 +1191,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
                         // stoi converts implicitly to string before converting. Doing the conversion before hand allows
                         // to handle the empty string case.
                         const auto str        = std::string(bp_input[i].data());
-                        const auto conv_input = (str.size() == 0) ? 0 : std::stoi(str, nullptr, 16);
+                        const auto conv_input = str.empty() ? 0 : std::stoi(str, nullptr, 16);
                         current_sh2->breakpoint(i, conv_input);
                     } catch (std::exception const& e) { Log::warning(Logger::exception, e.what()); }
                 }
@@ -1202,10 +1210,11 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::BeginChild("ChildCallstack", child_size, true, window_flags);
         ImGui::ChildWindowHeader(tr("Callstack"));
 
+        const auto table_size = ImVec2(0.0f, 135.f);
         if (ImGui::BeginTable("callstack",
                               1,
                               ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_ScrollY | ImGuiTableFlags_PadOuterX,
-                              ImVec2(0.0f, 135.f))) {
+                              table_size)) {
             const auto callstack_mask = std::string{"{:#010x}"};
             const auto callstack      = current_sh2->callstack();
             std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
@@ -1276,14 +1285,16 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::Begin(tr("VDP1 debug").c_str(), opened, window_flags);
 
     if (state.debugStatus() != core::DebugStatus::disabled) {
-        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(5, 2));
+        constexpr auto local_child_rounding = 5.0f;
+        const auto     local_cell_padding   = ImVec2(5, 2);
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, local_child_rounding);
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, local_cell_padding);
 
         static auto current_part_idx = size_t{}; // Here we store our selection data as an index.
         auto        draw_list        = state.vdp1()->vdp1Parts();
         ImGuiIO&    io               = ImGui::GetIO();
         io.WantCaptureKeyboard       = true;
-        if (draw_list.size() < current_part_idx) current_part_idx = 0;
+        if (draw_list.size() < current_part_idx) { current_part_idx = 0; }
 
         {
             // Draw list
@@ -1370,12 +1381,14 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
 void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
     enum class Vdp2DebugTab { none, global, vram, registers, scroll_screens };
     static auto current_tab = Vdp2DebugTab::none;
-    if (current_tab == Vdp2DebugTab::none) current_tab = Vdp2DebugTab::global;
+    if (current_tab == Vdp2DebugTab::none) { current_tab = Vdp2DebugTab::global; }
 
     const auto window_size_global         = ImVec2(610, 300);
     const auto window_size_vram           = ImVec2(610, 150);
     const auto window_size_scroll_screens = ImVec2(610, 600);
     const auto window_size_default        = ImVec2(610, 400);
+
+    const ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
 
     switch (current_tab) {
         case Vdp2DebugTab::global: ImGui::SetNextWindowSize(window_size_global); break;
@@ -1408,11 +1421,8 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::TableNextRow();
                     auto column_index = u8{0};
                     ImGui::TableSetColumnIndex(column_index++);
-                    ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
-
                     ImGui::TextUnformatted(label.c_str());
-
                     ImGui::TableSetColumnIndex(column_index++);
                     if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
                 }
@@ -1421,11 +1431,8 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::TableNextRow();
                     auto column_index = u8{0};
                     ImGui::TableSetColumnIndex(column_index++);
-                    ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
-
                     ImGui::TextUnformatted(label.c_str());
-
                     ImGui::TableSetColumnIndex(column_index++);
                     if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
                 }
@@ -1440,10 +1447,12 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 static auto disabled_layers = std::array{false, false, false, false, false, false};
                 const auto  addCheckbox     = [&](const ScrollScreen ss) {
                     ImGui::Checkbox(scroll_screens.at(ss).c_str(), &disabled_layers[util::toUnderlying(ss)]);
-                    ImGui::SameLine(ImGui::GetCursorPosX() + 50);
+                    ImGui::SameLine();
+                    constexpr auto offset = 20;
+                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
                 };
 
-                const auto child_size = ImVec2(475, 40);
+                const auto child_size = ImVec2(475, 35);
                 ImGui::BeginChild("vdp2_disable_layers", child_size, true, window_flags);
                 addCheckbox(ScrollScreen::nbg0);
                 addCheckbox(ScrollScreen::nbg1);
@@ -1483,16 +1492,15 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     for (u8 column = 0; column < video::vram_timing_size + 1; ++column) {
                         ImGui::TableSetColumnIndex(column);
                         if (column == 0) {
-                            ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
                             ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
                             ImGui::TextUnformatted(banks_name[row].c_str());
                             continue;
                         };
-                        const auto command_desc = state.vdp2()->getDebugVramAccessCommandDescription(banks[row][column - 1]);
+                        const auto command_desc = Vdp2::getDebugVramAccessCommandDescription(banks[row][column - 1]);
                         ImGui::TextUnformatted(command_desc.first.c_str());
                         if (command_desc.second.has_value()) {
                             ImGui::SameLine();
-                            ImGui::HelpMarker(command_desc.second.value().c_str());
+                            ImGui::HelpMarker(command_desc.second.value());
                         }
                     }
                 }
@@ -1502,8 +1510,8 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem(tr("Registers").c_str())) {
-            current_tab           = Vdp2DebugTab::registers;
-            const auto child_size = ImVec2(600, 380);
+            current_tab = Vdp2DebugTab::registers;
+            // const auto child_size = ImVec2(600, 380);
             ImGui::BeginChild("vdp2_registers_child");
 
             static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
@@ -1581,11 +1589,8 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                                 ImGui::TableNextRow();
                                 auto column_index = u8{0};
                                 ImGui::TableSetColumnIndex(column_index++);
-                                ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
                                 ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
-
                                 ImGui::TextUnformatted(label.c_str());
-
                                 ImGui::TableSetColumnIndex(column_index++);
                                 if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
                             }
@@ -1663,10 +1668,13 @@ void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::SameLine();
 
     if (ImGui::Button("Load")) {
+        constexpr auto load_address       = 0x6004000;
+        constexpr auto start_address      = 0x6004000;
+        constexpr auto breakpoint_address = 0x6004002;
         state.emulationStatus(core::EmulationStatus::stopped);
-        state.masterSh2()->setBinaryFileStartAddress(0x6004000);
-        state.masterSh2()->breakpoint(0, 0x6004002);
-        state.memory()->loadBinaryFile(full_path, 0x6004000);
+        state.masterSh2()->setBinaryFileStartAddress(start_address);
+        state.masterSh2()->breakpoint(0, breakpoint_address);
+        state.memory()->loadBinaryFile(full_path, load_address);
         Log::info(Logger::main, tr("Binary file loaded."));
     }
     ImGui::End();
@@ -1681,13 +1689,13 @@ void buildGui(core::EmulatorContext& state) {
 }
 
 void addTextureToDrawList(s32 texture, const u32 width, const u32 height, const u8 alpha) {
-    // ImColor(0xff, 0xff, 0xff, alpha);
+    const auto color = ImColor(0xff, 0xff, 0xff, alpha);
     ImGui::GetWindowDrawList()->AddImage((ImTextureID)(intptr_t)texture,
                                          ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y),
                                          ImVec2(ImGui::GetCursorScreenPos().x + width, ImGui::GetCursorScreenPos().y + height),
                                          ImVec2(0, 0),
                                          ImVec2(1, 1),
-                                         ImColor(0xff, 0xff, 0xff, alpha));
+                                         color);
 }
 
 auto getMouseCoordinates(core::EmulatorContext& state) -> Coord {

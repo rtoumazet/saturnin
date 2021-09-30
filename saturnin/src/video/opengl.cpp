@@ -341,7 +341,7 @@ void Opengl::render() {
         const auto proj_matrix = calculateDisplayViewportMatrix();
 
         for (const auto& part : parts_list) {
-            if (part->vertexes_.empty()) continue;
+            if (part->vertexes_.empty()) { continue; }
 
             switch (part->drawType()) {
                 case DrawType::textured_polygon: {
@@ -607,7 +607,7 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
         const auto vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
 
         for (const auto& part : parts_list) {
-            if (part->vertexes_.empty()) continue;
+            if (part->vertexes_.empty()) { continue; }
 
             // Quad is tessellated into 2 triangles, using a texture
 
