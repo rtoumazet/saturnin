@@ -173,17 +173,17 @@ class Scu {
     void write32(u32 addr, u32 data);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::executeDma(const DmaConfiguration& dc);
+    /// \fn void Scu::executeDma(DmaConfiguration& dc);
     ///
     /// \brief  Executes the DMA operation.
     ///
     /// \author Runik
     /// \date   02/02/2019
     ///
-    /// \param  dc  DMA configuration.
+    /// \param [in,out] dc  DMA configuration.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void executeDma(const DmaConfiguration& dc);
+    void executeDma(DmaConfiguration& dc);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::setInterruptStatusRegister(const Interrupt& i);

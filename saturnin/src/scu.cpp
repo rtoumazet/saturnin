@@ -180,7 +180,7 @@ void Scu::write32(const u32 addr, const u32 data) {
     rawWrite<u32>(modules_.memory()->scu_, addr & scu_memory_mask, data);
 };
 
-void Scu::executeDma(const DmaConfiguration& dc) {
+void Scu::executeDma(DmaConfiguration& dc) {
     constexpr auto max_transfer_byte_number = u32{0x100000};
     constexpr auto address_add_0            = u8{0};
     constexpr auto address_add_2            = u8{2};
@@ -325,9 +325,9 @@ void Scu::executeDma(const DmaConfiguration& dc) {
                 default: Log::warning(Logger::scu, tr("Unknown DMA bus ! : {}"), dc.write_address); break;
             }
 
-            if (dc.read_address_update == ReadAddressUpdate::update) { read_address += long_counter * read_address_add; }
+            if (dc.read_address_update == ReadAddressUpdate::update) { dc.read_address += long_counter * read_address_add; }
 
-            if (dc.write_address_update == WriteAddressUpdate::update) { write_address += word_counter * write_address_add; }
+            if (dc.write_address_update == WriteAddressUpdate::update) { dc.write_address += word_counter * write_address_add; }
 
             sendDmaEndInterrupt(dc.dma_level);
             resetDmaEnable(dc);
@@ -749,9 +749,13 @@ void Scu::activateDma() {
     if (dma_queue_.top().dma_status == DmaStatus::active) { return; }
 
     while (dma_queue_.top().dma_status == DmaStatus::queued) {
-        executeDma(dma_queue_.top());
         auto dc{dma_queue_.top()}; // Disregard LNT1001 notice, copy is intended
-        dc.dma_status = DmaStatus::finished;
+        executeDma(dc);
+        if (dc.dma_enable == DmaEnable::enabled) {
+            dc.dma_status = DmaStatus::waiting_start_factor;
+        } else {
+            dc.dma_status = DmaStatus::finished;
+        }
         dma_queue_.pop();
         dma_queue_.push(dc);
     }
