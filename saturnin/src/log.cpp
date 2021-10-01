@@ -80,6 +80,17 @@ auto Log::initialize() -> bool {
 }
 
 // static //
+void Log::shutdown() {
+    // Adding a delay to allow the thread to finish cleanly.
+    using namespace std::this_thread;     // sleep_for
+    using namespace std::chrono_literals; // ms
+    const auto time_to_sleep = 2000ms;
+    sleep_for(time_to_sleep);
+
+    spdlog::shutdown();
+}
+
+// static //
 auto Log::createFileSink(const std::string& logger_path) -> std::shared_ptr<spdlog::sinks::basic_file_sink_mt> {
     removeFile(logger_path);
 
@@ -127,7 +138,9 @@ void Log::removeFile(const std::string& path) {
     auto full_path = fs::current_path() / path;
     full_path.make_preferred();
     fs::create_directories(full_path.parent_path());
-    fs::remove(full_path);
+    try {
+        fs::remove(full_path);
+    } catch (const fs::filesystem_error& e) { Log::error(Logger::exception, e.what()); }
 }
 
 // static //

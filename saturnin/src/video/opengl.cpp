@@ -1088,8 +1088,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         glClear(GL_COLOR_BUFFER_BIT);
 
         gui::buildGui(state);
-        if (state.renderingStatus() == core::RenderingStatus::reset) { glfwSetWindowShouldClose(ihm_window, GLFW_TRUE); }
-        if (state.renderingStatus() == core::RenderingStatus::stopped) { glfwSetWindowShouldClose(ihm_window, GLFW_TRUE); }
+        if (state.renderingStatus() != core::RenderingStatus::running) { glfwSetWindowShouldClose(ihm_window, GLFW_TRUE); }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

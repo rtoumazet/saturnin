@@ -33,13 +33,18 @@ using core::tr;
 auto main(int argc, char* argv[]) -> int {
     try {
         auto state = EmulatorContext{};
-        if (!state.initialize()) {
-            Log::error(Logger::main, tr("Could not initialize the program ..."));
-            throw std::runtime_error("Main error !");
+
+        while (state.renderingStatus() != core::RenderingStatus::stopped) {
+            if (!state.initialize()) {
+                Log::error(Logger::main, tr("Could not initialize the program ..."));
+                throw std::runtime_error("Main error !");
+            }
+
+            state.startInterface();
+            state.stopEmulation();
+            Log::shutdown();
         }
 
-        state.startInterface();
-        state.stopEmulation();
         std::exit(EXIT_SUCCESS);
     } catch (const std::runtime_error& e) { Log::error(Logger::exception, e.what()); } catch (const std::exception& e) {
         Log::error(Logger::exception, e.what());
