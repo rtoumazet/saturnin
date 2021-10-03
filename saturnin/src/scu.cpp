@@ -526,20 +526,19 @@ void Scu::resetInterruptStatusRegister(const Interrupt& i) { interrupt_status_re
 void Scu::generateInterrupt(const Interrupt& i) {
     if (i.level != 0) {
         if (!isInterruptMasked(i)) {
-            //            if (!isInterruptExecuting(i)) {
             setInterruptStatusRegister(i);
             modules_.masterSh2()->sendInterrupt(i);
+        }
 
-            if (modules_.smpc()->isSlaveSh2On()) {
-                switch (i.vector) {
-                    case is::vector_nmi:
-                    case is::vector_frt_input_capture:
-                    case is::vector_frt_input_capture2: modules_.slaveSh2()->sendInterrupt(i); break;
-                    case is::vector_v_blank_in: modules_.slaveSh2()->sendInterrupt(is::v_blank_in_slave); break;
-                    case is::vector_h_blank_in: modules_.slaveSh2()->sendInterrupt(is::h_blank_in_slave); break;
-                }
+        // There's no checking for the interrupt status in the SCU for the slave SH2, they are always sent.
+        if (modules_.smpc()->isSlaveSh2On()) {
+            switch (i.vector) {
+                case is::vector_nmi:
+                case is::vector_frt_input_capture:
+                case is::vector_frt_input_capture2: modules_.slaveSh2()->sendInterrupt(i); break;
+                case is::vector_v_blank_in: modules_.slaveSh2()->sendInterrupt(is::v_blank_in_slave); break;
+                case is::vector_h_blank_in: modules_.slaveSh2()->sendInterrupt(is::h_blank_in_slave); break;
             }
-            //          }
         }
     }
 };
