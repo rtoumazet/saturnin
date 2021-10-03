@@ -952,6 +952,7 @@ auto isModernOpenglCapable() -> bool {
 void windowCloseCallback(GLFWwindow* window) {
     auto state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
     state->stopEmulation();
+    state->renderingStatus(core::RenderingStatus::stopped);
 
     // Adding a delay to allow the thread to finish cleanly.
     using namespace std::this_thread;     // sleep_for
@@ -1141,9 +1142,7 @@ auto loadPngImage(const char* filename) -> GLFWimage {
 
 void windowSizeCallback(GLFWwindow* window, int width, int height) {
     const auto state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
-
     state->opengl()->onWindowResize(width, height);
-    Log::warning(Logger::opengl, "Window was resized: {} {}", width, height);
 }
 
 void checkShaderCompilation(const u32 shader) {
