@@ -1059,15 +1059,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     const auto clear_color = ImVec4{0.0f, 0.0f, 0.0f, 1.00f};
 
-    // Getting the right rendering context
-    // auto opengl = std::make_unique<Opengl>(state.config());
-    // state.opengl(opengl.get());
-    // opengl->ihmRenderingContext(ihm_window);
-    // opengl->initializeRenderingContext();
-
     updateMainWindowSizeAndRatio(ihm_window, minimum_window_width, minimum_window_height);
-
-    // opengl->hostScreenResolution(ScreenResolution{minimum_window_width, minimum_window_height});
 
     state.opengl()->initialize(ihm_window);
 
@@ -1114,9 +1106,9 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     state.stopEmulation();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyPlatformWindows();
     ImGui::DestroyContext();
 
-    // opengl->shutdownRenderingContext();
     glfwDestroyWindow(ihm_window);
     glfwTerminate();
 

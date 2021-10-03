@@ -88,8 +88,6 @@ auto EmulatorContext::vdp2() -> Vdp2* { return vdp2_.get(); };
 auto EmulatorContext::opengl() -> Opengl* { return opengl_.get(); };
 
 auto EmulatorContext::initialize() -> bool {
-    Log::initialize();
-
     // Locale is defaulted to english to handle the case when there's no config file created yet.
     if (!Locale::getInstance().initialize("en")) { return false; }
 
@@ -226,7 +224,10 @@ void EmulatorContext::emulationMainThread() {
     }
 }
 
-void EmulatorContext::startInterface() { video::runOpengl(*this); }
+void EmulatorContext::startInterface() {
+    renderingStatus(core::RenderingStatus::running);
+    video::runOpengl(*this);
+}
 
 void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
 

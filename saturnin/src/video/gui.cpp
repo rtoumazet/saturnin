@@ -57,7 +57,7 @@ static auto show_debug_memory = false;
 static auto show_debug_sh2    = false;
 static auto show_debug_vdp1   = false;
 static auto show_debug_vdp2   = false;
-static auto show_demo         = false;
+static auto show_demo         = true;
 static auto show_log          = true;
 
 using core::Log;

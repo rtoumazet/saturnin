@@ -450,6 +450,8 @@ auto Vdp2::isLayerDisabled(const ScrollScreen s) -> bool {
     try {
         return disabled_scroll_screens_.at(s);
     } catch (std::exception const& e) { Log::warning(Logger::exception, e.what()); }
+
+    return false;
 }
 
 void Vdp2::setLayerDisabledState(const ScrollScreen s, const bool is_disabled) { disabled_scroll_screens_[s] = is_disabled; }
