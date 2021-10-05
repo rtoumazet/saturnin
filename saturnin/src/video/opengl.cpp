@@ -87,26 +87,27 @@ void Opengl::shutdown() {
     glDeleteProgram(program_shader_);
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        for (auto f : fbos_) {
-            glDeleteFramebuffersEXT(1, &f);
+        for (const auto& [type, fbo_data] : fbo_list_) {
+            glDeleteFramebuffersEXT(1, &fbo_data.first);
+            glDeleteTextures(1, &fbo_data.second);
         }
     } else {
         gl33core::glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-        for (auto f : fbos_) {
-            gl33core::glDeleteFramebuffers(1, &f);
+        for (const auto& [type, fbo_data] : fbo_list_) {
+            glDeleteFramebuffers(1, &fbo_data.first);
+            glDeleteTextures(1, &fbo_data.second);
         }
-    }
-    for (auto t : fbo_textures_) {
-        glDeleteTextures(1, &t);
     }
 }
 
 void Opengl::preRender() {
-    const auto current_index = 1 - displayed_texture_index_; // toggles the value
+    // const auto current_index = 1 - displayed_texture_index_; // toggles the value
+    switchRenderedBuffer();
+
     if (is_legacy_opengl_) {
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbos_[current_index]);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, getFboId(currentRenderedBuffer()));
     } else {
-        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbos_[current_index]);
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, getFboId(currentRenderedBuffer()));
     }
 
     // Viewport is the entire Saturn framebuffer
@@ -156,7 +157,7 @@ void Opengl::postRender() {
     } else {
         gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    displayed_texture_index_ = 1 - displayed_texture_index_; // toggles the value
+    // displayed_texture_index_ = 1 - displayed_texture_index_; // toggles the value
 
     glDisable(GL_SCISSOR_TEST);
 };
@@ -503,9 +504,9 @@ auto Opengl::isThereSomethingToRender() -> const bool {
 void Opengl::renderVdp1DebugOverlay() {
     //----------- Pre render -----------//
     if (is_legacy_opengl_) {
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbos_[toUnderlying(FboIndex::vdp1_debug_overlay)]);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, getFboId(FboType::vdp1_debug_overlay));
     } else {
-        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbos_[toUnderlying(FboIndex::vdp1_debug_overlay)]);
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, getFboId(FboType::vdp1_debug_overlay));
     }
 
     // Viewport is the entire Saturn framebuffer
@@ -570,9 +571,9 @@ void Opengl::renderVdp1DebugOverlay() {
 void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Pre render -----------//
     if (is_legacy_opengl_) {
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbos_[toUnderlying(FboIndex::vdp2_debug_layer)]);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, getFboId(FboType::vdp2_debug_layer));
     } else {
-        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbos_[toUnderlying(FboIndex::vdp2_debug_layer)]);
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, getFboId(FboType::vdp2_debug_layer));
     }
 
     // Viewport is the entire Saturn framebuffer
@@ -837,64 +838,78 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 }
 
 void Opengl::initializeFbos() {
-    // 4 FBOs are generated.
-    // 0 and 1 are used as front and back buffers : one will be used as the last complete rendering by the GUI while the other
-    // will be rendered to.
-    // 1 is used as the VDP1 debug overlay
-    // 2 is used as the VDP2 debug layer.
-    constexpr auto fbos_number = u8{4};
-    for (int i = 0; i < fbos_number; ++i) {
-        auto fbo     = u32{};
-        auto texture = u32{};
-        if (is_legacy_opengl_) {
-            glGenFramebuffersEXT(1, &fbo);
-        } else {
-            gl33core::glGenFramebuffers(1, &fbo);
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    // A FBO (and its related texture) is generated for every FboType.
+    // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while the
+    // other will be rendered to.
 
-        // Creating a texture for the color buffer
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     GL_RGBA8,
-                     saturn_framebuffer_width,
-                     saturn_framebuffer_height,
-                     0,
-                     GL_RGBA,
-                     GL_UNSIGNED_BYTE,
-                     nullptr);
+    initializeFbo(FboType::front_buffer);
+    initializeFbo(FboType::back_buffer);
+    initializeFbo(FboType::vdp1_debug_overlay);
+    initializeFbo(FboType::vdp2_debug_layer);
+    initializeFbo(FboType::priority_level_1);
+    initializeFbo(FboType::priority_level_2);
+    initializeFbo(FboType::priority_level_3);
+    initializeFbo(FboType::priority_level_4);
+    initializeFbo(FboType::priority_level_5);
+    initializeFbo(FboType::priority_level_6);
+    initializeFbo(FboType::priority_level_7);
 
-        // No need for mipmaps, they are turned off
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    currentRenderedBuffer(FboType::front_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
+}
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // Attaching the color texture to the fbo
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
-
-        if (is_legacy_opengl_) {
-            const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
-            if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE_EXT) {
-                Log::error(Logger::opengl, tr("Could not initialize framebuffer object !"));
-                throw std::runtime_error("Opengl error !");
-            }
-        } else {
-            const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
-            if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
-                Log::error(Logger::opengl, tr("Could not initialize framebuffer object !"));
-                throw std::runtime_error("Opengl error !");
-            }
-        }
-        fbos_.emplace_back(fbo);
-        fbo_textures_.emplace_back(texture);
+void Opengl::initializeFbo(const FboType type) {
+    auto fbo     = u32{};
+    auto texture = u32{};
+    if (is_legacy_opengl_) {
+        glGenFramebuffersEXT(1, &fbo);
+    } else {
+        gl33core::glGenFramebuffers(1, &fbo);
     }
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    displayedTexture(index_0); // Setting the texture of first fbo used.
-    glBindFramebuffer(GL_FRAMEBUFFER, fbos_[index_0]);
+    // Creating a texture for the color buffer
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA8,
+                 saturn_framebuffer_width,
+                 saturn_framebuffer_height,
+                 0,
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 nullptr);
+
+    // No need for mipmaps, they are turned off
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Attaching the color texture to the fbo
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
+
+    if (is_legacy_opengl_) {
+        const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
+        if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE_EXT) {
+            Log::error(Logger::opengl, tr("Could not initialize framebuffer object !"));
+            throw std::runtime_error("Opengl error !");
+        }
+    } else {
+        const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
+        if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
+            Log::error(Logger::opengl, tr("Could not initialize framebuffer object !"));
+            throw std::runtime_error("Opengl error !");
+        }
+    }
+    // fbos_.emplace_back(fbo);
+    // fbo_textures_.emplace_back(texture);
+    fbo_list_.try_emplace(type, fbo, texture);
+
+    currentRenderedBuffer(FboType::front_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
 }
 
 void Opengl::calculateFps() {
@@ -921,6 +936,10 @@ void Opengl::calculateFps() {
         frames_count         = 0;
         time_elapsed         = micro{0};
     }
+}
+
+void Opengl::switchRenderedBuffer() {
+    current_rendered_buffer_ = (current_rendered_buffer_ == FboType::back_buffer) ? FboType::front_buffer : FboType::back_buffer;
 }
 
 auto isModernOpenglCapable() -> bool {

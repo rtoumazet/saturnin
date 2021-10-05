@@ -55,7 +55,22 @@ using utilities::toUnderlying;
 constexpr auto minimum_window_width  = u16{512};
 constexpr auto minimum_window_height = u16{512};
 
-enum class FboIndex : u8 { front_buffer = 0, back_buffer = 1, vdp1_debug_overlay = 2, vdp2_debug_layer = 3 };
+enum class FboType : u8 {
+    front_buffer,
+    back_buffer,
+    vdp1_debug_overlay,
+    vdp2_debug_layer,
+    priority_level_1,
+    priority_level_2,
+    priority_level_3,
+    priority_level_4,
+    priority_level_5,
+    priority_level_6,
+    priority_level_7
+};
+
+using FboData = std::pair<u32, u32>; // 1st is fbo id, 2nd is texture id.
+using FboList = std::unordered_map<FboType, FboData>;
 
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
@@ -79,10 +94,12 @@ class Opengl {
 
     ///@{
     /// Accessors / Mutators
-    [[nodiscard]] auto displayedTexture() const { return fbo_textures_[displayed_texture_index_]; };
-    void               displayedTexture(const u32 index) { displayed_texture_index_ = index; };
-    [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return fbo_textures_[toUnderlying(FboIndex::vdp1_debug_overlay)]; };
-    [[nodiscard]] auto vdp2DebugLayerTextureId() -> u32 { return fbo_textures_[toUnderlying(FboIndex::vdp2_debug_layer)]; }
+    //[[nodiscard]] auto displayedTexture() const { return fbo_textures_[displayed_texture_index_]; };
+    // void               displayedTexture(const u32 index) { displayed_texture_index_ = index; };
+    [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
+    void               currentRenderedBuffer(const FboType type) { current_rendered_buffer_ = type; };
+    [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return fbo_textures_[toUnderlying(FboType::vdp1_debug_overlay)]; };
+    [[nodiscard]] auto vdp2DebugLayerTextureId() -> u32 { return fbo_textures_[toUnderlying(FboType::vdp2_debug_layer)]; }
     [[nodiscard]] auto guiRenderingContext() const { return gui_rendering_context_; };
     void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
     [[nodiscard]] auto fps() const { return fps_; };
@@ -295,7 +312,7 @@ class Opengl {
     /// \returns    True if framebuffer objects are initialized.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto areFbosInitialized() -> bool { return !fbos_.empty(); }
+    auto areFbosInitialized() -> bool { return !fbo_list_.empty(); }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::render();
@@ -391,17 +408,26 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void initializeFbos();
+    void initializeFbo(const FboType type);
 
     void calculateFps();
+
+    auto getFboId(const FboType type) -> const u32 { return fbo_list_.at(type).first; };
+    auto getFboTextureId(const FboType type) -> const u32 { return fbo_list_.at(type).first; };
+    void switchRenderedBuffer();
 
     core::Config* config_;                ///< Configuration object.
     GLFWwindow*   gui_rendering_context_; ///< Context used for GUI rendering.
     // GLFWwindow*   emulator_rendering_context_; ///< Context used for  emulator rendering.
 
-    u32              displayed_texture_index_{}; ///< Index of complete texture displayed by the GUI, will be one of fbo_texture.
-    std::vector<u32> fbos_;                      ///< The framebuffer objects used for rendering + debug overlay.
-    std::vector<u32> fbo_textures_;              ///< The textures used by the framebuffer objects.
-    bool             is_legacy_opengl_{};        ///< True if rendering in legacy opengl.
+    // u32              displayed_texture_index_{}; ///< Index of complete texture displayed by the GUI, will be one of
+    // fbo_texture.
+    // std::vector<u32> fbos_;                    ///< The framebuffer objects used for rendering + debug overlay.
+    // std::vector<u32> fbo_textures_;            ///< The textures used by the framebuffer objects.
+    FboList fbo_list_;                ///< List of framebuffer objects used in the program.
+    FboType current_rendered_buffer_; ///< The current rendered buffer (front or back)
+
+    bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
