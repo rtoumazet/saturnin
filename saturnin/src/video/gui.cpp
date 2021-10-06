@@ -911,7 +911,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
     if (state.opengl()->areFbosInitialized()) {
         if (state.opengl()->isThereSomethingToRender()) { state.opengl()->render(); }
         const auto alpha = 0xff;
-        gui::addTextureToDrawList(state.opengl()->displayedTexture(), width, height, alpha);
+        gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(), width, height, alpha);
         if (state.debugStatus() != core::DebugStatus::disabled) {
             state.opengl()->renderVdp1DebugOverlay();
             const auto overlay_alpha = 0x80;

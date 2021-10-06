@@ -98,8 +98,8 @@ class Opengl {
     // void               displayedTexture(const u32 index) { displayed_texture_index_ = index; };
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboType type) { current_rendered_buffer_ = type; };
-    [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return fbo_textures_[toUnderlying(FboType::vdp1_debug_overlay)]; };
-    [[nodiscard]] auto vdp2DebugLayerTextureId() -> u32 { return fbo_textures_[toUnderlying(FboType::vdp2_debug_layer)]; }
+    [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };
+    [[nodiscard]] auto vdp2DebugLayerTextureId() -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
     [[nodiscard]] auto guiRenderingContext() const { return gui_rendering_context_; };
     void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
     [[nodiscard]] auto fps() const { return fps_; };
@@ -325,7 +325,31 @@ class Opengl {
 
     void render();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto saturnin::video::Opengl::isThereSomethingToRender() -> const bool;
+    ///
+    /// \brief  Is there something to render
+    ///
+    /// \author Runik
+    /// \date   06/10/2021
+    ///
+    /// \returns    A const bool.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     auto isThereSomethingToRender() -> const bool;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::getRenderedBufferTextureId() -> u32;
+    ///
+    /// \brief  Gets the texture ID of the buffer currently rendered to.
+    ///
+    /// \author Runik
+    /// \date   06/10/2021
+    ///
+    /// \returns    The rendered buffer texture identifier.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getRenderedBufferTextureId() -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::renderVdp1DebugOverlay();
@@ -412,8 +436,8 @@ class Opengl {
 
     void calculateFps();
 
-    auto getFboId(const FboType type) -> const u32 { return fbo_list_.at(type).first; };
-    auto getFboTextureId(const FboType type) -> const u32 { return fbo_list_.at(type).first; };
+    auto getFboId(const FboType type) const -> u32 { return fbo_list_.at(type).first; };
+    auto getFboTextureId(const FboType type) const -> u32 { return fbo_list_.at(type).first; };
     void switchRenderedBuffer();
 
     core::Config* config_;                ///< Configuration object.

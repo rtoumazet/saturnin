@@ -501,6 +501,8 @@ auto Opengl::isThereSomethingToRender() -> const bool {
     return !parts_list_.empty();
 }
 
+auto Opengl::getRenderedBufferTextureId() -> u32 { return getFboTextureId(current_rendered_buffer_); }
+
 void Opengl::renderVdp1DebugOverlay() {
     //----------- Pre render -----------//
     if (is_legacy_opengl_) {
