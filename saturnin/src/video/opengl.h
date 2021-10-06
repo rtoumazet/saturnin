@@ -440,6 +440,8 @@ class Opengl {
     auto getFboTextureId(const FboType type) const -> u32 { return fbo_list_.at(type).first; };
     void switchRenderedBuffer();
 
+    auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
+
     core::Config* config_;                ///< Configuration object.
     GLFWwindow*   gui_rendering_context_; ///< Context used for GUI rendering.
     // GLFWwindow*   emulator_rendering_context_; ///< Context used for  emulator rendering.

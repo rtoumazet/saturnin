@@ -119,34 +119,36 @@ void Opengl::preRender() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    const auto host_res     = hostScreenResolution();
-    const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
-    const auto saturn_res   = saturnScreenResolution();
-    const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
+    // const auto host_res     = hostScreenResolution();
+    // const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
+    // const auto saturn_res   = saturnScreenResolution();
+    // const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
+
+    //// Scissor test calculation, to remove from display everything outside the current Saturn resolution.
+    // auto scissor_x      = u32{};
+    // auto scissor_y      = u32{};
+    // auto scissor_width  = u32{};
+    // auto scissor_height = u32{};
+
+    // if (host_ratio >= saturn_ratio) {
+    //    // Pillarbox display (wide viewport), use full height
+    //    const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
+    //    scissor_x             = empty_zone * saturn_framebuffer_width / host_res.width / 2;
+    //    scissor_y             = 0;
+    //    scissor_width         = (host_res.width - empty_zone) * saturn_framebuffer_width / host_res.width;
+    //    scissor_height        = saturn_framebuffer_height;
+    //} else {
+    //    // Letterbox display (tall viewport) use full width
+    //    const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
+    //    scissor_x             = 0;
+    //    scissor_y             = empty_zone * saturn_framebuffer_height / host_res.height / 2;
+    //    scissor_width         = saturn_framebuffer_width;
+    //    scissor_height        = (host_res.height - empty_zone) * saturn_framebuffer_height / host_res.height;
+    //}
 
     // Scissor test calculation, to remove from display everything outside the current Saturn resolution.
-    auto scissor_x      = u32{};
-    auto scissor_y      = u32{};
-    auto scissor_width  = u32{};
-    auto scissor_height = u32{};
-
-    if (host_ratio >= saturn_ratio) {
-        // Pillarbox display (wide viewport), use full height
-        const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
-        scissor_x             = empty_zone * saturn_framebuffer_width / host_res.width / 2;
-        scissor_y             = 0;
-        scissor_width         = (host_res.width - empty_zone) * saturn_framebuffer_width / host_res.width;
-        scissor_height        = saturn_framebuffer_height;
-    } else {
-        // Letterbox display (tall viewport) use full width
-        const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
-        scissor_x             = 0;
-        scissor_y             = empty_zone * saturn_framebuffer_height / host_res.height / 2;
-        scissor_width         = saturn_framebuffer_width;
-        scissor_height        = (host_res.height - empty_zone) * saturn_framebuffer_height / host_res.height;
-    }
-
     glEnable(GL_SCISSOR_TEST);
+    auto [scissor_x, scissor_y, scissor_width, scissor_height] = calculateViewportPosAndSize();
     glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
 };
 
@@ -157,8 +159,6 @@ void Opengl::postRender() {
     } else {
         gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    // displayed_texture_index_ = 1 - displayed_texture_index_; // toggles the value
-
     glDisable(GL_SCISSOR_TEST);
 };
 
@@ -517,6 +517,11 @@ void Opengl::renderVdp1DebugOverlay() {
     gl::glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // Scissor test calculation, to remove from display everything outside the current Saturn resolution.
+    glEnable(GL_SCISSOR_TEST);
+    auto [scissor_x, scissor_y, scissor_width, scissor_height] = calculateViewportPosAndSize();
+    glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
+
     //----------- Render -----------------//
     // Calculating the ortho projection matrix
     const auto [vao_simple, vertex_buffer_simple] = initializeVao(ShaderName::textured);
@@ -568,6 +573,8 @@ void Opengl::renderVdp1DebugOverlay() {
     } else {
         gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
+
+    glDisable(GL_SCISSOR_TEST);
 };
 
 void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
@@ -942,6 +949,37 @@ void Opengl::calculateFps() {
 
 void Opengl::switchRenderedBuffer() {
     current_rendered_buffer_ = (current_rendered_buffer_ == FboType::back_buffer) ? FboType::front_buffer : FboType::back_buffer;
+}
+
+auto Opengl::calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32> {
+    const auto host_res     = hostScreenResolution();
+    const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
+    const auto saturn_res   = saturnScreenResolution();
+    const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
+
+    // Viewport position and size
+    auto x      = u32{};
+    auto y      = u32{};
+    auto width  = u32{};
+    auto height = u32{};
+
+    if (host_ratio >= saturn_ratio) {
+        // Pillarbox display (wide viewport), use full height
+        const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
+        x                     = empty_zone * saturn_framebuffer_width / host_res.width / 2;
+        y                     = 0;
+        width                 = (host_res.width - empty_zone) * saturn_framebuffer_width / host_res.width;
+        height                = saturn_framebuffer_height;
+    } else {
+        // Letterbox display (tall viewport) use full width
+        const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
+        x                     = 0;
+        y                     = empty_zone * saturn_framebuffer_height / host_res.height / 2;
+        width                 = saturn_framebuffer_width;
+        height                = (host_res.height - empty_zone) * saturn_framebuffer_height / host_res.height;
+    }
+
+    return std::make_tuple(x, y, width, height);
 }
 
 auto isModernOpenglCapable() -> bool {
