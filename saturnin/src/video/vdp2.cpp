@@ -1962,6 +1962,7 @@ void Vdp2::populateRenderData() {
             }
         }
     }
+    resetCacheState();
 }
 
 auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
@@ -3090,6 +3091,18 @@ auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {
     }
     return ((register_offset & register_mask) << displacement_8) * color_size;
 };
+
+//--------------------------------------------------------------------------------------------------------------
+// CACHE methods
+//--------------------------------------------------------------------------------------------------------------
+
+void Vdp2::resetCacheState() { modules_.memory()->was_vdp2_cram_accessed_ = false; }
+
+auto Vdp2::isCacheDirty(const ScrollScreenStatus& screen) -> bool { return true; }
+
+//--------------------------------------------------------------------------------------------------------------
+// Free functions
+//--------------------------------------------------------------------------------------------------------------
 
 auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data                      = PatternNameData{};

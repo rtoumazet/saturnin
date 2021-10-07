@@ -1468,6 +1468,32 @@ class Vdp2 {
 
     auto getColorRamAddressOffset(const u8 register_offset) -> u16;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::resetCacheState();
+    ///
+    /// \brief  Resets the cache state.
+    ///
+    /// \author Runik
+    /// \date   07/10/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void resetCacheState();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::isCacheDirty(const ScrollScreenStatus& screen) -> bool;
+    ///
+    /// \brief  Checks if a scroll screen has to be reloaded.
+    ///
+    /// \author Runik
+    /// \date   07/10/2021
+    ///
+    /// \param  screen  The scroll screen to check.
+    ///
+    /// \returns    True if the cache has to be reloaded.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto isCacheDirty(const ScrollScreenStatus& screen) -> bool;
+
     EmulatorModules modules_;
 
     AddressToNameMap address_to_name_; ///< Link between a register address and its name.
