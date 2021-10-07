@@ -119,34 +119,7 @@ void Opengl::preRender() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // const auto host_res     = hostScreenResolution();
-    // const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
-    // const auto saturn_res   = saturnScreenResolution();
-    // const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
-
-    //// Scissor test calculation, to remove from display everything outside the current Saturn resolution.
-    // auto scissor_x      = u32{};
-    // auto scissor_y      = u32{};
-    // auto scissor_width  = u32{};
-    // auto scissor_height = u32{};
-
-    // if (host_ratio >= saturn_ratio) {
-    //    // Pillarbox display (wide viewport), use full height
-    //    const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
-    //    scissor_x             = empty_zone * saturn_framebuffer_width / host_res.width / 2;
-    //    scissor_y             = 0;
-    //    scissor_width         = (host_res.width - empty_zone) * saturn_framebuffer_width / host_res.width;
-    //    scissor_height        = saturn_framebuffer_height;
-    //} else {
-    //    // Letterbox display (tall viewport) use full width
-    //    const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
-    //    scissor_x             = 0;
-    //    scissor_y             = empty_zone * saturn_framebuffer_height / host_res.height / 2;
-    //    scissor_width         = saturn_framebuffer_width;
-    //    scissor_height        = (host_res.height - empty_zone) * saturn_framebuffer_height / host_res.height;
-    //}
-
-    // Scissor test calculation, to remove from display everything outside the current Saturn resolution.
+    // Scissor test calculation, to remove from display everything outside the current display area.
     glEnable(GL_SCISSOR_TEST);
     auto [scissor_x, scissor_y, scissor_width, scissor_height] = calculateViewportPosAndSize();
     glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
@@ -263,17 +236,6 @@ void Opengl::initializeShaders() {
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
     PartsList parts_list;
-    // PartsList parts_list_debug;
-
-    // const auto addVdp2PartsToDebugList = [&](const ScrollScreen s) {
-    //    const auto vdp2_parts = state.vdp2()->vdp2Parts(s);
-    //    if (!vdp2_parts.empty()) {
-    //        parts_list_debug.reserve(parts_list_debug.size() + vdp2_parts.size());
-    //        for (auto&& p : vdp2_parts) {
-    //            parts_list_debug.push_back(std::make_unique<Vdp2Part>(p));
-    //        }
-    //    }
-    //};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
         const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
@@ -294,8 +256,6 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
             }
         }
     };
-
-    // if (state.vdp2()->screenInDebug() != ScrollScreen::none) { addVdp2PartsToDebugList(state.vdp2()->screenInDebug()); }
 
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) { addVdp2PartsToList(ScrollScreen::nbg0); };
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) { addVdp2PartsToList(ScrollScreen::nbg1); };
@@ -1052,26 +1012,26 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const std::string window_title
         = fmt::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
-    const auto ihm_window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
-    if (ihm_window == nullptr) { return EXIT_FAILURE; }
-    state.openglWindow(ihm_window);
+    const auto window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
+    if (window == nullptr) { return EXIT_FAILURE; }
+    state.openglWindow(window);
 
     // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     // const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, ihm_window);
 
-    glfwSetWindowCloseCallback(ihm_window, windowCloseCallback);
-    glfwSetWindowSizeCallback(ihm_window, windowSizeCallback);
+    glfwSetWindowCloseCallback(window, windowCloseCallback);
+    glfwSetWindowSizeCallback(window, windowSizeCallback);
 
-    glfwSetWindowUserPointer(ihm_window, static_cast<void*>(&state));
+    glfwSetWindowUserPointer(window, static_cast<void*>(&state));
 
-    glfwSetInputMode(ihm_window, GLFW_STICKY_KEYS, GLFW_TRUE);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
-    glfwMakeContextCurrent(ihm_window);
+    glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
     auto icons = std::array<GLFWimage, 3>{
         {loadPngImage("saturnin-ico-16.png"), loadPngImage("saturnin-ico-32.png"), loadPngImage("saturnin-ico-48.png")}};
-    glfwSetWindowIcon(ihm_window, 3, icons.data());
+    glfwSetWindowIcon(window, 3, icons.data());
 
     glbinding::initialize(glfwGetProcAddress);
 
@@ -1086,7 +1046,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
 
-    ImGui_ImplGlfw_InitForOpenGL(ihm_window, true);
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
     (is_legacy_opengl) ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Setup style
@@ -1119,12 +1079,12 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     const auto clear_color = ImVec4{0.0f, 0.0f, 0.0f, 1.00f};
 
-    updateMainWindowSizeAndRatio(ihm_window, minimum_window_width, minimum_window_height);
+    updateMainWindowSizeAndRatio(window, minimum_window_width, minimum_window_height);
 
-    state.opengl()->initialize(ihm_window);
+    state.opengl()->initialize(window);
 
     // Main loop
-    while (glfwWindowShouldClose(ihm_window) == GLFW_FALSE) {
+    while (glfwWindowShouldClose(window) == GLFW_FALSE) {
         // Start the ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -1133,14 +1093,14 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         // Rendering
         auto display_w = s32{};
         auto display_h = s32{};
-        glfwMakeContextCurrent(ihm_window);
-        glfwGetFramebufferSize(ihm_window, &display_w, &display_h);
+        glfwMakeContextCurrent(window);
+        glfwGetFramebufferSize(window, &display_w, &display_h);
 
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
         gui::buildGui(state);
-        if (state.renderingStatus() != core::RenderingStatus::running) { glfwSetWindowShouldClose(ihm_window, GLFW_TRUE); }
+        if (state.renderingStatus() != core::RenderingStatus::running) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -1151,7 +1111,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
             ImGui::RenderPlatformWindowsDefault();
         }
 
-        glfwSwapBuffers(ihm_window);
+        glfwSwapBuffers(window);
 
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -1169,7 +1129,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     ImGui::DestroyPlatformWindows();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(ihm_window);
+    glfwDestroyWindow(window);
     glfwTerminate();
 
     return EXIT_SUCCESS;
