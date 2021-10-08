@@ -2452,6 +2452,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         }
         return ScreenOffset{0, 0};
     }(screen.plane_size);
+
+    saved_bg_[util::toUnderlying(s)] = bg_[util::toUnderlying(s)];
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -3098,7 +3100,11 @@ auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {
 
 void Vdp2::resetCacheState() { modules_.memory()->was_vdp2_cram_accessed_ = false; }
 
-auto Vdp2::isCacheDirty(const ScrollScreenStatus& screen) -> bool { return true; }
+auto Vdp2::isCacheDirty(const ScrollScreenStatus& screen) -> bool {
+    if (modules_.memory()->was_vdp2_cram_accessed_) return true;
+
+    return false;
+}
 
 //--------------------------------------------------------------------------------------------------------------
 // Free functions

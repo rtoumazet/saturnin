@@ -1518,7 +1518,8 @@ class Vdp2 {
     TvScreenStatus tv_screen_status_; ///< The TV screen status.
     RamStatus      ram_status_;       ///< The RAM status
 
-    std::array<ScrollScreenStatus, 6> bg_; ///< The backgrounds status.
+    std::array<ScrollScreenStatus, 6> bg_;       ///< The backgrounds status.
+    std::array<ScrollScreenStatus, 6> saved_bg_; /// \brief  The backgrounds status from the previous frame.
 
     // Pre calculated modulo values used for character patterns positionning
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
