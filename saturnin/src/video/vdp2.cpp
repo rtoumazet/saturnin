@@ -214,7 +214,6 @@ void Vdp2::calculateDisplayDuration() {
 void Vdp2::onVblankIn() {
     updateResolution();
     updateRamStatus();
-    clearRenderData();
     populateRenderData();
 }
 
@@ -1913,14 +1912,7 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 // DISPLAY methods
 //--------------------------------------------------------------------------------------------------------------
 
-void Vdp2::clearRenderData() {
-    vdp2_parts_[util::toUnderlying(ScrollScreen::nbg0)].clear();
-    vdp2_parts_[util::toUnderlying(ScrollScreen::nbg1)].clear();
-    vdp2_parts_[util::toUnderlying(ScrollScreen::nbg2)].clear();
-    vdp2_parts_[util::toUnderlying(ScrollScreen::nbg3)].clear();
-    vdp2_parts_[util::toUnderlying(ScrollScreen::rbg0)].clear();
-    vdp2_parts_[util::toUnderlying(ScrollScreen::rbg1)].clear();
-}
+void Vdp2::clearRenderData(const ScrollScreen s) { vdp2_parts_[toUnderlying(s)].clear(); }
 
 void Vdp2::populateRenderData() {
     if (isScreenDisplayed(ScrollScreen::rbg1)) {
@@ -1941,7 +1933,6 @@ void Vdp2::populateRenderData() {
             if (getScreen(ScrollScreen::nbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg0); }
         }
 
-        getScreen(ScrollScreen::nbg1).is_display_enabled = false;
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg1)) {
             if (isScreenDisplayed(ScrollScreen::nbg1)) {
                 updateScrollScreenStatus(ScrollScreen::nbg1);
@@ -2453,7 +2444,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return ScreenOffset{0, 0};
     }(screen.plane_size);
 
-    saved_bg_[util::toUnderlying(s)] = bg_[util::toUnderlying(s)];
+    if (isCacheDirty(s)) { discardCache(s); }
+    clearRenderData(s);
+    saved_bg_[util::toUnderlying(s)] = screen;
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -2611,7 +2604,8 @@ auto Vdp2::getScreen(const ScrollScreen s) const -> const ScrollScreenStatus& { 
 
 void Vdp2::readScrollScreenData(const ScrollScreen s) {
     const auto& screen = getScreen(s);
-    vdp2_parts_[util::toUnderlying(s)].clear();
+    // if (isCacheDirty(s)) { discardCache(s); }
+    // vdp2_parts_[util::toUnderlying(s)].clear();
 
     if (screen.format == ScrollScreenFormat::cell) {
         // Using a set to prevent calculating same address data multiple times
@@ -3100,12 +3094,66 @@ auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {
 
 void Vdp2::resetCacheState() { modules_.memory()->was_vdp2_cram_accessed_ = false; }
 
-auto Vdp2::isCacheDirty(const ScrollScreenStatus& screen) -> bool {
-    if (modules_.memory()->was_vdp2_cram_accessed_) return true;
+auto Vdp2::isCacheDirty(const ScrollScreen screen) -> bool {
+    if (modules_.memory()->was_vdp2_cram_accessed_) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - CRAM was accessed"));
+        return true;
+    }
+
+    if (bg_[toUnderlying(screen)].is_display_enabled != saved_bg_[toUnderlying(screen)].is_display_enabled) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Display was enabled / disabled"));
+        return true;
+    }
+    if (bg_[toUnderlying(screen)].is_transparency_code_valid != saved_bg_[toUnderlying(screen)].is_transparency_code_valid) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Transparency code has changed"));
+        return true;
+    }
+    if (bg_[toUnderlying(screen)].character_color_number != saved_bg_[toUnderlying(screen)].character_color_number) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Character color number has changed"));
+        return true;
+    }
+    if (bg_[toUnderlying(screen)].bitmap_size != saved_bg_[toUnderlying(screen)].bitmap_size) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Bitmap size has changed"));
+        return true;
+    }
+    if (bg_[toUnderlying(screen)].format != saved_bg_[toUnderlying(screen)].format) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Format has changed"));
+        return true;
+    }
+    if (bg_[toUnderlying(screen)].character_pattern_size != saved_bg_[toUnderlying(screen)].character_pattern_size) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Character pattern size has changed"));
+        return true;
+    }
+    if (bg_[toUnderlying(screen)].pattern_name_data_size != saved_bg_[toUnderlying(screen)].pattern_name_data_size) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Pattern name data has changed"));
+        return true;
+    }
+    if (bg_[toUnderlying(screen)].plane_size != saved_bg_[toUnderlying(screen)].plane_size) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Plane size has changed"));
+        return true;
+    }
+    if (bg_[toUnderlying(screen)].map_offset != saved_bg_[toUnderlying(screen)].map_offset) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Map offset has changed"));
+        return true;
+    }
+    if (bg_[toUnderlying(screen)].bitmap_palette_number != saved_bg_[toUnderlying(screen)].bitmap_palette_number) {
+        core::Log::debug(Logger::vdp2, core::tr("Cache - Bitmap palette number has changed"));
+        return true;
+    }
 
     return false;
 }
 
+void Vdp2::discardCache(const ScrollScreen screen) {
+    // 1) Textures used by the vdp2 parts of the screen are discarded
+
+    for (const auto& p : vdp2_parts_[toUnderlying(screen)]) {
+        Texture::getTexture(p.textureKey()).isDiscarded(true);
+        Texture::getTexture(p.textureKey()).deleteOnGpu(true);
+    }
+
+    // 2) Vdp2 parts are deleted
+}
 //--------------------------------------------------------------------------------------------------------------
 // Free functions
 //--------------------------------------------------------------------------------------------------------------

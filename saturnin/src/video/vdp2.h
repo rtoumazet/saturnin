@@ -1102,15 +1102,17 @@ class Vdp2 {
     //--------------------------------------------------------------------------------------------------------------
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::clearRenderData();
+    /// \fn void Vdp2::clearRenderData(const ScrollScreen s);
     ///
-    /// \brief  Clears data from the VDP2 memory.
+    /// \brief  Clears data from the VDP2 memory for the selected scroll screen.
     ///
     /// \author Runik
     /// \date   01/07/2021
+    ///
+    /// \param  s   A ScrollScreen to process.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void clearRenderData();
+    void clearRenderData(const ScrollScreen s);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::populateRenderData();
@@ -1480,7 +1482,7 @@ class Vdp2 {
     void resetCacheState();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::isCacheDirty(const ScrollScreenStatus& screen) -> bool;
+    /// \fn auto Vdp2::isCacheDirty(const ScrollScreen screen) -> bool;
     ///
     /// \brief  Checks if a scroll screen has to be reloaded.
     ///
@@ -1492,7 +1494,20 @@ class Vdp2 {
     /// \returns    True if the cache has to be reloaded.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto isCacheDirty(const ScrollScreenStatus& screen) -> bool;
+    auto isCacheDirty(const ScrollScreen screen) -> bool;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::discardCache(const ScrollScreen screen);
+    ///
+    /// \brief  Discards cache data for the scroll screen.
+    ///
+    /// \author Runik
+    /// \date   08/10/2021
+    ///
+    /// \param  screen  The scroll screen to manage.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void discardCache(const ScrollScreen screen);
 
     EmulatorModules modules_;
 

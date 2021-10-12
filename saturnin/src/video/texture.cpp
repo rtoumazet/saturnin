@@ -30,7 +30,7 @@ using core::Log;
 using core::Logger;
 using core::tr;
 
-std::map<size_t, Texture> Texture::texture_storage_;
+std::unordered_map<size_t, Texture> Texture::texture_storage_;
 
 Texture::Texture(const VdpType    vp,
                  const u32        address,
@@ -56,17 +56,20 @@ auto Texture::storeTexture(Texture&& t) -> size_t {
 
 // static //
 auto Texture::getTexture(const size_t key) -> Texture& {
-    const auto it = texture_storage_.find(key);
+    const auto& it = texture_storage_.find(key);
     if (it != texture_storage_.end()) { return it->second; }
     Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
+    Log::error(Logger::texture, tr("End {:#x} "), it->second.key());
+    Log::error(Logger::texture, tr("Map content :"));
+    for (const auto& t : texture_storage_) {
+        Log::error(Logger::texture, "Key {:#x} ", t.second.key());
+    }
+
     throw std::runtime_error("Texture error !");
 }
 
 // static //
-auto Texture::isTextureStored(const size_t key) -> bool {
-    if (texture_storage_.find(key) != texture_storage_.end()) { return true; }
-    return false;
-}
+auto Texture::isTextureStored(const size_t key) -> bool { return (texture_storage_.count(key) > 0); }
 
 // static //
 auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
