@@ -1387,6 +1387,7 @@ class Vdp2 {
         auto           current_address = vram_start_address + cell_address;
         constexpr auto palette_disp    = u8{8};
         const auto     palette         = palette_number << palette_disp;
+
         for (u32 i = 0; i < 8; ++i) {
             auto row = Dots8Bits(modules_.memory()->read<u32>(current_address));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
