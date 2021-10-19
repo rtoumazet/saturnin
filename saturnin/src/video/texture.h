@@ -220,13 +220,14 @@ class Texture {
 
   private:
     static std::unordered_map<size_t, Texture> texture_storage_; ///< The texture storage
+    static std::mutex                          storage_mutex_;   ///< Used for multithreading access to the texture pool.
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
     u16     width_{};                    ///< The texture width.
     u16     height_{};                   ///< The texture height.
-    bool    is_discarded_{true};         ///< True if the texture is discarded.
+    bool    is_discarded_{false};        ///< True if the texture is discarded.
     bool    is_recently_used_{true};     ///< True if the texture was used during the current frame.
-    bool    delete_on_gpu_{true};        ///< True to delete the texture on the GPU.
+    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.
     size_t  key_{};                      ///< The key of the part.
     u32     api_handle_{};               ///< Handle to the graphics API.
 

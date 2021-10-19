@@ -214,7 +214,9 @@ void Vdp2::calculateDisplayDuration() {
 void Vdp2::onVblankIn() {
     updateResolution();
     updateRamStatus();
+    Texture::setCache(VdpType::vdp2);
     populateRenderData();
+    Texture::cleanCache(VdpType::vdp2);
 }
 
 auto Vdp2::getSpriteColorAddressOffset() -> u16 {
@@ -2982,7 +2984,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     const auto key
         = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
 
-    //    if (!Texture::isTextureStored(key)) {
+    // if (key == 0xcbdfa4db016e94cf) DebugBreak();
     if (Texture::isTextureLoadingNeeded(key)) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
@@ -3146,13 +3148,10 @@ auto Vdp2::isCacheDirty(const ScrollScreen screen) -> bool {
 
 void Vdp2::discardCache(const ScrollScreen screen) {
     // 1) Textures used by the vdp2 parts of the screen are discarded
-
-    for (const auto& p : vdp2_parts_[toUnderlying(screen)]) {
-        Texture::getTexture(p.textureKey()).isDiscarded(true);
-        Texture::getTexture(p.textureKey()).deleteOnGpu(true);
-    }
+    Texture::discardCache(VdpType::vdp2);
 
     // 2) Vdp2 parts are deleted
+    clearRenderData(screen);
 }
 //--------------------------------------------------------------------------------------------------------------
 // Free functions

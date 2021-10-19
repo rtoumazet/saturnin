@@ -339,6 +339,7 @@ void Opengl::render() {
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
                     if (Texture::isTextureStored(part->textureKey())) {
                         auto& t = Texture::getTexture(part->textureKey());
+                        if (t.rawData().size() == 0) DebugBreak();
                         if (t.deleteOnGpu() || t.apiHandle() == 0) {
                             // Creation / replacement of the texture on the GPU
                             if (t.deleteOnGpu()) {
@@ -349,16 +350,6 @@ void Opengl::render() {
                         }
 
                         glBindTexture(GL_TEXTURE_2D, t.apiHandle());
-                    } else {
-                        /* part->vertexes_->
-                         Texture::storeTexture(Texture(VdpType::vdp2,
-                                       cell_address,
-                                       toUnderlying(screen.character_color_number),
-                                       pnd.palette_number,
-                                       texture_data,
-                                       texture_width,
-                                       texture_height));*/
-                        core::Log::warning(Logger::vdp2, "Texture with key {:#010x} not found in the pool !", part->textureKey());
                     }
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
