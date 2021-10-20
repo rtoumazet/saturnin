@@ -217,6 +217,7 @@ void Vdp2::onVblankIn() {
     Texture::setCache(VdpType::vdp2);
     populateRenderData();
     Texture::cleanCache(VdpType::vdp2);
+    resetCacheState();
 }
 
 auto Vdp2::getSpriteColorAddressOffset() -> u16 {
@@ -1955,7 +1956,6 @@ void Vdp2::populateRenderData() {
             }
         }
     }
-    resetCacheState();
 }
 
 auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
@@ -2447,7 +2447,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     }(screen.plane_size);
 
     if (isCacheDirty(s)) { discardCache(s); }
-    clearRenderData(s);
     saved_bg_[util::toUnderlying(s)] = screen;
 }
 
