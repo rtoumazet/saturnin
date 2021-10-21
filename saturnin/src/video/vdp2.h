@@ -81,6 +81,8 @@ constexpr auto vertical_res_512   = u16{512};
 constexpr auto vram_start_address = u32{0x25e00000};
 constexpr auto cram_start_address = u32{0x25f00000};
 
+constexpr auto minimum_page_size = u16{0x800};
+
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)
 //  Vertical resolution :

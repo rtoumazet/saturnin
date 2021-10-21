@@ -110,6 +110,8 @@ constexpr auto cart_absolute_address = u32{0x02000000};
 
 constexpr auto full_memory_map_size = u32{0x10000000};
 
+constexpr auto vdp2_page_disp = u8{11};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   StvIOPort
 ///
@@ -258,6 +260,8 @@ class Memory {
     HardwareMode HardwareMode_{HardwareMode::saturn}; ///< Current hardware mode
 
     bool was_vdp2_cram_accessed_{false}; ///< true when VDP2 color ram was accessed
+    std::array<bool, vdp2_vram_size / video::minimum_page_size>
+        was_vdp2_page_accessed_; ///< True when a specific VDP2 page was accessed.
 
     sh2::Sh2Type sh2_in_operation_; ///< Which SH2 is in operation
     // bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
@@ -1290,7 +1294,7 @@ struct writeVdp2Vram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             rawWrite<T>(m.vdp2_vram_, addr & vdp2_vram_memory_mask, data);
-            // :TODO: handle VDP2 page cache
+            m.was_vdp2_page_accessed_[addr & vdp2_vram_memory_mask >> vdp2_page_disp] = true;
         };
     }
 };

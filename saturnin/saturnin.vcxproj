@@ -214,6 +214,7 @@
     <Link>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -257,6 +258,7 @@
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -280,6 +282,7 @@
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent />
@@ -302,7 +305,7 @@
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent />
   </ItemDefinitionGroup>
