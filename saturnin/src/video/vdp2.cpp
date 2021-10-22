@@ -3123,13 +3123,14 @@ auto Vdp2::isCacheDirty(const ScrollScreen screen) -> bool {
     if (bg_[toUnderlying(screen)].map_offset != saved_bg_[toUnderlying(screen)].map_offset) { return true; }
     if (bg_[toUnderlying(screen)].bitmap_palette_number != saved_bg_[toUnderlying(screen)].bitmap_palette_number) { return true; }
 
+    // Checking the pages
     const auto page_address_start
         = (getScreen(screen).plane_a_start_address & core::vdp2_vram_memory_mask) >> core::vdp2_page_disp;
     const auto page_address_end
         = ((getScreen(screen).plane_a_start_address + getScreen(screen).page_size) & core::vdp2_vram_memory_mask)
           >> core::vdp2_page_disp;
     for (u32 i = page_address_start; i < page_address_end; ++i) {
-        if (modules_.memory()->was_vdp2_page_accessed_[i]) {}
+        if (modules_.memory()->was_vdp2_page_accessed_[i]) { return true; }
     }
 
     return false;

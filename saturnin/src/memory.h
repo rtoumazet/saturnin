@@ -110,7 +110,8 @@ constexpr auto cart_absolute_address = u32{0x02000000};
 
 constexpr auto full_memory_map_size = u32{0x10000000};
 
-constexpr auto vdp2_page_disp = u8{11};
+constexpr auto vdp2_page_disp         = u8{11};
+constexpr auto vdp2_minimum_page_size = u16{0x800};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   StvIOPort
@@ -260,7 +261,7 @@ class Memory {
     HardwareMode HardwareMode_{HardwareMode::saturn}; ///< Current hardware mode
 
     bool was_vdp2_cram_accessed_{false}; ///< true when VDP2 color ram was accessed
-    std::array<bool, vdp2_vram_size / video::minimum_page_size>
+    std::array<bool, vdp2_vram_size / vdp2_minimum_page_size>
         was_vdp2_page_accessed_; ///< True when a specific VDP2 page was accessed.
 
     sh2::Sh2Type sh2_in_operation_; ///< Which SH2 is in operation
