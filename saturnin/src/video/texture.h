@@ -84,7 +84,7 @@ class Texture {
     static auto storeTexture(Texture&& t) -> size_t;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::getTexture(const size_t key) -> Texture&;
+    /// \fn static auto Texture::getTexture(const size_t key) -> Texture;
     ///
     /// \brief  Gets a texture
     ///
@@ -96,7 +96,7 @@ class Texture {
     /// \returns    The texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getTexture(const size_t key) -> Texture&;
+    static auto getTexture(const size_t key) -> Texture;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::isTextureStored(const size_t key) -> bool;

@@ -338,13 +338,13 @@ void Opengl::render() {
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
                     if (Texture::isTextureStored(part->textureKey())) {
-                        auto& t = Texture::getTexture(part->textureKey());
-                        if (t.rawData().size() == 0) DebugBreak();
+                        auto t = Texture::getTexture(part->textureKey());
                         if (t.deleteOnGpu() || t.apiHandle() == 0) {
                             // Creation / replacement of the texture on the GPU
                             if (t.deleteOnGpu()) {
                                 deleteTexture(t.apiHandle());
                                 t.deleteOnGpu(false);
+                                Texture::storeTexture(std::move(t));
                             }
                             t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
                         }
@@ -612,12 +612,13 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
             // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
             if (Texture::isTextureStored(part->textureKey())) {
-                auto& t = Texture::getTexture(part->textureKey());
+                auto t = Texture::getTexture(part->textureKey());
                 if (t.deleteOnGpu() || t.apiHandle() == 0) {
                     // Creation / replacement of the texture on the GPU
                     if (t.deleteOnGpu()) {
                         deleteTexture(t.apiHandle());
                         t.deleteOnGpu(false);
+                        Texture::storeTexture(std::move(t));
                     }
                     t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
                 }

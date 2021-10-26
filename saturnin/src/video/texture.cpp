@@ -59,8 +59,9 @@ auto Texture::storeTexture(Texture&& t) -> size_t {
 }
 
 // static //
-auto Texture::getTexture(const size_t key) -> Texture& {
-    const auto& it = texture_storage_.find(key);
+auto Texture::getTexture(const size_t key) -> Texture {
+    std::lock_guard<std::mutex> lock(storage_mutex_);
+    const auto                  it = texture_storage_.find(key);
     if (it != texture_storage_.end()) { return it->second; }
     Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
     throw std::runtime_error("Texture error !");
@@ -74,9 +75,10 @@ auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
     if (!Texture::isTextureStored(key)) {
         return true;
     } else {
-        auto& t = Texture::getTexture(key);
+        auto t = Texture::getTexture(key);
         if (t.isDiscarded()) {
             t.isDiscarded(false);
+            storeTexture(std::move(t));
             return true;
         }
         t.isRecentlyUsed(true);

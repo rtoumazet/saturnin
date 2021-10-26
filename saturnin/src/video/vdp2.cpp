@@ -1918,30 +1918,36 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 void Vdp2::clearRenderData(const ScrollScreen s) { vdp2_parts_[toUnderlying(s)].clear(); }
 
 void Vdp2::populateRenderData() {
+    clearRenderData(ScrollScreen::rbg1);
     if (isScreenDisplayed(ScrollScreen::rbg1)) {
         updateScrollScreenStatus(ScrollScreen::rbg1);
         if (getScreen(ScrollScreen::rbg1).priority_number != 0) { readScrollScreenData(ScrollScreen::rbg1); }
     }
+
+    clearRenderData(ScrollScreen::rbg0);
     if (isScreenDisplayed(ScrollScreen::rbg0)) {
         updateScrollScreenStatus(ScrollScreen::rbg0);
         if (getScreen(ScrollScreen::rbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::rbg0); }
     }
-
     auto is_nbg_displayed
         = !(getScreen(ScrollScreen::rbg0).is_display_enabled && getScreen(ScrollScreen::rbg1).is_display_enabled);
 
     if (is_nbg_displayed) {
+        clearRenderData(ScrollScreen::nbg0);
         if (isScreenDisplayed(ScrollScreen::nbg0)) {
             updateScrollScreenStatus(ScrollScreen::nbg0);
             if (getScreen(ScrollScreen::nbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg0); }
         }
 
+        clearRenderData(ScrollScreen::nbg1);
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg1)) {
             if (isScreenDisplayed(ScrollScreen::nbg1)) {
                 updateScrollScreenStatus(ScrollScreen::nbg1);
                 if (getScreen(ScrollScreen::nbg1).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg1); }
             }
         }
+
+        clearRenderData(ScrollScreen::nbg2);
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg2)) {
             if (isScreenDisplayed(ScrollScreen::nbg2)) {
                 updateScrollScreenStatus(ScrollScreen::nbg2);
@@ -1949,6 +1955,7 @@ void Vdp2::populateRenderData() {
             }
         }
 
+        clearRenderData(ScrollScreen::nbg3);
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
             if (isScreenDisplayed(ScrollScreen::nbg3)) {
                 updateScrollScreenStatus(ScrollScreen::nbg3);
