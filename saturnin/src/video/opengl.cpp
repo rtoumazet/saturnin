@@ -338,13 +338,12 @@ void Opengl::render() {
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
                     if (Texture::isTextureStored(part->textureKey())) {
-                        auto t = Texture::getTexture(part->textureKey());
+                        auto& t = Texture::getTexture(part->textureKey());
                         if (t.deleteOnGpu() || t.apiHandle() == 0) {
                             // Creation / replacement of the texture on the GPU
                             if (t.deleteOnGpu()) {
                                 deleteTexture(t.apiHandle());
                                 t.deleteOnGpu(false);
-                                Texture::storeTexture(std::move(t));
                             }
                             t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
                         }
@@ -451,6 +450,8 @@ void Opengl::render() {
 
         glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
         glDeleteVertexArrays(elements_nb, vao_ids_array.data());
+
+        Texture::cleanCache();
     }
 
     postRender();
@@ -612,13 +613,12 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
             // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
             if (Texture::isTextureStored(part->textureKey())) {
-                auto t = Texture::getTexture(part->textureKey());
+                auto& t = Texture::getTexture(part->textureKey());
                 if (t.deleteOnGpu() || t.apiHandle() == 0) {
                     // Creation / replacement of the texture on the GPU
                     if (t.deleteOnGpu()) {
                         deleteTexture(t.apiHandle());
                         t.deleteOnGpu(false);
-                        Texture::storeTexture(std::move(t));
                     }
                     t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
                 }

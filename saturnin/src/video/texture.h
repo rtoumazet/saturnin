@@ -99,6 +99,19 @@ class Texture {
     static auto getTexture(const size_t key) -> Texture;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void Texture::deleteTextureData(Texture& t);
+    ///
+    /// \brief  Deletes raw data of the texture
+    ///
+    /// \author Runik
+    /// \date   27/10/2021
+    ///
+    /// \param [in,out] t   The texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void deleteTextureData(Texture& t);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::isTextureStored(const size_t key) -> bool;
     ///
     /// \brief  Checks if the texture exists.

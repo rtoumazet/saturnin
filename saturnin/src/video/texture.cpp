@@ -51,7 +51,8 @@ Texture::Texture(const VdpType    vp,
 // static //
 auto Texture::storeTexture(Texture&& t) -> size_t {
     {
-        std::lock_guard<std::mutex> lock(storage_mutex_);
+        // std::lock_guard<std::mutex> lock(storage_mutex_);
+        deleteTextureData(t);
         texture_storage_.erase(t.key());
         texture_storage_.emplace(t.key(), t);
     }
@@ -60,11 +61,16 @@ auto Texture::storeTexture(Texture&& t) -> size_t {
 
 // static //
 auto Texture::getTexture(const size_t key) -> Texture {
-    std::lock_guard<std::mutex> lock(storage_mutex_);
-    const auto                  it = texture_storage_.find(key);
+    // std::lock_guard<std::mutex> lock(storage_mutex_);
+    const auto it = texture_storage_.find(key);
     if (it != texture_storage_.end()) { return it->second; }
     Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
     throw std::runtime_error("Texture error !");
+}
+
+// static //
+void Texture::deleteTextureData(Texture& t) {
+    std::vector<u8>().swap(t.raw_data_); // Allocated texture data is deleted.
 }
 
 // static //
@@ -75,10 +81,9 @@ auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
     if (!Texture::isTextureStored(key)) {
         return true;
     } else {
-        auto t = Texture::getTexture(key);
+        auto& t = Texture::getTexture(key);
         if (t.isDiscarded()) {
             t.isDiscarded(false);
-            storeTexture(std::move(t));
             return true;
         }
         t.isRecentlyUsed(true);
@@ -139,14 +144,15 @@ void Texture::cleanCache(const VdpType t) {
         auto is_elt_selected = (t == VdpType::not_set) ? true : ((iter->second.vdpType() == t) ? true : false);
         if (is_elt_selected) {
             if (!(iter->second.isRecentlyUsed())) {
-                std::vector<u8>().swap(iter->second.raw_data_); // Allocated texture data is deleted.
-                iter = texture_storage_.erase(iter);
+                deleteTextureData(iter->second);
+                // iter = texture_storage_.erase(iter);
             } else {
-                ++iter;
+                //++iter;
             }
         } else {
-            ++iter;
+            //++iter;
         }
+        ++iter;
     }
 }
 
@@ -154,7 +160,8 @@ void Texture::cleanCache(const VdpType t) {
 void Texture::deleteCache() {
     std::lock_guard<std::mutex> lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
-        std::vector<u8>().swap(value.raw_data_);
+        // std::vector<u8>().swap(value.raw_data_);
+        deleteTextureData(value);
     }
     texture_storage_.clear();
 }

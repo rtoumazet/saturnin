@@ -1280,26 +1280,24 @@ class Vdp2 {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
-    /// ScreenOffset& cell_offset, std::vector<u8>& texture_data, const size_t key);
+    /// ScreenOffset& cell_offset, const size_t key);
     ///
     /// \brief  Saves a cell to the parts vector
     ///
     /// \author Runik
     /// \date   14/04/2021
     ///
-    /// \param          screen          Current scroll screen status.
-    /// \param          pnd             The pattern name data.
-    /// \param          cell_address    The cell address.
-    /// \param          cell_offset     The cell offset in cell units.
-    /// \param [in,out] texture_data    Texture raw data.
-    /// \param          key             Texture key.
+    /// \param  screen          Current scroll screen status.
+    /// \param  pnd             The pattern name data.
+    /// \param  cell_address    The cell address.
+    /// \param  cell_offset     The cell offset in cell units.
+    /// \param  key             Texture key.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void saveCell(const ScrollScreenStatus& screen,
                   const PatternNameData&    pnd,
                   const u32                 cell_address,
                   const ScreenOffset&       cell_offset,
-                  std::vector<u8>&          texture_data,
                   const size_t              key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

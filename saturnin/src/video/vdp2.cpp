@@ -216,7 +216,7 @@ void Vdp2::onVblankIn() {
     updateRamStatus();
     Texture::setCache(VdpType::vdp2);
     populateRenderData();
-    Texture::cleanCache(VdpType::vdp2);
+    //  Texture::cleanCache(VdpType::vdp2);
     resetCacheState();
 }
 
@@ -1915,7 +1915,11 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 // DISPLAY methods
 //--------------------------------------------------------------------------------------------------------------
 
-void Vdp2::clearRenderData(const ScrollScreen s) { vdp2_parts_[toUnderlying(s)].clear(); }
+void Vdp2::clearRenderData(const ScrollScreen s) {
+    // std::vector<Vdp2Part>
+    std::vector<Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]);
+    // vdp2_parts_[toUnderlying(s)].clear();
+}
 
 void Vdp2::populateRenderData() {
     clearRenderData(ScrollScreen::rbg1);
@@ -2660,7 +2664,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
 
         // Unique addresses are handled
         for (const auto& [addr, offset] : start_addresses) {
-            readPlaneData(screen, addr, offset);
+            // readPlaneData(screen, addr, offset);
         }
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);
@@ -3050,7 +3054,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                                       texture_width,
                                       texture_height));
     }
-    saveCell(screen, pnd, cell_address, cell_offset, texture_data, key);
+    saveCell(screen, pnd, cell_address, cell_offset, key);
     // Log::info("vdp2", "(Cell address : {:#x},{:#x})", cell_offset.x, cell_offset.y);
 }
 
@@ -3058,7 +3062,6 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
                     const PatternNameData&    pnd,
                     const u32                 cell_address,
                     const ScreenOffset&       cell_offset,
-                    std::vector<u8>&          texture_data,
                     const size_t              key) {
     constexpr auto texture_width  = u16{8};
     constexpr auto texture_height = u16{8};
@@ -3103,7 +3106,7 @@ auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {
 
 void Vdp2::resetCacheState() {
     modules_.memory()->was_vdp2_cram_accessed_ = false;
-    for (auto accessed : modules_.memory()->was_vdp2_page_accessed_) {
+    for (auto& accessed : modules_.memory()->was_vdp2_page_accessed_) {
         accessed = false;
     }
 }
