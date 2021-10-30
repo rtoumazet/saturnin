@@ -298,6 +298,8 @@ void Opengl::render() {
         const auto     vao_ids_array           = std::array<u32, elements_nb>{vao};
         const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
 
+        auto texture_ids = std::vector<u32>{};
+
         // Calculating the ortho projection matrix
         const auto proj_matrix = calculateDisplayViewportMatrix();
 
@@ -339,17 +341,19 @@ void Opengl::render() {
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
                     if (Texture::isTextureStored(part->textureKey())) {
                         auto& t = Texture::getTexture(part->textureKey());
-                        if (t.deleteOnGpu() || t.apiHandle() == 0) {
-                            // Creation / replacement of the texture on the GPU
-                            if (t.deleteOnGpu()) {
-                                deleteTexture(t.apiHandle());
-                                t.deleteOnGpu(false);
-                            }
-                            t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-                        }
-
+                        // if (t.deleteOnGpu() || t.apiHandle() == 0) {
+                        //    // Creation / replacement of the texture on the GPU
+                        //    if (t.deleteOnGpu()) {
+                        //        deleteTexture(t.apiHandle());
+                        //        t.deleteOnGpu(false);
+                        //    }
+                        //    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+                        //}
+                        t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+                        texture_ids.emplace_back(t.apiHandle());
                         glBindTexture(GL_TEXTURE_2D, t.apiHandle());
                     }
+
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
                 }
@@ -450,6 +454,10 @@ void Opengl::render() {
 
         glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
         glDeleteVertexArrays(elements_nb, vao_ids_array.data());
+
+        for (auto id : texture_ids) {
+            deleteTexture(id);
+        }
 
         Texture::cleanCache();
     }
@@ -578,6 +586,8 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
         const auto vao_ids_array           = std::array<u32, elements_nb>{vao};
         const auto vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
 
+        auto texture_ids = std::vector<u32>{};
+
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
 
@@ -614,15 +624,16 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
             if (Texture::isTextureStored(part->textureKey())) {
                 auto& t = Texture::getTexture(part->textureKey());
-                if (t.deleteOnGpu() || t.apiHandle() == 0) {
-                    // Creation / replacement of the texture on the GPU
-                    if (t.deleteOnGpu()) {
-                        deleteTexture(t.apiHandle());
-                        t.deleteOnGpu(false);
-                    }
-                    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-                }
-
+                // if (t.deleteOnGpu() || t.apiHandle() == 0) {
+                //    // Creation / replacement of the texture on the GPU
+                //    if (t.deleteOnGpu()) {
+                //        deleteTexture(t.apiHandle());
+                //        t.deleteOnGpu(false);
+                //    }
+                //    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+                //}
+                t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+                texture_ids.emplace_back(t.apiHandle());
                 glBindTexture(GL_TEXTURE_2D, t.apiHandle());
             }
             glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
@@ -630,6 +641,10 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
         glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
         glDeleteVertexArrays(elements_nb, vao_ids_array.data());
+
+        for (auto id : texture_ids) {
+            deleteTexture(id);
+        }
     }
 
     //------ Post render --------//

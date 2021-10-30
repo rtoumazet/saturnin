@@ -2664,7 +2664,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
 
         // Unique addresses are handled
         for (const auto& [addr, offset] : start_addresses) {
-            // readPlaneData(screen, addr, offset);
+            readPlaneData(screen, addr, offset);
         }
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);

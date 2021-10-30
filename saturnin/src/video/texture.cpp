@@ -123,7 +123,7 @@ void Texture::discardCache(const VdpType t) {
         auto discard_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (discard_elt) {
             value.isDiscarded(true);
-            value.deleteOnGpu(true);
+            // value.deleteOnGpu(true);
         }
     }
 }

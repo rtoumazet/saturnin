@@ -63,8 +63,8 @@ class Texture {
     void isDiscarded(const bool discarded) { is_discarded_ = discarded; }
     auto isRecentlyUsed() const { return is_recently_used_; }
     void isRecentlyUsed(const bool used) { is_recently_used_ = used; }
-    auto deleteOnGpu() const { return delete_on_gpu_; }
-    void deleteOnGpu(const bool d) { delete_on_gpu_ = d; }
+    // auto deleteOnGpu() const { return delete_on_gpu_; }
+    // void deleteOnGpu(const bool d) { delete_on_gpu_ = d; }
     auto vdpType() const { return vdp_type_; }
     ///@}
 
@@ -240,9 +240,9 @@ class Texture {
     u16     height_{};                   ///< The texture height.
     bool    is_discarded_{false};        ///< True if the texture is discarded.
     bool    is_recently_used_{true};     ///< True if the texture was used during the current frame.
-    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.
-    size_t  key_{};                      ///< The key of the part.
-    u32     api_handle_{};               ///< Handle to the graphics API.
+                                         //    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.
+    size_t key_{};                       ///< The key of the part.
+    u32    api_handle_{};                ///< Handle to the graphics API.
 
     std::vector<u8> raw_data_{}; ///< Raw texture data.
 };
