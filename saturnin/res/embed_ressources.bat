@@ -1,0 +1,1 @@
+embed saturnin-ico-16.png saturnin-ico-32.png saturnin-ico-48.png saturnin-logo.png saturnin-icons.ttf -o "d:\Dev\Sources\github\saturnin\saturnin\src"

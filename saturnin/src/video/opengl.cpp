@@ -48,6 +48,7 @@
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/base_rendering_part.h>
+#include <saturnin/src/resource_holder.hpp>
 
 // using namespace gl;
 using namespace gl21;
@@ -1086,11 +1087,13 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe908, 0}; // Will not be copied by AddFont* so keep in scope.
     ImFontConfig                        config;
     config.MergeMode = true;
-    const auto font_path{std::filesystem::current_path() / "res" / "saturnin-icons.ttf"};
+    // const auto font_path{std::filesystem::current_path() / "res" / "saturnin-icons.ttf"};
+    auto       data          = rh::embed("saturnin-icons.ttf");
     const auto glyph_offset  = ImVec2(0, 2);
     config.GlyphOffset       = glyph_offset;
     constexpr auto font_size = 13.0f;
-    io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), font_size, &config, icons_ranges.data());
+    // io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), font_size, &config, icons_ranges.data());
+    io.Fonts->AddFontFromMemoryTTF((void*)data.data(), data.size(), font_size, &config, icons_ranges.data());
     io.Fonts->Build();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 

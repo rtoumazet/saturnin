@@ -290,5 +290,11 @@
     <ClInclude Include="lib\imgui\imfilebrowser.h">
       <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="src\resource.hpp">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resource_holder.hpp">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
