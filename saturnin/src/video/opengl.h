@@ -576,6 +576,8 @@ auto createMainWindow(u32 width, u32 height, std::string title) -> GLFWwindow*;
 
 auto loadPngImage(const char* filename) -> GLFWimage;
 
+auto loadPngImage(const u8* data, const size_t size) -> GLFWimage;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void checkShaderCompilation(const u32 shader);
 ///

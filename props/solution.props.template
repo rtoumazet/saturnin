@@ -26,10 +26,8 @@
       <PrecompiledHeaderFile>saturnin/src/pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)\stv\*.* $(OutDir)stv\ /Y
-xcopy $(ProjectDir)\lang\exe $(OutDir)lang\ /Y /S
-xcopy $(ProjectDir)\res\*.ttf $(OutDir)res\ /Y
-xcopy $(ProjectDir)\res\*.png $(OutDir)res\ /Y</Command>
+      <Command>xcopy $(MSBuildProjectDirectory)\stv\*.* $(LocalDebuggerWorkingDirectory)stv\ /Y
+xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ /Y /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

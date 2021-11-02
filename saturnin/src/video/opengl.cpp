@@ -1046,9 +1046,12 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
-
-    auto icons = std::array<GLFWimage, 3>{
-        {loadPngImage("saturnin-ico-16.png"), loadPngImage("saturnin-ico-32.png"), loadPngImage("saturnin-ico-48.png")}};
+    const auto ico_16 = rh::embed("saturnin-ico-16.png");
+    const auto ico_32 = rh::embed("saturnin-ico-32.png");
+    const auto ico_48 = rh::embed("saturnin-ico-48.png");
+    auto       icons  = std::array<GLFWimage, 3>{{loadPngImage(ico_16.data(), ico_16.size()),
+                                           loadPngImage(ico_32.data(), ico_32.size()),
+                                           loadPngImage(ico_48.data(), ico_48.size())}};
     glfwSetWindowIcon(window, 3, icons.data());
 
     glbinding::initialize(glfwGetProcAddress);
@@ -1086,14 +1089,14 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     io.Fonts->AddFontDefault();
     static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe908, 0}; // Will not be copied by AddFont* so keep in scope.
     ImFontConfig                        config;
-    config.MergeMode = true;
-    // const auto font_path{std::filesystem::current_path() / "res" / "saturnin-icons.ttf"};
-    auto       data          = rh::embed("saturnin-icons.ttf");
-    const auto glyph_offset  = ImVec2(0, 2);
-    config.GlyphOffset       = glyph_offset;
-    constexpr auto font_size = 13.0f;
-    // io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), font_size, &config, icons_ranges.data());
-    io.Fonts->AddFontFromMemoryTTF((void*)data.data(), data.size(), font_size, &config, icons_ranges.data());
+    config.MergeMode            = true;
+    config.FontDataOwnedByAtlas = false;
+    auto       data             = rh::embed("saturnin-icons.ttf");
+    const auto glyph_offset     = ImVec2(0, 2);
+    config.GlyphOffset          = glyph_offset;
+    constexpr auto font_size    = 13.0f;
+
+    io.Fonts->AddFontFromMemoryTTF((void*)data.data(), static_cast<u32>(data.size()), font_size, &config, icons_ranges.data());
     io.Fonts->Build();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
@@ -1169,6 +1172,22 @@ auto loadPngImage(const char* filename) -> GLFWimage {
     auto       width  = u32{};
     auto       height = u32{};
     const auto error  = lodepng_decode32_file(&(image.pixels), &width, &height, full_path.string().c_str());
+    if (error != 0) {
+        Log::warning(Logger::opengl, lodepng_error_text(error));
+        return image;
+    }
+    image.width  = width;
+    image.height = height;
+
+    return image;
+}
+
+auto loadPngImage(const u8* data, const size_t size) -> GLFWimage {
+    // const auto full_path{std::filesystem::current_path() / "res" / filename};
+    auto       image  = GLFWimage{};
+    auto       width  = u32{};
+    auto       height = u32{};
+    const auto error  = lodepng_decode32(&(image.pixels), &width, &height, data, size);
     if (error != 0) {
         Log::warning(Logger::opengl, lodepng_error_text(error));
         return image;
