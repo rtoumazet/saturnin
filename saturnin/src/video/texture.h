@@ -32,6 +32,8 @@
 
 namespace saturnin::video {
 
+enum class StorageType { current, previous };
+
 class Texture {
   public:
     ///@{
@@ -69,6 +71,23 @@ class Texture {
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static auto Texture::storageContainer(const StorageType type)
+    ///
+    /// \brief  Returns the storage container corresponding to the type given type.
+    ///
+    /// \author Runik
+    /// \date   02/11/2021
+    ///
+    /// \param  type    The storage type.
+    ///
+    /// \returns    An auto.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto storageContainer(const StorageType type) {
+        return (type == StorageType::current) ? current_texture_storage_ : saved_texture_storage_;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::storeTexture(Texture&& t) -> size_t;
     ///
     /// \brief  Stores a texture, replacing the existing one if any.
@@ -84,19 +103,20 @@ class Texture {
     static auto storeTexture(Texture&& t) -> size_t;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::getTexture(const size_t key) -> Texture;
+    /// \fn static auto Texture::getTexture(const StorageType type, const size_t key) -> Texture;
     ///
     /// \brief  Gets a texture
     ///
     /// \author Runik
     /// \date   04/04/2021
     ///
-    /// \param  key Key of the texture.
+    /// \param  type    The type of storage accessed.
+    /// \param  key     Key of the texture.
     ///
     /// \returns    The texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getTexture(const size_t key) -> Texture;
+    static auto getTexture(const StorageType type, const size_t key) -> Texture;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Texture::deleteTextureData(Texture& t);
@@ -232,8 +252,9 @@ class Texture {
     static void deleteCache();
 
   private:
-    static std::unordered_map<size_t, Texture> texture_storage_; ///< The texture storage
-    static std::mutex                          storage_mutex_;   ///< Used for multithreading access to the texture pool.
+    static std::unordered_map<size_t, Texture> current_texture_storage_; ///< The current texture storage.
+    static std::unordered_map<size_t, Texture> saved_texture_storage_;   ///< Texture storage of the last calculated frame.
+    static std::mutex                          storage_mutex_;           ///< Used for multithreading access to the texture pool.
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
     u16     width_{};                    ///< The texture width.

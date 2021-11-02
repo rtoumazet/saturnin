@@ -30,7 +30,7 @@ using core::Log;
 using core::Logger;
 using core::tr;
 
-std::unordered_map<size_t, Texture> Texture::texture_storage_;
+std::unordered_map<size_t, Texture> Texture::current_texture_storage_;
 std::mutex                          Texture::storage_mutex_;
 
 Texture::Texture(const VdpType    vp,
@@ -51,19 +51,18 @@ Texture::Texture(const VdpType    vp,
 // static //
 auto Texture::storeTexture(Texture&& t) -> size_t {
     {
-        // std::lock_guard<std::mutex> lock(storage_mutex_);
         deleteTextureData(t);
-        texture_storage_.erase(t.key());
-        texture_storage_.emplace(t.key(), t);
+        current_texture_storage_.erase(t.key());
+        current_texture_storage_.emplace(t.key(), t);
     }
     return t.key();
 }
 
 // static //
-auto Texture::getTexture(const size_t key) -> Texture {
-    // std::lock_guard<std::mutex> lock(storage_mutex_);
-    const auto it = texture_storage_.find(key);
-    if (it != texture_storage_.end()) { return it->second; }
+auto Texture::getTexture(const StorageType type, const size_t key) -> Texture {
+    const auto storage = Texture::storageContainer(type);
+    const auto it      = storage.find(key);
+    if (it != storage.end()) { return it->second; }
     Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
     throw std::runtime_error("Texture error !");
 }
@@ -74,7 +73,7 @@ void Texture::deleteTextureData(Texture& t) {
 }
 
 // static //
-auto Texture::isTextureStored(const size_t key) -> bool { return (texture_storage_.count(key) > 0); }
+auto Texture::isTextureStored(const size_t key) -> bool { return (current_texture_storage_.count(key) > 0); }
 
 // static //
 auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
@@ -118,8 +117,7 @@ auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_c
 
 // static
 void Texture::discardCache(const VdpType t) {
-    std::lock_guard<std::mutex> lock(storage_mutex_);
-    for (auto& [key, value] : texture_storage_) {
+    for (auto& [key, value] : current_texture_storage_) {
         auto discard_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (discard_elt) {
             value.isDiscarded(true);
@@ -130,8 +128,7 @@ void Texture::discardCache(const VdpType t) {
 
 // static
 void Texture::setCache(const VdpType t) {
-    std::lock_guard<std::mutex> lock(storage_mutex_);
-    for (auto& [key, value] : texture_storage_) {
+    for (auto& [key, value] : current_texture_storage_) {
         auto set_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (set_elt) { value.isRecentlyUsed(false); }
     }
@@ -139,8 +136,7 @@ void Texture::setCache(const VdpType t) {
 
 // static
 void Texture::cleanCache(const VdpType t) {
-    std::lock_guard<std::mutex> lock(storage_mutex_);
-    for (auto iter = texture_storage_.begin(); iter != texture_storage_.end();) {
+    for (auto iter = current_texture_storage_.begin(); iter != current_texture_storage_.end();) {
         auto is_elt_selected = (t == VdpType::not_set) ? true : ((iter->second.vdpType() == t) ? true : false);
         if (is_elt_selected) {
             if (!(iter->second.isRecentlyUsed())) {
@@ -158,12 +154,12 @@ void Texture::cleanCache(const VdpType t) {
 
 // static
 void Texture::deleteCache() {
-    std::lock_guard<std::mutex> lock(storage_mutex_);
-    for (auto& [key, value] : texture_storage_) {
+    // std::lock_guard<std::mutex> lock(storage_mutex_);
+    for (auto& [key, value] : current_texture_storage_) {
         // std::vector<u8>().swap(value.raw_data_);
         deleteTextureData(value);
     }
-    texture_storage_.clear();
+    current_texture_storage_.clear();
 }
 
 } // namespace saturnin::video
