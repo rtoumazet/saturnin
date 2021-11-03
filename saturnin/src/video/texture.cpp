@@ -31,6 +31,7 @@ using core::Logger;
 using core::tr;
 
 std::unordered_map<size_t, Texture> Texture::current_texture_storage_;
+std::unordered_map<size_t, Texture> Texture::saved_texture_storage_;
 std::mutex                          Texture::storage_mutex_;
 
 Texture::Texture(const VdpType    vp,
@@ -73,20 +74,22 @@ void Texture::deleteTextureData(Texture& t) {
 }
 
 // static //
-auto Texture::isTextureStored(const size_t key) -> bool { return (current_texture_storage_.count(key) > 0); }
+auto Texture::isTextureStored(const StorageType type, const size_t key) -> bool {
+    const auto storage = Texture::storageContainer(type);
+    return (storage.count(key) > 0);
+}
 
 // static //
-auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
-    if (!Texture::isTextureStored(key)) {
+auto Texture::isTextureLoadingNeeded(const StorageType type, const size_t key) -> bool {
+    if (!Texture::isTextureStored(type, key)) { return true; }
+
+    auto& t = Texture::getTexture(type, key);
+    if (t.isDiscarded()) {
+        t.isDiscarded(false);
         return true;
-    } else {
-        auto& t = Texture::getTexture(key);
-        if (t.isDiscarded()) {
-            t.isDiscarded(false);
-            return true;
-        }
-        t.isRecentlyUsed(true);
     }
+    t.isRecentlyUsed(true);
+
     return false;
 }
 
@@ -95,6 +98,12 @@ auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_c
     auto key = size_t{0};
     util::hashCombine(key, vp, address, color_count, palette_number);
     return key;
+}
+
+// static
+void Texture::saveStorage() {
+    std::lock_guard<std::mutex> lock(storage_mutex_);
+    saved_texture_storage_ = current_texture_storage_;
 }
 
 // static

@@ -216,6 +216,7 @@ void Vdp2::onVblankIn() {
     updateRamStatus();
     Texture::setCache(VdpType::vdp2);
     populateRenderData();
+    Texture::saveStorage();
     //  Texture::cleanCache(VdpType::vdp2);
     resetCacheState();
 }
@@ -2710,7 +2711,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                                            screen.bitmap_palette_number);
 
     // if (!Texture::isTextureStored(key)) {
-    if (Texture::isTextureLoadingNeeded(key)) {
+    if (Texture::isTextureLoadingNeeded(StorageType::current, key)) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (screen.character_color_number) {
@@ -2996,7 +2997,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
         = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
 
     // if (key == 0xcbdfa4db016e94cf) DebugBreak();
-    if (Texture::isTextureLoadingNeeded(key)) {
+    if (Texture::isTextureLoadingNeeded(StorageType::current, key)) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (screen.character_color_number) {
