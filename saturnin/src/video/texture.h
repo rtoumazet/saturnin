@@ -71,23 +71,6 @@ class Texture {
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::storageContainer(const StorageType type)
-    ///
-    /// \brief  Returns the storage container corresponding to the type given type.
-    ///
-    /// \author Runik
-    /// \date   02/11/2021
-    ///
-    /// \param  type    The storage type.
-    ///
-    /// \returns    An auto.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static auto storageContainer(const StorageType type) {
-        return (type == StorageType::current) ? current_texture_storage_ : saved_texture_storage_;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::storeTexture(Texture&& t) -> size_t;
     ///
     /// \brief  Stores a texture, replacing the existing one if any.
@@ -103,20 +86,19 @@ class Texture {
     static auto storeTexture(Texture&& t) -> size_t;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::getTexture(const StorageType type, const size_t key) -> Texture;
+    /// \fn static auto Texture::getTexture(const size_t key) -> Texture;
     ///
     /// \brief  Gets a texture
     ///
     /// \author Runik
     /// \date   04/04/2021
     ///
-    /// \param  type    The type of storage accessed.
-    /// \param  key     Key of the texture.
+    /// \param  key Key of the texture.
     ///
     /// \returns    The texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getTexture(const StorageType type, const size_t key) -> Texture;
+    static auto getTexture(const size_t key) -> Texture;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Texture::deleteTextureData(Texture& t);
@@ -132,23 +114,22 @@ class Texture {
     static void deleteTextureData(Texture& t);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::isTextureStored(const StorageType type, const size_t key) -> bool;
+    /// \fn static auto Texture::isTextureStored( const size_t key) -> bool;
     ///
     /// \brief  Checks if the texture exists.
     ///
     /// \author Runik
     /// \date   29/03/2021
     ///
-    /// \param  type    The type of storage accessed.
-    /// \param  key     Key of the texture to check.
+    /// \param  key Key of the texture to check.
     ///
     /// \returns    True if the texture is already stored.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto isTextureStored(const StorageType type, const size_t key) -> bool;
+    static auto isTextureStored(const size_t key) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::isTextureLoadingNeeded(const StorageType type, const size_t key) -> bool;
+    /// \fn static auto Texture::isTextureLoadingNeeded(const size_t key) -> bool;
     ///
     /// \brief  Checks if the texture linked to the key needs to be loaded / reloaded. Not stored ->
     ///         texture will be loaded. Stored but discarded -> texture will be reloaded. Stored and
@@ -157,13 +138,12 @@ class Texture {
     /// \author Runik
     /// \date   25/08/2021
     ///
-    /// \param  type    The type of storage accessed.
-    /// \param  key     Key of the texture.
+    /// \param  key Key of the texture.
     ///
     /// \returns    True if texture needs to be loaded.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto isTextureLoadingNeeded(const StorageType type, const size_t key) -> bool;
+    static auto isTextureLoadingNeeded(const size_t key) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_count, const u16 palette_number
@@ -183,17 +163,6 @@ class Texture {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static auto calculateKey(const VdpType vp, const u32 address, const u8 color_count, const u16 palette_number = 0) -> size_t;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Texture::saveStorage();
-    ///
-    /// \brief  Saves the texture storage to be used while rendering.
-    ///
-    /// \author Runik
-    /// \date   03/11/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static void saveStorage();
 
     /*static auto deleteTexturesOnGpu() {
         for (auto& t : texture_storage_) {
@@ -265,9 +234,8 @@ class Texture {
     static void deleteCache();
 
   private:
-    static std::unordered_map<size_t, Texture> current_texture_storage_; ///< The current texture storage.
-    static std::unordered_map<size_t, Texture> saved_texture_storage_;   ///< Texture storage of the last calculated frame.
-    static std::mutex                          storage_mutex_;           ///< Used for multithreading access to the texture pool.
+    static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.
+    static std::mutex                          storage_mutex_;   ///< Used for multithreading access to the texture pool.
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
     u16     width_{};                    ///< The texture width.

@@ -238,6 +238,10 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
     PartsList parts_list;
 
+    // If the destination vector isn't empty, it means rendering isn't finished.
+    // In that case current frame data is dropped.
+    if (!parts_list_.empty()) { return; }
+
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
         const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
         if (!vdp2_parts.empty()) {
@@ -271,12 +275,12 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                   return a->priority() < b->priority();
               });
 
-    {
-        std::lock_guard<std::mutex> lock(parts_list_mutex_);
-        // If the destination vector isn't empty, it means rendering isn't finished.
-        // In that case current frame data is dropped.
-        if (parts_list_.empty()) { parts_list_ = std::move(parts_list); }
-    }
+    parts_list_ = std::move(parts_list);
+    //{
+    //    // If the destination vector isn't empty, it means rendering isn't finished.
+    //    // In that case current frame data is dropped.
+    //    if (parts_list_.empty()) { parts_list_ = std::move(parts_list); }
+    //}
 }
 
 void Opengl::render() {
@@ -340,8 +344,8 @@ void Opengl::render() {
                     glUniform1i(uni_use_texture, is_texture_used);
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-                    if (Texture::isTextureStored(StorageType::previous, part->textureKey())) {
-                        auto& t = Texture::getTexture(StorageType::previous, part->textureKey());
+                    if (Texture::isTextureStored(part->textureKey())) {
+                        auto& t = Texture::getTexture(part->textureKey());
                         // if (t.deleteOnGpu() || t.apiHandle() == 0) {
                         //    // Creation / replacement of the texture on the GPU
                         //    if (t.deleteOnGpu()) {
@@ -463,12 +467,14 @@ void Opengl::render() {
         Texture::cleanCache();
     }
 
+    std::vector<std::unique_ptr<video::BaseRenderingPart>>().swap(parts_list_);
+
     postRender();
     calculateFps();
 }
 
 auto Opengl::isThereSomethingToRender() -> const bool {
-    std::lock_guard<std::mutex> lock(parts_list_mutex_);
+    // std::lock_guard<std::mutex> lock(parts_list_mutex_);
     return !parts_list_.empty();
 }
 
@@ -623,8 +629,8 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             glUniform1i(uni_use_texture, is_texture_used);
 
             // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-            if (Texture::isTextureStored(StorageType::previous, part->textureKey())) {
-                auto& t = Texture::getTexture(StorageType::previous, part->textureKey());
+            if (Texture::isTextureStored(part->textureKey())) {
+                auto& t = Texture::getTexture(part->textureKey());
                 // if (t.deleteOnGpu() || t.apiHandle() == 0) {
                 //    // Creation / replacement of the texture on the GPU
                 //    if (t.deleteOnGpu()) {

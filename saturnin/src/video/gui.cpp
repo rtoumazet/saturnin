@@ -1359,8 +1359,7 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
                 }
 
                 if (draw_list[current_part_idx].textureKey() != 0) {
-                    const auto tex
-                        = video::Texture::getTexture(video::StorageType::previous, draw_list[current_part_idx].textureKey());
+                    const auto tex          = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
                     const auto tex_id       = tex.apiHandle();
                     const auto preview_size = ImVec2(200, 200);
                     ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
