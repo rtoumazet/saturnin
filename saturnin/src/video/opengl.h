@@ -376,6 +376,30 @@ class Opengl {
 
     void renderVdp2DebugLayer(core::EmulatorContext& state);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void saturnin::video::Opengl::addOrUpdateTexture(const size_t key);
+    ///
+    /// \brief  Adds a texture to be created or updated on OpenGL.
+    ///
+    /// \author Runik
+    /// \date   05/11/2021
+    ///
+    /// \param  key The texture key.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void addOrUpdateTexture(const size_t key);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Opengl::generateTextures();
+    ///
+    /// \brief  Generates the textures that will be used during rendering.
+    ///
+    /// \author Runik
+    /// \date   05/11/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void generateTextures();
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
@@ -444,12 +468,7 @@ class Opengl {
 
     core::Config* config_;                ///< Configuration object.
     GLFWwindow*   gui_rendering_context_; ///< Context used for GUI rendering.
-    // GLFWwindow*   emulator_rendering_context_; ///< Context used for  emulator rendering.
 
-    // u32              displayed_texture_index_{}; ///< Index of complete texture displayed by the GUI, will be one of
-    // fbo_texture.
-    // std::vector<u32> fbos_;                    ///< The framebuffer objects used for rendering + debug overlay.
-    // std::vector<u32> fbo_textures_;            ///< The textures used by the framebuffer objects.
     FboList fbo_list_;                ///< List of framebuffer objects used in the program.
     FboType current_rendered_buffer_; ///< The current rendered buffer (front or back)
 
@@ -462,6 +481,8 @@ class Opengl {
                parts_list_;                                // Will have to be moved to the platform agnostic renderer.
     std::mutex parts_list_mutex_;  ///< Prevents rendering thread to use the list while it's being processed.
     Vdp1Part   part_to_highlight_; ///< Part that will be highlighted during debug.
+
+    std::unordered_map<size_t, u32> texture_key_id_link_; ///< Link between the texture key and the opengl id.
 
     std::vector<std::unique_ptr<video::BaseRenderingPart>> ///< List of parts used to generate textures for debugging
         parts_list_debug_;                                 // Will have to be moved to the platform agnostic renderer.

@@ -663,6 +663,20 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     }
 };
 
+void Opengl::addOrUpdateTexture(const size_t key) {
+    // If the key doesn't exist it will be automatically added.
+    texture_key_id_link_[key] = 0;
+}
+
+void Opengl::generateTextures() {
+    for (auto& [key, id] : texture_key_id_link_) {
+        if (!id) {
+            const auto& t = Texture::getTexture(key);
+            id            = generateTexture(t.width(), t.height(), t.rawData());
+        }
+    }
+}
+
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
 
 void Opengl::updateScreenResolution() {}
