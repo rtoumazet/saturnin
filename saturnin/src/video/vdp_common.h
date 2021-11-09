@@ -159,6 +159,9 @@ struct Vertex {
     TextureCoordinates tex_coords; ///< Texture coordinates.
     VertexColor        color;      ///< Color.
     Gouraud            gouraud;    ///< Gouraud color.
+
+    // Vertex::Vertex(const VertexPosition vp, const TextureCoordinates tc, const VertexColor vc) :
+    //     pos(vp), tex_coords(tc), color(vc){};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -90,13 +90,13 @@ void Opengl::shutdown() {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         for (const auto& [type, fbo_data] : fbo_list_) {
             glDeleteFramebuffersEXT(1, &fbo_data.first);
-            glDeleteTextures(1, &fbo_data.second);
+            deleteTexture(fbo_data.second);
         }
     } else {
         gl33core::glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
         for (const auto& [type, fbo_data] : fbo_list_) {
             glDeleteFramebuffers(1, &fbo_data.first);
-            glDeleteTextures(1, &fbo_data.second);
+            deleteTexture(fbo_data.second);
         }
     }
 }
@@ -246,7 +246,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
         if (!vdp2_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_parts.size());
-            for (auto&& p : vdp2_parts) {
+            for (const auto& p : vdp2_parts) {
                 parts_list.push_back(std::make_unique<Vdp2Part>(p));
             }
         }
@@ -256,7 +256,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         const auto& vdp1_parts = state.vdp1()->vdp1Parts();
         if (!vdp1_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp1_parts.size());
-            for (auto&& p : vdp1_parts) {
+            for (const auto& p : vdp1_parts) {
                 parts_list.push_back(std::make_unique<Vdp1Part>(p));
             }
         }
@@ -299,11 +299,9 @@ void Opengl::render() {
 
         const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
 
-        constexpr auto elements_nb             = u8{2};
-        const auto     vao_ids_array           = std::array<u32, elements_nb>{vao};
-        const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
-
-        auto texture_ids = std::vector<u32>{};
+        // constexpr auto elements_nb             = u8{2};
+        //  const auto     vao_ids_array           = std::array<u32, elements_nb>{vao};
+        //  const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
 
         // Calculating the ortho projection matrix
         const auto proj_matrix = calculateDisplayViewportMatrix();
@@ -344,20 +342,22 @@ void Opengl::render() {
                     glUniform1i(uni_use_texture, is_texture_used);
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-                    if (Texture::isTextureStored(part->textureKey())) {
-                        auto& t = Texture::getTexture(part->textureKey());
-                        // if (t.deleteOnGpu() || t.apiHandle() == 0) {
-                        //    // Creation / replacement of the texture on the GPU
-                        //    if (t.deleteOnGpu()) {
-                        //        deleteTexture(t.apiHandle());
-                        //        t.deleteOnGpu(false);
-                        //    }
-                        //    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-                        //}
-                        t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-                        texture_ids.emplace_back(t.apiHandle());
-                        glBindTexture(GL_TEXTURE_2D, t.apiHandle());
-                    }
+                    // if (Texture::isTextureStored(part->textureKey())) {
+                    // auto& t = Texture::getTexture(part->textureKey());
+                    //  if (t.deleteOnGpu() || t.apiHandle() == 0) {
+                    //     // Creation / replacement of the texture on the GPU
+                    //     if (t.deleteOnGpu()) {
+                    //         deleteTexture(t.apiHandle());
+                    //         t.deleteOnGpu(false);
+                    //     }
+                    //     t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+                    // }
+
+                    // t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+                    // glBindTexture(GL_TEXTURE_2D, t.apiHandle());
+                    //}
+
+                    glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
 
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
@@ -457,12 +457,10 @@ void Opengl::render() {
             }
         }
 
-        glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
-        glDeleteVertexArrays(elements_nb, vao_ids_array.data());
-
-        for (auto id : texture_ids) {
-            deleteTexture(id);
-        }
+        // glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
+        // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
+        glDeleteBuffers(1, &vertex_buffer);
+        glDeleteVertexArrays(1, &vao);
 
         Texture::cleanCache();
     }
@@ -584,16 +582,14 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     }
     if (!parts_list.empty()) {
         constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
-        constexpr auto elements_nb                   = u8{2};
+        // constexpr auto elements_nb                   = u8{2};
 
         // Calculating the ortho projection matrix
         const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
         const auto proj_matrix          = calculateDisplayViewportMatrix();
 
-        const auto vao_ids_array           = std::array<u32, elements_nb>{vao};
-        const auto vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
-
-        auto texture_ids = std::vector<u32>{};
+        // const auto vao_ids_array           = std::array<u32, elements_nb>{vao};
+        // const auto vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
 
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
@@ -629,29 +625,27 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             glUniform1i(uni_use_texture, is_texture_used);
 
             // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-            if (Texture::isTextureStored(part->textureKey())) {
-                auto& t = Texture::getTexture(part->textureKey());
-                // if (t.deleteOnGpu() || t.apiHandle() == 0) {
-                //    // Creation / replacement of the texture on the GPU
-                //    if (t.deleteOnGpu()) {
-                //        deleteTexture(t.apiHandle());
-                //        t.deleteOnGpu(false);
-                //    }
-                //    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-                //}
-                t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-                texture_ids.emplace_back(t.apiHandle());
-                glBindTexture(GL_TEXTURE_2D, t.apiHandle());
-            }
+            // if (Texture::isTextureStored(part->textureKey())) {
+            //    auto& t = Texture::getTexture(part->textureKey());
+            //    // if (t.deleteOnGpu() || t.apiHandle() == 0) {
+            //    //    // Creation / replacement of the texture on the GPU
+            //    //    if (t.deleteOnGpu()) {
+            //    //        deleteTexture(t.apiHandle());
+            //    //        t.deleteOnGpu(false);
+            //    //    }
+            //    //    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+            //    //}
+            //    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
+            //    glBindTexture(GL_TEXTURE_2D, t.apiHandle());
+            //}
+            glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
             glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
         }
 
-        glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
-        glDeleteVertexArrays(elements_nb, vao_ids_array.data());
-
-        for (auto id : texture_ids) {
-            deleteTexture(id);
-        }
+        // glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
+        // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
+        glDeleteBuffers(1, &vertex_buffer);
+        glDeleteVertexArrays(1, &vao);
     }
 
     //------ Post render --------//
@@ -665,14 +659,17 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
 void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
+    if (texture_key_id_link_.count(key)) { deleteTexture(texture_key_id_link_[key]); }
     texture_key_id_link_[key] = 0;
 }
 
 void Opengl::generateTextures() {
+    auto count = u32{0};
     for (auto& [key, id] : texture_key_id_link_) {
         if (!id) {
             const auto& t = Texture::getTexture(key);
             id            = generateTexture(t.width(), t.height(), t.rawData());
+            ++count;
         }
     }
 }
@@ -757,7 +754,10 @@ auto Opengl::generateTexture(const u32 width, const u32 height, const std::vecto
 }
 
 // static
-void Opengl::deleteTexture(const u32 texture) { glDeleteTextures(1, &texture); }
+void Opengl::deleteTexture(const u32 texture) {
+    //
+    glDeleteTextures(1, &texture);
+}
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 

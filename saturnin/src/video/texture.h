@@ -32,6 +32,8 @@
 
 namespace saturnin::video {
 
+class Opengl;
+
 enum class StorageType { current, previous };
 
 class Texture {
@@ -50,7 +52,7 @@ class Texture {
     Texture(Texture&&)      = default;
     auto operator=(const Texture&) & -> Texture& = default;
     auto operator=(Texture&&) & -> Texture& = default;
-    ~Texture()                              = default;
+    ~Texture();
     ///@}
 
     ///@{
@@ -65,8 +67,6 @@ class Texture {
     void isDiscarded(const bool discarded) { is_discarded_ = discarded; }
     auto isRecentlyUsed() const { return is_recently_used_; }
     void isRecentlyUsed(const bool used) { is_recently_used_ = used; }
-    // auto deleteOnGpu() const { return delete_on_gpu_; }
-    // void deleteOnGpu(const bool d) { delete_on_gpu_ = d; }
     auto vdpType() const { return vdp_type_; }
     ///@}
 
@@ -194,7 +194,7 @@ class Texture {
     /// \param  t   (Optional) A VdpType textures to discard.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void discardCache(const VdpType t = VdpType::not_set);
+    static void discardCache(Opengl* ogl, const VdpType t = VdpType::not_set);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void setCache(const VdpType t = VdpType::not_set);

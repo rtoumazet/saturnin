@@ -48,12 +48,19 @@ Texture::Texture(const VdpType    vp,
     raw_data_ = std::move(texture);
 };
 
+Texture::~Texture() {
+    // std::vector<u8>().swap(raw_data_); // Allocated texture data is deleted.
+}
+
 // static //
 auto Texture::storeTexture(Texture&& t) -> size_t {
     {
-        deleteTextureData(t);
+        if (isTextureStored(t.key())) {
+            auto& old_t = getTexture(t.key());
+            deleteTextureData(old_t);
+        }
         texture_storage_.erase(t.key());
-        texture_storage_.emplace(t.key(), t);
+        texture_storage_.emplace(t.key(), std::move(t));
     }
     return t.key();
 }
@@ -114,12 +121,12 @@ auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_c
 //}
 
 // static
-void Texture::discardCache(const VdpType t) {
+void Texture::discardCache(Opengl* ogl, const VdpType t) {
     for (auto& [key, value] : texture_storage_) {
         auto discard_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (discard_elt) {
             value.isDiscarded(true);
-            // value.deleteOnGpu(true);
+            // ogl->addOrUpdateTexture(key);
         }
     }
 }

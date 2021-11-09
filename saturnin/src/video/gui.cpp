@@ -909,8 +909,10 @@ void showRenderingWindow(core::EmulatorContext& state) {
     // state.opengl()->displayFramebuffer(state);
 
     if (state.opengl()->areFbosInitialized()) {
-        state.opengl()->generateTextures();
-        if (state.opengl()->isThereSomethingToRender()) { state.opengl()->render(); }
+        if (state.opengl()->isThereSomethingToRender()) {
+            state.opengl()->generateTextures();
+            state.opengl()->render();
+        }
         const auto alpha = 0xff;
         gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(), width, height, alpha);
         if (state.debugStatus() != core::DebugStatus::disabled) {
@@ -1361,7 +1363,7 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
 
                 if (draw_list[current_part_idx].textureKey() != 0) {
                     const auto tex          = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
-                    const auto tex_id       = tex.apiHandle();
+                    const auto tex_id       = state.opengl()->getTextureId(tex.key());
                     const auto preview_size = ImVec2(200, 200);
                     ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
                 }
@@ -1467,7 +1469,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::EndChild();
             }
 
-            if (ImGui::Button(tr("Reload cache").c_str())) { video::Texture::discardCache(video::VdpType::vdp2); }
+            if (ImGui::Button(tr("Reload cache").c_str())) { video::Texture::discardCache(state.opengl(), video::VdpType::vdp2); }
 
             ImGui::EndTabItem();
         }

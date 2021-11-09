@@ -400,6 +400,21 @@ class Opengl {
 
     void generateTextures();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::getTextureId(const size_t key);
+    ///
+    /// \brief  Gets texture identifier corresponding to the key.
+    ///
+    /// \author Runik
+    /// \date   05/11/2021
+    ///
+    /// \param  key The key.
+    ///
+    /// \returns    The texture identifier.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getTextureId(const size_t key) -> u32 { return texture_key_id_link_[key]; };
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char*;

@@ -2765,6 +2765,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                                       texture_data,
                                       texture_width,
                                       texture_height));
+        modules_.opengl()->addOrUpdateTexture(key);
     }
     saveBitmap(screen, texture_data, texture_width, texture_height, key);
 }
@@ -2995,7 +2996,6 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     const auto key
         = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
 
-    // if (key == 0xcbdfa4db016e94cf) DebugBreak();
     if (Texture::isTextureLoadingNeeded(key)) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
@@ -3053,9 +3053,9 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                                       texture_data,
                                       texture_width,
                                       texture_height));
+        modules_.opengl()->addOrUpdateTexture(key);
     }
     saveCell(screen, pnd, cell_address, cell_offset, key);
-    // Log::info("vdp2", "(Cell address : {:#x},{:#x})", cell_offset.x, cell_offset.y);
 }
 
 void Vdp2::saveCell(const ScrollScreenStatus& screen,
@@ -3148,7 +3148,7 @@ auto Vdp2::isCacheDirty(const ScrollScreen screen) -> bool {
 
 void Vdp2::discardCache(const ScrollScreen screen) {
     // 1) Textures used by the vdp2 parts of the screen are discarded
-    Texture::discardCache(VdpType::vdp2);
+    Texture::discardCache(modules_.opengl(), VdpType::vdp2);
 
     // 2) Vdp2 parts are deleted
     // clearRenderData(screen);

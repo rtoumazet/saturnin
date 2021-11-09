@@ -19,6 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp1_part.h>
+#include <saturnin/src/video/opengl.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/emulator_modules.h>
@@ -944,6 +945,7 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
 
         Texture::storeTexture(
             Texture(VdpType::vdp1, start_address, toUnderlying(color_mode), 0, texture_data, texture_width, texture_height));
+        modules.opengl()->addOrUpdateTexture(key);
     }
     part.textureKey(key);
 }
