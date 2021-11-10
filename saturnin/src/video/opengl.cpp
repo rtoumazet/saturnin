@@ -1128,6 +1128,14 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
+        // Poll and handle events (inputs, window resize, etc.)
+        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+
+        glfwPollEvents();
+
         // Start the ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -1149,27 +1157,21 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
-        if ((ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) > 0) {
+        if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) > 0) {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
         }
 
         glfwSwapBuffers(window);
-
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-
-        glfwPollEvents();
     }
 
     // Cleanup
-    state.stopEmulation();
+    // state.stopEmulation();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyPlatformWindows();
+    // ImGui::DestroyPlatformWindows();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
