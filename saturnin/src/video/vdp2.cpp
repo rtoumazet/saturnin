@@ -1916,8 +1916,8 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 //--------------------------------------------------------------------------------------------------------------
 
 void Vdp2::clearRenderData(const ScrollScreen s) {
-    // std::vector<Vdp2Part>
-    std::vector<Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]);
+    // std::vector<std::unique_ptr<video::BaseRenderingPart>>().swap(vdp2_parts_[toUnderlying(s)]);
+    std::vector<video::Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]);
     // vdp2_parts_[toUnderlying(s)].clear();
 }
 
@@ -2778,6 +2778,7 @@ void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
     // auto pos = ScreenPos{0, 0};
 
     auto p = Vdp2Part(key, width, height);
+    // auto p = std::make_unique<Vdp2Part>(key, width, height);
     p.priority(screen.priority_number);
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
 }
@@ -2988,15 +2989,16 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                     const PatternNameData&    pnd,
                     const u32                 cell_address,
                     const ScreenOffset&       cell_offset) {
-    constexpr auto  texture_width  = u16{8};
-    constexpr auto  texture_height = u16{8};
-    constexpr auto  texture_size   = texture_width * texture_height * 4;
-    std::vector<u8> texture_data;
-    texture_data.reserve(texture_size);
     const auto key
         = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
 
     if (Texture::isTextureLoadingNeeded(key)) {
+        constexpr auto  texture_width  = u16{8};
+        constexpr auto  texture_height = u16{8};
+        constexpr auto  texture_size   = texture_width * texture_height * 4;
+        std::vector<u8> texture_data;
+        texture_data.reserve(texture_size);
+
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (screen.character_color_number) {
@@ -3071,6 +3073,7 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     pos.y -= screen.screen_scroll_vertical_integer;
 
     auto p = Vdp2Part(pnd, pos, key);
+    // auto p = std::make_unique<Vdp2Part>(pnd, pos, key);
     p.priority(screen.priority_number);
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
 }

@@ -130,6 +130,7 @@ struct VertexPosition {
 
 struct VertexColor {
     u8 r, g, b, a; ///< Color.
+    VertexColor(const u8 r, const u8 g, const u8 b, const u8 a) : r(r), g(g), b(b), a(a){};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,6 +144,7 @@ struct VertexColor {
 
 struct TextureCoordinates {
     float s, t; ///< Texture coordinates.
+    TextureCoordinates(const float s, const float t) : s(s), t(t){};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +163,21 @@ struct Vertex {
     Gouraud            gouraud;    ///< Gouraud color.
 
     // Vertex::Vertex(const VertexPosition vp, const TextureCoordinates tc, const VertexColor vc) :
-    //     pos(vp), tex_coords(tc), color(vc){};
+    //      pos(vp), tex_coords(tc), color(vc){};
+    Vertex::Vertex(const s16 x, const s16 y, const float s, const float t) :
+        pos(VertexPosition(x, y)), tex_coords(TextureCoordinates(s, t)), color(VertexColor(0, 0, 0, 0)), gouraud(Gouraud()){};
+
+    Vertex::Vertex(const s16     x,
+                   const s16     y,
+                   const float   s,
+                   const float   t,
+                   const u8      r,
+                   const u8      g,
+                   const u8      b,
+                   const u8      a,
+                   const Gouraud grd) :
+        pos(VertexPosition(x, y)),
+        tex_coords(TextureCoordinates(s, t)), color(VertexColor(r, g, b, a)), gouraud(grd){};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

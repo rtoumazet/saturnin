@@ -71,7 +71,7 @@ class Texture {
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::storeTexture(Texture&& t) -> size_t;
+    /// \fn static auto Texture::storeTexture(Texture& t) -> size_t;
     ///
     /// \brief  Stores a texture, replacing the existing one if any.
     ///
@@ -83,7 +83,7 @@ class Texture {
     /// \returns    The key of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto storeTexture(Texture&& t) -> size_t;
+    static auto storeTexture(Texture& t) -> size_t;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::getTexture(const size_t key) -> Texture;

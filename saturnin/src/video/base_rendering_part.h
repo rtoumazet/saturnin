@@ -84,7 +84,7 @@ class BaseRenderingPart {
     /// \date   18/03/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    virtual void renderPart() = 0;
+    // virtual void renderPart() = 0;
 
     ///@{
     /// Accessors / Mutators

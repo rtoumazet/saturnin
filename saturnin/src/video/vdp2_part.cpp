@@ -44,12 +44,16 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos& pos, size_t texture_ke
     // vertexes_.emplace_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
     // vertexes_.emplace_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
     // vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
-    // vertexes_.emplace_back({pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0});
 
-    vertexes_.push_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
-    vertexes_.push_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
-    vertexes_.push_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
-    vertexes_.push_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
+    vertexes_.emplace_back(pos_x, pos_y, 0.0, 0.0);              // lower left
+    vertexes_.emplace_back(pos_x_width, pos_y, 1.0, 0.0);        // lower right
+    vertexes_.emplace_back(pos_x_width, pos_y_height, 1.0, 1.0); // upper right
+    vertexes_.emplace_back(pos_x, pos_y_height, 0.0, 1.0);       // upper left
+
+    // vertexes_.push_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
+    // vertexes_.push_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
+    // vertexes_.push_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
+    // vertexes_.push_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
 };
 
 Vdp2Part::Vdp2Part(size_t texture_key, const u16 texture_width, const u16 texture_height) {
@@ -70,14 +74,20 @@ Vdp2Part::Vdp2Part(size_t texture_key, const u16 texture_width, const u16 textur
     // vertexes_.emplace_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
     // vertexes_.emplace_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
     // vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
-    vertexes_.push_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
-    vertexes_.push_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
-    vertexes_.push_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
-    vertexes_.push_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
+
+    vertexes_.emplace_back(pos_x, pos_y, 0.0, 0.0);              // lower left
+    vertexes_.emplace_back(pos_x_width, pos_y, 1.0, 0.0);        // lower right
+    vertexes_.emplace_back(pos_x_width, pos_y_height, 1.0, 1.0); // upper right
+    vertexes_.emplace_back(pos_x, pos_y_height, 0.0, 1.0);       // upper left
+
+    // vertexes_.push_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
+    // vertexes_.push_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
+    // vertexes_.push_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
+    // vertexes_.push_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
 };
 
-void Vdp2Part::renderPart() { displayCell(); };
-
-void Vdp2Part::displayCell() {}
+// void Vdp2Part::renderPart() { displayCell(); };
+//
+// void Vdp2Part::displayCell() {}
 
 } // namespace saturnin::video

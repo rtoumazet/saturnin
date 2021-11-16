@@ -158,7 +158,7 @@ class Vdp1 {
     auto getTvModeSelectionRegister() -> TvModeSelection { return tvmr_; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp1::vdp1Parts() -> const std::vector<Vdp1Part>&
+    /// \fn auto Vdp1::vdp1Parts() -> const std::vector<Vdp1Part>
     ///
     /// \brief  Returns the current VDP1 draw list.
     ///
@@ -168,7 +168,7 @@ class Vdp1 {
     /// \returns    A reference to a const std::vector&lt;Vdp1Part&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto vdp1Parts() -> const std::vector<Vdp1Part>& { return vdp1_parts_; }
+    auto vdp1Parts() -> const std::vector<Vdp1Part> { return vdp1_parts_; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::getDebugDrawList() const -> std::vector<std::string>;

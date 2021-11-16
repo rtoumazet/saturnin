@@ -88,7 +88,7 @@ class Vdp1Part final : public BaseRenderingPart {
     ~Vdp1Part()                               = default;
     ///@}
 
-    void renderPart(){};
+    // void renderPart(){};
 
     static void SetLocalCoordinates(const s16 x, const s16 y);
 

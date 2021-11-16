@@ -661,10 +661,18 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
         Log::error(Logger::vdp1, tr("VDP1 normal sprite draw coordinates error"));
         throw std::runtime_error("VDP1 normal sprite draw coordinates error !");
     }
-    part.vertexes_.emplace_back(Vertex{a, coords[0], {color.r, color.g, color.b, color.a}, gouraud_values[0]}); // lower left
-    part.vertexes_.emplace_back(Vertex{b, coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
-    part.vertexes_.emplace_back(Vertex{c, coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
-    part.vertexes_.emplace_back(Vertex{d, coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
+    // part.vertexes_.emplace_back(Vertex{a, coords[0], {color.r, color.g, color.b, color.a}, gouraud_values[0]}); // lower left
+    // part.vertexes_.emplace_back(Vertex{b, coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
+    // part.vertexes_.emplace_back(Vertex{c, coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
+    // part.vertexes_.emplace_back(Vertex{d, coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
+    part.vertexes_
+        .emplace_back(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a, gouraud_values[0]); // lower left
+    part.vertexes_
+        .emplace_back(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b, color.a, gouraud_values[1]); // lower right
+    part.vertexes_
+        .emplace_back(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g, color.b, color.a, gouraud_values[2]); // upper right
+    part.vertexes_
+        .emplace_back(d.x, d.y, coords[3].s, coords[3].t, color.r, color.g, color.b, color.a, gouraud_values[3]); // upper left
 }
 
 void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -761,14 +769,51 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     auto       color          = Color{u16{}};
     const auto gouraud_values = readGouraudData(modules, part);
-    part.vertexes_.emplace_back(
-        Vertex{vertexes_pos[0], coords[0], {color.r, color.g, color.b, color.a}, gouraud_values[0]}); // lower left
-    part.vertexes_.emplace_back(
-        Vertex{vertexes_pos[1], coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
-    part.vertexes_.emplace_back(
-        Vertex{vertexes_pos[2], coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
-    part.vertexes_.emplace_back(
-        Vertex{vertexes_pos[3], coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
+    // part.vertexes_.emplace_back(
+    //     Vertex{vertexes_pos[0], coords[0], {color.r, color.g, color.b, color.a}, gouraud_values[0]}); // lower left
+    // part.vertexes_.emplace_back(
+    //     Vertex{vertexes_pos[1], coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
+    // part.vertexes_.emplace_back(
+    //     Vertex{vertexes_pos[2], coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
+    // part.vertexes_.emplace_back(
+    //     Vertex{vertexes_pos[3], coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
+
+    part.vertexes_.emplace_back(vertexes_pos[0].x,
+                                vertexes_pos[0].y,
+                                coords[0].s,
+                                coords[0].t,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[0]); // lower left
+    part.vertexes_.emplace_back(vertexes_pos[1].x,
+                                vertexes_pos[1].y,
+                                coords[1].s,
+                                coords[1].t,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[1]); // lower right
+    part.vertexes_.emplace_back(vertexes_pos[2].x,
+                                vertexes_pos[2].y,
+                                coords[2].s,
+                                coords[2].t,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[2]); // upper right
+    part.vertexes_.emplace_back(vertexes_pos[3].x,
+                                vertexes_pos[3].y,
+                                coords[3].s,
+                                coords[3].t,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[3]); // upper left
 }
 
 void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -780,22 +825,59 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     const auto gouraud_values = readGouraudData(modules, part);
 
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
-                                       {0.0, 0.0}, // lower left
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[0]});
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
-                                       {1.0, 0.0}, // lower right
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[1]});
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
-                                       {1.0, 1.0}, // upper right
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[2]});
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
-                                       {0.0, 1.0}, // upper left
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[3]});
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
+    //                                    {0.0, 0.0}, // lower left
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[0]});
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
+    //                                   {1.0, 0.0}, // lower right
+    //                                   {color.r, color.g, color.b, color.a},
+    //                                   gouraud_values[1]});
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
+    //                                   {1.0, 1.0}, // upper right
+    //                                   {color.r, color.g, color.b, color.a},
+    //                                   gouraud_values[2]});
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
+    //                                   {0.0, 1.0}, // upper left
+    //                                   {color.r, color.g, color.b, color.a},
+    //                                   gouraud_values[3]});
+
+    part.vertexes_.emplace_back(part.calculatedXA(),
+                                part.calculatedYA(),
+                                0.0,
+                                0.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[0]); // lower left
+    part.vertexes_.emplace_back(part.calculatedXB(),
+                                part.calculatedYB(),
+                                1.0,
+                                0.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[1]); // lower right
+    part.vertexes_.emplace_back(part.calculatedXC(),
+                                part.calculatedYC(),
+                                1.0,
+                                1.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[2]); // upper right
+    part.vertexes_.emplace_back(part.calculatedXD(),
+                                part.calculatedYD(),
+                                0.0,
+                                0.1,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[3]); // upper left
 }
 
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -806,22 +888,59 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     if (!cmdcolr) { color.a = 0; }
     const auto gouraud_values = readGouraudData(modules, part);
 
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
-                                       {0.0, 0.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[0]}); // lower left
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
-                                       {1.0, 0.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[1]}); // lower right
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
-                                       {1.0, 1.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[2]}); // upper right
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
-                                       {0.0, 1.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[3]}); // upper left
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
+    //                                    {0.0, 0.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[0]}); // lower left
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
+    //                                    {1.0, 0.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[1]}); // lower right
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
+    //                                    {1.0, 1.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[2]}); // upper right
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
+    //                                    {0.0, 1.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[3]}); // upper left
+
+    part.vertexes_.emplace_back(part.calculatedXA(),
+                                part.calculatedYA(),
+                                0.0,
+                                0.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[0]); // lower left
+    part.vertexes_.emplace_back(part.calculatedXB(),
+                                part.calculatedYB(),
+                                1.0,
+                                0.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[1]); // lower right
+    part.vertexes_.emplace_back(part.calculatedXC(),
+                                part.calculatedYC(),
+                                1.0,
+                                1.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[2]); // upper right
+    part.vertexes_.emplace_back(part.calculatedXD(),
+                                part.calculatedYD(),
+                                0.0,
+                                0.1,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[3]); // upper left
 }
 
 void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -833,22 +952,59 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     const auto gouraud_values = readGouraudData(modules, part);
 
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
-                                       {0.0, 0.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[0]}); // lower left
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
-                                       {1.0, 0.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[1]}); // lower right
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
-                                       {1.0, 1.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[2]}); // upper right
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
-                                       {0.0, 1.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[3]}); // upper left
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
+    //                                    {0.0, 0.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[0]}); // lower left
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
+    //                                    {1.0, 0.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[1]}); // lower right
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
+    //                                    {1.0, 1.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[2]}); // upper right
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
+    //                                    {0.0, 1.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[3]}); // upper left
+
+    part.vertexes_.emplace_back(part.calculatedXA(),
+                                part.calculatedYA(),
+                                0.0,
+                                0.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[0]); // lower left
+    part.vertexes_.emplace_back(part.calculatedXB(),
+                                part.calculatedYB(),
+                                1.0,
+                                0.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[1]); // lower right
+    part.vertexes_.emplace_back(part.calculatedXC(),
+                                part.calculatedYC(),
+                                1.0,
+                                1.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[2]); // upper right
+    part.vertexes_.emplace_back(part.calculatedXD(),
+                                part.calculatedYD(),
+                                0.0,
+                                0.1,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[3]); // upper left
 }
 
 void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -860,14 +1016,33 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     const auto gouraud_values = readGouraudData(modules, part);
 
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
-                                       {0.0, 0.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[0]}); // lower left
-    part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
-                                       {1.0, 0.0},
-                                       {color.r, color.g, color.b, color.a},
-                                       gouraud_values[1]}); // lower right
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
+    //                                    {0.0, 0.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[0]}); // lower left
+    // part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
+    //                                    {1.0, 0.0},
+    //                                    {color.r, color.g, color.b, color.a},
+    //                                    gouraud_values[1]}); // lower right
+
+    part.vertexes_.emplace_back(part.calculatedXA(),
+                                part.calculatedYA(),
+                                0.0,
+                                0.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[0]); // lower left
+    part.vertexes_.emplace_back(part.calculatedXB(),
+                                part.calculatedYB(),
+                                1.0,
+                                0.0,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a,
+                                gouraud_values[1]); // lower right
 }
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {

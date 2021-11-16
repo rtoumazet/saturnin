@@ -41,24 +41,22 @@ Texture::Texture(const VdpType    vp,
                  const u16        width,
                  const u16        height) :
     vdp_type_(vp),
-    width_(width), height_(height) {
+    width_(width), height_(height), raw_data_(std::move(texture)) {
     key_ = calculateKey(vp, address, color_count, palette_number);
-    // if (key_ == 0xf6d6ea85f4cfd613) DebugBreak();
-    // if (key_ == 0xa57b381a6e5b28d0) DebugBreak();
-    raw_data_ = std::move(texture);
+    // raw_data_ = std::move(texture);
 };
 
 Texture::~Texture() {
-    // std::vector<u8>().swap(raw_data_); // Allocated texture data is deleted.
+    std::vector<u8>().swap(raw_data_); // Allocated texture data is deleted.
 }
 
 // static //
-auto Texture::storeTexture(Texture&& t) -> size_t {
+auto Texture::storeTexture(Texture& t) -> size_t {
     {
-        if (isTextureStored(t.key())) {
-            auto& old_t = getTexture(t.key());
-            deleteTextureData(old_t);
-        }
+        // if (isTextureStored(t.key())) {
+        //     auto& old_t = getTexture(t.key());
+        //     deleteTextureData(old_t);
+        // }
         texture_storage_.erase(t.key());
         texture_storage_.emplace(t.key(), std::move(t));
     }

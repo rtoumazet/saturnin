@@ -19,7 +19,8 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/opengl.h>
-#include <windows.h>  // removes C4005 warning
+#include <windows.h> // removes C4005 warning
+#include <algorithm>
 #include <fstream>    // ifstream
 #include <filesystem> // filesystem
 #include <iostream>   // cout
@@ -236,19 +237,27 @@ void Opengl::initializeShaders() {
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
-    PartsList parts_list;
+    auto parts_list = PartsList{};
 
     // If the destination vector isn't empty, it means rendering isn't finished.
     // In that case current frame data is dropped.
     if (!parts_list_.empty()) { return; }
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-        const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
+        // const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
+        auto vdp2_parts = state.vdp2()->vdp2Parts(s);
         if (!vdp2_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_parts.size());
-            for (const auto& p : vdp2_parts) {
-                parts_list.push_back(std::make_unique<Vdp2Part>(p));
+            for (auto p : vdp2_parts) {
+                parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
+                //  parts_list.emplace_back(std::move(p));
+                //   parts_list.push_back(std::move(p));
+                //   parts_list.emplace_back(p);
             }
+
+            // std::move(vdp2_parts.begin(), vdp2_parts.end(), std::back_inserter(parts_list));
+
+            state.vdp2()->clearRenderData(s);
         }
     };
 
@@ -256,8 +265,9 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         const auto& vdp1_parts = state.vdp1()->vdp1Parts();
         if (!vdp1_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp1_parts.size());
-            for (const auto& p : vdp1_parts) {
+            for (const auto p : vdp1_parts) {
                 parts_list.push_back(std::make_unique<Vdp1Part>(p));
+                // parts_list.emplace_back(std::move(p));
             }
         }
     };
@@ -277,10 +287,10 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 
     parts_list_ = std::move(parts_list);
     //{
-    //    // If the destination vector isn't empty, it means rendering isn't finished.
-    //    // In that case current frame data is dropped.
-    //    if (parts_list_.empty()) { parts_list_ = std::move(parts_list); }
-    //}
+    //     // If the destination vector isn't empty, it means rendering isn't finished.
+    //     // In that case current frame data is dropped.
+    //     if (parts_list_.empty()) { parts_list_ = std::move(parts_list); }
+    // }
 }
 
 void Opengl::render() {
@@ -569,17 +579,17 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Render -----------------//
     std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
     // if (!parts_list_debug_.empty()) { parts_list = std::move(parts_list_debug_); }
-    if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
-        const auto vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
-        if (!vdp2_parts.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_parts.size());
-            for (auto&& p : vdp2_parts) {
-                parts_list.push_back(std::make_unique<Vdp2Part>(p));
-            }
-        }
+    // if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
+    //    const auto vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
+    //    if (!vdp2_parts.empty()) {
+    //        parts_list.reserve(parts_list.size() + vdp2_parts.size());
+    //        for (auto&& p : vdp2_parts) {
+    //             parts_list.push_back(std::make_unique<Vdp2Part>(p));
+    //        }
+    //    }
 
-        // parts_list = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
-    }
+    //    // parts_list = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
+    //}
     if (!parts_list.empty()) {
         constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
         // constexpr auto elements_nb                   = u8{2};
