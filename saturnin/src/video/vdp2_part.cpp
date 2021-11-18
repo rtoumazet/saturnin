@@ -23,14 +23,11 @@
 
 namespace saturnin::video {
 
-Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos& pos, size_t texture_key) {
+Vdp2Part::Vdp2Part(const PatternNameData& pnd, const ScreenPos& pos, const size_t texture_key, const u8 priority) :
+    scroll_screen_pos_(pos), character_number_(pnd.character_number), palette_number_(pnd.palette_number),
+    is_horizontally_flipped_(pnd.is_horizontally_flipped), is_vertically_flipped_(pnd.is_vertically_flipped) {
     vdpType(VdpType::vdp2);
     drawType(DrawType::textured_polygon);
-    scroll_screen_pos_       = pos;
-    character_number_        = pnd.character_number;
-    palette_number_          = pnd.palette_number;
-    is_horizontally_flipped_ = pnd.is_horizontally_flipped;
-    is_vertically_flipped_   = pnd.is_vertically_flipped;
     textureKey(texture_key);
 
     // Vdp2 parts are 8*8 pixels squares
@@ -56,14 +53,11 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd, ScreenPos& pos, size_t texture_ke
     // vertexes_.push_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
 };
 
-Vdp2Part::Vdp2Part(size_t texture_key, const u16 texture_width, const u16 texture_height) {
+Vdp2Part::Vdp2Part(const size_t texture_key, const u16 texture_width, const u16 texture_height, const u8 priority) :
+    scroll_screen_pos_({0, 0}), character_number_(0), palette_number_(0), is_horizontally_flipped_(false),
+    is_vertically_flipped_(false) {
     vdpType(VdpType::vdp2);
     drawType(DrawType::textured_polygon);
-    scroll_screen_pos_       = {0, 0};
-    character_number_        = 0;
-    palette_number_          = 0;
-    is_horizontally_flipped_ = false;
-    is_vertically_flipped_   = false;
     textureKey(texture_key);
 
     const auto pos_x        = static_cast<s16>(0);

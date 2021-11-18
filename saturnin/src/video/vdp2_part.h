@@ -45,11 +45,11 @@ class Vdp2Part final : public BaseRenderingPart {
   public:
     ///@{
     /// Constructors / Destructors
-    Vdp2Part(const PatternNameData& pnd, ScreenPos& pos, size_t texture_key);
-    Vdp2Part(size_t texture_key, const u16 texture_width, const u16 texture_height); // Constructor for bitmaps
-    Vdp2Part(const Vdp2Part&) = default;
+    Vdp2Part(const PatternNameData& pnd, const ScreenPos& pos, const size_t texture_key, const u8 priority);
+    Vdp2Part(size_t texture_key, const u16 texture_width, const u16 texture_height, const u8 priority); // Constructor for bitmaps
+    Vdp2Part(const Vdp2Part&) = delete;
     Vdp2Part(Vdp2Part&&)      = default;
-    auto operator=(const Vdp2Part&) & -> Vdp2Part& = default;
+    auto operator=(const Vdp2Part&) & -> Vdp2Part& = delete;
     auto operator=(Vdp2Part&&) & -> Vdp2Part& = default;
     ~Vdp2Part()                               = default;
     ///@}
