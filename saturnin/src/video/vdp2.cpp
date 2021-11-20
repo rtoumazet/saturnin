@@ -1916,8 +1916,8 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 //--------------------------------------------------------------------------------------------------------------
 
 void Vdp2::clearRenderData(const ScrollScreen s) {
-    std::vector<std::unique_ptr<video::BaseRenderingPart>>().swap(vdp2_parts_[toUnderlying(s)]);
-    // std::vector<video::Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]);
+    // std::vector<std::unique_ptr<video::BaseRenderingPart>>().swap(vdp2_parts_[toUnderlying(s)]);
+    std::vector<video::Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]);
     //  vdp2_parts_[toUnderlying(s)].clear();
 }
 
@@ -2780,8 +2780,9 @@ void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
     auto p = Vdp2Part(key, width, height, screen.priority_number);
     // auto p = std::make_unique<Vdp2Part>(key, width, height);
     // p.priority(screen.priority_number);
-    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
-        std::make_unique<Vdp2Part>(key, width, height, screen.priority_number));
+    // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
+    //    std::make_unique<Vdp2Part>(key, width, height, screen.priority_number));
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(key, width, height, screen.priority_number);
 }
 
 void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset) {
@@ -3077,8 +3078,9 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     // auto p = std::make_unique<Vdp2Part>(pnd, pos, key, screen.priority_number);
     // p.priority(screen.priority_number);
     // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
-    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
-        std::make_unique<Vdp2Part>(pnd, pos, key, screen.priority_number));
+    // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
+    //    std::make_unique<Vdp2Part>(pnd, pos, key, screen.priority_number));
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd, pos, key, screen.priority_number);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {

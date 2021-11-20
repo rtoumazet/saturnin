@@ -10,3 +10,4 @@ saturnin/src/cdrom/.clang-tidy.cpt_backup
 saturnin/src/.clang-tidy.cpt_backup
 *.tmp
 saturnin/doxygen/generated/*
+saturnin/src/video/.clang-tidy.cpt_backup

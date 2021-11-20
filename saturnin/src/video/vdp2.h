@@ -628,7 +628,7 @@ class Vdp2 {
     void onVblankIn();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::vdp2Parts(const ScrollScreen s) -> const std::vector<video::Vdp2Part>&
+    /// \fn auto Vdp2::vdp2Parts(const ScrollScreen s) -> const std::vector<std::unique_ptr<video::BaseRenderingPart>>
     ///
     /// \brief  Returns the VDP2 parts of a scroll screen.
     ///
@@ -640,7 +640,7 @@ class Vdp2 {
     /// \returns    A reference to a const std::vector&lt;Vdp2Part&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto vdp2Parts(const ScrollScreen s) -> const std::vector<std::unique_ptr<video::BaseRenderingPart>>& {
+    auto vdp2Parts(const ScrollScreen s) -> const std::vector<video::Vdp2Part>& {
         return vdp2_parts_[utilities::toUnderlying(s)];
     }
 
@@ -1541,9 +1541,9 @@ class Vdp2 {
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
-    // std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
-    std::vector<std::unique_ptr<video::BaseRenderingPart>> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll
-    //  cell.
+    std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
+    // std::vector<std::unique_ptr<video::BaseRenderingPart>> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll
+    //   cell.
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.
 
