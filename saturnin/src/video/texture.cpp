@@ -51,7 +51,7 @@ Texture::~Texture() {
 }
 
 // static //
-auto Texture::storeTexture(Texture& t) -> size_t {
+auto Texture::storeTexture(Texture t) -> size_t {
     {
         // if (isTextureStored(t.key())) {
         //     auto& old_t = getTexture(t.key());

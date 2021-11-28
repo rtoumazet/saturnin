@@ -665,14 +665,24 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     // part.vertexes_.emplace_back(Vertex{b, coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
     // part.vertexes_.emplace_back(Vertex{c, coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
     // part.vertexes_.emplace_back(Vertex{d, coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
-    part.vertexes_
-        .emplace_back(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a, gouraud_values[0]); // lower left
-    part.vertexes_
-        .emplace_back(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b, color.a, gouraud_values[1]); // lower right
-    part.vertexes_
-        .emplace_back(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g, color.b, color.a, gouraud_values[2]); // upper right
-    part.vertexes_
-        .emplace_back(d.x, d.y, coords[3].s, coords[3].t, color.r, color.g, color.b, color.a, gouraud_values[3]); // upper left
+    part.vertexes_.reserve(4);
+    // part.vertexes_
+    //     .emplace_back(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a, gouraud_values[0]); // lower left
+    // part.vertexes_
+    //    .emplace_back(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b, color.a, gouraud_values[1]); // lower right
+    // part.vertexes_
+    //    .emplace_back(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g, color.b, color.a, gouraud_values[2]); // upper right
+    // part.vertexes_
+    //    .emplace_back(d.x, d.y, coords[3].s, coords[3].t, color.r, color.g, color.b, color.a, gouraud_values[3]); // upper left
+
+    part.vertexes_.push_back(
+        std::move(Vertex(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a, gouraud_values[0])));
+    part.vertexes_.push_back(
+        std::move(Vertex(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b, color.a, gouraud_values[1])));
+    part.vertexes_.push_back(
+        std::move(Vertex(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g, color.b, color.a, gouraud_values[2])));
+    part.vertexes_.push_back(
+        std::move(Vertex(d.x, d.y, coords[3].s, coords[3].t, color.r, color.g, color.b, color.a, gouraud_values[3])));
 }
 
 void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -684,7 +694,7 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     const auto width  = part.cmdxb_.twoCmp();
     const auto height = part.cmdyb_.twoCmp();
-
+    vertexes_pos.reserve(4);
     switch (part.cmdctrl_.get(CmdCtrl::zoom_point)) {
         case ZoomPoint::two_coordinates: {
             const auto size_x = static_cast<s16>(part.cmdsize_.get(CmdSize::character_size_x) * 8);
@@ -777,7 +787,7 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     //     Vertex{vertexes_pos[2], coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
     // part.vertexes_.emplace_back(
     //     Vertex{vertexes_pos[3], coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
-
+    part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(vertexes_pos[0].x,
                                 vertexes_pos[0].y,
                                 coords[0].s,
@@ -841,7 +851,7 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     //                                   {0.0, 1.0}, // upper left
     //                                   {color.r, color.g, color.b, color.a},
     //                                   gouraud_values[3]});
-
+    part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
                                 0.0,
@@ -904,7 +914,7 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     //                                    {0.0, 1.0},
     //                                    {color.r, color.g, color.b, color.a},
     //                                    gouraud_values[3]}); // upper left
-
+    part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
                                 0.0,
@@ -968,7 +978,7 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     //                                    {0.0, 1.0},
     //                                    {color.r, color.g, color.b, color.a},
     //                                    gouraud_values[3]}); // upper left
-
+    part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
                                 0.0,
@@ -1024,7 +1034,7 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     //                                    {1.0, 0.0},
     //                                    {color.r, color.g, color.b, color.a},
     //                                    gouraud_values[1]}); // lower right
-
+    part.vertexes_.reserve(2);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
                                 0.0,
