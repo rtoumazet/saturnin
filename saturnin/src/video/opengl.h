@@ -498,6 +498,7 @@ class Opengl {
     Vdp1Part   part_to_highlight_; ///< Part that will be highlighted during debug.
 
     std::unordered_map<size_t, u32> texture_key_id_link_; ///< Link between the texture key and the opengl id.
+    std::vector<u32>                textures_to_delete_;  ///< List of the textures id to delete.
 
     std::vector<std::unique_ptr<video::BaseRenderingPart>> ///< List of parts used to generate textures for debugging
         parts_list_debug_;                                 // Will have to be moved to the platform agnostic renderer.

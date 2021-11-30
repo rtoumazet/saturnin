@@ -669,11 +669,16 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
 void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
-    if (texture_key_id_link_.count(key)) { deleteTexture(texture_key_id_link_[key]); }
+    if (texture_key_id_link_.count(key)) { textures_to_delete_.push_back(key); }
     texture_key_id_link_[key] = 0;
 }
 
 void Opengl::generateTextures() {
+    for (const auto id : textures_to_delete_) {
+        deleteTexture(texture_key_id_link_[id]);
+    }
+    std::vector<u32>().swap(textures_to_delete_);
+
     auto count = u32{0};
     for (auto& [key, id] : texture_key_id_link_) {
         if (!id) {
