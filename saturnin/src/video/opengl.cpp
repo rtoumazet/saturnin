@@ -248,8 +248,8 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         auto vdp2_parts = state.vdp2()->vdp2Parts(s);
         if (!vdp2_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_parts.size());
-            for (auto p : vdp2_parts) {
-                // parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
+            for (const auto& p : vdp2_parts) {
+                parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
                 //  auto a{std::move(*p)};
                 //  parts_list.push_back(std::move(p));
                 //  parts_list.emplace_back(std::move(p));
@@ -257,7 +257,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 
             // std::move(vdp2_parts.begin(), vdp2_parts.end(), std::back_inserter(parts_list));
 
-            state.vdp2()->clearRenderData(s);
+            // state.vdp2()->clearRenderData(s);
         }
     };
 
@@ -579,17 +579,17 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Render -----------------//
     std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
     // if (!parts_list_debug_.empty()) { parts_list = std::move(parts_list_debug_); }
-    // if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
-    //    const auto vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
-    //    if (!vdp2_parts.empty()) {
-    //        parts_list.reserve(parts_list.size() + vdp2_parts.size());
-    //        for (auto&& p : vdp2_parts) {
-    //             parts_list.push_back(std::make_unique<Vdp2Part>(p));
-    //        }
-    //    }
+    if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
+        const auto& vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
+        if (!vdp2_parts.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_parts.size());
+            for (const auto& p : vdp2_parts) {
+                parts_list.push_back(std::make_unique<Vdp2Part>(p));
+            }
+        }
 
-    //    // parts_list = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
-    //}
+        // parts_list = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
+    }
     if (!parts_list.empty()) {
         constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
         // constexpr auto elements_nb                   = u8{2};
@@ -669,6 +669,8 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
 void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
+    // 0x000000006ec8dbe5
+    // if (key == 0x86f381a66ec8dbe5) { DebugBreak(); }
     if (texture_key_id_link_.count(key)) { textures_to_delete_.push_back(key); }
     texture_key_id_link_[key] = 0;
 }
@@ -683,8 +685,10 @@ void Opengl::generateTextures() {
     for (auto& [key, id] : texture_key_id_link_) {
         if (!id) {
             const auto& t = Texture::getTexture(key);
-            id            = generateTexture(t.width(), t.height(), t.rawData());
-            ++count;
+            if (t) {
+                id = generateTexture((*t).width(), (*t).height(), (*t).rawData());
+                ++count;
+            }
         }
     }
 }

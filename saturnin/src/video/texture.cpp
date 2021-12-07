@@ -64,11 +64,12 @@ auto Texture::storeTexture(Texture t) -> size_t {
 }
 
 // static //
-auto Texture::getTexture(const size_t key) -> Texture {
+auto Texture::getTexture(const size_t key) -> std::optional<Texture> {
     const auto it = texture_storage_.find(key);
     if (it != texture_storage_.end()) { return it->second; }
     Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
-    throw std::runtime_error("Texture error !");
+    // throw std::runtime_error("Texture error !");
+    return std::nullopt;
 }
 
 // static //
@@ -84,13 +85,15 @@ auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
     if (!Texture::isTextureStored(key)) { return true; }
 
     auto& t = Texture::getTexture(key);
-    if (t.isDiscarded()) {
-        t.isDiscarded(false);
-        return true;
+    if (t) {
+        if ((*t).isDiscarded()) {
+            (*t).isDiscarded(false);
+            return true;
+        }
+        (*t).isRecentlyUsed(true);
+        return false;
     }
-    t.isRecentlyUsed(true);
-
-    return false;
+    return true;
 }
 
 // static

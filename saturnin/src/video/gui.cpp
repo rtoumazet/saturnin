@@ -1362,10 +1362,12 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
                 }
 
                 if (draw_list[current_part_idx].textureKey() != 0) {
-                    const auto tex          = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
-                    const auto tex_id       = state.opengl()->getTextureId(tex.key());
-                    const auto preview_size = ImVec2(200, 200);
-                    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                    const auto tex = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
+                    if (tex) {
+                        const auto tex_id       = state.opengl()->getTextureId((*tex).key());
+                        const auto preview_size = ImVec2(200, 200);
+                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                    }
                 }
                 ImGui::EndChild();
                 ImGui::PopStyleVar();

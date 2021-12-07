@@ -2765,6 +2765,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                                       texture_data,
                                       texture_width,
                                       texture_height));
+        if (key == 0x000000006ec8dbe5) { DebugBreak(); }
         modules_.opengl()->addOrUpdateTexture(key);
     }
     saveBitmap(screen, texture_data, texture_width, texture_height, key);
@@ -3057,6 +3058,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                                       texture_data,
                                       texture_width,
                                       texture_height));
+        if (key == 0x000000006ec8dbe5) { DebugBreak(); }
         modules_.opengl()->addOrUpdateTexture(key);
     }
     saveCell(screen, pnd, cell_address, cell_offset, key);
