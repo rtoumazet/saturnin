@@ -479,8 +479,7 @@ class Opengl {
 
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
 
-    core::Config* config_;                ///< Configuration object.
-    GLFWwindow*   gui_rendering_context_; ///< Context used for GUI rendering.
+    core::Config* config_; ///< Configuration object.
 
     FboList fbo_list_;                ///< List of framebuffer objects used in the program.
     FboType current_rendered_buffer_; ///< The current rendered buffer (front or back)
