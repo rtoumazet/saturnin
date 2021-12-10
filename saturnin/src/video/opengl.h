@@ -100,8 +100,6 @@ class Opengl {
     void               currentRenderedBuffer(const FboType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };
     [[nodiscard]] auto vdp2DebugLayerTextureId() -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
-    [[nodiscard]] auto guiRenderingContext() const { return gui_rendering_context_; };
-    void               guiRenderingContext(GLFWwindow* context) { gui_rendering_context_ = context; };
     [[nodiscard]] auto fps() const { return fps_; };
     void               fps(std::string fps) { fps_ = fps; };
 
@@ -118,7 +116,7 @@ class Opengl {
     /// \param [in,out] gui_context If non-null, context for the graphical user interface.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initialize(GLFWwindow* gui_context);
+    void initialize();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::shutdown();

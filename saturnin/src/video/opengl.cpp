@@ -67,10 +67,9 @@ Opengl::Opengl(core::Config* config) { config_ = config; }
 
 Opengl::~Opengl() { shutdown(); }
 
-void Opengl::initialize(GLFWwindow* gui_context) {
+void Opengl::initialize() {
     is_legacy_opengl_ = config_->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
 
-    guiRenderingContext(gui_context);
     hostScreenResolution(ScreenResolution{video::minimum_window_width, video::minimum_window_height});
 
     glbinding::initialize(glfwGetProcAddress);
@@ -1143,7 +1142,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     updateMainWindowSizeAndRatio(window, minimum_window_width, minimum_window_height);
 
-    state.opengl()->initialize(window);
+    // state.opengl()->initialize(window);
+    state.opengl()->initialize();
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
@@ -1177,6 +1177,10 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
         // Update and Render additional Platform Windows
         if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) > 0) {
+            if (ImGui::GetIO().KeyAlt) { //
+                printf("");
+            } // Set a debugger breakpoint here!
+
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
@@ -1190,7 +1194,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // state.stopEmulation();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
-    // ImGui::DestroyPlatformWindows();
+    ImGui::DestroyPlatformWindows();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
