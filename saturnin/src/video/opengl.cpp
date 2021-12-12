@@ -685,7 +685,7 @@ void Opengl::addOrUpdateTexture(const size_t key) {
             return v.first == key;
         });
         if (it != texture_key_id_link_.end()) {
-            textures_to_delete_.push_back(key);
+            textures_to_delete_.push_back((*it).second);
             (*it).second = 0;
         } else {
             texture_key_id_link_.push_back(std::pair(key, 0));
@@ -694,10 +694,11 @@ void Opengl::addOrUpdateTexture(const size_t key) {
 }
 
 void Opengl::generateTextures() {
-    for (const auto key : textures_to_delete_) {
+    for (const auto id : textures_to_delete_) {
         // deleteTexture(texture_key_id_link_[key]);
-        const auto id = getTextureId(key);
-        if (id.has_value()) { deleteTexture(*id); }
+        // const auto id = getTextureId(key);
+        // if (id) { deleteTexture(*id); }
+        deleteTexture(id);
     }
     std::vector<u32>().swap(textures_to_delete_);
 
@@ -714,12 +715,12 @@ void Opengl::generateTextures() {
     }
 }
 
-// auto Opengl::getTextureId(const size_t key) -> std::optional<u32> {
-//     auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
-//         return v.first == key;
-//     });
-//     return (it != texture_key_id_link_.end()) ? std::optional<u32>((*it).second) : std::nullopt;
-// }
+auto Opengl::getTextureId(const size_t key) -> std::optional<u32> {
+    auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
+        return v.first == key;
+    });
+    return (it != texture_key_id_link_.end()) ? std::optional<u32>((*it).second) : std::nullopt;
+}
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
 

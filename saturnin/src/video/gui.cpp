@@ -1366,7 +1366,7 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
                     if (tex) {
                         const auto tex_id       = state.opengl()->getTextureId((*tex).key());
                         const auto preview_size = ImVec2(200, 200);
-                        //ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                        // ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
                         if (tex_id.has_value()) {
                             ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(*tex_id)), preview_size);
                         }
