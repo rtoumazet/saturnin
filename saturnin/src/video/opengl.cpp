@@ -366,7 +366,9 @@ void Opengl::render() {
                     // glBindTexture(GL_TEXTURE_2D, t.apiHandle());
                     //}
 
-                    glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
+                    // glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
+                    const auto id = getTextureId(part->textureKey());
+                    if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
 
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
@@ -647,7 +649,11 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             //    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
             //    glBindTexture(GL_TEXTURE_2D, t.apiHandle());
             //}
-            glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
+
+            // glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
+            const auto id = getTextureId(part->textureKey());
+            if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
+
             glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
         }
 
@@ -670,17 +676,33 @@ void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
     // 0x000000006ec8dbe5
     // if (key == 0x86f381a66ec8dbe5) { DebugBreak(); }
-    if (texture_key_id_link_.count(key)) { textures_to_delete_.push_back(key); }
-    texture_key_id_link_[key] = 0;
+    {
+        // if (texture_key_id_link_.count(key)) { textures_to_delete_.push_back(key); }
+        // std::lock_guard<std::mutex> lock(texture_key_id_link_mutex_);
+        // texture_key_id_link_[key] = 0;
+
+        auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
+            return v.first == key;
+        });
+        if (it != texture_key_id_link_.end()) {
+            textures_to_delete_.push_back(key);
+            (*it).second = 0;
+        } else {
+            texture_key_id_link_.push_back(std::pair(key, 0));
+        }
+    }
 }
 
 void Opengl::generateTextures() {
-    for (const auto id : textures_to_delete_) {
-        deleteTexture(texture_key_id_link_[id]);
+    for (const auto key : textures_to_delete_) {
+        // deleteTexture(texture_key_id_link_[key]);
+        const auto id = getTextureId(key);
+        if (id.has_value()) { deleteTexture(*id); }
     }
     std::vector<u32>().swap(textures_to_delete_);
 
-    auto count = u32{0};
+    auto                        count = u32{0};
+    std::lock_guard<std::mutex> lock(texture_key_id_link_mutex_);
     for (auto& [key, id] : texture_key_id_link_) {
         if (!id) {
             const auto& t = Texture::getTexture(key);
@@ -691,6 +713,13 @@ void Opengl::generateTextures() {
         }
     }
 }
+
+// auto Opengl::getTextureId(const size_t key) -> std::optional<u32> {
+//     auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
+//         return v.first == key;
+//     });
+//     return (it != texture_key_id_link_.end()) ? std::optional<u32>((*it).second) : std::nullopt;
+// }
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
 
@@ -1191,10 +1220,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     }
 
     // Cleanup
-    // state.stopEmulation();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyPlatformWindows();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
