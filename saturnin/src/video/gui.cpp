@@ -1474,7 +1474,9 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::EndChild();
             }
 
-            if (ImGui::Button(tr("Reload cache").c_str())) { video::Texture::discardCache(state.opengl(), video::VdpType::vdp2); }
+            // if (ImGui::Button(tr("Reload cache").c_str())) { video::Texture::discardCache(state.opengl(),
+            // video::VdpType::vdp2); }
+            if (ImGui::Button(tr("Reload cache").c_str())) { video::Texture::discardCache(state.opengl()); }
 
             ImGui::EndTabItem();
         }
