@@ -100,6 +100,10 @@ class BaseRenderingPart {
 
     std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes of the part.
 
+  protected:
+    BaseRenderingPart(const VdpType vdp_type, const DrawType draw_type, const size_t texture_key = {}, const u8 priority = {}) :
+        vdp_type_(vdp_type), draw_type_(draw_type), texture_key_(texture_key), priority_(priority){};
+
   private:
     VdpType           vdp_type_{VdpType::not_set};     ///< Type of the part.
     DrawType          draw_type_{DrawType::undefined}; ///< Type of the draw
