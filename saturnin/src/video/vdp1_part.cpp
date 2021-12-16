@@ -46,8 +46,6 @@ Vdp1Part::Vdp1Part(EmulatorModules& modules,
                    const CmdCtrl&   cmdctrl,
                    const CmdLink&   cmdlink) :
     BaseRenderingPart(VdpType::vdp1, type) {
-    // vdpType(VdpType::vdp1);
-    // drawType(type);
     cmdctrl_       = std::move(cmdctrl);
     cmdlink_       = std::move(cmdlink);
     table_address_ = table_address;
@@ -883,7 +881,7 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     part.vertexes_.emplace_back(part.calculatedXD(),
                                 part.calculatedYD(),
                                 0.0,
-                                0.1,
+                                1.0,
                                 color.r,
                                 color.g,
                                 color.b,
