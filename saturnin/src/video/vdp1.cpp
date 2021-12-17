@@ -114,6 +114,7 @@ void Vdp1::populateRenderData() {
     auto cmdlink               = CmdLink{modules_.memory()->read<u16>(current_table_address + cmdlink_offset)};
     auto skip_table            = false;
     vdp1_parts_.clear();
+    // Texture::discardCache(modules_.opengl(), VdpType::vdp1);
 
     while (cmdctrl.get(CmdCtrl::end_bit) == EndBit::command_selection_valid) {
         skip_table = false;

@@ -1390,16 +1390,16 @@ class Vdp2 {
 
         for (u32 i = 0; i < 8; ++i) {
             auto row = Dots8Bits(modules_.memory()->read<u32>(current_address));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_0));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_1));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_3));
             current_address += row_offset;
             row = Dots8Bits(modules_.memory()->read<u32>(current_address));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_0));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_1));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_3));
             current_address += row_offset;
         }
     }
