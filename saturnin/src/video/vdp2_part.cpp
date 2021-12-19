@@ -34,20 +34,25 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd, const ScreenPos& pos, const size_
     const auto     pos_x_width  = static_cast<s16>(pos_x + cell_width);
     const auto     pos_y        = static_cast<s16>(pos.y);
     const auto     pos_y_height = static_cast<s16>(pos.y + cell_height);
-    // vertexes_.emplace_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
-    // vertexes_.emplace_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
-    // vertexes_.emplace_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
-    // vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
 
-    vertexes_.emplace_back(pos_x, pos_y, 0.0, 0.0);              // lower left
-    vertexes_.emplace_back(pos_x_width, pos_y, 1.0, 0.0);        // lower right
-    vertexes_.emplace_back(pos_x_width, pos_y_height, 1.0, 1.0); // upper right
-    vertexes_.emplace_back(pos_x, pos_y_height, 0.0, 1.0);       // upper left
+    auto s_left  = float{0.0};
+    auto s_right = float{1.0};
+    auto t_down  = float{0.0};
+    auto t_up    = float{1.0};
 
-    // vertexes_.push_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
-    // vertexes_.push_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
-    // vertexes_.push_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
-    // vertexes_.push_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
+    if (is_horizontally_flipped_) {
+        s_left  = 1.0 - s_left;
+        s_right = 1.0 - s_right;
+    }
+    if (is_vertically_flipped_) {
+        t_down = 1.0 - t_down;
+        t_up   = 1.0 - t_up;
+    }
+
+    vertexes_.emplace_back(pos_x, pos_y, s_left, t_down);             // lower left
+    vertexes_.emplace_back(pos_x_width, pos_y, s_right, t_down);      // lower right
+    vertexes_.emplace_back(pos_x_width, pos_y_height, s_right, t_up); // upper right
+    vertexes_.emplace_back(pos_x, pos_y_height, s_left, t_up);        // upper left
 };
 
 Vdp2Part::Vdp2Part(const size_t texture_key, const u16 texture_width, const u16 texture_height, const u8 priority) :
@@ -57,20 +62,11 @@ Vdp2Part::Vdp2Part(const size_t texture_key, const u16 texture_width, const u16 
     const auto pos_x_width  = static_cast<s16>(texture_width);
     const auto pos_y        = static_cast<s16>(0);
     const auto pos_y_height = static_cast<s16>(texture_height);
-    // vertexes_.emplace_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
-    // vertexes_.emplace_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
-    // vertexes_.emplace_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
-    // vertexes_.emplace_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
 
     vertexes_.emplace_back(pos_x, pos_y, 0.0, 0.0);              // lower left
     vertexes_.emplace_back(pos_x_width, pos_y, 1.0, 0.0);        // lower right
     vertexes_.emplace_back(pos_x_width, pos_y_height, 1.0, 1.0); // upper right
     vertexes_.emplace_back(pos_x, pos_y_height, 0.0, 1.0);       // upper left
-
-    // vertexes_.push_back(Vertex{{pos_x, pos_y}, {0.0, 0.0}, {0, 0, 0, 0}});              // lower left
-    // vertexes_.push_back(Vertex{{pos_x_width, pos_y}, {1.0, 0.0}, {0, 0, 0, 0}});        // lower right
-    // vertexes_.push_back(Vertex{{pos_x_width, pos_y_height}, {1.0, 1.0}, {0, 0, 0, 0}}); // upper right
-    // vertexes_.push_back(Vertex{{pos_x, pos_y_height}, {0.0, 1.0}, {0, 0, 0, 0}});       // upper left
 };
 
 // void Vdp2Part::renderPart() { displayCell(); };

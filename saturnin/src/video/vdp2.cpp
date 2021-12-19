@@ -2939,7 +2939,7 @@ void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternN
         const auto cell_number = u32{4};
         for (u32 i = 0; i < cell_number; ++i) {
             cells_address.emplace_back(current_cell_address);
-            current_cell_address += pnd_offset;
+            current_cell_address += screen.cell_size;
         }
 
         const auto readCells = [&](const std::array<u8, cell_number>& cells_pos) {
@@ -3228,7 +3228,7 @@ auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const Scroll
     pattern_name_data.character_number = (reg.get(PatternNameData1Word1CellOver16Colors10Bits::palette_number) << cn_disp);
     pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors10Bits::character_number);
 
-    constexpr auto pn_disp           = u8{4};
+    constexpr auto pn_disp           = u8{8};
     pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
@@ -3248,7 +3248,7 @@ auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const Scroll
     pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
     pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors12Bits::character_number);
 
-    constexpr auto pn_disp           = u8{4};
+    constexpr auto pn_disp           = u8{8};
     pattern_name_data.palette_number = (reg.get(PatternNameData1Word1CellOver16Colors12Bits::palette_number) << pn_disp);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
@@ -3319,7 +3319,7 @@ auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const Scrol
     constexpr auto cn_mask_2 = u8{0x3};
     pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
 
-    constexpr auto pn_disp           = u8{4};
+    constexpr auto pn_disp           = u8{8};
     pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors10Bits::palette_number) << pn_disp);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
@@ -3342,7 +3342,7 @@ auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const Scrol
     constexpr auto cn_mask_2 = u8{0x3};
     pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
 
-    constexpr auto pn_disp           = u8{4};
+    constexpr auto pn_disp           = u8{8};
     pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors12Bits::palette_number) << pn_disp);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
