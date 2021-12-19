@@ -857,8 +857,8 @@ void Sh2::start64bitsDivision() {
     // Log::debug(Logger::sh2, "{} / {} {:x}", dividend, dvsr, pc_);
 
     // auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
-    auto quotient  = s32{};
-    auto remainder = s32{};
+    auto quotient  = s64{};
+    auto remainder = s64{};
     if (divu_dvsr_.any()) {
         quotient  = (s64)dividend / (s32)dvsr;
         remainder = (s64)dividend % (s32)dvsr;

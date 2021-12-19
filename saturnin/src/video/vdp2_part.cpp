@@ -63,10 +63,10 @@ Vdp2Part::Vdp2Part(const size_t texture_key, const u16 texture_width, const u16 
     const auto pos_y        = static_cast<s16>(0);
     const auto pos_y_height = static_cast<s16>(texture_height);
 
-    vertexes_.emplace_back(pos_x, pos_y, 0.0, 0.0);              // lower left
-    vertexes_.emplace_back(pos_x_width, pos_y, 1.0, 0.0);        // lower right
-    vertexes_.emplace_back(pos_x_width, pos_y_height, 1.0, 1.0); // upper right
-    vertexes_.emplace_back(pos_x, pos_y_height, 0.0, 1.0);       // upper left
+    vertexes_.emplace_back(pos_x, pos_y, 0.0f, 0.0f);              // lower left
+    vertexes_.emplace_back(pos_x_width, pos_y, 1.0f, 0.0f);        // lower right
+    vertexes_.emplace_back(pos_x_width, pos_y_height, 1.0f, 1.0f); // upper right
+    vertexes_.emplace_back(pos_x, pos_y_height, 0.0f, 1.0f);       // upper left
 };
 
 // void Vdp2Part::renderPart() { displayCell(); };
