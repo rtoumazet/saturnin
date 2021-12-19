@@ -75,7 +75,7 @@ class Vdp2Part final : public BaseRenderingPart {
   private:
     ScreenPos scroll_screen_pos_{};       ///< Position in the scroll screen.
     u16       character_number_{};        ///< The character number.
-    u8        palette_number_{};          ///< The palette number.
+    u16       palette_number_{};          ///< The palette number.
     bool      is_horizontally_flipped_{}; ///< True if the part is horizontally flipped.
     bool      is_vertically_flipped_{};   ///< True if the part is vertically flipped.
     // size_t    texture_key_{};             ///< Link to the texture.

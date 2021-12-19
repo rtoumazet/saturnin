@@ -184,7 +184,7 @@ class Vdp1Part final : public BaseRenderingPart {
     void calculatePriority(const EmulatorModules& modules);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto final::getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> const u8;
+    /// \fn auto final::getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> u8;
     ///
     /// \brief  Gets the priority register depending on dot data.
     ///
@@ -197,7 +197,7 @@ class Vdp1Part final : public BaseRenderingPart {
     /// \returns    The priority register.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> const u8;
+    auto getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> u8;
 
     EmulatorModules modules_;
 

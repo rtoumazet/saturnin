@@ -41,12 +41,12 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd, const ScreenPos& pos, const size_
     auto t_up    = float{1.0};
 
     if (is_horizontally_flipped_) {
-        s_left  = 1.0 - s_left;
-        s_right = 1.0 - s_right;
+        s_left  = 1.0f - s_left;
+        s_right = 1.0f - s_right;
     }
     if (is_vertically_flipped_) {
-        t_down = 1.0 - t_down;
-        t_up   = 1.0 - t_up;
+        t_down = 1.0f - t_down;
+        t_up   = 1.0f - t_up;
     }
 
     vertexes_.emplace_back(pos_x, pos_y, s_left, t_down);             // lower left

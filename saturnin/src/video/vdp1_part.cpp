@@ -36,6 +36,7 @@ using core::tr;
 using utilities::toUnderlying;
 
 constexpr auto vdp1_vram_start_address = u32{0x25C00000};
+constexpr auto horizontal_multiplier   = u8{8};
 
 s16 Vdp1Part::local_coordinate_x_;
 s16 Vdp1Part::local_coordinate_y_;
@@ -300,7 +301,7 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     priority(modules.vdp2()->getSpritePriority(priority_number_register));
 }
 
-auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> const u8 {
+auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> u8 {
     const auto color_mode = cmdpmod_.get(CmdPmod::color_mode);
     switch (color_mode) {
         case ColorMode::mode_5_32k_colors_rgb: {
@@ -563,7 +564,7 @@ Gouraud shading
             part_detail += fmt::format("Vertex A ({}, {})", cmdxa_.twoCmp(), cmdya_.twoCmp());
             part_detail += fmt::format("{}\n", getCharacterReadDirection(cmdctrl_.get(CmdCtrl::character_read_direction)));
             part_detail += fmt::format("Character size {} * {}\n",
-                                       cmdsize_.get(CmdSize::character_size_x) * 8,
+                                       cmdsize_.get(CmdSize::character_size_x) * horizontal_multiplier,
                                        cmdsize_.get(CmdSize::character_size_y));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
@@ -643,7 +644,7 @@ auto Vdp1Part::calculatedYD() -> s16 { return cmdyd_.twoCmp() + local_coordinate
 
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));
-    const auto size_x = static_cast<s16>(part.cmdsize_.get(CmdSize::character_size_x) * 8);
+    const auto size_x = static_cast<s16>(part.cmdsize_.get(CmdSize::character_size_x) * horizontal_multiplier);
     const auto size_y = static_cast<s16>(part.cmdsize_.get(CmdSize::character_size_y));
 
     loadTextureData(modules, part);
@@ -674,14 +675,15 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     // part.vertexes_
     //    .emplace_back(d.x, d.y, coords[3].s, coords[3].t, color.r, color.g, color.b, color.a, gouraud_values[3]); // upper left
 
-    part.vertexes_.push_back(
-        std::move(Vertex(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a, gouraud_values[0])));
-    part.vertexes_.push_back(
-        std::move(Vertex(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b, color.a, gouraud_values[1])));
-    part.vertexes_.push_back(
-        std::move(Vertex(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g, color.b, color.a, gouraud_values[2])));
-    part.vertexes_.push_back(
-        std::move(Vertex(d.x, d.y, coords[3].s, coords[3].t, color.r, color.g, color.b, color.a, gouraud_values[3])));
+    // part.vertexes_.push_back(Vertex(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a,
+    // gouraud_values[0])); part.vertexes_.push_back(Vertex(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b,
+    // color.a, gouraud_values[1])); part.vertexes_.push_back(Vertex(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g,
+    // color.b, color.a, gouraud_values[2])); part.vertexes_.push_back(Vertex(d.x, d.y, coords[3].s, coords[3].t, color.r,
+    // color.g, color.b, color.a, gouraud_values[3]));
+    part.vertexes_.emplace_back(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a, gouraud_values[0]);
+    part.vertexes_.emplace_back(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b, color.a, gouraud_values[1]);
+    part.vertexes_.emplace_back(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g, color.b, color.a, gouraud_values[2]);
+    part.vertexes_.emplace_back(d.x, d.y, coords[3].s, coords[3].t, color.r, color.g, color.b, color.a, gouraud_values[3]);
 }
 
 void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -853,8 +855,8 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
-                                0.0,
-                                0.0,
+                                0.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -862,8 +864,8 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[0]); // lower left
     part.vertexes_.emplace_back(part.calculatedXB(),
                                 part.calculatedYB(),
-                                1.0,
-                                0.0,
+                                1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -871,8 +873,8 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[1]); // lower right
     part.vertexes_.emplace_back(part.calculatedXC(),
                                 part.calculatedYC(),
-                                1.0,
-                                1.0,
+                                1.0f,
+                                1.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -880,8 +882,8 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[2]); // upper right
     part.vertexes_.emplace_back(part.calculatedXD(),
                                 part.calculatedYD(),
-                                0.0,
-                                1.0,
+                                0.0f,
+                                1.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -894,7 +896,7 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     const auto cmdcolr = part.cmdcolr_.get(CmdColr::color_control);
     auto       color   = Color(cmdcolr);
-    if (!cmdcolr) { color.a = 0; }
+    if (cmdcolr == 0) { color.a = 0; }
     const auto gouraud_values = readGouraudData(modules, part);
 
     // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
@@ -916,8 +918,8 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
-                                0.0,
-                                0.0,
+                                0.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -925,8 +927,8 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[0]); // lower left
     part.vertexes_.emplace_back(part.calculatedXB(),
                                 part.calculatedYB(),
-                                1.0,
-                                0.0,
+                                1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -934,8 +936,8 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[1]); // lower right
     part.vertexes_.emplace_back(part.calculatedXC(),
                                 part.calculatedYC(),
-                                1.0,
-                                1.0,
+                                1.0f,
+                                1.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -943,8 +945,8 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[2]); // upper right
     part.vertexes_.emplace_back(part.calculatedXD(),
                                 part.calculatedYD(),
-                                0.0,
-                                0.1,
+                                0.0f,
+                                1.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -957,7 +959,7 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     const auto cmdcolr = part.cmdcolr_.get(CmdColr::color_control);
     auto       color   = Color(cmdcolr);
-    if (!cmdcolr) { color.a = 0; }
+    if (cmdcolr == 0) { color.a = 0; }
 
     const auto gouraud_values = readGouraudData(modules, part);
 
@@ -980,8 +982,8 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
-                                0.0,
-                                0.0,
+                                0.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -989,8 +991,8 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[0]); // lower left
     part.vertexes_.emplace_back(part.calculatedXB(),
                                 part.calculatedYB(),
-                                1.0,
-                                0.0,
+                                1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -998,8 +1000,8 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[1]); // lower right
     part.vertexes_.emplace_back(part.calculatedXC(),
                                 part.calculatedYC(),
-                                1.0,
-                                1.0,
+                                1.0f,
+                                1.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -1007,8 +1009,8 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[2]); // upper right
     part.vertexes_.emplace_back(part.calculatedXD(),
                                 part.calculatedYD(),
-                                0.0,
-                                0.1,
+                                0.0f,
+                                1.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -1021,7 +1023,7 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     const auto cmdcolr = part.cmdcolr_.get(CmdColr::color_control);
     auto       color   = Color(cmdcolr);
-    if (!cmdcolr) { color.a = 0; }
+    if (cmdcolr == 0) { color.a = 0; }
 
     const auto gouraud_values = readGouraudData(modules, part);
 
@@ -1036,8 +1038,8 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     part.vertexes_.reserve(2);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
-                                0.0,
-                                0.0,
+                                0.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -1045,8 +1047,8 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 gouraud_values[0]); // lower left
     part.vertexes_.emplace_back(part.calculatedXB(),
                                 part.calculatedYB(),
-                                1.0,
-                                0.0,
+                                1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
