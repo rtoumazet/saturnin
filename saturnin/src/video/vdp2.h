@@ -282,7 +282,6 @@ struct RamStatus {
 struct ScrollScreenStatus {
     ScrollScreen scroll_screen{};                    ///< The scroll screen value
     bool         is_display_enabled{};               ///< True when displayed.
-    bool         is_display_enabled_dirty{};         ///< True when displayed state was changed.
     bool         is_transparency_code_valid{};       ///< True when transparency code is valid.
     bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
 

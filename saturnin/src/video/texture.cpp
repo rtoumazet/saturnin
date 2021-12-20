@@ -146,8 +146,8 @@ void Texture::cleanCache(const VdpType t) {
         auto is_elt_selected = (t == VdpType::not_set) ? true : ((iter->second.vdpType() == t) ? true : false);
         if (is_elt_selected) {
             if (!(iter->second.isRecentlyUsed())) {
-                deleteTextureData(iter->second);
-                // iter = texture_storage_.erase(iter);
+                // iter->second.isDiscarded(true);
+                //  deleteTextureData(iter->second);
             } else {
                 //++iter;
             }

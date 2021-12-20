@@ -1378,6 +1378,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     }
 
     getScreen(s).is_display_enabled = true;
+
     return true;
 }
 
@@ -1926,12 +1927,16 @@ void Vdp2::populateRenderData() {
     if (isScreenDisplayed(ScrollScreen::rbg1)) {
         updateScrollScreenStatus(ScrollScreen::rbg1);
         if (getScreen(ScrollScreen::rbg1).priority_number != 0) { readScrollScreenData(ScrollScreen::rbg1); }
+    } else {
+        // discardCache(ScrollScreen::rbg1);
     }
 
     clearRenderData(ScrollScreen::rbg0);
     if (isScreenDisplayed(ScrollScreen::rbg0)) {
         updateScrollScreenStatus(ScrollScreen::rbg0);
         if (getScreen(ScrollScreen::rbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::rbg0); }
+    } else {
+        // discardCache(ScrollScreen::rbg0);
     }
     auto is_nbg_displayed
         = !(getScreen(ScrollScreen::rbg0).is_display_enabled && getScreen(ScrollScreen::rbg1).is_display_enabled);
@@ -1957,6 +1962,8 @@ void Vdp2::populateRenderData() {
                 updateScrollScreenStatus(ScrollScreen::nbg2);
                 if (getScreen(ScrollScreen::nbg2).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg2); }
             }
+        } else {
+            // bg_[util::toUnderlying(ScrollScreen::nbg2)] = {};
         }
 
         clearRenderData(ScrollScreen::nbg3);
@@ -2765,7 +2772,6 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                                       texture_data,
                                       texture_width,
                                       texture_height));
-        if (key == 0x000000006ec8dbe5) { DebugBreak(); }
         modules_.opengl()->addOrUpdateTexture(key);
     }
     saveBitmap(screen, texture_data, texture_width, texture_height, key);
@@ -3058,7 +3064,6 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                                       texture_data,
                                       texture_width,
                                       texture_height));
-        if (key == 0x000000006ec8dbe5) { DebugBreak(); }
         modules_.opengl()->addOrUpdateTexture(key);
     }
     saveCell(screen, pnd, cell_address, cell_offset, key);
