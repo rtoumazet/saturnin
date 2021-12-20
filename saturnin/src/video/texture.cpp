@@ -148,6 +148,9 @@ void Texture::cleanCache(const VdpType t) {
             if (!(iter->second.isRecentlyUsed())) {
                 // iter->second.isDiscarded(true);
                 //  deleteTextureData(iter->second);
+                if (iter->second.isDiscarded()) {
+                    // WIP
+                }
             } else {
                 //++iter;
             }
