@@ -428,13 +428,13 @@ void Smpc::executeCommand() {
             sf_.reset();
             break;
         case SmpcCommand::cd_on:
-            is_cd_on = true;
+            is_cd_on_ = true;
             Log::debug(Logger::smpc, tr("-=CD ON=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
             break;
         case SmpcCommand::cd_off:
-            is_cd_on = false;
+            is_cd_on_ = false;
             Log::debug(Logger::smpc, tr("-=CD OFF=- command executed"));
             oreg_[index_31].set(OutputRegister::all_bits, util::toUnderlying(command));
             sf_.reset();
@@ -572,7 +572,10 @@ void Smpc::getStatus() {
         sr_.set(StatusRegister::peripheral_data_remaining, PeripheralDataRemaining::no_remaining_peripheral_data);
     }
 
-    oreg_[index_0].reset();
+    for (u8 i = 0; i < output_registers_number; ++i) {
+        oreg_[i].reset();
+    }
+    //oreg_[index_0].reset();
     if (is_soft_reset_allowed_) {
         oreg_[index_0].set(OutputRegister::oreg0_reset_status, ResetStatus::enabled);
     } else {
@@ -606,7 +609,8 @@ void Smpc::getStatus() {
     oreg_[index_10][bit_0] = is_sound_on_;
 
     oreg_[index_11].reset();
-    oreg_[index_11][bit_6] = is_cd_on;
+    //oreg_[index_11][bit_6] = is_cd_on_;
+    oreg_[index_11][bit_6] = 0;
 
     oreg_[index_12].set(OutputRegister::all_bits, smem_[0]);
     oreg_[index_13].set(OutputRegister::all_bits, smem_[1]);
@@ -614,6 +618,27 @@ void Smpc::getStatus() {
     oreg_[index_15].set(OutputRegister::all_bits, smem_[3]);
 
     oreg_[index_31].reset();
+
+    Log::debug(Logger::smpc, "IREG[0] = {:x}", ireg_[index_0].toU16());
+    Log::debug(Logger::smpc, "IREG[1] = {:x}", ireg_[index_1].toU16());
+    Log::debug(Logger::smpc, "IREG[2] = {:x}", ireg_[index_2].toU16());
+    Log::debug(Logger::smpc, "IREG[3] = {:x}", ireg_[index_3].toU16());
+    Log::debug(Logger::smpc, "IREG[4] = {:x}", ireg_[index_4].toU16());
+    Log::debug(Logger::smpc, "IREG[5] = {:x}", ireg_[index_5].toU16());
+    Log::debug(Logger::smpc, "IREG[6] = {:x}", ireg_[index_6].toU16());
+
+    Log::debug(Logger::smpc, "OREG[0] = {:x}", oreg_[index_0].toU16());
+    Log::debug(Logger::smpc, "OREG[1] = {:x}", oreg_[index_1].toU16());
+    Log::debug(Logger::smpc, "OREG[2] = {:x}", oreg_[index_2].toU16());
+    Log::debug(Logger::smpc, "OREG[3] = {:x}", oreg_[index_3].toU16());
+    Log::debug(Logger::smpc, "OREG[4] = {:x}", oreg_[index_4].toU16());
+    Log::debug(Logger::smpc, "OREG[5] = {:x}", oreg_[index_5].toU16());
+    Log::debug(Logger::smpc, "OREG[6] = {:x}", oreg_[index_6].toU16());
+    Log::debug(Logger::smpc, "OREG[7] = {:x}", oreg_[index_7].toU16());
+    Log::debug(Logger::smpc, "OREG[8] = {:x}", oreg_[index_8].toU16());
+    Log::debug(Logger::smpc, "OREG[9] = {:x}", oreg_[index_9].toU16());
+    Log::debug(Logger::smpc, "OREG[10] = {:x}", oreg_[index_10].toU16());
+    Log::debug(Logger::smpc, "OREG[11] = {:x}", oreg_[index_11].toU16());
 };
 
 void Smpc::getPeripheralData() {
@@ -955,10 +980,14 @@ auto getRtcTime() -> RtcTime {
     rtc.month_hex = static_cast<unsigned>(today.month());
     rtc.day_hex   = weekday.weekday().c_encoding();
 
-    const auto month     = static_cast<unsigned>(today.month());
-    const auto month_bcd = util::dec2bcd(month);
-    rtc.day_10_bcd       = std::bitset<4>((month_bcd >> displacement_4) & bitmask_0F);
-    rtc.day_1_bcd        = std::bitset<4>(month_bcd & bitmask_0F);
+    //const auto month     = static_cast<unsigned>(today.month());
+    //const auto month_bcd = util::dec2bcd(month);
+    //rtc.day_10_bcd       = std::bitset<4>((month_bcd >> displacement_4) & bitmask_0F);
+    //rtc.day_1_bcd        = std::bitset<4>(month_bcd & bitmask_0F);
+    const auto day     = static_cast<unsigned>(today.day());
+    const auto day_bcd = util::dec2bcd(day);
+    rtc.day_10_bcd     = std::bitset<4>((day_bcd >> displacement_4) & bitmask_0F);
+    rtc.day_1_bcd      = std::bitset<4>(day_bcd & bitmask_0F);
 
     const auto hour     = time.hours().count();
     const auto hour_bcd = util::dec2bcd(hour);

@@ -1220,12 +1220,12 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
                               ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_ScrollY | ImGuiTableFlags_PadOuterX,
                               table_size)) {
             const auto callstack_mask = std::string{"{:#010x}"};
-            const auto callstack      = current_sh2->callstack();
-            std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(fmt::format(callstack_mask, item.call_address).c_str());
-            });
+             auto callstack      = current_sh2->callstack();
+            //std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
+            //    ImGui::TableNextRow();
+            //    ImGui::TableSetColumnIndex(0);
+            //    ImGui::TextUnformatted(fmt::format(callstack_mask, item.call_address).c_str());
+            //});
 
             ImGui::EndTable();
         }

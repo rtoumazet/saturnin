@@ -216,8 +216,8 @@ void Vdp2::onVblankIn() {
     updateRamStatus();
     Texture::setCache(VdpType::vdp2);
     populateRenderData();
-    //  Texture::cleanCache(VdpType::vdp2);
     resetCacheState();
+    Texture::cleanCache(modules_.opengl(), VdpType::vdp2);
 }
 
 auto Vdp2::getSpriteColorAddressOffset() -> u16 {

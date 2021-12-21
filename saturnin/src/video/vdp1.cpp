@@ -76,6 +76,7 @@ auto Vdp1::intializeFramebuffer() -> bool {
 void Vdp1::run(const u8 cycles) {}
 
 void Vdp1::onVblankIn() {
+    
     Texture::setCache(VdpType::vdp1);
     updateResolution();
 
@@ -92,7 +93,7 @@ void Vdp1::onVblankIn() {
         default: // Nothing
             break;
     }
-    Texture::cleanCache(VdpType::vdp1);
+    Texture::cleanCache(modules_.opengl(), VdpType::vdp1);
 }
 
 auto Vdp1::getDebugDrawList() const -> std::vector<std::string> {

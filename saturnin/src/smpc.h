@@ -635,7 +635,7 @@ class Smpc {
     bool is_sound_on_{false};           ///< Sound status
     bool is_soft_reset_allowed_{false}; ///< NMI generation from reset button status
     bool is_horizontal_res_352{false};  ///< Horizontal resolution (320/352)
-    bool is_cd_on{false};               ///< CD status
+    bool is_cd_on_{false};               ///< CD status
 
     bool is_intback_processing_{false}; ///< Intback status
     // bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
