@@ -1311,6 +1311,11 @@ void Sh2::popFromCallstack() {
     // if (emulatorContext()->debugStatus() == core::DebugStatus::wait_end_of_routine) { --step_over_subroutine_depth_; }
 };
 
+auto Sh2::callstack() -> std::vector<CallstackItem> {
+    std::lock_guard<std::mutex> lock(sh2_mutex_);
+    return callstack_;
+};
+
 void Sh2::setBinaryFileStartAddress(const u32 val) {
     is_binary_file_loaded_     = true;
     binary_file_start_address_ = val;

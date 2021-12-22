@@ -26,6 +26,7 @@
 #pragma once
 
 #include <array>  // array
+#include <mutex> // mutex
 #include <vector> // vector
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/emulator_modules.h>
@@ -429,17 +430,17 @@ class Sh2 {
     void popFromCallstack();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::callstack() const -> const std::vector<CallstackItem>&
+    /// \fn auto Sh2::callstack() -> std::vector<CallstackItem>
     ///
     /// \brief  Returns the callstack of the CPU
     ///
     /// \author Runik
     /// \date   06/05/2020
     ///
-    /// \returns    A reference to a const std::vector&lt;CallstackItem&gt;
+    /// \returns    A std::vector&lt;CallstackItem&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [[nodiscard]] auto callstack() const -> const std::vector<CallstackItem>& { return callstack_; };
+    [[nodiscard]] auto callstack() -> std::vector<CallstackItem>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::initializeSubroutineDepth()
@@ -900,6 +901,8 @@ class Sh2 {
 
     bool is_binary_file_loaded_{false}; ///< True if a binary file has been loaded.
     u32  binary_file_start_address_{};  ///< Start address of the binary file if any.
+
+    std::mutex sh2_mutex_; ///< Handles class data when accessed from another thread.
 
     /// \name Interrupt management
     //@{
