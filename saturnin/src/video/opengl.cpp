@@ -678,6 +678,7 @@ void Opengl::addOrUpdateTexture(const size_t key) {
         auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
             return v.first == key;
         });
+        std::lock_guard<std::mutex> lock(texture_key_id_link_mutex_);
         if (it != texture_key_id_link_.end()) {
             textures_to_delete_.push_back((*it).second);
             (*it).second = 0;
