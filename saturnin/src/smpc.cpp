@@ -350,6 +350,8 @@ auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 
 
 auto Smpc::getSystemClock() -> u32 { return util::toUnderlying(clock_); }
 
+auto Smpc::getRegisters() const -> const AddressToNameMap& { return address_to_name_; };
+
 void Smpc::setCommandDuration() {
     using micro = std::chrono::duration<double, std::micro>;
     using milli = std::chrono::duration<double, std::milli>;
@@ -362,28 +364,33 @@ void Smpc::setCommandDuration() {
         case SmpcCommand::nmi_request:
         case SmpcCommand::reset_enable:
         case SmpcCommand::reset_disable: {
-            intback_remaining_cycles_ = calculateCyclesNumber(micro(30));
+            command_remaining_cycles_ = calculateCyclesNumber(micro(30));
             break;
         }
         case SmpcCommand::cd_on:
         case SmpcCommand::cd_off:
         case SmpcCommand::smpc_memory_setting: {
-            intback_remaining_cycles_ = calculateCyclesNumber(micro(40));
+            command_remaining_cycles_ = calculateCyclesNumber(micro(40));
             break;
         }
         case SmpcCommand::reset_entire_system:
         case SmpcCommand::clock_change_320:
         case SmpcCommand::clock_change_352: {
             // Alpha is fixed to 0
-            intback_remaining_cycles_ = calculateCyclesNumber(milli(100));
+            command_remaining_cycles_ = calculateCyclesNumber(milli(100));
             break;
         }
         case SmpcCommand::time_setting: {
-            intback_remaining_cycles_ = calculateCyclesNumber(micro(70));
+            command_remaining_cycles_ = calculateCyclesNumber(micro(70));
             break;
         }
         case SmpcCommand::interrupt_back: {
-            intback_remaining_cycles_ = calculateCyclesNumber(milli(320));
+            // intback_remaining_cycles_ = calculateCyclesNumber(milli(320));
+            // Values are from previous Saturnin version, not sure how accurate they are ...
+            auto is_status_returned
+                = bool{ireg_[index_0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned};
+            command_remaining_cycles_
+                = (is_status_returned) ? calculateCyclesNumber(micro(50)) : calculateCyclesNumber(micro(1500));
             break;
         }
         default: break;
@@ -498,7 +505,7 @@ void Smpc::executeCommand() {
             break;
         case SmpcCommand::interrupt_back:
             executeIntback();
-            sf_.reset();
+            // sf_.reset();
             break;
         case SmpcCommand::smpc_memory_setting:
             for (u8 i = 0; i < 4; ++i) {
@@ -518,45 +525,82 @@ void Smpc::executeCommand() {
 }
 
 void Smpc::executeIntback() {
-    auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
-    if (is_break_requested) {
-        Log::debug(Logger::smpc, tr("INTBACK break request"));
-        sf_.reset();
-        return;
-    }
+    // auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
+    // if (is_break_requested) {
+    //     Log::debug(Logger::smpc, tr("INTBACK break request"));
+    //     sf_.reset();
+    //     return;
+    // }
 
-    auto is_continue_requested
-        = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
-    if (is_continue_requested) {
-        Log::debug(Logger::smpc, tr("INTBACK continue request"));
-        next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
-        getPeripheralData();
-        return;
-    }
+    // auto is_continue_requested
+    //     = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
+    // if (is_continue_requested) {
+    //     Log::debug(Logger::smpc, tr("INTBACK continue request"));
+    //     getPeripheralData();
+    //     next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
+    //     Log::debug(Logger::smpc, tr("Interrupt request"));
+    //     modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+    //     return;
+    // }
 
     Log::debug(Logger::smpc, tr("INTBACK started"));
     oreg_[index_31].reset();
-    next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
+
     auto is_status_returned
         = bool{ireg_[index_0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned};
+    auto is_peripheral_data_returned
+        = bool{ireg_[index_1].get(InputRegister::ireg1_peripheral_data_enable) == PeripheralDataEnable::peripheral_data_returned};
+
     if (is_status_returned) {
         getStatus();
-        auto is_peripheral_data_returned = bool{ireg_[index_1].get(InputRegister::ireg1_peripheral_data_enable)
-                                                == PeripheralDataEnable::peripheral_data_returned};
+
         if (is_peripheral_data_returned) {
-            getPeripheralData();
-            next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
+            next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
             sf_.set();
         } else {
             sf_.reset();
         }
-    } else {
-        getPeripheralData();
-        sf_.reset();
+        oreg_[index_31].set(OutputRegister::oreg31_smpc_command, SmpcCommand::interrupt_back);
+
+        Log::debug(Logger::smpc, tr("Interrupt request"));
+        modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+        return;
     }
 
-    Log::debug(Logger::smpc, tr("Interrupt request"));
-    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+    if (is_peripheral_data_returned) {
+        getPeripheralData();
+    } else {
+        // Nothing left to do
+    }
+    oreg_[index_31].set(OutputRegister::oreg31_smpc_command, SmpcCommand::interrupt_back);
+    sf_.reset();
+
+    //// next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
+    // auto is_status_returned
+    //     = bool{ireg_[index_0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned};
+    // if (is_status_returned) {
+    //     getStatus();
+    //     auto is_peripheral_data_returned = bool{ireg_[index_1].get(InputRegister::ireg1_peripheral_data_enable)
+    //                                             == PeripheralDataEnable::peripheral_data_returned};
+    //     if (is_peripheral_data_returned) {
+    //         // Peripheral data must be returned after the status.
+    //         next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
+    //         sr_[bit_7]              = true;
+    //         sf_.reset();
+    //     } else {
+    //         sf_.reset();
+    //     }
+
+    //    Log::debug(Logger::smpc, tr("Interrupt request"));
+    //    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+
+    //} else {
+    //    next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
+    //    getPeripheralData();
+    //    Log::debug(Logger::smpc, tr("Interrupt request"));
+    //    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+    //    sf_.reset();
+    //}
 };
 
 void Smpc::getStatus() {
@@ -573,9 +617,9 @@ void Smpc::getStatus() {
     }
 
     for (u8 i = 0; i < output_registers_number; ++i) {
-        oreg_[i].reset();
+        oreg_[i].set();
     }
-    //oreg_[index_0].reset();
+    // oreg_[index_0].reset();
     if (is_soft_reset_allowed_) {
         oreg_[index_0].set(OutputRegister::oreg0_reset_status, ResetStatus::enabled);
     } else {
@@ -608,8 +652,8 @@ void Smpc::getStatus() {
     oreg_[index_10][bit_1] = false; // SYSRES is never triggered by software
     oreg_[index_10][bit_0] = is_sound_on_;
 
-    oreg_[index_11].reset();
-    //oreg_[index_11][bit_6] = is_cd_on_;
+    // oreg_[index_11].reset();
+    //  oreg_[index_11][bit_6] = is_cd_on_;
     oreg_[index_11][bit_6] = 0;
 
     oreg_[index_12].set(OutputRegister::all_bits, smem_[0]);
@@ -618,27 +662,6 @@ void Smpc::getStatus() {
     oreg_[index_15].set(OutputRegister::all_bits, smem_[3]);
 
     oreg_[index_31].reset();
-
-    Log::debug(Logger::smpc, "IREG[0] = {:x}", ireg_[index_0].toU16());
-    Log::debug(Logger::smpc, "IREG[1] = {:x}", ireg_[index_1].toU16());
-    Log::debug(Logger::smpc, "IREG[2] = {:x}", ireg_[index_2].toU16());
-    Log::debug(Logger::smpc, "IREG[3] = {:x}", ireg_[index_3].toU16());
-    Log::debug(Logger::smpc, "IREG[4] = {:x}", ireg_[index_4].toU16());
-    Log::debug(Logger::smpc, "IREG[5] = {:x}", ireg_[index_5].toU16());
-    Log::debug(Logger::smpc, "IREG[6] = {:x}", ireg_[index_6].toU16());
-
-    Log::debug(Logger::smpc, "OREG[0] = {:x}", oreg_[index_0].toU16());
-    Log::debug(Logger::smpc, "OREG[1] = {:x}", oreg_[index_1].toU16());
-    Log::debug(Logger::smpc, "OREG[2] = {:x}", oreg_[index_2].toU16());
-    Log::debug(Logger::smpc, "OREG[3] = {:x}", oreg_[index_3].toU16());
-    Log::debug(Logger::smpc, "OREG[4] = {:x}", oreg_[index_4].toU16());
-    Log::debug(Logger::smpc, "OREG[5] = {:x}", oreg_[index_5].toU16());
-    Log::debug(Logger::smpc, "OREG[6] = {:x}", oreg_[index_6].toU16());
-    Log::debug(Logger::smpc, "OREG[7] = {:x}", oreg_[index_7].toU16());
-    Log::debug(Logger::smpc, "OREG[8] = {:x}", oreg_[index_8].toU16());
-    Log::debug(Logger::smpc, "OREG[9] = {:x}", oreg_[index_9].toU16());
-    Log::debug(Logger::smpc, "OREG[10] = {:x}", oreg_[index_10].toU16());
-    Log::debug(Logger::smpc, "OREG[11] = {:x}", oreg_[index_11].toU16());
 };
 
 void Smpc::getPeripheralData() {
@@ -823,6 +846,7 @@ auto Smpc::read(const u32 addr) -> u8 {
                 constexpr auto default_stv_data = u8{0xcf};
                 return default_stv_data;
             }
+            Log::warning(Logger::smpc, "SR read, pc={:x}", modules_.context()->masterSh2()->getRegister(sh2::Sh2Register::pc));
             return sr_.get(StatusRegister::all_bits);
         case status_flag: return sf_.get(StatusFlag::sf);
         case output_register_0: return oreg_[index_0].get(OutputRegister::all_bits);
@@ -880,6 +904,19 @@ auto Smpc::read(const u32 addr) -> u8 {
     }
 }
 
+auto Smpc::rawRead(const u32 addr) -> u8 {
+    switch (addr) {
+        case input_register_0: return ireg_[index_0].get(InputRegister::all_bits);
+        case input_register_1: return ireg_[index_1].get(InputRegister::all_bits);
+        case input_register_2: return ireg_[index_2].get(InputRegister::all_bits);
+        case input_register_3: return ireg_[index_3].get(InputRegister::all_bits);
+        case input_register_4: return ireg_[index_4].get(InputRegister::all_bits);
+        case input_register_5: return ireg_[index_5].get(InputRegister::all_bits);
+        case input_register_6: return ireg_[index_6].get(InputRegister::all_bits);
+        default: return read(addr);
+    }
+}
+
 void Smpc::write(const u32 addr, const u8 data) {
     switch (addr) {
         case command_register:
@@ -887,7 +924,24 @@ void Smpc::write(const u32 addr, const u8 data) {
             setCommandDuration();
             break;
         case status_flag: sf_.set(StatusFlag::sf, data); break;
-        case input_register_0: ireg_[index_0].set(InputRegister::all_bits, data); break;
+        case input_register_0: {
+            ireg_[index_0].set(InputRegister::all_bits, data);
+            const auto is_command_executing = (sf_.get(StatusFlag::sf) == 1);
+            const auto is_command_intback
+                = (oreg_[index_31].get(OutputRegister::oreg31_smpc_command) == SmpcCommand::interrupt_back);
+            if (is_command_intback && is_command_executing) {
+                if (ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested) {
+                    Log::debug(Logger::smpc, tr("INTBACK continue request"));
+                }
+
+                if (ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested) {
+                    Log::debug(Logger::smpc, tr("INTBACK break request"));
+                    sf_.reset();
+                }
+            }
+
+            break;
+        }
         case input_register_1: ireg_[index_1].set(InputRegister::all_bits, data); break;
         case input_register_2: ireg_[index_2].set(InputRegister::all_bits, data); break;
         case input_register_3: ireg_[index_3].set(InputRegister::all_bits, data); break;
@@ -945,17 +999,67 @@ auto Smpc::getStvPeripheralMapping() -> StvPeripheralMapping { return stv_mappin
 
 void Smpc::initialize() {
     Log::info(Logger::smpc, tr("SMPC initialization"));
+    initializeRegisterNameMap();
     reset();
 }
 
 void Smpc::run(const s8 cycles) {
-    if (intback_remaining_cycles_ > 0) {
-        intback_remaining_cycles_ -= cycles;
-        if (intback_remaining_cycles_ <= 0) { executeCommand(); }
+    if (command_remaining_cycles_ >= 0) {
+        command_remaining_cycles_ -= cycles;
+        if (command_remaining_cycles_ <= 0) { executeCommand(); }
     }
 }
 
 auto Smpc::openglWindow() const -> GLFWwindow* { return modules_.context()->openglWindow(); };
+
+void Smpc::addToRegisterNameMap(const u32 addr, const std::string& name) {
+    address_to_name_.insert(AddressToNameMap::value_type(addr, name));
+}
+
+void Smpc::initializeRegisterNameMap() {
+    addToRegisterNameMap(command_register, "Command Register");
+    addToRegisterNameMap(status_register, "Status Register");
+    addToRegisterNameMap(status_flag, "Status Flag");
+    addToRegisterNameMap(input_register_0, "IREG0");
+    addToRegisterNameMap(input_register_1, "IREG1");
+    addToRegisterNameMap(input_register_2, "IREG2");
+    addToRegisterNameMap(input_register_3, "IREG3");
+    addToRegisterNameMap(input_register_4, "IREG4");
+    addToRegisterNameMap(input_register_5, "IREG5");
+    addToRegisterNameMap(input_register_6, "IREG6");
+    addToRegisterNameMap(output_register_0, "OREG0");
+    addToRegisterNameMap(output_register_1, "OREG1");
+    addToRegisterNameMap(output_register_2, "OREG2");
+    addToRegisterNameMap(output_register_3, "OREG3");
+    addToRegisterNameMap(output_register_4, "OREG4");
+    addToRegisterNameMap(output_register_5, "OREG5");
+    addToRegisterNameMap(output_register_6, "OREG6");
+    addToRegisterNameMap(output_register_7, "OREG7");
+    addToRegisterNameMap(output_register_8, "OREG8");
+    addToRegisterNameMap(output_register_9, "OREG9");
+    addToRegisterNameMap(output_register_10, "OREG10");
+    addToRegisterNameMap(output_register_11, "OREG11");
+    addToRegisterNameMap(output_register_12, "OREG12");
+    addToRegisterNameMap(output_register_13, "OREG13");
+    addToRegisterNameMap(output_register_14, "OREG14");
+    addToRegisterNameMap(output_register_15, "OREG15");
+    addToRegisterNameMap(output_register_16, "OREG16");
+    addToRegisterNameMap(output_register_17, "OREG17");
+    addToRegisterNameMap(output_register_18, "OREG18");
+    addToRegisterNameMap(output_register_19, "OREG19");
+    addToRegisterNameMap(output_register_20, "OREG20");
+    addToRegisterNameMap(output_register_21, "OREG21");
+    addToRegisterNameMap(output_register_22, "OREG22");
+    addToRegisterNameMap(output_register_23, "OREG23");
+    addToRegisterNameMap(output_register_24, "OREG24");
+    addToRegisterNameMap(output_register_25, "OREG25");
+    addToRegisterNameMap(output_register_26, "OREG26");
+    addToRegisterNameMap(output_register_27, "OREG27");
+    addToRegisterNameMap(output_register_28, "OREG28");
+    addToRegisterNameMap(output_register_29, "OREG29");
+    addToRegisterNameMap(output_register_30, "OREG30");
+    addToRegisterNameMap(output_register_31, "OREG31");
+}
 
 auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout[pk]; }
 
@@ -980,10 +1084,10 @@ auto getRtcTime() -> RtcTime {
     rtc.month_hex = static_cast<unsigned>(today.month());
     rtc.day_hex   = weekday.weekday().c_encoding();
 
-    //const auto month     = static_cast<unsigned>(today.month());
-    //const auto month_bcd = util::dec2bcd(month);
-    //rtc.day_10_bcd       = std::bitset<4>((month_bcd >> displacement_4) & bitmask_0F);
-    //rtc.day_1_bcd        = std::bitset<4>(month_bcd & bitmask_0F);
+    // const auto month     = static_cast<unsigned>(today.month());
+    // const auto month_bcd = util::dec2bcd(month);
+    // rtc.day_10_bcd       = std::bitset<4>((month_bcd >> displacement_4) & bitmask_0F);
+    // rtc.day_1_bcd        = std::bitset<4>(month_bcd & bitmask_0F);
     const auto day     = static_cast<unsigned>(today.day());
     const auto day_bcd = util::dec2bcd(day);
     rtc.day_10_bcd     = std::bitset<4>((day_bcd >> displacement_4) & bitmask_0F);

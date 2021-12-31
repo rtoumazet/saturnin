@@ -51,7 +51,7 @@ using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
 using saturnin::core::Log;
 using saturnin::core::Logger;
-using AddressToNameMap = std::map<u32, std::string>;
+// using AddressToNameMap = std::map<u32, std::string>;
 
 using seconds = std::chrono::duration<double>;
 using micro   = std::chrono::duration<double, std::micro>;

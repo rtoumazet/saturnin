@@ -55,6 +55,7 @@ namespace saturnin::gui {
 static auto show_load_binary  = false;
 static auto show_debug_memory = false;
 static auto show_debug_sh2    = false;
+static auto show_debug_smpc   = false;
 static auto show_debug_vdp1   = false;
 static auto show_debug_vdp2   = false;
 static auto show_demo         = false;
@@ -142,6 +143,7 @@ void showMainMenu(core::EmulatorContext& state) {
                 if (ImGui::BeginMenu(tr("Debug").c_str())) {
                     ImGui::MenuItem(tr("Memory editor").c_str(), nullptr, &show_debug_memory);
                     ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
+                    ImGui::MenuItem(tr("SMPC").c_str(), nullptr, &show_debug_smpc);
                     ImGui::MenuItem(tr("VDP1").c_str(), nullptr, &show_debug_vdp1);
                     ImGui::MenuItem(tr("VDP2").c_str(), nullptr, &show_debug_vdp2);
                     ImGui::EndMenu();
@@ -149,6 +151,7 @@ void showMainMenu(core::EmulatorContext& state) {
 
                 if (show_debug_memory) { showMemoryDebugWindow(state, &show_debug_memory); };
                 if (show_debug_sh2) { showSh2DebugWindow(state, &show_debug_sh2); };
+                if (show_debug_smpc) { showSmpcDebugWindow(state, &show_debug_smpc); };
                 if (show_debug_vdp1) { showVdp1DebugWindow(state, &show_debug_vdp1); };
                 if (show_debug_vdp2) { showVdp2DebugWindow(state, &show_debug_vdp2); };
             }
@@ -1219,7 +1222,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
                               1,
                               ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_ScrollY | ImGuiTableFlags_PadOuterX,
                               table_size)) {
-            const auto callstack_mask = std::string{"{:#010x}"};
+            const auto  callstack_mask = std::string{"{:#010x}"};
             static auto callstack      = current_sh2->callstack();
             std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
                 ImGui::TableNextRow();
@@ -1644,6 +1647,44 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
         }
         ImGui::EndTabBar();
     }
+
+    ImGui::End();
+}
+
+void showSmpcDebugWindow(core::EmulatorContext& state, bool* opened) {
+    const auto window_size = ImVec2(810, 320);
+    ImGui::SetNextWindowSize(window_size);
+
+    auto window_flags
+        = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
+    ImGui::Begin(tr("SMPC debug").c_str(), opened, window_flags);
+
+    ImGui::BeginChild("smpc_registers_child");
+
+    static ImGuiTableFlags flags          = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
+    constexpr auto         columns_number = u8{3};
+    if (ImGui::BeginTable("smpc_registers_table", columns_number, flags)) {
+        ImGui::TableSetupColumn(tr("Address").c_str());
+        ImGui::TableSetupColumn(tr("Description").c_str());
+        ImGui::TableSetupColumn(tr("Value").c_str());
+        ImGui::TableHeadersRow();
+
+        const auto& registers = state.smpc()->getRegisters();
+        for (const auto& [address, desc] : registers) {
+            ImGui::TableNextRow();
+            auto column_index = u8{0};
+            ImGui::TableSetColumnIndex(column_index++);
+            ImGui::TextUnformatted(fmt::format("{:#010x}", address).c_str());
+
+            ImGui::TableSetColumnIndex(column_index++);
+            ImGui::TextUnformatted(desc.c_str());
+
+            ImGui::TableSetColumnIndex(column_index);
+            ImGui::TextUnformatted(fmt::format("{:#04x}", state.smpc()->rawRead(address)).c_str());
+        }
+        ImGui::EndTable();
+    }
+    ImGui::EndChild();
 
     ImGui::End();
 }

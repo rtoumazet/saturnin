@@ -409,6 +409,7 @@ class Smpc {
     //@}
 
     auto read(u32 addr) -> u8;
+    auto rawRead(u32 addr) -> u8;
     void write(u32 addr, u8 data);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -521,6 +522,19 @@ class Smpc {
 
     auto getSystemClock() -> u32;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Smpc::getRegisters() const -> const AddressToNameMap&;
+    ///
+    /// \brief  Gets registers content for debug purpose.
+    ///
+    /// \author Runik
+    /// \date   24/12/2021
+    ///
+    /// \returns    The registers content.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    [[nodiscard]] auto getRegisters() const -> const AddressToNameMap&;
+
   private:
     static constexpr u8 input_registers_number{7};
     static constexpr u8 output_registers_number{32};
@@ -606,6 +620,31 @@ class Smpc {
 
     void executeIntback();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::addToRegisterNameMap(u32 addr, const std::string& name);
+    ///
+    /// \brief  Adds an entry to the RegisterName map.
+    ///
+    /// \author Runik
+    /// \date   23/12/2021
+    ///
+    /// \param  addr    The address.
+    /// \param  name    The name.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void addToRegisterNameMap(u32 addr, const std::string& name);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Smpc::initializeRegisterNameMap();
+    ///
+    /// \brief  Initializes the map that links the register address to its name.
+    ///
+    /// \author Runik
+    /// \date   23/12/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initializeRegisterNameMap();
+
     EmulatorModules modules_;
 
     //@{
@@ -628,14 +667,14 @@ class Smpc {
     SaturnPeripheralMapping saturn_mapping_; ///< Saturn paripheral mapping
     StvPeripheralMapping    stv_mapping_;    ///< ST-V peripheral mapping
 
-    s32 intback_remaining_cycles_{}; ///< The intback remaining cycles
+    s32 command_remaining_cycles_{}; ///< The command remaining cycles
 
     bool is_master_sh2_on_{false};      ///< Master SH2 status
     bool is_slave_sh2_on_{false};       ///< Slave SH2 status
     bool is_sound_on_{false};           ///< Sound status
     bool is_soft_reset_allowed_{false}; ///< NMI generation from reset button status
     bool is_horizontal_res_352{false};  ///< Horizontal resolution (320/352)
-    bool is_cd_on_{false};               ///< CD status
+    bool is_cd_on_{false};              ///< CD status
 
     bool is_intback_processing_{false}; ///< Intback status
     // bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
@@ -645,6 +684,8 @@ class Smpc {
     std::vector<OutputRegister> full_peripheral_data_table_;               ///< The full peripheral data table
 
     std::array<u8, 0x4> smem_; ///< SMPC battery backupable memory (4B).
+
+    AddressToNameMap address_to_name_; ///< Link between a register address and its name.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

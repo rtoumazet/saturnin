@@ -302,9 +302,10 @@ enum class SetTime : u8 {
 class OutputRegister : public Register {
   public:
     using Register::Register;
-    inline static const auto oreg0_reset_status = BitRange<ResetStatus>{6}; ///< Defines RESD bit (OREG0).
-    inline static const auto oreg0_set_time     = BitRange<SetTime>{7};     ///< Defines STE bit (OREG0).
-    inline static const auto all_bits           = BitRange<u8>{0, 7}; ///< Defines the range of all the bits of the register.
+    inline static const auto oreg0_reset_status  = BitRange<ResetStatus>{6};    ///< Defines RESD bit (OREG0).
+    inline static const auto oreg0_set_time      = BitRange<SetTime>{7};        ///< Defines STE bit (OREG0).
+    inline static const auto oreg31_smpc_command = BitRange<SmpcCommand>{0, 7}; ///< Defines the smpc command (OREG31).
+    inline static const auto all_bits            = BitRange<u8>{0, 7}; ///< Defines the range of all the bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -181,6 +181,20 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened);
 void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void showSmpcDebugWindow(core::EmulatorContext& state, bool* opened);
+///
+/// \brief  Displays the SMPC debug window.
+///
+/// \author Runik
+/// \date   21/02/2021
+///
+/// \param [in,out] state   The emulator state.
+/// \param [in,out] opened  If non-null, true if opened.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void showSmpcDebugWindow(core::EmulatorContext& state, bool* opened);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened);
 ///
 /// \brief  Displays the window to load binary files.
