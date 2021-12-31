@@ -525,23 +525,23 @@ void Smpc::executeCommand() {
 }
 
 void Smpc::executeIntback() {
-    // auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
-    // if (is_break_requested) {
-    //     Log::debug(Logger::smpc, tr("INTBACK break request"));
-    //     sf_.reset();
-    //     return;
-    // }
+     //auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
+     //if (is_break_requested) {
+     //    //Log::debug(Logger::smpc, tr("INTBACK break request"));
+     //    sf_.reset();
+     //    return;
+     //}
 
-    // auto is_continue_requested
-    //     = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
-    // if (is_continue_requested) {
-    //     Log::debug(Logger::smpc, tr("INTBACK continue request"));
-    //     getPeripheralData();
-    //     next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
-    //     Log::debug(Logger::smpc, tr("Interrupt request"));
-    //     modules_.scu()->generateInterrupt(interrupt_source::system_manager);
-    //     return;
-    // }
+     //auto is_continue_requested
+     //    = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
+     //if (is_continue_requested) {
+     //    //Log::debug(Logger::smpc, tr("INTBACK continue request"));
+     //    getPeripheralData();
+     //    next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
+     //    Log::debug(Logger::smpc, tr("Interrupt request"));
+     //    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+     //    return;
+     //}
 
     Log::debug(Logger::smpc, tr("INTBACK started"));
     oreg_[index_31].reset();
@@ -846,7 +846,6 @@ auto Smpc::read(const u32 addr) -> u8 {
                 constexpr auto default_stv_data = u8{0xcf};
                 return default_stv_data;
             }
-            Log::warning(Logger::smpc, "SR read, pc={:x}", modules_.context()->masterSh2()->getRegister(sh2::Sh2Register::pc));
             return sr_.get(StatusRegister::all_bits);
         case status_flag: return sf_.get(StatusFlag::sf);
         case output_register_0: return oreg_[index_0].get(OutputRegister::all_bits);
@@ -932,6 +931,8 @@ void Smpc::write(const u32 addr, const u8 data) {
             if (is_command_intback && is_command_executing) {
                 if (ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested) {
                     Log::debug(Logger::smpc, tr("INTBACK continue request"));
+                    setCommandDuration();
+                    sr_ &= bitmask_0F;
                 }
 
                 if (ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested) {
