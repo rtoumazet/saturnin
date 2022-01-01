@@ -525,24 +525,24 @@ void Smpc::executeCommand() {
 }
 
 void Smpc::executeIntback() {
-     //auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
-     //if (is_break_requested) {
-     //    //Log::debug(Logger::smpc, tr("INTBACK break request"));
-     //    sf_.reset();
-     //    return;
-     //}
+     auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
+     if (is_break_requested) {
+         ireg_[index_0].set(InputRegister::ireg0_break_request, IntbackBreakRequest::not_requested);
+         sf_.reset();
+         return;
+     }
 
-     //auto is_continue_requested
-     //    = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
-     //if (is_continue_requested) {
-     //    //Log::debug(Logger::smpc, tr("INTBACK continue request"));
-     //    getPeripheralData();
-     //    //next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
-     //    sr_.set(StatusRegister::peripheral_data_location, PeripheralDataLocation::second_or_above_peripheral_data);
-     //    Log::debug(Logger::smpc, tr("Interrupt request"));
-     //    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
-     //    return;
-     //}
+     auto is_continue_requested
+         = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
+     if (is_continue_requested) {
+         getPeripheralData();
+         next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
+         ireg_[index_0].set(InputRegister::ireg0_continue_request, IntbackContinueRequest::not_requested);
+         sf_.reset();
+         Log::debug(Logger::smpc, tr("Interrupt request"));
+         modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+         return;
+     }
 
     Log::debug(Logger::smpc, tr("INTBACK started"));
     oreg_[index_31].reset();
@@ -556,8 +556,7 @@ void Smpc::executeIntback() {
         getStatus();
 
         if (is_peripheral_data_returned) {
-            //next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
-            sr_.set(StatusRegister::peripheral_data_location, PeripheralDataLocation::first_peripheral_data);
+            next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
             sf_.set();
         } else {
             sf_.reset();
@@ -570,40 +569,15 @@ void Smpc::executeIntback() {
     }
 
     if (is_peripheral_data_returned) {
+        next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
         getPeripheralData();
-        sr_.set(StatusRegister::peripheral_data_location, PeripheralDataLocation::first_peripheral_data);
     } else {
         // Nothing left to do
     }
     oreg_[index_31].set(OutputRegister::oreg31_smpc_command, SmpcCommand::interrupt_back);
     sf_.reset();
 
-    //// next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
-    // auto is_status_returned
-    //     = bool{ireg_[index_0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned};
-    // if (is_status_returned) {
-    //     getStatus();
-    //     auto is_peripheral_data_returned = bool{ireg_[index_1].get(InputRegister::ireg1_peripheral_data_enable)
-    //                                             == PeripheralDataEnable::peripheral_data_returned};
-    //     if (is_peripheral_data_returned) {
-    //         // Peripheral data must be returned after the status.
-    //         next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
-    //         sr_[bit_7]              = true;
-    //         sf_.reset();
-    //     } else {
-    //         sf_.reset();
-    //     }
 
-    //    Log::debug(Logger::smpc, tr("Interrupt request"));
-    //    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
-
-    //} else {
-    //    next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
-    //    getPeripheralData();
-    //    Log::debug(Logger::smpc, tr("Interrupt request"));
-    //    modules_.scu()->generateInterrupt(interrupt_source::system_manager);
-    //    sf_.reset();
-    //}
 };
 
 void Smpc::getStatus() {
@@ -622,7 +596,6 @@ void Smpc::getStatus() {
     for (u8 i = 0; i < output_registers_number; ++i) {
         oreg_[i].set();
     }
-    // oreg_[index_0].reset();
     if (is_soft_reset_allowed_) {
         oreg_[index_0].set(OutputRegister::oreg0_reset_status, ResetStatus::enabled);
     } else {
@@ -940,7 +913,7 @@ void Smpc::write(const u32 addr, const u8 data) {
 
                 if (ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested) {
                     Log::debug(Logger::smpc, tr("INTBACK break request"));
-                    sf_.reset();
+                    //sf_.reset();
                 }
             }
 
