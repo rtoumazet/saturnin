@@ -525,24 +525,27 @@ void Smpc::executeCommand() {
 }
 
 void Smpc::executeIntback() {
-     auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
-     if (is_break_requested) {
-         ireg_[index_0].set(InputRegister::ireg0_break_request, IntbackBreakRequest::not_requested);
-         sf_.reset();
-         return;
-     }
+    auto is_break_requested = bool{ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested};
+    if (is_break_requested) {
+        ireg_[index_0].set(InputRegister::ireg0_break_request, IntbackBreakRequest::not_requested);
+        ireg_[index_0].set(InputRegister::ireg0_continue_request, IntbackContinueRequest::not_requested);
+        sf_.reset();
+        Log::debug(Logger::smpc, tr("Interrupt request"));
+        modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+        return;
+    }
 
-     auto is_continue_requested
-         = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
-     if (is_continue_requested) {
-         getPeripheralData();
-         next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
-         ireg_[index_0].set(InputRegister::ireg0_continue_request, IntbackContinueRequest::not_requested);
-         sf_.reset();
-         Log::debug(Logger::smpc, tr("Interrupt request"));
-         modules_.scu()->generateInterrupt(interrupt_source::system_manager);
-         return;
-     }
+    auto is_continue_requested
+        = bool{ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested};
+    if (is_continue_requested) {
+        getPeripheralData();
+        next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
+        ireg_[index_0].set(InputRegister::ireg0_continue_request, IntbackContinueRequest::not_requested);
+        sf_.reset();
+        Log::debug(Logger::smpc, tr("Interrupt request"));
+        modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+        return;
+    }
 
     Log::debug(Logger::smpc, tr("INTBACK started"));
     oreg_[index_31].reset();
@@ -571,13 +574,15 @@ void Smpc::executeIntback() {
     if (is_peripheral_data_returned) {
         next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
         getPeripheralData();
+
+        Log::debug(Logger::smpc, tr("Interrupt request"));
+        modules_.scu()->generateInterrupt(interrupt_source::system_manager);
+
     } else {
         // Nothing left to do
     }
     oreg_[index_31].set(OutputRegister::oreg31_smpc_command, SmpcCommand::interrupt_back);
     sf_.reset();
-
-
 };
 
 void Smpc::getStatus() {
@@ -900,23 +905,21 @@ void Smpc::write(const u32 addr, const u8 data) {
             break;
         case status_flag: sf_.set(StatusFlag::sf, data); break;
         case input_register_0: {
-            ireg_[index_0].set(InputRegister::all_bits, data);
-            const auto is_command_executing = (sf_.get(StatusFlag::sf) == 1);
             const auto is_command_intback
                 = (oreg_[index_31].get(OutputRegister::oreg31_smpc_command) == SmpcCommand::interrupt_back);
-            if (is_command_intback && is_command_executing) {
+            if (is_intback_processing_) {
                 if (ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested) {
                     Log::debug(Logger::smpc, tr("INTBACK continue request"));
                     setCommandDuration();
-                    sr_ &= bitmask_0F;
                 }
 
                 if (ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested) {
                     Log::debug(Logger::smpc, tr("INTBACK break request"));
-                    //sf_.reset();
+                    sr_ &= bitmask_0F;
+                    // sf_.reset();
                 }
             }
-
+            ireg_[index_0].set(InputRegister::all_bits, data);
             break;
         }
         case input_register_1: ireg_[index_1].set(InputRegister::all_bits, data); break;
