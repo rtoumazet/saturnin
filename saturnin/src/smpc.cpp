@@ -387,10 +387,9 @@ void Smpc::setCommandDuration() {
         case SmpcCommand::interrupt_back: {
             // intback_remaining_cycles_ = calculateCyclesNumber(milli(320));
             // Values are from previous Saturnin version, not sure how accurate they are ...
-            auto is_status_returned
-                = bool{ireg_[index_0].get(InputRegister::ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned};
             command_remaining_cycles_
-                = (is_status_returned) ? calculateCyclesNumber(micro(50)) : calculateCyclesNumber(micro(1500));
+                = (is_intback_processing_) ? calculateCyclesNumber(micro(50)) : calculateCyclesNumber(micro(1500));
+
             break;
         }
         default: break;
@@ -529,6 +528,7 @@ void Smpc::executeIntback() {
         getPeripheralData();
         next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
         sf_.reset();
+        oreg_[index_31].set(OutputRegister::oreg31_smpc_command, SmpcCommand::interrupt_back);
         Log::debug(Logger::smpc, tr("Interrupt request"));
         modules_.scu()->generateInterrupt(interrupt_source::system_manager);
         return;
@@ -553,9 +553,9 @@ void Smpc::executeIntback() {
         }
     } else {
         // Peripheral data only.
+        getPeripheralData();
         next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
         is_intback_processing_  = true;
-        getPeripheralData();
     }
 
     Log::debug(Logger::smpc, tr("Interrupt request"));
@@ -578,7 +578,7 @@ void Smpc::getStatus() {
     }
 
     for (u8 i = 0; i < output_registers_number; ++i) {
-        oreg_[i].set();
+        oreg_[i].reset();
     }
     if (is_soft_reset_allowed_) {
         oreg_[index_0].set(OutputRegister::oreg0_reset_status, ResetStatus::enabled);
@@ -621,7 +621,7 @@ void Smpc::getStatus() {
     oreg_[index_14].set(OutputRegister::all_bits, smem_[2]);
     oreg_[index_15].set(OutputRegister::all_bits, smem_[3]);
 
-    oreg_[index_31].reset();
+    // oreg_[index_31].reset();
 };
 
 void Smpc::getPeripheralData() {
@@ -662,11 +662,11 @@ void Smpc::getPeripheralData() {
     sr_.set(StatusRegister::port_2_mode, ireg_[index_1].get(InputRegister::ireg1_port_2_mode));
     sr_.set(StatusRegister::port_1_mode, ireg_[index_1].get(InputRegister::ireg1_port_1_mode));
 
-    for (u32 i = 0; i < output_registers_number; ++i) {
-        oreg_[i] = 0;
-    }
+     for (u32 i = 0; i < output_registers_number; ++i) {
+         oreg_[i] = 0;
+     }
 
-    switch (sr_.get(StatusRegister::port_1_mode)) {
+    switch (ireg_[index_1].get(InputRegister::ireg1_port_1_mode)) {
         case PortMode::mode_0_byte: break; // no data returned
         case PortMode::mode_15_byte:
         case PortMode::mode_255_byte: {
@@ -702,7 +702,7 @@ void Smpc::getPeripheralData() {
         default: Log::warning(Logger::smpc, tr("Port Status reserved"));
     }
 
-    switch (sr_.get(StatusRegister::port_2_mode)) {
+    switch (ireg_[index_1].get(InputRegister::ireg1_port_2_mode)) {
         case PortMode::mode_0_byte: break; // no data returned
         case PortMode::mode_15_byte:
         case PortMode::mode_255_byte: // no difference between 15 byte and 255 byte for now
@@ -884,26 +884,25 @@ void Smpc::write(const u32 addr, const u8 data) {
             break;
         case status_flag: sf_.set(StatusFlag::sf, data); break;
         case input_register_0: {
+            auto old_ireg0 = ireg_[index_0];
             ireg_[index_0].set(InputRegister::all_bits, data);
             if (is_intback_processing_) {
-                const auto is_continue_request
-                    = (ireg_[index_0].get(InputRegister::ireg0_continue_request) == IntbackContinueRequest::requested);
-                if (is_continue_request) {
-                    Log::debug(Logger::smpc, tr("INTBACK continue request"));
-                    setCommandDuration();
-                    break;
-                }
-
-                const auto is_break_request
-                    = (ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested);
-                if (is_break_request) {
+                if (ireg_[index_0].get(InputRegister::ireg0_break_request) == IntbackBreakRequest::requested) {
                     Log::debug(Logger::smpc, tr("INTBACK break request"));
                     sr_ &= bitmask_0F;
+                    is_intback_processing_ = false;
+                    break;
                 }
-
+                auto old_continue = old_ireg0.get(InputRegister::ireg0_continue_request);
+                auto new_continue = ireg_[index_0].get(InputRegister::ireg0_continue_request);
+                if (new_continue != old_continue) {
+                    Log::debug(Logger::smpc, tr("INTBACK continue request"));
+                    setCommandDuration();
+                    sf_.set(StatusFlag::sf, static_cast<u8>(1));
+                    break;
+                }
                 is_intback_processing_ = false;
             }
-
             break;
         }
         case input_register_1: ireg_[index_1].set(InputRegister::all_bits, data); break;
@@ -968,7 +967,7 @@ void Smpc::initialize() {
 }
 
 void Smpc::run(const s8 cycles) {
-    if (command_remaining_cycles_ >= 0) {
+    if (command_remaining_cycles_ > 0) {
         command_remaining_cycles_ -= cycles;
         if (command_remaining_cycles_ <= 0) { executeCommand(); }
     }
