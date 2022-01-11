@@ -142,19 +142,16 @@ void Texture::setCache(const VdpType t) {
 
 // static
 void Texture::cleanCache(Opengl* ogl, const VdpType t) {
-    for (auto iter = texture_storage_.begin(); iter != texture_storage_.end();) {
-        auto is_elt_selected = (t == VdpType::not_set) ? true : ((iter->second.vdpType() == t) ? true : false);
+    for (auto& [key, value] : texture_storage_) {
+        auto is_elt_selected = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (is_elt_selected) {
-            if (!(iter->second.isRecentlyUsed())) {
-                // iter->second.isDiscarded(true);
-                //  deleteTextureData(iter->second);
-                if (iter->second.isDiscarded()) {
+            if (!(value.isRecentlyUsed())) {
+                if (value.isDiscarded()) {
                     // WIP
-                    ogl->addOrUpdateTexture(iter->second.key());
+                    ogl->addOrUpdateTexture(value.key());
                 }
             }
         }
-        ++iter;
     }
 }
 

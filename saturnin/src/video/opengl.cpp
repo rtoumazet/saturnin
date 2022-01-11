@@ -473,7 +473,7 @@ void Opengl::render() {
         glDeleteBuffers(1, &vertex_buffer);
         glDeleteVertexArrays(1, &vao);
 
-        Texture::cleanCache(this);
+        // Texture::cleanCache(this);
     }
 
     std::vector<std::unique_ptr<video::BaseRenderingPart>>().swap(parts_list_);
