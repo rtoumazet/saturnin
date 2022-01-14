@@ -26,6 +26,7 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/bitfield.h>
 
 namespace saturnin::cdrom {
 
@@ -43,12 +44,37 @@ constexpr auto fetch_data_pointer_address = u32{0x25818000};
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \union  HirqStatusRegister
+///
+/// \brief  HIRQ status register.
+///
+/// \author Runik
+/// \date   14/01/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+union HirqStatusRegister {
+    u16             raw;
+    BitField<10, 1> scdq;
+    BitField<9, 1>  efls;
+    BitField<8, 1>  ecpy;
+    BitField<7, 1>  ehst;
+    BitField<6, 1>  esel;
+    BitField<5, 1>  dchg;
+    BitField<4, 1>  pend;
+    BitField<3, 1>  bful;
+    BitField<2, 1>  csct;
+    BitField<1, 1>  drdy;
+    BitField<0, 1>  cmok;
+    BitField<0, 16> data;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   Scdq
 ///
 /// \brief  Values that represent SCDQ bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Scdq : u8 {
+enum Scdq : bool {
     subcode_q_decode_in_progress = 0, ///< Subcode Q decode in progress for current sector.
     subcode_q_decoded            = 1  ///< Subcode Q has been decoded for current sector.
 };
@@ -59,7 +85,7 @@ enum class Scdq : u8 {
 /// \brief  Values that represent EFLS bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Efls : u8 {
+enum Efls : bool {
     file_system_in_progress = 0, ///< CD block file system in progress.
     file_system_finished    = 1  ///< CD block file system finished.
 };
@@ -70,7 +96,7 @@ enum class Efls : u8 {
 /// \brief  Values that represent ECPY bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Ecpy : u8 {
+enum Ecpy : bool {
     sector_copy_or_move_in_progress = 0, ///< Sector copy or move in progress.
     sector_copy_or_move_finished    = 1  ///< Sector copy or move finished.
 };
@@ -81,7 +107,7 @@ enum class Ecpy : u8 {
 /// \brief  Values that represent EHST bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Ehst : u8 {
+enum Ehst : bool {
     host_io_in_progress = 0, ///< Host I/O is in progress.
     host_io_finished    = 1  ///< Host I/O has finished.
 };
@@ -92,7 +118,7 @@ enum class Ehst : u8 {
 /// \brief  Values that represent ESEL bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Esel : u8 {
+enum Esel : bool {
     soft_reset_or_selector_set_in_progress = 0, ///< Soft reset or selector set in progress.
     soft_reset_or_selector_set_finished    = 1  ///< Soft reset or selector set finished.
 };
@@ -103,7 +129,7 @@ enum class Esel : u8 {
 /// \brief  Values that represent DCHG bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Dchg : u8 {
+enum Dchg : bool {
     disk_has_not_changed = 0, ///< Disk has not changed.
     disk_changed         = 1  ///< Disk has been changed (tray opened and closed).
 };
@@ -114,7 +140,7 @@ enum class Dchg : u8 {
 /// \brief  Values that represent PEND bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Pend : u8 {
+enum Pend : bool {
     cd_play_in_progress = 0, ///< CD play has not ended.
     cd_play_has_ended   = 1  ///< CD play has ended (FAD out of range).
 };
@@ -125,7 +151,7 @@ enum class Pend : u8 {
 /// \brief  Values that represent BFUL bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Bful : u8 {
+enum Bful : bool {
     buffer_not_full = 0, ///< CD buffer is not full.
     buffer_full     = 1  ///< CD buffer is full.
 };
@@ -136,7 +162,7 @@ enum class Bful : u8 {
 /// \brief  Values that represent CSCT bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Csct : u8 {
+enum Csct : bool {
     sector_not_stored = 0, ///< Sector has not been stored or been discarded.
     sector_stored     = 1  ///< 1 sector has just been stored.
 };
@@ -147,7 +173,7 @@ enum class Csct : u8 {
 /// \brief  Values that represent DRDY bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Drdy : u8 {
+enum Drdy : bool {
     not_setup      = 0, ///< Not setup.
     setup_complete = 1  ///< Data transfer setup complete, data can be read from fetch_data_pointer.
 };
@@ -158,58 +184,52 @@ enum class Drdy : u8 {
 /// \brief  Values that represent CMOK bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Cmok : u8 {
+enum Cmok : bool {
     processing = 0, ///< System still processing last command.
     ready      = 1  ///< System ready for new command.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  HirqStatusRegister
+/// \union  HirqStatusRegister
 ///
-/// \brief  HIRQ status register.
+/// \brief  HIRQ mask register.
 ///
 /// \author Runik
-/// \date   09/05/2020
+/// \date   14/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class HirqStatusRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto scdq     = BitRange<Scdq>{10};   ///< Defines the SCDQ bit.
-    inline static const auto efls     = BitRange<Efls>{9};    ///< Defines the EFLS bit.
-    inline static const auto ecpy     = BitRange<Ecpy>{8};    ///< Defines the ECPY bit.
-    inline static const auto ehst     = BitRange<Ehst>{7};    ///< Defines the EHST bit.
-    inline static const auto esel     = BitRange<Esel>{6};    ///< Defines the ESEL bit.
-    inline static const auto dchg     = BitRange<Dchg>{5};    ///< Defines the DCHG bit.
-    inline static const auto pend     = BitRange<Pend>{4};    ///< Defines the PEND bit.
-    inline static const auto bful     = BitRange<Bful>{3};    ///< Defines the BFUL bit.
-    inline static const auto csct     = BitRange<Csct>{2};    ///< Defines the CSCT bit.
-    inline static const auto drdy     = BitRange<Drdy>{1};    ///< Defines the DRDY bit.
-    inline static const auto cmok     = BitRange<Cmok>{0};    ///< Defines the CMOK bit.
-    inline static const auto all_bits = BitRange<u16>{0, 15}; ///< Defines the range of all the bits of the register.
+union HirqMaskRegister {
+    u16             raw;
+    BitField<10, 1> scdq_status; ///< Defines the SCDQ bit interrupt status.
+    BitField<9, 1>  efls_status; ///< Defines the EFLS bit interrupt status.
+    BitField<8, 1>  ecpy_status; ///< Defines the ECPY bit interrupt status.
+    BitField<7, 1>  ehst_status; ///< Defines the EHST bit interrupt status.
+    BitField<6, 1>  esel_status; ///< Defines the ESEL bit interrupt status.
+    BitField<5, 1>  dchg_status; ///< Defines the DCHG bit interrupt status.
+    BitField<4, 1>  pend_status; ///< Defines the PEND bit interrupt status.
+    BitField<3, 1>  bful_status; ///< Defines the BFUL bit interrupt status.
+    BitField<2, 1>  csct_status; ///< Defines the CSCT bit interrupt status.
+    BitField<1, 1>  drdy_status; ///< Defines the DRDY bit interrupt status.
+    BitField<0, 1>  cmok_status; ///< Defines the CMOK bit interrupt status.
+    BitField<0, 16> data;        ///< Defines the range of all the bits of the register.
 };
 
-enum class InterruptStatus : u8 {
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   InterruptStatus
+///
+/// \brief  Values of the interrupt status.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum InterruptStatus : bool {
     masked  = 0, ///< Interrupt is masked.
     enabled = 1  ///< Interrupt is enabled.
 };
 
-class HirqMaskRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto scdq_status = BitRange<InterruptStatus>{10}; ///< Defines the SCDQ bit interrupt status.
-    inline static const auto efls_status = BitRange<InterruptStatus>{9};  ///< Defines the EFLS bit interrupt status.
-    inline static const auto ecpy_status = BitRange<InterruptStatus>{8};  ///< Defines the ECPY bit interrupt status.
-    inline static const auto ehst_status = BitRange<InterruptStatus>{7};  ///< Defines the EHST bit interrupt status.
-    inline static const auto esel_status = BitRange<InterruptStatus>{6};  ///< Defines the ESEL bit interrupt status.
-    inline static const auto dchg_status = BitRange<InterruptStatus>{5};  ///< Defines the DCHG bit interrupt status.
-    inline static const auto pend_status = BitRange<InterruptStatus>{4};  ///< Defines the PEND bit interrupt status.
-    inline static const auto bful_status = BitRange<InterruptStatus>{3};  ///< Defines the BFUL bit interrupt status.
-    inline static const auto csct_status = BitRange<InterruptStatus>{2};  ///< Defines the CSCT bit interrupt status.
-    inline static const auto drdy_status = BitRange<InterruptStatus>{1};  ///< Defines the DRDY bit interrupt status.
-    inline static const auto cmok_status = BitRange<InterruptStatus>{0};  ///< Defines the CMOK bit interrupt status.
-    inline static const auto all_bits    = BitRange<u16>{0, 15};          ///< Defines the range of all the bits of the register.
-};
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   Command
+///
+/// \brief  Values of the cdblock commands.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Command : u8 {
     get_status                       = 0x00,
@@ -291,12 +311,33 @@ enum class Command : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \union  CommandRegister
+///
+/// \brief  Command register.
+///
+/// \author Runik
+/// \date   14/01/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+union CommandRegister {
+    u16            raw;
+    BitField<8, 8> command;     ///< Command (CR1 input).
+    BitField<8, 8> status;      ///< Status (CR1 output).
+    BitField<8, 8> high_8_bits; ///< 8..15 bits range of the register.
+    BitField<0, 8> low_8_bits;  ///< 0..7 bits range of the register.
+    BitField<4, 4> flag;        ///< 4 bit flag.
+    BitField<0, 4> rep_cnt;     ///< 4 bit repeat frequency. Notification range 0x0..0xE (0..14 times)
+
+    BitField<0, 16> data; ///< Defines the range of all the bits of the register.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   CdDriveStatus
 ///
 /// \brief  Values that represent CD drive status
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CdDriveStatus : u8 {
+enum CdDriveStatus : u8 {
     busy                = 0x00,
     paused              = 0x01,
     standby             = 0x02,
@@ -314,16 +355,16 @@ enum class CdDriveStatus : u8 {
     command_rejected    = 0xff
 };
 
-class CommandRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto command      = BitRange<Command>{8, 15};       ///< Command (CR1 input).
-    inline static const auto status       = BitRange<CdDriveStatus>{8, 15}; ///< Status (CR1 output).
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15};            ///< 8..15 bits range of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};             ///< 0..7 bits range of the register.
-    inline static const auto bits_4_7     = BitRange<u8>{4, 7};             ///< 4..7 bits range of the register.
-    inline static const auto bits_0_3     = BitRange<u8>{0, 3};             ///< 0..3 bits range of the register.
-    inline static const auto all_bits     = BitRange<u16>{0, 15}; ///< Defines the range of all the bits of the register.
-};
+// class CommandRegister : public Register {
+//   public:
+//     using Register::Register;
+//     inline static const auto command      = BitRange<Command>{8, 15};       ///< Command (CR1 input).
+//     inline static const auto status       = BitRange<CdDriveStatus>{8, 15}; ///< Status (CR1 output).
+//     inline static const auto upper_8_bits = BitRange<u8>{8, 15};            ///< 8..15 bits range of the register.
+//     inline static const auto lower_8_bits = BitRange<u8>{0, 7};             ///< 0..7 bits range of the register.
+//     inline static const auto bits_4_7     = BitRange<u8>{4, 7};             ///< 4..7 bits range of the register.
+//     inline static const auto bits_0_3     = BitRange<u8>{0, 3};             ///< 0..3 bits range of the register.
+//     inline static const auto all_bits     = BitRange<u16>{0, 15}; ///< Defines the range of all the bits of the register.
+// };
 
 } // namespace saturnin::cdrom

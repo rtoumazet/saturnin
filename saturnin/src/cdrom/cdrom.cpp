@@ -159,7 +159,7 @@ auto Cdrom::getDriveIndice(const s8 path, const s8 target, const s8 lun) -> u8 {
 //
 //
 void Cdrom::executeCommand() {
-    switch (cr1_.get(CommandRegister::command)) {
+    switch (readCommand(cr1_.command)) {
         case Command::get_status: getStatus(); break;
         case Command::get_hardware_info:
             getHardwareInfo();
@@ -1359,7 +1359,7 @@ void Cdrom::executeCommand() {
             //			EmuState::pLog->CdBlockWrite("Unknown command : ",CR1>>8);
             //			EmuState::pLog->CdBlockU("Unknown command : ",CR1>>8);
             //			#endif
-            Log::unimplemented("Cdblock command {:04x}", cr1_.get(CommandRegister::command));
+            Log::unimplemented("Cdblock command {:04x}", cr1_.command);
             break;
     }
     executed_commands_++;
@@ -1367,7 +1367,8 @@ void Cdrom::executeCommand() {
     //	// SH2 command is reset
     //	//EmuState::pSh2m->executerCommandeCdBlock = false;
 
-    if (executed_commands_ > max_number_of_commands_) hirq_status_reg_.reset(HirqStatusRegister::cmok);
+    // if (executed_commands_ > max_number_of_commands_) hirq_status_reg_.reset(HirqStatusRegister::cmok);
+    if (executed_commands_ > max_number_of_commands_) hirq_status_reg_.cmok = Cmok::processing;
 }
 //
 //
@@ -1714,16 +1715,16 @@ auto Cdrom::read8(const u32 addr) const -> u8 {
 auto Cdrom::read16(const u32 addr) -> u16 {
     switch (addr) {
         case hirq_register_address:
-            Log::debug(Logger::cdrom, "HIrqReg={:#06x}", hirq_status_reg_.toU32());
-            return hirq_status_reg_.toU32();
-        case hirq_mask_register_address: return hirq_mask_reg_.toU32();
-        case command_register_1_address: return cr1_.toU32();
-        case command_register_2_address: return cr2_.toU32();
-        case command_register_3_address: return cr3_.toU32();
+            Log::debug(Logger::cdrom, "HIrqReg={:#06x}", hirq_status_reg_.data);
+            return hirq_status_reg_.data;
+        case hirq_mask_register_address: return hirq_mask_reg_.data;
+        case command_register_1_address: return cr1_.data;
+        case command_register_2_address: return cr2_.data;
+        case command_register_3_address: return cr3_.data;
         case command_register_4_address:
             // firstReading = false;
             is_initialization_done_ = true;
-            return cr4_.toU32();
+            return cr4_.data;
         case toc_data_pointer_address:
             //			{
             //				uint16_t data=0;
@@ -1780,22 +1781,23 @@ void Cdrom::write8(const u32 addr, const u8 data) {
 
 void Cdrom::write16(const u32 addr, const u16 data) {
     switch (addr) {
-        case hirq_register_address: hirq_status_reg_ &= data; break;
-        case hirq_mask_register_address: hirq_mask_reg_.set(HirqMaskRegister::all_bits, data); break;
+        // case hirq_register_address: hirq_status_reg_ &= data; break;
+        case hirq_register_address: hirq_status_reg_.data &= data; break;
+        case hirq_mask_register_address: hirq_mask_reg_.data = data; break;
         case command_register_1_address:
-            cr1_.set(CommandRegister::all_bits, data);
+            cr1_.data                     = data;
             is_command_being_initialized_ = true;
             break;
         case command_register_2_address:
-            cr2_.set(CommandRegister::all_bits, data);
+            cr2_.data                     = data;
             is_command_being_initialized_ = true;
             break;
         case command_register_3_address:
-            cr3_.set(CommandRegister::all_bits, data);
+            cr3_.data                     = data;
             is_command_being_initialized_ = true;
             break;
         case command_register_4_address:
-            cr4_.set(CommandRegister::all_bits, data);
+            cr4_.data                     = data;
             is_command_being_initialized_ = false;
             executeCommand();
             break;
@@ -1870,7 +1872,7 @@ void Cdrom::run(const u8 cycles) {
         Log::debug(Logger::cdrom, "Sending periodic response");
         executed_commands_ = 0;
 
-        hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+        hirq_status_reg_.cmok = Cmok::ready;
 
         elapsed_cycles_ += periodic_response_duration_;
 
@@ -1911,10 +1913,11 @@ void Cdrom::run(const u8 cycles) {
         if (is_command_being_initialized_) { return; }
 
         sendStatus();
-        cr1_ |= (utilities::toUnderlying(CdDriveStatus::periodical_response) << displacement_8);
+        // cr1_ |= (utilities::toUnderlying(CdDriveStatus::periodical_response) << displacement_8);
+        cr1_.status |= CdDriveStatus::periodical_response;
 
         // periodic response timing is the same as SCDQ update timing
-        hirq_status_reg_.set(HirqStatusRegister::scdq, Scdq::subcode_q_decoded);
+        hirq_status_reg_.scdq = Scdq::subcode_q_decoded;
 
         //		if (FindFreeSector()==NO_FREE_SECTOR){
         //
@@ -1931,12 +1934,12 @@ void Cdrom::run(const u8 cycles) {
 
 auto Cdrom::getRegisters() -> std::vector<std::string> {
     std::vector<std::string> registers;
-    registers.emplace_back(fmt::format("HIrq Status Register : {:#06x}", hirq_status_reg_.toU16()));
-    registers.emplace_back(fmt::format("HIrq Mask Register : {:#06x}", hirq_mask_reg_.toU16()));
-    registers.emplace_back(fmt::format("Command Register 1 : {:#06x}", cr1_.toU16()));
-    registers.emplace_back(fmt::format("Command Register 2 : {:#06x}", cr2_.toU16()));
-    registers.emplace_back(fmt::format("Command Register 3 : {:#06x}", cr3_.toU16()));
-    registers.emplace_back(fmt::format("Command Register 4 : {:#06x}", cr4_.toU16()));
+    registers.emplace_back(fmt::format("HIrq Status Register : {:#06x}", hirq_status_reg_.data));
+    registers.emplace_back(fmt::format("HIrq Mask Register : {:#06x}", hirq_mask_reg_.data));
+    registers.emplace_back(fmt::format("Command Register 1 : {:#06x}", cr1_.data));
+    registers.emplace_back(fmt::format("Command Register 2 : {:#06x}", cr2_.data));
+    registers.emplace_back(fmt::format("Command Register 3 : {:#06x}", cr3_.data));
+    registers.emplace_back(fmt::format("Command Register 4 : {:#06x}", cr4_.data));
 
     return registers;
 }
@@ -2077,29 +2080,29 @@ auto Cdrom::getRegisters() -> std::vector<std::string> {
 
 void Cdrom::reset() {
     // CD-BLOCK registers initialization
-    hirq_status_reg_.reset();
-    hirq_status_reg_.set(HirqStatusRegister::scdq, Scdq::subcode_q_decoded);
-    hirq_status_reg_.set(HirqStatusRegister::efls, Efls::file_system_finished);
-    hirq_status_reg_.set(HirqStatusRegister::ecpy, Ecpy::sector_copy_or_move_finished);
-    hirq_status_reg_.set(HirqStatusRegister::ehst, Ehst::host_io_finished);
-    hirq_status_reg_.set(HirqStatusRegister::esel, Esel::soft_reset_or_selector_set_finished);
-    hirq_status_reg_.set(HirqStatusRegister::dchg, Dchg::disk_has_not_changed);
-    hirq_status_reg_.set(HirqStatusRegister::pend, Pend::cd_play_has_ended);
-    hirq_status_reg_.set(HirqStatusRegister::bful, Bful::buffer_not_full);
-    hirq_status_reg_.set(HirqStatusRegister::csct, Csct::sector_not_stored);
-    hirq_status_reg_.set(HirqStatusRegister::drdy, Drdy::setup_complete);
-    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+    hirq_status_reg_      = {};
+    hirq_status_reg_.scdq = Scdq::subcode_q_decoded;
+    hirq_status_reg_.efls = Efls::file_system_finished;
+    hirq_status_reg_.ecpy = Ecpy::sector_copy_or_move_finished;
+    hirq_status_reg_.ehst = Ehst::host_io_finished;
+    hirq_status_reg_.esel = Esel::soft_reset_or_selector_set_finished;
+    hirq_status_reg_.dchg = Dchg::disk_has_not_changed;
+    hirq_status_reg_.pend = Pend::cd_play_has_ended;
+    hirq_status_reg_.bful = Bful::buffer_not_full;
+    hirq_status_reg_.csct = Csct::sector_not_stored;
+    hirq_status_reg_.drdy = Drdy::setup_complete;
+    hirq_status_reg_.cmok = Cmok::ready;
 
-    hirq_mask_reg_.set();
+    hirq_mask_reg_ = {u16_max};
 
     constexpr auto cr1_default = u8{0x43}; // 'C'
-    cr1_.set(CommandRegister::lower_8_bits, cr1_default);
+    cr1_.low_8_bits            = cr1_default;
     constexpr auto cr2_default = u16{0x4442}; // 'DB'
-    cr2_.set(CommandRegister::all_bits, cr2_default);
+    cr2_.data                  = cr2_default;
     constexpr auto cr3_default = u16{0x4C4F}; // 'LO'
-    cr3_.set(CommandRegister::all_bits, cr3_default);
+    cr3_.data                  = cr3_default;
     constexpr auto cr4_default = u16{0x434B}; // 'CK'
-    cr4_.set(CommandRegister::all_bits, cr4_default);
+    cr4_.data                  = cr4_default;
 
     cd_drive_status_    = CdDriveStatus::no_disc_inserted;
     cd_drive_play_mode_ = CdDrivePlayMode::standby;
@@ -2132,16 +2135,16 @@ auto Cdrom::calculatePeriodicResponseDuration() -> u32 {
 //--------------------------------------------------------------------------------------------------------------
 void Cdrom::sendStatus() {
     // CR1 = cd_drive_status_ << 8; // CR1-H
-    cr1_.set(CommandRegister::status, cd_drive_status_);
+    cr1_.status = cd_drive_status_;
     switch (cd_drive_status_) {
         case CdDriveStatus::drive_is_open:
         case CdDriveStatus::no_disc_inserted:
         case CdDriveStatus::error:
             // CR1 |= 0xFF;
-            cr1_.set(CommandRegister::lower_8_bits, u8{0xff});
-            cr2_.set(CommandRegister::all_bits, u16{0xffff});
-            cr3_.set(CommandRegister::all_bits, u16{0xffff});
-            cr4_.set(CommandRegister::all_bits, u16{0xffff});
+            cr1_.low_8_bits = u8_max;
+            cr2_.data       = u16_max;
+            cr3_.data       = u16_max;
+            cr4_.data       = u16_max;
             break;
         default:
             // CR1 |= ((flag & 0xF) << 4) | (repCnt & 0xF);
@@ -2160,7 +2163,7 @@ void Cdrom::getStatus() {
 
     sendStatus();
 
-    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+    hirq_status_reg_.cmok = Cmok::ready;
 
     Log::debug(Logger::cdrom, "Get Status executed");
 }
@@ -2171,13 +2174,13 @@ void Cdrom::getHardwareInfo() {
     // 0x00 | Mpeg Version (8)
     // Driver Version(8) | Revision(8)
 
-    cr1_.set(CommandRegister::status, cd_drive_status_);
-    cr1_.set(CommandRegister::lower_8_bits, u8{0});
-    cr2_.set(CommandRegister::all_bits, u16{0x0001});
-    cr3_.set(CommandRegister::all_bits, u16{0x0000});
-    cr4_.set(CommandRegister::all_bits, u16{0x0102});
+    cr1_.status     = cd_drive_status_;
+    cr1_.low_8_bits = u8{0};
+    cr2_.data       = u16{0x0001};
+    cr3_.data       = u16{0x0000};
+    cr4_.data       = u16{0x0102};
 
-    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+    hirq_status_reg_.cmok = Cmok::ready;
 
     Log::debug(Logger::cdrom, "Get Hardware Info executed");
 }
@@ -2299,14 +2302,14 @@ void Cdrom::endDataTransfer() {
     //			HIRQREQ|=CMOK | EHST;
     //			//HIRQREQ|=DRDY;
 
-    cr1_.set(CommandRegister::status, cd_drive_status_);
-    cr1_.set(CommandRegister::lower_8_bits, u8{0});
-    cr2_.set(CommandRegister::all_bits, u16{0x0});
-    cr3_.set(CommandRegister::all_bits, u16{0x0});
-    cr4_.set(CommandRegister::all_bits, u16{0x0});
+    cr1_.status     = cd_drive_status_;
+    cr1_.low_8_bits = u8{0};
+    cr2_.data       = u16{0};
+    cr3_.data       = u16{0};
+    cr4_.data       = u16{0};
 
-    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
-    hirq_status_reg_.set(HirqStatusRegister::drdy, Drdy::setup_complete);
+    hirq_status_reg_.cmok = Cmok::ready;
+    hirq_status_reg_.drdy = Drdy::setup_complete;
 
     Log::debug(Logger::cdrom, "End Data Transfer executed");
 }
@@ -2319,8 +2322,8 @@ void Cdrom::abortFile() {
 
     cd_drive_status_ = isCdInserted() ? CdDriveStatus::paused : CdDriveStatus::no_disc_inserted;
 
-    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
-    hirq_status_reg_.set(HirqStatusRegister::efls, Efls::file_system_finished);
+    hirq_status_reg_.cmok = Cmok::ready;
+    hirq_status_reg_.efls = Efls::file_system_finished;
 
     sendStatus();
 
@@ -2333,26 +2336,26 @@ void Cdrom::getCopyError() {
     // 0x0000
     // 0x0000
 
-    cr1_.set(CommandRegister::status, cd_drive_status_);
-    cr1_.set(CommandRegister::lower_8_bits, u8{0});
-    cr2_.set(CommandRegister::all_bits, u16{0x0});
-    cr3_.set(CommandRegister::all_bits, u16{0x0});
-    cr4_.set(CommandRegister::all_bits, u16{0x0});
+    cr1_.status     = cd_drive_status_;
+    cr1_.low_8_bits = u8{0};
+    cr2_.data       = u16{0};
+    cr3_.data       = u16{0};
+    cr4_.data       = u16{0};
 
-    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
-    hirq_status_reg_.set(HirqStatusRegister::ecpy, Ecpy::sector_copy_or_move_finished);
+    hirq_status_reg_.cmok = Cmok::ready;
+    hirq_status_reg_.ecpy = Ecpy::sector_copy_or_move_finished;
 
     Log::debug(Logger::cdrom, "Get Copy Error executed");
 }
 
 void Cdrom::getDeviceAuthenticationStatus() {
-    cr1_.set(CommandRegister::status, cd_drive_status_);
-    cr1_.set(CommandRegister::lower_8_bits, u8{0});
-    cr2_.set(CommandRegister::all_bits, u16{0x0004});
-    cr3_.set(CommandRegister::all_bits, u16{0x0000});
-    cr4_.set(CommandRegister::all_bits, u16{0x0000});
+    cr1_.status     = cd_drive_status_;
+    cr1_.low_8_bits = u8{0};
+    cr2_.data       = u16{0x0004};
+    cr3_.data       = u16{0};
+    cr4_.data       = u16{0};
 
-    hirq_status_reg_.set(HirqStatusRegister::cmok, Cmok::ready);
+    hirq_status_reg_.cmok = Cmok::ready;
 
     Log::debug(Logger::cdrom, "Get Device Authentication Status executed");
 }
