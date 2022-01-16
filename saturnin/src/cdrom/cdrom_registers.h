@@ -53,19 +53,18 @@ constexpr auto fetch_data_pointer_address = u32{0x25818000};
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union HirqStatusRegister {
-    u16             raw;
-    BitField<10, 1> scdq;
-    BitField<9, 1>  efls;
-    BitField<8, 1>  ecpy;
-    BitField<7, 1>  ehst;
-    BitField<6, 1>  esel;
-    BitField<5, 1>  dchg;
-    BitField<4, 1>  pend;
-    BitField<3, 1>  bful;
-    BitField<2, 1>  csct;
-    BitField<1, 1>  drdy;
-    BitField<0, 1>  cmok;
-    BitField<0, 16> data;
+    u16          raw;  ///< Raw representation.
+    BitField<10> scdq; ///< Defines the SCDQ bit.
+    BitField<9>  efls; ///< Defines the EFLS bit.
+    BitField<8>  ecpy; ///< Defines the ECPY bit.
+    BitField<7>  ehst; ///< Defines the EHST bit.
+    BitField<6>  esel; ///< Defines the ESEL bit.
+    BitField<5>  dchg; ///< Defines the DCHG bit.
+    BitField<4>  pend; ///< Defines the PEND bit.
+    BitField<3>  bful; ///< Defines the BFUL bit.
+    BitField<2>  csct; ///< Defines the CSCT bit.
+    BitField<1>  drdy; ///< Defines the DRDY bit.
+    BitField<0>  cmok; ///< Defines the CMOK bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,9 +73,9 @@ union HirqStatusRegister {
 /// \brief  Values that represent SCDQ bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Scdq : bool {
-    subcode_q_decode_in_progress = 0, ///< Subcode Q decode in progress for current sector.
-    subcode_q_decoded            = 1  ///< Subcode Q has been decoded for current sector.
+enum class Scdq {
+    subcode_q_decode_in_progress = 0u, ///< Subcode Q decode in progress for current sector.
+    subcode_q_decoded            = 1u  ///< Subcode Q has been decoded for current sector.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +84,7 @@ enum Scdq : bool {
 /// \brief  Values that represent EFLS bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Efls : bool {
+enum class Efls : bool {
     file_system_in_progress = 0, ///< CD block file system in progress.
     file_system_finished    = 1  ///< CD block file system finished.
 };
@@ -96,7 +95,7 @@ enum Efls : bool {
 /// \brief  Values that represent ECPY bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Ecpy : bool {
+enum class Ecpy : bool {
     sector_copy_or_move_in_progress = 0, ///< Sector copy or move in progress.
     sector_copy_or_move_finished    = 1  ///< Sector copy or move finished.
 };
@@ -107,7 +106,7 @@ enum Ecpy : bool {
 /// \brief  Values that represent EHST bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Ehst : bool {
+enum class Ehst : bool {
     host_io_in_progress = 0, ///< Host I/O is in progress.
     host_io_finished    = 1  ///< Host I/O has finished.
 };
@@ -118,7 +117,7 @@ enum Ehst : bool {
 /// \brief  Values that represent ESEL bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Esel : bool {
+enum class Esel : bool {
     soft_reset_or_selector_set_in_progress = 0, ///< Soft reset or selector set in progress.
     soft_reset_or_selector_set_finished    = 1  ///< Soft reset or selector set finished.
 };
@@ -129,7 +128,7 @@ enum Esel : bool {
 /// \brief  Values that represent DCHG bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Dchg : bool {
+enum class Dchg : bool {
     disk_has_not_changed = 0, ///< Disk has not changed.
     disk_changed         = 1  ///< Disk has been changed (tray opened and closed).
 };
@@ -140,7 +139,7 @@ enum Dchg : bool {
 /// \brief  Values that represent PEND bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Pend : bool {
+enum class Pend : bool {
     cd_play_in_progress = 0, ///< CD play has not ended.
     cd_play_has_ended   = 1  ///< CD play has ended (FAD out of range).
 };
@@ -151,7 +150,7 @@ enum Pend : bool {
 /// \brief  Values that represent BFUL bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Bful : bool {
+enum class Bful : bool {
     buffer_not_full = 0, ///< CD buffer is not full.
     buffer_full     = 1  ///< CD buffer is full.
 };
@@ -162,7 +161,7 @@ enum Bful : bool {
 /// \brief  Values that represent CSCT bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Csct : bool {
+enum class Csct : bool {
     sector_not_stored = 0, ///< Sector has not been stored or been discarded.
     sector_stored     = 1  ///< 1 sector has just been stored.
 };
@@ -173,7 +172,7 @@ enum Csct : bool {
 /// \brief  Values that represent DRDY bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Drdy : bool {
+enum class Drdy : bool {
     not_setup      = 0, ///< Not setup.
     setup_complete = 1  ///< Data transfer setup complete, data can be read from fetch_data_pointer.
 };
@@ -184,7 +183,7 @@ enum Drdy : bool {
 /// \brief  Values that represent CMOK bit of HirqRegister.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum Cmok : bool {
+enum class Cmok : bool {
     processing = 0, ///< System still processing last command.
     ready      = 1  ///< System ready for new command.
 };
@@ -199,19 +198,18 @@ enum Cmok : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union HirqMaskRegister {
-    u16             raw;
-    BitField<10, 1> scdq_status; ///< Defines the SCDQ bit interrupt status.
-    BitField<9, 1>  efls_status; ///< Defines the EFLS bit interrupt status.
-    BitField<8, 1>  ecpy_status; ///< Defines the ECPY bit interrupt status.
-    BitField<7, 1>  ehst_status; ///< Defines the EHST bit interrupt status.
-    BitField<6, 1>  esel_status; ///< Defines the ESEL bit interrupt status.
-    BitField<5, 1>  dchg_status; ///< Defines the DCHG bit interrupt status.
-    BitField<4, 1>  pend_status; ///< Defines the PEND bit interrupt status.
-    BitField<3, 1>  bful_status; ///< Defines the BFUL bit interrupt status.
-    BitField<2, 1>  csct_status; ///< Defines the CSCT bit interrupt status.
-    BitField<1, 1>  drdy_status; ///< Defines the DRDY bit interrupt status.
-    BitField<0, 1>  cmok_status; ///< Defines the CMOK bit interrupt status.
-    BitField<0, 16> data;        ///< Defines the range of all the bits of the register.
+    u16          raw;         ///< Raw representation.
+    BitField<10> scdq_status; ///< Defines the SCDQ bit interrupt status.
+    BitField<9>  efls_status; ///< Defines the EFLS bit interrupt status.
+    BitField<8>  ecpy_status; ///< Defines the ECPY bit interrupt status.
+    BitField<7>  ehst_status; ///< Defines the EHST bit interrupt status.
+    BitField<6>  esel_status; ///< Defines the ESEL bit interrupt status.
+    BitField<5>  dchg_status; ///< Defines the DCHG bit interrupt status.
+    BitField<4>  pend_status; ///< Defines the PEND bit interrupt status.
+    BitField<3>  bful_status; ///< Defines the BFUL bit interrupt status.
+    BitField<2>  csct_status; ///< Defines the CSCT bit interrupt status.
+    BitField<1>  drdy_status; ///< Defines the DRDY bit interrupt status.
+    BitField<0>  cmok_status; ///< Defines the CMOK bit interrupt status.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,15 +318,13 @@ enum class Command : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CommandRegister {
-    u16            raw;
+    u16            raw;         ///< Raw representation.
     BitField<8, 8> command;     ///< Command (CR1 input).
     BitField<8, 8> status;      ///< Status (CR1 output).
     BitField<8, 8> high_8_bits; ///< 8..15 bits range of the register.
     BitField<0, 8> low_8_bits;  ///< 0..7 bits range of the register.
     BitField<4, 4> flag;        ///< 4 bit flag.
     BitField<0, 4> rep_cnt;     ///< 4 bit repeat frequency. Notification range 0x0..0xE (0..14 times)
-
-    BitField<0, 16> data; ///< Defines the range of all the bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

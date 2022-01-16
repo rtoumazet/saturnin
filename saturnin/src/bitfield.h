@@ -1,3 +1,22 @@
+//
+// bitfield.h
+// Saturnin
+//
+// Copyright (c) 2022 Renaud Toumazet
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \file	bitfield.h
 ///
@@ -33,6 +52,18 @@ struct MinimumTypeHelper {
 
 } // namespace
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  BitField
+///
+/// \brief  A bit field.
+///
+/// \author Runik
+/// \date   14/01/2022
+///
+/// \tparam Index   Start index.
+/// \tparam Bits    Number of bits.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 template<size_t Index, size_t Bits = 1>
 class BitField {
   private:
@@ -47,8 +78,11 @@ class BitField {
         return *this;
     }
 
-              operator T() const { return (value_ >> Index) & Mask; }
-    explicit  operator bool() const { return value_ & (Mask << Index); }
+    operator T() const { return (value_ >> Index) & Mask; }
+
+    // explicit operator bool() const { return value_ & (Mask << Index); }
+    explicit operator bool() const { return (value_ >> Index) & Mask; }
+
     BitField& operator++() { return *this = *this + 1; }
     T         operator++(int) {
         T r = *this;
@@ -69,6 +103,17 @@ class BitField {
     T value_;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class  BitField<Index,1>
+///
+/// \brief  BitField specialization to consider 1 bit BitField as a boolean.
+///
+/// \author Runik
+/// \date   14/01/2022
+///
+/// \tparam Index Start index.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 template<size_t Index>
 class BitField<Index, 1> {
   private:
@@ -82,10 +127,48 @@ class BitField<Index, 1> {
         return *this;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template<class T, class = typename std::enable_if<std::is_enum<T>::value>::type> BitField& 1>::operator=(T e)
+    ///
+    /// \brief  Assignment operator specialization for scoped enums.
+    ///
+    /// \author Runik
+    /// \date   14/01/2022
+    ///
+    /// \param  e   A T to process.
+    ///
+    /// \returns    A shallow copy of this object.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<class T, class = typename std::enable_if<std::is_enum<T>::value>::type>
+    BitField& operator=(T e) {
+        auto value = static_cast<typename std::underlying_type<T>::type>(e);
+        value_     = (value_ & ~(Mask << Index)) | (value << Index);
+        return *this;
+    }
+
     explicit operator bool() const { return value_ & (Mask << Index); }
 
   private:
     T value_;
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<typename E, size_t T, size_t N> constexpr auto toEnum(BitField<T, N> b) noexcept
+///
+/// \brief  BitField to enum conversion helper.
+///
+/// \tparam E     Type of the e.
+/// \tparam Index Index of the BitField.
+/// \tparam Size  Size onf the BitField.
+/// \param  b     A BitField&lt;T,N&gt; to process.
+///
+/// \returns      BitField as an enum.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename E, size_t Index, size_t Size>
+constexpr auto toEnum(BitField<Index, Size> b) noexcept {
+    return static_cast<E>(static_cast<std::underlying_type_t<E>>(b));
+}
 
 } // namespace saturnin

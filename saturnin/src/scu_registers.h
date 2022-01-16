@@ -26,6 +26,7 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/bitfield.h>
 
 namespace saturnin::core {
 
@@ -68,78 +69,73 @@ constexpr auto scu_version_register        = u32{0x25FE00C8};
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaReadAddressRegister
+/// \union  DmaReadAddressRegister
 ///
 /// \brief  DMA Level 2-0 Read Address Register (D0R, D1R &amp; D2R).
 ///
 /// \author Runik
-/// \date   29/01/2019
+/// \date   14/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaReadAddressRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto read_address = BitRange<u32>{0, 26}; ///< Defines read address in bytes.
+union DmaReadAddressRegister {
+    u32             raw;          ///< Raw representation.
+    BitField<0, 27> read_address; ///< Defines read address in bytes.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaWriteAddressRegister
+/// \union DmaWriteAddressRegister
 ///
 /// \brief  DMA Level 2-0 Write Address Register (D0W, D1W &amp; D2W).
 ///
 /// \author Runik
-/// \date   29/01/2019
+/// \date   14/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaWriteAddressRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto write_address = BitRange<u32>{0, 26}; ///< Defines write address in bytes.
+union DmaWriteAddressRegister {
+    u32             raw;           ///< Raw representation.
+    BitField<0, 27> write_address; ///< Defines write address in bytes.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaLevel0TransferByteNumberRegister
+/// \union  DmaLevel0TransferByteNumberRegister
 ///
 /// \brief  DMA Level 0 Transfer Byte Number (D0C).
 ///
 /// \author Runik
-/// \date   29/01/2019
+/// \date   14/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaLevel0TransferByteNumberRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto transfer_byte_number = BitRange<u32>{0, 19}; ///< Defines transfer byte number.
+union DmaLevel0TransferByteNumberRegister {
+    u32             raw;                  ///< Raw representation.
+    BitField<0, 20> transfer_byte_number; ///< Defines transfer byte number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaLevel1TransferByteNumberRegister
+/// \union  DmaLevel1TransferByteNumberRegister
 ///
 /// \brief  DMA Level 1 Transfer Byte Number (D1C).
 ///
 /// \author Runik
-/// \date   29/01/2019
+/// \date   14/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaLevel1TransferByteNumberRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto transfer_byte_number = BitRange<u32>{0, 11}; ///< Defines transfer byte number.
+union DmaLevel1TransferByteNumberRegister {
+    u32             raw;                  ///< Raw representation.
+    BitField<0, 12> transfer_byte_number; ///< Defines transfer byte number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaLevel2TransferByteNumberRegister
+/// \union  DmaLevel2TransferByteNumberRegister
 ///
 /// \brief  DMA Level 2 Transfer Byte Number (D2C).
 ///
 /// \author Runik
-/// \date   29/01/2019
+/// \date   14/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaLevel2TransferByteNumberRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto transfer_byte_number = BitRange<u32>{0, 11}; ///< Defines transfer byte number.
+union DmaLevel2TransferByteNumberRegister {
+    u32             raw;                  ///< Raw representation.
+    BitField<0, 12> transfer_byte_number; ///< Defines transfer byte number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,9 +144,9 @@ class DmaLevel2TransferByteNumberRegister : public Register {
 /// \brief  Number of bytes added to the read address.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ReadAddressAddValue : u8 {
-    add_0 = 0b0, ///< Nothing is added.
-    add_4 = 0b1  ///< 4 bytes are added
+enum class ReadAddressAddValue : bool {
+    add_0 = 0, ///< Nothing is added.
+    add_4 = 1  ///< 4 bytes are added
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,21 +167,18 @@ enum class WriteAddressAddValue : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaAddressAddValueRegister
+/// \union  DmaAddressAddValueRegister
 ///
 /// \brief  DMA Address Add Value Register (D0AD, D1AD and D2AD).
 ///
 /// \author Runik
-/// \date   25/01/2019
+/// \date   15/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaAddressAddValueRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto read_add_value
-        = BitRange<ReadAddressAddValue>{8}; ///< Defines read address add value (D0RA, D1RA and D2RA).
-    inline static const auto write_add_value
-        = BitRange<WriteAddressAddValue>{0, 2}; ///< Defines write address add value (D0WA, D1WA and D2WA).
+union DmaAddressAddValueRegister {
+    u32            raw;             ///< Raw representation.
+    BitField<8>    read_add_value;  ///< Defines read address add value (D0RA, D1RA and D2RA).
+    BitField<0, 3> write_add_value; ///< Defines write address add value (D0WA, D1WA and D2WA).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,9 +187,9 @@ class DmaAddressAddValueRegister : public Register {
 /// \brief  DxEN bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaEnable : u8 {
-    disabled = 0b0, ///< DMA is disabled.
-    enabled  = 0b1  ///< DMA is enabled.
+enum class DmaEnable : bool {
+    disabled = 0, ///< DMA is disabled.
+    enabled  = 1  ///< DMA is enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,25 +198,24 @@ enum class DmaEnable : u8 {
 /// \brief  DxGO bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaStarting : u8 {
-    not_started = 0b0, ///< DMA isn't started.
-    started     = 0b1  ///< DMA starts execution. Only relevant when start factor is DMA.
+enum class DmaStarting : bool {
+    not_started = 0, ///< DMA isn't started.
+    started     = 1  ///< DMA starts execution. Only relevant when start factor is DMA.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaEnableRegister
+/// \union  DmaEnableRegister
 ///
 /// \brief  DMA Enable Register (DxEN).
 ///
 /// \author Runik
-/// \date   27/01/2019
+/// \date   15/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaEnableRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dma_enable   = BitRange<DmaEnable>{8};   ///< Defines DMA Enable Bit (D0EN, D1EN, D2EN)
-    inline static const auto dma_starting = BitRange<DmaStarting>{0}; ///< Defines DMA Starting Bit (D0GO, D1GO, D2GO).
+union DmaEnableRegister {
+    u32         raw;          ///< Raw representation.
+    BitField<8> dma_enable;   ///< Defines DMA Enable Bit (D0EN, D1EN, D2EN)
+    BitField<0> dma_starting; ///< Defines DMA Starting Bit (D0GO, D1GO, D2GO).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,9 +224,9 @@ class DmaEnableRegister : public Register {
 /// \brief  DxMOD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaMode : u8 {
-    direct   = 0b0, ///< Direct mode.
-    indirect = 0b1  ///< Indirect mode.
+enum class DmaMode : bool {
+    direct   = 0, ///< Direct mode.
+    indirect = 1  ///< Indirect mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -243,9 +235,9 @@ enum class DmaMode : u8 {
 /// \brief  DxRUP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ReadAddressUpdate : u8 {
-    save   = 0b0, ///< Saves the value.
-    update = 0b1  ///< Updates the value.
+enum class ReadAddressUpdate : bool {
+    save   = 0, ///< Saves the value.
+    update = 1  ///< Updates the value.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -254,9 +246,9 @@ enum class ReadAddressUpdate : u8 {
 /// \brief  DxWUP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class WriteAddressUpdate : u8 {
-    save   = 0b0, ///< Saves the value.
-    update = 0b1  ///< Updates the value.
+enum class WriteAddressUpdate : bool {
+    save   = 0, ///< Saves the value.
+    update = 1  ///< Updates the value.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,21 +270,20 @@ enum class StartingFactorSelect : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaEnableRegister
+/// \union  DmaEnableRegister
 ///
 /// \brief  DMA Mode, Address Update, Start Factor Select Register (DxMD).
 ///
 /// \author Runik
-/// \date   27/01/2019
+/// \date   15/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaModeRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dma_mode               = BitRange<DmaMode>{24};                ///< Defines DxMOD bit.
-    inline static const auto read_address_update    = BitRange<ReadAddressUpdate>{16};      ///< Defines DxRUP bit.
-    inline static const auto write_address_update   = BitRange<WriteAddressUpdate>{8};      ///< Defines DxWUP bit.
-    inline static const auto starting_factor_select = BitRange<StartingFactorSelect>{0, 2}; ///< Defines DxFTy bits.
+union DmaModeRegister {
+    u32            raw;                    ///< Raw representation.
+    BitField<24>   dma_mode;               ///< Defines DxMOD bit.
+    BitField<16>   read_address_update;    ///< Defines DxRUP bit.
+    BitField<8>    write_address_update;   ///< Defines DxWUP bit.
+    BitField<0, 3> starting_factor_select; ///< Defines DxFTy bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -301,9 +292,9 @@ class DmaModeRegister : public Register {
 /// \brief  DACSD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DspBusAccess : u8 {
-    not_accessing = 0b0, ///< Not accessing the DSP Bus.
-    accessing     = 0b1  ///< Accessing the DSP Bus.
+enum class DspBusAccess : bool {
+    not_accessing = 0, ///< Not accessing the DSP Bus.
+    accessing     = 1  ///< Accessing the DSP Bus.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -312,9 +303,9 @@ enum class DspBusAccess : u8 {
 /// \brief  DACSB bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BBusAccess : u8 {
-    not_accessing = 0b0, ///< Not accessing the B Bus.
-    accessing     = 0b1  ///< Accessing the B Bus.
+enum class BBusAccess : bool {
+    not_accessing = 0, ///< Not accessing the B Bus.
+    accessing     = 1  ///< Accessing the B Bus.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -323,9 +314,9 @@ enum class BBusAccess : u8 {
 /// \brief  DACSA bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ABusAccess : u8 {
-    not_accessing = 0b0, ///< Not accessing the A Bus.
-    accessing     = 0b1  ///< Accessing the A Bus.
+enum class ABusAccess : bool {
+    not_accessing = 0, ///< Not accessing the A Bus.
+    accessing     = 1  ///< Accessing the A Bus.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -334,9 +325,9 @@ enum class ABusAccess : u8 {
 /// \brief  D1BK bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Level1DmaInterrupt : u8 {
-    not_interrupted = 0b0, ///< Level 1 DMA isn't interrupted.
-    interrupted     = 0b1  ///< Level 1 DMA is interrupted.
+enum class Level1DmaInterrupt : bool {
+    not_interrupted = 0, ///< Level 1 DMA isn't interrupted.
+    interrupted     = 1  ///< Level 1 DMA is interrupted.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -345,9 +336,9 @@ enum class Level1DmaInterrupt : u8 {
 /// \brief  D0BK bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Level0DmaInterrupt : u8 {
-    not_interrupted = 0b0, ///< Level 0 DMA isn't interrupted.
-    interrupted     = 0b1  ///< Level 0 DMA is interrupted.
+enum class Level0DmaInterrupt : bool {
+    not_interrupted = 0, ///< Level 0 DMA isn't interrupted.
+    interrupted     = 1  ///< Level 0 DMA is interrupted.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -356,9 +347,9 @@ enum class Level0DmaInterrupt : u8 {
 /// \brief  D2WT bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Level2DmaStandBy : u8 {
-    not_on_standby = 0b0, ///< Level 2 DMA isn't on standby.
-    on_standby     = 0b1  ///< Level 2 DMA is on standby.
+enum class Level2DmaStandBy : bool {
+    not_on_standby = 0, ///< Level 2 DMA isn't on standby.
+    on_standby     = 1  ///< Level 2 DMA is on standby.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -367,9 +358,9 @@ enum class Level2DmaStandBy : u8 {
 /// \brief  D2MV bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Level2DmaOperation : u8 {
-    not_in_operation = 0b0, ///< Level 2 DMA isn't in operation.
-    in_operation     = 0b1  ///< Level 2 DMA is in operation.
+enum class Level2DmaOperation : bool {
+    not_in_operation = 0, ///< Level 2 DMA isn't in operation.
+    in_operation     = 1  ///< Level 2 DMA is in operation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -378,9 +369,9 @@ enum class Level2DmaOperation : u8 {
 /// \brief  D1WT bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Level1DmaStandBy : u8 {
-    not_on_standby = 0b0, ///< Level 1 DMA isn't on standby.
-    on_standby     = 0b1  ///< Level 1 DMA is on standby.
+enum class Level1DmaStandBy : bool {
+    not_on_standby = 0, ///< Level 1 DMA isn't on standby.
+    on_standby     = 1  ///< Level 1 DMA is on standby.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -389,9 +380,9 @@ enum class Level1DmaStandBy : u8 {
 /// \brief  D1MV bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Level1DmaOperation : u8 {
-    not_in_operation = 0b0, ///< Level 1 DMA isn't in operation.
-    in_operation     = 0b1  ///< Level 1 DMA is in operation.
+enum class Level1DmaOperation : bool {
+    not_in_operation = 0, ///< Level 1 DMA isn't in operation.
+    in_operation     = 1  ///< Level 1 DMA is in operation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -400,9 +391,9 @@ enum class Level1DmaOperation : u8 {
 /// \brief  D0WT bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Level0DmaStandBy : u8 {
-    not_on_standby = 0b0, ///< Level 0 DMA isn't on standby.
-    on_standby     = 0b1  ///< Level 0 DMA is on standby.
+enum class Level0DmaStandBy : bool {
+    not_on_standby = 0, ///< Level 0 DMA isn't on standby.
+    on_standby     = 1  ///< Level 0 DMA is on standby.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -411,9 +402,9 @@ enum class Level0DmaStandBy : u8 {
 /// \brief  D0MV bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Level0DmaOperation : u8 {
-    not_in_operation = 0b0, ///< Level 0 DMA isn't in operation.
-    in_operation     = 0b1  ///< Level 0 DMA is in operation.
+enum class Level0DmaOperation : bool {
+    not_in_operation = 0, ///< Level 0 DMA isn't in operation.
+    in_operation     = 1  ///< Level 0 DMA is in operation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -422,9 +413,9 @@ enum class Level0DmaOperation : u8 {
 /// \brief  DDWT bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DspDmaStandBy : u8 {
-    not_on_standby = 0b0, ///< DSP DMA isn't on standby.
-    on_standby     = 0b1  ///< DSP DMA is on standby.
+enum class DspDmaStandBy : bool {
+    not_on_standby = 0, ///< DSP DMA isn't on standby.
+    on_standby     = 1  ///< DSP DMA is on standby.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -433,36 +424,35 @@ enum class DspDmaStandBy : u8 {
 /// \brief  DDMV bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DspDmaOperation : u8 {
-    not_in_operation = 0b0, ///< DSP DMA isn't in operation.
-    in_operation     = 0b1  ///< DSP DMA is in operation.
+enum class DspDmaOperation : bool {
+    not_in_operation = 0, ///< DSP DMA isn't in operation.
+    in_operation     = 1  ///< DSP DMA is in operation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaEnableRegister
+/// \union  DmaEnableRegister
 ///
 /// \brief  DMA Status Register (DSTA).
 ///
 /// \author Runik
-/// \date   27/01/2019
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaStatusRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dsp_bus_access        = BitRange<DspBusAccess>{22};       ///< Defines DACSD bit.
-    inline static const auto b_bus_access          = BitRange<BBusAccess>{21};         ///< Defines DACSB bit.
-    inline static const auto a_bus_access          = BitRange<ABusAccess>{20};         ///< Defines DACSA bit.
-    inline static const auto level_1_dma_interrupt = BitRange<Level1DmaInterrupt>{17}; ///< Defines D1BK bit.
-    inline static const auto level_0_dma_interrupt = BitRange<Level0DmaInterrupt>{16}; ///< Defines D0BK bit.
-    inline static const auto level_2_dma_stand_by  = BitRange<Level2DmaStandBy>{13};   ///< Defines D2WT bit.
-    inline static const auto level_2_dma_operation = BitRange<Level2DmaOperation>{12}; ///< Defines D2MV bit.
-    inline static const auto level_1_dma_stand_by  = BitRange<Level1DmaStandBy>{9};    ///< Defines D1WT bit.
-    inline static const auto level_1_dma_operation = BitRange<Level1DmaOperation>{8};  ///< Defines D1MV bit.
-    inline static const auto level_0_dma_stand_by  = BitRange<Level0DmaStandBy>{5};    ///< Defines D0WT bit.
-    inline static const auto level_0_dma_operation = BitRange<Level0DmaOperation>{4};  ///< Defines D0MV bit.
-    inline static const auto dsp_dma_stand_by      = BitRange<DspDmaStandBy>{1};       ///< Defines DDWT bit.
-    inline static const auto dsp_dma_operation     = BitRange<DspDmaOperation>{0};     ///< Defines DDMV bit.
+union DmaStatusRegister {
+    u32          raw;                   ///< Raw representation.
+    BitField<22> dsp_bus_access;        ///< Defines DACSD bit.
+    BitField<21> b_bus_access;          ///< Defines DACSB bit.
+    BitField<20> a_bus_access;          ///< Defines DACSA bit.
+    BitField<17> level_1_dma_interrupt; ///< Defines D1BK bit.
+    BitField<16> level_0_dma_interrupt; ///< Defines D0BK bit.
+    BitField<13> level_2_dma_stand_by;  ///< Defines D2WT bit.
+    BitField<12> level_2_dma_operation; ///< Defines D2MV bit.
+    BitField<9>  level_1_dma_stand_by;  ///< Defines D1WT bit.
+    BitField<8>  level_1_dma_operation; ///< Defines D1MV bit.
+    BitField<5>  level_0_dma_stand_by;  ///< Defines D0WT bit.
+    BitField<4>  level_0_dma_operation; ///< Defines D0MV bit.
+    BitField<1>  dsp_dma_stand_by;      ///< Defines DDWT bit.
+    BitField<0>  dsp_dma_operation;     ///< Defines DDMV bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -471,7 +461,7 @@ class DmaStatusRegister : public Register {
 /// \brief  Values that represent interrupt masks.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class InterruptMask : u8 {
+enum class InterruptMask : bool {
     not_masked = 0, ///< Interupt is not masked
     masked     = 1  ///< Interrupt is masked
 };
@@ -482,7 +472,7 @@ enum class InterruptMask : u8 {
 /// \brief  Interrupt Mask Register (IMS).
 ///
 /// \author Runik
-/// \date   05/02/2019
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class InterruptMaskRegister : public Register {
@@ -520,8 +510,44 @@ class InterruptMaskRegister : public Register {
     inline static const auto h_blank_in      = BitRange<InterruptMask>{2};  ///< Defines H-Blank-In interrupt mask bit.
     inline static const auto v_blank_out     = BitRange<InterruptMask>{1};  ///< Defines V-Blank-Out interrupt mask bit.
     inline static const auto v_blank_in      = BitRange<InterruptMask>{0};  ///< Defines V-Blank-In interrupt mask bit.
-    inline static const auto undefined       = BitRange<InterruptMask>{0};  ///< Undefined value.
+    inline static const auto undefined       = BitRange<InterruptMask>{14}; ///< Undefined value.
 };
+
+// union InterruptMaskRegister {
+//     u32          raw;             ///< Raw representation.
+//     BitField<31> external_15;     ///< Defines External interrupt 15 mask bit.
+//     BitField<30> external_14;     ///< Defines External interrupt 14 mask bit.
+//     BitField<29> external_13;     ///< Defines External interrupt 13 mask bit.
+//     BitField<28> external_12;     ///< Defines External interrupt 12 mask bit.
+//     BitField<27> external_11;     ///< Defines External interrupt 11 mask bit.
+//     BitField<26> external_10;     ///< Defines External interrupt 10 mask bit.
+//     BitField<25> external_09;     ///< Defines External interrupt 09 mask bit.
+//     BitField<24> external_08;     ///< Defines External interrupt 08 mask bit.
+//     BitField<23> external_07;     ///< Defines External interrupt 07 mask bit.
+//     BitField<22> external_06;     ///< Defines External interrupt 06 mask bit.
+//     BitField<21> external_05;     ///< Defines External interrupt 05 mask bit.
+//     BitField<20> external_04;     ///< Defines External interrupt 04 mask bit.
+//     BitField<19> external_03;     ///< Defines External interrupt 03 mask bit.
+//     BitField<18> external_02;     ///< Defines External interrupt 02 mask bit.
+//     BitField<17> external_01;     ///< Defines External interrupt 01 mask bit.
+//     BitField<16> external_00;     ///< Defines External interrupt 00 mask bit.
+//     BitField<15> a_bus;           ///< Defines A-Bus interrupt mask bit.
+//     BitField<13> sprite_draw_end; ///< Defines Sprite Draw End interrupt mask bit.
+//     BitField<12> dma_illegal;     ///< Defines DMA Illegal interrupt mask bit.
+//     BitField<11> level_0_dma;     ///< Defines Level 0 DMA interrupt mask bit.
+//     BitField<10> level_1_dma;     ///< Defines Level 1 DMA interrupt mask bit.
+//     BitField<9>  level_2_dma;     ///< Defines Level 2 DMA interrupt mask bit.
+//     BitField<8>  pad;             ///< Defines PAD interrupt mask bit.
+//     BitField<7>  system_manager;  ///< Defines System Manager interrupt mask bit.
+//     BitField<6>  sound_request;   ///< Defines Sound Request interrupt mask bit.
+//     BitField<5>  dsp_end;         ///< Defines DSP End interrupt mask bit.
+//     BitField<4>  timer_1;         ///< Defines Timer 1 interrupt mask bit.
+//     BitField<3>  timer_0;         ///< Defines Timer 0 interrupt mask bit.
+//     BitField<2>  h_blank_in;      ///< Defines H-Blank-In interrupt mask bit.
+//     BitField<1>  v_blank_out;     ///< Defines V-Blank-Out interrupt mask bit.
+//     BitField<0>  v_blank_in;      ///< Defines V-Blank-In interrupt mask bit.
+//     BitField<14> undefined;       ///< Undefined value.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   InterruptEnable

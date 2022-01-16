@@ -757,6 +757,10 @@ class Cdrom {
     u32 periodic_response_duration_{}; ///< Periodic response duration.
 };
 
-inline Command readCommand(BitField<8, 8> command) { return Command(static_cast<u16>(command)); };
+inline auto readCommand(BitField<8, 8> command) { return Command(static_cast<u16>(command)); };
+template<typename T>
+auto toBool(const T& e) -> bool {
+    return utilities::toUnderlying(e);
+}
 
 } // namespace saturnin::cdrom

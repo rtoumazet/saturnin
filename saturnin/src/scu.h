@@ -552,6 +552,7 @@ class Scu {
     DmaLevel0TransferByteNumberRegister d0c_;
     DmaLevel1TransferByteNumberRegister d1c_;
     DmaLevel2TransferByteNumberRegister d2c_;
+    DmaStatusRegister                   dsta_;
     InterruptStatusRegister             interrupt_status_register_;
     InterruptMaskRegister               interrupt_mask_register_;
     Timer0CompareRegister               t0c_;
