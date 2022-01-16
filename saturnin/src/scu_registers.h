@@ -608,33 +608,31 @@ class InterruptStatusRegister : public Register {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Timer0CompareRegister
+/// \union  Timer0CompareRegister
 ///
 /// \brief  Timer 0 compare register (T0C).
 ///
 /// \author Runik
-/// \date   07/06/2020
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Timer0CompareRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto timer_0_compare_data = BitRange<u32>{0, 9}; ///< Defines timer 0 compare data bits.
+union Timer0CompareRegister {
+    u32             raw;                  ///< Raw representation.
+    BitField<0, 10> timer_0_compare_data; ///< Defines timer 0 compare data bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Timer1SetDataRegister
+/// \union  Timer1SetDataRegister
 ///
 /// \brief  Timer 1 Set Data Register (T1S).
 ///
 /// \author Runik
-/// \date   07/06/2020
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Timer1SetDataRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto timer_1_set_data = BitRange<u32>{0, 8}; ///< Defines timer 1 set data bits.
+union Timer1SetDataRegister {
+    u32            raw;                  ///< Raw representation.
+    BitField<0, 9> timer_0_compare_data; ///< Defines timer 1 set data bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -643,7 +641,7 @@ class Timer1SetDataRegister : public Register {
 /// \brief  T1MD bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Timer1Mode : u8 {
+enum class Timer1Mode : bool {
     interrupt_occurs_each_line     = 0, ///< Interrupt occurs at each line.
     interrupt_occurs_only_at_timer = 1  ///< Interrupt occurs only at lines indicated by Timer 0.
 };
@@ -654,25 +652,24 @@ enum class Timer1Mode : u8 {
 /// \brief  TENB bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TimerEnable : u8 {
+enum class TimerEnable : bool {
     timer_operation_off = 0, ///< Timer operation off.
     timer_operation_on  = 1  ///< Timer operation on.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Timer1ModeRegister
+/// \union  Timer1ModeRegister
 ///
 /// \brief  Timer 1 Mode Register (T1MD).
 ///
 /// \author Runik
-/// \date   07/06/2020
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Timer1ModeRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto timer_1_mode = BitRange<Timer1Mode>{8};  ///< Defines T1MD bit.
-    inline static const auto timer_enable = BitRange<TimerEnable>{0}; ///< Defines TENB bit.
+union Timer1ModeRegister {
+    u32         raw;          ///< Raw representation.
+    BitField<8> timer_1_mode; ///< Defines T1MD bit.
+    BitField<0> timer_enable; ///< Defines TENB bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -681,7 +678,7 @@ class Timer1ModeRegister : public Register {
 /// \brief  PR bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ExecutePauseReset : u8 {
+enum class ExecutePauseReset : bool {
     no_change              = 0, ///< No condition change.
     program_pause_is_reset = 1  ///< Program pause is reset when program execution begins.
 };
@@ -692,7 +689,7 @@ enum class ExecutePauseReset : u8 {
 /// \brief  EP bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ExecutePause : u8 {
+enum class ExecutePause : bool {
     no_change      = 0, ///< No condition change.
     program_pauses = 1  ///< Program pauses when program execution begins.
 };
@@ -703,7 +700,7 @@ enum class ExecutePause : u8 {
 /// \brief  T0 bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class D0BusDmaExecution : u8 {
+enum class D0BusDmaExecution : bool {
     no_dma           = 0, ///< No DMA is executing.
     dma_is_executing = 1  ///< Executing DMA using the D0-Bus.
 };
@@ -714,7 +711,7 @@ enum class D0BusDmaExecution : u8 {
 /// \brief  S bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Sign : u8 {
+enum class Sign : bool {
     operation_result_is_not_negative = 0, ///< Operation result isn't negative.
     operation_result_is_negative     = 1  ///< Operation result is negative.
 };
@@ -725,7 +722,7 @@ enum class Sign : u8 {
 /// \brief  Z bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Zero : u8 {
+enum class Zero : bool {
     operation_result_is_not_zero = 0, ///< Operation result isn't 0.
     operation_result_is_zero     = 1  ///< Operation result is 0.
 };
@@ -736,7 +733,7 @@ enum class Zero : u8 {
 /// \brief  C bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Carry : u8 {
+enum class Carry : bool {
     operation_result_has_no_carry = 0, ///< Carry does not occurs in operation result.
     operation_result_has_carry    = 1  ///< Carry occurs in operation result.
 };
@@ -747,7 +744,7 @@ enum class Carry : u8 {
 /// \brief  V bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Overflow : u8 {
+enum class Overflow : bool {
     operation_does_not_cause_overflow = 0, ///< Operation result does not cause overflow or underflow.
     operation_causes_overflow         = 1  ///< Operation result causes overflow or underflow.
 };
@@ -758,7 +755,7 @@ enum class Overflow : u8 {
 /// \brief  E bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ProgramEndInterrupt : u8 {
+enum class ProgramEndInterrupt : bool {
     program_not_ended_by_endi = 0, ///< Program not ended by ENDI command.
     program_ended_by_endi     = 1  ///< Program ended by ENDI command detected.
 };
@@ -769,7 +766,7 @@ enum class ProgramEndInterrupt : u8 {
 /// \brief  ES bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class StepExecuteControl : u8 {
+enum class StepExecuteControl : bool {
     program_does_not_execute_one_step = 0, ///< Program does not execute one step.
     program_executes_one_step         = 1  ///< Program executes one step if program is paused.
 };
@@ -780,7 +777,7 @@ enum class StepExecuteControl : u8 {
 /// \brief  EX bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ProgramExecuteControl : u8 {
+enum class ProgramExecuteControl : bool {
     program_execution_stops  = 0, ///< Program execution stops when writing 0.
     program_execution_begins = 1  ///< Program execution begins when writing 1.
 };
@@ -791,50 +788,71 @@ enum class ProgramExecuteControl : u8 {
 /// \brief  LE bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ProgramCounterTransferEnable : u8 {
+enum class ProgramCounterTransferEnable : bool {
     program_ram_address_not_loaded_to_program_counter = 0, ///< The program RAM address is not loaded to the program counter.
     program_ram_address_loaded_to_program_counter     = 1  ///< The program RAM address is loaded to the program counter.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DspProgramControlPort
+/// \union  DspProgramControlPort
 ///
 /// \brief  DSP Program Control Port (PPAF).
 ///
 /// \author Runik
-/// \date   02/05/2021
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DspProgramControlPort : public Register {
-  public:
-    using Register::Register;
-    inline static const auto execute_pause_reset             = BitRange<ExecutePauseReset>{26};            ///< Defines PP bit.
-    inline static const auto execute_pause                   = BitRange<ExecutePause>{25};                 ///< Defines EP bit.
-    inline static const auto d0_bus_dma_execution            = BitRange<D0BusDmaExecution>{23};            ///< Defines T0 bit.
-    inline static const auto sign                            = BitRange<Sign>{22};                         ///< Defines S bit.
-    inline static const auto zero                            = BitRange<Zero>{21};                         ///< Defines Z bit.
-    inline static const auto carry                           = BitRange<Carry>{20};                        ///< Defines C bit.
-    inline static const auto overflow                        = BitRange<Overflow>{19};                     ///< Defines V bit.
-    inline static const auto program_end_interrupt           = BitRange<ProgramEndInterrupt>{18};          ///< Defines E bit.
-    inline static const auto step_execute_control            = BitRange<StepExecuteControl>{17};           ///< Defines ES bit.
-    inline static const auto program_execute_control         = BitRange<ProgramExecuteControl>{16};        ///< Defines EX bit.
-    inline static const auto program_counter_transfer_enable = BitRange<ProgramCounterTransferEnable>{15}; ///< Defines LE bit.
-    inline static const auto program_ram_address             = BitRange<u8>{0, 7};                         ///< Defines P7-0 bits.
+// class DspProgramControlPort : public Register {
+//   public:
+//     using Register::Register;
+//     inline static const auto execute_pause_reset             = BitRange<ExecutePauseReset>{26};            ///< Defines PP bit.
+//     inline static const auto execute_pause                   = BitRange<ExecutePause>{25};                 ///< Defines EP bit.
+//     inline static const auto d0_bus_dma_execution            = BitRange<D0BusDmaExecution>{23};            ///< Defines T0 bit.
+//     inline static const auto sign                            = BitRange<Sign>{22};                         ///< Defines S bit.
+//     inline static const auto zero                            = BitRange<Zero>{21};                         ///< Defines Z bit.
+//     inline static const auto carry                           = BitRange<Carry>{20};                        ///< Defines C bit.
+//     inline static const auto overflow                        = BitRange<Overflow>{19};                     ///< Defines V bit.
+//     inline static const auto program_end_interrupt           = BitRange<ProgramEndInterrupt>{18};          ///< Defines E bit.
+//     inline static const auto step_execute_control            = BitRange<StepExecuteControl>{17};           ///< Defines ES bit.
+//     inline static const auto program_execute_control         = BitRange<ProgramExecuteControl>{16};        ///< Defines EX bit.
+//     inline static const auto program_counter_transfer_enable = BitRange<ProgramCounterTransferEnable>{15}; ///< Defines LE bit.
+//     inline static const auto program_ram_address             = BitRange<u8>{0, 7};                         ///< Defines P7-0
+//     bits.
+// };
+
+union DspProgramControlPort {
+    u32            raw;                             ///< Raw representation.
+    BitField<26>   execute_pause_reset;             ///< Defines PP bit.
+    BitField<25>   execute_pause;                   ///< Defines EP bit.
+    BitField<23>   d0_bus_dma_execution;            ///< Defines T0 bit.
+    BitField<22>   sign;                            ///< Defines S bit.
+    BitField<21>   zero;                            ///< Defines Z bit.
+    BitField<20>   carry;                           ///< Defines C bit.
+    BitField<19>   overflow;                        ///< Defines V bit.
+    BitField<18>   program_end_interrupt;           ///< Defines E bit.
+    BitField<17>   step_execute_control;            ///< Defines ES bit.
+    BitField<16>   program_execute_control;         ///< Defines EX bit.
+    BitField<15>   program_counter_transfer_enable; ///< Defines LE bit.
+    BitField<0, 8> program_ram_address;             ///< Defines P7-0 bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DspProgramDataPort
+/// \union  DspProgramDataPort
 ///
 /// \brief  DSP Program Data Port (PPD).
 ///
 /// \author Runik
-/// \date   02/05/2021
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DspProgramDataPort : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dsp_program_data_port = BitRange<u32>{0, 31}; ///< Defines DSP program data port.
+// class DspProgramDataPort : public Register {
+//   public:
+//     using Register::Register;
+//     inline static const auto dsp_program_data_port = BitRange<u32>{0, 31}; ///< Defines DSP program data port.
+// };
+
+union DspProgramDataPort {
+    u32 raw; ///< Defines DSP program data port.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -851,33 +869,44 @@ enum class DataRamSelect : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DspDataRamAddressPort
+/// \union  DspDataRamAddressPort
 ///
 /// \brief  DSP Data RAM Address Port (PPA).
 ///
 /// \author Runik
-/// \date   02/05/2021
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DspDataRamAddressPort : public Register {
-  public:
-    using Register::Register;
-    inline static const auto data_ram_select  = BitRange<DataRamSelect>{6, 7}; ///< Defines RA7-6.
-    inline static const auto data_ram_address = BitRange<u8>{0, 5};            ///< Defines RA5-0.
+// class DspDataRamAddressPort : public Register {
+//   public:
+//     using Register::Register;
+//     inline static const auto data_ram_select  = BitRange<DataRamSelect>{6, 7}; ///< Defines RA7-6.
+//     inline static const auto data_ram_address = BitRange<u8>{0, 5};            ///< Defines RA5-0.
+// };
+
+union DspDataRamAddressPort {
+    u32            raw;              ///< Raw representation.
+    BitField<6, 2> data_ram_select;  ///< Defines RA7-6 bits.
+    BitField<0, 6> data_ram_address; ///< Defines RA5-0 bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DspDataRamDataPort
+/// \union DspDataRamDataPort
 ///
 /// \brief  DSP Data RAM Data Port (PDD).
 ///
 /// \author Runik
-/// \date   03/05/2021
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DspDataRamDataPort : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dsp_data_ram_data_port = BitRange<u32>{0, 31}; ///< Defines DSP data ram port.
+// class DspDataRamDataPort : public Register {
+//   public:
+//     using Register::Register;
+//     inline static const auto dsp_data_ram_data_port = BitRange<u32>{0, 31}; ///< Defines DSP data ram port.
+// };
+
+union DspDataRamDataPort {
+    u32 raw; ///< Defines DSP data ram port.
 };
+
 } // namespace saturnin::core
