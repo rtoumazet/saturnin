@@ -34,36 +34,9 @@ namespace saturnin::sh2 {
 using core::Log;
 using core::Logger;
 
-// Masks constants
-constexpr auto allow_bsc_write_mask = u32{0xA55A0000};
-constexpr auto cache_purge_mask     = u32{0xFFFFFC0B};
-
-// Default values
-// BSC
-constexpr auto bsc_bcr1_master_default_value = u32{0x000003F0};
-constexpr auto bsc_bcr1_slave_default_value  = u32{0x000083F0};
-constexpr auto bsc_bcr2_default_value        = u32{0x000000FCu};
-constexpr auto bsc_wcr_default_value         = u32{0x0000AAFFu};
-constexpr auto frt_tier_default_value        = u8{0x01};
-constexpr auto frt_ocra_default_value        = u16{0xFFFF};
-constexpr auto frt_ocrb_default_value        = u16{0xFFFF};
-constexpr auto frt_tocr_default_value        = u8{0xe0};
-constexpr auto wdt_wtcsr_default_value       = u8{0x18};
-constexpr auto wdt_rstcsr_default_value      = u8{0x1F};
-constexpr auto sci_ssr_default_value         = u8{0x84};
-
-constexpr auto divu_normal_cycles_number   = u8{39};
-constexpr auto divu_overflow_cycles_number = u8{6};
-
-constexpr auto pc_start_vector = u32{0x00000008};
-constexpr auto sp_start_vector = u32{0x0000000C};
-constexpr auto sr_stack_offset = u8{4};
-constexpr auto pc_stack_offset = u8{8};
-
-constexpr auto transfer_byte_size_1  = u8{0x1};
-constexpr auto transfer_byte_size_2  = u8{0x2};
-constexpr auto transfer_byte_size_4  = u8{0x4};
-constexpr auto transfer_byte_size_16 = u8{0x10};
+// Do not remove, will be used !!!
+// constexpr auto divu_normal_cycles_number   = u8{39};
+// constexpr auto divu_overflow_cycles_number = u8{6};
 
 Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : modules_(ec), sh2_type_(st) { reset(); }
 
@@ -72,26 +45,22 @@ auto Sh2::readRegisters8(const u32 addr) -> u8 {
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a:
-            return intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::upper_8_bits);
-        case interrupt_priority_level_setting_register_a + 1:
-            return intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::lower_8_bits);
-        case interrupt_priority_level_setting_register_b:
-            return intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::upper_8_bits);
-        case interrupt_priority_level_setting_register_b + 1:
-            return intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::lower_8_bits);
-        case vector_number_setting_register_a: return intc_vcra_.get(VectorNumberSettingRegisterA::upper_8_bits);
-        case vector_number_setting_register_a + 1: return intc_vcra_.get(VectorNumberSettingRegisterA::lower_8_bits);
-        case vector_number_setting_register_b: return intc_vcrb_.get(VectorNumberSettingRegisterB::upper_8_bits);
-        case vector_number_setting_register_b + 1: return intc_vcrb_.get(VectorNumberSettingRegisterB::lower_8_bits);
-        case vector_number_setting_register_c: return intc_vcrc_.get(VectorNumberSettingRegisterC::upper_8_bits);
-        case vector_number_setting_register_c + 1: return intc_vcrc_.get(VectorNumberSettingRegisterC::lower_8_bits);
-        case vector_number_setting_register_d: return intc_vcrd_.get(VectorNumberSettingRegisterD::upper_8_bits);
-        case vector_number_setting_register_d + 1: return intc_vcrd_.get(VectorNumberSettingRegisterD::lower_8_bits);
-        case vector_number_setting_register_wdt: return intc_vcrwdt_.get(VectorNumberSettingRegisterWdt::upper_8_bits);
-        case vector_number_setting_register_wdt + 1: return intc_vcrwdt_.get(VectorNumberSettingRegisterWdt::lower_8_bits);
-        case interrupt_control_register: return intc_icr_.get(InterruptControlRegister::upper_8_bits);
-        case interrupt_control_register + 1: return intc_icr_.get(InterruptControlRegister::lower_8_bits);
+        case interrupt_priority_level_setting_register_a: return static_cast<u8>(intc_ipra_.upper_8_bits);
+        case interrupt_priority_level_setting_register_a + 1: return intc_ipra_.lower_8_bits;
+        case interrupt_priority_level_setting_register_b: return static_cast<u8>(intc_iprb_.upper_8_bits);
+        case interrupt_priority_level_setting_register_b + 1: return intc_iprb_.lower_8_bits;
+        case vector_number_setting_register_a: return static_cast<u8>(intc_vcra_.upper_8_bits);
+        case vector_number_setting_register_a + 1: return intc_vcra_.lower_8_bits;
+        case vector_number_setting_register_b: return static_cast<u8>(intc_vcrb_.upper_8_bits);
+        case vector_number_setting_register_b + 1: return intc_vcrb_.lower_8_bits;
+        case vector_number_setting_register_c: return static_cast<u8>(intc_vcrc_.upper_8_bits);
+        case vector_number_setting_register_c + 1: return intc_vcrc_.lower_8_bits;
+        case vector_number_setting_register_d: return static_cast<u8>(intc_vcrd_.upper_8_bits);
+        case vector_number_setting_register_d + 1: return intc_vcrd_.lower_8_bits;
+        case vector_number_setting_register_wdt: return static_cast<u8>(intc_vcrwdt_.upper_8_bits);
+        case vector_number_setting_register_wdt + 1: return intc_vcrwdt_.lower_8_bits;
+        case interrupt_control_register: return static_cast<u8>(intc_icr_.upper_8_bits);
+        case interrupt_control_register + 1: return intc_icr_.lower_8_bits;
         /////////////
         // 7. BSC //
         /////////////
@@ -103,8 +72,8 @@ auto Sh2::readRegisters8(const u32 addr) -> u8 {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_request_response_selection_control_register_0: return dmac_drcr0_.get(bits_0_7);
-        case dma_request_response_selection_control_register_1: return dmac_drcr1_.get(bits_0_7);
+        case dma_request_response_selection_control_register_0: return dmac_drcr0_.raw;
+        case dma_request_response_selection_control_register_1: return dmac_drcr1_.raw;
         //////////////
         // 10. DIVU //
         //////////////
@@ -112,36 +81,36 @@ auto Sh2::readRegisters8(const u32 addr) -> u8 {
         /////////////
         // 11. FRT //
         /////////////
-        case timer_interrupt_enable_register: return frt_tier_.get(bits_0_7);
-        case free_running_timer_control_status_register: return frt_ftcsr_.get(bits_0_7);
-        case free_running_counter: return frt_frc_.get(FreeRunningCounter::upper_8_bits);
-        case free_running_counter + 1: return frt_frc_.get(FreeRunningCounter::lower_8_bits);
-        case timer_control_register: return frt_tcr_.get(bits_0_7);
-        case timer_output_compare_control_register: return frt_tocr_.get(bits_0_7);
-        case input_capture_register: return frt_icr_.get(InputCaptureRegister::upper_8_bits);
-        case input_capture_register + 1: return frt_icr_.get(InputCaptureRegister::lower_8_bits);
+        case timer_interrupt_enable_register: return frt_tier_.raw;
+        case free_running_timer_control_status_register: return frt_ftcsr_.raw;
+        case free_running_counter: return static_cast<u8>(frt_frc_.upper_8_bits);
+        case free_running_counter + 1: return frt_frc_.lower_8_bits;
+        case timer_control_register: return frt_tcr_.raw;
+        case timer_output_compare_control_register: return frt_tocr_.raw;
+        case input_capture_register: return static_cast<u8>(frt_icr_.upper_8_bits);
+        case input_capture_register + 1: return frt_icr_.lower_8_bits;
 
         /////////////
         // 12. WDT //
         /////////////
-        case watchdog_timer_control_status_register: return wdt_wtcsr_.get(bits_0_7);
-        case watchdog_timer_counter: return wdt_wtcnt_.get(bits_0_7);
-        case reset_control_status_register + 1: return wdt_rstcsr_.get(bits_0_7);
+        case watchdog_timer_control_status_register: return wdt_wtcsr_.raw;
+        case watchdog_timer_counter: return wdt_wtcnt_.raw;
+        case reset_control_status_register + 1: return wdt_rstcsr_.raw;
 
         /////////////
         // 13. SCI //
         /////////////
-        case serial_mode_register: return sci_smr_.get(bits_0_7);
-        case bit_rate_register: return sci_brr_.get(bits_0_7);
-        case serial_control_register: return sci_scr_.get(bits_0_7);
-        case transmit_data_register: return sci_tdr_.get(bits_0_7);
-        case serial_status_register: return sci_ssr_.get(bits_0_7);
-        case receive_data_register: return sci_rdr_.get(bits_0_7);
+        case serial_mode_register: return sci_smr_.raw;
+        case bit_rate_register: return sci_brr_.raw;
+        case serial_control_register: return sci_scr_.raw;
+        case transmit_data_register: return sci_tdr_.raw;
+        case serial_status_register: return sci_ssr_.raw;
+        case receive_data_register: return sci_rdr_.raw;
 
         //////////////////////////
         // 14. Power-Down modes //
         //////////////////////////
-        case standby_control_register: return sbycr_.get(bits_0_7);
+        case standby_control_register: return sbycr_.raw;
 
         default: unmappedAccess(addr); return 0;
     }
@@ -152,32 +121,33 @@ auto Sh2::readRegisters16(const u32 addr) -> u16 {
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a: return intc_ipra_.get(bits_0_15);
-        case interrupt_priority_level_setting_register_b: return intc_iprb_.get(bits_0_15);
-        case vector_number_setting_register_a: return intc_vcra_.get(bits_0_15);
-        case vector_number_setting_register_b: return intc_vcrb_.get(bits_0_15);
-        case vector_number_setting_register_c: return intc_vcrc_.get(bits_0_15);
-        case vector_number_setting_register_d: return intc_vcrd_.get(bits_0_15);
-        case vector_number_setting_register_wdt: return intc_vcrwdt_.get(bits_0_15);
-        case interrupt_control_register: return intc_icr_.get(bits_0_15);
-        case vector_number_setting_register_div: return intc_vcrdiv_.get(VectorNumberSettingRegisterDiv::upper_16_bits);
-        case vector_number_setting_register_div + 2: return intc_vcrdiv_.get(VectorNumberSettingRegisterDiv::lower_16_bits);
+        case interrupt_priority_level_setting_register_a: return intc_ipra_.raw;
+        case interrupt_priority_level_setting_register_b: return intc_iprb_.raw;
+        case vector_number_setting_register_a: return intc_vcra_.raw;
+        case vector_number_setting_register_b: return intc_vcrb_.raw;
+        case vector_number_setting_register_c: return intc_vcrc_.raw;
+        case vector_number_setting_register_d: return intc_vcrd_.raw;
+        case vector_number_setting_register_wdt: return intc_vcrwdt_.raw;
+        case interrupt_control_register: return intc_icr_.raw;
+        case vector_number_setting_register_div: return intc_vcrdiv_.upper_16_bits;
+        case vector_number_setting_register_div + 2: return intc_vcrdiv_.lower_16_bits;
 
         /////////////
         // 7. BSC //
         /////////////
-        case bus_control_register1 + 2: return bsc_bcr1_.get(BusControlRegister1::lower_16_bits);
-        case bus_control_register2 + 2: return bsc_bcr2_.get(BusControlRegister2::lower_16_bits);
-        case wait_state_control_register + 2: return bsc_wcr_.get(WaitControlRegister::lower_16_bits);
-        case individual_memory_control_register + 2: return bsc_mcr_.get(IndividualMemoryControlRegister::lower_16_bits);
-        case refresh_timer_control_status_register + 2: return bsc_rtcsr_.get(RefreshTimeControlStatusRegister::lower_16_bits);
-        case refresh_timer_counter + 2: return bsc_rtcnt_.get(RefreshTimerCounter::lower_16_bits);
-        case refresh_time_constant_register + 2: return bsc_rtcor_.get(RefreshTimerConstantRegister::lower_16_bits);
+        case bus_control_register1 + 2: return bsc_bcr1_.lower_16_bits;
+        case bus_control_register2 + 2: return bsc_bcr2_.lower_16_bits;
+        case wait_state_control_register + 2: return bsc_wcr_.lower_16_bits;
+        case individual_memory_control_register + 2: return bsc_mcr_.lower_16_bits;
+        case refresh_timer_control_status_register + 2: return bsc_rtcsr_.lower_16_bits;
+        case refresh_timer_counter + 2: return bsc_rtcnt_.lower_16_bits;
+        case refresh_time_constant_register + 2: return bsc_rtcor_.lower_16_bits;
 
         //////////////
         // 8. Cache //
         //////////////
-        case cache_control_register: return cache_ccr_.get(bits_0_15);
+        // As this register is 8 bits wide, there shouldn't be 16 bits access
+        // case cache_control_register: return cache_ccr_.get(bits_0_15);
 
         /////////////
         // 9. DMAC //
@@ -188,11 +158,11 @@ auto Sh2::readRegisters16(const u32 addr) -> u16 {
         //////////////
         case division_control_register: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            return divu_dvcr_.get(DivisionControlRegister::upper_16_bits);
+            return divu_dvcr_.upper_16_bits;
         }
         case division_control_register + 2: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            return divu_dvcr_.get(DivisionControlRegister::lower_16_bits);
+            return divu_dvcr_.lower_16_bits;
         }
 
             /////////////
@@ -216,21 +186,21 @@ auto Sh2::readRegisters32(const u32 addr) -> u32 {
         /////////////
         // 5. INTC //
         /////////////
-        case vector_number_setting_register_div: return intc_vcrdiv_.toU32();
-        case dma_vector_number_register_0: return intc_vcrdma0_.toU32();
-        case dma_vector_number_register_1: return intc_vcrdma1_.toU32();
+        case vector_number_setting_register_div: return intc_vcrdiv_.raw;
+        case dma_vector_number_register_0: return intc_vcrdma0_.raw;
+        case dma_vector_number_register_1: return intc_vcrdma1_.raw;
 
         /////////////
         // 7. BSC //
         /////////////
         // Upper 16 bits are 0x0000, but as they're initialized and never written to after that, no need to mask the return value.
-        case bus_control_register1: return bsc_bcr1_.toU32();
-        case bus_control_register2: return bsc_bcr2_.toU32();
-        case wait_state_control_register: return bsc_wcr_.toU32();
-        case individual_memory_control_register: return bsc_mcr_.toU32();
-        case refresh_timer_control_status_register: return bsc_rtcsr_.toU32();
-        case refresh_timer_counter: return bsc_rtcnt_.toU32();
-        case refresh_time_constant_register: return bsc_rtcor_.toU32();
+        case bus_control_register1: return bsc_bcr1_.raw;
+        case bus_control_register2: return bsc_bcr2_.raw;
+        case wait_state_control_register: return bsc_wcr_.raw;
+        case individual_memory_control_register: return bsc_mcr_.raw;
+        case refresh_timer_control_status_register: return bsc_rtcsr_.raw;
+        case refresh_timer_counter: return bsc_rtcnt_.raw;
+        case refresh_time_constant_register: return bsc_rtcor_.raw;
 
         //////////////
         // 8. Cache //
@@ -239,46 +209,46 @@ auto Sh2::readRegisters32(const u32 addr) -> u32 {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_source_address_register_0: return dmac_sar0_.toU32();
-        case dma_source_address_register_1: return dmac_sar1_.toU32();
-        case dma_destination_address_register_0: return dmac_dar0_.toU32();
-        case dma_destination_address_register_1: return dmac_dar1_.toU32();
-        case dma_tranfer_count_register_0: return dmac_tcr0_.toU32();
-        case dma_tranfer_count_register_1: return dmac_tcr1_.toU32();
-        case dma_channel_control_register_0: return dmac_chcr0_.toU32();
-        case dma_channel_control_register_1: return dmac_chcr1_.toU32();
-        case dma_operation_register: return dmac_dmaor_.toU32();
+        case dma_source_address_register_0: return dmac_sar0_.raw;
+        case dma_source_address_register_1: return dmac_sar1_.raw;
+        case dma_destination_address_register_0: return dmac_dar0_.raw;
+        case dma_destination_address_register_1: return dmac_dar1_.raw;
+        case dma_tranfer_count_register_0: return dmac_tcr0_.raw;
+        case dma_tranfer_count_register_1: return dmac_tcr1_.raw;
+        case dma_channel_control_register_0: return dmac_chcr0_.raw;
+        case dma_channel_control_register_1: return dmac_chcr1_.raw;
+        case dma_operation_register: return dmac_dmaor_.raw;
 
         //////////////
         // 10. DIVU //
         //////////////
         case divisor_register: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            return divu_dvsr_.toU32();
+            return divu_dvsr_.raw;
         }
         case dividend_register_l_32_bits: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            return divu_dvdnt_.toU32();
+            return divu_dvdnt_.raw;
         }
         case division_control_register: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            return divu_dvcr_.toU32();
+            return divu_dvcr_.raw;
         }
         case dividend_register_l: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            return divu_dvdntl_.toU32();
+            return divu_dvdntl_.raw;
         }
         case dividend_register_l_shadow: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            return divu_dvdntl_shadow_.toU32();
+            return divu_dvdntl_shadow_.raw;
         }
         case dividend_register_h: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            return divu_dvdnth_.toU32();
+            return divu_dvdnth_.raw;
         }
         case dividend_register_h_shadow: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            return divu_dvdnth_shadow_.toU32();
+            return divu_dvdnth_shadow_.raw;
         }
             /////////////
             // 11. FRT //
@@ -301,27 +271,21 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a:
-            intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::upper_8_bits, data);
-            break;
-        case interrupt_priority_level_setting_register_a + 1:
-            intc_ipra_.set(InterruptPriorityLevelSettingRegisterA::lower_8_bits, data);
-            break;
-        case interrupt_priority_level_setting_register_b:
-            intc_iprb_.set(InterruptPriorityLevelSettingRegisterB::upper_8_bits, data);
-            break;
-        case vector_number_setting_register_a: intc_vcra_.set(VectorNumberSettingRegisterA::upper_8_bits, data); break;
-        case vector_number_setting_register_a + 1: intc_vcra_.set(VectorNumberSettingRegisterA::lower_8_bits, data); break;
-        case vector_number_setting_register_b: intc_vcrb_.set(VectorNumberSettingRegisterB::upper_8_bits, data); break;
-        case vector_number_setting_register_b + 1: intc_vcrb_.set(VectorNumberSettingRegisterB::lower_8_bits, data); break;
-        case vector_number_setting_register_c: intc_vcrc_.set(VectorNumberSettingRegisterC::upper_8_bits, data); break;
-        case vector_number_setting_register_c + 1: intc_vcrc_.set(VectorNumberSettingRegisterC::lower_8_bits, data); break;
-        case vector_number_setting_register_d: intc_vcrd_.set(VectorNumberSettingRegisterD::upper_8_bits, data); break;
+        case interrupt_priority_level_setting_register_a: intc_ipra_.upper_8_bits = data; break;
+        case interrupt_priority_level_setting_register_a + 1: intc_ipra_.lower_8_bits = data; break;
+        case interrupt_priority_level_setting_register_b: intc_iprb_.upper_8_bits = data; break;
+        case vector_number_setting_register_a: intc_vcra_.upper_8_bits = data; break;
+        case vector_number_setting_register_a + 1: intc_vcra_.lower_8_bits = data; break;
+        case vector_number_setting_register_b: intc_vcrb_.upper_8_bits = data; break;
+        case vector_number_setting_register_b + 1: intc_vcrb_.lower_8_bits = data; break;
+        case vector_number_setting_register_c: intc_vcrc_.upper_8_bits = data; break;
+        case vector_number_setting_register_c + 1: intc_vcrc_.lower_8_bits = data; break;
+        case vector_number_setting_register_d: intc_vcrd_.upper_8_bits = data; break;
         case vector_number_setting_register_d + 1: break; // Read only
-        case vector_number_setting_register_wdt: intc_vcrwdt_.set(VectorNumberSettingRegisterWdt::upper_8_bits, data); break;
-        case vector_number_setting_register_wdt + 1: intc_vcrwdt_.set(VectorNumberSettingRegisterWdt::lower_8_bits, data); break;
-        case interrupt_control_register: intc_icr_.set(InterruptControlRegister::upper_8_bits, data); break;
-        case interrupt_control_register + 1: intc_icr_.set(InterruptControlRegister::lower_8_bits, data); break;
+        case vector_number_setting_register_wdt: intc_vcrwdt_.upper_8_bits = data; break;
+        case vector_number_setting_register_wdt + 1: intc_vcrwdt_.lower_8_bits = data; break;
+        case interrupt_control_register: intc_icr_.upper_8_bits = data; break;
+        case interrupt_control_register + 1: intc_icr_.lower_8_bits = data; break;
 
         /////////////
         // 7. BSC  //
@@ -333,20 +297,20 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case cache_control_register:
             Log::debug(Logger::sh2, "CCR byte write: {}", data);
 
-            cache_ccr_.set(bits_0_7, data);
-            if (cache_ccr_.get(CacheControlRegister::cache_purge) == CachePurge::cache_purge) {
+            cache_ccr_.raw = data;
+            if (toEnum<CachePurge>(cache_ccr_.cache_purge) == CachePurge::cache_purge) {
                 purgeCache();
 
                 // cache purge bit is cleared after operation
-                cache_ccr_.reset(CacheControlRegister::cache_purge);
+                cache_ccr_.cache_purge = false;
             }
             break;
 
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_request_response_selection_control_register_0: dmac_drcr0_.set(bits_0_7, data); break;
-        case dma_request_response_selection_control_register_1: dmac_drcr1_.set(bits_0_7, data); break;
+        case dma_request_response_selection_control_register_0: dmac_drcr0_.raw = data; break;
+        case dma_request_response_selection_control_register_1: dmac_drcr1_.raw = data; break;
 
         //////////////
         // 10. DIVU //
@@ -355,25 +319,25 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         /////////////
         // 11. FRT //
         /////////////
-        case timer_interrupt_enable_register: frt_tier_.set(bits_0_7, data); break;
-        case free_running_timer_control_status_register: frt_ftcsr_.set(bits_0_7, data); break;
-        case free_running_counter: frt_frc_.set(FreeRunningCounter::upper_8_bits, data); break;
-        case free_running_counter + 1: frt_frc_.set(FreeRunningCounter::lower_8_bits, data); break;
+        case timer_interrupt_enable_register: frt_tier_.raw = data; break;
+        case free_running_timer_control_status_register: frt_ftcsr_.raw = data; break;
+        case free_running_counter: frt_frc_.upper_8_bits = data; break;
+        case free_running_counter + 1: frt_frc_.lower_8_bits = data; break;
         case output_compare_register:
-            switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegister::upper_8_bits, data); break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegister::upper_8_bits, data); break;
+            switch (toEnum<OutputCompareRegisterSelect>(frt_tocr_.output_compare_register_select)) {
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.upper_8_bits = data; break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.upper_8_bits = data; break;
             }
             break;
         case output_compare_register + 1:
-            switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(OutputCompareRegister::lower_8_bits, data); break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(OutputCompareRegister::lower_8_bits, data); break;
+            switch (toEnum<OutputCompareRegisterSelect>(frt_tocr_.output_compare_register_select)) {
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.lower_8_bits = data; break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.lower_8_bits = data; break;
             }
             break;
         case timer_control_register:
-            frt_tcr_.set(bits_0_7, data);
-            switch (frt_tcr_.get(TimerControlRegister::clock_select)) {
+            frt_tcr_.raw = data;
+            switch (toEnum<FrtClockSelect>(frt_tcr_.clock_select)) {
                 case FrtClockSelect::internal_divided_by_8:
                     frt_clock_divisor_ = frt_clock_divisor_8;
                     frt_mask_          = frt_clock_divisor_mask_8;
@@ -389,12 +353,14 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
                 case FrtClockSelect::external: Log::warning(Logger::sh2, "FRT - External clock not implemented"); break;
             }
             break;
-        case timer_output_compare_control_register:
-            frt_tocr_.set(bits_0_7, static_cast<u8>(data & TimerOutputCompareControlRegister::access_mask));
+        case timer_output_compare_control_register: {
+            constexpr auto access_mask = u8{0b00010011};
+            frt_tocr_.raw              = (data & access_mask);
             break;
-        case input_capture_register: frt_icr_.set(InputCaptureRegister::upper_8_bits, data); break;
+        }
+        case input_capture_register: frt_icr_.upper_8_bits = data; break;
         case input_capture_register + 1:
-            frt_icr_.set(InputCaptureRegister::lower_8_bits, data);
+            frt_icr_.lower_8_bits = data;
             break;
 
             /////////////
@@ -405,12 +371,12 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             // 13. SCI //
             /////////////
 
-        case serial_mode_register: sci_smr_.set(bits_0_7, data); break;
-        case bit_rate_register: sci_brr_.set(bits_0_7, data); break;
-        case serial_control_register: sci_scr_.set(bits_0_7, data); break;
-        case transmit_data_register: sci_tdr_.set(bits_0_7, data); break;
+        case serial_mode_register: sci_smr_.raw = data; break;
+        case bit_rate_register: sci_brr_.raw = data; break;
+        case serial_control_register: sci_scr_.raw = data; break;
+        case transmit_data_register: sci_tdr_.raw = data; break;
         case serial_status_register:
-            sci_ssr_.set(bits_0_7, data);
+            sci_ssr_.raw = data;
             break;
 
             //////////////////////////
@@ -418,7 +384,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
             //////////////////////////
 
         case standby_control_register:
-            sbycr_.set(bits_0_7, data);
+            sbycr_.raw = data;
             Log::warning(Logger::sh2, "PWR - Standby control register write {:#0x}", data);
             break;
 
@@ -432,30 +398,27 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a: intc_ipra_.set(bits_0_15, data); break;
-        case interrupt_priority_level_setting_register_b: intc_iprb_.set(bits_0_15, data); break;
-        case vector_number_setting_register_a: intc_vcra_.set(bits_0_15, data); break;
-        case vector_number_setting_register_b: intc_vcrb_.set(bits_0_15, data); break;
-        case vector_number_setting_register_c: intc_vcrc_.set(bits_0_15, data); break;
-        case vector_number_setting_register_d: intc_vcrd_.set(bits_0_15, data); break;
-        case vector_number_setting_register_wdt: intc_vcrwdt_.set(bits_0_15, data); break;
+        case interrupt_priority_level_setting_register_a: intc_ipra_.raw = data; break;
+        case interrupt_priority_level_setting_register_b: intc_iprb_.raw = data; break;
+        case vector_number_setting_register_a: intc_vcra_.raw = data; break;
+        case vector_number_setting_register_b: intc_vcrb_.raw = data; break;
+        case vector_number_setting_register_c: intc_vcrc_.raw = data; break;
+        case vector_number_setting_register_d: intc_vcrd_.raw = data; break;
+        case vector_number_setting_register_wdt: intc_vcrwdt_.raw = data; break;
         case vector_number_setting_register_div: break; // Read only access
-        case vector_number_setting_register_div + 2:
-            intc_vcrdiv_.set(VectorNumberSettingRegisterDiv::lower_16_bits,
-                             static_cast<u16>(data & DivisionControlRegister::access_mask));
-            break;
+        case vector_number_setting_register_div + 2: intc_vcrdiv_.lower_16_bits = (data & bitmask_7F); break;
         case interrupt_control_register: {
-            auto new_icr = InterruptControlRegister(data);
-            switch (intc_icr_.get(InterruptControlRegister::nmi_edge_detection)) {
+            auto new_icr = InterruptControlRegister{data};
+            switch (toEnum<NmiEdgeDetection>(intc_icr_.nmi_edge_detection)) {
                 case NmiEdgeDetection::falling:
-                    if ((intc_icr_.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high)
-                        && (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low)) {
+                    if ((toEnum<NmiInputLevel>(intc_icr_.nmi_input_level) == NmiInputLevel::high)
+                        && (toEnum<NmiInputLevel>(new_icr.nmi_input_level) == NmiInputLevel::low)) {
                         Log::warning(Logger::sh2, "Falling edge NMI, not implemented !");
                     }
                     break;
                 case NmiEdgeDetection::rising:
-                    if ((intc_icr_.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::low)
-                        && (new_icr.get(InterruptControlRegister::nmi_input_level) == NmiInputLevel::high)) {
+                    if ((toEnum<NmiInputLevel>(intc_icr_.nmi_input_level) == NmiInputLevel::low)
+                        && (toEnum<NmiInputLevel>(new_icr.nmi_input_level) == NmiInputLevel::high)) {
                         Log::warning(Logger::sh2, "Rising edge NMI, not implemented !");
                     }
                     break;
@@ -464,32 +427,39 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
             // Will force exit from the Sleep instruction. Will have to be adapted using Power Down modes.
             is_nmi_registered_ = true;
 
-            intc_icr_.set(bits_0_15, data);
+            intc_icr_.raw = data;
         } break;
 
         /////////////
         // 7. BSC //
         /////////////
-        case bus_control_register1 + 2:
-            bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::write_mask));
+        case bus_control_register1 + 2: {
+            constexpr auto write_mask = u16{0b0001111111110111};
+            bsc_bcr1_.lower_16_bits   = (data & write_mask);
             break;
-        case bus_control_register2 + 2:
-            bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::write_mask));
+        }
+        case bus_control_register2 + 2: {
+            constexpr auto write_mask = u16{0b0000000011111100};
+            bsc_bcr2_.lower_16_bits   = (data & write_mask);
             break;
-        case wait_state_control_register + 2: bsc_wcr_.set(WaitControlRegister::lower_16_bits, data); break;
-        case individual_memory_control_register + 2: bsc_mcr_.set(IndividualMemoryControlRegister::lower_16_bits, data); break;
-        case refresh_timer_control_status_register + 2:
-            bsc_rtcsr_.set(RefreshTimeControlStatusRegister::lower_16_bits,
-                           static_cast<u16>(data & RefreshTimeControlStatusRegister::write_mask));
+        }
+        case wait_state_control_register + 2: bsc_wcr_.lower_16_bits = data; break;
+        case individual_memory_control_register + 2: bsc_mcr_.lower_16_bits = data; break;
+        case refresh_timer_control_status_register + 2: {
+            constexpr auto write_mask = u16{0b0000000011111000};
+            bsc_rtcsr_.lower_16_bits  = (data & write_mask);
             break;
-        case refresh_timer_counter + 2:
-            bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & RefreshTimerCounter::write_mask));
+        }
+        case refresh_timer_counter + 2: {
+            constexpr auto write_mask = u16{0b0000000011111111};
+            bsc_rtcnt_.lower_16_bits  = (data & write_mask);
             break;
-        case refresh_time_constant_register + 2:
-            bsc_rtcor_.set(RefreshTimerConstantRegister::lower_16_bits,
-                           static_cast<u16>(data & RefreshTimerConstantRegister::write_mask));
+        }
+        case refresh_time_constant_register + 2: {
+            constexpr auto write_mask = u16{0b0000000011111111};
+            bsc_rtcor_.lower_16_bits  = (data & write_mask);
             break;
-
+        }
         //////////////
         // 8. Cache //
         //////////////
@@ -504,31 +474,32 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         case division_control_register: break; // Read only access
         case division_control_register + 2: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            divu_dvcr_.set(DivisionControlRegister::lower_16_bits, static_cast<u16>(data & DivisionControlRegister::access_mask));
+            static constexpr auto access_mask = u32{0b11};
+            divu_dvcr_.lower_16_bits          = (data & access_mask);
             break;
         }
 
         /////////////
         // 11. FRT //
         /////////////
-        case free_running_counter: frt_frc_.set(bits_0_15, data); break;
+        case free_running_counter: frt_frc_.raw = data; break;
         case output_compare_register:
-            switch (frt_tocr_.get(TimerOutputCompareControlRegister::output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.set(bits_0_15, data); break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.set(bits_0_15, data); break;
+            switch (toEnum<OutputCompareRegisterSelect>(frt_tocr_.output_compare_register_select)) {
+                case OutputCompareRegisterSelect::ocra: frt_ocra_.raw = data; break;
+                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.raw = data; break;
             }
             break;
-        case input_capture_register: frt_icr_.set(bits_0_15, data); break;
+        case input_capture_register: frt_icr_.raw = data; break;
 
         /////////////
         // 12. WDT //
         /////////////
         case watchdog_timer_control_status_register:
-            wdt_wtcsr_.set(bits_0_7, static_cast<u8>(data >> number_of_bits_8));
-            wdt_wtcnt_.set(bits_0_7, static_cast<u8>(data & bitmask_00FF));
+            wdt_wtcsr_.raw = static_cast<u8>(data >> number_of_bits_8);
+            wdt_wtcnt_.raw = static_cast<u8>(data & bitmask_00FF);
             break;
         case reset_control_status_register:
-            wdt_rstcsr_.set(bits_0_7, static_cast<u8>(data >> number_of_bits_8));
+            wdt_rstcsr_.raw = static_cast<u8>(data >> number_of_bits_8);
             break;
 
             /////////////
@@ -543,52 +514,52 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
 }
 
 void Sh2::writeRegisters(u32 addr, u32 data) {
+    constexpr auto allow_bsc_write_mask = u32{0xA55A0000};
     switch (addr) {
         /////////////
         // 5. INTC //
         /////////////
-        case vector_number_setting_register_div: intc_vcrdiv_.set(bits_0_31, data); break;
-        case dma_vector_number_register_0: intc_vcrdma0_.set(bits_0_31, data); break;
-        case dma_vector_number_register_1: intc_vcrdma1_.set(bits_0_31, data); break;
+        case vector_number_setting_register_div: intc_vcrdiv_.raw = data; break;
+        case dma_vector_number_register_0: intc_vcrdma0_.raw = data; break;
+        case dma_vector_number_register_1: intc_vcrdma1_.raw = data; break;
 
         /////////////
         // 7. BSC //
         /////////////
         case bus_control_register1:
             if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
-                bsc_bcr1_.set(BusControlRegister1::lower_16_bits, static_cast<u16>(data & BusControlRegister1::write_mask));
+                constexpr auto write_mask = u16{0b0001111111110111};
+                bsc_bcr1_.lower_16_bits   = (data & write_mask);
             }
             break;
         case bus_control_register2:
             if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
-                bsc_bcr2_.set(BusControlRegister2::lower_16_bits, static_cast<u16>(data & BusControlRegister2::write_mask));
+                constexpr auto write_mask = u16{0b0000000011111100};
+                bsc_bcr2_.lower_16_bits   = (data & write_mask);
             }
             break;
         case wait_state_control_register:
-            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
-                bsc_wcr_.set(WaitControlRegister::lower_16_bits, static_cast<u16>(data));
-            }
+            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) { bsc_wcr_.lower_16_bits = data; }
             break;
         case individual_memory_control_register:
-            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
-                bsc_mcr_.set(IndividualMemoryControlRegister::lower_16_bits, static_cast<u16>(data));
-            }
+            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) { bsc_mcr_.lower_16_bits = data; }
             break;
         case refresh_timer_control_status_register:
             if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
-                bsc_rtcsr_.set(RefreshTimeControlStatusRegister::lower_16_bits,
-                               static_cast<u16>(data & RefreshTimeControlStatusRegister::write_mask));
+                constexpr auto write_mask = u16{0b0000000011111000};
+                bsc_rtcsr_.lower_16_bits  = (data & write_mask);
             }
             break;
         case refresh_timer_counter:
             if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
-                bsc_rtcnt_.set(RefreshTimerCounter::lower_16_bits, static_cast<u16>(data & RefreshTimerCounter::write_mask));
+                constexpr auto write_mask = u16{0b0000000011111111};
+                bsc_rtcnt_.lower_16_bits  = (data & write_mask);
             }
             break;
         case refresh_time_constant_register:
             if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
-                bsc_rtcor_.set(RefreshTimerConstantRegister::lower_16_bits,
-                               static_cast<u16>(data & RefreshTimerConstantRegister::write_mask));
+                constexpr auto write_mask = u16{0b0000000011111111};
+                bsc_rtcor_.lower_16_bits  = (data & write_mask);
             }
             break;
 
@@ -599,24 +570,24 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_source_address_register_0: dmac_sar0_.set(bits_0_31, data); break;
-        case dma_source_address_register_1: dmac_sar1_.set(bits_0_31, data); break;
-        case dma_destination_address_register_0: dmac_dar0_.set(bits_0_31, data); break;
-        case dma_destination_address_register_1: dmac_dar1_.set(bits_0_31, data); break;
-        case dma_tranfer_count_register_0: dmac_tcr0_.set(bits_0_31, data & DmaTransferCountRegister::write_mask); break;
-        case dma_tranfer_count_register_1: dmac_tcr1_.set(bits_0_31, data & DmaTransferCountRegister::write_mask); break;
+        case dma_source_address_register_0: dmac_sar0_.raw = data; break;
+        case dma_source_address_register_1: dmac_sar1_.raw = data; break;
+        case dma_destination_address_register_0: dmac_dar0_.raw = data; break;
+        case dma_destination_address_register_1: dmac_dar1_.raw = data; break;
+        case dma_tranfer_count_register_0: dmac_tcr0_.raw = (data & bitmask_00FFFFFF); break;
+        case dma_tranfer_count_register_1: dmac_tcr1_.raw = (data & bitmask_00FFFFFF); break;
         case dma_channel_control_register_0:
-            dmac_chcr0_.set(bits_0_31, data & DmaChannelControlRegister::write_mask);
+            dmac_chcr0_.raw = (data & bitmask_0000FFFF);
             executeDma();
             break;
         case dma_channel_control_register_1:
-            dmac_chcr1_.set(bits_0_31, data & DmaChannelControlRegister::write_mask);
+            dmac_chcr1_.raw = (data & bitmask_0000FFFF);
             executeDma();
             break;
         case dma_operation_register: {
-            auto new_dmaor = DmaOperationRegister(data & DmaOperationRegister::write_mask);
-            if (dmac_dmaor_.get(DmaOperationRegister::priority_mode) != new_dmaor.get(DmaOperationRegister::priority_mode)) {
-                dmac_next_transfer_priority_ = (new_dmaor.get(DmaOperationRegister::priority_mode) == PriorityMode::fixed)
+            auto new_dmaor = DmaOperationRegister{data & bitmask_0F};
+            if (dmac_dmaor_.priority_mode != new_dmaor.priority_mode) {
+                dmac_next_transfer_priority_ = (toEnum<PriorityMode>(new_dmaor.priority_mode) == PriorityMode::fixed)
                                                    ? DmaNextTransferPriority::channel_0_first
                                                    : DmaNextTransferPriority::channel_1_first;
             }
@@ -629,21 +600,21 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         //////////////
         case divisor_register: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            divu_dvsr_.set(bits_0_31, data);
+            divu_dvsr_.raw = data;
             // if (data == 0x96385) modules_.context()->debugStatus(core::DebugStatus::paused);
             break;
         }
         case dividend_register_l_32_bits: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            divu_dvdnt_.set(bits_0_31, data);
+            divu_dvdnt_.raw = data;
 
             // ST-V needs some mirroring
-            divu_dvdntl_.set(bits_0_31, data);
-            divu_dvdntl_shadow_.set(bits_0_31, data);
+            divu_dvdntl_.raw        = data;
+            divu_dvdntl_shadow_.raw = data;
 
             // Sign extension for the upper 32 bits if needed
 
-            ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.set(bits_0_31, u32_max) : divu_dvdnth_.set(bits_0_31, 0x00000000u);
+            ((data & sign_bit_32_mask) != 0) ? divu_dvdnth_.raw = u32_max : divu_dvdnth_.raw = 0;
 
             start32bitsDivision();
             runDivisionUnit(0);
@@ -651,13 +622,13 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         }
         case division_control_register: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            divu_dvcr_.set(bits_0_31, data);
+            divu_dvcr_.raw = data;
             break;
         }
         case dividend_register_l: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            divu_dvdntl_.set(bits_0_31, data);
-            divu_dvdntl_shadow_.set(bits_0_31, data);
+            divu_dvdntl_.raw        = data;
+            divu_dvdntl_shadow_.raw = data;
 
             start64bitsDivision();
             runDivisionUnit(0);
@@ -665,7 +636,7 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         }
         case dividend_register_h: {
             // if (divu_is_running_) divu_opcode_is_stalled_ = true;
-            divu_dvdnth_.set(bits_0_31, data);
+            divu_dvdnth_.raw = data;
             break;
         }
 
@@ -690,6 +661,7 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
 
 void Sh2::purgeCache() {
     // All the valid bits and LRU bits are initialized to 0
+    constexpr auto cache_purge_mask = u32{0xFFFFFC0B};
     for (u8 i = 0; i < cache_lines_number; ++i) {
         // :WARNING: following code is untested
         auto data = core::rawRead<u32>(this->cache_addresses_, i);
@@ -700,72 +672,89 @@ void Sh2::purgeCache() {
 
 void Sh2::initializeOnChipRegisters() {
     // Interrupt Control
-    intc_ipra_.reset();
-    intc_iprb_.reset();
-    intc_vcra_.reset();
-    intc_vcrb_.reset();
-    intc_vcrc_.reset();
-    intc_vcrd_.reset();
-    intc_vcrwdt_.reset();
-    intc_vcrdiv_.reset();  // lower 16 bits are undefined
-    intc_vcrdma0_.reset(); // lower 8 bits are undefined
-    intc_vcrdma1_.reset(); // lower 8 bits are undefined
-    intc_icr_.reset();
+    intc_ipra_.raw    = {};
+    intc_iprb_.raw    = {};
+    intc_vcra_.raw    = {};
+    intc_vcrb_.raw    = {};
+    intc_vcrc_.raw    = {};
+    intc_vcrd_.raw    = {};
+    intc_vcrwdt_.raw  = {};
+    intc_vcrdiv_.raw  = {}; // lower 16 bits are undefined
+    intc_vcrdma0_.raw = {}; // lower 8 bits are undefined
+    intc_vcrdma1_.raw = {}; // lower 8 bits are undefined
+    intc_icr_.raw     = {};
 
     // Bus State Controler registers
-    auto default_bcr1 = u32{(sh2_type_ == Sh2Type::master) ? bsc_bcr1_master_default_value : bsc_bcr1_slave_default_value};
-    bsc_bcr1_.set(bits_0_31, default_bcr1);
-    bsc_bcr2_.set(bits_0_31, bsc_bcr2_default_value);
-    bsc_wcr_.set(bits_0_31, bsc_wcr_default_value);
-    bsc_mcr_.reset();
-    bsc_rtcsr_.reset();
-    bsc_rtcnt_.reset();
-    bsc_rtcor_.reset();
+    constexpr auto bsc_bcr1_master_default_value = u32{0x000003F0};
+    constexpr auto bsc_bcr1_slave_default_value  = u32{0x000083F0};
+    constexpr auto bsc_bcr2_default_value        = u32{0x000000FCu};
+    constexpr auto bsc_wcr_default_value         = u32{0x0000AAFFu};
+    const auto default_bcr1 = u32{(sh2_type_ == Sh2Type::master) ? bsc_bcr1_master_default_value : bsc_bcr1_slave_default_value};
+
+    bsc_bcr1_.raw  = default_bcr1;
+    bsc_bcr2_.raw  = bsc_bcr2_default_value;
+    bsc_wcr_.raw   = bsc_wcr_default_value;
+    bsc_mcr_.raw   = {};
+    bsc_rtcsr_.raw = {};
+    bsc_rtcnt_.raw = {};
+    bsc_rtcor_.raw = {};
 
     // Cache registers
-    cache_ccr_.reset();
+    cache_ccr_.raw = {};
 
     // Direct Memory Access Controler registers
-    dmac_tcr0_.reset(); // lower 24 bits are undefined
-    dmac_tcr1_.reset(); // lower 24 bits are undefined
-    dmac_chcr0_.reset();
-    dmac_chcr1_.reset();
-    dmac_drcr0_.reset();
-    dmac_drcr1_.reset();
-    dmac_dmaor_.reset();
+    dmac_tcr0_.raw  = {}; // lower 24 bits are undefined
+    dmac_tcr1_.raw  = {}; // lower 24 bits are undefined
+    dmac_chcr0_.raw = {};
+    dmac_chcr1_.raw = {};
+    dmac_drcr0_.raw = {};
+    dmac_drcr1_.raw = {};
+    dmac_dmaor_.raw = {};
 
     // Division Unit
-    divu_dvcr_.reset();
+    divu_dvcr_.raw = {};
 
     // Free Running timer
-    frt_tier_.set(bits_0_7, frt_tier_default_value);
-    frt_ftcsr_.reset();
-    frt_frc_.reset();
-    frt_ocra_.set(bits_0_15, frt_ocra_default_value);
-    frt_ocrb_.set(bits_0_15, frt_ocrb_default_value);
-    frt_tcr_.reset();
-    frt_tocr_.set(bits_0_7, frt_tocr_default_value);
-    frt_tcr_.reset();
+    constexpr auto frt_ocra_default_value = u16{0xFFFF};
+    constexpr auto frt_ocrb_default_value = u16{0xFFFF};
+    constexpr auto frt_tier_default_value = u8{0x01};
+    constexpr auto frt_tocr_default_value = u8{0xe0};
+
+    frt_tier_.raw  = frt_tier_default_value;
+    frt_ftcsr_.raw = {};
+    frt_frc_.raw   = {};
+    frt_ocra_.raw  = frt_ocra_default_value;
+    frt_ocrb_.raw  = frt_ocrb_default_value;
+    frt_tcr_.raw   = {};
+    frt_tocr_.raw  = frt_tocr_default_value;
 
     // Watch Dog Timer
-    wdt_wtcsr_.set(bits_0_7, wdt_wtcsr_default_value);
-    wdt_wtcnt_.reset();
-    wdt_rstcsr_.set(bits_0_7, wdt_rstcsr_default_value);
+    constexpr auto wdt_wtcsr_default_value  = u8{0x18};
+    constexpr auto wdt_rstcsr_default_value = u8{0x1F};
+
+    wdt_wtcsr_.raw  = wdt_wtcsr_default_value;
+    wdt_wtcnt_.raw  = {};
+    wdt_rstcsr_.raw = wdt_rstcsr_default_value;
 
     // Serial Communication Interface
-    sci_smr_.reset();
-    sci_brr_.set();
-    sci_scr_.reset();
-    sci_tdr_.set();
-    sci_ssr_.set(bits_0_7, sci_ssr_default_value);
-    sci_rdr_.reset();
+    constexpr auto sci_ssr_default_value = u8{0x84};
+
+    sci_smr_.raw = {};
+    sci_brr_.raw = u8_max;
+    sci_scr_.raw = {};
+    sci_tdr_.raw = u8_max;
+    sci_ssr_.raw = sci_ssr_default_value;
+    sci_rdr_.raw = {};
 
     // Power-Down Modes
     constexpr auto sbycr_default_value = u8{0x60};
-    sbycr_.set(bits_0_7, sbycr_default_value);
+    sbycr_.raw                         = sbycr_default_value;
 }
 
 void Sh2::powerOnReset() {
+    constexpr auto pc_start_vector = u32{0x00000008};
+    constexpr auto sp_start_vector = u32{0x0000000C};
+
     if (is_binary_file_loaded_) {
         pc_                    = binary_file_start_address_;
         is_binary_file_loaded_ = false;
@@ -773,14 +762,15 @@ void Sh2::powerOnReset() {
         pc_ = modules_.memory()->read<u32>(pc_start_vector);
     }
 
-    r_[sp_register_index] = modules_.memory()->read<u32>(sp_start_vector);
-    vbr_                  = 0;
-    sr_.reset();
-    sr_.set(StatusRegister::i);
-    gbr_  = 0;
-    mach_ = 0;
-    macl_ = 0;
-    pr_   = 0;
+    r_[sp_register_index]          = modules_.memory()->read<u32>(sp_start_vector);
+    vbr_                           = 0;
+    sr_.raw                        = {};
+    constexpr auto i_default_value = u8{0b1111};
+    sr_.i                          = i_default_value;
+    gbr_                           = 0;
+    mach_                          = 0;
+    macl_                          = 0;
+    pr_                            = 0;
 
     for (u8 i = 0; i < general_registers_number; ++i) {
         r_[i] = 0;
@@ -797,21 +787,21 @@ void Sh2::start32bitsDivision() {
     // divu_opcode_is_stalled_ = false;
 
     // DVDNT is copied in DVDNTL and DVDNTH
-    divu_dvdntl_ = divu_dvdnt_.toU32();
+    divu_dvdntl_.raw = divu_dvdnt_.raw;
 
-    const auto dvdnt = divu_dvdnt_.toU32();
+    const auto dvdnt = divu_dvdnt_.raw;
     if (static_cast<s32>(dvdnt) < 0) {
-        divu_dvdnth_.set();
+        divu_dvdnth_.raw = u32_max;
     } else {
-        divu_dvdnth_.reset();
+        divu_dvdnth_.raw = 0;
     }
-    const auto dvsr = divu_dvsr_.toU32();
+    const auto dvsr = divu_dvsr_.raw;
 
     // Log::debug(Logger::sh2, "{:#x} / {:#x} -> {:#x},{:#x}", dvdnt, dvsr, pc_);
 
     divu_quot_ = 0;
     divu_rem_  = 0;
-    if (divu_dvsr_.any()) {
+    if (divu_dvsr_.raw != 0) {
         divu_quot_ = (s32)dvdnt / (s32)dvsr;
         divu_rem_  = (s32)dvdnt % (s32)dvsr;
         // Log::debug(Logger::sh2, "Quotient : {}, remainder : {}", divu_quot_, divu_rem_);
@@ -819,7 +809,7 @@ void Sh2::start32bitsDivision() {
     } else {
         // Log::debug(Logger::sh2, "Overflow detected !");
         Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dvdnt, dvsr);
-        divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+        divu_dvcr_.overflow_flag = true;
     }
 
     // Overflow check
@@ -829,7 +819,7 @@ void Sh2::start32bitsDivision() {
         if ((divu_quot_ == INT32_MAX) && ((divu_rem_ & sign_bit_32_mask) != 0)) {
             // Log::debug(Logger::sh2, "Overflow detected !");
             Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dvdnt, dvsr);
-            divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+            divu_dvcr_.overflow_flag = true;
         }
     }
 
@@ -847,9 +837,9 @@ void Sh2::start64bitsDivision() {
 
     // divu_opcode_is_stalled_ = false;
 
-    const auto dvdntl = divu_dvdntl_.toU32();
-    const auto dvdnth = divu_dvdnth_.toU32();
-    const auto dvsr   = divu_dvsr_.toU32();
+    const auto dvdntl = divu_dvdntl_.raw;
+    const auto dvdnth = divu_dvdnth_.raw;
+    const auto dvsr   = divu_dvsr_.raw;
 
     const auto dividend = (static_cast<u64>(dvdnth) << number_of_bits_32) | dvdntl;
 
@@ -859,7 +849,7 @@ void Sh2::start64bitsDivision() {
     // auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
     auto quotient  = s64{};
     auto remainder = s64{};
-    if (divu_dvsr_.any()) {
+    if (divu_dvsr_.raw != 0) {
         quotient  = (s64)dividend / (s32)dvsr;
         remainder = (s64)dividend % (s32)dvsr;
         // Log::debug(Logger::sh2, "Quotient : {}, remainder : {}", quotient, remainder);
@@ -867,7 +857,7 @@ void Sh2::start64bitsDivision() {
     } else {
         // Log::debug(Logger::sh2, "Overflow detected !");
         Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dividend, dvsr);
-        divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+        divu_dvcr_.overflow_flag = true;
     }
 
     // Overflow check
@@ -877,7 +867,7 @@ void Sh2::start64bitsDivision() {
         if ((quotient == INT32_MAX) && ((remainder & sign_bit_32_mask) != 0)) {
             // Log::debug(Logger::sh2, "Overflow detected !");
             Log::debug(Logger::sh2, "{:#x} / {:#x} -> Overflow detected !", dividend, dvsr);
-            divu_dvcr_.set(DivisionControlRegister::overflow_flag);
+            divu_dvcr_.overflow_flag = true;
         }
     }
 
@@ -895,7 +885,7 @@ void Sh2::start64bitsDivision() {
 void Sh2::runInterruptController() {
     if (!is_interrupted_) {
         if (!pending_interrupts_.empty()) {
-            const auto  interrupt_mask = sr_.get(StatusRegister::i);
+            const auto  interrupt_mask = sr_.i;
             const auto& interrupt      = pending_interrupts_.front();
             if ((interrupt.level > interrupt_mask) || interrupt == is::nmi) {
                 Log::debug(Logger::sh2,
@@ -908,12 +898,15 @@ void Sh2::runInterruptController() {
                 is_level_interrupted_[interrupt.level] = false;
 
                 // SR and PC are saved to the stack.
-                modules_.memory()->write(r_[sp_register_index] - sr_stack_offset, sr_.toU32());
+                constexpr auto sr_stack_offset = u8{4};
+                constexpr auto pc_stack_offset = u8{8};
+
+                modules_.memory()->write(r_[sp_register_index] - sr_stack_offset, sr_.raw);
                 modules_.memory()->write(r_[sp_register_index] - pc_stack_offset, pc_);
 
                 r_[sp_register_index] = r_[sp_register_index] - displacement_8; // Stack pointer is updated.
 
-                sr_.set(StatusRegister::i, interrupt.level);
+                sr_.i = interrupt.level;
 
                 if (interrupt != is::nmi) {
                     is_interrupted_    = true; // Entering interrupt mode.
@@ -936,22 +929,22 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
     divu_remaining_cycles_ -= cycles_to_run;
     if (divu_remaining_cycles_ == 0) {
         // auto dvcr = DivisionControlRegister(io_registers_[division_control_register & sh2_memory_mask]);
-        if (divu_dvcr_.get(DivisionControlRegister::overflow_flag) == OverflowFlag::overflow) {
-            if (divu_dvcr_.get(DivisionControlRegister::interrupt_enable) == core::InterruptEnable::enabled) {
+        if (toEnum<OverflowFlag>(divu_dvcr_.overflow_flag) == OverflowFlag::overflow) {
+            if (toEnum<core::InterruptEnable>(divu_dvcr_.interrupt_enable) == core::InterruptEnable::enabled) {
                 Log::debug(Logger::sh2, "DIVU - Sending division overflow interrupt");
-                is::sh2_division_overflow.vector = intc_vcrdiv_.get(VectorNumberSettingRegisterDiv::divu_interrupt_vector);
-                is::sh2_division_overflow.level  = intc_ipra_.get(InterruptPriorityLevelSettingRegisterA::divu_level);
+                is::sh2_division_overflow.vector = intc_vcrdiv_.divu_interrupt_vector;
+                is::sh2_division_overflow.level  = static_cast<u8>(intc_ipra_.divu_level);
                 sendInterrupt(is::sh2_division_overflow);
             }
-            divu_dvcr_.reset(DivisionControlRegister::overflow_flag);
+            divu_dvcr_.overflow_flag = false;
         } else {
             // Copy in DVDNTL and DVDNTH + ST-V mirroring
-            divu_dvdnt_         = divu_quot_;
-            divu_dvdntl_        = divu_quot_;
-            divu_dvdntl_shadow_ = divu_quot_;
+            divu_dvdnt_.raw         = divu_quot_;
+            divu_dvdntl_.raw        = divu_quot_;
+            divu_dvdntl_shadow_.raw = divu_quot_;
 
-            divu_dvdnth_        = divu_rem_;
-            divu_dvdnth_shadow_ = divu_rem_;
+            divu_dvdnth_.raw        = divu_rem_;
+            divu_dvdnth_shadow_.raw = divu_rem_;
 
             // if (divu_dvdnth_.toU32() == 0x16f0) modules_.context()->debugStatus(core::DebugStatus::paused);
         }
@@ -966,51 +959,47 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
     // const auto cycles_remainder  = u32{elapsed_cycles % frt_clock_divisor_};
 
     if (counter_increment > 0) {
-        const auto old_frc     = u32{frt_frc_.get(bits_0_31)};
+        const auto old_frc     = u32{frt_frc_.raw};
         const auto current_frc = u32{old_frc + counter_increment};
-        frt_frc_.set(bits_0_15, static_cast<u16>(current_frc));
+        frt_frc_.raw           = current_frc;
 
         frt_elapsed_cycles_ = elapsed_cycles & frt_mask_;
 
         // Checking overflow
-        if (current_frc > UINT16_MAX) {
-            frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::timer_overflow_flag);
-            if (frt_tier_.get(TimerInterruptEnableRegister::timer_overflow_interrupt_enable)
+        if (current_frc > u16_max) {
+            frt_ftcsr_.timer_overflow_flag = true;
+            if (toEnum<TimerOverflowInterruptEnable>(frt_tier_.timer_overflow_interrupt_enable)
                 == TimerOverflowInterruptEnable::interrupt_request_enabled) {
                 Log::debug(Logger::sh2, "FRT - Sending overflow interrupt");
-                is::sh2_frt_overflow_flag_set.vector = intc_vcrd_.get(VectorNumberSettingRegisterD::frt_overflow_vector);
-                is::sh2_frt_overflow_flag_set.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+                is::sh2_frt_overflow_flag_set.vector = static_cast<u8>(intc_vcrd_.frt_overflow_vector);
+                is::sh2_frt_overflow_flag_set.level  = static_cast<u8>(intc_iprb_.frt_level);
                 sendInterrupt(is::sh2_frt_overflow_flag_set);
             }
         }
 
         // Checking comparison for OCRA
-        const auto ocra = frt_ocra_.toU32();
+        const auto ocra = frt_ocra_.raw;
         if ((old_frc <= ocra) && (current_frc > ocra)) {
-            frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::output_compare_flag_a);
-            if (frt_tier_.get(TimerInterruptEnableRegister::output_compare_interrupt_a_enable)
+            frt_ftcsr_.output_compare_flag_a = true;
+            if (toEnum<OutputCompareInterruptAEnable>(frt_tier_.output_compare_interrupt_a_enable)
                 == OutputCompareInterruptAEnable::interrupt_request_enabled) {
                 Log::debug(Logger::sh2, "FRT - OCRA match");
-                is::sh2_frt_output_compare_flag_a_set.vector
-                    = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_output_compare_vector);
-                is::sh2_frt_output_compare_flag_a_set.level = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+                is::sh2_frt_output_compare_flag_a_set.vector = intc_vcrc_.frt_output_compare_vector;
+                is::sh2_frt_output_compare_flag_a_set.level  = static_cast<u8>(intc_iprb_.frt_level);
                 sendInterrupt(is::sh2_frt_output_compare_flag_a_set);
             }
-            if (frt_ftcsr_.get(FreeRunningTimerControlStatusRegister::counter_clear_a) == CounterClearA::clear_on_compare) {
-                frt_frc_.reset();
-            }
+            if (toEnum<CounterClearA>(frt_ftcsr_.counter_clear_a) == CounterClearA::clear_on_compare) { frt_frc_.raw = {}; }
         }
 
         // Checking comparison for OCRB
-        const auto ocrb = frt_ocrb_.toU32();
+        const auto ocrb = frt_ocrb_.raw;
         if ((old_frc <= ocrb) && (current_frc > ocrb)) {
-            frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::output_compare_flag_b);
-            if (frt_tier_.get(TimerInterruptEnableRegister::output_compare_interrupt_b_enable)
+            frt_ftcsr_.output_compare_flag_b = true;
+            if (toEnum<OutputCompareInterruptBEnable>(frt_tier_.output_compare_interrupt_b_enable)
                 == OutputCompareInterruptBEnable::interrupt_request_enabled) {
                 Log::debug(Logger::sh2, "FRT - OCRB match");
-                is::sh2_frt_output_compare_flag_b_set.vector
-                    = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_output_compare_vector);
-                is::sh2_frt_output_compare_flag_b_set.level = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+                is::sh2_frt_output_compare_flag_b_set.vector = intc_vcrc_.frt_output_compare_vector;
+                is::sh2_frt_output_compare_flag_b_set.level  = static_cast<u8>(intc_iprb_.frt_level);
                 sendInterrupt(is::sh2_frt_output_compare_flag_b_set);
             }
         }
@@ -1021,7 +1010,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
 }
 
 void Sh2::executeDma() {
-    if (dmac_dmaor_.get(DmaOperationRegister::dma_master_enable) == DmaMasterEnable::disabled) { return; }
+    if (toEnum<DmaMasterEnable>(dmac_dmaor_.dma_master_enable) == DmaMasterEnable::disabled) { return; }
 
     auto conf_channel_0{configureDmaTransfer(DmaChannel::channel_0)};
     auto conf_channel_1{configureDmaTransfer(DmaChannel::channel_1)};
@@ -1037,7 +1026,7 @@ void Sh2::executeDma() {
             break;
     }
 
-    if (dmac_dmaor_.get(DmaOperationRegister::priority_mode) == PriorityMode::round_robin) {
+    if (toEnum<PriorityMode>(dmac_dmaor_.priority_mode) == PriorityMode::round_robin) {
         switch (dmac_next_transfer_priority_) {
             case DmaNextTransferPriority::channel_0_first:
                 dmac_next_transfer_priority_ = DmaNextTransferPriority::channel_1_first;
@@ -1053,23 +1042,21 @@ auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLIN
     // DE=1 TE=0 NMIF=0 AE=0
     switch (dc) {
         case DmaChannel::channel_0: {
-            auto channel_0_is_set
-                = bool{dmac_chcr0_.get(DmaChannelControlRegister::dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
+            auto channel_0_is_set = bool{toEnum<Sh2DmaEnable>(dmac_chcr0_.dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
             channel_0_is_set
-                &= dmac_chcr0_.get(DmaChannelControlRegister::transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
-            channel_0_is_set &= dmac_dmaor_.get(DmaOperationRegister::nmi_flag) == NmiFlag::no_nmif_interrupt;
+                &= toEnum<TransferEndFlag>(dmac_chcr0_.transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
+            channel_0_is_set &= toEnum<NmiFlag>(dmac_dmaor_.nmi_flag) == NmiFlag::no_nmif_interrupt;
             channel_0_is_set
-                &= dmac_dmaor_.get(DmaOperationRegister::address_error_flag) == AddressErrorFlag::no_dmac_address_error;
+                &= toEnum<AddressErrorFlag>(dmac_dmaor_.address_error_flag) == AddressErrorFlag::no_dmac_address_error;
             return channel_0_is_set;
         }
         case DmaChannel::channel_1: {
-            auto channel_1_is_set
-                = bool{dmac_chcr1_.get(DmaChannelControlRegister::dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
+            auto channel_1_is_set = bool{toEnum<Sh2DmaEnable>(dmac_chcr1_.dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
             channel_1_is_set
-                &= dmac_chcr1_.get(DmaChannelControlRegister::transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
-            channel_1_is_set &= dmac_dmaor_.get(DmaOperationRegister::nmi_flag) == NmiFlag::no_nmif_interrupt;
+                &= toEnum<TransferEndFlag>(dmac_chcr1_.transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
+            channel_1_is_set &= toEnum<NmiFlag>(dmac_dmaor_.nmi_flag) == NmiFlag::no_nmif_interrupt;
             channel_1_is_set
-                &= dmac_dmaor_.get(DmaOperationRegister::address_error_flag) == AddressErrorFlag::no_dmac_address_error;
+                &= toEnum<AddressErrorFlag>(dmac_dmaor_.address_error_flag) == AddressErrorFlag::no_dmac_address_error;
             return channel_1_is_set;
         }
         case DmaChannel::channel_unknown: return false;
@@ -1082,18 +1069,18 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
     switch (dc) {
         case DmaChannel::channel_0:
             conf.channel     = DmaChannel::channel_0;
-            conf.counter     = dmac_tcr0_.toU32() & bitmask_00FFFFFF;
-            conf.source      = dmac_sar0_.toU32();
-            conf.destination = dmac_dar0_.toU32();
+            conf.counter     = dmac_tcr0_.raw & bitmask_00FFFFFF;
+            conf.source      = dmac_sar0_.raw;
+            conf.destination = dmac_dar0_.raw;
             conf.chcr        = dmac_chcr0_;
             conf.drcr        = dmac_drcr0_;
             conf.interrupt   = is::sh2_dma_0_transfer_end;
             break;
         case DmaChannel::channel_1:
             conf.channel     = DmaChannel::channel_1;
-            conf.counter     = dmac_tcr1_.toU32() & bitmask_00FFFFFF;
-            conf.source      = dmac_sar1_.toU32();
-            conf.destination = dmac_dar1_.toU32();
+            conf.counter     = dmac_tcr1_.raw & bitmask_00FFFFFF;
+            conf.source      = dmac_sar1_.raw;
+            conf.destination = dmac_dar1_.raw;
             conf.chcr        = dmac_chcr1_;
             conf.drcr        = dmac_drcr1_;
             conf.interrupt   = is::sh2_dma_1_transfer_end;
@@ -1106,8 +1093,8 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
 void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
     if (dmaStartConditionsAreSatisfied(conf.channel)) {
         const auto channel_number = static_cast<u8>((conf.channel == DmaChannel::channel_0) ? 0 : 1);
-        if (conf.chcr.get(DmaChannelControlRegister::auto_request_mode) == AutoRequestMode::module_request) {
-            switch (conf.drcr.get(DmaRequestResponseSelectionControlRegister::resource_select)) {
+        if (toEnum<AutoRequestMode>(conf.chcr.auto_request_mode) == AutoRequestMode::module_request) {
+            switch (toEnum<ResourceSelect>(conf.drcr.resource_select)) {
                 case ResourceSelect::dreq: {
                     // External request is immediately executed without waiting for an external signal.
                     // Not sure how to implement this, could be interesting to check on the console ...
@@ -1139,9 +1126,14 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
         Log::debug(Logger::sh2, "Destination:{:#0x}", destination);
         Log::debug(Logger::sh2, "Count:{:#0x}", counter);
 
+        constexpr auto transfer_byte_size_1  = u8{0x1};
+        constexpr auto transfer_byte_size_2  = u8{0x2};
+        constexpr auto transfer_byte_size_4  = u8{0x4};
+        constexpr auto transfer_byte_size_16 = u8{0x10};
+
         while (counter > 0) {
             auto transfer_size = u8{};
-            switch (conf.chcr.get(DmaChannelControlRegister::transfer_size)) {
+            switch (toEnum<TransferSize>(conf.chcr.transfer_size)) {
                 case TransferSize::one_byte_unit:
                     modules_.memory()->write<u8>(destination, modules_.memory()->read<u8>(source));
                     transfer_size = transfer_byte_size_1;
@@ -1170,14 +1162,14 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                     break;
             }
 
-            switch (conf.chcr.get(DmaChannelControlRegister::source_address_mode)) {
+            switch (toEnum<SourceAddressMode>(conf.chcr.source_address_mode)) {
                 case SourceAddressMode::fixed: break;
                 case SourceAddressMode::incremented: source += transfer_size; break;
                 case SourceAddressMode::decremented: source -= transfer_size; break;
                 case SourceAddressMode::reserved: Log::warning(Logger::sh2, "Reserved source address mode used !");
             }
 
-            switch (conf.chcr.get(DmaChannelControlRegister::destination_address_mode)) {
+            switch (toEnum<DestinationAddressMode>(conf.chcr.destination_address_mode)) {
                 case DestinationAddressMode::fixed: break;
                 case DestinationAddressMode::incremented: destination += transfer_size; break;
                 case DestinationAddressMode::decremented: destination -= transfer_size; break;
@@ -1187,24 +1179,26 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
 
         switch (conf.channel) {
             case DmaChannel::channel_0:
-                dmac_tcr0_.set(bits_0_31, counter);
-                dmac_sar0_.set(bits_0_31, source);
-                dmac_dar0_.set(bits_0_31, destination);
-                dmac_chcr0_.set(DmaChannelControlRegister::transfer_end_flag);
+                dmac_tcr0_.raw                = counter;
+                dmac_sar0_.raw                = source;
+                dmac_dar0_.raw                = destination;
+                dmac_chcr0_.transfer_end_flag = true;
+                conf.interrupt.vector         = intc_vcrdma0_.dma_transfert_end_vector;
                 break;
             case DmaChannel::channel_1:
-                dmac_tcr1_.set(bits_0_31, counter);
-                dmac_sar1_.set(bits_0_31, source);
-                dmac_dar1_.set(bits_0_31, destination);
-                dmac_chcr1_.set(DmaChannelControlRegister::transfer_end_flag);
+                dmac_tcr1_.raw                = counter;
+                dmac_sar1_.raw                = source;
+                dmac_dar1_.raw                = destination;
+                dmac_chcr1_.transfer_end_flag = true;
+                conf.interrupt.vector         = intc_vcrdma1_.dma_transfert_end_vector;
                 break;
             case DmaChannel::channel_unknown: Log::warning(Logger::sh2, "Unknown DMA channel used !");
         }
 
-        if (conf.chcr.get(DmaChannelControlRegister::interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
+        if (toEnum<Sh2DmaInterruptEnable>(conf.chcr.interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
             Log::debug(Logger::sh2, "DMAC - Sending DMA channel {} transfer end interrupt.", channel_number);
-            conf.interrupt.vector = intc_vcrc_.get(VectorNumberSettingRegisterDma::dma_transfert_end_vector);
-            conf.interrupt.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterA::dmac_level);
+            // conf.interrupt.vector = intc_vcrc_.get(VectorNumberSettingRegisterDma::dma_transfert_end_vector);
+            conf.interrupt.level = static_cast<u8>(intc_ipra_.dmac_level);
             sendInterrupt(conf.interrupt);
         }
     };
@@ -1251,15 +1245,15 @@ void Sh2::sendInterrupt(const core::Interrupt& i) { // NOLINT(readability-conver
 }
 
 void Sh2::sendInterruptCaptureSignal() {
-    if (frt_tier_.get(TimerInterruptEnableRegister::interrupt_capture_interrupt_enable)
+    if (toEnum<InterruptCaptureInterruptEnable>(frt_tier_.interrupt_capture_interrupt_enable)
         == InterruptCaptureInterruptEnable::interrupt_request_enabled) {
-        is::sh2_frt_input_capture.vector = intc_vcrc_.get(VectorNumberSettingRegisterC::frt_input_capture_vector);
-        is::sh2_frt_input_capture.level  = intc_iprb_.get(InterruptPriorityLevelSettingRegisterB::frt_level);
+        is::sh2_frt_input_capture.vector = static_cast<u8>(intc_vcrc_.frt_input_capture_vector);
+        is::sh2_frt_input_capture.level  = static_cast<u8>(intc_iprb_.frt_level);
         sendInterrupt(is::sh2_frt_input_capture);
     }
 
-    frt_ftcsr_.set(FreeRunningTimerControlStatusRegister::input_capture_flag);
-    frt_icr_.set(bits_0_15, frt_frc_.get(bits_0_15));
+    frt_ftcsr_.input_capture_flag = true;
+    frt_icr_.raw                  = frt_frc_.raw;
 }
 
 auto Sh2::run() -> u8 {
@@ -1280,7 +1274,7 @@ auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
         case Sh2Register::mach: return mach_; break;
         case Sh2Register::vbr: return vbr_; break;
         case Sh2Register::gbr: return gbr_; break;
-        case Sh2Register::sr: return sr_.toU32(); break;
+        case Sh2Register::sr: return sr_.raw; break;
         case Sh2Register::r0: return r_[index_0]; break;
         case Sh2Register::r1: return r_[index_1]; break;
         case Sh2Register::r2: return r_[index_2]; break;

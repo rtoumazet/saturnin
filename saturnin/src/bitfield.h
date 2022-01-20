@@ -122,6 +122,19 @@ class BitField<Index, 1> {
     typedef typename MinimumTypeHelper<Index + Bits>::type T;
 
   public:
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	BitField& 1>::operator=(bool value)
+    ///
+    /// \brief	Assignment operator
+    ///
+    /// \author	Runik
+    /// \date	17/01/2022
+    ///
+    /// \param 	value	True to value.
+    ///
+    /// \returns	A shallow copy of this object.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     BitField& operator=(bool value) {
         value_ = (value_ & ~(Mask << Index)) | (value << Index);
         return *this;
@@ -149,6 +162,59 @@ class BitField<Index, 1> {
 
     explicit operator bool() const { return value_ & (Mask << Index); }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	template<class T2, typename = std::enable_if_t<std::is_integral_v<T2>>> bool 1>::operator==(T2 val)
+    ///
+    /// \brief	Equality operator for integral values.
+    ///
+    /// \author	Runik
+    /// \date	17/01/2022
+    ///
+    /// \param 	val	The value.
+    ///
+    /// \returns	True if the parameters are considered equivalent.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<class T2, typename = std::enable_if_t<std::is_integral_v<T2>>>
+    bool operator==(T2 val) {
+        return (value_ & (Mask << Index)) == val;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	template<class T2> bool 1>::operator==(T2& b)
+    ///
+    /// \brief	Equality operator between BitField bools.
+    ///
+    /// \author	Runik
+    /// \date	17/01/2022
+    ///
+    /// \param [in,out]	b	A T2 to process.
+    ///
+    /// \returns	True if the parameters are considered equivalent.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<class T2>
+    bool operator==(T2& b) {
+        return static_cast<bool>(value_ & (Mask << Index)) == static_cast<bool>(b);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	template<class T2> bool 1>::operator==(T2& b)
+    ///
+    /// \brief	Difference operator between BitField bools.
+    ///
+    /// \author	Runik
+    /// \date	19/01/2022
+    ///
+    /// \param [in,out]	b	A T2 to process.
+    ///
+    /// \returns	True if the parameters are considered equivalent.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    template<class T2>
+    bool operator!=(T2& b) {
+        return static_cast<bool>(value_ & (Mask << Index)) != static_cast<bool>(b);
+    }
+
   private:
     T value_;
 };
@@ -156,11 +222,11 @@ class BitField<Index, 1> {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename E, size_t T, size_t N> constexpr auto toEnum(BitField<T, N> b) noexcept
 ///
-/// \brief  BitField to enum conversion helper.
+/// \brief  BitField to scoped enum conversion helper.
 ///
 /// \tparam E     Type of the e.
 /// \tparam Index Index of the BitField.
-/// \tparam Size  Size onf the BitField.
+/// \tparam Size  Size of the BitField.
 /// \param  b     A BitField&lt;T,N&gt; to process.
 ///
 /// \returns      BitField as an enum.

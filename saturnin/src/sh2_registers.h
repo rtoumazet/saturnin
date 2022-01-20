@@ -105,34 +105,21 @@ constexpr auto refresh_time_constant_register                    = u32{0xFFFFFFF
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   BitValue
-///
-/// \brief  Bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class BitValue : u8 {
-    clear = 0, ///< Value when cleared
-    set   = 1  ///< Value when set
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  StatusRegister
+/// \union  StatusRegister
 ///
 /// \brief  Status Register (SR).
 ///
 /// \author Runik
-/// \date   21/09/2019
+/// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class StatusRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto m        = BitRange<u8>{9};     ///< Defines M bit.
-    inline static const auto q        = BitRange<u8>{8};     ///< Defines Q bit.
-    inline static const auto i        = BitRange<u8>{4, 7};  ///< Defines interrupt mask bits (I0-I3).
-    inline static const auto s        = BitRange<u8>{1};     ///< Defines S bit.
-    inline static const auto t        = BitRange<u8>{0};     ///< Defines T bit.
-    inline static const auto all_bits = BitRange<u16>{0, 9}; ///< Defines the range of all the bits of the register.
+union StatusRegister {
+    u32            raw; ///< Raw representation.
+    BitField<9>    m;   ///< Defines M bit.
+    BitField<8>    q;   ///< Defines Q bit.
+    BitField<4, 4> i;   ///< Defines interrupt mask bits (I0-I3).
+    BitField<1>    s;   ///< Defines S bit.
+    BitField<0>    t;   ///< Defines T bit.
 };
 
 /////////////////////////////////////
@@ -140,169 +127,152 @@ class StatusRegister : public Register {
 /////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  InterruptPriorityLevelSettingRegisterA
+/// \union  InterruptPriorityLevelSettingRegisterA
 ///
 /// \brief  Interrupt Priority Level Setting Register A (IPRA).
 ///
 /// \author Runik
-/// \date   28/10/2019
+/// \date   17/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class InterruptPriorityLevelSettingRegisterA : public Register {
-  public:
-    using Register::Register;
-    inline static const auto divu_level   = BitRange<u8>{12, 15}; ///< Defines DIVU priority level.
-    inline static const auto dmac_level   = BitRange<u8>{8, 11};  ///< Defines DMAC0/DMAC1 priority level.
-    inline static const auto wdt_level    = BitRange<u8>{4, 7};   ///< Defines WDT/DRAM refresh priority level.
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15};  ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};   ///< Defines the range of the lower 8 bits of the register.
+union InterruptPriorityLevelSettingRegisterA {
+    u16             raw;          ///< Raw representation.
+    BitField<12, 4> divu_level;   ///< Defines DIVU priority level.
+    BitField<8, 4>  dmac_level;   ///< Defines DMAC0/DMAC1 priority level.
+    BitField<4, 4>  wdt_level;    ///< Defines WDT/DRAM refresh priority level.
+    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  InterruptPriorityLevelSettingRegisterB
+/// \union  InterruptPriorityLevelSettingRegisterB
 ///
 /// \brief  Interrupt Priority Level Setting Register B (IPRB).
 ///
 /// \author Runik
-/// \date   29/10/2019
+/// \date   17/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class InterruptPriorityLevelSettingRegisterB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto sci_level    = BitRange<u8>{12, 15}; ///< Defines SCI priority level.
-    inline static const auto frt_level    = BitRange<u8>{8, 11};  ///< Defines FRT priority level.
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15};  ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};   ///< Defines the range of the lower 8 bits of the register.
+union InterruptPriorityLevelSettingRegisterB {
+    u16             raw;          ///< Raw representation.
+    BitField<12, 4> sci_level;    ///< Defines SCI priority level.
+    BitField<8, 4>  frt_level;    ///< Defines FRT priority level.
+    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VectorNumberSettingRegisterA
+/// \union	VectorNumberSettingRegisterA
 ///
-/// \brief  Vector Number Setting Register A (VCRA).
+/// \brief	Vector Number Setting Register A (VCRA).
 ///
-/// \author Runik
-/// \date   12/11/2019
+/// \author	Runik
+/// \date	17/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VectorNumberSettingRegisterA : public Register {
-  public:
-    using Register::Register;
-    inline static const auto sci_receive_error_vector
-        = BitRange<u8>{8, 14}; ///< Defines SCI receive error interrupt vector number.
-    inline static const auto sci_receive_data_full_vector
-        = BitRange<u8>{0, 6};                                    ///< Defines SCI receive data full interrupt vector number.
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+union VectorNumberSettingRegisterA {
+    u16            raw;                          ///< Raw representation.
+    BitField<8, 7> sci_receive_error_vector;     ///< Defines SCI receive error interrupt vector number.
+    BitField<0, 7> sci_receive_data_full_vector; ///< Defines SCI receive data full interrupt vector number.
+    BitField<8, 8> upper_8_bits;                 ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;                 ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VectorNumberSettingRegisterB
+/// \union	VectorNumberSettingRegisterB
 ///
-/// \brief  Vector Number Setting Register B (VCRB).
+/// \brief	Vector Number Setting Register B (VCRB).
 ///
-/// \author Runik
-/// \date   12/11/2019
+/// \author	Runik
+/// \date	17/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VectorNumberSettingRegisterB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto sci_transmit_data_empty_vector
-        = BitRange<u8>{8, 14}; ///< Defines SCI transmit data empty interrupt vector number.
-    inline static const auto sci_transmit_end_vector = BitRange<u8>{0, 6}; ///< Defines SCI transmit end interrupt vector number.
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+union VectorNumberSettingRegisterB {
+    u16            raw;                            ///< Raw representation.
+    BitField<8, 7> sci_transmit_data_empty_vector; ///< Defines SCI transmit data empty interrupt vector number.
+    BitField<0, 7> sci_transmit_end_vector;        ///< Defines SCI transmit end interrupt vector number.
+    BitField<8, 8> upper_8_bits;                   ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;                   ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VectorNumberSettingRegisterC
+/// \union	VectorNumberSettingRegisterC
 ///
-/// \brief  Vector Number Setting Register C (VCRC).
+/// \brief	Vector Number Setting Register C (VCRC).
 ///
-/// \author Runik
-/// \date   12/11/2019
+/// \author	Runik
+/// \date	17/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VectorNumberSettingRegisterC : public Register {
-  public:
-    using Register::Register;
-    inline static const auto frt_input_capture_vector
-        = BitRange<u8>{8, 14}; ///< Defines FRT input capture interrupt vector number.
-    inline static const auto frt_output_compare_vector
-        = BitRange<u8>{0, 6};                                    ///< Defines FRT output compare interrupt vector number.
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+union VectorNumberSettingRegisterC {
+    u16            raw;                       ///< Raw representation.
+    BitField<8, 7> frt_input_capture_vector;  ///< Defines FRT input capture interrupt vector number.
+    BitField<0, 7> frt_output_compare_vector; ///< Defines FRT output compare interrupt vector number.
+    BitField<8, 8> upper_8_bits;              ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;              ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VectorNumberSettingRegisterD
+/// \union	VectorNumberSettingRegisterD
 ///
-/// \brief  Vector Number Setting Register D (VCRD).
+/// \brief	Vector Number Setting Register D (VCRD).
 ///
-/// \author Runik
-/// \date   12/11/2019
+/// \author	Runik
+/// \date	17/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VectorNumberSettingRegisterD : public Register {
-  public:
-    using Register::Register;
-    inline static const auto frt_overflow_vector = BitRange<u8>{8, 14}; ///< Defines FRT overflow interrupt vector number.
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+union VectorNumberSettingRegisterD {
+    u16            raw;                 ///< Raw representation.
+    BitField<8, 7> frt_overflow_vector; ///< Defines FRT overflow interrupt vector number.
+    BitField<8, 8> upper_8_bits;        ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;        ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VectorNumberSettingRegisterWDT
+/// \union	VectorNumberSettingRegisterWdt
 ///
-/// \brief  Vector Number Setting Register WDT (VCRWDT).
+/// \brief	Vector Number Setting Register WDT (VCRWDT).
 ///
-/// \author Runik
-/// \date   12/11/2019
+/// \author	Runik
+/// \date	18/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VectorNumberSettingRegisterWdt : public Register {
-  public:
-    using Register::Register;
-    inline static const auto wdt_interval_vector = BitRange<u8>{8, 14}; ///< Defines WDT interval interrupt vector number.
-    inline static const auto wdt_compare_match_vector
-        = BitRange<u8>{0, 6};                                    ///< Defines WDT compare match interrupt vector number.
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+union VectorNumberSettingRegisterWdt {
+    u16            raw;                      ///< Raw representation.
+    BitField<8, 7> wdt_interval_vector;      ///< Defines WDT interval interrupt vector number.
+    BitField<0, 7> wdt_compare_match_vector; ///< Defines WDT compare match interrupt vector number.
+    BitField<8, 8> upper_8_bits;             ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;             ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VectorNumberSettingRegisterDiv
+/// \union	VectorNumberSettingRegisterDiv
 ///
-/// \brief  Vector Number Setting Register Div (VCRDIV).
+/// \brief	Vector Number Setting Register Div (VCRDIV).
 ///
-/// \author Runik
-/// \date   07/11/2019
+/// \author	Runik
+/// \date	18/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VectorNumberSettingRegisterDiv : public Register {
-  public:
-    using Register::Register;
-    inline static const auto divu_interrupt_vector = BitRange<u8>{0, 6}; ///< Defines DIVU vector number.
-    inline static const auto upper_16_bits = BitRange<u16>{16, 31}; ///< Defines the range of the upper 16 bits of the register.
-    inline static const auto lower_16_bits = BitRange<u16>{0, 15};  ///< Defines the range of the lower 16 bits of the register.
-    static constexpr auto    access_mask   = u32{0b1111111};        ///< The access mask
+union VectorNumberSettingRegisterDiv {
+    u32              raw;                   ///< Raw representation.
+    BitField<0, 7>   divu_interrupt_vector; ///< Defines DIVU vector number.
+    BitField<16, 16> upper_16_bits;         ///< Defines the range of the upper 16 bits of the register.
+    BitField<0, 16>  lower_16_bits;         ///< Defines the range of the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VectorNumberSettingRegisterDma
+/// \union	VectorNumberSettingRegisterDma
 ///
-/// \brief  Vector Number Setting Register DMA (VCRDMAx).
+/// \brief	Vector Number Setting Register DMA (VCRDMAx).
 ///
-/// \author Runik
-/// \date   12/11/2019
+/// \author	Runik
+/// \date	18/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VectorNumberSettingRegisterDma : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dma_transfert_end_vector = BitRange<u8>{0, 7}; ///< Defines DMACx vector number.
-    static constexpr auto    access_mask              = u32{0x00000000FF};  ///< The access mask
+union VectorNumberSettingRegisterDma {
+    u32            raw;                      ///< Raw representation.
+    BitField<0, 8> dma_transfert_end_vector; ///< Defines DMACx vector number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -311,9 +281,9 @@ class VectorNumberSettingRegisterDma : public Register {
 /// \brief  ICR - NMIL bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class NmiInputLevel : u8 {
-    low  = 0b0, ///< NMI input level is low
-    high = 0b1  ///< NMI input level is high
+enum class NmiInputLevel : bool {
+    low  = 0, ///< NMI input level is low
+    high = 1  ///< NMI input level is high
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -322,9 +292,9 @@ enum class NmiInputLevel : u8 {
 /// \brief  ICR - NMIE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class NmiEdgeDetection : u8 {
-    falling = 0b0, ///< Interrupt request detected on falling edge of NMI input (initial)
-    rising  = 0b1  ///< Interrupt request detected on rising edge of NMI input
+enum class NmiEdgeDetection : bool {
+    falling = 0, ///< Interrupt request detected on falling edge of NMI input (initial)
+    rising  = 1  ///< Interrupt request detected on rising edge of NMI input
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -333,28 +303,27 @@ enum class NmiEdgeDetection : u8 {
 /// \brief  ICR - VECMD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VectorMode : u8 {
-    auto_vector     = 0b0, ///< Auto vector mode (initial)
-    external_vector = 0b1  ///< External vector mode
+enum class VectorMode : bool {
+    auto_vector     = 0, ///< Auto vector mode (initial)
+    external_vector = 1  ///< External vector mode
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  InterruptControlRegister
+/// \union	InterruptControlRegister
 ///
-/// \brief  Interrupt Control Register (ICR).
+/// \brief	Interrupt Control Register (ICR).
 ///
-/// \author Runik
-/// \date   02/02/2019
+/// \author	Runik
+/// \date	18/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class InterruptControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto nmi_input_level    = BitRange<NmiInputLevel>{15};   ///< Defines NMIL  bit.
-    inline static const auto nmi_edge_detection = BitRange<NmiEdgeDetection>{8}; ///< Defines NMIE  bit.
-    inline static const auto vector_mode        = BitRange<VectorMode>{0};       ///< Defines VECMD  bit.
-    inline static const auto upper_8_bits       = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits       = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+union InterruptControlRegister {
+    u16            raw;                ///< Raw representation.
+    BitField<15>   nmi_input_level;    ///< Defines NMIL bit
+    BitField<8>    nmi_edge_detection; ///< Defines NMIE bit.
+    BitField<0>    vector_mode;        ///< Defines VECMD  bit.
+    BitField<8, 8> upper_8_bits;       ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;       ///< Defines the range of the lower 8 bits of the register.
 };
 
 //////////////////////////////////
@@ -362,113 +331,101 @@ class InterruptControlRegister : public Register {
 //////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  BusControlRegister1
+/// \union	BusControlRegister1
 ///
-/// \brief  Bus Control Register 1 (BCR1).
+/// \brief	Bus Control Register 1 (BCR1).
 ///
-/// \author Runik
-/// \date   02/02/2019
+/// \author	Runik
+/// \date	18/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class BusControlRegister1 : public Register {
-  public:
-    using Register::Register;
-    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the whole register bits
-    static constexpr auto    write_mask    = u16{0b0001111111110111}; ///< The write mask
+union BusControlRegister1 {
+    u32             raw;           ///< Raw representation.
+    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  BusControlRegister1
+/// \union	BusControlRegister2
 ///
-/// \brief  Bus Control Register 2 (BCR2).
+/// \brief	Bus Control Register 2 (BCR2).
 ///
-/// \author Runik
-/// \date   02/02/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class BusControlRegister2 : public Register {
-  public:
-    using Register::Register;
-    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the whole register bits
-    static constexpr auto    write_mask    = u16{0b0000000011111100}; ///< The write mask
+union BusControlRegister2 {
+    u32             raw;           ///< Raw representation.
+    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WaitControlRegister
+/// \union	WaitControlRegister
 ///
-/// \brief  Wait Control Register (WCR).
+/// \brief	Wait Control Register (WCR).
 ///
-/// \author Runik
-/// \date   26/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WaitControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto lower_16_bits = BitRange<u16>{0, 15}; ///< Defines the lower 16 bits of the register.
+union WaitControlRegister {
+    u32             raw;           ///< Raw representation.
+    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  IndividualMemoryControlRegister
+/// \union	IndividualMemoryControlRegister
 ///
-/// \brief  Individual Memory Control Register (MCR).
+/// \brief	Individual Memory Control Register (MCR).
 ///
-/// \author Runik
-/// \date   26/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class IndividualMemoryControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto lower_16_bits = BitRange<u16>{0, 15}; ///< Defines the lower 16 bits of the register.
+union IndividualMemoryControlRegister {
+    u32             raw;           ///< Raw representation.
+    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  RefreshTimeControlStatusRegister
+/// \union	RefreshTimeControlStatusRegister
 ///
-/// \brief  Refresh Time Control/Status Register (RTCSR).
+/// \brief	Refresh Time Control/Status Register (RTCSR).
 ///
-/// \author Runik
-/// \date   27/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class RefreshTimeControlStatusRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the lower 16 bits of the register.
-    static constexpr auto    write_mask    = u16{0b0000000011111000}; ///< The write mask
+union RefreshTimeControlStatusRegister {
+    u32             raw;           ///< Raw representation.
+    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  RefreshTimerCounter
+/// \union	RefreshTimerCounter
 ///
-/// \brief  Refresh Timer Counter (RTCNT).
+/// \brief	Refresh Timer Counter (RTCNT).
 ///
-/// \author Runik
-/// \date   27/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class RefreshTimerCounter : public Register {
-  public:
-    using Register::Register;
-    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the lower 16 bits of the register.
-    static constexpr auto    write_mask    = u16{0b0000000011111111}; ///< The write mask
+union RefreshTimerCounter {
+    u32             raw;           ///< Raw representation.
+    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  RefreshTimerConstantRegister
+/// \union	RefreshTimerConstantRegister
 ///
-/// \brief  Refresh Timer Constant Register (RTCOR).
+/// \brief	Refresh Timer Constant Register (RTCOR).
 ///
-/// \author Runik
-/// \date   28/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class RefreshTimerConstantRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto lower_16_bits = BitRange<u16>{0, 15};    ///< Defines the lower 16 bits of the register.
-    static constexpr auto    write_mask    = u16{0b0000000011111111}; ///< The write mask
+union RefreshTimerConstantRegister {
+    u32             raw;           ///< Raw representation.
+    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
 };
 
 //////////////
@@ -494,9 +451,9 @@ enum class WaySpecification : u8 {
 /// \brief  CCR - CP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CachePurge : u8 {
-    normal_operation = 0b0, ///< Normal operation.
-    cache_purge      = 0b1  ///< Cache purge.
+enum class CachePurge : bool {
+    normal_operation = 0, ///< Normal operation.
+    cache_purge      = 1  ///< Cache purge.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -505,9 +462,9 @@ enum class CachePurge : u8 {
 /// \brief  CCR - CP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TwoWayMode : u8 {
-    four_way = 0b0, ///< Four way mode (initial).
-    two_way  = 0b1  ///< Two way mode.
+enum class TwoWayMode : bool {
+    four_way = 0, ///< Four way mode (initial).
+    two_way  = 1  ///< Two way mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -516,9 +473,9 @@ enum class TwoWayMode : u8 {
 /// \brief  CCR - OD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DataReplacementDisable : u8 {
-    normal_operation  = 0b0, ///< Normal operation (initial).
-    data_not_replaced = 0b1  ///< Data not replaced even when wache miss occurs in data access.
+enum class DataReplacementDisable : bool {
+    normal_operation  = 0, ///< Normal operation (initial).
+    data_not_replaced = 1  ///< Data not replaced even when wache miss occurs in data access.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -527,9 +484,9 @@ enum class DataReplacementDisable : u8 {
 /// \brief  CCR - ID bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class InstructionReplacementDisable : u8 {
-    normal_operation  = 0b0, ///< Normal operation (initial).
-    data_not_replaced = 0b1  ///< Data not replaced even when wache miss occurs in instruction fetch.
+enum class InstructionReplacementDisable : bool {
+    normal_operation  = 0, ///< Normal operation (initial).
+    data_not_replaced = 1  ///< Data not replaced even when wache miss occurs in instruction fetch.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -538,30 +495,28 @@ enum class InstructionReplacementDisable : u8 {
 /// \brief  CCR - CE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CacheEnable : u8 {
-    cache_disabled = 0b0, ///< Cache disabled (initial).
-    cache_enabled  = 0b1  ///< Cache enabled.
+enum class CacheEnable : bool {
+    cache_disabled = 0, ///< Cache disabled (initial).
+    cache_enabled  = 1  ///< Cache enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CacheControlRegister
+/// \union	CacheControlRegister
 ///
-/// \brief  Cache Control Register (CCR).
+/// \brief	Cache Control Register (CCR).
 ///
-/// \author Runik
-/// \date   02/02/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CacheControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto way_specification               = BitRange<WaySpecification>{6, 7};           ///< Defines Wx bits.
-    inline static const auto cache_purge                     = BitRange<CachePurge>{4};                    ///< Defines CP bit.
-    inline static const auto two_way_mode                    = BitRange<TwoWayMode>{3};                    ///< Defines TW bit.
-    inline static const auto data_replacement_disable        = BitRange<DataReplacementDisable>{2};        ///< Defines OD bit.
-    inline static const auto instruction_replacement_disable = BitRange<InstructionReplacementDisable>{1}; ///< Defines ID bit.
-    inline static const auto cache_enable                    = BitRange<CacheEnable>{0};                   ///< Defines CE bit.
-    static constexpr auto    write_mask                      = u8{0b11011111};                             ///< The write mask
+union CacheControlRegister {
+    u8             raw;                             ///< Raw representation.
+    BitField<6, 2> way_specification;               ///< Defines Wx bits.
+    BitField<4>    cache_purge;                     ///< Defines CP bit.
+    BitField<3>    two_way_mode;                    ///< Defines TW bits.
+    BitField<2>    data_replacement_disable;        ///< Defines OD bits.
+    BitField<1>    instruction_replacement_disable; ///< Defines ID bits.
+    BitField<0>    cache_enable;                    ///< Defines CE bits.
 };
 
 //////////////////////////////////////////////
@@ -569,46 +524,42 @@ class CacheControlRegister : public Register {
 //////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaSourceAddressRegister
+/// \union	DmaSourceAddressRegister
 ///
-/// \brief  Dma Source Address Register (SAR0,SAR1).
+/// \brief	Dma Source Address Register (SAR0,SAR1).
 ///
-/// \author Runik
-/// \date   28/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaSourceAddressRegister : public Register {
-  public:
-    using Register::Register;
+union DmaSourceAddressRegister {
+    u32 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaDestinationAddressRegister
+/// \union	DmaDestinationAddressRegister
 ///
-/// \brief  Dma Destination Address Register (DAR0/DAR1).
+/// \brief	Dma Destination Address Register (DAR0/DAR1).
 ///
-/// \author Runik
-/// \date   28/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaDestinationAddressRegister : public Register {
-  public:
-    using Register::Register;
+union DmaDestinationAddressRegister {
+    u32 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaTransferCountRegister
+/// \union	DmaTransferCountRegister
 ///
-/// \brief  Dma Transfer Count Register (TCR0 / TCR1).
+/// \brief	Dma Transfer Count Register (TCR0 / TCR1).
 ///
-/// \author Runik
-/// \date   28/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaTransferCountRegister : public Register {
-  public:
-    using Register::Register;
-    static constexpr auto write_mask = u32{0x00FFFFFF}; ///< The write mask
+union DmaTransferCountRegister {
+    u32 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -656,9 +607,9 @@ enum class TransferSize : u8 {
 /// \brief  CHCR0 - AR bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class AutoRequestMode : u8 {
-    module_request = 0b0, ///< Module request mode (initial).
-    auto_request   = 0b1, ///< Auto request mode.
+enum class AutoRequestMode : bool {
+    module_request = 0, ///< Module request mode (initial).
+    auto_request   = 1, ///< Auto request mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -667,9 +618,9 @@ enum class AutoRequestMode : u8 {
 /// \brief  CHCR0 - AM bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class AcknowledgeMode : u8 {
-    output_read  = 0b0, ///< DACK output in read cycle/transfer from memory to device (initial).
-    output_write = 0b1, ///< DACK output in write cycle/transfer from device to memory.
+enum class AcknowledgeMode : bool {
+    output_read  = 0, ///< DACK output in read cycle/transfer from memory to device (initial).
+    output_write = 1, ///< DACK output in write cycle/transfer from device to memory.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -678,9 +629,9 @@ enum class AcknowledgeMode : u8 {
 /// \brief  CHCR0 - AL bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class AcknowledgeLevel : u8 {
-    active_low  = 0b0, ///< DACK signal is active low (initial).
-    active_high = 0b1, ///< DACK signal is active high.
+enum class AcknowledgeLevel : bool {
+    active_low  = 0, ///< DACK signal is active low (initial).
+    active_high = 1, ///< DACK signal is active high.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -689,9 +640,9 @@ enum class AcknowledgeLevel : u8 {
 /// \brief  CHCR0 - DS bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DreqSelect : u8 {
-    by_level = 0b0, ///< Detected by level (initial).
-    by_edge  = 0b1, ///< Detected by edge.
+enum class DreqSelect : bool {
+    by_level = 0, ///< Detected by level (initial).
+    by_edge  = 1, ///< Detected by edge.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -700,9 +651,9 @@ enum class DreqSelect : u8 {
 /// \brief  CHCR0 - DL bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DreqLevel : u8 {
-    low_level_or_fall  = 0b0, ///< DREQ detected by low level if 0, by fall if 1 (initial).
-    high_level_or_rise = 0b1, ///< DREQ detected by high level if 0, by rise if 1.
+enum class DreqLevel : bool {
+    low_level_or_fall  = 0, ///< DREQ detected by low level if 0, by fall if 1 (initial).
+    high_level_or_rise = 1, ///< DREQ detected by high level if 0, by rise if 1.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -711,9 +662,9 @@ enum class DreqLevel : u8 {
 /// \brief  CHCR0 - TB bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransferBusMode : u8 {
-    cycle_steal = 0b0, ///< Cycle steal mode (initial).
-    burst       = 0b1, ///< Burst mode.
+enum class TransferBusMode : bool {
+    cycle_steal = 0, ///< Cycle steal mode (initial).
+    burst       = 1, ///< Burst mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -722,9 +673,9 @@ enum class TransferBusMode : u8 {
 /// \brief  CHCR0 - TA bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransferAddressMode : u8 {
-    dual_address   = 0b0, ///< Dual address mode (initial).
-    single_address = 0b1, ///< Single address mode.
+enum class TransferAddressMode : bool {
+    dual_address   = 0, ///< Dual address mode (initial).
+    single_address = 1, ///< Single address mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -733,9 +684,9 @@ enum class TransferAddressMode : u8 {
 /// \brief  CHCR0 - IE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Sh2DmaInterruptEnable : u8 {
-    disabled = 0b0, ///< Interrupt disabled.
-    enabled  = 0b1  ///< Interrupt enabled.
+enum class Sh2DmaInterruptEnable : bool {
+    disabled = 0, ///< Interrupt disabled.
+    enabled  = 1  ///< Interrupt enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -744,9 +695,9 @@ enum class Sh2DmaInterruptEnable : u8 {
 /// \brief  CHCR0 - TE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransferEndFlag : u8 {
-    dma_not_ended_or_aborted = 0b0, ///< DMA has not ended or was aborted (initial).
-    dma_ended_normally       = 0b1  ///< DMA has ended normally.
+enum class TransferEndFlag : bool {
+    dma_not_ended_or_aborted = 0, ///< DMA has not ended or was aborted (initial).
+    dma_ended_normally       = 1  ///< DMA has ended normally.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -755,37 +706,35 @@ enum class TransferEndFlag : u8 {
 /// \brief  CHCR0 - DE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Sh2DmaEnable : u8 {
-    dma_transfer_disabled = 0b0, ///< DMA transfer disabled (initial).
-    dma_transfer_enabled  = 0b1  ///< DMA transfer enabled.
+enum class Sh2DmaEnable : bool {
+    dma_transfer_disabled = 0, ///< DMA transfer disabled (initial).
+    dma_transfer_enabled  = 1  ///< DMA transfer enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaChannelControlRegister
+/// \union	DmaChannelControlRegister
 ///
-/// \brief  DMA Channel Control Register (CHCR0/CHCR1).
+/// \brief	DMA Channel Control Register (CHCR0/CHCR1).
 ///
-/// \author Runik
-/// \date   02/02/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaChannelControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto destination_address_mode = BitRange<DestinationAddressMode>{14, 15}; ///< Defines DMx  bits.
-    inline static const auto source_address_mode      = BitRange<SourceAddressMode>{12, 13};      ///< Defines SMx  bits.
-    inline static const auto transfer_size            = BitRange<TransferSize>{10, 11};           ///< Defines TSx  bits.
-    inline static const auto auto_request_mode        = BitRange<AutoRequestMode>{9};             ///< Defines AR  bit.
-    inline static const auto acknowledge_mode         = BitRange<AcknowledgeMode>{8};             ///< Defines AM  bit.
-    inline static const auto acknowledge_level        = BitRange<AcknowledgeLevel>{7};            ///< Defines AL  bit.
-    inline static const auto dreq_select              = BitRange<DreqSelect>{6};                  ///< Defines DS bit.
-    inline static const auto dreq_level               = BitRange<DreqLevel>{5};                   ///< Defines DL bit.
-    inline static const auto transfer_busMode         = BitRange<TransferBusMode>{4};             ///< Defines TB bit.
-    inline static const auto transfer_address_mode    = BitRange<TransferAddressMode>{3};         ///< Defines TA bit.
-    inline static const auto interrupt_enable         = BitRange<Sh2DmaInterruptEnable>{2};       ///< Defines IE bit.
-    inline static const auto transfer_end_flag        = BitRange<TransferEndFlag>{1};             ///< Defines TE bit.
-    inline static const auto dma_enable               = BitRange<Sh2DmaEnable>{0};                ///< Defines DE bit.
-    static constexpr auto    write_mask               = u32{0x0000FFFF};                          ///< The write mask
+union DmaChannelControlRegister {
+    u32             raw;                      ///< Raw representation.
+    BitField<14, 2> destination_address_mode; ///< Defines AMx bits.
+    BitField<12, 2> source_address_mode;      ///< Defines SMx bits.
+    BitField<10, 2> transfer_size;            ///< Defines TSx bit.
+    BitField<9>     auto_request_mode;        ///< Defines AR bit.
+    BitField<8>     acknowledge_mode;         ///< Defines AM bit.
+    BitField<7>     acknowledge_level;        ///< Defines AL bit.
+    BitField<6>     dreq_select;              ///< Defines DS bit.
+    BitField<5>     dreq_level;               ///< Defines DL bit.
+    BitField<4>     transfer_busMode;         ///< Defines TB bit.
+    BitField<3>     transfer_address_mode;    ///< Defines TA bit.
+    BitField<2>     interrupt_enable;         ///< Defines IE bit.
+    BitField<1>     transfer_end_flag;        ///< Defines TE bit.
+    BitField<0>     dma_enable;               ///< Defines DE bit.
 };
 
 enum class ResourceSelect : u8 {
@@ -796,19 +745,17 @@ enum class ResourceSelect : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaRequestResponseSelectionControlRegister
+/// \union	DmaRequestResponseSelectionControlRegister
 ///
-/// \brief  Dma Request/Response Selection Control Register (DRCR0 / DRCR1).
+/// \brief	Dma Request/Response Selection Control Register (DRCR0 / DRCR1).
 ///
-/// \author Runik
-/// \date   28/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaRequestResponseSelectionControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto resource_select = BitRange<ResourceSelect>{0, 1}; ///< Defines RSx bits.
-    static constexpr auto    write_mask      = u8{0b00000011};                 ///< The write mask
+union DmaRequestResponseSelectionControlRegister {
+    u8             raw;             ///< Raw representation.
+    BitField<0, 2> resource_select; ///< Defines RSx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -817,9 +764,9 @@ class DmaRequestResponseSelectionControlRegister : public Register {
 /// \brief  DMAOR - PR bit.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PriorityMode : u8 {
-    fixed       = 0b0, ///< Fixed priority (initial)
-    round_robin = 0b1, ///< Round robin
+enum class PriorityMode : bool {
+    fixed       = 0, ///< Fixed priority (initial)
+    round_robin = 1, ///< Round robin
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -828,9 +775,9 @@ enum class PriorityMode : u8 {
 /// \brief  DMAOR - AE bit.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class AddressErrorFlag : u8 {
-    no_dmac_address_error = 0b0, ///< No DMAC address error (initial)
-    dmac_address_error    = 0b1, ///< Address error by DMAC
+enum class AddressErrorFlag : bool {
+    no_dmac_address_error = 0, ///< No DMAC address error (initial)
+    dmac_address_error    = 1, ///< Address error by DMAC
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -839,9 +786,9 @@ enum class AddressErrorFlag : u8 {
 /// \brief  DMAOR - NMIF bit.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class NmiFlag : u8 {
-    no_nmif_interrupt      = 0b0, ///< No NMIF interrupt (initial)
-    nmif_interrupt_occured = 0b1, ///< NMIF has occurred
+enum class NmiFlag : bool {
+    no_nmif_interrupt      = 0, ///< No NMIF interrupt (initial)
+    nmif_interrupt_occured = 1, ///< NMIF has occurred
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -850,28 +797,26 @@ enum class NmiFlag : u8 {
 /// \brief  DMAOR - DME bit.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DmaMasterEnable : u8 {
-    disabled = 0b0, ///< DMA transfers disabled on all channels (initial)
-    enabled  = 0b1, ///< DMA transfers enabled on all channels
+enum class DmaMasterEnable : bool {
+    disabled = 0, ///< DMA transfers disabled on all channels (initial)
+    enabled  = 1, ///< DMA transfers enabled on all channels
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DmaOperationRegister
+/// \union	DmaOperationRegister
 ///
-/// \brief  DMA Operation Register (DMAOR).
+/// \brief	DMA Operation Register (DMAOR).
 ///
-/// \author Runik
-/// \date   03/02/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DmaOperationRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto priority_mode      = BitRange<PriorityMode>{3};     ///< Defines PR bit.
-    inline static const auto address_error_flag = BitRange<AddressErrorFlag>{2}; ///< Defines AE bit.
-    inline static const auto nmi_flag           = BitRange<NmiFlag>{1};          ///< Defines NMIF bit.
-    inline static const auto dma_master_enable  = BitRange<DmaMasterEnable>{0};  ///< Defines DME bit.
-    static constexpr auto    write_mask         = u32{0x0000000F};               ///< The write mask
+union DmaOperationRegister {
+    u32         raw;                ///< Raw representation.
+    BitField<3> priority_mode;      ///< Defines PR bit.
+    BitField<2> address_error_flag; ///< Defines AE bit.
+    BitField<1> nmi_flag;           ///< Defines NMIF bit.
+    BitField<0> dma_master_enable;  ///< Defines DME bit.
 };
 
 //////////////////////////////
@@ -879,31 +824,29 @@ class DmaOperationRegister : public Register {
 //////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DivisorRegister
+/// \union	DivisorRegister
 ///
-/// \brief  Divisor Register (DVSR).
+/// \brief	Divisor Register (DVSR).
 ///
-/// \author Runik
-/// \date   11/09/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DivisorRegister : public Register {
-  public:
-    using Register::Register;
+union DivisorRegister {
+    u32 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DividendRegister32Bits
+/// \union	DividendRegister32Bits
 ///
-/// \brief  Dividend Register L for 32 bits Division (DVDNT).
+/// \brief	Dividend Register L for 32 bits Division (DVDNT).
 ///
-/// \author Runik
-/// \date   07/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DividendRegister32Bits : public Register {
-  public:
-    using Register::Register;
+union DividendRegister32Bits {
+    u32 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -912,56 +855,52 @@ class DividendRegister32Bits : public Register {
 /// \brief  DVCR - OVF bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OverflowFlag : u8 {
-    no_overflow = 0b0, ///< No overflow has occurred (initial)
-    overflow    = 0b1  ///< Overflow has occurred
+enum class OverflowFlag : bool {
+    no_overflow = 0, ///< No overflow has occurred (initial)
+    overflow    = 1  ///< Overflow has occurred
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DivisionControlRegister
+/// \union	DivisionControlRegister
 ///
-/// \brief  Division Control Register (DVCR).
+/// \brief	Division Control Register (DVCR).
 ///
-/// \author Runik
-/// \date   11/09/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DivisionControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto interrupt_enable = BitRange<core::InterruptEnable>{1}; ///< Defines OVFIE bit.
-    inline static const auto overflow_flag    = BitRange<OverflowFlag>{0};          ///< Defines OVF bit.
-    inline static const auto upper_16_bits = BitRange<u16>{16, 31}; ///< Defines the range of the upper 16 bits of the register.
-    inline static const auto lower_16_bits = BitRange<u16>{0, 15};  ///< Defines the range of the lower 16 bits of the register.
-    static constexpr auto    access_mask   = u32{0b11};             ///< The access mask
+union DivisionControlRegister {
+    u32              raw;              ///< Raw representation.
+    BitField<1>      interrupt_enable; ///< Defines OVFIE bit.
+    BitField<0>      overflow_flag;    ///< Defines OVF bit.
+    BitField<16, 16> upper_16_bits;    ///< Defines the range of the upper 16 bits of the register.
+    BitField<0, 16>  lower_16_bits;    ///< Defines the range of the lower 16 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DividendRegisterH
+/// \union	DividendRegisterH
 ///
-/// \brief  Dividend Register H (DVDNTH).
+/// \brief	Dividend Register H (DVDNTH).
 ///
-/// \author Runik
-/// \date   07/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DividendRegisterH : public Register {
-  public:
-    using Register::Register;
+union DividendRegisterH {
+    u32 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DividendRegisterL
+/// \union	DividendRegisterL
 ///
-/// \brief  Dividend Register L.
+/// \brief	Dividend Register L.
 ///
-/// \author Runik
-/// \date   07/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DividendRegisterL : public Register {
-  public:
-    using Register::Register;
+union DividendRegisterL {
+    u32 raw; ///< Raw representation.
 };
 
 //////////////////////////////////////////
@@ -974,9 +913,9 @@ class DividendRegisterL : public Register {
 /// \brief  TIER - ICIE values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class InterruptCaptureInterruptEnable : u8 {
-    interrupt_request_disabled = 0b0, ///< Interrupt request (ICI) caused by ICF disabled (initial)
-    interrupt_request_enabled  = 0b1  ///< Interrupt request (ICI) caused by ICF enabled
+enum class InterruptCaptureInterruptEnable : bool {
+    interrupt_request_disabled = 0, ///< Interrupt request (ICI) caused by ICF disabled (initial)
+    interrupt_request_enabled  = 1  ///< Interrupt request (ICI) caused by ICF enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -985,9 +924,9 @@ enum class InterruptCaptureInterruptEnable : u8 {
 /// \brief  TIER - OCIAE values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OutputCompareInterruptAEnable : u8 {
-    interrupt_request_disabled = 0b0, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
-    interrupt_request_enabled  = 0b1  ///< Interrupt request (ICIA) caused by OCFA enabled
+enum class OutputCompareInterruptAEnable : bool {
+    interrupt_request_disabled = 0, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
+    interrupt_request_enabled  = 1  ///< Interrupt request (ICIA) caused by OCFA enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -996,9 +935,9 @@ enum class OutputCompareInterruptAEnable : u8 {
 /// \brief  TIER - OCIBE values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OutputCompareInterruptBEnable : u8 {
-    interrupt_request_disabled = 0b0, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
-    interrupt_request_enabled  = 0b1  ///< Interrupt request (ICIB) caused by OCFB enabled
+enum class OutputCompareInterruptBEnable : bool {
+    interrupt_request_disabled = 0, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
+    interrupt_request_enabled  = 1  ///< Interrupt request (ICIB) caused by OCFB enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1007,30 +946,26 @@ enum class OutputCompareInterruptBEnable : u8 {
 /// \brief  TIER - OVIE values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TimerOverflowInterruptEnable : u8 {
-    interrupt_request_disabled = 0b0, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
-    interrupt_request_enabled  = 0b1  ///< Interrupt request (FOVI) caused by OVF enabled
+enum class TimerOverflowInterruptEnable : bool {
+    interrupt_request_disabled = 0, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
+    interrupt_request_enabled  = 1  ///< Interrupt request (FOVI) caused by OVF enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  TimerInterruptEnableRegister
+/// \union	TimerInterruptEnableRegister
 ///
-/// \brief  Timer Interrupt Enable Register (TIER).
+/// \brief	Timer Interrupt Enable Register (TIER).
 ///
-/// \author Runik
-/// \date   26/10/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TimerInterruptEnableRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto interrupt_capture_interrupt_enable
-        = BitRange<InterruptCaptureInterruptEnable>{7}; ///< Defines ICIE bit.
-    inline static const auto output_compare_interrupt_a_enable
-        = BitRange<OutputCompareInterruptAEnable>{3}; ///< Defines OCIAE bit.
-    inline static const auto output_compare_interrupt_b_enable
-        = BitRange<OutputCompareInterruptBEnable>{2};                                                     ///< Defines OCIBE bit.
-    inline static const auto timer_overflow_interrupt_enable = BitRange<TimerOverflowInterruptEnable>{1}; ///< Defines OVIE bit.
+union TimerInterruptEnableRegister {
+    u8          raw;                                ///< Raw representation.
+    BitField<7> interrupt_capture_interrupt_enable; ///< Defines ICIE bit.
+    BitField<3> output_compare_interrupt_a_enable;  ///< Defines OCIAE bit.
+    BitField<2> output_compare_interrupt_b_enable;  ///< Defines OCIBE bit.
+    BitField<1> timer_overflow_interrupt_enable;    ///< Defines OVIE bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1039,9 +974,9 @@ class TimerInterruptEnableRegister : public Register {
 /// \brief  FTCSR - ICF values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class InputCaptureFlag : u8 {
-    clear = 0b0, ///< Clear conditions: 0 is written when 1 is read
-    set   = 0b1  ///< Set conditions: when the FRC value is sent to ICR by the input capture signal
+enum class InputCaptureFlag : bool {
+    clear = 0, ///< Clear conditions: 0 is written when 1 is read
+    set   = 1  ///< Set conditions: when the FRC value is sent to ICR by the input capture signal
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1050,9 +985,9 @@ enum class InputCaptureFlag : u8 {
 /// \brief  FTCSR - OCFA values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OutputCompareFlagA : u8 {
-    clear = 0b0, ///< Clear conditions: 0 is written when 1 is read
-    set   = 0b1  ///< Set conditions: when the FRC value becomes equal to OCRA
+enum class OutputCompareFlagA : bool {
+    clear = 0, ///< Clear conditions: 0 is written when 1 is read
+    set   = 1  ///< Set conditions: when the FRC value becomes equal to OCRA
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1061,9 +996,9 @@ enum class OutputCompareFlagA : u8 {
 /// \brief  FTCSR - OCFB values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OutputCompareFlagB : u8 {
-    clear = 0b0, ///< Clear conditions: 0 is written when 1 is read
-    set   = 0b1  ///< Set conditions: when the FRC value becomes equal to OCRB
+enum class OutputCompareFlagB : bool {
+    clear = 0, ///< Clear conditions: 0 is written when 1 is read
+    set   = 1  ///< Set conditions: when the FRC value becomes equal to OCRB
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1072,9 +1007,9 @@ enum class OutputCompareFlagB : u8 {
 /// \brief  FTCSR - OVF values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TimerOverflowFlag : u8 {
-    clear = 0b0, ///< Clear conditions: 0 is written when 1 is read
-    set   = 0b1  ///< Set conditions: when the FRC value changes from 0xFFFF to 0x0000
+enum class TimerOverflowFlag : bool {
+    clear = 0, ///< Clear conditions: 0 is written when 1 is read
+    set   = 1  ///< Set conditions: when the FRC value changes from 0xFFFF to 0x0000
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1083,60 +1018,57 @@ enum class TimerOverflowFlag : u8 {
 /// \brief  FTCSR - CCLRA values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CounterClearA : u8 {
-    clear_disabled   = 0b0, ///< FRC clear disabled (initial)
-    clear_on_compare = 0b1  ///< FRC cleared on compare match A
+enum class CounterClearA : bool {
+    clear_disabled   = 0, ///< FRC clear disabled (initial)
+    clear_on_compare = 1  ///< FRC cleared on compare match A
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  FreeRunningTimerControlStatusRegister
+/// \union	FreeRunningTimerControlStatusRegister
 ///
-/// \brief  Free Running Timer Control/Status register (FTCSR).
+/// \brief	Free Running Timer Control/Status register (FTCSR).
 ///
-/// \author Runik
-/// \date   05/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class FreeRunningTimerControlStatusRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto input_capture_flag    = BitRange<InputCaptureFlag>{7};   ///< Defines ICF bit.
-    inline static const auto output_compare_flag_a = BitRange<OutputCompareFlagA>{3}; ///< Defines OCFA bit.
-    inline static const auto output_compare_flag_b = BitRange<OutputCompareFlagB>{2}; ///< Defines OCFB bit.
-    inline static const auto timer_overflow_flag   = BitRange<TimerOverflowFlag>{1};  ///< Defines OVF bit.
-    inline static const auto counter_clear_a       = BitRange<CounterClearA>{0};      ///< Defines CCLRA bit.
+union FreeRunningTimerControlStatusRegister {
+    u8          raw;                   ///< Raw representation.
+    BitField<7> input_capture_flag;    ///< Defines ICF bit.
+    BitField<3> output_compare_flag_a; ///< Defines OCFA bit.
+    BitField<2> output_compare_flag_b; ///< Defines OCFB bit.
+    BitField<1> timer_overflow_flag;   ///< Defines OVF bit.
+    BitField<0> counter_clear_a;       ///< Defines CCLRA bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  FreeRunningCounter
+/// \union	FreeRunningCounter
 ///
-/// \brief  Free Running Counter (FRC).
+/// \brief	Free Running Counter (FRC).
 ///
-/// \author Runik
-/// \date   05/11/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class FreeRunningCounter : public Register {
-  public:
-    using Register::Register;
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+union FreeRunningCounter {
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  OutputCompareRegister
+/// \union	OutputCompareRegister
 ///
-/// \brief  Output Compare Register (OCRA / OCRB).
+/// \brief	Output Compare Register (OCRA / OCRB).
 ///
-/// \author Runik
-/// \date   30/10/2019
+/// \author	Runik
+/// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class OutputCompareRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+union OutputCompareRegister {
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1145,9 +1077,9 @@ class OutputCompareRegister : public Register {
 /// \brief  TCR - IEDG bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class InputEdgeSelect : u8 {
-    falling = 0b0, ///< Input captured on falling edge (initial)
-    rising  = 0b1  ///< Input captured on rising edge
+enum class InputEdgeSelect : bool {
+    falling = 0, ///< Input captured on falling edge (initial)
+    rising  = 1  ///< Input captured on rising edge
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1164,19 +1096,18 @@ enum class FrtClockSelect : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  TimerControlRegister
+/// \union	TimerControlRegister
 ///
-/// \brief  Timer Control Register (TCR).
+/// \brief	Timer Control Register (TCR).
 ///
-/// \author Runik
-/// \date   26/10/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TimerControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto input_edge_select = BitRange<InputEdgeSelect>{7};   ///< Defines IEDG bit.
-    inline static const auto clock_select      = BitRange<FrtClockSelect>{0, 1}; ///< Defines IEDG bit.
+union TimerControlRegister {
+    u8             raw;               ///< Raw representation.
+    BitField<7>    input_edge_select; ///< Defines IEDG bit.
+    BitField<0, 2> clock_select;      ///< Defines CKSx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1185,9 +1116,9 @@ class TimerControlRegister : public Register {
 /// \brief  TOCR - OCRS bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OutputCompareRegisterSelect : u8 {
-    ocra = 0b0, ///< Selects register OCRA
-    ocrb = 0b1  ///< Selects register OCRB
+enum class OutputCompareRegisterSelect : bool {
+    ocra = 0, ///< Selects register OCRA
+    ocrb = 1  ///< Selects register OCRB
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1196,9 +1127,9 @@ enum class OutputCompareRegisterSelect : u8 {
 /// \brief  TOCR - OLVLA bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OutputLevelA : u8 {
-    outputs_0 = 0b0, ///< Outputs 0 on compare match A
-    outputs_1 = 0b1  ///< Outputs 1 on compare match A
+enum class OutputLevelA : bool {
+    outputs_0 = 0, ///< Outputs 0 on compare match A
+    outputs_1 = 1  ///< Outputs 1 on compare match A
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1207,43 +1138,40 @@ enum class OutputLevelA : u8 {
 /// \brief  TOCR - OLVLB bit value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OutputLevelB : u8 {
-    outputs_0 = 0b0, ///< Outputs 0 on compare match B
-    outputs_1 = 0b1  ///< Outputs 1 on compare match B
+enum class OutputLevelB : bool {
+    outputs_0 = 0, ///< Outputs 0 on compare match B
+    outputs_1 = 1  ///< Outputs 1 on compare match B
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  TimerOutputCompareControlRegister
+/// \union	TimerOutputCompareControlRegister
 ///
-/// \brief  Timer Output Compare Control Register (TOCR).
+/// \brief	Timer Output Compare Control Register (TOCR).
 ///
-/// \author Runik
-/// \date   03/02/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TimerOutputCompareControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto output_compare_register_select = BitRange<OutputCompareRegisterSelect>{4}; ///< Defines OCRS bit.
-    inline static const auto output_level_a                 = BitRange<OutputLevelA>{1};                ///< Defines OLVLA bit.
-    inline static const auto output_level_b                 = BitRange<OutputLevelB>{0};                ///< Defines OLVLB bit.
-    static constexpr auto    access_mask                    = u8{0b00010011};                           ///< The access mask
+union TimerOutputCompareControlRegister {
+    u8          raw;                            ///< Raw representation.
+    BitField<4> output_compare_register_select; ///< Defines OCRS bit.
+    BitField<1> output_level_a;                 ///< Defines OLVLA bit.
+    BitField<0> output_level_b;                 ///< Defines OLVLB bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  InputCaptureRegister
+/// \union	InputCaptureRegister
 ///
-/// \brief  Input Capture Register (ICR).
+/// \brief	Input Capture Register (ICR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class InputCaptureRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto upper_8_bits = BitRange<u8>{8, 15}; ///< Defines the range of the upper 8 bits of the register.
-    inline static const auto lower_8_bits = BitRange<u8>{0, 7};  ///< Defines the range of the lower 8 bits of the register.
+union InputCaptureRegister {
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ///////////////////////////////
@@ -1251,17 +1179,16 @@ class InputCaptureRegister : public Register {
 ///////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WatchdogTimerCounter
+/// \union	WatchdogTimerCounter
 ///
-/// \brief  Watchdog Timer Counter (WTCNT).
+/// \brief	Watchdog Timer Counter (WTCNT).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WatchdogTimerCounter : public Register {
-  public:
-    using Register::Register;
+union WatchdogTimerCounter {
+    u8 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1270,7 +1197,7 @@ class WatchdogTimerCounter : public Register {
 /// \brief  WTCSR - OVF value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class WdtOverflowFlag : u8 {
+enum class WdtOverflowFlag : bool {
     no_overflow = 0, ///< No overflow of WTCNT in interval timer mode (initial)
     overflow    = 1  ///< WTCNT overflow in interval timer mode
 };
@@ -1281,7 +1208,7 @@ enum class WdtOverflowFlag : u8 {
 /// \brief WTCSR - (WT /IT) value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TimerModeSelect : u8 {
+enum class TimerModeSelect : bool {
     interval_timer_mode = 0, ///< Interval timer mode option
     watchdog_timer_mode = 1  ///< Watchdog timer mode option
 };
@@ -1292,7 +1219,7 @@ enum class TimerModeSelect : u8 {
 /// \brief  WTCSR - TME value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TimerEnable : u8 {
+enum class TimerEnable : bool {
     timer_disabled = 0, ///< Timer disabled : WTCNT is initialized to 0x00 and count up stops. (initial)
     timer_enabled  = 1, ///< Timer enabled : WTCNT starts counting.
 };
@@ -1316,21 +1243,20 @@ enum class WdtClockSelect : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WatchdogTimerControlStatusRegister
+/// \union	WatchdogTimerControlStatusRegister
 ///
-/// \brief  Watchdog Timer Control/Status Register (WTCSR).
+/// \brief	Watchdog Timer Control/Status Register (WTCSR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WatchdogTimerControlStatusRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto overflow_flag     = BitRange<WdtOverflowFlag>{7};   ///< Defines OVF bit.
-    inline static const auto timer_mode_select = BitRange<TimerModeSelect>{6};   ///< Defines WT/IT bit.
-    inline static const auto timer_enable      = BitRange<TimerEnable>{5};       ///< Defines TME bit.
-    inline static const auto clock_select      = BitRange<WdtClockSelect>{0, 2}; ///< Defines CKSx bits.
+union WatchdogTimerControlStatusRegister {
+    u8             raw;               ///< Raw representation.
+    BitField<7>    overflow_flag;     ///< Defines OVF bit.
+    BitField<6>    timer_mode_select; ///< Defines WT/IT bit.
+    BitField<5>    timer_enable;      ///< Defines TME bit.
+    BitField<0, 3> clock_select;      ///< Defines CKSx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1339,7 +1265,7 @@ class WatchdogTimerControlStatusRegister : public Register {
 /// \brief  RSTCSR - WOVF bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class WatchdogTimerOverflowFlag : u8 {
+enum class WatchdogTimerOverflowFlag : bool {
     no_overflow = 0, ///< No WTCNT overflow in watchdof timer mode (initial).
     overflow    = 1  ///< Set by WTCNT overflow in watchdog mode.
 };
@@ -1350,7 +1276,7 @@ enum class WatchdogTimerOverflowFlag : u8 {
 /// \brief  RSTCSR - RSTE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ResetEnable : u8 {
+enum class ResetEnable : bool {
     not_reset_when_overflow = 0, ///< Not reset when WTCNT overflows (initial).
     reset_when_overflow     = 1, ///< Reset when WTCNT overflows.
 };
@@ -1361,26 +1287,25 @@ enum class ResetEnable : u8 {
 /// \brief  RSTCSR - RSTS bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ResetSelect : u8 {
+enum class ResetSelect : bool {
     power_on_reset = 0, ///< Power-on reset (initial)
     manual_reset   = 1  ///< Manual reset
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ResetControlStatusRegister
+/// \union	ResetControlStatusRegister
 ///
-/// \brief  Reset Control Status Register (RSTCSR).
+/// \brief	Reset Control Status Register (RSTCSR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ResetControlStatusRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto watchdog_timer_overflow_flag = BitRange<WatchdogTimerOverflowFlag>{7}; ///< Defines WOVF bit.
-    inline static const auto reset_enable                 = BitRange<ResetEnable>{6};               ///< Defines RSTE bit.
-    inline static const auto reset_select                 = BitRange<ResetSelect>{5};               ///< Defines RSTS bit.
+union ResetControlStatusRegister {
+    u8          raw;                          ///< Raw representation.
+    BitField<7> watchdog_timer_overflow_flag; ///< Defines WOVF bit.
+    BitField<6> reset_enable;                 ///< Defines RSTE bit.
+    BitField<5> reset_select;                 ///< Defines RSTS bit.
 };
 
 /////////////////////////////////////////////
@@ -1393,7 +1318,7 @@ class ResetControlStatusRegister : public Register {
 /// \brief  SMR - C/A bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CommunicationMode : u8 {
+enum class CommunicationMode : bool {
     asynchronous        = 0, ///< Asynchronous mode (initial).
     clocked_synchronous = 1, ///< Clocked synchronous mode.
 };
@@ -1404,7 +1329,7 @@ enum class CommunicationMode : u8 {
 /// \brief  SMR - CHR bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CharacterLength : u8 {
+enum class CharacterLength : bool {
     eight_bit_data = 0, ///< 8-bit data (initial).
     seven_bit_data = 1, ///< 7-bit data.
 };
@@ -1415,7 +1340,7 @@ enum class CharacterLength : u8 {
 /// \brief  SMR - O/E bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ParityEnable : u8 {
+enum class ParityEnable : bool {
     parity_bit_not_added = 0, ///< Parity bit not added or checked (initial).
     parity_bit_added     = 1, ///< Parity bit added and checked.
 };
@@ -1426,7 +1351,7 @@ enum class ParityEnable : u8 {
 /// \brief  SMR - O/E bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ParityMode : u8 {
+enum class ParityMode : bool {
     even_parity = 0, ///< Even parity (initial).
     odd_parity  = 1, ///< Odd parity.
 };
@@ -1437,7 +1362,7 @@ enum class ParityMode : u8 {
 /// \brief  SMR - STOP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class StopBitLength : u8 {
+enum class StopBitLength : bool {
     one_stop_bit  = 0, ///< One stop bit (initial).
     two_stop_bits = 1, ///< Two stop bits.
 };
@@ -1448,7 +1373,7 @@ enum class StopBitLength : u8 {
 /// \brief  SMR - MP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class MultiprocessorMode : u8 {
+enum class MultiprocessorMode : bool {
     multiprocessor_function_disabled = 0, ///< Multiprocessor mode enabled (initial).
     multiprocessor_function_enabled  = 1, ///< Multiprocessor mode disabled.
 };
@@ -1467,38 +1392,36 @@ enum class SciClockSelect : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  SerialModeRegister
+/// \union	SerialModeRegister
 ///
-/// \brief  Serial Mode Register (SMR).
+/// \brief	Serial Mode Register (SMR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SerialModeRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto communication_mode  = BitRange<CommunicationMode>{7};  ///< Defines C/A bit.
-    inline static const auto character_length    = BitRange<CharacterLength>{6};    ///< Defines CHR bit.
-    inline static const auto parity_enable       = BitRange<ParityEnable>{5};       ///< Defines PE bit.
-    inline static const auto parity_mode         = BitRange<ParityMode>{4};         ///< Defines O/E bit.
-    inline static const auto stop_bit_length     = BitRange<StopBitLength>{3};      ///< Defines STOP bit.
-    inline static const auto multiprocessor_mode = BitRange<MultiprocessorMode>{2}; ///< Defines MP bit.
-    inline static const auto clock_select        = BitRange<SciClockSelect>{0, 1};  ///< Defines CKSx bit.
+union SerialModeRegister {
+    u8             raw;                 ///< Raw representation.
+    BitField<7>    communication_mode;  ///< Defines C/A bit.
+    BitField<6>    character_length;    ///< Defines CHR bit.
+    BitField<5>    parity_enable;       ///< Defines PE bit.
+    BitField<4>    parity_mode;         ///< Defines O/E bit.
+    BitField<3>    stop_bit_length;     ///< Defines STOP bit.
+    BitField<2>    multiprocessor_mode; ///< Defines MP bit.
+    BitField<0, 2> clock_select;        ///< Defines CKSx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  BitRateRegister
+/// \union	BitRateRegister
 ///
-/// \brief  Bit Rate Register (BRR).
+/// \brief	Bit Rate Register (BRR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class BitRateRegister : public Register {
-  public:
-    using Register::Register;
+union BitRateRegister {
+    u8 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1507,7 +1430,7 @@ class BitRateRegister : public Register {
 /// \brief  SCR - TIE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransmitInterruptEnable : u8 {
+enum class TransmitInterruptEnable : bool {
     interrupt_disabled = 0, ///< TXI request is disabled (initial).
     interrupt_enabled  = 1  ///< TXI request is enabled.
 };
@@ -1518,7 +1441,7 @@ enum class TransmitInterruptEnable : u8 {
 /// \brief  SCR - REI bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ReceiveInterruptEnable : u8 {
+enum class ReceiveInterruptEnable : bool {
     interrupts_disabled = 0, ///< RXI and ERI requests are disabled (initial).
     interrupts_enabled  = 1  ///< RXI and ERI requests are enabled.
 };
@@ -1529,7 +1452,7 @@ enum class ReceiveInterruptEnable : u8 {
 /// \brief  SCR - TE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransmitEnable : u8 {
+enum class TransmitEnable : bool {
     transmitter_disabled = 0, ///< Transmitter disabled (initial).
     transmitter_enabled  = 1  ///< Transmitter enabled.
 };
@@ -1540,7 +1463,7 @@ enum class TransmitEnable : u8 {
 /// \brief  SCR - RE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ReceiveEnable : u8 {
+enum class ReceiveEnable : bool {
     receiver_disabled = 0, ///< Receiver disabled (initial).
     receiver_enabled  = 1  ///< Receiver enabled.
 };
@@ -1551,7 +1474,7 @@ enum class ReceiveEnable : u8 {
 /// \brief  SCR - MPIE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class MultiprocessorInterruptEnable : u8 {
+enum class MultiprocessorInterruptEnable : bool {
     interrupt_disabled = 0, ///< Multiprocessor interrupts are disabled (initial).
     interrupt_enabled  = 1  ///< Multiprocessor interrupts are enabled.
 };
@@ -1562,7 +1485,7 @@ enum class MultiprocessorInterruptEnable : u8 {
 /// \brief  SCR - TEIE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransmitEndInterruptEnable : u8 {
+enum class TransmitEndInterruptEnable : bool {
     interrupt_disabled = 0, ///< Transmit end interrupt (TEI) requests are disabled (initial).
     interrupt_enabled  = 1  ///< Transmit end interrupt (TEI) requests are enabled.
 };
@@ -1581,52 +1504,49 @@ enum class ClockEnable : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  SerialControlRegister
+/// \union	SerialControlRegister
 ///
-/// \brief  Serial Control Register (SCR).
+/// \brief	Serial Control Register (SCR).
 ///
-/// \author Runik
-/// \date   10/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SerialControlRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto transmit_interrupt_enable       = BitRange<TransmitInterruptEnable>{7};       ///< Defines TIE bit.
-    inline static const auto receive_interrupts_enable       = BitRange<ReceiveInterruptEnable>{6};        ///< Defines RIE bit.
-    inline static const auto transmit_enable                 = BitRange<TransmitEnable>{5};                ///< Defines TE bit.
-    inline static const auto receive_enable                  = BitRange<ReceiveEnable>{4};                 ///< Defines ORE bit.
-    inline static const auto multiprocessor_interrupt_enable = BitRange<MultiprocessorInterruptEnable>{3}; ///< Defines MPIE bit.
-    inline static const auto transmit_end_interrupt_enable   = BitRange<TransmitEndInterruptEnable>{2};    ///< Defines TEIE bit.
-    inline static const auto clock_enable                    = BitRange<ClockEnable>{0, 1};                ///< Defines CKEx bit.
+union SerialControlRegister {
+    u8             raw;                             ///< Raw representation.
+    BitField<7>    transmit_interrupt_enable;       ///< Defines TIE bit.
+    BitField<6>    receive_interrupts_enable;       ///< Defines RIE bit.
+    BitField<5>    transmit_enable;                 ///< Defines TE bit.
+    BitField<4>    receive_enable;                  ///< Defines ORE bit.
+    BitField<3>    multiprocessor_interrupt_enable; ///< Defines MPIE bit.
+    BitField<2>    transmit_end_interrupt_enable;   ///< Defines TEIE bit.
+    BitField<0, 2> clock_enable;                    ///< Defines CKEx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  TransmitDataRegister
+/// \union	TransmitDataRegister
 ///
-/// \brief  Transmit Data Register (TDR).
+/// \brief	Transmit Data Register (TDR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TransmitDataRegister : public Register {
-  public:
-    using Register::Register;
+union TransmitDataRegister {
+    u8 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  TransmitShiftRegister
+/// \union	TransmitShiftRegister
 ///
-/// \brief  Transmit Shift Register (TSR).
+/// \brief	Transmit Shift Register (TSR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TransmitShiftRegister : public Register {
-  public:
-    using Register::Register;
+union TransmitShiftRegister {
+    u8 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1635,7 +1555,7 @@ class TransmitShiftRegister : public Register {
 /// \brief  SSR - TDRE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransmitDataRegisterEmpty : u8 {
+enum class TransmitDataRegisterEmpty : bool {
     contains_valid_data         = 0, ///< TDR contains valid transmit data (initial).
     does_not_contain_valid_data = 1  ///< TDR does not contain valid transmit data.
 };
@@ -1646,7 +1566,7 @@ enum class TransmitDataRegisterEmpty : u8 {
 /// \brief  SSR - RDRF bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ReceiveDataRegisterFull : u8 {
+enum class ReceiveDataRegisterFull : bool {
     no_valid_data_received = 0, ///< RDR does not contain valid received data (initial).
     valid_data_received    = 1  ///< RDR contains valid received data.
 };
@@ -1657,7 +1577,7 @@ enum class ReceiveDataRegisterFull : u8 {
 /// \brief  SSR - ORER bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OverrunError : u8 {
+enum class OverrunError : bool {
     in_progress_or_ended_normally = 0, ///< Receiving is in progress or has ended normally (initial).
     error_occurred                = 1  ///< A receive overrun error occurred.
 };
@@ -1668,7 +1588,7 @@ enum class OverrunError : u8 {
 /// \brief  SSR - FER bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class FramingError : u8 {
+enum class FramingError : bool {
     in_progress_or_ended_normally = 0, ///< Receiving is in progress or has ended normally (initial).
     error_occurred                = 1  ///< A receive framing error occurred.
 };
@@ -1679,7 +1599,7 @@ enum class FramingError : u8 {
 /// \brief  SSR - PER bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ParityError : u8 {
+enum class ParityError : bool {
     in_progress_or_ended_normally = 0, ///< Receiving is in progress or has ended normally (initial).
     error_occurred                = 1  ///< A receive parity error occurred.
 };
@@ -1690,7 +1610,7 @@ enum class ParityError : u8 {
 /// \brief  SSR - TEND bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransmitEnd : u8 {
+enum class TransmitEnd : bool {
     transmission_in_progress = 0, ///< Transmission is in progress.
     end_of_transmission      = 1  ///< End of transmission (initial).
 };
@@ -1701,7 +1621,7 @@ enum class TransmitEnd : u8 {
 /// \brief  SSR - MPB bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class MultiprocessorBit : u8 {
+enum class MultiprocessorBit : bool {
     bit_value_0 = 0, ///< Multiprocessor bit value in receive data is 0 (initial).
     bit_value_1 = 1  ///< Multiprocessor bit value in receive data is 1.
 };
@@ -1712,63 +1632,69 @@ enum class MultiprocessorBit : u8 {
 /// \brief  SSR - MPBT bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class MultiprocessorBitTransfer : u8 {
+enum class MultiprocessorBitTransfer : bool {
     bit_value_0 = 0, ///< Multiprocessor bit value in transmit data is 0 (initial).
     bit_value_1 = 1  ///< Multiprocessor bit value in transmit data is 1.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  SerialStatusRegister
+/// \union	SerialStatusRegister
 ///
-/// \brief  Serial Status Register (SSR).
+/// \brief	Serial Status Register (SSR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SerialStatusRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto transmit_data_register_empty = BitRange<TransmitDataRegisterEmpty>{7}; ///< Defines TDRE bit.
-    inline static const auto receive_data_register_full   = BitRange<ReceiveDataRegisterFull>{6};   ///< Defines RDRF bit.
-    inline static const auto overrun_error                = BitRange<OverrunError>{5};              ///< Defines ORER bit.
-    inline static const auto framing_error                = BitRange<FramingError>{4};              ///< Defines FER bit.
-    inline static const auto parity_error                 = BitRange<ParityError>{3};               ///< Defines PER bit.
-    inline static const auto transmit_end                 = BitRange<TransmitEnd>{2};               ///< Defines TEND bit.
-    inline static const auto multiprocessor_bit           = BitRange<MultiprocessorBit>{1};         ///< Defines MPB bit.
-    inline static const auto multiprocessor_bit_transfer  = BitRange<MultiprocessorBitTransfer>{0}; ///< Defines MPBT bit.
+union SerialStatusRegister {
+    u8          raw;                          ///< Raw representation.
+    BitField<7> transmit_data_register_empty; ///< Defines TDRE bit.
+    BitField<6> receive_data_register_full;   ///< Defines RDRF bit.
+    BitField<5> overrun_error;                ///< Defines ORER bit.
+    BitField<4> framing_error;                ///< Defines FER bit.
+    BitField<3> parity_error;                 ///< Defines PER bit.
+    BitField<2> transmit_end;                 ///< Defines TEND bit.
+    BitField<1> multiprocessor_bit;           ///< Defines MPB bit.
+    BitField<0> multiprocessor_bit_transfer;  ///< Defines MPBT bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ReceiveDataRegister
+/// \union	ReceiveDataRegister
 ///
-/// \brief  Receive Data Register (RDR).
+/// \brief	Receive Data Register (RDR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ReceiveDataRegister : public Register {
-  public:
-    using Register::Register;
+union ReceiveDataRegister {
+    u8 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ReceiveShiftRegister
+/// \union	ReceiveShiftRegister
 ///
-/// \brief  Receive Shift Register (RSR).
+/// \brief	Receive Shift Register (RSR).
 ///
-/// \author Runik
-/// \date   07/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ReceiveShiftRegister : public Register {
-  public:
-    using Register::Register;
+union ReceiveShiftRegister {
+    u8 raw; ///< Raw representation.
 };
 
-class StandbyControlRegister : public Register {
-  public:
-    using Register::Register;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \union	StandbyControlRegister
+///
+/// \brief	Standby Control Register (SCR)
+///
+/// \author	Runik
+/// \date	20/01/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+union StandbyControlRegister {
+    u8 raw; ///< Raw representation.
 };
+
 } // namespace saturnin::sh2

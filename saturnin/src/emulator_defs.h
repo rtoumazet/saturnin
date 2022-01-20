@@ -85,6 +85,7 @@ constexpr auto bitmask_00FF             = u16{0x00FF};
 constexpr auto bitmask_03FF             = u16{0x03FF};
 constexpr auto bitmask_0FFF             = u16{0x0FFF};
 constexpr auto bitmask_FFFF             = u16{0xFFFF};
+constexpr auto bitmask_7F               = u8{0x7F};
 constexpr auto bitmask_0F               = u8{0x0F};
 constexpr auto bitmask_vdp2_vram_4mb    = u16{0x3FFF};
 constexpr auto bitmask_vdp2_vram_8mb    = u16{0x7FFF};

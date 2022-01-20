@@ -555,7 +555,7 @@ class InterruptMaskRegister : public Register {
 /// \brief  Values that represent if an interrupt is enabled or not.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class InterruptEnable : u8 {
+enum class InterruptEnable : bool {
     disabled = 0, ///< Interrupt is disabled
     enabled  = 1  ///< Interrupt is enabled
 };
@@ -802,24 +802,6 @@ enum class ProgramCounterTransferEnable : bool {
 /// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// class DspProgramControlPort : public Register {
-//   public:
-//     using Register::Register;
-//     inline static const auto execute_pause_reset             = BitRange<ExecutePauseReset>{26};            ///< Defines PP bit.
-//     inline static const auto execute_pause                   = BitRange<ExecutePause>{25};                 ///< Defines EP bit.
-//     inline static const auto d0_bus_dma_execution            = BitRange<D0BusDmaExecution>{23};            ///< Defines T0 bit.
-//     inline static const auto sign                            = BitRange<Sign>{22};                         ///< Defines S bit.
-//     inline static const auto zero                            = BitRange<Zero>{21};                         ///< Defines Z bit.
-//     inline static const auto carry                           = BitRange<Carry>{20};                        ///< Defines C bit.
-//     inline static const auto overflow                        = BitRange<Overflow>{19};                     ///< Defines V bit.
-//     inline static const auto program_end_interrupt           = BitRange<ProgramEndInterrupt>{18};          ///< Defines E bit.
-//     inline static const auto step_execute_control            = BitRange<StepExecuteControl>{17};           ///< Defines ES bit.
-//     inline static const auto program_execute_control         = BitRange<ProgramExecuteControl>{16};        ///< Defines EX bit.
-//     inline static const auto program_counter_transfer_enable = BitRange<ProgramCounterTransferEnable>{15}; ///< Defines LE bit.
-//     inline static const auto program_ram_address             = BitRange<u8>{0, 7};                         ///< Defines P7-0
-//     bits.
-// };
-
 union DspProgramControlPort {
     u32            raw;                             ///< Raw representation.
     BitField<26>   execute_pause_reset;             ///< Defines PP bit.
@@ -844,12 +826,6 @@ union DspProgramControlPort {
 /// \author Runik
 /// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// class DspProgramDataPort : public Register {
-//   public:
-//     using Register::Register;
-//     inline static const auto dsp_program_data_port = BitRange<u32>{0, 31}; ///< Defines DSP program data port.
-// };
 
 union DspProgramDataPort {
     u32 raw; ///< Defines DSP program data port.
@@ -877,13 +853,6 @@ enum class DataRamSelect : u8 {
 /// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// class DspDataRamAddressPort : public Register {
-//   public:
-//     using Register::Register;
-//     inline static const auto data_ram_select  = BitRange<DataRamSelect>{6, 7}; ///< Defines RA7-6.
-//     inline static const auto data_ram_address = BitRange<u8>{0, 5};            ///< Defines RA5-0.
-// };
-
 union DspDataRamAddressPort {
     u32            raw;              ///< Raw representation.
     BitField<6, 2> data_ram_select;  ///< Defines RA7-6 bits.
@@ -898,12 +867,6 @@ union DspDataRamAddressPort {
 /// \author Runik
 /// \date   16/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// class DspDataRamDataPort : public Register {
-//   public:
-//     using Register::Register;
-//     inline static const auto dsp_data_ram_data_port = BitRange<u32>{0, 31}; ///< Defines DSP data ram port.
-// };
 
 union DspDataRamDataPort {
     u32 raw; ///< Defines DSP data ram port.
