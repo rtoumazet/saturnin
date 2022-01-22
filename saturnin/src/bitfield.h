@@ -161,7 +161,7 @@ class BitField<Index, 1> {
     }
 
     explicit operator bool() const { return value_ & (Mask << Index); }
-             operator T() const { return static_cast<T>(value_ & (Mask << Index)); }
+    //         operator T() const { return static_cast<T>(value_ & (Mask << Index)); }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	template<class T2, typename = std::enable_if_t<std::is_integral_v<T2>>> bool 1>::operator==(T2 val)

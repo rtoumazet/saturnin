@@ -3175,12 +3175,12 @@ void Vdp2::discardCache(const ScrollScreen screen) {
 auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data                      = PatternNameData{};
     auto reg                                    = PatternNameData2Words{data};
-    pattern_name_data.character_number          = reg.get(PatternNameData2Words::character_number);
-    pattern_name_data.palette_number            = reg.get(PatternNameData2Words::palette_number);
-    pattern_name_data.special_color_calculation = reg.get(PatternNameData2Words::special_color_calculation);
-    pattern_name_data.special_priority          = reg.get(PatternNameData2Words::special_priority);
-    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData2Words::horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData2Words::vertical_flip);
+    pattern_name_data.character_number          = reg.character_number;
+    pattern_name_data.palette_number            = reg.palette_number;
+    pattern_name_data.special_color_calculation = static_cast<u8>(static_cast<bool>(reg.special_color_calculation));
+    pattern_name_data.special_priority          = static_cast<u8>(static_cast<bool>(reg.special_priority));
+    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
     return pattern_name_data;
 };
 
@@ -3190,16 +3190,16 @@ auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScre
 
     constexpr auto cn_disp             = u8{10};
     pattern_name_data.character_number = (screen.supplementary_character_number << cn_disp);
-    pattern_name_data.character_number |= reg.get(PatternNameData1Word1Cell16Colors10Bits::character_number);
+    pattern_name_data.character_number |= reg.character_number;
 
     constexpr auto pn_disp           = u8{4};
     pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-    pattern_name_data.palette_number |= reg.get(PatternNameData1Word1Cell16Colors10Bits::palette_number);
+    pattern_name_data.palette_number |= reg.palette_number;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
-    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word1Cell16Colors10Bits::horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word1Cell16Colors10Bits::vertical_flip);
+    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
 
     return pattern_name_data;
 };
@@ -3211,11 +3211,11 @@ auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScre
     constexpr auto cn_disp             = u8{10};
     constexpr auto cn_mask             = u8{0x1C};
     pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
-    pattern_name_data.character_number |= reg.get(PatternNameData1Word1Cell16Colors12Bits::character_number);
+    pattern_name_data.character_number |= reg.character_number;
 
     constexpr auto pn_disp           = u8{4};
     pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-    pattern_name_data.palette_number |= reg.get(PatternNameData1Word1Cell16Colors12Bits::palette_number);
+    pattern_name_data.palette_number |= reg.palette_number;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
@@ -3230,16 +3230,16 @@ auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const Scroll
     auto reg               = PatternNameData1Word1CellOver16Colors10Bits{data};
 
     constexpr auto cn_disp             = u8{10};
-    pattern_name_data.character_number = (reg.get(PatternNameData1Word1CellOver16Colors10Bits::palette_number) << cn_disp);
-    pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors10Bits::character_number);
+    pattern_name_data.character_number = (reg.palette_number << cn_disp);
+    pattern_name_data.character_number |= reg.character_number;
 
     constexpr auto pn_disp           = u8{8};
     pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
-    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word1CellOver16Colors10Bits::horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word1CellOver16Colors10Bits::vertical_flip);
+    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
 
     return pattern_name_data;
 };
@@ -3251,10 +3251,10 @@ auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const Scroll
     constexpr auto cn_disp             = u8{10};
     constexpr auto cn_mask             = u8{0x1C};
     pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
-    pattern_name_data.character_number |= reg.get(PatternNameData1Word1CellOver16Colors12Bits::character_number);
+    pattern_name_data.character_number |= reg.character_number;
 
     constexpr auto pn_disp           = u8{8};
-    pattern_name_data.palette_number = (reg.get(PatternNameData1Word1CellOver16Colors12Bits::palette_number) << pn_disp);
+    pattern_name_data.palette_number = (reg.palette_number << pn_disp);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
@@ -3272,18 +3272,18 @@ auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScr
     constexpr auto cn_mask_1           = u8{0x1C};
     pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
     constexpr auto cn_disp_2           = u8{2};
-    pattern_name_data.character_number |= (reg.get(PatternNameData1Word4Cells16Colors10Bits::character_number) << cn_disp_2);
+    pattern_name_data.character_number |= (reg.character_number << cn_disp_2);
     constexpr auto cn_mask_2 = u8{0x3};
     pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
 
     constexpr auto pn_disp           = u8{4};
     pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-    pattern_name_data.palette_number |= reg.get(PatternNameData1Word4Cells16Colors10Bits::palette_number);
+    pattern_name_data.palette_number |= reg.palette_number;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
-    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word4Cells16Colors10Bits::horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word4Cells16Colors10Bits::vertical_flip);
+    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
 
     return pattern_name_data;
 };
@@ -3296,13 +3296,13 @@ auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScr
     constexpr auto cn_mask_1           = u8{0x10};
     pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
     constexpr auto cn_disp_2           = u8{2};
-    pattern_name_data.character_number |= (reg.get(PatternNameData1Word4Cells16Colors12Bits::character_number) << cn_disp_2);
+    pattern_name_data.character_number |= (reg.character_number << cn_disp_2);
     constexpr auto cn_mask_2 = u8{0x3};
     pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
 
     constexpr auto pn_disp           = u8{4};
     pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-    pattern_name_data.palette_number |= reg.get(PatternNameData1Word4Cells16Colors12Bits::palette_number);
+    pattern_name_data.palette_number |= reg.palette_number;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
@@ -3320,17 +3320,17 @@ auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const Scrol
     constexpr auto cn_mask_1           = u8{0x1C};
     pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
     constexpr auto cn_disp_2           = u8{2};
-    pattern_name_data.character_number |= (reg.get(PatternNameData1Word4CellsOver16Colors10Bits::character_number) << cn_disp_2);
+    pattern_name_data.character_number |= (reg.character_number << cn_disp_2);
     constexpr auto cn_mask_2 = u8{0x3};
     pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
 
     constexpr auto pn_disp           = u8{8};
-    pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors10Bits::palette_number) << pn_disp);
+    pattern_name_data.palette_number = (reg.palette_number << pn_disp);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
-    pattern_name_data.is_horizontally_flipped   = reg.get(PatternNameData1Word4CellsOver16Colors10Bits::horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = reg.get(PatternNameData1Word4CellsOver16Colors10Bits::vertical_flip);
+    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
+    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
 
     return pattern_name_data;
 };
@@ -3343,12 +3343,12 @@ auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const Scrol
     constexpr auto cn_mask_1           = u8{0x10};
     pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
     constexpr auto cn_disp_2           = u8{2};
-    pattern_name_data.character_number |= (reg.get(PatternNameData1Word4CellsOver16Colors12Bits::character_number) << cn_disp_2);
+    pattern_name_data.character_number |= (reg.character_number << cn_disp_2);
     constexpr auto cn_mask_2 = u8{0x3};
     pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
 
     constexpr auto pn_disp           = u8{8};
-    pattern_name_data.palette_number = (reg.get(PatternNameData1Word4CellsOver16Colors12Bits::palette_number) << pn_disp);
+    pattern_name_data.palette_number = (reg.palette_number << pn_disp);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;

@@ -200,7 +200,7 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
                 if (is_data_mixed) {
                     // priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_0_priority_mixed);
                     priority_number_register
-                        = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_0_priority_mixed));
+                        = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_0_priority_mixed)));
                     priority_number_register <<= disp_priority_on_1_bit;
                 } else {
                     // priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_0_priority_palette);
@@ -222,7 +222,8 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
                 break;
             }
             case SpriteType::type_2: {
-                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_2_priority));
+                priority_number_register
+                    = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_2_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
@@ -259,12 +260,14 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
         // 8 bits by pixel
         switch (sprite_type) {
             case SpriteType::type_8: {
-                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_8_priority));
+                priority_number_register
+                    = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_8_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
             case SpriteType::type_9: {
-                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_9_priority));
+                priority_number_register
+                    = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_9_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
@@ -279,7 +282,8 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
                 break;
             }
             case SpriteType::type_c: {
-                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_c_priority));
+                priority_number_register
+                    = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_c_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }

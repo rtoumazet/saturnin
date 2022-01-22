@@ -29,6 +29,7 @@
 #include <chrono>                          // duration
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>    // u8, u16, u32
+#include <saturnin/src/bitfield.h>
 #include <saturnin/src/emulator_modules.h> // EmulatorModules
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
@@ -362,125 +363,118 @@ struct PatternNameData {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameData2Words
+/// \union	PatternNameData2Words
 ///
-/// \brief  Pattern Name Data - 2 words configuration.
+/// \brief	Pattern Name Data - 2 words configuration.
 ///
-/// \author Runik
-/// \date   15/03/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameData2Words : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical_flip             = BitRange<bool>{31};   ///< Defines the vertical flip bit.
-    inline static const auto horizontal_flip           = BitRange<bool>{30};   ///< Defines the horizontal flip bit.
-    inline static const auto special_priority          = BitRange<u8>{29};     ///< Defines the special priority bit.
-    inline static const auto special_color_calculation = BitRange<u8>{28};     ///< Defines the special color calculation bit.
-    inline static const auto palette_number            = BitRange<u8>{16, 22}; ///< Defines the palette number.
-    inline static const auto character_number          = BitRange<u16>{0, 14}; ///< Defines the character number.
+union PatternNameData2Words {
+    u32             raw;                       ///< Raw representation.
+    BitField<31>    vertical_flip;             ///< Defines the vertical flip bit.
+    BitField<30>    horizontal_flip;           ///< Defines the horizontal flip bit.
+    BitField<29>    special_priority;          ///< Defines the special priority bit.
+    BitField<28>    special_color_calculation; ///< Defines the special color calculation bit.
+    BitField<16, 7> palette_number;            ///< Defines the palette number.
+    BitField<0, 15> character_number;          ///< Defines the character number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameData1Word1Cell16Colors10Bits
+/// \union	PatternNameData1Word1Cell16Colors10Bits
 ///
-/// \brief  Pattern Name Data - 1 word, 1 cell, 16 colors, 10 bits configuration.
+/// \brief	Pattern Name Data - 1 word, 1 cell, 16 colors, 10 bits configuration.
 ///
-/// \author Runik
-/// \date   15/03/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameData1Word1Cell16Colors10Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical_flip    = BitRange<bool>{11};   ///< Defines the vertical flip bit.
-    inline static const auto horizontal_flip  = BitRange<bool>{10};   ///< Defines the horizontal flip bit.
-    inline static const auto palette_number   = BitRange<u8>{12, 15}; ///< Defines the palette number.
-    inline static const auto character_number = BitRange<u16>{0, 9};  ///< Defines the character number.
+union PatternNameData1Word1Cell16Colors10Bits {
+    u32             raw;              ///< Raw representation.
+    BitField<11>    vertical_flip;    ///< Defines the vertical flip bit.
+    BitField<10>    horizontal_flip;  ///< Defines the horizontal flip bit.
+    BitField<12, 4> palette_number;   ///< Defines the palette number.
+    BitField<0, 10> character_number; ///< Defines the character number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameData1Word1Cell16Colors12Bits
+/// \union	PatternNameData1Word1Cell16Colors12Bits
 ///
-/// \brief  Pattern Name Data - 1 word, 1 cell, 16 colors, 12 bits configuration.
+/// \brief	Pattern Name Data - 1 word, 1 cell, 16 colors, 12 bits configuration.
 ///
-/// \author Runik
-/// \date   15/03/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameData1Word1Cell16Colors12Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto palette_number   = BitRange<u8>{12, 15}; ///< Defines the palette number.
-    inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
+union PatternNameData1Word1Cell16Colors12Bits {
+    u32             raw;              ///< Raw representation.
+    BitField<12, 4> palette_number;   ///< Defines the palette number.
+    BitField<0, 12> character_number; ///< Defines the character number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameData1Word1CellOver16Colors10Bits
+/// \union	PatternNameData1Word1CellOver16Colors10Bits
 ///
-/// \brief  Pattern Name Data - 1 word, 1 cell, over 16 colors, 10 bits configuration.
+/// \brief	Pattern Name Data - 1 word, 1 cell, over 16 colors, 10 bits configuration.
 ///
-/// \author Runik
-/// \date   15/03/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameData1Word1CellOver16Colors10Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical_flip    = BitRange<bool>{11};   ///< Defines the vertical flip bit.
-    inline static const auto horizontal_flip  = BitRange<bool>{10};   ///< Defines the horizontal flip bit.
-    inline static const auto palette_number   = BitRange<u8>{12, 14}; ///< Defines the palette number.
-    inline static const auto character_number = BitRange<u16>{0, 9};  ///< Defines the character number.
+union PatternNameData1Word1CellOver16Colors10Bits {
+    u32             raw;              ///< Raw representation.
+    BitField<11>    vertical_flip;    ///< Defines the vertical flip bit.
+    BitField<10>    horizontal_flip;  ///< Defines the horizontal flip bit.
+    BitField<12, 3> palette_number;   ///< Defines the palette number.
+    BitField<0, 10> character_number; ///< Defines the character number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameData1Word1CellOver16Colors12Bits
+/// \union	PatternNameData1Word1CellOver16Colors12Bits
 ///
-/// \brief  Pattern Name Data - 1 word, 1 cell, over 16 colors, 10 bits configuration.
+/// \brief	Pattern Name Data - 1 word, 1 cell, over 16 colors, 10 bits configuration.
 ///
-/// \author Runik
-/// \date   15/03/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameData1Word1CellOver16Colors12Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto palette_number   = BitRange<u8>{12, 14}; ///< Defines the palette number.
-    inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
+union PatternNameData1Word1CellOver16Colors12Bits {
+    u32             raw;              ///< Raw representation.
+    BitField<12, 3> palette_number;   ///< Defines the palette number.
+    BitField<0, 12> character_number; ///< Defines the character number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameData1Word4Cells16Colors10Bits
+/// \union	PatternNameData1Word4Cells16Colors10Bits
 ///
-/// \brief  Pattern Name Data - 1 word, 4 cells, 16 colors, 10 bits configuration.
+/// \brief	Pattern Name Data - 1 word, 4 cells, 16 colors, 10 bits configuration.
 ///
-/// \author Runik
-/// \date   15/03/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameData1Word4Cells16Colors10Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical_flip    = BitRange<bool>{11};   ///< Defines the vertical flip bit.
-    inline static const auto horizontal_flip  = BitRange<bool>{10};   ///< Defines the horizontal flip bit.
-    inline static const auto palette_number   = BitRange<u8>{12, 15}; ///< Defines the palette number.
-    inline static const auto character_number = BitRange<u16>{0, 9};  ///< Defines the character number.
+union PatternNameData1Word4Cells16Colors10Bits {
+    u32             raw;              ///< Raw representation.
+    BitField<11>    vertical_flip;    ///< Defines the vertical flip bit.
+    BitField<10>    horizontal_flip;  ///< Defines the horizontal flip bit.
+    BitField<12, 4> palette_number;   ///< Defines the palette number.
+    BitField<0, 10> character_number; ///< Defines the character number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameData1Word4Cells16Colors12Bits
+/// \union	PatternNameData1Word4Cells16Colors12Bits
 ///
-/// \brief  Pattern Name Data - 1 word, 4 cells, 16 colors, 12 bits configuration.
+/// \brief	Pattern Name Data - 1 word, 4 cells, 16 colors, 12 bits configuration.
 ///
-/// \author Runik
-/// \date   15/03/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameData1Word4Cells16Colors12Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto palette_number   = BitRange<u8>{12, 15}; ///< Defines the palette number.
-    inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
+union PatternNameData1Word4Cells16Colors12Bits {
+    u32             raw;              ///< Raw representation.
+    BitField<12, 4> palette_number;   ///< Defines the palette number.
+    BitField<0, 12> character_number; ///< Defines the character number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -492,29 +486,27 @@ class PatternNameData1Word4Cells16Colors12Bits : public Register {
 /// \date   15/03/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameData1Word4CellsOver16Colors10Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical_flip    = BitRange<bool>{11};   ///< Defines the vertical flip bit.
-    inline static const auto horizontal_flip  = BitRange<bool>{10};   ///< Defines the horizontal flip bit.
-    inline static const auto palette_number   = BitRange<u8>{12, 14}; ///< Defines the palette number.
-    inline static const auto character_number = BitRange<u16>{0, 9};  ///< Defines the character number.
+union PatternNameData1Word4CellsOver16Colors10Bits {
+    u32             raw;              ///< Raw representation.
+    BitField<11>    vertical_flip;    ///< Defines the vertical flip bit.
+    BitField<10>    horizontal_flip;  ///< Defines the horizontal flip bit.
+    BitField<12, 3> palette_number;   ///< Defines the palette number.
+    BitField<0, 10> character_number; ///< Defines the character number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameData1Word4CellsOver16Colors12Bits
+/// \union	PatternNameData1Word4CellsOver16Colors12Bits
 ///
-/// \brief  Pattern Name Data - 1 word, 4 cells, 16 colors, 12 bits configuration.
+/// \brief	Pattern Name Data - 1 word, 4 cells, 16 colors, 12 bits configuration.
 ///
-/// \author Runik
-/// \date   15/03/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameData1Word4CellsOver16Colors12Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto palette_number   = BitRange<u8>{12, 14}; ///< Defines the palette number.
-    inline static const auto character_number = BitRange<u16>{0, 11}; ///< Defines the character number.
+union PatternNameData1Word4CellsOver16Colors12Bits {
+    u32             raw;              ///< Raw representation.
+    BitField<12, 3> palette_number;   ///< Defines the palette number.
+    BitField<0, 12> character_number; ///< Defines the character number.
 };
 
 class Vdp2 {
