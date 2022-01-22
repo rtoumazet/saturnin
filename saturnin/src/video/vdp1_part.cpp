@@ -56,81 +56,81 @@ Vdp1Part::Vdp1Part(EmulatorModules& modules,
 };
 
 void Vdp1Part::readParameters(Memory* m, const u32 address) {
-    switch (cmdctrl_.get(CmdCtrl::command_select)) {
+    switch (toEnum<CommandSelect>(cmdctrl_.command_select)) {
         case CommandSelect::system_clipping: {
-            cmdxc_ = m->read<u16>(address + cmdxc_offset);
-            cmdyc_ = m->read<u16>(address + cmdyc_offset);
+            cmdxc_.raw = m->read<u16>(address + cmdxc_offset);
+            cmdyc_.raw = m->read<u16>(address + cmdyc_offset);
             break;
         }
         case CommandSelect::user_clipping: {
-            cmdxa_ = m->read<u16>(address + cmdxa_offset);
-            cmdya_ = m->read<u16>(address + cmdya_offset);
-            cmdxc_ = m->read<u16>(address + cmdxc_offset);
-            cmdyc_ = m->read<u16>(address + cmdyc_offset);
+            cmdxa_.raw = m->read<u16>(address + cmdxa_offset);
+            cmdya_.raw = m->read<u16>(address + cmdya_offset);
+            cmdxc_.raw = m->read<u16>(address + cmdxc_offset);
+            cmdyc_.raw = m->read<u16>(address + cmdyc_offset);
             break;
         }
         case CommandSelect::local_coordinate: {
-            cmdxa_ = m->read<u16>(address + cmdxa_offset);
-            cmdya_ = m->read<u16>(address + cmdya_offset);
+            cmdxa_.raw = m->read<u16>(address + cmdxa_offset);
+            cmdya_.raw = m->read<u16>(address + cmdya_offset);
             break;
         }
         case CommandSelect::normal_sprite_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
+            cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
+            cmdsrca_.raw = m->read<u16>(address + cmdsrca_offset);
+            cmdsize_.raw = m->read<u16>(address + cmdsize_offset);
+            cmdxa_.raw   = m->read<u16>(address + cmdxa_offset);
+            cmdya_.raw   = m->read<u16>(address + cmdya_offset);
+            cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
             break;
         }
         case CommandSelect::scaled_sprite_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            cmdxc_   = m->read<u16>(address + cmdxc_offset);
-            cmdyc_   = m->read<u16>(address + cmdyc_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
+            cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
+            cmdsrca_.raw = m->read<u16>(address + cmdsrca_offset);
+            cmdsize_.raw = m->read<u16>(address + cmdsize_offset);
+            cmdxa_.raw   = m->read<u16>(address + cmdxa_offset);
+            cmdya_.raw   = m->read<u16>(address + cmdya_offset);
+            cmdxb_.raw   = m->read<u16>(address + cmdxb_offset);
+            cmdyb_.raw   = m->read<u16>(address + cmdyb_offset);
+            cmdxc_.raw   = m->read<u16>(address + cmdxc_offset);
+            cmdyc_.raw   = m->read<u16>(address + cmdyc_offset);
+            cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
             break;
         }
         case CommandSelect::distorted_sprite_draw:
         case CommandSelect::polygon_draw:
         case CommandSelect::polyline_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            cmdxc_   = m->read<u16>(address + cmdxc_offset);
-            cmdyc_   = m->read<u16>(address + cmdyc_offset);
-            cmdxd_   = m->read<u16>(address + cmdxd_offset);
-            cmdyd_   = m->read<u16>(address + cmdyd_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
+            cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
+            cmdsrca_.raw = m->read<u16>(address + cmdsrca_offset);
+            cmdsize_.raw = m->read<u16>(address + cmdsize_offset);
+            cmdxa_.raw   = m->read<u16>(address + cmdxa_offset);
+            cmdya_.raw   = m->read<u16>(address + cmdya_offset);
+            cmdxb_.raw   = m->read<u16>(address + cmdxb_offset);
+            cmdyb_.raw   = m->read<u16>(address + cmdyb_offset);
+            cmdxc_.raw   = m->read<u16>(address + cmdxc_offset);
+            cmdyc_.raw   = m->read<u16>(address + cmdyc_offset);
+            cmdxd_.raw   = m->read<u16>(address + cmdxd_offset);
+            cmdyd_.raw   = m->read<u16>(address + cmdyd_offset);
+            cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
             break;
         }
         case CommandSelect::line_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
+            cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
+            cmdxa_.raw   = m->read<u16>(address + cmdxa_offset);
+            cmdya_.raw   = m->read<u16>(address + cmdya_offset);
+            cmdxb_.raw   = m->read<u16>(address + cmdxb_offset);
+            cmdyb_.raw   = m->read<u16>(address + cmdyb_offset);
+            cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
             break;
         }
     }
 }
 
 void Vdp1Part::generatePartData(const EmulatorModules& modules) {
-    switch (cmdctrl_.get(CmdCtrl::command_select)) {
+    switch (toEnum<CommandSelect>(cmdctrl_.command_select)) {
         case CommandSelect::system_clipping: {
             // Not implemented
             debug_header_ = tr("Set system clipping coordinates");
@@ -142,7 +142,7 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             break;
         }
         case CommandSelect::local_coordinate: {
-            SetLocalCoordinates(cmdxa_.twoCmp(), cmdya_.twoCmp());
+            SetLocalCoordinates(twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             debug_header_ = tr("Set local coordinates");
             break;
         }
@@ -183,61 +183,69 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     // calculation overhead is too big for now, and you can't have a one pixel granularity using OpenGL.
     // That will have to be reworked later.
 
-    auto           spctl                    = modules.vdp2()->getSpriteControlRegister();
-    auto           tvmr                     = modules.vdp1()->getTvModeSelectionRegister();
-    const auto     sprite_type              = spctl.get(SpriteControl::sprite_type);
+    auto       spctl           = modules.vdp2()->getSpriteControlRegister();
+    auto       tvmr            = modules.vdp1()->getTvModeSelectionRegister();
+    const auto sprite_type     = spctl.get(SpriteControl::sprite_type);
+    auto       sprite_register = SpriteTypeRegister{cmdcolr_.raw};
+    // sprite_type.
     auto           priority_number_register = u8{};
     constexpr auto disp_priority_on_2_bits  = u8{1};
     constexpr auto disp_priority_on_1_bit   = u8{2};
 
-    if (tvmr.get(TvModeSelection::tvm_bit_depth_selection) == BitDepthSelection::sixteen_bits_per_pixel) {
+    if (toEnum<BitDepthSelection>(tvmr.tvm_bit_depth_selection) == BitDepthSelection::sixteen_bits_per_pixel) {
         const auto is_data_mixed = spctl.get(SpriteControl::sprite_color_mode) == SpriteColorMode::mixed;
 
         switch (sprite_type) {
             case SpriteType::type_0: {
                 if (is_data_mixed) {
-                    priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_0_priority_mixed);
+                    // priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_0_priority_mixed);
+                    priority_number_register
+                        = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_0_priority_mixed));
                     priority_number_register <<= disp_priority_on_1_bit;
                 } else {
-                    priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_0_priority_palette);
+                    // priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_0_priority_palette);
+                    priority_number_register
+                        = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_0_priority_palette));
                     priority_number_register <<= disp_priority_on_2_bits;
                 }
                 break;
             }
             case SpriteType::type_1: {
                 if (is_data_mixed) {
-                    priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_1_priority_mixed);
+                    priority_number_register
+                        = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_1_priority_mixed));
                     priority_number_register <<= disp_priority_on_2_bits;
                 } else {
-                    priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_1_priority_palette);
+                    priority_number_register
+                        = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_1_priority_palette));
                 }
                 break;
             }
             case SpriteType::type_2: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_2_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_2_priority));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
             case SpriteType::type_3: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_3_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_3_priority));
                 priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
             case SpriteType::type_4: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_4_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_4_priority));
                 priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
             case SpriteType::type_5: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_5_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_5_priority));
                 break;
             }
             case SpriteType::type_6: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_6_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_6_priority));
                 break;
             }
             case SpriteType::type_7: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_7_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_7_priority));
                 break;
             }
             default: {
@@ -251,17 +259,17 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
         // 8 bits by pixel
         switch (sprite_type) {
             case SpriteType::type_8: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_8_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_8_priority));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
             case SpriteType::type_9: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_9_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_9_priority));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
             case SpriteType::type_a: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_a_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_a_priority));
                 priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
@@ -271,17 +279,18 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
                 break;
             }
             case SpriteType::type_c: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_c_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_c_priority));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
             case SpriteType::type_d: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_d_priority);
+                priority_number_register
+                    = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_d_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
             case SpriteType::type_e: {
-                priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_e_priority);
+                priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_e_priority));
                 priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
@@ -301,20 +310,19 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     priority(modules.vdp2()->getSpritePriority(priority_number_register));
 }
 
-auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> u8 {
-    const auto color_mode = cmdpmod_.get(CmdPmod::color_mode);
+auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const u8 priority) -> u8 {
+    const auto color_mode = toEnum<ColorMode>(cmdpmod_.color_mode);
     switch (color_mode) {
         case ColorMode::mode_5_32k_colors_rgb: {
             return 0;
         }
         case ColorMode::mode_1_16_colors_lookup: {
-            const auto lut_address = u32{vdp1_ram_start_address + cmdsrca_.toU32() * address_multiplier};
-            auto       reg         = SpriteTypeRegister{modules.memory()->read<u32>(lut_address)};
-            return (reg.get(SpriteTypeRegister::msb) == 1) ? 0 : reg.get(range);
+            const auto lut_address = u32{vdp1_ram_start_address + cmdsrca_.raw * address_multiplier};
+            auto       reg         = SpriteTypeRegister{modules.memory()->read<u16>(lut_address)};
+            return (reg.msb == 1) ? 0 : priority;
         }
         default: {
-            auto reg = SpriteTypeRegister{cmdcolr_.toU32()};
-            return reg.get(range);
+            return priority;
         }
     }
 }
@@ -506,44 +514,47 @@ Color calculation
         auto s = std::string{};
 
         s += "MSB ";
-        s += (cp.get(CmdPmod::msb_on) == MsbOn::on) ? "on" : "off";
+        s += (toEnum<MsbOn>(cp.msb_on) == MsbOn::on) ? "on" : "off";
         s += "\nHigh speed shrink ";
-        s += (cp.get(CmdPmod::high_speed_shrink) == HighSpeedShrink::enabled) ? "enabled" : "disabled";
+        s += (toEnum<HighSpeedShrink>(cp.high_speed_shrink) == HighSpeedShrink::enabled) ? "enabled" : "disabled";
         s += "\nPre-clipping ";
-        s += (cp.get(CmdPmod::pre_clipping_disable) == PreClippingDisable::pre_clipping) ? "enabled" : "disabled";
+        s += (toEnum<PreClippingDisable>(cp.pre_clipping_disable) == PreClippingDisable::pre_clipping) ? "enabled" : "disabled";
         s += "\nUser clipping ";
-        if (cp.get(CmdPmod::user_clipping_enable) == UserClippingEnable::enabled) {
+        if (toEnum<UserClippingEnable>(cp.user_clipping_enable) == UserClippingEnable::enabled) {
             s += "enabled";
             s += "\nUser clipping ";
-            s += (cp.get(CmdPmod::user_clipping_mode) == UserClippingMode::drawing_inside) ? "drawing inside" : "drawing outside";
+            s += (toEnum<UserClippingMode>(cp.user_clipping_mode) == UserClippingMode::drawing_inside) ? "drawing inside"
+                                                                                                       : "drawing outside";
         } else {
             s += "ignored";
         }
         s += "\n";
-        s += (cp.get(CmdPmod::mesh_enable) == MeshEnable::enabled) ? "Draw with mesh processing" : "Draw without mesh processing";
+        s += (toEnum<MeshEnable>(cp.mesh_enable) == MeshEnable::enabled) ? "Draw with mesh processing"
+                                                                         : "Draw without mesh processing";
         s += "\nEnd code ";
-        s += (cp.get(CmdPmod::end_code_disable) == EndCodeDisable::enabled) ? "enabled" : "disabled";
+        s += (toEnum<EndCodeDisable>(cp.end_code_disable) == EndCodeDisable::enabled) ? "enabled" : "disabled";
         s += "\nTransparent pixel ";
-        s += (cp.get(CmdPmod::transparent_pixel_disable) == TransparentPixelDisable::transparent_pixel_enabled) ? "enabled"
-                                                                                                                : "disabled";
-        s += getColorMode(cp.get(CmdPmod::color_mode));
-        s += getColorCalculation(cp.get(CmdPmod::color_calculation));
+        s += (toEnum<TransparentPixelDisable>(cp.transparent_pixel_disable) == TransparentPixelDisable::transparent_pixel_enabled)
+                 ? "enabled"
+                 : "disabled";
+        s += getColorMode(toEnum<ColorMode>(cp.color_mode));
+        s += getColorCalculation(toEnum<ColorCalculation>(cp.color_calculation));
 
         return s;
     };
 
     const auto getGouraudShadingData = [&]() {
-        if (cmdpmod_.get(CmdPmod::gouraud_shading) == GouraudShading::enabled) {
+        if (toEnum<GouraudShading>(cmdpmod_.gouraud_shading) == GouraudShading::enabled) {
             return fmt::format(R"(
 Gouraud shading 
     Table address {:#x}
 )",
-                               vdp1_ram_start_address + cmdgrda_.get(CmdGrda::gouraud_shading_table) * address_multiplier);
+                               vdp1_ram_start_address + cmdgrda_.raw * address_multiplier);
         }
         return std::string{};
     };
 
-    switch (cmdctrl_.get(CmdCtrl::command_select)) {
+    switch (toEnum<CommandSelect>(cmdctrl_.command_select)) {
         case CommandSelect::system_clipping: {
             // cmdxc_ = m->read<u16>(address + cmdxc_offset);
             // cmdyc_ = m->read<u16>(address + cmdyc_offset);
@@ -557,23 +568,25 @@ Gouraud shading
             break;
         }
         case CommandSelect::local_coordinate: {
-            part_detail += fmt::format("x = {}, y = {}\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
+            part_detail += fmt::format("x = {}, y = {}\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             break;
         }
         case CommandSelect::normal_sprite_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})", cmdxa_.twoCmp(), cmdya_.twoCmp());
-            part_detail += fmt::format("{}\n", getCharacterReadDirection(cmdctrl_.get(CmdCtrl::character_read_direction)));
+            part_detail += fmt::format("Vertex A ({}, {})", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail
+                += fmt::format("{}\n",
+                               getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
             part_detail += fmt::format("Character size {} * {}\n",
-                                       cmdsize_.get(CmdSize::character_size_x) * horizontal_multiplier,
-                                       cmdsize_.get(CmdSize::character_size_y));
+                                       cmdsize_.character_size_x * horizontal_multiplier,
+                                       cmdsize_.character_size_y);
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
             part_detail += fmt::format("Texture key : {:#x}", textureKey());
             break;
         }
         case CommandSelect::scaled_sprite_draw: {
-            part_detail += getZoomPoint(cmdctrl_.get(CmdCtrl::zoom_point));
-            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
+            part_detail += getZoomPoint(toEnum<ZoomPoint>(cmdctrl_.zoom_point));
+            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
             part_detail += fmt::format("Texture key : {:#x}", textureKey());
@@ -591,39 +604,39 @@ Gouraud shading
             break;
         }
         case CommandSelect::distorted_sprite_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
-            part_detail += fmt::format("Vertex B ({}, {})\n", cmdxb_.twoCmp(), cmdyb_.twoCmp());
-            part_detail += fmt::format("Vertex C ({}, {})\n", cmdxc_.twoCmp(), cmdyc_.twoCmp());
-            part_detail += fmt::format("Vertex D ({}, {})\n", cmdxd_.twoCmp(), cmdyd_.twoCmp());
+            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += fmt::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += fmt::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
+            part_detail += fmt::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
             part_detail += fmt::format("Texture key : {:#x}", textureKey());
             break;
         }
         case CommandSelect::polygon_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
-            part_detail += fmt::format("Vertex B ({}, {})\n", cmdxb_.twoCmp(), cmdyb_.twoCmp());
-            part_detail += fmt::format("Vertex C ({}, {})\n", cmdxc_.twoCmp(), cmdyc_.twoCmp());
-            part_detail += fmt::format("Vertex D ({}, {})\n", cmdxd_.twoCmp(), cmdyd_.twoCmp());
-            auto color = Color(cmdcolr_.get(CmdColr::color_control));
+            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += fmt::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += fmt::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
+            part_detail += fmt::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
+            auto color = Color(cmdcolr_.raw);
             part_detail += fmt::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }
         case CommandSelect::polyline_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
-            part_detail += fmt::format("Vertex B ({}, {})\n", cmdxb_.twoCmp(), cmdyb_.twoCmp());
-            part_detail += fmt::format("Vertex C ({}, {})\n", cmdxc_.twoCmp(), cmdyc_.twoCmp());
-            part_detail += fmt::format("Vertex D ({}, {})\n", cmdxd_.twoCmp(), cmdyd_.twoCmp());
-            auto color = Color(cmdcolr_.get(CmdColr::color_control));
+            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += fmt::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += fmt::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
+            part_detail += fmt::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
+            auto color = Color(cmdcolr_.raw);
             part_detail += fmt::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }
         case CommandSelect::line_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})\n", cmdxa_.twoCmp(), cmdya_.twoCmp());
-            part_detail += fmt::format("Vertex B ({}, {})\n", cmdxb_.twoCmp(), cmdyb_.twoCmp());
-            auto color = Color(cmdcolr_.get(CmdColr::color_control));
+            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += fmt::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            auto color = Color(cmdcolr_.raw);
             part_detail += fmt::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
@@ -633,19 +646,19 @@ Gouraud shading
     return part_detail;
 }
 
-auto Vdp1Part::calculatedXA() -> s16 { return cmdxa_.twoCmp() + local_coordinate_x_; }
-auto Vdp1Part::calculatedYA() -> s16 { return cmdya_.twoCmp() + local_coordinate_y_; }
-auto Vdp1Part::calculatedXB() -> s16 { return cmdxb_.twoCmp() + local_coordinate_x_; }
-auto Vdp1Part::calculatedYB() -> s16 { return cmdyb_.twoCmp() + local_coordinate_y_; }
-auto Vdp1Part::calculatedXC() -> s16 { return cmdxc_.twoCmp() + local_coordinate_x_; }
-auto Vdp1Part::calculatedYC() -> s16 { return cmdyc_.twoCmp() + local_coordinate_y_; }
-auto Vdp1Part::calculatedXD() -> s16 { return cmdxd_.twoCmp() + local_coordinate_x_; }
-auto Vdp1Part::calculatedYD() -> s16 { return cmdyd_.twoCmp() + local_coordinate_y_; }
+auto Vdp1Part::calculatedXA() -> s16 { return twosComplement(cmdxa_.raw) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYA() -> s16 { return twosComplement(cmdya_.raw) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXB() -> s16 { return twosComplement(cmdxb_.raw) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYB() -> s16 { return twosComplement(cmdyb_.raw) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXC() -> s16 { return twosComplement(cmdxc_.raw) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYC() -> s16 { return twosComplement(cmdyc_.raw) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXD() -> s16 { return twosComplement(cmdxd_.raw) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYD() -> s16 { return twosComplement(cmdyd_.raw) + local_coordinate_y_; }
 
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));
-    const auto size_x = static_cast<s16>(part.cmdsize_.get(CmdSize::character_size_x) * horizontal_multiplier);
-    const auto size_y = static_cast<s16>(part.cmdsize_.get(CmdSize::character_size_y));
+    const auto size_x = static_cast<s16>(part.cmdsize_.character_size_x * horizontal_multiplier);
+    const auto size_y = static_cast<s16>(part.cmdsize_.character_size_y);
 
     loadTextureData(modules, part);
 
@@ -656,7 +669,7 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     VertexPosition c{static_cast<s16>(part.calculatedXA() + size_x), static_cast<s16>(part.calculatedYA() + size_y)};
     VertexPosition d{part.calculatedXA(), static_cast<s16>(part.calculatedYA() + size_y)};
 
-    const auto coords = getTextureCoordinates(part.cmdctrl_.get(CmdCtrl::character_read_direction));
+    const auto coords = getTextureCoordinates(toEnum<CharacterReadDirection>(part.cmdctrl_.character_read_direction));
     if (coords.size() != 4) {
         Log::error(Logger::vdp1, tr("VDP1 normal sprite draw coordinates error"));
         throw std::runtime_error("VDP1 normal sprite draw coordinates error !");
@@ -693,13 +706,13 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     std::vector<VertexPosition> vertexes_pos;
 
-    const auto width  = part.cmdxb_.twoCmp();
-    const auto height = part.cmdyb_.twoCmp();
+    const auto width  = twosComplement(part.cmdxb_.raw);
+    const auto height = twosComplement(part.cmdyb_.raw);
     vertexes_pos.reserve(4);
-    switch (part.cmdctrl_.get(CmdCtrl::zoom_point)) {
+    switch (toEnum<ZoomPoint>(part.cmdctrl_.zoom_point)) {
         case ZoomPoint::two_coordinates: {
-            const auto size_x = static_cast<s16>(part.cmdsize_.get(CmdSize::character_size_x) * 8);
-            const auto size_y = static_cast<s16>(part.cmdsize_.get(CmdSize::character_size_y));
+            const auto size_x = static_cast<s16>(part.cmdsize_.character_size_x * 8);
+            const auto size_y = static_cast<s16>(part.cmdsize_.character_size_y);
             Log::debug(Logger::vdp1, "Character size {} * {}", size_x, size_y);
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() + size_x, part.calculatedYA());
@@ -772,7 +785,7 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
         }
     }
 
-    const auto coords = getTextureCoordinates(part.cmdctrl_.get(CmdCtrl::character_read_direction));
+    const auto coords = getTextureCoordinates(toEnum<CharacterReadDirection>(part.cmdctrl_.character_read_direction));
     if (coords.size() != 4) {
         Log::error(Logger::vdp1, tr("VDP1 scaled sprite draw coordinates error"));
         throw std::runtime_error("VDP1 scaled sprite draw coordinates error !");
@@ -894,9 +907,8 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
 
-    const auto cmdcolr = part.cmdcolr_.get(CmdColr::color_control);
-    auto       color   = Color(cmdcolr);
-    if (cmdcolr == 0) { color.a = 0; }
+    auto color = Color(part.cmdcolr_.raw);
+    if (part.cmdcolr_.raw == 0) { color.a = 0; }
     const auto gouraud_values = readGouraudData(modules, part);
 
     // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
@@ -957,9 +969,8 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
 
-    const auto cmdcolr = part.cmdcolr_.get(CmdColr::color_control);
-    auto       color   = Color(cmdcolr);
-    if (cmdcolr == 0) { color.a = 0; }
+    auto color = Color(part.cmdcolr_.raw);
+    if (part.cmdcolr_.raw == 0) { color.a = 0; }
 
     const auto gouraud_values = readGouraudData(modules, part);
 
@@ -1021,9 +1032,8 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Line draw"));
 
-    const auto cmdcolr = part.cmdcolr_.get(CmdColr::color_control);
-    auto       color   = Color(cmdcolr);
-    if (cmdcolr == 0) { color.a = 0; }
+    auto color = Color(part.cmdcolr_.raw);
+    if (part.cmdcolr_.raw == 0) { color.a = 0; }
 
     const auto gouraud_values = readGouraudData(modules, part);
 
@@ -1058,10 +1068,10 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
     const auto      color_ram_address_offset = modules.vdp1()->getColorRamAddressOffset();
-    auto            start_address            = vdp1_vram_start_address + part.cmdsrca_.toU16() * address_multiplier;
-    const auto      texture_width            = part.cmdsize_.get(CmdSize::character_size_x) * 8;
-    const auto      texture_height           = part.cmdsize_.get(CmdSize::character_size_y);
-    const auto      color_mode               = part.cmdpmod_.get(CmdPmod::color_mode);
+    auto            start_address            = vdp1_vram_start_address + part.cmdsrca_.raw * address_multiplier;
+    const auto      texture_width            = part.cmdsize_.character_size_x * 8;
+    const auto      texture_height           = part.cmdsize_.character_size_y;
+    const auto      color_mode               = toEnum<ColorMode>(part.cmdpmod_.color_mode);
     const auto      texture_size             = static_cast<u32>(texture_width * texture_height * 4);
     std::vector<u8> texture_data;
     texture_data.reserve(texture_size);
@@ -1138,8 +1148,8 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
 
 auto readGouraudData(const EmulatorModules& modules, Vdp1Part& part) -> std::vector<Gouraud> {
     auto gouraud_values = std::vector<Gouraud>{};
-    if (part.cmdpmod_.get(CmdPmod::gouraud_shading) == GouraudShading::enabled) {
-        const auto grd_table_address = vdp1_ram_start_address + part.cmdgrda_.get(CmdGrda::gouraud_shading_table) * 8;
+    if (toEnum<GouraudShading>(part.cmdpmod_.gouraud_shading) == GouraudShading::enabled) {
+        const auto grd_table_address = vdp1_ram_start_address + part.cmdgrda_.raw * 8;
 
         constexpr auto max_values = u8{4};
         for (u8 i = 0; i < max_values; i++) {
@@ -1186,11 +1196,11 @@ auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<Text
 }
 
 void checkColorCalculation(Vdp1Part& part) {
-    switch (part.cmdpmod_.get(CmdPmod::color_calculation)) {
+    switch (toEnum<ColorCalculation>(part.cmdpmod_.color_calculation)) {
         case ColorCalculation::mode_0: break;
         case ColorCalculation::mode_4: break;
         default: {
-            Log::unimplemented("Vdp1 - Color calculation {}", toUnderlying(part.cmdpmod_.get(CmdPmod::color_calculation)));
+            Log::unimplemented("Vdp1 - Color calculation {}", part.cmdpmod_.color_calculation);
         }
     }
 }

@@ -26,6 +26,7 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/bitfield.h>
 
 namespace saturnin::video {
 namespace vdp1_register_address {
@@ -42,14 +43,13 @@ constexpr u32 current_operation_command_address  = {0x25d00014};
 constexpr u32 mode_status                        = {0x25d00016};
 }; // namespace vdp1_register_address
 
-constexpr auto coordinate_mask = u16{0x03FF};
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   VBlankEraseWriteEnable
 ///
 /// \brief  VBE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VBlankEraseWriteEnable : u8 {
+enum class VBlankEraseWriteEnable : bool {
     no_erase_write_performed_during_vblank = 0, ///< Erase/Write is not performed during VBlank.
     erase_write_performed_during_vblank    = 1  ///< Erase/Write is performed during VBlank.
 };
@@ -60,7 +60,7 @@ enum class VBlankEraseWriteEnable : u8 {
 /// \brief  TVM bit 2 values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class HdtvEnable : u8 {
+enum class HdtvEnable : bool {
     ntsc_pal  = 0, ///< NTSC, PAL.
     hdtv_31kc = 1  ///< HDTV, 31KC.
 };
@@ -71,7 +71,7 @@ enum class HdtvEnable : u8 {
 /// \brief  TVM bit 1 values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class FrameBufferRotationEnable : u8 {
+enum class FrameBufferRotationEnable : bool {
     no_rotation = 0, ///< No rotation.
     rotation    = 1  ///< Rotation.
 };
@@ -82,27 +82,26 @@ enum class FrameBufferRotationEnable : u8 {
 /// \brief  TVM bit 0 values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BitDepthSelection : u8 {
+enum class BitDepthSelection : bool {
     sixteen_bits_per_pixel = 0, ///< 16 bits / pixel.
     eight_bits_per_pixel   = 1  ///< 8 bits / pixel.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  TvModeSelection
+/// \union	TvModeSelection
 ///
-/// \brief  TV Mode Selection register (TVMR).
+/// \brief	TV Mode Selection register (TVMR).
 ///
-/// \author Runik
-/// \date   10/06/2020
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TvModeSelection : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<VBlankEraseWriteEnable>    vblank_erase_write_enable{3};        ///< Defines VBE bit.
-    inline static const BitRange<HdtvEnable>                tvm_hdtv_enable{2};                  ///< Defines TVM bit 2.
-    inline static const BitRange<FrameBufferRotationEnable> tvm_frame_buffer_rotation_enable{1}; ///< Defines TVM bit 1.
-    inline static const BitRange<BitDepthSelection>         tvm_bit_depth_selection{0};          ///< Defines TVM bit 0.
+union TvModeSelection {
+    u16         raw;                              ///< Raw representation.
+    BitField<3> vblank_erase_write_enable;        ///< Defines VBE bit.
+    BitField<2> tvm_hdtv_enable;                  ///< Defines TVM bit 2.
+    BitField<1> tvm_frame_buffer_rotation_enable; ///< Defines TVM bit 1.
+    BitField<0> tvm_bit_depth_selection;          ///< Defines TVM bit 0.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +110,7 @@ class TvModeSelection : public Register {
 /// \brief  EOS bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class EvenOddCoordinateSelect : u8 {
+enum class EvenOddCoordinateSelect : bool {
     samples_pixels_at_even_coordinates = 0, ///< Samples only pixels at even coordinates.
     samples_pixels_at_odd_coordinates  = 1  ///< Samples only pixels at odd coordinates.
 };
@@ -122,7 +121,7 @@ enum class EvenOddCoordinateSelect : u8 {
 /// \brief  DIE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DoubleInterlaceEnable : u8 {
+enum class DoubleInterlaceEnable : bool {
     non_interlace_or_single_interlace = 0, ///< Non-interlace/single interlace.
     double_interlace                  = 1  ///< Double interlace.
 };
@@ -133,7 +132,7 @@ enum class DoubleInterlaceEnable : u8 {
 /// \brief  DIL bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DoubleInterlaceDrawLine : u8 {
+enum class DoubleInterlaceDrawLine : bool {
     not_set = 0, ///< DIL bit not set.
     set     = 1  ///< DIL bit set.
 };
@@ -156,7 +155,7 @@ enum class DoubleInterlaceBothBits : u8 {
 /// \brief  FCM bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class FrameBufferChangeModeBit : u8 {
+enum class FrameBufferChangeModeBit : bool {
     automatic_mode = 0, ///< Automatic mode change.
     manual_mode    = 1  ///< Manual mode change.
 };
@@ -175,23 +174,22 @@ enum class FrameBufferChangeBothBits : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  FrameBufferSwitchMode
+/// \union	FrameBufferSwitchMode
 ///
-/// \brief  Frame Buffer Switch Mode register (FBCR).
+/// \brief	Frame Buffer Switch Mode register (FBCR).
 ///
-/// \author Runik
-/// \date   12/06/2020
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class FrameBufferSwitchMode : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<EvenOddCoordinateSelect>   even_odd_coordinate_select{4};       ///< Defines EOS bit.
-    inline static const BitRange<DoubleInterlaceEnable>     double_interlace_enable{3};          ///< Defines DIE bit.
-    inline static const BitRange<DoubleInterlaceDrawLine>   double_interlace_draw_line{2};       ///< Defines DIL bit.
-    inline static const BitRange<DoubleInterlaceDrawLine>   double_interlace_both_bits{2, 3};    ///< Defines DIE + DIL bits.
-    inline static const BitRange<FrameBufferChangeModeBit>  frame_buffer_change_mode{1};         ///< Defines FCM bits.
-    inline static const BitRange<FrameBufferChangeBothBits> frame_buffer_change_both_bits{0, 1}; ///< Defines FCM + FCT bits.
+union FrameBufferSwitchMode {
+    u16            raw;                           ///< Raw representation.
+    BitField<4>    even_odd_coordinate_select;    ///< Defines EOS bit.
+    BitField<3>    double_interlace_enable;       ///< Defines DIE bit.
+    BitField<2>    double_interlace_draw_line;    ///< Defines DIL bit.
+    BitField<2, 2> double_interlace_both_bits;    ///< Defines DIE + DIL bits.
+    BitField<1>    frame_buffer_change_mode;      ///< Defines FCM bits.
+    BitField<0, 2> frame_buffer_change_both_bits; ///< Defines FCM + FCT bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,7 +211,7 @@ enum class PlotTriggerMode : u8 {
 /// \brief  PTM bit 1 values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PlotTriggerMode1 : u8 {
+enum class PlotTriggerMode1 : bool {
     cleared = 0, ///< Bit is cleared.
     set     = 1  ///< Bit is set.
 
@@ -228,11 +226,10 @@ enum class PlotTriggerMode1 : u8 {
 /// \date   13/06/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PlotTrigger : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<PlotTriggerMode>  plot_trigger_mode{0, 1};    ///< Defines PTM bits.
-    inline static const BitRange<PlotTriggerMode1> plot_trigger_mode_bit_1{1}; ///< Defines PTM1 bit.
+union PlotTrigger {
+    u16            raw;                     ///< Raw representation.
+    BitField<1>    plot_trigger_mode_bit_1; ///< Defines PTM1 bit.
+    BitField<0, 2> plot_trigger_mode;       ///< Defines PTM bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -258,45 +255,41 @@ class EraseWriteData : public Register {
 /// \brief  Erase/Write Upper-Left Coordinate register (EWLR).
 ///
 /// \author Runik
-/// \date   13/06/2020
+/// \date
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class EraseWriteUpperLeftCoordinate : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u8> upper_left_coordinate_x1{9, 14}; ///< Erase/Write Upper Left Coordinate X1.
-    inline static const BitRange<u8> upper_left_coordinate_y1{0, 8};  ///< Erase/Write Upper Left Coordinate Y1.
+union EraseWriteUpperLeftCoordinate {
+    u16            raw;                      ///< Raw representation.
+    BitField<9, 6> upper_left_coordinate_x1; ///< Erase/Write Upper Left Coordinate X1.
+    BitField<0, 9> upper_left_coordinate_y1; ///< Erase/Write Upper Left Coordinate Y1.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  EraseWriteLowerRightCoordinate
+/// \union	EraseWriteLowerRightCoordinate
 ///
-/// \brief  Erase/Write Lower-Right Coordinate register (EWRR).
+/// \brief	Erase/Write Lower-Right Coordinate register (EWRR).
 ///
-/// \author Runik
-/// \date   13/06/2020
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class EraseWriteLowerRightCoordinate : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u8> lower_right_coordinate_x3{9, 15}; ///< Erase/Write Lower Right Coordinate X3.
-    inline static const BitRange<u8> lower_right_coordinate_y3{0, 8};  ///< Erase/Write Lower Right Coordinate Y3.
+union EraseWriteLowerRightCoordinate {
+    u16            raw;                       ///< Raw representation.
+    BitField<9, 7> lower_right_coordinate_x3; ///< Erase/Write Upper Left Coordinate X3.
+    BitField<0, 9> lower_right_coordinate_y3; ///< Erase/Write Upper Left Coordinate Y3.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DrawForcedTermination
+/// \union	DrawForcedTermination
 ///
-/// \brief  Draw Forced Termination register (ENDR).
+/// \brief	Draw Forced Termination register (ENDR).
 ///
-/// \author Runik
-/// \date   13/06/2020
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DrawForcedTermination : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u16> draw_forced_termination{0, 15}; ///< Draw forced termination: draw end.
+union DrawForcedTermination {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -305,7 +298,7 @@ class DrawForcedTermination : public Register {
 /// \brief  CEF bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CurrentEndBitFetchStatus : u8 {
+enum class CurrentEndBitFetchStatus : bool {
     end_bit_not_fetched = 0, ///< The end bit in current frame has not been fetched.
     end_bit_fetched     = 1  ///< The end bit in current frame has been fetched and plotting is ended.
 };
@@ -316,7 +309,7 @@ enum class CurrentEndBitFetchStatus : u8 {
 /// \brief  BEF bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BeforeEndBitFetchStatus : u8 {
+enum class BeforeEndBitFetchStatus : bool {
     end_bit_not_fetched = 0, ///< The end bit in previous frame has not been fetched.
     end_bit_fetched     = 1  ///< The end bit in previous frame has been fetched and drawing is terminated.
 };
@@ -330,41 +323,36 @@ enum class BeforeEndBitFetchStatus : u8 {
 /// \date   13/06/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TransferEndStatus : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<CurrentEndBitFetchStatus> current_end_bit_fetch_status{1}; ///< Defines CEF bit.
-    inline static const BitRange<BeforeEndBitFetchStatus>  before_end_bit_fetch_status{0};  ///< Defines BEF bit.
+union TransferEndStatus {
+    u16         raw;                          ///< Raw representation.
+    BitField<1> current_end_bit_fetch_status; ///< Defines CEF bit.
+    BitField<0> before_end_bit_fetch_status;  ///< Defines BEF bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LastOperationCommandAddress
+/// \union	LastOperationCommandAddress
 ///
-/// \brief  Last Operation Command Address register (LOPR).
+/// \brief	Last Operation Command Address register (LOPR).
 ///
-/// \author Runik
-/// \date   13/06/2020
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LastOperationCommandAddress : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u16> last_operation_command_address{0, 15}; ///< Last operation command address.
+union LastOperationCommandAddress {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CurrentOperationCommandAddress
+/// \union	CurrentOperationCommandAddress
 ///
-/// \brief  Current Operation Command Address register (COPR).
+/// \brief	Current Operation Command Address register (COPR).
 ///
-/// \author Runik
-/// \date   13/06/2020
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CurrentOperationCommandAddress : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u16> current_operation_command_address{0, 15}; ///< Current operation command address.
+union CurrentOperationCommandAddress {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -376,19 +364,18 @@ class CurrentOperationCommandAddress : public Register {
 /// \date   13/06/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ModeStatus : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u8>                        version_number{12, 15};              ///< Version number (VER) bits.
-    inline static const BitRange<PlotTriggerMode1>          plot_trigger_mode_bit_1{8};          ///< Defines PTM1 bit.
-    inline static const BitRange<EvenOddCoordinateSelect>   even_odd_coordinate_select{7};       ///< Defines EOS bit.
-    inline static const BitRange<DoubleInterlaceEnable>     double_interlace_enable{6};          ///< Defines DIE bit.
-    inline static const BitRange<DoubleInterlaceDrawLine>   double_interlace_draw_line{5};       ///< Defines DIL bit.
-    inline static const BitRange<FrameBufferChangeModeBit>  frame_buffer_change_mode{4};         ///< Defines FCM bit.
-    inline static const BitRange<VBlankEraseWriteEnable>    vblank_erase_write_enable{3};        ///< Defines VBE bit.
-    inline static const BitRange<HdtvEnable>                tvm_hdtv_enable{2};                  ///< Defines TVM bit 2.
-    inline static const BitRange<FrameBufferRotationEnable> tvm_frame_buffer_rotation_enable{1}; ///< Defines TVM bit 1.
-    inline static const BitRange<BitDepthSelection>         tvm_bit_depth_selection{0};          ///< Defines TVM bit 0.
+union ModeStatus {
+    u16             raw;                              ///< Raw representation.
+    BitField<12, 4> version_number;                   ///< Version number (VER) bits.
+    BitField<8>     plot_trigger_mode_bit_1;          ///< Defines PTM1 bit.
+    BitField<7>     even_odd_coordinate_select;       ///< Defines EOS bit.
+    BitField<6>     double_interlace_enable;          ///< Defines DIE bit.
+    BitField<5>     double_interlace_draw_line;       ///< Defines DIL bit.
+    BitField<4>     frame_buffer_change_mode;         ///< Defines FCM bit.
+    BitField<3>     vblank_erase_write_enable;        ///< Defines VBE bit.
+    BitField<2>     tvm_hdtv_enable;                  ///< Defines TVM bit 2.
+    BitField<1>     tvm_frame_buffer_rotation_enable; ///< Defines TVM bit 1.
+    BitField<0>     tvm_bit_depth_selection;          ///< Defines TVM bit 0.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -397,7 +384,7 @@ class ModeStatus : public Register {
 /// \brief  END bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class EndBit : u8 {
+enum class EndBit : bool {
     command_selection_valid = 0, ///< Command selection valid.
     draw_ended              = 1  ///< Draw end command
 };
@@ -464,37 +451,34 @@ enum class CommandSelect : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CmdCtrl
+/// \union	CmdCtrl
 ///
-/// \brief  Control Words.
+/// \brief	Control Words.
 ///
-/// \author Runik
-/// \date   08/05/2021
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CmdCtrl : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<EndBit>                 end_bit{15};                    ///< END bit.
-    inline static const BitRange<JumpSelect>             jump_select{12, 14};            ///< JS bits.
-    inline static const BitRange<ZoomPoint>              zoom_point{8, 11};              ///< ZP bits.
-    inline static const BitRange<CharacterReadDirection> character_read_direction{4, 5}; ///< Dir bits.
-    inline static const BitRange<CommandSelect>          command_select{0, 3};           ///< Comm bits.
+union CmdCtrl {
+    u16             raw;                      ///< Raw representation.
+    BitField<15>    end_bit;                  ///< END bit.
+    BitField<12, 3> jump_select;              ///< JS bits.
+    BitField<8, 4>  zoom_point;               ///< ZP bits.
+    BitField<4, 2>  character_read_direction; ///< Dir bits.
+    BitField<0, 4>  command_select;           ///< Comm bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CmdLink
+/// \union	CmdLink
 ///
-/// \brief  Link specification.
+/// \brief	Link specification.
 ///
-/// \author Runik
-/// \date   08/05/2021
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CmdLink : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u16> link_specification{0, 15}; ///< Link specification divided by 8.
+union CmdLink {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -503,7 +487,7 @@ class CmdLink : public Register {
 /// \brief  MON bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class MsbOn : u8 {
+enum class MsbOn : bool {
     off = 0, ///< MSB is 0 on the framebuffer pixels that should be drawn.
     on  = 1  ///< MSB is 1 on the framebuffer pixels that should be drawn.
 };
@@ -514,7 +498,7 @@ enum class MsbOn : u8 {
 /// \brief  HSS bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class HighSpeedShrink : u8 {
+enum class HighSpeedShrink : bool {
     disabled = 0, ///< High Speed Shrink is disabled.
     enabled  = 1  ///< High Speed Shrink is enabled.
 };
@@ -525,7 +509,7 @@ enum class HighSpeedShrink : u8 {
 /// \brief  PCLP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PreClippingDisable : u8 {
+enum class PreClippingDisable : bool {
     pre_clipping    = 0, ///< Pre-clipping with horizontal inversion.
     no_pre_clipping = 1  ///< No pre-clipping and no horizontal inversion.
 };
@@ -536,7 +520,7 @@ enum class PreClippingDisable : u8 {
 /// \brief  CLIP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class UserClippingEnable : u8 {
+enum class UserClippingEnable : bool {
     ignored = 0, ///< User clipping coordinates are ignored.
     enabled = 1  ///< Part is clipped and drawn according to the user clipping coordinates and clipping mode bit.
 };
@@ -547,7 +531,7 @@ enum class UserClippingEnable : u8 {
 /// \brief  CMOD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class UserClippingMode : u8 {
+enum class UserClippingMode : bool {
     drawing_inside  = 0, ///< Drawing is performed inside the clipping area.
     drawing_outside = 1  ///< Drawing is performed outside the clipping area.
 };
@@ -558,7 +542,7 @@ enum class UserClippingMode : u8 {
 /// \brief  MESH bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class MeshEnable : u8 {
+enum class MeshEnable : bool {
     disabled = 0, ///< Draw without mesh processing.
     enabled  = 1  ///< Draw with mesh processing.
 };
@@ -569,7 +553,7 @@ enum class MeshEnable : u8 {
 /// \brief  ECD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class EndCodeDisable : u8 {
+enum class EndCodeDisable : bool {
     enabled  = 0, ///< End code is enabled.
     disabled = 1  ///< End code is disabled.
 };
@@ -580,7 +564,7 @@ enum class EndCodeDisable : u8 {
 /// \brief  SPD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransparentPixelDisable : u8 {
+enum class TransparentPixelDisable : bool {
     transparent_pixel_enabled  = 0, ///< Transparent pixel is enabled.
     transparent_pixel_disabled = 1  ///< Transparent pixel disabled.
 };
@@ -617,183 +601,203 @@ enum class ColorCalculation : u8 {
     mode_7 = 0b111, ///< Gouraud shading + half-transparent.
 };
 
-enum class GouraudShading : u8 { disabled = 0, enabled = 1 };
+enum class GouraudShading : bool { disabled = 0, enabled = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CmdPmod
+/// \union	CmdPmod
 ///
-/// \brief  Draw Mode Word.
+/// \brief	Draw Mode Word.
 ///
-/// \author Runik
-/// \date   08/05/2021
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CmdPmod : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<MsbOn>                   msb_on{15};                   ///< MON bit.
-    inline static const BitRange<HighSpeedShrink>         high_speed_shrink{12};        ///< HSS bit.
-    inline static const BitRange<PreClippingDisable>      pre_clipping_disable{11};     ///< PCLP bit.
-    inline static const BitRange<UserClippingEnable>      user_clipping_enable{10};     ///< CLIP bit.
-    inline static const BitRange<UserClippingMode>        user_clipping_mode{9};        ///< CMOD bit.
-    inline static const BitRange<MeshEnable>              mesh_enable{8};               ///< MESH bit.
-    inline static const BitRange<EndCodeDisable>          end_code_disable{7};          ///< ECD bit.
-    inline static const BitRange<TransparentPixelDisable> transparent_pixel_disable{6}; ///< SPD bit.
-    inline static const BitRange<ColorMode>               color_mode{3, 5};             ///< Color mode bits.
-    inline static const BitRange<ColorCalculation>        color_calculation{0, 2};      ///< Color calculation bits.
-    inline static const BitRange<GouraudShading>          gouraud_shading{2};           ///< Gouraud shading bit.
+union CmdPmod {
+    u16            raw;                       ///< Raw representation.
+    BitField<15>   msb_on;                    ///< MON bit.
+    BitField<12>   high_speed_shrink;         ///< HSS bit.
+    BitField<11>   pre_clipping_disable;      ///< PCLP bit.
+    BitField<10>   user_clipping_enable;      ///< CLIP bit.
+    BitField<9>    user_clipping_mode;        ///< CMOD bit.
+    BitField<8>    mesh_enable;               ///< MESH bit.
+    BitField<7>    end_code_disable;          ///< ECD bit.
+    BitField<6>    transparent_pixel_disable; ///< SPD bit.
+    BitField<3, 3> color_mode;                ///< Color mode bits.
+    BitField<0, 3> color_calculation;         ///< Color calculation bits.
+    BitField<2>    gouraud_shading;           ///< Gouraud shading bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CmdColr
+/// \union	CmdColr
 ///
-/// \brief  Color Control Word.
+/// \brief	Color Control Word.
 ///
-/// \author Runik
-/// \date   08/05/2021
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CmdColr : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u16> color_control{0, 15}; ///< Color control divided by 8.
+union CmdColr {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CmdSrca
+/// \union	CmdSrca
 ///
-/// \brief  Character Address.
+/// \brief	Character Address.
 ///
-/// \author Runik
-/// \date   08/05/2021
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CmdSrca : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u16> character_address{0, 15}; ///< Character Address divided by 8.
+union CmdSrca {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CmdSize
+/// \union	CmdSize
 ///
-/// \brief  Character Size.
+/// \brief	Character Size.
 ///
-/// \author Runik
-/// \date   08/05/2021
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CmdSize : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u8> character_size_x{8, 13}; ///< Character Size X divided by 8.
-    inline static const BitRange<u8> character_size_y{0, 7};  ///< Character Size Y.
+union CmdSize {
+    u16            raw;              ///< Raw representation.
+    BitField<8, 6> character_size_x; ///< Character Size X divided by 8.
+    BitField<0, 8> character_size_y; ///< Character Size Y.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CmdVertexCoordinate
+/// \union	CmdVertexCoordinate
 ///
-/// \brief  Vertex Coordinate data.
+/// \brief	Vertex Coordinate data.
 ///
-/// \author Runik
-/// \date   08/05/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CmdVertexCoordinate : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u16> vertex_coordinate{0, 15}; ///< Vertex coordinate (X or Y).
-    [[nodiscard]] inline auto         twoCmp() const -> s16 {
-        return (register_value[10] == 1) ? -static_cast<s16>((~register_value.to_ulong() + 1) & coordinate_mask)
-                                                 : static_cast<s16>(register_value.to_ulong() & coordinate_mask);
-    };
+union CmdVertexCoordinate {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CmdGrda
+/// \union	CmdGrda
 ///
-/// \brief  Gouraud Shading Table.
+/// \brief	Gouraud Shading Table.
 ///
-/// \author Runik
-/// \date   08/05/2021
+/// \author	Runik
+/// \date	22/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CmdGrda : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u16> gouraud_shading_table{0, 15}; ///< Gouraud Shading table address divided by 8.
+union CmdGrda {
+    u16 raw; ///< Raw representation.
 };
 
-class SpriteTypeRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u8> type_0_priority_palette{14, 15};  ///< Priority for Type 0 sprites on palette only fb.
-    inline static const BitRange<u8> type_0_priority_mixed{14};        ///< Priority for Type 0 sprites on mixed fb.
-    inline static const BitRange<u8> type_0_color_calculation{11, 13}; ///< Color calculation for Type 0 sprites.
-    inline static const BitRange<u8> type_0_dot_color{0, 10};          ///< Dot color for Type 0 sprites.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \union	SpriteTypeRegister
+///
+/// \brief	Sprite type register.
+///
+/// \author	Runik
+/// \date	22/01/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    inline static const BitRange<u8> type_1_priority_palette{13, 15};  ///< Priority for Type 1 sprites on palette only fb.
-    inline static const BitRange<u8> type_1_priority_mixed{13, 14};    ///< Priority for Type 1 sprites on mixed fb.
-    inline static const BitRange<u8> type_1_color_calculation{11, 12}; ///< Color calculation for Type 1 sprites.
-    inline static const BitRange<u8> type_1_dot_color{0, 10};          ///< Dot color for Type 1 sprites.
+union SpriteTypeRegister {
+    u16 raw; ///< Raw representation.
 
-    inline static const BitRange<u8> type_2_priority{14};              ///< Priority for Type 2 sprites.
-    inline static const BitRange<u8> type_2_shadow_palette{15};        ///< Shadow for Type 2 sprites on palette only fb.
-    inline static const BitRange<u8> type_2_color_calculation{11, 13}; ///< Color calculation for Type 2 sprites.
-    inline static const BitRange<u8> type_2_dot_color{0, 10};          ///< Dot color for Type 2 sprites.
+    BitField<14, 2> type_0_priority_palette;  ///< Priority for Type 0 sprites on palette only fb.
+    BitField<14>    type_0_priority_mixed;    ///< Priority for Type 0 sprites on mixed fb.
+    BitField<11, 2> type_0_color_calculation; ///< Color calculation for Type 0 sprites.
+    BitField<0, 11> type_0_dot_color;         ///< Dot color for Type 0 sprites.
 
-    inline static const BitRange<u8> type_3_shadow_palette{15};        ///< Shadow for Type 3 sprites on palette only fb.
-    inline static const BitRange<u8> type_3_priority{13, 14};          ///< Priority for Type 3 sprites.
-    inline static const BitRange<u8> type_3_color_calculation{11, 12}; ///< Color calculation for Type 3 sprites.
-    inline static const BitRange<u8> type_3_dot_color{0, 10};          ///< Dot color for Type 3 sprites.
+    BitField<13, 3> type_1_priority_palette;  ///< Priority for Type 1 sprites on palette only fb.
+    BitField<13, 2> type_1_priority_mixed;    ///< Priority for Type 1 sprites on mixed fb.
+    BitField<11, 2> type_1_color_calculation; ///< Color calculation for Type 1 sprites.
+    BitField<0, 11> type_1_dot_color;         ///< Dot color for Type 1 sprites.
 
-    inline static const BitRange<u8> type_4_shadow_palette{15};        ///< Shadow for Type 4 sprites on palette only fb.
-    inline static const BitRange<u8> type_4_priority{13, 14};          ///< Priority for Type 4 sprites.
-    inline static const BitRange<u8> type_4_color_calculation{10, 12}; ///< Color calculation for Type 4 sprites.
-    inline static const BitRange<u8> type_4_dot_color{0, 9};           ///< Dot color for Type 4 sprites.
+    BitField<14>    type_2_priority;          ///< Priority for Type 2 sprites.
+    BitField<15>    type_2_shadow_palette;    ///< Shadow for Type 2 sprites on palette only fb.
+    BitField<11, 3> type_2_color_calculation; ///< Color calculation for Type 2 sprites.
+    BitField<0, 11> type_2_dot_color;         ///< Dot color for Type 2 sprites.
 
-    inline static const BitRange<u8> type_5_shadow_palette{15};    ///< Shadow for Type 5 sprites on palette only fb.
-    inline static const BitRange<u8> type_5_priority{12, 14};      ///< Priority for Type 5 sprites.
-    inline static const BitRange<u8> type_5_color_calculation{11}; ///< Color calculation for Type 5 sprites.
-    inline static const BitRange<u8> type_5_dot_color{0, 10};      ///< Dot color for Type 5 sprites.
+    BitField<15>    type_3_shadow_palette;    ///< Shadow for Type 3 sprites on palette only fb.
+    BitField<13, 2> type_3_priority;          ///< Priority for Type 3 sprites.
+    BitField<11, 2> type_3_color_calculation; ///< Color calculation for Type 3 sprites.
+    BitField<0, 11> type_3_dot_color;         ///< Dot color for Type 3 sprites.
 
-    inline static const BitRange<u8> type_6_shadow_palette{15};        ///< Shadow for Type 6 sprites on palette only fb.
-    inline static const BitRange<u8> type_6_priority{12, 14};          ///< Priority for Type 6 sprites.
-    inline static const BitRange<u8> type_6_color_calculation{10, 11}; ///< Color calculation for Type 6 sprites.
-    inline static const BitRange<u8> type_6_dot_color{0, 9};           ///< Dot color for Type 6 sprites.
+    BitField<15>    type_4_shadow_palette;    ///< Shadow for Type 4 sprites on palette only fb.
+    BitField<13, 2> type_4_priority;          ///< Priority for Type 4 sprites.
+    BitField<10, 3> type_4_color_calculation; ///< Color calculation for Type 4 sprites.
+    BitField<0, 10> type_4_dot_color;         ///< Dot color for Type 4 sprites.
 
-    inline static const BitRange<u8> type_7_shadow_palette{15};       ///< Shadow for Type 7 sprites on palette only fb.
-    inline static const BitRange<u8> type_7_priority{12, 14};         ///< Priority for Type 7 sprites.
-    inline static const BitRange<u8> type_7_color_calculation{9, 11}; ///< Color calculation for Type 7 sprites.
-    inline static const BitRange<u8> type_7_dot_color{0, 8};          ///< Dot color for Type 7 sprites.
+    BitField<15>    type_5_shadow_palette;    ///< Shadow for Type 5 sprites on palette only fb.
+    BitField<12, 3> type_5_priority;          ///< Priority for Type 5 sprites.
+    BitField<11>    type_5_color_calculation; ///< Color calculation for Type 5 sprites.
+    BitField<0, 11> type_5_dot_color;         ///< Dot color for Type 5 sprites.
 
-    inline static const BitRange<u8> type_8_priority{7};     ///< Priority for Type 8 sprites.
-    inline static const BitRange<u8> type_8_dot_color{0, 6}; ///< Dot color for Type 8 sprites.
+    BitField<15>    type_6_shadow_palette;    ///< Shadow for Type 6 sprites on palette only fb.
+    BitField<12, 3> type_6_priority;          ///< Priority for Type 6 sprites.
+    BitField<10, 2> type_6_color_calculation; ///< Color calculation for Type 6 sprites.
+    BitField<0, 10> type_6_dot_color;         ///< Dot color for Type 6 sprites.
 
-    inline static const BitRange<u8> type_9_priority{7};          ///< Priority for Type 9 sprites.
-    inline static const BitRange<u8> type_9_color_calculation{6}; ///< Color calculation for Type 9 sprites.
-    inline static const BitRange<u8> type_9_dot_color{0, 5};      ///< Dot color for Type 9 sprites.
+    BitField<15>    type_7_shadow_palette;    ///< Shadow for Type 7 sprites on palette only fb.
+    BitField<12, 3> type_7_priority;          ///< Priority for Type 7 sprites.
+    BitField<9, 3>  type_7_color_calculation; ///< Color calculation for Type 7 sprites.
+    BitField<0, 9>  type_7_dot_color;         ///< Dot color for Type 7 sprites.
 
-    inline static const BitRange<u8> type_a_priority{6, 7};  ///< Priority for Type A sprites.
-    inline static const BitRange<u8> type_a_dot_color{0, 5}; ///< Dot color for Type A sprites.
+    BitField<7>    type_8_priority;  ///< Priority for Type 8 sprites.
+    BitField<0, 7> type_8_dot_color; ///< Dot color for Type 8 sprites.
 
-    inline static const BitRange<u8> type_b_color_calculation{6, 7}; ///< Color calculation for Type B sprites.
-    inline static const BitRange<u8> type_b_dot_color{0, 5};         ///< Dot color for Type B sprites.
+    BitField<7>    type_9_priority;          ///< Priority for Type 9 sprites.
+    BitField<6>    type_9_color_calculation; ///< Color calculation for Type 9 sprites.
+    BitField<0, 6> type_9_dot_color;         ///< Dot color for Type 9 sprites.
 
-    inline static const BitRange<u8> type_c_priority{7};     ///< Priority for Type C sprites.
-    inline static const BitRange<u8> type_c_dot_color{0, 7}; ///< Dot color for Type C sprites.
+    BitField<6, 2> type_a_priority;  ///< Priority for Type A sprites.
+    BitField<0, 6> type_a_dot_color; ///< Dot color for Type A sprites.
 
-    inline static const BitRange<u8> type_d_priority{7};          ///< Priority for Type D sprites.
-    inline static const BitRange<u8> type_d_color_calculation{6}; ///< Color calculation for Type D sprites.
-    inline static const BitRange<u8> type_d_dot_color{0, 7};      ///< Dot color for Type D sprites.
+    BitField<6, 2> type_b_color_calculation; ///< Color calculation for Type B sprites.
+    BitField<0, 6> type_b_dot_color;         ///< Dot color for Type B sprites.
 
-    inline static const BitRange<u8> type_e_priority{6, 7};  ///< Priority for Type E sprites.
-    inline static const BitRange<u8> type_e_dot_color{0, 7}; ///< Dot color for Type E sprites.
+    BitField<7>    type_c_priority;  ///< Priority for Type C sprites.
+    BitField<0, 8> type_c_dot_color; ///< Dot color for Type C sprites.
 
-    inline static const BitRange<u8> type_f_color_calculation{6, 7}; ///< Color calculation for Type F sprites.
-    inline static const BitRange<u8> type_f_dot_color{0, 7};         ///< Dot color for Type F sprites.
+    BitField<7>    type_d_priority;          ///< Priority for Type D sprites.
+    BitField<6>    type_d_color_calculation; ///< Color calculation for Type D sprites.
+    BitField<0, 8> type_d_dot_color;         ///< Dot color for Type D sprites.
 
-    inline static const BitRange<u8> msb{15}; ///< MSB, RGB or palette discriminant.
+    BitField<6, 2> type_e_priority;  ///< Priority for Type E sprites.
+    BitField<0, 8> type_e_dot_color; ///< Dot color for Type E sprites.
+
+    BitField<6, 2> type_f_color_calculation; ///< Color calculation for Type F sprites.
+    BitField<0, 8> type_f_dot_color;         ///< Dot color for Type F sprites.
+
+    BitField<15> msb; ///< MSB, RGB or palette discriminant.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	inline auto twosComplement(u16 value) -> s16
+///
+/// \brief	Calculates the complement of 2 for a VDP1 coordinate.
+///
+/// \author	Runik
+/// \date	22/01/2022
+///
+/// \param 	value	The value to get the complement of 2 from.
+///
+/// \returns	A s16.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[[nodiscard]] inline auto twosComplement(u16 value) -> s16 {
+    constexpr auto coordinate_mask = u16{0x03FF};
+    constexpr auto bit_10_set_mask = u16{0x0400};
+    constexpr auto sign_extension  = u16{0xf800};
+    if (value & bit_10_set_mask) {
+        value |= sign_extension;
+        return -static_cast<s16>((~value + 1) & coordinate_mask);
+    } else {
+        return static_cast<s16>(value & coordinate_mask);
+    }
 };
 
 }; // namespace saturnin::video

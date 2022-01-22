@@ -26,6 +26,7 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/bitfield.h>
 
 namespace saturnin::sh2 {
 

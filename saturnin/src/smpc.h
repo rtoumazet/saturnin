@@ -317,10 +317,10 @@ enum class SaturnPeripheralId : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct PeripheralData {
-    SaturnPeripheralId          saturn_peripheral_id{SaturnPeripheralId::unknown};
-    u8                          data_size{};
-    u8                          extension_data_size{};
-    std::vector<OutputRegister> peripheral_data_table;
+    SaturnPeripheralId saturn_peripheral_id{SaturnPeripheralId::unknown};
+    u8                 data_size{};
+    u8                 extension_data_size{};
+    std::vector<u8>    peripheral_data_table;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -678,10 +678,10 @@ class Smpc {
 
     bool is_intback_processing_{false}; ///< Intback status
     // bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
-    PeripheralDataLocation      next_peripheral_return_;
-    PortStatus                  port_1_status_{PortStatus::not_connected}; ///< The port 1 status
-    PortStatus                  port_2_status_{PortStatus::not_connected}; ///< The port 2 status
-    std::vector<OutputRegister> full_peripheral_data_table_;               ///< The full peripheral data table
+    PeripheralDataLocation next_peripheral_return_;
+    PortStatus             port_1_status_{PortStatus::not_connected}; ///< The port 1 status
+    PortStatus             port_2_status_{PortStatus::not_connected}; ///< The port 2 status
+    std::vector<u8>        full_peripheral_data_table_;               ///< The full peripheral data table
 
     std::array<u8, 0x4> smem_; ///< SMPC battery backupable memory (4B).
 

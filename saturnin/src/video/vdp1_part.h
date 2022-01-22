@@ -184,20 +184,20 @@ class Vdp1Part final : public BaseRenderingPart {
     void calculatePriority(const EmulatorModules& modules);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto final::getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> u8;
+    /// \fn	auto final::getPriorityRegister(const EmulatorModules& modules, const u8 priority) -> u8;
     ///
-    /// \brief  Gets the priority register depending on dot data.
+    /// \brief	Gets the priority register depending on dot data.
     ///
-    /// \author Runik
-    /// \date   16/09/2021
+    /// \author	Runik
+    /// \date	16/09/2021
     ///
-    /// \param  modules The color mode.
-    /// \param  range   The range to get.
+    /// \param 	modules 	The color mode.
+    /// \param 	priority	The priority.
     ///
-    /// \returns    The priority register.
+    /// \returns	The priority register.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getPriorityRegister(const EmulatorModules& modules, const BitRange<u8>& range) -> u8;
+    auto getPriorityRegister(const EmulatorModules& modules, const u8 priority) -> u8;
 
     EmulatorModules modules_;
 
@@ -243,12 +243,13 @@ void readDotColorBank16(const EmulatorModules& modules,
                         const u8               dot) {
     constexpr auto color_bank_mask = u16{0x0FF0};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.toU16() & color_bank_mask) | dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.raw & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (part.cmdpmod_.get(CmdPmod::transparent_pixel_disable) == TransparentPixelDisable::transparent_pixel_enabled) {
+    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
+        == TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -271,12 +272,13 @@ void readDotColorBank16(const EmulatorModules& modules,
 template<typename T>
 void readDotLookUpTable16(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot) {
     // const auto color_address = u32{vdp1_vram_start_address + (part.cmdcolr_.toU16() * address_multiplier + dot) * sizeof(T)};
-    const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.toU16() * address_multiplier + dot * sizeof(T)};
+    const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.raw * address_multiplier + dot * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (part.cmdpmod_.get(CmdPmod::transparent_pixel_disable) == TransparentPixelDisable::transparent_pixel_enabled) {
+    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
+        == TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -305,12 +307,13 @@ void readDotColorBank64(const EmulatorModules& modules,
                         const u8               dot) {
     constexpr auto color_bank_mask = u16{0x0FC0};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.toU16() & color_bank_mask) | dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.raw & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (part.cmdpmod_.get(CmdPmod::transparent_pixel_disable) == TransparentPixelDisable::transparent_pixel_enabled) {
+    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
+        == TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -339,12 +342,13 @@ void readDotColorBank128(const EmulatorModules& modules,
                          const u8               dot) {
     constexpr auto color_bank_mask = u16{0x0F80};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.toU16() & color_bank_mask) | dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.raw & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (part.cmdpmod_.get(CmdPmod::transparent_pixel_disable) == TransparentPixelDisable::transparent_pixel_enabled) {
+    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
+        == TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -373,12 +377,13 @@ void readDotColorBank256(const EmulatorModules& modules,
                          const u8               dot) {
     constexpr auto color_bank_mask = u16{0xFF00};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.toU16() & color_bank_mask) | dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.raw & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (part.cmdpmod_.get(CmdPmod::transparent_pixel_disable) == TransparentPixelDisable::transparent_pixel_enabled) {
+    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
+        == TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -404,7 +409,8 @@ void readDotRgb(const EmulatorModules& modules, std::vector<u8>& texture_data, V
     auto color = Color(dot);
 
     // Checking transparency.
-    if (part.cmdpmod_.get(CmdPmod::transparent_pixel_disable) == TransparentPixelDisable::transparent_pixel_enabled) {
+    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
+        == TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 

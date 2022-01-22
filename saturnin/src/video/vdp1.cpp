@@ -52,16 +52,16 @@ using core::StartingFactorSelect;
 using core::tr;
 
 void Vdp1::initialize() {
-    tvmr_.reset(); // Undefined after power on or reset.
-    fbcr_.reset(); // Undefined after power on or reset.
-    ptmr_.reset();
-    ewdr_.reset(); // Undefined after power on or reset.
-    endr_.reset(); // Write only
-    edsr_.reset(); // Unknown at power on or reset.
-    lopr_.reset(); // Unknown at power on or reset.
-    copr_.reset(); // Unknown at power on or reset.
+    tvmr_.raw = {}; // Undefined after power on or reset.
+    fbcr_.raw = {}; // Undefined after power on or reset.
+    ptmr_.raw = {};
+    ewdr_.reset();                          // Undefined after power on or reset.
+    endr_.raw                         = {}; // Write only
+    edsr_.raw                         = {}; // Unknown at power on or reset.
+    lopr_.raw                         = {}; // Unknown at power on or reset.
+    copr_.raw                         = {}; // Unknown at power on or reset.
     constexpr auto copr_default_value = u16{1000};
-    modr_                             = copr_default_value;
+    modr_.raw                         = copr_default_value;
 }
 
 auto Vdp1::intializeFramebuffer() -> bool {
@@ -76,11 +76,10 @@ auto Vdp1::intializeFramebuffer() -> bool {
 void Vdp1::run(const u8 cycles) {}
 
 void Vdp1::onVblankIn() {
-    
     Texture::setCache(VdpType::vdp1);
     updateResolution();
 
-    switch (ptmr_.get(PlotTrigger::plot_trigger_mode)) {
+    switch (toEnum<PlotTriggerMode>(ptmr_.plot_trigger_mode)) {
         case PlotTriggerMode::idle_at_frame_change: {
             Log::debug(Logger::vdp1, tr("Idle at frame change"));
             break;
@@ -117,9 +116,9 @@ void Vdp1::populateRenderData() {
     vdp1_parts_.clear();
     // Texture::discardCache(modules_.opengl(), VdpType::vdp1);
 
-    while (cmdctrl.get(CmdCtrl::end_bit) == EndBit::command_selection_valid) {
+    while (toEnum<EndBit>(cmdctrl.end_bit) == EndBit::command_selection_valid) {
         skip_table = false;
-        switch (cmdctrl.get(CmdCtrl::jump_select)) {
+        switch (toEnum<JumpSelect>(cmdctrl.jump_select)) {
             case JumpSelect::jump_next: {
                 Log::debug(Logger::vdp1, tr("Jump next"));
                 next_table_address += table_size;
@@ -127,12 +126,12 @@ void Vdp1::populateRenderData() {
             }
             case JumpSelect::jump_assign: {
                 Log::debug(Logger::vdp1, tr("Jump assign"));
-                next_table_address = vdp1_ram_start_address + cmdlink.toU16() * address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.raw * address_multiplier;
                 break;
             }
             case JumpSelect::jump_call: {
                 Log::debug(Logger::vdp1, tr("Jump call"));
-                next_table_address = vdp1_ram_start_address + cmdlink.toU16() * address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.raw * address_multiplier;
                 return_address     = current_table_address + table_size;
                 break;
             }
@@ -150,13 +149,13 @@ void Vdp1::populateRenderData() {
             }
             case JumpSelect::skip_assign: {
                 Log::debug(Logger::vdp1, tr("Skip assign"));
-                next_table_address = vdp1_ram_start_address + cmdlink.toU16() * address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.raw * address_multiplier;
                 skip_table         = true;
                 break;
             }
             case JumpSelect::skip_call: {
                 Log::debug(Logger::vdp1, tr("Skip call"));
-                next_table_address = vdp1_ram_start_address + cmdlink.toU16() * address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.raw * address_multiplier;
                 return_address     = current_table_address + table_size;
                 skip_table         = true;
                 break;
@@ -171,7 +170,7 @@ void Vdp1::populateRenderData() {
         }
 
         if (!skip_table) {
-            switch (cmdctrl.get(CmdCtrl::command_select)) {
+            switch (toEnum<CommandSelect>(cmdctrl.command_select)) {
                 case CommandSelect::system_clipping: {
                     Log::unimplemented(tr("VDP1 command - System clipping coordinate set"));
                     break;
@@ -224,8 +223,8 @@ void Vdp1::populateRenderData() {
 
     Log::debug(Logger::vdp1, tr("-= Draw End command =-"));
 
-    edsr_.set(TransferEndStatus::current_end_bit_fetch_status, CurrentEndBitFetchStatus::end_bit_fetched);
-    edsr_.set(TransferEndStatus::before_end_bit_fetch_status, BeforeEndBitFetchStatus::end_bit_fetched); // Needs rework
+    edsr_.current_end_bit_fetch_status = CurrentEndBitFetchStatus::end_bit_fetched;
+    edsr_.before_end_bit_fetch_status  = BeforeEndBitFetchStatus::end_bit_fetched; // Needs rework
 
     using namespace saturnin::core::interrupt_source;
     using saturnin::core::StartingFactorSelect;
@@ -236,10 +235,10 @@ void Vdp1::populateRenderData() {
 
 auto Vdp1::read16(const u32 addr) const -> u16 {
     switch (addr) {
-        case transfer_end_status: return edsr_.toU16();
-        case last_operation_command_address: return lopr_.toU16();
-        case current_operation_command_address: return copr_.toU16();
-        case mode_status: return modr_.toU16();
+        case transfer_end_status: return edsr_.raw;
+        case last_operation_command_address: return lopr_.raw;
+        case current_operation_command_address: return copr_.raw;
+        case mode_status: return modr_.raw;
         default: Log::warning(Logger::vdp1, core::tr("Unimplemented register read {:#010x}"), addr);
     }
 
@@ -248,20 +247,20 @@ auto Vdp1::read16(const u32 addr) const -> u16 {
 
 void Vdp1::write16(const u32 addr, const u16 data) {
     switch (addr) {
-        case tv_mode_selection: tvmr_.set(bits_0_15, data); break;
-        case frame_buffer_change_mode: fbcr_.set(bits_0_15, data); break;
+        case tv_mode_selection: tvmr_.raw = data; break;
+        case frame_buffer_change_mode: fbcr_.raw = data; break;
         case plot_trigger:
-            ptmr_.set(bits_0_15, data);
-            if (ptmr_.get(PlotTrigger::plot_trigger_mode) == PlotTriggerMode::starts_drawing_when_written) {
+            ptmr_.raw = data;
+            if (toEnum<PlotTriggerMode>(ptmr_.plot_trigger_mode) == PlotTriggerMode::starts_drawing_when_written) {
                 // Drawing starts from the beginning of the table
                 Log::debug(Logger::vdp1, tr("Drawing started at register write"));
                 populateRenderData();
             }
             break;
         case erase_write_data: ewdr_.set(bits_0_15, data); break;
-        case erase_write_upper_left_coordinate: ewlr_.set(bits_0_15, data); break;
-        case erase_write_lower_right_coordinate: ewlr_.set(bits_0_15, data); break;
-        case draw_forced_termination: endr_.set(bits_0_15, data); break;
+        case erase_write_upper_left_coordinate: ewlr_.raw = data; break;
+        case erase_write_lower_right_coordinate: ewlr_.raw = data; break;
+        case draw_forced_termination: endr_.raw = data; break;
         default: Log::warning(Logger::vdp1, core::tr("Unimplemented register write {:#010x}"), addr);
     }
 }

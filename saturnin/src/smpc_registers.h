@@ -26,6 +26,7 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/bitfield.h>
 
 namespace saturnin::core {
 
@@ -112,19 +113,16 @@ enum class SmpcCommand : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CommandRegister
+/// \union	CommandRegister
 ///
-/// \brief  Command Register (COMREG).
+/// \brief	Command Register (COMREG).
 ///
-/// \author Runik
-/// \date   14/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CommandRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto smpc_command = BitRange<SmpcCommand>{0, 7}; ///< Defines the smpc command.
-    inline static const auto all_bits     = BitRange<u8>{0, 7};          ///< Defines the range of all the bits of the register.
+union CommandRegister {
+    u8 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +144,7 @@ enum class PortMode : u8 {
 /// \brief  Reset button status values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ResetButtonStatus : u8 {
+enum class ResetButtonStatus : bool {
     button_off = 0, ///< Reset button off.
     button_on  = 1  ///< Reset buton on.
 };
@@ -157,7 +155,7 @@ enum class ResetButtonStatus : u8 {
 /// \brief  Peripheral data remaining values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PeripheralDataRemaining : u8 { no_remaining_peripheral_data = 0, remaining_peripheral_data = 1 };
+enum class PeripheralDataRemaining : bool { no_remaining_peripheral_data = 0, remaining_peripheral_data = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralDataLocation
@@ -165,41 +163,40 @@ enum class PeripheralDataRemaining : u8 { no_remaining_peripheral_data = 0, rema
 /// \brief  SR - PDL bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PeripheralDataLocation : u8 { second_or_above_peripheral_data = 0, first_peripheral_data = 1 };
+enum class PeripheralDataLocation : bool { second_or_above_peripheral_data = 0, first_peripheral_data = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  StatusRegister
+/// \union	StatusRegister
 ///
-/// \brief  Status Register (SR).
+/// \brief	Status Register (SR).
 ///
-/// \author Runik
-/// \date   14/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class StatusRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto port_1_mode               = BitRange<PortMode>{0, 1};             ///< Defines port 1 mode (P1MD).
-    inline static const auto port_2_mode               = BitRange<PortMode>{2, 3};             ///< Defines port 2 mode (P2MD).
-    inline static const auto reset_button_status       = BitRange<ResetButtonStatus>{4};       ///< Defines RESB bit.
-    inline static const auto peripheral_data_remaining = BitRange<PeripheralDataRemaining>{5}; ///< Defines PDE bit.
-    inline static const auto peripheral_data_location  = BitRange<PeripheralDataLocation>{6};  ///< Defines PDL bit.
-    inline static const auto all_bits = BitRange<u8>{0, 7}; ///< Defines the range of all the bits of the register.
+union StatusRegister {
+    u8             raw;                       ///< Raw representation.
+    BitField<0, 2> port_1_mode;               ///< Defines port 1 mode (P1MD).
+    BitField<2, 2> port_2_mode;               ///< Defines port 2 mode (P2MD).
+    BitField<4>    reset_button_status;       ///< Defines RESB bit.
+    BitField<5>    peripheral_data_remaining; ///< Defines PDE bit.
+    BitField<6>    peripheral_data_location;  ///< Defines PDL bit.
+    BitField<6>    bit_6;                     ///< Bit 6 access.
+    BitField<7>    bit_7;                     ///< Bit 7 access.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  StatusFlag
+/// \union	StatusFlag
 ///
-/// \brief  Status Flag (SF).
+/// \brief	Status Flag (SF).
 ///
-/// \author Runik
-/// \date   14/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class StatusFlag : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u8> sf{0}; ///< SF value.
+union StatusFlag {
+    u8          raw; ///< Raw representation.
+    BitField<0> sf;  ///< SF value.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -208,7 +205,7 @@ class StatusFlag : public Register {
 /// \brief  Intback Continue Request values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class IntbackContinueRequest : u8 { not_requested = 0, requested = 1 };
+enum class IntbackContinueRequest : bool { not_requested = 0, requested = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   IntbackBreakRequest
@@ -216,7 +213,7 @@ enum class IntbackContinueRequest : u8 { not_requested = 0, requested = 1 };
 /// \brief  Intback Break Request values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class IntbackBreakRequest : u8 { not_requested = 0, requested = 1 };
+enum class IntbackBreakRequest : bool { not_requested = 0, requested = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   SmpcStatusAcquisition
@@ -224,7 +221,7 @@ enum class IntbackBreakRequest : u8 { not_requested = 0, requested = 1 };
 /// \brief  Status acquisition values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class SmpcStatusAcquisition : u8 { status_not_returned = 0x00, status_returned = 0x01 };
+enum class SmpcStatusAcquisition : bool { status_not_returned = 0, status_returned = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   AcquisitionTimeOptimization
@@ -232,7 +229,7 @@ enum class SmpcStatusAcquisition : u8 { status_not_returned = 0x00, status_retur
 /// \brief  Acquisition time optimizations values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class AcquisitionTimeOptimization : u8 { optimized = 0, not_optimized = 1 };
+enum class AcquisitionTimeOptimization : bool { optimized = 0, not_optimized = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralDataEnable
@@ -240,32 +237,26 @@ enum class AcquisitionTimeOptimization : u8 { optimized = 0, not_optimized = 1 }
 /// \brief  Peripheral data enable values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PeripheralDataEnable : u8 { peripheral_data_not_returned = 0, peripheral_data_returned = 1 };
+enum class PeripheralDataEnable : bool { peripheral_data_not_returned = 0, peripheral_data_returned = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  InputRegister
+/// \union	InputRegister
 ///
-/// \brief  Input Register (IREGx).
+/// \brief	Input Register (IREGx).
 ///
-/// \author Runik
-/// \date   14/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class InputRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto ireg0_continue_request
-        = BitRange<IntbackContinueRequest>{7}; ///< Defines Intback continue request (IREG0).
-    inline static const auto ireg0_break_request = BitRange<IntbackBreakRequest>{6}; ///< Defines Intback break request (IREG0).
-    inline static const auto ireg0_status_acquisition
-        = BitRange<SmpcStatusAcquisition>{0, 7}; ///< Defines SMPC status acquisition (IREG0).
-    inline static const auto ireg1_acquisition_time_optimization
-        = BitRange<AcquisitionTimeOptimization>{1}; ///< Defines if peripheral acquisition time is optimized (IREG1).
-    inline static const auto ireg1_peripheral_data_enable
-        = BitRange<PeripheralDataEnable>{3};                               ///< Defines if peripheral data is enabled (IREG1).
-    inline static const auto ireg1_port_1_mode = BitRange<PortMode>{4, 5}; ///< Defines port 1 mode (IREG1).
-    inline static const auto ireg1_port_2_mode = BitRange<PortMode>{6, 7}; ///< Defines port 2 mode (IREG1).
-    inline static const auto all_bits          = BitRange<u8>{0, 7};       ///< Defines the range of all the bits of the register.
+union InputRegister {
+    u8             raw;                                 ///< Raw representation.
+    BitField<7>    ireg0_continue_request;              ///< Defines Intback continue request (IREG0).
+    BitField<6>    ireg0_break_request;                 ///< Defines Intback break request (IREG0).
+    BitField<0>    ireg0_status_acquisition;            ///< Defines SMPC status acquisition (IREG0).
+    BitField<6, 2> ireg1_port_2_mode;                   ///< Defines port 2 mode (IREG1).
+    BitField<4, 2> ireg1_port_1_mode;                   ///< Defines port 1 mode (IREG1).
+    BitField<3>    ireg1_peripheral_data_enable;        ///< Defines if peripheral data is enabled (IREG1).
+    BitField<1>    ireg1_acquisition_time_optimization; ///< Defines if peripheral acquisition time is optimized (IREG1).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -274,7 +265,7 @@ class InputRegister : public Register {
 /// \brief  Defines OREG0 - RESD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ResetStatus : u8 {
+enum class ResetStatus : bool {
     enabled  = 0, ///< Reset enabled.
     disabled = 1  ///< Reset disabled.
 };
@@ -285,7 +276,7 @@ enum class ResetStatus : u8 {
 /// \brief  Defines OREG0 - STE bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class SetTime : u8 {
+enum class SetTime : bool {
     not_set_time = 0, ///< Not SETTIME after SMPC cold reset.
     set_time     = 1  ///< SETTIME is done after SMPC cold reset.
 };
@@ -299,13 +290,18 @@ enum class SetTime : u8 {
 /// \date   14/12/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class OutputRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto oreg0_reset_status  = BitRange<ResetStatus>{6};    ///< Defines RESD bit (OREG0).
-    inline static const auto oreg0_set_time      = BitRange<SetTime>{7};        ///< Defines STE bit (OREG0).
-    inline static const auto oreg31_smpc_command = BitRange<SmpcCommand>{0, 7}; ///< Defines the smpc command (OREG31).
-    inline static const auto all_bits            = BitRange<u8>{0, 7}; ///< Defines the range of all the bits of the register.
+union OutputRegister {
+    u8          raw;                ///< Raw representation.
+    BitField<7> oreg0_set_time;     ///< Defines STE bit (OREG0).
+    BitField<6> oreg0_reset_status; ///< Defines RESD bit (OREG0).
+    BitField<7> bit_7;              ///< Bit 7 access.
+    BitField<6> bit_6;              ///< Bit 6 access.
+    BitField<5> bit_5;              ///< Bit 5 access.
+    BitField<4> bit_4;              ///< Bit 4 access.
+    BitField<3> bit_3;              ///< Bit 3 access.
+    BitField<2> bit_2;              ///< Bit 2 access.
+    BitField<1> bit_1;              ///< Bit 1 access.
+    BitField<0> bit_0;              ///< Bit 0 access.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,48 +310,62 @@ class OutputRegister : public Register {
 /// \brief  Reset button status values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ButtonStatus : u8 {
+enum class ButtonStatus : bool {
     pressed  = 0, ///< Button is pressed.
     released = 1  ///< Button is released.
 };
 
-class SaturnStandardPad1stData : public OutputRegister {
-  public:
-    using OutputRegister::OutputRegister;
-    inline static const BitRange<ButtonStatus> direction_right{7};
-    inline static const BitRange<ButtonStatus> direction_left{6};
-    inline static const BitRange<ButtonStatus> direction_down{5};
-    inline static const BitRange<ButtonStatus> direction_up{4};
-    inline static const BitRange<ButtonStatus> button_start{3};
-    inline static const BitRange<ButtonStatus> button_a{2};
-    inline static const BitRange<ButtonStatus> button_c{1};
-    inline static const BitRange<ButtonStatus> button_b{2};
-};
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \union	SaturnStandardPad1stData
+///
+/// \brief	First part of the standard Saturn PAD data.
+///
+/// \author	Runik
+/// \date	20/01/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SaturnStandardPad2ndData : public OutputRegister {
-  public:
-    using OutputRegister::OutputRegister;
-    inline static const BitRange<ButtonStatus> button_shoulder_right{7};
-    inline static const BitRange<ButtonStatus> button_x{6};
-    inline static const BitRange<ButtonStatus> button_y{5};
-    inline static const BitRange<ButtonStatus> button_z{4};
-    inline static const BitRange<ButtonStatus> button_shoulder_left{3};
+union SaturnStandardPad1stData {
+    u8          raw;             ///< Raw representation.
+    BitField<7> direction_right; ///< Right direction.
+    BitField<6> direction_left;  ///< Left direction.
+    BitField<5> direction_down;  ///< Down direction.
+    BitField<4> direction_up;    ///< Up direction.
+    BitField<3> button_start;    ///< Start button.
+    BitField<2> button_a;        ///< A button.
+    BitField<1> button_c;        ///< C button.
+    BitField<0> button_b;        ///< B button.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  DataDirectionRegister
+/// \union	SaturnStandardPad2ndData
 ///
-/// \brief  Data Direction Register (DDRx).
+/// \brief	Second part of the standard Saturn PAD data.
 ///
-/// \author Runik
-/// \date   14/12/2019
+/// \author	Runik
+/// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DataDirectionRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u8> all_bits{0, 6};         ///< Defines the range of all the bits of the register.
-    static constexpr u8              access_mask{0b1111111}; ///< The access mask
+union SaturnStandardPad2ndData {
+    u8          raw;                   ///< Raw representation.
+    BitField<7> button_shoulder_right; ///< Right shoulder button.
+    BitField<6> button_x;              ///< X button.
+    BitField<5> button_y;              ///< Y button.
+    BitField<4> button_z;              ///< Z button.
+    BitField<3> button_shoulder_left;  ///< Left shoulder button.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \union	DataDirectionRegister
+///
+/// \brief	Data Direction Register (DDRx).
+///
+/// \author	Runik
+/// \date	21/01/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+union DataDirectionRegister {
+    u8             raw; ///< Raw representation.
+    BitField<0, 6> ddr; ///< Used bits in the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -367,11 +377,9 @@ class DataDirectionRegister : public Register {
 /// \date   14/12/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PortDataRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u8> all_bits{0, 6};         ///< Defines the range of all the bits of the register.
-    static constexpr u8              access_mask{0b1111111}; ///< The access mask
+union PortDataRegister {
+    u8             raw; ///< Raw representation.
+    BitField<0, 6> pdr; ///< Used bits in the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -380,26 +388,24 @@ class PortDataRegister : public Register {
 /// \brief  IOSEL values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PeripheralPortMode : u8 {
+enum class PeripheralPortMode : bool {
     smpc_control_mode = 0, ///< SMPC control mode. (initial)
     sh2_direct_mode   = 1, ///< SH2 direct mode
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  IOSelect
+/// \union	IOSelect
 ///
-/// \brief  I/O Select (IOSEL).
+/// \brief	I/O Select (IOSEL).
 ///
-/// \author Runik
-/// \date   14/12/2019
+/// \author	Runik
+/// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class IOSelect : public Register {
-  public:
-    using Register::Register;
-    inline static const auto peripheral_port_2_mode = BitRange<PeripheralPortMode>{1}; ///< IOSEL2 bit.
-    inline static const auto peripheral_port_1_mode = BitRange<PeripheralPortMode>{0}; ///< IOSEL1 bit.
-    inline static const auto all_bits               = BitRange<u8>{0, 1}; ///< Defines the range of all the bits of the register.
+union IOSelect {
+    u8          raw;                    ///< Raw representation.
+    BitField<1> peripheral_port_2_mode; ///< IOSEL2 bit.
+    BitField<0> peripheral_port_1_mode; ///< IOSEL1 bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -408,7 +414,7 @@ class IOSelect : public Register {
 /// \brief  EXLE values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ExternalLatch : u8 {
+enum class ExternalLatch : bool {
     disabled = 0, ///< Disabled. (initial)
     enabled  = 1, ///< Enabled
 };
@@ -422,12 +428,11 @@ enum class ExternalLatch : u8 {
 /// \date   14/12/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ExternalLatchEnable : public Register {
-  public:
-    using Register::Register;
-    inline static const auto external_latch_2_enable = BitRange<ExternalLatch>{1}; ///< EXLE2 bit.
-    inline static const auto external_latch_1_enable = BitRange<ExternalLatch>{0}; ///< EXLE1 bit.
-    inline static const auto all_bits                = BitRange<u8>{0, 1}; ///< Defines the range of all the bits of the register.
+union ExternalLatchEnable {
+    u8             raw;                     ///< Raw representation.
+    BitField<1>    external_latch_2_enable; ///< EXLE2 bit.
+    BitField<0>    external_latch_1_enable; ///< EXLE1 bit.
+    BitField<0, 2> exle;                    ///< Used bits in the register.
 };
 
 } // namespace saturnin::core
