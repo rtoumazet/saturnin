@@ -54,8 +54,8 @@ void Vdp2::initialize() {
 
     const std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (modules_.config()->getTvStandard(ts)) {
-        case video::TvStandard::pal: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::pal_standard); break;
-        case video::TvStandard::ntsc: tvstat_.set(ScreenStatus::tv_standard_flag, TvStandardFlag::ntsc_standard); break;
+        case video::TvStandard::pal: tvstat_.tv_standard_flag = TvStandardFlag::pal_standard; break;
+        case video::TvStandard::ntsc: tvstat_.tv_standard_flag = TvStandardFlag::ntsc_standard; break;
         default: Log::warning(Logger::vdp2, tr("Unknown TV standard"));
     }
     calculateDisplayDuration();
@@ -73,9 +73,9 @@ void Vdp2::run(const u8 cycles) {
     if (elapsed_frame_cycles_ > cycles_per_vactive_) {
         if (!is_vblank_current_) {
             // Entering vertical blanking
-            is_vblank_current_ = true;
-            tvstat_.set(ScreenStatus::vertical_blank_flag, VerticalBlankFlag::during_vertical_retrace);
-            tvmd_.set(TvScreenMode::display, Display::not_displayed);
+            is_vblank_current_          = true;
+            tvstat_.vertical_blank_flag = VerticalBlankFlag::during_vertical_retrace;
+            tvmd_.display               = Display::not_displayed;
 
             Log::debug(Logger::vdp2, tr("VBlankIn interrupt request"));
 
@@ -98,15 +98,15 @@ void Vdp2::run(const u8 cycles) {
 
     if (elapsed_frame_cycles_ > cycles_per_frame_) {
         // End of the frame display (active + vblank)
-        elapsed_frame_cycles_ = 0;
-        is_vblank_current_    = false;
-        tvstat_.set(ScreenStatus::vertical_blank_flag, VerticalBlankFlag::during_vertical_scan);
+        elapsed_frame_cycles_       = 0;
+        is_vblank_current_          = false;
+        tvstat_.vertical_blank_flag = VerticalBlankFlag::during_vertical_scan;
 
-        elapsed_line_cycles_ = 0;
-        is_hblank_current_   = false;
-        tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_scan);
+        elapsed_line_cycles_          = 0;
+        is_hblank_current_            = false;
+        tvstat_.horizontal_blank_flag = HorizontalBlankFlag::during_horizontal_scan;
 
-        tvmd_.set(TvScreenMode::display, Display::displayed);
+        tvmd_.display = Display::displayed;
 
         Log::debug(Logger::vdp2, tr("VBlankOut interrupt request"));
         modules_.scu()->onVblankOut();
@@ -121,8 +121,8 @@ void Vdp2::run(const u8 cycles) {
     if (elapsed_line_cycles_ > cycles_per_hactive_) {
         if (!is_hblank_current_) {
             // Entering horizontal blanking
-            is_hblank_current_ = true;
-            tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_retrace);
+            is_hblank_current_            = true;
+            tvstat_.horizontal_blank_flag = HorizontalBlankFlag::during_horizontal_retrace;
 
             modules_.scu()->onHblankIn();
 
@@ -134,9 +134,9 @@ void Vdp2::run(const u8 cycles) {
 
     if (elapsed_line_cycles_ > cycles_per_line_) {
         // End of line display (active + hblank)
-        elapsed_line_cycles_ = 0;
-        is_hblank_current_   = false;
-        tvstat_.set(ScreenStatus::horizontal_blank_flag, HorizontalBlankFlag::during_horizontal_scan);
+        elapsed_line_cycles_          = 0;
+        is_hblank_current_            = false;
+        tvstat_.horizontal_blank_flag = HorizontalBlankFlag::during_horizontal_scan;
     }
 
     // Yet to implement : H Counter, V Counter, Timer 1
@@ -163,7 +163,7 @@ void Vdp2::calculateDisplayDuration() {
 
             constexpr auto total_lines   = u16{313};
             auto           visible_lines = u16{};
-            switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+            switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                 case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
                 case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
                 case VerticalResolution::lines_nb_256: visible_lines = lines_nb_256; break;
@@ -191,7 +191,7 @@ void Vdp2::calculateDisplayDuration() {
 
             constexpr auto total_lines   = u16{263};
             auto           visible_lines = u16{};
-            switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+            switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                 case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
                 case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
                 default: core::Log::warning(Logger::vdp2, core::tr("Unknown NTSC vertical resolution."));
@@ -220,37 +220,22 @@ void Vdp2::onVblankIn() {
     Texture::cleanCache(modules_.opengl(), VdpType::vdp2);
 }
 
-auto Vdp2::getSpriteColorAddressOffset() -> u16 {
-    return getColorRamAddressOffset(craofb_.get(ColorRamAddressOffsetB::color_ram_address_offset_sprite));
-}
+auto Vdp2::getSpriteColorAddressOffset() -> u16 { return getColorRamAddressOffset(craofb_.color_ram_address_offset_sprite); }
 
 auto Vdp2::getSpritePriority(const u8 register_number) -> u8 {
+    // Next line works from LLVM version 14.0.0
+    // NOLINTBEGIN(readability-magic-numbers)
     switch (register_number) {
-        case 0: {
-            return prisa_.get(PriorityNumberSpriteA::sprite_register_0);
-        }
-        case 1: {
-            return prisa_.get(PriorityNumberSpriteA::sprite_register_1);
-        }
-        case 2: {
-            return prisb_.get(PriorityNumberSpriteB::sprite_register_2);
-        }
-        case 3: {
-            return prisb_.get(PriorityNumberSpriteB::sprite_register_3);
-        }
-        case 4: {
-            return prisc_.get(PriorityNumberSpriteC::sprite_register_4);
-        }
-        case 5: {
-            return prisc_.get(PriorityNumberSpriteC::sprite_register_5);
-        }
-        case 6: {
-            return prisd_.get(PriorityNumberSpriteD::sprite_register_6);
-        }
-        case 7: {
-            return prisd_.get(PriorityNumberSpriteD::sprite_register_7);
-        }
+        case 0: return prisa_.sprite_register_0;
+        case 1: return static_cast<u8>(prisa_.sprite_register_1);
+        case 2: return prisb_.sprite_register_2;
+        case 3: return static_cast<u8>(prisb_.sprite_register_3);
+        case 4: return prisc_.sprite_register_4;
+        case 5: return static_cast<u8>(prisc_.sprite_register_5);
+        case 6: return prisd_.sprite_register_6;
+        case 7: return static_cast<u8>(prisd_.sprite_register_7);
     }
+    // NOLINTEND(readability-magic-numbers)
     core::Log::warning(Logger::vdp2, core::tr("Unknown sprite priority."));
     return 0;
 }
@@ -266,150 +251,150 @@ auto Vdp2::getSpritePriority(const u8 register_number) -> u8 {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::read16(const u32 addr) const -> u16 {
     switch (addr) {
-        case tv_screen_mode: return tvmd_.toU16();
-        case external_signal_enable: return exten_.toU16();
-        case screen_status: return tvstat_.toU16();
-        case vram_size: return vrsize_.toU16();
-        case h_counter: return hcnt_.toU16();
-        case v_counter: return vcnt_.toU16();
-        case reserve_1: return rsv1_.toU16();
-        case ram_control: return ramctl_.toU16();
-        case vram_cycle_pattern_bank_a0_lower: return cyca0l_.toU16();
-        case vram_cycle_pattern_bank_a0_upper: return cyca0u_.toU16();
-        case vram_cycle_pattern_bank_a1_lower: return cyca1l_.toU16();
-        case vram_cycle_pattern_bank_a1_upper: return cyca1u_.toU16();
-        case vram_cycle_pattern_bank_b0_lower: return cycb0l_.toU16();
-        case vram_cycle_pattern_bank_b0_upper: return cycb0u_.toU16();
-        case vram_cycle_pattern_bank_b1_lower: return cycb1l_.toU16();
-        case vram_cycle_pattern_bank_b1_upper: return cycb1u_.toU16();
-        case screen_display_enable: return bgon_.toU16();
-        case mosaic_control: return mzctl_.toU16();
-        case special_function_code_select: return sfsel_.toU16();
-        case special_function_code: return sfcode_.toU16();
-        case character_control_a: return chctla_.toU16();
-        case character_control_b: return chctlb_.toU16();
-        case bitmap_palette_number_a: return bmpna_.toU16();
-        case bitmap_palette_number_b: return bmpnb_.toU16();
-        case pattern_name_control_nbg0: return pncn0_.toU16();
-        case pattern_name_control_nbg1: return pncn1_.toU16();
-        case pattern_name_control_nbg2: return pncn2_.toU16();
-        case pattern_name_control_nbg3: return pncn3_.toU16();
-        case pattern_name_control_rbg0: return pncr_.toU16();
-        case plane_size: return plsz_.toU16();
-        case map_offset_n: return mpofn_.toU16();
-        case map_offset_r: return mpofr_.toU16();
-        case map_nbg0_plane_a_b: return mpabn0_.toU16();
-        case map_nbg0_plane_c_d: return mpcdn0_.toU16();
-        case map_nbg1_plane_a_b: return mpabn1_.toU16();
-        case map_nbg1_plane_c_d: return mpcdn1_.toU16();
-        case map_nbg2_plane_a_b: return mpabn2_.toU16();
-        case map_nbg2_plane_c_d: return mpcdn2_.toU16();
-        case map_nbg3_plane_a_b: return mpabn3_.toU16();
-        case map_nbg3_plane_c_d: return mpcdn3_.toU16();
-        case map_rotation_parameter_a_plane_a_b: return mpabra_.toU16();
-        case map_rotation_parameter_a_plane_c_d: return mpcdra_.toU16();
-        case map_rotation_parameter_a_plane_e_f: return mpefra_.toU16();
-        case map_rotation_parameter_a_plane_g_h: return mpghra_.toU16();
-        case map_rotation_parameter_a_plane_i_j: return mpijra_.toU16();
-        case map_rotation_parameter_a_plane_k_l: return mpklra_.toU16();
-        case map_rotation_parameter_a_plane_m_n: return mpmnra_.toU16();
-        case map_rotation_parameter_a_plane_o_p: return mpopra_.toU16();
-        case map_rotation_parameter_b_plane_a_b: return mpabrb_.toU16();
-        case map_rotation_parameter_b_plane_c_d: return mpcdrb_.toU16();
-        case map_rotation_parameter_b_plane_e_f: return mpefrb_.toU16();
-        case map_rotation_parameter_b_plane_g_h: return mpghrb_.toU16();
-        case map_rotation_parameter_b_plane_i_j: return mpijrb_.toU16();
-        case map_rotation_parameter_b_plane_k_l: return mpklrb_.toU16();
-        case map_rotation_parameter_b_plane_m_n: return mpmnrb_.toU16();
-        case map_rotation_parameter_b_plane_o_p: return mpoprb_.toU16();
-        case screen_scroll_value_nbg0_h_int_part: return scxin0_.toU16();
-        case screen_scroll_value_nbg0_h_fract_part: return scxdn0_.toU16();
-        case screen_scroll_value_nbg0_v_int_part: return scyin0_.toU16();
-        case screen_scroll_value_nbg0_v_fract_part: return scydn0_.toU16();
-        case coordinate_increment_nbg0_h_int_part: return zmxin0_.toU16();
-        case coordinate_increment_nbg0_h_fract_part: return zmxdn0_.toU16();
-        case coordinate_increment_nbg0_v_int_part: return zmyin0_.toU16();
-        case coordinate_increment_nbg0_v_fract_part: return zmydn0_.toU16();
-        case screen_scroll_value_nbg1_h_int_part: return scxin1_.toU16();
-        case screen_scroll_value_nbg1_h_fract_part: return scxdn1_.toU16();
-        case screen_scroll_value_nbg1_v_int_part: return scyin1_.toU16();
-        case screen_scroll_value_nbg1_v_fract_part: return scydn1_.toU16();
-        case coordinate_increment_nbg1_h_int_part: return zmxin1_.toU16();
-        case coordinate_increment_nbg1_h_fract_part: return zmxdn1_.toU16();
-        case coordinate_increment_nbg1_v_int_part: return zmyin1_.toU16();
-        case coordinate_increment_nbg1_v_fract_part: return zmydn1_.toU16();
-        case screen_scroll_value_nbg2_h: return scxn2_.toU16();
-        case screen_scroll_value_nbg2_v: return scyn2_.toU16();
-        case screen_scroll_value_nbg3_h: return scxn3_.toU16();
-        case screen_scroll_value_nbg3_v: return scyn3_.toU16();
-        case reduction_enable: return zmctl_.toU16();
-        case line_and_vertical_cell_scroll_control: return scrctl_.toU16();
-        case vertical_cell_scroll_table_address_upper: return vcstau_.toU16();
-        case vertical_cell_scroll_table_address_lower: return vcstal_.toU16();
-        case line_scroll_table_address_nbg0_upper: return lsta0u_.toU16();
-        case line_scroll_table_address_nbg0_lower: return lsta0l_.toU16();
-        case line_scroll_table_address_nbg1_upper: return lsta1u_.toU16();
-        case line_scroll_table_address_nbg1_lower: return lsta1l_.toU16();
-        case line_color_screen_table_address_upper: return lctau_.toU16();
-        case line_color_screen_table_address_lower: return lctal_.toU16();
-        case back_screen_table_address_upper: return bktau_.toU16();
-        case back_screen_table_address_lower: return bktal_.toU16();
-        case rotation_parameter_mode: return rpmd_.toU16();
-        case rotation_parameter_read_control: return rprctl_.toU16();
-        case coefficient_table_control: return ktctl_.toU16();
-        case coefficient_table_address_offset: return ktaof_.toU16();
-        case screen_over_pattern_name_a: return ovpnra_.toU16();
-        case screen_over_pattern_name_b: return ovpnrb_.toU16();
-        case rotation_parameter_table_address_upper: return rptau_.toU16();
-        case rotation_parameter_table_address_lower: return rptal_.toU16();
-        case window_position_w0_h_start_point: return wpsx0_.toU16();
-        case window_position_w0_v_start_point: return wpsy0_.toU16();
-        case window_position_w0_h_end_point: return wpex0_.toU16();
-        case window_position_w0_v_end_point: return wpey0_.toU16();
-        case window_position_w1_h_start_point: return wpsx1_.toU16();
-        case window_position_w1_v_start_point: return wpsy1_.toU16();
-        case window_position_w1_h_end_point: return wpex1_.toU16();
-        case window_position_w1_v_end_point: return wpey1_.toU16();
-        case window_control_a: return wctla_.toU16();
-        case window_control_b: return wctlb_.toU16();
-        case window_control_c: return wctlc_.toU16();
-        case window_control_d: return wctld_.toU16();
-        case line_window_table_address_w0_upper: return lwta0u_.toU16();
-        case line_window_table_address_w0_lower: return lwta0l_.toU16();
-        case line_window_table_address_w1_upper: return lwta1u_.toU16();
-        case line_window_table_address_w1_lower: return lwta1l_.toU16();
-        case sprite_control: return spctl_.toU16();
-        case shadow_control: return sdctl_.toU16();
-        case color_ram_address_offset_a: return craofa_.toU16();
-        case color_ram_address_offset_b: return craofb_.toU16();
-        case line_color_screen_enable: return lnclen_.toU16();
-        case special_priority_mode: return sfprmd_.toU16();
-        case color_calculation_control: return ccctl_.toU16();
-        case special_color_calculation_mode: return sfccmd_.toU16();
-        case priority_number_sprite_0_1: return prisa_.toU16();
-        case priority_number_sprite_2_3: return prisb_.toU16();
-        case priority_number_sprite_4_5: return prisc_.toU16();
-        case priority_number_sprite_6_7: return prisd_.toU16();
-        case priority_number_nbg0_nbg1: return prina_.toU16();
-        case priority_number_nbg2_nbg3: return prinb_.toU16();
-        case priority_number_rbg0: return prir_.toU16();
-        case reserve_2: return rsv2_.toU16();
-        case color_calculation_ratio_sprite_0_1: return ccrsa_.toU16();
-        case color_calculation_ratio_sprite_2_3: return ccrsb_.toU16();
-        case color_calculation_ratio_sprite_4_5: return ccrsc_.toU16();
-        case color_calculation_ratio_sprite_6_7: return ccrsd_.toU16();
-        case color_calculation_ratio_nbg0_nbg1: return ccrna_.toU16();
-        case color_calculation_ratio_nbg2_nbg3: return ccrnb_.toU16();
-        case color_calculation_ratio_rbg0: return ccrr_.toU16();
-        case color_calculation_ratio_line_color_back: return ccrlb_.toU16();
-        case color_offset_enable: return clofen_.toU16();
-        case color_offset_select: return clofsl_.toU16();
-        case color_offset_a_red: return coar_.toU16();
-        case color_offset_a_green: return coag_.toU16();
-        case color_offset_a_blue: return coab_.toU16();
-        case color_offset_b_red: return cobr_.toU16();
-        case color_offset_b_green: return cobg_.toU16();
-        case color_offset_b_blue: return cobb_.toU16();
+        case tv_screen_mode: return tvmd_.raw;
+        case external_signal_enable: return exten_.raw;
+        case screen_status: return tvstat_.raw;
+        case vram_size: return vrsize_.raw;
+        case h_counter: return hcnt_.raw;
+        case v_counter: return vcnt_.raw;
+        case reserve_1: return rsv1_.raw;
+        case ram_control: return ramctl_.raw;
+        case vram_cycle_pattern_bank_a0_lower: return cyca0l_.raw;
+        case vram_cycle_pattern_bank_a0_upper: return cyca0u_.raw;
+        case vram_cycle_pattern_bank_a1_lower: return cyca1l_.raw;
+        case vram_cycle_pattern_bank_a1_upper: return cyca1u_.raw;
+        case vram_cycle_pattern_bank_b0_lower: return cycb0l_.raw;
+        case vram_cycle_pattern_bank_b0_upper: return cycb0u_.raw;
+        case vram_cycle_pattern_bank_b1_lower: return cycb1l_.raw;
+        case vram_cycle_pattern_bank_b1_upper: return cycb1u_.raw;
+        case screen_display_enable: return bgon_.raw;
+        case mosaic_control: return mzctl_.raw;
+        case special_function_code_select: return sfsel_.raw;
+        case special_function_code: return sfcode_.raw;
+        case character_control_a: return chctla_.raw;
+        case character_control_b: return chctlb_.raw;
+        case bitmap_palette_number_a: return bmpna_.raw;
+        case bitmap_palette_number_b: return bmpnb_.raw;
+        case pattern_name_control_nbg0: return pncn0_.raw;
+        case pattern_name_control_nbg1: return pncn1_.raw;
+        case pattern_name_control_nbg2: return pncn2_.raw;
+        case pattern_name_control_nbg3: return pncn3_.raw;
+        case pattern_name_control_rbg0: return pncr_.raw;
+        case plane_size: return plsz_.raw;
+        case map_offset_n: return mpofn_.raw;
+        case map_offset_r: return mpofr_.raw;
+        case map_nbg0_plane_a_b: return mpabn0_.raw;
+        case map_nbg0_plane_c_d: return mpcdn0_.raw;
+        case map_nbg1_plane_a_b: return mpabn1_.raw;
+        case map_nbg1_plane_c_d: return mpcdn1_.raw;
+        case map_nbg2_plane_a_b: return mpabn2_.raw;
+        case map_nbg2_plane_c_d: return mpcdn2_.raw;
+        case map_nbg3_plane_a_b: return mpabn3_.raw;
+        case map_nbg3_plane_c_d: return mpcdn3_.raw;
+        case map_rotation_parameter_a_plane_a_b: return mpabra_.raw;
+        case map_rotation_parameter_a_plane_c_d: return mpcdra_.raw;
+        case map_rotation_parameter_a_plane_e_f: return mpefra_.raw;
+        case map_rotation_parameter_a_plane_g_h: return mpghra_.raw;
+        case map_rotation_parameter_a_plane_i_j: return mpijra_.raw;
+        case map_rotation_parameter_a_plane_k_l: return mpklra_.raw;
+        case map_rotation_parameter_a_plane_m_n: return mpmnra_.raw;
+        case map_rotation_parameter_a_plane_o_p: return mpopra_.raw;
+        case map_rotation_parameter_b_plane_a_b: return mpabrb_.raw;
+        case map_rotation_parameter_b_plane_c_d: return mpcdrb_.raw;
+        case map_rotation_parameter_b_plane_e_f: return mpefrb_.raw;
+        case map_rotation_parameter_b_plane_g_h: return mpghrb_.raw;
+        case map_rotation_parameter_b_plane_i_j: return mpijrb_.raw;
+        case map_rotation_parameter_b_plane_k_l: return mpklrb_.raw;
+        case map_rotation_parameter_b_plane_m_n: return mpmnrb_.raw;
+        case map_rotation_parameter_b_plane_o_p: return mpoprb_.raw;
+        case screen_scroll_value_nbg0_h_int_part: return scxin0_.raw;
+        case screen_scroll_value_nbg0_h_fract_part: return scxdn0_.raw;
+        case screen_scroll_value_nbg0_v_int_part: return scyin0_.raw;
+        case screen_scroll_value_nbg0_v_fract_part: return scydn0_.raw;
+        case coordinate_increment_nbg0_h_int_part: return zmxin0_.raw;
+        case coordinate_increment_nbg0_h_fract_part: return zmxdn0_.raw;
+        case coordinate_increment_nbg0_v_int_part: return zmyin0_.raw;
+        case coordinate_increment_nbg0_v_fract_part: return zmydn0_.raw;
+        case screen_scroll_value_nbg1_h_int_part: return scxin1_.raw;
+        case screen_scroll_value_nbg1_h_fract_part: return scxdn1_.raw;
+        case screen_scroll_value_nbg1_v_int_part: return scyin1_.raw;
+        case screen_scroll_value_nbg1_v_fract_part: return scydn1_.raw;
+        case coordinate_increment_nbg1_h_int_part: return zmxin1_.raw;
+        case coordinate_increment_nbg1_h_fract_part: return zmxdn1_.raw;
+        case coordinate_increment_nbg1_v_int_part: return zmyin1_.raw;
+        case coordinate_increment_nbg1_v_fract_part: return zmydn1_.raw;
+        case screen_scroll_value_nbg2_h: return scxn2_.raw;
+        case screen_scroll_value_nbg2_v: return scyn2_.raw;
+        case screen_scroll_value_nbg3_h: return scxn3_.raw;
+        case screen_scroll_value_nbg3_v: return scyn3_.raw;
+        case reduction_enable: return zmctl_.raw;
+        case line_and_vertical_cell_scroll_control: return scrctl_.raw;
+        case vertical_cell_scroll_table_address_upper: return vcstau_.raw;
+        case vertical_cell_scroll_table_address_lower: return vcstal_.raw;
+        case line_scroll_table_address_nbg0_upper: return lsta0u_.raw;
+        case line_scroll_table_address_nbg0_lower: return lsta0l_.raw;
+        case line_scroll_table_address_nbg1_upper: return lsta1u_.raw;
+        case line_scroll_table_address_nbg1_lower: return lsta1l_.raw;
+        case line_color_screen_table_address_upper: return lctau_.raw;
+        case line_color_screen_table_address_lower: return lctal_.raw;
+        case back_screen_table_address_upper: return bktau_.raw;
+        case back_screen_table_address_lower: return bktal_.raw;
+        case rotation_parameter_mode: return rpmd_.raw;
+        case rotation_parameter_read_control: return rprctl_.raw;
+        case coefficient_table_control: return ktctl_.raw;
+        case coefficient_table_address_offset: return ktaof_.raw;
+        case screen_over_pattern_name_a: return ovpnra_.raw;
+        case screen_over_pattern_name_b: return ovpnrb_.raw;
+        case rotation_parameter_table_address_upper: return rptau_.raw;
+        case rotation_parameter_table_address_lower: return rptal_.raw;
+        case window_position_w0_h_start_point: return wpsx0_.raw;
+        case window_position_w0_v_start_point: return wpsy0_.raw;
+        case window_position_w0_h_end_point: return wpex0_.raw;
+        case window_position_w0_v_end_point: return wpey0_.raw;
+        case window_position_w1_h_start_point: return wpsx1_.raw;
+        case window_position_w1_v_start_point: return wpsy1_.raw;
+        case window_position_w1_h_end_point: return wpex1_.raw;
+        case window_position_w1_v_end_point: return wpey1_.raw;
+        case window_control_a: return wctla_.raw;
+        case window_control_b: return wctlb_.raw;
+        case window_control_c: return wctlc_.raw;
+        case window_control_d: return wctld_.raw;
+        case line_window_table_address_w0_upper: return lwta0u_.raw;
+        case line_window_table_address_w0_lower: return lwta0l_.raw;
+        case line_window_table_address_w1_upper: return lwta1u_.raw;
+        case line_window_table_address_w1_lower: return lwta1l_.raw;
+        case sprite_control: return spctl_.raw;
+        case shadow_control: return sdctl_.raw;
+        case color_ram_address_offset_a: return craofa_.raw;
+        case color_ram_address_offset_b: return craofb_.raw;
+        case line_color_screen_enable: return lnclen_.raw;
+        case special_priority_mode: return sfprmd_.raw;
+        case color_calculation_control: return ccctl_.raw;
+        case special_color_calculation_mode: return sfccmd_.raw;
+        case priority_number_sprite_0_1: return prisa_.raw;
+        case priority_number_sprite_2_3: return prisb_.raw;
+        case priority_number_sprite_4_5: return prisc_.raw;
+        case priority_number_sprite_6_7: return prisd_.raw;
+        case priority_number_nbg0_nbg1: return prina_.raw;
+        case priority_number_nbg2_nbg3: return prinb_.raw;
+        case priority_number_rbg0: return prir_.raw;
+        case reserve_2: return rsv2_.raw;
+        case color_calculation_ratio_sprite_0_1: return ccrsa_.raw;
+        case color_calculation_ratio_sprite_2_3: return ccrsb_.raw;
+        case color_calculation_ratio_sprite_4_5: return ccrsc_.raw;
+        case color_calculation_ratio_sprite_6_7: return ccrsd_.raw;
+        case color_calculation_ratio_nbg0_nbg1: return ccrna_.raw;
+        case color_calculation_ratio_nbg2_nbg3: return ccrnb_.raw;
+        case color_calculation_ratio_rbg0: return ccrr_.raw;
+        case color_calculation_ratio_line_color_back: return ccrlb_.raw;
+        case color_offset_enable: return clofen_.raw;
+        case color_offset_select: return clofsl_.raw;
+        case color_offset_a_red: return coar_.raw;
+        case color_offset_a_green: return coag_.raw;
+        case color_offset_a_blue: return coab_.raw;
+        case color_offset_b_red: return cobr_.raw;
+        case color_offset_b_green: return cobg_.raw;
+        case color_offset_b_blue: return cobb_.raw;
 
         default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register read (16) {:#010x}"), addr);
     }
@@ -420,149 +405,149 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write16(const u32 addr, const u16 data) {
     switch (addr) {
-        case tv_screen_mode: tvmd_.set(bits_0_15, data); break;
-        case external_signal_enable: exten_.set(bits_0_15, data); break;
-        case vram_size: vrsize_.set(bits_0_15, data); break;
-        case h_counter: hcnt_.set(bits_0_15, data); break;
-        case v_counter: vcnt_.set(bits_0_15, data); break;
-        case reserve_1: rsv1_.set(bits_0_15, data); break;
-        case ram_control: ramctl_.set(bits_0_15, data); break;
-        case vram_cycle_pattern_bank_a0_lower: cyca0l_.set(bits_0_15, data); break;
-        case vram_cycle_pattern_bank_a0_upper: cyca0u_.set(bits_0_15, data); break;
-        case vram_cycle_pattern_bank_a1_lower: cyca1l_.set(bits_0_15, data); break;
-        case vram_cycle_pattern_bank_a1_upper: cyca1u_.set(bits_0_15, data); break;
-        case vram_cycle_pattern_bank_b0_lower: cycb0l_.set(bits_0_15, data); break;
-        case vram_cycle_pattern_bank_b0_upper: cycb0u_.set(bits_0_15, data); break;
-        case vram_cycle_pattern_bank_b1_lower: cycb1l_.set(bits_0_15, data); break;
-        case vram_cycle_pattern_bank_b1_upper: cycb1u_.set(bits_0_15, data); break;
-        case screen_display_enable: bgon_.set(bits_0_15, data); break;
-        case mosaic_control: mzctl_.set(bits_0_15, data); break;
-        case special_function_code_select: sfsel_.set(bits_0_15, data); break;
-        case special_function_code: sfcode_.set(bits_0_15, data); break;
-        case character_control_a: chctla_.set(bits_0_15, data); break;
-        case character_control_b: chctlb_.set(bits_0_15, data); break;
-        case bitmap_palette_number_a: bmpna_.set(bits_0_15, data); break;
-        case bitmap_palette_number_b: bmpnb_.set(bits_0_15, data); break;
-        case pattern_name_control_nbg0: pncn0_.set(bits_0_15, data); break;
-        case pattern_name_control_nbg1: pncn1_.set(bits_0_15, data); break;
-        case pattern_name_control_nbg2: pncn2_.set(bits_0_15, data); break;
-        case pattern_name_control_nbg3: pncn3_.set(bits_0_15, data); break;
-        case pattern_name_control_rbg0: pncr_.set(bits_0_15, data); break;
-        case plane_size: plsz_.set(bits_0_15, data); break;
-        case map_offset_n: mpofn_.set(bits_0_15, data); break;
-        case map_offset_r: mpofr_.set(bits_0_15, data); break;
-        case map_nbg0_plane_a_b: mpabn0_.set(bits_0_15, data); break;
-        case map_nbg0_plane_c_d: mpcdn0_.set(bits_0_15, data); break;
-        case map_nbg1_plane_a_b: mpabn1_.set(bits_0_15, data); break;
-        case map_nbg1_plane_c_d: mpcdn1_.set(bits_0_15, data); break;
-        case map_nbg2_plane_a_b: mpabn2_.set(bits_0_15, data); break;
-        case map_nbg2_plane_c_d: mpcdn2_.set(bits_0_15, data); break;
-        case map_nbg3_plane_a_b: mpabn3_.set(bits_0_15, data); break;
-        case map_nbg3_plane_c_d: mpcdn3_.set(bits_0_15, data); break;
-        case map_rotation_parameter_a_plane_a_b: mpabra_.set(bits_0_15, data); break;
-        case map_rotation_parameter_a_plane_c_d: mpcdra_.set(bits_0_15, data); break;
-        case map_rotation_parameter_a_plane_e_f: mpefra_.set(bits_0_15, data); break;
-        case map_rotation_parameter_a_plane_g_h: mpghra_.set(bits_0_15, data); break;
-        case map_rotation_parameter_a_plane_i_j: mpijra_.set(bits_0_15, data); break;
-        case map_rotation_parameter_a_plane_k_l: mpklra_.set(bits_0_15, data); break;
-        case map_rotation_parameter_a_plane_m_n: mpmnra_.set(bits_0_15, data); break;
-        case map_rotation_parameter_a_plane_o_p: mpopra_.set(bits_0_15, data); break;
-        case map_rotation_parameter_b_plane_a_b: mpabrb_.set(bits_0_15, data); break;
-        case map_rotation_parameter_b_plane_c_d: mpcdrb_.set(bits_0_15, data); break;
-        case map_rotation_parameter_b_plane_e_f: mpefrb_.set(bits_0_15, data); break;
-        case map_rotation_parameter_b_plane_g_h: mpghrb_.set(bits_0_15, data); break;
-        case map_rotation_parameter_b_plane_i_j: mpijrb_.set(bits_0_15, data); break;
-        case map_rotation_parameter_b_plane_k_l: mpklrb_.set(bits_0_15, data); break;
-        case map_rotation_parameter_b_plane_m_n: mpmnrb_.set(bits_0_15, data); break;
-        case map_rotation_parameter_b_plane_o_p: mpoprb_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg0_h_int_part: scxin0_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg0_h_fract_part: scxdn0_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg0_v_int_part: scyin0_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg0_v_fract_part: scydn0_.set(bits_0_15, data); break;
-        case coordinate_increment_nbg0_h_int_part: zmxin0_.set(bits_0_15, data); break;
-        case coordinate_increment_nbg0_h_fract_part: zmxdn0_.set(bits_0_15, data); break;
-        case coordinate_increment_nbg0_v_int_part: zmyin0_.set(bits_0_15, data); break;
-        case coordinate_increment_nbg0_v_fract_part: zmydn0_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg1_h_int_part: scxin1_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg1_h_fract_part: scxdn1_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg1_v_int_part: scyin1_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg1_v_fract_part: scydn1_.set(bits_0_15, data); break;
-        case coordinate_increment_nbg1_h_int_part: zmxin1_.set(bits_0_15, data); break;
-        case coordinate_increment_nbg1_h_fract_part: zmxdn1_.set(bits_0_15, data); break;
-        case coordinate_increment_nbg1_v_int_part: zmyin1_.set(bits_0_15, data); break;
-        case coordinate_increment_nbg1_v_fract_part: zmydn1_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg2_h: scxn2_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg2_v: scyn2_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg3_h: scxn3_.set(bits_0_15, data); break;
-        case screen_scroll_value_nbg3_v: scyn3_.set(bits_0_15, data); break;
-        case reduction_enable: zmctl_.set(bits_0_15, data); break;
-        case line_and_vertical_cell_scroll_control: scrctl_.set(bits_0_15, data); break;
-        case vertical_cell_scroll_table_address_upper: vcstau_.set(bits_0_15, data); break;
-        case vertical_cell_scroll_table_address_lower: vcstal_.set(bits_0_15, data); break;
-        case line_scroll_table_address_nbg0_upper: lsta0u_.set(bits_0_15, data); break;
-        case line_scroll_table_address_nbg0_lower: lsta0l_.set(bits_0_15, data); break;
-        case line_scroll_table_address_nbg1_upper: lsta1u_.set(bits_0_15, data); break;
-        case line_scroll_table_address_nbg1_lower: lsta1l_.set(bits_0_15, data); break;
-        case line_color_screen_table_address_upper: lctau_.set(bits_0_15, data); break;
-        case line_color_screen_table_address_lower: lctal_.set(bits_0_15, data); break;
-        case back_screen_table_address_upper: bktau_.set(bits_0_15, data); break;
-        case back_screen_table_address_lower: bktal_.set(bits_0_15, data); break;
-        case rotation_parameter_mode: rpmd_.set(bits_0_15, data); break;
-        case rotation_parameter_read_control: rprctl_.set(bits_0_15, data); break;
-        case coefficient_table_control: ktctl_.set(bits_0_15, data); break;
-        case coefficient_table_address_offset: ktaof_.set(bits_0_15, data); break;
-        case screen_over_pattern_name_a: ovpnra_.set(bits_0_15, data); break;
-        case screen_over_pattern_name_b: ovpnrb_.set(bits_0_15, data); break;
-        case rotation_parameter_table_address_upper: rptau_.set(bits_0_15, data); break;
-        case rotation_parameter_table_address_lower: rptal_.set(bits_0_15, data); break;
-        case window_position_w0_h_start_point: wpsx0_.set(bits_0_15, data); break;
-        case window_position_w0_v_start_point: wpsy0_.set(bits_0_15, data); break;
-        case window_position_w0_h_end_point: wpex0_.set(bits_0_15, data); break;
-        case window_position_w0_v_end_point: wpey0_.set(bits_0_15, data); break;
-        case window_position_w1_h_start_point: wpsx1_.set(bits_0_15, data); break;
-        case window_position_w1_v_start_point: wpsy1_.set(bits_0_15, data); break;
-        case window_position_w1_h_end_point: wpex1_.set(bits_0_15, data); break;
-        case window_position_w1_v_end_point: wpey1_.set(bits_0_15, data); break;
-        case window_control_a: wctla_.set(bits_0_15, data); break;
-        case window_control_b: wctlb_.set(bits_0_15, data); break;
-        case window_control_c: wctlc_.set(bits_0_15, data); break;
-        case window_control_d: wctld_.set(bits_0_15, data); break;
-        case line_window_table_address_w0_upper: lwta0u_.set(bits_0_15, data); break;
-        case line_window_table_address_w0_lower: lwta0l_.set(bits_0_15, data); break;
-        case line_window_table_address_w1_upper: lwta1u_.set(bits_0_15, data); break;
-        case line_window_table_address_w1_lower: lwta1l_.set(bits_0_15, data); break;
-        case sprite_control: spctl_.set(bits_0_15, data); break;
-        case shadow_control: sdctl_.set(bits_0_15, data); break;
-        case color_ram_address_offset_a: craofa_.set(bits_0_15, data); break;
-        case color_ram_address_offset_b: craofb_.set(bits_0_15, data); break;
-        case line_color_screen_enable: lnclen_.set(bits_0_15, data); break;
-        case special_priority_mode: sfprmd_.set(bits_0_15, data); break;
-        case color_calculation_control: ccctl_.set(bits_0_15, data); break;
-        case special_color_calculation_mode: sfccmd_.set(bits_0_15, data); break;
-        case priority_number_sprite_0_1: prisa_.set(bits_0_15, data); break;
-        case priority_number_sprite_2_3: prisb_.set(bits_0_15, data); break;
-        case priority_number_sprite_4_5: prisc_.set(bits_0_15, data); break;
-        case priority_number_sprite_6_7: prisd_.set(bits_0_15, data); break;
-        case priority_number_nbg0_nbg1: prina_.set(bits_0_15, data); break;
-        case priority_number_nbg2_nbg3: prinb_.set(bits_0_15, data); break;
-        case priority_number_rbg0: prir_.set(bits_0_15, data); break;
-        case reserve_2: rsv2_.set(bits_0_15, data); break;
-        case color_calculation_ratio_sprite_0_1: ccrsa_.set(bits_0_15, data); break;
-        case color_calculation_ratio_sprite_2_3: ccrsb_.set(bits_0_15, data); break;
-        case color_calculation_ratio_sprite_4_5: ccrsc_.set(bits_0_15, data); break;
-        case color_calculation_ratio_sprite_6_7: ccrsd_.set(bits_0_15, data); break;
-        case color_calculation_ratio_nbg0_nbg1: ccrna_.set(bits_0_15, data); break;
-        case color_calculation_ratio_nbg2_nbg3: ccrnb_.set(bits_0_15, data); break;
-        case color_calculation_ratio_rbg0: ccrr_.set(bits_0_15, data); break;
-        case color_calculation_ratio_line_color_back: ccrlb_.set(bits_0_15, data); break;
-        case color_offset_enable: clofen_.set(bits_0_15, data); break;
-        case color_offset_select: clofsl_.set(bits_0_15, data); break;
-        case color_offset_a_red: coar_.set(bits_0_15, data); break;
-        case color_offset_a_green: coag_.set(bits_0_15, data); break;
-        case color_offset_a_blue: coab_.set(bits_0_15, data); break;
-        case color_offset_b_red: cobr_.set(bits_0_15, data); break;
-        case color_offset_b_green: cobg_.set(bits_0_15, data); break;
-        case color_offset_b_blue: cobb_.set(bits_0_15, data); break;
+        case tv_screen_mode: tvmd_.raw = data; break;
+        case external_signal_enable: exten_.raw = data; break;
+        case vram_size: vrsize_.raw = data; break;
+        case h_counter: hcnt_.raw = data; break;
+        case v_counter: vcnt_.raw = data; break;
+        case reserve_1: rsv1_.raw = data; break;
+        case ram_control: ramctl_.raw = data; break;
+        case vram_cycle_pattern_bank_a0_lower: cyca0l_.raw = data; break;
+        case vram_cycle_pattern_bank_a0_upper: cyca0u_.raw = data; break;
+        case vram_cycle_pattern_bank_a1_lower: cyca1l_.raw = data; break;
+        case vram_cycle_pattern_bank_a1_upper: cyca1u_.raw = data; break;
+        case vram_cycle_pattern_bank_b0_lower: cycb0l_.raw = data; break;
+        case vram_cycle_pattern_bank_b0_upper: cycb0u_.raw = data; break;
+        case vram_cycle_pattern_bank_b1_lower: cycb1l_.raw = data; break;
+        case vram_cycle_pattern_bank_b1_upper: cycb1u_.raw = data; break;
+        case screen_display_enable: bgon_.raw = data; break;
+        case mosaic_control: mzctl_.raw = data; break;
+        case special_function_code_select: sfsel_.raw = data; break;
+        case special_function_code: sfcode_.raw = data; break;
+        case character_control_a: chctla_.raw = data; break;
+        case character_control_b: chctlb_.raw = data; break;
+        case bitmap_palette_number_a: bmpna_.raw = data; break;
+        case bitmap_palette_number_b: bmpnb_.raw = data; break;
+        case pattern_name_control_nbg0: pncn0_.raw = data; break;
+        case pattern_name_control_nbg1: pncn1_.raw = data; break;
+        case pattern_name_control_nbg2: pncn2_.raw = data; break;
+        case pattern_name_control_nbg3: pncn3_.raw = data; break;
+        case pattern_name_control_rbg0: pncr_.raw = data; break;
+        case plane_size: plsz_.raw = data; break;
+        case map_offset_n: mpofn_.raw = data; break;
+        case map_offset_r: mpofr_.raw = data; break;
+        case map_nbg0_plane_a_b: mpabn0_.raw = data; break;
+        case map_nbg0_plane_c_d: mpcdn0_.raw = data; break;
+        case map_nbg1_plane_a_b: mpabn1_.raw = data; break;
+        case map_nbg1_plane_c_d: mpcdn1_.raw = data; break;
+        case map_nbg2_plane_a_b: mpabn2_.raw = data; break;
+        case map_nbg2_plane_c_d: mpcdn2_.raw = data; break;
+        case map_nbg3_plane_a_b: mpabn3_.raw = data; break;
+        case map_nbg3_plane_c_d: mpcdn3_.raw = data; break;
+        case map_rotation_parameter_a_plane_a_b: mpabra_.raw = data; break;
+        case map_rotation_parameter_a_plane_c_d: mpcdra_.raw = data; break;
+        case map_rotation_parameter_a_plane_e_f: mpefra_.raw = data; break;
+        case map_rotation_parameter_a_plane_g_h: mpghra_.raw = data; break;
+        case map_rotation_parameter_a_plane_i_j: mpijra_.raw = data; break;
+        case map_rotation_parameter_a_plane_k_l: mpklra_.raw = data; break;
+        case map_rotation_parameter_a_plane_m_n: mpmnra_.raw = data; break;
+        case map_rotation_parameter_a_plane_o_p: mpopra_.raw = data; break;
+        case map_rotation_parameter_b_plane_a_b: mpabrb_.raw = data; break;
+        case map_rotation_parameter_b_plane_c_d: mpcdrb_.raw = data; break;
+        case map_rotation_parameter_b_plane_e_f: mpefrb_.raw = data; break;
+        case map_rotation_parameter_b_plane_g_h: mpghrb_.raw = data; break;
+        case map_rotation_parameter_b_plane_i_j: mpijrb_.raw = data; break;
+        case map_rotation_parameter_b_plane_k_l: mpklrb_.raw = data; break;
+        case map_rotation_parameter_b_plane_m_n: mpmnrb_.raw = data; break;
+        case map_rotation_parameter_b_plane_o_p: mpoprb_.raw = data; break;
+        case screen_scroll_value_nbg0_h_int_part: scxin0_.raw = data; break;
+        case screen_scroll_value_nbg0_h_fract_part: scxdn0_.raw = data; break;
+        case screen_scroll_value_nbg0_v_int_part: scyin0_.raw = data; break;
+        case screen_scroll_value_nbg0_v_fract_part: scydn0_.raw = data; break;
+        case coordinate_increment_nbg0_h_int_part: zmxin0_.raw = data; break;
+        case coordinate_increment_nbg0_h_fract_part: zmxdn0_.raw = data; break;
+        case coordinate_increment_nbg0_v_int_part: zmyin0_.raw = data; break;
+        case coordinate_increment_nbg0_v_fract_part: zmydn0_.raw = data; break;
+        case screen_scroll_value_nbg1_h_int_part: scxin1_.raw = data; break;
+        case screen_scroll_value_nbg1_h_fract_part: scxdn1_.raw = data; break;
+        case screen_scroll_value_nbg1_v_int_part: scyin1_.raw = data; break;
+        case screen_scroll_value_nbg1_v_fract_part: scydn1_.raw = data; break;
+        case coordinate_increment_nbg1_h_int_part: zmxin1_.raw = data; break;
+        case coordinate_increment_nbg1_h_fract_part: zmxdn1_.raw = data; break;
+        case coordinate_increment_nbg1_v_int_part: zmyin1_.raw = data; break;
+        case coordinate_increment_nbg1_v_fract_part: zmydn1_.raw = data; break;
+        case screen_scroll_value_nbg2_h: scxn2_.raw = data; break;
+        case screen_scroll_value_nbg2_v: scyn2_.raw = data; break;
+        case screen_scroll_value_nbg3_h: scxn3_.raw = data; break;
+        case screen_scroll_value_nbg3_v: scyn3_.raw = data; break;
+        case reduction_enable: zmctl_.raw = data; break;
+        case line_and_vertical_cell_scroll_control: scrctl_.raw = data; break;
+        case vertical_cell_scroll_table_address_upper: vcstau_.raw = data; break;
+        case vertical_cell_scroll_table_address_lower: vcstal_.raw = data; break;
+        case line_scroll_table_address_nbg0_upper: lsta0u_.raw = data; break;
+        case line_scroll_table_address_nbg0_lower: lsta0l_.raw = data; break;
+        case line_scroll_table_address_nbg1_upper: lsta1u_.raw = data; break;
+        case line_scroll_table_address_nbg1_lower: lsta1l_.raw = data; break;
+        case line_color_screen_table_address_upper: lctau_.raw = data; break;
+        case line_color_screen_table_address_lower: lctal_.raw = data; break;
+        case back_screen_table_address_upper: bktau_.raw = data; break;
+        case back_screen_table_address_lower: bktal_.raw = data; break;
+        case rotation_parameter_mode: rpmd_.raw = data; break;
+        case rotation_parameter_read_control: rprctl_.raw = data; break;
+        case coefficient_table_control: ktctl_.raw = data; break;
+        case coefficient_table_address_offset: ktaof_.raw = data; break;
+        case screen_over_pattern_name_a: ovpnra_.raw = data; break;
+        case screen_over_pattern_name_b: ovpnrb_.raw = data; break;
+        case rotation_parameter_table_address_upper: rptau_.raw = data; break;
+        case rotation_parameter_table_address_lower: rptal_.raw = data; break;
+        case window_position_w0_h_start_point: wpsx0_.raw = data; break;
+        case window_position_w0_v_start_point: wpsy0_.raw = data; break;
+        case window_position_w0_h_end_point: wpex0_.raw = data; break;
+        case window_position_w0_v_end_point: wpey0_.raw = data; break;
+        case window_position_w1_h_start_point: wpsx1_.raw = data; break;
+        case window_position_w1_v_start_point: wpsy1_.raw = data; break;
+        case window_position_w1_h_end_point: wpex1_.raw = data; break;
+        case window_position_w1_v_end_point: wpey1_.raw = data; break;
+        case window_control_a: wctla_.raw = data; break;
+        case window_control_b: wctlb_.raw = data; break;
+        case window_control_c: wctlc_.raw = data; break;
+        case window_control_d: wctld_.raw = data; break;
+        case line_window_table_address_w0_upper: lwta0u_.raw = data; break;
+        case line_window_table_address_w0_lower: lwta0l_.raw = data; break;
+        case line_window_table_address_w1_upper: lwta1u_.raw = data; break;
+        case line_window_table_address_w1_lower: lwta1l_.raw = data; break;
+        case sprite_control: spctl_.raw = data; break;
+        case shadow_control: sdctl_.raw = data; break;
+        case color_ram_address_offset_a: craofa_.raw = data; break;
+        case color_ram_address_offset_b: craofb_.raw = data; break;
+        case line_color_screen_enable: lnclen_.raw = data; break;
+        case special_priority_mode: sfprmd_.raw = data; break;
+        case color_calculation_control: ccctl_.raw = data; break;
+        case special_color_calculation_mode: sfccmd_.raw = data; break;
+        case priority_number_sprite_0_1: prisa_.raw = data; break;
+        case priority_number_sprite_2_3: prisb_.raw = data; break;
+        case priority_number_sprite_4_5: prisc_.raw = data; break;
+        case priority_number_sprite_6_7: prisd_.raw = data; break;
+        case priority_number_nbg0_nbg1: prina_.raw = data; break;
+        case priority_number_nbg2_nbg3: prinb_.raw = data; break;
+        case priority_number_rbg0: prir_.raw = data; break;
+        case reserve_2: rsv2_.raw = data; break;
+        case color_calculation_ratio_sprite_0_1: ccrsa_.raw = data; break;
+        case color_calculation_ratio_sprite_2_3: ccrsb_.raw = data; break;
+        case color_calculation_ratio_sprite_4_5: ccrsc_.raw = data; break;
+        case color_calculation_ratio_sprite_6_7: ccrsd_.raw = data; break;
+        case color_calculation_ratio_nbg0_nbg1: ccrna_.raw = data; break;
+        case color_calculation_ratio_nbg2_nbg3: ccrnb_.raw = data; break;
+        case color_calculation_ratio_rbg0: ccrr_.raw = data; break;
+        case color_calculation_ratio_line_color_back: ccrlb_.raw = data; break;
+        case color_offset_enable: clofen_.raw = data; break;
+        case color_offset_select: clofsl_.raw = data; break;
+        case color_offset_a_red: coar_.raw = data; break;
+        case color_offset_a_green: coag_.raw = data; break;
+        case color_offset_a_blue: coab_.raw = data; break;
+        case color_offset_b_red: cobr_.raw = data; break;
+        case color_offset_b_green: cobg_.raw = data; break;
+        case color_offset_b_blue: cobb_.raw = data; break;
         default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (16) {:#010x}"), addr);
     }
 }
@@ -573,276 +558,276 @@ void Vdp2::write32(const u32 addr, const u32 data) {
     const auto l = static_cast<u16>(data & bitmask_FFFF);
     switch (addr) {
         case vram_cycle_pattern_bank_a0_lower:
-            cyca0l_.set(bits_0_15, h);
-            cyca0u_.set(bits_0_15, l);
+            cyca0l_.raw = h;
+            cyca0u_.raw = l;
             break;
         case vram_cycle_pattern_bank_a1_lower:
-            cyca1l_.set(bits_0_15, h);
-            cyca1u_.set(bits_0_15, l);
+            cyca1l_.raw = h;
+            cyca1u_.raw = l;
             break;
         case vram_cycle_pattern_bank_b0_lower:
-            cycb0l_.set(bits_0_15, h);
-            cycb0u_.set(bits_0_15, l);
+            cycb0l_.raw = h;
+            cycb0u_.raw = l;
             break;
         case vram_cycle_pattern_bank_b1_lower:
-            cycb1l_.set(bits_0_15, h);
-            cycb1u_.set(bits_0_15, l);
+            cycb1l_.raw = h;
+            cycb1u_.raw = l;
             break;
         case screen_display_enable:
-            bgon_.set(bits_0_15, h);
-            mzctl_.set(bits_0_15, l);
+            bgon_.raw  = h;
+            mzctl_.raw = l;
             break;
         case special_function_code_select:
-            sfsel_.set(bits_0_15, h);
-            sfcode_.set(bits_0_15, l);
+            sfsel_.raw  = h;
+            sfcode_.raw = l;
             break;
         case character_control_a:
-            chctla_.set(bits_0_15, h);
-            chctlb_.set(bits_0_15, l);
+            chctla_.raw = h;
+            chctlb_.raw = l;
             break;
         case bitmap_palette_number_a:
-            bmpna_.set(bits_0_15, h);
-            bmpnb_.set(bits_0_15, l);
+            bmpna_.raw = h;
+            bmpnb_.raw = l;
             break;
         case pattern_name_control_nbg0:
-            pncn0_.set(bits_0_15, h);
-            pncn1_.set(bits_0_15, l);
+            pncn0_.raw = h;
+            pncn1_.raw = l;
             break;
         case pattern_name_control_nbg2:
-            pncn2_.set(bits_0_15, h);
-            pncn3_.set(bits_0_15, l);
+            pncn2_.raw = h;
+            pncn3_.raw = l;
             break;
         case pattern_name_control_rbg0:
-            pncr_.set(bits_0_15, h);
-            plsz_.set(bits_0_15, l);
+            pncr_.raw = h;
+            plsz_.raw = l;
             break;
         case map_offset_n:
-            mpofn_.set(bits_0_15, h);
-            mpofr_.set(bits_0_15, l);
+            mpofn_.raw = h;
+            mpofr_.raw = l;
             break;
         case map_nbg0_plane_a_b:
-            mpabn0_.set(bits_0_15, h);
-            mpcdn0_.set(bits_0_15, l);
+            mpabn0_.raw = h;
+            mpcdn0_.raw = l;
             break;
         case map_nbg1_plane_a_b:
-            mpabn1_.set(bits_0_15, h);
-            mpcdn1_.set(bits_0_15, l);
+            mpabn1_.raw = h;
+            mpcdn1_.raw = l;
             break;
         case map_nbg2_plane_a_b:
-            mpabn2_.set(bits_0_15, h);
-            mpcdn2_.set(bits_0_15, l);
+            mpabn2_.raw = h;
+            mpcdn2_.raw = l;
             break;
         case map_nbg3_plane_a_b:
-            mpabn3_.set(bits_0_15, h);
-            mpcdn3_.set(bits_0_15, l);
+            mpabn3_.raw = h;
+            mpcdn3_.raw = l;
             break;
         case map_rotation_parameter_a_plane_a_b:
-            mpabra_.set(bits_0_15, h);
-            mpcdra_.set(bits_0_15, l);
+            mpabra_.raw = h;
+            mpcdra_.raw = l;
             break;
         case map_rotation_parameter_a_plane_e_f:
-            mpefra_.set(bits_0_15, h);
-            mpghra_.set(bits_0_15, l);
+            mpefra_.raw = h;
+            mpghra_.raw = l;
             break;
         case map_rotation_parameter_a_plane_i_j:
-            mpijra_.set(bits_0_15, h);
-            mpklra_.set(bits_0_15, l);
+            mpijra_.raw = h;
+            mpklra_.raw = l;
             break;
         case map_rotation_parameter_a_plane_m_n:
-            mpmnra_.set(bits_0_15, h);
-            mpopra_.set(bits_0_15, l);
+            mpmnra_.raw = h;
+            mpopra_.raw = l;
             break;
         case map_rotation_parameter_b_plane_a_b:
-            mpabrb_.set(bits_0_15, h);
-            mpcdrb_.set(bits_0_15, l);
+            mpabrb_.raw = h;
+            mpcdrb_.raw = l;
             break;
         case map_rotation_parameter_b_plane_e_f:
-            mpefrb_.set(bits_0_15, h);
-            mpghrb_.set(bits_0_15, l);
+            mpefrb_.raw = h;
+            mpghrb_.raw = l;
             break;
         case map_rotation_parameter_b_plane_i_j:
-            mpijrb_.set(bits_0_15, h);
-            mpklrb_.set(bits_0_15, l);
+            mpijrb_.raw = h;
+            mpklrb_.raw = l;
             break;
         case map_rotation_parameter_b_plane_m_n:
-            mpmnrb_.set(bits_0_15, h);
-            mpoprb_.set(bits_0_15, l);
+            mpmnrb_.raw = h;
+            mpoprb_.raw = l;
             break;
         case screen_scroll_value_nbg0_h_int_part:
-            scxin0_.set(bits_0_15, h);
-            scxdn0_.set(bits_0_15, l);
+            scxin0_.raw = h;
+            scxdn0_.raw = l;
             break;
         case screen_scroll_value_nbg0_v_int_part:
-            scyin0_.set(bits_0_15, h);
-            scydn0_.set(bits_0_15, l);
+            scyin0_.raw = h;
+            scydn0_.raw = l;
             break;
         case coordinate_increment_nbg0_h_int_part:
-            zmxin0_.set(bits_0_15, h);
-            zmxdn0_.set(bits_0_15, l);
+            zmxin0_.raw = h;
+            zmxdn0_.raw = l;
             break;
         case coordinate_increment_nbg0_v_int_part:
-            zmyin0_.set(bits_0_15, h);
-            zmydn0_.set(bits_0_15, l);
+            zmyin0_.raw = h;
+            zmydn0_.raw = l;
             break;
         case screen_scroll_value_nbg1_h_int_part:
-            scxin1_.set(bits_0_15, h);
-            scxdn1_.set(bits_0_15, l);
+            scxin1_.raw = h;
+            scxdn1_.raw = l;
             break;
         case screen_scroll_value_nbg1_v_int_part:
-            scyin1_.set(bits_0_15, h);
-            scydn1_.set(bits_0_15, l);
+            scyin1_.raw = h;
+            scydn1_.raw = l;
             break;
         case coordinate_increment_nbg1_h_int_part:
-            zmxin1_.set(bits_0_15, h);
-            zmxdn1_.set(bits_0_15, l);
+            zmxin1_.raw = h;
+            zmxdn1_.raw = l;
             break;
         case coordinate_increment_nbg1_v_int_part:
-            zmyin1_.set(bits_0_15, h);
-            zmydn1_.set(bits_0_15, l);
+            zmyin1_.raw = h;
+            zmydn1_.raw = l;
             break;
         case screen_scroll_value_nbg2_h:
-            scxn2_.set(bits_0_15, h);
-            scyn2_.set(bits_0_15, l);
+            scxn2_.raw = h;
+            scyn2_.raw = l;
             break;
         case screen_scroll_value_nbg3_h:
-            scxn3_.set(bits_0_15, h);
-            scyn3_.set(bits_0_15, l);
+            scxn3_.raw = h;
+            scyn3_.raw = l;
             break;
         case reduction_enable:
-            zmctl_.set(bits_0_15, h);
-            scrctl_.set(bits_0_15, l);
+            zmctl_.raw  = h;
+            scrctl_.raw = l;
             break;
         case vertical_cell_scroll_table_address_upper:
-            vcstau_.set(bits_0_15, h);
-            vcstal_.set(bits_0_15, l);
+            vcstau_.raw = h;
+            vcstal_.raw = l;
             break;
         case line_scroll_table_address_nbg0_upper:
-            lsta0u_.set(bits_0_15, h);
-            lsta0l_.set(bits_0_15, l);
+            lsta0u_.raw = h;
+            lsta0l_.raw = l;
             break;
         case line_scroll_table_address_nbg1_upper:
-            lsta1u_.set(bits_0_15, h);
-            lsta1l_.set(bits_0_15, l);
+            lsta1u_.raw = h;
+            lsta1l_.raw = l;
             break;
         case line_color_screen_table_address_upper:
-            lctau_.set(bits_0_15, h);
-            lctal_.set(bits_0_15, l);
+            lctau_.raw = h;
+            lctal_.raw = l;
             break;
         case back_screen_table_address_upper:
-            bktau_.set(bits_0_15, h);
-            bktal_.set(bits_0_15, l);
+            bktau_.raw = h;
+            bktal_.raw = l;
             break;
         case rotation_parameter_mode:
-            rpmd_.set(bits_0_15, h);
-            rprctl_.set(bits_0_15, l);
+            rpmd_.raw   = h;
+            rprctl_.raw = l;
             break;
         case coefficient_table_control:
-            ktctl_.set(bits_0_15, h);
-            ktaof_.set(bits_0_15, l);
+            ktctl_.raw = h;
+            ktaof_.raw = l;
             break;
         case screen_over_pattern_name_a:
-            ovpnra_.set(bits_0_15, h);
-            ovpnrb_.set(bits_0_15, l);
+            ovpnra_.raw = h;
+            ovpnrb_.raw = l;
             break;
         case rotation_parameter_table_address_upper:
-            rptau_.set(bits_0_15, h);
-            rptal_.set(bits_0_15, l);
+            rptau_.raw = h;
+            rptal_.raw = l;
             break;
         case window_position_w0_h_start_point:
-            wpsx0_.set(bits_0_15, h);
-            wpsy0_.set(bits_0_15, l);
+            wpsx0_.raw = h;
+            wpsy0_.raw = l;
             break;
         case window_position_w0_h_end_point:
-            wpex0_.set(bits_0_15, h);
-            wpey0_.set(bits_0_15, l);
+            wpex0_.raw = h;
+            wpey0_.raw = l;
             break;
         case window_position_w1_h_start_point:
-            wpsx1_.set(bits_0_15, h);
-            wpsy1_.set(bits_0_15, l);
+            wpsx1_.raw = h;
+            wpsy1_.raw = l;
             break;
         case window_position_w1_h_end_point:
-            wpex1_.set(bits_0_15, h);
-            wpey1_.set(bits_0_15, l);
+            wpex1_.raw = h;
+            wpey1_.raw = l;
             break;
         case window_control_a:
-            wctla_.set(bits_0_15, h);
-            wctlb_.set(bits_0_15, l);
+            wctla_.raw = h;
+            wctlb_.raw = l;
             break;
         case window_control_c:
-            wctlc_.set(bits_0_15, h);
-            wctld_.set(bits_0_15, l);
+            wctlc_.raw = h;
+            wctld_.raw = l;
             break;
         case line_window_table_address_w0_upper:
-            lwta0u_.set(bits_0_15, h);
-            lwta0l_.set(bits_0_15, l);
+            lwta0u_.raw = h;
+            lwta0l_.raw = l;
             break;
         case line_window_table_address_w1_upper:
-            lwta1u_.set(bits_0_15, h);
-            lwta1l_.set(bits_0_15, l);
+            lwta1u_.raw = h;
+            lwta1l_.raw = l;
             break;
         case sprite_control:
-            spctl_.set(bits_0_15, h);
-            sdctl_.set(bits_0_15, l);
+            spctl_.raw = h;
+            sdctl_.raw = l;
             break;
         case color_ram_address_offset_a:
-            craofa_.set(bits_0_15, h);
-            craofb_.set(bits_0_15, l);
+            craofa_.raw = h;
+            craofb_.raw = l;
             break;
         case line_color_screen_enable:
-            lnclen_.set(bits_0_15, h);
-            sfprmd_.set(bits_0_15, l);
+            lnclen_.raw = h;
+            sfprmd_.raw = l;
             break;
         case color_calculation_control:
-            ccctl_.set(bits_0_15, h);
-            sfccmd_.set(bits_0_15, l);
+            ccctl_.raw  = h;
+            sfccmd_.raw = l;
             break;
         case priority_number_sprite_0_1:
-            prisa_.set(bits_0_15, h);
-            prisb_.set(bits_0_15, l);
+            prisa_.raw = h;
+            prisb_.raw = l;
             break;
         case priority_number_sprite_4_5:
-            prisc_.set(bits_0_15, h);
-            prisd_.set(bits_0_15, l);
+            prisc_.raw = h;
+            prisd_.raw = l;
             break;
         case priority_number_nbg0_nbg1:
-            prina_.set(bits_0_15, h);
-            prinb_.set(bits_0_15, l);
+            prina_.raw = h;
+            prinb_.raw = l;
             break;
         case priority_number_rbg0:
-            prir_.set(bits_0_15, h);
-            rsv2_.set(bits_0_15, l);
+            prir_.raw = h;
+            rsv2_.raw = l;
             break;
         case color_calculation_ratio_sprite_0_1:
-            ccrsa_.set(bits_0_15, h);
-            ccrsb_.set(bits_0_15, l);
+            ccrsa_.raw = h;
+            ccrsb_.raw = l;
             break;
         case color_calculation_ratio_sprite_4_5:
-            ccrsc_.set(bits_0_15, h);
-            ccrsd_.set(bits_0_15, l);
+            ccrsc_.raw = h;
+            ccrsd_.raw = l;
             break;
         case color_calculation_ratio_nbg0_nbg1:
-            ccrna_.set(bits_0_15, h);
-            ccrnb_.set(bits_0_15, l);
+            ccrna_.raw = h;
+            ccrnb_.raw = l;
             break;
         case color_calculation_ratio_rbg0:
-            ccrr_.set(bits_0_15, h);
-            ccrlb_.set(bits_0_15, l);
+            ccrr_.raw  = h;
+            ccrlb_.raw = l;
             break;
         case color_offset_enable:
-            clofen_.set(bits_0_15, h);
-            clofsl_.set(bits_0_15, l);
+            clofen_.raw = h;
+            clofsl_.raw = l;
             break;
         case color_offset_a_red:
-            coar_.set(bits_0_15, h);
-            coag_.set(bits_0_15, l);
+            coar_.raw = h;
+            coag_.raw = l;
             break;
         case color_offset_a_blue:
-            coab_.set(bits_0_15, h);
-            cobr_.set(bits_0_15, l);
+            coab_.raw = h;
+            cobr_.raw = l;
             break;
         case color_offset_b_green:
-            cobg_.set(bits_0_15, h);
-            cobb_.set(bits_0_15, l);
+            cobg_.raw = h;
+            cobb_.raw = l;
             break;
         default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (16) {:#010x}"), addr);
     }
@@ -1032,16 +1017,16 @@ void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& 
 }
 
 void Vdp2::updateResolution() {
-    tv_screen_status_.is_picture_displayed = (tvmd_.get(TvScreenMode::display) == Display::displayed);
-    tv_screen_status_.border_color_mode    = tvmd_.get(TvScreenMode::border_color_mode);
-    tv_screen_status_.interlace_mode       = tvmd_.get(TvScreenMode::interlace_mode);
+    tv_screen_status_.is_picture_displayed = (toEnum<Display>(tvmd_.display) == Display::displayed);
+    tv_screen_status_.border_color_mode    = toEnum<BorderColorMode>(tvmd_.border_color_mode);
+    tv_screen_status_.interlace_mode       = toEnum<InterlaceMode>(tvmd_.interlace_mode);
 
-    switch (tvmd_.get(TvScreenMode::horizontal_resolution)) {
+    switch (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution)) {
         case HorizontalResolution::normal_320:
             tv_screen_status_.horizontal_res   = horizontal_res_320;
             tv_screen_status_.screen_mode_type = ScreenModeType::normal;
             if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                     case VerticalResolution::lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_224;
@@ -1057,7 +1042,7 @@ void Vdp2::updateResolution() {
                     default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                     case VerticalResolution::lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_448;
@@ -1079,7 +1064,7 @@ void Vdp2::updateResolution() {
             tv_screen_status_.horizontal_res   = horizontal_res_352;
             tv_screen_status_.screen_mode_type = ScreenModeType::normal;
             if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                     case VerticalResolution::lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_224;
@@ -1095,7 +1080,7 @@ void Vdp2::updateResolution() {
                     default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                     case VerticalResolution::lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_448;
@@ -1117,7 +1102,7 @@ void Vdp2::updateResolution() {
             tv_screen_status_.horizontal_res   = horizontal_res_640;
             tv_screen_status_.screen_mode_type = ScreenModeType::hi_res;
             if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                     case VerticalResolution::lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_224;
@@ -1133,7 +1118,7 @@ void Vdp2::updateResolution() {
                     default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                     case VerticalResolution::lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_448;
@@ -1154,7 +1139,7 @@ void Vdp2::updateResolution() {
             tv_screen_status_.horizontal_res   = horizontal_res_704;
             tv_screen_status_.screen_mode_type = ScreenModeType::hi_res;
             if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                     case VerticalResolution::lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_224;
@@ -1170,7 +1155,7 @@ void Vdp2::updateResolution() {
                     default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
-                switch (tvmd_.get(TvScreenMode::vertical_resolution)) {
+                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
                     case VerticalResolution::lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_448;
@@ -1217,18 +1202,18 @@ void Vdp2::updateResolution() {
 };
 
 void Vdp2::updateRamStatus() {
-    ram_status_.vram_size      = vrsize_.get(VramSizeRegister::vram_size);
-    ram_status_.vram_a_mode    = ramctl_.get(RamControl::vram_a_mode);
-    ram_status_.vram_b_mode    = ramctl_.get(RamControl::vram_b_mode);
-    ram_status_.color_ram_mode = ramctl_.get(RamControl::color_ram_mode);
+    ram_status_.vram_size      = toEnum<VramSize>(static_cast<bool>(vrsize_.vram_size));
+    ram_status_.vram_a_mode    = toEnum<VramMode>(ramctl_.vram_a_mode);
+    ram_status_.vram_b_mode    = toEnum<VramMode>(ramctl_.vram_b_mode);
+    ram_status_.color_ram_mode = toEnum<ColorRamMode>(ramctl_.color_ram_mode);
     // memory()->vdp2_cram_memory_mask_         = (ram_status_.color_ram_mode == ColorRamMode::mode_1_rgb_5_bits_2048_colors)
     //                                               ? core::vdp2_cram_32Kb_memory_mask
     //                                               : core::vdp2_cram_16Kb_memory_mask;
-    ram_status_.coefficient_table_storage    = ramctl_.get(RamControl::coefficient_table_storage);
-    ram_status_.vram_a0_rotation_bank_select = ramctl_.get(RamControl::vram_a0_rotation_bank_select);
-    ram_status_.vram_a1_rotation_bank_select = ramctl_.get(RamControl::vram_a1_rotation_bank_select);
-    ram_status_.vram_b0_rotation_bank_select = ramctl_.get(RamControl::vram_b0_rotation_bank_select);
-    ram_status_.vram_b1_rotation_bank_select = ramctl_.get(RamControl::vram_b1_rotation_bank_select);
+    ram_status_.coefficient_table_storage    = toEnum<CoefficientTableStorage>(ramctl_.coefficient_table_storage);
+    ram_status_.vram_a0_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_a0_rotation_bank_select);
+    ram_status_.vram_a1_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_a1_rotation_bank_select);
+    ram_status_.vram_b0_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_b0_rotation_bank_select);
+    ram_status_.vram_b1_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_b1_rotation_bank_select);
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -1254,18 +1239,18 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 
     switch (s) {
         case ScrollScreen::nbg0: {
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display) {
+            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
 
             // Pattern name data reads depend on the reduction setting of the screen
-            const auto reduction = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg0),
-                                                       zmctl_.get(ReductionEnable::zoom_half_nbg0));
+            const auto reduction = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg0)),
+                                                       static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg0)));
 
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
-            if (chctla_.get(CharacterControlA::bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
+            if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
                 // Bitmap format needs only bitmap pattern data.
-                const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg0);
+                const auto color_number = toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0);
                 const auto required_bpd_reads
                     = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
                 const auto current_bdp_reads
@@ -1277,7 +1262,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
                 const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg0_pattern_name_read, reduction);
                 if (current_pnd_reads < required_pnd_reads) { return false; }
 
-                const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg0);
+                const auto color_number = toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0);
                 const auto required_cpd_reads
                     = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
                 const auto current_cpd_reads
@@ -1287,17 +1272,17 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             break;
         }
         case ScrollScreen::nbg1: {
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg1) == ScreenDisplayEnableBit::cannot_display) {
+            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
             // Pattern name data reads depend on the reduction setting of the screen
-            const auto reduction = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg1),
-                                                       zmctl_.get(ReductionEnable::zoom_half_nbg1));
+            const auto reduction = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg1)),
+                                                       static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg1)));
 
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
-            if (chctla_.get(CharacterControlA::bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
+            if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
                 // Bitmap format needs only bitmap pattern data.
-                const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg1);
+                const auto color_number = toEnum<CharacterColorNumber2Bits>(chctla_.character_color_number_nbg1);
                 const auto required_bpd_reads
                     = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
                 const auto current_bdp_reads
@@ -1309,7 +1294,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
                 const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg1_pattern_name_read, reduction);
                 if (current_pnd_reads < required_pnd_reads) { return false; }
 
-                const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg1);
+                const auto color_number = toEnum<CharacterColorNumber2Bits>(chctla_.character_color_number_nbg1);
                 const auto required_cpd_reads
                     = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
                 const auto current_cpd_reads
@@ -1320,7 +1305,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             break;
         }
         case ScrollScreen::nbg2: {
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg2) == ScreenDisplayEnableBit::cannot_display) {
+            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg2) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
 
@@ -1333,7 +1318,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg2_pattern_name_read, reduction);
             if (current_pnd_reads < required_pnd_reads) { return false; }
 
-            const auto color_number = chctlb_.get(CharacterControlB::character_color_number_nbg2);
+            const auto color_number = toEnum<CharacterColorNumber1Bit>(chctlb_.character_color_number_nbg2);
             const auto required_cpd_reads
                 = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
             const auto current_cpd_reads = getVramAccessByCommand(VramAccessCommand::nbg2_character_pattern_data_read, reduction);
@@ -1342,7 +1327,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             break;
         }
         case ScrollScreen::nbg3: {
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_nbg3) == ScreenDisplayEnableBit::cannot_display) {
+            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg3) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
             if (isScreenDisplayLimitedByReduction(s)) { return false; }
@@ -1354,7 +1339,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg3_pattern_name_read, reduction);
             if (current_pnd_reads < required_pnd_reads) { return false; }
 
-            const auto color_number = chctlb_.get(CharacterControlB::character_color_number_nbg3);
+            const auto color_number = toEnum<CharacterColorNumber1Bit>(chctlb_.character_color_number_nbg3);
             const auto required_cpd_reads
                 = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
             const auto current_cpd_reads = getVramAccessByCommand(VramAccessCommand::nbg3_character_pattern_data_read, reduction);
@@ -1362,18 +1347,21 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             break;
         }
         case ScrollScreen::rbg0: {
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display) {
+            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
             core::Log::unimplemented(core::tr("VDP2 RBG0 display"));
             break;
         }
         case ScrollScreen::rbg1: {
-            if (bgon_.get(ScreenDisplayEnable::screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display) {
+            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
             core::Log::unimplemented(core::tr("VDP2 RBG1 display"));
             break;
+        }
+        default: {
+            Log::warning(Logger::vdp2, tr("Scroll scrren not set"));
         }
     }
 
@@ -1386,22 +1374,22 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool {
     switch (s) {
         case ScrollScreen::nbg2: {
-            const auto reduction    = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg0),
-                                                       zmctl_.get(ReductionEnable::zoom_half_nbg0));
-            const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg0);
+            const auto reduction    = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg0)),
+                                                       static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg0)));
+            const auto color_number = toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0);
 
-            if ((reduction == ReductionSetting::up_to_one_quarter) && (color_number == CharacterColorNumber3bits::palette_16)) {
+            if ((reduction == ReductionSetting::up_to_one_quarter) && (color_number == CharacterColorNumber3Bits::palette_16)) {
                 return true;
             }
-            if ((reduction == ReductionSetting::up_to_one_half) && (color_number == CharacterColorNumber3bits::palette_256)) {
+            if ((reduction == ReductionSetting::up_to_one_half) && (color_number == CharacterColorNumber3Bits::palette_256)) {
                 return true;
             }
             break;
         }
         case ScrollScreen::nbg3: {
-            const auto reduction    = getReductionSetting(zmctl_.get(ReductionEnable::zoom_quarter_nbg1),
-                                                       zmctl_.get(ReductionEnable::zoom_half_nbg1));
-            const auto color_number = chctla_.get(CharacterControlA::character_color_number_nbg1);
+            const auto reduction    = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg1)),
+                                                       static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg1)));
+            const auto color_number = toEnum<CharacterColorNumber2Bits>(chctla_.character_color_number_nbg1);
 
             if ((reduction == ReductionSetting::up_to_one_quarter) && (color_number == CharacterColorNumber2Bits::palette_16)) {
                 return true;
@@ -1421,51 +1409,51 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
     constexpr auto vram_timing_size = u8{8};
     using VramTiming                = std::array<VramAccessCommand, vram_timing_size>;
 
-    auto is_normal_mode = (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_320);
-    is_normal_mode |= (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_352);
+    auto is_normal_mode = (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_320);
+    is_normal_mode |= (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_352);
 
-    static VramTiming bank_a0 = {cyca0l_.get(VramCyclePatternBankA0Lower::t0),
-                                 cyca0l_.get(VramCyclePatternBankA0Lower::t1),
-                                 cyca0l_.get(VramCyclePatternBankA0Lower::t2),
-                                 cyca0l_.get(VramCyclePatternBankA0Lower::t3),
-                                 is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t4) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t5) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t6) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t7) : VramAccessCommand::no_access};
+    static VramTiming bank_a0 = {toEnum<VramAccessCommand>(cyca0l_.t0),
+                                 toEnum<VramAccessCommand>(cyca0l_.t1),
+                                 toEnum<VramAccessCommand>(cyca0l_.t2),
+                                 toEnum<VramAccessCommand>(cyca0l_.t3),
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t4) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t5) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t6) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t7) : VramAccessCommand::no_access};
 
-    static VramTiming bank_a1 = {cyca1l_.get(VramCyclePatternBankA1Lower::t0),
-                                 cyca1l_.get(VramCyclePatternBankA1Lower::t1),
-                                 cyca1l_.get(VramCyclePatternBankA1Lower::t2),
-                                 cyca1l_.get(VramCyclePatternBankA1Lower::t3),
-                                 is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t4) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t5) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t6) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t7) : VramAccessCommand::no_access};
+    static VramTiming bank_a1 = {toEnum<VramAccessCommand>(cyca1l_.t0),
+                                 toEnum<VramAccessCommand>(cyca1l_.t1),
+                                 toEnum<VramAccessCommand>(cyca1l_.t2),
+                                 toEnum<VramAccessCommand>(cyca1l_.t3),
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t4) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t5) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t6) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t7) : VramAccessCommand::no_access};
 
-    static VramTiming bank_b0 = {cycb0l_.get(VramCyclePatternBankB0Lower::t0),
-                                 cycb0l_.get(VramCyclePatternBankB0Lower::t1),
-                                 cycb0l_.get(VramCyclePatternBankB0Lower::t2),
-                                 cycb0l_.get(VramCyclePatternBankB0Lower::t3),
-                                 is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t4) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t5) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t6) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t7) : VramAccessCommand::no_access};
+    static VramTiming bank_b0 = {toEnum<VramAccessCommand>(cycb0l_.t0),
+                                 toEnum<VramAccessCommand>(cycb0l_.t1),
+                                 toEnum<VramAccessCommand>(cycb0l_.t2),
+                                 toEnum<VramAccessCommand>(cycb0l_.t3),
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t4) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t5) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t6) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t7) : VramAccessCommand::no_access};
 
-    static VramTiming bank_b1 = {cycb1l_.get(VramCyclePatternBankB1Lower::t0),
-                                 cycb1l_.get(VramCyclePatternBankB1Lower::t1),
-                                 cycb1l_.get(VramCyclePatternBankB1Lower::t2),
-                                 cycb1l_.get(VramCyclePatternBankB1Lower::t3),
-                                 is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t4) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t5) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t6) : VramAccessCommand::no_access,
-                                 is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t7) : VramAccessCommand::no_access};
+    static VramTiming bank_b1 = {toEnum<VramAccessCommand>(cycb1l_.t0),
+                                 toEnum<VramAccessCommand>(cycb1l_.t1),
+                                 toEnum<VramAccessCommand>(cycb1l_.t2),
+                                 toEnum<VramAccessCommand>(cycb1l_.t3),
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t4) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t5) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t6) : VramAccessCommand::no_access,
+                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : VramAccessCommand::no_access};
 
     switch (command) {
         case VramAccessCommand::nbg0_character_pattern_data_read: {
-            if (chctla_.get(CharacterControlA::bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
+            if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
-            const auto cp_size = chctla_.get(CharacterControlA::character_size_nbg0);
+            const auto cp_size = toEnum<CharacterSize>(chctla_.character_size_nbg0);
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
                                                     bank_b0,
@@ -1476,10 +1464,10 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     (cp_size == CharacterSize::two_by_two));
         }
         case VramAccessCommand::nbg1_character_pattern_data_read: {
-            if (chctla_.get(CharacterControlA::bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
+            if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
-            const auto cp_size = chctla_.get(CharacterControlA::character_size_nbg1);
+            const auto cp_size = toEnum<CharacterSize>(chctla_.character_size_nbg1);
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
                                                     bank_b0,
@@ -1490,7 +1478,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     (cp_size == CharacterSize::two_by_two));
         }
         case VramAccessCommand::nbg2_character_pattern_data_read: {
-            const auto cp_size = chctlb_.get(CharacterControlB::character_size_nbg2);
+            const auto cp_size = toEnum<CharacterSize>(chctlb_.character_size_nbg2);
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
                                                     bank_b0,
@@ -1501,7 +1489,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     (cp_size == CharacterSize::two_by_two));
         }
         case VramAccessCommand::nbg3_character_pattern_data_read: {
-            const auto cp_size = chctlb_.get(CharacterControlB::character_size_nbg3);
+            const auto cp_size = toEnum<CharacterSize>(chctlb_.character_size_nbg3);
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
                                                     bank_b0,
@@ -1539,11 +1527,11 @@ auto Vdp2::getVramBitmapReads(const VramTiming&       bank_a0,
                               const VramTiming&       bank_b1,
                               const VramAccessCommand command) -> u8 {
     auto bitmap_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
-    if (ramctl_.get(RamControl::vram_a_mode) == VramMode::partition_in_2_banks) {
+    if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks) {
         bitmap_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
     }
     bitmap_reads += std::count(bank_b0.begin(), bank_b0.end(), command);
-    if (ramctl_.get(RamControl::vram_b_mode) == VramMode::partition_in_2_banks) {
+    if (toEnum<VramMode>(ramctl_.vram_b_mode) == VramMode::partition_in_2_banks) {
         bitmap_reads += std::count(bank_b1.begin(), bank_b1.end(), command);
     }
     return static_cast<u8>(bitmap_reads);
@@ -1568,8 +1556,8 @@ auto Vdp2::getVramPatternNameDataReads(const VramTiming&       bank_a0,
     // |   yes     |   yes     | A0, B0 or A1,B1 |
     // -------------------------------------------
     auto pnd_reads = ptrdiff_t{};
-    if (ramctl_.get(RamControl::vram_a_mode) == VramMode::partition_in_2_banks
-        && (ramctl_.get(RamControl::vram_b_mode) == VramMode::partition_in_2_banks)) {
+    if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks
+        && (toEnum<VramMode>(ramctl_.vram_b_mode) == VramMode::partition_in_2_banks)) {
         auto pnd_reads_bank_0 = std::count(bank_a0.begin(), bank_a0.end(), command);
         pnd_reads_bank_0 += std::count(bank_b0.begin(), bank_b0.end(), command);
 
@@ -1592,35 +1580,35 @@ auto Vdp2::getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting 
 };
 
 // static
-auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3bits ccn) -> VramAccessNumber {
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3Bits ccn) -> VramAccessNumber {
     switch (ccn) {
-        case CharacterColorNumber3bits::palette_16:
+        case CharacterColorNumber3Bits::palette_16:
             switch (r) {
                 case ReductionSetting::none: return VramAccessNumber::one;
                 case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
                 case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
             }
             break;
-        case CharacterColorNumber3bits::palette_256:
+        case CharacterColorNumber3Bits::palette_256:
             switch (r) {
                 case ReductionSetting::none: return VramAccessNumber::two;
                 case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
-        case CharacterColorNumber3bits::palette_2048:
+        case CharacterColorNumber3Bits::palette_2048:
             switch (r) {
                 case ReductionSetting::none: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
-        case CharacterColorNumber3bits::rgb_32k:
+        case CharacterColorNumber3Bits::rgb_32k:
             switch (r) {
                 case ReductionSetting::none: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
-        case CharacterColorNumber3bits::rgb_16m:
+        case CharacterColorNumber3Bits::rgb_16m:
             switch (r) {
                 case ReductionSetting::none: return VramAccessNumber::eight;
                 default: return VramAccessNumber::none;
@@ -1855,7 +1843,7 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
                                             const VramAccessCommand command,
                                             const ReductionSetting  reduction,
                                             const bool              is_screen_mode_normal,
-                                            const bool              is_using_cp_4_by_4) -> u8 {
+                                            const bool              is_using_2_by_2_cp) -> u8 {
     // From the command we must use the linked Pattern Name Data. The limitations are based on the PND read position.
     // Step 1 : find PND reads for the current command
     // const auto pnd = getPatternNameFromCharacterPattern(command);
@@ -1889,7 +1877,7 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
         // Some more restrictions can be applied when displaying NBG screens in high res when using 2*2 CP (cf sattechs #37 for
         // details)
         auto allowed_cpd_timing = std::array{false, false, false, false, false, false, false, false};
-        setCharacterPatternLimitations(is_screen_mode_normal, is_using_cp_4_by_4, pnd_timing_access, allowed_cpd_timing);
+        setCharacterPatternLimitations(is_screen_mode_normal, is_using_2_by_2_cp, pnd_timing_access, allowed_cpd_timing);
 
         // Step 3 : get the reads
         // First access not available are changed to no access
@@ -2006,15 +1994,15 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     constexpr auto map_size_rbg = u8{4 * 4};
     constexpr auto cell_size    = u8{8 * 8};
 
-    const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3bits c, const ScreenModeType t) {
+    const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3Bits c, const ScreenModeType t) {
         switch (c) {
-            case CharacterColorNumber3bits::palette_16: return ColorCount::palette_16;
-            case CharacterColorNumber3bits::palette_256: return ColorCount::palette_256;
-            case CharacterColorNumber3bits::palette_2048: return ColorCount::palette_2048;
-            case CharacterColorNumber3bits::rgb_32k: {
+            case CharacterColorNumber3Bits::palette_16: return ColorCount::palette_16;
+            case CharacterColorNumber3Bits::palette_256: return ColorCount::palette_256;
+            case CharacterColorNumber3Bits::palette_2048: return ColorCount::palette_2048;
+            case CharacterColorNumber3Bits::rgb_32k: {
                 return (t == ScreenModeType::normal) ? ColorCount::rgb_32k : ColorCount::not_allowed;
             }
-            case CharacterColorNumber3bits::rgb_16m: return ColorCount::rgb_16m;
+            case CharacterColorNumber3Bits::rgb_16m: return ColorCount::rgb_16m;
             default: return ColorCount::not_allowed;
         }
     };
@@ -2036,15 +2024,15 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             default: return ColorCount::not_allowed;
         }
     };
-    const auto getCharacterColorNumberRbg0 = [](const CharacterColorNumber3bits c, const ScreenModeType t) {
+    const auto getCharacterColorNumberRbg0 = [](const CharacterColorNumber3Bits c, const ScreenModeType t) {
         if (t == ScreenModeType::exclusive) { return ColorCount::cannot_display; }
 
         switch (c) {
-            case CharacterColorNumber3bits::palette_16: return ColorCount::palette_16;
-            case CharacterColorNumber3bits::palette_256: return ColorCount::palette_256;
-            case CharacterColorNumber3bits::palette_2048: return ColorCount::palette_2048;
-            case CharacterColorNumber3bits::rgb_32k: return ColorCount::rgb_32k;
-            case CharacterColorNumber3bits::rgb_16m: {
+            case CharacterColorNumber3Bits::palette_16: return ColorCount::palette_16;
+            case CharacterColorNumber3Bits::palette_256: return ColorCount::palette_256;
+            case CharacterColorNumber3Bits::palette_2048: return ColorCount::palette_2048;
+            case CharacterColorNumber3Bits::rgb_32k: return ColorCount::rgb_32k;
+            case CharacterColorNumber3Bits::rgb_16m: {
                 return (t == ScreenModeType::normal) ? ColorCount::rgb_16m : ColorCount::not_allowed;
             }
             default: return ColorCount::not_allowed;
@@ -2101,164 +2089,160 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     switch (s) {
         case ScrollScreen::nbg0:
             // Color RAM
-            screen.color_ram_address_offset
-                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg0));
+            screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
 
             // Transparency
-            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg0)
+            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg0)
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prina_.get(PriorityNumberA::nbg0);
+            screen.priority_number = prina_.nbg0;
 
             // Map
             screen.map_size   = map_size_nbg;
-            screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg0);
+            screen.map_offset = mpofn_.map_offset_nbg0;
 
             // Plane
-            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_nbg0);
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_a));
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneAB::plane_b));
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneCD::plane_c));
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpabn0_.get(MapNbg0PlaneCD::plane_d));
+            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_nbg0);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn0_.plane_a);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn0_.plane_b);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn0_.plane_c);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn0_.plane_d);
 
             // Page
-            screen.page_size = getPageSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size),
-                                           chctla_.get(CharacterControlA::character_size_nbg0));
+            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size),
+                                           toEnum<CharacterSize>(chctla_.character_size_nbg0));
 
             // Pattern name data
-            screen.pattern_name_data_size           = pncn0_.get(PatternNameControlNbg0::pattern_name_data_size);
-            screen.character_number_supplement_mode = pncn0_.get(PatternNameControlNbg0::character_number_mode);
-            screen.special_priority                 = pncn0_.get(PatternNameControlNbg0::special_priority);
-            screen.special_color_calculation        = pncn0_.get(PatternNameControlNbg0::special_color_calculation);
-            screen.supplementary_palette_number     = pncn0_.get(PatternNameControlNbg0::supplementary_palette_number);
-            screen.supplementary_character_number   = pncn0_.get(PatternNameControlNbg0::supplementary_character_number);
+            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
+            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn0_.character_number_mode);
+            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn0_.special_priority));
+            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn0_.special_color_calculation));
+            screen.supplementary_palette_number     = pncn0_.supplementary_palette_number;
+            screen.supplementary_character_number   = pncn0_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = chctla_.get(CharacterControlA::character_size_nbg0);
+            screen.character_pattern_size = toEnum<CharacterSize>(chctla_.character_size_nbg0);
             screen.character_color_number
-                = getCharacterColorNumber3Bits(chctla_.get(CharacterControlA::character_color_number_nbg0),
+                = getCharacterColorNumber3Bits(toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0),
                                                tv_screen_status_.screen_mode_type);
-            screen.format = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg0));
+            screen.format = getScrollScreenFormat(toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg0));
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
-            screen.bitmap_size                      = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg0));
-            screen.bitmap_palette_number            = bmpna_.get(BitmapPaletteNumberA::bitmap_palette_number_nbg0);
-            screen.bitmap_special_priority          = bmpna_.get(BitmapPaletteNumberA::bitmap_special_priority_nbg0);
-            screen.bitmap_special_color_calculation = bmpna_.get(BitmapPaletteNumberA::bitmap_special_color_calculation_nbg0);
-            screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
+            screen.bitmap_size           = getBitmapSize(toEnum<BitmapSize2Bits>(chctla_.bitmap_size_nbg0));
+            screen.bitmap_palette_number = bmpna_.bitmap_palette_number_nbg0;
+            // screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_priority_nbg0));
+            screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_priority_nbg0));
+            screen.bitmap_special_color_calculation
+                = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_color_calculation_nbg0));
+            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer = scxin0_.get(ScreenScrollValueNbg0HorizontalIntegerPart::horizontal_integer);
-            screen.screen_scroll_horizontal_fractional
-                = scxdn0_.get(ScreenScrollValueNbg0HorizontalFractionalPart::horizontal_fractional);
-            screen.screen_scroll_vertical_integer = scyin0_.get(ScreenScrollValueNbg0VerticalIntegerPart::vertical_integer);
-            screen.screen_scroll_vertical_fractional
-                = scydn0_.get(ScreenScrollValueNbg0VerticalFractionalPart::vertical_fractional);
+            screen.screen_scroll_horizontal_integer    = scxin0_.integer;
+            screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn0_.fractional);
+            screen.screen_scroll_vertical_integer      = scyin0_.integer;
+            screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn0_.fractional);
 
             break;
         case ScrollScreen::nbg1:
             // Color RAM
-            screen.color_ram_address_offset
-                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg1));
+            screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg1);
 
             // Transparency
-            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg1)
+            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg1)
                                                  == TransparentDisplayEnable::transparency_code_valid);
             // Priority
-            screen.priority_number = prina_.get(PriorityNumberA::nbg1);
+            screen.priority_number = static_cast<u8>(prina_.nbg1);
 
             // Map
             screen.map_size   = map_size_nbg;
-            screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg1);
+            screen.map_offset = mpofn_.map_offset_nbg1;
 
             // Plane
-            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_nbg1);
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_a));
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneAB::plane_b));
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneCD::plane_c));
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpabn1_.get(MapNbg1PlaneCD::plane_d));
+            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_nbg1);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn1_.plane_a);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn1_.plane_b);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn1_.plane_c);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn1_.plane_d);
 
             // Page
-            screen.page_size = getPageSize(pncn1_.get(PatternNameControlNbg1::pattern_name_data_size),
-                                           chctla_.get(CharacterControlA::character_size_nbg1));
+            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size),
+                                           toEnum<CharacterSize>(chctla_.character_size_nbg1));
 
             // Pattern name data
-            screen.pattern_name_data_size           = pncn1_.get(PatternNameControlNbg1::pattern_name_data_size);
-            screen.character_number_supplement_mode = pncn1_.get(PatternNameControlNbg1::character_number_mode);
-            screen.special_priority                 = pncn1_.get(PatternNameControlNbg1::special_priority);
-            screen.special_color_calculation        = pncn1_.get(PatternNameControlNbg1::special_color_calculation);
-            screen.supplementary_palette_number     = pncn1_.get(PatternNameControlNbg1::supplementary_palette_number);
-            screen.supplementary_character_number   = pncn1_.get(PatternNameControlNbg1::supplementary_character_number);
+            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size);
+            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn1_.character_number_mode);
+            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn1_.special_priority));
+            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn1_.special_color_calculation));
+            screen.supplementary_palette_number     = pncn1_.supplementary_palette_number;
+            screen.supplementary_character_number   = pncn1_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = chctla_.get(CharacterControlA::character_size_nbg1);
+            screen.character_pattern_size = toEnum<CharacterSize>(chctla_.character_size_nbg1);
             screen.character_color_number
-                = getCharacterColorNumber2Bits(chctla_.get(CharacterControlA::character_color_number_nbg1),
+                = getCharacterColorNumber2Bits(toEnum<CharacterColorNumber2Bits>(chctla_.character_color_number_nbg1),
                                                tv_screen_status_.screen_mode_type);
-            screen.format = getScrollScreenFormat(chctla_.get(CharacterControlA::bitmap_enable_nbg1));
+            screen.format = getScrollScreenFormat(toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg1));
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
-            screen.bitmap_size                      = getBitmapSize(chctla_.get(CharacterControlA::bitmap_size_nbg1));
-            screen.bitmap_palette_number            = bmpna_.get(BitmapPaletteNumberA::bitmap_palette_number_nbg1);
-            screen.bitmap_special_priority          = bmpna_.get(BitmapPaletteNumberA::bitmap_special_priority_nbg1);
-            screen.bitmap_special_color_calculation = bmpna_.get(BitmapPaletteNumberA::bitmap_special_color_calculation_nbg1);
-            screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
+            screen.bitmap_size             = getBitmapSize(toEnum<BitmapSize2Bits>(chctla_.bitmap_size_nbg1));
+            screen.bitmap_palette_number   = static_cast<u8>(bmpna_.bitmap_palette_number_nbg1);
+            screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_priority_nbg1));
+            screen.bitmap_special_color_calculation
+                = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_color_calculation_nbg1));
+            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer = scxin1_.get(ScreenScrollValueNbg1HorizontalIntegerPart::horizontal_integer);
-            screen.screen_scroll_horizontal_fractional
-                = scxdn1_.get(ScreenScrollValueNbg1HorizontalFractionalPart::horizontal_fractional);
-            screen.screen_scroll_vertical_integer = scyin1_.get(ScreenScrollValueNbg1VerticalIntegerPart::vertical_integer);
-            screen.screen_scroll_vertical_fractional
-                = scydn1_.get(ScreenScrollValueNbg1VerticalFractionalPart::vertical_fractional);
+            screen.screen_scroll_horizontal_integer    = scxin1_.integer;
+            screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn1_.fractional);
+            screen.screen_scroll_vertical_integer      = scyin1_.integer;
+            screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn1_.fractional);
 
             break;
         case ScrollScreen::nbg2:
             // Color RAM
-            screen.color_ram_address_offset
-                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg2));
+            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg2));
 
             // Transparency
-            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg2)
+            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg2)
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prinb_.get(PriorityNumberB::nbg2);
+            screen.priority_number = prinb_.nbg2;
 
             // Map
             screen.map_size   = map_size_nbg;
-            screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg2);
+            screen.map_offset = static_cast<u8>(mpofn_.map_offset_nbg2);
 
             // Plane
-            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_nbg2);
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_a));
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneAB::plane_b));
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneCD::plane_c));
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpabn2_.get(MapNbg2PlaneCD::plane_d));
+            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_nbg2);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn2_.plane_a);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn2_.plane_b);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn2_.plane_c);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn2_.plane_d);
 
             // Page
-            screen.page_size = getPageSize(pncn2_.get(PatternNameControlNbg2::pattern_name_data_size),
-                                           chctlb_.get(CharacterControlB::character_size_nbg2));
+            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size),
+                                           toEnum<CharacterSize>(chctlb_.character_size_nbg2));
 
             // Pattern name data
-            screen.pattern_name_data_size           = pncn2_.get(PatternNameControlNbg2::pattern_name_data_size);
-            screen.character_number_supplement_mode = pncn2_.get(PatternNameControlNbg2::character_number_mode);
-            screen.special_priority                 = pncn2_.get(PatternNameControlNbg2::special_priority);
-            screen.special_color_calculation        = pncn2_.get(PatternNameControlNbg2::special_color_calculation);
-            screen.supplementary_palette_number     = pncn2_.get(PatternNameControlNbg2::supplementary_palette_number);
-            screen.supplementary_character_number   = pncn2_.get(PatternNameControlNbg2::supplementary_character_number);
+            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size);
+            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn2_.character_number_mode);
+            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn2_.special_priority));
+            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn2_.special_color_calculation));
+            screen.supplementary_palette_number     = pncn2_.supplementary_palette_number;
+            screen.supplementary_character_number   = pncn2_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = chctlb_.get(CharacterControlB::character_size_nbg2);
+            screen.character_pattern_size = toEnum<CharacterSize>(chctlb_.character_size_nbg2);
             screen.character_color_number
-                = getCharacterColorNumber1Bit(chctlb_.get(CharacterControlB::character_color_number_nbg2));
+                = getCharacterColorNumber1Bit(toEnum<CharacterColorNumber1Bit>(chctlb_.character_color_number_nbg2));
             screen.bitmap_size          = BitmapSize::not_set;
             screen.bitmap_start_address = 0;
 
@@ -2266,50 +2250,49 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer = scxn2_.get(ScreenScrollValueNbg2Horizontal::horizontal);
-            screen.screen_scroll_vertical_integer   = scyn2_.get(ScreenScrollValueNbg2Vertical::vertical);
+            screen.screen_scroll_horizontal_integer = scxn2_.integer;
+            screen.screen_scroll_vertical_integer   = scyn2_.integer;
 
             break;
 
         case ScrollScreen::nbg3:
             // Color RAM
-            screen.color_ram_address_offset
-                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg3));
+            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg3));
 
             // Transparency
-            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg3)
+            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg3)
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prinb_.get(PriorityNumberB::nbg3);
+            screen.priority_number = static_cast<u8>(prinb_.nbg3);
 
             // Map
             screen.map_size   = map_size_nbg;
-            screen.map_offset = mpofn_.get(MapOffsetNbg::map_offset_nbg3);
+            screen.map_offset = static_cast<u8>(mpofn_.map_offset_nbg3);
 
             // Plane
-            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_nbg3);
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_a));
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneAB::plane_b));
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneCD::plane_c));
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpabn3_.get(MapNbg3PlaneCD::plane_d));
+            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_nbg3);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn3_.plane_a);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn3_.plane_b);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn3_.plane_c);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn3_.plane_d);
 
             // Page
-            screen.page_size = getPageSize(pncn3_.get(PatternNameControlNbg3::pattern_name_data_size),
-                                           chctlb_.get(CharacterControlB::character_size_nbg3));
+            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size),
+                                           toEnum<CharacterSize>(chctlb_.character_size_nbg3));
 
             // Pattern name data
-            screen.pattern_name_data_size           = pncn3_.get(PatternNameControlNbg3::pattern_name_data_size);
-            screen.character_number_supplement_mode = pncn3_.get(PatternNameControlNbg3::character_number_mode);
-            screen.special_priority                 = pncn3_.get(PatternNameControlNbg3::special_priority);
-            screen.special_color_calculation        = pncn3_.get(PatternNameControlNbg3::special_color_calculation);
-            screen.supplementary_palette_number     = pncn3_.get(PatternNameControlNbg3::supplementary_palette_number);
-            screen.supplementary_character_number   = pncn3_.get(PatternNameControlNbg3::supplementary_character_number);
+            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size);
+            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn3_.character_number_mode);
+            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn3_.special_priority));
+            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn3_.special_color_calculation));
+            screen.supplementary_palette_number     = pncn3_.supplementary_palette_number;
+            screen.supplementary_character_number   = pncn3_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = chctlb_.get(CharacterControlB::character_size_nbg3);
+            screen.character_pattern_size = toEnum<CharacterSize>(chctlb_.character_size_nbg3);
             screen.character_color_number
-                = getCharacterColorNumber1Bit(chctlb_.get(CharacterControlB::character_color_number_nbg3));
+                = getCharacterColorNumber1Bit(toEnum<CharacterColorNumber1Bit>(chctlb_.character_color_number_nbg3));
             screen.bitmap_size          = BitmapSize::not_set;
             screen.bitmap_start_address = 0;
 
@@ -2317,127 +2300,126 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer = scxn3_.get(ScreenScrollValueNbg3Horizontal::horizontal);
-            screen.screen_scroll_vertical_integer   = scyn3_.get(ScreenScrollValueNbg3Vertical::vertical);
+            screen.screen_scroll_horizontal_integer = scxn3_.integer;
+            screen.screen_scroll_vertical_integer   = scyn3_.integer;
 
             break;
 
         case ScrollScreen::rbg0:
             // Color RAM
-            screen.color_ram_address_offset
-                = getColorRamAddressOffset(craofb_.get(ColorRamAddressOffsetB::color_ram_address_offset_rbg0));
+            screen.color_ram_address_offset = getColorRamAddressOffset(craofb_.color_ram_address_offset_rbg0);
 
             // Transparency
-            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_rbg0)
+            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_rbg0)
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prir_.get(PriorityNumberR::rbg0);
+            screen.priority_number = prir_.rbg0;
 
             // Map
             screen.map_size   = map_size_rbg;
-            screen.map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpa);
+            screen.map_offset = mpofr_.map_offset_rpa;
 
             // Plane
-            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_rpa);
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_a));
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneAB::plane_b));
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneCD::plane_c));
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneCD::plane_d));
-            screen.plane_e_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneEF::plane_e));
-            screen.plane_f_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneEF::plane_f));
-            screen.plane_g_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneGH::plane_g));
-            screen.plane_h_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneGH::plane_h));
-            screen.plane_i_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneIJ::plane_i));
-            screen.plane_j_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneIJ::plane_j));
-            screen.plane_k_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneKL::plane_k));
-            screen.plane_l_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneKL::plane_l));
-            screen.plane_m_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneMN::plane_m));
-            screen.plane_n_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneMN::plane_n));
-            screen.plane_o_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneOP::plane_o));
-            screen.plane_p_start_address = calculatePlaneStartAddress(s, mpabra_.get(MapRotationParameterAPlaneOP::plane_p));
+            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_rpa);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabra_.plane_a);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabra_.plane_b);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdra_.plane_c);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdra_.plane_d);
+            screen.plane_e_start_address = calculatePlaneStartAddress(s, mpefra_.plane_e);
+            screen.plane_f_start_address = calculatePlaneStartAddress(s, mpefra_.plane_f);
+            screen.plane_g_start_address = calculatePlaneStartAddress(s, mpghra_.plane_g);
+            screen.plane_h_start_address = calculatePlaneStartAddress(s, mpghra_.plane_h);
+            screen.plane_i_start_address = calculatePlaneStartAddress(s, mpijra_.plane_i);
+            screen.plane_j_start_address = calculatePlaneStartAddress(s, mpijra_.plane_j);
+            screen.plane_k_start_address = calculatePlaneStartAddress(s, mpklra_.plane_k);
+            screen.plane_l_start_address = calculatePlaneStartAddress(s, mpklra_.plane_l);
+            screen.plane_m_start_address = calculatePlaneStartAddress(s, mpmnra_.plane_m);
+            screen.plane_n_start_address = calculatePlaneStartAddress(s, mpmnra_.plane_n);
+            screen.plane_o_start_address = calculatePlaneStartAddress(s, mpopra_.plane_o);
+            screen.plane_p_start_address = calculatePlaneStartAddress(s, mpopra_.plane_p);
 
             // Page
-            screen.page_size = getPageSize(pncr_.get(PatternNameControlRbg0::pattern_name_data_size),
-                                           chctlb_.get(CharacterControlB::character_size_rbg0));
+            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size),
+                                           toEnum<CharacterSize>(chctlb_.character_size_rbg0));
 
             // Pattern name data
-            screen.pattern_name_data_size           = pncr_.get(PatternNameControlRbg0::pattern_name_data_size);
-            screen.character_number_supplement_mode = pncr_.get(PatternNameControlRbg0::character_number_mode);
-            screen.special_priority                 = pncr_.get(PatternNameControlRbg0::special_priority);
-            screen.special_color_calculation        = pncr_.get(PatternNameControlRbg0::special_color_calculation);
-            screen.supplementary_palette_number     = pncr_.get(PatternNameControlRbg0::supplementary_palette_number);
-            screen.supplementary_character_number   = pncr_.get(PatternNameControlRbg0::supplementary_character_number);
+            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size);
+            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncr_.character_number_mode);
+            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncr_.special_priority));
+            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncr_.special_color_calculation));
+            screen.supplementary_palette_number     = pncr_.supplementary_palette_number;
+            screen.supplementary_character_number   = pncr_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = chctlb_.get(CharacterControlB::character_size_rbg0);
+            screen.character_pattern_size = toEnum<CharacterSize>(chctlb_.character_size_rbg0);
             screen.character_color_number
-                = getCharacterColorNumberRbg0(chctlb_.get(CharacterControlB::character_color_number_rbg0),
+                = getCharacterColorNumberRbg0(toEnum<CharacterColorNumber3Bits>(chctlb_.character_color_number_rbg0),
                                               tv_screen_status_.screen_mode_type);
-            screen.format = getScrollScreenFormat(chctlb_.get(CharacterControlB::bitmap_enable_rbg0));
+            screen.format = getScrollScreenFormat(toEnum<BitmapEnable>(chctlb_.bitmap_enable_rbg0));
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
-            screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(chctlb_.get(CharacterControlB::bitmap_size_rbg0)));
-            screen.bitmap_palette_number            = bmpnb_.get(BitmapPaletteNumberB::bitmap_palette_number_rbg0);
-            screen.bitmap_special_priority          = bmpnb_.get(BitmapPaletteNumberB::bitmap_special_priority_rbg0);
-            screen.bitmap_special_color_calculation = bmpnb_.get(BitmapPaletteNumberB::bitmap_special_color_calculation_rbg0);
-            screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
+            screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(toEnum<BitmapSize1Bit>(chctlb_.bitmap_size_rbg0)));
+            screen.bitmap_palette_number   = bmpnb_.bitmap_palette_number_rbg0;
+            screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpnb_.bitmap_special_priority_rbg0));
+            screen.bitmap_special_color_calculation
+                = static_cast<u8>(static_cast<bool>(bmpnb_.bitmap_special_color_calculation_rbg0));
+            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
             break;
 
         case ScrollScreen::rbg1:
             // Color RAM
-            screen.color_ram_address_offset
-                = getColorRamAddressOffset(craofa_.get(ColorRamAddressOffsetA::color_ram_address_offset_nbg0));
+            screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
 
             // Transparency
-            screen.is_transparency_code_valid = (bgon_.get(ScreenDisplayEnable::transparency_display_enable_nbg0)
+            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg0)
                                                  == TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prina_.get(PriorityNumberA::nbg0);
+            screen.priority_number = prina_.nbg0;
 
             // Map
             screen.map_size   = map_size_rbg;
-            screen.map_offset = mpofr_.get(MapOffsetRbg::map_offset_rpb);
+            screen.map_offset = mpofr_.map_offset_rpb;
 
             // Plane
-            screen.plane_size            = plsz_.get(PlaneSizeRegister::plane_size_rpb);
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_a));
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneAB::plane_b));
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneCD::plane_c));
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneCD::plane_d));
-            screen.plane_e_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneEF::plane_e));
-            screen.plane_f_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneEF::plane_f));
-            screen.plane_g_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneGH::plane_g));
-            screen.plane_h_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneGH::plane_h));
-            screen.plane_i_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneIJ::plane_i));
-            screen.plane_j_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneIJ::plane_j));
-            screen.plane_k_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneKL::plane_k));
-            screen.plane_l_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneKL::plane_l));
-            screen.plane_m_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneMN::plane_m));
-            screen.plane_n_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneMN::plane_n));
-            screen.plane_o_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneOP::plane_o));
-            screen.plane_p_start_address = calculatePlaneStartAddress(s, mpabrb_.get(MapRotationParameterBPlaneOP::plane_p));
+            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_rpb);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabrb_.plane_a);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabrb_.plane_b);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdrb_.plane_c);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdrb_.plane_d);
+            screen.plane_e_start_address = calculatePlaneStartAddress(s, mpefrb_.plane_e);
+            screen.plane_f_start_address = calculatePlaneStartAddress(s, mpefrb_.plane_f);
+            screen.plane_g_start_address = calculatePlaneStartAddress(s, mpghrb_.plane_g);
+            screen.plane_h_start_address = calculatePlaneStartAddress(s, mpghrb_.plane_h);
+            screen.plane_i_start_address = calculatePlaneStartAddress(s, mpijrb_.plane_i);
+            screen.plane_j_start_address = calculatePlaneStartAddress(s, mpijrb_.plane_j);
+            screen.plane_k_start_address = calculatePlaneStartAddress(s, mpklrb_.plane_k);
+            screen.plane_l_start_address = calculatePlaneStartAddress(s, mpklrb_.plane_l);
+            screen.plane_m_start_address = calculatePlaneStartAddress(s, mpmnrb_.plane_m);
+            screen.plane_n_start_address = calculatePlaneStartAddress(s, mpmnrb_.plane_n);
+            screen.plane_o_start_address = calculatePlaneStartAddress(s, mpoprb_.plane_o);
+            screen.plane_p_start_address = calculatePlaneStartAddress(s, mpoprb_.plane_p);
 
             // Page
-            screen.page_size = getPageSize(pncn0_.get(PatternNameControlNbg0::pattern_name_data_size),
-                                           chctla_.get(CharacterControlA::character_size_nbg0));
+            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size),
+                                           toEnum<CharacterSize>(chctla_.character_size_nbg0));
 
             // Pattern name data
-            screen.pattern_name_data_size           = pncn0_.get(PatternNameControlNbg0::pattern_name_data_size);
-            screen.character_number_supplement_mode = pncn0_.get(PatternNameControlNbg0::character_number_mode);
-            screen.special_priority                 = pncn0_.get(PatternNameControlNbg0::special_priority);
-            screen.special_color_calculation        = pncn0_.get(PatternNameControlNbg0::special_color_calculation);
-            screen.supplementary_palette_number     = pncn0_.get(PatternNameControlNbg0::supplementary_palette_number);
-            screen.supplementary_character_number   = pncn0_.get(PatternNameControlNbg0::supplementary_character_number);
+            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
+            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn0_.character_number_mode);
+            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn0_.special_priority));
+            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn0_.special_color_calculation));
+            screen.supplementary_palette_number     = pncn0_.supplementary_palette_number;
+            screen.supplementary_character_number   = pncn0_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = chctla_.get(CharacterControlA::character_size_nbg0);
+            screen.character_pattern_size = toEnum<CharacterSize>(chctla_.character_size_nbg0);
             screen.character_color_number
-                = getCharacterColorNumber3Bits(chctla_.get(CharacterControlA::character_color_number_nbg0),
+                = getCharacterColorNumber3Bits(toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0),
                                                tv_screen_status_.screen_mode_type);
             screen.bitmap_size          = BitmapSize::not_set;
             screen.bitmap_start_address = 0;
@@ -2445,6 +2427,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
             break;
+        default: Log::warning(Logger::vdp2, tr("Scroll screen not set !"));
     }
 
     // Position calculation helpers
@@ -2479,7 +2462,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     constexpr auto multiplier_10000 = u32{0x10000};
 
     auto&      screen                 = getScreen(s);
-    const auto is_vram_size_4mb       = (vrsize_.get(VramSizeRegister::vram_size) == VramSize::size_4_mbits);
+    const auto is_vram_size_4mb       = toEnum<VramSize>(vrsize_.vram_size) == VramSize::size_4_mbits;
     auto       plane_size             = PlaneSize{};
     auto       pattern_name_data_size = PatternNameDataSize{};
     auto       character_size         = CharacterSize{};
@@ -2487,34 +2470,34 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
 
     switch (s) {
         case ScrollScreen::nbg0:
-            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_nbg0);
-            pattern_name_data_size = pncn0_.get(PatternNameControlNbg0::pattern_name_data_size);
-            character_size         = chctla_.get(CharacterControlA::character_size_nbg0);
+            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg0);
+            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
+            character_size         = toEnum<CharacterSize>(chctla_.character_size_nbg0);
             break;
         case ScrollScreen::nbg1:
-            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_nbg1);
-            pattern_name_data_size = pncn1_.get(PatternNameControlNbg1::pattern_name_data_size);
-            character_size         = chctla_.get(CharacterControlA::character_size_nbg1);
+            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg1);
+            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size);
+            character_size         = toEnum<CharacterSize>(chctla_.character_size_nbg1);
             break;
         case ScrollScreen::nbg2:
-            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_nbg2);
-            pattern_name_data_size = pncn2_.get(PatternNameControlNbg2::pattern_name_data_size);
-            character_size         = chctlb_.get(CharacterControlB::character_size_nbg2);
+            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg2);
+            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size);
+            character_size         = toEnum<CharacterSize>(chctlb_.character_size_nbg2);
             break;
         case ScrollScreen::nbg3:
-            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_nbg3);
-            pattern_name_data_size = pncn3_.get(PatternNameControlNbg3::pattern_name_data_size);
-            character_size         = chctlb_.get(CharacterControlB::character_size_nbg3);
+            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg3);
+            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size);
+            character_size         = toEnum<CharacterSize>(chctlb_.character_size_nbg3);
             break;
         case ScrollScreen::rbg0:
-            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_rpa);
-            pattern_name_data_size = pncr_.get(PatternNameControlRbg0::pattern_name_data_size);
-            character_size         = chctlb_.get(CharacterControlB::character_size_rbg0);
+            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpa);
+            pattern_name_data_size = toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size);
+            character_size         = toEnum<CharacterSize>(chctlb_.character_size_rbg0);
             break;
         case ScrollScreen::rbg1:
-            plane_size             = plsz_.get(PlaneSizeRegister::plane_size_rpb);
-            pattern_name_data_size = pncn0_.get(PatternNameControlNbg0::pattern_name_data_size);
-            character_size         = chctla_.get(CharacterControlA::character_size_nbg0);
+            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpb);
+            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
+            character_size         = toEnum<CharacterSize>(chctla_.character_size_nbg0);
             break;
         default: break;
     }
@@ -2706,6 +2689,9 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
             texture_width  = width_512;
             texture_height = height_512;
             break;
+        }
+        default: {
+            Log::warning(Logger::vdp2, tr("Bitmap size not set !"));
         }
     }
     const auto      texture_size = texture_width * texture_height * 4;
@@ -2938,9 +2924,9 @@ void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternN
         readCell(screen, pnd, character_number_address, cp_offset);
     } else { // CharacterSize::two_by_two
 
-        const auto pnd_offset           = (screen.pattern_name_data_size == PatternNameDataSize::one_word) ? 2 : 4;
-        auto       current_cell_address = character_number_address;
-        auto       cells_address        = std::vector<u32>{};
+        // const auto pnd_offset           = (screen.pattern_name_data_size == PatternNameDataSize::one_word) ? 2 : 4;
+        auto current_cell_address = character_number_address;
+        auto cells_address        = std::vector<u32>{};
 
         const auto cell_number = u32{4};
         for (u32 i = 0; i < cell_number; ++i) {

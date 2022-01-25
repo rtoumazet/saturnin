@@ -261,11 +261,11 @@ struct TvScreenStatus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct RamStatus {
-    VramSize                vram_size{VramSize::not_set};
+    VramSize                vram_size{VramSize::size_4_mbits};
     VramMode                vram_a_mode{VramMode::no_partition};
     VramMode                vram_b_mode{VramMode::no_partition};
     ColorRamMode            color_ram_mode{ColorRamMode::not_set};
-    CoefficientTableStorage coefficient_table_storage{CoefficientTableStorage::not_set};
+    CoefficientTableStorage coefficient_table_storage{CoefficientTableStorage::stored_in_vram};
     RotationDataBankSelect  vram_a0_rotation_bank_select{RotationDataBankSelect::not_used};
     RotationDataBankSelect  vram_a1_rotation_bank_select{RotationDataBankSelect::not_used};
     RotationDataBankSelect  vram_b0_rotation_bank_select{RotationDataBankSelect::not_used};
@@ -304,13 +304,14 @@ struct ScrollScreenStatus {
     PlaneSize                     plane_size{PlaneSize::not_set}; ///< Size of the plane (1*1, 2*1 or 2*2 pages)
     u16                           page_size{};                    ///< Size of the page / pattern name table
     PatternNameDataSize           pattern_name_data_size{};       ///< Size of the pattern name data (1 or 2 words)
-    CharacterNumberSupplementMode character_number_supplement_mode{CharacterNumberSupplementMode::not_set}; ///< 10 bits/12 bits
-    u8                            special_priority{};               ///< Special priority bit
-    u8                            special_color_calculation{};      ///< Special color calculation bit
-    u8                            supplementary_palette_number{};   ///< Supplementary palette number bit
-    u8                            supplementary_character_number{}; ///< Supplementary character number bit
-    CharacterSize                 character_pattern_size{};         ///< Size of the character pattern (1*1 or 2*2 cells)
-    u16                           cell_size{};                      ///< Size of the cell (8*8 dots)
+    CharacterNumberSupplementMode character_number_supplement_mode{
+        CharacterNumberSupplementMode::character_number_10_bits}; ///< 10 bits/12 bits
+    u8            special_priority{};                             ///< Special priority bit
+    u8            special_color_calculation{};                    ///< Special color calculation bit
+    u8            supplementary_palette_number{};                 ///< Supplementary palette number bit
+    u8            supplementary_character_number{};               ///< Supplementary character number bit
+    CharacterSize character_pattern_size{};                       ///< Size of the character pattern (1*1 or 2*2 cells)
+    u16           cell_size{};                                    ///< Size of the cell (8*8 dots)
 
     // Positioning variables
     ScreenOffset plane_screen_offset{};             ///< Offset of one plane in cell units.
@@ -953,21 +954,21 @@ class Vdp2 {
     static auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3bits ccn) ->
+    /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3Bits ccn) ->
     /// VramAccessNumber;
     ///
-    /// \brief  Calculates the required VRAM character/bitmap pattern reads to display a screen.
+    /// \brief	Calculates the required VRAM character/bitmap pattern reads to display a screen.
     ///
-    /// \author Runik
-    /// \date   10/08/2020
+    /// \author	Runik
+    /// \date	10/08/2020
     ///
-    /// \param  r   The reduction setting.
-    /// \param  ccn The character color number.
+    /// \param 	r  	The reduction setting.
+    /// \param 	ccn	The character color number.
     ///
-    /// \returns    The required VRAM character pattern reads.
+    /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3bits ccn) -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3Bits ccn) -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2Bits ccn) ->
@@ -1549,14 +1550,14 @@ class Vdp2 {
     VCounter                                        vcnt_;
     RamControl                                      ramctl_;
     Reserve                                         rsv1_;
-    VramCyclePatternBankA0Lower                     cyca0l_;
-    VramCyclePatternBankA0Upper                     cyca0u_;
-    VramCyclePatternBankA1Lower                     cyca1l_;
-    VramCyclePatternBankA1Upper                     cyca1u_;
-    VramCyclePatternBankB0Lower                     cycb0l_;
-    VramCyclePatternBankB0Upper                     cycb0u_;
-    VramCyclePatternBankB1Lower                     cycb1l_;
-    VramCyclePatternBankB1Upper                     cycb1u_;
+    VramCyclePatternBankLower                       cyca0l_;
+    VramCyclePatternBankUpper                       cyca0u_;
+    VramCyclePatternBankLower                       cyca1l_;
+    VramCyclePatternBankUpper                       cyca1u_;
+    VramCyclePatternBankLower                       cycb0l_;
+    VramCyclePatternBankUpper                       cycb0u_;
+    VramCyclePatternBankLower                       cycb1l_;
+    VramCyclePatternBankUpper                       cycb1u_;
     ScreenDisplayEnable                             bgon_;
     MosaicControl                                   mzctl_;
     SpecialFunctionCodeSelect                       sfsel_;
@@ -1565,58 +1566,58 @@ class Vdp2 {
     CharacterControlB                               chctlb_;
     BitmapPaletteNumberA                            bmpna_;
     BitmapPaletteNumberB                            bmpnb_;
-    PatternNameControlNbg0                          pncn0_;
-    PatternNameControlNbg1                          pncn1_;
-    PatternNameControlNbg2                          pncn2_;
-    PatternNameControlNbg3                          pncn3_;
-    PatternNameControlRbg0                          pncr_;
+    PatternNameControl                              pncn0_;
+    PatternNameControl                              pncn1_;
+    PatternNameControl                              pncn2_;
+    PatternNameControl                              pncn3_;
+    PatternNameControl                              pncr_;
     PlaneSizeRegister                               plsz_;
     MapOffsetNbg                                    mpofn_;
     MapOffsetRbg                                    mpofr_;
-    MapNbg0PlaneAB                                  mpabn0_;
-    MapNbg0PlaneCD                                  mpcdn0_;
-    MapNbg1PlaneAB                                  mpabn1_;
-    MapNbg1PlaneCD                                  mpcdn1_;
-    MapNbg2PlaneAB                                  mpabn2_;
-    MapNbg2PlaneCD                                  mpcdn2_;
-    MapNbg3PlaneAB                                  mpabn3_;
-    MapNbg3PlaneCD                                  mpcdn3_;
-    MapRotationParameterAPlaneAB                    mpabra_;
-    MapRotationParameterAPlaneCD                    mpcdra_;
-    MapRotationParameterAPlaneEF                    mpefra_;
-    MapRotationParameterAPlaneGH                    mpghra_;
-    MapRotationParameterAPlaneIJ                    mpijra_;
-    MapRotationParameterAPlaneKL                    mpklra_;
-    MapRotationParameterAPlaneMN                    mpmnra_;
-    MapRotationParameterAPlaneOP                    mpopra_;
-    MapRotationParameterBPlaneAB                    mpabrb_;
-    MapRotationParameterBPlaneCD                    mpcdrb_;
-    MapRotationParameterBPlaneEF                    mpefrb_;
-    MapRotationParameterBPlaneGH                    mpghrb_;
-    MapRotationParameterBPlaneIJ                    mpijrb_;
-    MapRotationParameterBPlaneKL                    mpklrb_;
-    MapRotationParameterBPlaneMN                    mpmnrb_;
-    MapRotationParameterBPlaneOP                    mpoprb_;
-    ScreenScrollValueNbg0HorizontalIntegerPart      scxin0_;
-    ScreenScrollValueNbg0HorizontalFractionalPart   scxdn0_;
-    ScreenScrollValueNbg0VerticalIntegerPart        scyin0_;
-    ScreenScrollValueNbg0VerticalFractionalPart     scydn0_;
+    MapPlaneAB                                      mpabn0_;
+    MapPlaneCD                                      mpcdn0_;
+    MapPlaneAB                                      mpabn1_;
+    MapPlaneCD                                      mpcdn1_;
+    MapPlaneAB                                      mpabn2_;
+    MapPlaneCD                                      mpcdn2_;
+    MapPlaneAB                                      mpabn3_;
+    MapPlaneCD                                      mpcdn3_;
+    MapPlaneAB                                      mpabra_;
+    MapPlaneCD                                      mpcdra_;
+    MapPlaneEF                                      mpefra_;
+    MapPlaneGH                                      mpghra_;
+    MapPlaneIJ                                      mpijra_;
+    MapPlaneKL                                      mpklra_;
+    MapPlaneMN                                      mpmnra_;
+    MapPlaneOP                                      mpopra_;
+    MapPlaneAB                                      mpabrb_;
+    MapPlaneCD                                      mpcdrb_;
+    MapPlaneEF                                      mpefrb_;
+    MapPlaneGH                                      mpghrb_;
+    MapPlaneIJ                                      mpijrb_;
+    MapPlaneKL                                      mpklrb_;
+    MapPlaneMN                                      mpmnrb_;
+    MapPlaneOP                                      mpoprb_;
+    ScreenScrollValueIntegerPart                    scxin0_;
+    ScreenScrollValueFractionalPart                 scxdn0_;
+    ScreenScrollValueIntegerPart                    scyin0_;
+    ScreenScrollValueFractionalPart                 scydn0_;
     CoordinateIncrementNbg0HorizontalIntegerPart    zmxin0_;
     CoordinateIncrementNbg0HorizontalFractionalPart zmxdn0_;
     CoordinateIncrementNbg0VerticalIntegerPart      zmyin0_;
     CoordinateIncrementNbg0VerticalFractionalPart   zmydn0_;
-    ScreenScrollValueNbg1HorizontalIntegerPart      scxin1_;
-    ScreenScrollValueNbg1HorizontalFractionalPart   scxdn1_;
-    ScreenScrollValueNbg1VerticalIntegerPart        scyin1_;
-    ScreenScrollValueNbg1VerticalFractionalPart     scydn1_;
+    ScreenScrollValueIntegerPart                    scxin1_;
+    ScreenScrollValueFractionalPart                 scxdn1_;
+    ScreenScrollValueIntegerPart                    scyin1_;
+    ScreenScrollValueFractionalPart                 scydn1_;
     CoordinateIncrementNbg1HorizontalIntegerPart    zmxin1_;
     CoordinateIncrementNbg1HorizontalFractionalPart zmxdn1_;
     CoordinateIncrementNbg1VerticalIntegerPart      zmyin1_;
     CoordinateIncrementNbg1VerticalFractionalPart   zmydn1_;
-    ScreenScrollValueNbg2Horizontal                 scxn2_;
-    ScreenScrollValueNbg2Vertical                   scyn2_;
-    ScreenScrollValueNbg3Horizontal                 scxn3_;
-    ScreenScrollValueNbg3Vertical                   scyn3_;
+    ScreenScrollValueIntegerPart                    scxn2_;
+    ScreenScrollValueIntegerPart                    scyn2_;
+    ScreenScrollValueIntegerPart                    scxn3_;
+    ScreenScrollValueIntegerPart                    scyn3_;
     ReductionEnable                                 zmctl_;
     LineAndVerticalCellScrollControl                scrctl_;
     VerticalCellScrollTableAddressUpper             vcstau_;

@@ -189,53 +189,53 @@ auto Vdp2::getDebugVramAccessMainData() -> std::vector<LabelValue> {
 }
 
 auto Vdp2::getDebugVramAccessBanks() -> std::vector<VramTiming> {
-    auto is_normal_mode = (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_320);
-    is_normal_mode |= (tvmd_.get(TvScreenMode::horizontal_resolution) == HorizontalResolution::normal_352);
+    auto is_normal_mode = (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_320);
+    is_normal_mode |= (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_352);
 
     const auto banks_used = getDebugVramAccessBanksUsed();
     auto       banks      = std::vector<VramTiming>{};
 
-    const VramTiming bank_a0 = {cyca0l_.get(VramCyclePatternBankA0Lower::t0),
-                                cyca0l_.get(VramCyclePatternBankA0Lower::t1),
-                                cyca0l_.get(VramCyclePatternBankA0Lower::t2),
-                                cyca0l_.get(VramCyclePatternBankA0Lower::t3),
-                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t4) : VramAccessCommand::no_access,
-                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t5) : VramAccessCommand::no_access,
-                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t6) : VramAccessCommand::no_access,
-                                is_normal_mode ? cyca0u_.get(VramCyclePatternBankA0Upper::t7) : VramAccessCommand::no_access};
+    const VramTiming bank_a0 = {toEnum<VramAccessCommand>(cyca0l_.t0),
+                                toEnum<VramAccessCommand>(cyca0l_.t1),
+                                toEnum<VramAccessCommand>(cyca0l_.t2),
+                                toEnum<VramAccessCommand>(cyca0l_.t3),
+                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t4) : VramAccessCommand::no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t5) : VramAccessCommand::no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t6) : VramAccessCommand::no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t7) : VramAccessCommand::no_access};
     banks.emplace_back(bank_a0);
 
     if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_a1 = {cyca1l_.get(VramCyclePatternBankA1Lower::t0),
-                                    cyca1l_.get(VramCyclePatternBankA1Lower::t1),
-                                    cyca1l_.get(VramCyclePatternBankA1Lower::t2),
-                                    cyca1l_.get(VramCyclePatternBankA1Lower::t3),
-                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t4) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t5) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t6) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cyca1u_.get(VramCyclePatternBankA1Upper::t7) : VramAccessCommand::no_access};
+        const VramTiming bank_a1 = {toEnum<VramAccessCommand>(cyca1l_.t0),
+                                    toEnum<VramAccessCommand>(cyca1l_.t1),
+                                    toEnum<VramAccessCommand>(cyca1l_.t2),
+                                    toEnum<VramAccessCommand>(cyca1l_.t3),
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t4) : VramAccessCommand::no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t5) : VramAccessCommand::no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t6) : VramAccessCommand::no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t7) : VramAccessCommand::no_access};
         banks.emplace_back(bank_a1);
     }
 
-    const VramTiming bank_b0 = {cycb0l_.get(VramCyclePatternBankB0Lower::t0),
-                                cycb0l_.get(VramCyclePatternBankB0Lower::t1),
-                                cycb0l_.get(VramCyclePatternBankB0Lower::t2),
-                                cycb0l_.get(VramCyclePatternBankB0Lower::t3),
-                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t4) : VramAccessCommand::no_access,
-                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t5) : VramAccessCommand::no_access,
-                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t6) : VramAccessCommand::no_access,
-                                is_normal_mode ? cycb0u_.get(VramCyclePatternBankB0Upper::t7) : VramAccessCommand::no_access};
+    const VramTiming bank_b0 = {toEnum<VramAccessCommand>(cycb0l_.t0),
+                                toEnum<VramAccessCommand>(cycb0l_.t1),
+                                toEnum<VramAccessCommand>(cycb0l_.t2),
+                                toEnum<VramAccessCommand>(cycb0l_.t3),
+                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t4) : VramAccessCommand::no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t5) : VramAccessCommand::no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t6) : VramAccessCommand::no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t7) : VramAccessCommand::no_access};
     banks.emplace_back(bank_b0);
 
     if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_b1 = {cycb1l_.get(VramCyclePatternBankB1Lower::t0),
-                                    cycb1l_.get(VramCyclePatternBankB1Lower::t1),
-                                    cycb1l_.get(VramCyclePatternBankB1Lower::t2),
-                                    cycb1l_.get(VramCyclePatternBankB1Lower::t3),
-                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t4) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t5) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t6) : VramAccessCommand::no_access,
-                                    is_normal_mode ? cycb1u_.get(VramCyclePatternBankB1Upper::t7) : VramAccessCommand::no_access};
+        const VramTiming bank_b1 = {toEnum<VramAccessCommand>(cycb1l_.t0),
+                                    toEnum<VramAccessCommand>(cycb1l_.t1),
+                                    toEnum<VramAccessCommand>(cycb1l_.t2),
+                                    toEnum<VramAccessCommand>(cycb1l_.t3),
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t4) : VramAccessCommand::no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t5) : VramAccessCommand::no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t6) : VramAccessCommand::no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : VramAccessCommand::no_access};
         banks.emplace_back(bank_b1);
     }
     return banks;
@@ -245,8 +245,8 @@ auto Vdp2::getDebugVramAccessBanks() -> std::vector<VramTiming> {
 auto Vdp2::getDebugVramAccessBanksUsed() -> std::array<bool, vram_banks_number> {
     // Bank A/A0 and B/B0 are always used
     auto banks = std::array{true, false, true, false};
-    if (ramctl_.get(RamControl::vram_a_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_a1_index] = true; }
-    if (ramctl_.get(RamControl::vram_b_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_b1_index] = true; }
+    if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_a1_index] = true; }
+    if (toEnum<VramMode>(ramctl_.vram_b_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_b1_index] = true; }
 
     return banks;
 }

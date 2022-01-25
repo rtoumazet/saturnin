@@ -185,7 +185,7 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
 
     auto       spctl           = modules.vdp2()->getSpriteControlRegister();
     auto       tvmr            = modules.vdp1()->getTvModeSelectionRegister();
-    const auto sprite_type     = spctl.get(SpriteControl::sprite_type);
+    const auto sprite_type     = static_cast<SpriteType>(static_cast<u8>(spctl.sprite_type));
     auto       sprite_register = SpriteTypeRegister{cmdcolr_.raw};
     // sprite_type.
     auto           priority_number_register = u8{};
@@ -193,7 +193,8 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     constexpr auto disp_priority_on_1_bit   = u8{2};
 
     if (toEnum<BitDepthSelection>(tvmr.tvm_bit_depth_selection) == BitDepthSelection::sixteen_bits_per_pixel) {
-        const auto is_data_mixed = spctl.get(SpriteControl::sprite_color_mode) == SpriteColorMode::mixed;
+        const auto is_data_mixed
+            = static_cast<SpriteColorMode>(static_cast<bool>(spctl.sprite_color_mode)) == SpriteColorMode::mixed;
 
         switch (sprite_type) {
             case SpriteType::type_0: {

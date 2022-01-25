@@ -182,7 +182,7 @@ constexpr auto color_offset_b_blue                      = u32{0x25f8011e};
 /// \brief  DISP bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Display : u8 {
+enum class Display : bool {
     not_displayed = 0, ///< Picture is not displayed on TV screen.
     displayed     = 1  ///< Picture is displayed on TV screen.
 };
@@ -193,7 +193,7 @@ enum class Display : u8 {
 /// \brief  BDCLMD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BorderColorMode : u8 {
+enum class BorderColorMode : bool {
     displays_black       = 0, ///< Displays black.
     displays_back_screen = 1  ///< Displays back screen.
 };
@@ -250,28 +250,26 @@ enum class HorizontalResolution : u8 {
 /// \date   17/05/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TvScreenMode : public Register {
-  public:
-    using Register::Register;
-    inline static const auto display               = BitRange<Display>{15};                ///< Defines DISP bit.
-    inline static const auto border_color_mode     = BitRange<BorderColorMode>{8};         ///< Defines BDCLMD bit.
-    inline static const auto interlace_mode        = BitRange<InterlaceMode>{6, 7};        ///< Defines LSMDx bit.
-    inline static const auto vertical_resolution   = BitRange<VerticalResolution>{4, 5};   ///< Defines VRESOx bit.
-    inline static const auto horizontal_resolution = BitRange<HorizontalResolution>{0, 2}; ///< Defines HRESOx bit.
+union TvScreenMode {
+    u16            raw;                   ///< Raw representation.
+    BitField<15>   display;               ///< Defines DISP bit.
+    BitField<8>    border_color_mode;     ///< Defines BDCLMD bit.
+    BitField<6, 2> interlace_mode;        ///< Defines LSMDx bit.
+    BitField<4, 2> vertical_resolution;   ///< Defines VRESOx bit.
+    BitField<0, 3> horizontal_resolution; ///< Defines HRESOx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ExternalSignalEnable
+/// \union	ExternalSignalEnable
 ///
-/// \brief  External Signal Enable register (EXTEN).
+/// \brief	External Signal Enable register (EXTEN).
 ///
-/// \author Runik
-/// \date   19/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ExternalSignalEnable : public Register {
-  public:
-    using Register::Register;
+union ExternalSignalEnable {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,7 +278,7 @@ class ExternalSignalEnable : public Register {
 /// \brief  EXLTFG bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ExternalLatchFlag : u8 {
+enum class ExternalLatchFlag : bool {
     not_latched_in_register = 0, ///< Not latched in register.
     latched_in_register     = 1  ///< Latched in register.
 };
@@ -291,7 +289,7 @@ enum class ExternalLatchFlag : u8 {
 /// \brief  EXSYFG bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ExternalSyncFlag : u8 {
+enum class ExternalSyncFlag : bool {
     no_sync       = 0, ///< Not synchronized.
     internal_sync = 1  ///< Internal circuit synchronized.
 };
@@ -302,7 +300,7 @@ enum class ExternalSyncFlag : u8 {
 /// \brief  VBLANK bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VerticalBlankFlag : u8 {
+enum class VerticalBlankFlag : bool {
     during_vertical_scan    = 0, ///< During vertical scan.
     during_vertical_retrace = 1  ///< During vertical retrace (vblank).
 };
@@ -313,7 +311,7 @@ enum class VerticalBlankFlag : u8 {
 /// \brief  HBLANK bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class HorizontalBlankFlag : u8 {
+enum class HorizontalBlankFlag : bool {
     during_horizontal_scan    = 0, ///< During horizontal scan.
     during_horizontal_retrace = 1  ///< During horizontal retrace (hblank).
 };
@@ -324,7 +322,7 @@ enum class HorizontalBlankFlag : u8 {
 /// \brief  ODD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ScanFieldFlag : u8 {
+enum class ScanFieldFlag : bool {
     during_even_field_scan = 0, ///< During even field scan.
     during_odd_field_scan  = 1  ///< During odd field scan.
 };
@@ -335,29 +333,28 @@ enum class ScanFieldFlag : u8 {
 /// \brief  PAL bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TvStandardFlag : u8 {
+enum class TvStandardFlag : bool {
     ntsc_standard = 0, ///< NTSC standard.
     pal_standard  = 1  ///< PAL standard.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenStatus
+/// \union	ScreenStatus
 ///
-/// \brief  Screen Status register (TVSTAT).
+/// \brief	Screen Status register (TVSTAT).
 ///
-/// \author Runik
-/// \date   20/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ScreenStatus : public Register {
-  public:
-    using Register::Register;
-    inline static const auto external_latch_flag   = BitRange<ExternalLatchFlag>{9};   ///< Defines EXLTFG bit.
-    inline static const auto external_sync_flag    = BitRange<ExternalSyncFlag>{8};    ///< Defines EXSYFG bit.
-    inline static const auto vertical_blank_flag   = BitRange<VerticalBlankFlag>{3};   ///< Defines VBLANK bit.
-    inline static const auto horizontal_blank_flag = BitRange<HorizontalBlankFlag>{2}; ///< Defines HBLANK bit.
-    inline static const auto scan_field_flag       = BitRange<ScanFieldFlag>{1};       ///< Defines ODD bit.
-    inline static const auto tv_standard_flag      = BitRange<TvStandardFlag>{0};      ///< Defines PAL bit.
+union ScreenStatus {
+    u16         raw;                   ///< Raw representation.
+    BitField<9> external_latch_flag;   ///< Defines EXLTFG bit.
+    BitField<8> external_sync_flag;    ///< Defines EXSYFG bit.
+    BitField<3> vertical_blank_flag;   ///< Defines VBLANK bit.
+    BitField<2> horizontal_blank_flag; ///< Defines HBLANK bit.
+    BitField<1> scan_field_flag;       ///< Defines ODD bit.
+    BitField<0> tv_standard_flag;      ///< Defines PAL bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -366,68 +363,63 @@ class ScreenStatus : public Register {
 /// \brief  PAL bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VramSize : u8 {
-    not_set      = 0xFF, ///< Not set.
-    size_4_mbits = 0,    ///< 4 Mbit.
-    size_8_mbits = 1     ///< 8 Mbit.
+enum class VramSize : bool {
+    size_4_mbits = 0, ///< 4 Mbit.
+    size_8_mbits = 1  ///< 8 Mbit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VramSize
+/// \union	VramSizeRegister
 ///
-/// \brief  VRAM Size register (VRSIZE).
+/// \brief	VRAM Size register (VRSIZE).
 ///
-/// \author Runik
-/// \date   20/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VramSizeRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vram_size      = BitRange<VramSize>{15}; ///< Defines VRAMSZ bit.
-    inline static const auto version_number = BitRange<u8>{0, 3};     ///< Defines VERx bits.
+union VramSizeRegister {
+    u16            raw;            ///< Raw representation.
+    BitField<15>   vram_size;      ///< Defines VRAMSZ bit.
+    BitField<0, 4> version_number; ///< Defines VERx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  HCounter
+/// \union	HCounter
 ///
-/// \brief  H-Counter register.
+/// \brief	H-Counter register.
 ///
-/// \author Runik
-/// \date   20/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class HCounter : public Register {
-  public:
-    using Register::Register;
+union HCounter {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VCounter
+/// \union	VCounter
 ///
-/// \brief  V-Counter register (VCNT).
+/// \brief	V-Counter register (VCNT).
 ///
-/// \author Runik
-/// \date   20/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VCounter : public Register {
-  public:
-    using Register::Register;
+union VCounter {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Reserve
+/// \union	Reserve
 ///
-/// \brief  Reserve register.
+/// \brief	Reserve register.
 ///
-/// \author Runik
-/// \date   21/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Reserve : public Register {
-  public:
-    using Register::Register;
+union Reserve {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,10 +428,9 @@ class Reserve : public Register {
 /// \brief  Selects whether to store the coefficient table in the color RAM (CRKTE bit).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CoefficientTableStorage : u8 {
-    not_set             = 0xFF, ///< Not set.
-    stored_in_vram      = 0,    ///< Coefficient table is stored in VRAM.
-    stored_in_color_ram = 1     ///< Coefficient table is stored in color RAM.
+enum class CoefficientTableStorage : bool {
+    stored_in_vram      = 0, ///< Coefficient table is stored in VRAM.
+    stored_in_color_ram = 1  ///< Coefficient table is stored in color RAM.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -462,7 +453,7 @@ enum class ColorRamMode : u8 {
 /// \brief  VRAM mode bit (VRxMD bit).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VramMode : u8 {
+enum class VramMode : bool {
     no_partition         = 0, ///< Do not partition in 2 banks.
     partition_in_2_banks = 1  ///< Partition in 2 banks.
 };
@@ -475,25 +466,24 @@ enum class RotationDataBankSelect : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  RamControl
+/// \union	RamControl
 ///
-/// \brief  RAM Control register (RAMCTL).
+/// \brief	RAM Control register (RAMCTL).
 ///
-/// \author Runik
-/// \date   20/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class RamControl : public Register {
-  public:
-    using Register::Register;
-    inline static const auto coefficient_table_storage    = BitRange<CoefficientTableStorage>{15};  ///< Defines CRKTE bit.
-    inline static const auto color_ram_mode               = BitRange<ColorRamMode>{12, 13};         ///< Defines CRMDx bits.
-    inline static const auto vram_b_mode                  = BitRange<VramMode>{9};                  ///< Defines VRBMD bit.
-    inline static const auto vram_a_mode                  = BitRange<VramMode>{8};                  ///< Defines VRAMD bit.
-    inline static const auto vram_a0_rotation_bank_select = BitRange<RotationDataBankSelect>{0, 1}; ///< Defines RDBSA0x bits.
-    inline static const auto vram_a1_rotation_bank_select = BitRange<RotationDataBankSelect>{2, 3}; ///< Defines RDBSA1x bits.
-    inline static const auto vram_b0_rotation_bank_select = BitRange<RotationDataBankSelect>{4, 5}; ///< Defines RDBSB0x bits.
-    inline static const auto vram_b1_rotation_bank_select = BitRange<RotationDataBankSelect>{6, 7}; ///< Defines RDBSB1x bits.
+union RamControl {
+    u16             raw;                          ///< Raw representation.
+    BitField<15>    coefficient_table_storage;    ///< Defines CRKTE bit.
+    BitField<12, 2> color_ram_mode;               ///< Defines CRMDx bits.
+    BitField<9>     vram_b_mode;                  ///< Defines VRBMD bit.
+    BitField<8>     vram_a_mode;                  ///< Defines VRAMD bit.
+    BitField<0, 2>  vram_a0_rotation_bank_select; ///< Defines RDBSA0x bits.
+    BitField<2, 2>  vram_a1_rotation_bank_select; ///< Defines RDBSA1x bits.
+    BitField<4, 2>  vram_b0_rotation_bank_select; ///< Defines RDBSB0x bits.
+    BitField<6, 2>  vram_b1_rotation_bank_select; ///< Defines RDBSB1x bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -521,147 +511,37 @@ enum class VramAccessCommand : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VramCyclePatternBankA0Lower
+/// \union	VramCyclePatternBankLower
 ///
-/// \brief  VRAM Cycle Pattern (Bank A0) lower register (CYCA0L).
+/// \brief	VRAM Cycle Pattern lower register (CYCxxL).
 ///
-/// \author Runik
-/// \date   21/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VramCyclePatternBankA0Lower : public Register {
-  public:
-    using Register::Register;
-    inline static const auto t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0A0x bits.
-    inline static const auto t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1A0x bits.
-    inline static const auto t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2A0x bits.
-    inline static const auto t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3A0x bits.
+union VramCyclePatternBankLower {
+    u16             raw; ///< Raw representation.
+    BitField<12, 4> t0;  ///< Defines VCP0xxx bits.
+    BitField<8, 4>  t1;  ///< Defines VCP1xxx bits.
+    BitField<4, 4>  t2;  ///< Defines VCP2xxx bits.
+    BitField<0, 4>  t3;  ///< Defines VCP3xxx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VramCyclePatternBankA0Upper
+/// \union	VramCyclePatternBankUpper
 ///
-/// \brief  VRAM Cycle Pattern (Bank A0) upper register (CYCA0U).
+/// \brief	VRAM Cycle Pattern upper register (CYCxxU).
 ///
-/// \author Runik
-/// \date   21/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VramCyclePatternBankA0Upper : public Register {
-  public:
-    using Register::Register;
-    inline static const auto t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4A0x bits.
-    inline static const auto t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5A0x bits.
-    inline static const auto t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6A0x bits.
-    inline static const auto t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7A0x bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VramCyclePatternBankA1Lower
-///
-/// \brief  VRAM Cycle Pattern (Bank A1) lower register (CYCA1L).
-///
-/// \author Runik
-/// \date   21/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class VramCyclePatternBankA1Lower : public Register {
-  public:
-    using Register::Register;
-    inline static const auto t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0A1x bits.
-    inline static const auto t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1A1x bits.
-    inline static const auto t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2A1x bits.
-    inline static const auto t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3A1x bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VramCyclePatternBankA1Upper
-///
-/// \brief  VRAM Cycle Pattern (Bank A1) upper register (CYCA1U).
-///
-/// \author Runik
-/// \date   21/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class VramCyclePatternBankA1Upper : public Register {
-  public:
-    using Register::Register;
-    inline static const auto t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4A1x bits.
-    inline static const auto t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5A1x bits.
-    inline static const auto t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6A1x bits.
-    inline static const auto t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7A1x bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VramCyclePatternBankB0Lower
-///
-/// \brief  VRAM Cycle Pattern (Bank B0) lower register (CYCB0L).
-///
-/// \author Runik
-/// \date   21/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class VramCyclePatternBankB0Lower : public Register {
-  public:
-    using Register::Register;
-    inline static const auto t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0B0x bits.
-    inline static const auto t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1B0x bits.
-    inline static const auto t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2B0x bits.
-    inline static const auto t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3B0x bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VramCyclePatternBankB0Upper
-///
-/// \brief  VRAM Cycle Pattern (Bank B0) upper register (CYCB0U).
-///
-/// \author Runik
-/// \date   21/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class VramCyclePatternBankB0Upper : public Register {
-  public:
-    using Register::Register;
-    inline static const auto t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4B0x bits.
-    inline static const auto t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5B0x bits.
-    inline static const auto t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6B0x bits.
-    inline static const auto t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7B0x bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VramCyclePatternBankB1Lower
-///
-/// \brief  VRAM Cycle Pattern (Bank B1) lower register (CYCB1L).
-///
-/// \author Runik
-/// \date   21/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class VramCyclePatternBankB1Lower : public Register {
-  public:
-    using Register::Register;
-    inline static const auto t0 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP0B1x bits.
-    inline static const auto t1 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP1B1x bits.
-    inline static const auto t2 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP2B1x bits.
-    inline static const auto t3 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP3B1x bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VramCyclePatternBankB1Upper
-///
-/// \brief  VRAM Cycle Pattern (Bank B1) upper register (CYCB1U).
-///
-/// \author Runik
-/// \date   21/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class VramCyclePatternBankB1Upper : public Register {
-  public:
-    using Register::Register;
-    inline static const auto t4 = BitRange<VramAccessCommand>{12, 15}; ///< Defines VCP4B1x bits.
-    inline static const auto t5 = BitRange<VramAccessCommand>{8, 11};  ///< Defines VCP5B1x bits.
-    inline static const auto t6 = BitRange<VramAccessCommand>{4, 7};   ///< Defines VCP6B1x bits.
-    inline static const auto t7 = BitRange<VramAccessCommand>{0, 3};   ///< Defines VCP7B1x bits.
+union VramCyclePatternBankUpper {
+    u16             raw; ///< Raw representation.
+    BitField<12, 4> t4;  ///< Defines VCP4xxx bits.
+    BitField<8, 4>  t5;  ///< Defines VCP5xxx bits.
+    BitField<4, 4>  t6;  ///< Defines VCP6xxx bits.
+    BitField<0, 4>  t7;  ///< Defines VCP7xxx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -670,7 +550,7 @@ class VramCyclePatternBankB1Upper : public Register {
 /// \brief  xxTPON bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TransparentDisplayEnable : u8 {
+enum class TransparentDisplayEnable : bool {
     transparency_code_valid = 0, ///< Validates transparency code (transparency code becomes valid).
     transparency_code_invalid
     = 1 ///< Invalidates transparency code (transparency code dots are displayed according to data values).
@@ -682,76 +562,72 @@ enum class TransparentDisplayEnable : u8 {
 /// \brief  xxON bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ScreenDisplayEnableBit : u8 {
+enum class ScreenDisplayEnableBit : bool {
     cannot_display = 0, ///< Cannot display (Does not execute VRAM access for display).
     can_display    = 1  ///< Can display.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenDisplayEnable
+/// \union	ScreenDisplayEnable
 ///
-/// \brief  Screen Display Enable register (BGON).
+/// \brief	Screen Display Enable register (BGON).
 ///
-/// \author Runik
-/// \date   22/05/2020
+/// \author	Runik
+/// \date	24/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ScreenDisplayEnable : public Register {
-  public:
-    using Register::Register;
-    inline static const auto transparency_display_enable_rbg0 = BitRange<TransparentDisplayEnable>{12}; ///< Defines R0TPON bit.
-    inline static const auto transparency_display_enable_nbg3 = BitRange<TransparentDisplayEnable>{11}; ///< Defines N3TPON bit.
-    inline static const auto transparency_display_enable_nbg2 = BitRange<TransparentDisplayEnable>{10}; ///< Defines N2TPON bit.
-    inline static const auto transparency_display_enable_nbg1 = BitRange<TransparentDisplayEnable>{9};  ///< Defines N1TPON bit.
-    inline static const auto transparency_display_enable_nbg0 = BitRange<TransparentDisplayEnable>{8};  ///< Defines N0TPON bit.
-    inline static const auto screen_display_enable_rbg1       = BitRange<ScreenDisplayEnableBit>{5};    ///< Defines R1ON bit.
-    inline static const auto screen_display_enable_rbg0       = BitRange<ScreenDisplayEnableBit>{4};    ///< Defines R0ON bit.
-    inline static const auto screen_display_enable_nbg3       = BitRange<ScreenDisplayEnableBit>{3};    ///< Defines N3ON bit.
-    inline static const auto screen_display_enable_nbg2       = BitRange<ScreenDisplayEnableBit>{2};    ///< Defines N2ON bit.
-    inline static const auto screen_display_enable_nbg1       = BitRange<ScreenDisplayEnableBit>{1};    ///< Defines N1ON bit.
-    inline static const auto screen_display_enable_nbg0       = BitRange<ScreenDisplayEnableBit>{0};    ///< Defines N0ON bit.
+union ScreenDisplayEnable {
+    u16          raw;                              ///< Raw representation.
+    BitField<12> transparency_display_enable_rbg0; ///< Defines R0TPON bit.
+    BitField<11> transparency_display_enable_nbg3; ///< Defines N3TPON bit.
+    BitField<10> transparency_display_enable_nbg2; ///< Defines N2TPON bit.
+    BitField<9>  transparency_display_enable_nbg1; ///< Defines N1TPON bit.
+    BitField<8>  transparency_display_enable_nbg0; ///< Defines N0TPON bit.
+    BitField<5>  screen_display_enable_rbg1;       ///< Defines R1ON bit.
+    BitField<4>  screen_display_enable_rbg0;       ///< Defines R0ON bit.
+    BitField<3>  screen_display_enable_nbg3;       ///< Defines N3ON bit.
+    BitField<2>  screen_display_enable_nbg2;       ///< Defines N2ON bit.
+    BitField<1>  screen_display_enable_nbg1;       ///< Defines N1ON bit.
+    BitField<0>  screen_display_enable_nbg0;       ///< Defines N0ON bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MosaicControl
+/// \union	MosaicControl
 ///
-/// \brief  Mosaic Control register (MZCTL).
+/// \brief	Mosaic Control register (MZCTL).
 ///
-/// \author Runik
-/// \date   22/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MosaicControl : public Register {
-  public:
-    using Register::Register;
+union MosaicControl {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  SpecialFunctionCodeSelect
+/// \union	SpecialFunctionCodeSelect
 ///
-/// \brief  Special Function Code Select register (SFSEL).
+/// \brief	Special Function Code Select register (SFSEL).
 ///
-/// \author Runik
-/// \date   22/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SpecialFunctionCodeSelect : public Register {
-  public:
-    using Register::Register;
+union SpecialFunctionCodeSelect {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  SpecialFunctionCode
+/// \union	SpecialFunctionCodeSelect
 ///
-/// \brief  Special Function Code register (SFCODE).
+/// \brief	Special Function Code register (SFCODE).
 ///
-/// \author Runik
-/// \date   22/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SpecialFunctionCode : public Register {
-  public:
-    using Register::Register;
+union SpecialFunctionCode {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -760,7 +636,7 @@ class SpecialFunctionCode : public Register {
 /// \brief  N0CHCNx / R0CHCNx bits values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CharacterColorNumber3bits : u8 {
+enum class CharacterColorNumber3Bits : u8 {
     palette_16   = 0b000, ///< Palette format, 16 colors.
     palette_256  = 0b001, ///< Palette format, 256 colors.
     palette_2048 = 0b010, ///< Palette format, 2048 colors.
@@ -787,9 +663,9 @@ enum class CharacterColorNumber2Bits : u8 {
 /// \brief  N2CHCNx / N3CHCNx bits values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CharacterColorNumber1Bit : u8 {
-    palette_16  = 0b0, ///< Palette format, 16 colors.
-    palette_256 = 0b1, ///< Palette format, 256 colors.
+enum class CharacterColorNumber1Bit : bool {
+    palette_16  = 0, ///< Palette format, 16 colors.
+    palette_256 = 1, ///< Palette format, 256 colors.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -812,9 +688,9 @@ enum class BitmapSize2Bits : u8 {
 /// \brief  R0BMSZ bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BitmapSize1Bit : u8 {
-    size_512_by_256 = 0b0, ///< 512 H dots* 256 V dots.
-    size_512_by_512 = 0b1  ///< 512 H dots* 512 V dots.
+enum class BitmapSize1Bit : bool {
+    size_512_by_256 = 0, ///< 512 H dots* 256 V dots.
+    size_512_by_512 = 1  ///< 512 H dots* 512 V dots.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -823,9 +699,9 @@ enum class BitmapSize1Bit : u8 {
 /// \brief  xxBMEN bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BitmapEnable : u8 {
-    cell_format   = 0b0, ///< Cell Format.
-    bitmap_format = 0b1  ///< Bitmap Format.
+enum class BitmapEnable : bool {
+    cell_format   = 0, ///< Cell Format.
+    bitmap_format = 1  ///< Bitmap Format.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -834,90 +710,86 @@ enum class BitmapEnable : u8 {
 /// \brief  xxCHSZ bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CharacterSize : u8 {
-    one_by_one = 0b0, ///< 1 H Cell x 1 V Cell.
-    two_by_two = 0b1  ///< 2 H Cells x 2 V Cells.
+enum class CharacterSize : bool {
+    one_by_one = 0, ///< 1 H Cell x 1 V Cell.
+    two_by_two = 1  ///< 2 H Cells x 2 V Cells.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CharacterControlA
+/// \union	CharacterControlA
 ///
-/// \brief  Character Control (NBG0, NBG1) register (CHCTLA).
+/// \brief	Character Control (NBG0, NBG1) register (CHCTLA).
 ///
-/// \author Runik
-/// \date   22/05/2020
+/// \author	Runik
+/// \date	24/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CharacterControlA : public Register {
-  public:
-    using Register::Register;
-    inline static const auto character_color_number_nbg1 = BitRange<CharacterColorNumber2Bits>{12, 13}; ///< Defines N1CHCNx bits.
-    inline static const auto character_color_number_nbg0 = BitRange<CharacterColorNumber3bits>{4, 6};   ///< Defines N0CHCNx bits.
-    inline static const auto bitmap_size_nbg1            = BitRange<BitmapSize2Bits>{10, 11};           ///< Defines N1BMSZx bits.
-    inline static const auto bitmap_size_nbg0            = BitRange<BitmapSize2Bits>{2, 3};             ///< Defines N0BMSZx bits.
-    inline static const auto bitmap_enable_nbg0          = BitRange<BitmapEnable>{1};                   ///< Defines N0BMEN bit.
-    inline static const auto bitmap_enable_nbg1          = BitRange<BitmapEnable>{9};                   ///< Defines N1BMEN bit.
-    inline static const auto character_size_nbg0         = BitRange<CharacterSize>{0};                  ///< Defines N0CHSZ bit.
-    inline static const auto character_size_nbg1         = BitRange<CharacterSize>{8};                  ///< Defines N1CHSZ bit.
+union CharacterControlA {
+    u16             raw;                         ///< Raw representation.
+    BitField<12, 2> character_color_number_nbg1; ///< Defines N1CHCNx bits.
+    BitField<10, 2> bitmap_size_nbg1;            ///< Defines N1BMSZx bits.
+    BitField<9>     bitmap_enable_nbg1;          ///< Defines N1BMEN bit.
+    BitField<8>     character_size_nbg1;         ///< Defines N1CHSZ bit.
+    BitField<4, 3>  character_color_number_nbg0; ///< Defines N0CHCNx bits.
+    BitField<2, 2>  bitmap_size_nbg0;            ///< Defines N0BMSZx bits.
+    BitField<1>     bitmap_enable_nbg0;          ///< Defines N0BMEN bit.
+    BitField<0>     character_size_nbg0;         ///< Defines N0CHSZ bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CharacterControlB
+/// \union	CharacterControlB
 ///
-/// \brief  Character Control (NBG2, NBG3, RBG0) register (CHCTLB).
+/// \brief	Character Control (NBG2, NBG3, RBG0) register (CHCTLB).
 ///
-/// \author Runik
-/// \date   22/05/2020
+/// \author	Runik
+/// \date	24/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CharacterControlB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto character_color_number_rbg0 = BitRange<CharacterColorNumber3bits>{12, 14}; ///< Defines R0CHCNx bits.
-    inline static const auto character_color_number_nbg3 = BitRange<CharacterColorNumber1Bit>{5};       ///< Defines N3CHCNx bit.
-    inline static const auto character_color_number_nbg2 = BitRange<CharacterColorNumber1Bit>{1};       ///< Defines N2CHCNx bit.
-    inline static const auto bitmap_size_rbg0            = BitRange<BitmapSize1Bit>{2};                 ///< Defines R0BMSZ bit.
-    inline static const auto bitmap_enable_rbg0          = BitRange<BitmapEnable>{9};                   ///< Defines R0BMEN bit.
-    inline static const auto character_size_nbg2         = BitRange<CharacterSize>{0};                  ///< Defines N2CHSZ bit.
-    inline static const auto character_size_nbg3         = BitRange<CharacterSize>{4};                  ///< Defines N3CHSZ bit.
-    inline static const auto character_size_rbg0         = BitRange<CharacterSize>{8};                  ///< Defines R0CHSZ bit.
+union CharacterControlB {
+    u16              raw;                         ///< Raw representation.
+    BitField<12, 14> character_color_number_rbg0; ///< Defines R0CHCNx bits.
+    BitField<9>      bitmap_enable_rbg0;          ///< Defines R0BMEN bit.
+    BitField<8>      character_size_rbg0;         ///< Defines R0CHSZ bit.
+    BitField<5>      character_color_number_nbg3; ///< Defines N3CHCNx bit.
+    BitField<4>      character_size_nbg3;         ///< Defines N3CHSZ bit.
+    BitField<2>      bitmap_size_rbg0;            ///< Defines R0BMSZ bit.
+    BitField<1>      character_color_number_nbg2; ///< Defines N2CHCNx bit.
+    BitField<0>      character_size_nbg2;         ///< Defines N2CHSZ bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  BitmapPaletteNumberA
+/// \union	BitmapPaletteNumberA
 ///
-/// \brief  Bitmap Palette Number (NBG0, NBG1) register (BMPNA).
+/// \brief	Bitmap Palette Number (NBG0, NBG1) register (BMPNA).
 ///
-/// \author Runik
-/// \date   22/05/2020
+/// \author	Runik
+/// \date	24/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class BitmapPaletteNumberA : public Register {
-  public:
-    using Register::Register;
-    inline static const auto bitmap_special_priority_nbg0          = BitRange<u8>{5};     ///< Defines N0BMPR bit.
-    inline static const auto bitmap_special_priority_nbg1          = BitRange<u8>{13};    ///< Defines N1BMPR bit.
-    inline static const auto bitmap_special_color_calculation_nbg0 = BitRange<u8>{4};     ///< Defines N0BMCC bit.
-    inline static const auto bitmap_special_color_calculation_nbg1 = BitRange<u8>{12};    ///< Defines N1BMCC bit.
-    inline static const auto bitmap_palette_number_nbg0            = BitRange<u8>{0, 2};  ///< Defines N0BMPx bit.
-    inline static const auto bitmap_palette_number_nbg1            = BitRange<u8>{8, 10}; ///< Defines N1BMPx bit.
+union BitmapPaletteNumberA {
+    u16            raw;                                   ///< Raw representation.
+    BitField<13>   bitmap_special_priority_nbg1;          ///< Defines N1BMPR bit.
+    BitField<12>   bitmap_special_color_calculation_nbg1; ///< Defines N1BMCC bit.
+    BitField<8, 3> bitmap_palette_number_nbg1;            ///< Defines N1BMPx bit.
+    BitField<5>    bitmap_special_priority_nbg0;          ///< Defines N0BMPR bit.
+    BitField<4>    bitmap_special_color_calculation_nbg0; ///< Defines N0BMCC bit.
+    BitField<0, 3> bitmap_palette_number_nbg0;            ///< Defines N0BMPx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  BitmapPaletteNumberB
+/// \union	BitmapPaletteNumberB
 ///
-/// \brief  Bitmap Palette Number (RBG0) register (BMPNB).
+/// \brief	Bitmap Palette Number (RBG0) register (BMPNB).
 ///
-/// \author Runik
-/// \date   22/05/2020
+/// \author	Runik
+/// \date	24/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class BitmapPaletteNumberB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto bitmap_special_priority_rbg0          = BitRange<u8>{5};    ///< Defines N0BMPR bit.
-    inline static const auto bitmap_special_color_calculation_rbg0 = BitRange<u8>{4};    ///< Defines R0BMCC bit.
-    inline static const auto bitmap_palette_number_rbg0            = BitRange<u8>{0, 2}; ///< Defines R0BMPx bit.
+union BitmapPaletteNumberB {
+    u16            raw;                                   ///< Raw representation.
+    BitField<5>    bitmap_special_priority_rbg0;          ///< Defines N0BMPR bit.
+    BitField<4>    bitmap_special_color_calculation_rbg0; ///< Defines R0BMCC bit.
+    BitField<0, 3> bitmap_palette_number_rbg0;            ///< Defines R0BMPx bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -926,10 +798,9 @@ class BitmapPaletteNumberB : public Register {
 /// \brief  PNCNx / PNCR bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PatternNameDataSize : u8 {
-    not_set   = 0xFF, ///< Not set
-    two_words = 0b0,  ///< 2 Words.
-    one_word  = 0b1   ///< 1 Word.
+enum class PatternNameDataSize : bool {
+    two_words = 0, ///< 2 Words.
+    one_word  = 1  ///< 1 Word.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -938,111 +809,29 @@ enum class PatternNameDataSize : u8 {
 /// \brief  NxCNSM / R0CNSM bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CharacterNumberSupplementMode : u8 {
-    not_set = 0xFF, ///< Not set.
+enum class CharacterNumberSupplementMode : bool {
     character_number_10_bits
     = 0b0, ///< Character number in pattern name data is 10 bits. Flip function can be selected in character units.
     character_number_12_bits = 0b1 ///< Character number in pattern name data is 12 bits. Flip function cannot be used.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameControlNbg0
+/// \union	PatternNameControlNbg0
 ///
-/// \brief  Pattern Name Control (NBG0) register (PNCN0).
+/// \brief	Pattern Name Control (NBGx, RBG0) register (PNCxx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	24/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PatternNameControlNbg0 : public Register {
-  public:
-    using Register::Register;
-    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N0PNB bit.
-    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N0CNSM bit.
-    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines N0SPR bit.
-    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N0SCC bit.
-    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N0SPLTx bits.
-    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N0SCNx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameControlNbg1
-///
-/// \brief  Pattern Name Control (NBG1) register (PNCN1).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class PatternNameControlNbg1 : public Register {
-  public:
-    using Register::Register;
-    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N1PNB bit.
-    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N1CNSM bit.
-    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines N1SPR bit.
-    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N1SCC bit.
-    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N1SPLTx bits.
-    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N1SCNx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameControlNbg2
-///
-/// \brief  Pattern Name Control (NBG2) register (PNCN2).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class PatternNameControlNbg2 : public Register {
-  public:
-    using Register::Register;
-    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N2PNB bit.
-    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N2CNSM bit.
-    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines N2SPR bit.
-    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N2SCC bit.
-    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N2SPLTx bits.
-    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N2SCNx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameControlNbg3
-///
-/// \brief  Pattern Name Control (NBG3) register (PNCN3).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class PatternNameControlNbg3 : public Register {
-  public:
-    using Register::Register;
-    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines N3PNB bit.
-    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines N3CNSM bit.
-    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines N3SPR bit.
-    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines N3SCC bit.
-    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines N3SPLTx bits.
-    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines N3SCNx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameControlRbg0
-///
-/// \brief  Pattern Name Control (RBG0) register (PNCNR).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class PatternNameControlRbg0 : public Register {
-  public:
-    using Register::Register;
-    inline static const auto pattern_name_data_size       = BitRange<PatternNameDataSize>{15};           ///< Defines R0PNB bit.
-    inline static const auto character_number_mode        = BitRange<CharacterNumberSupplementMode>{14}; ///< Defines R0CNSM bit.
-    inline static const auto special_priority             = BitRange<u8>{9};                             ///< Defines R0SPR bit.
-    inline static const auto special_color_calculation    = BitRange<u8>{8};                             ///< Defines R0SCC bit.
-    inline static const auto supplementary_palette_number = BitRange<u8>{5, 7};   ///< Defines R0SPLTx bits.
-    inline static const auto supplementary_character_number = BitRange<u8>{0, 4}; ///< Defines R0SCNx bits.
+union PatternNameControl {
+    u16            raw;                            ///< Raw representation.
+    BitField<15>   pattern_name_data_size;         ///< Defines N0PNB bit.
+    BitField<14>   character_number_mode;          ///< Defines N0CNSM bit.
+    BitField<9>    special_priority;               ///< Defines N0SPR bit.
+    BitField<8>    special_color_calculation;      ///< Defines N0SCC bit.
+    BitField<5, 3> supplementary_palette_number;   ///< Defines N0SPLTx bits.
+    BitField<0, 5> supplementary_character_number; ///< Defines N0SCNx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1084,727 +873,300 @@ enum class ScreenOverProcess : u8 {
 /// \date   23/05/2020
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PlaneSizeRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_size_nbg0 = BitRange<PlaneSize>{0, 1};           ///< Defines N0PLSZx bits.
-    inline static const auto plane_size_nbg1 = BitRange<PlaneSize>{2, 3};           ///< Defines N1PLSZx bits.
-    inline static const auto plane_size_nbg2 = BitRange<PlaneSize>{4, 5};           ///< Defines N2PLSZx bits.
-    inline static const auto plane_size_nbg3 = BitRange<PlaneSize>{6, 7};           ///< Defines N3PLSZx bits.
-    inline static const auto plane_size_rpa  = BitRange<PlaneSize>{8, 9};           ///< Defines RAPLSZx bits.
-    inline static const auto plane_size_rpb  = BitRange<PlaneSize>{12, 13};         ///< Defines RBPLSZx bits.
-    inline static const auto screen_over_rpa = BitRange<ScreenOverProcess>{10, 11}; ///< Defines RAOVRx bits.
-    inline static const auto screen_over_rpb = BitRange<ScreenOverProcess>{14, 15}; ///< Defines RBOVRx bits.
+union PlaneSizeRegister {
+    u16             raw;             ///< Raw representation.
+    BitField<14, 2> screen_over_rpb; ///< Defines RBOVRx bits.
+    BitField<12, 2> plane_size_rpb;  ///< Defines RBPLSZx bits.
+    BitField<10, 2> screen_over_rpa; ///< Defines RAOVRx bits.
+    BitField<8, 2>  plane_size_rpa;  ///< Defines RAPLSZx bits.
+    BitField<6, 2>  plane_size_nbg3; ///< Defines N3PLSZx bits.
+    BitField<4, 2>  plane_size_nbg2; ///< Defines N2PLSZx bits.
+    BitField<2, 2>  plane_size_nbg1; ///< Defines N1PLSZx bits.
+    BitField<0, 2>  plane_size_nbg0; ///< Defines N0PLSZx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapOffsetNbg
+/// \union	MapOffsetNbg
 ///
-/// \brief  Map Offset (NBG0 - NBG3) register (MPOFN).
+/// \brief	Map Offset (NBG0 - NBG3) register (MPOFN).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapOffsetNbg : public Register {
-  public:
-    using Register::Register;
-    inline static const auto map_offset_nbg0 = BitRange<u8>{0, 2};   ///< Defines N0MPx bits.
-    inline static const auto map_offset_nbg1 = BitRange<u8>{4, 6};   ///< Defines N1MPx bits.
-    inline static const auto map_offset_nbg2 = BitRange<u8>{8, 10};  ///< Defines N2MPx bits.
-    inline static const auto map_offset_nbg3 = BitRange<u8>{12, 14}; ///< Defines N3MPx bits.
+union MapOffsetNbg {
+    u16             raw;             ///< Raw representation.
+    BitField<12, 3> map_offset_nbg3; ///< Defines N3MPx bits.
+    BitField<8, 3>  map_offset_nbg2; ///< Defines N2MPx bits.
+    BitField<4, 3>  map_offset_nbg1; ///< Defines N1MPx bits.
+    BitField<0, 3>  map_offset_nbg0; ///< Defines N0MPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapOffsetRbg
+/// \union	MapOffsetRbg
 ///
-/// \brief  Map Offset (Rotation Parameter A,B) register (MPOFR).
+/// \brief	Map Offset (Rotation Parameter A,B) register (MPOFR).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapOffsetRbg : public Register {
-  public:
-    using Register::Register;
-    inline static const auto map_offset_rpa = BitRange<u8>{0, 2}; ///< Defines RAMPx bits.
-    inline static const auto map_offset_rpb = BitRange<u8>{4, 6}; ///< Defines RBMPx bits.
+union MapOffsetRbg {
+    u16            raw;            ///< Raw representation.
+    BitField<4, 3> map_offset_rpb; ///< Defines RBMPx bits.
+    BitField<0, 3> map_offset_rpa; ///< Defines RAMPx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapNbg0PlaneAB
+/// \union	MapPlaneAB
 ///
-/// \brief  Map (NBG0, Plane A,B) register (MPABN0).
+/// \brief	Map (NBGx, RBGx, Plane A,B) register (MPABxx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapNbg0PlaneAB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines N0MPAx bits.
-    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines N0MPBx bits.
+union MapPlaneAB {
+    u16            raw;     ///< Raw representation.
+    BitField<0, 6> plane_a; ///< Defines N0MPAx bits.
+    BitField<8, 6> plane_b; ///< Defines N0MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapNbg0PlaneCD
+/// \union	MapPlaneCD
 ///
-/// \brief  Map (NBG0, Plane C,D) register (MPCDN0).
+/// \brief	Map (NBGx, RBGx, Plane C,D) register (MPCDxx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapNbg0PlaneCD : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines N0MPCx bits.
-    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines N0MPDx bits.
+union MapPlaneCD {
+    u16            raw;     ///< Raw representation.
+    BitField<0, 6> plane_c; ///< Defines N0MPAx bits.
+    BitField<8, 6> plane_d; ///< Defines N0MPBx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapNbg1PlaneAB
+/// \union	MapPlaneEF
 ///
-/// \brief  Map (NBG1, Plane A,B) register (MPABN1).
+/// \brief	Map (Rotation Parameter x, Plane E,F) register (MPEFRx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapNbg1PlaneAB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines N1MPAx bits.
-    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines N1MPBx bits.
+union MapPlaneEF {
+    u16            raw;     ///< Raw representation.
+    BitField<0, 6> plane_e; ///< Defines RxMPEx bits.
+    BitField<8, 6> plane_f; ///< Defines RxMPFx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapNbg1PlaneCD
+/// \union	MapPlaneGH
 ///
-/// \brief  Map (NBG1, Plane C,D) register (MPCDN1).
+/// \brief	Map (Rotation Parameter x, Plane G,H) register (MPGHRx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapNbg1PlaneCD : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines N1MPCx bits.
-    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines N1MPDx bits.
+union MapPlaneGH {
+    u16            raw;     ///< Raw representation.
+    BitField<0, 6> plane_g; ///< Defines RxMPGx bits.
+    BitField<8, 6> plane_h; ///< Defines RxMPHx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapNbg2PlaneAB
+/// \union	MapPlaneIJ
 ///
-/// \brief  Map (NBG2, Plane A,B) register (MPABN2).
+/// \brief	Map (Rotation Parameter x, Plane I,J) register (MPIJRx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapNbg2PlaneAB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines N2MPAx bits.
-    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines N2MPBx bits.
+union MapPlaneIJ {
+    u16            raw;     ///< Raw representation.
+    BitField<0, 6> plane_i; ///< Defines RxMPIx bits.
+    BitField<8, 6> plane_j; ///< Defines RxMPJx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapNbg2PlaneCD
+/// \union	MapPlaneKL
 ///
-/// \brief  Map (NBG2, Plane C,D) register (MPCDN2).
+/// \brief	Map (Rotation Parameter x, Plane K,L) register (MPKLRx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapNbg2PlaneCD : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines N2MPCx bits.
-    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines N2MPDx bits.
+union MapPlaneKL {
+    u16            raw;     ///< Raw representation.
+    BitField<0, 6> plane_k; ///< Defines RxMPIx bits.
+    BitField<8, 6> plane_l; ///< Defines RxMPJx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapNbg3PlaneAB
+/// \union	MapPlaneMN
 ///
-/// \brief  Map (NBG3, Plane A,B) register (MPABN3).
+/// \brief	Map (Rotation Parameter x, Plane M,N) register (MPMNRx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapNbg3PlaneAB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines N3MPAx bits.
-    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines N3MPBx bits.
+union MapPlaneMN {
+    u16            raw;     ///< Raw representation.
+    BitField<0, 6> plane_m; ///< Defines RxMPIx bits.
+    BitField<8, 6> plane_n; ///< Defines RxMPJx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapNbg3PlaneCD
+/// \union	MapPlaneOP
 ///
-/// \brief  Map (NBG3, Plane C,D) register (MPCDN3).
+/// \brief	Map (Rotation Parameter x, Plane O,P) register (MPOPRx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapNbg3PlaneCD : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines N3MPCx bits.
-    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines N3MPDx bits.
+union MapPlaneOP {
+    u16            raw;     ///< Raw representation.
+    BitField<0, 6> plane_o; ///< Defines RxMPIx bits.
+    BitField<8, 6> plane_p; ///< Defines RxMPJx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterAPlaneAB
+/// \union	ScreenScrollValueIntegerPart
 ///
-/// \brief  Map (Rotation Parameter A, Plane A,B) register (MPABRA).
+/// \brief	Screen Scroll Value (Integer Part) (SCXINx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterAPlaneAB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines RAMPAx bits.
-    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines RAMPBx bits.
+union ScreenScrollValueIntegerPart {
+    u16             raw;     ///< Raw representation.
+    BitField<0, 11> integer; ///< Defines  NxSCxIx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterAPlaneCD
+/// \union	ScreenScrollValueFractionalPart
 ///
-/// \brief  Map (Rotation Parameter A, Plane C,D) register (MPCDRA).
+/// \brief	Screen Scroll Value (Fractional Part) (SCXDNx).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterAPlaneCD : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines RAMPCx bits.
-    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines RAMPDx bits.
+union ScreenScrollValueFractionalPart {
+    u16            raw;        ///< Raw representation.
+    BitField<8, 8> fractional; ///< Defines  NxSCxDx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterAPlaneEF
+/// \union	CoordinateIncrementNbg0HorizontalIntegerPart
 ///
-/// \brief  Map (Rotation Parameter A, Plane E,F) register (MPEFRA).
+/// \brief	Coordinate Increment (NBG0, Horizontal Integer Part) (ZMXIN0).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterAPlaneEF : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_e = BitRange<u8>{0, 5};  ///< Defines RAMPEx bits.
-    inline static const auto plane_f = BitRange<u8>{8, 13}; ///< Defines RAMPFx bits.
+union CoordinateIncrementNbg0HorizontalIntegerPart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterAPlaneGH
+/// \union	CoordinateIncrementNbg0HorizontalFractionalPart
 ///
-/// \brief  Map (Rotation Parameter A, Plane G,H) register (MPGHRA).
+/// \brief	Coordinate Increment (NBG0, Horizontal Fractional Part) (ZMXDN0).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterAPlaneGH : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_g = BitRange<u8>{0, 5};  ///< Defines RAMPGx bits.
-    inline static const auto plane_h = BitRange<u8>{8, 13}; ///< Defines RAMPHx bits.
+union CoordinateIncrementNbg0HorizontalFractionalPart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterAPlaneIJ
+/// \union	CoordinateIncrementNbg0VerticalIntegerPart
 ///
-/// \brief  Map (Rotation Parameter A, Plane I,J) register (MPIJRA).
+/// \brief	CoordinateIncrement (NBG0, Vertical Integer Part) (ZMYIN0).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterAPlaneIJ : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_i = BitRange<u8>{0, 5};  ///< Defines RAMPIx bits.
-    inline static const auto plane_j = BitRange<u8>{8, 13}; ///< Defines RAMPJx bits.
+union CoordinateIncrementNbg0VerticalIntegerPart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterAPlaneKL
+/// \union	CoordinateIncrementNbg0VerticalFractionalPart
 ///
-/// \brief  Map (Rotation Parameter A, Plane K,L) register (MPKLRA).
+/// \brief	Coordinate Increment (NBG0, Vertical Fractional Part) (ZMYDN0).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterAPlaneKL : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_k = BitRange<u8>{0, 5};  ///< Defines RAMPKx bits.
-    inline static const auto plane_l = BitRange<u8>{8, 13}; ///< Defines RAMPLx bits.
+union CoordinateIncrementNbg0VerticalFractionalPart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterAPlaneMN
+/// \union	CoordinateIncrementNbg1HorizontalIntegerPart
 ///
-/// \brief  Map (Rotation Parameter A, Plane M,N) register (MPMNRA).
+/// \brief	Coordinate Increment (NBG1, Horizontal Integer Part) (ZMXIN1).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterAPlaneMN : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_m = BitRange<u8>{0, 5};  ///< Defines RAMPMx bits.
-    inline static const auto plane_n = BitRange<u8>{8, 13}; ///< Defines RAMPNx bits.
+union CoordinateIncrementNbg1HorizontalIntegerPart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterAPlaneOP
+/// \union	CoordinateIncrementNbg1HorizontalFractionalPart
 ///
-/// \brief  Map (Rotation Parameter A, Plane O,P) register (MPOPRA).
+/// \brief	Coordinate Increment (NBG1, Horizontal Fractional Part) (ZMXDN1).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterAPlaneOP : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_o = BitRange<u8>{0, 5};  ///< Defines RAMPOx bits.
-    inline static const auto plane_p = BitRange<u8>{8, 13}; ///< Defines RAMPPx bits.
+union CoordinateIncrementNbg1HorizontalFractionalPart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterBPlaneAB
+/// \union	CoordinateIncrementNbg1VerticalIntegerPart
 ///
-/// \brief  Map (Rotation Parameter B, Plane A,B) register (MPABRB).
+/// \brief	CoordinateIncrement (NBG1, Vertical Integer Part) (ZMYIN1).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterBPlaneAB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_a = BitRange<u8>{0, 5};  ///< Defines RBMPAx bits.
-    inline static const auto plane_b = BitRange<u8>{8, 13}; ///< Defines RBMPBx bits.
+union CoordinateIncrementNbg1VerticalIntegerPart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterBPlaneCD
+/// \union	CoordinateIncrementNbg1VerticalFractionalPart
 ///
-/// \brief  Map (Rotation Parameter B, Plane C,D) register (MPCDRB).
+/// \brief	Coordinate Increment (NBG1, Vertical Fractional Part) (ZMYDN1).
 ///
-/// \author Runik
-/// \date   23/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MapRotationParameterBPlaneCD : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_c = BitRange<u8>{0, 5};  ///< Defines RBMPCx bits.
-    inline static const auto plane_d = BitRange<u8>{8, 13}; ///< Defines RBMPDx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterBPlaneEF
-///
-/// \brief  Map (Rotation Parameter B, Plane E,F) register (MPEFRB).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class MapRotationParameterBPlaneEF : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_e = BitRange<u8>{0, 5};  ///< Defines RBMPEx bits.
-    inline static const auto plane_f = BitRange<u8>{8, 13}; ///< Defines RBMPFx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterBPlaneGH
-///
-/// \brief  Map (Rotation Parameter B, Plane G,H) register (MPGHRB).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class MapRotationParameterBPlaneGH : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_g = BitRange<u8>{0, 5};  ///< Defines RBMPGx bits.
-    inline static const auto plane_h = BitRange<u8>{8, 13}; ///< Defines RBMPHx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterBPlaneIJ
-///
-/// \brief  Map (Rotation Parameter B, Plane I,J) register (MPIJRB).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class MapRotationParameterBPlaneIJ : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_i = BitRange<u8>{0, 5};  ///< Defines RBMPIx bits.
-    inline static const auto plane_j = BitRange<u8>{8, 13}; ///< Defines RBMPJx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterBPlaneKL
-///
-/// \brief  Map (Rotation Parameter B, Plane K,L) register (MPKLRB).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class MapRotationParameterBPlaneKL : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_k = BitRange<u8>{0, 5};  ///< Defines RBMPKx bits.
-    inline static const auto plane_l = BitRange<u8>{8, 13}; ///< Defines RBMPLx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterBPlaneMN
-///
-/// \brief  Map (Rotation Parameter B, Plane M,N) register (MPMNRB).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class MapRotationParameterBPlaneMN : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_m = BitRange<u8>{0, 5};  ///< Defines RBMPMx bits.
-    inline static const auto plane_n = BitRange<u8>{8, 13}; ///< Defines RBMPNx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  MapRotationParameterBPlaneOP
-///
-/// \brief  Map (Rotation Parameter B, Plane O,P) register (MPOPRB).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class MapRotationParameterBPlaneOP : public Register {
-  public:
-    using Register::Register;
-    inline static const auto plane_o = BitRange<u8>{0, 5};  ///< Defines RBMPOx bits.
-    inline static const auto plane_p = BitRange<u8>{8, 13}; ///< Defines RBMPPx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg0HorizontalIntegerPart
-///
-/// \brief  Screen Scroll Value (NBG0, Horizontal Integer Part) (SCXIN0).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg0HorizontalIntegerPart : public Register {
-  public:
-    using Register::Register;
-    inline static const auto horizontal_integer = BitRange<u8>{0, 10}; ///< Defines N0SCXIx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg0HorizontalFractionalPart
-///
-/// \brief  Screen Scroll Value (NBG0, Horizontal Fractional Part) (SCXDN0).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg0HorizontalFractionalPart : public Register {
-  public:
-    using Register::Register;
-    inline static const auto horizontal_fractional = BitRange<u8>{8, 15}; ///< Defines N0SCXDx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg0VerticalIntegerPart
-///
-/// \brief  Screen Scroll Value (NBG0, Vertical Integer Part) (SCYIN0).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg0VerticalIntegerPart : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical_integer = BitRange<u8>{0, 10}; ///< Defines N0SCYIx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg0VerticalFractionalPart
-///
-/// \brief  Screen Scroll Value (NBG0, Vertical Fractional Part) (SCYDN0).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg0VerticalFractionalPart : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical_fractional = BitRange<u8>{8, 15}; ///< Defines N0SCYDx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoordinateIncrementNbg0HorizontalIntegerPart
-///
-/// \brief  Coordinate Increment (NBG0, Horizontal Integer Part) (ZMXIN0).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CoordinateIncrementNbg0HorizontalIntegerPart : public Register {
-  public:
-    using Register::Register;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoordinateIncrementNbg0HorizontalFractionalPart
-///
-/// \brief  Coordinate Increment (NBG0, Horizontal Fractional Part) (ZMXDN0).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CoordinateIncrementNbg0HorizontalFractionalPart : public Register {
-  public:
-    using Register::Register;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoordinateIncrementNbg0VerticalIntegerPart
-///
-/// \brief  CoordinateIncrement (NBG0, Vertical Integer Part) (ZMYIN0).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CoordinateIncrementNbg0VerticalIntegerPart : public Register {
-  public:
-    using Register::Register;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoordinateIncrementNbg0VerticalFractionalPart
-///
-/// \brief  Coordinate Increment (NBG0, Vertical Fractional Part) (ZMYDN0).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CoordinateIncrementNbg0VerticalFractionalPart : public Register {
-  public:
-    using Register::Register;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg1HorizontalIntegerPart
-///
-/// \brief  Screen Scroll Value (NBG1, Horizontal Integer Part) (SCXIN1).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg1HorizontalIntegerPart : public Register {
-  public:
-    using Register::Register;
-    inline static const auto horizontal_integer = BitRange<u8>{0, 10}; ///< Defines N1SCXIx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg1HorizontalFractionalPart
-///
-/// \brief  Screen Scroll Value (NBG1, Horizontal Fractional Part) (SCXDN1).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg1HorizontalFractionalPart : public Register {
-  public:
-    using Register::Register;
-    inline static const auto horizontal_fractional = BitRange<u8>{8, 15}; ///< Defines N1SCXDx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg1VerticalIntegerPart
-///
-/// \brief  Screen Scroll Value (NBG1, Vertical Integer Part) (SCYIN1).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg1VerticalIntegerPart : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical_integer = BitRange<u8>{0, 10}; ///< Defines N1SCYIx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg1VerticalFractionalPart
-///
-/// \brief  Screen Scroll Value (NBG1, Vertical Fractional Part) (SCYDN1).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg1VerticalFractionalPart : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical_fractional = BitRange<u8>{8, 15}; ///< Defines N1SCYDx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoordinateIncrementNbg1HorizontalIntegerPart
-///
-/// \brief  Coordinate Increment (NBG1, Horizontal Integer Part) (ZMXIN1).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CoordinateIncrementNbg1HorizontalIntegerPart : public Register {
-  public:
-    using Register::Register;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoordinateIncrementNbg1HorizontalFractionalPart
-///
-/// \brief  Coordinate Increment (NBG1, Horizontal Fractional Part) (ZMXDN1).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CoordinateIncrementNbg1HorizontalFractionalPart : public Register {
-  public:
-    using Register::Register;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoordinateIncrementNbg1VerticalIntegerPart
-///
-/// \brief  CoordinateIncrement (NBG1, Vertical Integer Part) (ZMYIN1).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CoordinateIncrementNbg1VerticalIntegerPart : public Register {
-  public:
-    using Register::Register;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoordinateIncrementNbg1VerticalFractionalPart
-///
-/// \brief  Coordinate Increment (NBG1, Vertical Fractional Part) (ZMYDN1).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CoordinateIncrementNbg1VerticalFractionalPart : public Register {
-  public:
-    using Register::Register;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg2Horizontal
-///
-/// \brief  Screen Scroll Value (NBG2, Horizontal) (SCXN2).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg2Horizontal : public Register {
-  public:
-    using Register::Register;
-    inline static const auto horizontal = BitRange<u8>{0, 10}; ///< Defines N2SCXx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg2Vertical
-///
-/// \brief  Screen Scroll Value (NBG2, Vertical) (SCYN2).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg2Vertical : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical = BitRange<u8>{0, 10}; ///< Defines N2SCYx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg3Horizontal
-///
-/// \brief  Screen Scroll Value (NBG3, Horizontal) (SCXN3).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg3Horizontal : public Register {
-  public:
-    using Register::Register;
-    inline static const auto horizontal = BitRange<u8>{0, 10}; ///< Defines N3SCXx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenScrollValueNbg3Vertical
-///
-/// \brief  Screen Scroll Value (NBG3, Vertical) (SCYN3).
-///
-/// \author Runik
-/// \date   25/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScreenScrollValueNbg3Vertical : public Register {
-  public:
-    using Register::Register;
-    inline static const auto vertical = BitRange<u8>{0, 10}; ///< Defines N3SCYx bits.
+union CoordinateIncrementNbg1VerticalFractionalPart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1813,7 +1175,7 @@ class ScreenScrollValueNbg3Vertical : public Register {
 /// \brief  NxZMQT bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ZoomQuarter : u8 { none = 0, up_to_one_quarter = 1 };
+enum class ZoomQuarter : bool { none = 0, up_to_one_quarter = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ZoomHalf
@@ -1821,514 +1183,478 @@ enum class ZoomQuarter : u8 { none = 0, up_to_one_quarter = 1 };
 /// \brief  NxZMHF bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ZoomHalf : u8 { none = 0, up_to_one_half = 1 };
+enum class ZoomHalf : bool { none = 0, up_to_one_half = 1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ReductionEnable
+/// \union	ReductionEnable
 ///
-/// \brief  Reduction Enable (ZMCTL).
+/// \brief	Reduction Enable (ZMCTL).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ReductionEnable : public Register {
-  public:
-    using Register::Register;
-    inline static const auto zoom_half_nbg0    = BitRange<ZoomHalf>{0};    ///< Defines N0ZMHF bits.
-    inline static const auto zoom_quarter_nbg0 = BitRange<ZoomQuarter>{1}; ///< Defines N0ZMQT bits.
-    inline static const auto zoom_half_nbg1    = BitRange<ZoomHalf>{8};    ///< Defines N1ZMHF bits.
-    inline static const auto zoom_quarter_nbg1 = BitRange<ZoomQuarter>{9}; ///< Defines N1ZMQT bits.
+union ReductionEnable {
+    u16         raw;               ///< Raw representation.
+    BitField<9> zoom_quarter_nbg1; ///< Defines N1ZMQT bits.
+    BitField<8> zoom_half_nbg1;    ///< Defines N1ZMHF bits.
+    BitField<1> zoom_quarter_nbg0; ///< Defines N0ZMQT bits.
+    BitField<0> zoom_half_nbg0;    ///< Defines N0ZMHF bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineAndVerticalCellScrollControl
+/// \union	LineAndVerticalCellScrollControl
 ///
-/// \brief  Line And Vertical Cell Scroll Control (NBG0, NBG1) (SRCCTL).
+/// \brief	Line And Vertical Cell Scroll Control (NBG0, NBG1) (SRCCTL).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineAndVerticalCellScrollControl : public Register {
-  public:
-    using Register::Register;
+union LineAndVerticalCellScrollControl {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VerticalCellScrollTableAddress
+/// \union	VerticalCellScrollTableAddressUpper
 ///
-/// \brief  Vertical Cell Scroll Table Address Upper (NBG0, NBG1) (VCSTAU).
+/// \brief	Vertical Cell Scroll Table Address Upper (NBG0, NBG1) (VCSTAU).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VerticalCellScrollTableAddressUpper : public Register {
-  public:
-    using Register::Register;
+union VerticalCellScrollTableAddressUpper {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  VerticalCellScrollTableAddressLower
+/// \union	VerticalCellScrollTableAddressLower
 ///
-/// \brief  Vertical Cell Scroll Table Address Lower (NBG0, NBG1) (VCSTAL).
+/// \brief	Vertical Cell Scroll Table Address Lower (NBG0, NBG1) (VCSTAL).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class VerticalCellScrollTableAddressLower : public Register {
-  public:
-    using Register::Register;
+union VerticalCellScrollTableAddressLower {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineScrollTableAddressNbg0Upper
+/// \union	LineScrollTableAddressNbg0Upper
 ///
-/// \brief  Line Scroll Table Address Upper (NBG0) (LSTA0U).
+/// \brief	Line Scroll Table Address Upper (NBG0) (LSTA0U).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineScrollTableAddressNbg0Upper : public Register {
-  public:
-    using Register::Register;
+union LineScrollTableAddressNbg0Upper {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineScrollTableAddressNbg0Lower
+/// \union	LineScrollTableAddressNbg0Lower
 ///
-/// \brief  Line Scroll Table Address Lower (NBG0) (LSTA0L).
+/// \brief	Line Scroll Table Address Lower (NBG0) (LSTA0L).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineScrollTableAddressNbg0Lower : public Register {
-  public:
-    using Register::Register;
+union LineScrollTableAddressNbg0Lower {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineScrollTableAddressNbg1Upper
+/// \union	LineScrollTableAddressNbg1Upper
 ///
-/// \brief  Line Scroll Table Address Upper (NBG1) (LSTA1U).
+/// \brief	Line Scroll Table Address Upper (NBG1) (LSTA1U).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineScrollTableAddressNbg1Upper : public Register {
-  public:
-    using Register::Register;
+union LineScrollTableAddressNbg1Upper {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineScrollTableAddressNbg1Lower
+/// \union	LineScrollTableAddressNbg1Lower
 ///
-/// \brief  Line Scroll Table Address Lower (NBG1) (LSTA1L).
+/// \brief	Line Scroll Table Address Lower (NBG1) (LSTA1L).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineScrollTableAddressNbg1Lower : public Register {
-  public:
-    using Register::Register;
+union LineScrollTableAddressNbg1Lower {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineColorScreenTableAddressUpper
+/// \union	LineColorScreenTableAddressUpper
 ///
-/// \brief  Line Color Screen Table Address Upper (LCTAU).
+/// \brief	Line Color Screen Table Address Upper (LCTAU).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineColorScreenTableAddressUpper : public Register {
-  public:
-    using Register::Register;
+union LineColorScreenTableAddressUpper {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineColorScreenTableAddressLower
+/// \union	LineColorScreenTableAddressLower
 ///
-/// \brief  Line Color Screen Table Address Lower (LCTAL).
+/// \brief	Line Color Screen Table Address Lower (LCTAL).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineColorScreenTableAddressLower : public Register {
-  public:
-    using Register::Register;
+union LineColorScreenTableAddressLower {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  BackScreenTableAddressUpper
+/// \union	BackScreenTableAddressUpper
 ///
-/// \brief  Back Screen Table Address Upper (BKTAU).
+/// \brief	Back Screen Table Address Upper (BKTAU).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class BackScreenTableAddressUpper : public Register {
-  public:
-    using Register::Register;
+union BackScreenTableAddressUpper {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  BackScreenTableAddressLower
+/// \union	BackScreenTableAddressLower
 ///
-/// \brief  Back Screen Table Address Lower (BKTAL).
+/// \brief	Back Screen Table Address Lower (BKTAL).
 ///
-/// \author Runik
-/// \date   26/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class BackScreenTableAddressLower : public Register {
-  public:
-    using Register::Register;
+union BackScreenTableAddressLower {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  RotationParameterMode
+/// \union	RotationParameterMode
 ///
-/// \brief  Rotation Parameter Mode (RPMD).
+/// \brief	Rotation Parameter Mode (RPMD).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class RotationParameterMode : public Register {
-  public:
-    using Register::Register;
+union RotationParameterMode {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  RotationParameterReadControl
+/// \union	RotationParameterReadControl
 ///
-/// \brief  Rotation Parameter Read Control (RPRCTL).
+/// \brief	Rotation Parameter Read Control (RPRCTL).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class RotationParameterReadControl : public Register {
-  public:
-    using Register::Register;
+union RotationParameterReadControl {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoefficientTableControl
+/// \union	CoefficientTableControl
 ///
-/// \brief  Coefficient Table Control (KTCTL).
+/// \brief	Coefficient Table Control (KTCTL).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CoefficientTableControl : public Register {
-  public:
-    using Register::Register;
+union CoefficientTableControl {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  CoefficientTableAddressOffset
+/// \union	CoefficientTableAddressOffset
 ///
-/// \brief  Coefficient Table Address Offset (Rotation Parameter A,B) (KTAOF).
+/// \brief	Coefficient Table Address Offset (Rotation Parameter A,B) (KTAOF).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CoefficientTableAddressOffset : public Register {
-  public:
-    using Register::Register;
+union CoefficientTableAddressOffset {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenOverPatternNameA
+/// \union	ScreenOverPatternNameA
 ///
-/// \brief  Screen Over Pattern Name (Rotation Parameter A) (OVPNRA).
+/// \brief	Screen Over Pattern Name (Rotation Parameter A) (OVPNRA).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ScreenOverPatternNameA : public Register {
-  public:
-    using Register::Register;
+union ScreenOverPatternNameA {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ScreenOverPatternNameB
+/// \union	ScreenOverPatternNameB
 ///
-/// \brief  Screen Over Pattern Name (Rotation Parameter B) (OVPNRB).
+/// \brief	Screen Over Pattern Name (Rotation Parameter B) (OVPNRB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ScreenOverPatternNameB : public Register {
-  public:
-    using Register::Register;
+union ScreenOverPatternNameB {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  RotationParameterTableAddressUpper
+/// \union	RotationParameterTableAddressUpper
 ///
-/// \brief  Rotation Parameter Table Address Upper (RPTAU).
+/// \brief	Rotation Parameter Table Address Upper (RPTAU).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class RotationParameterTableAddressUpper : public Register {
-  public:
-    using Register::Register;
+union RotationParameterTableAddressUpper {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  RotationParameterTableAddressLower
+/// \union	RotationParameterTableAddressLower
 ///
-/// \brief  Rotation Parameter Table Address Lower (RPTAL).
+/// \brief	Rotation Parameter Table Address Lower (RPTAL).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class RotationParameterTableAddressLower : public Register {
-  public:
-    using Register::Register;
+union RotationParameterTableAddressLower {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowPositionW0HorizontalStart
+/// \union	WindowPositionW0HorizontalStart
 ///
-/// \brief  Window Position (W0 Horizontal Start Point) (WPSX0).
+/// \brief	Window Position (W0 Horizontal Start Point) (WPSX0).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowPositionW0HorizontalStart : public Register {
-  public:
-    using Register::Register;
+union WindowPositionW0HorizontalStart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowPositionW0VerticalStart
+/// \union	WindowPositionW0VerticalStart
 ///
-/// \brief  Window Position (W0 Vertical Start Point) (WPSY0).
+/// \brief	Window Position (W0 Vertical Start Point) (WPSY0).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowPositionW0VerticalStart : public Register {
-  public:
-    using Register::Register;
+union WindowPositionW0VerticalStart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowPositionW0HorizontalEnd
+/// \union	WindowPositionW0HorizontalEnd
 ///
-/// \brief  Window Position (W0 Horizontal End Point) (WPEX0).
+/// \brief	Window Position (W0 Horizontal End Point) (WPEX0).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowPositionW0HorizontalEnd : public Register {
-  public:
-    using Register::Register;
+union WindowPositionW0HorizontalEnd {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowPositionW0VerticalEnd
+/// \union	WindowPositionW0VerticalEnd
 ///
-/// \brief  Window Position (W0 Vertical End Point) (WPEY0).
+/// \brief	Window Position (W0 Vertical End Point) (WPEY0).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowPositionW0VerticalEnd : public Register {
-  public:
-    using Register::Register;
+union WindowPositionW0VerticalEnd {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowPositionW1HorizontalStart
+/// \union	WindowPositionW1HorizontalStart
 ///
-/// \brief  Window Position (W1 Horizontal Start Point) (WPSX1).
+/// \brief	Window Position (W1 Horizontal Start Point) (WPSX1).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowPositionW1HorizontalStart : public Register {
-  public:
-    using Register::Register;
+union WindowPositionW1HorizontalStart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowPositionW1VerticalStart
+/// \union	WindowPositionW1VerticalStart
 ///
-/// \brief  Window Position (W1 Vertical Start Point) (WPSY1).
+/// \brief	Window Position (W1 Vertical Start Point) (WPSY1).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowPositionW1VerticalStart : public Register {
-  public:
-    using Register::Register;
+union WindowPositionW1VerticalStart {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowPositionW1HorizontalEnd
+/// \union	WindowPositionW1HorizontalEnd
 ///
-/// \brief  Window Position (W1 Horizontal End Point) (WPEX1).
+/// \brief	Window Position (W1 Horizontal End Point) (WPEX1).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowPositionW1HorizontalEnd : public Register {
-  public:
-    using Register::Register;
+union WindowPositionW1HorizontalEnd {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowPositionW1VerticalEnd
+/// \union	WindowPositionW1VerticalEnd
 ///
-/// \brief  Window Position (W1 Vertical End Point) (WPEY1).
+/// \brief	Window Position (W1 Vertical End Point) (WPEY1).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowPositionW1VerticalEnd : public Register {
-  public:
-    using Register::Register;
+union WindowPositionW1VerticalEnd {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowControlA
+/// \union	WindowControlA
 ///
-/// \brief  Window Control (NBG0, NBG1) (WCTLA).
+/// \brief	Window Control (NBG0, NBG1) (WCTLA).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowControlA : public Register {
-  public:
-    using Register::Register;
+union WindowControlA {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowControlB
+/// \union	WindowControlB
 ///
-/// \brief  Window Control (NBG2, NBG3) (WCTLB).
+/// \brief	Window Control (NBG2, NBG3) (WCTLB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowControlB : public Register {
-  public:
-    using Register::Register;
+union WindowControlB {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowControlC
+/// \union	WindowControlC
 ///
-/// \brief  Window Control (RBG0, SPRITE) (WCTLC).
+/// \brief	Window Control (RBG0, SPRITE) (WCTLC).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowControlC : public Register {
-  public:
-    using Register::Register;
+union WindowControlC {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WindowControlD
+/// \union	WindowControlD
 ///
-/// \brief  Window Control (Parameter Window, Color Calc. Window) (WCTLD).
+/// \brief	Window Control (Parameter Window, Color Calc. Window) (WCTLD).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WindowControlD : public Register {
-  public:
-    using Register::Register;
+union WindowControlD {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineWindowTableAddressW0Upper
+/// \union	LineWindowTableAddressW0Upper
 ///
-/// \brief  Line Window Table Address Upper (W0) (LWTA0U).
+/// \brief	Line Window Table Address Upper (W0) (LWTA0U).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineWindowTableAddressW0Upper : public Register {
-  public:
-    using Register::Register;
+union LineWindowTableAddressW0Upper {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineWindowTableAddressW0Lower
+/// \union	LineWindowTableAddressW0Lower
 ///
-/// \brief  Line Window Table Address Lower (W0) (LWTA0L).
+/// \brief	Line Window Table Address Lower (W0) (LWTA0L).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineWindowTableAddressW0Lower : public Register {
-  public:
-    using Register::Register;
+union LineWindowTableAddressW0Lower {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineWindowTableAddressW1Upper
+/// \union	LineWindowTableAddressW1Upper
 ///
-/// \brief  Line Window Table Address Upper (W1) (LWTA1U).
+/// \brief	Line Window Table Address Upper (W1) (LWTA1U).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineWindowTableAddressW1Upper : public Register {
-  public:
-    using Register::Register;
+union LineWindowTableAddressW1Upper {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineWindowTableAddressW1Lower
+/// \union	LineWindowTableAddressW1Lower
 ///
-/// \brief  Line Window Table Address Lower (W1) (LWTA1L).
+/// \brief	Line Window Table Address Lower (W1) (LWTA1L).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineWindowTableAddressW1Lower : public Register {
-  public:
-    using Register::Register;
+union LineWindowTableAddressW1Lower {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2350,9 +1676,9 @@ enum class SpriteColorCalculationCondition : u8 {
 /// \brief  SPCLMD bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class SpriteColorMode : u8 {
-    only_palette = 0b0, ///< Sprite data is all in palette format.
-    mixed        = 0b1  ///< Sprite data is in palette format and RGB format.
+enum class SpriteColorMode : bool {
+    only_palette = 0, ///< Sprite data is all in palette format.
+    mixed        = 1  ///< Sprite data is in palette format and RGB format.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2361,9 +1687,9 @@ enum class SpriteColorMode : u8 {
 /// \brief  SPWINEN bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class SpriteWindowEnable : u8 {
-    does_not_use_sprite_window = 0b0, ///< Does not use sprite window.
-    uses_sprite_window         = 0b1  ///< Uses sprite window.
+enum class SpriteWindowEnable : bool {
+    does_not_use_sprite_window = 0, ///< Does not use sprite window.
+    uses_sprite_window         = 1  ///< Uses sprite window.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2393,462 +1719,430 @@ enum class SpriteType : u8 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  SpriteControl
+/// \union	SpriteControl
 ///
-/// \brief  Sprite Control (SPCTL).
+/// \brief	Sprite Control (SPCTL).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SpriteControl : public Register {
-  public:
-    using Register::Register;
-    inline static const auto sprite_color_calculation_condition
-        = BitRange<SpriteColorCalculationCondition>{12, 13};                                    ///< Defines SPCCCSx bits.
-    inline static const auto sprite_color_calculation_number = BitRange<u8>{8, 10};             ///< Defines SPCCNx bits.
-    inline static const auto sprite_color_mode               = BitRange<SpriteColorMode>{5};    ///< Defines SPCLMD bit.
-    inline static const auto sprite_window_enable            = BitRange<SpriteWindowEnable>{4}; ///< Defines SPWINEN bit.
-    inline static const auto sprite_type                     = BitRange<SpriteType>{0, 3};      ///< Defines SPTYPEx bits.
+union SpriteControl {
+    u16             raw;                                ///< Raw representation.
+    BitField<12, 2> sprite_color_calculation_condition; ///< Defines SPCCCSx bits.
+    BitField<8, 3>  sprite_color_calculation_number;    ///< Defines SPCCNx bits.
+    BitField<5>     sprite_color_mode;                  ///< Defines SPCLMD bit.
+    BitField<4>     sprite_window_enable;               ///< Defines SPWINEN bit.
+    BitField<0, 4>  sprite_type;                        ///< Defines SPTYPEx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ShadowControl
+/// \union	ShadowControl
 ///
-/// \brief  Shadow Control (SDCTL).
+/// \brief	Shadow Control (SDCTL).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ShadowControl : public Register {
-  public:
-    using Register::Register;
+union ShadowControl {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorRamAddressOffsetA
+/// \union	ColorRamAddressOffsetA
 ///
-/// \brief  Color RAM Address Offset (NBG0 - NBG3) (CRAOFA).
+/// \brief	Color RAM Address Offset (NBG0 - NBG3) (CRAOFA).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorRamAddressOffsetA : public Register {
-  public:
-    using Register::Register;
-    inline static const auto color_ram_address_offset_nbg3 = BitRange<u8>{12, 14}; ///< Defines N3CAOSx bits.
-    inline static const auto color_ram_address_offset_nbg2 = BitRange<u8>{8, 10};  ///< Defines N2CAOSx bits.
-    inline static const auto color_ram_address_offset_nbg1 = BitRange<u8>{4, 6};   ///< Defines N1CAOSx bits.
-    inline static const auto color_ram_address_offset_nbg0 = BitRange<u8>{0, 2};   ///< Defines N0CAOSx bits.
+union ColorRamAddressOffsetA {
+    u16             raw;                           ///< Raw representation.
+    BitField<12, 3> color_ram_address_offset_nbg3; ///< Defines N3CAOSx bits.
+    BitField<8, 3>  color_ram_address_offset_nbg2; ///< Defines N2CAOSx bits.
+    BitField<4, 3>  color_ram_address_offset_nbg1; ///< Defines N1CAOSx bits.
+    BitField<0, 3>  color_ram_address_offset_nbg0; ///< Defines N0CAOSx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorRamAddressOffsetB
+/// \union	ColorRamAddressOffsetB
 ///
-/// \brief  Color RAM Address Offset (RBG0, SPRITE) (CRAOFB).
+/// \brief	Color RAM Address Offset (RBG0, SPRITE) (CRAOFB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorRamAddressOffsetB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto color_ram_address_offset_sprite = BitRange<u8>{4, 6}; ///< Defines SPCAOSx bits.
-    inline static const auto color_ram_address_offset_rbg0   = BitRange<u8>{0, 2}; ///< Defines R0CAOSx bits.
+union ColorRamAddressOffsetB {
+    u16            raw;                             ///< Raw representation.
+    BitField<4, 3> color_ram_address_offset_sprite; ///< Defines SPCAOSx bits.
+    BitField<0, 3> color_ram_address_offset_rbg0;   ///< Defines R0CAOSx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  LineColorScreenEnable
+/// \union	LineColorScreenEnable
 ///
-/// \brief  Line Color Screen Enable (LNCLEN).
+/// \brief	Line Color Screen Enable (LNCLEN).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LineColorScreenEnable : public Register {
-  public:
-    using Register::Register;
+union LineColorScreenEnable {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  SpecialPriorityMode
+/// \union	SpecialPriorityMode
 ///
-/// \brief  Special Priority Mode (SFPRMD).
+/// \brief	Special Priority Mode (SFPRMD).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SpecialPriorityMode : public Register {
-  public:
-    using Register::Register;
+union SpecialPriorityMode {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorCalculationControl
+/// \union	ColorCalculationControl
 ///
-/// \brief  Color Calculation Control (CCCTL).
+/// \brief	Color Calculation Control (CCCTL).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorCalculationControl : public Register {
-  public:
-    using Register::Register;
+union ColorCalculationControl {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  SpecialColorCalculationMode
+/// \union	SpecialColorCalculationMode
 ///
-/// \brief  Special Color Calculation Mode (SFCCMD).
+/// \brief	Special Color Calculation Mode (SFCCMD).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SpecialColorCalculationMode : public Register {
-  public:
-    using Register::Register;
+union SpecialColorCalculationMode {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberSpriteA
+/// \union	PriorityNumberSpriteA
 ///
-/// \brief  Priority Number (SPRITE 0,1) (PRISA).
+/// \brief	Priority Number (SPRITE 0,1) (PRISA).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberSpriteA : public Register {
-  public:
-    using Register::Register;
-    inline static const auto sprite_register_0 = BitRange<u8>{0, 2};  ///< Defines S0PRINx bits.
-    inline static const auto sprite_register_1 = BitRange<u8>{8, 10}; ///< Defines S1PRINx bits.
+union PriorityNumberSpriteA {
+    u16            raw;               ///< Raw representation.
+    BitField<0, 3> sprite_register_0; ///< Defines S0PRINx bits.
+    BitField<8, 3> sprite_register_1; ///< Defines S1PRINx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberSpriteB
+/// \union	PriorityNumber
 ///
-/// \brief  Priority Number (SPRITE 2,3) (PRISB).
+/// \brief	Priority Number (SPRITE 2,3) (PRISB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberSpriteB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto sprite_register_2 = BitRange<u8>{0, 2};  ///< Defines S2PRINx bits.
-    inline static const auto sprite_register_3 = BitRange<u8>{8, 10}; ///< Defines S3PRINx bits.
+union PriorityNumberSpriteB {
+    u16            raw;               ///< Raw representation.
+    BitField<0, 3> sprite_register_2; ///< Defines S2PRINx bits.
+    BitField<8, 3> sprite_register_3; ///< Defines S3PRINx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberSpriteC
+/// \union	PriorityNumberSpriteC
 ///
-/// \brief  Priority Number (SPRITE 4,5) (PRISC).
+/// \brief	Priority Number (SPRITE 4,5) (PRISC).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberSpriteC : public Register {
-  public:
-    using Register::Register;
-    inline static const auto sprite_register_4 = BitRange<u8>{0, 2};  ///< Defines S4PRINx bits.
-    inline static const auto sprite_register_5 = BitRange<u8>{8, 10}; ///< Defines S5PRINx bits.
+union PriorityNumberSpriteC {
+    u16            raw;               ///< Raw representation.
+    BitField<0, 3> sprite_register_4; ///< Defines S4PRINx bits.
+    BitField<8, 3> sprite_register_5; ///< Defines S5PRINx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberSpriteD
+/// \union	PriorityNumberSpriteD
 ///
-/// \brief  Priority Number (SPRITE 6,7) (PRISD).
+/// \brief	Priority Number (SPRITE 6,7) (PRISD).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberSpriteD : public Register {
-  public:
-    using Register::Register;
-    inline static const auto sprite_register_6 = BitRange<u8>{0, 2};  ///< Defines S6PRINx bits.
-    inline static const auto sprite_register_7 = BitRange<u8>{8, 10}; ///< Defines S7PRINx bits.
+union PriorityNumberSpriteD {
+    u16            raw;               ///< Raw representation.
+    BitField<0, 3> sprite_register_6; ///< Defines S6PRINx bits.
+    BitField<8, 3> sprite_register_7; ///< Defines S7PRINx bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberA
+/// \union	PriorityNumberA
 ///
-/// \brief  Priority Number A (NBG0, NBG1) (PRINA).
+/// \brief	Priority Number A (NBG0, NBG1) (PRINA).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberA : public Register {
-  public:
-    using Register::Register;
-    inline static const auto nbg1 = BitRange<u8>{8, 10}; ///< Defines the priority number of NBG1 (N1PRINx).
-    inline static const auto nbg0 = BitRange<u8>{0, 2};  ///< Defines the priority number of NBG0 (N0PRINx).
+union PriorityNumberA {
+    u16            raw;  ///< Raw representation.
+    BitField<8, 3> nbg1; ///< Defines the priority number of NBG1 (N1PRINx).
+    BitField<0, 3> nbg0; ///< Defines the priority number of NBG0 (N0PRINx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberB
+/// \union	PriorityNumberB
 ///
-/// \brief  Priority Number B (NBG2, NBG3) (PRINB).
+/// \brief	Priority Number B (NBG2, NBG3) (PRINB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberB : public Register {
-  public:
-    using Register::Register;
-    inline static const auto nbg3 = BitRange<u8>{8, 10}; ///< Defines the priority number of NBG3 (N3PRINx).
-    inline static const auto nbg2 = BitRange<u8>{0, 2};  ///< Defines the priority number of NBG2 (N2PRINx).
+union PriorityNumberB {
+    u16            raw;  ///< Raw representation.
+    BitField<8, 3> nbg3; ///< Defines the priority number of NBG1 (N1PRINx).
+    BitField<0, 3> nbg2; ///< Defines the priority number of NBG0 (N0PRINx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PriorityNumberR
+/// \union	PriorityNumberR
 ///
-/// \brief  Priority Number R (Rbg0) (PRIR).
+/// \brief	Priority Number R (Rbg0) (PRIR).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PriorityNumberR : public Register {
-  public:
-    using Register::Register;
-    inline static const auto rbg0 = BitRange<u8>{0, 2}; ///< Defines the priority number of RBG0 (R0PRINx).
+union PriorityNumberR {
+    u16            raw;  ///< Raw representation.
+    BitField<0, 3> rbg0; ///< Defines the priority number of RBG0 (R0PRINx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorCalculationRatioSpriteA
+/// \union	ColorCalculationRatioSpriteA
 ///
-/// \brief  Color Calculation Ratio (Sprite 0,1) (CCRSA).
+/// \brief	Color Calculation Ratio (Sprite 0,1) (CCRSA).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorCalculationRatioSpriteA : public Register {
-  public:
-    using Register::Register;
+union ColorCalculationRatioSpriteA {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorCalculationRatioSpriteB
+/// \union	ColorCalculationRatioSpriteB
 ///
-/// \brief  Color Calculation Ratio (Sprite 2,3) (CCRSB).
+/// \brief	Color Calculation Ratio (Sprite 2,3) (CCRSB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorCalculationRatioSpriteB : public Register {
-  public:
-    using Register::Register;
+union ColorCalculationRatioSpriteB {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorCalculationRatioSpriteC
+/// \union	ColorCalculationRatioSpriteC
 ///
-/// \brief  Color Calculation Ratio (Sprite 4,5) (CCRSC).
+/// \brief	Color Calculation Ratio (Sprite 4,5) (CCRSC).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorCalculationRatioSpriteC : public Register {
-  public:
-    using Register::Register;
+union ColorCalculationRatioSpriteC {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorCalculationRatioSpriteD
+/// \union	ColorCalculationRatioSpriteD
 ///
-/// \brief  Color Calculation Ratio (Sprite 6,7) (CCRSD).
+/// \brief	Color Calculation Ratio (Sprite 6,7) (CCRSD).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorCalculationRatioSpriteD : public Register {
-  public:
-    using Register::Register;
+union ColorCalculationRatioSpriteD {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorCalculationRatioNbg0Nbg1
+/// \union	ColorCalculationRatioNbg0Nbg1
 ///
-/// \brief  Color Calculation Ratio (NBG0, NBG1) (CCRNA).
+/// \brief	Color Calculation Ratio (NBG0, NBG1) (CCRNA).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorCalculationRatioNbg0Nbg1 : public Register {
-  public:
-    using Register::Register;
+union ColorCalculationRatioNbg0Nbg1 {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorCalculationRatioNbg2Nbg3
+/// \union	ColorCalculationRatioNbg2Nbg3
 ///
-/// \brief  Color Calculation Ratio (NBG2, NBG3) (CCRNB).
+/// \brief	Color Calculation Ratio (NBG2, NBG3) (CCRNB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorCalculationRatioNbg2Nbg3 : public Register {
-  public:
-    using Register::Register;
+union ColorCalculationRatioNbg2Nbg3 {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorCalculationRatioRbg0
+/// \union	ColorCalculationRatioRbg0
 ///
-/// \brief  Color Calculation Ratio (RBG0) (CCRR).
+/// \brief	Color Calculation Ratio (RBG0) (CCRR).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorCalculationRatioRbg0 : public Register {
-  public:
-    using Register::Register;
+union ColorCalculationRatioRbg0 {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorCalculationRatioLineColorBack
+/// \union	ColorCalculationRatioLineColorBack
 ///
-/// \brief  Color Calculation Ratio (Line Color Screen, Back Screen) (CCRLB).
+/// \brief	Color Calculation Ratio (Line Color Screen, Back Screen) (CCRLB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorCalculationRatioLineColorBack : public Register {
-  public:
-    using Register::Register;
+union ColorCalculationRatioLineColorBack {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorOffsetEnable
+/// \union	ColorOffsetEnable
 ///
-/// \brief  Color Offset Enable (CLOFEN).
+/// \brief	Color Offset Enable (CLOFEN).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorOffsetEnable : public Register {
-  public:
-    using Register::Register;
+union ColorOffsetEnable {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorOffsetSelect
+/// \union	ColorOffsetSelect
 ///
-/// \brief  Color Offset Select (CLOFSL).
+/// \brief	Color Offset Select (CLOFSL).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorOffsetSelect : public Register {
-  public:
-    using Register::Register;
+union ColorOffsetSelect {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorOffsetARed
+/// \union	ColorOffsetARed
 ///
-/// \brief  Color Offset A (Red) (COAR).
+/// \brief	Color Offset A (Red) (COAR).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorOffsetARed : public Register {
-  public:
-    using Register::Register;
+union ColorOffsetARed {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorOffsetAGreen
+/// \union	ColorOffsetAGreen
 ///
-/// \brief  Color Offset A (Green) (COAG).
+/// \brief	Color Offset A (Green) (COAG).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorOffsetAGreen : public Register {
-  public:
-    using Register::Register;
+union ColorOffsetAGreen {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorOffsetABlue
+/// \union	ColorOffsetABlue
 ///
-/// \brief  Color Offset A (Blue)  (COAB).
+/// \brief	Color Offset A (Blue)  (COAB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorOffsetABlue : public Register {
-  public:
-    using Register::Register;
+union ColorOffsetABlue {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorOffsetBRed
+/// \union	ColorOffsetBRed
 ///
-/// \brief  Color Offset B (Red) (COBR).
+/// \brief	Color Offset B (Red) (COBR).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorOffsetBRed : public Register {
-  public:
-    using Register::Register;
+union ColorOffsetBRed {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorOffsetBGreen
+/// \union	ColorOffsetBGreen
 ///
-/// \brief  Color Offset B (Green) (COBG).
+/// \brief	Color Offset B (Green) (COBG).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorOffsetBGreen : public Register {
-  public:
-    using Register::Register;
+union ColorOffsetBGreen {
+    u16 raw; ///< Raw representation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ColorOffsetBBlue
+/// \union	ColorOffsetBBlue
 ///
-/// \brief  Color Offset A (Blue) (COBB).
+/// \brief	Color Offset A (Blue) (COBB).
 ///
-/// \author Runik
-/// \date   27/05/2020
+/// \author	Runik
+/// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ColorOffsetBBlue : public Register {
-  public:
-    using Register::Register;
+union ColorOffsetBBlue {
+    u16 raw; ///< Raw representation.
 };
 
 } // namespace saturnin::video
