@@ -1357,15 +1357,15 @@ class Vdp2 {
         // constexpr auto palette_disp    = u8{4};
         // const auto     palette         = palette_number << palette_disp;
         for (u32 i = 0; i < 8; ++i) {
-            auto row = Dots4Bits(modules_.memory()->read<u32>(current_address));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_0));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_1));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_2));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_3));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_4));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_5));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_6));
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.get(Dots4Bits::dot_7));
+            auto row = Dots4Bits{modules_.memory()->read<u32>(current_address)};
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.dot_0);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.dot_1);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.dot_2);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.dot_3);
+            readPalette16Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_4));
+            readPalette16Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_5));
+            readPalette16Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_6));
+            readPalette16Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_7));
             current_address += row_offset;
         }
     }
@@ -1382,17 +1382,17 @@ class Vdp2 {
         // const auto palette = palette_number;
 
         for (u32 i = 0; i < 8; ++i) {
-            auto row = Dots8Bits(modules_.memory()->read<u32>(current_address));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
+            auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_0);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_1);
+            readPalette256Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_3);
             current_address += row_offset;
-            row = Dots8Bits(modules_.memory()->read<u32>(current_address));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_0));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_1));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.get(Dots8Bits::dot_3));
+            row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_0);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_1);
+            readPalette256Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_3);
             current_address += row_offset;
         }
     }
@@ -1412,17 +1412,17 @@ class Vdp2 {
             // if (screen.format == ScrollScreenFormat::bitmap) {
             //    if (current_address == 0x25E26830) DebugBreak();
             //}
-            auto row = Dots8Bits(modules_.memory()->read<u32>(current_address));
-            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_0));
-            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_1));
-            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_3));
+            auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+            readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
+            readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
+            readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
             current_address += offset;
-            row = Dots8Bits(modules_.memory()->read<u32>(current_address));
-            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_0));
-            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_1));
-            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette, row.get(Dots8Bits::dot_3));
+            row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+            readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
+            readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
+            readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
+            readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
             current_address += offset;
         }
     }

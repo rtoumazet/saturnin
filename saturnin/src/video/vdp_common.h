@@ -26,6 +26,7 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h> // u8, u16, u32
+#include <saturnin/src/bitfield.h>
 
 namespace saturnin::video {
 
@@ -181,94 +182,90 @@ struct Vertex {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Dots4Bits
+/// \union	Dots4Bits
 ///
-/// \brief  32 bits register splitted in 4 bits dots components.
+/// \brief	32 bits register splitted in 4 bits dots components.
 ///
-/// \author Runik
-/// \date   26/03/2021
+/// \author	Runik
+/// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Dots4Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dot_0 = BitRange<u8>{28, 31};
-    inline static const auto dot_1 = BitRange<u8>{24, 27};
-    inline static const auto dot_2 = BitRange<u8>{20, 23};
-    inline static const auto dot_3 = BitRange<u8>{16, 19};
-    inline static const auto dot_4 = BitRange<u8>{12, 15};
-    inline static const auto dot_5 = BitRange<u8>{8, 11};
-    inline static const auto dot_6 = BitRange<u8>{4, 7};
-    inline static const auto dot_7 = BitRange<u8>{0, 3};
+union Dots4Bits {
+    u32             raw; ///< Raw representation.
+    BitField<28, 4> dot_0;
+    BitField<24, 4> dot_1;
+    BitField<20, 4> dot_2;
+    BitField<16, 4> dot_3;
+    BitField<12, 4> dot_4;
+    BitField<8, 4>  dot_5;
+    BitField<4, 4>  dot_6;
+    BitField<0, 4>  dot_7;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Dots6Bits
+/// \union	Dots6Bits
 ///
-/// \brief  32 bits register splitted in 6 bits dots components.
+/// \brief	32 bits register splitted in 6 bits dots components.
 ///
-/// \author Runik
-/// \date   15/05/2021
+/// \author	Runik
+/// \date	26/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Dots6Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dot_0 = BitRange<u8>{24, 29};
-    inline static const auto dot_1 = BitRange<u8>{16, 21};
-    inline static const auto dot_2 = BitRange<u8>{8, 13};
-    inline static const auto dot_3 = BitRange<u8>{0, 5};
+union Dots6Bits {
+    u32             raw; ///< Raw representation.
+    BitField<24, 6> dot_0;
+    BitField<16, 6> dot_1;
+    BitField<8, 6>  dot_2;
+    BitField<0, 6>  dot_3;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Dots7Bits
+/// \union	Dots7Bits
 ///
-/// \brief  32 bits register splitted in 7 bits dots components.
+/// \brief	32 bits register splitted in 7 bits dots components.
 ///
-/// \author Runik
-/// \date   15/05/2021
+/// \author	Runik
+/// \date	26/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Dots7Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dot_0 = BitRange<u8>{24, 30};
-    inline static const auto dot_1 = BitRange<u8>{16, 22};
-    inline static const auto dot_2 = BitRange<u8>{8, 14};
-    inline static const auto dot_3 = BitRange<u8>{0, 6};
+union Dots7Bits {
+    u32             raw; ///< Raw representation.
+    BitField<24, 7> dot_0;
+    BitField<16, 7> dot_1;
+    BitField<8, 7>  dot_2;
+    BitField<0, 7>  dot_3;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Dots8Bits
+/// \union	Dots8Bits
 ///
-/// \brief  32 bits register splitted in 8 bits dots components.
+/// \brief	32 bits register splitted in 8 bits dots components.
 ///
-/// \author Runik
-/// \date   15/05/2021
+/// \author	Runik
+/// \date	26/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Dots8Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dot_0 = BitRange<u8>{24, 31};
-    inline static const auto dot_1 = BitRange<u8>{16, 23};
-    inline static const auto dot_2 = BitRange<u8>{8, 15};
-    inline static const auto dot_3 = BitRange<u8>{0, 7};
+union Dots8Bits {
+    u32             raw; ///< Raw representation.
+    BitField<24, 8> dot_0;
+    BitField<16, 8> dot_1;
+    BitField<8, 8>  dot_2;
+    BitField<0, 8>  dot_3;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Dots16Bits
+/// \union	Dots16Bits
 ///
-/// \brief  32 bits register splitted in 16 bits dots components..
+/// \brief	32 bits register splitted in 16 bits dots components..
 ///
-/// \author Runik
-/// \date   15/05/2021
+/// \author	Runik
+/// \date	26/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Dots16Bits : public Register {
-  public:
-    using Register::Register;
-    inline static const auto dot_0 = BitRange<u16>{16, 31};
-    inline static const auto dot_1 = BitRange<u16>{0, 15};
+union Dots16Bits {
+    u32              raw; ///< Raw representation.
+    BitField<16, 16> dot_0;
+    BitField<0, 16>  dot_1;
 };
+
 } // namespace saturnin::video
