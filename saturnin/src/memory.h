@@ -110,8 +110,10 @@ constexpr auto cart_absolute_address = u32{0x02000000};
 
 constexpr auto full_memory_map_size = u32{0x10000000};
 
-constexpr auto vdp2_page_disp         = u8{11};
-constexpr auto vdp2_minimum_page_size = u16{0x800};
+constexpr auto vdp2_page_disp           = u8{11};
+constexpr auto vdp2_minimum_page_size   = u16{0x800};
+constexpr auto vdp2_bitmap_disp         = u8{17};
+constexpr auto vdp2_minimum_bitmap_size = u32{0x20000};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   StvIOPort
@@ -263,6 +265,8 @@ class Memory {
     bool was_vdp2_cram_accessed_{false}; ///< true when VDP2 color ram was accessed
     std::array<bool, vdp2_vram_size / vdp2_minimum_page_size>
         was_vdp2_page_accessed_; ///< True when a specific VDP2 page was accessed.
+    std::array<bool, vdp2_vram_size / vdp2_minimum_bitmap_size>
+        was_vdp2_bitmap_accessed_; ///< True when a specific VDP2 bitmap was accessed.
 
     sh2::Sh2Type sh2_in_operation_; ///< Which SH2 is in operation
     // bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
@@ -1295,7 +1299,8 @@ struct writeVdp2Vram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             rawWrite<T>(m.vdp2_vram_, addr & vdp2_vram_memory_mask, data);
-            m.was_vdp2_page_accessed_[addr & vdp2_vram_memory_mask >> vdp2_page_disp] = true;
+            m.was_vdp2_page_accessed_[addr & vdp2_vram_memory_mask >> vdp2_page_disp]     = true;
+            m.was_vdp2_bitmap_accessed_[addr & vdp2_vram_memory_mask >> vdp2_bitmap_disp] = true;
         };
     }
 };

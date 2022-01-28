@@ -692,10 +692,11 @@ void Opengl::generateTextures() {
     for (const auto id : textures_to_delete_) {
         deleteTexture(id);
     }
-    std::vector<u32>().swap(textures_to_delete_);
 
     auto                        count = u32{0};
     std::lock_guard<std::mutex> lock(texture_key_id_link_mutex_);
+    std::vector<u32>().swap(textures_to_delete_);
+
     for (auto& [key, id] : texture_key_id_link_) {
         if (!id) {
             const auto& t = Texture::getTexture(key);
