@@ -1306,7 +1306,7 @@ void Sh2::popFromCallstack() {
 };
 
 auto Sh2::callstack() -> std::vector<CallstackItem> {
-    std::lock_guard<std::mutex> lock(sh2_mutex_);
+    std::lock_guard lock(sh2_mutex_);
     return callstack_;
 };
 

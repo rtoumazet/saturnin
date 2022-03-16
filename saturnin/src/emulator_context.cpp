@@ -91,6 +91,8 @@ auto EmulatorContext::initialize() -> bool {
     // Locale is defaulted to english to handle the case when there's no config file created yet.
     if (!Locale::getInstance().initialize("en")) { return false; }
 
+    Log::info(Logger::main, tr("Max number of threads available : {}"), std::thread::hardware_concurrency());
+
     if (!this->config()->initialize(video::isModernOpenglCapable())) { return false; }
 
     std::string country = config()->readValue(core::AccessKeys::cfg_global_language);
@@ -176,6 +178,7 @@ void EmulatorContext::startEmulation() {
     // auto                       b = tst.twoCompl();
     // video::CmdVertexCoordinate tst2{0x8234};
     // auto                       b2 = tst2.twoCompl();
+    //
     // TESTING //
 }
 

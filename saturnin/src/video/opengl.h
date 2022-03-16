@@ -324,17 +324,17 @@ class Opengl {
     void render();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::video::Opengl::isThereSomethingToRender() -> const bool;
+    /// \fn auto saturnin::video::Opengl::isThereSomethingToRender() -> bool;
     ///
     /// \brief  Is there something to render
     ///
     /// \author Runik
     /// \date   06/10/2021
     ///
-    /// \returns    A const bool.
+    /// \returns   True if there is something to render.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto isThereSomethingToRender() -> const bool;
+    auto isThereSomethingToRender() -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getRenderedBufferTextureId() -> u32;
@@ -475,7 +475,7 @@ class Opengl {
     void calculateFps();
 
     auto getFboId(const FboType type) const -> u32 { return fbo_list_.at(type).first; };
-    auto getFboTextureId(const FboType type) const -> u32 { return fbo_list_.at(type).first; };
+    auto getFboTextureId(const FboType type) const -> u32 { return fbo_list_.at(type).second; };
     void switchRenderedBuffer();
 
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
@@ -490,18 +490,23 @@ class Opengl {
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    std::vector<std::unique_ptr<video::BaseRenderingPart>> ///< List of parts
-               parts_list_;                                // Will have to be moved to the platform agnostic renderer.
-    std::mutex parts_list_mutex_;  ///< Prevents rendering thread to use the list while it's being processed.
-    Vdp1Part   part_to_highlight_; ///< Part that will be highlighted during debug.
+    using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
+    PartsList parts_list_;        // Will have to be moved to the platform agnostic renderer.
+    Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
 
-    std::mutex texture_key_id_link_mutex_; ///< Prevents rendering thread to use the map while it's being processed.
-    // std::unordered_map<size_t, u32> texture_key_id_link_; ///< Link between the texture key and the opengl id.
-    std::vector<std::pair<size_t, u32>> texture_key_id_link_; ///< Link between the texture key and the opengl id.
-    std::vector<u32>                    textures_to_delete_;  ///< List of the textures id to delete.
+    // std::vector<std::pair<size_t, u32>> texture_key_id_link_; ///< Link between the texture key and the opengl id.
+    std::unordered_map<size_t, u32> texture_key_id_link_; ///< Link between the texture key and the opengl id.
 
-    std::vector<std::unique_ptr<video::BaseRenderingPart>> ///< List of parts used to generate textures for debugging
-        parts_list_debug_;                                 // Will have to be moved to the platform agnostic renderer.
+    std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
+
+    std::mutex parts_list_mutex_;     ///< Mutex protecting parts_list_.
+    std::mutex texture_link_mutex_;   ///< Mutex protecting texture_key_id_link_.
+    std::mutex texture_delete_mutex_; ///< Mutex protecting textures_to_delete_.
+
+    std::condition_variable data_condition_; ///< Condition variable to synchronize between emulation and UI thread.
+
+    PartsList parts_list_debug_; ///< List of parts used to generate textures for debugging
+                                 // Will have to be moved to the platform agnostic renderer.
 
     u32         program_shader_; ///< Program shader used to render parts.
     ShadersList shaders_list_;   ///< List of shaders.

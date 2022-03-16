@@ -66,6 +66,8 @@ void Vdp2::initialize() {
     disabled_scroll_screens_[ScrollScreen::nbg3] = false;
     disabled_scroll_screens_[ScrollScreen::rbg0] = false;
     disabled_scroll_screens_[ScrollScreen::rbg1] = false;
+
+    current_time_ = steady_clock::now();
 }
 
 void Vdp2::run(const u8 cycles) {
@@ -79,11 +81,6 @@ void Vdp2::run(const u8 cycles) {
 
             Log::debug(Logger::vdp2, tr("VBlankIn interrupt request"));
 
-            // if (modules_.memory()->was_vdp2_cram_accessed_) {
-            //    Texture::discardCache();
-            //    modules_.memory()->was_vdp2_cram_accessed_ = false;
-            //}
-
             modules_.vdp1()->onVblankIn();
             this->onVblankIn();
 
@@ -94,6 +91,11 @@ void Vdp2::run(const u8 cycles) {
                 modules_.context()->debugStatus(core::DebugStatus::paused);
             }
         }
+        // new_time_ = steady_clock::now();
+        // auto diff = milli{new_time_ - current_time_};
+
+        // Log::warning(Logger::vdp2, tr("Saturn frame duration : {}ms"), diff.count());
+        // current_time_ = new_time_;
     }
 
     if (elapsed_frame_cycles_ > cycles_per_frame_) {

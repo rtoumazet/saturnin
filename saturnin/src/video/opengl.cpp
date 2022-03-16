@@ -63,6 +63,10 @@ using core::Log;
 using core::Logger;
 using core::tr;
 
+constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
+constexpr auto vertexes_per_polyline         = u32{4};
+constexpr auto vertexes_per_line             = u32{2};
+
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
 Opengl::~Opengl() { shutdown(); }
@@ -235,12 +239,10 @@ void Opengl::initializeShaders() {
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
+    // if (is_saturn_data_available_) return;
+
     using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
     auto parts_list = PartsList{};
-
-    // If the destination vector isn't empty, it means rendering isn't finished.
-    // In that case current frame data is dropped.
-    if (!parts_list_.empty()) { return; }
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
         // const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
@@ -249,14 +251,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
             parts_list.reserve(parts_list.size() + vdp2_parts.size());
             for (const auto& p : vdp2_parts) {
                 parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
-                //  auto a{std::move(*p)};
-                //  parts_list.push_back(std::move(p));
-                //  parts_list.emplace_back(std::move(p));
             }
-
-            // std::move(vdp2_parts.begin(), vdp2_parts.end(), std::back_inserter(parts_list));
-
-            // state.vdp2()->clearRenderData(s);
         }
     };
 
@@ -266,7 +261,6 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
             parts_list.reserve(parts_list.size() + vdp1_parts.size());
             for (const auto& p : vdp1_parts) {
                 parts_list.push_back(std::make_unique<Vdp1Part>(p));
-                // parts_list.emplace_back(std::move(p));
             }
         }
     };
@@ -284,12 +278,11 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                   return a->priority() < b->priority();
               });
 
-    parts_list_ = std::move(parts_list);
-    //{
-    //     // If the destination vector isn't empty, it means rendering isn't finished.
-    //     // In that case current frame data is dropped.
-    //     if (parts_list_.empty()) { parts_list_ = std::move(parts_list); }
-    // }
+    if (parts_list_.empty()) {
+        std::unique_lock lk(parts_list_mutex_);
+        parts_list_ = std::move(parts_list);
+        data_condition_.wait(lk, [&]() { return parts_list_.empty(); });
+    }
 }
 
 void Opengl::render() {
@@ -297,15 +290,12 @@ void Opengl::render() {
 
     preRender();
     {
-        std::lock_guard<std::mutex> lock(parts_list_mutex_);
+        std::lock_guard lock(parts_list_mutex_);
+        // Log::info(Logger::main, "parts_list_ : {}", parts_list_.size());
         if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
     }
 
     if (!parts_list.empty()) {
-        constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
-        constexpr auto vertexes_per_polyline         = u32{4};
-        constexpr auto vertexes_per_line             = u32{2};
-
         const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
 
         // constexpr auto elements_nb             = u8{2};
@@ -476,16 +466,17 @@ void Opengl::render() {
         // Texture::cleanCache(this);
     }
 
-    std::vector<std::unique_ptr<video::BaseRenderingPart>>().swap(parts_list_);
+    {
+        std::lock_guard lk(parts_list_mutex_);
+        PartsList().swap(parts_list_);
+        data_condition_.notify_one();
+    }
 
     postRender();
     calculateFps();
 }
 
-auto Opengl::isThereSomethingToRender() -> const bool {
-    // std::lock_guard<std::mutex> lock(parts_list_mutex_);
-    return !parts_list_.empty();
-}
+auto Opengl::isThereSomethingToRender() -> bool { return !parts_list_.empty(); }
 
 auto Opengl::getRenderedBufferTextureId() -> u32 { return getFboTextureId(current_rendered_buffer_); }
 
@@ -524,7 +515,7 @@ void Opengl::renderVdp1DebugOverlay() {
         part.vertexes_[2].color = debug_color;
         part.vertexes_[3].color = debug_color;
 
-        vertexes.reserve(6);
+        vertexes.reserve(vertexes_per_tessellated_quad);
         vertexes.emplace_back(part.vertexes_[0]);
         vertexes.emplace_back(part.vertexes_[1]);
         vertexes.emplace_back(part.vertexes_[2]);
@@ -549,7 +540,7 @@ void Opengl::renderVdp1DebugOverlay() {
         glUniform1i(uni_use_texture, is_texture_used);
 
         // Drawing the list
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
     }
 
     //------ Post render --------//
@@ -579,7 +570,6 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
     //----------- Render -----------------//
     std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
-    // if (!parts_list_debug_.empty()) { parts_list = std::move(parts_list_debug_); }
     if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
         const auto& vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
         if (!vdp2_parts.empty()) {
@@ -674,45 +664,56 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
 void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
-    {
-        auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
-            return v.first == key;
-        });
-        std::lock_guard<std::mutex> lock(texture_key_id_link_mutex_);
-        if (it != texture_key_id_link_.end()) {
-            textures_to_delete_.push_back((*it).second);
-            (*it).second = 0;
-        } else {
-            texture_key_id_link_.push_back(std::pair(key, 0));
-        }
+    const auto texture_id = getTextureId(key);
+    if (texture_id && (*texture_id > 0)) {
+        std::lock_guard lock(texture_delete_mutex_);
+        textures_to_delete_.push_back(*texture_id);
     }
+
+    std::lock_guard lock(texture_link_mutex_);
+    texture_key_id_link_[key] = 0;
 }
 
 void Opengl::generateTextures() {
-    for (const auto id : textures_to_delete_) {
+    auto local_textures_to_delete = std::vector<u32>();
+    {
+        // vector is swapped to a local copy to keep the data structure locked for the minimum possible time.
+        std::lock_guard lock(texture_delete_mutex_);
+        local_textures_to_delete.swap(textures_to_delete_);
+    }
+    for (const auto id : local_textures_to_delete) {
         deleteTexture(id);
     }
 
-    auto                        count = u32{0};
-    std::lock_guard<std::mutex> lock(texture_key_id_link_mutex_);
-    std::vector<u32>().swap(textures_to_delete_);
-
-    for (auto& [key, id] : texture_key_id_link_) {
-        if (!id) {
+    auto local_texture_key_id_link = std::unordered_map<size_t, u32>();
+    {
+        // unordered_map is copied locally to keep the data structure locked for the minimum possible time.
+        std::lock_guard tl_lock(texture_link_mutex_);
+        local_texture_key_id_link = texture_key_id_link_;
+    }
+    for (auto& [key, id] : local_texture_key_id_link) {
+        if (id == 0) {
             const auto& t = Texture::getTexture(key);
             if (t) {
-                id = generateTexture((*t).width(), (*t).height(), (*t).rawData());
-                ++count;
+                const auto texture_id = generateTexture(t->width(), t->height(), t->rawData());
+
+                std::lock_guard tl_lock(texture_link_mutex_);
+                texture_key_id_link_[key] = texture_id;
             }
         }
     }
 }
 
 auto Opengl::getTextureId(const size_t key) -> std::optional<u32> {
-    auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
-        return v.first == key;
-    });
-    return (it != texture_key_id_link_.end()) ? std::optional<u32>((*it).second) : std::nullopt;
+    // std::lock_guard lock(texture_link_mutex_);
+    // auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
+    //     return v.first == key;
+    // });
+    // return (it != texture_key_id_link_.end()) ? std::optional<u32>(it->second) : std::nullopt;
+
+    std::lock_guard lock(texture_link_mutex_);
+    const auto      it = texture_key_id_link_.find(key);
+    return (it == texture_key_id_link_.end()) ? std::nullopt : std::optional<u32>(it->second);
 }
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
@@ -975,9 +976,11 @@ void Opengl::calculateFps() {
 
     if (time_elapsed > 1s) {
         if (max_frames == 0) {
-            std::string ts       = config_->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-            const auto  standard = config_->getTvStandard(ts);
-            max_frames           = (standard == TvStandard::pal) ? 50 : 60;
+            std::string    ts           = config_->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+            const auto     standard     = config_->getTvStandard(ts);
+            constexpr auto max_fps_pal  = 50;
+            constexpr auto max_fps_ntsc = 60;
+            max_frames                  = (standard == TvStandard::pal) ? max_fps_pal : max_fps_ntsc;
         }
         fps_                 = fmt::format("{:d} / {}", frames_count, max_frames);
         previous_frame_start = current_frame_start;

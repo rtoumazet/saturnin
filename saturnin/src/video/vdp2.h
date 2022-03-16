@@ -54,8 +54,10 @@ using saturnin::core::Log;
 using saturnin::core::Logger;
 // using AddressToNameMap = std::map<u32, std::string>;
 
-using seconds = std::chrono::duration<double>;
-using micro   = std::chrono::duration<double, std::micro>;
+using namespace std::chrono;
+using seconds = duration<double>;
+using milli   = duration<double, std::milli>;
+using micro   = duration<double, std::micro>;
 
 constexpr auto vram_banks_number  = u8{4};
 constexpr auto vram_bank_a0_index = u8{0};
@@ -1539,6 +1541,9 @@ class Vdp2 {
     //   cell.
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.
+
+    std::chrono::time_point<std::chrono::steady_clock> current_time_;
+    std::chrono::time_point<std::chrono::steady_clock> new_time_;
 
     ///@{
     /// \name VDP2 registers

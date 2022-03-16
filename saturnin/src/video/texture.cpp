@@ -53,10 +53,7 @@ Texture::~Texture() {
 // static //
 auto Texture::storeTexture(Texture t) -> size_t {
     {
-        // if (isTextureStored(t.key())) {
-        //     auto& old_t = getTexture(t.key());
-        //     deleteTextureData(old_t);
-        // }
+        std::lock_guard lock(storage_mutex_);
         texture_storage_.erase(t.key());
         texture_storage_.emplace(t.key(), std::move(t));
     }
@@ -65,8 +62,11 @@ auto Texture::storeTexture(Texture t) -> size_t {
 
 // static //
 auto Texture::getTexture(const size_t key) -> std::optional<Texture> {
-    const auto it = texture_storage_.find(key);
-    if (it != texture_storage_.end()) { return it->second; }
+    {
+        std::lock_guard lock(storage_mutex_);
+        const auto      it = texture_storage_.find(key);
+        if (it != texture_storage_.end()) { return it->second; }
+    }
     Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
     // throw std::runtime_error("Texture error !");
     return std::nullopt;
@@ -78,19 +78,18 @@ void Texture::deleteTextureData(Texture& t) {
 }
 
 // static //
-auto Texture::isTextureStored(const size_t key) -> bool { return (texture_storage_.count(key) > 0); }
-
-// static //
 auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
-    if (!Texture::isTextureStored(key)) { return true; }
+    if (texture_storage_.count(key) == 0) { return true; }
 
-    auto& t = Texture::getTexture(key);
+    auto t = Texture::getTexture(key);
     if (t) {
         if ((*t).isDiscarded()) {
             (*t).isDiscarded(false);
+            storeTexture(*t);
             return true;
         }
         (*t).isRecentlyUsed(true);
+        storeTexture(*t);
         return false;
     }
     return true;
@@ -104,36 +103,17 @@ auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_c
 }
 
 // static
-// auto Texture::clearUnusedTextures() -> std::vector<u32> {
-//    std::vector<u32> api_handles;
-//    // for (auto& [key, value] : texture_storage_) {
-//    //    if (value.is_discarded_) {
-//    //        std::vector<u8>().swap(value.raw_data_); // Clears vector data and reallocates.
-//    //        if (value.delete_on_gpu_) { api_handles.push_back(value.api_handle_); }
-//    //    }
-//    //}
-//    for (auto& [key, value] : texture_storage_) {
-//        std::vector<u8>().swap(value.raw_data_); // Clears vector data and reallocates.
-//        if (value.delete_on_gpu_) { api_handles.push_back(value.api_handle_); }
-//    }
-//    texture_storage_.clear();
-//
-//    return api_handles;
-//}
-
-// static
 void Texture::discardCache(Opengl* ogl, const VdpType t) {
+    std::lock_guard lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
         auto discard_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
-        if (discard_elt) {
-            value.isDiscarded(true);
-            // ogl->addOrUpdateTexture(key);
-        }
+        if (discard_elt) { value.isDiscarded(true); }
     }
 }
 
 // static
 void Texture::setCache(const VdpType t) {
+    std::lock_guard lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
         auto set_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (set_elt) { value.isRecentlyUsed(false); }
@@ -142,6 +122,7 @@ void Texture::setCache(const VdpType t) {
 
 // static
 void Texture::cleanCache(Opengl* ogl, const VdpType t) {
+    std::lock_guard lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
         auto is_elt_selected = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (is_elt_selected) {
@@ -157,7 +138,7 @@ void Texture::cleanCache(Opengl* ogl, const VdpType t) {
 
 // static
 void Texture::deleteCache() {
-    // std::lock_guard<std::mutex> lock(storage_mutex_);
+    std::lock_guard lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
         // std::vector<u8>().swap(value.raw_data_);
         deleteTextureData(value);

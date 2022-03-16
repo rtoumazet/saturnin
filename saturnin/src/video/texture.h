@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include <vector> // vector
+#include <shared_mutex> // shared_timed_mutex
+#include <vector>       // vector
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/video/base_rendering_part.h> // VdpType
 #include <saturnin/src/video/vdp2.h>                // ColorCount
@@ -58,8 +59,6 @@ class Texture {
     ///@{
     /// Accessors / Mutators
     auto key() const { return key_; }
-    auto apiHandle() const { return api_handle_; }
-    void apiHandle(const u32 h) { api_handle_ = h; }
     auto width() const { return width_; }
     auto height() const { return height_; }
     auto rawData() const -> const std::vector<u8>& { return raw_data_; }
@@ -114,21 +113,6 @@ class Texture {
     static void deleteTextureData(Texture& t);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::isTextureStored( const size_t key) -> bool;
-    ///
-    /// \brief  Checks if the texture exists.
-    ///
-    /// \author Runik
-    /// \date   29/03/2021
-    ///
-    /// \param  key Key of the texture to check.
-    ///
-    /// \returns    True if the texture is already stored.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static auto isTextureStored(const size_t key) -> bool;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::isTextureLoadingNeeded(const size_t key) -> bool;
     ///
     /// \brief  Checks if the texture linked to the key needs to be loaded / reloaded. Not stored ->
@@ -163,12 +147,6 @@ class Texture {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static auto calculateKey(const VdpType vp, const u32 address, const u8 color_count, const u16 palette_number = 0) -> size_t;
-
-    /*static auto deleteTexturesOnGpu() {
-        for (auto& t : texture_storage_) {
-            t.second.delete_on_gpu_ = true;
-        }
-    }*/
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto clearUnusedTextures() -> std::vector<size_t>;

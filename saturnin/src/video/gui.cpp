@@ -244,7 +244,7 @@ void showMainMenu(core::EmulatorContext& state) {
                 ImGui::SameLine(second_column_offset);
 
                 static bool is_time_set = state.config()->readValue(core::AccessKeys::cfg_global_set_time);
-                if (ImGui::Checkbox("", &is_time_set)) {
+                if (ImGui::Checkbox("##time_set", &is_time_set)) {
                     state.config()->writeValue(core::AccessKeys::cfg_global_set_time, is_time_set);
                 }
             }
@@ -908,11 +908,11 @@ void showRenderingWindow(core::EmulatorContext& state) {
 
     ImGui::Begin("Video rendering", nullptr, flags);
 
-    // state.waitUntilRenderingDone();
-    // state.opengl()->displayFramebuffer(state);
+    // Log::info(Logger::main, "UI rendering.");
 
     if (state.opengl()->areFbosInitialized()) {
         if (state.opengl()->isThereSomethingToRender()) {
+            // Log::info(Logger::main, "Saturn rendering.");
             state.opengl()->generateTextures();
             state.opengl()->render();
         }

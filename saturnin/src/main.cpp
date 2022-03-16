@@ -39,7 +39,6 @@ auto main(int argc, char* argv[]) -> int {
                 Log::error(Logger::main, tr("Could not initialize the program ..."));
                 throw std::runtime_error("Main error !");
             }
-
             state.startInterface();
             state.stopEmulation();
         }
