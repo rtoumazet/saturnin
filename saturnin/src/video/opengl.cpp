@@ -298,12 +298,18 @@ void Opengl::render() {
     if (!parts_list.empty()) {
         const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
 
-        // constexpr auto elements_nb             = u8{2};
-        //  const auto     vao_ids_array           = std::array<u32, elements_nb>{vao};
-        //  const auto     vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
+        glUseProgram(program_shader_);
+        glBindVertexArray(vao);                       // binding VAO
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
         // Calculating the ortho projection matrix
         const auto proj_matrix = calculateDisplayViewportMatrix();
+
+        // Sending the ortho projection matrix to the shader
+        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+        const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
 
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
@@ -323,40 +329,15 @@ void Opengl::render() {
                     vertexes.emplace_back(part->vertexes_[2]);
                     vertexes.emplace_back(part->vertexes_[3]);
 
-                    glUseProgram(program_shader_);
-                    glBindVertexArray(vao);                       // binding VAO
-                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
-
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-                    glActiveTexture(GLenum::GL_TEXTURE0);
-
-                    // Sending the ortho projection matrix to the shader
-                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-                    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+                    // glActiveTexture(GLenum::GL_TEXTURE0);
 
                     // Sending the variable to configure the shader to use texture data.
-                    const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+                    // const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
                     const auto is_texture_used = GLboolean(true);
                     glUniform1i(uni_use_texture, is_texture_used);
 
-                    // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-                    // if (Texture::isTextureStored(part->textureKey())) {
-                    // auto& t = Texture::getTexture(part->textureKey());
-                    //  if (t.deleteOnGpu() || t.apiHandle() == 0) {
-                    //     // Creation / replacement of the texture on the GPU
-                    //     if (t.deleteOnGpu()) {
-                    //         deleteTexture(t.apiHandle());
-                    //         t.deleteOnGpu(false);
-                    //     }
-                    //     t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-                    // }
-
-                    // t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-                    // glBindTexture(GL_TEXTURE_2D, t.apiHandle());
-                    //}
-
-                    // glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
                     const auto id = getTextureId(part->textureKey());
                     if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
 
@@ -376,19 +357,11 @@ void Opengl::render() {
                     vertexes.emplace_back(part->vertexes_[2]);
                     vertexes.emplace_back(part->vertexes_[3]);
 
-                    glUseProgram(program_shader_);
-                    glBindVertexArray(vao);                       // binding VAO
-                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
-
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-                    // Sending the ortho projection matrix to the shader
-                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-                    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
                     // Sending the variable to configure the shader to use color.
-                    const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+                    // const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
                     const auto is_texture_used = GLboolean(false);
                     glUniform1i(uni_use_texture, is_texture_used);
 
@@ -405,19 +378,11 @@ void Opengl::render() {
                     vertexes.emplace_back(part->vertexes_[2]);
                     vertexes.emplace_back(part->vertexes_[3]);
 
-                    glUseProgram(program_shader_);
-                    glBindVertexArray(vao);                       // binding VAO
-                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
-
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-                    // Sending the ortho projection matrix to the shader
-                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-                    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
                     // Sending the variable to configure the shader to use color.
-                    const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+                    // const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
                     const auto is_texture_used = GLboolean(false);
                     glUniform1i(uni_use_texture, is_texture_used);
 
@@ -432,19 +397,11 @@ void Opengl::render() {
                     vertexes.emplace_back(part->vertexes_[0]);
                     vertexes.emplace_back(part->vertexes_[1]);
 
-                    glUseProgram(program_shader_);
-                    glBindVertexArray(vao);                       // binding VAO
-                    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
-
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-                    // Sending the ortho projection matrix to the shader
-                    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-                    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
                     // Sending the variable to configure the shader to use color.
-                    const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+                    // const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
                     const auto is_texture_used = GLboolean(false);
                     glUniform1i(uni_use_texture, is_texture_used);
 
