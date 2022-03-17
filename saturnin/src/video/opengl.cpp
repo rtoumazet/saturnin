@@ -334,7 +334,6 @@ void Opengl::render() {
                     // glActiveTexture(GLenum::GL_TEXTURE0);
 
                     // Sending the variable to configure the shader to use texture data.
-                    // const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
                     const auto is_texture_used = GLboolean(true);
                     glUniform1i(uni_use_texture, is_texture_used);
 
@@ -361,7 +360,6 @@ void Opengl::render() {
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
                     // Sending the variable to configure the shader to use color.
-                    // const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
                     const auto is_texture_used = GLboolean(false);
                     glUniform1i(uni_use_texture, is_texture_used);
 
@@ -382,7 +380,6 @@ void Opengl::render() {
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
                     // Sending the variable to configure the shader to use color.
-                    // const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
                     const auto is_texture_used = GLboolean(false);
                     glUniform1i(uni_use_texture, is_texture_used);
 
@@ -401,7 +398,6 @@ void Opengl::render() {
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
                     // Sending the variable to configure the shader to use color.
-                    // const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
                     const auto is_texture_used = GLboolean(false);
                     glUniform1i(uni_use_texture, is_texture_used);
 
@@ -582,21 +578,6 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             const auto is_texture_used = GLboolean(true);
             glUniform1i(uni_use_texture, is_texture_used);
 
-            // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
-            // if (Texture::isTextureStored(part->textureKey())) {
-            //    auto& t = Texture::getTexture(part->textureKey());
-            //    // if (t.deleteOnGpu() || t.apiHandle() == 0) {
-            //    //    // Creation / replacement of the texture on the GPU
-            //    //    if (t.deleteOnGpu()) {
-            //    //        deleteTexture(t.apiHandle());
-            //    //        t.deleteOnGpu(false);
-            //    //    }
-            //    //    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-            //    //}
-            //    t.apiHandle(generateTexture(t.width(), t.height(), t.rawData()));
-            //    glBindTexture(GL_TEXTURE_2D, t.apiHandle());
-            //}
-
             // glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
             const auto id = getTextureId(part->textureKey());
             if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
@@ -623,11 +604,11 @@ void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
     const auto texture_id = getTextureId(key);
     if (texture_id && (*texture_id > 0)) {
-        std::lock_guard lock(texture_delete_mutex_);
+        //        std::lock_guard lock(texture_delete_mutex_);
         textures_to_delete_.push_back(*texture_id);
     }
 
-    std::lock_guard lock(texture_link_mutex_);
+    //    std::lock_guard lock(texture_link_mutex_);
     texture_key_id_link_[key] = 0;
 }
 
@@ -635,7 +616,7 @@ void Opengl::generateTextures() {
     auto local_textures_to_delete = std::vector<u32>();
     {
         // vector is swapped to a local copy to keep the data structure locked for the minimum possible time.
-        std::lock_guard lock(texture_delete_mutex_);
+        //        std::lock_guard lock(texture_delete_mutex_);
         local_textures_to_delete.swap(textures_to_delete_);
     }
     for (const auto id : local_textures_to_delete) {
@@ -645,7 +626,7 @@ void Opengl::generateTextures() {
     auto local_texture_key_id_link = std::unordered_map<size_t, u32>();
     {
         // unordered_map is copied locally to keep the data structure locked for the minimum possible time.
-        std::lock_guard tl_lock(texture_link_mutex_);
+        //        std::lock_guard tl_lock(texture_link_mutex_);
         local_texture_key_id_link = texture_key_id_link_;
     }
     for (auto& [key, id] : local_texture_key_id_link) {
@@ -654,7 +635,7 @@ void Opengl::generateTextures() {
             if (t) {
                 const auto texture_id = generateTexture(t->width(), t->height(), t->rawData());
 
-                std::lock_guard tl_lock(texture_link_mutex_);
+                //                std::lock_guard tl_lock(texture_link_mutex_);
                 texture_key_id_link_[key] = texture_id;
             }
         }

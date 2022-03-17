@@ -52,7 +52,7 @@ Texture::~Texture() {
 // static //
 auto Texture::storeTexture(Texture t) -> size_t {
     {
-        std::lock_guard lock(storage_mutex_);
+        //        std::lock_guard lock(storage_mutex_);
         texture_storage_.erase(t.key());
         texture_storage_.emplace(t.key(), std::move(t));
     }
@@ -62,8 +62,8 @@ auto Texture::storeTexture(Texture t) -> size_t {
 // static //
 auto Texture::getTexture(const size_t key) -> std::optional<Texture> {
     {
-        std::lock_guard lock(storage_mutex_);
-        const auto      it = texture_storage_.find(key);
+        //        std::lock_guard lock(storage_mutex_);
+        const auto it = texture_storage_.find(key);
         if (it != texture_storage_.end()) { return it->second; }
     }
     Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
@@ -103,7 +103,7 @@ auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_c
 
 // static
 void Texture::discardCache(Opengl* ogl, const VdpType t) {
-    std::lock_guard lock(storage_mutex_);
+    //    std::lock_guard lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
         auto discard_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (discard_elt) { value.isDiscarded(true); }
@@ -112,7 +112,7 @@ void Texture::discardCache(Opengl* ogl, const VdpType t) {
 
 // static
 void Texture::setCache(const VdpType t) {
-    std::lock_guard lock(storage_mutex_);
+    //    std::lock_guard lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
         auto set_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (set_elt) { value.isRecentlyUsed(false); }
@@ -121,7 +121,7 @@ void Texture::setCache(const VdpType t) {
 
 // static
 void Texture::cleanCache(Opengl* ogl, const VdpType t) {
-    std::lock_guard lock(storage_mutex_);
+    //    std::lock_guard lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
         auto is_elt_selected = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
         if (is_elt_selected) {
@@ -137,7 +137,7 @@ void Texture::cleanCache(Opengl* ogl, const VdpType t) {
 
 // static
 void Texture::deleteCache() {
-    std::lock_guard lock(storage_mutex_);
+    //    std::lock_guard lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
         // std::vector<u8>().swap(value.raw_data_);
         deleteTextureData(value);
