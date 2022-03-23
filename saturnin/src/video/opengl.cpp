@@ -311,6 +311,46 @@ void Opengl::render() {
 
         const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
 
+        // Filling a vector with all the vertexes needed to render the parts list, in order to send data only once to the GPU.
+        auto batch_vertex_size = getVertexesNumberByDrawType(parts_list);
+        auto batch_vertexes    = std::vector<Vertex>{};
+        batch_vertexes.reserve(batch_vertex_size);
+
+        for (const auto& part : parts_list) {
+            if (part->vertexes_.empty()) { continue; }
+
+            switch (part->drawType()) {
+                case DrawType::textured_polygon:
+                case DrawType::non_textured_polygon: {
+                    // Transforming one quad in 2 triangles
+                    batch_vertexes.emplace_back(part->vertexes_[0]);
+                    batch_vertexes.emplace_back(part->vertexes_[1]);
+                    batch_vertexes.emplace_back(part->vertexes_[2]);
+                    batch_vertexes.emplace_back(part->vertexes_[0]);
+                    batch_vertexes.emplace_back(part->vertexes_[2]);
+                    batch_vertexes.emplace_back(part->vertexes_[3]);
+                    break;
+                }
+                case DrawType::polyline: {
+                    // Quad is drawn using LINE_LOOP (4 vertexes)
+                    batch_vertexes.emplace_back(part->vertexes_[0]);
+                    batch_vertexes.emplace_back(part->vertexes_[1]);
+                    batch_vertexes.emplace_back(part->vertexes_[2]);
+                    batch_vertexes.emplace_back(part->vertexes_[3]);
+                    break;
+                }
+                case DrawType::line: {
+                    // Single line (2 vertexes)
+                    batch_vertexes.emplace_back(part->vertexes_[0]);
+                    batch_vertexes.emplace_back(part->vertexes_[1]);
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        };
+
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
 
@@ -413,8 +453,8 @@ void Opengl::render() {
 
         // glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
         // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
-        glDeleteBuffers(1, &vertex_buffer);
-        glDeleteVertexArrays(1, &vao);
+        gl::glDeleteBuffers(1, &vertex_buffer);
+        gl::glDeleteVertexArrays(1, &vao);
 
         // Texture::cleanCache(this);
     }
@@ -427,6 +467,34 @@ void Opengl::render() {
 
     postRender();
     calculateFps();
+}
+
+auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u32 {
+    auto batch_vertex_size
+        = std::count_if(parts_list.begin(),
+                        parts_list.end(),
+                        [](std::unique_ptr<video::BaseRenderingPart>& p) { return p->drawType() == DrawType::textured_polygon; })
+          * vertexes_per_tessellated_quad;
+    batch_vertex_size += std::count_if(parts_list.begin(),
+                                       parts_list.end(),
+                                       [](std::unique_ptr<video::BaseRenderingPart>& p) {
+                                           return p->drawType() == DrawType::non_textured_polygon;
+                                       })
+                         * vertexes_per_tessellated_quad;
+
+    batch_vertex_size
+        += std::count_if(parts_list.begin(),
+                         parts_list.end(),
+                         [](std::unique_ptr<video::BaseRenderingPart>& p) { return p->drawType() == DrawType::polyline; })
+           * vertexes_per_polyline;
+
+    batch_vertex_size
+        += std::count_if(parts_list.begin(),
+                         parts_list.end(),
+                         [](std::unique_ptr<video::BaseRenderingPart>& p) { return p->drawType() == DrawType::line; })
+           * vertexes_per_line;
+
+    return batch_vertex_size;
 }
 
 auto Opengl::isThereSomethingToRender() -> bool { return !parts_list_.empty(); }
@@ -587,8 +655,8 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
         // glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
         // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
-        glDeleteBuffers(1, &vertex_buffer);
-        glDeleteVertexArrays(1, &vao);
+        gl::glDeleteBuffers(1, &vertex_buffer);
+        gl::glDeleteVertexArrays(1, &vao);
     }
 
     //------ Post render --------//

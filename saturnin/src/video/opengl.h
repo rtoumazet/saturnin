@@ -72,6 +72,8 @@ enum class FboType : u8 {
 using FboData = std::pair<u32, u32>; // 1st is fbo id, 2nd is texture id.
 using FboList = std::unordered_map<FboType, FboData>;
 
+using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
+
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
 enum class GlslVersion { glsl_120, glsl_330 };
@@ -480,6 +482,19 @@ class Opengl {
 
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) -> u32;
+    ///
+    /// \brief  Returns the number of vertexes needed to display the parts.
+    ///
+    /// \author Runik
+    /// \date   23/03/2022
+    ///
+    /// \returns    The number of vertexes.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u32;
+
     core::Config* config_; ///< Configuration object.
 
     FboList fbo_list_;                ///< List of framebuffer objects used in the program.
@@ -490,7 +505,6 @@ class Opengl {
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
     PartsList parts_list_;        // Will have to be moved to the platform agnostic renderer.
     Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
 
