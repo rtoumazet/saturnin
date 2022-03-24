@@ -316,8 +316,15 @@ void Opengl::render() {
         auto batch_vertexes    = std::vector<Vertex>{};
         batch_vertexes.reserve(batch_vertex_size);
 
+        using BatchDraw = std::pair<DrawType, u32>; // 1st is current draw type, 2nd is the number of vertexes to draw
+        std::vector<BatchDraw> draws;
+        auto                   previous_draw_type   = DrawType{};
+        auto                   current_draw_type    = DrawType{};
+        auto                   current_vertex_index = u32{};
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
+
+            current_draw_type = part->drawType();
 
             switch (part->drawType()) {
                 case DrawType::textured_polygon:
@@ -350,6 +357,8 @@ void Opengl::render() {
                 }
             }
         };
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * batch_vertexes.size(), batch_vertexes.data(), GL_STATIC_DRAW);
 
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
