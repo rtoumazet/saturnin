@@ -318,13 +318,18 @@ void Opengl::render() {
 
         using BatchDraw = std::pair<DrawType, u32>; // 1st is current draw type, 2nd is the number of vertexes to draw
         std::vector<BatchDraw> draws;
-        auto                   previous_draw_type   = DrawType{};
-        auto                   current_draw_type    = DrawType{};
+        auto                   previous_draw_type   = parts_list[0]->drawType();
+        auto                   current_draw_type    = previous_draw_type;
         auto                   current_vertex_index = u32{};
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
 
             current_draw_type = part->drawType();
+            if (current_draw_type != previous_draw_type) {
+                draws.emplace_back(previous_draw_type, current_vertex_index);
+                current_vertex_index = 0;
+                previous_draw_type   = current_draw_type;
+            }
 
             switch (part->drawType()) {
                 case DrawType::textured_polygon:
@@ -336,6 +341,7 @@ void Opengl::render() {
                     batch_vertexes.emplace_back(part->vertexes_[0]);
                     batch_vertexes.emplace_back(part->vertexes_[2]);
                     batch_vertexes.emplace_back(part->vertexes_[3]);
+                    current_vertex_index += vertexes_per_tessellated_quad;
                     break;
                 }
                 case DrawType::polyline: {
@@ -344,12 +350,14 @@ void Opengl::render() {
                     batch_vertexes.emplace_back(part->vertexes_[1]);
                     batch_vertexes.emplace_back(part->vertexes_[2]);
                     batch_vertexes.emplace_back(part->vertexes_[3]);
+                    current_vertex_index += vertexes_per_polyline;
                     break;
                 }
                 case DrawType::line: {
                     // Single line (2 vertexes)
                     batch_vertexes.emplace_back(part->vertexes_[0]);
                     batch_vertexes.emplace_back(part->vertexes_[1]);
+                    current_vertex_index += vertexes_per_line;
                     break;
                 }
                 default: {
@@ -357,6 +365,8 @@ void Opengl::render() {
                 }
             }
         };
+
+        draws.emplace_back(previous_draw_type, current_vertex_index);
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * batch_vertexes.size(), batch_vertexes.data(), GL_STATIC_DRAW);
 
@@ -478,29 +488,24 @@ void Opengl::render() {
     calculateFps();
 }
 
-auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u32 {
-    auto batch_vertex_size
-        = std::count_if(parts_list.begin(),
-                        parts_list.end(),
-                        [](std::unique_ptr<video::BaseRenderingPart>& p) { return p->drawType() == DrawType::textured_polygon; })
-          * vertexes_per_tessellated_quad;
+auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64 {
+    auto batch_vertex_size = u64{};
+
+    batch_vertex_size = std::count_if(parts_list.begin(),
+                                      parts_list.end(),
+                                      [](const auto& p) { return p->drawType() == DrawType::textured_polygon; })
+                        * vertexes_per_tessellated_quad;
     batch_vertex_size += std::count_if(parts_list.begin(),
                                        parts_list.end(),
-                                       [](std::unique_ptr<video::BaseRenderingPart>& p) {
-                                           return p->drawType() == DrawType::non_textured_polygon;
-                                       })
+                                       [](const auto& p) { return p->drawType() == DrawType::non_textured_polygon; })
                          * vertexes_per_tessellated_quad;
 
     batch_vertex_size
-        += std::count_if(parts_list.begin(),
-                         parts_list.end(),
-                         [](std::unique_ptr<video::BaseRenderingPart>& p) { return p->drawType() == DrawType::polyline; })
+        += std::count_if(parts_list.begin(), parts_list.end(), [](const auto& p) { return p->drawType() == DrawType::polyline; })
            * vertexes_per_polyline;
 
     batch_vertex_size
-        += std::count_if(parts_list.begin(),
-                         parts_list.end(),
-                         [](std::unique_ptr<video::BaseRenderingPart>& p) { return p->drawType() == DrawType::line; })
+        += std::count_if(parts_list.begin(), parts_list.end(), [](const auto& p) { return p->drawType() == DrawType::line; })
            * vertexes_per_line;
 
     return batch_vertex_size;

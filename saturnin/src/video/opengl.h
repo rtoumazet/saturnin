@@ -483,7 +483,7 @@ class Opengl {
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) -> u32;
+    /// \fn auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) -> u64;
     ///
     /// \brief  Returns the number of vertexes needed to display the parts.
     ///
@@ -493,7 +493,7 @@ class Opengl {
     /// \returns    The number of vertexes.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u32;
+    auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64;
 
     core::Config* config_; ///< Configuration object.
 
