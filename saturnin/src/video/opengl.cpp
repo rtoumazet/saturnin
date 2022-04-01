@@ -368,7 +368,33 @@ void Opengl::render() {
 
         draws.emplace_back(previous_draw_type, current_vertex_index);
 
+        // Sending vertex buffer data to the GPU
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * batch_vertexes.size(), batch_vertexes.data(), GL_STATIC_DRAW);
+
+        for (const auto& draw : draws) {
+            switch (draw.first) {
+                case DrawType::textured_polygon: {
+                    // Sending the variable to configure the shader to use texture data.
+                    const auto is_texture_used = GLboolean(true);
+                    glUniform1i(uni_use_texture, is_texture_used);
+
+                    // const auto id = getTextureId(part->textureKey());
+                    // if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
+
+                    // glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+                    break;
+                }
+                case DrawType::non_textured_polygon: {
+                }
+                case DrawType::polyline: {
+                }
+                case DrawType::line: {
+                }
+                default: {
+                    break;
+                }
+            }
+        }
 
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
@@ -377,20 +403,20 @@ void Opengl::render() {
                 case DrawType::textured_polygon: {
                     // Quad is tessellated into 2 triangles, using a texture
 
-                    auto vertexes = std::vector<Vertex>{};
+                    // auto vertexes = std::vector<Vertex>{};
 
-                    vertexes.reserve(vertexes_per_tessellated_quad);
-                    // Transforming one quad in 2 triangles
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[1]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[3]);
+                    // vertexes.reserve(vertexes_per_tessellated_quad);
+                    //// Transforming one quad in 2 triangles
+                    // vertexes.emplace_back(part->vertexes_[0]);
+                    // vertexes.emplace_back(part->vertexes_[1]);
+                    // vertexes.emplace_back(part->vertexes_[2]);
+                    // vertexes.emplace_back(part->vertexes_[0]);
+                    // vertexes.emplace_back(part->vertexes_[2]);
+                    // vertexes.emplace_back(part->vertexes_[3]);
 
-                    // Sending vertex buffer data to the GPU
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-                    // glActiveTexture(GLenum::GL_TEXTURE0);
+                    //// Sending vertex buffer data to the GPU
+                    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    //  glActiveTexture(GLenum::GL_TEXTURE0);
 
                     // Sending the variable to configure the shader to use texture data.
                     const auto is_texture_used = GLboolean(true);
@@ -404,19 +430,19 @@ void Opengl::render() {
                 }
                 case DrawType::non_textured_polygon: {
                     // Quad is tessellated into 2 triangles, using color
-                    auto vertexes = std::vector<Vertex>{};
+                    // auto vertexes = std::vector<Vertex>{};
 
-                    vertexes.reserve(vertexes_per_tessellated_quad);
-                    // Transforming one quad in 2 triangles
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[1]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[3]);
+                    // vertexes.reserve(vertexes_per_tessellated_quad);
+                    //// Transforming one quad in 2 triangles
+                    // vertexes.emplace_back(part->vertexes_[0]);
+                    // vertexes.emplace_back(part->vertexes_[1]);
+                    // vertexes.emplace_back(part->vertexes_[2]);
+                    // vertexes.emplace_back(part->vertexes_[0]);
+                    // vertexes.emplace_back(part->vertexes_[2]);
+                    // vertexes.emplace_back(part->vertexes_[3]);
 
-                    // Sending vertex buffer data to the GPU
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    //// Sending vertex buffer data to the GPU
+                    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
@@ -428,15 +454,15 @@ void Opengl::render() {
                 }
                 case DrawType::polyline: {
                     // Quad is drawn using LINE_LOOP (4 vertexes)
-                    auto vertexes = std::vector<Vertex>{};
-                    vertexes.reserve(vertexes_per_polyline);
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[1]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[3]);
+                    // auto vertexes = std::vector<Vertex>{};
+                    // vertexes.reserve(vertexes_per_polyline);
+                    // vertexes.emplace_back(part->vertexes_[0]);
+                    // vertexes.emplace_back(part->vertexes_[1]);
+                    // vertexes.emplace_back(part->vertexes_[2]);
+                    // vertexes.emplace_back(part->vertexes_[3]);
 
-                    // Sending vertex buffer data to the GPU
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    //// Sending vertex buffer data to the GPU
+                    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
@@ -448,13 +474,13 @@ void Opengl::render() {
                 }
                 case DrawType::line: {
                     // Single line (2 vertexes)
-                    auto vertexes = std::vector<Vertex>{};
-                    vertexes.reserve(vertexes_per_polyline);
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[1]);
+                    // auto vertexes = std::vector<Vertex>{};
+                    // vertexes.reserve(vertexes_per_polyline);
+                    // vertexes.emplace_back(part->vertexes_[0]);
+                    // vertexes.emplace_back(part->vertexes_[1]);
 
-                    // Sending vertex buffer data to the GPU
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    //// Sending vertex buffer data to the GPU
+                    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
