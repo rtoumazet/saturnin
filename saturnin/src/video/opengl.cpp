@@ -312,89 +312,89 @@ void Opengl::render() {
         const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
 
         // Filling a vector with all the vertexes needed to render the parts list, in order to send data only once to the GPU.
-        auto batch_vertex_size = getVertexesNumberByDrawType(parts_list);
-        auto batch_vertexes    = std::vector<Vertex>{};
-        batch_vertexes.reserve(batch_vertex_size);
+        // auto batch_vertex_size = getVertexesNumberByDrawType(parts_list);
+        // auto batch_vertexes    = std::vector<Vertex>{};
+        // batch_vertexes.reserve(batch_vertex_size);
 
-        using BatchDraw = std::pair<DrawType, u32>; // 1st is current draw type, 2nd is the number of vertexes to draw
-        std::vector<BatchDraw> draws;
-        auto                   previous_draw_type   = parts_list[0]->drawType();
-        auto                   current_draw_type    = previous_draw_type;
-        auto                   current_vertex_index = u32{};
-        for (const auto& part : parts_list) {
-            if (part->vertexes_.empty()) { continue; }
+        // using BatchDraw = std::pair<DrawType, u32>; // 1st is current draw type, 2nd is the number of vertexes to draw
+        // std::vector<BatchDraw> draws;
+        // auto                   previous_draw_type   = parts_list[0]->drawType();
+        // auto                   current_draw_type    = previous_draw_type;
+        // auto                   current_vertex_index = u32{};
+        // for (const auto& part : parts_list) {
+        //     if (part->vertexes_.empty()) { continue; }
 
-            current_draw_type = part->drawType();
-            if (current_draw_type != previous_draw_type) {
-                draws.emplace_back(previous_draw_type, current_vertex_index);
-                current_vertex_index = 0;
-                previous_draw_type   = current_draw_type;
-            }
+        //    current_draw_type = part->drawType();
+        //    if (current_draw_type != previous_draw_type) {
+        //        draws.emplace_back(previous_draw_type, current_vertex_index);
+        //        current_vertex_index = 0;
+        //        previous_draw_type   = current_draw_type;
+        //    }
 
-            switch (part->drawType()) {
-                case DrawType::textured_polygon:
-                case DrawType::non_textured_polygon: {
-                    // Transforming one quad in 2 triangles
-                    batch_vertexes.emplace_back(part->vertexes_[0]);
-                    batch_vertexes.emplace_back(part->vertexes_[1]);
-                    batch_vertexes.emplace_back(part->vertexes_[2]);
-                    batch_vertexes.emplace_back(part->vertexes_[0]);
-                    batch_vertexes.emplace_back(part->vertexes_[2]);
-                    batch_vertexes.emplace_back(part->vertexes_[3]);
-                    current_vertex_index += vertexes_per_tessellated_quad;
-                    break;
-                }
-                case DrawType::polyline: {
-                    // Quad is drawn using LINE_LOOP (4 vertexes)
-                    batch_vertexes.emplace_back(part->vertexes_[0]);
-                    batch_vertexes.emplace_back(part->vertexes_[1]);
-                    batch_vertexes.emplace_back(part->vertexes_[2]);
-                    batch_vertexes.emplace_back(part->vertexes_[3]);
-                    current_vertex_index += vertexes_per_polyline;
-                    break;
-                }
-                case DrawType::line: {
-                    // Single line (2 vertexes)
-                    batch_vertexes.emplace_back(part->vertexes_[0]);
-                    batch_vertexes.emplace_back(part->vertexes_[1]);
-                    current_vertex_index += vertexes_per_line;
-                    break;
-                }
-                default: {
-                    break;
-                }
-            }
-        };
+        //    switch (part->drawType()) {
+        //        case DrawType::textured_polygon:
+        //        case DrawType::non_textured_polygon: {
+        //            // Transforming one quad in 2 triangles
+        //            batch_vertexes.emplace_back(part->vertexes_[0]);
+        //            batch_vertexes.emplace_back(part->vertexes_[1]);
+        //            batch_vertexes.emplace_back(part->vertexes_[2]);
+        //            batch_vertexes.emplace_back(part->vertexes_[0]);
+        //            batch_vertexes.emplace_back(part->vertexes_[2]);
+        //            batch_vertexes.emplace_back(part->vertexes_[3]);
+        //            current_vertex_index += vertexes_per_tessellated_quad;
+        //            break;
+        //        }
+        //        case DrawType::polyline: {
+        //            // Quad is drawn using LINE_LOOP (4 vertexes)
+        //            batch_vertexes.emplace_back(part->vertexes_[0]);
+        //            batch_vertexes.emplace_back(part->vertexes_[1]);
+        //            batch_vertexes.emplace_back(part->vertexes_[2]);
+        //            batch_vertexes.emplace_back(part->vertexes_[3]);
+        //            current_vertex_index += vertexes_per_polyline;
+        //            break;
+        //        }
+        //        case DrawType::line: {
+        //            // Single line (2 vertexes)
+        //            batch_vertexes.emplace_back(part->vertexes_[0]);
+        //            batch_vertexes.emplace_back(part->vertexes_[1]);
+        //            current_vertex_index += vertexes_per_line;
+        //            break;
+        //        }
+        //        default: {
+        //            break;
+        //        }
+        //    }
+        //};
 
-        draws.emplace_back(previous_draw_type, current_vertex_index);
+        // draws.emplace_back(previous_draw_type, current_vertex_index);
 
-        // Sending vertex buffer data to the GPU
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * batch_vertexes.size(), batch_vertexes.data(), GL_STATIC_DRAW);
+        //// Sending vertex buffer data to the GPU
+        // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * batch_vertexes.size(), batch_vertexes.data(), GL_STATIC_DRAW);
 
-        for (const auto& draw : draws) {
-            switch (draw.first) {
-                case DrawType::textured_polygon: {
-                    // Sending the variable to configure the shader to use texture data.
-                    const auto is_texture_used = GLboolean(true);
-                    glUniform1i(uni_use_texture, is_texture_used);
+        // for (const auto& draw : draws) {
+        //     switch (draw.first) {
+        //         case DrawType::textured_polygon: {
+        //             // Sending the variable to configure the shader to use texture data.
+        //             const auto is_texture_used = GLboolean(true);
+        //             glUniform1i(uni_use_texture, is_texture_used);
 
-                    // const auto id = getTextureId(part->textureKey());
-                    // if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
+        //            // const auto id = getTextureId(part->textureKey());
+        //            // if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
 
-                    // glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
-                    break;
-                }
-                case DrawType::non_textured_polygon: {
-                }
-                case DrawType::polyline: {
-                }
-                case DrawType::line: {
-                }
-                default: {
-                    break;
-                }
-            }
-        }
+        //            // glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+        //            break;
+        //        }
+        //        case DrawType::non_textured_polygon: {
+        //        }
+        //        case DrawType::polyline: {
+        //        }
+        //        case DrawType::line: {
+        //        }
+        //        default: {
+        //            break;
+        //        }
+        //    }
+        //}
 
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
@@ -402,21 +402,22 @@ void Opengl::render() {
             switch (part->drawType()) {
                 case DrawType::textured_polygon: {
                     // Quad is tessellated into 2 triangles, using a texture
+                    //******
+                    auto vertexes = std::vector<Vertex>{};
 
-                    // auto vertexes = std::vector<Vertex>{};
+                    vertexes.reserve(vertexes_per_tessellated_quad);
+                    // Transforming one quad in 2 triangles
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[1]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[3]);
 
-                    // vertexes.reserve(vertexes_per_tessellated_quad);
-                    //// Transforming one quad in 2 triangles
-                    // vertexes.emplace_back(part->vertexes_[0]);
-                    // vertexes.emplace_back(part->vertexes_[1]);
-                    // vertexes.emplace_back(part->vertexes_[2]);
-                    // vertexes.emplace_back(part->vertexes_[0]);
-                    // vertexes.emplace_back(part->vertexes_[2]);
-                    // vertexes.emplace_back(part->vertexes_[3]);
-
-                    //// Sending vertex buffer data to the GPU
-                    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-                    //  glActiveTexture(GLenum::GL_TEXTURE0);
+                    // Sending vertex buffer data to the GPU
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    glActiveTexture(GLenum::GL_TEXTURE0);
+                    //******
 
                     // Sending the variable to configure the shader to use texture data.
                     const auto is_texture_used = GLboolean(true);
@@ -430,19 +431,21 @@ void Opengl::render() {
                 }
                 case DrawType::non_textured_polygon: {
                     // Quad is tessellated into 2 triangles, using color
-                    // auto vertexes = std::vector<Vertex>{};
+                    //*****
+                    auto vertexes = std::vector<Vertex>{};
 
-                    // vertexes.reserve(vertexes_per_tessellated_quad);
-                    //// Transforming one quad in 2 triangles
-                    // vertexes.emplace_back(part->vertexes_[0]);
-                    // vertexes.emplace_back(part->vertexes_[1]);
-                    // vertexes.emplace_back(part->vertexes_[2]);
-                    // vertexes.emplace_back(part->vertexes_[0]);
-                    // vertexes.emplace_back(part->vertexes_[2]);
-                    // vertexes.emplace_back(part->vertexes_[3]);
+                    vertexes.reserve(vertexes_per_tessellated_quad);
+                    // Transforming one quad in 2 triangles
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[1]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[3]);
 
-                    //// Sending vertex buffer data to the GPU
-                    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    // Sending vertex buffer data to the GPU
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    //*****
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
@@ -454,15 +457,17 @@ void Opengl::render() {
                 }
                 case DrawType::polyline: {
                     // Quad is drawn using LINE_LOOP (4 vertexes)
-                    // auto vertexes = std::vector<Vertex>{};
-                    // vertexes.reserve(vertexes_per_polyline);
-                    // vertexes.emplace_back(part->vertexes_[0]);
-                    // vertexes.emplace_back(part->vertexes_[1]);
-                    // vertexes.emplace_back(part->vertexes_[2]);
-                    // vertexes.emplace_back(part->vertexes_[3]);
+                    //*****
+                    auto vertexes = std::vector<Vertex>{};
+                    vertexes.reserve(vertexes_per_polyline);
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[1]);
+                    vertexes.emplace_back(part->vertexes_[2]);
+                    vertexes.emplace_back(part->vertexes_[3]);
 
-                    //// Sending vertex buffer data to the GPU
-                    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    // Sending vertex buffer data to the GPU
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    //*****
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
@@ -474,13 +479,15 @@ void Opengl::render() {
                 }
                 case DrawType::line: {
                     // Single line (2 vertexes)
-                    // auto vertexes = std::vector<Vertex>{};
-                    // vertexes.reserve(vertexes_per_polyline);
-                    // vertexes.emplace_back(part->vertexes_[0]);
-                    // vertexes.emplace_back(part->vertexes_[1]);
+                    //*****
+                    auto vertexes = std::vector<Vertex>{};
+                    vertexes.reserve(vertexes_per_polyline);
+                    vertexes.emplace_back(part->vertexes_[0]);
+                    vertexes.emplace_back(part->vertexes_[1]);
 
-                    //// Sending vertex buffer data to the GPU
-                    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    // Sending vertex buffer data to the GPU
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+                    //*****
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
@@ -1160,8 +1167,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const auto ico_32 = rh::embed("saturnin-ico-32.png");
     const auto ico_48 = rh::embed("saturnin-ico-48.png");
     auto       icons  = std::array<GLFWimage, 3>{{loadPngImage(ico_16.data(), ico_16.size()),
-                                           loadPngImage(ico_32.data(), ico_32.size()),
-                                           loadPngImage(ico_48.data(), ico_48.size())}};
+                                                  loadPngImage(ico_32.data(), ico_32.size()),
+                                                  loadPngImage(ico_48.data(), ico_48.size())}};
     glfwSetWindowIcon(window, 3, icons.data());
 
     glbinding::initialize(glfwGetProcAddress);
