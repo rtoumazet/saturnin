@@ -518,11 +518,11 @@ class Vdp2 {
     /// Constructors / Destructors
     Vdp2() = delete;
     Vdp2(EmulatorContext* ec) : modules_(ec){};
-    Vdp2(const Vdp2&) = delete;
-    Vdp2(Vdp2&&)      = delete;
+    Vdp2(const Vdp2&)                      = delete;
+    Vdp2(Vdp2&&)                           = delete;
     auto operator=(const Vdp2&) & -> Vdp2& = delete;
-    auto operator=(Vdp2&&) & -> Vdp2& = delete;
-    ~Vdp2()                           = default;
+    auto operator=(Vdp2&&) & -> Vdp2&      = delete;
+    ~Vdp2()                                = default;
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -738,7 +738,7 @@ class Vdp2 {
     auto        screenInDebug() -> ScrollScreen;
     void        screenInDebug(const ScrollScreen s);
     auto        isLayerDisabled(const ScrollScreen s) -> bool;
-    void        setLayerDisabledState(const ScrollScreen s, const bool is_disabled);
+    void        disableLayer(const ScrollScreen s, const bool is_disabled);
 
     ///@}
 

@@ -454,5 +454,5 @@ auto Vdp2::isLayerDisabled(const ScrollScreen s) -> bool {
     return false;
 }
 
-void Vdp2::setLayerDisabledState(const ScrollScreen s, const bool is_disabled) { disabled_scroll_screens_[s] = is_disabled; }
+void Vdp2::disableLayer(const ScrollScreen s, const bool is_disabled) { disabled_scroll_screens_[s] = is_disabled; }
 } // namespace saturnin::video
