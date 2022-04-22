@@ -49,10 +49,10 @@ class Texture {
             std::vector<u8>& texture,
             const u16        width,
             const u16        height);
-    Texture(const Texture&) = default;
-    Texture(Texture&&)      = default;
+    Texture(const Texture&)                      = default;
+    Texture(Texture&&)                           = default;
     auto operator=(const Texture&) & -> Texture& = default;
-    auto operator=(Texture&&) & -> Texture& = default;
+    auto operator=(Texture&&) & -> Texture&      = default;
     ~Texture();
     ///@}
 
@@ -210,6 +210,17 @@ class Texture {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static void deleteCache();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void detailedList();
+    ///
+    /// \brief  Returns the detailed list of textures.
+    ///
+    /// \author Runik
+    /// \date   22/04/2022
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto detailedList() -> std::vector<std::string>;
 
   private:
     static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.

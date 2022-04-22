@@ -145,4 +145,14 @@ void Texture::deleteCache() {
     texture_storage_.clear();
 }
 
+// static
+auto Texture::detailedList() -> std::vector<std::string> {
+    auto       list = std::vector<std::string>{};
+    const auto mask = std::string("{}x{} key: {}");
+    for (auto& [key, value] : texture_storage_) {
+        list.emplace_back(fmt::format(mask, value.width_, value.height_, value.key_));
+    }
+    return list;
+}
+
 } // namespace saturnin::video
