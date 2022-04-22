@@ -52,14 +52,15 @@ namespace video = saturnin::video;
 namespace saturnin::gui {
 
 // static bool show_load_stv     = false;
-static auto show_load_binary  = false;
-static auto show_debug_memory = false;
-static auto show_debug_sh2    = false;
-static auto show_debug_smpc   = false;
-static auto show_debug_vdp1   = false;
-static auto show_debug_vdp2   = false;
-static auto show_demo         = false;
-static auto show_log          = true;
+static auto show_load_binary    = false;
+static auto show_debug_memory   = false;
+static auto show_debug_sh2      = false;
+static auto show_debug_smpc     = false;
+static auto show_debug_vdp1     = false;
+static auto show_debug_vdp2     = false;
+static auto show_debug_textures = false;
+static auto show_demo           = false;
+static auto show_log            = true;
 
 using core::Log;
 using core::Logger;
@@ -146,6 +147,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     ImGui::MenuItem(tr("SMPC").c_str(), nullptr, &show_debug_smpc);
                     ImGui::MenuItem(tr("VDP1").c_str(), nullptr, &show_debug_vdp1);
                     ImGui::MenuItem(tr("VDP2").c_str(), nullptr, &show_debug_vdp2);
+                    ImGui::MenuItem(tr("Textures").c_str(), nullptr, &show_debug_textures);
                     ImGui::EndMenu();
                 }
 
@@ -154,6 +156,7 @@ void showMainMenu(core::EmulatorContext& state) {
                 if (show_debug_smpc) { showSmpcDebugWindow(state, &show_debug_smpc); };
                 if (show_debug_vdp1) { showVdp1DebugWindow(state, &show_debug_vdp1); };
                 if (show_debug_vdp2) { showVdp2DebugWindow(state, &show_debug_vdp2); };
+                if (show_debug_textures) { showTexturesDebugWindow(state, &show_debug_textures); };
             }
             default: break;
         }
@@ -1456,7 +1459,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 static auto disabled_layers = std::array{false, false, false, false, false, false};
                 const auto  addCheckbox     = [&](const ScrollScreen ss) {
                     if (ImGui::Checkbox(scroll_screens.at(ss).c_str(), &disabled_layers[util::toUnderlying(ss)])) {
-                        state.vdp2()->setLayerDisabledState(ss, disabled_layers[util::toUnderlying(ss)]);
+                        state.vdp2()->disableLayer(ss, disabled_layers[util::toUnderlying(ss)]);
                     };
                     ImGui::SameLine();
                     constexpr auto offset = 20;
@@ -1648,6 +1651,113 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::EndTabBar();
     }
 
+    ImGui::End();
+}
+
+void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
+    const auto window_size = ImVec2(810, 320);
+    ImGui::SetNextWindowSize(window_size);
+
+    auto window_flags
+        = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
+    ImGui::Begin(tr("Textures debug").c_str(), opened, window_flags);
+
+    if (state.debugStatus() != core::DebugStatus::disabled) {
+        constexpr auto local_child_rounding = 5.0f;
+        const auto     local_cell_padding   = ImVec2(5, 2);
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, local_child_rounding);
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, local_cell_padding);
+
+        static auto current_part_idx = size_t{}; // Here we store our selection data as an index.
+        auto        textures_list    = video::Texture::detailedList();
+        ImGuiIO&    io               = ImGui::GetIO();
+        io.WantCaptureKeyboard       = true;
+        if (textures_list.size() < current_part_idx) { current_part_idx = 0; }
+
+        {
+            // Draw list
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+            const auto child_size = ImVec2(310, 280);
+            ImGui::BeginChild("ChildTexturesList", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+
+            // if (ImGui::BeginMenuBar()) {
+            //     ImGui::TextUnformatted(tr("Textures list").c_str());
+            //     ImGui::EndMenuBar();
+            // }
+            const auto draw_list_size = ImVec2(310, 260);
+            if (ImGui::BeginListBox("##texture_list", draw_list_size)) {
+                for (u32 n = 0; n < textures_list.size(); ++n) {
+                    const bool is_selected = (current_part_idx == n);
+                    if (ImGui::Selectable(fmt::format("{}##{}", textures_list[n], n).c_str(),
+                                          is_selected,
+                                          ImGuiSelectableFlags_SelectOnNav)) {
+                        current_part_idx = n;
+                    }
+
+                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                    if (is_selected) { ImGui::SetItemDefaultFocus(); }
+                }
+                ImGui::EndListBox();
+            }
+
+            ImGui::EndChild();
+            ImGui::PopStyleVar();
+        }
+
+        // ImGui::SameLine();
+        //{
+        //     // Part detail
+        //     if (!draw_list.empty()) {
+        //         const auto child_size = ImVec2(260, 280);
+        //         ImGui::BeginChild("ChildPartDetail", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+
+        //        if (ImGui::BeginMenuBar()) {
+        //            ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
+        //            ImGui::EndMenuBar();
+        //        }
+        //        ImGui::TextWrapped(draw_list[current_part_idx].getDebugDetail().c_str());
+        //        // state.vdp1()->partToHighlight(draw_list[current_part_idx]);
+        //        state.opengl()->partToHighlight(draw_list[current_part_idx]);
+        //        ImGui::EndChild();
+        //    }
+        //}
+
+        // ImGui::SameLine();
+        //{
+        //     // Texture
+        //     if (!draw_list.empty()) {
+        //         const auto child_size = ImVec2(200, 220);
+        //         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+        //         ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+
+        //        if (ImGui::BeginMenuBar()) {
+        //            ImGui::TextUnformatted(tr("Texture").c_str());
+        //            ImGui::EndMenuBar();
+        //        }
+
+        //        if (draw_list[current_part_idx].textureKey() != 0) {
+        //            const auto tex = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
+        //            if (tex) {
+        //                const auto tex_id       = state.opengl()->getTextureId((*tex).key());
+        //                const auto preview_size = ImVec2(200, 200);
+        //                // ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+        //                if (tex_id.has_value()) {
+        //                    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(*tex_id)), preview_size);
+        //                }
+        //            }
+        //        }
+        //        ImGui::EndChild();
+        //        ImGui::PopStyleVar();
+        //    }
+        //}
+
+        io.WantCaptureKeyboard = false;
+
+        ImGui::PopStyleVar();
+        ImGui::PopStyleVar();
+    } else {
+        ImGui::TextUnformatted(tr("Pause emulation to display debug data ...").c_str());
+    }
     ImGui::End();
 }
 

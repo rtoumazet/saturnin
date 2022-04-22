@@ -195,6 +195,20 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened);
 void showSmpcDebugWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened);
+///
+/// \brief  Displays the textures debug window.
+///
+/// \author Runik
+/// \date   22/04/2022
+///
+/// \param [in,out] state   The emulator state.
+/// \param [in,out] opened  If non-null, true if opened.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened);
 ///
 /// \brief  Displays the window to load binary files.
