@@ -35,6 +35,8 @@ namespace saturnin::video {
 
 class Opengl;
 
+using DebugKey = std::pair<std::string, size_t>; // Debug information of the texture and its key.
+
 enum class StorageType { current, previous };
 
 class Texture {
@@ -220,7 +222,7 @@ class Texture {
     /// \date   22/04/2022
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto detailedList() -> std::vector<std::string>;
+    static auto detailedList() -> std::vector<DebugKey>;
 
   private:
     static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.

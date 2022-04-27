@@ -1655,7 +1655,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(810, 320);
+    const auto window_size = ImVec2(600, 320);
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags
@@ -1668,11 +1668,11 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, local_child_rounding);
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, local_cell_padding);
 
-        static auto current_part_idx = size_t{}; // Here we store our selection data as an index.
-        auto        textures_list    = video::Texture::detailedList();
-        ImGuiIO&    io               = ImGui::GetIO();
-        io.WantCaptureKeyboard       = true;
-        if (textures_list.size() < current_part_idx) { current_part_idx = 0; }
+        static auto current_texture_idx = size_t{}; // Here we store our selection data as an index.
+        auto        textures_list       = video::Texture::detailedList();
+        ImGuiIO&    io                  = ImGui::GetIO();
+        io.WantCaptureKeyboard          = true;
+        if (textures_list.size() < current_texture_idx) { current_texture_idx = 0; }
 
         {
             // Draw list
@@ -1684,14 +1684,14 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
             //     ImGui::TextUnformatted(tr("Textures list").c_str());
             //     ImGui::EndMenuBar();
             // }
-            const auto draw_list_size = ImVec2(310, 260);
-            if (ImGui::BeginListBox("##texture_list", draw_list_size)) {
+            const auto texture_list_size = ImVec2(310, 260);
+            if (ImGui::BeginListBox("##texture_list", texture_list_size)) {
                 for (u32 n = 0; n < textures_list.size(); ++n) {
-                    const bool is_selected = (current_part_idx == n);
-                    if (ImGui::Selectable(fmt::format("{}##{}", textures_list[n], n).c_str(),
+                    const bool is_selected = (current_texture_idx == n);
+                    if (ImGui::Selectable(fmt::format("{}##{}", textures_list[n].first, n).c_str(),
                                           is_selected,
                                           ImGuiSelectableFlags_SelectOnNav)) {
-                        current_part_idx = n;
+                        current_texture_idx = n;
                     }
 
                     // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
@@ -1704,52 +1704,26 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
             ImGui::PopStyleVar();
         }
 
-        // ImGui::SameLine();
-        //{
-        //     // Part detail
-        //     if (!draw_list.empty()) {
-        //         const auto child_size = ImVec2(260, 280);
-        //         ImGui::BeginChild("ChildPartDetail", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+        ImGui::SameLine();
+        {
+            // Texture
+            if (!textures_list.empty()) {
+                const auto child_size = ImVec2(260, 280);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+                ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
 
-        //        if (ImGui::BeginMenuBar()) {
-        //            ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
-        //            ImGui::EndMenuBar();
-        //        }
-        //        ImGui::TextWrapped(draw_list[current_part_idx].getDebugDetail().c_str());
-        //        // state.vdp1()->partToHighlight(draw_list[current_part_idx]);
-        //        state.opengl()->partToHighlight(draw_list[current_part_idx]);
-        //        ImGui::EndChild();
-        //    }
-        //}
-
-        // ImGui::SameLine();
-        //{
-        //     // Texture
-        //     if (!draw_list.empty()) {
-        //         const auto child_size = ImVec2(200, 220);
-        //         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-        //         ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
-
-        //        if (ImGui::BeginMenuBar()) {
-        //            ImGui::TextUnformatted(tr("Texture").c_str());
-        //            ImGui::EndMenuBar();
-        //        }
-
-        //        if (draw_list[current_part_idx].textureKey() != 0) {
-        //            const auto tex = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
-        //            if (tex) {
-        //                const auto tex_id       = state.opengl()->getTextureId((*tex).key());
-        //                const auto preview_size = ImVec2(200, 200);
-        //                // ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
-        //                if (tex_id.has_value()) {
-        //                    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(*tex_id)), preview_size);
-        //                }
-        //            }
-        //        }
-        //        ImGui::EndChild();
-        //        ImGui::PopStyleVar();
-        //    }
-        //}
+                const auto texture_key = textures_list[current_texture_idx].second;
+                if (texture_key != 0) {
+                    const auto tex_id       = state.opengl()->getTextureId(texture_key);
+                    const auto preview_size = ImVec2(260, 260);
+                    if (tex_id.has_value()) {
+                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(*tex_id)), preview_size);
+                    }
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleVar();
+            }
+        }
 
         io.WantCaptureKeyboard = false;
 

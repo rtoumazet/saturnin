@@ -146,11 +146,11 @@ void Texture::deleteCache() {
 }
 
 // static
-auto Texture::detailedList() -> std::vector<std::string> {
-    auto       list = std::vector<std::string>{};
+auto Texture::detailedList() -> std::vector<DebugKey> {
+    auto       list = std::vector<DebugKey>{};
     const auto mask = std::string("{}x{} key: {}");
     for (auto& [key, value] : texture_storage_) {
-        list.emplace_back(fmt::format(mask, value.width_, value.height_, value.key_));
+        list.emplace_back(fmt::format(mask, value.width_, value.height_, value.key_), value.key_);
     }
     return list;
 }
