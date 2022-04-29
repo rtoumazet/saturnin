@@ -150,11 +150,34 @@ void Texture::deleteCache() {
 // static
 auto Texture::detailedList() -> std::vector<DebugKey> {
     auto       list = std::vector<DebugKey>{};
-    const auto mask = std::string("{}x{} key: {}");
+    const auto mask = std::string("{}x{} key: {:x}");
     for (auto& [key, value] : texture_storage_) {
         list.emplace_back(fmt::format(mask, value.width_, value.height_, value.key_), value.key_);
     }
     return list;
 }
 
+// static
+auto Texture::calculateTextureSize(const ImageSize& max_size, const size_t texture_key) -> ImageSize {
+    auto       ratio   = 0.0;
+    const auto texture = getTexture(texture_key);
+    if (texture->width() > texture->height()) {
+        if (texture->width() > max_size.width) {
+            ratio = texture->width() / max_size.width;
+        } else {
+            ratio = max_size.width / texture->width();
+        }
+    } else {
+        if (texture->width() > max_size.height) {
+            ratio = texture->height() / max_size.height;
+        } else {
+            ratio = max_size.height / texture->height();
+        }
+    }
+    const auto width  = texture->width() % max_size.width * ratio;
+    const auto height = texture->height() % max_size.height * ratio;
+
+    return ImageSize{static_cast<u16>(width), static_cast<u16>(height)};
+    // return ImageSize{};
+}
 } // namespace saturnin::video

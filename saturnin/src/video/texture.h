@@ -224,6 +224,17 @@ class Texture {
 
     static auto detailedList() -> std::vector<DebugKey>;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn static void calculateTextureSize();
+    ///
+    /// \brief  Returns the texture size within max_size while keeping image ratio.
+    ///
+    /// \author Runik
+    /// \date   29/04/2022
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto calculateTextureSize(const ImageSize& max_size, const size_t texture_key) -> ImageSize;
+
   private:
     static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.
     static std::mutex                          storage_mutex_;   ///< Used for multithreading access to the texture pool.

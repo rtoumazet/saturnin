@@ -184,12 +184,12 @@ class Register {
     /// \name Constructors/Destructors.
     //@{
     Register(const u32 v) : register_value(v){};
-    Register()                = default;
-    Register(const Register&) = default;
-    Register(Register&&)      = default;
+    Register()                                     = default;
+    Register(const Register&)                      = default;
+    Register(Register&&)                           = default;
     auto operator=(const Register&) & -> Register& = default;
-    auto operator=(Register&&) & -> Register& = default;
-    ~Register()                               = default;
+    auto operator=(Register&&) & -> Register&      = default;
+    ~Register()                                    = default;
     //@}
 
     template<typename T>
@@ -319,5 +319,19 @@ struct ScreenPos {
 struct ScreenOffset {
     u16 x;
     u16 y;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct ImageSize
+///
+/// \brief  An image size
+///
+/// \author Runik
+/// \date   29/04/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct ImageSize {
+    u16 width;
+    u16 height;
 };
 }; // namespace saturnin
