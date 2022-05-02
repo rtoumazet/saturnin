@@ -1287,7 +1287,7 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(810, 320);
+    const auto window_size = ImVec2(860, 320);
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags
@@ -1358,7 +1358,7 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
         {
             // Texture
             if (!draw_list.empty()) {
-                const auto child_size = ImVec2(200, 220);
+                const auto child_size = ImVec2(260, 280);
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
                 ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
 
@@ -1370,8 +1370,16 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
                 if (draw_list[current_part_idx].textureKey() != 0) {
                     const auto tex = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
                     if (tex) {
-                        const auto tex_id       = state.opengl()->getTextureId((*tex).key());
-                        const auto preview_size = ImVec2(200, 200);
+                        const auto tex_id       = state.opengl()->getTextureId(tex->key());
+                        //const auto preview_size = ImVec2(200, 200);
+
+                    // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the image
+                        // ratio.
+                        const auto max_size     = ImageSize{260, 260};
+                        auto       tex_size     = video::Texture::calculateTextureSize(max_size, tex->key());
+                        const auto preview_size = ImVec2(tex_size.width, tex_size.height);
+
+
                         // ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
                         if (tex_id.has_value()) {
                             ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(*tex_id)), preview_size);
@@ -1718,29 +1726,9 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
                     const auto tex_id = state.opengl()->getTextureId(texture_key);
 
                     // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the image ratio.
-                    // constexpr auto max_preview_width  = 260;
-                    // constexpr auto max_preview_height = 260;
-                    // auto           ratio              = 0;
-                    // if (texture->width() > texture->height()) {
-                    //     if (texture->width() > max_preview_width) {
-                    //         ratio = texture->width() / max_preview_width;
-                    //     } else {
-                    //         ratio = max_preview_width / texture->width();
-                    //     }
-                    // } else {
-                    //     if (texture->width() > max_preview_width) {
-                    //         ratio = texture->height() / max_preview_height;
-                    //     } else {
-                    //         ratio = max_preview_height / texture->height();
-                    //     }
-                    // }
-                    // const auto preview_size
-                    //     = ImVec2(texture->width() % max_preview_width * ratio, texture->height() % max_preview_height * ratio);
                     const auto max_size     = ImageSize{260, 260};
                     auto       tex_size     = video::Texture::calculateTextureSize(max_size, texture_key);
                     const auto preview_size = ImVec2(tex_size.width, tex_size.height);
-                    //                        = ImVec2(texture->width() % max_preview_width * ratio, texture->height() %
-                    //                        max_preview_height * ratio);
                     if (tex_id.has_value()) {
                         ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(*tex_id)), preview_size);
                     }
