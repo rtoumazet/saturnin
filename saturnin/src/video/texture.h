@@ -225,6 +225,19 @@ class Texture {
     static auto detailedList() -> std::vector<DebugKey>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	static auto Texture::statistics() -> std::vector<std::string>;
+    ///
+    /// \brief	Gets the statistics.
+    ///
+    /// \author	Runik
+    /// \date	05/05/2022
+    ///
+    /// \returns	A std::vector<std::string>
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto statistics() -> std::vector<std::string>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void calculateTextureSize();
     ///
     /// \brief  Returns the texture size within max_size while keeping image ratio.

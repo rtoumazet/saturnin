@@ -150,7 +150,7 @@ void Texture::deleteCache() {
 // static
 auto Texture::detailedList() -> std::vector<DebugKey> {
     auto       list = std::vector<DebugKey>{};
-    const auto mask = std::string("{}x{} key: {:x}");
+    const auto mask = std::string("{}x{} | {:x}");
     for (auto& [key, value] : texture_storage_) {
         list.emplace_back(fmt::format(mask, value.width_, value.height_, value.key_), value.key_);
     }
@@ -179,5 +179,33 @@ auto Texture::calculateTextureSize(const ImageSize& max_size, const size_t textu
 
     return ImageSize{static_cast<u16>(width), static_cast<u16>(height)};
     // return ImageSize{};
+}
+
+// static
+auto Texture::statistics() -> std::vector<std::string> {
+    auto stats = std::vector<std::string>{};
+    stats.push_back(fmt::format("Total number of textures : {}", texture_storage_.size()));
+
+    const auto vdp1_nb = std::count_if(texture_storage_.begin(), texture_storage_.end(), [](const auto& t) {
+        return t.second.vdpType() == VdpType::vdp1;
+    });
+    stats.push_back(fmt::format("Number of VDP1 textures : {}", vdp1_nb));
+
+    const auto vdp2_nb = std::count_if(texture_storage_.begin(), texture_storage_.end(), [](const auto& t) {
+        return t.second.vdpType() == VdpType::vdp2;
+    });
+    stats.push_back(fmt::format("Number of VDP2 textures : {}", vdp2_nb));
+
+    auto max_width  = 0;
+    auto max_height = 0;
+    for (const auto& t : texture_storage_) {
+        if (t.second.vdpType() == VdpType::vdp1) {
+            if (t.second.height() > max_height) { max_height = t.second.height(); }
+            if (t.second.width() > max_width) { max_width = t.second.width(); }
+        }
+    }
+    stats.push_back(fmt::format("Maximum VDP1 texture size : {}x{}", max_height, max_width));
+
+    return stats;
 }
 } // namespace saturnin::video
