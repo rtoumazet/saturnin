@@ -87,10 +87,10 @@ class Opengl {
     /// Constructors / Destructors
     Opengl() = delete;
     Opengl(core::Config* config);
-    Opengl(const Opengl&) = delete;
-    Opengl(Opengl&&)      = delete;
+    Opengl(const Opengl&)                      = delete;
+    Opengl(Opengl&&)                           = delete;
     auto operator=(const Opengl&) & -> Opengl& = delete;
-    auto operator=(Opengl&&) & -> Opengl& = delete;
+    auto operator=(Opengl&&) & -> Opengl&      = delete;
     ~Opengl();
     ///@}
 
@@ -413,8 +413,20 @@ class Opengl {
     /// \returns    The texture identifier.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // auto getTextureId(const size_t key) -> u32 { return texture_key_id_link_[key]; };
     auto getTextureId(const size_t key) -> std::optional<u32>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::isSaturnResolutionSet();
+    ///
+    /// \brief  Checks if the Saturn resolution is set.
+    ///
+    /// \author Runik
+    /// \date   05/11/2021
+    ///
+    /// \returns    Returns true if the saturn screen resolution is set.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto isSaturnResolutionSet() -> bool;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////

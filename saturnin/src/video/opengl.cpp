@@ -769,6 +769,10 @@ auto Opengl::getTextureId(const size_t key) -> std::optional<u32> {
     return (it == texture_key_id_link_.end()) ? std::nullopt : std::optional<u32>(it->second);
 }
 
+auto Opengl::isSaturnResolutionSet() -> bool {
+    return (saturn_screen_resolution_.width == 0 || saturn_screen_resolution_.height == 0) ? false : true;
+}
+
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
 
 void Opengl::updateScreenResolution() {}

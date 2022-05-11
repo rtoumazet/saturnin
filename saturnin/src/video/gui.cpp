@@ -922,9 +922,11 @@ void showRenderingWindow(core::EmulatorContext& state) {
         const auto alpha = 0xff;
         gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(), width, height, alpha);
         if (state.debugStatus() != core::DebugStatus::disabled) {
-            state.opengl()->renderVdp1DebugOverlay();
-            const auto overlay_alpha = 0x80;
-            gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
+            if (state.opengl()->isSaturnResolutionSet()) {
+                state.opengl()->renderVdp1DebugOverlay();
+                const auto overlay_alpha = 0x80;
+                gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
+            }
         }
     }
     ImGui::Text("%s", state.opengl()->fps().c_str());
