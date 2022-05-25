@@ -949,7 +949,7 @@ void showStvWindow() {
     ImGui::EndChild();
 }
 
-void showLogWindow(bool* opened) {
+void showLogWindow(core::EmulatorContext& state, bool* opened) {
     auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_None};
     window_flags |= ImGuiWindowFlags_NoResize;
     window_flags |= ImGuiWindowFlags_NoSavedSettings;
@@ -957,10 +957,10 @@ void showLogWindow(bool* opened) {
     const auto window_size = ImVec2(700, 150);
     ImGui::SetNextWindowSize(window_size);
 
-    auto window = glfwGetCurrentContext();
+    // auto window = glfwGetCurrentContext();
     auto width  = s32{};
     auto height = s32{};
-    glfwGetWindowSize(window, &width, &height);
+    glfwGetWindowSize(state.openglWindow(), &width, &height);
 
     const auto pos_x = float{ImGui::GetMainViewport()->Pos.x};
     const auto pos_y = float{ImGui::GetMainViewport()->Pos.y + static_cast<float>(height)};
@@ -1863,7 +1863,7 @@ void buildGui(core::EmulatorContext& state) {
     showRenderingWindow(state);
 
     if (show_demo) { showImguiDemoWindow(show_demo); }
-    if (show_log) { showLogWindow(&show_log); }
+    if (show_log) { showLogWindow(state, &show_log); }
 }
 
 void addTextureToDrawList(s32 texture, const u32 width, const u32 height, const u8 alpha) {

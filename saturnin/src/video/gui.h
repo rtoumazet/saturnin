@@ -112,17 +112,19 @@ void showRenderingWindow(core::EmulatorContext& state);
 void showStvWindow();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showLogWindow(bool* opened);
+/// \fn void showLogWindow(core::EmulatorContext& state, bool* opened);
 ///
 /// \brief  Displays the log window.
 ///
 /// \author Runik
 /// \date   24/10/2019
 ///
+/// \param [in,out] state   The emulator context.
 /// \param [in,out] opened  True will display the window.
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showLogWindow(bool* opened);
+void showLogWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showSh2DebugWindow(core::EmulatorContext& state, bool* opened);
