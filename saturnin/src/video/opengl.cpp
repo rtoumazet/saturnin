@@ -724,8 +724,8 @@ void Opengl::addOrUpdateTexture(const size_t key) {
     }
 
     //    std::lock_guard lock(texture_link_mutex_);
-    // texture_key_id_link_[key] = 0;
-    texture_key_id_link_.erase(key);
+    texture_key_id_link_[key] = 0;
+    // texture_key_id_link_.erase(key);
 }
 
 void Opengl::generateTextures() {
