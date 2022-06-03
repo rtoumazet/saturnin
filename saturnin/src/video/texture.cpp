@@ -138,8 +138,10 @@ void Texture::cleanCache(Opengl* ogl, const VdpType t) {
         }
     }
 
-    for (auto&& key : keys_to_erase)
+    for (auto&& key : keys_to_erase) {
         texture_storage_.erase(key);
+        ogl->removeTextureLink(key);
+    }
 }
 
 // static

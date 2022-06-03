@@ -390,6 +390,19 @@ class Opengl {
     void addOrUpdateTexture(const size_t key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void saturnin::video::Opengl::removeTextureLink(const size_t key);
+    ///
+    /// \brief  Removes the link between the texture and the OpenGL id.
+    ///
+    /// \author Runik
+    /// \date   03/06/2022
+    ///
+    /// \param  key The texture key.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void removeTextureLink(const size_t key);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::generateTextures();
     ///
     /// \brief  Generates the textures that will be used during rendering.

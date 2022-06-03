@@ -728,6 +728,8 @@ void Opengl::addOrUpdateTexture(const size_t key) {
     // texture_key_id_link_.erase(key);
 }
 
+void Opengl::removeTextureLink(const size_t key) { texture_key_id_link_.erase(key); }
+
 void Opengl::generateTextures() {
     auto local_textures_to_delete = std::vector<u32>();
     {
