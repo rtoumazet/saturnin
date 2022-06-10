@@ -214,12 +214,12 @@ void Vdp2::calculateDisplayDuration() {
 }
 
 void Vdp2::onVblankIn() {
+    Texture::cleanCache(modules_.opengl(), VdpType::vdp2);
     updateResolution();
     updateRamStatus();
     Texture::setCache(VdpType::vdp2);
     populateRenderData();
     resetCacheState();
-    Texture::cleanCache(modules_.opengl(), VdpType::vdp2);
 }
 
 auto Vdp2::getSpriteColorAddressOffset() -> u16 { return getColorRamAddressOffset(craofb_.color_ram_address_offset_sprite); }
