@@ -21,8 +21,9 @@
 #include <saturnin/src/video/gui.h>
 //#include <imgui.h>
 #include <istream>
-#include <filesystem>       // path
-#include <imgui_internal.h> // ImGuiSelectableFlags_SelectOnNav
+#include <filesystem>         // path
+#include <imgui_internal.h>   // ImGuiSelectableFlags_SelectOnNav
+#include <BS_thread_pool.hpp> // thread_pool
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_enums.h> // EmulationStatus
 #include <saturnin/src/locale.h>         // tr
@@ -61,6 +62,7 @@ static auto show_debug_vdp2     = false;
 static auto show_debug_textures = false;
 static auto show_demo           = false;
 static auto show_log            = true;
+static auto show_benchmarks     = false;
 
 using core::Log;
 using core::Logger;
@@ -881,6 +883,19 @@ void showMainMenu(core::EmulatorContext& state) {
             ImGui::TextUnformatted(status_message.c_str());
             ImGui::EndMenu();
         }
+
+        // Tests
+        if (ImGui::BeginMenu(tr("Benchmarks").c_str())) {
+            ImGui::MenuItem(tr("Benchmarks").c_str(), nullptr, &show_benchmarks);
+            ImGui::EndMenu();
+        }
+        if (show_benchmarks) {
+            //
+            //
+            //
+            // auto s = sizeof(state);
+            showBenchmarkWindow(state, &show_benchmarks);
+        };
 
         ImGui::EndMenuBar();
     }
@@ -1855,6 +1870,65 @@ void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened) {
         state.memory()->loadBinaryFile(full_path, load_address);
         Log::info(Logger::main, tr("Binary file loaded."));
     }
+    ImGui::End();
+}
+
+void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
+    const auto window_size = ImVec2(600, 345);
+    ImGui::SetNextWindowSize(window_size);
+
+    auto window_flags
+        = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
+    ImGui::Begin(tr("Benchmarks").c_str(), opened, window_flags);
+
+    const auto  available_threads = std::thread::hardware_concurrency() - 2;
+    static auto log               = std::string();
+    if (ImGui::Button("Run")) {
+        BS::thread_pool pool(available_threads);
+
+        const auto read4Bytes = [&](const u8 address) {
+            return state.memory()->read<u8>(address * 4) << 24 | state.memory()->read<u8>(address * 4 + 1) << 16
+                   | state.memory()->read<u8>(address * 4 + 2) << 8 | state.memory()->read<u8>(address * 4 + 3);
+        };
+        BS::timer tmr;
+
+        state.memory()->initialize();
+        state.memory()->loadBios(saturnin::core::HardwareMode::saturn);
+        {
+            log += tr("Sequential read");
+            auto seq_read_array = std::make_unique<std::array<u32, core::rom_size / 4>>();
+
+            tmr.start();
+            for (u32 i = 0; i < core::rom_size / 4; i++) {
+                (*seq_read_array)[i] = read4Bytes(i);
+            }
+            tmr.stop();
+            log += fmt::format(" {:#x} ", (*seq_read_array)[0]);
+            log += fmt::format(" {}ms\n", tmr.ms());
+        }
+        {
+            log += tr("Multithreaded read");
+            auto multithread_read_array = std::make_unique<std::array<u32, core::rom_size / 4>>();
+
+            // tmr.start();
+            std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
+            pool.parallelize_loop(0,
+                                  core::rom_size / 4,
+                                  [&multithread_read_array, &read4Bytes](const int a, const int b) {
+                                      for (int i = a; i < b; ++i) {
+                                          (*multithread_read_array)[i] = read4Bytes(i);
+                                      }
+                                  })
+                .wait();
+            // tmr.stop();
+            std::chrono::duration<double> elapsed_time = std::chrono::steady_clock::now() - start_time;
+            auto                          res = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+            log += fmt::format(" {:#x} ", (*multithread_read_array)[0]);
+            log += fmt::format(" {}µs\n", res);
+        }
+    }
+    ImGui::TextUnformatted(log.c_str());
+
     ImGui::End();
 }
 

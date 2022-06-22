@@ -225,6 +225,20 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened);
 void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	void showBenchmarkWindow(core::EmulatorContext& state, bool* opened);
+///
+/// \brief	Shows the benchmark window
+///
+/// \author	Runik
+/// \date	21/06/2022
+///
+/// \param [in,out]	state 	The emulator context.
+/// \param [in,out]	opened	If non-null, true if opened.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void showBenchmarkWindow(core::EmulatorContext& state, bool* opened);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void buildGui(core::EmulatorContext& state);
 ///
 /// \brief  Builds a graphical user interface.
