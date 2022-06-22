@@ -886,7 +886,7 @@ void showMainMenu(core::EmulatorContext& state) {
 
         // Tests
         if (ImGui::BeginMenu(tr("Benchmarks").c_str())) {
-            ImGui::MenuItem(tr("Benchmarks").c_str(), nullptr, &show_benchmarks);
+            ImGui::MenuItem(tr("Threads").c_str(), nullptr, &show_benchmarks);
             ImGui::EndMenu();
         }
         if (show_benchmarks) {
@@ -1883,14 +1883,17 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
 
     const auto  available_threads = std::thread::hardware_concurrency() - 2;
     static auto log               = std::string();
-    if (ImGui::Button("Run")) {
+    if (ImGui::Button("Read from file")) {
         BS::thread_pool pool(available_threads);
+        log += fmt::format(tr("{} threads created\n"), available_threads);
 
         const auto read4Bytes = [&](const u8 address) {
             return state.memory()->read<u8>(address * 4) << 24 | state.memory()->read<u8>(address * 4 + 1) << 16
                    | state.memory()->read<u8>(address * 4 + 2) << 8 | state.memory()->read<u8>(address * 4 + 3);
         };
-        BS::timer tmr;
+        BS::timer                                          tmr;
+        std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
+        std::chrono::duration<double>                      elapsed_time{};
 
         state.memory()->initialize();
         state.memory()->loadBios(saturnin::core::HardwareMode::saturn);
@@ -1898,20 +1901,23 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
             log += tr("Sequential read");
             auto seq_read_array = std::make_unique<std::array<u32, core::rom_size / 4>>();
 
-            tmr.start();
+            // tmr.start();
+            start_time = std::chrono::steady_clock::now();
             for (u32 i = 0; i < core::rom_size / 4; i++) {
                 (*seq_read_array)[i] = read4Bytes(i);
             }
-            tmr.stop();
+            // tmr.stop();
+            elapsed_time = std::chrono::steady_clock::now() - start_time;
+            auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
             log += fmt::format(" {:#x} ", (*seq_read_array)[0]);
-            log += fmt::format(" {}ms\n", tmr.ms());
+            log += fmt::format(u8" {}µs\n", res);
         }
         {
             log += tr("Multithreaded read");
             auto multithread_read_array = std::make_unique<std::array<u32, core::rom_size / 4>>();
 
             // tmr.start();
-            std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
+            start_time = std::chrono::steady_clock::now();
             pool.parallelize_loop(0,
                                   core::rom_size / 4,
                                   [&multithread_read_array, &read4Bytes](const int a, const int b) {
@@ -1921,10 +1927,10 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
                                   })
                 .wait();
             // tmr.stop();
-            std::chrono::duration<double> elapsed_time = std::chrono::steady_clock::now() - start_time;
-            auto                          res = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+            elapsed_time = std::chrono::steady_clock::now() - start_time;
+            auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
             log += fmt::format(" {:#x} ", (*multithread_read_array)[0]);
-            log += fmt::format(" {}µs\n", res);
+            log += fmt::format(u8" {}µs\n", res);
         }
     }
     ImGui::TextUnformatted(log.c_str());
