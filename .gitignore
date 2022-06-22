@@ -12,3 +12,6 @@ saturnin/src/.clang-tidy.cpt_backup
 saturnin/doxygen/generated/*
 saturnin/src/video/.clang-tidy.cpt_backup
 saturnin/My Inspector Results - saturnin/*
+GPUCache/*
+saturnin/VTune Profiler Results/*
+debug.log
