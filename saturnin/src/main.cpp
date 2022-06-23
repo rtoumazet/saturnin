@@ -35,6 +35,7 @@ auto main(int argc, char* argv[]) -> int {
         auto state = EmulatorContext{};
         Log::initialize();
         while (state.renderingStatus() != core::RenderingStatus::stopped) {
+            if (state.renderingStatus() == core::RenderingStatus::reset) { state.reset(); }
             if (!state.initialize()) {
                 Log::error(Logger::main, tr("Could not initialize the program ..."));
                 throw std::runtime_error("Main error !");

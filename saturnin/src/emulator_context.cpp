@@ -108,6 +108,8 @@ auto EmulatorContext::initialize() -> bool {
     return cdrom::Scsi::initialize();
 }
 
+void EmulatorContext::reset() { EmulatorContext(); }
+
 void EmulatorContext::startEmulation() {
     switch (emulation_status_) {
         case EmulationStatus::running: {

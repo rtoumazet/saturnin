@@ -83,10 +83,10 @@ class EmulatorContext {
     //@{
     // Constructors / Destructors
     EmulatorContext();
-    EmulatorContext(const EmulatorContext&) = delete;
-    EmulatorContext(EmulatorContext&&)      = delete;
+    EmulatorContext(const EmulatorContext&)                      = delete;
+    EmulatorContext(EmulatorContext&&)                           = delete;
     auto operator=(const EmulatorContext&) & -> EmulatorContext& = delete;
-    auto operator=(EmulatorContext&&) & -> EmulatorContext& = delete;
+    auto operator=(EmulatorContext&&) & -> EmulatorContext&      = delete;
     ~EmulatorContext();
     //@}
 
@@ -102,6 +102,17 @@ class EmulatorContext {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto initialize() -> bool;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void EmulatorContext::reset();
+    ///
+    /// \brief	Resets this object
+    ///
+    /// \author	Runik
+    /// \date	23/06/2022
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void reset();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::startEmulation();

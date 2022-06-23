@@ -1184,19 +1184,22 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
-    auto flags = ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    (void)flags;
-    // io.ConfigViewportDecorations
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
-    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
+    // auto flags = ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    //(void)flags;
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
 
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    (is_legacy_opengl) ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
+    //  io.ConfigViewportDecorations
+    //  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    //  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
 
     // Setup style
     ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    (is_legacy_opengl) ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
     // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
@@ -1209,7 +1212,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
     // Adding glyphs that will be used as images in text
-    ImGuiIO& io = ImGui::GetIO();
+    // ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
     static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe908, 0}; // Will not be copied by AddFont* so keep in scope.
     ImFontConfig                        config;
@@ -1223,6 +1226,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     io.Fonts->AddFontFromMemoryTTF((void*)data.data(), static_cast<u32>(data.size()), font_size, &config, icons_ranges.data());
     io.Fonts->Build();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
 
     const auto clear_color = ImVec4{0.0f, 0.0f, 0.0f, 1.00f};
 
@@ -1263,14 +1267,14 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
         // Update and Render additional Platform Windows
         if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) > 0) {
-            if (ImGui::GetIO().KeyAlt) { //
-                printf("");
-            } // Set a debugger breakpoint here!
+            // if (ImGui::GetIO().KeyAlt) { //
+            //     printf("");
+            // } // Set a debugger breakpoint here!
 
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            // GLFWwindow* backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
+            // glfwMakeContextCurrent(backup_current_context);
         }
 
         glfwSwapBuffers(window);

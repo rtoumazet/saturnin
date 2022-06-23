@@ -128,7 +128,7 @@ void showMainMenu(core::EmulatorContext& state) {
 
                 const auto child_size = ImVec2(200, 100);
                 ImGui::BeginChild("ST-V window", child_size);
-                ImGui::Combo("", &listbox_item_current, files);
+                ImGui::Combo("##combo_stv_rom", &listbox_item_current, files);
                 ImGui::EndChild();
                 ImGui::EndMenu();
             };
@@ -289,7 +289,7 @@ void showMainMenu(core::EmulatorContext& state) {
 
                 static bool is_legacy         = state.config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
                 const auto  initial_rendering = bool{is_legacy};
-                if (ImGui::Checkbox("", &is_legacy)) {
+                if (ImGui::Checkbox("##checkbox_legacy", &is_legacy)) {
                     state.config()->writeValue(core::AccessKeys::cfg_rendering_legacy_opengl, is_legacy);
                     if (initial_rendering != is_legacy) { reset_rendering = true; }
                 }
@@ -396,7 +396,7 @@ void showMainMenu(core::EmulatorContext& state) {
                                                                 std::stoi(drive_parts[2]));
                 }
 
-                if (ImGui::Combo("", &current_item, cdrom::Cdrom::scsi_drives_list)) {
+                if (ImGui::Combo("##combo_cddrive", &current_item, cdrom::Cdrom::scsi_drives_list)) {
                     auto value = std::to_string(cdrom::Cdrom::di_list[current_item].path);
                     value += ':';
                     value += std::to_string(cdrom::Cdrom::di_list[current_item].target);
@@ -442,7 +442,7 @@ void showMainMenu(core::EmulatorContext& state) {
                 ImGui::SameLine(second_column_offset);
 
                 static bool disabled = state.config()->readValue(core::AccessKeys::cfg_sound_disabled);
-                if (ImGui::Checkbox("", &disabled)) {
+                if (ImGui::Checkbox("##checkbox_sound_disabled", &disabled)) {
                     state.config()->writeValue(core::AccessKeys::cfg_sound_disabled, disabled);
                 }
             }
