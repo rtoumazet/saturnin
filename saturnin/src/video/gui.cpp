@@ -97,6 +97,10 @@ void showCoreWindow(core::EmulatorContext& state) {
     const auto size = ImVec2(275, 80);
     ImGui::SetNextWindowSize(size);
 
+    auto wc                     = ImGuiWindowClass{};
+    wc.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
+    ImGui::SetNextWindowClass(&wc);
+
     ImGui::Begin(tr("Core").c_str(), nullptr, window_flags);
 
     showMainMenu(state);
