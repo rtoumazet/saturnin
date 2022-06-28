@@ -25,7 +25,7 @@ set "libslist=libraries.lst"
 setlocal enabledelayedexpansion
 set command=%vcpkg_full_path% install
 for /f %%l in (%libslist%) do (
-    set command=!command! %%l:x86-windows%library_type%
-    set command=!command! %%l:x64-windows%library_type%
+    set command=!command! %%l:x86-windows%library_type% --editable
+    set command=!command! %%l:x64-windows%library_type% --editable
 )
 %command%
