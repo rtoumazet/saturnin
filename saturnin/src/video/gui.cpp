@@ -1885,7 +1885,7 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
         = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
     ImGui::Begin(tr("Benchmarks").c_str(), opened, window_flags);
 
-    const auto  available_threads = std::thread::hardware_concurrency() - 2;
+    const auto  available_threads = std::thread::hardware_concurrency() - 1;
     static auto log               = std::string();
     if (ImGui::Button("Read from file")) {
         BS::thread_pool pool(available_threads);

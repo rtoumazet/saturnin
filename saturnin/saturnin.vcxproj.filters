@@ -141,6 +141,9 @@
     <ClCompile Include="src\video\vdp2_debug.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
+    <ClCompile Include="src\thread_pool.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -297,6 +300,9 @@
       <Filter>Fichiers sources</Filter>
     </ClInclude>
     <ClInclude Include="src\bitfield.h">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\thread_pool.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
