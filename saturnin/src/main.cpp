@@ -20,20 +20,23 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <istream>
-#include <saturnin/src/locale.h> // tr
-#include <saturnin/src/log.h>    // Log
+#include <saturnin/src/locale.h>      // tr
+#include <saturnin/src/log.h>         // Log
+#include <saturnin/src/thread_pool.h> // TreadPool
 
 namespace core = saturnin::core;
 
 using core::EmulatorContext;
 using core::Log;
 using core::Logger;
+using core::ThreadPool;
 using core::tr;
 
 auto main(int argc, char* argv[]) -> int {
     try {
         auto state = EmulatorContext{};
         Log::initialize();
+        ThreadPool::initialize();
         while (state.renderingStatus() != core::RenderingStatus::stopped) {
             if (state.renderingStatus() == core::RenderingStatus::reset) { state.reset(); }
             if (!state.initialize()) {
@@ -44,6 +47,7 @@ auto main(int argc, char* argv[]) -> int {
             state.stopEmulation();
         }
         Log::shutdown();
+        ThreadPool::shutdown();
         std::exit(EXIT_SUCCESS);
     } catch (const std::runtime_error& e) { Log::error(Logger::exception, e.what()); } catch (const std::exception& e) {
         Log::error(Logger::exception, e.what());

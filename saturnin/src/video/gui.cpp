@@ -31,6 +31,7 @@
 #include <saturnin/src/sh2.h>            // Sh2
 #include <saturnin/src/sh2_instructions.h>
 #include <saturnin/src/smpc.h>                        // SaturnDigitalPad, PeripheralKey
+#include <saturnin/src/thread_pool.h>                 // ThreadPool
 #include <saturnin/src/utilities.h>                   // stringToVector
 #include <saturnin/src/cdrom/scsi.h>                  // ScsiDriveInfo
 #include <saturnin/src/video/opengl.h>                // Opengl
@@ -1885,11 +1886,11 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
         = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
     ImGui::Begin(tr("Benchmarks").c_str(), opened, window_flags);
 
-    const auto  available_threads = std::thread::hardware_concurrency() - 1;
-    static auto log               = std::string();
+    // const auto  available_threads = std::thread::hardware_concurrency() - 1;
+    static auto log = std::string();
     if (ImGui::Button("Read from file")) {
-        BS::thread_pool pool(available_threads);
-        log += fmt::format(tr("{} threads created\n"), available_threads);
+        // BS::thread_pool pool(available_threads);
+        // log += fmt::format(tr("{} threads created\n"), available_threads);
 
         const auto read4Bytes = [&](const u8 address) {
             return state.memory()->read<u8>(address * 4) << 24 | state.memory()->read<u8>(address * 4 + 1) << 16
@@ -1922,7 +1923,8 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
 
             // tmr.start();
             start_time = std::chrono::steady_clock::now();
-            pool.parallelize_loop(0,
+            core::ThreadPool::pool_
+                .parallelize_loop(0,
                                   core::rom_size / 4,
                                   [&multithread_read_array, &read4Bytes](const int a, const int b) {
                                       for (int i = a; i < b; ++i) {

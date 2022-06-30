@@ -32,7 +32,7 @@ namespace saturnin::core {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  ThreadPool
 ///
-/// \brief  Handles a pool of threads the emulator. BS_thread_pool wrapper.
+/// \brief  Handles a pool of general purpose threads in the emulator. BS_thread_pool wrapper.
 ///
 /// \author Runik
 /// \date   29/06/2022
@@ -74,7 +74,6 @@ class ThreadPool {
 
     static void shutdown();
 
-  private:
     static BS::thread_pool pool_; ///< Pool of threads
 };
 }; // namespace saturnin::core

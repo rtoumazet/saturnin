@@ -22,11 +22,12 @@
 
 namespace saturnin::core {
 
+BS::thread_pool ThreadPool::pool_;
+
 // static //
 auto ThreadPool::initialize() -> bool {
     const auto available_threads = std::thread::hardware_concurrency() - 1;
     pool_.reset(available_threads);
-
     return true;
 }
 
