@@ -31,7 +31,7 @@ Saturnin is a Sega Saturn emulator
     * libzippp (zip wrapper)
     * lodepng (png format handling)
     * spdlog (logging + string formatting)
-    * thread-pool (thread pool management)
+    * thread-pool : Shoshany, B. (2021). A C++17 Thread Pool for High-Performance Scientific Computing. arXiv. https://doi.org/10.5281/zenodo.4742687
 
 ### Contribution guidelines ###
 
