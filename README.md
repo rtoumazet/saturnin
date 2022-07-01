@@ -21,17 +21,17 @@ Saturnin is a Sega Saturn emulator
     
     List of used libraries for reference:
     
-    * date (rtc handling)
-    * glbinding (opengl functions management)
-    * glfw3 (opengl context)
-    * glm (opengl mathematics)
-    * dear imgui (gui)
-    * libconfig (configuration)
-    * libzip (zip handling)
-    * libzippp (zip wrapper)
-    * lodepng (png format handling)
-    * spdlog (logging + string formatting)
-    * thread-pool : Shoshany, B. (2021). A C++17 Thread Pool for High-Performance Scientific Computing. arXiv. https://doi.org/10.5281/zenodo.4742687
+    * [date](https://github.com/HowardHinnant/date) :  A date and time library based on the C++11/14/17 <chrono> header.
+    * [glbinding](https://github.com/cginternals/glbinding) : A C++ binding for the OpenGL API, generated using the gl.xml specification.
+    * [glfw3](https://github.com/glfw/glfw) : A multi-platform library for OpenGL, OpenGL ES, Vulkan, window and input.
+    * [glm](https://github.com/g-truc/glm) : OpenGL Mathematics (GLM).
+    * [dear imgui](https://github.com/ocornut/imgui) : Bloat-free Graphical User interface for C++ with minimal dependencies.
+    * [libconfig](https://github.com/hyperrealm/libconfig) : C/C++ library for processing configuration files.
+    * [libzip](https://github.com/nih-at/libzip) : A C library for reading, creating, and modifying zip archives.
+    * [libzippp](https://github.com/ctabin/libzippp) : C++ wrapper for libzip.
+    * [lodepng](https://github.com/lvandeve/lodepng) : PNG encoder and decoder in C and C++.
+    * [spdlog](https://github.com/gabime/spdlog) : Fast C++ logging library.
+    * [thread-pool](https://github.com/bshoshany/thread-pool) : Shoshany, B. (2021). A C++17 Thread Pool for High-Performance Scientific Computing. arXiv. https://doi.org/10.5281/zenodo.4742687
 
 ### Contribution guidelines ###
 
