@@ -1939,6 +1939,13 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
             log += fmt::format(u8" {}µs\n", res);
         }
     }
+    if (ImGui::Button("Read from array")) {
+        auto arr = std::array<u8, 0xFF>{};
+        for (int i = 0; i < 0x100; ++i) {
+            arr[i] = i;
+        }
+    }
+
     ImGui::TextUnformatted(log.c_str());
 
     ImGui::End();
