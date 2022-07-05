@@ -33,6 +33,7 @@
 #include <saturnin/src/emulator_modules.h> // EmulatorModules
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
+#include <saturnin/src/thread_pool.h>      // ThreadPool
 #include <saturnin/src/utilities.h>        // toUnderlying
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp2_part.h> // ScrollScreenPos
@@ -52,6 +53,7 @@ using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
 using saturnin::core::Log;
 using saturnin::core::Logger;
+using saturnin::core::ThreadPool;
 // using AddressToNameMap = std::map<u32, std::string>;
 
 using namespace std::chrono;
@@ -1407,26 +1409,60 @@ class Vdp2 {
     void read256ColorsBitmapData(std::vector<u8>& texture_data, const ScrollScreenStatus& screen) {
         constexpr auto offset          = u8{4};
         auto           current_address = screen.bitmap_start_address;
-        const auto     end_address     = current_address + texture_data.capacity() / 4;
+        const auto     end_address     = current_address + static_cast<u32>(texture_data.capacity()) / 4;
         constexpr auto palette_disp    = u8{8};
         const auto     palette         = screen.bitmap_palette_number << palette_disp;
+        // for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
+        //     // if (screen.format == ScrollScreenFormat::bitmap) {
+        //     //    if (current_address == 0x25E26830) DebugBreak();
+        //     //}
+        //     auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
+        //     readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
+        //     current_address += offset;
+        //     row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
+        //     readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
+        //     current_address += offset;
+        // }
+
+        auto mf = BS::multi_future<std::vector<u8>>{};
         for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
-            // if (screen.format == ScrollScreenFormat::bitmap) {
-            //    if (current_address == 0x25E26830) DebugBreak();
-            //}
-            auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
-            readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
-            current_address += offset;
-            row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
-            readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
-            current_address += offset;
+            mf.f.push_back(ThreadPool::pool_.submit([&]() {
+                auto           local_texture      = std::vector<u8>{};
+                constexpr auto local_texture_size = 8 * 4;
+                local_texture.reserve(local_texture_size);
+                auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+                readPalette256Dot<T>(local_texture, screen, palette, row.dot_0);
+                readPalette256Dot<T>(local_texture, screen, palette, row.dot_1);
+                readPalette256Dot<T>(local_texture, screen, palette, static_cast<u8>(row.dot_2));
+                readPalette256Dot<T>(local_texture, screen, palette, row.dot_3);
+                current_address += offset;
+                row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+                readPalette256Dot<T>(local_texture, screen, palette, row.dot_0);
+                readPalette256Dot<T>(local_texture, screen, palette, row.dot_1);
+                readPalette256Dot<T>(local_texture, screen, palette, static_cast<u8>(row.dot_2));
+                readPalette256Dot<T>(local_texture, screen, palette, row.dot_3);
+                current_address += offset;
+                return local_texture;
+            }));
         }
+
+        auto futures = mf.get();
+        for (auto& v : futures) {
+            // for (auto a : v) {
+            //     texture_data.push_back(a);
+            // }
+            std::move(std::begin(v), std::end(v), std::back_inserter(texture_data));
+            // src.clear();
+        }
+
+        // std::future<std::vector<u8>> my_future = core::ThreadPool::pool_.submit([] { return std::vector<u8>{0x01, 0x02, 0x04};
+        // });
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
