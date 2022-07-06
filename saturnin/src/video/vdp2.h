@@ -1434,6 +1434,7 @@ class Vdp2 {
         for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
             mf.f.push_back(ThreadPool::pool_.submit([&]() {
                 auto           local_texture      = std::vector<u8>{};
+                auto           local_address      = current_address;
                 constexpr auto local_texture_size = 8 * 4;
                 local_texture.reserve(local_texture_size);
                 auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
@@ -1441,25 +1442,58 @@ class Vdp2 {
                 readPalette256Dot<T>(local_texture, screen, palette, row.dot_1);
                 readPalette256Dot<T>(local_texture, screen, palette, static_cast<u8>(row.dot_2));
                 readPalette256Dot<T>(local_texture, screen, palette, row.dot_3);
-                current_address += offset;
+                local_address += offset;
                 row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
                 readPalette256Dot<T>(local_texture, screen, palette, row.dot_0);
                 readPalette256Dot<T>(local_texture, screen, palette, row.dot_1);
                 readPalette256Dot<T>(local_texture, screen, palette, static_cast<u8>(row.dot_2));
                 readPalette256Dot<T>(local_texture, screen, palette, row.dot_3);
-                current_address += offset;
+                local_address += offset;
                 return local_texture;
             }));
+            current_address += offset * 2;
         }
 
         auto futures = mf.get();
         for (auto& v : futures) {
-            // for (auto a : v) {
-            //     texture_data.push_back(a);
-            // }
             std::move(std::begin(v), std::end(v), std::back_inserter(texture_data));
-            // src.clear();
         }
+
+        // auto bitmap_parts = std::vector<std::pair<u32, std::vector<u8>>>{};
+        // auto order        = u32{};
+        // for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
+        //     ThreadPool::pool_.push_task([&]() {
+        //         auto           local_texture      = std::vector<u8>{};
+        //         constexpr auto local_texture_size = 8 * 4;
+        //         local_texture.reserve(local_texture_size);
+        //         auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+        //         readPalette256Dot<T>(local_texture, screen, palette, row.dot_0);
+        //         readPalette256Dot<T>(local_texture, screen, palette, row.dot_1);
+        //         readPalette256Dot<T>(local_texture, screen, palette, static_cast<u8>(row.dot_2));
+        //         readPalette256Dot<T>(local_texture, screen, palette, row.dot_3);
+        //         current_address += offset;
+        //         row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+        //         readPalette256Dot<T>(local_texture, screen, palette, row.dot_0);
+        //         readPalette256Dot<T>(local_texture, screen, palette, row.dot_1);
+        //         readPalette256Dot<T>(local_texture, screen, palette, static_cast<u8>(row.dot_2));
+        //         readPalette256Dot<T>(local_texture, screen, palette, row.dot_3);
+        //         current_address += offset;
+        //         bitmap_parts.push_back(std::pair(order, local_texture));
+        //     });
+        //     ++order;
+        // }
+
+        // auto futures = mf.get();
+        // for (auto& v : futures) {
+        //     std::move(std::begin(v), std::end(v), std::back_inserter(texture_data));
+        // }
+
+        // if (!texture_data.empty()) {
+        //     std::ofstream outfile("bitmap_seq.dat", std::ofstream::binary);
+        //     // outfile.write(reinterpret_cast<const char*>(texture_data.data(), sizeof(u8) * texture_data.size());
+        //     outfile.write(reinterpret_cast<const char*>(texture_data.data()), sizeof(u8) * texture_data.size());
+        //     outfile.close();
+        // }
 
         // std::future<std::vector<u8>> my_future = core::ThreadPool::pool_.submit([] { return std::vector<u8>{0x01, 0x02, 0x04};
         // });
