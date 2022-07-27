@@ -43,12 +43,12 @@ class BaseRenderingPart {
   public:
     ///@{
     /// Constructors / Destructors
-    BaseRenderingPart()                         = default;
-    BaseRenderingPart(const BaseRenderingPart&) = default;
-    BaseRenderingPart(BaseRenderingPart&&)      = default;
+    BaseRenderingPart()                                              = default;
+    BaseRenderingPart(const BaseRenderingPart&)                      = default;
+    BaseRenderingPart(BaseRenderingPart&&)                           = default;
     auto operator=(const BaseRenderingPart&) & -> BaseRenderingPart& = default;
-    auto operator=(BaseRenderingPart&&) & -> BaseRenderingPart& = default;
-    virtual ~BaseRenderingPart()                                = default;
+    auto operator=(BaseRenderingPart&&) & -> BaseRenderingPart&      = default;
+    virtual ~BaseRenderingPart()                                     = default;
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,5 +111,6 @@ class BaseRenderingPart {
     u32               order_{0};        ///< Creation order for the same priority parts (mostly used for VDP1 parts).
     static inline u32 global_order_{0}; ///< Static variable used to get the current part order.
     size_t            texture_key_{};   ///< Link to the texture.
+    LinkedLayer       linked_layer_{LinkedLayer::undefined}; ///< The layer linked to the part.
 };
 } // namespace saturnin::video
