@@ -21,9 +21,8 @@
 #include <saturnin/src/video/gui.h>
 //#include <imgui.h>
 #include <istream>
-#include <filesystem>         // path
-#include <imgui_internal.h>   // ImGuiSelectableFlags_SelectOnNav
-#include <BS_thread_pool.hpp> // thread_pool
+#include <filesystem>       // path
+#include <imgui_internal.h> // ImGuiSelectableFlags_SelectOnNav
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_enums.h> // EmulationStatus
 #include <saturnin/src/locale.h>         // tr
@@ -73,6 +72,7 @@ using core::PeripheralLayout;
 using core::SaturnDigitalPad;
 using core::StvBoardControls;
 using core::StvPlayerControls;
+using core::ThreadPool;
 using core::tr;
 using sh2::Sh2Register;
 using sh2::Sh2Type;
