@@ -2065,6 +2065,7 @@ union ColorOffsetEnable {
 
 union ColorOffsetSelect {
     u16 raw; ///< Raw representation.
+    // BitField<9>     bitmap_enable_nbg1;          ///< Defines N1BMEN bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

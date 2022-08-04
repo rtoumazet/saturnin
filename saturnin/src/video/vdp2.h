@@ -284,6 +284,7 @@ struct RamStatus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScrollScreenStatus {
     ScrollScreen scroll_screen{};                    ///< The scroll screen value
+    LinkedLayer  linked_layer{};                     ///< The linked layer (ScrollScreen related).
     bool         is_display_enabled{};               ///< True when displayed.
     bool         is_transparency_code_valid{};       ///< True when transparency code is valid.
     bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
@@ -345,6 +346,9 @@ struct ScrollScreenStatus {
     u8  screen_scroll_horizontal_fractional{}; ///< Horizontal screen scroll fractional part.
     u16 screen_scroll_vertical_integer{};      ///< Vertical screen scroll vertical integer part.
     u8  screen_scroll_vertical_fractional{};   ///< Vertical screen scroll fractional part.
+
+    // Color offset data
+    bool is_color_offset_enabled{}; ///< True when color offset is enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
