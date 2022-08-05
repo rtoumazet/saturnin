@@ -349,6 +349,9 @@ struct ScrollScreenStatus {
 
     // Color offset data
     bool is_color_offset_enabled{}; ///< True when color offset is enabled.
+    s16  color_offset_red{};        ///< Red data of the color offset.
+    s16  color_offset_green{};      ///< Green data of the color offset.
+    s16  color_offset_blue{};       ///< Blue data of the color offset.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

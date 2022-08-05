@@ -2085,6 +2085,22 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return vram_start_address + map_offset * boundary;
     };
 
+    const auto setColorOffset
+        = [&](ScrollScreenStatus& s, const ColorOffsetEnableBit enable_bit, const ColorOffsetSelectBit select_bit) {
+              s.is_color_offset_enabled = (enable_bit == ColorOffsetEnableBit::enabled);
+              if (s.is_color_offset_enabled) {
+                  if (select_bit == ColorOffsetSelectBit::use_color_offset_a) {
+                      s.color_offset_red   = (coar_.sign == 0) ? coar_.red_data : -(~(coar_.red_data - 1));
+                      s.color_offset_green = (coag_.sign == 0) ? coag_.green_data : -(~(coag_.green_data - 1));
+                      s.color_offset_blue  = (coab_.sign == 0) ? coab_.blue_data : -(~(coab_.blue_data - 1));
+                  } else {
+                      s.color_offset_red   = (cobr_.sign == 0) ? cobr_.red_data : -(~(cobr_.red_data - 1));
+                      s.color_offset_green = (cobg_.sign == 0) ? cobg_.green_data : -(~(cobg_.green_data - 1));
+                      s.color_offset_blue  = (cobb_.sign == 0) ? cobb_.blue_data : -(~(cobb_.blue_data - 1));
+                  }
+              }
+          };
+
     auto& screen         = getScreen(s);
     screen.scroll_screen = s;
 
@@ -2149,6 +2165,23 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_integer      = scyin0_.integer;
             screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn0_.fractional);
 
+            // Color offset
+            // screen.is_color_offset_enabled
+            //    = (toEnum<ColorOffsetEnableBit>(clofen_.color_offset_enable_nbg0) == ColorOffsetEnableBit::enabled);
+            // if (screen.is_color_offset_enabled) {
+            //    if (toEnum<ColorOffsetSelectBit>(clofsl_.color_offset_select_nbg0) == ColorOffsetSelectBit::use_color_offset_a)
+            //    {
+            //        screen.color_offset_red   = (coar_.sign == 0) ? coar_.red_data : -(~(coar_.red_data - 1));
+            //        screen.color_offset_green = (coag_.sign == 0) ? coag_.green_data : -(~(coag_.green_data - 1));
+            //        screen.color_offset_blue  = (coab_.sign == 0) ? coab_.blue_data : -(~(coab_.blue_data - 1));
+            //    } else {
+            //        screen.color_offset_red   = (cobr_.sign == 0) ? cobr_.red_data : -(~(cobr_.red_data - 1));
+            //        screen.color_offset_green = (cobg_.sign == 0) ? cobg_.green_data : -(~(cobg_.green_data - 1));
+            //        screen.color_offset_blue  = (cobb_.sign == 0) ? cobb_.blue_data : -(~(cobb_.blue_data - 1));
+            //    }
+            //}
+            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg0), toEnum<ColorOffsetSelectBit>(clofsl_.nbg0));
+
             break;
         case ScrollScreen::nbg1:
             screen.linked_layer = LinkedLayer::nbg1;
@@ -2208,6 +2241,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_integer      = scyin1_.integer;
             screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn1_.fractional);
 
+            // Color offset
+            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg1), toEnum<ColorOffsetSelectBit>(clofsl_.nbg1));
             break;
         case ScrollScreen::nbg2:
             screen.linked_layer = LinkedLayer::nbg2;
@@ -2258,6 +2293,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_horizontal_integer = scxn2_.integer;
             screen.screen_scroll_vertical_integer   = scyn2_.integer;
 
+            // Color offset
+            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg2), toEnum<ColorOffsetSelectBit>(clofsl_.nbg2));
             break;
 
         case ScrollScreen::nbg3:
@@ -2309,6 +2346,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_horizontal_integer = scxn3_.integer;
             screen.screen_scroll_vertical_integer   = scyn3_.integer;
 
+            // Color offset
+            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg3), toEnum<ColorOffsetSelectBit>(clofsl_.nbg3));
             break;
 
         case ScrollScreen::rbg0:
@@ -2375,6 +2414,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_special_color_calculation
                 = static_cast<u8>(static_cast<bool>(bmpnb_.bitmap_special_color_calculation_rbg0));
             screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
+
+            // Color offset
+            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.rbg0), toEnum<ColorOffsetSelectBit>(clofsl_.rbg0));
             break;
 
         case ScrollScreen::rbg1:
@@ -2434,6 +2476,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
+
+            // Color offset
+            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg0), toEnum<ColorOffsetSelectBit>(clofsl_.nbg0));
             break;
         default: Log::warning(Logger::vdp2, tr("Scroll screen not set !"));
     }
