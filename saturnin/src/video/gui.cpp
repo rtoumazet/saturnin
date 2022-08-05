@@ -1573,14 +1573,17 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 for (const auto& [address, desc] : registers) {
                     ImGui::TableNextRow();
                     auto column_index = u8{0};
+                    // ImGui::TableSetColumnIndex(column_index++);
                     ImGui::TableSetColumnIndex(column_index++);
                     ImGui::TextUnformatted(fmt::format("{:#010x}", address).c_str());
 
                     ImGui::TableSetColumnIndex(column_index++);
-                    ImGui::TextUnformatted(desc.c_str());
+                    // ImGui::TextUnformatted(desc.c_str());
+                    ImGui::Text("bbb");
 
                     ImGui::TableSetColumnIndex(column_index);
-                    ImGui::TextUnformatted(fmt::format("{:#06x}", state.vdp2()->readRegisters<u16>(address)).c_str());
+                    // ImGui::TextUnformatted(fmt::format("{:#06x}", state.vdp2()->readRegisters<u16>(address)).c_str());
+                    // ImGui::Text("ccc");
                 }
                 ImGui::EndTable();
             }
