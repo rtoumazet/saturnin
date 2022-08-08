@@ -2090,13 +2090,13 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
               s.is_color_offset_enabled = (enable_bit == ColorOffsetEnableBit::enabled);
               if (s.is_color_offset_enabled) {
                   if (select_bit == ColorOffsetSelectBit::use_color_offset_a) {
-                      s.color_offset_red   = (coar_.sign == 0) ? coar_.red_data : -(~(coar_.red_data - 1));
-                      s.color_offset_green = (coag_.sign == 0) ? coag_.green_data : -(~(coag_.green_data - 1));
-                      s.color_offset_blue  = (coab_.sign == 0) ? coab_.blue_data : -(~(coab_.blue_data - 1));
+                      s.color_offset_red   = static_cast<s16>(coar_.raw);
+                      s.color_offset_green = static_cast<s16>(coag_.raw);
+                      s.color_offset_blue  = static_cast<s16>(coab_.raw);
                   } else {
-                      s.color_offset_red   = (cobr_.sign == 0) ? cobr_.red_data : -(~(cobr_.red_data - 1));
-                      s.color_offset_green = (cobg_.sign == 0) ? cobg_.green_data : -(~(cobg_.green_data - 1));
-                      s.color_offset_blue  = (cobb_.sign == 0) ? cobb_.blue_data : -(~(cobb_.blue_data - 1));
+                      s.color_offset_red   = static_cast<s16>(cobr_.raw);
+                      s.color_offset_green = static_cast<s16>(cobg_.raw);
+                      s.color_offset_blue  = static_cast<s16>(cobb_.raw);
                   }
               }
           };

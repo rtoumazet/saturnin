@@ -181,6 +181,18 @@ void EmulatorContext::startEmulation() {
     // video::CmdVertexCoordinate tst2{0x8234};
     // auto                       b2 = tst2.twoCompl();
     //
+    // video::ScrollScreenStatus sss;
+    // video::ColorOffsetBRed    a{0xFFE9};
+    // video::ColorOffsetBRed    b{0x00e3};
+
+    // bool a_t = static_cast<bool>(a.sign);
+    // bool b_t = static_cast<bool>(b.sign);
+    // if ((bool)a.sign == 1) {
+    //     //
+    //     // sss.color_offset_red = -(~((u16)(a.raw + 1)));
+    //     sss.color_offset_red = -((u16)(~a.raw) + 1);
+    // }
+
     // TESTING //
 }
 

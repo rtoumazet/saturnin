@@ -2104,6 +2104,17 @@ union ColorOffsetSelect {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum	Sign
+///
+/// \brief	Sign bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Sign : bool {
+    positive = 0, ///< Sign is positive.
+    negative = 1  ///< Sign is negative.
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	ColorOffsetARed
 ///
 /// \brief	Color Offset A (Red) (COAR).
@@ -2114,8 +2125,8 @@ union ColorOffsetSelect {
 
 union ColorOffsetARed {
     u16            raw;      ///< Raw representation.
-    BitField<8>    sign;     ///< Sign of the data.
-    BitField<0, 7> red_data; ///< Defines the color offset A red data (COARDx).
+    BitField<15>   sign;     ///< Sign of the data.
+    BitField<0, 8> red_data; ///< Defines the color offset A red data (COARDx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2129,8 +2140,8 @@ union ColorOffsetARed {
 
 union ColorOffsetAGreen {
     u16            raw;        ///< Raw representation.
-    BitField<8>    sign;       ///< Sign of the data.
-    BitField<0, 7> green_data; ///< Defines the color offset A green data (COAGRx).
+    BitField<15>   sign;       ///< Sign of the data.
+    BitField<0, 8> green_data; ///< Defines the color offset A green data (COAGRx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2144,8 +2155,8 @@ union ColorOffsetAGreen {
 
 union ColorOffsetABlue {
     u16            raw;       ///< Raw representation.
-    BitField<8>    sign;      ///< Sign of the data.
-    BitField<0, 7> blue_data; ///< Defines the color offset A red data (COABLx).
+    BitField<15>   sign;      ///< Sign of the data.
+    BitField<0, 8> blue_data; ///< Defines the color offset A red data (COABLx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2159,8 +2170,8 @@ union ColorOffsetABlue {
 
 union ColorOffsetBRed {
     u16            raw;      ///< Raw representation.
-    BitField<8>    sign;     ///< Sign of the data.
-    BitField<0, 7> red_data; ///< Defines the color offset B red data (COBRDx).
+    BitField<15>   sign;     ///< Sign of the data.
+    BitField<0, 8> red_data; ///< Defines the color offset B red data (COBRDx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2174,8 +2185,8 @@ union ColorOffsetBRed {
 
 union ColorOffsetBGreen {
     u16            raw;        ///< Raw representation.
-    BitField<8>    sign;       ///< Sign of the data.
-    BitField<0, 7> green_data; ///< Defines the color offset B green data (COBGRx).
+    BitField<15>   sign;       ///< Sign of the data.
+    BitField<0, 8> green_data; ///< Defines the color offset B green data (COBGRx).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2189,8 +2200,8 @@ union ColorOffsetBGreen {
 
 union ColorOffsetBBlue {
     u16            raw;       ///< Raw representation.
-    BitField<8>    sign;      ///< Sign of the data.
-    BitField<0, 7> blue_data; ///< Defines the color offset B red data (COBBLx).
+    BitField<15>   sign;      ///< Sign of the data.
+    BitField<0, 8> blue_data; ///< Defines the color offset B red data (COBBLx).
 };
 
 } // namespace saturnin::video
