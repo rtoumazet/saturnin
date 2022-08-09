@@ -201,6 +201,7 @@ void Opengl::initializeShaders() {
 
         uniform sampler2D texture1;
         uniform bool is_texture_used;
+        uniform vec4 color_offset; // not used for now
 
         void main()
         {
@@ -209,6 +210,7 @@ void Opengl::initializeShaders() {
             }else{
                 gl_FragColor = frg_color;
             }
+   
         }
     )");
 
@@ -223,6 +225,7 @@ void Opengl::initializeShaders() {
 
         uniform sampler2D texture1;
         uniform bool is_texture_used;
+        uniform vec3 color_offset;
 
         //vec4 test = vec4(1.0,0.0,0.0,1.0);
         
@@ -234,6 +237,7 @@ void Opengl::initializeShaders() {
                 out_color = frg_color;
             }
             out_color.rgb += frg_grd_color.rgb;
+            out_color.rgb += color_offset.rgb;
         } 
     )");
 }
@@ -310,6 +314,10 @@ void Opengl::render() {
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
         const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+
+        const auto uni_color_offset = glGetUniformLocation(program_shader_, "color_offset");
+        const s32  color_offset[3]  = {0x50, 0x50, 0x50};
+        glUniform3iv(uni_color_offset, 1, color_offset);
 
         // Filling a vector with all the vertexes needed to render the parts list, in order to send data only once to the GPU.
         // auto batch_vertex_size = getVertexesNumberByDrawType(parts_list);
