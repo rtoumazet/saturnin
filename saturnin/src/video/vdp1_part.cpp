@@ -46,7 +46,7 @@ Vdp1Part::Vdp1Part(EmulatorModules& modules,
                    const u32        table_address,
                    const CmdCtrl&   cmdctrl,
                    const CmdLink&   cmdlink) :
-    BaseRenderingPart(VdpType::vdp1, type, 0, 0, LinkedLayer::sprite) {
+    BaseRenderingPart(VdpType::vdp1, type) {
     cmdctrl_       = std::move(cmdctrl);
     cmdlink_       = std::move(cmdlink);
     table_address_ = table_address;

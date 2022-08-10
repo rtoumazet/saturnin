@@ -2088,16 +2088,20 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     const auto setColorOffset
         = [&](ScrollScreenStatus& s, const ColorOffsetEnableBit enable_bit, const ColorOffsetSelectBit select_bit) {
               s.is_color_offset_enabled = (enable_bit == ColorOffsetEnableBit::enabled);
+              s.color_offset            = {};
               if (s.is_color_offset_enabled) {
                   if (select_bit == ColorOffsetSelectBit::use_color_offset_a) {
-                      s.color_offset_red   = static_cast<s16>(coar_.raw);
-                      s.color_offset_green = static_cast<s16>(coag_.raw);
-                      s.color_offset_blue  = static_cast<s16>(coab_.raw);
+                      s.color_offset.as_s16.r = static_cast<s16>(coar_.raw);
+                      s.color_offset.as_s16.g = static_cast<s16>(coag_.raw);
+                      s.color_offset.as_s16.b = static_cast<s16>(coab_.raw);
                   } else {
-                      s.color_offset_red   = static_cast<s16>(cobr_.raw);
-                      s.color_offset_green = static_cast<s16>(cobg_.raw);
-                      s.color_offset_blue  = static_cast<s16>(cobb_.raw);
+                      s.color_offset.as_s16.r = static_cast<s16>(cobr_.raw);
+                      s.color_offset.as_s16.g = static_cast<s16>(cobg_.raw);
+                      s.color_offset.as_s16.b = static_cast<s16>(cobb_.raw);
                   }
+                  s.color_offset.as_float.r = static_cast<float>(s.color_offset.as_s16.r) / static_cast<float>(u16_max);
+                  s.color_offset.as_float.g = static_cast<float>(s.color_offset.as_s16.g) / static_cast<float>(u16_max);
+                  s.color_offset.as_float.b = static_cast<float>(s.color_offset.as_s16.b) / static_cast<float>(u16_max);
               }
           };
 
@@ -2106,7 +2110,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
     switch (s) {
         case ScrollScreen::nbg0:
-            screen.linked_layer = LinkedLayer::nbg0;
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
 
@@ -2184,7 +2187,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             break;
         case ScrollScreen::nbg1:
-            screen.linked_layer = LinkedLayer::nbg1;
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg1);
 
@@ -2245,7 +2247,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg1), toEnum<ColorOffsetSelectBit>(clofsl_.nbg1));
             break;
         case ScrollScreen::nbg2:
-            screen.linked_layer = LinkedLayer::nbg2;
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg2));
 
@@ -2298,7 +2299,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             break;
 
         case ScrollScreen::nbg3:
-            screen.linked_layer = LinkedLayer::nbg3;
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg3));
 
@@ -2351,7 +2351,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             break;
 
         case ScrollScreen::rbg0:
-            screen.linked_layer = LinkedLayer::rbg0;
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(craofb_.color_ram_address_offset_rbg0);
 
@@ -2420,7 +2419,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             break;
 
         case ScrollScreen::rbg1:
-            screen.linked_layer = LinkedLayer::nbg0;
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
 
@@ -2828,11 +2826,7 @@ void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
     //  p.priority(screen.priority_number);
     //  vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
     //     std::make_unique<Vdp2Part>(key, width, height, screen.priority_number));
-    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(key,
-                                                                       width,
-                                                                       height,
-                                                                       screen.priority_number,
-                                                                       screen.linked_layer);
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(key, width, height, screen.priority_number);
 }
 
 void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset) {
@@ -3130,11 +3124,7 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
     // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
     //    std::make_unique<Vdp2Part>(pnd, pos, key, screen.priority_number));
-    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
-                                                                       pos,
-                                                                       key,
-                                                                       screen.priority_number,
-                                                                       screen.linked_layer);
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd, pos, key, screen.priority_number);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {

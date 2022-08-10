@@ -315,9 +315,9 @@ void Opengl::render() {
 
         const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
 
-        const auto uni_color_offset = glGetUniformLocation(program_shader_, "color_offset");
-        const s32  color_offset[3]  = {0x50, 0x50, 0x50};
-        glUniform3iv(uni_color_offset, 1, color_offset);
+        const auto  uni_color_offset = glGetUniformLocation(program_shader_, "color_offset");
+        const float color_offset[3]  = {-0.5, -0.5, -0.5};
+        glUniform3fv(uni_color_offset, 1, color_offset);
 
         // Filling a vector with all the vertexes needed to render the parts list, in order to send data only once to the GPU.
         // auto batch_vertex_size = getVertexesNumberByDrawType(parts_list);

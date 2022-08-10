@@ -274,6 +274,20 @@ struct RamStatus {
     RotationDataBankSelect  vram_b1_rotation_bank_select{RotationDataBankSelect::not_used};
 };
 
+struct ColorOffset {
+    struct DataS16 {
+        s16 r;
+        s16 g;
+        s16 b;
+    } as_s16;
+
+    struct DataFloat {
+        float r;
+        float g;
+        float b;
+    } as_float;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct ScrollScreenStatus
 ///
@@ -284,7 +298,6 @@ struct RamStatus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScrollScreenStatus {
     ScrollScreen scroll_screen{};                    ///< The scroll screen value
-    LinkedLayer  linked_layer{};                     ///< The linked layer (ScrollScreen related).
     bool         is_display_enabled{};               ///< True when displayed.
     bool         is_transparency_code_valid{};       ///< True when transparency code is valid.
     bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
@@ -348,10 +361,8 @@ struct ScrollScreenStatus {
     u8  screen_scroll_vertical_fractional{};   ///< Vertical screen scroll fractional part.
 
     // Color offset data
-    bool is_color_offset_enabled{}; ///< True when color offset is enabled.
-    s16  color_offset_red{};        ///< Red data of the color offset.
-    s16  color_offset_green{};      ///< Green data of the color offset.
-    s16  color_offset_blue{};       ///< Blue data of the color offset.
+    bool        is_color_offset_enabled{}; ///< True when color offset is enabled.
+    ColorOffset color_offset;              ///< Color offset data.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
