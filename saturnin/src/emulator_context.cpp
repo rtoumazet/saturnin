@@ -182,15 +182,16 @@ void EmulatorContext::startEmulation() {
     // auto                       b2 = tst2.twoCompl();
     //
     // video::ScrollScreenStatus sss;
-    // video::ColorOffsetBRed    a{0xFFE9};
-    // video::ColorOffsetBRed    b{0x00e3};
+    // video::ColorOffsetBRed a{0x01E9};
+    // video::ColorOffsetBRed b{0x00e3};
 
-    // bool a_t = static_cast<bool>(a.sign);
-    // bool b_t = static_cast<bool>(b.sign);
-    // if ((bool)a.sign == 1) {
-    //     //
-    //     // sss.color_offset_red = -(~((u16)(a.raw + 1)));
-    //     sss.color_offset_red = -((u16)(~a.raw) + 1);
+    // auto a_t = (bool)a.sign;
+    // auto b_t = (bool)b.sign;
+
+    // if (a.sign == 1) {
+    //     //     //
+    //     //     // sss.color_offset_red = -(~((u16)(a.raw + 1)));
+    //     //     sss.color_offset_red = -((u16)(~a.raw) + 1);
     // }
 
     // TESTING //

@@ -54,11 +54,11 @@ class Vdp1 {
     // Constructors / Destructors
     Vdp1() = delete;
     Vdp1(EmulatorContext* ec) : modules_(ec){};
-    Vdp1(const Vdp1&) = delete;
-    Vdp1(Vdp1&&)      = delete;
+    Vdp1(const Vdp1&)                      = delete;
+    Vdp1(Vdp1&&)                           = delete;
     auto operator=(const Vdp1&) & -> Vdp1& = delete;
-    auto operator=(Vdp1&&) & -> Vdp1& = delete;
-    ~Vdp1()                           = default;
+    auto operator=(Vdp1&&) & -> Vdp1&      = delete;
+    ~Vdp1()                                = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,6 +255,8 @@ class Vdp1 {
 
     std::vector<Vdp1Part> vdp1_parts_;               ///< Storage of vdp1 rendering parts .
     u16                   color_ram_address_offset_; ///< The color ram address offset.
+
+    ColorOffset color_offset_; ///< Current color offset configuration for the sprite layer.
 };
 
 } // namespace saturnin::video

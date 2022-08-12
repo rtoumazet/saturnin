@@ -96,21 +96,29 @@ class BaseRenderingPart {
     [[nodiscard]] auto priority() const -> const u8 { return priority_; };
     void               textureKey(const size_t k) { texture_key_ = k; };
     [[nodiscard]] auto textureKey() const -> const size_t { return texture_key_; };
+    [[nodiscard]] auto colorOffset() const -> const std::array<float, 3> {
+        return std::array<float, 3>{color_offset_.r, color_offset_.g, color_offset_.b};
+    };
     ///@}
 
     std::vector<Vertex> vertexes_; ///< Contains the geometry vertexes of the part.
 
   protected:
-    BaseRenderingPart(const VdpType vdp_type, const DrawType draw_type, const size_t texture_key = {}, const u8 priority = {}) :
-        vdp_type_(vdp_type), draw_type_(draw_type), texture_key_(texture_key), priority_(priority){};
+    BaseRenderingPart(const VdpType  vdp_type,
+                      const DrawType draw_type,
+                      const size_t   texture_key  = {},
+                      const u8       priority     = {},
+                      const ColorF   color_offset = {}) :
+        vdp_type_(vdp_type),
+        draw_type_(draw_type), texture_key_(texture_key), priority_(priority), color_offset_(color_offset){};
 
   private:
-    VdpType              vdp_type_{VdpType::not_set};     ///< Type of the part.
-    DrawType             draw_type_{DrawType::undefined}; ///< Type of the draw
-    u8                   priority_{0};                    ///< Priority of the part.
-    u32                  order_{0};        ///< Creation order for the same priority parts (mostly used for VDP1 parts).
-    static inline u32    global_order_{0}; ///< Static variable used to get the current part order.
-    size_t               texture_key_{};   ///< Link to the texture.
-    std::array<float, 3> color_offset_{};  ///< Color offset for the part
+    VdpType           vdp_type_{VdpType::not_set};     ///< Type of the part.
+    DrawType          draw_type_{DrawType::undefined}; ///< Type of the draw
+    u8                priority_{0};                    ///< Priority of the part.
+    u32               order_{0};        ///< Creation order for the same priority parts (mostly used for VDP1 parts).
+    static inline u32 global_order_{0}; ///< Static variable used to get the current part order.
+    size_t            texture_key_{};   ///< Link to the texture.
+    ColorF            color_offset_{};  ///< Color offset for the part.
 };
 } // namespace saturnin::video

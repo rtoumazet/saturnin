@@ -45,8 +45,9 @@ Vdp1Part::Vdp1Part(EmulatorModules& modules,
                    const DrawType   type,
                    const u32        table_address,
                    const CmdCtrl&   cmdctrl,
-                   const CmdLink&   cmdlink) :
-    BaseRenderingPart(VdpType::vdp1, type) {
+                   const CmdLink&   cmdlink,
+                   const ColorF&    color_offset) :
+    BaseRenderingPart(VdpType::vdp1, type, 0, 0, color_offset) {
     cmdctrl_       = std::move(cmdctrl);
     cmdlink_       = std::move(cmdlink);
     table_address_ = table_address;

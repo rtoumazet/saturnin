@@ -151,10 +151,12 @@ void Opengl::initializeShaders() {
         attribute vec2 vtx_tex_coord;
         attribute vec4 vtx_color;
         attribute vec4 vtx_grd_color;
+        attribute vec3 vtx_color_offset;
         
         varying vec2   frg_tex_coord;
         varying vec4   frg_color; 
         varying vec4   frg_grd_color; 
+        varying vec3   frg_color_offset;
         
         uniform mat4 proj_matrix;
 
@@ -163,6 +165,7 @@ void Opengl::initializeShaders() {
             frg_tex_coord   = vec2(vtx_tex_coord);
             frg_color       = vtx_color;
             frg_grd_color   = vtx_grd_color;
+            frg_color_offset= vtx_color_offset;
         }
     )");
 
@@ -173,10 +176,12 @@ void Opengl::initializeShaders() {
         layout (location = 1) in vec2 vtx_tex_coord;
         layout (location = 2) in vec4 vtx_color;
         layout (location = 3) in vec4 vtx_grd_color;
+        // layout (location = 4) in vec3 vtx_color_offset;
 
         out vec2 frg_tex_coord;
         out vec4 frg_color;
         out vec4 frg_grd_color;
+        // out vec3 frg_color_offset;
 
         uniform mat4 proj_matrix;
 
@@ -185,6 +190,7 @@ void Opengl::initializeShaders() {
             frg_tex_coord   = vec2(vtx_tex_coord);
             frg_color       = vtx_color;
             frg_grd_color   = vtx_grd_color;
+            // frg_color_offset= vtx_color_offset;
         }
     )");
 
@@ -198,18 +204,30 @@ void Opengl::initializeShaders() {
         varying vec2 frg_tex_coord;
         varying vec4 frg_color;
         varying vec4 frg_grd_color;
+        varying vec3 frg_color_offset; // not used for now
 
         uniform sampler2D texture1;
         uniform bool is_texture_used;
-        uniform vec4 color_offset; // not used for now
 
         void main()
         {
+            vec4 out_color;
             if(is_texture_used){            
-                gl_FragColor = texture2D(texture1,frg_tex_coord);
+                //gl_FragColor = texture2D(texture1,frg_tex_coord);                
+                out_color = texture2D(texture1,frg_tex_coord);
             }else{
-                gl_FragColor = frg_color;
+                //gl_FragColor = frg_color;
+                out_color = frg_color;
             }
+            out_color.rgb += frg_color_offset.rgb;
+            if(out_color.r > 1.0) out_color.r = 1.0;
+            if(out_color.g > 1.0) out_color.g = 1.0;
+            if(out_color.b > 1.0) out_color.b = 1.0;
+            if(out_color.r < 0.0) out_color.r = 0.0;
+            if(out_color.g < 0.0) out_color.g = 0.0;
+            if(out_color.b < 0.0) out_color.b = 0.0;
+
+            gl_FragColor = out_color;
    
         }
     )");
@@ -220,6 +238,7 @@ void Opengl::initializeShaders() {
         in vec2 frg_tex_coord;
         in vec4 frg_color;
         in vec4 frg_grd_color;
+        //in vec3 frg_color_offset;
 
         out vec4 out_color;
 
@@ -238,6 +257,14 @@ void Opengl::initializeShaders() {
             }
             out_color.rgb += frg_grd_color.rgb;
             out_color.rgb += color_offset.rgb;
+
+            if(out_color.r > 1.0) out_color.r = 1.0;
+            if(out_color.g > 1.0) out_color.g = 1.0;
+            if(out_color.b > 1.0) out_color.b = 1.0;
+            if(out_color.r < 0.0) out_color.r = 0.0;
+            if(out_color.g < 0.0) out_color.g = 0.0;
+            if(out_color.b < 0.0) out_color.b = 0.0;
+
         } 
     )");
 }
@@ -314,10 +341,6 @@ void Opengl::render() {
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
         const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
-
-        const auto  uni_color_offset = glGetUniformLocation(program_shader_, "color_offset");
-        const float color_offset[3]  = {-0.5, -0.5, -0.5};
-        glUniform3fv(uni_color_offset, 1, color_offset);
 
         // Filling a vector with all the vertexes needed to render the parts list, in order to send data only once to the GPU.
         // auto batch_vertex_size = getVertexesNumberByDrawType(parts_list);
@@ -406,6 +429,10 @@ void Opengl::render() {
 
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
+
+            const auto uni_color_offset = glGetUniformLocation(program_shader_, "color_offset");
+            // const float color_offset[3]  = {-0.5, -0.5, -0.5};
+            glUniform3fv(uni_color_offset, 1, part->colorOffset().data());
 
             switch (part->drawType()) {
                 case DrawType::textured_polygon: {
@@ -821,6 +848,7 @@ auto Opengl::createProgramShader(const u32 vertex_shader, const u32 fragment_sha
     glBindAttribLocation(shader_program, 1, "vtx_tex_coord");
     glBindAttribLocation(shader_program, 2, "vtx_color");
     glBindAttribLocation(shader_program, 3, "vtx_grd_color");
+    glBindAttribLocation(shader_program, 4, "vtx_color_offset");
 
     glLinkProgram(shader_program);
     checkProgramCompilation(shader_program);

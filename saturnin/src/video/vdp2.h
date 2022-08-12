@@ -275,17 +275,8 @@ struct RamStatus {
 };
 
 struct ColorOffset {
-    struct DataS16 {
-        s16 r;
-        s16 g;
-        s16 b;
-    } as_s16;
-
-    struct DataFloat {
-        float r;
-        float g;
-        float b;
-    } as_float;
+    ColorS16 as_s16;
+    ColorF   as_float;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -709,6 +700,21 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto getSpritePriority(const u8 register_number) -> u8;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset;
+    ///
+    /// \brief	Returns the color offset for the specified layer.
+    ///
+    /// \author	Runik
+    /// \date	11/08/2022
+    ///
+    /// \param 	layer	The layer.
+    ///
+    /// \returns	The color offset.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getColorOffset(const Layer layer) -> ColorOffset;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> auto Vdp2::readColor(const u32 color_address) -> const Color

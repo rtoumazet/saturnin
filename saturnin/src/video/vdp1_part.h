@@ -80,12 +80,13 @@ class Vdp1Part final : public BaseRenderingPart {
              const DrawType   type,
              const u32        table_address,
              const CmdCtrl&   cmdctrl,
-             const CmdLink&   cmdlink);
-    Vdp1Part(const Vdp1Part&) = default;
-    Vdp1Part(Vdp1Part&&)      = default;
+             const CmdLink&   cmdlink,
+             const ColorF&    color_offset);
+    Vdp1Part(const Vdp1Part&)                      = default;
+    Vdp1Part(Vdp1Part&&)                           = default;
     auto operator=(const Vdp1Part&) & -> Vdp1Part& = default;
-    auto operator=(Vdp1Part&&) & -> Vdp1Part& = default;
-    ~Vdp1Part()                               = default;
+    auto operator=(Vdp1Part&&) & -> Vdp1Part&      = default;
+    ~Vdp1Part()                                    = default;
     ///@}
 
     // void renderPart(){};

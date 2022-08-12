@@ -242,6 +242,78 @@ auto Vdp2::getSpritePriority(const u8 register_number) -> u8 {
     return 0;
 }
 
+auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
+    auto enable_bit = ColorOffsetEnableBit{};
+    auto select_bit = ColorOffsetSelectBit{};
+    switch (layer) {
+        case Layer::nbg0: {
+            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg0);
+            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg0);
+            break;
+        }
+        case Layer::nbg1: {
+            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg1);
+            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg1);
+            break;
+        }
+        case Layer::nbg2: {
+            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg2);
+            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg2);
+            break;
+        }
+        case Layer::nbg3: {
+            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg3);
+            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg3);
+            break;
+        }
+        case Layer::rbg0: {
+            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.rbg0);
+            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.rbg0);
+            break;
+        }
+        case Layer::back: {
+            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.back);
+            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.back);
+            break;
+        }
+        case Layer::sprite: {
+            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.sprite);
+            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.sprite);
+            break;
+        }
+        default: {
+            core::Log::warning(Logger::vdp2, core::tr("Undefined layer for color offset."));
+            break;
+        }
+    }
+
+    auto color_offset = ColorOffset{};
+    if (enable_bit == ColorOffsetEnableBit::enabled) {
+        constexpr auto sign_ext_mask = u16{0xFF00};
+
+        if (select_bit == ColorOffsetSelectBit::use_color_offset_a) {
+            if (toEnum<Sign>(coar_.sign) == Sign::negative) { coar_.raw |= sign_ext_mask; }
+            if (toEnum<Sign>(coag_.sign) == Sign::negative) { coag_.raw |= sign_ext_mask; }
+            if (toEnum<Sign>(coab_.sign) == Sign::negative) { coab_.raw |= sign_ext_mask; }
+            color_offset.as_s16.r = static_cast<s16>(coar_.raw);
+            color_offset.as_s16.g = static_cast<s16>(coag_.raw);
+            color_offset.as_s16.b = static_cast<s16>(coab_.raw);
+        } else {
+            if (cobr_.sign == 1) { cobr_.raw |= sign_ext_mask; }
+            if (cobg_.sign == 1) { cobg_.raw |= sign_ext_mask; }
+            if (cobb_.sign == 1) { cobb_.raw |= sign_ext_mask; }
+            color_offset.as_s16.r = static_cast<s16>(cobr_.raw);
+            color_offset.as_s16.g = static_cast<s16>(cobg_.raw);
+            color_offset.as_s16.b = static_cast<s16>(cobb_.raw);
+        }
+
+        color_offset.as_float.r = static_cast<float>(color_offset.as_s16.r) / static_cast<float>(u8_max);
+        color_offset.as_float.g = static_cast<float>(color_offset.as_s16.g) / static_cast<float>(u8_max);
+        color_offset.as_float.b = static_cast<float>(color_offset.as_s16.b) / static_cast<float>(u8_max);
+    }
+    return color_offset;
+}
+
 //--------------------------------------------------------------------------------------------------------------
 // PRIVATE section
 //--------------------------------------------------------------------------------------------------------------
@@ -2085,25 +2157,25 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return vram_start_address + map_offset * boundary;
     };
 
-    const auto setColorOffset
-        = [&](ScrollScreenStatus& s, const ColorOffsetEnableBit enable_bit, const ColorOffsetSelectBit select_bit) {
-              s.is_color_offset_enabled = (enable_bit == ColorOffsetEnableBit::enabled);
-              s.color_offset            = {};
-              if (s.is_color_offset_enabled) {
-                  if (select_bit == ColorOffsetSelectBit::use_color_offset_a) {
-                      s.color_offset.as_s16.r = static_cast<s16>(coar_.raw);
-                      s.color_offset.as_s16.g = static_cast<s16>(coag_.raw);
-                      s.color_offset.as_s16.b = static_cast<s16>(coab_.raw);
-                  } else {
-                      s.color_offset.as_s16.r = static_cast<s16>(cobr_.raw);
-                      s.color_offset.as_s16.g = static_cast<s16>(cobg_.raw);
-                      s.color_offset.as_s16.b = static_cast<s16>(cobb_.raw);
-                  }
-                  s.color_offset.as_float.r = static_cast<float>(s.color_offset.as_s16.r) / static_cast<float>(u16_max);
-                  s.color_offset.as_float.g = static_cast<float>(s.color_offset.as_s16.g) / static_cast<float>(u16_max);
-                  s.color_offset.as_float.b = static_cast<float>(s.color_offset.as_s16.b) / static_cast<float>(u16_max);
-              }
-          };
+    // const auto setColorOffset
+    //     = [&](ScrollScreenStatus& s, const ColorOffsetEnableBit enable_bit, const ColorOffsetSelectBit select_bit) {
+    //           s.is_color_offset_enabled = (enable_bit == ColorOffsetEnableBit::enabled);
+    //           s.color_offset            = {};
+    //           if (s.is_color_offset_enabled) {
+    //               if (select_bit == ColorOffsetSelectBit::use_color_offset_a) {
+    //                   s.color_offset.as_s16.r = static_cast<s16>(coar_.raw);
+    //                   s.color_offset.as_s16.g = static_cast<s16>(coag_.raw);
+    //                   s.color_offset.as_s16.b = static_cast<s16>(coab_.raw);
+    //               } else {
+    //                   s.color_offset.as_s16.r = static_cast<s16>(cobr_.raw);
+    //                   s.color_offset.as_s16.g = static_cast<s16>(cobg_.raw);
+    //                   s.color_offset.as_s16.b = static_cast<s16>(cobb_.raw);
+    //               }
+    //               s.color_offset.as_float.r = static_cast<float>(s.color_offset.as_s16.r) / static_cast<float>(u16_max);
+    //               s.color_offset.as_float.g = static_cast<float>(s.color_offset.as_s16.g) / static_cast<float>(u16_max);
+    //               s.color_offset.as_float.b = static_cast<float>(s.color_offset.as_s16.b) / static_cast<float>(u16_max);
+    //           }
+    //       };
 
     auto& screen         = getScreen(s);
     screen.scroll_screen = s;
@@ -2169,21 +2241,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn0_.fractional);
 
             // Color offset
-            // screen.is_color_offset_enabled
-            //    = (toEnum<ColorOffsetEnableBit>(clofen_.color_offset_enable_nbg0) == ColorOffsetEnableBit::enabled);
-            // if (screen.is_color_offset_enabled) {
-            //    if (toEnum<ColorOffsetSelectBit>(clofsl_.color_offset_select_nbg0) == ColorOffsetSelectBit::use_color_offset_a)
-            //    {
-            //        screen.color_offset_red   = (coar_.sign == 0) ? coar_.red_data : -(~(coar_.red_data - 1));
-            //        screen.color_offset_green = (coag_.sign == 0) ? coag_.green_data : -(~(coag_.green_data - 1));
-            //        screen.color_offset_blue  = (coab_.sign == 0) ? coab_.blue_data : -(~(coab_.blue_data - 1));
-            //    } else {
-            //        screen.color_offset_red   = (cobr_.sign == 0) ? cobr_.red_data : -(~(cobr_.red_data - 1));
-            //        screen.color_offset_green = (cobg_.sign == 0) ? cobg_.green_data : -(~(cobg_.green_data - 1));
-            //        screen.color_offset_blue  = (cobb_.sign == 0) ? cobb_.blue_data : -(~(cobb_.blue_data - 1));
-            //    }
-            //}
-            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg0), toEnum<ColorOffsetSelectBit>(clofsl_.nbg0));
+            screen.color_offset = getColorOffset(Layer::nbg0);
 
             break;
         case ScrollScreen::nbg1:
@@ -2244,7 +2302,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn1_.fractional);
 
             // Color offset
-            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg1), toEnum<ColorOffsetSelectBit>(clofsl_.nbg1));
+            screen.color_offset = getColorOffset(Layer::nbg1);
             break;
         case ScrollScreen::nbg2:
             // Color RAM
@@ -2295,7 +2353,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_integer   = scyn2_.integer;
 
             // Color offset
-            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg2), toEnum<ColorOffsetSelectBit>(clofsl_.nbg2));
+            screen.color_offset = getColorOffset(Layer::nbg2);
             break;
 
         case ScrollScreen::nbg3:
@@ -2347,7 +2405,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_integer   = scyn3_.integer;
 
             // Color offset
-            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg3), toEnum<ColorOffsetSelectBit>(clofsl_.nbg3));
+            screen.color_offset = getColorOffset(Layer::nbg3);
             break;
 
         case ScrollScreen::rbg0:
@@ -2415,7 +2473,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
 
             // Color offset
-            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.rbg0), toEnum<ColorOffsetSelectBit>(clofsl_.rbg0));
+            screen.color_offset = getColorOffset(Layer::rbg0);
             break;
 
         case ScrollScreen::rbg1:
@@ -2476,7 +2534,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Color offset
-            setColorOffset(screen, toEnum<ColorOffsetEnableBit>(clofen_.nbg0), toEnum<ColorOffsetSelectBit>(clofsl_.nbg0));
+            screen.color_offset = getColorOffset(Layer::rbg1);
             break;
         default: Log::warning(Logger::vdp2, tr("Scroll screen not set !"));
     }
@@ -2826,7 +2884,11 @@ void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
     //  p.priority(screen.priority_number);
     //  vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
     //     std::make_unique<Vdp2Part>(key, width, height, screen.priority_number));
-    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(key, width, height, screen.priority_number);
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(key,
+                                                                       width,
+                                                                       height,
+                                                                       screen.priority_number,
+                                                                       screen.color_offset.as_float);
 }
 
 void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset) {
@@ -3124,7 +3186,11 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
     // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
     //    std::make_unique<Vdp2Part>(pnd, pos, key, screen.priority_number));
-    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd, pos, key, screen.priority_number);
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
+                                                                       pos,
+                                                                       key,
+                                                                       screen.priority_number,
+                                                                       screen.color_offset.as_float);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {

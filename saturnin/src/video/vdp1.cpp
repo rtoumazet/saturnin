@@ -116,6 +116,8 @@ void Vdp1::populateRenderData() {
     vdp1_parts_.clear();
     // Texture::discardCache(modules_.opengl(), VdpType::vdp1);
 
+    color_offset_ = modules_.vdp2()->getColorOffset(Layer::sprite);
+
     while (toEnum<EndBit>(cmdctrl.end_bit) == EndBit::command_selection_valid) {
         skip_table = false;
         switch (toEnum<JumpSelect>(cmdctrl.jump_select)) {
@@ -180,35 +182,58 @@ void Vdp1::populateRenderData() {
                     break;
                 }
                 case CommandSelect::local_coordinate: {
-                    vdp1_parts_.emplace_back(Vdp1Part(modules_, DrawType::not_drawable, current_table_address, cmdctrl, cmdlink));
+                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
+                                                      DrawType::not_drawable,
+                                                      current_table_address,
+                                                      cmdctrl,
+                                                      cmdlink,
+                                                      color_offset_.as_float));
                     break;
                 }
                 case CommandSelect::normal_sprite_draw: {
-                    vdp1_parts_.emplace_back(
-                        Vdp1Part(modules_, DrawType::textured_polygon, current_table_address, cmdctrl, cmdlink));
+                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
+                                                      DrawType::textured_polygon,
+                                                      current_table_address,
+                                                      cmdctrl,
+                                                      cmdlink,
+                                                      color_offset_.as_float));
                     break;
                 }
                 case CommandSelect::scaled_sprite_draw: {
-                    vdp1_parts_.emplace_back(
-                        Vdp1Part(modules_, DrawType::textured_polygon, current_table_address, cmdctrl, cmdlink));
+                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
+                                                      DrawType::textured_polygon,
+                                                      current_table_address,
+                                                      cmdctrl,
+                                                      cmdlink,
+                                                      color_offset_.as_float));
                     break;
                 }
                 case CommandSelect::distorted_sprite_draw: {
-                    vdp1_parts_.emplace_back(
-                        Vdp1Part(modules_, DrawType::textured_polygon, current_table_address, cmdctrl, cmdlink));
+                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
+                                                      DrawType::textured_polygon,
+                                                      current_table_address,
+                                                      cmdctrl,
+                                                      cmdlink,
+                                                      color_offset_.as_float));
                     break;
                 }
                 case CommandSelect::polygon_draw: {
-                    vdp1_parts_.emplace_back(
-                        Vdp1Part(modules_, DrawType::non_textured_polygon, current_table_address, cmdctrl, cmdlink));
+                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
+                                                      DrawType::non_textured_polygon,
+                                                      current_table_address,
+                                                      cmdctrl,
+                                                      cmdlink,
+                                                      color_offset_.as_float));
                     break;
                 }
                 case CommandSelect::polyline_draw: {
-                    vdp1_parts_.emplace_back(Vdp1Part(modules_, DrawType::polyline, current_table_address, cmdctrl, cmdlink));
+                    vdp1_parts_.emplace_back(
+                        Vdp1Part(modules_, DrawType::polyline, current_table_address, cmdctrl, cmdlink, color_offset_.as_float));
                     break;
                 }
                 case CommandSelect::line_draw: {
-                    vdp1_parts_.emplace_back(Vdp1Part(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink));
+                    vdp1_parts_.emplace_back(
+                        Vdp1Part(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink, color_offset_.as_float));
                     break;
                 }
                 default: {
