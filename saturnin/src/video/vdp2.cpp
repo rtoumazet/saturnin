@@ -2704,7 +2704,6 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                                            toUnderlying(screen.character_color_number),
                                            screen.bitmap_palette_number);
 
-    // if (!Texture::isTextureStored(key)) {
     if (Texture::isTextureLoadingNeeded(key)) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM

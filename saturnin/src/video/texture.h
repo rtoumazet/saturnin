@@ -35,7 +35,8 @@ namespace saturnin::video {
 
 class Opengl;
 
-using DebugKey = std::pair<std::string, size_t>; // Debug information of the texture and its key.
+using DebugKey  = std::pair<std::string, size_t>; // Debug information of the texture and its key.
+using MutexType = std::shared_timed_mutex;
 
 enum class StorageType { current, previous };
 
@@ -250,7 +251,7 @@ class Texture {
 
   private:
     static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.
-    static std::mutex                          storage_mutex_;   ///< Used for multithreading access to the texture pool.
+    static MutexType                           storage_mutex_;   ///< Used for multithreading access to the texture pool.
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
     u16     width_{};                    ///< The texture width.
