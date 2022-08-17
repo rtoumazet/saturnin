@@ -31,8 +31,7 @@ Saturnin is a Sega Saturn emulator
     * [libzippp](https://github.com/ctabin/libzippp) : C++ wrapper for libzip.
     * [lodepng](https://github.com/lvandeve/lodepng) : PNG encoder and decoder in C and C++.
     * [spdlog](https://github.com/gabime/spdlog) : Fast C++ logging library.
-    * [thread-pool](https://github.com/bshoshany/thread-pool) : Shoshany, B. (2021). A C++17 Thread Pool for High-Performance Scientific Computing. arXiv. https://doi.org/10.5281/zenodo.4742687
-
+    * [thread-pool](https://github.com/bshoshany/thread-pool) : Shoshany, B. (2021). A C++17 Thread Pool for High-Performance Scientific Computing.
 ### Contribution guidelines ###
 
 * [Saturnin Style Guide](wiki/saturnin%20style%20guide.md)
