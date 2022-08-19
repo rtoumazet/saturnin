@@ -2611,6 +2611,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
     const auto& screen = getScreen(s);
     // if (isCacheDirty(s)) { discardCache(s); }
     // vdp2_parts_[util::toUnderlying(s)].clear();
+    std::vector<CellData>().swap(cell_data_to_process_);
 
     if (screen.format == ScrollScreenFormat::cell) {
         // Using a set to prevent calculating same address data multiple times
@@ -2658,6 +2659,9 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         for (const auto& [addr, offset] : start_addresses) {
             readPlaneData(screen, addr, offset);
         }
+
+        // Getting all cell data values in order to parallelize their read.
+
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);
     }
@@ -2988,6 +2992,8 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     const auto key
         = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
 
+    cell_data_to_process_.emplace_back(pnd, cell_address, cell_offset, key);
+
     if (Texture::isTextureLoadingNeeded(key)) {
         constexpr auto  texture_width  = u16{8};
         constexpr auto  texture_height = u16{8};
@@ -3068,12 +3074,6 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     pos.x -= screen.screen_scroll_horizontal_integer;
     pos.y -= screen.screen_scroll_vertical_integer;
 
-    // auto p = Vdp2Part(pnd, pos, key, screen.priority_number);
-    // auto p = std::make_unique<Vdp2Part>(pnd, pos, key, screen.priority_number);
-    // p.priority(screen.priority_number);
-    // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
-    // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
-    //    std::make_unique<Vdp2Part>(pnd, pos, key, screen.priority_number));
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd, pos, key, screen.priority_number);
 }
 

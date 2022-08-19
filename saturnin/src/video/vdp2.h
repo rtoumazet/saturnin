@@ -368,6 +368,24 @@ struct PatternNameData {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct CellData
+///
+/// \brief  Stores cell data needed for parallel read.
+///
+/// \author Runik
+/// \date   19/08/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct CellData {
+    PatternNameData pnd;
+    u32             cell_address;
+    ScreenOffset    screen_offset;
+    size_t          key;
+    CellData(const PatternNameData pnd, const u32 cell_address, const ScreenOffset screen_offset, const size_t key) :
+        pnd(pnd), cell_address(cell_address), screen_offset(screen_offset), key(key){};
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	PatternNameData2Words
 ///
 /// \brief	Pattern Name Data - 2 words configuration.
@@ -1623,9 +1641,9 @@ class Vdp2 {
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
-    std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
-    // std::vector<std::unique_ptr<video::BaseRenderingPart>> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll
-    //   cell.
+    std::vector<Vdp2Part> vdp2_parts_[6];        ///< Storage of rendering parts for each scroll cell.
+    std::vector<CellData> cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
+
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.
 
