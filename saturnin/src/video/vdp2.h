@@ -307,6 +307,7 @@ struct ScrollScreenStatus {
     u8                            map_offset{};                   ///< The map offset
     PlaneSize                     plane_size{PlaneSize::not_set}; ///< Size of the plane (1*1, 2*1 or 2*2 pages)
     u16                           page_size{};                    ///< Size of the page / pattern name table
+    u16                           cells_number{};                 ///< Total number of cells
     PatternNameDataSize           pattern_name_data_size{};       ///< Size of the pattern name data (1 or 2 words)
     CharacterNumberSupplementMode character_number_supplement_mode{
         CharacterNumberSupplementMode::character_number_10_bits}; ///< 10 bits/12 bits

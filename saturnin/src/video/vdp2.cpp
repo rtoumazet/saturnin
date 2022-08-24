@@ -2066,6 +2066,17 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return (ch_sz == CharacterSize::one_by_one) ? boundary_2_words_1_by_1_cell : boundary_2_words_2_by_2_cells;
     };
 
+    const auto getCellsNumber = [&s]() {
+        constexpr auto cells_per_page = 64 * 64; // 32 * 32 * 2 * 2 or 64 * 64 * 1 * 1
+        auto           plane_size     = u16{};
+        // switch (s.plane_size) {
+        //     case PlaneSize::size_1_by_1: plane_size = 1; break;
+        // }
+
+        // screen.map_size
+        //  screen.plane_size
+    };
+
     const auto getScrollScreenFormat = [](const BitmapEnable be) {
         return (be == BitmapEnable::cell_format) ? ScrollScreenFormat::cell : ScrollScreenFormat::bitmap;
     };
@@ -2611,9 +2622,11 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
     const auto& screen = getScreen(s);
     // if (isCacheDirty(s)) { discardCache(s); }
     // vdp2_parts_[util::toUnderlying(s)].clear();
-    std::vector<CellData>().swap(cell_data_to_process_);
 
     if (screen.format == ScrollScreenFormat::cell) {
+        std::vector<CellData>().swap(cell_data_to_process_);
+        cell_data_to_process_.reserve(0x1000);
+
         // Using a set to prevent calculating same address data multiple times
         auto unique_addresses = std::unordered_set<u32>{};
         auto start_addresses  = std::vector<std::pair<u32, ScreenOffset>>{};
