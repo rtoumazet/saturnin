@@ -1296,6 +1296,28 @@ class Vdp2 {
                   const ScreenOffset&       cell_offset);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::concurrentReadCell(const ScrollScreenStatus screen, const PatternNameData pnd, const u32 cell_address,
+    /// const ScreenOffset cell_offset, const size_t key);
+    ///
+    /// \brief  Reads a cell in parallel. The cell data itself is read from a single thread.
+    ///
+    /// \author Runik
+    /// \date   26/08/2022
+    ///
+    /// \param  screen          Current scroll screen status.
+    /// \param  pnd             The pattern name data.
+    /// \param  cell_address    The cell address.
+    /// \param  cell_offset     The cell offset, in cell units.
+    /// \param  key             Key of the cell.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void concurrentReadCell(const ScrollScreenStatus screen,
+                            const PatternNameData    pnd,
+                            const u32                cell_address,
+                            const ScreenOffset       cell_offset,
+                            const size_t             key);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
     /// ScreenOffset& cell_offset, const size_t key);
     ///

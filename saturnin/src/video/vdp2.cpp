@@ -2066,17 +2066,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return (ch_sz == CharacterSize::one_by_one) ? boundary_2_words_1_by_1_cell : boundary_2_words_2_by_2_cells;
     };
 
-    const auto getCellsNumber = [&s]() {
-        constexpr auto cells_per_page = 64 * 64; // 32 * 32 * 2 * 2 or 64 * 64 * 1 * 1
-        auto           plane_size     = u16{};
-        // switch (s.plane_size) {
-        //     case PlaneSize::size_1_by_1: plane_size = 1; break;
-        // }
-
-        // screen.map_size
-        //  screen.plane_size
-    };
-
     const auto getScrollScreenFormat = [](const BitmapEnable be) {
         return (be == BitmapEnable::cell_format) ? ScrollScreenFormat::cell : ScrollScreenFormat::bitmap;
     };
@@ -2460,6 +2449,21 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return ScreenOffset{0, 0};
     }(screen.plane_size);
 
+    // Calculating the total number of cells for current scroll screen. Doesn't take into account identicals
+    // map start addresses, meaning the the real number of cells can be lower than the calculated one.
+
+    screen.cells_number = [&screen]() {
+        constexpr auto cells_per_page = 64 * 64; // 32 * 32 * 4 or 64 * 64 * 1
+        auto           plane_size     = u16{};
+        switch (screen.plane_size) {
+            case PlaneSize::size_1_by_1: plane_size = 1; break;
+            case PlaneSize::size_2_by_1: plane_size = 2; break;
+            case PlaneSize::size_2_by_2: plane_size = 4; break;
+        }
+
+        return cells_per_page * plane_size * screen.map_size;
+    }();
+
     if (isCacheDirty(s)) { discardCache(s); }
     clearRenderData(s);
     saved_bg_[util::toUnderlying(s)] = screen;
@@ -2625,7 +2629,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
 
     if (screen.format == ScrollScreenFormat::cell) {
         std::vector<CellData>().swap(cell_data_to_process_);
-        cell_data_to_process_.reserve(0x1000);
+        cell_data_to_process_.reserve(screen.cells_number);
 
         // Using a set to prevent calculating same address data multiple times
         auto unique_addresses = std::unordered_set<u32>{};
@@ -2674,6 +2678,11 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         }
 
         // Getting all cell data values in order to parallelize their read.
+        for (const auto& cell : cell_data_to_process_) {
+            ThreadPool::pool_
+                .push_task(&Vdp2::concurrentReadCell, this, screen, cell.pnd, cell.cell_address, cell.screen_offset, cell.key);
+        }
+        ThreadPool::pool_.wait_for_tasks();
 
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);
@@ -3007,6 +3016,79 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
 
     cell_data_to_process_.emplace_back(pnd, cell_address, cell_offset, key);
 
+    // if (Texture::isTextureLoadingNeeded(key)) {
+    //     constexpr auto  texture_width  = u16{8};
+    //     constexpr auto  texture_height = u16{8};
+    //     constexpr auto  texture_size   = texture_width * texture_height * 4;
+    //     std::vector<u8> texture_data;
+    //     texture_data.reserve(texture_size);
+
+    //    if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+    //        // 32 bits access to color RAM
+    //        switch (screen.character_color_number) {
+    //            case ColorCount::palette_16: {
+    //                read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+    //                break;
+    //            }
+    //            case ColorCount::palette_256: {
+    //                read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+    //                break;
+    //            }
+    //            case ColorCount::palette_2048: {
+    //                break;
+    //            }
+    //            case ColorCount::rgb_32k: {
+    //                break;
+    //            }
+    //            case ColorCount::rgb_16m: {
+    //                break;
+    //            }
+    //            default: {
+    //                Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+    //            }
+    //        }
+    //    } else {
+    //        // 16 bits access to color RAM
+    //        switch (screen.character_color_number) {
+    //            case ColorCount::palette_16: {
+    //                read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+    //                break;
+    //            }
+    //            case ColorCount::palette_256: {
+    //                read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+    //                break;
+    //            }
+    //            case ColorCount::palette_2048: {
+    //                break;
+    //            }
+    //            case ColorCount::rgb_32k: {
+    //                break;
+    //            }
+    //            case ColorCount::rgb_16m: {
+    //                break;
+    //            }
+    //            default: {
+    //                Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+    //            }
+    //        }
+    //    }
+    //    Texture::storeTexture(Texture(VdpType::vdp2,
+    //                                  cell_address,
+    //                                  toUnderlying(screen.character_color_number),
+    //                                  pnd.palette_number,
+    //                                  texture_data,
+    //                                  texture_width,
+    //                                  texture_height));
+    //    modules_.opengl()->addOrUpdateTexture(key);
+    //}
+    // saveCell(screen, pnd, cell_address, cell_offset, key);
+}
+
+void Vdp2::concurrentReadCell(const ScrollScreenStatus screen,
+                              const PatternNameData    pnd,
+                              const u32                cell_address,
+                              const ScreenOffset       cell_offset,
+                              const size_t             key) {
     if (Texture::isTextureLoadingNeeded(key)) {
         constexpr auto  texture_width  = u16{8};
         constexpr auto  texture_height = u16{8};
