@@ -719,11 +719,11 @@ void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
     const auto texture_id = getTextureId(key);
     if (texture_id && (*texture_id > 0)) {
-        //        std::lock_guard lock(texture_delete_mutex_);
+        std::lock_guard lock(texture_delete_mutex_);
         textures_to_delete_.push_back(*texture_id);
     }
 
-    //    std::lock_guard lock(texture_link_mutex_);
+    std::lock_guard lock(texture_link_mutex_);
     texture_key_id_link_[key] = 0;
     // texture_key_id_link_.erase(key);
 }

@@ -307,7 +307,7 @@ struct ScrollScreenStatus {
     u8                            map_offset{};                   ///< The map offset
     PlaneSize                     plane_size{PlaneSize::not_set}; ///< Size of the plane (1*1, 2*1 or 2*2 pages)
     u16                           page_size{};                    ///< Size of the page / pattern name table
-    u16                           cells_number{};                 ///< Total number of cells
+    u32                           cells_number{};                 ///< Total number of cells
     PatternNameDataSize           pattern_name_data_size{};       ///< Size of the pattern name data (1 or 2 words)
     CharacterNumberSupplementMode character_number_supplement_mode{
         CharacterNumberSupplementMode::character_number_10_bits}; ///< 10 bits/12 bits
@@ -1318,6 +1318,21 @@ class Vdp2 {
                             const size_t             key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus screen,const std::vector<CellData> cells);
+    ///
+    /// \brief	Reads the vector content of cells in parallel. The cells in the vector are read in a
+    /// 		single thread.
+    ///
+    /// \author	Runik
+    /// \date	01/09/2022
+    ///
+    /// \param 	screen	Current scroll screen status.
+    /// \param 	cells 	The cells to read.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void concurrentMultiReadCell(const ScrollScreenStatus screen, const std::vector<CellData> cells);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
     /// ScreenOffset& cell_offset, const size_t key);
     ///
@@ -1664,6 +1679,7 @@ class Vdp2 {
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
+    Mutex                 vdp2_parts_mutex_;     ///< Mutex to handle access to the shared vector between threads.
     std::vector<Vdp2Part> vdp2_parts_[6];        ///< Storage of rendering parts for each scroll cell.
     std::vector<CellData> cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
 
