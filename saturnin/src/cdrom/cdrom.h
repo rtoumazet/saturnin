@@ -31,6 +31,7 @@
 #include <string>
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/emulator_modules.h>
+#include <saturnin/src/utilities.h>
 #include <saturnin/src/cdrom/cdrom_registers.h>
 
 // Forward declarations
@@ -261,11 +262,11 @@ class Cdrom {
     // Constructors / Destructors
     Cdrom() = delete;
     Cdrom(EmulatorContext* ec) : modules_(ec){};
-    Cdrom(const Cdrom&) = delete;
-    Cdrom(Cdrom&&)      = delete;
+    Cdrom(const Cdrom&)                      = delete;
+    Cdrom(Cdrom&&)                           = delete;
     auto operator=(const Cdrom&) & -> Cdrom& = delete;
-    auto operator=(Cdrom&&) & -> Cdrom& = delete;
-    ~Cdrom()                            = default;
+    auto operator=(Cdrom&&) & -> Cdrom&      = delete;
+    ~Cdrom()                                 = default;
     //@}
 
     void initialize();

@@ -47,11 +47,11 @@ class Locale {
     //@{
     // Constructors / Destructors
     // Locale()              = default;
-    Locale(const Locale&) = delete;
-    Locale(Locale&&)      = delete;
+    Locale(const Locale&)                      = delete;
+    Locale(Locale&&)                           = delete;
     auto operator=(const Locale&) & -> Locale& = delete;
-    auto operator=(Locale&&) & -> Locale& = delete;
-    ~Locale()                             = default;
+    auto operator=(Locale&&) & -> Locale&      = delete;
+    ~Locale()                                  = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
