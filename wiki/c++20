@@ -1,1 +1,8 @@
-Interesting features
+C++20 features that could be interesting to integrate to the project :
+- std::byte as u8 replacement for memory arrays declaration
+- using enum class https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1099r5.html
+- Range-based for statements with initializer https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0614r1.html
+- likely and unlikely attributes https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0479r5.html
+- coroutines ?
+- modules (headers + dlls replacement)
+
