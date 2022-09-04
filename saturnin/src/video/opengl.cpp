@@ -751,7 +751,7 @@ void Opengl::generateTextures() {
         if (id == 0) {
             const auto& t = Texture::getTexture(key);
             if (t) {
-                const auto texture_id = generateTexture(t->width(), t->height(), t->rawData());
+                const auto texture_id = generateTexture((*t)->width(), (*t)->height(), (*t)->rawData());
 
                 //                std::lock_guard tl_lock(texture_link_mutex_);
                 texture_key_id_link_[key] = texture_id;

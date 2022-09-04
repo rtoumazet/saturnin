@@ -86,19 +86,33 @@ class Texture {
     static auto storeTexture(Texture t) -> size_t;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::getTexture(const size_t key) -> Texture;
+    /// \fn	static void Texture::storeTextures(std::vector<Texture>& textures);
     ///
-    /// \brief  Gets a texture
+    /// \brief	Stores a vector of textures.
     ///
-    /// \author Runik
-    /// \date   04/04/2021
+    /// \author	Runik
+    /// \date	03/09/2022
     ///
-    /// \param  key Key of the texture.
-    ///
-    /// \returns    The texture.
+    /// \param [in,out]	textures	The textures to store.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getTexture(const size_t key) -> std::optional<Texture>;
+    static void storeTextures(std::vector<Texture>& textures);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	static auto Texture::getTexture(const size_t key) -> std::optional<Texture*>;
+    ///
+    /// \brief	Gets a texture
+    ///
+    /// \author	Runik
+    /// \date	04/04/2021
+    ///
+    /// \param 	key	Key of the texture.
+    ///
+    /// \returns	The texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto getTexture(const size_t key) -> std::optional<Texture*>;
+    // static auto getTexture(const size_t key) -> std::optional<Texture>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Texture::deleteTextureData(Texture& t);

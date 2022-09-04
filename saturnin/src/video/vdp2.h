@@ -1318,19 +1318,22 @@ class Vdp2 {
                             const size_t             key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus screen,const std::vector<CellData> cells);
+    /// \fn	void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus screen, const std::vector<CellData>::iterator start, const
+    /// std::vector<CellData>::iterator end);
     ///
-    /// \brief	Reads the vector content of cells in parallel. The cells in the vector are read in a
-    /// 		single thread.
+    /// \brief	Reads a range of cells in parallel. The cells in the range are read in a single thread.
     ///
     /// \author	Runik
     /// \date	01/09/2022
     ///
     /// \param 	screen	Current scroll screen status.
-    /// \param 	cells 	The cells to read.
+    /// \param 	start 	Start iterator of the cells to read.
+    /// \param 	end   	End iterator of the cells to read .
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void concurrentMultiReadCell(const ScrollScreenStatus screen, const std::vector<CellData> cells);
+    void concurrentMultiReadCell(const ScrollScreenStatus              screen,
+                                 const std::vector<CellData>::iterator start,
+                                 const std::vector<CellData>::iterator end);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const

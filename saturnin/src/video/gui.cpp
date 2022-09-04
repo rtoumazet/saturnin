@@ -1391,13 +1391,13 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
                 if (draw_list[current_part_idx].textureKey() != 0) {
                     const auto tex = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
                     if (tex) {
-                        const auto tex_id = state.opengl()->getTextureId(tex->key());
+                        const auto tex_id = state.opengl()->getTextureId((*tex)->key());
                         // const auto preview_size = ImVec2(200, 200);
 
                         // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the image
                         // ratio.
                         const auto max_size     = ImageSize{260, 260};
-                        auto       tex_size     = video::Texture::calculateTextureSize(max_size, tex->key());
+                        auto       tex_size     = video::Texture::calculateTextureSize(max_size, (*tex)->key());
                         const auto preview_size = ImVec2(tex_size.width, tex_size.height);
 
                         // ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);

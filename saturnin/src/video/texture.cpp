@@ -64,16 +64,32 @@ auto Texture::storeTexture(Texture t) -> size_t {
 }
 
 // static //
-auto Texture::getTexture(const size_t key) -> std::optional<Texture> {
+void Texture::storeTextures(std::vector<Texture>& textures) {
     {
-        //        std::lock_guard lock(storage_mutex_);
-        ReadOnlyLock lock(storage_mutex_);
-        const auto   it = texture_storage_.find(key);
-        if (it != texture_storage_.end()) { return it->second; }
+        UpdatableLock lock(storage_mutex_);
+        for (auto& t : textures) {
+            texture_storage_.erase(t.key());
+            texture_storage_.emplace(t.key(), std::move(t));
+        }
     }
-    Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
-    // throw std::runtime_error("Texture error !");
-    return std::nullopt;
+}
+
+// static //
+auto Texture::getTexture(const size_t key) -> std::optional<Texture*> {
+    {
+        ReadOnlyLock lock(storage_mutex_);
+        try {
+            auto& t = texture_storage_.at(key);
+            return &t;
+        } catch (const std::out_of_range& oor) {
+            Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ({})"), key, oor.what());
+            return std::nullopt;
+        }
+        // const auto   it = texture_storage_.find(key);
+        // if (it != texture_storage_.end()) { return it->second; }
+    }
+    // Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
+    // return std::nullopt;
 }
 
 // static //
@@ -90,15 +106,25 @@ auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
 
     auto t = Texture::getTexture(key);
     if (t) {
-        if ((*t).isDiscarded()) {
-            (*t).isDiscarded(false);
-            storeTexture(*t);
+        if ((*t)->isDiscarded()) {
+            (*t)->isDiscarded(false);
             return true;
         }
-        (*t).isRecentlyUsed(true);
-        storeTexture(*t);
+        (*t)->isRecentlyUsed(true);
         return false;
     }
+
+    // if (t) {
+    //     if ((*t).isDiscarded()) {
+    //         (*t).isDiscarded(false);
+    //         storeTexture(*t);
+    //         return true;
+    //     }
+    //     (*t).isRecentlyUsed(true);
+    //     storeTexture(*t);
+    //     return false;
+    // }
+
     return true;
 }
 
@@ -180,21 +206,21 @@ auto Texture::detailedList() -> std::vector<DebugKey> {
 auto Texture::calculateTextureSize(const ImageSize& max_size, const size_t texture_key) -> ImageSize {
     auto       ratio   = 0.0;
     const auto texture = getTexture(texture_key);
-    if (texture->width() > texture->height()) {
-        if (texture->width() > max_size.width) {
-            ratio = texture->width() / max_size.width;
+    if ((*texture)->width() > (*texture)->height()) {
+        if ((*texture)->width() > max_size.width) {
+            ratio = (*texture)->width() / max_size.width;
         } else {
-            ratio = max_size.width / texture->width();
+            ratio = max_size.width / (*texture)->width();
         }
     } else {
-        if (texture->width() > max_size.height) {
-            ratio = texture->height() / max_size.height;
+        if ((*texture)->width() > max_size.height) {
+            ratio = (*texture)->height() / max_size.height;
         } else {
-            ratio = max_size.height / texture->height();
+            ratio = max_size.height / (*texture)->height();
         }
     }
-    const auto width  = texture->width() % max_size.width * ratio;
-    const auto height = texture->height() % max_size.height * ratio;
+    const auto width  = (*texture)->width() % max_size.width * ratio;
+    const auto height = (*texture)->height() % max_size.height * ratio;
 
     return ImageSize{static_cast<u16>(width), static_cast<u16>(height)};
     // return ImageSize{};
