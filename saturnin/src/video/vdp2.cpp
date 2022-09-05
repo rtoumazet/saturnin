@@ -2468,6 +2468,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
     if (isCacheDirty(s)) { discardCache(s); }
     clearRenderData(s);
+    vdp2_parts_[util::toUnderlying(s)].reserve(screen.cells_number);
+
     saved_bg_[util::toUnderlying(s)] = screen;
 }
 
@@ -2697,7 +2699,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         //     ThreadPool::pool_
         //         .push_task(&Vdp2::concurrentReadCell, this, screen, cell.pnd, cell.cell_address, cell.screen_offset, cell.key);
         // }
-        // ThreadPool::pool_.wait_for_tasks();
+        ThreadPool::pool_.wait_for_tasks();
 
         auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
         elapsed_time = std::chrono::steady_clock::now() - start_time;
