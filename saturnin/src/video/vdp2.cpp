@@ -3396,7 +3396,11 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     pos.y -= screen.screen_scroll_vertical_integer;
 
     LockGuard lock(vdp2_parts_mutex_);
-    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd, pos, key, screen.priority_number);
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
+                                                                       pos,
+                                                                       key,
+                                                                       screen.priority_number,
+                                                                       screen.color_offset.as_float);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {
