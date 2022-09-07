@@ -76,12 +76,12 @@ class Log {
   public:
     //@{
     // Constructors / Destructors
-    Log()           = delete;
-    Log(const Log&) = delete;
-    Log(Log&&)      = delete;
+    Log()                                = delete;
+    Log(const Log&)                      = delete;
+    Log(Log&&)                           = delete;
     auto operator=(const Log&) & -> Log& = delete;
-    auto operator=(Log&&) & -> Log& = delete;
-    ~Log()                          = delete;
+    auto operator=(Log&&) & -> Log&      = delete;
+    ~Log()                               = delete;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

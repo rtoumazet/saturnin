@@ -25,8 +25,7 @@
 
 #pragma once
 
-#include <shared_mutex> // shared_timed_mutex
-#include <vector>       // vector
+#include <vector> // vector
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/video/base_rendering_part.h> // VdpType
 #include <saturnin/src/video/vdp2.h>                // ColorCount
@@ -87,19 +86,33 @@ class Texture {
     static auto storeTexture(Texture t) -> size_t;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Texture::getTexture(const size_t key) -> Texture;
+    /// \fn	static void Texture::storeTextures(std::vector<Texture>& textures);
     ///
-    /// \brief  Gets a texture
+    /// \brief	Stores a vector of textures.
     ///
-    /// \author Runik
-    /// \date   04/04/2021
+    /// \author	Runik
+    /// \date	03/09/2022
     ///
-    /// \param  key Key of the texture.
-    ///
-    /// \returns    The texture.
+    /// \param [in,out]	textures	The textures to store.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getTexture(const size_t key) -> std::optional<Texture>;
+    static void storeTextures(std::vector<Texture>& textures);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	static auto Texture::getTexture(const size_t key) -> std::optional<Texture*>;
+    ///
+    /// \brief	Gets a texture
+    ///
+    /// \author	Runik
+    /// \date	04/04/2021
+    ///
+    /// \param 	key	Key of the texture.
+    ///
+    /// \returns	The texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto getTexture(const size_t key) -> std::optional<Texture*>;
+    // static auto getTexture(const size_t key) -> std::optional<Texture>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Texture::deleteTextureData(Texture& t);
@@ -250,7 +263,7 @@ class Texture {
 
   private:
     static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.
-    static std::mutex                          storage_mutex_;   ///< Used for multithreading access to the texture pool.
+    static SharedMutex                         storage_mutex_;   ///< Used for multithreading access to the texture pool.
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
     u16     width_{};                    ///< The texture width.

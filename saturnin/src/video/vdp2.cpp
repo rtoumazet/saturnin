@@ -44,6 +44,10 @@ using core::StartingFactorSelect;
 using core::tr;
 using util::toUnderlying;
 
+using LockGuard = std::lock_guard<Mutex>;
+
+constexpr auto use_concurrent_read_for_cells = bool{false};
+
 //--------------------------------------------------------------------------------------------------------------
 // PUBLIC section
 //--------------------------------------------------------------------------------------------------------------
@@ -2556,8 +2560,25 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return ScreenOffset{0, 0};
     }(screen.plane_size);
 
+    // Calculating the total number of cells for current scroll screen. Doesn't take into account identicals
+    // map start addresses, meaning the the real number of cells can be lower than the calculated one.
+
+    screen.cells_number = [&screen]() {
+        constexpr auto cells_per_page = 64 * 64; // 32 * 32 * 4 or 64 * 64 * 1
+        auto           plane_size     = u16{};
+        switch (screen.plane_size) {
+            case PlaneSize::size_1_by_1: plane_size = 1; break;
+            case PlaneSize::size_2_by_1: plane_size = 2; break;
+            case PlaneSize::size_2_by_2: plane_size = 4; break;
+        }
+
+        return cells_per_page * plane_size * screen.map_size;
+    }();
+
     if (isCacheDirty(s)) { discardCache(s); }
     clearRenderData(s);
+    vdp2_parts_[util::toUnderlying(s)].reserve(screen.cells_number);
+
     saved_bg_[util::toUnderlying(s)] = screen;
 }
 
@@ -2720,6 +2741,12 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
     // vdp2_parts_[util::toUnderlying(s)].clear();
 
     if (screen.format == ScrollScreenFormat::cell) {
+        std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
+        std::chrono::duration<double>                      elapsed_time{};
+
+        std::vector<CellData>().swap(cell_data_to_process_);
+        cell_data_to_process_.reserve(screen.cells_number);
+
         // Using a set to prevent calculating same address data multiple times
         auto unique_addresses = std::unordered_set<u32>{};
         auto start_addresses  = std::vector<std::pair<u32, ScreenOffset>>{};
@@ -2765,6 +2792,32 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         for (const auto& [addr, offset] : start_addresses) {
             readPlaneData(screen, addr, offset);
         }
+
+        if constexpr (use_concurrent_read_for_cells) {
+            // Getting all cell data values in order to parallelize their read.
+
+            constexpr auto chunk_size = u32{0x400};
+            for (u32 current = 0; current < cell_data_to_process_.size(); current += chunk_size) {
+                ThreadPool::pool_.push_task(&Vdp2::concurrentMultiReadCell,
+                                            this,
+                                            screen,
+                                            cell_data_to_process_.begin() + current,
+                                            cell_data_to_process_.begin() + current + chunk_size);
+            }
+
+            // for (const auto& cell : cell_data_to_process_) {
+            //     ThreadPool::pool_
+            //         .push_task(&Vdp2::concurrentReadCell, this, screen, cell.pnd, cell.cell_address, cell.screen_offset,
+            //         cell.key);
+            // }
+            ThreadPool::pool_.wait_for_tasks();
+        }
+
+        auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+        elapsed_time = std::chrono::steady_clock::now() - start_time;
+        res          = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+        core::Log::warning(Logger::vdp2, core::tr(u8"Parallel read {}�s"), res);
+
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);
     }
@@ -2811,7 +2864,6 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                                            toUnderlying(screen.character_color_number),
                                            screen.bitmap_palette_number);
 
-    // if (!Texture::isTextureStored(key)) {
     if (Texture::isTextureLoadingNeeded(key)) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
@@ -3100,6 +3152,83 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     const auto key
         = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
 
+    if constexpr (use_concurrent_read_for_cells) {
+        cell_data_to_process_.emplace_back(pnd, cell_address, cell_offset, key);
+    } else {
+        if (Texture::isTextureLoadingNeeded(key)) {
+            constexpr auto  texture_width  = u16{8};
+            constexpr auto  texture_height = u16{8};
+            constexpr auto  texture_size   = texture_width * texture_height * 4;
+            std::vector<u8> texture_data;
+            texture_data.reserve(texture_size);
+
+            if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+                // 32 bits access to color RAM
+                switch (screen.character_color_number) {
+                    case ColorCount::palette_16: {
+                        read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+                        break;
+                    }
+                    case ColorCount::palette_256: {
+                        read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+                        break;
+                    }
+                    case ColorCount::palette_2048: {
+                        break;
+                    }
+                    case ColorCount::rgb_32k: {
+                        break;
+                    }
+                    case ColorCount::rgb_16m: {
+                        break;
+                    }
+                    default: {
+                        Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+                    }
+                }
+            } else {
+                // 16 bits access to color RAM
+                switch (screen.character_color_number) {
+                    case ColorCount::palette_16: {
+                        read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                        break;
+                    }
+                    case ColorCount::palette_256: {
+                        read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                        break;
+                    }
+                    case ColorCount::palette_2048: {
+                        break;
+                    }
+                    case ColorCount::rgb_32k: {
+                        break;
+                    }
+                    case ColorCount::rgb_16m: {
+                        break;
+                    }
+                    default: {
+                        Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+                    }
+                }
+            }
+            Texture::storeTexture(Texture(VdpType::vdp2,
+                                          cell_address,
+                                          toUnderlying(screen.character_color_number),
+                                          pnd.palette_number,
+                                          texture_data,
+                                          texture_width,
+                                          texture_height));
+            modules_.opengl()->addOrUpdateTexture(key);
+        }
+        saveCell(screen, pnd, cell_address, cell_offset, key);
+    }
+}
+
+void Vdp2::concurrentReadCell(const ScrollScreenStatus screen,
+                              const PatternNameData    pnd,
+                              const u32                cell_address,
+                              const ScreenOffset       cell_offset,
+                              const size_t             key) {
     if (Texture::isTextureLoadingNeeded(key)) {
         constexpr auto  texture_width  = u16{8};
         constexpr auto  texture_height = u16{8};
@@ -3168,6 +3297,92 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
     saveCell(screen, pnd, cell_address, cell_offset, key);
 }
 
+void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus              screen,
+                                   const std::vector<CellData>::iterator start,
+                                   const std::vector<CellData>::iterator end) {
+    std::vector<Texture> textures;
+    textures.reserve(end - start);
+
+    for (auto it = start; it != end; ++it) {
+        if (Texture::isTextureLoadingNeeded(it->key)) {
+            constexpr auto  texture_width  = u16{8};
+            constexpr auto  texture_height = u16{8};
+            constexpr auto  texture_size   = texture_width * texture_height * 4;
+            std::vector<u8> texture_data;
+            texture_data.reserve(texture_size);
+
+            if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+                // 32 bits access to color RAM
+                switch (screen.character_color_number) {
+                    case ColorCount::palette_16: {
+                        read16ColorsCellData<u32>(texture_data, screen, it->pnd.palette_number, it->cell_address);
+                        break;
+                    }
+                    case ColorCount::palette_256: {
+                        read256ColorsCellData<u32>(texture_data, screen, it->pnd.palette_number, it->cell_address);
+                        break;
+                    }
+                    case ColorCount::palette_2048: {
+                        break;
+                    }
+                    case ColorCount::rgb_32k: {
+                        break;
+                    }
+                    case ColorCount::rgb_16m: {
+                        break;
+                    }
+                    default: {
+                        Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+                    }
+                }
+            } else {
+                // 16 bits access to color RAM
+                switch (screen.character_color_number) {
+                    case ColorCount::palette_16: {
+                        read16ColorsCellData<u16>(texture_data, screen, it->pnd.palette_number, it->cell_address);
+                        break;
+                    }
+                    case ColorCount::palette_256: {
+                        read256ColorsCellData<u16>(texture_data, screen, it->pnd.palette_number, it->cell_address);
+                        break;
+                    }
+                    case ColorCount::palette_2048: {
+                        break;
+                    }
+                    case ColorCount::rgb_32k: {
+                        break;
+                    }
+                    case ColorCount::rgb_16m: {
+                        break;
+                    }
+                    default: {
+                        Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+                    }
+                }
+            }
+            // Texture::storeTexture(Texture(VdpType::vdp2,
+            //                               it->cell_address,
+            //                               toUnderlying(screen.character_color_number),
+            //                               it->pnd.palette_number,
+            //                               texture_data,
+            //                               texture_width,
+            //                               texture_height));
+            modules_.opengl()->addOrUpdateTexture(it->key);
+
+            textures.emplace_back(Texture(VdpType::vdp2,
+                                          it->cell_address,
+                                          toUnderlying(screen.character_color_number),
+                                          it->pnd.palette_number,
+                                          texture_data,
+                                          texture_width,
+                                          texture_height));
+        }
+        saveCell(screen, it->pnd, it->cell_address, it->screen_offset, it->key);
+    }
+
+    Texture::storeTextures(textures);
+}
+
 void Vdp2::saveCell(const ScrollScreenStatus& screen,
                     const PatternNameData&    pnd,
                     const u32                 cell_address,
@@ -3180,17 +3395,8 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     pos.x -= screen.screen_scroll_horizontal_integer;
     pos.y -= screen.screen_scroll_vertical_integer;
 
-    // auto p = Vdp2Part(pnd, pos, key, screen.priority_number);
-    // auto p = std::make_unique<Vdp2Part>(pnd, pos, key, screen.priority_number);
-    // p.priority(screen.priority_number);
-    // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(std::move(p));
-    // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
-    //    std::make_unique<Vdp2Part>(pnd, pos, key, screen.priority_number));
-    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
-                                                                       pos,
-                                                                       key,
-                                                                       screen.priority_number,
-                                                                       screen.color_offset.as_float);
+    LockGuard lock(vdp2_parts_mutex_);
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd, pos, key, screen.priority_number);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {

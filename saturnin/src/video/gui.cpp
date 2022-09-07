@@ -1392,13 +1392,13 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
                 if (draw_list[current_part_idx].textureKey() != 0) {
                     const auto tex = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
                     if (tex) {
-                        const auto tex_id = state.opengl()->getTextureId(tex->key());
+                        const auto tex_id = state.opengl()->getTextureId((*tex)->key());
                         // const auto preview_size = ImVec2(200, 200);
 
                         // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the image
                         // ratio.
                         const auto max_size     = ImageSize{260, 260};
-                        auto       tex_size     = video::Texture::calculateTextureSize(max_size, tex->key());
+                        auto       tex_size     = video::Texture::calculateTextureSize(max_size, (*tex)->key());
                         const auto preview_size = ImVec2(tex_size.width, tex_size.height);
 
                         // ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
@@ -1887,7 +1887,11 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::Begin(tr("Benchmarks").c_str(), opened, window_flags);
 
     // const auto  available_threads = std::thread::hardware_concurrency() - 1;
-    static auto log = std::string();
+    static auto                                        log = std::string();
+    BS::timer                                          tmr;
+    std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
+    std::chrono::duration<double>                      elapsed_time{};
+
     if (ImGui::Button("Read from file")) {
         // BS::thread_pool pool(available_threads);
         // log += fmt::format(tr("{} threads created\n"), available_threads);
@@ -1896,10 +1900,6 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
             return state.memory()->read<u8>(address * 4) << 24 | state.memory()->read<u8>(address * 4 + 1) << 16
                    | state.memory()->read<u8>(address * 4 + 2) << 8 | state.memory()->read<u8>(address * 4 + 3);
         };
-        BS::timer                                          tmr;
-        std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
-        std::chrono::duration<double>                      elapsed_time{};
-
         state.memory()->initialize();
         state.memory()->loadBios(saturnin::core::HardwareMode::saturn);
         {
@@ -1939,6 +1939,46 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
             log += fmt::format(u8" {}µs\n", res);
         }
     }
+    if (ImGui::Button("Read from array")) {
+        auto arr8 = std::array<u8, 0x400>{};
+        for (int i = 0; i < 0x400; ++i) {
+            arr8[i] = i;
+        }
+        ImGui::TextUnformatted("Loading done.");
+
+        auto arr32 = std::array<u32, 0x100>{};
+
+        log += tr("Sequential read");
+        start_time = std::chrono::steady_clock::now();
+        for (int i = 0; i < 0x100; ++i) {
+            arr32[i] = arr8[i * 4 + 0] << 24 | arr8[i * 4 + 1] << 16 | arr8[i * 4 + 2] << 8 | arr8[i * 4 + 3];
+        }
+        elapsed_time = std::chrono::steady_clock::now() - start_time;
+        auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+        log += fmt::format(u8" {}µs\n", res);
+
+        log += tr("Multithreaded read");
+        start_time = std::chrono::steady_clock::now();
+        // core::ThreadPool::pool_
+        //     .parallelize_loop(0,
+        //                       0x100,
+
+        //                      [&arr8, &arr32](const int a, const int b) {
+        //                          for (int i = a; i < b; ++i) {
+        //                              arr32[i] = arr8[i * 4 + 0] << 24 | arr8[i * 4 + 1] << 16 | arr8[i * 4 + 2] << 8
+        //                                         | arr8[i * 4 + 3];
+        //                          }
+        //                      })
+        //    .wait();
+        std::future<std::vector<u8>> my_future = core::ThreadPool::pool_.submit([] { return std::vector<u8>{0x01, 0x02, 0x04}; });
+
+        elapsed_time = std::chrono::steady_clock::now() - start_time;
+        auto res2    = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+        log += fmt::format(u8" {}µs\n", res2);
+
+        ImGui::TextUnformatted("Transfert done.");
+    }
+
     ImGui::TextUnformatted(log.c_str());
 
     ImGui::End();

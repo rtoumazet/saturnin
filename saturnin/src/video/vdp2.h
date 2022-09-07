@@ -33,6 +33,7 @@
 #include <saturnin/src/emulator_modules.h> // EmulatorModules
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
+#include <saturnin/src/thread_pool.h>      // ThreadPool
 #include <saturnin/src/utilities.h>        // toUnderlying
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp2_part.h> // ScrollScreenPos
@@ -52,6 +53,7 @@ using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
 using saturnin::core::Log;
 using saturnin::core::Logger;
+using saturnin::core::ThreadPool;
 // using AddressToNameMap = std::map<u32, std::string>;
 
 using namespace std::chrono;
@@ -310,6 +312,7 @@ struct ScrollScreenStatus {
     u8                            map_offset{};                   ///< The map offset
     PlaneSize                     plane_size{PlaneSize::not_set}; ///< Size of the plane (1*1, 2*1 or 2*2 pages)
     u16                           page_size{};                    ///< Size of the page / pattern name table
+    u32                           cells_number{};                 ///< Total number of cells
     PatternNameDataSize           pattern_name_data_size{};       ///< Size of the pattern name data (1 or 2 words)
     CharacterNumberSupplementMode character_number_supplement_mode{
         CharacterNumberSupplementMode::character_number_10_bits}; ///< 10 bits/12 bits
@@ -372,6 +375,24 @@ struct PatternNameData {
     u8   special_color_calculation;
     bool is_vertically_flipped;
     bool is_horizontally_flipped;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct CellData
+///
+/// \brief  Stores cell data needed for parallel read.
+///
+/// \author Runik
+/// \date   19/08/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct CellData {
+    PatternNameData pnd;
+    u32             cell_address;
+    ScreenOffset    screen_offset;
+    size_t          key;
+    CellData(const PatternNameData pnd, const u32 cell_address, const ScreenOffset screen_offset, const size_t key) :
+        pnd(pnd), cell_address(cell_address), screen_offset(screen_offset), key(key){};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1299,6 +1320,46 @@ class Vdp2 {
                   const ScreenOffset&       cell_offset);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::concurrentReadCell(const ScrollScreenStatus screen, const PatternNameData pnd, const u32 cell_address,
+    /// const ScreenOffset cell_offset, const size_t key);
+    ///
+    /// \brief  Reads a cell in parallel. The cell data itself is read from a single thread.
+    ///
+    /// \author Runik
+    /// \date   26/08/2022
+    ///
+    /// \param  screen          Current scroll screen status.
+    /// \param  pnd             The pattern name data.
+    /// \param  cell_address    The cell address.
+    /// \param  cell_offset     The cell offset, in cell units.
+    /// \param  key             Key of the cell.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void concurrentReadCell(const ScrollScreenStatus screen,
+                            const PatternNameData    pnd,
+                            const u32                cell_address,
+                            const ScreenOffset       cell_offset,
+                            const size_t             key);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus screen, const std::vector<CellData>::iterator start, const
+    /// std::vector<CellData>::iterator end);
+    ///
+    /// \brief	Reads a range of cells in parallel. The cells in the range are read in a single thread.
+    ///
+    /// \author	Runik
+    /// \date	01/09/2022
+    ///
+    /// \param 	screen	Current scroll screen status.
+    /// \param 	start 	Start iterator of the cells to read.
+    /// \param 	end   	End iterator of the cells to read .
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void concurrentMultiReadCell(const ScrollScreenStatus              screen,
+                                 const std::vector<CellData>::iterator start,
+                                 const std::vector<CellData>::iterator end);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
     /// ScreenOffset& cell_offset, const size_t key);
     ///
@@ -1358,6 +1419,26 @@ class Vdp2 {
         if (!dot && screen.is_transparency_code_valid) color.a = 0;
 
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
+    };
+
+    template<typename T>
+    void readPalette256DotBitmap(std::vector<u8>&          texture_data,
+                                 const u32                 texture_offset,
+                                 const ScrollScreenStatus& screen,
+                                 const u16                 palette_number,
+                                 const u8                  dot) {
+        const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (palette_number + dot) * sizeof(T)};
+        auto       color         = readColor<T>(color_address);
+        // if (screen.format == ScrollScreenFormat::bitmap) {
+        //    if (dot) DebugBreak();
+        //}
+        if (!dot && screen.is_transparency_code_valid) color.a = 0;
+
+        texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
+        // texture_data[texture_offset + 0] = color.r;
+        // texture_data[texture_offset + 1] = color.g;
+        // texture_data[texture_offset + 2] = color.b;
+        // texture_data[texture_offset + 3] = color.a;
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1431,26 +1512,91 @@ class Vdp2 {
     void read256ColorsBitmapData(std::vector<u8>& texture_data, const ScrollScreenStatus& screen) {
         constexpr auto offset          = u8{4};
         auto           current_address = screen.bitmap_start_address;
-        const auto     end_address     = current_address + texture_data.capacity() / 4;
+        const auto     end_address     = current_address + static_cast<u32>(texture_data.capacity()) / 4;
         constexpr auto palette_disp    = u8{8};
         const auto     palette         = screen.bitmap_palette_number << palette_disp;
-        for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
-            // if (screen.format == ScrollScreenFormat::bitmap) {
-            //    if (current_address == 0x25E26830) DebugBreak();
-            //}
-            auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
-            readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
-            current_address += offset;
-            row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
-            readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
-            current_address += offset;
+
+        BS::timer                                          tmr;
+        std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
+        std::chrono::duration<double>                      elapsed_time{};
+
+        // start_time = std::chrono::steady_clock::now();
+
+        // for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
+        //     // if (screen.format == ScrollScreenFormat::bitmap) {
+        //     //    if (current_address == 0x25E26830) DebugBreak();
+        //     //}
+        //     auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
+        //     readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
+        //     current_address += offset;
+        //     row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
+        //     readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
+        //     current_address += offset;
+        // }
+        // elapsed_time = std::chrono::steady_clock::now() - start_time;
+        auto res = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+        // core::Log::warning(Logger::vdp2, core::tr(u8"Sequential read {}µs"), res);
+
+        //---------------------------------------------------------//
+
+        // Data to read is divided in chucks to facilitate parallelization
+        // At first data is read from memory to a local vector, then this local vector is copied to the main vector.
+        // The main vector can be updated by the various threads concurrently without synchronisation as the data don't
+        // overlap.
+        texture_data.assign(texture_data.capacity(), 0);
+        constexpr auto chunk_size     = u32{0x1000};
+        auto           readBitmapPart = [&](u32 start_address, u32 texture_offset) {
+            auto       local_texture      = std::vector<u8>{};
+            const auto local_texture_size = chunk_size / offset * 0x10;
+            local_texture.reserve(local_texture_size);
+            // core::Log::warning(Logger::vdp2, u8"start {:#x}, offset {:#x}", start_address, texture_offset);
+            auto local_offset = texture_offset;
+            for (u32 i = start_address; i < (start_address + chunk_size); i += offset) {
+                auto row = Dots8Bits{modules_.memory()->read<u32>(i)};
+                readPalette256DotBitmap<T>(local_texture, local_offset - texture_offset, screen, palette, row.dot_0);
+                local_offset += 4;
+                readPalette256DotBitmap<T>(local_texture, local_offset - texture_offset, screen, palette, row.dot_1);
+                local_offset += 4;
+                readPalette256DotBitmap<T>(local_texture,
+                                           local_offset - texture_offset,
+                                           screen,
+                                           palette,
+                                           static_cast<u8>(row.dot_2));
+                local_offset += 4;
+                readPalette256DotBitmap<T>(local_texture, local_offset - texture_offset, screen, palette, row.dot_3);
+                local_offset += 4;
+            }
+            std::copy(local_texture.begin(), local_texture.end(), &texture_data[0] + texture_offset * 4);
+        };
+        // start_time          = std::chrono::steady_clock::now();
+        auto texture_offset = u32{};
+
+        // core::Log::warning(Logger::vdp2, u8"Bitmap size {:#x}", end_address - screen.bitmap_start_address);
+        for (u32 i = screen.bitmap_start_address; i < end_address; i += chunk_size) {
+            ThreadPool::pool_.push_task(readBitmapPart, current_address, texture_offset);
+            current_address += chunk_size;
+            texture_offset += chunk_size;
         }
+        ThreadPool::pool_.wait_for_tasks();
+
+        // elapsed_time = std::chrono::steady_clock::now() - start_time;
+        // res          = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+        // core::Log::warning(Logger::vdp2, core::tr(u8"Parallel read {}µs"), res);
+
+        //---------------------
+
+        // if (!texture_data.empty()) {
+        //     std::ofstream outfile("bitmap_seq.dat", std::ofstream::binary);
+        //     // outfile.write(reinterpret_cast<const char*>(texture_data.data(), sizeof(u8) * texture_data.size());
+        //     outfile.write(reinterpret_cast<const char*>(texture_data.data()), sizeof(u8) * texture_data.size());
+        //     outfile.close();
+        // }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1560,9 +1706,10 @@ class Vdp2 {
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
-    std::vector<Vdp2Part> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll cell.
-    // std::vector<std::unique_ptr<video::BaseRenderingPart>> vdp2_parts_[6]; ///< Storage of rendering parts for each scroll
-    //   cell.
+    Mutex                 vdp2_parts_mutex_;     ///< Mutex to handle access to the shared vector between threads.
+    std::vector<Vdp2Part> vdp2_parts_[6];        ///< Storage of rendering parts for each scroll cell.
+    std::vector<CellData> cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
+
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.
 
