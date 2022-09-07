@@ -29,6 +29,8 @@
 
 namespace saturnin::core {
 
+using utilities::format;
+
 // SCU DMA accesses
 // Write to A-Bus prohibited
 // Read from VDP2 area prohibited (B-Bus)
@@ -581,7 +583,7 @@ auto Scu::isInterruptMasked(const Interrupt& i) -> bool {
         case is::vector_external_13:
         case is::vector_external_14:
         case is::vector_external_15: return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
-        default: Log::warning(Logger::scu, fmt::format("Unknown interrupt vector {}", i.vector));
+        default: Log::warning(Logger::scu, format("Unknown interrupt vector {}", i.vector));
     }
     return false;
 }

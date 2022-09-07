@@ -20,7 +20,7 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/opengl.h>
-#include <saturnin/src/utilities.h> // hashCombine
+#include <saturnin/src/utilities.h> // hashCombine, format
 
 namespace util = saturnin::utilities;
 
@@ -29,6 +29,7 @@ namespace saturnin::video {
 using core::Log;
 using core::Logger;
 using core::tr;
+using utilities::format;
 
 using ReadOnlyLock  = std::shared_lock<SharedMutex>;
 using UpdatableLock = std::unique_lock<SharedMutex>;
@@ -197,7 +198,7 @@ auto Texture::detailedList() -> std::vector<DebugKey> {
     const auto   mask = std::string("{}x{} | {:x}");
     ReadOnlyLock lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
-        list.emplace_back(fmt::format(mask, value.width_, value.height_, value.key_), value.key_);
+        list.emplace_back(format(mask, value.width_, value.height_, value.key_), value.key_);
     }
     return list;
 }
@@ -230,17 +231,17 @@ auto Texture::calculateTextureSize(const ImageSize& max_size, const size_t textu
 auto Texture::statistics() -> std::vector<std::string> {
     ReadOnlyLock lock(storage_mutex_);
     auto         stats = std::vector<std::string>{};
-    stats.push_back(fmt::format("Total number of textures : {}", texture_storage_.size()));
+    stats.push_back(format("Total number of textures : {}", texture_storage_.size()));
 
     const auto vdp1_nb = std::count_if(texture_storage_.begin(), texture_storage_.end(), [](const auto& t) {
         return t.second.vdpType() == VdpType::vdp1;
     });
-    stats.push_back(fmt::format("Number of VDP1 textures : {}", vdp1_nb));
+    stats.push_back(format("Number of VDP1 textures : {}", vdp1_nb));
 
     const auto vdp2_nb = std::count_if(texture_storage_.begin(), texture_storage_.end(), [](const auto& t) {
         return t.second.vdpType() == VdpType::vdp2;
     });
-    stats.push_back(fmt::format("Number of VDP2 textures : {}", vdp2_nb));
+    stats.push_back(format("Number of VDP2 textures : {}", vdp2_nb));
 
     auto max_width  = 0;
     auto max_height = 0;
@@ -250,7 +251,7 @@ auto Texture::statistics() -> std::vector<std::string> {
             if (t.second.width() > max_width) { max_width = t.second.width(); }
         }
     }
-    stats.push_back(fmt::format("Maximum VDP1 texture size : {}x{}", max_height, max_width));
+    stats.push_back(format("Maximum VDP1 texture size : {}x{}", max_height, max_width));
 
     return stats;
 }

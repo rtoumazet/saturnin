@@ -31,6 +31,7 @@
 #include <type_traits>                  // underlying_type_t
 #include <vector>                       // vector
 #include <saturnin/src/emulator_defs.h> // u8, u16, u32
+#include <fmt/core.h>
 
 namespace saturnin::utilities {
 
@@ -198,6 +199,22 @@ T swap_endianness(T u) {
 
 inline u32 swap_words(const u32 param) {
     return (param & bitmask_FFFF0000) >> displacement_16 | (param & bitmask_0000FFFF) << displacement_16;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn template<typename... T> auto format(std::string_view str, T&&... args) -> std::string
+///
+/// \brief  Formats args according to specifications in str and returns the result as a string.
+///         Raw wrapper over fmt::format.
+///
+/// \tparam T       Generic type parameter.
+/// \param          str     String to format.
+/// \param          args    Variable formats arguments.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename... T>
+auto format(std::string_view str, T&&... args) -> std::string {
+    return fmt::format(fmt::runtime(str), std::forward<T>(args)...);
 }
 
 } // namespace saturnin::utilities

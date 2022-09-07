@@ -213,11 +213,11 @@ class Memory {
     // Constructors / Destructors
     Memory() = delete;
     Memory(EmulatorContext* ec) : modules_(ec){};
-    Memory(const Memory&) = delete;
-    Memory(Memory&&)      = delete;
+    Memory(const Memory&)                      = delete;
+    Memory(Memory&&)                           = delete;
     auto operator=(const Memory&) & -> Memory& = delete;
-    auto operator=(Memory&&) & -> Memory& = delete;
-    ~Memory()                             = default;
+    auto operator=(Memory&&) & -> Memory&      = delete;
+    ~Memory()                                  = default;
     //@}
 
     /// \name Memory handlers functions typedefs
@@ -666,7 +666,7 @@ struct writeDummy {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             Log::warning(Logger::memory,
-                         fmt::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
+                         utilities::format(core::tr("Write ({}) to unmapped area {:#0x} : {:#x}"), sizeof(T), addr, data));
             // assert(false);
         };
     }
@@ -687,7 +687,7 @@ template<typename T>
 struct readDummy {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::warning(Logger::memory, fmt::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
+            Log::warning(Logger::memory, utilities::format(core::tr("Read ({}) from unmapped area {:#0x}"), sizeof(T), addr));
             // assert(false);
             return T{};
         };

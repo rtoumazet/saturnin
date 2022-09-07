@@ -36,7 +36,8 @@
 #include <spdlog/sinks/ostream_sink.h>
 #include <spdlog/sinks/ringbuffer_sink.h>
 // NOLINTNEXTLINE(modernize - deprecated - headers)
-#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/locale.h>    // tr
+#include <saturnin/src/utilities.h> // format
 
 namespace saturnin::core {
 
@@ -238,7 +239,7 @@ class Log {
 
     static inline auto loggerExists(const std::string& logger_name) -> bool {
         if (loggers_.count(logger_name) == 0) {
-            throw std::runtime_error(fmt::format(tr("Log '{0}' is not defined !"), logger_name));
+            throw std::runtime_error(utilities::format(tr("Log '{0}' is not defined !"), logger_name));
         }
         return true;
     }

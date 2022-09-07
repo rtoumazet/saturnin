@@ -93,6 +93,7 @@ void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& d
     }
 }
 
+//void CenteredText(const std::string& text) {
 void CenteredText(const std::string& text) {
     auto           size  = ImGui::CalcTextSize(text.c_str());
     constexpr auto ratio = float{0.5f};

@@ -25,7 +25,7 @@
 #include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/locale.h> // tr
 #include <saturnin/src/memory.h>
-#include <saturnin/src/utilities.h>
+#include <saturnin/src/utilities.h> // format, toUnderlying
 
 namespace saturnin::video {
 
@@ -33,6 +33,7 @@ using core::EmulatorModules;
 using core::rawRead;
 using core::rawWrite;
 using core::tr;
+using utilities::format;
 using utilities::toUnderlying;
 
 constexpr auto vdp1_vram_start_address = u32{0x25C00000};
@@ -341,7 +342,7 @@ void Vdp1Part::SetLocalCoordinates(const s16 x, const s16 y) {
 }
 
 auto Vdp1Part::getDebugDetail() -> std::string {
-    auto part_detail = fmt::format("Table address : {:#x}\n", table_address_);
+    auto part_detail = format("Table address : {:#x}\n", table_address_);
 
     const auto getZoomPoint = [](const ZoomPoint zp) {
         switch (zp) {
@@ -551,11 +552,11 @@ Color calculation
 
     const auto getGouraudShadingData = [&]() {
         if (toEnum<GouraudShading>(cmdpmod_.gouraud_shading) == GouraudShading::enabled) {
-            return fmt::format(R"(
+            return format(R"(
 Gouraud shading 
     Table address {:#x}
 )",
-                               vdp1_ram_start_address + cmdgrda_.raw * address_multiplier);
+                          vdp1_ram_start_address + cmdgrda_.raw * address_multiplier);
         }
         return std::string{};
     };
@@ -574,28 +575,27 @@ Gouraud shading
             break;
         }
         case CommandSelect::local_coordinate: {
-            part_detail += fmt::format("x = {}, y = {}\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += format("x = {}, y = {}\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             break;
         }
         case CommandSelect::normal_sprite_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += format("Vertex A ({}, {})", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail
-                += fmt::format("{}\n",
-                               getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
-            part_detail += fmt::format("Character size {} * {}\n",
-                                       cmdsize_.character_size_x * horizontal_multiplier,
-                                       cmdsize_.character_size_y);
+                += format("{}\n", getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
+            part_detail += format("Character size {} * {}\n",
+                                  cmdsize_.character_size_x * horizontal_multiplier,
+                                  cmdsize_.character_size_y);
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
-            part_detail += fmt::format("Texture key : {:#x}", textureKey());
+            part_detail += format("Texture key : {:#x}", textureKey());
             break;
         }
         case CommandSelect::scaled_sprite_draw: {
             part_detail += getZoomPoint(toEnum<ZoomPoint>(cmdctrl_.zoom_point));
-            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
-            part_detail += fmt::format("Texture key : {:#x}", textureKey());
+            part_detail += format("Texture key : {:#x}", textureKey());
             // cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
             // cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
             // cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
@@ -610,40 +610,40 @@ Gouraud shading
             break;
         }
         case CommandSelect::distorted_sprite_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += fmt::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            part_detail += fmt::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
-            part_detail += fmt::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
+            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
+            part_detail += format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
-            part_detail += fmt::format("Texture key : {:#x}", textureKey());
+            part_detail += format("Texture key : {:#x}", textureKey());
             break;
         }
         case CommandSelect::polygon_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += fmt::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            part_detail += fmt::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
-            part_detail += fmt::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
+            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
+            part_detail += format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
             auto color = Color(cmdcolr_.raw);
-            part_detail += fmt::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
+            part_detail += format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }
         case CommandSelect::polyline_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += fmt::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            part_detail += fmt::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
-            part_detail += fmt::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
+            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
+            part_detail += format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
             auto color = Color(cmdcolr_.raw);
-            part_detail += fmt::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
+            part_detail += format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }
         case CommandSelect::line_draw: {
-            part_detail += fmt::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += fmt::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
             auto color = Color(cmdcolr_.raw);
-            part_detail += fmt::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
+            part_detail += format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }

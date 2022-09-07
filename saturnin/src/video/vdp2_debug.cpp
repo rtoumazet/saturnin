@@ -24,11 +24,13 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <saturnin/src/pch.h>
+#include <saturnin/src/utilities.h> // format
 #include <saturnin/src/video/vdp2.h>
 
 namespace saturnin::video {
 
 using core::tr;
+using utilities::format;
 
 //--------------------------------------------------------------------------------------------------------------
 // DEBUG methods
@@ -75,7 +77,7 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
             }
             values.emplace_back(
                 tr("Resolution"),
-                fmt::format("{:d}x{:d} - {:s}", tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res, screen_mode));
+                format("{:d}x{:d} - {:s}", tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res, screen_mode));
         }
     }
 
@@ -94,7 +96,7 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
 
     //    auto nbgDisplayStatus = [&](const ScrollScreen s) {
     //        const auto& nbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
-    //        values.emplace_back(fmt::format("NBG{}", toUnderlying(s)), nbg);
+    //        values.emplace_back(format("NBG{}", toUnderlying(s)), nbg);
     //    };
     //    nbgDisplayStatus(ScrollScreen::nbg0);
     //    nbgDisplayStatus(ScrollScreen::nbg1);
@@ -103,7 +105,7 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
 
     //    auto rbgDisplayStatus = [&](const ScrollScreen s) {
     //        const auto& rbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
-    //        values.emplace_back(fmt::format("RBG{}", toUnderlying(s) - 4), rbg);
+    //        values.emplace_back(format("RBG{}", toUnderlying(s) - 4), rbg);
     //    };
     //    rbgDisplayStatus(ScrollScreen::rbg0);
     //    rbgDisplayStatus(ScrollScreen::rbg1);
@@ -332,12 +334,11 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
             }
         };
         values.emplace_back(tr("Bitmap size"), bitmapSize(screen.bitmap_size));
-        values.emplace_back(tr("Bitmap palette number"), fmt::format("{:#x}", screen.bitmap_palette_number));
-        values.emplace_back(tr("Priority"), fmt::format("{}", screen.priority_number));
-        values.emplace_back(tr("Bitmap special priority bit"), fmt::format("{:#x}", screen.bitmap_special_priority));
-        values.emplace_back(tr("Bitmap special color calculation bit"),
-                            fmt::format("{:#x}", screen.bitmap_special_color_calculation));
-        values.emplace_back(tr("Bitmap start address"), fmt::format("{:#x}", screen.bitmap_start_address));
+        values.emplace_back(tr("Bitmap palette number"), format("{:#x}", screen.bitmap_palette_number));
+        values.emplace_back(tr("Priority"), format("{}", screen.priority_number));
+        values.emplace_back(tr("Bitmap special priority bit"), format("{:#x}", screen.bitmap_special_priority));
+        values.emplace_back(tr("Bitmap special color calculation bit"), format("{:#x}", screen.bitmap_special_color_calculation));
+        values.emplace_back(tr("Bitmap start address"), format("{:#x}", screen.bitmap_start_address));
         return values;
     }
 
@@ -346,7 +347,7 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
 
     // Scroll size
     // const auto size = screen.page_size * screen.plane_size * screen.map_size;
-    // values.emplace_back(tr("Total screen size"), fmt::format("{:#x}", size));
+    // values.emplace_back(tr("Total screen size"), format("{:#x}", size));
 
     // Map size
     const auto mapSize = [](const ScrollScreen s) {
@@ -380,11 +381,10 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
                   ? tr("10 bits, can flip")
                   : tr("12 bits, cannot flip");
         values.emplace_back(tr("Character number supplement mode"), character_mode);
-        values.emplace_back(tr("Special priority bit"), fmt::format("{:#x}", screen.special_priority));
-        values.emplace_back(tr("Special color calculation bit"), fmt::format("{:#x}", screen.special_color_calculation));
-        values.emplace_back(tr("Supplementary palette number bit"), fmt::format("{:#x}", screen.supplementary_palette_number));
-        values.emplace_back(tr("Supplementary character number bit"),
-                            fmt::format("{:#x}", screen.supplementary_character_number));
+        values.emplace_back(tr("Special priority bit"), format("{:#x}", screen.special_priority));
+        values.emplace_back(tr("Special color calculation bit"), format("{:#x}", screen.special_color_calculation));
+        values.emplace_back(tr("Supplementary palette number bit"), format("{:#x}", screen.supplementary_palette_number));
+        values.emplace_back(tr("Supplementary character number bit"), format("{:#x}", screen.supplementary_character_number));
     }
 
     // Character Pattern size
@@ -395,33 +395,33 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     values.emplace_back(tr("Character color number"), colorNumber(screen.character_color_number));
 
     // Color RAM offset
-    values.emplace_back(tr("Color RAM address offset"), fmt::format("{:#x}", screen.color_ram_address_offset));
+    values.emplace_back(tr("Color RAM address offset"), format("{:#x}", screen.color_ram_address_offset));
 
     // Cell size
     values.emplace_back(tr("Cell size"), tr("8x8 dots"));
 
     // Priority
-    values.emplace_back(tr("Priority"), fmt::format("{}", screen.priority_number));
+    values.emplace_back(tr("Priority"), format("{}", screen.priority_number));
 
     // Plane start address
-    values.emplace_back(tr("Plane A start address"), fmt::format("{:#010x}", screen.plane_a_start_address));
-    values.emplace_back(tr("Plane B start address"), fmt::format("{:#010x}", screen.plane_b_start_address));
-    values.emplace_back(tr("Plane C start address"), fmt::format("{:#010x}", screen.plane_c_start_address));
-    values.emplace_back(tr("Plane D start address"), fmt::format("{:#010x}", screen.plane_d_start_address));
+    values.emplace_back(tr("Plane A start address"), format("{:#010x}", screen.plane_a_start_address));
+    values.emplace_back(tr("Plane B start address"), format("{:#010x}", screen.plane_b_start_address));
+    values.emplace_back(tr("Plane C start address"), format("{:#010x}", screen.plane_c_start_address));
+    values.emplace_back(tr("Plane D start address"), format("{:#010x}", screen.plane_d_start_address));
     const auto rotation_screens = std::array{ScrollScreen::rbg0, ScrollScreen::rbg1};
     if (std::any_of(rotation_screens.begin(), rotation_screens.end(), [&s](const ScrollScreen rss) { return rss == s; })) {
-        values.emplace_back(tr("Plane E start address"), fmt::format("{:#010x}", screen.plane_e_start_address));
-        values.emplace_back(tr("Plane F start address"), fmt::format("{:#010x}", screen.plane_f_start_address));
-        values.emplace_back(tr("Plane G start address"), fmt::format("{:#010x}", screen.plane_g_start_address));
-        values.emplace_back(tr("Plane H start address"), fmt::format("{:#010x}", screen.plane_h_start_address));
-        values.emplace_back(tr("Plane I start address"), fmt::format("{:#010x}", screen.plane_i_start_address));
-        values.emplace_back(tr("Plane J start address"), fmt::format("{:#010x}", screen.plane_j_start_address));
-        values.emplace_back(tr("Plane K start address"), fmt::format("{:#010x}", screen.plane_k_start_address));
-        values.emplace_back(tr("Plane L start address"), fmt::format("{:#010x}", screen.plane_l_start_address));
-        values.emplace_back(tr("Plane M start address"), fmt::format("{:#010x}", screen.plane_m_start_address));
-        values.emplace_back(tr("Plane N start address"), fmt::format("{:#010x}", screen.plane_n_start_address));
-        values.emplace_back(tr("Plane O start address"), fmt::format("{:#010x}", screen.plane_o_start_address));
-        values.emplace_back(tr("Plane P start address"), fmt::format("{:#010x}", screen.plane_p_start_address));
+        values.emplace_back(tr("Plane E start address"), format("{:#010x}", screen.plane_e_start_address));
+        values.emplace_back(tr("Plane F start address"), format("{:#010x}", screen.plane_f_start_address));
+        values.emplace_back(tr("Plane G start address"), format("{:#010x}", screen.plane_g_start_address));
+        values.emplace_back(tr("Plane H start address"), format("{:#010x}", screen.plane_h_start_address));
+        values.emplace_back(tr("Plane I start address"), format("{:#010x}", screen.plane_i_start_address));
+        values.emplace_back(tr("Plane J start address"), format("{:#010x}", screen.plane_j_start_address));
+        values.emplace_back(tr("Plane K start address"), format("{:#010x}", screen.plane_k_start_address));
+        values.emplace_back(tr("Plane L start address"), format("{:#010x}", screen.plane_l_start_address));
+        values.emplace_back(tr("Plane M start address"), format("{:#010x}", screen.plane_m_start_address));
+        values.emplace_back(tr("Plane N start address"), format("{:#010x}", screen.plane_n_start_address));
+        values.emplace_back(tr("Plane O start address"), format("{:#010x}", screen.plane_o_start_address));
+        values.emplace_back(tr("Plane P start address"), format("{:#010x}", screen.plane_p_start_address));
     }
 
     // Scrolling
@@ -429,17 +429,17 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
         case ScrollScreen::nbg0:
         case ScrollScreen::nbg1:
             values.emplace_back(tr("Screen scroll"),
-                                fmt::format("x = {}.{}, y = {}.{}",
-                                            screen.screen_scroll_horizontal_integer,
-                                            screen.screen_scroll_horizontal_fractional,
-                                            screen.screen_scroll_vertical_integer,
-                                            screen.screen_scroll_vertical_fractional));
+                                format("x = {}.{}, y = {}.{}",
+                                       screen.screen_scroll_horizontal_integer,
+                                       screen.screen_scroll_horizontal_fractional,
+                                       screen.screen_scroll_vertical_integer,
+                                       screen.screen_scroll_vertical_fractional));
             break;
         case ScrollScreen::nbg2:
         case ScrollScreen::nbg3:
             values.emplace_back(
                 tr("Screen scroll"),
-                fmt::format("x = {}, y = {}", screen.screen_scroll_horizontal_integer, screen.screen_scroll_vertical_integer));
+                format("x = {}, y = {}", screen.screen_scroll_horizontal_integer, screen.screen_scroll_vertical_integer));
             break;
         default: break;
     }
@@ -447,13 +447,13 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     // Color offset
     if (screen.is_color_offset_enabled) {
         values.emplace_back(tr("Color offset"),
-                            fmt::format("R:{:+d} G:{:+d} B:{:+d}",
-                                        screen.color_offset.as_s16.r,
-                                        screen.color_offset.as_s16.g,
-                                        screen.color_offset.as_s16.b));
+                            format("R:{:+d} G:{:+d} B:{:+d}",
+                                   screen.color_offset.as_s16.r,
+                                   screen.color_offset.as_s16.g,
+                                   screen.color_offset.as_s16.b));
         // values.emplace_back(
         //     tr("  R:G:B"),
-        //     fmt::format("R:{:+d} G:{:+d} B:{:+d}", screen.color_offset_red, screen.color_offset_green,
+        //     format("R:{:+d} G:{:+d} B:{:+d}", screen.color_offset_red, screen.color_offset_green,
         //     screen.color_offset_blue));
 
     } else {

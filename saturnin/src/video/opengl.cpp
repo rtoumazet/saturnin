@@ -44,6 +44,7 @@
 #include <saturnin/src/config.h>
 #include <saturnin/src/locale.h> // tr
 #include <saturnin/src/log.h>
+#include <saturnin/src/utilities.h> // format
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp_common.h>
@@ -62,6 +63,7 @@ namespace saturnin::video {
 using core::Log;
 using core::Logger;
 using core::tr;
+using utilities::format;
 
 constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
 constexpr auto vertexes_per_polyline         = u32{4};
@@ -1069,7 +1071,7 @@ void Opengl::calculateFps() {
             constexpr auto max_fps_ntsc = 60;
             max_frames                  = (standard == TvStandard::pal) ? max_fps_pal : max_fps_ntsc;
         }
-        fps_                 = fmt::format("{:d} / {}", frames_count, max_frames);
+        fps_                 = format("{:d} / {}", frames_count, max_frames);
         previous_frame_start = current_frame_start;
         frames_count         = 0;
         time_elapsed         = micro{0};
@@ -1178,8 +1180,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     }
 #endif
     const std::string rendering_mode = (is_legacy_opengl) ? core::tr("Legacy") : core::tr("Modern");
-    const std::string window_title
-        = fmt::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
+    const std::string window_title   = format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
     const auto window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
     if (window == nullptr) { return EXIT_FAILURE; }
