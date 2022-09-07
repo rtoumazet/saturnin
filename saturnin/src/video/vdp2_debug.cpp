@@ -75,9 +75,11 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
                 case ScreenMode::exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
                 default: screen_mode = tr("Unknown");
             }
-            values.emplace_back(
-                tr("Resolution"),
-                format("{:d}x{:d} - {:s}", tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res, screen_mode));
+            values.emplace_back(tr("Resolution"),
+                                utilities::format("{:d}x{:d} - {:s}",
+                                                  tv_screen_status_.horizontal_res,
+                                                  tv_screen_status_.vertical_res,
+                                                  screen_mode));
         }
     }
 

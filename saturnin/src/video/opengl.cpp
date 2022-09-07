@@ -60,6 +60,8 @@ using namespace std::string_literals; // enables s-suffix for std::string litera
 
 namespace saturnin::video {
 
+namespace util = saturnin::utilities;
+
 using core::Log;
 using core::Logger;
 using core::tr;
@@ -1180,7 +1182,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     }
 #endif
     const std::string rendering_mode = (is_legacy_opengl) ? core::tr("Legacy") : core::tr("Modern");
-    const std::string window_title   = format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
+    const std::string window_title
+        = util::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
     const auto window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
     if (window == nullptr) { return EXIT_FAILURE; }

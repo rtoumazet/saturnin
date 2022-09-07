@@ -132,7 +132,7 @@ class Log {
                 loggers_.at(logger_name)->error(value.c_str(), args...);
                 // errors are also logged to console, using original logger name
                 const auto message = std::string{"[{}] " + value};
-                loggers_.at("console")->error(message.c_str(), logger_name, args...);
+                loggers_.at("console")->error(fmt::runtime(message.c_str()), logger_name, args...);
             }
         } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }
     }
@@ -157,10 +157,10 @@ class Log {
         try {
             const auto& logger_name = loggers_names_[logger];
             if (loggerExists(logger_name)) {
-                loggers_.at(logger_name)->warn(value.c_str(), args...);
+                loggers_.at(logger_name)->warn(fmt::runtime(value.c_str()), args...);
                 // warnings are also logged to console, using original logger name
                 const auto message = std::string{"[{}] " + value};
-                loggers_.at("console")->warn(message.c_str(), logger_name, args...);
+                loggers_.at("console")->warn(fmt::runtime(message.c_str()), logger_name, args...);
             }
         } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }
     }
@@ -204,7 +204,7 @@ class Log {
     template<typename... Args>
     static inline void debug(const Logger logger, const std::string& value, const Args&... args) {
         const auto& logger_name = loggers_names_[logger];
-        if (loggerExists(logger_name)) { loggers_.at(logger_name)->debug(value.c_str(), args...); }
+        if (loggerExists(logger_name)) { loggers_.at(logger_name)->debug(fmt::runtime(value.c_str()), args...); }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
