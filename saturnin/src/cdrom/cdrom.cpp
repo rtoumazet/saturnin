@@ -25,15 +25,16 @@
 #include <saturnin/src/locale.h>
 #include <saturnin/src/log.h> // Log
 #include <saturnin/src/smpc.h>
-#include <saturnin/src/utilities.h> // toUnderlying
+#include <saturnin/src/utilities.h> // toUnderlying, format
 #include <saturnin/src/cdrom/scsi.h>
 
 namespace saturnin::cdrom {
 
+namespace uti = saturnin::utilities;
+
 using core::Log;
 using core::Logger;
 using core::tr;
-using utilities::format;
 
 // Static variables initialization
 CdromAccessMethod Cdrom::access_method = CdromAccessMethod::spti;
@@ -1936,12 +1937,12 @@ void Cdrom::run(const u8 cycles) {
 
 auto Cdrom::getRegisters() -> std::vector<std::string> {
     std::vector<std::string> registers;
-    registers.emplace_back(format("HIrq Status Register : {:#06x}", hirq_status_reg_.raw));
-    registers.emplace_back(format("HIrq Mask Register : {:#06x}", hirq_mask_reg_.raw));
-    registers.emplace_back(format("Command Register 1 : {:#06x}", cr1_.raw));
-    registers.emplace_back(format("Command Register 2 : {:#06x}", cr2_.raw));
-    registers.emplace_back(format("Command Register 3 : {:#06x}", cr3_.raw));
-    registers.emplace_back(format("Command Register 4 : {:#06x}", cr4_.raw));
+    registers.emplace_back(uti::format("HIrq Status Register : {:#06x}", hirq_status_reg_.raw));
+    registers.emplace_back(uti::format("HIrq Mask Register : {:#06x}", hirq_mask_reg_.raw));
+    registers.emplace_back(uti::format("Command Register 1 : {:#06x}", cr1_.raw));
+    registers.emplace_back(uti::format("Command Register 2 : {:#06x}", cr2_.raw));
+    registers.emplace_back(uti::format("Command Register 3 : {:#06x}", cr3_.raw));
+    registers.emplace_back(uti::format("Command Register 4 : {:#06x}", cr4_.raw));
 
     return registers;
 }

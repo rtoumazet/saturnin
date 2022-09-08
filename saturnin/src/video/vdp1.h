@@ -46,7 +46,6 @@ using saturnin::core::EmulatorModules;
 
 constexpr auto vdp1_ram_start_address = u32{0x25c00000};
 constexpr auto table_size             = u8{0x20};
-constexpr auto address_multiplier     = u8{8};
 
 class Vdp1 {
   public:

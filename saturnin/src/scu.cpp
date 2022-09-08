@@ -25,11 +25,11 @@
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu_registers.h>
 #include <saturnin/src/sh2.h>
-#include <saturnin/src/utilities.h>
+#include <saturnin/src/utilities.h> // format
+
+namespace uti = saturnin::utilities;
 
 namespace saturnin::core {
-
-using utilities::format;
 
 // SCU DMA accesses
 // Write to A-Bus prohibited
@@ -583,7 +583,7 @@ auto Scu::isInterruptMasked(const Interrupt& i) -> bool {
         case is::vector_external_13:
         case is::vector_external_14:
         case is::vector_external_15: return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
-        default: Log::warning(Logger::scu, format("Unknown interrupt vector {}", i.vector));
+        default: Log::warning(Logger::scu, uti::format("Unknown interrupt vector {}", i.vector));
     }
     return false;
 }

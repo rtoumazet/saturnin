@@ -128,12 +128,12 @@ void Vdp1::populateRenderData() {
             }
             case JumpSelect::jump_assign: {
                 Log::debug(Logger::vdp1, tr("Jump assign"));
-                next_table_address = vdp1_ram_start_address + cmdlink.raw * address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
                 break;
             }
             case JumpSelect::jump_call: {
                 Log::debug(Logger::vdp1, tr("Jump call"));
-                next_table_address = vdp1_ram_start_address + cmdlink.raw * address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
                 return_address     = current_table_address + table_size;
                 break;
             }
@@ -151,13 +151,13 @@ void Vdp1::populateRenderData() {
             }
             case JumpSelect::skip_assign: {
                 Log::debug(Logger::vdp1, tr("Skip assign"));
-                next_table_address = vdp1_ram_start_address + cmdlink.raw * address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
                 skip_table         = true;
                 break;
             }
             case JumpSelect::skip_call: {
                 Log::debug(Logger::vdp1, tr("Skip call"));
-                next_table_address = vdp1_ram_start_address + cmdlink.raw * address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
                 return_address     = current_table_address + table_size;
                 skip_table         = true;
                 break;

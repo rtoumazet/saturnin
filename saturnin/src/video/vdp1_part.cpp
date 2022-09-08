@@ -18,14 +18,16 @@
 //
 
 #include <saturnin/src/pch.h>
+#include <saturnin/src/memory.h>
 #include <saturnin/src/video/vdp1_part.h>
 #include <saturnin/src/video/opengl.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/emulator_modules.h>
-#include <saturnin/src/locale.h> // tr
-#include <saturnin/src/memory.h>
+#include <saturnin/src/locale.h>    // tr
 #include <saturnin/src/utilities.h> // format, toUnderlying
+
+namespace uti = saturnin::utilities;
 
 namespace saturnin::video {
 
@@ -33,11 +35,9 @@ using core::EmulatorModules;
 using core::rawRead;
 using core::rawWrite;
 using core::tr;
-using utilities::format;
 using utilities::toUnderlying;
 
-constexpr auto vdp1_vram_start_address = u32{0x25C00000};
-constexpr auto horizontal_multiplier   = u8{8};
+constexpr auto horizontal_multiplier = u8{8};
 
 s16 Vdp1Part::local_coordinate_x_;
 s16 Vdp1Part::local_coordinate_y_;
@@ -324,7 +324,7 @@ auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const u8 prio
             return 0;
         }
         case ColorMode::mode_1_16_colors_lookup: {
-            const auto lut_address = u32{vdp1_ram_start_address + cmdsrca_.raw * address_multiplier};
+            const auto lut_address = u32{vdp1_ram_start_address + cmdsrca_.raw * vdp1_address_multiplier};
             auto       reg         = SpriteTypeRegister{modules.memory()->read<u16>(lut_address)};
             return (reg.msb == 1) ? 0 : priority;
         }
@@ -342,7 +342,7 @@ void Vdp1Part::SetLocalCoordinates(const s16 x, const s16 y) {
 }
 
 auto Vdp1Part::getDebugDetail() -> std::string {
-    auto part_detail = format("Table address : {:#x}\n", table_address_);
+    auto part_detail = uti::format("Table address : {:#x}\n", table_address_);
 
     const auto getZoomPoint = [](const ZoomPoint zp) {
         switch (zp) {
@@ -552,11 +552,11 @@ Color calculation
 
     const auto getGouraudShadingData = [&]() {
         if (toEnum<GouraudShading>(cmdpmod_.gouraud_shading) == GouraudShading::enabled) {
-            return format(R"(
+            return uti::format(R"(
 Gouraud shading 
     Table address {:#x}
 )",
-                          vdp1_ram_start_address + cmdgrda_.raw * address_multiplier);
+                               vdp1_ram_start_address + cmdgrda_.raw * vdp1_address_multiplier);
         }
         return std::string{};
     };
@@ -575,27 +575,28 @@ Gouraud shading
             break;
         }
         case CommandSelect::local_coordinate: {
-            part_detail += format("x = {}, y = {}\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += uti::format("x = {}, y = {}\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             break;
         }
         case CommandSelect::normal_sprite_draw: {
-            part_detail += format("Vertex A ({}, {})", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += uti::format("Vertex A ({}, {})", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail
-                += format("{}\n", getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
-            part_detail += format("Character size {} * {}\n",
-                                  cmdsize_.character_size_x * horizontal_multiplier,
-                                  cmdsize_.character_size_y);
+                += uti::format("{}\n",
+                               getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
+            part_detail += uti::format("Character size {} * {}\n",
+                                       cmdsize_.character_size_x * horizontal_multiplier,
+                                       cmdsize_.character_size_y);
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
-            part_detail += format("Texture key : {:#x}", textureKey());
+            part_detail += uti::format("Texture key : {:#x}", textureKey());
             break;
         }
         case CommandSelect::scaled_sprite_draw: {
             part_detail += getZoomPoint(toEnum<ZoomPoint>(cmdctrl_.zoom_point));
-            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
-            part_detail += format("Texture key : {:#x}", textureKey());
+            part_detail += uti::format("Texture key : {:#x}", textureKey());
             // cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
             // cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
             // cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
@@ -610,40 +611,40 @@ Gouraud shading
             break;
         }
         case CommandSelect::distorted_sprite_draw: {
-            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            part_detail += format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
-            part_detail += format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
+            part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += uti::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += uti::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
+            part_detail += uti::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
-            part_detail += format("Texture key : {:#x}", textureKey());
+            part_detail += uti::format("Texture key : {:#x}", textureKey());
             break;
         }
         case CommandSelect::polygon_draw: {
-            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            part_detail += format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
-            part_detail += format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
+            part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += uti::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += uti::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
+            part_detail += uti::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
             auto color = Color(cmdcolr_.raw);
-            part_detail += format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
+            part_detail += uti::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }
         case CommandSelect::polyline_draw: {
-            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            part_detail += format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
-            part_detail += format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
+            part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += uti::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += uti::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
+            part_detail += uti::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
             auto color = Color(cmdcolr_.raw);
-            part_detail += format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
+            part_detail += uti::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }
         case CommandSelect::line_draw: {
-            part_detail += format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
+            part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += uti::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
             auto color = Color(cmdcolr_.raw);
-            part_detail += format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
+            part_detail += uti::format("Color ({}, {}, {}, {})\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }
@@ -1074,7 +1075,7 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
     const auto      color_ram_address_offset = modules.vdp1()->getColorRamAddressOffset();
-    auto            start_address            = vdp1_vram_start_address + part.cmdsrca_.raw * address_multiplier;
+    auto            start_address            = vdp1_vram_start_address + part.cmdsrca_.raw * vdp1_address_multiplier;
     const auto      texture_width            = part.cmdsize_.character_size_x * 8;
     const auto      texture_height           = part.cmdsize_.character_size_y;
     const auto      color_mode               = toEnum<ColorMode>(part.cmdpmod_.color_mode);

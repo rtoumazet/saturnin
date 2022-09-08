@@ -31,9 +31,11 @@
 #include <tuple>     //tuple
 #include <vector>    // vector
 #include <Windows.h> // VK constants
+#define GLFW_INCLUDE_NONE
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/emulator_enums.h>
 #include <saturnin/src/emulator_modules.h> // EmulatorModules
+#include <saturnin/src/log.h>              // Log, Logger
 #include <saturnin/src/scu.h>
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/utilities.h> // toUnderlying
@@ -1473,6 +1475,19 @@ struct writeWorkramHigh {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn inline bool isMasterSh2InOperation(const Memory& m);
+///
+/// \brief  Checks which SH2 is in operation.
+///
+/// \author Runik
+/// \date   01/01/2019
+///
+/// \return Returns true if master SH2 is in operation, false if slave SH2 is in operation.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline auto isMasterSh2InOperation(const Memory& m) -> bool;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct readSh2Registers
 ///
 /// \brief  SH2 registers read handler.
@@ -1659,19 +1674,6 @@ struct writeCacheData {
         };
     }
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn inline bool isMasterSh2InOperation(const Memory& m);
-///
-/// \brief  Checks which SH2 is in operation.
-///
-/// \author Runik
-/// \date   01/01/2019
-///
-/// \return Returns true if master SH2 is in operation, false if slave SH2 is in operation.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline auto isMasterSh2InOperation(const Memory& m) -> bool;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn inline auto getDirectAddress(AddressRange ar) -> AddressRange;

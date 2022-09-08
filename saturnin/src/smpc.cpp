@@ -30,7 +30,7 @@
 
 namespace saturnin::core {
 
-namespace util = saturnin::utilities;
+namespace uti = saturnin::utilities;
 
 // using sound::Scsp;
 
@@ -344,11 +344,11 @@ void Smpc::reset() {
 
 auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 {
     using seconds             = std::chrono::duration<double>;
-    const auto cycle_duration = seconds{(static_cast<double>(1) / static_cast<double>(util::toUnderlying(clock_)))};
+    const auto cycle_duration = seconds{(static_cast<double>(1) / static_cast<double>(uti::toUnderlying(clock_)))};
     return static_cast<u32>(d / cycle_duration);
 }
 
-auto Smpc::getSystemClock() -> u32 { return util::toUnderlying(clock_); }
+auto Smpc::getSystemClock() -> u32 { return uti::toUnderlying(clock_); }
 
 auto Smpc::getRegisters() const -> const AddressToNameMap& { return address_to_name_; };
 
@@ -409,46 +409,46 @@ void Smpc::executeCommand() {
         case SmpcCommand::master_sh2_on:
             is_master_sh2_on_ = true;
             Log::debug(Logger::smpc, tr("-=Master SH2 ON=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::slave_sh2_on:
             is_slave_sh2_on_ = true;
             modules_.slaveSh2()->powerOnReset();
             Log::debug(Logger::smpc, tr("-=Slave SH2 ON=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::slave_sh2_off:
             is_slave_sh2_on_ = false;
             Log::debug(Logger::smpc, tr("-=Slave SH2 OFF=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::sound_on:
             is_sound_on_ = true;
             modules_.scsp()->reset();
             Log::debug(Logger::smpc, tr("-=Sound ON=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::sound_off:
             is_sound_on_ = false;
             // emulator_context_->scsp()->setSound(false);
             Log::debug(Logger::smpc, tr("-=Sound OFF=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::cd_on:
             is_cd_on_ = true;
             Log::debug(Logger::smpc, tr("-=CD ON=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::cd_off:
             is_cd_on_ = false;
             Log::debug(Logger::smpc, tr("-=CD OFF=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::reset_entire_system:
@@ -456,7 +456,7 @@ void Smpc::executeCommand() {
             modules_.slaveSh2()->powerOnReset();
             // emulator_context_->scsp()->reset();
             Log::debug(Logger::smpc, tr("-=Reset Entire System=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::clock_change_320:
@@ -487,25 +487,25 @@ void Smpc::executeCommand() {
                 is_horizontal_res_352 = true;
                 Log::debug(Logger::smpc, tr("-=Clock Change 352 Mode=- command executed"));
             }
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::nmi_request:
             modules_.scu()->generateInterrupt(interrupt_source::nmi);
             Log::debug(Logger::smpc, tr("-=NMI Request=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::reset_enable:
             is_soft_reset_allowed_ = true;
             Log::debug(Logger::smpc, tr("-=Reset Enable=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::reset_disable:
             is_soft_reset_allowed_ = false;
             Log::debug(Logger::smpc, tr("-=Reset Disable=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::interrupt_back:
@@ -517,15 +517,15 @@ void Smpc::executeCommand() {
                 smem_[i] = ireg_[i].raw;
             }
             Log::debug(Logger::smpc, tr("-=SMPC Memory Setting=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
         case SmpcCommand::time_setting:
             Log::debug(Logger::smpc, tr("-=Time Setting=- command executed"));
-            oreg_[index_31].raw = util::toUnderlying(command);
+            oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        default: Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), util::toUnderlying(command));
+        default: Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), uti::toUnderlying(command));
     }
 }
 
@@ -534,7 +534,7 @@ void Smpc::executeIntback() {
         getPeripheralData();
         next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
         sf_.sf                  = false;
-        oreg_[index_31].raw     = util::toUnderlying(SmpcCommand::interrupt_back);
+        oreg_[index_31].raw     = uti::toUnderlying(SmpcCommand::interrupt_back);
         Log::debug(Logger::smpc, tr("Interrupt request"));
         modules_.scu()->generateInterrupt(interrupt_source::system_manager);
         return;
@@ -607,7 +607,7 @@ void Smpc::getStatus() {
     oreg_[index_8].raw = {}; // No cartridge code handling for now
 
     std::string ac     = modules_.config()->readValue(core::AccessKeys::cfg_global_area_code);
-    oreg_[index_9].raw = util::toUnderlying(modules_.config()->getAreaCode(ac));
+    oreg_[index_9].raw = uti::toUnderlying(modules_.config()->getAreaCode(ac));
 
     oreg_[index_10].bit_7 = false;
     oreg_[index_10].bit_6 = is_horizontal_res_352;
@@ -680,7 +680,7 @@ void Smpc::getPeripheralData() {
             auto port_1_data = PortData{};
             switch (port_1_status_) {
                 case PortStatus::not_connected: {
-                    full_peripheral_data_table_.emplace_back(util::toUnderlying(port_1_status_));
+                    full_peripheral_data_table_.emplace_back(uti::toUnderlying(port_1_status_));
                     full_peripheral_data_table_.emplace_back(u8_max);
                     full_peripheral_data_table_.emplace_back(u8_max);
                     full_peripheral_data_table_.emplace_back(u8_max);
@@ -688,7 +688,7 @@ void Smpc::getPeripheralData() {
                 }
                 case PortStatus::direct_connection: {
                     const auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
-                    full_peripheral_data_table_.emplace_back(util::toUnderlying(port_1_status_));
+                    full_peripheral_data_table_.emplace_back(uti::toUnderlying(port_1_status_));
 
                     const auto local_data_size
                         = u8{(pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size};
@@ -716,7 +716,7 @@ void Smpc::getPeripheralData() {
             auto port_2_data = PortData{};
             switch (port_2_status_) {
                 case PortStatus::not_connected: {
-                    full_peripheral_data_table_.emplace_back(util::toUnderlying(port_2_status_));
+                    full_peripheral_data_table_.emplace_back(uti::toUnderlying(port_2_status_));
                     full_peripheral_data_table_.emplace_back(u8_max);
                     full_peripheral_data_table_.emplace_back(u8_max);
                     full_peripheral_data_table_.emplace_back(u8_max);
@@ -724,7 +724,7 @@ void Smpc::getPeripheralData() {
                 }
                 case PortStatus::direct_connection: {
                     const auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
-                    full_peripheral_data_table_.emplace_back(util::toUnderlying(port_2_status_));
+                    full_peripheral_data_table_.emplace_back(uti::toUnderlying(port_2_status_));
                     const auto local_data_size
                         = u8{(pad_data.data_size != 0) ? pad_data.data_size : pad_data.extension_data_size};
                     full_peripheral_data_table_.reserve(full_peripheral_data_table_.size() + local_data_size);
@@ -765,7 +765,7 @@ void Smpc::getPeripheralData() {
 auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData {
     auto peripheral_data                 = PeripheralData{};
     peripheral_data.saturn_peripheral_id = id;
-    peripheral_data.data_size            = util::toUnderlying(id) & bitmask_0F;
+    peripheral_data.data_size            = uti::toUnderlying(id) & bitmask_0F;
     if (peripheral_data.data_size != 0) { peripheral_data.extension_data_size = 0; }
 
     const auto p1 = getSaturnPeripheralMapping().player_1;
@@ -851,7 +851,7 @@ auto Smpc::read(const u32 addr) -> u8 {
         case port_data_register_2:
             // if (emulator_context_->hardwareMode() == HardwareMode::stv) {
             //    pdr2_.reset();
-            //    if (glfwGetKey(glfwGetCurrentContext(), util::toUnderlying(stv_mapping_.board_controls.test_switch)) ==
+            //    if (glfwGetKey(glfwGetCurrentContext(), uti::toUnderlying(stv_mapping_.board_controls.test_switch)) ==
             //    GLFW_PRESS) {
 
             //    }
@@ -1030,16 +1030,17 @@ auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout[
 auto getRtcTime() -> RtcTime {
     using namespace date;
     using namespace std::chrono;
+    namespace chr = std::chrono;
 
-    const auto tp      = system_clock::now();
+    const auto tp      = chr::system_clock::now();
     const auto dp      = floor<days>(tp);    // Day part of time_point
     const auto time    = make_time(tp - dp); // Time part of time_point
-    const auto today   = year_month_day(dp);
-    const auto weekday = year_month_weekday(dp);
+    const auto today   = chr::year_month_day(dp);
+    const auto weekday = chr::year_month_weekday(dp);
 
     auto       rtc      = RtcTime{};
     const auto year     = static_cast<int>(today.year());
-    const auto year_bcd = util::dec2bcd(year);
+    const auto year_bcd = uti::dec2bcd(year);
     rtc.year_1000_bcd   = std::bitset<4>((year_bcd >> displacement_12) & bitmask_0F);
     rtc.year_100_bcd    = std::bitset<4>((year_bcd >> displacement_8) & bitmask_0F);
     rtc.year_10_bcd     = std::bitset<4>((year_bcd >> displacement_4) & bitmask_0F);
@@ -1049,26 +1050,26 @@ auto getRtcTime() -> RtcTime {
     rtc.day_hex   = weekday.weekday().c_encoding();
 
     // const auto month     = static_cast<unsigned>(today.month());
-    // const auto month_bcd = util::dec2bcd(month);
+    // const auto month_bcd = uti::dec2bcd(month);
     // rtc.day_10_bcd       = std::bitset<4>((month_bcd >> displacement_4) & bitmask_0F);
     // rtc.day_1_bcd        = std::bitset<4>(month_bcd & bitmask_0F);
     const auto day     = static_cast<unsigned>(today.day());
-    const auto day_bcd = util::dec2bcd(day);
+    const auto day_bcd = uti::dec2bcd(day);
     rtc.day_10_bcd     = std::bitset<4>((day_bcd >> displacement_4) & bitmask_0F);
     rtc.day_1_bcd      = std::bitset<4>(day_bcd & bitmask_0F);
 
     const auto hour     = time.hours().count();
-    const auto hour_bcd = util::dec2bcd(hour);
+    const auto hour_bcd = uti::dec2bcd(hour);
     rtc.hour_10_bcd     = std::bitset<4>((hour_bcd >> displacement_4) & bitmask_0F);
     rtc.hour_1_bcd      = std::bitset<4>(hour_bcd & bitmask_0F);
 
     const auto minute     = time.minutes().count();
-    const auto minute_bcd = util::dec2bcd(minute);
+    const auto minute_bcd = uti::dec2bcd(minute);
     rtc.minute_10_bcd     = std::bitset<4>((minute_bcd >> displacement_4) & bitmask_0F);
     rtc.minute_1_bcd      = std::bitset<4>(minute_bcd & bitmask_0F);
 
     const auto second     = static_cast<u16>(time.seconds().count());
-    const auto second_bcd = util::dec2bcd(second);
+    const auto second_bcd = uti::dec2bcd(second);
     rtc.second_10_bcd     = std::bitset<4>((second_bcd >> displacement_4) & bitmask_0F);
     rtc.second_1_bcd      = std::bitset<4>(second_bcd & bitmask_0F);
 
@@ -1076,7 +1077,7 @@ auto getRtcTime() -> RtcTime {
 }
 
 auto isKeyPressed(const PeripheralKey pk, GLFWwindow* window) -> bool {
-    return glfwGetKey(window, util::toUnderlying(pk)) == GLFW_PRESS;
+    return glfwGetKey(window, uti::toUnderlying(pk)) == GLFW_PRESS;
 }
 
 } // namespace saturnin::core

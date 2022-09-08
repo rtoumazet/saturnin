@@ -28,11 +28,11 @@
 namespace libcfg = libconfig;
 namespace fs     = std::filesystem;
 namespace cdrom  = saturnin::cdrom;
+namespace uti    = saturnin::utilities;
 
 namespace saturnin::core {
 
 using core::Log;
-using utilities::format;
 
 // Config::Config(const std::string& configuration_filename) {
 Config::Config(std::string_view configuration_filename) {
@@ -142,7 +142,7 @@ auto Config::readFile() -> bool {
         cfg_.readFile(filename_.c_str());
         return true;
     } catch (const libcfg::FileIOException& fioex) {
-        const auto error = format(tr("Could not read file {0} : {1}"), filename_, fioex.what());
+        const auto error = uti::format(tr("Could not read file {0} : {1}"), filename_, fioex.what());
         Log::error(Logger::config, error);
         return false;
     }
@@ -225,7 +225,7 @@ auto Config::readValue(const AccessKeys& value) -> libcfg::Setting& {
         if (!existsValue(value)) { createDefault(value); }
         return cfg_.lookup(full_keys_[value]);
     } catch (const libcfg::SettingNotFoundException& e) {
-        const auto error = format(tr("Setting '{0}' not found !"), e.getPath());
+        const auto error = uti::format(tr("Setting '{0}' not found !"), e.getPath());
         Log::error(Logger::config, error);
         throw std::runtime_error("Config error !");
     }
@@ -387,7 +387,7 @@ auto Config::listLogLevels() -> std::vector<std::string> {
 auto Config::configToPortStatus(const std::string value) -> PortStatus { return port_status_[value]; }
 
 void logError(const std::string& error, const std::string& path) {
-    const auto str = format(error, path);
+    const auto str = uti::format(error, path);
     Log::error(Logger::config, str);
 };
 

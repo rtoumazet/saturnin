@@ -28,6 +28,7 @@
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/locale.h> // NOLINT(modernize-deprecated-headers)
 #include <saturnin/src/sh2.h>
+#include <saturnin/src/utilities.h> // format
 #include <saturnin/src/cdrom/cdrom.h>
 #include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/video/vdp1.h>
@@ -36,13 +37,13 @@
 namespace lzpp = libzippp;
 namespace fs   = std::filesystem;
 namespace sh2  = saturnin::sh2;
+namespace uti  = saturnin::utilities;
 
 namespace saturnin::core {
 
 using core::Log;
 using core::Logger;
 using std::copy;
-using utilities::format;
 
 constexpr auto region_cart_address_not_interleaved  = u8{0x40};
 constexpr auto region_cart_address_odd_interleaved  = u8{0x81};
@@ -139,20 +140,20 @@ auto Memory::loadRom(const std::string& zip_name,
                     break;
                 }
                 default: {
-                    Log::warning(Logger::memory, format(tr("Unknown rom type while loading {0}.zip"), zip_name));
+                    Log::warning(Logger::memory, uti::format(tr("Unknown rom type while loading {0}.zip"), zip_name));
                     return false;
                     break;
                 }
             }
         } else {
             zf.close();
-            const auto str = format(tr("File '{0}' not found in zip file !"), file_name);
+            const auto str = uti::format(tr("File '{0}' not found in zip file !"), file_name);
             Log::warning(Logger::memory, str);
             return false;
         }
         zf.close();
     } else {
-        const auto str = format(tr("Zip file '{0}' not found !"), rom_path.string());
+        const auto str = uti::format(tr("Zip file '{0}' not found !"), rom_path.string());
         Log::warning(Logger::memory, str);
         return false;
     }
@@ -473,7 +474,7 @@ void Memory::writeStvProtection(const u32 addr, u32 data) {
             // Radiant Silvergun
         case 0x77770000: break; // NOLINT(readability-magic-numbers)
     }
-    Log::debug(Logger::memory, format(core::tr("ST-V offset start: {}"), this->stv_protection_offset_));
+    Log::debug(Logger::memory, uti::format(core::tr("ST-V offset start: {}"), this->stv_protection_offset_));
 }
 
 auto Memory::isStvProtectionEnabled() const -> bool {

@@ -46,7 +46,7 @@
 #endif
 
 namespace fs    = std::filesystem;
-namespace util  = saturnin::utilities;
+namespace uti   = saturnin::utilities;
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;
 
@@ -76,7 +76,6 @@ using core::ThreadPool;
 using core::tr;
 using sh2::Sh2Register;
 using sh2::Sh2Type;
-using utilities::format;
 using video::Vdp2;
 
 void showImguiDemoWindow(const bool show_window) {
@@ -1081,9 +1080,9 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 constexpr auto offset = u8{8};
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(format(mask, index, current_sh2->getRegister(reg1)).c_str());
+                ImGui::TextUnformatted(uti::format(mask, index, current_sh2->getRegister(reg1)).c_str());
                 ImGui::TableSetColumnIndex(1);
-                ImGui::TextUnformatted(format(mask, index + offset, current_sh2->getRegister(reg2)).c_str());
+                ImGui::TextUnformatted(uti::format(mask, index + offset, current_sh2->getRegister(reg2)).c_str());
             };
 
             addGeneralRegisters(i++, Sh2Register::r0, Sh2Register::r8);
@@ -1112,25 +1111,25 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(format(system_mask, "MACH", current_sh2->getRegister(Sh2Register::mach)).c_str());
+            ImGui::TextUnformatted(uti::format(system_mask, "MACH", current_sh2->getRegister(Sh2Register::mach)).c_str());
             ImGui::TableSetColumnIndex(1);
-            ImGui::TextUnformatted(format(control_mask, "VBR", current_sh2->getRegister(Sh2Register::vbr)).c_str());
+            ImGui::TextUnformatted(uti::format(control_mask, "VBR", current_sh2->getRegister(Sh2Register::vbr)).c_str());
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(format(system_mask, "MACL", current_sh2->getRegister(Sh2Register::macl)).c_str());
+            ImGui::TextUnformatted(uti::format(system_mask, "MACL", current_sh2->getRegister(Sh2Register::macl)).c_str());
             ImGui::TableSetColumnIndex(1);
-            ImGui::TextUnformatted(format(control_mask, "GBR", current_sh2->getRegister(Sh2Register::gbr)).c_str());
+            ImGui::TextUnformatted(uti::format(control_mask, "GBR", current_sh2->getRegister(Sh2Register::gbr)).c_str());
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(format(system_mask, "PR", current_sh2->getRegister(Sh2Register::pr)).c_str());
+            ImGui::TextUnformatted(uti::format(system_mask, "PR", current_sh2->getRegister(Sh2Register::pr)).c_str());
             ImGui::TableSetColumnIndex(1);
-            ImGui::TextUnformatted(format(control_mask, "SR", current_sh2->getRegister(Sh2Register::sr)).c_str());
+            ImGui::TextUnformatted(uti::format(control_mask, "SR", current_sh2->getRegister(Sh2Register::sr)).c_str());
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(format(system_mask, "PC", current_sh2->getRegister(Sh2Register::pc)).c_str());
+            ImGui::TextUnformatted(uti::format(system_mask, "PC", current_sh2->getRegister(Sh2Register::pc)).c_str());
 
             ImGui::EndTable();
         }
@@ -1211,12 +1210,12 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::SetCursorPos(cursor_pos);
 
                 if (current_sh2->breakpoint(i) == 0) {
-                    bp_input[i] = util::stringToVector(std::string{""}, input_size);
+                    bp_input[i] = uti::stringToVector(std::string{""}, input_size);
                 } else {
-                    bp_input[i] = util::stringToVector(format("{:x}", current_sh2->breakpoint(i)), input_size);
+                    bp_input[i] = uti::stringToVector(uti::format("{:x}", current_sh2->breakpoint(i)), input_size);
                 }
 
-                if (ImGui::InputText(format("##bp{:d}", i).c_str(),
+                if (ImGui::InputText(uti::format("##bp{:d}", i).c_str(),
                                      bp_input[i].data(),
                                      bp_input[i].capacity(),
                                      ImGuiInputTextFlags_CharsHexadecimal)) {
@@ -1253,7 +1252,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
             std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(format(callstack_mask, item.call_address).c_str());
+                ImGui::TextUnformatted(uti::format(callstack_mask, item.call_address).c_str());
             });
 
             ImGui::EndTable();
@@ -1575,13 +1574,13 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::TableNextRow();
                     auto column_index = u8{0};
                     ImGui::TableSetColumnIndex(column_index++);
-                    ImGui::TextUnformatted(format("{:#010x}", address).c_str());
+                    ImGui::TextUnformatted(uti::format("{:#010x}", address).c_str());
 
                     ImGui::TableSetColumnIndex(column_index++);
                     ImGui::TextUnformatted(desc.c_str());
 
                     ImGui::TableSetColumnIndex(column_index);
-                    ImGui::TextUnformatted(format("{:#06x}", state.vdp2()->readRegisters<u16>(address)).c_str());
+                    ImGui::TextUnformatted(uti::format("{:#06x}", state.vdp2()->readRegisters<u16>(address)).c_str());
                 }
                 ImGui::EndTable();
             }
@@ -1820,13 +1819,13 @@ void showSmpcDebugWindow(core::EmulatorContext& state, bool* opened) {
             ImGui::TableNextRow();
             auto column_index = u8{0};
             ImGui::TableSetColumnIndex(column_index++);
-            ImGui::TextUnformatted(format("{:#010x}", address).c_str());
+            ImGui::TextUnformatted(uti::format("{:#010x}", address).c_str());
 
             ImGui::TableSetColumnIndex(column_index++);
             ImGui::TextUnformatted(desc.c_str());
 
             ImGui::TableSetColumnIndex(column_index);
-            ImGui::TextUnformatted(format("{:#04x}", state.smpc()->rawRead(address)).c_str());
+            ImGui::TextUnformatted(uti::format("{:#04x}", state.smpc()->rawRead(address)).c_str());
         }
         ImGui::EndTable();
     }
@@ -1849,7 +1848,7 @@ void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::SameLine();
 
     static auto full_path    = std::string{};
-    auto        path_for_gui = util::stringToVector(full_path, string_size);
+    auto        path_for_gui = uti::stringToVector(full_path, string_size);
     const auto  flags        = ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_ReadOnly;
     ImGui::InputText("##binary_file", path_for_gui.data(), path_for_gui.capacity(), flags);
 
@@ -1915,8 +1914,8 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
             // tmr.stop();
             elapsed_time = std::chrono::steady_clock::now() - start_time;
             auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
-            log += format(" {:#x} ", (*seq_read_array)[0]);
-            log += format(u8" {}탎\n", res);
+            log += uti::format(" {:#x} ", (*seq_read_array)[0]);
+            log += uti::format(" {}탎\n", res);
         }
         {
             log += tr("Multithreaded read");
@@ -1936,8 +1935,8 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
             // tmr.stop();
             elapsed_time = std::chrono::steady_clock::now() - start_time;
             auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
-            log += format(" {:#x} ", (*multithread_read_array)[0]);
-            log += format(u8" {}탎\n", res);
+            log += uti::format(" {:#x} ", (*multithread_read_array)[0]);
+            log += uti::format(" {}탎\n", res);
         }
     }
     if (ImGui::Button("Read from array")) {
@@ -1956,7 +1955,7 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
         }
         elapsed_time = std::chrono::steady_clock::now() - start_time;
         auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
-        log += format(u8" {}탎\n", res);
+        log += uti::format(" {}탎\n", res);
 
         log += tr("Multithreaded read");
         start_time = std::chrono::steady_clock::now();
@@ -1975,7 +1974,7 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
 
         elapsed_time = std::chrono::steady_clock::now() - start_time;
         auto res2    = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
-        log += format(u8" {}탎\n", res2);
+        log += uti::format(" {}탎\n", res2);
 
         ImGui::TextUnformatted("Transfert done.");
     }

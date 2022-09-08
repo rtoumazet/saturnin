@@ -32,35 +32,38 @@
 #include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/log.h>
 #include <saturnin/src/utilities.h> // toUnderlying
+#include <saturnin/src/memory.h>
 
 // Forward declarations
 namespace saturnin::core {
 class EmulatorModules;
-class Memory;
+// class Memory;
 } // namespace saturnin::core
 
 namespace saturnin::video {
 
 using core::EmulatorModules;
 using core::Log;
+using core::Logger;
 using core::Memory;
 using utilities::toUnderlying;
 
-constexpr auto cmdctrl_offset = u8{0x0};
-constexpr auto cmdlink_offset = u8{0x2};
-constexpr auto cmdpmod_offset = u8{0x4};
-constexpr auto cmdcolr_offset = u8{0x6};
-constexpr auto cmdsrca_offset = u8{0x8};
-constexpr auto cmdsize_offset = u8{0xa};
-constexpr auto cmdxa_offset   = u8{0xc};
-constexpr auto cmdya_offset   = u8{0xe};
-constexpr auto cmdxb_offset   = u8{0x10};
-constexpr auto cmdyb_offset   = u8{0x12};
-constexpr auto cmdxc_offset   = u8{0x14};
-constexpr auto cmdyc_offset   = u8{0x16};
-constexpr auto cmdxd_offset   = u8{0x18};
-constexpr auto cmdyd_offset   = u8{0x1a};
-constexpr auto cmdgrda_offset = u8{0x1c};
+constexpr auto vdp1_vram_start_address = u32{0x25C00000};
+constexpr auto cmdctrl_offset          = u8{0x0};
+constexpr auto cmdlink_offset          = u8{0x2};
+constexpr auto cmdpmod_offset          = u8{0x4};
+constexpr auto cmdcolr_offset          = u8{0x6};
+constexpr auto cmdsrca_offset          = u8{0x8};
+constexpr auto cmdsize_offset          = u8{0xa};
+constexpr auto cmdxa_offset            = u8{0xc};
+constexpr auto cmdya_offset            = u8{0xe};
+constexpr auto cmdxb_offset            = u8{0x10};
+constexpr auto cmdyb_offset            = u8{0x12};
+constexpr auto cmdxc_offset            = u8{0x14};
+constexpr auto cmdyc_offset            = u8{0x16};
+constexpr auto cmdxd_offset            = u8{0x18};
+constexpr auto cmdyd_offset            = u8{0x1a};
+constexpr auto cmdgrda_offset          = u8{0x1c};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Vdp1Part
@@ -273,7 +276,7 @@ void readDotColorBank16(const EmulatorModules& modules,
 template<typename T>
 void readDotLookUpTable16(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot) {
     // const auto color_address = u32{vdp1_vram_start_address + (part.cmdcolr_.toU16() * address_multiplier + dot) * sizeof(T)};
-    const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.raw * address_multiplier + dot * sizeof(T)};
+    const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.raw * vdp1_address_multiplier + dot * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
@@ -417,6 +420,8 @@ void readDotRgb(const EmulatorModules& modules, std::vector<u8>& texture_data, V
 
     texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
 };
+
+void checkColorCalculation(Vdp1Part& part);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T> void readColorBankMode16Colors(const Memory* m, std::vector<u8>& texture_data, const u32
@@ -642,7 +647,5 @@ void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_d
 }
 
 auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<TextureCoordinates>;
-
-void checkColorCalculation(Vdp1Part& part);
 
 } // namespace saturnin::video

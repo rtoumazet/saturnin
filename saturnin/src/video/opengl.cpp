@@ -60,12 +60,11 @@ using namespace std::string_literals; // enables s-suffix for std::string litera
 
 namespace saturnin::video {
 
-namespace util = saturnin::utilities;
+namespace uti = saturnin::utilities;
 
 using core::Log;
 using core::Logger;
 using core::tr;
-using utilities::format;
 
 constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
 constexpr auto vertexes_per_polyline         = u32{4};
@@ -1073,7 +1072,7 @@ void Opengl::calculateFps() {
             constexpr auto max_fps_ntsc = 60;
             max_frames                  = (standard == TvStandard::pal) ? max_fps_pal : max_fps_ntsc;
         }
-        fps_                 = format("{:d} / {}", frames_count, max_frames);
+        fps_                 = uti::format("{:d} / {}", frames_count, max_frames);
         previous_frame_start = current_frame_start;
         frames_count         = 0;
         time_elapsed         = micro{0};

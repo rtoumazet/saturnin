@@ -103,6 +103,20 @@ using MapPortStatus   = std::map<const std::string, const PortStatus>; ///< MapP
 using MapLogLevel     = std::map<const std::string, const LogLevel>;   ///< MapLogLevel alias definition.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn void logError(const std::string& error, const std::string& path);
+///
+/// \brief  Logs an error while fetching a setting.
+///
+/// \author Runik
+/// \date   12/12/2020
+///
+/// \param  error   The raw error message (not translated).
+/// \param  path    Path of the setting.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void logError(const std::string& error, const std::string& path);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Config
 ///
 /// \brief  Manages configuration of the emulator.
@@ -763,19 +777,5 @@ class Config {
     MapPortStatus port_status_; ///< Link between the port status string value defined in the config file and the PortStatus type.
     MapLogLevel   log_level_;   ///< Link between the log level string value defined in the config file and the LogLevel type.
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void logError(const std::string& error, const std::string& path);
-///
-/// \brief  Logs an error while fetching a setting.
-///
-/// \author Runik
-/// \date   12/12/2020
-///
-/// \param  error   The raw error message (not translated).
-/// \param  path    Path of the setting.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void logError(const std::string& error, const std::string& path);
 
 }; // namespace saturnin::core

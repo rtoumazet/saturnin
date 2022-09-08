@@ -33,15 +33,16 @@
 #include <saturnin/src/emulator_modules.h> // EmulatorModules
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
-#include <saturnin/src/thread_pool.h>      // ThreadPool
-#include <saturnin/src/utilities.h>        // toUnderlying
+#include <saturnin/src/memory.h>
+#include <saturnin/src/thread_pool.h> // ThreadPool
+#include <saturnin/src/utilities.h>   // toUnderlying
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp2_part.h> // ScrollScreenPos
 #include <saturnin/src/video/vdp2_registers.h>
 
 // Forward declarations
 namespace saturnin::core {
-class Memory;
+// class Memory;
 class Scu;
 } // namespace saturnin::core
 
@@ -82,9 +83,6 @@ constexpr auto vertical_res_256   = u16{256};
 constexpr auto vertical_res_448   = u16{448};
 constexpr auto vertical_res_480   = u16{480};
 constexpr auto vertical_res_512   = u16{512};
-
-constexpr auto vram_start_address = u32{0x25e00000};
-constexpr auto cram_start_address = u32{0x25f00000};
 
 // Saturn video resolution
 //  Horizontal resolution : 320 or 352 dots (PAL or NTSC)

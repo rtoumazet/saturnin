@@ -129,7 +129,7 @@ class Log {
         try {
             const auto& logger_name = loggers_names_[logger];
             if (loggerExists(logger_name)) {
-                loggers_.at(logger_name)->error(value.c_str(), args...);
+                loggers_.at(logger_name)->error(fmt::runtime(value.c_str()), args...);
                 // errors are also logged to console, using original logger name
                 const auto message = std::string{"[{}] " + value};
                 loggers_.at("console")->error(fmt::runtime(message.c_str()), logger_name, args...);
@@ -183,7 +183,7 @@ class Log {
     template<typename... Args>
     static inline void info(const Logger logger, const std::string& value, const Args&... args) {
         const auto& logger_name = loggers_names_[logger];
-        if (loggerExists(logger_name)) { loggers_.at(logger_name)->info(value.c_str(), args...); }
+        if (loggerExists(logger_name)) { loggers_.at(logger_name)->info(fmt::runtime(value.c_str()), args...); }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
