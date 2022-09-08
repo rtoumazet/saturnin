@@ -146,8 +146,9 @@ void showMainMenu(core::EmulatorContext& state) {
 
         // Debug
         switch (state.emulationStatus()) {
-            case core::EmulationStatus::running:
-            case core::EmulationStatus::reset: {
+            using enum core::EmulationStatus;
+            case running:
+            case reset: {
                 if (ImGui::BeginMenu(tr("Debug").c_str())) {
                     ImGui::MenuItem(tr("Memory editor").c_str(), nullptr, &show_debug_memory);
                     ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
@@ -1025,8 +1026,9 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
 
     sh2::Sh2* current_sh2{nullptr};
     switch (sh2_type) {
-        case Sh2Type::master: current_sh2 = state.masterSh2(); break;
-        case Sh2Type::slave: current_sh2 = state.slaveSh2(); break;
+        using enum Sh2Type;
+        case master: current_sh2 = state.masterSh2(); break;
+        case slave: current_sh2 = state.slaveSh2(); break;
         default: break;
     }
 
@@ -1284,11 +1286,12 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
                 current_area = k;
 
                 switch (current_area) {
-                    case MemoryMapArea::vdp2_registers: {
+                    using enum MemoryMapArea;
+                    case vdp2_registers: {
                         ImGui::TextUnformatted(tr("Check VDP2 debug window").c_str());
                         break;
                     }
-                    case MemoryMapArea::cd_block:
+                    case cd_block:
                         for (auto const& r : state.cdrom()->getRegisters()) {
                             ImGui::TextUnformatted(r.c_str());
                         }
@@ -1435,9 +1438,10 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
     const ImU32 row_bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.2f, 0.2f, 1.f));
 
     switch (current_tab) {
-        case Vdp2DebugTab::global: ImGui::SetNextWindowSize(window_size_global); break;
-        case Vdp2DebugTab::vram: ImGui::SetNextWindowSize(window_size_vram); break;
-        case Vdp2DebugTab::scroll_screens: ImGui::SetNextWindowSize(window_size_scroll_screens); break;
+        using enum Vdp2DebugTab;
+        case global: ImGui::SetNextWindowSize(window_size_global); break;
+        case vram: ImGui::SetNextWindowSize(window_size_vram); break;
+        case scroll_screens: ImGui::SetNextWindowSize(window_size_scroll_screens); break;
         default: ImGui::SetNextWindowSize(window_size_default);
     }
 

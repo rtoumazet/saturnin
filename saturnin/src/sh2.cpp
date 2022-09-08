@@ -325,32 +325,35 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case free_running_counter + 1: frt_frc_.lower_8_bits = data; break;
         case output_compare_register:
             switch (toEnum<OutputCompareRegisterSelect>(frt_tocr_.output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.upper_8_bits = data; break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.upper_8_bits = data; break;
+                using enum OutputCompareRegisterSelect;
+                case ocra: frt_ocra_.upper_8_bits = data; break;
+                case ocrb: frt_ocrb_.upper_8_bits = data; break;
             }
             break;
         case output_compare_register + 1:
             switch (toEnum<OutputCompareRegisterSelect>(frt_tocr_.output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.lower_8_bits = data; break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.lower_8_bits = data; break;
+                using enum OutputCompareRegisterSelect;
+                case ocra: frt_ocra_.lower_8_bits = data; break;
+                case ocrb: frt_ocrb_.lower_8_bits = data; break;
             }
             break;
         case timer_control_register:
             frt_tcr_.raw = data;
             switch (toEnum<FrtClockSelect>(frt_tcr_.clock_select)) {
-                case FrtClockSelect::internal_divided_by_8:
+                using enum FrtClockSelect;
+                case internal_divided_by_8:
                     frt_clock_divisor_ = frt_clock_divisor_8;
                     frt_mask_          = frt_clock_divisor_mask_8;
                     break;
-                case FrtClockSelect::internal_divided_by_32:
+                case internal_divided_by_32:
                     frt_clock_divisor_ = frt_clock_divisor_32;
                     frt_mask_          = frt_clock_divisor_mask_32;
                     break;
-                case FrtClockSelect::internal_divided_by_128:
+                case internal_divided_by_128:
                     frt_clock_divisor_ = frt_clock_divisor_128;
                     frt_mask_          = frt_clock_divisor_mask_128;
                     break;
-                case FrtClockSelect::external: Log::warning(Logger::sh2, "FRT - External clock not implemented"); break;
+                case external: Log::warning(Logger::sh2, "FRT - External clock not implemented"); break;
             }
             break;
         case timer_output_compare_control_register: {
@@ -410,13 +413,14 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         case interrupt_control_register: {
             auto new_icr = InterruptControlRegister{data};
             switch (toEnum<NmiEdgeDetection>(intc_icr_.nmi_edge_detection)) {
-                case NmiEdgeDetection::falling:
+                using enum NmiEdgeDetection;
+                case falling:
                     if ((toEnum<NmiInputLevel>(intc_icr_.nmi_input_level) == NmiInputLevel::high)
                         && (toEnum<NmiInputLevel>(new_icr.nmi_input_level) == NmiInputLevel::low)) {
                         Log::warning(Logger::sh2, "Falling edge NMI, not implemented !");
                     }
                     break;
-                case NmiEdgeDetection::rising:
+                case rising:
                     if ((toEnum<NmiInputLevel>(intc_icr_.nmi_input_level) == NmiInputLevel::low)
                         && (toEnum<NmiInputLevel>(new_icr.nmi_input_level) == NmiInputLevel::high)) {
                         Log::warning(Logger::sh2, "Rising edge NMI, not implemented !");
@@ -485,8 +489,9 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         case free_running_counter: frt_frc_.raw = data; break;
         case output_compare_register:
             switch (toEnum<OutputCompareRegisterSelect>(frt_tocr_.output_compare_register_select)) {
-                case OutputCompareRegisterSelect::ocra: frt_ocra_.raw = data; break;
-                case OutputCompareRegisterSelect::ocrb: frt_ocrb_.raw = data; break;
+                using enum OutputCompareRegisterSelect;
+                case ocra: frt_ocra_.raw = data; break;
+                case ocrb: frt_ocrb_.raw = data; break;
             }
             break;
         case input_capture_register: frt_icr_.raw = data; break;
@@ -1016,11 +1021,12 @@ void Sh2::executeDma() {
     auto conf_channel_1{configureDmaTransfer(DmaChannel::channel_1)};
 
     switch (dmac_next_transfer_priority_) {
-        case DmaNextTransferPriority::channel_0_first:
+        using enum DmaNextTransferPriority;
+        case channel_0_first:
             executeDmaOnChannel(conf_channel_0);
             executeDmaOnChannel(conf_channel_1);
             break;
-        case DmaNextTransferPriority::channel_1_first:
+        case channel_1_first:
             executeDmaOnChannel(conf_channel_1);
             executeDmaOnChannel(conf_channel_0);
             break;
@@ -1028,12 +1034,9 @@ void Sh2::executeDma() {
 
     if (toEnum<PriorityMode>(dmac_dmaor_.priority_mode) == PriorityMode::round_robin) {
         switch (dmac_next_transfer_priority_) {
-            case DmaNextTransferPriority::channel_0_first:
-                dmac_next_transfer_priority_ = DmaNextTransferPriority::channel_1_first;
-                break;
-            case DmaNextTransferPriority::channel_1_first:
-                dmac_next_transfer_priority_ = DmaNextTransferPriority::channel_0_first;
-                break;
+            using enum DmaNextTransferPriority;
+            case channel_0_first: dmac_next_transfer_priority_ = DmaNextTransferPriority::channel_1_first; break;
+            case channel_1_first: dmac_next_transfer_priority_ = DmaNextTransferPriority::channel_0_first; break;
         }
     }
 }
@@ -1041,7 +1044,8 @@ void Sh2::executeDma() {
 auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLINT(readability-convert-member-functions-to-static)
     // DE=1 TE=0 NMIF=0 AE=0
     switch (dc) {
-        case DmaChannel::channel_0: {
+        using enum DmaChannel;
+        case channel_0: {
             auto channel_0_is_set = bool{toEnum<Sh2DmaEnable>(dmac_chcr0_.dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
             channel_0_is_set
                 &= toEnum<TransferEndFlag>(dmac_chcr0_.transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
@@ -1050,7 +1054,7 @@ auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLIN
                 &= toEnum<AddressErrorFlag>(dmac_dmaor_.address_error_flag) == AddressErrorFlag::no_dmac_address_error;
             return channel_0_is_set;
         }
-        case DmaChannel::channel_1: {
+        case channel_1: {
             auto channel_1_is_set = bool{toEnum<Sh2DmaEnable>(dmac_chcr1_.dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
             channel_1_is_set
                 &= toEnum<TransferEndFlag>(dmac_chcr1_.transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
@@ -1059,7 +1063,7 @@ auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLIN
                 &= toEnum<AddressErrorFlag>(dmac_dmaor_.address_error_flag) == AddressErrorFlag::no_dmac_address_error;
             return channel_1_is_set;
         }
-        case DmaChannel::channel_unknown: return false;
+        case channel_unknown: return false;
     }
     return false;
 }
@@ -1067,7 +1071,8 @@ auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLIN
 auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
     auto conf = Sh2DmaConfiguration{};
     switch (dc) {
-        case DmaChannel::channel_0:
+        using enum DmaChannel;
+        case channel_0:
             conf.channel     = DmaChannel::channel_0;
             conf.counter     = dmac_tcr0_.raw & bitmask_00FFFFFF;
             conf.source      = dmac_sar0_.raw;
@@ -1076,7 +1081,7 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
             conf.drcr        = dmac_drcr0_;
             conf.interrupt   = is::sh2_dma_0_transfer_end;
             break;
-        case DmaChannel::channel_1:
+        case channel_1:
             conf.channel     = DmaChannel::channel_1;
             conf.counter     = dmac_tcr1_.raw & bitmask_00FFFFFF;
             conf.source      = dmac_sar1_.raw;
@@ -1095,17 +1100,18 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
         const auto channel_number = static_cast<u8>((conf.channel == DmaChannel::channel_0) ? 0 : 1);
         if (toEnum<AutoRequestMode>(conf.chcr.auto_request_mode) == AutoRequestMode::module_request) {
             switch (toEnum<ResourceSelect>(conf.drcr.resource_select)) {
-                case ResourceSelect::dreq: {
+                using enum ResourceSelect;
+                case dreq: {
                     // External request is immediately executed without waiting for an external signal.
                     // Not sure how to implement this, could be interesting to check on the console ...
                     Log::debug(Logger::sh2, "DMAC - Channel {} external request", channel_number);
                     break;
                 }
-                case ResourceSelect::txi: {
+                case txi: {
                     Log::unimplemented("SH2 DMAC - Channel {} SCI transmit request not implemented !", channel_number);
                     return;
                 }
-                case ResourceSelect::rxi: {
+                case rxi: {
                     Log::unimplemented("SH2 DMAC - Channel {} SCI receive request not implemented !", channel_number);
                     return;
                 }
@@ -1134,22 +1140,23 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
         while (counter > 0) {
             auto transfer_size = u8{};
             switch (toEnum<TransferSize>(conf.chcr.transfer_size)) {
-                case TransferSize::one_byte_unit:
+                using enum TransferSize;
+                case one_byte_unit:
                     modules_.memory()->write<u8>(destination, modules_.memory()->read<u8>(source));
                     transfer_size = transfer_byte_size_1;
                     --counter;
                     break;
-                case TransferSize::two_byte_unit:
+                case two_byte_unit:
                     modules_.memory()->write<u16>(destination, modules_.memory()->read<u16>(source));
                     transfer_size = transfer_byte_size_2;
                     --counter;
                     break;
-                case TransferSize::four_byte_unit:
+                case four_byte_unit:
                     modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
                     transfer_size = transfer_byte_size_4;
                     --counter;
                     break;
-                case TransferSize::sixteen_byte_unit:
+                case sixteen_byte_unit:
                     modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
                     modules_.memory()->write<u32>(destination + displacement_4,
                                                   modules_.memory()->read<u32>(source + displacement_4));
@@ -1163,17 +1170,19 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
             }
 
             switch (toEnum<SourceAddressMode>(conf.chcr.source_address_mode)) {
-                case SourceAddressMode::fixed: break;
-                case SourceAddressMode::incremented: source += transfer_size; break;
-                case SourceAddressMode::decremented: source -= transfer_size; break;
-                case SourceAddressMode::reserved: Log::warning(Logger::sh2, "Reserved source address mode used !");
+                using enum SourceAddressMode;
+                case fixed: break;
+                case incremented: source += transfer_size; break;
+                case decremented: source -= transfer_size; break;
+                case reserved: Log::warning(Logger::sh2, "Reserved source address mode used !");
             }
 
             switch (toEnum<DestinationAddressMode>(conf.chcr.destination_address_mode)) {
-                case DestinationAddressMode::fixed: break;
-                case DestinationAddressMode::incremented: destination += transfer_size; break;
-                case DestinationAddressMode::decremented: destination -= transfer_size; break;
-                case DestinationAddressMode::reserved: Log::warning(Logger::sh2, "Reserved destination address mode used !");
+                using enum DestinationAddressMode;
+                case fixed: break;
+                case incremented: destination += transfer_size; break;
+                case decremented: destination -= transfer_size; break;
+                case reserved: Log::warning(Logger::sh2, "Reserved destination address mode used !");
             }
         }
 
@@ -1268,29 +1277,30 @@ auto Sh2::run() -> u8 {
 
 auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
     switch (reg) {
-        case Sh2Register::pc: return pc_; break;
-        case Sh2Register::pr: return pr_; break;
-        case Sh2Register::macl: return macl_; break;
-        case Sh2Register::mach: return mach_; break;
-        case Sh2Register::vbr: return vbr_; break;
-        case Sh2Register::gbr: return gbr_; break;
-        case Sh2Register::sr: return sr_.raw; break;
-        case Sh2Register::r0: return r_[index_0]; break;
-        case Sh2Register::r1: return r_[index_1]; break;
-        case Sh2Register::r2: return r_[index_2]; break;
-        case Sh2Register::r3: return r_[index_3]; break;
-        case Sh2Register::r4: return r_[index_4]; break;
-        case Sh2Register::r5: return r_[index_5]; break;
-        case Sh2Register::r6: return r_[index_6]; break;
-        case Sh2Register::r7: return r_[index_7]; break;
-        case Sh2Register::r8: return r_[index_8]; break;
-        case Sh2Register::r9: return r_[index_9]; break;
-        case Sh2Register::r10: return r_[index_10]; break;
-        case Sh2Register::r11: return r_[index_11]; break;
-        case Sh2Register::r12: return r_[index_12]; break;
-        case Sh2Register::r13: return r_[index_13]; break;
-        case Sh2Register::r14: return r_[index_14]; break;
-        case Sh2Register::r15: return r_[index_15]; break;
+        using enum Sh2Register;
+        case pc: return pc_; break;
+        case pr: return pr_; break;
+        case macl: return macl_; break;
+        case mach: return mach_; break;
+        case vbr: return vbr_; break;
+        case gbr: return gbr_; break;
+        case sr: return sr_.raw; break;
+        case r0: return r_[index_0]; break;
+        case r1: return r_[index_1]; break;
+        case r2: return r_[index_2]; break;
+        case r3: return r_[index_3]; break;
+        case r4: return r_[index_4]; break;
+        case r5: return r_[index_5]; break;
+        case r6: return r_[index_6]; break;
+        case r7: return r_[index_7]; break;
+        case r8: return r_[index_8]; break;
+        case r9: return r_[index_9]; break;
+        case r10: return r_[index_10]; break;
+        case r11: return r_[index_11]; break;
+        case r12: return r_[index_12]; break;
+        case r13: return r_[index_13]; break;
+        case r14: return r_[index_14]; break;
+        case r15: return r_[index_15]; break;
     }
     return 0;
 }

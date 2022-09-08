@@ -162,8 +162,9 @@ auto Cdrom::getDriveIndice(const s8 path, const s8 target, const s8 lun) -> u8 {
 //
 void Cdrom::executeCommand() {
     switch (readCommand(cr1_.command)) {
-        case Command::get_status: getStatus(); break;
-        case Command::get_hardware_info:
+        using enum Command;
+        case get_status: getStatus(); break;
+        case get_hardware_info:
             getHardwareInfo();
             break;
             //		case 0x2: // Get TOC
@@ -401,7 +402,7 @@ void Cdrom::executeCommand() {
             //			EmuState::pLog->CdBlockWrite("-=Open CD Tray=- executed (UNIMPLEMENTED)");
             //			#endif
             //			break;
-        case Command::end_data_transfer: {
+        case end_data_transfer: {
             endDataTransfer();
             break;
         }
@@ -1234,7 +1235,7 @@ void Cdrom::executeCommand() {
             //			EmuState::pLog->CdBlockWrite("-=Move Sector Data=- executed (UNIMPLEMENTED)");
             //			#endif
             //			break;
-        case Command::get_copy_error:
+        case get_copy_error:
             getCopyError();
             break;
             //		case 0x70: // Change Directory
@@ -1331,8 +1332,8 @@ void Cdrom::executeCommand() {
             //			HIRQREQ|=CMOK;
             //			SendStatus();
             //			break;
-        case Command::abort_file: abortFile(); break;
-        case Command::get_device_authentication_status:
+        case abort_file: abortFile(); break;
+        case get_device_authentication_status:
             getDeviceAuthenticationStatus();
             break;
             //		case 0xE0:
@@ -2118,15 +2119,16 @@ auto Cdrom::calculatePeriodicResponseDuration() -> u32 {
     enum class NumberOfCommands { standard_play_speed = 34, double_play_speed = 30, standby = 60 };
 
     switch (cd_drive_play_mode_) {
-        case CdDrivePlayMode::standard_play_speed:
+        using enum CdDrivePlayMode;
+        case standard_play_speed:
             max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::standard_play_speed);
             return modules_.smpc()->calculateCyclesNumber(periodic_response_period_standard);
 
-        case CdDrivePlayMode::double_play_speed:
+        case double_play_speed:
             max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::double_play_speed);
             return modules_.smpc()->calculateCyclesNumber(periodic_response_period_double);
 
-        case CdDrivePlayMode::standby:
+        case standby:
             max_number_of_commands_ = utilities::toUnderlying(NumberOfCommands::standby);
             return modules_.smpc()->calculateCyclesNumber(periodic_response_period_standby);
         default: Log::warning(Logger::cdrom, "Unknown play mode"); return 0;
@@ -2140,9 +2142,10 @@ void Cdrom::sendStatus() {
     // CR1 = cd_drive_status_ << 8; // CR1-H
     cr1_.status = cd_drive_status_;
     switch (cd_drive_status_) {
-        case CdDriveStatus::drive_is_open:
-        case CdDriveStatus::no_disc_inserted:
-        case CdDriveStatus::error:
+        using enum CdDriveStatus;
+        case drive_is_open:
+        case no_disc_inserted:
+        case error:
             // CR1 |= 0xFF;
             cr1_.low_8_bits = u8_max;
             cr2_.raw        = u16_max;

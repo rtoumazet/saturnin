@@ -235,53 +235,50 @@ auto Config::existsValue(const AccessKeys& value) -> bool { return cfg_.exists(f
 
 void Config::createDefault(const AccessKeys& key) {
     switch (key) {
-        case AccessKeys::cfg_global_language:
-        case AccessKeys::cfg_global_hardware_mode:
-        case AccessKeys::cfg_global_area_code:
-        case AccessKeys::cfg_rendering_tv_standard:
-        case AccessKeys::cfg_paths_roms_stv:
-        case AccessKeys::cfg_paths_bios_stv:
-        case AccessKeys::cfg_paths_bios_saturn:
-        case AccessKeys::cfg_cdrom_drive:
-        case AccessKeys::cfg_cdrom_access_method:
-        case AccessKeys::cfg_sound_soundcard:
-        case AccessKeys::cfg_controls_saturn_player_1_connection:
-        case AccessKeys::cfg_controls_saturn_player_2_connection:
-        case AccessKeys::cfg_log_cdrom:
-        case AccessKeys::cfg_log_config:
-        case AccessKeys::cfg_log_main:
-        case AccessKeys::cfg_log_memory:
-        case AccessKeys::cfg_log_scsp:
-        case AccessKeys::cfg_log_scu:
-        case AccessKeys::cfg_log_sh2:
-        case AccessKeys::cfg_log_smpc:
-        case AccessKeys::cfg_log_vdp1:
-        case AccessKeys::cfg_log_vdp2:
-        case AccessKeys::cfg_log_unimplemented: {
+        using enum AccessKeys;
+        case cfg_global_language:
+        case cfg_global_hardware_mode:
+        case cfg_global_area_code:
+        case cfg_rendering_tv_standard:
+        case cfg_paths_roms_stv:
+        case cfg_paths_bios_stv:
+        case cfg_paths_bios_saturn:
+        case cfg_cdrom_drive:
+        case cfg_cdrom_access_method:
+        case cfg_sound_soundcard:
+        case cfg_controls_saturn_player_1_connection:
+        case cfg_controls_saturn_player_2_connection:
+        case cfg_log_cdrom:
+        case cfg_log_config:
+        case cfg_log_main:
+        case cfg_log_memory:
+        case cfg_log_scsp:
+        case cfg_log_scu:
+        case cfg_log_sh2:
+        case cfg_log_smpc:
+        case cfg_log_vdp1:
+        case cfg_log_vdp2:
+        case cfg_log_unimplemented: {
             add(full_keys_[key], std::any_cast<const std::string>(default_keys_[key]));
             break;
         }
-        case AccessKeys::cfg_global_set_time:
-        case AccessKeys::cfg_rendering_legacy_opengl:
-        case AccessKeys::cfg_sound_disabled: {
+        case cfg_global_set_time:
+        case cfg_rendering_legacy_opengl:
+        case cfg_sound_disabled: {
             add(full_keys_[key], std::any_cast<const bool>(default_keys_[key]));
             break;
         }
-        case AccessKeys::cfg_controls_saturn_player_1:
+        case cfg_controls_saturn_player_1:
             add(full_keys_[key], SaturnDigitalPad().toConfig(PeripheralLayout::default_layout));
             break;
-        case AccessKeys::cfg_controls_saturn_player_2:
+        case cfg_controls_saturn_player_2:
             add(full_keys_[key], SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout));
             break;
-        case AccessKeys::cfg_controls_stv_board:
-            add(full_keys_[key], StvBoardControls().toConfig(PeripheralLayout::default_layout));
-            break;
-        case AccessKeys::cfg_controls_stv_player_1:
+        case cfg_controls_stv_board: add(full_keys_[key], StvBoardControls().toConfig(PeripheralLayout::default_layout)); break;
+        case cfg_controls_stv_player_1:
             add(full_keys_[key], StvPlayerControls().toConfig(PeripheralLayout::default_layout));
             break;
-        case AccessKeys::cfg_controls_stv_player_2:
-            add(full_keys_[key], StvPlayerControls().toConfig(PeripheralLayout::empty_layout));
-            break;
+        case cfg_controls_stv_player_2: add(full_keys_[key], StvPlayerControls().toConfig(PeripheralLayout::empty_layout)); break;
         default: {
             Log::error(Logger::config, tr("Undefined default value '{}'!"), full_keys_[key]);
             throw std::runtime_error("Config error !");

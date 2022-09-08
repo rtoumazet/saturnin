@@ -1755,7 +1755,8 @@ void initializeOpcodesLut() {
 
 void execute(Sh2& s) {
     switch (s.modules_.context()->debugStatus()) {
-        case core::DebugStatus::step_over: {
+        using enum core::DebugStatus;
+        case step_over: {
             if (!calls_subroutine_lut[s.current_opcode_]) {
                 //
                 s.modules_.context()->debugStatus(core::DebugStatus::paused);
@@ -1765,7 +1766,7 @@ void execute(Sh2& s) {
             }
             break;
         }
-        case core::DebugStatus::step_into: {
+        case step_into: {
             s.modules_.context()->debugStatus(core::DebugStatus::paused);
             break;
         }

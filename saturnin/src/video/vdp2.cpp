@@ -1527,7 +1527,8 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                  is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : VramAccessCommand::no_access};
 
     switch (command) {
-        case VramAccessCommand::nbg0_character_pattern_data_read: {
+        using enum VramAccessCommand;
+        case nbg0_character_pattern_data_read: {
             if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
@@ -1541,7 +1542,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     is_normal_mode,
                                                     (cp_size == CharacterSize::two_by_two));
         }
-        case VramAccessCommand::nbg1_character_pattern_data_read: {
+        case nbg1_character_pattern_data_read: {
             if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
@@ -1555,7 +1556,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     is_normal_mode,
                                                     (cp_size == CharacterSize::two_by_two));
         }
-        case VramAccessCommand::nbg2_character_pattern_data_read: {
+        case nbg2_character_pattern_data_read: {
             const auto cp_size = toEnum<CharacterSize>(chctlb_.character_size_nbg2);
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
@@ -1566,7 +1567,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     is_normal_mode,
                                                     (cp_size == CharacterSize::two_by_two));
         }
-        case VramAccessCommand::nbg3_character_pattern_data_read: {
+        case nbg3_character_pattern_data_read: {
             const auto cp_size = toEnum<CharacterSize>(chctlb_.character_size_nbg3);
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
@@ -1577,18 +1578,18 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     is_normal_mode,
                                                     (cp_size == CharacterSize::two_by_two));
         }
-        case VramAccessCommand::nbg0_pattern_name_read:
-        case VramAccessCommand::nbg1_pattern_name_read:
-        case VramAccessCommand::nbg2_pattern_name_read:
-        case VramAccessCommand::nbg3_pattern_name_read: {
+        case nbg0_pattern_name_read:
+        case nbg1_pattern_name_read:
+        case nbg2_pattern_name_read:
+        case nbg3_pattern_name_read: {
             return getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
         }
-        case VramAccessCommand::nbg0_vertical_cell_scroll_table_data_read:
-        case VramAccessCommand::nbg1_vertical_cell_scroll_table_data_read: {
+        case nbg0_vertical_cell_scroll_table_data_read:
+        case nbg1_vertical_cell_scroll_table_data_read: {
             core::Log::unimplemented(core::tr("VDP2 vertical cell scroll table data read"));
             break;
         }
-        case VramAccessCommand::cpu_read_write: {
+        case cpu_read_write: {
             break;
         }
         default: core::Log::warning(Logger::vdp2, core::tr("VDP2 VRAM access command not allowed"));

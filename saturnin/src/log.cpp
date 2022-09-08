@@ -156,11 +156,12 @@ void Log::dumpBacktraceToConsole() { core::Log::loggers_.at("console")->dump_bac
 // static
 void Log::setLogLevel(const std::string& logger, const LogLevel level) {
     switch (level) {
-        case LogLevel::off: {
+        using enum LogLevel;
+        case off: {
             loggers_.at(logger)->set_level(spdlog::level::level_enum::off);
             break;
         }
-        case LogLevel::debug: {
+        case debug: {
             loggers_.at(logger)->set_level(spdlog::level::level_enum::debug);
             break;
         }

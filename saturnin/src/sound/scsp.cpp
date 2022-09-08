@@ -24,7 +24,7 @@
 #include <saturnin/src/locale.h> // tr
 #include <saturnin/src/memory.h>
 extern "C" {
-#include <saturnin/lib/musashi/m68k.h> // Musashi
+#include <saturnin/lib/musashi/m68k.h>        // Musashi
 #include <saturnin/lib/scsp_stef/scsp_stef.h> // Stef's SCSP core
 }
 
@@ -141,11 +141,12 @@ void Scsp::calculateSamplesPerFrame() {
 
     std::string ts = modules_.config()->readValue(AccessKeys::cfg_rendering_tv_standard);
     switch (modules_.config()->getTvStandard(ts)) {
-        case video::TvStandard::pal: {
+        using enum video::TvStandard;
+        case pal: {
             samples_per_frame_ = sample_rate / pal_frames_per_second;
             break;
         }
-        case video::TvStandard::ntsc: {
+        case ntsc: {
             samples_per_frame_ = sample_rate / ntsc_frames_per_second;
             break;
         }
