@@ -58,8 +58,9 @@ void Vdp2::initialize() {
 
     const std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (modules_.config()->getTvStandard(ts)) {
-        case video::TvStandard::pal: tvstat_.tv_standard_flag = TvStandardFlag::pal_standard; break;
-        case video::TvStandard::ntsc: tvstat_.tv_standard_flag = TvStandardFlag::ntsc_standard; break;
+        using enum video::TvStandard;
+        case pal: tvstat_.tv_standard_flag = TvStandardFlag::pal_standard; break;
+        case ntsc: tvstat_.tv_standard_flag = TvStandardFlag::ntsc_standard; break;
         default: Log::warning(Logger::vdp2, tr("Unknown TV standard"));
     }
     calculateDisplayDuration();
@@ -157,22 +158,24 @@ void Vdp2::calculateDisplayDuration() {
     //      - 262.5 lines for NTSC
     //      - 312.5 for PAL
 
-    constexpr auto lines_nb_224 = u16{224};
-    constexpr auto lines_nb_240 = u16{240};
-    constexpr auto lines_nb_256 = u16{256};
+    constexpr auto lines_224 = u16{224};
+    constexpr auto lines_240 = u16{240};
+    constexpr auto lines_256 = u16{256};
 
     std::string ts = modules_.context()->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (modules_.context()->config()->getTvStandard(ts)) {
-        case video::TvStandard::pal: {
+        using enum video::TvStandard;
+        case pal: {
             constexpr auto frame_duration = seconds{1.0 / 50.0};
             cycles_per_frame_             = modules_.smpc()->calculateCyclesNumber(frame_duration);
 
             constexpr auto total_lines   = u16{313};
             auto           visible_lines = u16{};
             switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
-                case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
-                case VerticalResolution::lines_nb_256: visible_lines = lines_nb_256; break;
+                using enum VerticalResolution;
+                case lines_nb_224: visible_lines = lines_224; break;
+                case lines_nb_240: visible_lines = lines_240; break;
+                case lines_nb_256: visible_lines = lines_256; break;
                 default: core::Log::warning(Logger::vdp2, core::tr("Unknown PAL vertical resolution."));
             }
             const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
@@ -191,15 +194,16 @@ void Vdp2::calculateDisplayDuration() {
             // cycles_per_line_    = cycles_per_hactive_ + cycles_per_hblank_;
             break;
         }
-        case video::TvStandard::ntsc: {
+        case ntsc: {
             constexpr auto frame_duration = seconds{1.0 / 60.0};
             cycles_per_frame_             = modules_.smpc()->calculateCyclesNumber(frame_duration);
 
             constexpr auto total_lines   = u16{263};
             auto           visible_lines = u16{};
             switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                case VerticalResolution::lines_nb_224: visible_lines = lines_nb_224; break;
-                case VerticalResolution::lines_nb_240: visible_lines = lines_nb_240; break;
+                using enum VerticalResolution;
+                case lines_nb_224: visible_lines = lines_224; break;
+                case lines_nb_240: visible_lines = lines_240; break;
                 default: core::Log::warning(Logger::vdp2, core::tr("Unknown NTSC vertical resolution."));
             }
             const auto vblank_lines = u16{static_cast<u16>(total_lines - visible_lines)};
@@ -250,37 +254,38 @@ auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
     auto enable_bit = ColorOffsetEnableBit{};
     auto select_bit = ColorOffsetSelectBit{};
     switch (layer) {
-        case Layer::nbg0: {
+        using enum Layer;
+        case nbg0: {
             enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg0);
             select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg0);
             break;
         }
-        case Layer::nbg1: {
+        case nbg1: {
             enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg1);
             select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg1);
             break;
         }
-        case Layer::nbg2: {
+        case nbg2: {
             enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg2);
             select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg2);
             break;
         }
-        case Layer::nbg3: {
+        case nbg3: {
             enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg3);
             select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg3);
             break;
         }
-        case Layer::rbg0: {
+        case rbg0: {
             enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.rbg0);
             select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.rbg0);
             break;
         }
-        case Layer::back: {
+        case back: {
             enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.back);
             select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.back);
             break;
         }
-        case Layer::sprite: {
+        case sprite: {
             enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.sprite);
             select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.sprite);
             break;
@@ -1100,20 +1105,22 @@ void Vdp2::updateResolution() {
     tv_screen_status_.interlace_mode       = toEnum<InterlaceMode>(tvmd_.interlace_mode);
 
     switch (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution)) {
-        case HorizontalResolution::normal_320:
+        using enum HorizontalResolution;
+        case normal_320:
             tv_screen_status_.horizontal_res   = horizontal_res_320;
             tv_screen_status_.screen_mode_type = ScreenModeType::normal;
             if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
                 switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
+                    using enum VerticalResolution;
+                    case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_224;
                         break;
-                    case VerticalResolution::lines_nb_240:
+                    case lines_nb_240:
                         tv_screen_status_.vertical_res = vertical_res_240;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_240;
                         break;
-                    case VerticalResolution::lines_nb_256:
+                    case lines_nb_256:
                         tv_screen_status_.vertical_res = vertical_res_256;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_256;
                         break;
@@ -1121,15 +1128,16 @@ void Vdp2::updateResolution() {
                 }
             } else {
                 switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
+                    using enum VerticalResolution;
+                    case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_448;
                         break;
-                    case VerticalResolution::lines_nb_240:
+                    case lines_nb_240:
                         tv_screen_status_.vertical_res = vertical_res_480;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_480;
                         break;
-                    case VerticalResolution::lines_nb_256:
+                    case lines_nb_256:
                         tv_screen_status_.vertical_res = vertical_res_512;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_512;
                         break;
@@ -1138,20 +1146,21 @@ void Vdp2::updateResolution() {
             }
 
             break;
-        case HorizontalResolution::normal_352:
+        case normal_352:
             tv_screen_status_.horizontal_res   = horizontal_res_352;
             tv_screen_status_.screen_mode_type = ScreenModeType::normal;
             if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
                 switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
+                    using enum VerticalResolution;
+                    case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_224;
                         break;
-                    case VerticalResolution::lines_nb_240:
+                    case lines_nb_240:
                         tv_screen_status_.vertical_res = vertical_res_240;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_240;
                         break;
-                    case VerticalResolution::lines_nb_256:
+                    case lines_nb_256:
                         tv_screen_status_.vertical_res = vertical_res_256;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_256;
                         break;
@@ -1159,15 +1168,16 @@ void Vdp2::updateResolution() {
                 }
             } else {
                 switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
+                    using enum VerticalResolution;
+                    case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_448;
                         break;
-                    case VerticalResolution::lines_nb_240:
+                    case lines_nb_240:
                         tv_screen_status_.vertical_res = vertical_res_480;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_480;
                         break;
-                    case VerticalResolution::lines_nb_256:
+                    case lines_nb_256:
                         tv_screen_status_.vertical_res = vertical_res_512;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_512;
                         break;
@@ -1176,20 +1186,21 @@ void Vdp2::updateResolution() {
             }
 
             break;
-        case HorizontalResolution::hi_res_640:
+        case hi_res_640:
             tv_screen_status_.horizontal_res   = horizontal_res_640;
             tv_screen_status_.screen_mode_type = ScreenModeType::hi_res;
             if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
                 switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
+                    using enum VerticalResolution;
+                    case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_224;
                         break;
-                    case VerticalResolution::lines_nb_240:
+                    case lines_nb_240:
                         tv_screen_status_.vertical_res = vertical_res_240;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_240;
                         break;
-                    case VerticalResolution::lines_nb_256:
+                    case lines_nb_256:
                         tv_screen_status_.vertical_res = vertical_res_256;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_256;
                         break;
@@ -1197,15 +1208,16 @@ void Vdp2::updateResolution() {
                 }
             } else {
                 switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
+                    using enum VerticalResolution;
+                    case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_448;
                         break;
-                    case VerticalResolution::lines_nb_240:
+                    case lines_nb_240:
                         tv_screen_status_.vertical_res = vertical_res_480;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_480;
                         break;
-                    case VerticalResolution::lines_nb_256:
+                    case lines_nb_256:
                         tv_screen_status_.vertical_res = vertical_res_512;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_512;
                         break;
@@ -1213,20 +1225,21 @@ void Vdp2::updateResolution() {
                 }
             }
             break;
-        case HorizontalResolution::hi_res_704:
+        case hi_res_704:
             tv_screen_status_.horizontal_res   = horizontal_res_704;
             tv_screen_status_.screen_mode_type = ScreenModeType::hi_res;
             if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
                 switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
+                    using enum VerticalResolution;
+                    case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_224;
                         break;
-                    case VerticalResolution::lines_nb_240:
+                    case lines_nb_240:
                         tv_screen_status_.vertical_res = vertical_res_240;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_240;
                         break;
-                    case VerticalResolution::lines_nb_256:
+                    case lines_nb_256:
                         tv_screen_status_.vertical_res = vertical_res_256;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_256;
                         break;
@@ -1234,15 +1247,16 @@ void Vdp2::updateResolution() {
                 }
             } else {
                 switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    case VerticalResolution::lines_nb_224:
+                    using enum VerticalResolution;
+                    case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_448;
                         break;
-                    case VerticalResolution::lines_nb_240:
+                    case lines_nb_240:
                         tv_screen_status_.vertical_res = vertical_res_480;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_480;
                         break;
-                    case VerticalResolution::lines_nb_256:
+                    case lines_nb_256:
                         tv_screen_status_.vertical_res = vertical_res_512;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_512;
                         break;
@@ -1250,25 +1264,25 @@ void Vdp2::updateResolution() {
                 }
             }
             break;
-        case HorizontalResolution::exclusive_normal_320:
+        case exclusive_normal_320:
             tv_screen_status_.horizontal_res   = horizontal_res_320;
             tv_screen_status_.vertical_res     = vertical_res_480;
             tv_screen_status_.screen_mode      = ScreenMode::exclusive_320_480;
             tv_screen_status_.screen_mode_type = ScreenModeType::exclusive;
             break;
-        case HorizontalResolution::exclusive_normal_352:
+        case exclusive_normal_352:
             tv_screen_status_.horizontal_res   = horizontal_res_352;
             tv_screen_status_.vertical_res     = vertical_res_480;
             tv_screen_status_.screen_mode      = ScreenMode::exclusive_352_480;
             tv_screen_status_.screen_mode_type = ScreenModeType::exclusive;
             break;
-        case HorizontalResolution::exclusive_hi_res_640:
+        case exclusive_hi_res_640:
             tv_screen_status_.horizontal_res   = horizontal_res_640;
             tv_screen_status_.vertical_res     = vertical_res_480;
             tv_screen_status_.screen_mode      = ScreenMode::exclusive_640_480;
             tv_screen_status_.screen_mode_type = ScreenModeType::exclusive;
             break;
-        case HorizontalResolution::exclusive_hi_res_704:
+        case exclusive_hi_res_704:
             tv_screen_status_.horizontal_res   = horizontal_res_704;
             tv_screen_status_.vertical_res     = vertical_res_480;
             tv_screen_status_.screen_mode      = ScreenMode::exclusive_704_480;
@@ -1316,7 +1330,8 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     getScreen(s).is_display_enabled = false;
 
     switch (s) {
-        case ScrollScreen::nbg0: {
+        using enum ScrollScreen;
+        case nbg0: {
             if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
@@ -1349,7 +1364,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             }
             break;
         }
-        case ScrollScreen::nbg1: {
+        case nbg1: {
             if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
@@ -1382,7 +1397,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 
             break;
         }
-        case ScrollScreen::nbg2: {
+        case nbg2: {
             if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg2) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
@@ -1404,7 +1419,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 
             break;
         }
-        case ScrollScreen::nbg3: {
+        case nbg3: {
             if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg3) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
@@ -1424,14 +1439,14 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             if (current_cpd_reads < required_cpd_reads) { return false; }
             break;
         }
-        case ScrollScreen::rbg0: {
+        case rbg0: {
             if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
             core::Log::unimplemented(core::tr("VDP2 RBG0 display"));
             break;
         }
-        case ScrollScreen::rbg1: {
+        case rbg1: {
             if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display) {
                 return false;
             }
@@ -1451,7 +1466,8 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool {
     switch (s) {
-        case ScrollScreen::nbg2: {
+        using enum ScrollScreen;
+        case nbg2: {
             const auto reduction    = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg0)),
                                                        static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg0)));
             const auto color_number = toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0);
@@ -1464,7 +1480,7 @@ auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool {
             }
             break;
         }
-        case ScrollScreen::nbg3: {
+        case nbg3: {
             const auto reduction    = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg1)),
                                                        static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg1)));
             const auto color_number = toEnum<CharacterColorNumber2Bits>(chctla_.character_color_number_nbg1);
@@ -1527,7 +1543,8 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                  is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : VramAccessCommand::no_access};
 
     switch (command) {
-        case VramAccessCommand::nbg0_character_pattern_data_read: {
+        using enum VramAccessCommand;
+        case nbg0_character_pattern_data_read: {
             if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
@@ -1541,7 +1558,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     is_normal_mode,
                                                     (cp_size == CharacterSize::two_by_two));
         }
-        case VramAccessCommand::nbg1_character_pattern_data_read: {
+        case nbg1_character_pattern_data_read: {
             if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
@@ -1555,7 +1572,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     is_normal_mode,
                                                     (cp_size == CharacterSize::two_by_two));
         }
-        case VramAccessCommand::nbg2_character_pattern_data_read: {
+        case nbg2_character_pattern_data_read: {
             const auto cp_size = toEnum<CharacterSize>(chctlb_.character_size_nbg2);
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
@@ -1566,7 +1583,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     is_normal_mode,
                                                     (cp_size == CharacterSize::two_by_two));
         }
-        case VramAccessCommand::nbg3_character_pattern_data_read: {
+        case nbg3_character_pattern_data_read: {
             const auto cp_size = toEnum<CharacterSize>(chctlb_.character_size_nbg3);
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
@@ -1577,18 +1594,18 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     is_normal_mode,
                                                     (cp_size == CharacterSize::two_by_two));
         }
-        case VramAccessCommand::nbg0_pattern_name_read:
-        case VramAccessCommand::nbg1_pattern_name_read:
-        case VramAccessCommand::nbg2_pattern_name_read:
-        case VramAccessCommand::nbg3_pattern_name_read: {
+        case nbg0_pattern_name_read:
+        case nbg1_pattern_name_read:
+        case nbg2_pattern_name_read:
+        case nbg3_pattern_name_read: {
             return getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
         }
-        case VramAccessCommand::nbg0_vertical_cell_scroll_table_data_read:
-        case VramAccessCommand::nbg1_vertical_cell_scroll_table_data_read: {
+        case nbg0_vertical_cell_scroll_table_data_read:
+        case nbg1_vertical_cell_scroll_table_data_read: {
             core::Log::unimplemented(core::tr("VDP2 vertical cell scroll table data read"));
             break;
         }
-        case VramAccessCommand::cpu_read_write: {
+        case cpu_read_write: {
             break;
         }
         default: core::Log::warning(Logger::vdp2, core::tr("VDP2 VRAM access command not allowed"));
@@ -1660,35 +1677,41 @@ auto Vdp2::getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting 
 // static
 auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3Bits ccn) -> VramAccessNumber {
     switch (ccn) {
-        case CharacterColorNumber3Bits::palette_16:
+        using enum CharacterColorNumber3Bits;
+        case palette_16:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::one;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::one;
+                case up_to_one_half: return VramAccessNumber::two;
+                case up_to_one_quarter: return VramAccessNumber::four;
             }
             break;
-        case CharacterColorNumber3Bits::palette_256:
+        case palette_256:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::two;
+                case up_to_one_half: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
-        case CharacterColorNumber3Bits::palette_2048:
+        case palette_2048:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
-        case CharacterColorNumber3Bits::rgb_32k:
+        case rgb_32k:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
-        case CharacterColorNumber3Bits::rgb_16m:
+        case rgb_16m:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::eight;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::eight;
                 default: return VramAccessNumber::none;
             }
             break;
@@ -1700,29 +1723,34 @@ auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Charac
 // static
 auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2Bits ccn) -> VramAccessNumber {
     switch (ccn) {
-        case CharacterColorNumber2Bits::palette_16:
+        using enum CharacterColorNumber2Bits;
+        case palette_16:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::one;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::one;
+                case up_to_one_half: return VramAccessNumber::two;
+                case up_to_one_quarter: return VramAccessNumber::four;
             }
             break;
-        case CharacterColorNumber2Bits::palette_256:
+        case palette_256:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::two;
+                case up_to_one_half: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
-        case CharacterColorNumber2Bits::palette_2048:
+        case palette_2048:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
-        case CharacterColorNumber2Bits::rgb_32k:
+        case rgb_32k:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
@@ -1734,17 +1762,20 @@ auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Charac
 // static
 auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1Bit ccn) -> VramAccessNumber {
     switch (ccn) {
-        case CharacterColorNumber1Bit::palette_16:
+        using enum CharacterColorNumber1Bit;
+        case palette_16:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::one;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::one;
+                case up_to_one_half: return VramAccessNumber::two;
+                case up_to_one_quarter: return VramAccessNumber::four;
             }
             break;
-        case CharacterColorNumber1Bit::palette_256:
+        case palette_256:
             switch (r) {
-                case ReductionSetting::none: return VramAccessNumber::two;
-                case ReductionSetting::up_to_one_half: return VramAccessNumber::four;
+                using enum ReductionSetting;
+                case none: return VramAccessNumber::two;
+                case up_to_one_half: return VramAccessNumber::four;
                 default: return VramAccessNumber::none;
             }
             break;
@@ -1756,8 +1787,9 @@ auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Charac
 // static
 auto Vdp2::calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber {
     switch (r) {
-        case ReductionSetting::up_to_one_quarter: return VramAccessNumber::four;
-        case ReductionSetting::up_to_one_half: return VramAccessNumber::two;
+        using enum ReductionSetting;
+        case up_to_one_quarter: return VramAccessNumber::four;
+        case up_to_one_half: return VramAccessNumber::two;
         default: return VramAccessNumber::one;
     }
 };
@@ -1765,16 +1797,17 @@ auto Vdp2::calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAcce
 // static
 auto Vdp2::getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand {
     switch (character_pattern) {
-        case VramAccessCommand::nbg0_character_pattern_data_read: {
+        using enum VramAccessCommand;
+        case nbg0_character_pattern_data_read: {
             return VramAccessCommand::nbg0_pattern_name_read;
         }
-        case VramAccessCommand::nbg1_character_pattern_data_read: {
+        case nbg1_character_pattern_data_read: {
             return VramAccessCommand::nbg1_pattern_name_read;
         }
-        case VramAccessCommand::nbg2_character_pattern_data_read: {
+        case nbg2_character_pattern_data_read: {
             return VramAccessCommand::nbg2_pattern_name_read;
         }
-        case VramAccessCommand::nbg3_character_pattern_data_read: {
+        case nbg3_character_pattern_data_read: {
             return VramAccessCommand::nbg3_pattern_name_read;
         }
         default: return VramAccessCommand::no_access;
@@ -2046,16 +2079,17 @@ auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
     const auto nbg0_color_nb = getScreen(ScrollScreen::nbg0).character_color_number;
     const auto nbg1_color_nb = getScreen(ScrollScreen::nbg1).character_color_number;
     switch (s) {
-        case ScrollScreen::nbg1: {
+        using enum ScrollScreen;
+        case nbg1: {
             return (nbg0_color_nb != ColorCount::rgb_16m);
         }
-        case ScrollScreen::nbg2: {
+        case nbg2: {
             const auto colors_preventing_display = std::array{ColorCount::palette_2048, ColorCount::rgb_32k, ColorCount::rgb_16m};
             return std::none_of(colors_preventing_display.begin(),
                                 colors_preventing_display.end(),
                                 [&nbg0_color_nb](const ColorCount cc) { return cc == nbg0_color_nb; });
         }
-        case ScrollScreen::nbg3: {
+        case nbg3: {
             if (nbg0_color_nb == ColorCount::rgb_16m) { return false; }
             const auto colors_preventing_display = std::array{ColorCount::palette_2048, ColorCount::rgb_32k};
             return std::none_of(colors_preventing_display.begin(),
@@ -2074,22 +2108,24 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
     const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3Bits c, const ScreenModeType t) {
         switch (c) {
-            case CharacterColorNumber3Bits::palette_16: return ColorCount::palette_16;
-            case CharacterColorNumber3Bits::palette_256: return ColorCount::palette_256;
-            case CharacterColorNumber3Bits::palette_2048: return ColorCount::palette_2048;
-            case CharacterColorNumber3Bits::rgb_32k: {
+            using enum CharacterColorNumber3Bits;
+            case palette_16: return ColorCount::palette_16;
+            case palette_256: return ColorCount::palette_256;
+            case palette_2048: return ColorCount::palette_2048;
+            case rgb_32k: {
                 return (t == ScreenModeType::normal) ? ColorCount::rgb_32k : ColorCount::not_allowed;
             }
-            case CharacterColorNumber3Bits::rgb_16m: return ColorCount::rgb_16m;
+            case rgb_16m: return ColorCount::rgb_16m;
             default: return ColorCount::not_allowed;
         }
     };
     const auto getCharacterColorNumber2Bits = [](const CharacterColorNumber2Bits c, const ScreenModeType t) {
         switch (c) {
-            case CharacterColorNumber2Bits::palette_16: return ColorCount::palette_16;
-            case CharacterColorNumber2Bits::palette_256: return ColorCount::palette_256;
-            case CharacterColorNumber2Bits::palette_2048: return ColorCount::palette_2048;
-            case CharacterColorNumber2Bits::rgb_32k: {
+            using enum CharacterColorNumber2Bits;
+            case palette_16: return ColorCount::palette_16;
+            case palette_256: return ColorCount::palette_256;
+            case palette_2048: return ColorCount::palette_2048;
+            case rgb_32k: {
                 return (t == ScreenModeType::exclusive) ? ColorCount::rgb_16m : ColorCount::rgb_32k;
             }
             default: return ColorCount::not_allowed;
@@ -2097,8 +2133,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     };
     const auto getCharacterColorNumber1Bit = [](const CharacterColorNumber1Bit c) {
         switch (c) {
-            case CharacterColorNumber1Bit::palette_16: return ColorCount::palette_16;
-            case CharacterColorNumber1Bit::palette_256: return ColorCount::palette_256;
+            using enum CharacterColorNumber1Bit;
+            case palette_16: return ColorCount::palette_16;
+            case palette_256: return ColorCount::palette_256;
             default: return ColorCount::not_allowed;
         }
     };
@@ -2106,11 +2143,12 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         if (t == ScreenModeType::exclusive) { return ColorCount::cannot_display; }
 
         switch (c) {
-            case CharacterColorNumber3Bits::palette_16: return ColorCount::palette_16;
-            case CharacterColorNumber3Bits::palette_256: return ColorCount::palette_256;
-            case CharacterColorNumber3Bits::palette_2048: return ColorCount::palette_2048;
-            case CharacterColorNumber3Bits::rgb_32k: return ColorCount::rgb_32k;
-            case CharacterColorNumber3Bits::rgb_16m: {
+            using enum CharacterColorNumber3Bits;
+            case palette_16: return ColorCount::palette_16;
+            case palette_256: return ColorCount::palette_256;
+            case palette_2048: return ColorCount::palette_2048;
+            case rgb_32k: return ColorCount::rgb_32k;
+            case rgb_16m: {
                 return (t == ScreenModeType::normal) ? ColorCount::rgb_16m : ColorCount::not_allowed;
             }
             default: return ColorCount::not_allowed;
@@ -2122,10 +2160,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         const auto dot_size_16 = u8{16};
         const auto dot_size_32 = u8{32};
         switch (cc) {
-            case ColorCount::palette_16: return dot_size_4;
-            case ColorCount::palette_256: return dot_size_8;
-            case ColorCount::palette_2048: return dot_size_16;
-            case ColorCount::rgb_32k: return dot_size_16;
+            using enum ColorCount;
+            case palette_16: return dot_size_4;
+            case palette_256: return dot_size_8;
+            case palette_2048: return dot_size_16;
+            case rgb_32k: return dot_size_16;
             default: return dot_size_32;
         }
     };
@@ -2148,10 +2187,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
     const auto getBitmapSize = [](const BitmapSize2Bits sz) {
         switch (sz) {
-            case BitmapSize2Bits::size_512_by_256: return BitmapSize::size_512_by_256;
-            case BitmapSize2Bits::size_512_by_512: return BitmapSize::size_512_by_512;
-            case BitmapSize2Bits::size_1024_by_256: return BitmapSize::size_1024_by_256;
-            case BitmapSize2Bits::size_1024_by_512: return BitmapSize::size_1024_by_512;
+            using enum BitmapSize2Bits;
+            case size_512_by_256: return BitmapSize::size_512_by_256;
+            case size_512_by_512: return BitmapSize::size_512_by_512;
+            case size_1024_by_256: return BitmapSize::size_1024_by_256;
+            case size_1024_by_512: return BitmapSize::size_1024_by_512;
             default: return BitmapSize::not_set;
         }
     };
@@ -2185,7 +2225,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     screen.scroll_screen = s;
 
     switch (s) {
-        case ScrollScreen::nbg0:
+        using enum ScrollScreen;
+        case nbg0:
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
 
@@ -2248,7 +2289,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_offset = getColorOffset(Layer::nbg0);
 
             break;
-        case ScrollScreen::nbg1:
+        case nbg1:
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg1);
 
@@ -2308,7 +2349,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg1);
             break;
-        case ScrollScreen::nbg2:
+        case nbg2:
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg2));
 
@@ -2360,7 +2401,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_offset = getColorOffset(Layer::nbg2);
             break;
 
-        case ScrollScreen::nbg3:
+        case nbg3:
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg3));
 
@@ -2412,7 +2453,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_offset = getColorOffset(Layer::nbg3);
             break;
 
-        case ScrollScreen::rbg0:
+        case rbg0:
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(craofb_.color_ram_address_offset_rbg0);
 
@@ -2480,7 +2521,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_offset = getColorOffset(Layer::rbg0);
             break;
 
-        case ScrollScreen::rbg1:
+        case rbg1:
             // Color RAM
             screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
 
@@ -2552,9 +2593,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     screen.page_screen_offset  = {cells_nb_64, cells_nb_64};
     screen.plane_screen_offset = [&](const PlaneSize sz) {
         switch (sz) {
-            case PlaneSize::size_1_by_1: return ScreenOffset{cells_nb_64, cells_nb_64};
-            case PlaneSize::size_2_by_1: return ScreenOffset{cells_nb_128, cells_nb_64};
-            case PlaneSize::size_2_by_2: return ScreenOffset{cells_nb_128, cells_nb_128};
+            using enum PlaneSize;
+            case size_1_by_1: return ScreenOffset{cells_nb_64, cells_nb_64};
+            case size_2_by_1: return ScreenOffset{cells_nb_128, cells_nb_64};
+            case size_2_by_2: return ScreenOffset{cells_nb_128, cells_nb_128};
             default: Log::warning(Logger::vdp2, tr("Plane screen offset wasn't properly calculated"));
         }
         return ScreenOffset{0, 0};
@@ -2567,9 +2609,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         constexpr auto cells_per_page = 64 * 64; // 32 * 32 * 4 or 64 * 64 * 1
         auto           plane_size     = u16{};
         switch (screen.plane_size) {
-            case PlaneSize::size_1_by_1: plane_size = 1; break;
-            case PlaneSize::size_2_by_1: plane_size = 2; break;
-            case PlaneSize::size_2_by_2: plane_size = 4; break;
+            using enum PlaneSize;
+            case size_1_by_1: plane_size = 1; break;
+            case size_2_by_1: plane_size = 2; break;
+            case size_2_by_2: plane_size = 4; break;
         }
 
         return cells_per_page * plane_size * screen.map_size;
@@ -2599,32 +2642,33 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     auto       start_address          = u32{screen.map_offset << displacement_6 | map_addr};
 
     switch (s) {
-        case ScrollScreen::nbg0:
+        using enum ScrollScreen;
+        case nbg0:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg0);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
             character_size         = toEnum<CharacterSize>(chctla_.character_size_nbg0);
             break;
-        case ScrollScreen::nbg1:
+        case nbg1:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg1);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size);
             character_size         = toEnum<CharacterSize>(chctla_.character_size_nbg1);
             break;
-        case ScrollScreen::nbg2:
+        case nbg2:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg2);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size);
             character_size         = toEnum<CharacterSize>(chctlb_.character_size_nbg2);
             break;
-        case ScrollScreen::nbg3:
+        case nbg3:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg3);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size);
             character_size         = toEnum<CharacterSize>(chctlb_.character_size_nbg3);
             break;
-        case ScrollScreen::rbg0:
+        case rbg0:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpa);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size);
             character_size         = toEnum<CharacterSize>(chctlb_.character_size_rbg0);
             break;
-        case ScrollScreen::rbg1:
+        case rbg1:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpb);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
             character_size         = toEnum<CharacterSize>(chctla_.character_size_nbg0);
@@ -2635,7 +2679,8 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     auto mask       = u32{};
     auto multiplier = u32{};
     switch (plane_size) {
-        case PlaneSize::size_1_by_1:
+        using enum PlaneSize;
+        case size_1_by_1:
             if (pattern_name_data_size == PatternNameDataSize::one_word) {
                 if (character_size == CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003f};
@@ -2666,7 +2711,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             }
             return vram_start_address + (start_address & mask) * multiplier;
             break;
-        case PlaneSize::size_2_by_1:
+        case size_2_by_1:
             if (pattern_name_data_size == PatternNameDataSize::one_word) {
                 if (character_size == CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003e};
@@ -2697,7 +2742,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             }
             return vram_start_address + ((start_address & mask) >> 1) * multiplier;
             break;
-        case PlaneSize::size_2_by_2:
+        case size_2_by_2:
             if (pattern_name_data_size == PatternNameDataSize::one_word) {
                 if (character_size == CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003c};
@@ -2832,22 +2877,23 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
     auto           texture_height = u16{};
 
     switch (screen.bitmap_size) {
-        case BitmapSize::size_1024_by_256: {
+        using enum BitmapSize;
+        case size_1024_by_256: {
             texture_width  = width_1024;
             texture_height = height_256;
             break;
         }
-        case BitmapSize::size_1024_by_512: {
+        case size_1024_by_512: {
             texture_width  = width_1024;
             texture_height = height_512;
             break;
         }
-        case BitmapSize::size_512_by_256: {
+        case size_512_by_256: {
             texture_width  = width_512;
             texture_height = height_256;
             break;
         }
-        case BitmapSize::size_512_by_512: {
+        case size_512_by_512: {
             texture_width  = width_512;
             texture_height = height_512;
             break;
@@ -2868,20 +2914,21 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (screen.character_color_number) {
-                case ColorCount::palette_16: {
+                using enum ColorCount;
+                case palette_16: {
                     break;
                 }
-                case ColorCount::palette_256: {
+                case palette_256: {
                     read256ColorsBitmapData<u32>(texture_data, screen);
                     break;
                 }
-                case ColorCount::palette_2048: {
+                case palette_2048: {
                     break;
                 }
-                case ColorCount::rgb_32k: {
+                case rgb_32k: {
                     break;
                 }
-                case ColorCount::rgb_16m: {
+                case rgb_16m: {
                     break;
                 }
                 default: {
@@ -2891,20 +2938,21 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
         } else {
             // 16 bits access to color RAM
             switch (screen.character_color_number) {
-                case ColorCount::palette_16: {
+                using enum ColorCount;
+                case palette_16: {
                     break;
                 }
-                case ColorCount::palette_256: {
+                case palette_256: {
                     read256ColorsBitmapData<u16>(texture_data, screen);
                     break;
                 }
-                case ColorCount::palette_2048: {
+                case palette_2048: {
                     break;
                 }
-                case ColorCount::rgb_32k: {
+                case rgb_32k: {
                     break;
                 }
-                case ColorCount::rgb_16m: {
+                case rgb_16m: {
                     break;
                 }
                 default: {
@@ -2946,15 +2994,16 @@ void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
 void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset) {
     auto page_start_address = plane_address;
     switch (screen.plane_size) {
-        case PlaneSize::size_1_by_1: readPageData(screen, page_start_address, plane_offset); break;
-        case PlaneSize::size_2_by_1: {
+        using enum PlaneSize;
+        case size_1_by_1: readPageData(screen, page_start_address, plane_offset); break;
+        case size_2_by_1: {
             readPageData(screen, page_start_address, plane_offset);
             page_start_address += screen.page_size;
             const auto page_offset_x = static_cast<u16>(plane_offset.x + screen.page_screen_offset.x);
             readPageData(screen, page_start_address, ScreenOffset{page_offset_x, plane_offset.y});
             break;
         }
-        case PlaneSize::size_2_by_2: {
+        case size_2_by_2: {
             readPageData(screen, page_start_address, plane_offset);
             page_start_address += screen.page_size;
             const auto page_offset_x = static_cast<u16>(plane_offset.x + screen.page_screen_offset.x);
@@ -3014,31 +3063,30 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
     using PatterNameDataFunc = PatternNameData (*)(const u32, const ScrollScreenStatus&);
     auto readPatternNameData = PatterNameDataFunc();
     switch (current_pnd_config) {
-        case PatternNameDataEnum::two_words:
-            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData2Words);
-            break;
-        case PatternNameDataEnum::one_word_1_cell_16_colors_10_bits:
+        using enum PatternNameDataEnum;
+        case two_words: readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData2Words); break;
+        case one_word_1_cell_16_colors_10_bits:
             readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1Cell16Colors10Bits);
             break;
-        case PatternNameDataEnum::one_word_1_cell_16_colors_12_bits:
+        case one_word_1_cell_16_colors_12_bits:
             readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1Cell16Colors12Bits);
             break;
-        case PatternNameDataEnum::one_word_1_cell_over_16_colors_10_bits:
+        case one_word_1_cell_over_16_colors_10_bits:
             readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1CellOver16Colors10Bits);
             break;
-        case PatternNameDataEnum::one_word_1_cell_over_16_colors_12_bits:
+        case one_word_1_cell_over_16_colors_12_bits:
             readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1CellOver16Colors12Bits);
             break;
-        case PatternNameDataEnum::one_word_4_cells_16_colors_10_bits:
+        case one_word_4_cells_16_colors_10_bits:
             readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4Cells16Colors10Bits);
             break;
-        case PatternNameDataEnum::one_word_4_cells_16_colors_12_bits:
+        case one_word_4_cells_16_colors_12_bits:
             readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4Cells16Colors12Bits);
             break;
-        case PatternNameDataEnum::one_word_4_cells_over_16_colors_10_bits:
+        case one_word_4_cells_over_16_colors_10_bits:
             readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4CellsOver16Colors10Bits);
             break;
-        case PatternNameDataEnum::one_word_4_cells_over_16_colors_12_bits:
+        case one_word_4_cells_over_16_colors_12_bits:
             readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4CellsOver16Colors12Bits);
             break;
     }
@@ -3165,21 +3213,22 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
             if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
                 // 32 bits access to color RAM
                 switch (screen.character_color_number) {
-                    case ColorCount::palette_16: {
+                    using enum ColorCount;
+                    case palette_16: {
                         read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
                         break;
                     }
-                    case ColorCount::palette_256: {
+                    case palette_256: {
                         read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
                         break;
                     }
-                    case ColorCount::palette_2048: {
+                    case palette_2048: {
                         break;
                     }
-                    case ColorCount::rgb_32k: {
+                    case rgb_32k: {
                         break;
                     }
-                    case ColorCount::rgb_16m: {
+                    case rgb_16m: {
                         break;
                     }
                     default: {
@@ -3189,21 +3238,22 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
             } else {
                 // 16 bits access to color RAM
                 switch (screen.character_color_number) {
-                    case ColorCount::palette_16: {
+                    using enum ColorCount;
+                    case palette_16: {
                         read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
                         break;
                     }
-                    case ColorCount::palette_256: {
+                    case palette_256: {
                         read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
                         break;
                     }
-                    case ColorCount::palette_2048: {
+                    case palette_2048: {
                         break;
                     }
-                    case ColorCount::rgb_32k: {
+                    case rgb_32k: {
                         break;
                     }
-                    case ColorCount::rgb_16m: {
+                    case rgb_16m: {
                         break;
                     }
                     default: {
@@ -3239,21 +3289,22 @@ void Vdp2::concurrentReadCell(const ScrollScreenStatus screen,
         if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (screen.character_color_number) {
-                case ColorCount::palette_16: {
+                using enum ColorCount;
+                case palette_16: {
                     read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
                     break;
                 }
-                case ColorCount::palette_256: {
+                case palette_256: {
                     read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
                     break;
                 }
-                case ColorCount::palette_2048: {
+                case palette_2048: {
                     break;
                 }
-                case ColorCount::rgb_32k: {
+                case rgb_32k: {
                     break;
                 }
-                case ColorCount::rgb_16m: {
+                case rgb_16m: {
                     break;
                 }
                 default: {
@@ -3263,21 +3314,22 @@ void Vdp2::concurrentReadCell(const ScrollScreenStatus screen,
         } else {
             // 16 bits access to color RAM
             switch (screen.character_color_number) {
-                case ColorCount::palette_16: {
+                using enum ColorCount;
+                case palette_16: {
                     read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
                     break;
                 }
-                case ColorCount::palette_256: {
+                case palette_256: {
                     read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
                     break;
                 }
-                case ColorCount::palette_2048: {
+                case palette_2048: {
                     break;
                 }
-                case ColorCount::rgb_32k: {
+                case rgb_32k: {
                     break;
                 }
-                case ColorCount::rgb_16m: {
+                case rgb_16m: {
                     break;
                 }
                 default: {
@@ -3314,21 +3366,22 @@ void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus              screen,
             if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
                 // 32 bits access to color RAM
                 switch (screen.character_color_number) {
-                    case ColorCount::palette_16: {
+                    using enum ColorCount;
+                    case palette_16: {
                         read16ColorsCellData<u32>(texture_data, screen, it->pnd.palette_number, it->cell_address);
                         break;
                     }
-                    case ColorCount::palette_256: {
+                    case palette_256: {
                         read256ColorsCellData<u32>(texture_data, screen, it->pnd.palette_number, it->cell_address);
                         break;
                     }
-                    case ColorCount::palette_2048: {
+                    case palette_2048: {
                         break;
                     }
-                    case ColorCount::rgb_32k: {
+                    case rgb_32k: {
                         break;
                     }
-                    case ColorCount::rgb_16m: {
+                    case rgb_16m: {
                         break;
                     }
                     default: {
@@ -3338,21 +3391,22 @@ void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus              screen,
             } else {
                 // 16 bits access to color RAM
                 switch (screen.character_color_number) {
-                    case ColorCount::palette_16: {
+                    using enum ColorCount;
+                    case palette_16: {
                         read16ColorsCellData<u16>(texture_data, screen, it->pnd.palette_number, it->cell_address);
                         break;
                     }
-                    case ColorCount::palette_256: {
+                    case palette_256: {
                         read256ColorsCellData<u16>(texture_data, screen, it->pnd.palette_number, it->cell_address);
                         break;
                     }
-                    case ColorCount::palette_2048: {
+                    case palette_2048: {
                         break;
                     }
-                    case ColorCount::rgb_32k: {
+                    case rgb_32k: {
                         break;
                     }
-                    case ColorCount::rgb_16m: {
+                    case rgb_16m: {
                         break;
                     }
                     default: {
@@ -3411,15 +3465,16 @@ auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {
     constexpr auto mask_3_bits        = u8{0x7};
     auto           register_mask      = u8{};
     switch (ram_status_.color_ram_mode) {
-        case ColorRamMode::mode_0_rgb_5_bits_1024_colors:
+        using enum ColorRamMode;
+        case mode_0_rgb_5_bits_1024_colors:
             color_size    = color_size_2_bytes;
             register_mask = mask_2_bits;
             break;
-        case ColorRamMode::mode_1_rgb_5_bits_2048_colors:
+        case mode_1_rgb_5_bits_2048_colors:
             color_size    = color_size_2_bytes;
             register_mask = mask_3_bits;
             break;
-        case ColorRamMode::mode_2_rgb_8_bits_1024_colors:
+        case mode_2_rgb_8_bits_1024_colors:
             color_size    = color_size_4_bytes;
             register_mask = mask_2_bits;
             break;

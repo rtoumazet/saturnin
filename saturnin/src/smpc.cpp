@@ -145,7 +145,8 @@ auto keyboard_layout    = MapKeyboardLayout{{PeripheralKey::key_space, "space"},
 
 auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
     switch (layout) {
-        case PeripheralLayout::empty_layout:
+        using enum PeripheralLayout;
+        case empty_layout:
             return std::vector<PeripheralKey>{PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
@@ -159,7 +160,7 @@ auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) -> std::vector<Pe
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown};
-        case PeripheralLayout::current_layout:
+        case current_layout:
             return std::vector<PeripheralKey>{direction_left,
                                               direction_right,
                                               direction_up,
@@ -217,7 +218,8 @@ void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
 
 auto StvPlayerControls::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
     switch (layout) {
-        case PeripheralLayout::empty_layout:
+        using enum PeripheralLayout;
+        case empty_layout:
             return std::vector<PeripheralKey>{PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
@@ -226,7 +228,7 @@ auto StvPlayerControls::toConfig(const PeripheralLayout layout) -> std::vector<P
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown};
-        case PeripheralLayout::current_layout:
+        case current_layout:
             return std::vector<PeripheralKey>{direction_left,
                                               direction_right,
                                               direction_up,
@@ -269,14 +271,15 @@ void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
 
 auto StvBoardControls::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
     switch (layout) {
-        case PeripheralLayout::empty_layout:
+        using enum PeripheralLayout;
+        case empty_layout:
             return std::vector<PeripheralKey>{PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown,
                                               PeripheralKey::key_unknown};
-        case PeripheralLayout::current_layout:
+        case current_layout:
             return std::vector<PeripheralKey>{service_switch, test_switch, p1_coin_switch, p2_coin_switch, p1_start, p2_start};
         default:
             return std::vector<PeripheralKey>{PeripheralKey::key_1,
@@ -330,8 +333,9 @@ void Smpc::reset() {
     // System clock is 320 at reset.
     std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (modules_.config()->getTvStandard(ts)) {
-        case video::TvStandard::pal: clock_ = SystemClock::pal_320; break;
-        case video::TvStandard::ntsc: clock_ = SystemClock::ntsc_320; break;
+        using enum video::TvStandard;
+        case pal: clock_ = SystemClock::pal_320; break;
+        case ntsc: clock_ = SystemClock::ntsc_320; break;
         default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = SystemClock::not_set;
     }
 
@@ -356,39 +360,40 @@ void Smpc::setCommandDuration() {
     using micro = std::chrono::duration<double, std::micro>;
     using milli = std::chrono::duration<double, std::milli>;
     switch (toEnum<SmpcCommand>(comreg_.raw)) {
-        case SmpcCommand::master_sh2_on:
-        case SmpcCommand::slave_sh2_on:
-        case SmpcCommand::slave_sh2_off:
-        case SmpcCommand::sound_on:
-        case SmpcCommand::sound_off:
-        case SmpcCommand::nmi_request:
-        case SmpcCommand::reset_enable:
-        case SmpcCommand::reset_disable: {
+        using enum SmpcCommand;
+        case master_sh2_on:
+        case slave_sh2_on:
+        case slave_sh2_off:
+        case sound_on:
+        case sound_off:
+        case nmi_request:
+        case reset_enable:
+        case reset_disable: {
             constexpr auto duration   = micro(30);
             command_remaining_cycles_ = calculateCyclesNumber(duration);
             break;
         }
-        case SmpcCommand::cd_on:
-        case SmpcCommand::cd_off:
-        case SmpcCommand::smpc_memory_setting: {
+        case cd_on:
+        case cd_off:
+        case smpc_memory_setting: {
             constexpr auto duration   = micro(40);
             command_remaining_cycles_ = calculateCyclesNumber(duration);
             break;
         }
-        case SmpcCommand::reset_entire_system:
-        case SmpcCommand::clock_change_320:
-        case SmpcCommand::clock_change_352: {
+        case reset_entire_system:
+        case clock_change_320:
+        case clock_change_352: {
             // Alpha is fixed to 0
             constexpr auto duration   = milli(100);
             command_remaining_cycles_ = calculateCyclesNumber(duration);
             break;
         }
-        case SmpcCommand::time_setting: {
+        case time_setting: {
             constexpr auto duration   = micro(70);
             command_remaining_cycles_ = calculateCyclesNumber(duration);
             break;
         }
-        case SmpcCommand::interrupt_back: {
+        case interrupt_back: {
             // intback_remaining_cycles_ = calculateCyclesNumber(milli(320));
             // Values are from previous Saturnin version, not sure how accurate they are ...
             constexpr auto intback_duration = micro(50);
@@ -406,52 +411,53 @@ void Smpc::executeCommand() {
     std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     auto        command{toEnum<SmpcCommand>(comreg_.raw)};
     switch (command) {
-        case SmpcCommand::master_sh2_on:
+        using enum SmpcCommand;
+        case master_sh2_on:
             is_master_sh2_on_ = true;
             Log::debug(Logger::smpc, tr("-=Master SH2 ON=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::slave_sh2_on:
+        case slave_sh2_on:
             is_slave_sh2_on_ = true;
             modules_.slaveSh2()->powerOnReset();
             Log::debug(Logger::smpc, tr("-=Slave SH2 ON=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::slave_sh2_off:
+        case slave_sh2_off:
             is_slave_sh2_on_ = false;
             Log::debug(Logger::smpc, tr("-=Slave SH2 OFF=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::sound_on:
+        case sound_on:
             is_sound_on_ = true;
             modules_.scsp()->reset();
             Log::debug(Logger::smpc, tr("-=Sound ON=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::sound_off:
+        case sound_off:
             is_sound_on_ = false;
             // emulator_context_->scsp()->setSound(false);
             Log::debug(Logger::smpc, tr("-=Sound OFF=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::cd_on:
+        case cd_on:
             is_cd_on_ = true;
             Log::debug(Logger::smpc, tr("-=CD ON=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::cd_off:
+        case cd_off:
             is_cd_on_ = false;
             Log::debug(Logger::smpc, tr("-=CD OFF=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::reset_entire_system:
+        case reset_entire_system:
             modules_.masterSh2()->powerOnReset();
             modules_.slaveSh2()->powerOnReset();
             // emulator_context_->scsp()->reset();
@@ -459,8 +465,8 @@ void Smpc::executeCommand() {
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::clock_change_320:
-        case SmpcCommand::clock_change_352:
+        case clock_change_320:
+        case clock_change_352:
             // -> VDP1, VDP2, SCU, SCSP : default power on value
             // -> Master SH2 : unknown
             // -> Slave SH2 : OFF
@@ -468,11 +474,11 @@ void Smpc::executeCommand() {
             // -> Work RAM kept
             // -> VRAM emptied
             switch (modules_.config()->getTvStandard(ts)) {
-                case video::TvStandard::pal:
+                using enum video::TvStandard;
+                case pal:
                     clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::pal_320 : SystemClock::pal_352;
                     break;
-                case video::TvStandard::ntsc:
-                    clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::ntsc_320 : SystemClock::ntsc_352;
+                case ntsc: clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::ntsc_320 : SystemClock::ntsc_352;
                 default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = SystemClock::not_set;
             }
             is_slave_sh2_on_ = false;
@@ -490,29 +496,29 @@ void Smpc::executeCommand() {
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::nmi_request:
+        case nmi_request:
             modules_.scu()->generateInterrupt(interrupt_source::nmi);
             Log::debug(Logger::smpc, tr("-=NMI Request=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::reset_enable:
+        case reset_enable:
             is_soft_reset_allowed_ = true;
             Log::debug(Logger::smpc, tr("-=Reset Enable=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::reset_disable:
+        case reset_disable:
             is_soft_reset_allowed_ = false;
             Log::debug(Logger::smpc, tr("-=Reset Disable=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::interrupt_back:
+        case interrupt_back:
             executeIntback();
             // sf_.reset();
             break;
-        case SmpcCommand::smpc_memory_setting:
+        case smpc_memory_setting:
             for (u8 i = 0; i < 4; ++i) {
                 smem_[i] = ireg_[i].raw;
             }
@@ -520,7 +526,7 @@ void Smpc::executeCommand() {
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
             break;
-        case SmpcCommand::time_setting:
+        case time_setting:
             Log::debug(Logger::smpc, tr("-=Time Setting=- command executed"));
             oreg_[index_31].raw = uti::toUnderlying(command);
             sf_.sf              = false;
@@ -673,9 +679,10 @@ void Smpc::getPeripheralData() {
     }
 
     switch (toEnum<PortMode>(ireg_[index_1].ireg1_port_1_mode)) {
-        case PortMode::mode_0_byte: break; // no data returned
-        case PortMode::mode_15_byte:
-        case PortMode::mode_255_byte: {
+        using enum PortMode;
+        case mode_0_byte: break; // no data returned
+        case mode_15_byte:
+        case mode_255_byte: {
             // no difference between 15 byte and 255 byte for now
             auto port_1_data = PortData{};
             switch (port_1_status_) {
@@ -709,20 +716,22 @@ void Smpc::getPeripheralData() {
     }
 
     switch (toEnum<PortMode>(ireg_[index_1].ireg1_port_2_mode)) {
-        case PortMode::mode_0_byte: break; // no data returned
-        case PortMode::mode_15_byte:
-        case PortMode::mode_255_byte: // no difference between 15 byte and 255 byte for now
+        using enum PortMode;
+        case mode_0_byte: break; // no data returned
+        case mode_15_byte:
+        case mode_255_byte: // no difference between 15 byte and 255 byte for now
         {
             auto port_2_data = PortData{};
             switch (port_2_status_) {
-                case PortStatus::not_connected: {
+                using enum PortStatus;
+                case not_connected: {
                     full_peripheral_data_table_.emplace_back(uti::toUnderlying(port_2_status_));
                     full_peripheral_data_table_.emplace_back(u8_max);
                     full_peripheral_data_table_.emplace_back(u8_max);
                     full_peripheral_data_table_.emplace_back(u8_max);
                     break;
                 }
-                case PortStatus::direct_connection: {
+                case direct_connection: {
                     const auto pad_data = generatePeripheralData(SaturnPeripheralId::saturn_standard_pad);
                     full_peripheral_data_table_.emplace_back(uti::toUnderlying(port_2_status_));
                     const auto local_data_size
@@ -770,7 +779,8 @@ auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData
 
     const auto p1 = getSaturnPeripheralMapping().player_1;
     switch (id) {
-        case SaturnPeripheralId::saturn_standard_pad: {
+        using enum SaturnPeripheralId;
+        case saturn_standard_pad: {
             auto first_data = SaturnStandardPad1stData{};
             first_data.raw  = u8_max;
             if (isKeyPressed(p1.direction_right, openglWindow())) { first_data.direction_right = false; }

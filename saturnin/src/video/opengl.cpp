@@ -430,7 +430,8 @@ void Opengl::render() {
             glUniform3fv(uni_color_offset, 1, part->colorOffset().data());
 
             switch (part->drawType()) {
-                case DrawType::textured_polygon: {
+                using enum DrawType;
+                case textured_polygon: {
                     // Quad is tessellated into 2 triangles, using a texture
                     //******
                     auto vertexes = std::vector<Vertex>{};
@@ -459,7 +460,7 @@ void Opengl::render() {
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
                 }
-                case DrawType::non_textured_polygon: {
+                case non_textured_polygon: {
                     // Quad is tessellated into 2 triangles, using color
                     //*****
                     auto vertexes = std::vector<Vertex>{};
@@ -485,7 +486,7 @@ void Opengl::render() {
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
                 }
-                case DrawType::polyline: {
+                case polyline: {
                     // Quad is drawn using LINE_LOOP (4 vertexes)
                     //*****
                     auto vertexes = std::vector<Vertex>{};
@@ -507,7 +508,7 @@ void Opengl::render() {
                     glDrawArrays(GL_LINE_LOOP, 0, vertexes_per_polyline);
                     break;
                 }
-                case DrawType::line: {
+                case line: {
                     // Single line (2 vertexes)
                     //*****
                     auto vertexes = std::vector<Vertex>{};
@@ -950,7 +951,8 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
     switch (name) {
-        case ShaderName::textured: {
+        using enum ShaderName;
+        case textured: {
             // position pointer
             glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
             glEnableVertexAttribArray(0);                                               // NOLINT: this is an index

@@ -112,11 +112,12 @@ void EmulatorContext::reset() { EmulatorContext(); }
 
 void EmulatorContext::startEmulation() {
     switch (emulation_status_) {
-        case EmulationStatus::running: {
+        using enum EmulationStatus;
+        case running: {
             debugStatus(DebugStatus::disabled);
             return;
         }
-        case EmulationStatus::stopped: {
+        case stopped: {
             emulationStatus(EmulationStatus::running);
 
             emulation_main_thread_ = std::thread(&EmulatorContext::emulationMainThread, this);

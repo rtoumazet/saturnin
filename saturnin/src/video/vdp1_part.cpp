@@ -59,24 +59,25 @@ Vdp1Part::Vdp1Part(EmulatorModules& modules,
 
 void Vdp1Part::readParameters(Memory* m, const u32 address) {
     switch (toEnum<CommandSelect>(cmdctrl_.command_select)) {
-        case CommandSelect::system_clipping: {
+        using enum CommandSelect;
+        case system_clipping: {
             cmdxc_.raw = m->read<u16>(address + cmdxc_offset);
             cmdyc_.raw = m->read<u16>(address + cmdyc_offset);
             break;
         }
-        case CommandSelect::user_clipping: {
+        case user_clipping: {
             cmdxa_.raw = m->read<u16>(address + cmdxa_offset);
             cmdya_.raw = m->read<u16>(address + cmdya_offset);
             cmdxc_.raw = m->read<u16>(address + cmdxc_offset);
             cmdyc_.raw = m->read<u16>(address + cmdyc_offset);
             break;
         }
-        case CommandSelect::local_coordinate: {
+        case local_coordinate: {
             cmdxa_.raw = m->read<u16>(address + cmdxa_offset);
             cmdya_.raw = m->read<u16>(address + cmdya_offset);
             break;
         }
-        case CommandSelect::normal_sprite_draw: {
+        case normal_sprite_draw: {
             cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
             cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
             cmdsrca_.raw = m->read<u16>(address + cmdsrca_offset);
@@ -86,7 +87,7 @@ void Vdp1Part::readParameters(Memory* m, const u32 address) {
             cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
             break;
         }
-        case CommandSelect::scaled_sprite_draw: {
+        case scaled_sprite_draw: {
             cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
             cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
             cmdsrca_.raw = m->read<u16>(address + cmdsrca_offset);
@@ -100,9 +101,9 @@ void Vdp1Part::readParameters(Memory* m, const u32 address) {
             cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
             break;
         }
-        case CommandSelect::distorted_sprite_draw:
-        case CommandSelect::polygon_draw:
-        case CommandSelect::polyline_draw: {
+        case distorted_sprite_draw:
+        case polygon_draw:
+        case polyline_draw: {
             cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
             cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
             cmdsrca_.raw = m->read<u16>(address + cmdsrca_offset);
@@ -118,7 +119,7 @@ void Vdp1Part::readParameters(Memory* m, const u32 address) {
             cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
             break;
         }
-        case CommandSelect::line_draw: {
+        case line_draw: {
             cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
             cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
             cmdxa_.raw   = m->read<u16>(address + cmdxa_offset);
@@ -133,46 +134,47 @@ void Vdp1Part::readParameters(Memory* m, const u32 address) {
 
 void Vdp1Part::generatePartData(const EmulatorModules& modules) {
     switch (toEnum<CommandSelect>(cmdctrl_.command_select)) {
-        case CommandSelect::system_clipping: {
+        using enum CommandSelect;
+        case system_clipping: {
             // Not implemented
             debug_header_ = tr("Set system clipping coordinates");
             break;
         }
-        case CommandSelect::user_clipping: {
+        case user_clipping: {
             // Not implemented
             debug_header_ = tr("Set user clipping coordinates");
             break;
         }
-        case CommandSelect::local_coordinate: {
+        case local_coordinate: {
             SetLocalCoordinates(twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             debug_header_ = tr("Set local coordinates");
             break;
         }
-        case CommandSelect::normal_sprite_draw: {
+        case normal_sprite_draw: {
             normalSpriteDraw(modules, *this);
             debug_header_ = tr("Normal sprite draw");
             break;
         }
-        case CommandSelect::scaled_sprite_draw: {
+        case scaled_sprite_draw: {
             scaledSpriteDraw(modules, *this);
             debug_header_ = tr("Scaled sprite draw");
             break;
         }
-        case CommandSelect::distorted_sprite_draw: {
+        case distorted_sprite_draw: {
             distortedSpriteDraw(modules, *this);
             debug_header_ = tr("Distorted sprite draw");
             break;
         }
-        case CommandSelect::polygon_draw: {
+        case polygon_draw: {
             polygonDraw(modules, *this);
             debug_header_ = tr("Polygon draw");
             break;
         }
-        case CommandSelect::polyline_draw: {
+        case polyline_draw: {
             debug_header_ = tr("Polyline draw");
             break;
         }
-        case CommandSelect::line_draw: {
+        case line_draw: {
             debug_header_ = tr("Line draw");
             break;
         }
@@ -199,7 +201,8 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
             = static_cast<SpriteColorMode>(static_cast<bool>(spctl.sprite_color_mode)) == SpriteColorMode::mixed;
 
         switch (sprite_type) {
-            case SpriteType::type_0: {
+            using enum SpriteType;
+            case type_0: {
                 if (is_data_mixed) {
                     // priority_number_register = getPriorityRegister(modules, SpriteTypeRegister::type_0_priority_mixed);
                     priority_number_register
@@ -213,7 +216,7 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
                 }
                 break;
             }
-            case SpriteType::type_1: {
+            case type_1: {
                 if (is_data_mixed) {
                     priority_number_register
                         = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_1_priority_mixed));
@@ -224,31 +227,31 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
                 }
                 break;
             }
-            case SpriteType::type_2: {
+            case type_2: {
                 priority_number_register
                     = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_2_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
-            case SpriteType::type_3: {
+            case type_3: {
                 priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_3_priority));
                 priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
-            case SpriteType::type_4: {
+            case type_4: {
                 priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_4_priority));
                 priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
-            case SpriteType::type_5: {
+            case type_5: {
                 priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_5_priority));
                 break;
             }
-            case SpriteType::type_6: {
+            case type_6: {
                 priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_6_priority));
                 break;
             }
-            case SpriteType::type_7: {
+            case type_7: {
                 priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_7_priority));
                 break;
             }
@@ -262,46 +265,47 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     } else {
         // 8 bits by pixel
         switch (sprite_type) {
-            case SpriteType::type_8: {
+            using enum SpriteType;
+            case type_8: {
                 priority_number_register
                     = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_8_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
-            case SpriteType::type_9: {
+            case type_9: {
                 priority_number_register
                     = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_9_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
-            case SpriteType::type_a: {
+            case type_a: {
                 priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_a_priority));
                 priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
-            case SpriteType::type_b: {
+            case type_b: {
                 // No priority bits for this sprite type.
                 priority_number_register = 0;
                 break;
             }
-            case SpriteType::type_c: {
+            case type_c: {
                 priority_number_register
                     = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_c_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
-            case SpriteType::type_d: {
+            case type_d: {
                 priority_number_register
                     = getPriorityRegister(modules, static_cast<u8>(static_cast<bool>(sprite_register.type_d_priority)));
                 priority_number_register <<= disp_priority_on_1_bit;
                 break;
             }
-            case SpriteType::type_e: {
+            case type_e: {
                 priority_number_register = getPriorityRegister(modules, static_cast<u8>(sprite_register.type_e_priority));
                 priority_number_register <<= disp_priority_on_2_bits;
                 break;
             }
-            case SpriteType::type_f: {
+            case type_f: {
                 // No priority bits for this sprite type.
                 priority_number_register = 0;
                 break;
@@ -320,10 +324,11 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
 auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const u8 priority) -> u8 {
     const auto color_mode = toEnum<ColorMode>(cmdpmod_.color_mode);
     switch (color_mode) {
-        case ColorMode::mode_5_32k_colors_rgb: {
+        using enum ColorMode;
+        case mode_5_32k_colors_rgb: {
             return 0;
         }
-        case ColorMode::mode_1_16_colors_lookup: {
+        case mode_1_16_colors_lookup: {
             const auto lut_address = u32{vdp1_ram_start_address + cmdsrca_.raw * vdp1_address_multiplier};
             auto       reg         = SpriteTypeRegister{modules.memory()->read<u16>(lut_address)};
             return (reg.msb == 1) ? 0 : priority;
@@ -346,43 +351,44 @@ auto Vdp1Part::getDebugDetail() -> std::string {
 
     const auto getZoomPoint = [](const ZoomPoint zp) {
         switch (zp) {
-            case ZoomPoint::center_center:
+            using enum ZoomPoint;
+            case center_center:
                 return R"(
 Zoom point
     Center-center)";
-            case ZoomPoint::center_left:
+            case center_left:
                 return R"(
 Zoom point
     Center-left)";
-            case ZoomPoint::center_right:
+            case center_right:
                 return R"(
 Zoom point
     Center-right)";
-            case ZoomPoint::lower_center:
+            case lower_center:
                 return R"(
 Zoom point 
     Lower-center)";
-            case ZoomPoint::lower_left:
+            case lower_left:
                 return R"(
 Zoom point
     Lower-left)";
-            case ZoomPoint::lower_right:
+            case lower_right:
                 return R"(
 Zoom point
     Lower-right)";
-            case ZoomPoint::upper_center:
+            case upper_center:
                 return R"(
 Zoom point
     Upper-center)";
-            case ZoomPoint::upper_left:
+            case upper_left:
                 return R"(
 Zoom point
     Upper-left)";
-            case ZoomPoint::upper_right:
+            case upper_right:
                 return R"(
 Zoom point
     Upper-right)";
-            case ZoomPoint::two_coordinates:
+            case two_coordinates:
                 return R"(
 Zoom point
     Specifies two coordinates)";
@@ -395,19 +401,20 @@ Zoom point
 
     const auto getCharacterReadDirection = [](const CharacterReadDirection crd) {
         switch (crd) {
-            case CharacterReadDirection::h_invertion:
+            using enum CharacterReadDirection;
+            case h_invertion:
                 return R"(
 Character read direction 
     Horizontally inverted)";
-            case CharacterReadDirection::not_inverted:
+            case not_inverted:
                 return R"(
 Character read direction
     Not inverted)";
-            case CharacterReadDirection::vh_invertion:
+            case vh_invertion:
                 return R"(
 Character read direction 
     Horizontally and vertically inverted)";
-            case CharacterReadDirection::v_invertion:
+            case v_invertion:
                 return R"(
 Character read direction
     Vertically inverted)";
@@ -417,42 +424,43 @@ Character read direction
 
     const auto getColorMode = [](const ColorMode cm) {
         switch (cm) {
-            case ColorMode::mode_0_16_colors_bank:
+            using enum ColorMode;
+            case mode_0_16_colors_bank:
                 return R"(
 Color mode 
     Mode 0
     16 colors
     Color bank
     4 bits/pixel)";
-            case ColorMode::mode_1_16_colors_lookup:
+            case mode_1_16_colors_lookup:
                 return R"(
 Color mode
     Mode 1
     16 colors
     Lookup table
     4 bits / pixel)";
-            case ColorMode::mode_2_64_colors_bank:
+            case mode_2_64_colors_bank:
                 return R"(
 Color mode 
     Mode 2
     64 colors
     Color bank
     8 bits/pixel)";
-            case ColorMode::mode_3_128_colors_bank:
+            case mode_3_128_colors_bank:
                 return R"(
 Color mode 
     Mode 3
     128 colors
     Color bank
     8 bits/pixel)";
-            case ColorMode::mode_4_256_colors_bank:
+            case mode_4_256_colors_bank:
                 return R"(
 Color mode 
     Mode 4
     256 colors
     Color bank
     8 bits/pixel)";
-            case ColorMode::mode_5_32k_colors_rgb:
+            case mode_5_32k_colors_rgb:
                 return R"(
 Color mode 
     Mode 5
@@ -465,49 +473,50 @@ Color mode
 
     const auto getColorCalculation = [](const ColorCalculation cc) {
         switch (cc) {
-            case ColorCalculation::mode_0:
+            using enum ColorCalculation;
+            case mode_0:
                 return R"(
 Color calculation
     Mode 0, 
     Replace
 )";
-            case ColorCalculation::mode_1:
+            case mode_1:
                 return R"(
 Color calculation 
     Mode 1
     Cannot rewrite / shadow
 )";
-            case ColorCalculation::mode_2:
+            case mode_2:
                 return R"(
 Color calculation 
     Mode 2
     Half-luminance
 )";
-            case ColorCalculation::mode_3:
+            case mode_3:
                 return R"(
 Color calculation 
     Mode 3
     Replace / half-transparent
 )";
-            case ColorCalculation::mode_4:
+            case mode_4:
                 return R"(
 Color calculation 
     Mode 4
     Gouraud shading
 )";
-            case ColorCalculation::mode_5:
+            case mode_5:
                 return R"(
 Color calculation 
     Mode 5
     Setting prohibited
 )";
-            case ColorCalculation::mode_6:
+            case mode_6:
                 return R"(
 Color calculation 
     Mode 6
     Gouraud shading + half-luminance
 )";
-            case ColorCalculation::mode_7:
+            case mode_7:
                 return R"(
 Color calculation 
     Mode 7
@@ -562,23 +571,24 @@ Gouraud shading
     };
 
     switch (toEnum<CommandSelect>(cmdctrl_.command_select)) {
-        case CommandSelect::system_clipping: {
+        using enum CommandSelect;
+        case system_clipping: {
             // cmdxc_ = m->read<u16>(address + cmdxc_offset);
             // cmdyc_ = m->read<u16>(address + cmdyc_offset);
             break;
         }
-        case CommandSelect::user_clipping: {
+        case user_clipping: {
             // cmdxa_ = m->read<u16>(address + cmdxa_offset);
             // cmdya_ = m->read<u16>(address + cmdya_offset);
             // cmdxc_ = m->read<u16>(address + cmdxc_offset);
             // cmdyc_ = m->read<u16>(address + cmdyc_offset);
             break;
         }
-        case CommandSelect::local_coordinate: {
+        case local_coordinate: {
             part_detail += uti::format("x = {}, y = {}\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             break;
         }
-        case CommandSelect::normal_sprite_draw: {
+        case normal_sprite_draw: {
             part_detail += uti::format("Vertex A ({}, {})", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail
                 += uti::format("{}\n",
@@ -591,7 +601,7 @@ Gouraud shading
             part_detail += uti::format("Texture key : {:#x}", textureKey());
             break;
         }
-        case CommandSelect::scaled_sprite_draw: {
+        case scaled_sprite_draw: {
             part_detail += getZoomPoint(toEnum<ZoomPoint>(cmdctrl_.zoom_point));
             part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail += getDrawMode(cmdpmod_);
@@ -610,7 +620,7 @@ Gouraud shading
             // cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
             break;
         }
-        case CommandSelect::distorted_sprite_draw: {
+        case distorted_sprite_draw: {
             part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail += uti::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
             part_detail += uti::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
@@ -620,7 +630,7 @@ Gouraud shading
             part_detail += uti::format("Texture key : {:#x}", textureKey());
             break;
         }
-        case CommandSelect::polygon_draw: {
+        case polygon_draw: {
             part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail += uti::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
             part_detail += uti::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
@@ -630,7 +640,7 @@ Gouraud shading
             part_detail += getGouraudShadingData();
             break;
         }
-        case CommandSelect::polyline_draw: {
+        case polyline_draw: {
             part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail += uti::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
             part_detail += uti::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
@@ -640,7 +650,7 @@ Gouraud shading
             part_detail += getGouraudShadingData();
             break;
         }
-        case CommandSelect::line_draw: {
+        case line_draw: {
             part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail += uti::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
             auto color = Color(cmdcolr_.raw);
@@ -717,7 +727,8 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     const auto height = twosComplement(part.cmdyb_.raw);
     vertexes_pos.reserve(4);
     switch (toEnum<ZoomPoint>(part.cmdctrl_.zoom_point)) {
-        case ZoomPoint::two_coordinates: {
+        using enum ZoomPoint;
+        case two_coordinates: {
             const auto size_x = static_cast<s16>(part.cmdsize_.character_size_x * 8);
             const auto size_y = static_cast<s16>(part.cmdsize_.character_size_y);
             Log::debug(Logger::vdp1, "Character size {} * {}", size_x, size_y);
@@ -727,63 +738,63 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + size_y);
             break;
         }
-        case ZoomPoint::upper_left: {
+        case upper_left: {
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + height);
             vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() + height);
             vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
             break;
         }
-        case ZoomPoint::upper_center: {
+        case upper_center: {
             vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() + height);
             vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() + height);
             vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA());
             break;
         }
-        case ZoomPoint::upper_right: {
+        case upper_right: {
             vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA() + height);
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + height);
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA());
             break;
         }
-        case ZoomPoint::center_left: {
+        case center_left: {
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height / 2);
             vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() - height / 2);
             vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() + height / 2);
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + height / 2);
             break;
         }
-        case ZoomPoint::center_center: {
+        case center_center: {
             vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() - height / 2);
             vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() - height / 2);
             vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() + height / 2);
             vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() + height / 2);
             break;
         }
-        case ZoomPoint::center_right: {
+        case center_right: {
             vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() - height / 2);
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height / 2);
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() + height / 2);
             vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() + height / 2);
             break;
         }
-        case ZoomPoint::lower_left: {
+        case lower_left: {
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() + width, part.calculatedYA() - height);
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height);
             break;
         }
-        case ZoomPoint::lower_center: {
+        case lower_center: {
             vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() + width / 2, part.calculatedYA() - height);
             vertexes_pos.emplace_back(part.calculatedXA() - width / 2, part.calculatedYA() - height);
             break;
         }
-        case ZoomPoint::lower_right: {
+        case lower_right: {
             vertexes_pos.emplace_back(part.calculatedXA() - width, part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA() - height);
@@ -1089,28 +1100,29 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
         if (modules.vdp2()->getColorRamMode() == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (color_mode) {
-                case ColorMode::mode_0_16_colors_bank: {
+                using enum ColorMode;
+                case mode_0_16_colors_bank: {
                     readColorBankMode16Colors<u32>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
                 }
-                case ColorMode::mode_1_16_colors_lookup: {
+                case mode_1_16_colors_lookup: {
                     // LUT doesn't depend on color RAM, it's always 16 bits.
                     readLookUpTable16Colors<u16>(modules, texture_data, start_address, part);
                     break;
                 }
-                case ColorMode::mode_2_64_colors_bank: {
+                case mode_2_64_colors_bank: {
                     readColorBankMode64Colors<u32>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
                 }
-                case ColorMode::mode_3_128_colors_bank: {
+                case mode_3_128_colors_bank: {
                     readColorBankMode128Colors<u32>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
                 }
-                case ColorMode::mode_4_256_colors_bank: {
+                case mode_4_256_colors_bank: {
                     readColorBankMode256Colors<u32>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
                 }
-                case ColorMode::mode_5_32k_colors_rgb: {
+                case mode_5_32k_colors_rgb: {
                     // RGB is always 16 bits.
                     readRgb32KColors<u16>(modules, texture_data, start_address, part);
                     break;
@@ -1119,27 +1131,28 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
         } else {
             // 16 bits access to color RAM
             switch (color_mode) {
-                case ColorMode::mode_0_16_colors_bank: {
+                using enum ColorMode;
+                case mode_0_16_colors_bank: {
                     readColorBankMode16Colors<u16>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
                 }
-                case ColorMode::mode_1_16_colors_lookup: {
+                case mode_1_16_colors_lookup: {
                     readLookUpTable16Colors<u16>(modules, texture_data, start_address, part);
                     break;
                 }
-                case ColorMode::mode_2_64_colors_bank: {
+                case mode_2_64_colors_bank: {
                     readColorBankMode64Colors<u16>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
                 }
-                case ColorMode::mode_3_128_colors_bank: {
+                case mode_3_128_colors_bank: {
                     readColorBankMode128Colors<u16>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
                 }
-                case ColorMode::mode_4_256_colors_bank: {
+                case mode_4_256_colors_bank: {
                     readColorBankMode256Colors<u16>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
                 }
-                case ColorMode::mode_5_32k_colors_rgb: {
+                case mode_5_32k_colors_rgb: {
                     readRgb32KColors<u16>(modules, texture_data, start_address, part);
                     break;
                 }
@@ -1171,21 +1184,22 @@ auto readGouraudData(const EmulatorModules& modules, Vdp1Part& part) -> std::vec
 auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<TextureCoordinates> {
     auto coords = std::vector<TextureCoordinates>{};
     switch (crd) {
-        case CharacterReadDirection::h_invertion: {
+        using enum CharacterReadDirection;
+        case h_invertion: {
             coords.emplace_back(TextureCoordinates{1.0, 0.0}); // lower left
             coords.emplace_back(TextureCoordinates{0.0, 0.0}); // lower right
             coords.emplace_back(TextureCoordinates{0.0, 1.0}); // upper right
             coords.emplace_back(TextureCoordinates{1.0, 1.0}); // upper left
             break;
         }
-        case CharacterReadDirection::v_invertion: {
+        case v_invertion: {
             coords.emplace_back(TextureCoordinates{0.0, 1.0}); // lower left
             coords.emplace_back(TextureCoordinates{1.0, 1.0}); // lower right
             coords.emplace_back(TextureCoordinates{1.0, 0.0}); // upper right
             coords.emplace_back(TextureCoordinates{0.0, 0.0}); // upper left
             break;
         }
-        case CharacterReadDirection::vh_invertion: {
+        case vh_invertion: {
             coords.emplace_back(TextureCoordinates{1.0, 1.0}); // lower left
             coords.emplace_back(TextureCoordinates{0.0, 1.0}); // lower right
             coords.emplace_back(TextureCoordinates{0.0, 0.0}); // upper right
@@ -1204,8 +1218,9 @@ auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<Text
 
 void checkColorCalculation(Vdp1Part& part) {
     switch (toEnum<ColorCalculation>(part.cmdpmod_.color_calculation)) {
-        case ColorCalculation::mode_0: break;
-        case ColorCalculation::mode_4: break;
+        using enum ColorCalculation;
+        case mode_0: break;
+        case mode_4: break;
         default: {
             Log::unimplemented("Vdp1 - Color calculation {}", part.cmdpmod_.color_calculation);
         }

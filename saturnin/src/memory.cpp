@@ -92,7 +92,8 @@ auto Memory::loadRom(const std::string& zip_name,
             std::unique_ptr<u8[]> data(static_cast<u8*>(entry.readAsBinary()));
 
             switch (rom_type) {
-                case RomType::bios: {
+                using enum RomType;
+                case bios: {
                     const auto counter = u32{size / 4};
                     // Needs byteswapping
                     for (u32 i = 0; i < counter; ++i) {
@@ -103,19 +104,20 @@ auto Memory::loadRom(const std::string& zip_name,
                     }
                     break;
                 }
-                case RomType::program:
-                case RomType::graphic: {
+                case program:
+                case graphic: {
                     const auto stv_bios_region_address = u32{0x808};
                     auto       region_cart_address     = u32{};
                     switch (rom_load) {
-                        case RomLoad::not_interleaved: {
+                        using enum RomLoad;
+                        case not_interleaved: {
                             const auto& src_begin = data.get();
                             std::move(src_begin, std::next(src_begin, size), destination);
 
                             region_cart_address = region_cart_address_not_interleaved;
                             break;
                         }
-                        case RomLoad::odd_interleaved: { // Data is loaded on odd bytes only
+                        case odd_interleaved: { // Data is loaded on odd bytes only
                             for (u32 i = 0; i < size; ++i) {
                                 destination[(i * 2 + 1)] = data[i];
                             }
@@ -123,7 +125,7 @@ auto Memory::loadRom(const std::string& zip_name,
                             region_cart_address = region_cart_address_odd_interleaved;
                             break;
                         }
-                        case RomLoad::even_interleaved: { // Data is loaded on even bytes only
+                        case even_interleaved: { // Data is loaded on even bytes only
                             for (u32 i = 0; i < size; ++i) {
                                 destination[i * 2] = data[i];
                             }
@@ -181,8 +183,9 @@ void Memory::loadBios(const HardwareMode mode) {
     Log::info(Logger::memory, tr("Loading bios"));
     auto bios_path = std::string{};
     switch (mode) {
-        case HardwareMode::saturn: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
-        case HardwareMode::stv: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
+        using enum HardwareMode;
+        case saturn: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
+        case stv: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
         default: {
             Log::error(Logger::memory, tr("Unknown hardware mode"));
             throw std::runtime_error("Config error !");
@@ -199,11 +202,12 @@ void Memory::loadBios(const HardwareMode mode) {
         const auto str = buffer.str();
 
         switch (mode) {
-            case HardwareMode::saturn: {
+            using enum HardwareMode;
+            case saturn: {
                 std::move(str.begin(), str.end(), this->rom_.data());
                 break;
             }
-            case HardwareMode::stv: {
+            case stv: {
                 // Needs byteswapping
                 for (size_t i = 0; i < str.size(); i += 4) {
                     this->rom_[i + 1] = str[i + 0];
@@ -488,27 +492,23 @@ void Memory::sendFrtInterruptToSlave() const { modules_.slaveSh2()->sendInterrup
 
 auto Memory::getMemoryMapAreaData(const MemoryMapArea area) -> std::tuple<u8*, size_t, u32> const {
     switch (area) {
-        case MemoryMapArea::rom: return std::make_tuple(rom_.data(), rom_.size(), rom_address.start);
-        case MemoryMapArea::smpc: return std::make_tuple(smpc_.data(), smpc_.size(), smpc_address.start);
-        case MemoryMapArea::backup_ram: return std::make_tuple(backup_ram_.data(), backup_ram_.size(), backup_ram_address.start);
-        case MemoryMapArea::workram_low:
-            return std::make_tuple(workram_low_.data(), workram_low_.size(), workram_low_address.start);
-        case MemoryMapArea::stv_io: return std::make_tuple(stv_io_.data(), stv_io_.size(), stv_io_address.start);
-        case MemoryMapArea::cart: return std::make_tuple(cart_.data(), cart_.size(), cart_address.start);
-        // case MemoryMapArea::cd_block: return std::make_tuple(.data(), .size(), cd_block_address.start);
-        case MemoryMapArea::scsp: return std::make_tuple(sound_ram_.data(), sound_ram_.size(), scsp_address.start);
-        case MemoryMapArea::vdp1_ram: return std::make_tuple(vdp1_vram_.data(), vdp1_vram_.size(), vdp1_ram_address.start);
-        case MemoryMapArea::vdp1_framebuffer:
-            return std::make_tuple(vdp1_framebuffer_.data(), vdp1_framebuffer_.size(), vdp1_fb_address.start);
-        case MemoryMapArea::vdp1_registers:
-            return std::make_tuple(vdp1_registers_.data(), vdp1_registers_.size(), vdp1_regs_address.start);
-        case MemoryMapArea::vdp2_video_ram: return std::make_tuple(vdp2_vram_.data(), vdp2_vram_.size(), vdp2_vram_address.start);
-        case MemoryMapArea::vdp2_color_ram: return std::make_tuple(vdp2_cram_.data(), vdp2_cram_.size(), vdp2_cram_address.start);
-        case MemoryMapArea::vdp2_registers:
-            return std::make_tuple(vdp2_registers_.data(), vdp2_registers_.size(), vdp2_regs_address.start);
-        case MemoryMapArea::scu: return std::make_tuple(scu_.data(), scu_.size(), scu_address.start);
-        case MemoryMapArea::workram_high:
-            return std::make_tuple(workram_high_.data(), workram_high_.size(), workram_high_address.start);
+        using enum MemoryMapArea;
+        case rom: return std::make_tuple(rom_.data(), rom_.size(), rom_address.start);
+        case smpc: return std::make_tuple(smpc_.data(), smpc_.size(), smpc_address.start);
+        case backup_ram: return std::make_tuple(backup_ram_.data(), backup_ram_.size(), backup_ram_address.start);
+        case workram_low: return std::make_tuple(workram_low_.data(), workram_low_.size(), workram_low_address.start);
+        case stv_io: return std::make_tuple(stv_io_.data(), stv_io_.size(), stv_io_address.start);
+        case cart: return std::make_tuple(cart_.data(), cart_.size(), cart_address.start);
+        // case cd_block: return std::make_tuple(.data(), .size(), cd_block_address.start);
+        case scsp: return std::make_tuple(sound_ram_.data(), sound_ram_.size(), scsp_address.start);
+        case vdp1_ram: return std::make_tuple(vdp1_vram_.data(), vdp1_vram_.size(), vdp1_ram_address.start);
+        case vdp1_framebuffer: return std::make_tuple(vdp1_framebuffer_.data(), vdp1_framebuffer_.size(), vdp1_fb_address.start);
+        case vdp1_registers: return std::make_tuple(vdp1_registers_.data(), vdp1_registers_.size(), vdp1_regs_address.start);
+        case vdp2_video_ram: return std::make_tuple(vdp2_vram_.data(), vdp2_vram_.size(), vdp2_vram_address.start);
+        case vdp2_color_ram: return std::make_tuple(vdp2_cram_.data(), vdp2_cram_.size(), vdp2_cram_address.start);
+        case vdp2_registers: return std::make_tuple(vdp2_registers_.data(), vdp2_registers_.size(), vdp2_regs_address.start);
+        case scu: return std::make_tuple(scu_.data(), scu_.size(), scu_address.start);
+        case workram_high: return std::make_tuple(workram_high_.data(), workram_high_.size(), workram_high_address.start);
         default: return std::make_tuple(nullptr, 0, 0);
     }
 };
@@ -517,9 +517,10 @@ void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad
     if (times_mirrored > 0) {
         auto multiple = u32{};
         switch (RomLoad) {
-            case RomLoad::not_interleaved: multiple = 1; break;
-            case RomLoad::even_interleaved: multiple = 2; break;
-            case RomLoad::odd_interleaved: multiple = 2; break;
+            using enum RomLoad;
+            case not_interleaved: multiple = 1; break;
+            case even_interleaved: multiple = 2; break;
+            case odd_interleaved: multiple = 2; break;
         }
         for (u8 i = 1; i <= times_mirrored; ++i) {
             std::copy(data, data + size * multiple - 1, data + (i * size * multiple));

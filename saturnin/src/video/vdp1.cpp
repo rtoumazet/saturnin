@@ -81,11 +81,12 @@ void Vdp1::onVblankIn() {
     updateResolution();
 
     switch (toEnum<PlotTriggerMode>(ptmr_.plot_trigger_mode)) {
-        case PlotTriggerMode::idle_at_frame_change: {
+        using enum PlotTriggerMode;
+        case idle_at_frame_change: {
             Log::debug(Logger::vdp1, tr("Idle at frame change"));
             break;
         }
-        case PlotTriggerMode::starts_drawing_at_frame_change: {
+        case starts_drawing_at_frame_change: {
             Log::debug(Logger::vdp1, tr("Starts drawing automatically at frame change"));
             populateRenderData();
             break;
@@ -121,48 +122,49 @@ void Vdp1::populateRenderData() {
     while (toEnum<EndBit>(cmdctrl.end_bit) == EndBit::command_selection_valid) {
         skip_table = false;
         switch (toEnum<JumpSelect>(cmdctrl.jump_select)) {
-            case JumpSelect::jump_next: {
+            using enum JumpSelect;
+            case jump_next: {
                 Log::debug(Logger::vdp1, tr("Jump next"));
                 next_table_address += table_size;
                 break;
             }
-            case JumpSelect::jump_assign: {
+            case jump_assign: {
                 Log::debug(Logger::vdp1, tr("Jump assign"));
                 next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
                 break;
             }
-            case JumpSelect::jump_call: {
+            case jump_call: {
                 Log::debug(Logger::vdp1, tr("Jump call"));
                 next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
                 return_address     = current_table_address + table_size;
                 break;
             }
-            case JumpSelect::jump_return: {
+            case jump_return: {
                 Log::debug(Logger::vdp1, tr("Jump return"));
                 next_table_address = return_address;
                 return_address     = 0;
                 break;
             }
-            case JumpSelect::skip_next: {
+            case skip_next: {
                 Log::debug(Logger::vdp1, tr("Skip next"));
                 next_table_address += table_size;
                 skip_table = true;
                 break;
             }
-            case JumpSelect::skip_assign: {
+            case skip_assign: {
                 Log::debug(Logger::vdp1, tr("Skip assign"));
                 next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
                 skip_table         = true;
                 break;
             }
-            case JumpSelect::skip_call: {
+            case skip_call: {
                 Log::debug(Logger::vdp1, tr("Skip call"));
                 next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
                 return_address     = current_table_address + table_size;
                 skip_table         = true;
                 break;
             }
-            case JumpSelect::skip_return: {
+            case skip_return: {
                 Log::debug(Logger::vdp1, tr("Skip return"));
                 next_table_address = return_address;
                 return_address     = 0;
@@ -173,15 +175,16 @@ void Vdp1::populateRenderData() {
 
         if (!skip_table) {
             switch (toEnum<CommandSelect>(cmdctrl.command_select)) {
-                case CommandSelect::system_clipping: {
+                using enum CommandSelect;
+                case system_clipping: {
                     Log::unimplemented(tr("VDP1 command - System clipping coordinate set"));
                     break;
                 }
-                case CommandSelect::user_clipping: {
+                case user_clipping: {
                     Log::unimplemented(tr("VDP1 command - User clipping coordinate set"));
                     break;
                 }
-                case CommandSelect::local_coordinate: {
+                case local_coordinate: {
                     vdp1_parts_.emplace_back(Vdp1Part(modules_,
                                                       DrawType::not_drawable,
                                                       current_table_address,
@@ -190,7 +193,7 @@ void Vdp1::populateRenderData() {
                                                       color_offset_.as_float));
                     break;
                 }
-                case CommandSelect::normal_sprite_draw: {
+                case normal_sprite_draw: {
                     vdp1_parts_.emplace_back(Vdp1Part(modules_,
                                                       DrawType::textured_polygon,
                                                       current_table_address,
@@ -199,7 +202,7 @@ void Vdp1::populateRenderData() {
                                                       color_offset_.as_float));
                     break;
                 }
-                case CommandSelect::scaled_sprite_draw: {
+                case scaled_sprite_draw: {
                     vdp1_parts_.emplace_back(Vdp1Part(modules_,
                                                       DrawType::textured_polygon,
                                                       current_table_address,
@@ -208,7 +211,7 @@ void Vdp1::populateRenderData() {
                                                       color_offset_.as_float));
                     break;
                 }
-                case CommandSelect::distorted_sprite_draw: {
+                case distorted_sprite_draw: {
                     vdp1_parts_.emplace_back(Vdp1Part(modules_,
                                                       DrawType::textured_polygon,
                                                       current_table_address,
@@ -217,7 +220,7 @@ void Vdp1::populateRenderData() {
                                                       color_offset_.as_float));
                     break;
                 }
-                case CommandSelect::polygon_draw: {
+                case polygon_draw: {
                     vdp1_parts_.emplace_back(Vdp1Part(modules_,
                                                       DrawType::non_textured_polygon,
                                                       current_table_address,
@@ -226,12 +229,12 @@ void Vdp1::populateRenderData() {
                                                       color_offset_.as_float));
                     break;
                 }
-                case CommandSelect::polyline_draw: {
+                case polyline_draw: {
                     vdp1_parts_.emplace_back(
                         Vdp1Part(modules_, DrawType::polyline, current_table_address, cmdctrl, cmdlink, color_offset_.as_float));
                     break;
                 }
-                case CommandSelect::line_draw: {
+                case line_draw: {
                     vdp1_parts_.emplace_back(
                         Vdp1Part(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink, color_offset_.as_float));
                     break;
