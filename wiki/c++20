@@ -4,5 +4,5 @@ C++20 features that could be interesting to integrate to the project :
 - Range-based for statements with initializer https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0614r1.html
 - likely and unlikely attributes https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0479r5.html
 - coroutines ?
-- modules (headers + dlls replacement)
+- modules (headers + dlls replacement) -> not standard in VS for now
 
