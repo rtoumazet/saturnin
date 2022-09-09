@@ -46,34 +46,35 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
         } else {
             auto screen_mode = std::string{};
             switch (tv_screen_status_.screen_mode) {
-                case ScreenMode::normal_320_224:
-                case ScreenMode::normal_320_240:
-                case ScreenMode::normal_320_256:
-                case ScreenMode::normal_320_448:
-                case ScreenMode::normal_320_480:
-                case ScreenMode::normal_320_512: screen_mode = tr("Normal Graphic A"); break;
-                case ScreenMode::normal_352_224:
-                case ScreenMode::normal_352_240:
-                case ScreenMode::normal_352_256:
-                case ScreenMode::normal_352_448:
-                case ScreenMode::normal_352_480:
-                case ScreenMode::normal_352_512: screen_mode = tr("Normal Graphic B"); break;
-                case ScreenMode::hi_res_640_224:
-                case ScreenMode::hi_res_640_240:
-                case ScreenMode::hi_res_640_256:
-                case ScreenMode::hi_res_640_448:
-                case ScreenMode::hi_res_640_480:
-                case ScreenMode::hi_res_640_512: screen_mode = tr("Hi-Res Graphic A"); break;
-                case ScreenMode::hi_res_704_224:
-                case ScreenMode::hi_res_704_240:
-                case ScreenMode::hi_res_704_256:
-                case ScreenMode::hi_res_704_448:
-                case ScreenMode::hi_res_704_480:
-                case ScreenMode::hi_res_704_512: screen_mode = tr("Hi-Res Graphic B"); break;
-                case ScreenMode::exclusive_320_480: screen_mode = tr("Exclusive Normal Graphic A"); break;
-                case ScreenMode::exclusive_352_480: screen_mode = tr("Exclusive Normal Graphic B"); break;
-                case ScreenMode::exclusive_640_480: screen_mode = tr("Exclusive Hi-Res Graphic A"); break;
-                case ScreenMode::exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
+                using enum ScreenMode;
+                case normal_320_224:
+                case normal_320_240:
+                case normal_320_256:
+                case normal_320_448:
+                case normal_320_480:
+                case normal_320_512: screen_mode = tr("Normal Graphic A"); break;
+                case normal_352_224:
+                case normal_352_240:
+                case normal_352_256:
+                case normal_352_448:
+                case normal_352_480:
+                case normal_352_512: screen_mode = tr("Normal Graphic B"); break;
+                case hi_res_640_224:
+                case hi_res_640_240:
+                case hi_res_640_256:
+                case hi_res_640_448:
+                case hi_res_640_480:
+                case hi_res_640_512: screen_mode = tr("Hi-Res Graphic A"); break;
+                case hi_res_704_224:
+                case hi_res_704_240:
+                case hi_res_704_256:
+                case hi_res_704_448:
+                case hi_res_704_480:
+                case hi_res_704_512: screen_mode = tr("Hi-Res Graphic B"); break;
+                case exclusive_320_480: screen_mode = tr("Exclusive Normal Graphic A"); break;
+                case exclusive_352_480: screen_mode = tr("Exclusive Normal Graphic B"); break;
+                case exclusive_640_480: screen_mode = tr("Exclusive Hi-Res Graphic A"); break;
+                case exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
                 default: screen_mode = tr("Unknown");
             }
             values.emplace_back(tr("Resolution"),
@@ -87,9 +88,10 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
     { // Interlace mode
         auto mode = std::string{};
         switch (tv_screen_status_.interlace_mode) {
-            case InterlaceMode::non_interlace: mode = tr("Non interlace"); break;
-            case InterlaceMode::single_density: mode = tr("Single density"); break;
-            case InterlaceMode::double_density: mode = tr("Double density"); break;
+            using enum InterlaceMode;
+            case non_interlace: mode = tr("Non interlace"); break;
+            case single_density: mode = tr("Single density"); break;
+            case double_density: mode = tr("Double density"); break;
             default: mode = tr("Not allowed"); break;
         }
         values.emplace_back(tr("Interlace mode"), mode);
@@ -122,8 +124,9 @@ auto Vdp2::getDebugRamMainData() -> std::vector<LabelValue> {
 
     const auto getVramSize = [](const VramSize sz) {
         switch (sz) {
-            case VramSize::size_4_mbits: return tr("4 mbits");
-            case VramSize::size_8_mbits: return tr("8 mbits");
+            using enum VramSize;
+            case size_4_mbits: return tr("4 mbits");
+            case size_8_mbits: return tr("8 mbits");
             default: return tr("Not set");
         }
     };
@@ -131,8 +134,9 @@ auto Vdp2::getDebugRamMainData() -> std::vector<LabelValue> {
 
     const auto getVramMode = [](const VramMode mode) {
         switch (mode) {
-            case VramMode::no_partition: return tr("No partition");
-            case VramMode::partition_in_2_banks: return tr("Partition in 2 banks");
+            using enum VramMode;
+            case no_partition: return tr("No partition");
+            case partition_in_2_banks: return tr("Partition in 2 banks");
             default: return tr("Not set");
         }
     };
@@ -141,10 +145,11 @@ auto Vdp2::getDebugRamMainData() -> std::vector<LabelValue> {
 
     const auto getColorRamMode = [](const ColorRamMode mode) {
         switch (mode) {
-            case ColorRamMode::mode_0_rgb_5_bits_1024_colors: return tr("Mode 0 (RGB 5 bits, 1024 colors) ");
-            case ColorRamMode::mode_1_rgb_5_bits_2048_colors: return tr("Mode 1 (RGB 5 bits, 2048 colors) ");
-            case ColorRamMode::mode_2_rgb_8_bits_1024_colors: return tr("Mode 2 (RGB 8 bits, 1024 colors) ");
-            case ColorRamMode::setting_not_allowed: return tr("Setting not allowed");
+            using enum ColorRamMode;
+            case mode_0_rgb_5_bits_1024_colors: return tr("Mode 0 (RGB 5 bits, 1024 colors) ");
+            case mode_1_rgb_5_bits_2048_colors: return tr("Mode 1 (RGB 5 bits, 2048 colors) ");
+            case mode_2_rgb_8_bits_1024_colors: return tr("Mode 2 (RGB 8 bits, 1024 colors) ");
+            case setting_not_allowed: return tr("Setting not allowed");
             default: return tr("Not set");
         }
     };
@@ -152,8 +157,9 @@ auto Vdp2::getDebugRamMainData() -> std::vector<LabelValue> {
 
     const auto getCoefficientTable = [](const CoefficientTableStorage cts) {
         switch (cts) {
-            case CoefficientTableStorage::stored_in_color_ram: return tr("Stored in color RAM");
-            case CoefficientTableStorage::stored_in_vram: return tr("Stored in VRAM");
+            using enum CoefficientTableStorage;
+            case stored_in_color_ram: return tr("Stored in color RAM");
+            case stored_in_vram: return tr("Stored in VRAM");
             default: return tr("Not set");
         }
     };
@@ -161,11 +167,11 @@ auto Vdp2::getDebugRamMainData() -> std::vector<LabelValue> {
 
     const auto getRotationBankSelect = [](const RotationDataBankSelect rdbs) {
         switch (rdbs) {
-            case RotationDataBankSelect::not_used: return tr("Not used as RBG0 RAM");
-            case RotationDataBankSelect::used_as_rbg0_character_pattern_table:
-                return tr("Used for RBG0 Character Pattern table (or Bitmap Pattern)");
-            case RotationDataBankSelect::used_as_rbg0_coefficient_table: return tr("Used for RBG0 Coefficient table");
-            case RotationDataBankSelect::used_as_rbg0_pattern_name_table: return tr("Used for RBG0 Pattern Name table");
+            using enum RotationDataBankSelect;
+            case not_used: return tr("Not used as RBG0 RAM");
+            case used_as_rbg0_character_pattern_table: return tr("Used for RBG0 Character Pattern table (or Bitmap Pattern)");
+            case used_as_rbg0_coefficient_table: return tr("Used for RBG0 Coefficient table");
+            case used_as_rbg0_pattern_name_table: return tr("Used for RBG0 Pattern Name table");
             default: return tr("Not set");
         }
     };
@@ -308,13 +314,14 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
 
     const auto colorNumber = [](const ColorCount c) {
         switch (c) {
-            case ColorCount::cannot_display: return tr("Cannot display");
-            case ColorCount::not_allowed: return tr("Not allowed");
-            case ColorCount::palette_16: return tr("16 colors (palette)");
-            case ColorCount::palette_256: return tr("256 colors (palette)");
-            case ColorCount::palette_2048: return tr("2048 colors (palette)");
-            case ColorCount::rgb_32k: return tr("32K colors (RGB)");
-            case ColorCount::rgb_16m: return tr("16M colors (RGB)");
+            using enum ColorCount;
+            case cannot_display: return tr("Cannot display");
+            case not_allowed: return tr("Not allowed");
+            case palette_16: return tr("16 colors (palette)");
+            case palette_256: return tr("256 colors (palette)");
+            case palette_2048: return tr("2048 colors (palette)");
+            case rgb_32k: return tr("32K colors (RGB)");
+            case rgb_16m: return tr("16M colors (RGB)");
             default: return tr("Not set");
         }
     };
@@ -329,10 +336,11 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
         // Bitmap size
         const auto bitmapSize = [](const BitmapSize sz) {
             switch (sz) {
-                case BitmapSize::size_512_by_256: return tr("512 H x 256 V dots");
-                case BitmapSize::size_512_by_512: return tr("512 H x 512 V dots");
-                case BitmapSize::size_1024_by_256: return tr("1024 H x 256 V dots");
-                case BitmapSize::size_1024_by_512: return tr("1024 H x 512 V dots");
+                using enum BitmapSize;
+                case size_512_by_256: return tr("512 H x 256 V dots");
+                case size_512_by_512: return tr("512 H x 512 V dots");
+                case size_1024_by_256: return tr("1024 H x 256 V dots");
+                case size_1024_by_512: return tr("1024 H x 512 V dots");
                 default: return tr("Not set");
             }
         };
@@ -356,8 +364,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     // Map size
     const auto mapSize = [](const ScrollScreen s) {
         switch (s) {
-            case ScrollScreen::rbg0:
-            case ScrollScreen::rbg1: return tr("4x4 planes");
+            using enum ScrollScreen;
+            case rbg0:
+            case rbg1: return tr("4x4 planes");
             default: return tr("2x2 planes");
         }
     };
@@ -366,9 +375,10 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     // Plane size
     const auto planeSize = [](const ScrollScreenStatus s) {
         switch (s.plane_size) {
-            case PlaneSize::size_1_by_1: return tr("1x1 page");
-            case PlaneSize::size_2_by_1: return tr("2x1 pages");
-            case PlaneSize::size_2_by_2: return tr("2x2 pages");
+            using enum PlaneSize;
+            case size_1_by_1: return tr("1x1 page");
+            case size_2_by_1: return tr("2x1 pages");
+            case size_2_by_2: return tr("2x2 pages");
             default: return tr("Unknown");
         }
     };
@@ -431,8 +441,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
 
     // Scrolling
     switch (s) {
-        case ScrollScreen::nbg0:
-        case ScrollScreen::nbg1:
+        using enum ScrollScreen;
+        case nbg0:
+        case nbg1:
             values.emplace_back(tr("Screen scroll"),
                                 uti::format("x = {}.{}, y = {}.{}",
                                             screen.screen_scroll_horizontal_integer,
@@ -440,8 +451,8 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
                                             screen.screen_scroll_vertical_integer,
                                             screen.screen_scroll_vertical_fractional));
             break;
-        case ScrollScreen::nbg2:
-        case ScrollScreen::nbg3:
+        case nbg2:
+        case nbg3:
             values.emplace_back(
                 tr("Screen scroll"),
                 uti::format("x = {}, y = {}", screen.screen_scroll_horizontal_integer, screen.screen_scroll_vertical_integer));

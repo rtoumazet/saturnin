@@ -202,7 +202,11 @@ void Memory::loadBios(const HardwareMode mode) {
         const auto str = buffer.str();
 
         switch (mode) {
-            using enum HardwareMode case saturn : { std::move(str.begin(), str.end(), this->rom_.data()); break; }
+            using enum HardwareMode;
+            case saturn: {
+                std::move(str.begin(), str.end(), this->rom_.data());
+                break;
+            }
             case stv: {
                 // Needs byteswapping
                 for (size_t i = 0; i < str.size(); i += 4) {
