@@ -225,7 +225,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>__SCL_SECURE_NO_WARNINGS;IMGUI_USER_CONFIG="$(ProjectDir)src\video\imgui_wrapper.h";IMGUI_IMPL_OPENGL_LOADER_CUSTOM="$(ProjectDir)lib\imgui\imgui_loader.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -246,7 +245,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>__SCL_SECURE_NO_WARNINGS;IMGUI_USER_CONFIG="$(ProjectDir)src\video\imgui_wrapper.h";IMGUI_IMPL_OPENGL_LOADER_CUSTOM="$(ProjectDir)lib\imgui\imgui_loader.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -295,7 +293,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;IMGUI_USER_CONFIG="$(ProjectDir)src\video\imgui_wrapper.h";IMGUI_IMPL_OPENGL_LOADER_CUSTOM="$(ProjectDir)lib\imgui\imgui_loader.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
