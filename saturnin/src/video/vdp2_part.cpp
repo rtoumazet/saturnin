@@ -52,7 +52,7 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd,
         t_down = 1.0f - t_down;
         t_up   = 1.0f - t_up;
     }
-
+    vertexes_.reserve(4);
     vertexes_.emplace_back(pos_x, pos_y, s_left, t_down);             // lower left
     vertexes_.emplace_back(pos_x_width, pos_y, s_right, t_down);      // lower right
     vertexes_.emplace_back(pos_x_width, pos_y_height, s_right, t_up); // upper right
@@ -72,6 +72,7 @@ Vdp2Part::Vdp2Part(const size_t  texture_key,
     const auto pos_y        = static_cast<s16>(0);
     const auto pos_y_height = static_cast<s16>(texture_height);
 
+    vertexes_.reserve(4);
     vertexes_.emplace_back(pos_x, pos_y, 0.0f, 0.0f);              // lower left
     vertexes_.emplace_back(pos_x_width, pos_y, 1.0f, 0.0f);        // lower right
     vertexes_.emplace_back(pos_x_width, pos_y_height, 1.0f, 1.0f); // upper right

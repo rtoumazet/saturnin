@@ -89,6 +89,9 @@ void Opengl::initialize() {
 
     const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured};
     deleteShaders(shaders_to_delete);
+
+    auto max_layers = int{};
+    gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
 }
 
 void Opengl::shutdown() {
