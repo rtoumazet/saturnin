@@ -52,8 +52,10 @@ class BaseRenderingPart;
 using saturnin::core::Config;
 using utilities::toUnderlying;
 
-constexpr auto minimum_window_width  = u16{512};
-constexpr auto minimum_window_height = u16{512};
+constexpr auto minimum_window_width           = u16{512};
+constexpr auto minimum_window_height          = u16{512};
+constexpr auto texture_atlas_width_for_cells  = u16{256};
+constexpr auto texture_atlas_height_for_cells = u16{256};
 
 enum class FboType : u8 {
     front_buffer,
@@ -80,6 +82,16 @@ enum class GlslVersion { glsl_120, glsl_330 };
 
 using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
+
+struct OpenglTexture {
+    u32   opengl_id; ///< Identifier of the OpenGL texture.
+    u16   layer;     ///< The layer (or index) in the texture array.
+    u16   width;     ///< Texture width.
+    u16   height;    ///< Texture height.
+    Coord pos;       ///< Position of the texture in the texture atlas.
+};
+
+using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
 
 class Opengl {
   public:
@@ -414,19 +426,19 @@ class Opengl {
     void generateTextures();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getTextureId(const size_t key);
+    /// \fn	auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture>;
     ///
-    /// \brief  Gets texture identifier corresponding to the key.
+    /// \brief	Gets texture identifier corresponding to the key.
     ///
-    /// \author Runik
-    /// \date   05/11/2021
+    /// \author	Runik
+    /// \date	05/11/2021
     ///
-    /// \param  key The key.
+    /// \param 	key	The key.
     ///
-    /// \returns    The texture identifier.
+    /// \returns	The OpenglTexture if found.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getTextureId(const size_t key) -> std::optional<u32>;
+    auto getOpenglTexture(const size_t key) -> std::optional<OpenglTexture>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::isSaturnResolutionSet();
@@ -534,12 +546,12 @@ class Opengl {
     Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
 
     // std::vector<std::pair<size_t, u32>> texture_key_id_link_; ///< Link between the texture key and the opengl id.
-    std::unordered_map<size_t, u32> texture_key_id_link_; ///< Link between the texture key and the opengl id.
+    TexturesLink textures_link_; ///< Link between the Texture key and the OpenglTexture.
 
     std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
     std::mutex parts_list_mutex_;     ///< Mutex protecting parts_list_.
-    std::mutex texture_link_mutex_;   ///< Mutex protecting texture_key_id_link_.
+    std::mutex textures_link_mutex_;  ///< Mutex protecting textures_link_.
     std::mutex texture_delete_mutex_; ///< Mutex protecting textures_to_delete_.
 
     std::condition_variable data_condition_; ///< Condition variable to synchronize between emulation and UI thread.

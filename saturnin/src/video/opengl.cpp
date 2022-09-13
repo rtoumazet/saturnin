@@ -457,8 +457,8 @@ void Opengl::render() {
                     const auto is_texture_used = GLboolean(true);
                     glUniform1i(uni_use_texture, is_texture_used);
 
-                    const auto id = getTextureId(part->textureKey());
-                    if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
+                    const auto opengl_tex = getOpenglTexture(part->textureKey());
+                    if (opengl_tex.has_value()) { glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id); }
 
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
@@ -728,8 +728,8 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             glUniform1i(uni_use_texture, is_texture_used);
 
             // glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
-            const auto id = getTextureId(part->textureKey());
-            if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
+            const auto opengl_tex = getOpenglTexture(part->textureKey());
+            if (opengl_tex.has_value()) { glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id); }
 
             glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
         }
@@ -751,20 +751,31 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
 void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
-    const auto texture_id = getTextureId(key);
-    if (texture_id && (*texture_id > 0)) {
+    const auto opengl_tex = getOpenglTexture(key);
+    if (opengl_tex && ((*opengl_tex).opengl_id > 0)) {
         std::lock_guard lock(texture_delete_mutex_);
-        textures_to_delete_.push_back(*texture_id);
+        textures_to_delete_.push_back((*opengl_tex).opengl_id);
     }
 
-    std::lock_guard lock(texture_link_mutex_);
-    texture_key_id_link_[key] = 0;
+    std::lock_guard lock(textures_link_mutex_);
+    textures_link_[key].opengl_id = 0;
     // texture_key_id_link_.erase(key);
 }
 
-void Opengl::removeTextureLink(const size_t key) { texture_key_id_link_.erase(key); }
+void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
 
 void Opengl::generateTextures() {
+    //	In theory, the maximum number of different VDP2 cells that could be stored by the Saturn at a given time is 0x80000
+    //	(ie both RBG at maximum capacity).
+    //	Textures representing VDP2 cells are stored in a texture array of 256 layers maximum, each layer composed of a texture
+    //	atlas of 256*256 pixels, storing effectively 32*32 cells (ie 1024 or 0x400 cells). The total of storable cells in this
+    //	configuration is then 256 * 1024 = 0x40000.
+    //
+    //	VDP1 textures will use the same system, the difference being that the size of the texture atlas will be dynamically
+    //	adjusted to the bigger texture.
+    //
+    //
+
     auto local_textures_to_delete = std::vector<u32>();
     {
         // vector is swapped to a local copy to keep the data structure locked for the minimum possible time.
@@ -775,35 +786,35 @@ void Opengl::generateTextures() {
         deleteTexture(id);
     }
 
-    auto local_texture_key_id_link = std::unordered_map<size_t, u32>();
+    auto local_textures_link = TexturesLink();
     {
         // unordered_map is copied locally to keep the data structure locked for the minimum possible time.
         //        std::lock_guard tl_lock(texture_link_mutex_);
-        local_texture_key_id_link = texture_key_id_link_;
+        local_textures_link = textures_link_;
     }
-    for (auto& [key, id] : local_texture_key_id_link) {
-        if (id == 0) {
+    for (auto& [key, ogl_tex] : local_textures_link) {
+        if (ogl_tex.opengl_id == 0) {
             const auto& t = Texture::getTexture(key);
             if (t) {
                 const auto texture_id = generateTexture((*t)->width(), (*t)->height(), (*t)->rawData());
 
                 //                std::lock_guard tl_lock(texture_link_mutex_);
-                texture_key_id_link_[key] = texture_id;
+                textures_link_[key].opengl_id = texture_id;
             }
         }
     }
 }
 
-auto Opengl::getTextureId(const size_t key) -> std::optional<u32> {
+auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
     // std::lock_guard lock(texture_link_mutex_);
     // auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
     //     return v.first == key;
     // });
     // return (it != texture_key_id_link_.end()) ? std::optional<u32>(it->second) : std::nullopt;
 
-    std::lock_guard lock(texture_link_mutex_);
-    const auto      it = texture_key_id_link_.find(key);
-    return (it == texture_key_id_link_.end()) ? std::nullopt : std::optional<u32>(it->second);
+    std::lock_guard lock(textures_link_mutex_);
+    const auto      it = textures_link_.find(key);
+    return (it == textures_link_.end()) ? std::nullopt : std::optional<OpenglTexture>(it->second);
 }
 
 auto Opengl::isSaturnResolutionSet() -> bool {
