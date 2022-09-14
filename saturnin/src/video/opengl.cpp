@@ -766,10 +766,10 @@ void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
 
 void Opengl::generateTextures() {
     //	In theory, the maximum number of different VDP2 cells that could be stored by the Saturn at a given time is 0x80000
-    //	(ie both RBG at maximum capacity).
+    //	(ie both RBG at maximum size, with every cell different).
     //	Textures representing VDP2 cells are stored in a texture array of 256 layers maximum, each layer composed of a texture
     //	atlas of 256*256 pixels, storing effectively 32*32 cells (ie 1024 or 0x400 cells). The total of storable cells in this
-    //	configuration is then 256 * 1024 = 0x40000.
+    //	configuration is then 256 * 1024 = 0x40000, which should be enough (until proven otherwise).
     //
     //	VDP1 textures will use the same system, the difference being that the size of the texture atlas will be dynamically
     //	adjusted to the bigger texture.
