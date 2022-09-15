@@ -90,8 +90,9 @@ void Opengl::initialize() {
     const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured};
     deleteShaders(shaders_to_delete);
 
-    auto max_layers = int{};
-    gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
+    initializeTextureArray();
+    //  auto max_layers = int{};
+    //  gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
 }
 
 void Opengl::shutdown() {
@@ -765,16 +766,11 @@ void Opengl::addOrUpdateTexture(const size_t key) {
 void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
 
 void Opengl::generateTextures() {
-    //	In theory, the maximum number of different VDP2 cells that could be stored by the Saturn at a given time is 0x80000
-    //	(ie both RBG at maximum size, with every cell different).
-    //	Textures representing VDP2 cells are stored in a texture array of 256 layers maximum, each layer composed of a texture
-    //	atlas of 256*256 pixels, storing effectively 32*32 cells (ie 1024 or 0x400 cells). The total of storable cells in this
-    //	configuration is then 256 * 1024 = 0x40000, which should be enough (until proven otherwise).
-    //
-    //	VDP1 textures will use the same system, the difference being that the size of the texture atlas will be dynamically
-    //	adjusted to the bigger texture.
-    //
-    //
+    // Textures are generated in a 256 layers texture array (minimum for OpenGL 3.3), each layer being a texture atlas of
+    // 512*256 pixels.
+    // In theory, the maximum number of different VDP2 cells that could be stored by the Saturn at a given time is 0x80000
+    // (ie both RBG at maximum size, with every cell different).
+    // Maximum VDP1 texture size is 504*255.
 
     auto local_textures_to_delete = std::vector<u32>();
     {
@@ -1065,6 +1061,34 @@ void Opengl::initializeFbo(const FboType type) {
 
     currentRenderedBuffer(FboType::front_buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
+}
+
+void Opengl::initializeTextureArray() {
+    auto texture = u32{};
+    glGenTextures(1, &texture);
+    glActiveTexture(GLenum::GL_TEXTURE0);
+    glBindTexture(GLenum::GL_TEXTURE_2D_ARRAY, texture);
+    // The `my_gl_format` represents your cpu-side channel layout.
+    // Both GL_RGBA and GL_BGRA are common. See the "format" section
+    // of this page: https://www.opengl.org/wiki/GLAPI/glTexImage3D
+    glTexImage3D(GL_TEXTURE_2D_ARRAY,
+                 0,                        // mipmap level
+                 GL_RGBA,                  // gpu texel format
+                 texture_array_width,      // width
+                 texture_array_height,     // height
+                 texture_array_depth,      // depth
+                 0,                        // border
+                 GLenum::GL_RGBA,          // cpu pixel format
+                 GLenum::GL_UNSIGNED_BYTE, // cpu pixel coord type
+                 nullptr);                 // no data for now
+
+    // set the texture wrapping parameters
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+
+    // set texture filtering parameters
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
+    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
 }
 
 void Opengl::calculateFps() {

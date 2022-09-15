@@ -52,10 +52,11 @@ class BaseRenderingPart;
 using saturnin::core::Config;
 using utilities::toUnderlying;
 
-constexpr auto minimum_window_width           = u16{512};
-constexpr auto minimum_window_height          = u16{512};
-constexpr auto texture_atlas_width_for_cells  = u16{256};
-constexpr auto texture_atlas_height_for_cells = u16{256};
+constexpr auto minimum_window_width  = u16{512};
+constexpr auto minimum_window_height = u16{512};
+constexpr auto texture_array_width   = u16{512};
+constexpr auto texture_array_height  = u16{256};
+constexpr auto texture_array_depth   = u16{256};
 
 enum class FboType : u8 {
     front_buffer,
@@ -509,7 +510,30 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void initializeFbos();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::initializeFbo(const FboType type);
+    ///
+    /// \brief	Initializes the framebuffer object.
+    ///
+    /// \author	Runik
+    /// \date	15/09/2022
+    ///
+    /// \param 	type	The framebuffer object type.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void initializeFbo(const FboType type);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::initializeTextureArray();
+    ///
+    /// \brief	Initializes the texture array.
+    ///
+    /// \author	Runik
+    /// \date	15/09/2022
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initializeTextureArray();
 
     void calculateFps();
 
