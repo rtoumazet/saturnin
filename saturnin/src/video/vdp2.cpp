@@ -3414,13 +3414,7 @@ void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus              screen,
                     }
                 }
             }
-            // Texture::storeTexture(Texture(VdpType::vdp2,
-            //                               it->cell_address,
-            //                               toUnderlying(screen.character_color_number),
-            //                               it->pnd.palette_number,
-            //                               texture_data,
-            //                               texture_width,
-            //                               texture_height));
+
             modules_.opengl()->addOrUpdateTexture(it->key);
 
             textures.emplace_back(Texture(VdpType::vdp2,

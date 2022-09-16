@@ -85,11 +85,7 @@ auto Texture::getTexture(const size_t key) -> std::optional<Texture*> {
             Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ({})"), key, oor.what());
             return std::nullopt;
         }
-        // const auto   it = texture_storage_.find(key);
-        // if (it != texture_storage_.end()) { return it->second; }
     }
-    // Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ..."), key);
-    // return std::nullopt;
 }
 
 // static //
@@ -113,17 +109,6 @@ auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
         (*t)->isRecentlyUsed(true);
         return false;
     }
-
-    // if (t) {
-    //     if ((*t).isDiscarded()) {
-    //         (*t).isDiscarded(false);
-    //         storeTexture(*t);
-    //         return true;
-    //     }
-    //     (*t).isRecentlyUsed(true);
-    //     storeTexture(*t);
-    //     return false;
-    // }
 
     return true;
 }

@@ -772,33 +772,41 @@ void Opengl::generateTextures() {
     // (ie both RBG at maximum size, with every cell different).
     // Maximum VDP1 texture size is 504*255.
 
-    auto local_textures_to_delete = std::vector<u32>();
-    {
-        // vector is swapped to a local copy to keep the data structure locked for the minimum possible time.
-        //        std::lock_guard lock(texture_delete_mutex_);
-        local_textures_to_delete.swap(textures_to_delete_);
-    }
-    for (const auto id : local_textures_to_delete) {
-        deleteTexture(id);
-    }
+    // auto local_textures_to_delete = std::vector<u32>();
+    //{
+    //     // vector is swapped to a local copy to keep the data structure locked for the minimum possible time.
+    //     //        std::lock_guard lock(texture_delete_mutex_);
+    //     local_textures_to_delete.swap(textures_to_delete_);
+    // }
+    // for (const auto id : local_textures_to_delete) {
+    //     deleteTexture(id);
+    // }
 
-    auto local_textures_link = TexturesLink();
-    {
-        // unordered_map is copied locally to keep the data structure locked for the minimum possible time.
-        //        std::lock_guard tl_lock(texture_link_mutex_);
-        local_textures_link = textures_link_;
-    }
-    for (auto& [key, ogl_tex] : local_textures_link) {
-        if (ogl_tex.opengl_id == 0) {
-            const auto& t = Texture::getTexture(key);
-            if (t) {
-                const auto texture_id = generateTexture((*t)->width(), (*t)->height(), (*t)->rawData());
+    // auto local_textures_link = TexturesLink();
+    //{
+    //     // unordered_map is copied locally to keep the data structure locked for the minimum possible time.
+    //     //        std::lock_guard tl_lock(texture_link_mutex_);
+    //     local_textures_link = textures_link_;
+    // }
+    // for (auto& [key, ogl_tex] : local_textures_link) {
+    //     if (ogl_tex.opengl_id == 0) {
+    //         const auto& t = Texture::getTexture(key);
+    //         if (t) {
+    //             const auto texture_id = generateTexture((*t)->width(), (*t)->height(), (*t)->rawData());
 
-                //                std::lock_guard tl_lock(texture_link_mutex_);
-                textures_link_[key].opengl_id = texture_id;
-            }
-        }
-    }
+    //            //                std::lock_guard tl_lock(texture_link_mutex_);
+    //            textures_link_[key].opengl_id = texture_id;
+    //        }
+    //    }
+    //}
+
+    // OpenglTextures don't have to be deleted, as they are part of a bigger one
+    //
+    // First implementation :
+    // - Clear used texture atlas
+    // - Generate as many texture atlas as needed using
+    // 1. Loop on the Textures
+    // 2. For each Texture
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
