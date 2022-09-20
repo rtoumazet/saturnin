@@ -27,7 +27,7 @@
 #include <lodepng.h>
 #include <sstream> // stringstream
 #include <glbinding/glbinding.h>
-//#include <glbinding/gl/gl.h>
+// #include <glbinding/gl/gl.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>
 #include <glbinding/gl21/gl.h>
@@ -90,7 +90,7 @@ void Opengl::initialize() {
     const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured};
     deleteShaders(shaders_to_delete);
 
-    initializeTextureArray();
+    texture_array_id_ = initializeTextureArray();
     //  auto max_layers = int{};
     //  gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
 }
@@ -752,22 +752,24 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
 void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
-    const auto opengl_tex = getOpenglTexture(key);
-    if (opengl_tex && ((*opengl_tex).opengl_id > 0)) {
-        std::lock_guard lock(texture_delete_mutex_);
-        textures_to_delete_.push_back((*opengl_tex).opengl_id);
-    }
+    // const auto opengl_tex = getOpenglTexture(key);
 
+    // if (opengl_tex) {
     std::lock_guard lock(textures_link_mutex_);
+    textures_link_[key].key       = key;
     textures_link_[key].opengl_id = 0;
-    // texture_key_id_link_.erase(key);
+    textures_link_[key].layer     = 0;
+    // textures_link_[key].width     = (*opengl_tex).width;
+    // textures_link_[key].height    = (*opengl_tex).height;
+    // textures_link_[key].size      = (*opengl_tex).size;
+    //}
 }
 
 void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
 
 void Opengl::generateTextures() {
-    // Textures are generated in a 256 layers texture array (minimum for OpenGL 3.3), each layer being a texture atlas of
-    // 512*256 pixels.
+    // Textures are generated in a 128 layers texture array, each layer being a texture atlas of
+    // 512*512 pixels.
     // In theory, the maximum number of different VDP2 cells that could be stored by the Saturn at a given time is 0x80000
     // (ie both RBG at maximum size, with every cell different).
     // Maximum VDP1 texture size is 504*255.
@@ -800,13 +802,29 @@ void Opengl::generateTextures() {
     //    }
     //}
 
-    // OpenglTextures don't have to be deleted, as they are part of a bigger one
+    // OpenglTextures don't have to be deleted, as they are part of a texture atlas now
     //
     // First implementation :
     // - Clear used texture atlas
     // - Generate as many texture atlas as needed using
     // 1. Loop on the Textures
     // 2. For each Texture
+
+    auto local_textures_link = TexturesLink();
+    {
+        // unordered_map is copied locally to keep the data structure locked for the minimum possible time.
+        //        std::lock_guard tl_lock(texture_link_mutex_);
+        local_textures_link = textures_link_;
+    }
+
+    auto textures = std::vector<OpenglTexture>();
+    textures.reserve(local_textures_link.size());
+    for (auto& [key, ogl_tex] : local_textures_link) {
+        const auto& t          = Texture::getTexture(key);
+        const auto  opengl_tex = getOpenglTexture(key);
+        textures.push_back(ogl_tex);
+    }
+    std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) { return a.size > b.size; });
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
@@ -1071,7 +1089,7 @@ void Opengl::initializeFbo(const FboType type) {
     glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
 }
 
-void Opengl::initializeTextureArray() {
+auto Opengl::initializeTextureArray() -> u32 {
     auto texture = u32{};
     glGenTextures(1, &texture);
     glActiveTexture(GLenum::GL_TEXTURE0);
@@ -1097,6 +1115,8 @@ void Opengl::initializeTextureArray() {
     // set texture filtering parameters
     glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
     glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
+
+    return texture;
 }
 
 void Opengl::calculateFps() {

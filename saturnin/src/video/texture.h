@@ -268,6 +268,7 @@ class Texture {
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
     u16     width_{};                    ///< The texture width.
     u16     height_{};                   ///< The texture height.
+    u32     size_{};                     ///< The texture size.
     bool    is_discarded_{false};        ///< True if the texture is discarded.
     bool    is_recently_used_{true};     ///< True if the texture was used during the current frame.
                                          //    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.

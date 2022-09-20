@@ -55,8 +55,8 @@ using utilities::toUnderlying;
 constexpr auto minimum_window_width  = u16{512};
 constexpr auto minimum_window_height = u16{512};
 constexpr auto texture_array_width   = u16{512};
-constexpr auto texture_array_height  = u16{256};
-constexpr auto texture_array_depth   = u16{256};
+constexpr auto texture_array_height  = u16{512};
+constexpr auto texture_array_depth   = u16{128};
 
 enum class FboType : u8 {
     front_buffer,
@@ -85,11 +85,13 @@ using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
 
 struct OpenglTexture {
-    u32   opengl_id; ///< Identifier of the OpenGL texture.
-    u16   layer;     ///< The layer (or index) in the texture array.
-    u16   width;     ///< Texture width.
-    u16   height;    ///< Texture height.
-    Coord pos;       ///< Position of the texture in the texture atlas.
+    size_t key;       ///< The Saturn texture key.
+    u32    opengl_id; ///< Identifier of the OpenGL texture.
+    u16    layer;     ///< The layer (or index) in the texture array.
+    u16    width;     ///< Texture width.
+    u16    height;    ///< Texture height.
+    u32    size;      ///< Texture size.
+    Coord  pos;       ///< Position of the texture in the texture atlas.
 };
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
@@ -525,15 +527,17 @@ class Opengl {
     void initializeFbo(const FboType type);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::initializeTextureArray();
+    /// \fn	auto Opengl::initializeTextureArray() -> u32;
     ///
     /// \brief	Initializes the texture array.
     ///
     /// \author	Runik
     /// \date	15/09/2022
+    ///
+    /// \returns	The generated texture array id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeTextureArray();
+    auto initializeTextureArray() -> u32;
 
     void calculateFps();
 
@@ -569,10 +573,10 @@ class Opengl {
     PartsList parts_list_;        // Will have to be moved to the platform agnostic renderer.
     Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
 
-    // std::vector<std::pair<size_t, u32>> texture_key_id_link_; ///< Link between the texture key and the opengl id.
-    TexturesLink textures_link_; ///< Link between the Texture key and the OpenglTexture.
+    u32          texture_array_id_; ///< Identifier for the texture array.
+    TexturesLink textures_link_;    ///< Link between the Texture key and the OpenglTexture.
 
-    std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
+    // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
     std::mutex parts_list_mutex_;     ///< Mutex protecting parts_list_.
     std::mutex textures_link_mutex_;  ///< Mutex protecting textures_link_.
