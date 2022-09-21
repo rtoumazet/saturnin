@@ -752,17 +752,19 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
 void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
+    // If it does, opengl link will be reset in order to regenerate the texture.
     // const auto opengl_tex = getOpenglTexture(key);
+    // const auto& texture = Texture::getTexture(key);
 
-    // if (opengl_tex) {
+    // if (texture) {
     std::lock_guard lock(textures_link_mutex_);
     textures_link_[key].key       = key;
     textures_link_[key].opengl_id = 0;
     textures_link_[key].layer     = 0;
-    // textures_link_[key].width     = (*opengl_tex).width;
-    // textures_link_[key].height    = (*opengl_tex).height;
-    // textures_link_[key].size      = (*opengl_tex).size;
-    //}
+    // textures_link_[key].width     = (*texture)->width();
+    // textures_link_[key].height    = (*texture)->height();
+    // textures_link_[key].size      = (*texture)->size();
+    // }
 }
 
 void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
@@ -820,9 +822,15 @@ void Opengl::generateTextures() {
     auto textures = std::vector<OpenglTexture>();
     textures.reserve(local_textures_link.size());
     for (auto& [key, ogl_tex] : local_textures_link) {
-        const auto& t          = Texture::getTexture(key);
-        const auto  opengl_tex = getOpenglTexture(key);
-        textures.push_back(ogl_tex);
+        const auto t = Texture::getTexture(key);
+
+        auto opengl_tex = getOpenglTexture(key);
+        if (opengl_tex) {
+            (*opengl_tex).height = (**t).height();
+            (*opengl_tex).width  = (**t).width();
+            (*opengl_tex).size   = (**t).size();
+        }
+        textures.push_back(*opengl_tex);
     }
     std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) { return a.size > b.size; });
 }

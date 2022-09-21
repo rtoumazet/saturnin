@@ -62,6 +62,7 @@ class Texture {
     auto key() const { return key_; }
     auto width() const { return width_; }
     auto height() const { return height_; }
+    auto size() const { return size_; }
     auto rawData() const -> const std::vector<u8>& { return raw_data_; }
     auto isDiscarded() const { return is_discarded_; }
     void isDiscarded(const bool discarded) { is_discarded_ = discarded; }
