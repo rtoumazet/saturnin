@@ -62,7 +62,6 @@ class Texture {
     auto key() const { return key_; }
     auto width() const { return width_; }
     auto height() const { return height_; }
-    auto size() const { return size_; }
     auto rawData() const -> const std::vector<u8>& { return raw_data_; }
     auto isDiscarded() const { return is_discarded_; }
     void isDiscarded(const bool discarded) { is_discarded_ = discarded; }
@@ -260,7 +259,7 @@ class Texture {
     /// \date   29/04/2022
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateTextureSize(const ImageSize& max_size, const size_t texture_key) -> ImageSize;
+    static auto calculateTextureSize(const Size& max_size, const size_t texture_key) -> Size;
 
   private:
     static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.
@@ -269,7 +268,6 @@ class Texture {
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
     u16     width_{};                    ///< The texture width.
     u16     height_{};                   ///< The texture height.
-    u32     size_{};                     ///< The texture size.
     bool    is_discarded_{false};        ///< True if the texture is discarded.
     bool    is_recently_used_{true};     ///< True if the texture was used during the current frame.
                                          //    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.

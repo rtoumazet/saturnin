@@ -825,14 +825,17 @@ void Opengl::generateTextures() {
         const auto t = Texture::getTexture(key);
 
         auto opengl_tex = getOpenglTexture(key);
-        if (opengl_tex) {
-            (*opengl_tex).height = (**t).height();
-            (*opengl_tex).width  = (**t).width();
-            (*opengl_tex).size   = (**t).size();
-        }
+        if (opengl_tex) { (*opengl_tex).size = {(**t).width(), (**t).height()}; }
         textures.push_back(*opengl_tex);
     }
-    std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) { return a.size > b.size; });
+
+    packTextures(textures);
+}
+
+void Opengl::packTextures(const std::vector<OpenglTexture>& textures) {
+    std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) {
+        return a.size.w > b.size.w;
+    });
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {

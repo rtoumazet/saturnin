@@ -88,9 +88,7 @@ struct OpenglTexture {
     size_t key;       ///< The Saturn texture key.
     u32    opengl_id; ///< Identifier of the OpenGL texture.
     u16    layer;     ///< The layer (or index) in the texture array.
-    u16    width;     ///< Texture width.
-    u16    height;    ///< Texture height.
-    u32    size;      ///< Texture size.
+    Size   size;      ///< Texture size
     Coord  pos;       ///< Position of the texture in the texture atlas.
 };
 
@@ -559,6 +557,19 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::packTextures(const std::vector<OpenglTexture>& textures);
+    ///
+    /// \brief	Pack textures in a textuer array of texture atlases.
+    ///
+    /// \author	Runik
+    /// \date	22/09/2022
+    ///
+    /// \param 	textures	The textures to pack.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void packTextures(const std::vector<OpenglTexture>& textures);
 
     core::Config* config_; ///< Configuration object.
 

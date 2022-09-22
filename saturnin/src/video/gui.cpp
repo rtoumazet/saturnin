@@ -19,7 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/gui.h>
-//#include <imgui.h>
+// #include <imgui.h>
 #include <istream>
 #include <filesystem>       // path
 #include <imgui_internal.h> // ImGuiSelectableFlags_SelectOnNav
@@ -182,12 +182,12 @@ void showMainMenu(core::EmulatorContext& state) {
             };
             using HeaderMap                = std::map<const Header, const std::string>;
             const auto  headers            = HeaderMap{{Header::general, tr("General")},
-                                           {Header::rendering, tr("Rendering")},
-                                           {Header::path, tr("Paths")},
-                                           {Header::cd_rom, tr("CD-Rom")},
-                                           {Header::sound, ("Sound")},
-                                           {Header::peripherals, tr("Peripherals")},
-                                           {Header::logs, tr("Logs")}};
+                                                       {Header::rendering, tr("Rendering")},
+                                                       {Header::path, tr("Paths")},
+                                                       {Header::cd_rom, tr("CD-Rom")},
+                                                       {Header::sound, ("Sound")},
+                                                       {Header::peripherals, tr("Peripherals")},
+                                                       {Header::logs, tr("Logs")}};
             static auto last_opened_header = Header::none;
             if (last_opened_header == Header::none) { last_opened_header = Header::general; }
             auto setHeaderState = [](const Header header) {
@@ -1400,9 +1400,9 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
 
                         // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the image
                         // ratio.
-                        const auto max_size     = ImageSize{260, 260};
+                        const auto max_size     = Size{260, 260};
                         auto       tex_size     = video::Texture::calculateTextureSize(max_size, (*tex)->key());
-                        const auto preview_size = ImVec2(tex_size.width, tex_size.height);
+                        const auto preview_size = ImVec2(tex_size.w, tex_size.h);
 
                         // ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
                         if (opengl_tex.has_value()) {
@@ -1770,9 +1770,9 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
 
                             // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the
                             // image ratio.
-                            const auto max_size     = ImageSize{260, 260};
+                            const auto max_size     = Size{260, 260};
                             auto       tex_size     = video::Texture::calculateTextureSize(max_size, texture_key);
-                            const auto preview_size = ImVec2(tex_size.width, tex_size.height);
+                            const auto preview_size = ImVec2(tex_size.w, tex_size.h);
                             if (opengl_tex.has_value()) {
                                 ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>((*opengl_tex).opengl_id)),
                                              preview_size);
