@@ -832,10 +832,47 @@ void Opengl::generateTextures() {
     packTextures(textures);
 }
 
+// Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
+// improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
+// So for now, keeping things simple.
 void Opengl::packTextures(const std::vector<OpenglTexture>& textures) {
     std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) {
-        return a.size.w > b.size.w;
+        return a.size.h > b.size.h;
     });
+
+    auto current_layer          = u16{};
+    auto x_pos                  = u16{};
+    auto y_pos                  = u16{};
+    auto current_row_max_height = u16{};
+
+    for (auto& texture : textures) {
+        if ((x_pos + texture.size.w) > texture_array_width) {
+            // Texture doesn't fit in the remaining space of the row ... looping around to next row using
+            // the maximum height from the previous row.
+            y_pos += current_row_max_height;
+            x_pos                  = 0;
+            current_row_max_height = 0;
+        }
+
+        if ((y_pos + texture.size.h) > current_row_max_height) {
+            // Texture doesn't fit in the remaining space of the last row ... moving one layer forward.
+            ++current_layer;
+            x_pos                  = 0;
+            y_pos                  = 0;
+            current_row_max_height = 0;
+        }
+        // This is the position of the rectangle
+        texture.pos.x = x_pos;
+        texture.pos.y = y_pos;
+
+        x_pos += texture.size.w; // Move along to the next spot in the row
+
+        // Just saving the largest height in the new row
+        if (texture.size.h > current_row_max_height) { current_row_max_height = texture.size.h; }
+
+        // Success!
+        // rect.wasPacked = true;
+    }
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {

@@ -273,7 +273,7 @@ const auto bits_0_31  = BitRange<u32>{0, 31};  ///< Defines the 32 bits range of
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct Coord
 ///
-/// \brief  A coordinate in space.
+/// \brief  A coordinate in 2D space.
 ///
 /// \author Runik
 /// \date   21/01/2021

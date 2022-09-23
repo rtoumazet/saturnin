@@ -561,7 +561,7 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::packTextures(const std::vector<OpenglTexture>& textures);
     ///
-    /// \brief	Pack textures in a textuer array of texture atlases.
+    /// \brief	Pack textures in a texture array of texture atlases.
     ///
     /// \author	Runik
     /// \date	22/09/2022
