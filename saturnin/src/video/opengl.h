@@ -85,11 +85,11 @@ using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
 
 struct OpenglTexture {
-    size_t key;       ///< The Saturn texture key.
-    u32    opengl_id; ///< Identifier of the OpenGL texture.
-    u16    layer;     ///< The layer (or index) in the texture array.
-    Size   size;      ///< Texture size
-    Coord  pos;       ///< Position of the texture in the texture atlas.
+    size_t    key;       ///< The Saturn texture key.
+    u32       opengl_id; ///< Identifier of the OpenGL texture.
+    u16       layer;     ///< The layer (or index) in the texture array.
+    Size      size;      ///< Texture size
+    ScreenPos pos;       ///< Position of the texture in the texture atlas.
 };
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
@@ -559,17 +559,30 @@ class Opengl {
     auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::packTextures(const std::vector<OpenglTexture>& textures);
+    /// \fn	void Opengl::packTextures(std::vector<OpenglTexture>& textures);
     ///
     /// \brief	Pack textures in a texture array of texture atlases.
     ///
     /// \author	Runik
     /// \date	22/09/2022
     ///
-    /// \param 	textures	The textures to pack.
+    /// \param [in,out]	textures	The textures to pack.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void packTextures(const std::vector<OpenglTexture>& textures);
+    void packTextures(std::vector<OpenglTexture>& textures);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::generateSubTexture(const size_t key);
+    ///
+    /// \brief	Generates a subtexture in the texture array of texture atlas.
+    ///
+    /// \author	Runik
+    /// \date	24/09/2022
+    ///
+    /// \param 	key	Key to the texture details.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void generateSubTexture(const size_t key);
 
     core::Config* config_; ///< Configuration object.
 

@@ -835,7 +835,7 @@ void Opengl::generateTextures() {
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
 // improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
 // So for now, keeping things simple.
-void Opengl::packTextures(const std::vector<OpenglTexture>& textures) {
+void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
     std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) {
         return a.size.h > b.size.h;
     });
@@ -854,7 +854,7 @@ void Opengl::packTextures(const std::vector<OpenglTexture>& textures) {
             current_row_max_height = 0;
         }
 
-        if ((y_pos + texture.size.h) > current_row_max_height) {
+        if ((y_pos + texture.size.h) > texture_array_width) {
             // Texture doesn't fit in the remaining space of the last row ... moving one layer forward.
             ++current_layer;
             x_pos                  = 0;
@@ -862,10 +862,13 @@ void Opengl::packTextures(const std::vector<OpenglTexture>& textures) {
             current_row_max_height = 0;
         }
         // This is the position of the rectangle
-        texture.pos.x = x_pos;
-        texture.pos.y = y_pos;
+        textures_link_[texture.key].layer = current_layer;
+        textures_link_[texture.key].size  = texture.size;
+        textures_link_[texture.key].pos   = {x_pos, y_pos};
 
-        x_pos += texture.size.w; // Move along to the next spot in the row
+        generateSubTexture(texture.key);
+
+        x_pos += texture.size.w; // Move along to the next spot in the row.
 
         // Just saving the largest height in the new row
         if (texture.size.h > current_row_max_height) { current_row_max_height = texture.size.h; }
@@ -885,6 +888,27 @@ auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> 
     std::lock_guard lock(textures_link_mutex_);
     const auto      it = textures_link_.find(key);
     return (it == textures_link_.end()) ? std::nullopt : std::optional<OpenglTexture>(it->second);
+}
+
+void Opengl::generateSubTexture(const size_t key) {
+    const auto ogl_tex = getOpenglTexture(key);
+
+    if (ogl_tex) {
+        const auto tex = Texture::getTexture(key);
+        if (tex) {
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                            ogl_tex->layer,
+                            ogl_tex->pos.x,
+                            ogl_tex->pos.y,
+                            0,
+                            ogl_tex->size.w,
+                            ogl_tex->size.h,
+                            1,
+                            GLenum::GL_RGBA,
+                            GLenum::GL_UNSIGNED_BYTE,
+                            (*tex)->rawData().data());
+        }
+    }
 }
 
 auto Opengl::isSaturnResolutionSet() -> bool {
