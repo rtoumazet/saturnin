@@ -710,10 +710,10 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     // color.a, gouraud_values[1])); part.vertexes_.push_back(Vertex(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g,
     // color.b, color.a, gouraud_values[2])); part.vertexes_.push_back(Vertex(d.x, d.y, coords[3].s, coords[3].t, color.r,
     // color.g, color.b, color.a, gouraud_values[3]));
-    part.vertexes_.emplace_back(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a, gouraud_values[0]);
-    part.vertexes_.emplace_back(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b, color.a, gouraud_values[1]);
-    part.vertexes_.emplace_back(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g, color.b, color.a, gouraud_values[2]);
-    part.vertexes_.emplace_back(d.x, d.y, coords[3].s, coords[3].t, color.r, color.g, color.b, color.a, gouraud_values[3]);
+    part.vertexes_.emplace_back(a.x, a.y, coords[0].s, coords[0].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[0]);
+    part.vertexes_.emplace_back(b.x, b.y, coords[1].s, coords[1].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[1]);
+    part.vertexes_.emplace_back(c.x, c.y, coords[2].s, coords[2].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[2]);
+    part.vertexes_.emplace_back(d.x, d.y, coords[3].s, coords[3].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[3]);
 }
 
 void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
@@ -824,6 +824,7 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 vertexes_pos[0].y,
                                 coords[0].s,
                                 coords[0].t,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -833,6 +834,7 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 vertexes_pos[1].y,
                                 coords[1].s,
                                 coords[1].t,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -842,6 +844,7 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 vertexes_pos[2].y,
                                 coords[2].s,
                                 coords[2].t,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -851,6 +854,7 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 vertexes_pos[3].y,
                                 coords[3].s,
                                 coords[3].t,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -888,6 +892,7 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYA(),
                                 0.0f,
                                 0.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -896,6 +901,7 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     part.vertexes_.emplace_back(part.calculatedXB(),
                                 part.calculatedYB(),
                                 1.0f,
+                                0.0f,
                                 0.0f,
                                 color.r,
                                 color.g,
@@ -906,6 +912,7 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYC(),
                                 1.0f,
                                 1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -915,6 +922,7 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYD(),
                                 0.0f,
                                 1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -950,6 +958,7 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYA(),
                                 0.0f,
                                 0.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -958,6 +967,7 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     part.vertexes_.emplace_back(part.calculatedXB(),
                                 part.calculatedYB(),
                                 1.0f,
+                                0.0f,
                                 0.0f,
                                 color.r,
                                 color.g,
@@ -968,6 +978,7 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYC(),
                                 1.0f,
                                 1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -977,6 +988,7 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYD(),
                                 0.0f,
                                 1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -1013,6 +1025,7 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYA(),
                                 0.0f,
                                 0.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -1021,6 +1034,7 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     part.vertexes_.emplace_back(part.calculatedXB(),
                                 part.calculatedYB(),
                                 1.0f,
+                                0.0f,
                                 0.0f,
                                 color.r,
                                 color.g,
@@ -1031,6 +1045,7 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYC(),
                                 1.0f,
                                 1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -1040,6 +1055,7 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYD(),
                                 0.0f,
                                 1.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -1068,6 +1084,7 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                 part.calculatedYA(),
                                 0.0f,
                                 0.0f,
+                                0.0f,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -1076,6 +1093,7 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     part.vertexes_.emplace_back(part.calculatedXB(),
                                 part.calculatedYB(),
                                 1.0f,
+                                0.0f,
                                 0.0f,
                                 color.r,
                                 color.g,

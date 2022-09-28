@@ -159,7 +159,7 @@ void Opengl::initializeShaders() {
         attribute vec4 vtx_color;
         attribute vec4 vtx_grd_color;
         
-        varying vec2   frg_tex_coord;
+        varying vec3   frg_tex_coord;
         varying vec4   frg_color; 
         varying vec4   frg_grd_color; 
         
@@ -167,7 +167,7 @@ void Opengl::initializeShaders() {
 
         void main() {
             gl_Position     = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-            frg_tex_coord   = vec2(vtx_tex_coord);
+            frg_tex_coord   = vec3(vtx_tex_coord);
             frg_color       = vtx_color;
             frg_grd_color   = vtx_grd_color;
             //frg_color_offset= vtx_color_offset;
@@ -178,7 +178,7 @@ void Opengl::initializeShaders() {
         #version 330 core
 
         layout (location = 0) in vec2 vtx_position;
-        layout (location = 1) in vec2 vtx_tex_coord;
+        layout (location = 1) in vec3 vtx_tex_coord;
         layout (location = 2) in vec4 vtx_color;
         layout (location = 3) in vec4 vtx_grd_color;
 
@@ -190,7 +190,7 @@ void Opengl::initializeShaders() {
 
         void main() {
             gl_Position     = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-            frg_tex_coord   = vec2(vtx_tex_coord);
+            frg_tex_coord   = vec3(vtx_tex_coord);
             frg_color       = vtx_color;
             frg_grd_color   = vtx_grd_color;
         }
@@ -203,7 +203,7 @@ void Opengl::initializeShaders() {
     shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::textured}, R"(
         #version 120
         
-        varying vec2 frg_tex_coord;
+        varying vec3 frg_tex_coord;
         varying vec4 frg_color;
         varying vec4 frg_grd_color;
 
@@ -235,7 +235,7 @@ void Opengl::initializeShaders() {
     shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::fragment, ShaderName::textured}, R"(
         #version 330 core
         
-        in vec2 frg_tex_coord;
+        in vec3 frg_tex_coord;
         in vec4 frg_color;
         in vec4 frg_grd_color;
 

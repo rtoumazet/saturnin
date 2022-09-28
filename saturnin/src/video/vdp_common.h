@@ -30,8 +30,8 @@
 
 namespace saturnin::video {
 
-constexpr auto vram_start_address = u32{0x25e00000};
-constexpr auto cram_start_address = u32{0x25f00000};
+constexpr auto vram_start_address      = u32{0x25e00000};
+constexpr auto cram_start_address      = u32{0x25f00000};
 constexpr auto vdp1_address_multiplier = u8{8};
 
 constexpr s8 gouraud_offset = 0x10;
@@ -186,8 +186,9 @@ struct VertexColor {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct TextureCoordinates {
-    float s, t; ///< Texture coordinates.
-    TextureCoordinates(const float s, const float t) : s(s), t(t){};
+    float s, t, p; ///< Texture coordinates.
+    TextureCoordinates(const float s, const float t, const float p) : s(s), t(t), p(p){};
+    TextureCoordinates(const float s, const float t) : s(s), t(t), p(0.0f){};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,22 +206,22 @@ struct Vertex {
     VertexColor        color;      ///< Color.
     Gouraud            gouraud;    ///< Gouraud color.
 
-    // Vertex::Vertex(const VertexPosition vp, const TextureCoordinates tc, const VertexColor vc) :
-    //      pos(vp), tex_coords(tc), color(vc){};
     Vertex(const s16 x, const s16 y, const float s, const float t) :
-        pos(VertexPosition(x, y)), tex_coords(TextureCoordinates(s, t)), color(VertexColor(0, 0, 0, 0)), gouraud(Gouraud()){};
+        pos(VertexPosition(x, y)), tex_coords(TextureCoordinates(s, t, 0.0f)), color(VertexColor(0, 0, 0, 0)),
+        gouraud(Gouraud()){};
 
     Vertex(const s16     x,
            const s16     y,
            const float   s,
            const float   t,
+           const float   p,
            const u8      r,
            const u8      g,
            const u8      b,
            const u8      a,
            const Gouraud grd) :
         pos(VertexPosition(x, y)),
-        tex_coords(TextureCoordinates(s, t)), color(VertexColor(r, g, b, a)), gouraud(grd){};
+        tex_coords(TextureCoordinates(s, t, p)), color(VertexColor(r, g, b, a)), gouraud(grd){};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
