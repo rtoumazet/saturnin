@@ -155,7 +155,7 @@ void Opengl::initializeShaders() {
         #version 120
 
         attribute vec2 vtx_position;
-        attribute vec2 vtx_tex_coord;
+        attribute vec3 vtx_tex_coord;
         attribute vec4 vtx_color;
         attribute vec4 vtx_grd_color;
         
@@ -182,7 +182,7 @@ void Opengl::initializeShaders() {
         layout (location = 2) in vec4 vtx_color;
         layout (location = 3) in vec4 vtx_grd_color;
 
-        out vec2 frg_tex_coord;
+        out vec3 frg_tex_coord;
         out vec4 frg_color;
         out vec4 frg_grd_color;
 
@@ -241,7 +241,9 @@ void Opengl::initializeShaders() {
 
         out vec4 out_color;
 
-        uniform sampler2D texture1;
+        //uniform sampler2D texture1;
+        uniform sampler2DArray sampler;
+        uniform vec3 texture_pos;
         uniform bool is_texture_used;
         uniform vec3 color_offset;
 
@@ -250,7 +252,8 @@ void Opengl::initializeShaders() {
         void main()
         {
             if(is_texture_used){
-                out_color = texture(texture1, frg_tex_coord);
+                //out_color = texture(texture1, frg_tex_coord);
+                out_color = texture(sampler, vec3(texture_pos));
             }else{
                 out_color = frg_color;
             }
@@ -339,7 +342,8 @@ void Opengl::render() {
         const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
-        const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+        const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+        const auto texture_pos_loc  = glGetUniformLocation(program_shader_, "texture_pos");
 
         // Filling a vector with all the vertexes needed to render the parts list, in order to send data only once to the GPU.
         // auto batch_vertex_size = getVertexesNumberByDrawType(parts_list);
@@ -429,9 +433,13 @@ void Opengl::render() {
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
 
-            const auto uni_color_offset = glGetUniformLocation(program_shader_, "color_offset");
-            // const float color_offset[3]  = {-0.5, -0.5, -0.5};
-            glUniform3fv(uni_color_offset, 1, part->colorOffset().data());
+            const auto color_offset_loc = glGetUniformLocation(program_shader_, "color_offset");
+            glUniform3fv(color_offset_loc, 1, part->colorOffset().data());
+
+            glActiveTexture(GLenum::GL_TEXTURE0);
+            const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+            glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
 
             switch (part->drawType()) {
                 using enum DrawType;
@@ -456,10 +464,19 @@ void Opengl::render() {
 
                     // Sending the variable to configure the shader to use texture data.
                     const auto is_texture_used = GLboolean(true);
-                    glUniform1i(uni_use_texture, is_texture_used);
+                    glUniform1i(texture_used_loc, is_texture_used);
 
                     const auto opengl_tex = getOpenglTexture(part->textureKey());
-                    if (opengl_tex.has_value()) { glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id); }
+                    if (opengl_tex.has_value()) {
+                        glUniform3fv(texture_pos_loc,
+                                     1,
+                                     std::array<float, 3>{(float)opengl_tex->pos.x / (float)texture_array_width,
+                                                          (float)opengl_tex->pos.y / (float)texture_array_height,
+                                                          (float)opengl_tex->layer}
+                                         .data());
+                        // opengl_tex->pos
+                        //  glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
+                    }
 
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
@@ -484,7 +501,7 @@ void Opengl::render() {
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
-                    glUniform1i(uni_use_texture, is_texture_used);
+                    glUniform1i(texture_used_loc, is_texture_used);
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
@@ -506,7 +523,7 @@ void Opengl::render() {
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
-                    glUniform1i(uni_use_texture, is_texture_used);
+                    glUniform1i(texture_used_loc, is_texture_used);
 
                     // Drawing the list
                     glDrawArrays(GL_LINE_LOOP, 0, vertexes_per_polyline);
@@ -526,7 +543,7 @@ void Opengl::render() {
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
-                    glUniform1i(uni_use_texture, is_texture_used);
+                    glUniform1i(texture_used_loc, is_texture_used);
 
                     // Drawing the list
                     glDrawArrays(GL_LINES, 0, vertexes_per_line);
