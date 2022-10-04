@@ -342,6 +342,11 @@ void Opengl::render() {
         const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
+        glActiveTexture(GLenum::GL_TEXTURE0);
+        const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+        glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
+
         const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
         const auto texture_pos_loc  = glGetUniformLocation(program_shader_, "texture_pos");
 
@@ -436,11 +441,6 @@ void Opengl::render() {
             const auto color_offset_loc = glGetUniformLocation(program_shader_, "color_offset");
             glUniform3fv(color_offset_loc, 1, part->colorOffset().data());
 
-            glActiveTexture(GLenum::GL_TEXTURE0);
-            const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
-            glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
-
             switch (part->drawType()) {
                 using enum DrawType;
                 case textured_polygon: {
@@ -459,7 +459,7 @@ void Opengl::render() {
 
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-                    glActiveTexture(GLenum::GL_TEXTURE0);
+                    // glActiveTexture(GLenum::GL_TEXTURE0);
                     //******
 
                     // Sending the variable to configure the shader to use texture data.

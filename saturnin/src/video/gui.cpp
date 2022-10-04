@@ -1719,10 +1719,11 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, local_child_rounding);
                 ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, local_cell_padding);
 
-                static auto current_texture_idx = size_t{}; // Here we store our selection data as an index.
-                auto        textures_list       = video::Texture::detailedList();
-                ImGuiIO&    io                  = ImGui::GetIO();
-                io.WantCaptureKeyboard          = true;
+                static auto current_texture_idx  = size_t{}; // Here we store our selection data as an index.
+                static auto previous_texture_idx = size_t{};
+                const auto& textures_list        = video::Texture::detailedList();
+                ImGuiIO&    io                   = ImGui::GetIO();
+                io.WantCaptureKeyboard           = true;
                 if (textures_list.size() < current_texture_idx) { current_texture_idx = 0; }
 
                 {
@@ -1765,19 +1766,26 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
 
                         const auto texture_key = textures_list[current_texture_idx].second;
                         if (texture_key != 0) {
-                            // const auto texture = video::Texture::getTexture(texture_key);
-                            const auto opengl_tex = state.opengl()->getOpenglTexture(texture_key);
-
                             // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the
                             // image ratio.
-                            const auto max_size     = Size{260, 260};
-                            auto       tex_size     = video::Texture::calculateTextureSize(max_size, texture_key);
-                            const auto preview_size = ImVec2(tex_size.w, tex_size.h);
-                            if (opengl_tex.has_value()) {
-                                ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>((*opengl_tex).opengl_id)),
-                                             preview_size);
+                            const auto  max_size     = Size{260, 260};
+                            auto        tex_size     = video::Texture::calculateTextureSize(max_size, texture_key);
+                            const auto  preview_size = ImVec2(tex_size.w, tex_size.h);
+                            static auto opengl_id    = 0;
+                            if (previous_texture_idx != current_texture_idx) {
+                                // Reloading texture data from the new slected entry.
+                                const auto texture = video::Texture::getTexture(texture_key);
+                                if (texture) {
+                                    if (opengl_id != 0) { state.opengl()->deleteTexture(opengl_id); }
+                                    opengl_id = state.opengl()->generateTexture((*texture)->width(),
+                                                                                (*texture)->height(),
+                                                                                (*texture)->rawData());
+                                }
+                                previous_texture_idx = current_texture_idx;
                             }
+                            ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(opengl_id)), preview_size);
                         }
+
                         ImGui::EndChild();
                         ImGui::PopStyleVar();
                     }
