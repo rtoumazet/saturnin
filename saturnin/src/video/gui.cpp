@@ -1393,21 +1393,28 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
                 }
 
                 if (draw_list[current_part_idx].textureKey() != 0) {
-                    const auto tex = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
-                    if (tex) {
-                        const auto opengl_tex = state.opengl()->getOpenglTexture((*tex)->key());
-                        // const auto preview_size = ImVec2(200, 200);
+                    const auto& texture = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
+                    // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the image
+                    // ratio.
+                    const auto max_size     = Size{260, 260};
+                    const auto tex_size     = video::Texture::calculateTextureSize(max_size, (*texture)->key());
+                    const auto preview_size = ImVec2(tex_size.w, tex_size.h);
 
-                        // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the image
-                        // ratio.
-                        const auto max_size     = Size{260, 260};
-                        auto       tex_size     = video::Texture::calculateTextureSize(max_size, (*tex)->key());
-                        const auto preview_size = ImVec2(tex_size.w, tex_size.h);
+                    static auto opengl_id = 0;
+                    if (texture) {
+                        if (opengl_id != 0) { state.opengl()->deleteTexture(opengl_id); }
+                        opengl_id
+                            = state.opengl()->generateTexture((*texture)->width(), (*texture)->height(), (*texture)->rawData());
+                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(opengl_id)), preview_size);
+
+                        // const auto opengl_tex = state.opengl()->getOpenglTexture((*tex)->key());
 
                         // ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
-                        if (opengl_tex.has_value()) {
-                            ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>((*opengl_tex).opengl_id)), preview_size);
-                        }
+                        // if (opengl_tex.has_value()) {
+                        //
+                        //    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>((*opengl_tex).opengl_id)),
+                        //    preview_size);
+                        //}
                     }
                 }
                 ImGui::EndChild();
@@ -1720,7 +1727,7 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
                 ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, local_cell_padding);
 
                 static auto current_texture_idx  = size_t{}; // Here we store our selection data as an index.
-                static auto previous_texture_idx = size_t{};
+                static auto previous_texture_idx = size_t{1};
                 const auto& textures_list        = video::Texture::detailedList();
                 ImGuiIO&    io                   = ImGui::GetIO();
                 io.WantCaptureKeyboard           = true;
@@ -1773,7 +1780,7 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
                             const auto  preview_size = ImVec2(tex_size.w, tex_size.h);
                             static auto opengl_id    = 0;
                             if (previous_texture_idx != current_texture_idx) {
-                                // Reloading texture data from the new slected entry.
+                                // Reloading texture data from the new selected entry.
                                 const auto texture = video::Texture::getTexture(texture_key);
                                 if (texture) {
                                     if (opengl_id != 0) { state.opengl()->deleteTexture(opengl_id); }
