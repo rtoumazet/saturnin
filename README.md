@@ -22,6 +22,7 @@ Saturnin is a Sega Saturn emulator
     List of used libraries for reference:
     
     * [date](https://github.com/HowardHinnant/date) :  A date and time library based on the C++11/14/17 <chrono> header.
+    * [embed](https://github.com/MKlimenko/embed) : std::embed implementation for the poor (C++17).
     * [glbinding](https://github.com/cginternals/glbinding) : A C++ binding for the OpenGL API, generated using the gl.xml specification.
     * [glfw3](https://github.com/glfw/glfw) : A multi-platform library for OpenGL, OpenGL ES, Vulkan, window and input.
     * [glm](https://github.com/g-truc/glm) : OpenGL Mathematics (GLM).
