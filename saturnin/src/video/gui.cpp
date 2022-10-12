@@ -2001,6 +2001,8 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
 
     ImGui::TextUnformatted(log.c_str());
 
+    if (ImGui::Button("Read upper left texture")) {}
+
     ImGui::End();
 }
 

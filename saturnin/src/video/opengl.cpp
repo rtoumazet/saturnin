@@ -91,6 +91,20 @@ void Opengl::initialize() {
     deleteShaders(shaders_to_delete);
 
     texture_array_id_ = initializeTextureArray();
+
+    {
+        // const auto logo = rh::embed("saturnin-logo.png");
+        // auto       img  = loadPngImage(logo.data(), logo.size());
+        // Texture::storeTexture(Texture(VdpType::vdp1, 0, 5, 0, img.pixels, 1364, 886));
+
+        // auto ot      = OpenglTexture{};
+        // ot.key       = 1;
+        // ot.opengl_id = texture_array_id_;
+        // ot.size      = {1364, 886};
+        // ot.pos       = {0, 0};
+
+        // textures_link_[ot.key] = ot;
+    }
     //  auto max_layers = int{};
     //  gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
 }
@@ -468,12 +482,10 @@ void Opengl::render() {
 
                     const auto opengl_tex = getOpenglTexture(part->textureKey());
                     if (opengl_tex.has_value()) {
-                        glUniform3fv(texture_pos_loc,
-                                     1,
-                                     std::array<float, 3>{(float)opengl_tex->pos.x / (float)texture_array_width,
-                                                          (float)opengl_tex->pos.y / (float)texture_array_height,
-                                                          (float)opengl_tex->layer}
-                                         .data());
+                        auto tex_pos = std::array<float, 3>{(float)opengl_tex->pos.x / (float)texture_array_width,
+                                                            (float)opengl_tex->pos.y / (float)texture_array_height,
+                                                            (float)opengl_tex->layer};
+                        glUniform3fv(texture_pos_loc, 1, tex_pos.data());
                         // opengl_tex->pos
                         //  glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
                     }
@@ -1561,5 +1573,4 @@ void checkProgramCompilation(const u32 program) {
         throw std::runtime_error("Opengl error !");
     }
 }
-
 }; // namespace saturnin::video
