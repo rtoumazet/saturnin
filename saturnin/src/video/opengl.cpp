@@ -93,9 +93,12 @@ void Opengl::initialize() {
     texture_array_id_ = initializeTextureArray();
 
     {
-        // const auto logo = rh::embed("saturnin-logo.png");
-        // auto       img  = loadPngImage(logo.data(), logo.size());
-        // Texture::storeTexture(Texture(VdpType::vdp1, 0, 5, 0, img.pixels, 1364, 886));
+        const auto logo = rh::embed("saturnin-logo.png");
+        auto       img  = loadPngImage(logo.data(), logo.size());
+
+        const auto size = strlen((char*)img.pixels);
+        auto       vec  = std::vector<u8>{img.pixels, img.pixels + size};
+        Texture::storeTexture(Texture(VdpType::vdp1, 0, 5, 0, vec, 1364, 886));
 
         // auto ot      = OpenglTexture{};
         // ot.key       = 1;
