@@ -98,7 +98,10 @@ void Opengl::initialize() {
 
         const auto size = strlen((char*)img.pixels);
         auto       vec  = std::vector<u8>{img.pixels, img.pixels + size};
-        Texture::storeTexture(Texture(VdpType::vdp1, 0, 5, 0, vec, 1364, 886));
+        auto       tex  = Texture(VdpType::vdp1, 0, 5, 0, vec, 1364, 886);
+        Texture::storeTexture(tex);
+        addOrUpdateTexture(tex.key());
+        generateTextures();
 
         // auto ot      = OpenglTexture{};
         // ot.key       = 1;
