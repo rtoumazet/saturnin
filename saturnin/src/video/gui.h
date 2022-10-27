@@ -101,15 +101,17 @@ void showMainMenu(core::EmulatorContext& state);
 void showRenderingWindow(core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showStvWindow();
+/// \fn	void showStvWindow(core::EmulatorContext& state);
 ///
-/// \brief  Displays the ST-V games choice window.
+/// \brief	Displays the ST-V games choice window.
 ///
-/// \author Runik
-/// \date   24/10/2019
+/// \author	Runik
+/// \date	24/10/2019
+///
+/// \param [in,out]	state	The emulator context.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showStvWindow();
+void showStvWindow(core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showLogWindow(core::EmulatorContext& state, bool* opened);

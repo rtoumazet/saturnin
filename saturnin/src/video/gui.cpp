@@ -19,7 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/gui.h>
-//#include <imgui.h>
+// #include <imgui.h>
 #include <istream>
 #include <filesystem>       // path
 #include <imgui_internal.h> // ImGuiSelectableFlags_SelectOnNav
@@ -129,12 +129,14 @@ void showMainMenu(core::EmulatorContext& state) {
             if (ImGui::BeginMenu(tr("Load ST-V rom").c_str())) {
                 auto files = core::listStvConfigurationFiles();
 
-                static auto listbox_item_current = int{1};
+                static auto selected_item = int{0};
 
                 const auto child_size = ImVec2(200, 100);
                 ImGui::BeginChild("ST-V window", child_size);
-                ImGui::Combo("##combo_stv_rom", &listbox_item_current, files);
+                ImGui::Combo("##combo_stv_rom", &selected_item, files);
                 ImGui::EndChild();
+                ImGui::SameLine();
+                if (ImGui::Button(tr("load").c_str())) { state.memory()->loadStvGame(files[selected_item]); }
                 ImGui::EndMenu();
             };
             if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary)) {}
@@ -182,12 +184,12 @@ void showMainMenu(core::EmulatorContext& state) {
             };
             using HeaderMap                = std::map<const Header, const std::string>;
             const auto  headers            = HeaderMap{{Header::general, tr("General")},
-                                           {Header::rendering, tr("Rendering")},
-                                           {Header::path, tr("Paths")},
-                                           {Header::cd_rom, tr("CD-Rom")},
-                                           {Header::sound, ("Sound")},
-                                           {Header::peripherals, tr("Peripherals")},
-                                           {Header::logs, tr("Logs")}};
+                                                       {Header::rendering, tr("Rendering")},
+                                                       {Header::path, tr("Paths")},
+                                                       {Header::cd_rom, tr("CD-Rom")},
+                                                       {Header::sound, ("Sound")},
+                                                       {Header::peripherals, tr("Peripherals")},
+                                                       {Header::logs, tr("Logs")}};
             static auto last_opened_header = Header::none;
             if (last_opened_header == Header::none) { last_opened_header = Header::general; }
             auto setHeaderState = [](const Header header) {
@@ -960,7 +962,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
     ImGui::PopStyleVar();
 }
 
-void showStvWindow() {
+void showStvWindow(core::EmulatorContext& state) {
     auto files = core::listStvConfigurationFiles();
 
     static auto listbox_item_current = int{1};
@@ -968,6 +970,9 @@ void showStvWindow() {
     ImGui::BeginChild("ST-V window");
     ImGui::Combo("", &listbox_item_current, files);
     ImGui::EndChild();
+    ImGui::SameLine();
+    const auto label_load = icon_step_out + tr("Step out");
+    if (ImGui::Button(tr("load").c_str())) {}
 }
 
 void showLogWindow(core::EmulatorContext& state, bool* opened) {

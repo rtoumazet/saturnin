@@ -27,7 +27,7 @@
 #include <lodepng.h>
 #include <sstream> // stringstream
 #include <glbinding/glbinding.h>
-//#include <glbinding/gl/gl.h>
+// #include <glbinding/gl/gl.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>
 #include <glbinding/gl21/gl.h>
