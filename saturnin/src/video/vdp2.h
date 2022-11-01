@@ -1397,8 +1397,10 @@ class Vdp2 {
                           const ScrollScreenStatus& screen,
                           const u16                 palette_number,
                           const u8                  dot) {
-        const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (palette_number + dot) * sizeof(T)};
-        auto       color         = readColor<T>(color_address);
+        constexpr auto color_disp = u8{4};
+        const auto     color_address
+            = u32{cram_start_address + screen.color_ram_address_offset | ((palette_number << color_disp) + dot) * sizeof(T)};
+        auto color = readColor<T>(color_address);
         if (!dot && screen.is_transparency_code_valid) color.a = 0;
 
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
