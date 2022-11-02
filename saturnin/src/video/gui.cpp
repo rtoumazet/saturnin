@@ -131,12 +131,33 @@ void showMainMenu(core::EmulatorContext& state) {
 
                 static auto selected_item = int{0};
 
-                const auto child_size = ImVec2(200, 100);
-                ImGui::BeginChild("ST-V window", child_size);
-                ImGui::Combo("##combo_stv_rom", &selected_item, files);
-                ImGui::EndChild();
-                ImGui::SameLine();
-                if (ImGui::Button(tr("load").c_str())) { state.memory()->loadStvGame(files[selected_item]); }
+                // const auto default_key_name = std::string{getKeyName(default_key)};
+                // const auto combo            = std::string{"##combo_" + combo_name};
+                // if (ImGui::BeginCombo(combo.c_str(), default_key_name.c_str())) {
+                //     for (auto key : keys) {
+                //         bool is_selected = (default_key_name.c_str() == getKeyName(key).c_str());
+                //         if (ImGui::Selectable(getKeyName(key).c_str(), is_selected)) {
+                //             default_key = key;
+                //             if (is_selected) { ImGui::SetItemDefaultFocus(); }
+                //         }
+                //     }
+                //     ImGui::EndCombo();
+                // }
+
+                //const auto child_size = ImVec2(200, 100);
+                //ImGui::BeginChild("ST-V window", child_size);
+                //ImGui::Combo("##combo_stv_rom", &selected_item, files);
+                //ImGui::EndChild();
+                //ImGui::SameLine();
+                //if (ImGui::Button(tr("load").c_str())) { state.memory()->selectedStvSet(selected_item); }
+
+
+
+
+
+
+
+
                 ImGui::EndMenu();
             };
             if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary)) {}
@@ -1909,8 +1930,7 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
             return state.memory()->read<u8>(address * 4) << 24 | state.memory()->read<u8>(address * 4 + 1) << 16
                    | state.memory()->read<u8>(address * 4 + 2) << 8 | state.memory()->read<u8>(address * 4 + 3);
         };
-        state.memory()->initialize();
-        state.memory()->loadBios(saturnin::core::HardwareMode::saturn);
+        state.memory()->initialize(saturnin::core::HardwareMode::saturn);
         {
             log += tr("Sequential read");
             auto seq_read_array = std::make_unique<std::array<u32, core::rom_size / 4>>();

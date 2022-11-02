@@ -536,6 +536,7 @@ auto listStvConfigurationFiles() -> std::vector<std::string> {
             files.push_back(p.path().filename().string());
         }
     }
+    files.insert(files.begin(), tr("No game selected"));
     return files;
 }
 
@@ -548,11 +549,20 @@ inline auto getDirectAddress(AddressRange ar) -> AddressRange {
     return ar;
 }
 
-void Memory::initialize() {
+void Memory::initialize(saturnin::core::HardwareMode mode) {
     sh2_in_operation_ = sh2::Sh2Type::unknown;
 
     initializeHandlers();
     initializeMemoryMap();
+
+    loadBios(mode);
+
+    if (mode == HardwareMode::stv) {
+        if (selectedStvSet() != 0) {
+            auto files = core::listStvConfigurationFiles();
+            loadStvGame(files[selectedStvSet()]);
+        }
+    }
 }
 
 void Memory::initializeMemoryMap() {

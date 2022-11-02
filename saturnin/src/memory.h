@@ -197,6 +197,27 @@ struct AddressRange {
     u32 end;
 };
 
+// ST-V rom file description
+struct StvRomFile {
+    std::string rom_name;
+    u32         load_address;
+    u32         load_size;
+    RomLoad     rom_load;
+    u32         times_mirrored;
+    RomType     rom_type;
+};
+
+// ST-V game configuration
+struct StvGameConfiguration {
+    std::string             game_name;
+    std::string             zip_name;
+    std::string             parent_set;
+    std::string             version;
+    std::string             release_date;
+    std::string             region;
+    std::vector<StvRomFile> files;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Memory
 ///
@@ -273,6 +294,12 @@ class Memory {
     sh2::Sh2Type sh2_in_operation_; ///< Which SH2 is in operation
     // bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
     // bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
+
+    ///@{
+    /// Accessors / Mutators
+    void selectedStvSet(const u8 index) { selected_stv_set_ = index; };
+    auto selectedStvSet() const -> u8 { return selected_stv_set_; };
+    ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::loadBinaryFile(const std::string& full_path, const u32 addr);
@@ -428,15 +455,17 @@ class Memory {
     void sendFrtInterruptToSlave() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Memory::initialize();
+    /// \fn void Memory::initialize(saturnin::core::HardwareMode mode);
     ///
     /// \brief  Initializes the Memory object.
     ///
     /// \author Runik
     /// \date   27/09/2019
+    ///
+    /// \param  mode    Hardware mode (Saturn/ST-V).
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initialize();
+    void initialize(saturnin::core::HardwareMode mode);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Memory::getMemoryMapAreaData(MemoryMapArea area) -> std::tuple<u8*, size_t, u32> const;
@@ -562,6 +591,8 @@ class Memory {
     //@}
 
     u32 stv_protection_offset_{};
+
+    u8 selected_stv_set_{}; ///< Index of currently selected ST-V set.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -582,17 +613,17 @@ class Memory {
 void mirrorData(u8* data, u32 size, u8 times_mirrored, RomLoad RomLoad);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto listStvConfigurationFiles() -> std::vector<std::string>;
+/// \fn auto listAvailableStvGames() -> std::vector<StvGameConfiguration>;
 ///
-/// \brief  Returns a vector populated with valid ST-V configuration files found in.
+/// \brief  Returns a vector with valid ST-V games configuration data from the ST-V directory.
 ///
 /// \author Runik
 /// \date   04/09/2018
 ///
-/// \return The stv configuration files.
+/// \return Configurations of available ST-V games.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto listStvConfigurationFiles() -> std::vector<std::string>;
+auto listAvailableStvGames() -> std::vector<StvGameConfiguration>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T, typename U, size_t N> auto rawRead(const std::array<U, N>& arr, u32 addr) -> T

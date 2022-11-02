@@ -26,7 +26,7 @@
 #include <future>
 #include <chrono>
 #include <saturnin/src/config.h>
-//#include <saturnin/src/locale.h>
+// #include <saturnin/src/locale.h>
 #include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu_registers.h>
@@ -211,8 +211,7 @@ void EmulatorContext::emulationMainThread() {
 
         // opengl()->initialize(openglWindow());
 
-        memory()->initialize();
-        memory()->loadBios(hardware_mode_);
+        memory()->initialize(hardware_mode_);
 
         sh2::initializeOpcodesLut();
         masterSh2()->powerOnReset();
