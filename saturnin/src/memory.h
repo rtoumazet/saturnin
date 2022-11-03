@@ -297,8 +297,8 @@ class Memory {
 
     ///@{
     /// Accessors / Mutators
-    void selectedStvSet(const u8 index) { selected_stv_set_ = index; };
-    auto selectedStvSet() const -> u8 { return selected_stv_set_; };
+    void selectedStvGame(const StvGameConfiguration game) { selected_stv_game_ = game; };
+    auto selectedStvGame() const -> StvGameConfiguration { return selected_stv_game_; };
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -592,7 +592,7 @@ class Memory {
 
     u32 stv_protection_offset_{};
 
-    u8 selected_stv_set_{}; ///< Index of currently selected ST-V set.
+    StvGameConfiguration selected_stv_game_{}; ///< Currently selected ST-V set.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

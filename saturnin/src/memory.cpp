@@ -528,16 +528,45 @@ void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad
     }
 }
 
-auto listStvConfigurationFiles() -> std::vector<std::string> {
+auto listAvailableStvGames() -> std::vector<StvGameConfiguration> {
+    auto game      = StvGameConfiguration{};
+    game.game_name = tr("No game selected");
+
+    auto games = std::vector<StvGameConfiguration>{};
+    games.push_back(game);
+
+    auto config = core::Config("");
+    // Getting the files of the ST-V directory.
     const auto full_path = fs::current_path() / "stv";
-    auto       files     = std::vector<std::string>{};
     for (auto& p : fs::directory_iterator(full_path)) {
         if ((p.path().extension() == ".cfg") && (p.path().filename() != "dummy.cfg")) {
-            files.push_back(p.path().filename().string());
+            auto file = core::Config(p.path().string());
+            file.readFile();
+
+            game.game_name    = file.readValue(core::AccessKeys::stv_game_name).c_str();
+            game.zip_name     = file.readValue(core::AccessKeys::stv_zip_name).c_str();
+            game.parent_set   = file.readValue(core::AccessKeys::stv_parent_set).c_str();
+            game.version      = file.readValue(core::AccessKeys::stv_version).c_str();
+            game.release_date = file.readValue(core::AccessKeys::stv_release_date).c_str();
+            game.region       = file.readValue(core::AccessKeys::stv_region).c_str();
+
+            const libconfig::Setting& files = file.readValue(core::AccessKeys::stv_files);
+            for (u8 i = 0; i < files.getLength(); ++i) {
+                auto rom           = StvRomFile{};
+                rom.rom_name       = files[i][0].c_str();
+                rom.load_address   = u32{files[i][1]};
+                rom.load_size      = u32{files[i][2]};
+                rom.rom_load       = config.getRomLoad(files[i][3]);
+                rom.times_mirrored = u32{files[i][4]};
+                rom.rom_type       = config.getRomType(files[i][5]);
+                game.files.push_back(rom);
+            }
+
+            games.push_back(game);
         }
     }
-    files.insert(files.begin(), tr("No game selected"));
-    return files;
+
+    return games;
 }
 
 inline auto isMasterSh2InOperation(const Memory& m) -> bool { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
@@ -558,9 +587,10 @@ void Memory::initialize(saturnin::core::HardwareMode mode) {
     loadBios(mode);
 
     if (mode == HardwareMode::stv) {
-        if (selectedStvSet() != 0) {
-            auto files = core::listStvConfigurationFiles();
-            loadStvGame(files[selectedStvSet()]);
+        const auto game = selectedStvGame();
+        if (selectedStvGame() != 0) {
+            // auto files = core::listStvConfigurationFiles();
+            // loadStvGame(files[selectedStvSet()]);
         }
     }
 }

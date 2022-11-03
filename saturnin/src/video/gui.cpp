@@ -127,36 +127,30 @@ void showMainMenu(core::EmulatorContext& state) {
         // File
         if (ImGui::BeginMenu(tr("File").c_str())) {
             if (ImGui::BeginMenu(tr("Load ST-V rom").c_str())) {
-                auto files = core::listStvConfigurationFiles();
+                auto games = core::listAvailableStvGames();
 
-                static auto selected_item = int{0};
+                // static auto selected_index = int{0};
+                static auto current_game = std::string{tr("No game selected")};
 
-                // const auto default_key_name = std::string{getKeyName(default_key)};
-                // const auto combo            = std::string{"##combo_" + combo_name};
-                // if (ImGui::BeginCombo(combo.c_str(), default_key_name.c_str())) {
-                //     for (auto key : keys) {
-                //         bool is_selected = (default_key_name.c_str() == getKeyName(key).c_str());
-                //         if (ImGui::Selectable(getKeyName(key).c_str(), is_selected)) {
-                //             default_key = key;
-                //             if (is_selected) { ImGui::SetItemDefaultFocus(); }
-                //         }
-                //     }
-                //     ImGui::EndCombo();
-                // }
+                if (ImGui::BeginCombo("##combo_games", current_game.c_str())) {
+                    // for (int i = 0; i < games.size(); ++i) {
+                    for (const auto& game : games) {
+                        const bool is_selected = (current_game == game.game_name);
+                        if (ImGui::Selectable(game.game_name.c_str(), is_selected)) { current_game = game.game_name; }
 
-                //const auto child_size = ImVec2(200, 100);
-                //ImGui::BeginChild("ST-V window", child_size);
-                //ImGui::Combo("##combo_stv_rom", &selected_item, files);
-                //ImGui::EndChild();
-                //ImGui::SameLine();
-                //if (ImGui::Button(tr("load").c_str())) { state.memory()->selectedStvSet(selected_item); }
+                        // Set the initial focus when opening the combo
+                        // (scrolling + keyboard navigation focus)
+                        if (is_selected) { ImGui::SetItemDefaultFocus(); }
+                    }
+                    ImGui::EndCombo();
+                }
 
-
-
-
-
-
-
+                // const auto child_size = ImVec2(200, 100);
+                // ImGui::BeginChild("ST-V window", child_size);
+                // ImGui::Combo("##combo_stv_rom", &selected_item, files);
+                // ImGui::EndChild();
+                // ImGui::SameLine();
+                // if (ImGui::Button(tr("load").c_str())) { state.memory()->selectedStvSet(selected_item); }
 
                 ImGui::EndMenu();
             };
@@ -984,16 +978,16 @@ void showRenderingWindow(core::EmulatorContext& state) {
 }
 
 void showStvWindow(core::EmulatorContext& state) {
-    auto files = core::listStvConfigurationFiles();
+    // auto files = core::listStvConfigurationFiles();
 
-    static auto listbox_item_current = int{1};
+    // static auto listbox_item_current = int{1};
 
-    ImGui::BeginChild("ST-V window");
-    ImGui::Combo("", &listbox_item_current, files);
-    ImGui::EndChild();
-    ImGui::SameLine();
-    const auto label_load = icon_step_out + tr("Step out");
-    if (ImGui::Button(tr("load").c_str())) {}
+    // ImGui::BeginChild("ST-V window");
+    // ImGui::Combo("", &listbox_item_current, files);
+    // ImGui::EndChild();
+    // ImGui::SameLine();
+    // const auto label_load = icon_step_out + tr("Step out");
+    // if (ImGui::Button(tr("load").c_str())) {}
 }
 
 void showLogWindow(core::EmulatorContext& state, bool* opened) {
