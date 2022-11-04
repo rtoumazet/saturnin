@@ -626,6 +626,19 @@ void mirrorData(u8* data, u32 size, u8 times_mirrored, RomLoad RomLoad);
 auto listAvailableStvGames() -> std::vector<StvGameConfiguration>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn auto defaultStvGameConfiguration() -> StvGameConfiguration;
+///
+/// \brief  Returns the default ST-V game configuration.
+///
+/// \author Runik
+/// \date   04/11/2022
+///
+/// \return Default ST-V game Configuration.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto defaultStvGameConfiguration() -> StvGameConfiguration;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T, typename U, size_t N> auto rawRead(const std::array<U, N>& arr, u32 addr) -> T
 ///
 /// \brief  Reads a value from an array. Usage : auto val = read&lt;u32&gt;(memory, 0);

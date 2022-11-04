@@ -529,11 +529,8 @@ void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad
 }
 
 auto listAvailableStvGames() -> std::vector<StvGameConfiguration> {
-    auto game      = StvGameConfiguration{};
-    game.game_name = tr("No game selected");
-
     auto games = std::vector<StvGameConfiguration>{};
-    games.push_back(game);
+    games.push_back(defaultStvGameConfiguration());
 
     auto config = core::Config("");
     // Getting the files of the ST-V directory.
@@ -543,6 +540,7 @@ auto listAvailableStvGames() -> std::vector<StvGameConfiguration> {
             auto file = core::Config(p.path().string());
             file.readFile();
 
+            auto game         = StvGameConfiguration{};
             game.game_name    = file.readValue(core::AccessKeys::stv_game_name).c_str();
             game.zip_name     = file.readValue(core::AccessKeys::stv_zip_name).c_str();
             game.parent_set   = file.readValue(core::AccessKeys::stv_parent_set).c_str();
@@ -569,6 +567,8 @@ auto listAvailableStvGames() -> std::vector<StvGameConfiguration> {
     return games;
 }
 
+auto defaultStvGameConfiguration() -> StvGameConfiguration { return StvGameConfiguration{.game_name = tr("No game selected")}; }
+
 inline auto isMasterSh2InOperation(const Memory& m) -> bool { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
 
 inline auto getDirectAddress(AddressRange ar) -> AddressRange {
@@ -588,10 +588,10 @@ void Memory::initialize(saturnin::core::HardwareMode mode) {
 
     if (mode == HardwareMode::stv) {
         const auto game = selectedStvGame();
-        if (selectedStvGame() != 0) {
-            // auto files = core::listStvConfigurationFiles();
-            // loadStvGame(files[selectedStvSet()]);
-        }
+        // if (selectedStvGame().game_name.compare != 0) {
+        //  auto files = core::listStvConfigurationFiles();
+        //  loadStvGame(files[selectedStvSet()]);
+        //}
     }
 }
 

@@ -129,14 +129,15 @@ void showMainMenu(core::EmulatorContext& state) {
             if (ImGui::BeginMenu(tr("Load ST-V rom").c_str())) {
                 auto games = core::listAvailableStvGames();
 
-                // static auto selected_index = int{0};
-                static auto current_game = std::string{tr("No game selected")};
+                static auto current_game_name = state.memory()->selectedStvGame().game_name;
 
-                if (ImGui::BeginCombo("##combo_games", current_game.c_str())) {
-                    // for (int i = 0; i < games.size(); ++i) {
+                if (ImGui::BeginCombo("##combo_games", current_game_name.c_str())) {
                     for (const auto& game : games) {
-                        const bool is_selected = (current_game == game.game_name);
-                        if (ImGui::Selectable(game.game_name.c_str(), is_selected)) { current_game = game.game_name; }
+                        const bool is_selected = (current_game_name == game.game_name);
+                        if (ImGui::Selectable(game.game_name.c_str(), is_selected)) {
+                            state.memory()->selectedStvGame(game);
+                            current_game_name = game.game_name;
+                        }
 
                         // Set the initial focus when opening the combo
                         // (scrolling + keyboard navigation focus)
@@ -144,13 +145,13 @@ void showMainMenu(core::EmulatorContext& state) {
                     }
                     ImGui::EndCombo();
                 }
-
-                // const auto child_size = ImVec2(200, 100);
-                // ImGui::BeginChild("ST-V window", child_size);
-                // ImGui::Combo("##combo_stv_rom", &selected_item, files);
-                // ImGui::EndChild();
-                // ImGui::SameLine();
-                // if (ImGui::Button(tr("load").c_str())) { state.memory()->selectedStvSet(selected_item); }
+                if (state.memory()->selectedStvGame().game_name != core::defaultStvGameConfiguration().game_name) {
+                    ImGui::TextUnformatted(state.memory()->selectedStvGame().game_name.c_str());
+                    ImGui::TextUnformatted(state.memory()->selectedStvGame().zip_name.c_str());
+                    ImGui::TextUnformatted(state.memory()->selectedStvGame().version.c_str());
+                    ImGui::TextUnformatted(state.memory()->selectedStvGame().release_date.c_str());
+                    ImGui::TextUnformatted(state.memory()->selectedStvGame().region.c_str());
+                }
 
                 ImGui::EndMenu();
             };
