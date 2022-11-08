@@ -84,14 +84,14 @@ void Scu::write32(const u32 addr, const u32 data) {
             // if (current_DSP_program_control_port_ & DSP_EX) {
             if (toEnum<ProgramExecuteControl>(ppaf_.program_execute_control) == ProgramExecuteControl::program_execution_begins) {
                 Log::unimplemented("SCU DSP - Program execution");
-                //#ifdef _DEBUGEMU
-                //                std::ostringstream oss;
-                //                oss << "DSP program execution started at address : " << showbase << hex <<
-                //                static_cast<uint32_t>((current_DSP_program_control_port_ & DSP_P));
-                //                EmuState::pLog->ScuDsp(oss.str());
-                //#endif
-                //                PC_ = static_cast<uint8_t>((current_DSP_program_control_port_ & DSP_P));
-                //                DSPProgramDisasm(PC_);
+                // #ifdef _DEBUGEMU
+                //                 std::ostringstream oss;
+                //                 oss << "DSP program execution started at address : " << showbase << hex <<
+                //                 static_cast<uint32_t>((current_DSP_program_control_port_ & DSP_P));
+                //                 EmuState::pLog->ScuDsp(oss.str());
+                // #endif
+                //                 PC_ = static_cast<uint8_t>((current_DSP_program_control_port_ & DSP_P));
+                //                 DSPProgramDisasm(PC_);
                 ppaf_.raw = {};                                        // DSP interception
                 setInterruptStatusRegister(interrupt_source::dsp_end); // DSP interrupt flag
             }
@@ -232,7 +232,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
             const auto write_bus = getDmaBus(dc.write_address);
             switch (write_bus) {
                 using enum DmaBus;
-                case a_bus:
+                case a_bus: {
                     Log::debug(Logger::scu, "A-Bus transfer");
 
                     switch (getScuRegion(read_address)) {
@@ -273,7 +273,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
                         ++byte_counter;
                     }
                     break;
-
+                }
                 case b_bus: {
                     // B-Bus write
                     // 32 bits splitted into 2*16 bits
@@ -308,9 +308,8 @@ void Scu::executeDma(DmaConfiguration& dc) {
                     }
                     break;
                 }
-                case cpu_bus:
-                case dsp_bus:
-                    Log::debug(Logger::scu, "CPU-Bus or DSP-Bus transfer");
+                case cpu_bus: {
+                    Log::debug(Logger::scu, "CPU-Bus transfer");
 
                     switch (getScuRegion(read_address)) {
                         using enum ScuRegion;
@@ -334,6 +333,12 @@ void Scu::executeDma(DmaConfiguration& dc) {
 
                         ++byte_counter;
                     }
+                    break;
+                }
+                case dsp_bus: {
+                    Log::warning(Logger::scu, "DSP-Bus transfer - not implemented");
+                    break;
+                }
                 default: Log::warning(Logger::scu, tr("Unknown DMA bus ! : {}"), dc.write_address); break;
             }
 
@@ -391,7 +396,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
                 const auto write_bus = getDmaBus(dc.write_address);
                 switch (write_bus) {
                     using enum DmaBus;
-                    case a_bus:
+                    case a_bus: {
                         Log::debug(Logger::scu, "A-Bus transfer");
 
                         switch (getScuRegion(read_address)) {
@@ -432,7 +437,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
                             ++byte_counter;
                         }
                         break;
-
+                    }
                     case b_bus: {
                         // B-Bus write
                         // 32 bits splitted into 2*16 bits
@@ -467,9 +472,8 @@ void Scu::executeDma(DmaConfiguration& dc) {
                         }
                         break;
                     }
-                    case cpu_bus:
-                    case dsp_bus:
-                        Log::debug(Logger::scu, "CPU-Bus or DSP-Bus transfer");
+                    case cpu_bus: {
+                        Log::debug(Logger::scu, "CPU-Bus transfer");
 
                         switch (getScuRegion(read_address)) {
                             using enum ScuRegion;
@@ -493,7 +497,12 @@ void Scu::executeDma(DmaConfiguration& dc) {
 
                             ++byte_counter;
                         }
-
+                        break;
+                    }
+                    case dsp_bus: {
+                        Log::warning(Logger::scu, "DSP-Bus transfer - not implemented");
+                        break;
+                    }
                     default: Log::warning(Logger::scu, "Unknown DMA bus ! : {}", dc.write_address); break;
                 }
 
@@ -772,17 +781,31 @@ void Scu::activateDma() {
 auto Scu::getDmaBus(const u32 address) -> DmaBus {
     const auto a = u32{address & bitmask_0FFFFFFF};
 
-    constexpr auto b_bus_start_address = u32{0x05A00000};
-    constexpr auto b_bus_end_address   = u32{0x6000000};
-    if ((a >= b_bus_start_address) && (a < b_bus_end_address)) { return DmaBus::b_bus; }
-
-    constexpr auto a_bus_start_address = u32{0x02000000};
-    constexpr auto a_bus_end_address   = u32{0x5900000};
-    if ((a >= a_bus_start_address) && (a < a_bus_end_address)) { return DmaBus::a_bus; }
-    // CPU or DSP write
-    Log::warning(Logger::scu, "DMA - Bus access not implemented {}", address);
-
-    return DmaBus::unknown_bus;
+    switch (getScuRegion(a)) {
+        using enum ScuRegion;
+        case work_ram_h:
+        case work_ram_l:
+        case backup_ram:
+        case rom:
+        case smpc: {
+            return DmaBus::cpu_bus;
+        }
+        case a_bus_cs0:
+        case a_bus_cs1:
+        case a_bus_dummy:
+        case a_bus_cs2: {
+            return DmaBus::a_bus;
+        }
+        case vdp1:
+        case vdp2:
+        case sound: {
+            return DmaBus::b_bus;
+        }
+        default:
+            // DSP bus not implemented
+            Log::warning(Logger::scu, "DMA - Bus access not implemented {}", address);
+            return DmaBus::unknown_bus;
+    }
 }
 
 /* static */

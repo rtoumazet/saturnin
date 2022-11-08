@@ -1506,41 +1506,41 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
     auto is_normal_mode = (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_320);
     is_normal_mode |= (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_352);
 
-    static VramTiming bank_a0 = {toEnum<VramAccessCommand>(cyca0l_.t0),
-                                 toEnum<VramAccessCommand>(cyca0l_.t1),
-                                 toEnum<VramAccessCommand>(cyca0l_.t2),
-                                 toEnum<VramAccessCommand>(cyca0l_.t3),
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t4) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t5) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t6) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t7) : VramAccessCommand::no_access};
+    VramTiming bank_a0 = {toEnum<VramAccessCommand>(cyca0l_.t0),
+                          toEnum<VramAccessCommand>(cyca0l_.t1),
+                          toEnum<VramAccessCommand>(cyca0l_.t2),
+                          toEnum<VramAccessCommand>(cyca0l_.t3),
+                          is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t4) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t5) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t6) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t7) : VramAccessCommand::no_access};
 
-    static VramTiming bank_a1 = {toEnum<VramAccessCommand>(cyca1l_.t0),
-                                 toEnum<VramAccessCommand>(cyca1l_.t1),
-                                 toEnum<VramAccessCommand>(cyca1l_.t2),
-                                 toEnum<VramAccessCommand>(cyca1l_.t3),
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t4) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t5) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t6) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t7) : VramAccessCommand::no_access};
+    VramTiming bank_a1 = {toEnum<VramAccessCommand>(cyca1l_.t0),
+                          toEnum<VramAccessCommand>(cyca1l_.t1),
+                          toEnum<VramAccessCommand>(cyca1l_.t2),
+                          toEnum<VramAccessCommand>(cyca1l_.t3),
+                          is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t4) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t5) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t6) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t7) : VramAccessCommand::no_access};
 
-    static VramTiming bank_b0 = {toEnum<VramAccessCommand>(cycb0l_.t0),
-                                 toEnum<VramAccessCommand>(cycb0l_.t1),
-                                 toEnum<VramAccessCommand>(cycb0l_.t2),
-                                 toEnum<VramAccessCommand>(cycb0l_.t3),
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t4) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t5) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t6) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t7) : VramAccessCommand::no_access};
+    VramTiming bank_b0 = {toEnum<VramAccessCommand>(cycb0l_.t0),
+                          toEnum<VramAccessCommand>(cycb0l_.t1),
+                          toEnum<VramAccessCommand>(cycb0l_.t2),
+                          toEnum<VramAccessCommand>(cycb0l_.t3),
+                          is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t4) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t5) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t6) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t7) : VramAccessCommand::no_access};
 
-    static VramTiming bank_b1 = {toEnum<VramAccessCommand>(cycb1l_.t0),
-                                 toEnum<VramAccessCommand>(cycb1l_.t1),
-                                 toEnum<VramAccessCommand>(cycb1l_.t2),
-                                 toEnum<VramAccessCommand>(cycb1l_.t3),
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t4) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t5) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t6) : VramAccessCommand::no_access,
-                                 is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : VramAccessCommand::no_access};
+    VramTiming bank_b1 = {toEnum<VramAccessCommand>(cycb1l_.t0),
+                          toEnum<VramAccessCommand>(cycb1l_.t1),
+                          toEnum<VramAccessCommand>(cycb1l_.t2),
+                          toEnum<VramAccessCommand>(cycb1l_.t3),
+                          is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t4) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t5) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t6) : VramAccessCommand::no_access,
+                          is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : VramAccessCommand::no_access};
 
     switch (command) {
         using enum VramAccessCommand;
@@ -1957,14 +1957,14 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
                                             const bool              is_using_2_by_2_cp) -> u8 {
     // From the command we must use the linked Pattern Name Data. The limitations are based on the PND read position.
     // Step 1 : find PND reads for the current command
-    // const auto pnd = getPatternNameFromCharacterPattern(command);
+    const auto pnd = getPatternNameFromCharacterPattern(command);
     // const auto pnd_reads = getVramPatternNameDataReads(bank_a0, bank_a1, bank_b0, bank_b1, pnd);
 
     auto pnd_timing_access = std::array{false, false, false, false, false, false, false, false};
-    setPatternNameAccess(bank_a0, command, pnd_timing_access);
-    setPatternNameAccess(bank_b0, command, pnd_timing_access);
-    setPatternNameAccess(bank_a1, command, pnd_timing_access);
-    setPatternNameAccess(bank_b1, command, pnd_timing_access);
+    setPatternNameAccess(bank_a0, pnd, pnd_timing_access);
+    setPatternNameAccess(bank_b0, pnd, pnd_timing_access);
+    setPatternNameAccess(bank_a1, pnd, pnd_timing_access);
+    setPatternNameAccess(bank_b1, pnd, pnd_timing_access);
 
     // If there's no reduction, observe selection limits when CPD read access >= 2.
     // If reduction = 1/2 or 1/4, the behavior isn't clear from the docs ... I'll just

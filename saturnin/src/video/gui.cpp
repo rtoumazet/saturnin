@@ -145,7 +145,7 @@ void showMainMenu(core::EmulatorContext& state) {
                     }
                     ImGui::EndCombo();
                 }
-                if (state.memory()->selectedStvGame().game_name != core::defaultStvGameConfiguration().game_name) {
+                if (state.memory()->selectedStvGame().game_name != core::defaultStvGame().game_name) {
                     ImGui::TextUnformatted(state.memory()->selectedStvGame().game_name.c_str());
                     ImGui::TextUnformatted(state.memory()->selectedStvGame().zip_name.c_str());
                     ImGui::TextUnformatted(state.memory()->selectedStvGame().version.c_str());

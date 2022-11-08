@@ -101,6 +101,8 @@ auto EmulatorContext::initialize() -> bool {
     std::string hm = config()->readValue(core::AccessKeys::cfg_global_hardware_mode);
     hardwareMode(config()->getHardwareMode(hm));
 
+    memory()->selectedStvGame(core::defaultStvGame());
+
     this->smpc()->initializePeripheralMappings();
 
     cdrom::Scsi::settingUpSptiFunctions();

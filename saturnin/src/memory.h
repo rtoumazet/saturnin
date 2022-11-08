@@ -362,19 +362,19 @@ class Memory {
                  RomType            RomType) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Memory::loadStvGame(const std::string& config_filename) -> bool;
+    /// \fn	auto Memory::loadStvGame(const StvGameConfiguration& game) -> bool;
     ///
-    /// \brief  Loads a ST-V game into the cart area.
+    /// \brief	Loads a ST-V game into the cart area.
     ///
-    /// \author Runik
-    /// \date   28/08/2018
+    /// \author	Runik
+    /// \date	28/08/2018
     ///
-    /// \param  config_filename configuration file name, with cfg extension.
+    /// \param 	game	The configuration of the game to load.
     ///
-    /// \return True if the game is loaded.
+    /// \returns	True if the game is loaded.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto loadStvGame(const std::string& config_filename) -> bool;
+    auto loadStvGame(const StvGameConfiguration& game) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::swapCartArea();
@@ -626,17 +626,17 @@ void mirrorData(u8* data, u32 size, u8 times_mirrored, RomLoad RomLoad);
 auto listAvailableStvGames() -> std::vector<StvGameConfiguration>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto defaultStvGameConfiguration() -> StvGameConfiguration;
+/// \fn	auto defaultStvGame() -> StvGameConfiguration;
 ///
-/// \brief  Returns the default ST-V game configuration.
+/// \brief	Returns the default ST-V game configuration.
 ///
-/// \author Runik
-/// \date   04/11/2022
+/// \author	Runik
+/// \date	04/11/2022
 ///
-/// \return Default ST-V game Configuration.
+/// \returns	Default ST-V game Configuration.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto defaultStvGameConfiguration() -> StvGameConfiguration;
+auto defaultStvGame() -> StvGameConfiguration;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T, typename U, size_t N> auto rawRead(const std::array<U, N>& arr, u32 addr) -> T

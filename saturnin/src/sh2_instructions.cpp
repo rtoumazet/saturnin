@@ -123,9 +123,10 @@ auto isInstructionIllegal(const u16 inst) -> bool {
 
 void badOpcode(Sh2& s) {
     const auto type = std::string{(s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave"};
-    Log::error(Logger::sh2, "Unexpected opcode({} SH2). Opcode = {:#06X}. PC = {:#010X}", type, s.current_opcode_, s.pc_);
+    Log::error(Logger::sh2, "Unexpected opcode({} SH2). Opcode = {:#06x}. PC = {:#010x}", type, s.current_opcode_, s.pc_);
 
-    s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
+    // s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
+    s.modules_.context()->debugStatus(core::DebugStatus::paused);
 }
 
 void add(Sh2& s) {
@@ -1797,8 +1798,8 @@ void execute(Sh2& s) {
     //    //    //}
     //}
 
-    // if (s.getRegister(Sh2Register::r2) == 0x96c05) s.modules_.context()->debugStatus(core::DebugStatus::paused);
-    // if (s.getRegister(Sh2Register::r9) == 0x1159db) s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    // if (s.getRegister(Sh2Register::r7) == 0x6010000) s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    //  if (s.getRegister(Sh2Register::r9) == 0x1159db) s.modules_.context()->debugStatus(core::DebugStatus::paused);
 
     // if (s.modules_.context()->memory()->workram_high_[0x397D4] == 0x03)
     // s.modules_.context()->debugStatus(core::DebugStatus::paused);

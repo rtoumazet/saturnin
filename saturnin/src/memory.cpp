@@ -223,27 +223,15 @@ void Memory::loadBios(const HardwareMode mode) {
     }
 }
 
-auto Memory::loadStvGame(const std::string& config_filename) -> bool {
-    const auto full_path = std::filesystem::current_path() / "stv" / config_filename;
-
-    auto stv = core::Config(full_path.string());
-    stv.readFile();
-
-    const std::string         game_name    = stv.readValue(core::AccessKeys::stv_game_name);
-    const std::string         zip_name     = stv.readValue(core::AccessKeys::stv_zip_name);
-    const std::string         parent_set   = stv.readValue(core::AccessKeys::stv_parent_set);
-    const std::string         version      = stv.readValue(core::AccessKeys::stv_version);
-    const std::string         release_date = stv.readValue(core::AccessKeys::stv_release_date);
-    const std::string         region       = stv.readValue(core::AccessKeys::stv_region);
-    const libconfig::Setting& files        = stv.readValue(core::AccessKeys::stv_files);
-    for (u8 i = 0; i < files.getLength(); ++i) {
-        const std::string rom_name       = files[i][0];
-        const auto        load_address   = u32{files[i][1]};
-        const auto        load_size      = u32{files[i][2]};
-        const auto        rom_load       = modules_.config()->getRomLoad(files[i][3]);
-        const auto        times_mirrored = u32{files[i][4]};
-        const auto        rom_type       = modules_.config()->getRomType(files[i][5]);
-        if (!this->loadRom(zip_name, rom_name, &this->cart_[load_address], load_size, rom_load, times_mirrored, rom_type)) {
+auto Memory::loadStvGame(const StvGameConfiguration& game) -> bool {
+    for (const auto& file : game.files) {
+        if (!this->loadRom(game.zip_name,
+                           file.rom_name,
+                           &this->cart_[file.load_address],
+                           file.load_size,
+                           file.rom_load,
+                           file.times_mirrored,
+                           file.rom_type)) {
             return false;
         }
     }
@@ -530,7 +518,7 @@ void mirrorData(u8* data, const u32 size, const u8 times_mirrored, const RomLoad
 
 auto listAvailableStvGames() -> std::vector<StvGameConfiguration> {
     auto games = std::vector<StvGameConfiguration>{};
-    games.push_back(defaultStvGameConfiguration());
+    games.push_back(defaultStvGame());
 
     auto config = core::Config("");
     // Getting the files of the ST-V directory.
@@ -567,7 +555,7 @@ auto listAvailableStvGames() -> std::vector<StvGameConfiguration> {
     return games;
 }
 
-auto defaultStvGameConfiguration() -> StvGameConfiguration { return StvGameConfiguration{.game_name = tr("No game selected")}; }
+auto defaultStvGame() -> StvGameConfiguration { return StvGameConfiguration{.game_name = tr("No game selected")}; }
 
 inline auto isMasterSh2InOperation(const Memory& m) -> bool { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
 
@@ -587,11 +575,7 @@ void Memory::initialize(saturnin::core::HardwareMode mode) {
     loadBios(mode);
 
     if (mode == HardwareMode::stv) {
-        const auto game = selectedStvGame();
-        // if (selectedStvGame().game_name.compare != 0) {
-        //  auto files = core::listStvConfigurationFiles();
-        //  loadStvGame(files[selectedStvSet()]);
-        //}
+        if (selectedStvGame().game_name != defaultStvGame().game_name) { loadStvGame(selectedStvGame()); }
     }
 }
 
