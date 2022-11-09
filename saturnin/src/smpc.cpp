@@ -859,13 +859,15 @@ auto Smpc::read(const u32 addr) -> u8 {
             }
             return pdr1_.pdr;
         case port_data_register_2:
-            // if (emulator_context_->hardwareMode() == HardwareMode::stv) {
-            //    pdr2_.reset();
+            if (modules_.context()->hardwareMode() == HardwareMode::stv) {
+                pdr2_.pdr = 0;
+                const auto controls = getStvPeripheralMapping().board_controls;
+                controls.test_switch;
             //    if (glfwGetKey(glfwGetCurrentContext(), uti::toUnderlying(stv_mapping_.board_controls.test_switch)) ==
             //    GLFW_PRESS) {
 
             //    }
-            //}
+            }
             pdr2_.raw = u8_max;
 
             return pdr2_.pdr;
