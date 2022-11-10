@@ -276,6 +276,15 @@ void showMainMenu(core::EmulatorContext& state) {
                 if (ImGui::Checkbox("##time_set", &is_time_set)) {
                     state.config()->writeValue(core::AccessKeys::cfg_global_set_time, is_time_set);
                 }
+
+                // ST-V bios bypass
+                ImGui::TextUnformatted(tr("ST-V bios bypass").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                static bool is_stv_bios_bypass_set = state.config()->readValue(core::AccessKeys::cfg_global_stv_bios_bypass);
+                if (ImGui::Checkbox("##stv_bios_bypass_set", &is_stv_bios_bypass_set)) {
+                    state.config()->writeValue(core::AccessKeys::cfg_global_stv_bios_bypass, is_stv_bios_bypass_set);
+                }
             }
 
             // Rendering header

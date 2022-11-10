@@ -600,13 +600,16 @@ void Memory::initializeMemoryMap() {
 }
 
 void Memory::installStvBiosBypass() {
-    // Replacing these 2 opcodes by nops speed up significantly ST-V boot up time.
-    constexpr auto bypass_address_1  = u32{0xd4b0};
-    this->rom_[bypass_address_1]     = 0x00;
-    this->rom_[bypass_address_1 + 1] = 0x09;
+    const bool is_stv_bios_bypassed = modules_.config()->readValue(AccessKeys::cfg_global_stv_bios_bypass);
+    if (is_stv_bios_bypassed) {
+        // Replacing these 2 opcodes by nops speed up significantly ST-V boot up time.
+        constexpr auto bypass_address_1  = u32{0xd4b0};
+        this->rom_[bypass_address_1]     = 0x00;
+        this->rom_[bypass_address_1 + 1] = 0x09;
 
-    constexpr auto bypass_address_2  = u32{0xd4c6};
-    this->rom_[bypass_address_2]     = 0x00;
-    this->rom_[bypass_address_2 + 1] = 0x09;
+        constexpr auto bypass_address_2  = u32{0xd4c6};
+        this->rom_[bypass_address_2]     = 0x00;
+        this->rom_[bypass_address_2 + 1] = 0x09;
+    }
 }
 } // namespace saturnin::core
