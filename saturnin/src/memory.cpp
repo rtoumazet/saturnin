@@ -215,6 +215,7 @@ void Memory::loadBios(const HardwareMode mode) {
                     this->rom_[i + 3] = str[i + 2];
                     this->rom_[i + 2] = str[i + 3];
                 }
+                installStvBiosBypass();
                 break;
             }
         }
@@ -596,5 +597,16 @@ void Memory::initializeMemoryMap() {
     memory_map_.insert(MapArea::value_type(MemoryMapArea::vdp2_registers, tr("VDP2 registers")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::scu, tr("SCU")));
     memory_map_.insert(MapArea::value_type(MemoryMapArea::workram_high, tr("Workram high")));
+}
+
+void Memory::installStvBiosBypass() {
+    // Replacing these 2 opcodes by nops speed up significantly ST-V boot up time.
+    constexpr auto bypass_address_1  = u32{0xd4b0};
+    this->rom_[bypass_address_1]     = 0x00;
+    this->rom_[bypass_address_1 + 1] = 0x09;
+
+    constexpr auto bypass_address_2  = u32{0xd4c6};
+    this->rom_[bypass_address_2]     = 0x00;
+    this->rom_[bypass_address_2 + 1] = 0x09;
 }
 } // namespace saturnin::core
