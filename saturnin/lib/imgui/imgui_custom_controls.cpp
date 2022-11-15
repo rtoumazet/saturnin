@@ -93,7 +93,7 @@ void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& d
     }
 }
 
-//void CenteredText(const std::string& text) {
+// void CenteredText(const std::string& text) {
 void CenteredText(const std::string& text) {
     auto           size  = ImGui::CalcTextSize(text.c_str());
     constexpr auto ratio = float{0.5f};
@@ -134,4 +134,19 @@ void TextPadding(float amount) {
     ImGui::SetCursorPos(cursor_pos);
 }
 
+void TextMultiColored(std::string text) {
+    auto open_tag_pos = size_t{};
+    auto end_tag_pos  = size_t{};
+    auto current_tag  = none;
+    // getting the first tag of the string
+    for (const auto tag : color_tags) {
+        auto current_open_tag_pos = text.find(tag.open_tag, end_tag_pos);
+        if (current_open_tag_pos != std::string::npos) {
+            if (current_open_tag_pos < open_tag_pos) {
+                current_tag  = tag;
+                open_tag_pos = current_open_tag_pos;
+            }
+        }
+    }
+}
 } // namespace ImGui

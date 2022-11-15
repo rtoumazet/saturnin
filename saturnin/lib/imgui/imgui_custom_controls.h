@@ -32,6 +32,28 @@
 namespace ImGui {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	ColorTag
+///
+/// \brief	A color tag.
+///
+/// \author	Runik
+/// \date	13/11/2022
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct ColorTag {
+    std::string open_tag;
+    std::string end_tag;
+    ImVec4      color;
+};
+
+const auto none  = ColorTag{"", "", ImVec4(0.0f, 0.0f, 0.0f, 0.0f)};
+const auto red   = ColorTag{"[red]", "[/red]", ImVec4(1.0f, 0.0f, 0.0f, 1.0f)};
+const auto green = ColorTag{"[green]", "[/green]", ImVec4(0.0f, 1.0f, 0.0f, 1.0f)};
+const auto blue  = ColorTag{"[blue]", "[/blue]", ImVec4(0.0f, 0.0f, 1.0f, 1.0f)};
+
+static const std::array<ColorTag, 3> color_tags = {red, green, blue};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn auto ImageButtonWithText(ImTextureID texId, const char* label, const ImVec2& imageSize = ImVec2(0, 0), const ImVec2& uv0 =
 /// ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), int frame_padding = -1, const ImVec4& bg_col = ImVec4(0, 0, 0, 0), const
 /// ImVec4& tint_col = ImVec4(1, 1, 1, 1)) -> bool;
@@ -91,7 +113,7 @@ void peripheralKeyCombo(const std::vector<saturnin::core::PeripheralKey>& keys,
 /// \param  text    Text to display.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//void CenteredText(const std::string& text);
+// void CenteredText(const std::string& text);
 void CenteredText(const std::string& text);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,5 +155,18 @@ void ChildWindowHeader(const std::string& label);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TextPadding(float amount);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	void ImGui::TextMultiColored(const std::string text);
+///
+/// \brief	Displays a text taking into account colored tags.
+///
+/// \author	Runik
+/// \date	13/11/2022
+///
+/// \param 	text	The text to display.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void TextMultiColored(const std::string text);
 
 } // namespace ImGui

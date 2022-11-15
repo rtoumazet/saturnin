@@ -352,72 +352,27 @@ auto Vdp1Part::getDebugDetail() -> std::string {
     const auto getZoomPoint = [](const ZoomPoint zp) {
         switch (zp) {
             using enum ZoomPoint;
-            case center_center:
-                return R"(
-Zoom point
-    Center-center)";
-            case center_left:
-                return R"(
-Zoom point
-    Center-left)";
-            case center_right:
-                return R"(
-Zoom point
-    Center-right)";
-            case lower_center:
-                return R"(
-Zoom point 
-    Lower-center)";
-            case lower_left:
-                return R"(
-Zoom point
-    Lower-left)";
-            case lower_right:
-                return R"(
-Zoom point
-    Lower-right)";
-            case upper_center:
-                return R"(
-Zoom point
-    Upper-center)";
-            case upper_left:
-                return R"(
-Zoom point
-    Upper-left)";
-            case upper_right:
-                return R"(
-Zoom point
-    Upper-right)";
-            case two_coordinates:
-                return R"(
-Zoom point
-    Specifies two coordinates)";
-            default:
-                return R"(
-Zoom point
-    Setting prohibited)";
+            case center_center: return "Zoom point: center-center\n";
+            case center_left: return "Zoom point: center-left\n";
+            case center_right: return "Zoom point: center-right\n";
+            case lower_center: return "Zoom point: lower-center\n";
+            case lower_left: return "Zoom point: lower-left\n";
+            case lower_right: return "Zoom point: lower-right\n";
+            case upper_center: return "Zoom point: upper-center\n";
+            case upper_left: return "Zoom point: upper-left\n";
+            case upper_right: return "Zoom point: upper-right\n";
+            case two_coordinates: return "Zoom point: specifies two coordinates\n";
+            default: return "Zoom point: setting prohibited\n";
         }
     };
 
     const auto getCharacterReadDirection = [](const CharacterReadDirection crd) {
         switch (crd) {
             using enum CharacterReadDirection;
-            case h_invertion:
-                return R"(
-Character read direction 
-    Horizontally inverted)";
-            case not_inverted:
-                return R"(
-Character read direction
-    Not inverted)";
-            case vh_invertion:
-                return R"(
-Character read direction 
-    Horizontally and vertically inverted)";
-            case v_invertion:
-                return R"(
-Character read direction
-    Vertically inverted)";
+            case h_invertion: return "Horizontally inverted\n";
+            case not_inverted: return "Not inverted\n";
+            case vh_invertion: return "Horizontally and vertically inverted\n";
+            case v_invertion: return "Vertically inverted\n";
         }
         return "";
     };
@@ -425,48 +380,12 @@ Character read direction
     const auto getColorMode = [](const ColorMode cm) {
         switch (cm) {
             using enum ColorMode;
-            case mode_0_16_colors_bank:
-                return R"(
-Color mode 
-    Mode 0
-    16 colors
-    Color bank
-    4 bits/pixel)";
-            case mode_1_16_colors_lookup:
-                return R"(
-Color mode
-    Mode 1
-    16 colors
-    Lookup table
-    4 bits / pixel)";
-            case mode_2_64_colors_bank:
-                return R"(
-Color mode 
-    Mode 2
-    64 colors
-    Color bank
-    8 bits/pixel)";
-            case mode_3_128_colors_bank:
-                return R"(
-Color mode 
-    Mode 3
-    128 colors
-    Color bank
-    8 bits/pixel)";
-            case mode_4_256_colors_bank:
-                return R"(
-Color mode 
-    Mode 4
-    256 colors
-    Color bank
-    8 bits/pixel)";
-            case mode_5_32k_colors_rgb:
-                return R"(
-Color mode 
-    Mode 5
-    32K colors
-    RGB
-    16 bits/pixel)";
+            case mode_0_16_colors_bank: return "Color mode: mode 0, 16 colors, color bank, 4 bits/pixel\n";
+            case mode_1_16_colors_lookup: return "Color mode: mode 1, 16 colors, lookup table, 4 bits / pixel\n";
+            case mode_2_64_colors_bank: return "Color mode: mode 2, 64 colors, color bank, 8 bits/pixel\n";
+            case mode_3_128_colors_bank: return "Color mode: mode 3, 128 colors, color bank, 8 bits/pixel\n";
+            case mode_4_256_colors_bank: return "Color mode: mode 4, 256 colors, color bank, 8 bits/pixel\n";
+            case mode_5_32k_colors_rgb: return "Color mode: mode 5, 32K colors, RGB, 16 bits/pixel\n";
         }
         return "";
     };
@@ -474,54 +393,14 @@ Color mode
     const auto getColorCalculation = [](const ColorCalculation cc) {
         switch (cc) {
             using enum ColorCalculation;
-            case mode_0:
-                return R"(
-Color calculation
-    Mode 0, 
-    Replace
-)";
-            case mode_1:
-                return R"(
-Color calculation 
-    Mode 1
-    Cannot rewrite / shadow
-)";
-            case mode_2:
-                return R"(
-Color calculation 
-    Mode 2
-    Half-luminance
-)";
-            case mode_3:
-                return R"(
-Color calculation 
-    Mode 3
-    Replace / half-transparent
-)";
-            case mode_4:
-                return R"(
-Color calculation 
-    Mode 4
-    Gouraud shading
-)";
-            case mode_5:
-                return R"(
-Color calculation 
-    Mode 5
-    Setting prohibited
-)";
-            case mode_6:
-                return R"(
-Color calculation 
-    Mode 6
-    Gouraud shading + half-luminance
-)";
-            case mode_7:
-                return R"(
-Color calculation 
-    Mode 7
-    Gouraud shading / gouraud shading + half-tranparent
-)";
+            case mode_0: return "Color calculation: mode 0, replace\n";
+            case mode_1: return "Color calculation: mode 1, cannot rewrite / shadow\n";
+            case mode_2: return "Color calculation: mode 2, half-luminance\n";
+            case mode_3: return "Color calculation: mode 3, replace / half-transparent\n";
+            case mode_4: return "Color calculation: mode 4, gouraud shading\n";
+            case mode_5: return "Color calculation: mode 5, setting prohibited\n";
+            case mode_6: return "Color calculation: mode 6, gouraud shading + half-luminance\n";
+            case mode_7: return "Color calculation: mode 7, gouraud shading / gouraud shading + half-tranparent\n";
         }
         return "";
     };
@@ -530,7 +409,7 @@ Color calculation
         auto s = std::string{};
 
         s += "MSB ";
-        s += (toEnum<MsbOn>(cp.msb_on) == MsbOn::on) ? "on" : "off";
+        s += (toEnum<MsbOn>(cp.msb_on) == MsbOn::on) ? "[green]on[/green]" : "[red]off[/red]";
         s += "\nHigh speed shrink ";
         s += (toEnum<HighSpeedShrink>(cp.high_speed_shrink) == HighSpeedShrink::enabled) ? "enabled" : "disabled";
         s += "\nPre-clipping ";
@@ -604,6 +483,9 @@ Gouraud shading
         case scaled_sprite_draw: {
             part_detail += getZoomPoint(toEnum<ZoomPoint>(cmdctrl_.zoom_point));
             part_detail += uti::format("Vertex A ({}, {})\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail
+                += uti::format("{}\n",
+                               getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
             part_detail += uti::format("Texture key : {:#x}", textureKey());
@@ -625,6 +507,9 @@ Gouraud shading
             part_detail += uti::format("Vertex B ({}, {})\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
             part_detail += uti::format("Vertex C ({}, {})\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
             part_detail += uti::format("Vertex D ({}, {})\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
+            part_detail
+                += uti::format("{}",
+                               getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
             part_detail += uti::format("Texture key : {:#x}", textureKey());

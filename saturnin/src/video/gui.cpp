@@ -60,7 +60,7 @@ static auto show_debug_smpc     = false;
 static auto show_debug_vdp1     = false;
 static auto show_debug_vdp2     = false;
 static auto show_debug_textures = false;
-static auto show_demo           = false;
+static auto show_demo           = true;
 static auto show_log            = true;
 static auto show_benchmarks     = false;
 
@@ -1395,14 +1395,23 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
         {
             // Part detail
             if (!draw_list.empty()) {
-                const auto child_size = ImVec2(260, 280);
-                ImGui::BeginChild("ChildPartDetail", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+                const auto child_size   = ImVec2(260, 280);
+                const auto content_size = ImVec2(512, 280);
+
+                ImGui::SetNextWindowContentSize(content_size);
+                ImGui::BeginChild("ChildPartDetail",
+                                  child_size,
+                                  true,
+                                  window_flags | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar
+                                      | ImGuiWindowFlags_AlwaysAutoResize);
 
                 if (ImGui::BeginMenuBar()) {
                     ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "test");
                     ImGui::EndMenuBar();
                 }
                 ImGui::TextWrapped(draw_list[current_part_idx].getDebugDetail().c_str());
+                ImGui::TextMultiColored(std::string("bla [red]rouge[/red et [blue]bleu[/bleu] didi"));
                 // state.vdp1()->partToHighlight(draw_list[current_part_idx]);
                 state.opengl()->partToHighlight(draw_list[current_part_idx]);
                 ImGui::EndChild();
