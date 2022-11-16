@@ -46,7 +46,6 @@ struct ColorTag {
     ImVec4      color;
 };
 
-const auto none  = ColorTag{"", "", ImVec4(0.0f, 0.0f, 0.0f, 0.0f)};
 const auto red   = ColorTag{"[red]", "[/red]", ImVec4(1.0f, 0.0f, 0.0f, 1.0f)};
 const auto green = ColorTag{"[green]", "[/green]", ImVec4(0.0f, 1.0f, 0.0f, 1.0f)};
 const auto blue  = ColorTag{"[blue]", "[/blue]", ImVec4(0.0f, 0.0f, 1.0f, 1.0f)};
