@@ -18,6 +18,7 @@
 //
 
 #include <saturnin/src/pch.h>
+#include <String.>
 #include <saturnin/lib/imgui/imgui_custom_controls.h>
 
 namespace ImGui {
@@ -134,34 +135,19 @@ void TextPadding(float amount) {
     ImGui::SetCursorPos(cursor_pos);
 }
 
-void TextMultiColored(std::string text) {
-    auto open_tag_pos = size_t{};
-    auto end_tag_pos  = size_t{};
-    auto current_tag  = ColorTag{};
-    // getting the first tag of the string
-    for (const auto tag : color_tags) {
-        auto current_open_tag_pos = text.find(tag.open_tag, end_tag_pos);
-        if (current_open_tag_pos != std::string::npos) {
-            if (current_open_tag_pos < open_tag_pos) {
-                current_tag  = tag;
-                open_tag_pos = current_open_tag_pos;
-            }
-        }
-    }
-}
-
-const char ColorMarkerStart = '{';
-const char ColorMarkerEnd   = '}';
+const char ColorMarkerStart = '[';
+const char ColorMarkerEnd   = ']';
 
 bool ProcessInlineHexColor(const char* start, const char* end, ImVec4& color) {
     const int hexCount = (int)(end - start);
     if (hexCount == 6 || hexCount == 8) {
         char hex[9];
-        strncpy(hex, start, hexCount);
+        // std::strncpy(hex, start, hexCount);
+        strncpy_s(hex, start, hexCount);
         hex[hexCount] = 0;
 
         unsigned int hexColor = 0;
-        if (sscanf(hex, "%x", &hexColor) > 0) {
+        if (sscanf_s(hex, "%x", &hexColor) > 0) {
             color.x = static_cast<float>((hexColor & 0x00FF0000) >> 16) / 255.0f;
             color.y = static_cast<float>((hexColor & 0x0000FF00) >> 8) / 255.0f;
             color.z = static_cast<float>((hexColor & 0x000000FF)) / 255.0f;
@@ -181,7 +167,7 @@ void TextWithColors(const char* fmt, ...) {
 
     va_list argPtr;
     va_start(argPtr, fmt);
-    _vsnprintf(tempStr, sizeof(tempStr), fmt, argPtr);
+    _vsnprintf_s(tempStr, sizeof(tempStr), fmt, argPtr);
     va_end(argPtr);
     tempStr[sizeof(tempStr) - 1] = '\0';
 
