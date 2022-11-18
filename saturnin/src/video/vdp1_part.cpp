@@ -341,7 +341,7 @@ auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const u8 prio
 
 void Vdp1Part::SetLocalCoordinates(const s16 x, const s16 y) {
     Log::debug(Logger::vdp1, tr("Command - Local coordinate set"));
-    Log::debug(Logger::vdp1, tr("Local coordinates are now [cccccc]({},{})[]"), x, y);
+    Log::debug(Logger::vdp1, tr("Local coordinates are now ({},{})"), x, y);
     Vdp1Part::local_coordinate_x_ = x;
     Vdp1Part::local_coordinate_y_ = y;
 }
