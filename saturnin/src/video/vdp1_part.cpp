@@ -554,14 +554,14 @@ Gouraud shading
     return part_detail;
 }
 
-auto Vdp1Part::calculatedXA() -> s16 { return twosComplement(cmdxa_.raw) + local_coordinate_x_; }
-auto Vdp1Part::calculatedYA() -> s16 { return twosComplement(cmdya_.raw) + local_coordinate_y_; }
-auto Vdp1Part::calculatedXB() -> s16 { return twosComplement(cmdxb_.raw) + local_coordinate_x_; }
-auto Vdp1Part::calculatedYB() -> s16 { return twosComplement(cmdyb_.raw) + local_coordinate_y_; }
-auto Vdp1Part::calculatedXC() -> s16 { return twosComplement(cmdxc_.raw) + local_coordinate_x_; }
-auto Vdp1Part::calculatedYC() -> s16 { return twosComplement(cmdyc_.raw) + local_coordinate_y_; }
-auto Vdp1Part::calculatedXD() -> s16 { return twosComplement(cmdxd_.raw) + local_coordinate_x_; }
-auto Vdp1Part::calculatedYD() -> s16 { return twosComplement(cmdyd_.raw) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXA() const -> s16 { return twosComplement(cmdxa_.raw) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYA() const -> s16 { return twosComplement(cmdya_.raw) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXB() const -> s16 { return twosComplement(cmdxb_.raw) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYB() const -> s16 { return twosComplement(cmdyb_.raw) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXC() const -> s16 { return twosComplement(cmdxc_.raw) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYC() const -> s16 { return twosComplement(cmdyc_.raw) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXD() const -> s16 { return twosComplement(cmdxd_.raw) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYD() const -> s16 { return twosComplement(cmdyd_.raw) + local_coordinate_y_; }
 
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));
@@ -756,56 +756,47 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     auto color = Color{u16{}};
 
+    const auto coords = getTextureCoordinates(toEnum<CharacterReadDirection>(part.cmdctrl_.character_read_direction));
+    if (coords.size() != 4) {
+        Log::error(Logger::vdp1, tr("VDP1 distorted sprite draw coordinates error"));
+        throw std::runtime_error("VDP1 distorted sprite draw coordinates error !");
+    }
+
     const auto gouraud_values = readGouraudData(modules, part);
 
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
-    //                                    {0.0, 0.0}, // lower left
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[0]});
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
-    //                                   {1.0, 0.0}, // lower right
-    //                                   {color.r, color.g, color.b, color.a},
-    //                                   gouraud_values[1]});
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
-    //                                   {1.0, 1.0}, // upper right
-    //                                   {color.r, color.g, color.b, color.a},
-    //                                   gouraud_values[2]});
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
-    //                                   {0.0, 1.0}, // upper left
-    //                                   {color.r, color.g, color.b, color.a},
-    //                                   gouraud_values[3]});
     part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
-                                0.0f,
-                                0.0f,
+                                coords[0].s,
+                                coords[0].t,
                                 color.r,
                                 color.g,
                                 color.b,
                                 color.a,
                                 gouraud_values[0]); // lower left
-    part.vertexes_.emplace_back(part.calculatedXB(),
+
+    part.vertexes_.emplace_back(part.calculatedXB() + 1,
                                 part.calculatedYB(),
-                                1.0f,
-                                0.0f,
+                                coords[1].s,
+                                coords[1].t,
                                 color.r,
                                 color.g,
                                 color.b,
                                 color.a,
                                 gouraud_values[1]); // lower right
-    part.vertexes_.emplace_back(part.calculatedXC(),
-                                part.calculatedYC(),
-                                1.0f,
-                                1.0f,
+    part.vertexes_.emplace_back(part.calculatedXC() + 1,
+                                part.calculatedYC() + 1,
+                                coords[2].s,
+                                coords[2].t,
                                 color.r,
                                 color.g,
                                 color.b,
                                 color.a,
                                 gouraud_values[2]); // upper right
     part.vertexes_.emplace_back(part.calculatedXD(),
-                                part.calculatedYD(),
-                                0.0f,
-                                1.0f,
+                                part.calculatedYD() + 1,
+                                coords[3].s,
+                                coords[3].t,
                                 color.r,
                                 color.g,
                                 color.b,
@@ -820,22 +811,6 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     if (part.cmdcolr_.raw == 0) { color.a = 0; }
     const auto gouraud_values = readGouraudData(modules, part);
 
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
-    //                                    {0.0, 0.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[0]}); // lower left
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
-    //                                    {1.0, 0.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[1]}); // lower right
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
-    //                                    {1.0, 1.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[2]}); // upper right
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
-    //                                    {0.0, 1.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[3]}); // upper left
     part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
@@ -1057,7 +1032,7 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
     part.textureKey(key);
 }
 
-auto readGouraudData(const EmulatorModules& modules, Vdp1Part& part) -> std::vector<Gouraud> {
+auto readGouraudData(const EmulatorModules& modules, const Vdp1Part& part) -> std::vector<Gouraud> {
     auto gouraud_values = std::vector<Gouraud>{};
     if (toEnum<GouraudShading>(part.cmdpmod_.gouraud_shading) == GouraudShading::enabled) {
         const auto grd_table_address = vdp1_ram_start_address + part.cmdgrda_.raw * 8;

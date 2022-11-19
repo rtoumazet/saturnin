@@ -98,14 +98,14 @@ class Vdp1Part final : public BaseRenderingPart {
 
     ///@{
     /// \name  Calculated coordinates.
-    auto calculatedXA() -> s16;
-    auto calculatedYA() -> s16;
-    auto calculatedXB() -> s16;
-    auto calculatedYB() -> s16;
-    auto calculatedXC() -> s16;
-    auto calculatedYC() -> s16;
-    auto calculatedXD() -> s16;
-    auto calculatedYD() -> s16;
+    auto calculatedXA() const -> s16;
+    auto calculatedYA() const -> s16;
+    auto calculatedXB() const -> s16;
+    auto calculatedYB() const -> s16;
+    auto calculatedXC() const -> s16;
+    auto calculatedYC() const -> s16;
+    auto calculatedXD() const -> s16;
+    auto calculatedYD() const -> s16;
     ///@}
 
     ///@{
@@ -221,9 +221,35 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part);
 void polylineDraw(const EmulatorModules& modules, Vdp1Part& part);
 void lineDraw(const EmulatorModules& modules, Vdp1Part& part);
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	void loadTextureData(const EmulatorModules& modules, Vdp1Part& part);
+///
+/// \brief	Loads texture data in a texture for the part.
+///
+/// \author	Runik
+/// \date	19/11/2022
+///
+/// \param 		   	modules	Emulator modules.
+/// \param [in,out]	part   	The Vdp1Part being processed.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part);
 
-auto readGouraudData(const EmulatorModules& modules, Vdp1Part& part) -> std::vector<Gouraud>;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	auto readGouraudData(const EmulatorModules& modules, const Vdp1Part& part) -> std::vector<Gouraud>;
+///
+/// \brief	Reads gouraud data for the part.
+///
+/// \author	Runik
+/// \date	19/11/2022
+///
+/// \param 	modules	Emulator modules.
+/// \param 	part   	The Vdp1Part being processed.
+///
+/// \returns	The gouraud data.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto readGouraudData(const EmulatorModules& modules, const Vdp1Part& part) -> std::vector<Gouraud>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T> void readDotColorBank16(const EmulatorModules& modules, std::vector<u8>& texture_data, const u16
