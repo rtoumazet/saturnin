@@ -355,6 +355,9 @@ struct ScrollScreenStatus {
     // Color offset data
     bool        is_color_offset_enabled{}; ///< True when color offset is enabled.
     ColorOffset color_offset;              ///< Color offset data.
+
+    u16 total_screen_scroll_width{};  ///< Width of the screen scroll in pixels.
+    u16 total_screen_scroll_height{}; ///< Height of the screen scroll in pixels.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

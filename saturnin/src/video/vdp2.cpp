@@ -2280,10 +2280,12 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer    = scxin0_.integer;
+            screen.screen_scroll_horizontal_integer = scxin0_.integer;
+            if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
             screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn0_.fractional);
             screen.screen_scroll_vertical_integer      = scyin0_.integer;
-            screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn0_.fractional);
+            if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
+            screen.screen_scroll_vertical_fractional = static_cast<u8>(scydn0_.fractional);
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg0);
@@ -2343,8 +2345,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Scroll screen
             screen.screen_scroll_horizontal_integer    = scxin1_.integer;
             screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn1_.fractional);
-            screen.screen_scroll_vertical_integer      = scyin1_.integer;
-            screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn1_.fractional);
+            if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            screen.screen_scroll_vertical_integer = scyin1_.integer;
+            if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
+            screen.screen_scroll_vertical_fractional = static_cast<u8>(scydn1_.fractional);
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg1);
@@ -2395,7 +2399,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Scroll screen
             screen.screen_scroll_horizontal_integer = scxn2_.integer;
-            screen.screen_scroll_vertical_integer   = scyn2_.integer;
+            if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            screen.screen_scroll_vertical_integer = scyn2_.integer;
+            if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg2);
@@ -2447,7 +2453,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Scroll screen
             screen.screen_scroll_horizontal_integer = scxn3_.integer;
-            screen.screen_scroll_vertical_integer   = scyn3_.integer;
+            if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            screen.screen_scroll_vertical_integer = scyn3_.integer;
+            if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg3);
@@ -2616,6 +2624,74 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         }
 
         return cells_per_page * plane_size * screen.map_size;
+    }();
+
+    // Calculating the total width of the scroll screen, will be used for scrolling calculation.
+    screen.total_screen_scroll_width = [&screen]() {
+        constexpr auto pixels_per_cell      = 8;
+        constexpr auto cells_per_page_width = 64;
+        auto           plane_width          = u8{};
+        switch (screen.plane_size) {
+            using enum PlaneSize;
+            case size_1_by_1: plane_width = 1; break;
+            case size_2_by_1:
+            case size_2_by_2: plane_width = 2; break;
+        }
+        auto map_width = u8{};
+        switch (screen.scroll_screen) {
+            using enum ScrollScreen;
+            case nbg0:
+            case nbg1:
+            case nbg2:
+            case nbg3: {
+                map_width = 2;
+                break;
+            }
+            case rbg0:
+            case rbg1: {
+                map_width = 4;
+                break;
+            }
+        }
+
+        return pixels_per_cell * cells_per_page_width * plane_width * map_width;
+    }();
+
+    // Calculating the total height of the scroll screen, will be used for scrolling calculation.
+    screen.total_screen_scroll_height = [&screen]() {
+        constexpr auto pixels_per_cell       = 8;
+        constexpr auto cells_per_page_height = 64;
+        auto           plane_height          = u8{};
+        switch (screen.plane_size) {
+            using enum PlaneSize;
+            case size_1_by_1:
+            case size_2_by_1: {
+                plane_height = 1;
+                break;
+            }
+            case size_2_by_2: {
+                plane_height = 2;
+                break;
+            }
+        }
+        auto map_height = u8{};
+        switch (screen.scroll_screen) {
+            using enum ScrollScreen;
+            case nbg0:
+            case nbg1:
+            case nbg2:
+            case nbg3: {
+                map_height = 2;
+                break;
+            }
+            case rbg0:
+            case rbg1: {
+                map_height = 4;
+                break;
+            }
+        }
+
+        return pixels_per_cell * cells_per_page_height * plane_height * map_height;
     }();
 
     if (isCacheDirty(s)) { discardCache(s); }
