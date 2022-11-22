@@ -2281,10 +2281,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Scroll screen
             screen.screen_scroll_horizontal_integer = scxin0_.integer;
-            if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
             screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn0_.fractional);
             screen.screen_scroll_vertical_integer      = scyin0_.integer;
-            if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
             screen.screen_scroll_vertical_fractional = static_cast<u8>(scydn0_.fractional);
 
             // Color offset
@@ -2345,9 +2345,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Scroll screen
             screen.screen_scroll_horizontal_integer    = scxin1_.integer;
             screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn1_.fractional);
-            if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
             screen.screen_scroll_vertical_integer = scyin1_.integer;
-            if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
             screen.screen_scroll_vertical_fractional = static_cast<u8>(scydn1_.fractional);
 
             // Color offset
@@ -2399,9 +2399,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Scroll screen
             screen.screen_scroll_horizontal_integer = scxn2_.integer;
-            if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
             screen.screen_scroll_vertical_integer = scyn2_.integer;
-            if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg2);
@@ -2453,9 +2453,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Scroll screen
             screen.screen_scroll_horizontal_integer = scxn3_.integer;
-            if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
             screen.screen_scroll_vertical_integer = scyn3_.integer;
-            if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg3);
@@ -3522,7 +3522,12 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     constexpr auto texture_height = u16{8};
 
     auto pos = ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)};
-    pos.x -= screen.screen_scroll_horizontal_integer;
+    // if ((screen.total_screen_scroll_width - tv_screen_status_.horizontal_res) < screen.screen_scroll_horizontal_integer) {
+    //     pos.x -= (screen.screen_scroll_horizontal_integer % screen.total_screen_scroll_width);
+    // } else {
+    //     pos.x -= screen.screen_scroll_horizontal_integer;
+    // }
+    pos.x -= (screen.screen_scroll_horizontal_integer % screen.total_screen_scroll_width);
     pos.y -= screen.screen_scroll_vertical_integer;
 
     LockGuard lock(vdp2_parts_mutex_);
