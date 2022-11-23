@@ -460,6 +460,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
         default: break;
     }
 
+    values.emplace_back(tr("Scroll width"), uti::format("{}px", screen.total_screen_scroll_width));
+    values.emplace_back(tr("Scroll height"), uti::format("{}px", screen.total_screen_scroll_height));
+
     // Color offset
     if (screen.is_color_offset_enabled) {
         values.emplace_back(tr("Color offset"),
@@ -471,7 +474,6 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
         //     tr("  R:G:B"),
         //     format("R:{:+d} G:{:+d} B:{:+d}", screen.color_offset_red, screen.color_offset_green,
         //     screen.color_offset_blue));
-
     } else {
         values.emplace_back(tr("Color offset"), tr("Disabled"));
     }
