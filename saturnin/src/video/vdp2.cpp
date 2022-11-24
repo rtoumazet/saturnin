@@ -3527,7 +3527,7 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     // } else {
     //     pos.x -= screen.screen_scroll_horizontal_integer;
     // }
-    pos.x -= screen.screen_scroll_horizontal_integer;
+    pos.x -= (screen.screen_scroll_horizontal_integer % 190);
     pos.y -= screen.screen_scroll_vertical_integer;
 
     LockGuard lock(vdp2_parts_mutex_);
