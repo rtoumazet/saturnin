@@ -351,6 +351,8 @@ struct ScrollScreenStatus {
     u8  screen_scroll_horizontal_fractional{}; ///< Horizontal screen scroll fractional part.
     u16 screen_scroll_vertical_integer{};      ///< Vertical screen scroll vertical integer part.
     u8  screen_scroll_vertical_fractional{};   ///< Vertical screen scroll fractional part.
+    u16 scroll_offset_horizontal{};            ///< Horizontal scroll offset.
+    u16 scroll_offset_vertical{};              ///< Vertical scroll offset.
 
     // Color offset data
     bool        is_color_offset_enabled{}; ///< True when color offset is enabled.

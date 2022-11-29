@@ -2280,12 +2280,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer = scxin0_.integer;
-            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            screen.screen_scroll_horizontal_integer    = scxin0_.integer;
             screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn0_.fractional);
             screen.screen_scroll_vertical_integer      = scyin0_.integer;
-            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
-            screen.screen_scroll_vertical_fractional = static_cast<u8>(scydn0_.fractional);
+            screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn0_.fractional);
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg0);
@@ -2345,7 +2343,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Scroll screen
             screen.screen_scroll_horizontal_integer    = scxin1_.integer;
             screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn1_.fractional);
-            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            /// if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
             screen.screen_scroll_vertical_integer = scyin1_.integer;
             // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
             screen.screen_scroll_vertical_fractional = static_cast<u8>(scydn1_.fractional);
@@ -2692,6 +2690,23 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         }
 
         return pixels_per_cell * cells_per_page_height * plane_height * map_height;
+    }();
+
+    // screen.scroll_offset_horizontal = screen.screen_scroll_horizontal_integer
+    //                                   % (512 -)
+
+    screen.scroll_offset_horizontal = [&]() {
+        constexpr auto plane_width  = 512;
+        auto           nb_of_planes = u8{};
+        switch (screen.plane_size) {
+            using enum PlaneSize;
+            case size_1_by_1: nb_of_planes = 1; break;
+            case size_2_by_1:
+            case size_2_by_2: nb_of_planes = 2; break;
+        }
+
+        return screen.screen_scroll_horizontal_integer % (512 * nb_of_planes - tv_screen_status_.horizontal_res);
+        // return screen.screen_scroll_horizontal_integer % 200;
     }();
 
     if (isCacheDirty(s)) { discardCache(s); }
@@ -3527,7 +3542,8 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     // } else {
     //     pos.x -= screen.screen_scroll_horizontal_integer;
     // }
-    pos.x -= (screen.screen_scroll_horizontal_integer % 190);
+    // pos.x -= (screen.screen_scroll_horizontal_integer % (512 - tv_screen_status_.horizontal_res));
+    pos.x -= screen.scroll_offset_horizontal;
     pos.y -= screen.screen_scroll_vertical_integer;
 
     LockGuard lock(vdp2_parts_mutex_);

@@ -463,6 +463,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     values.emplace_back(tr("Scroll width"), uti::format("{}px", screen.total_screen_scroll_width));
     values.emplace_back(tr("Scroll height"), uti::format("{}px", screen.total_screen_scroll_height));
 
+    auto offset = screen.scroll_offset_horizontal;
+    values.emplace_back(tr("Scroll offset"), uti::format("{}", offset));
+
     // Color offset
     if (screen.is_color_offset_enabled) {
         values.emplace_back(tr("Color offset"),
