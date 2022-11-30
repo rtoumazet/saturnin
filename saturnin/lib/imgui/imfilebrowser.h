@@ -340,9 +340,7 @@ inline void ImGui::FileBrowser::Display() {
                 ScopeGuard closeNewDirPopup([] { CloseCurrentPopup(); });
                 if (create_directory(pwd_ / newDirNameBuf_->data()))
                     SetPwd(pwd_);
-                else {
-                    statusStr_ = "failed to create " + std::string(newDirNameBuf_->data());
-                }
+                else { statusStr_ = "failed to create " + std::string(newDirNameBuf_->data()); }
             }
         }
     }
@@ -443,7 +441,7 @@ inline void ImGui::FileBrowser::Display() {
     int escIdx = GetIO().KeyMap[ImGuiKey_Escape];
     if (Button("cancel") || closeFlag_
         || ((flags_ & ImGuiFileBrowserFlags_CloseOnEsc) && IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && escIdx >= 0
-            && IsKeyPressed(escIdx)))
+            && IsKeyPressed((ImGuiKey)escIdx)))
         CloseCurrentPopup();
 
     if (!statusStr_.empty() && !(flags_ & ImGuiFileBrowserFlags_NoStatusBar)) {
