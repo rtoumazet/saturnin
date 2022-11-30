@@ -2705,6 +2705,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             case size_2_by_2: nb_of_planes = 2; break;
         }
 
+        if (screen.screen_scroll_horizontal_integer & 0x400) {
+            screen.screen_scroll_horizontal_integer = -screen.screen_scroll_horizontal_integer;
+        }
+
         return screen.screen_scroll_horizontal_integer % (512 * nb_of_planes - tv_screen_status_.horizontal_res);
         // return screen.screen_scroll_horizontal_integer % 200;
     }();
