@@ -232,6 +232,7 @@ void Vdp2::onVblankIn() {
 
 auto Vdp2::getSpriteColorAddressOffset() -> u16 { return getColorRamAddressOffset(craofb_.color_ram_address_offset_sprite); }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::getSpritePriority(const u8 register_number) -> u8 {
     // Next line works from LLVM version 14.0.0
     // NOLINTBEGIN(readability-magic-numbers)
@@ -250,6 +251,7 @@ auto Vdp2::getSpritePriority(const u8 register_number) -> u8 {
     return 0;
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
     auto enable_bit = ColorOffsetEnableBit{};
     auto select_bit = ColorOffsetSelectBit{};
@@ -1076,6 +1078,7 @@ void Vdp2::initializeRegisterNameMap() {
     addToRegisterNameMap(color_offset_b_blue, "Color Offset B (Blue)");
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::computePrecalculatedData() {
     // Modulo values used for 1 cell character pattern positioning
     constexpr auto modulo_64_number = u8{64};
@@ -2705,11 +2708,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             case size_2_by_2: nb_of_planes = 2; break;
         }
 
-        if (screen.screen_scroll_horizontal_integer & 0x400) {
-            screen.screen_scroll_horizontal_integer = -screen.screen_scroll_horizontal_integer;
-        }
-
-        return screen.screen_scroll_horizontal_integer % (512 * nb_of_planes - tv_screen_status_.horizontal_res);
+        // return screen.screen_scroll_horizontal_integer % (512 * nb_of_planes - tv_screen_status_.horizontal_res);
+        return screen.screen_scroll_horizontal_integer % (512 * nb_of_planes);
         // return screen.screen_scroll_horizontal_integer % 200;
     }();
 
@@ -3532,6 +3532,7 @@ void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus              screen,
     Texture::storeTextures(textures);
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::saveCell(const ScrollScreenStatus& screen,
                     const PatternNameData&    pnd,
                     const u32                 cell_address,
