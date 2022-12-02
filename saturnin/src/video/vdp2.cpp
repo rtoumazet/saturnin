@@ -2346,9 +2346,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Scroll screen
             screen.screen_scroll_horizontal_integer    = scxin1_.integer;
             screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn1_.fractional);
-            /// if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xF800; }
             screen.screen_scroll_vertical_integer = scyin1_.integer;
-            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
+            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xF800; }
             screen.screen_scroll_vertical_fractional = static_cast<u8>(scydn1_.fractional);
 
             // Color offset
@@ -2709,8 +2709,13 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         }
 
         // return screen.screen_scroll_horizontal_integer % (512 * nb_of_planes - tv_screen_status_.horizontal_res);
-        return screen.screen_scroll_horizontal_integer % (512 * nb_of_planes);
-        // return screen.screen_scroll_horizontal_integer % 200;
+        if (screen.screen_scroll_horizontal_integer > 0) {
+            return (512 * nb_of_planes)
+                   - screen.screen_scroll_horizontal_integer % (512 * nb_of_planes - tv_screen_status_.horizontal_res);
+        }
+
+        // return (512 * nb_of_planes) - screen.screen_scroll_horizontal_integer % (512 * nb_of_planes);
+        return 0;
     }();
 
     if (isCacheDirty(s)) { discardCache(s); }
