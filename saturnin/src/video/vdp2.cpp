@@ -2346,10 +2346,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Scroll screen
             screen.screen_scroll_horizontal_integer    = scxin1_.integer;
             screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn1_.fractional);
-            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xF800; }
-            screen.screen_scroll_vertical_integer = scyin1_.integer;
-            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xF800; }
-            screen.screen_scroll_vertical_fractional = static_cast<u8>(scydn1_.fractional);
+            screen.screen_scroll_vertical_integer      = scyin1_.integer;
+            screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn1_.fractional);
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg1);
@@ -2695,9 +2693,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return pixels_per_cell * cells_per_page_height * plane_height * map_height;
     }();
 
-    // screen.scroll_offset_horizontal = screen.screen_scroll_horizontal_integer
-    //                                   % (512 -)
-
     screen.scroll_offset_horizontal = [&]() {
         constexpr auto plane_width  = 512;
         auto           nb_of_planes = u8{};
@@ -2708,14 +2703,20 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             case size_2_by_2: nb_of_planes = 2; break;
         }
 
-        // return screen.screen_scroll_horizontal_integer % (512 * nb_of_planes - tv_screen_status_.horizontal_res);
-        if (screen.screen_scroll_horizontal_integer > 0) {
-            return (512 * nb_of_planes)
-                   - screen.screen_scroll_horizontal_integer % (512 * nb_of_planes - tv_screen_status_.horizontal_res);
+        return screen.screen_scroll_horizontal_integer % (plane_width * nb_of_planes);
+    }();
+
+    screen.scroll_offset_vertical = [&]() {
+        constexpr auto plane_height = 512;
+        auto           nb_of_planes = u8{};
+        switch (screen.plane_size) {
+            using enum PlaneSize;
+            case size_1_by_1:
+            case size_2_by_1: nb_of_planes = 1; break;
+            case size_2_by_2: nb_of_planes = 2; break;
         }
 
-        // return (512 * nb_of_planes) - screen.screen_scroll_horizontal_integer % (512 * nb_of_planes);
-        return 0;
+        return screen.screen_scroll_vertical_integer % (plane_height * nb_of_planes);
     }();
 
     if (isCacheDirty(s)) { discardCache(s); }
@@ -2893,44 +2894,39 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         cell_data_to_process_.reserve(screen.cells_number);
 
         // Using a set to prevent calculating same address data multiple times
-        auto unique_addresses = std::unordered_set<u32>{};
-        auto start_addresses  = std::vector<std::pair<u32, ScreenOffset>>{};
+        // auto unique_addresses = std::unordered_set<u32>{};
+        auto start_addresses = std::vector<std::pair<u32, ScreenOffset>>{};
 
-        const auto addUniquePlane = [&](const u32 address, const ScreenOffset& offset) {
-            if (unique_addresses.insert(address).second) { start_addresses.emplace_back(address, offset); }
-        };
+        const auto addPlane
+            = [&](const u32 address, const ScreenOffset& offset) { start_addresses.emplace_back(address, offset); };
 
         const auto offset_x         = screen.plane_screen_offset.x;
         const auto offset_y         = screen.plane_screen_offset.y;
         const auto rotation_screens = std::array{ScrollScreen::rbg0, ScrollScreen::rbg1};
         if (std::none_of(rotation_screens.begin(), rotation_screens.end(), [&s](const ScrollScreen rss) { return rss == s; })) {
             // For NBG
-            addUniquePlane(screen.plane_a_start_address, ScreenOffset{0, 0});
-            addUniquePlane(screen.plane_b_start_address, ScreenOffset{offset_x, 0});
-            addUniquePlane(screen.plane_c_start_address, ScreenOffset{0, offset_y});
-            addUniquePlane(screen.plane_d_start_address, ScreenOffset{offset_x, offset_y});
+            addPlane(screen.plane_a_start_address, ScreenOffset{0, 0});
+            addPlane(screen.plane_b_start_address, ScreenOffset{offset_x, 0});
+            addPlane(screen.plane_c_start_address, ScreenOffset{0, offset_y});
+            addPlane(screen.plane_d_start_address, ScreenOffset{offset_x, offset_y});
         } else {
             // For RBG
-            addUniquePlane(screen.plane_a_start_address, ScreenOffset{0, 0});
-            addUniquePlane(screen.plane_b_start_address, ScreenOffset{offset_x, 0});
-            addUniquePlane(screen.plane_c_start_address, ScreenOffset{static_cast<u16>(offset_x * 2), 0});
-            addUniquePlane(screen.plane_d_start_address, ScreenOffset{static_cast<u16>(offset_x * 3), 0});
-            addUniquePlane(screen.plane_e_start_address, ScreenOffset{0, offset_y});
-            addUniquePlane(screen.plane_f_start_address, ScreenOffset{offset_x, offset_y});
-            addUniquePlane(screen.plane_g_start_address, ScreenOffset{static_cast<u16>(offset_x * 2), offset_y});
-            addUniquePlane(screen.plane_h_start_address, ScreenOffset{static_cast<u16>(offset_x * 3), offset_y});
-            addUniquePlane(screen.plane_i_start_address, ScreenOffset{0, static_cast<u16>(offset_y * 2)});
-            addUniquePlane(screen.plane_j_start_address, ScreenOffset{offset_x, static_cast<u16>(offset_y * 2)});
-            addUniquePlane(screen.plane_k_start_address,
-                           ScreenOffset{static_cast<u16>(offset_x * 2), static_cast<u16>(offset_y * 2)});
-            addUniquePlane(screen.plane_l_start_address,
-                           ScreenOffset{static_cast<u16>(offset_x * 3), static_cast<u16>(offset_y * 2)});
-            addUniquePlane(screen.plane_m_start_address, ScreenOffset{0, static_cast<u16>(offset_y * 3)});
-            addUniquePlane(screen.plane_n_start_address, ScreenOffset{offset_x, static_cast<u16>(offset_y * 3)});
-            addUniquePlane(screen.plane_o_start_address,
-                           ScreenOffset{static_cast<u16>(offset_x * 2), static_cast<u16>(offset_y * 3)});
-            addUniquePlane(screen.plane_p_start_address,
-                           ScreenOffset{static_cast<u16>(offset_x * 3), static_cast<u16>(offset_y * 3)});
+            addPlane(screen.plane_a_start_address, ScreenOffset{0, 0});
+            addPlane(screen.plane_b_start_address, ScreenOffset{offset_x, 0});
+            addPlane(screen.plane_c_start_address, ScreenOffset{static_cast<u16>(offset_x * 2), 0});
+            addPlane(screen.plane_d_start_address, ScreenOffset{static_cast<u16>(offset_x * 3), 0});
+            addPlane(screen.plane_e_start_address, ScreenOffset{0, offset_y});
+            addPlane(screen.plane_f_start_address, ScreenOffset{offset_x, offset_y});
+            addPlane(screen.plane_g_start_address, ScreenOffset{static_cast<u16>(offset_x * 2), offset_y});
+            addPlane(screen.plane_h_start_address, ScreenOffset{static_cast<u16>(offset_x * 3), offset_y});
+            addPlane(screen.plane_i_start_address, ScreenOffset{0, static_cast<u16>(offset_y * 2)});
+            addPlane(screen.plane_j_start_address, ScreenOffset{offset_x, static_cast<u16>(offset_y * 2)});
+            addPlane(screen.plane_k_start_address, ScreenOffset{static_cast<u16>(offset_x * 2), static_cast<u16>(offset_y * 2)});
+            addPlane(screen.plane_l_start_address, ScreenOffset{static_cast<u16>(offset_x * 3), static_cast<u16>(offset_y * 2)});
+            addPlane(screen.plane_m_start_address, ScreenOffset{0, static_cast<u16>(offset_y * 3)});
+            addPlane(screen.plane_n_start_address, ScreenOffset{offset_x, static_cast<u16>(offset_y * 3)});
+            addPlane(screen.plane_o_start_address, ScreenOffset{static_cast<u16>(offset_x * 2), static_cast<u16>(offset_y * 3)});
+            addPlane(screen.plane_p_start_address, ScreenOffset{static_cast<u16>(offset_x * 3), static_cast<u16>(offset_y * 3)});
         }
 
         // Unique addresses are handled
@@ -3547,14 +3543,9 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     constexpr auto texture_height = u16{8};
 
     auto pos = ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)};
-    // if ((screen.total_screen_scroll_width - tv_screen_status_.horizontal_res) < screen.screen_scroll_horizontal_integer) {
-    //     pos.x -= (screen.screen_scroll_horizontal_integer % screen.total_screen_scroll_width);
-    // } else {
-    //     pos.x -= screen.screen_scroll_horizontal_integer;
-    // }
-    // pos.x -= (screen.screen_scroll_horizontal_integer % (512 - tv_screen_status_.horizontal_res));
+
     pos.x -= screen.scroll_offset_horizontal;
-    pos.y -= screen.screen_scroll_vertical_integer;
+    pos.y -= screen.scroll_offset_vertical;
 
     LockGuard lock(vdp2_parts_mutex_);
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
