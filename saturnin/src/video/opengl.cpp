@@ -159,6 +159,8 @@ void Opengl::preRender() {
 
 void Opengl::postRender() {
     // Framebuffer is released
+    GLenum error = glGetError();
+    if (error != GLenum::GL_NO_ERROR) { Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     } else {
