@@ -70,6 +70,8 @@ constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
 constexpr auto vertexes_per_polyline         = u32{4};
 constexpr auto vertexes_per_line             = u32{2};
 
+constexpr auto check_gl_error = 1;
+
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
 Opengl::~Opengl() { shutdown(); }
@@ -159,8 +161,9 @@ void Opengl::preRender() {
 
 void Opengl::postRender() {
     // Framebuffer is released
-    GLenum error = glGetError();
-    if (error != GLenum::GL_NO_ERROR) { Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
+    // GLenum error = glGetError();
+    // if (error != GLenum::GL_NO_ERROR) { Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
+    checkGlError();
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     } else {
@@ -944,6 +947,7 @@ void Opengl::generateSubTexture(const size_t key) {
                             GLenum::GL_RGBA,
                             GLenum::GL_UNSIGNED_BYTE,
                             (*tex)->rawData().data());
+            checkGlError();
         }
     }
 }
@@ -1581,4 +1585,12 @@ void checkProgramCompilation(const u32 program) {
         throw std::runtime_error("Opengl error !");
     }
 }
+
+void checkGlError() {
+    if (check_gl_error) {
+        const auto error = glGetError();
+        if (error != GLenum::GL_NO_ERROR) { Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
+    }
+}
+
 }; // namespace saturnin::video

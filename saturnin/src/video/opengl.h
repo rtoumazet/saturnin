@@ -749,4 +749,6 @@ void checkShaderCompilation(u32 shader);
 
 void checkProgramCompilation(u32 program);
 
+void checkGlError();
+
 }; // namespace saturnin::video
