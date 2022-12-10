@@ -1808,6 +1808,20 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
 
                 ImGui::EndTabItem();
             }
+            if (ImGui::BeginTabItem(tr("Layers").c_str())) {
+                const auto child_size = ImVec2(500, 520);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+                ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
+
+                const auto preview_size = ImVec2(500, 500);
+                auto       tex_id       = state.opengl()->generateTextureFromTextureArrayLayer(0);
+                ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+
+                ImGui::EndChild();
+                ImGui::PopStyleVar();
+
+                ImGui::EndTabItem();
+            }
             ImGui::EndTabBar();
         }
         ImGui::EndGroup();

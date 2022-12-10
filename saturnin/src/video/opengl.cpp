@@ -95,15 +95,15 @@ void Opengl::initialize() {
     texture_array_id_ = initializeTextureArray();
 
     {
-        const auto logo = rh::embed("saturnin-logo.png");
-        auto       img  = loadPngImage(logo.data(), logo.size());
+        // const auto logo = rh::embed("saturnin-logo.png");
+        // auto       img  = loadPngImage(logo.data(), logo.size());
 
-        const auto size = strlen((char*)img.pixels);
-        auto       vec  = std::vector<u8>{img.pixels, img.pixels + size};
-        auto       tex  = Texture(VdpType::vdp1, 0, 5, 0, vec, 1364, 886);
-        Texture::storeTexture(tex);
-        addOrUpdateTexture(tex.key());
-        generateTextures();
+        // const auto size = strlen((char*)img.pixels);
+        // auto       vec  = std::vector<u8>{img.pixels, img.pixels + size};
+        // auto       tex  = Texture(VdpType::vdp1, 0, 5, 0, vec, 1364, 886);
+        // Texture::storeTexture(tex);
+        // addOrUpdateTexture(tex.key());
+        // generateTextures();
 
         // auto ot      = OpenglTexture{};
         // ot.key       = 1;
@@ -161,8 +161,6 @@ void Opengl::preRender() {
 
 void Opengl::postRender() {
     // Framebuffer is released
-    // GLenum error = glGetError();
-    // if (error != GLenum::GL_NO_ERROR) { Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
     checkGlError();
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -369,7 +367,8 @@ void Opengl::render() {
 
         glActiveTexture(GLenum::GL_TEXTURE0);
         const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
-        glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
+        // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
+        glUniform1i(sampler_loc, 0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
 
         const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
@@ -493,9 +492,9 @@ void Opengl::render() {
 
                     const auto opengl_tex = getOpenglTexture(part->textureKey());
                     if (opengl_tex.has_value()) {
-                        auto tex_pos = std::array<float, 3>{(float)opengl_tex->pos.x / (float)texture_array_width,
-                                                            (float)opengl_tex->pos.y / (float)texture_array_height,
-                                                            (float)opengl_tex->layer};
+                        auto tex_pos = std::array<gl::GLfloat, 3>{(float)opengl_tex->pos.x / (float)texture_array_width,
+                                                                  (float)opengl_tex->pos.y / (float)texture_array_height,
+                                                                  (float)opengl_tex->layer};
                         glUniform3fv(texture_pos_loc, 1, tex_pos.data());
                         // opengl_tex->pos
                         //  glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
@@ -956,6 +955,30 @@ auto Opengl::isSaturnResolutionSet() -> bool {
     return (saturn_screen_resolution_.width == 0 || saturn_screen_resolution_.height == 0) ? false : true;
 }
 
+auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer) -> u32 {
+    if (texture_array_debug_layer_id_ == 0) {
+        texture_array_debug_layer_id_ = generateTexture(texture_array_width, texture_array_height, std::vector<u8>{});
+    }
+
+    glCopyImageSubData(texture_array_id_,
+                       GL_TEXTURE_2D_ARRAY,
+                       0,
+                       0,
+                       0,
+                       layer,
+                       texture_array_debug_layer_id_,
+                       GL_TEXTURE_2D,
+                       0,
+                       0,
+                       0,
+                       0,
+                       texture_array_width,
+                       texture_array_height,
+                       1);
+
+    return texture_array_debug_layer_id_;
+};
+
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
 
 void Opengl::updateScreenResolution() {}
@@ -1222,12 +1245,16 @@ auto Opengl::initializeTextureArray() -> u32 {
                  nullptr);                 // no data for now
 
     // set the texture wrapping parameters
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
 
-    // set texture filtering parameters
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
+    // disabling mipmaps
+    // glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_LINEAR);
+    // glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_LINEAR);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
 
     return texture;
 }
@@ -1310,7 +1337,7 @@ auto isModernOpenglCapable() -> bool {
 
     glfwMakeContextCurrent(window);
 
-    glbinding::initialize(glfwGetProcAddress);
+    glbinding::initialize(glfwGetProcAddress, false);
     const auto version = glbinding::aux::ContextInfo::version();
 
     glfwDestroyWindow(window);
@@ -1331,6 +1358,56 @@ void windowCloseCallback(GLFWwindow* window) {
     using namespace std::chrono_literals; // ms
     const auto time_to_sleep = 20ms;
     sleep_for(time_to_sleep);
+}
+
+void glDebugOutput(gl::GLenum   source,
+                   gl::GLenum   type,
+                   unsigned int id,
+                   gl::GLenum   severity,
+                   gl::GLsizei  length,
+                   const char*  message,
+                   const void*  userParam) {
+    // ignore non-significant error/warning codes
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+    // Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
+    Log::warning(Logger::opengl, "---------------");
+    Log::warning(Logger::opengl, "Debug message ({}): {}", id, message);
+
+    auto source_str = std::string{};
+    switch (source) {
+        case GL_DEBUG_SOURCE_API: source_str = "API"; break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM: source_str = "Window System"; break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: source_str = "Shader Compiler"; break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY: source_str = "Third Party"; break;
+        case GL_DEBUG_SOURCE_APPLICATION: source_str = "Application"; break;
+        case GL_DEBUG_SOURCE_OTHER: source_str = "Other"; break;
+    }
+    Log::warning(Logger::opengl, "Source: {}", source_str);
+
+    auto type_str = std::string{};
+    switch (type) {
+        case GL_DEBUG_TYPE_ERROR: type_str = "Error"; break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: type_str = "Deprecated Behaviour"; break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: type_str = "Undefined Behaviour"; break;
+        case GL_DEBUG_TYPE_PORTABILITY: type_str = "Portability"; break;
+        case GL_DEBUG_TYPE_PERFORMANCE: type_str = "Performance"; break;
+        case GL_DEBUG_TYPE_MARKER: type_str = "Marker"; break;
+        case GL_DEBUG_TYPE_PUSH_GROUP: type_str = "Type: Push Group"; break;
+        case GL_DEBUG_TYPE_POP_GROUP: type_str = "Type: Pop Group"; break;
+        case GL_DEBUG_TYPE_OTHER: type_str = "Type: Other"; break;
+    }
+    Log::warning(Logger::opengl, "Type: {}", source_str);
+
+    auto severity_str = std::string{};
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH: severity_str = "high"; break;
+        case GL_DEBUG_SEVERITY_MEDIUM: severity_str = "medium"; break;
+        case GL_DEBUG_SEVERITY_LOW: severity_str = "low"; break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: severity_str = "notification"; break;
+    }
+    Log::warning(Logger::opengl, "Severity: {}", severity_str);
+    // std::cout << std::endl;
 }
 
 auto runOpengl(core::EmulatorContext& state) -> s32 {
@@ -1359,6 +1436,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         glfwWindowHint(GLFW_OPENGL_PROFILE,
                        GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
         // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
+
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     }
 #endif
     const std::string rendering_mode = (is_legacy_opengl) ? core::tr("Legacy") : core::tr("Modern");
@@ -1389,7 +1468,18 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
                                                   loadPngImage(ico_48.data(), ico_48.size())}};
     glfwSetWindowIcon(window, 3, icons.data());
 
+    int flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (toEnum<ContextFlagMask>(flags) == ContextFlagMask::GL_CONTEXT_FLAG_DEBUG_BIT) {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(glDebugOutput, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
+
     glbinding::initialize(glfwGetProcAddress);
+
+    // glCopyImageSubData()
 
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
@@ -1452,7 +1542,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two
+        // flags.
 
         glfwPollEvents();
 

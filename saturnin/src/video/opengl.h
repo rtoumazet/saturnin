@@ -109,14 +109,19 @@ class Opengl {
 
     ///@{
     /// Accessors / Mutators
-    //[[nodiscard]] auto displayedTexture() const { return fbo_textures_[displayed_texture_index_]; };
-    // void               displayedTexture(const u32 index) { displayed_texture_index_ = index; };
+    //[[nodiscard]] auto textureArrayDebugLayerId() const { return texture_array_debug_layer_id_; };
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };
     [[nodiscard]] auto vdp2DebugLayerTextureId() -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
     [[nodiscard]] auto fps() const { return fps_; };
     void               fps(std::string fps) { fps_ = fps; };
+    void               saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
+    auto               saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
+    void               hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
+    auto               hostScreenResolution() const -> ScreenResolution { return host_screen_resolution_; };
+    void               partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
+    auto               partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
 
     ///@}
 
@@ -214,16 +219,6 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void updateScreenResolution();
-
-    ///@{
-    /// Accessors / mutators
-    void saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
-    auto saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
-    void hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
-    auto hostScreenResolution() const -> ScreenResolution { return host_screen_resolution_; };
-    void partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
-    auto partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
-    ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::createVertexShader(const ShaderName name) -> u32;
@@ -454,6 +449,21 @@ class Opengl {
 
     auto isSaturnResolutionSet() -> bool;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer) -> u32;
+    ///
+    /// \brief	Generates a texture from a texture array layer.
+    ///
+    /// \author	Runik
+    /// \date	10/12/2022
+    ///
+    /// \param 	layer	Layer of the texture array to get data from.
+    ///
+    /// \returns	The texture id generated from texture array layer.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto generateTextureFromTextureArrayLayer(const u32 layer) -> u32;
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
@@ -597,8 +607,9 @@ class Opengl {
     PartsList parts_list_;        // Will have to be moved to the platform agnostic renderer.
     Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
 
-    u32          texture_array_id_; ///< Identifier for the texture array.
-    TexturesLink textures_link_;    ///< Link between the Texture key and the OpenglTexture.
+    u32          texture_array_id_;               ///< Identifier for the texture array.
+    TexturesLink textures_link_;                  ///< Link between the Texture key and the OpenglTexture.
+    u32          texture_array_debug_layer_id_{}; ///< Identifier for the texture array debug layer.
 
     // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
