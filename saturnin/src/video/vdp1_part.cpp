@@ -171,10 +171,12 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             break;
         }
         case polyline_draw: {
+            polylineDraw(modules, *this);
             debug_header_ = tr("Polyline draw");
             break;
         }
         case line_draw: {
+            lineDraw(modules, *this);
             debug_header_ = tr("Line draw");
             break;
         }
