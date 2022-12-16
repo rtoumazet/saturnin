@@ -1811,10 +1811,14 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
             if (ImGui::BeginTabItem(tr("Layers").c_str())) {
                 const auto child_size = ImVec2(500, 520);
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
 
+                static auto layers        = std::vector<std::string>{"0", "1", "2", "3", "4", "5"};
+                static auto current_layer = int{};
+                if (ImGui::Combo("Layer", &current_layer, layers)) {}
+                auto tex_id = state.opengl()->generateTextureFromTextureArrayLayer(current_layer);
+
+                ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
                 const auto preview_size = ImVec2(500, 500);
-                auto       tex_id       = state.opengl()->generateTextureFromTextureArrayLayer(0);
                 ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
 
                 ImGui::EndChild();

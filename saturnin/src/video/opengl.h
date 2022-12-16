@@ -85,11 +85,12 @@ using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
 
 struct OpenglTexture {
-    size_t    key;       ///< The Saturn texture key.
-    u32       opengl_id; ///< Identifier of the OpenGL texture.
-    u16       layer;     ///< The layer (or index) in the texture array.
-    Size      size;      ///< Texture size
-    ScreenPos pos;       ///< Position of the texture in the texture atlas.
+    size_t                          key;       ///< The Saturn texture key.
+    u32                             opengl_id; ///< Identifier of the OpenGL texture.
+    u16                             layer;     ///< The layer (or index) in the texture array.
+    Size                            size;      ///< Texture size
+    ScreenPos                       pos;       ///< Position of the texture in the texture atlas.
+    std::vector<TextureCoordinates> coords;    ///< The coordinates in the texture atlas
 };
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;

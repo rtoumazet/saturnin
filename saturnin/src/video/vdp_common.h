@@ -34,7 +34,7 @@ constexpr auto vram_start_address      = u32{0x25e00000};
 constexpr auto cram_start_address      = u32{0x25f00000};
 constexpr auto vdp1_address_multiplier = u8{8};
 
-constexpr s8 gouraud_offset = 0x10;
+constexpr auto gouraud_offset = s8{0x10};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   VdpType

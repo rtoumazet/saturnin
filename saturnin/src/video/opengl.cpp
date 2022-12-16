@@ -266,7 +266,7 @@ void Opengl::initializeShaders() {
 
         //uniform sampler2D texture1;
         uniform sampler2DArray sampler;
-        uniform vec3 texture_pos;
+        //uniform vec3 texture_pos;
         uniform bool is_texture_used;
         uniform vec3 color_offset;
 
@@ -276,7 +276,8 @@ void Opengl::initializeShaders() {
         {
             if(is_texture_used){
                 //out_color = texture(texture1, frg_tex_coord);
-                out_color = texture(sampler, vec3(texture_pos));
+                //out_color = texture(sampler, vec3(texture_pos));
+                out_color = texture(sampler, frg_tex_coord);
             }else{
                 out_color = frg_color;
             }
@@ -372,7 +373,7 @@ void Opengl::render() {
         glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
 
         const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
-        const auto texture_pos_loc  = glGetUniformLocation(program_shader_, "texture_pos");
+        // const auto texture_pos_loc  = glGetUniformLocation(program_shader_, "texture_pos");
 
         // Filling a vector with all the vertexes needed to render the parts list, in order to send data only once to the GPU.
         // auto batch_vertex_size = getVertexesNumberByDrawType(parts_list);
@@ -468,6 +469,33 @@ void Opengl::render() {
             switch (part->drawType()) {
                 using enum DrawType;
                 case textured_polygon: {
+                    // Sending the variable to configure the shader to use texture data.
+                    const auto is_texture_used = GLboolean(true);
+                    glUniform1i(texture_used_loc, is_texture_used);
+
+                    const auto opengl_tex = getOpenglTexture(part->textureKey());
+                    if (opengl_tex.has_value()) {
+                        // Replacing texture coordinates of the vertex by those of the OpenGL texture.
+                        for (auto& v : part->vertexes_) {
+                            if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+                                v.tex_coords = opengl_tex->coords[0];
+                                continue;
+                            }
+                            if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+                                v.tex_coords = opengl_tex->coords[1];
+                                continue;
+                            }
+                            if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+                                v.tex_coords = opengl_tex->coords[2];
+                                continue;
+                            }
+                            if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+                                v.tex_coords = opengl_tex->coords[3];
+                                continue;
+                            }
+                        }
+                    }
+
                     // Quad is tessellated into 2 triangles, using a texture
                     //******
                     auto vertexes = std::vector<Vertex>{};
@@ -485,20 +513,6 @@ void Opengl::render() {
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
                     // glActiveTexture(GLenum::GL_TEXTURE0);
                     //******
-
-                    // Sending the variable to configure the shader to use texture data.
-                    const auto is_texture_used = GLboolean(true);
-                    glUniform1i(texture_used_loc, is_texture_used);
-
-                    const auto opengl_tex = getOpenglTexture(part->textureKey());
-                    if (opengl_tex.has_value()) {
-                        auto tex_pos = std::array<gl::GLfloat, 3>{(float)opengl_tex->pos.x / (float)texture_array_width,
-                                                                  (float)opengl_tex->pos.y / (float)texture_array_height,
-                                                                  (float)opengl_tex->layer};
-                        glUniform3fv(texture_pos_loc, 1, tex_pos.data());
-                        // opengl_tex->pos
-                        //  glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
-                    }
 
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
@@ -904,6 +918,24 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
         textures_link_[texture.key].layer = current_layer;
         textures_link_[texture.key].size  = texture.size;
         textures_link_[texture.key].pos   = {x_pos, y_pos};
+
+        // Calculating the texture coordinates in the atlas
+        // (x1,y1)     (x2,y1)
+        //        .---.
+        //        |   |
+        //        .---.
+        // (x1,y2)     (x2,y2)
+
+        auto x1 = static_cast<float>(x_pos) / static_cast<float>(texture_array_width);
+        auto x2 = static_cast<float>(x_pos + texture.size.w) / static_cast<float>(texture_array_width);
+        auto y1 = static_cast<float>(y_pos) / static_cast<float>(texture_array_height);
+        auto y2 = static_cast<float>(y_pos + texture.size.h) / static_cast<float>(texture_array_height);
+
+        auto coords = std::vector{TextureCoordinates{x1, y1, static_cast<float>(current_layer)},
+                                  TextureCoordinates{x2, y1, static_cast<float>(current_layer)},
+                                  TextureCoordinates{x2, y2, static_cast<float>(current_layer)},
+                                  TextureCoordinates{x1, y2, static_cast<float>(current_layer)}};
+        textures_link_[texture.key].coords.swap(coords);
 
         generateSubTexture(texture.key);
 
