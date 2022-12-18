@@ -227,15 +227,17 @@ class Texture {
     static void deleteCache();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void detailedList();
+    /// \fn	static auto Texture::keysList() -> std::vector<DebugKey>;
     ///
-    /// \brief  Returns the detailed list of textures.
+    /// \brief	Returns the detailed list of textures.
     ///
-    /// \author Runik
-    /// \date   22/04/2022
+    /// \author	Runik
+    /// \date	22/04/2022
+    ///
+    /// \returns	A std::vector&lt;DebugKey&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto detailedList() -> std::vector<DebugKey>;
+    static auto keysList() -> std::vector<DebugKey>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Texture::statistics() -> std::vector<std::string>;

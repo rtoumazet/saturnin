@@ -899,6 +899,8 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
     auto current_row_max_height = u16{};
 
     for (auto& texture : textures) {
+        // if (texture.key == 0x8180518edf1c0411) DebugBreak();
+        // if (texture.key == 0xefc9178d67d050ee) DebugBreak();
         if ((x_pos + texture.size.w) > texture_array_width) {
             // Texture doesn't fit in the remaining space of the row ... looping around to next row using
             // the maximum height from the previous row.
@@ -959,6 +961,23 @@ auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> 
     std::lock_guard lock(textures_link_mutex_);
     const auto      it = textures_link_.find(key);
     return (it == textures_link_.end()) ? std::nullopt : std::optional<OpenglTexture>(it->second);
+}
+
+auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
+    auto            details = std::string{};
+    std::lock_guard lock(textures_link_mutex_);
+    const auto      it = textures_link_.find(key);
+    if (it != textures_link_.end()) {
+        details += util::format("Key: 0x{:x}\n", it->second.key);
+        details += util::format("Position: {},{}\n", it->second.pos.x, it->second.pos.y);
+        details += util::format("Size: {},{}\n", it->second.size.w, it->second.size.h);
+        details += util::format("Layer: {}\n", it->second.layer);
+        details += util::format("X1: {},{}\n", it->second.coords[0].s, it->second.coords[0].t);
+        details += util::format("X2: {},{}\n", it->second.coords[1].s, it->second.coords[1].t);
+        details += util::format("Y2: {},{}\n", it->second.coords[2].s, it->second.coords[2].t);
+        details += util::format("Y1: {},{}\n", it->second.coords[3].s, it->second.coords[3].t);
+    }
+    return details;
 }
 
 void Opengl::generateSubTexture(const size_t key) {

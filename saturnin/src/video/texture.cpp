@@ -177,12 +177,12 @@ void Texture::deleteCache() {
 }
 
 // static
-auto Texture::detailedList() -> std::vector<DebugKey> {
+auto Texture::keysList() -> std::vector<DebugKey> {
     auto         list = std::vector<DebugKey>{};
-    const auto   mask = std::string("{}x{} | {:x}");
+    const auto   mask = std::string("{:x}");
     ReadOnlyLock lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
-        list.emplace_back(uti::format(mask, value.width_, value.height_, value.key_), value.key_);
+        list.emplace_back(uti::format(mask, value.key_), value.key_);
     }
     return list;
 }

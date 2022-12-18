@@ -465,6 +465,21 @@ class Opengl {
 
     auto generateTextureFromTextureArrayLayer(const u32 layer) -> u32;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string;
+    ///
+    /// \brief	Texture details
+    ///
+    /// \author	Runik
+    /// \date	17/12/2022
+    ///
+    /// \param 	key	The key.
+    ///
+    /// \returns	The opengl texture details.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getOpenglTextureDetails(const size_t key) -> std::string;
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
