@@ -264,20 +264,15 @@ void Opengl::initializeShaders() {
 
         out vec4 out_color;
 
-        //uniform sampler2D texture1;
         uniform sampler2DArray sampler;
-        //uniform vec3 texture_pos;
         uniform bool is_texture_used;
         uniform vec3 color_offset;
 
-        //vec4 test = vec4(1.0,0.0,0.0,1.0);
-        
         void main()
         {
             if(is_texture_used){
-                //out_color = texture(texture1, frg_tex_coord);
-                //out_color = texture(sampler, vec3(texture_pos));
-                out_color = texture(sampler, frg_tex_coord);
+                //out_color = texture(sampler, frg_tex_coord);
+                out_color = texture(sampler, vec3(frg_tex_coord.xy,float(frg_tex_coord.z)));
             }else{
                 out_color = frg_color;
             }
@@ -829,34 +824,6 @@ void Opengl::generateTextures() {
     // (ie both RBG at maximum size, with every cell different).
     // Maximum VDP1 texture size is 504*255.
 
-    // auto local_textures_to_delete = std::vector<u32>();
-    //{
-    //     // vector is swapped to a local copy to keep the data structure locked for the minimum possible time.
-    //     //        std::lock_guard lock(texture_delete_mutex_);
-    //     local_textures_to_delete.swap(textures_to_delete_);
-    // }
-    // for (const auto id : local_textures_to_delete) {
-    //     deleteTexture(id);
-    // }
-
-    // auto local_textures_link = TexturesLink();
-    //{
-    //     // unordered_map is copied locally to keep the data structure locked for the minimum possible time.
-    //     //        std::lock_guard tl_lock(texture_link_mutex_);
-    //     local_textures_link = textures_link_;
-    // }
-    // for (auto& [key, ogl_tex] : local_textures_link) {
-    //     if (ogl_tex.opengl_id == 0) {
-    //         const auto& t = Texture::getTexture(key);
-    //         if (t) {
-    //             const auto texture_id = generateTexture((*t)->width(), (*t)->height(), (*t)->rawData());
-
-    //            //                std::lock_guard tl_lock(texture_link_mutex_);
-    //            textures_link_[key].opengl_id = texture_id;
-    //        }
-    //    }
-    //}
-
     // OpenglTextures don't have to be deleted, as they are part of a texture atlas now
     //
     // First implementation :
@@ -889,6 +856,22 @@ void Opengl::generateTextures() {
 // improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
 // So for now, keeping things simple.
 void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
+    // First previously used layers are cleared before reuse
+    auto empty_data = std::vector<u8>(texture_array_width * texture_array_height * 4);
+    for (auto i = 0; i <= texture_array_max_used_layer_; i++) {
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                        0,
+                        0,
+                        0,
+                        i,
+                        texture_array_width,
+                        texture_array_height,
+                        1,
+                        GLenum::GL_RGBA,
+                        GLenum::GL_UNSIGNED_BYTE,
+                        empty_data.data());
+    }
+
     std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) {
         return a.size.h > b.size.h;
     });
@@ -949,6 +932,7 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
         // Success!
         // rect.wasPacked = true;
     }
+    texture_array_max_used_layer_ = current_layer;
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
@@ -972,10 +956,10 @@ auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
         details += util::format("Position: {},{}\n", it->second.pos.x, it->second.pos.y);
         details += util::format("Size: {},{}\n", it->second.size.w, it->second.size.h);
         details += util::format("Layer: {}\n", it->second.layer);
-        details += util::format("X1: {},{}\n", it->second.coords[0].s, it->second.coords[0].t);
-        details += util::format("X2: {},{}\n", it->second.coords[1].s, it->second.coords[1].t);
-        details += util::format("Y2: {},{}\n", it->second.coords[2].s, it->second.coords[2].t);
-        details += util::format("Y1: {},{}\n", it->second.coords[3].s, it->second.coords[3].t);
+        details += util::format("X1: {},{},{}\n", it->second.coords[0].s, it->second.coords[0].t, it->second.coords[0].p);
+        details += util::format("X2: {},{},{}\n", it->second.coords[1].s, it->second.coords[1].t, it->second.coords[1].p);
+        details += util::format("Y2: {},{},{}\n", it->second.coords[2].s, it->second.coords[2].t, it->second.coords[2].p);
+        details += util::format("Y1: {},{},{}\n", it->second.coords[3].s, it->second.coords[3].t, it->second.coords[3].p);
     }
     return details;
 }
@@ -987,10 +971,10 @@ void Opengl::generateSubTexture(const size_t key) {
         const auto tex = Texture::getTexture(key);
         if (tex) {
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-                            ogl_tex->layer,
+                            0,
                             ogl_tex->pos.x,
                             ogl_tex->pos.y,
-                            0,
+                            ogl_tex->layer,
                             ogl_tex->size.w,
                             ogl_tex->size.h,
                             1,
@@ -1006,7 +990,7 @@ auto Opengl::isSaturnResolutionSet() -> bool {
     return (saturn_screen_resolution_.width == 0 || saturn_screen_resolution_.height == 0) ? false : true;
 }
 
-auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer) -> u32 {
+auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer, const size_t texture_key) -> u32 {
     if (texture_array_debug_layer_id_ == 0) {
         texture_array_debug_layer_id_ = generateTexture(texture_array_width, texture_array_height, std::vector<u8>{});
     }
@@ -1026,6 +1010,28 @@ auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer) -> u32 {
                        texture_array_width,
                        texture_array_height,
                        1);
+
+    if (texture_key > 0) {
+        const auto& tex_ogl       = getOpenglTexture(texture_key);
+        const auto& tex           = Texture::getTexture(texture_key);
+        auto        original_data = (*tex)->rawData();
+        for (auto i = 0; i < original_data.size(); i += 4) {
+            original_data[i] = 0xff;
+        }
+
+        glBindTexture(GL_TEXTURE_2D, texture_array_debug_layer_id_);
+
+        glTexSubImage2D(GL_TEXTURE_2D,
+                        0,
+                        tex_ogl->pos.x,
+                        tex_ogl->pos.y,
+                        tex_ogl->size.w,
+                        tex_ogl->size.h,
+                        GLenum::GL_RGBA,
+                        GLenum::GL_UNSIGNED_BYTE,
+                        original_data.data());
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
     return texture_array_debug_layer_id_;
 };
@@ -1448,7 +1454,7 @@ void glDebugOutput(gl::GLenum   source,
         case GL_DEBUG_TYPE_POP_GROUP: type_str = "Type: Pop Group"; break;
         case GL_DEBUG_TYPE_OTHER: type_str = "Type: Other"; break;
     }
-    Log::warning(Logger::opengl, "Type: {}", source_str);
+    Log::warning(Logger::opengl, "Type: {}", type_str);
 
     auto severity_str = std::string{};
     switch (severity) {

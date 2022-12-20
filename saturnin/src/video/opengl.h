@@ -451,19 +451,20 @@ class Opengl {
     auto isSaturnResolutionSet() -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer) -> u32;
+    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer, const size_t texture_key) -> u32;
     ///
     /// \brief	Generates a texture from a texture array layer.
     ///
     /// \author	Runik
     /// \date	10/12/2022
     ///
-    /// \param 	layer	Layer of the texture array to get data from.
+    /// \param 	layer	   	Layer of the texture array to get data from.
+    /// \param 	texture_key	The key of the texture to highlight.
     ///
     /// \returns	The texture id generated from texture array layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto generateTextureFromTextureArrayLayer(const u32 layer) -> u32;
+    auto generateTextureFromTextureArrayLayer(const u32 layer, const size_t texture_key) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string;
@@ -626,6 +627,7 @@ class Opengl {
     u32          texture_array_id_;               ///< Identifier for the texture array.
     TexturesLink textures_link_;                  ///< Link between the Texture key and the OpenglTexture.
     u32          texture_array_debug_layer_id_{}; ///< Identifier for the texture array debug layer.
+    u16          texture_array_max_used_layer_{}; ///< Maximum used layer of the texture array.
 
     // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
