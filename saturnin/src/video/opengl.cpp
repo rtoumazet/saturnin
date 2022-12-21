@@ -272,7 +272,10 @@ void Opengl::initializeShaders() {
         {
             if(is_texture_used){
                 //out_color = texture(sampler, frg_tex_coord);
-                out_color = texture(sampler, vec3(frg_tex_coord.xy,float(frg_tex_coord.z)));
+                float x = frg_tex_coord.x;
+                float y = frg_tex_coord.y;
+                float layer = frg_tex_coord.z;
+                out_color = texture(sampler, vec3(x,y,layer));
             }else{
                 out_color = frg_color;
             }
@@ -1188,7 +1191,7 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 
             // texture coords pointer
             auto offset = GLintptr(sizeof(VertexPosition));
-            glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+            glVertexAttribPointer(1, 3, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(1);
 
             // color pointer
