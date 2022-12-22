@@ -1780,7 +1780,7 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
 
                     // When image ratio isn't 1:1, preview size must be adapted to keep the image ratio.
                     if (!keys_list.empty()) {
-                        const auto  max_size     = Size{(u16)area_2_width, (u16)half_height};
+                        const auto  max_size     = Size{static_cast<u16>(area_2_width), static_cast<u16>(half_height)};
                         const auto& texture_key  = keys_list[current_texture_idx].second;
                         auto        tex_size     = video::Texture::calculateTextureSize(max_size, texture_key);
                         const auto  preview_size = ImVec2(tex_size.w, tex_size.h);
