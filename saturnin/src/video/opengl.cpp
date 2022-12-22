@@ -749,6 +749,43 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
 
+            glUseProgram(program_shader_);
+            glBindVertexArray(vao);                       // binding VAO
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+
+            // Sending the ortho projection matrix to the shader
+            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+            // Sending the variable to configure the shader to use texture data.
+            const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+            const auto is_texture_used = GLboolean(true);
+            glUniform1i(uni_use_texture, is_texture_used);
+
+            const auto opengl_tex = getOpenglTexture(part->textureKey());
+            if (opengl_tex.has_value()) {
+                // Replacing texture coordinates of the vertex by those of the OpenGL texture.
+                for (auto& v : part->vertexes_) {
+                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+                        v.tex_coords = opengl_tex->coords[0];
+                        continue;
+                    }
+                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+                        v.tex_coords = opengl_tex->coords[1];
+                        continue;
+                    }
+                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+                        v.tex_coords = opengl_tex->coords[2];
+                        continue;
+                    }
+                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+                        v.tex_coords = opengl_tex->coords[3];
+                        continue;
+                    }
+                }
+                glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
+            }
+
             // Quad is tessellated into 2 triangles, using a texture
 
             auto vertexes = std::vector<Vertex>{};
@@ -762,32 +799,13 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             vertexes.emplace_back(part->vertexes_[2]);
             vertexes.emplace_back(part->vertexes_[3]);
 
-            glUseProgram(program_shader_);
-            glBindVertexArray(vao);                       // binding VAO
-            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
-
             // Sending vertex buffer data to the GPU
             glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-            glActiveTexture(GLenum::GL_TEXTURE0);
-
-            // Sending the ortho projection matrix to the shader
-            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
-            // Sending the variable to configure the shader to use texture data.
-            const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
-            const auto is_texture_used = GLboolean(true);
-            glUniform1i(uni_use_texture, is_texture_used);
-
-            // glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
-            const auto opengl_tex = getOpenglTexture(part->textureKey());
-            if (opengl_tex.has_value()) { glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id); }
+            // glActiveTexture(GLenum::GL_TEXTURE0);
 
             glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
         }
 
-        // glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
-        // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
         gl::glDeleteBuffers(1, &vertex_buffer);
         gl::glDeleteVertexArrays(1, &vao);
     }
@@ -836,11 +854,7 @@ void Opengl::generateTextures() {
     // 2. For each Texture
 
     auto local_textures_link = TexturesLink();
-    {
-        // unordered_map is copied locally to keep the data structure locked for the minimum possible time.
-        //        std::lock_guard tl_lock(texture_link_mutex_);
-        local_textures_link = textures_link_;
-    }
+    { local_textures_link = textures_link_; }
 
     auto textures = std::vector<OpenglTexture>();
     textures.reserve(local_textures_link.size());
@@ -931,20 +945,11 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
 
         // Just saving the largest height in the new row
         if (texture.size.h > current_row_max_height) { current_row_max_height = texture.size.h; }
-
-        // Success!
-        // rect.wasPacked = true;
     }
     texture_array_max_used_layer_ = current_layer;
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
-    // std::lock_guard lock(texture_link_mutex_);
-    // auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
-    //     return v.first == key;
-    // });
-    // return (it != texture_key_id_link_.end()) ? std::optional<u32>(it->second) : std::nullopt;
-
     std::lock_guard lock(textures_link_mutex_);
     const auto      it = textures_link_.find(key);
     return (it == textures_link_.end()) ? std::nullopt : std::optional<OpenglTexture>(it->second);
