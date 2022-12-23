@@ -54,6 +54,9 @@ using utilities::toUnderlying;
 
 constexpr auto minimum_window_width  = u16{512};
 constexpr auto minimum_window_height = u16{512};
+constexpr auto texture_array_width   = u16{512};
+constexpr auto texture_array_height  = u16{512};
+constexpr auto texture_array_depth   = u16{128};
 
 enum class FboType : u8 {
     front_buffer,
@@ -81,6 +84,17 @@ enum class GlslVersion { glsl_120, glsl_330 };
 using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
 
+struct OpenglTexture {
+    size_t                          key;       ///< The Saturn texture key.
+    u32                             opengl_id; ///< Identifier of the OpenGL texture.
+    u16                             layer;     ///< The layer (or index) in the texture array.
+    Size                            size;      ///< Texture size
+    ScreenPos                       pos;       ///< Position of the texture in the texture atlas.
+    std::vector<TextureCoordinates> coords;    ///< The coordinates in the texture atlas
+};
+
+using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
+
 class Opengl {
   public:
     ///@{
@@ -96,14 +110,19 @@ class Opengl {
 
     ///@{
     /// Accessors / Mutators
-    //[[nodiscard]] auto displayedTexture() const { return fbo_textures_[displayed_texture_index_]; };
-    // void               displayedTexture(const u32 index) { displayed_texture_index_ = index; };
+    //[[nodiscard]] auto textureArrayDebugLayerId() const { return texture_array_debug_layer_id_; };
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };
     [[nodiscard]] auto vdp2DebugLayerTextureId() -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
     [[nodiscard]] auto fps() const { return fps_; };
     void               fps(std::string fps) { fps_ = fps; };
+    void               saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
+    auto               saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
+    void               hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
+    auto               hostScreenResolution() const -> ScreenResolution { return host_screen_resolution_; };
+    void               partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
+    auto               partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
 
     ///@}
 
@@ -201,16 +220,6 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void updateScreenResolution();
-
-    ///@{
-    /// Accessors / mutators
-    void saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
-    auto saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
-    void hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
-    auto hostScreenResolution() const -> ScreenResolution { return host_screen_resolution_; };
-    void partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
-    auto partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
-    ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::createVertexShader(const ShaderName name) -> u32;
@@ -414,19 +423,19 @@ class Opengl {
     void generateTextures();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getTextureId(const size_t key);
+    /// \fn	auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture>;
     ///
-    /// \brief  Gets texture identifier corresponding to the key.
+    /// \brief	Gets texture identifier corresponding to the key.
     ///
-    /// \author Runik
-    /// \date   05/11/2021
+    /// \author	Runik
+    /// \date	05/11/2021
     ///
-    /// \param  key The key.
+    /// \param 	key	The key.
     ///
-    /// \returns    The texture identifier.
+    /// \returns	The OpenglTexture if found.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getTextureId(const size_t key) -> std::optional<u32>;
+    auto getOpenglTexture(const size_t key) -> std::optional<OpenglTexture>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::isSaturnResolutionSet();
@@ -440,6 +449,37 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto isSaturnResolutionSet() -> bool;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer, const size_t texture_key) -> u32;
+    ///
+    /// \brief	Generates a texture from a texture array layer.
+    ///
+    /// \author	Runik
+    /// \date	10/12/2022
+    ///
+    /// \param 	layer	   	Layer of the texture array to get data from.
+    /// \param 	texture_key	The key of the texture to highlight.
+    ///
+    /// \returns	The texture id generated from texture array layer.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto generateTextureFromTextureArrayLayer(const u32 layer, const size_t texture_key) -> u32;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string;
+    ///
+    /// \brief	Texture details
+    ///
+    /// \author	Runik
+    /// \date	17/12/2022
+    ///
+    /// \param 	key	The key.
+    ///
+    /// \returns	The opengl texture details.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getOpenglTextureDetails(const size_t key) -> std::string;
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -497,7 +537,32 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void initializeFbos();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::initializeFbo(const FboType type);
+    ///
+    /// \brief	Initializes the framebuffer object.
+    ///
+    /// \author	Runik
+    /// \date	15/09/2022
+    ///
+    /// \param 	type	The framebuffer object type.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void initializeFbo(const FboType type);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Opengl::initializeTextureArray() -> u32;
+    ///
+    /// \brief	Initializes the texture array.
+    ///
+    /// \author	Runik
+    /// \date	15/09/2022
+    ///
+    /// \returns	The generated texture array id.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto initializeTextureArray() -> u32;
 
     void calculateFps();
 
@@ -520,6 +585,32 @@ class Opengl {
 
     auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::packTextures(std::vector<OpenglTexture>& textures);
+    ///
+    /// \brief	Pack textures in a texture array of texture atlases.
+    ///
+    /// \author	Runik
+    /// \date	22/09/2022
+    ///
+    /// \param [in,out]	textures	The textures to pack.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void packTextures(std::vector<OpenglTexture>& textures);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::generateSubTexture(const size_t key);
+    ///
+    /// \brief	Generates a subtexture in the texture array of texture atlas.
+    ///
+    /// \author	Runik
+    /// \date	24/09/2022
+    ///
+    /// \param 	key	Key to the texture details.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void generateSubTexture(const size_t key);
+
     core::Config* config_; ///< Configuration object.
 
     FboList fbo_list_;                ///< List of framebuffer objects used in the program.
@@ -533,13 +624,15 @@ class Opengl {
     PartsList parts_list_;        // Will have to be moved to the platform agnostic renderer.
     Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
 
-    // std::vector<std::pair<size_t, u32>> texture_key_id_link_; ///< Link between the texture key and the opengl id.
-    std::unordered_map<size_t, u32> texture_key_id_link_; ///< Link between the texture key and the opengl id.
+    u32          texture_array_id_;               ///< Identifier for the texture array.
+    TexturesLink textures_link_;                  ///< Link between the Texture key and the OpenglTexture.
+    u32          texture_array_debug_layer_id_{}; ///< Identifier for the texture array debug layer.
+    u16          texture_array_max_used_layer_{}; ///< Maximum used layer of the texture array.
 
-    std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
+    // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
     std::mutex parts_list_mutex_;     ///< Mutex protecting parts_list_.
-    std::mutex texture_link_mutex_;   ///< Mutex protecting texture_key_id_link_.
+    std::mutex textures_link_mutex_;  ///< Mutex protecting textures_link_.
     std::mutex texture_delete_mutex_; ///< Mutex protecting textures_to_delete_.
 
     std::condition_variable data_condition_; ///< Condition variable to synchronize between emulation and UI thread.
@@ -684,5 +777,7 @@ void checkShaderCompilation(u32 shader);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void checkProgramCompilation(u32 program);
+
+void checkGlError();
 
 }; // namespace saturnin::video

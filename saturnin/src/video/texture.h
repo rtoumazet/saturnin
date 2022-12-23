@@ -227,15 +227,17 @@ class Texture {
     static void deleteCache();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void detailedList();
+    /// \fn	static auto Texture::keysList() -> std::vector<DebugKey>;
     ///
-    /// \brief  Returns the detailed list of textures.
+    /// \brief	Returns the detailed list of textures.
     ///
-    /// \author Runik
-    /// \date   22/04/2022
+    /// \author	Runik
+    /// \date	22/04/2022
+    ///
+    /// \returns	A std::vector&lt;DebugKey&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto detailedList() -> std::vector<DebugKey>;
+    static auto keysList() -> std::vector<DebugKey>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Texture::statistics() -> std::vector<std::string>;
@@ -259,7 +261,7 @@ class Texture {
     /// \date   29/04/2022
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateTextureSize(const ImageSize& max_size, const size_t texture_key) -> ImageSize;
+    static auto calculateTextureSize(const Size& max_size, const size_t texture_key) -> Size;
 
   private:
     static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.

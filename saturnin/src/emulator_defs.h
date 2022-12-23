@@ -273,7 +273,7 @@ const auto bits_0_31  = BitRange<u32>{0, 31};  ///< Defines the 32 bits range of
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct Coord
 ///
-/// \brief  A coordinate in space.
+/// \brief  A coordinate in 2D space.
 ///
 /// \author Runik
 /// \date   21/01/2021
@@ -327,16 +327,16 @@ struct ScreenOffset {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct ImageSize
+/// \struct Size
 ///
-/// \brief  An image size
+/// \brief  An size.
 ///
 /// \author Runik
 /// \date   29/04/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ImageSize {
-    u16 width;
-    u16 height;
+struct Size {
+    u16 w; ///< Width
+    u16 h; ///< Height
 };
 }; // namespace saturnin

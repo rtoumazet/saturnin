@@ -70,6 +70,8 @@ constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
 constexpr auto vertexes_per_polyline         = u32{4};
 constexpr auto vertexes_per_line             = u32{2};
 
+constexpr auto check_gl_error = 1;
+
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
 Opengl::~Opengl() { shutdown(); }
@@ -90,8 +92,29 @@ void Opengl::initialize() {
     const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured};
     deleteShaders(shaders_to_delete);
 
-    auto max_layers = int{};
-    gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
+    texture_array_id_ = initializeTextureArray();
+
+    {
+        // const auto logo = rh::embed("saturnin-logo.png");
+        // auto       img  = loadPngImage(logo.data(), logo.size());
+
+        // const auto size = strlen((char*)img.pixels);
+        // auto       vec  = std::vector<u8>{img.pixels, img.pixels + size};
+        // auto       tex  = Texture(VdpType::vdp1, 0, 5, 0, vec, 1364, 886);
+        // Texture::storeTexture(tex);
+        // addOrUpdateTexture(tex.key());
+        // generateTextures();
+
+        // auto ot      = OpenglTexture{};
+        // ot.key       = 1;
+        // ot.opengl_id = texture_array_id_;
+        // ot.size      = {1364, 886};
+        // ot.pos       = {0, 0};
+
+        // textures_link_[ot.key] = ot;
+    }
+    //  auto max_layers = int{};
+    //  gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
 }
 
 void Opengl::shutdown() {
@@ -138,6 +161,7 @@ void Opengl::preRender() {
 
 void Opengl::postRender() {
     // Framebuffer is released
+    checkGlError();
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     } else {
@@ -154,11 +178,11 @@ void Opengl::initializeShaders() {
         #version 120
 
         attribute vec2 vtx_position;
-        attribute vec2 vtx_tex_coord;
+        attribute vec3 vtx_tex_coord;
         attribute vec4 vtx_color;
         attribute vec4 vtx_grd_color;
         
-        varying vec2   frg_tex_coord;
+        varying vec3   frg_tex_coord;
         varying vec4   frg_color; 
         varying vec4   frg_grd_color; 
         
@@ -166,7 +190,7 @@ void Opengl::initializeShaders() {
 
         void main() {
             gl_Position     = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-            frg_tex_coord   = vec2(vtx_tex_coord);
+            frg_tex_coord   = vec3(vtx_tex_coord);
             frg_color       = vtx_color;
             frg_grd_color   = vtx_grd_color;
             //frg_color_offset= vtx_color_offset;
@@ -177,11 +201,11 @@ void Opengl::initializeShaders() {
         #version 330 core
 
         layout (location = 0) in vec2 vtx_position;
-        layout (location = 1) in vec2 vtx_tex_coord;
+        layout (location = 1) in vec3 vtx_tex_coord;
         layout (location = 2) in vec4 vtx_color;
         layout (location = 3) in vec4 vtx_grd_color;
 
-        out vec2 frg_tex_coord;
+        out vec3 frg_tex_coord;
         out vec4 frg_color;
         out vec4 frg_grd_color;
 
@@ -189,7 +213,7 @@ void Opengl::initializeShaders() {
 
         void main() {
             gl_Position     = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-            frg_tex_coord   = vec2(vtx_tex_coord);
+            frg_tex_coord   = vec3(vtx_tex_coord);
             frg_color       = vtx_color;
             frg_grd_color   = vtx_grd_color;
         }
@@ -202,7 +226,7 @@ void Opengl::initializeShaders() {
     shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::textured}, R"(
         #version 120
         
-        varying vec2 frg_tex_coord;
+        varying vec3 frg_tex_coord;
         varying vec4 frg_color;
         varying vec4 frg_grd_color;
 
@@ -234,22 +258,24 @@ void Opengl::initializeShaders() {
     shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::fragment, ShaderName::textured}, R"(
         #version 330 core
         
-        in vec2 frg_tex_coord;
+        in vec3 frg_tex_coord;
         in vec4 frg_color;
         in vec4 frg_grd_color;
 
         out vec4 out_color;
 
-        uniform sampler2D texture1;
+        uniform sampler2DArray sampler;
         uniform bool is_texture_used;
         uniform vec3 color_offset;
 
-        //vec4 test = vec4(1.0,0.0,0.0,1.0);
-        
         void main()
         {
             if(is_texture_used){
-                out_color = texture(texture1, frg_tex_coord);
+                //out_color = texture(sampler, frg_tex_coord);
+                float x = frg_tex_coord.x;
+                float y = frg_tex_coord.y;
+                float layer = frg_tex_coord.z;
+                out_color = texture(sampler, vec3(x,y,layer));
             }else{
                 out_color = frg_color;
             }
@@ -338,7 +364,14 @@ void Opengl::render() {
         const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
-        const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+        glActiveTexture(GLenum::GL_TEXTURE0);
+        const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+        // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
+        glUniform1i(sampler_loc, 0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
+
+        const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+        // const auto texture_pos_loc  = glGetUniformLocation(program_shader_, "texture_pos");
 
         // Filling a vector with all the vertexes needed to render the parts list, in order to send data only once to the GPU.
         // auto batch_vertex_size = getVertexesNumberByDrawType(parts_list);
@@ -428,13 +461,39 @@ void Opengl::render() {
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
 
-            const auto uni_color_offset = glGetUniformLocation(program_shader_, "color_offset");
-            // const float color_offset[3]  = {-0.5, -0.5, -0.5};
-            glUniform3fv(uni_color_offset, 1, part->colorOffset().data());
+            const auto color_offset_loc = glGetUniformLocation(program_shader_, "color_offset");
+            glUniform3fv(color_offset_loc, 1, part->colorOffset().data());
 
             switch (part->drawType()) {
                 using enum DrawType;
                 case textured_polygon: {
+                    // Sending the variable to configure the shader to use texture data.
+                    const auto is_texture_used = GLboolean(true);
+                    glUniform1i(texture_used_loc, is_texture_used);
+
+                    const auto opengl_tex = getOpenglTexture(part->textureKey());
+                    if (opengl_tex.has_value()) {
+                        // Replacing texture coordinates of the vertex by those of the OpenGL texture.
+                        for (auto& v : part->vertexes_) {
+                            if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+                                v.tex_coords = opengl_tex->coords[0];
+                                continue;
+                            }
+                            if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+                                v.tex_coords = opengl_tex->coords[1];
+                                continue;
+                            }
+                            if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+                                v.tex_coords = opengl_tex->coords[2];
+                                continue;
+                            }
+                            if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+                                v.tex_coords = opengl_tex->coords[3];
+                                continue;
+                            }
+                        }
+                    }
+
                     // Quad is tessellated into 2 triangles, using a texture
                     //******
                     auto vertexes = std::vector<Vertex>{};
@@ -450,15 +509,8 @@ void Opengl::render() {
 
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-                    glActiveTexture(GLenum::GL_TEXTURE0);
+                    // glActiveTexture(GLenum::GL_TEXTURE0);
                     //******
-
-                    // Sending the variable to configure the shader to use texture data.
-                    const auto is_texture_used = GLboolean(true);
-                    glUniform1i(uni_use_texture, is_texture_used);
-
-                    const auto id = getTextureId(part->textureKey());
-                    if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
 
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
                     break;
@@ -483,7 +535,7 @@ void Opengl::render() {
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
-                    glUniform1i(uni_use_texture, is_texture_used);
+                    glUniform1i(texture_used_loc, is_texture_used);
 
                     // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
                     glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
@@ -505,7 +557,7 @@ void Opengl::render() {
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
-                    glUniform1i(uni_use_texture, is_texture_used);
+                    glUniform1i(texture_used_loc, is_texture_used);
 
                     // Drawing the list
                     glDrawArrays(GL_LINE_LOOP, 0, vertexes_per_polyline);
@@ -525,7 +577,7 @@ void Opengl::render() {
 
                     // Sending the variable to configure the shader to use color.
                     const auto is_texture_used = GLboolean(false);
-                    glUniform1i(uni_use_texture, is_texture_used);
+                    glUniform1i(texture_used_loc, is_texture_used);
 
                     // Drawing the list
                     glDrawArrays(GL_LINES, 0, vertexes_per_line);
@@ -697,6 +749,43 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
 
+            glUseProgram(program_shader_);
+            glBindVertexArray(vao);                       // binding VAO
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+
+            // Sending the ortho projection matrix to the shader
+            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+            // Sending the variable to configure the shader to use texture data.
+            const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+            const auto is_texture_used = GLboolean(true);
+            glUniform1i(uni_use_texture, is_texture_used);
+
+            const auto opengl_tex = getOpenglTexture(part->textureKey());
+            if (opengl_tex.has_value()) {
+                // Replacing texture coordinates of the vertex by those of the OpenGL texture.
+                for (auto& v : part->vertexes_) {
+                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+                        v.tex_coords = opengl_tex->coords[0];
+                        continue;
+                    }
+                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+                        v.tex_coords = opengl_tex->coords[1];
+                        continue;
+                    }
+                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+                        v.tex_coords = opengl_tex->coords[2];
+                        continue;
+                    }
+                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+                        v.tex_coords = opengl_tex->coords[3];
+                        continue;
+                    }
+                }
+                glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
+            }
+
             // Quad is tessellated into 2 triangles, using a texture
 
             auto vertexes = std::vector<Vertex>{};
@@ -710,32 +799,13 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             vertexes.emplace_back(part->vertexes_[2]);
             vertexes.emplace_back(part->vertexes_[3]);
 
-            glUseProgram(program_shader_);
-            glBindVertexArray(vao);                       // binding VAO
-            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
-
             // Sending vertex buffer data to the GPU
             glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-            glActiveTexture(GLenum::GL_TEXTURE0);
-
-            // Sending the ortho projection matrix to the shader
-            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
-            // Sending the variable to configure the shader to use texture data.
-            const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
-            const auto is_texture_used = GLboolean(true);
-            glUniform1i(uni_use_texture, is_texture_used);
-
-            // glBindTexture(GL_TEXTURE_2D, texture_key_id_link_[part->textureKey()]);
-            const auto id = getTextureId(part->textureKey());
-            if (id.has_value()) { glBindTexture(GL_TEXTURE_2D, *id); }
+            // glActiveTexture(GLenum::GL_TEXTURE0);
 
             glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
         }
 
-        // glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
-        // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
         gl::glDeleteBuffers(1, &vertex_buffer);
         gl::glDeleteVertexArrays(1, &vao);
     }
@@ -751,64 +821,228 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
 void Opengl::addOrUpdateTexture(const size_t key) {
     // If the key doesn't exist it will be automatically added.
-    const auto texture_id = getTextureId(key);
-    if (texture_id && (*texture_id > 0)) {
-        std::lock_guard lock(texture_delete_mutex_);
-        textures_to_delete_.push_back(*texture_id);
-    }
+    // If it does, opengl link will be reset in order to regenerate the texture.
+    // const auto opengl_tex = getOpenglTexture(key);
+    // const auto& texture = Texture::getTexture(key);
 
-    std::lock_guard lock(texture_link_mutex_);
-    texture_key_id_link_[key] = 0;
-    // texture_key_id_link_.erase(key);
+    // if (texture) {
+    std::lock_guard lock(textures_link_mutex_);
+    textures_link_[key].key       = key;
+    textures_link_[key].opengl_id = 0;
+    textures_link_[key].layer     = 0;
+    // textures_link_[key].width     = (*texture)->width();
+    // textures_link_[key].height    = (*texture)->height();
+    // textures_link_[key].size      = (*texture)->size();
+    // }
 }
 
-void Opengl::removeTextureLink(const size_t key) { texture_key_id_link_.erase(key); }
+void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
 
 void Opengl::generateTextures() {
-    auto local_textures_to_delete = std::vector<u32>();
-    {
-        // vector is swapped to a local copy to keep the data structure locked for the minimum possible time.
-        //        std::lock_guard lock(texture_delete_mutex_);
-        local_textures_to_delete.swap(textures_to_delete_);
-    }
-    for (const auto id : local_textures_to_delete) {
-        deleteTexture(id);
+    // Textures are generated in a 128 layers texture array, each layer being a texture atlas of
+    // 512*512 pixels.
+    // In theory, the maximum number of different VDP2 cells that could be stored by the Saturn at a given time is 0x80000
+    // (ie both RBG at maximum size, with every cell different).
+    // Maximum VDP1 texture size is 504*255.
+
+    // OpenglTextures don't have to be deleted, as they are part of a texture atlas now
+    //
+    // First implementation :
+    // - Clear used texture atlas
+    // - Generate as many texture atlas as needed using
+    // 1. Loop on the Textures
+    // 2. For each Texture
+
+    auto local_textures_link = TexturesLink();
+    { local_textures_link = textures_link_; }
+
+    auto textures = std::vector<OpenglTexture>();
+    textures.reserve(local_textures_link.size());
+    for (auto& [key, ogl_tex] : local_textures_link) {
+        const auto t = Texture::getTexture(key);
+
+        auto opengl_tex = getOpenglTexture(key);
+        if (opengl_tex) { (*opengl_tex).size = {(**t).width(), (**t).height()}; }
+        textures.push_back(*opengl_tex);
     }
 
-    auto local_texture_key_id_link = std::unordered_map<size_t, u32>();
-    {
-        // unordered_map is copied locally to keep the data structure locked for the minimum possible time.
-        //        std::lock_guard tl_lock(texture_link_mutex_);
-        local_texture_key_id_link = texture_key_id_link_;
-    }
-    for (auto& [key, id] : local_texture_key_id_link) {
-        if (id == 0) {
-            const auto& t = Texture::getTexture(key);
-            if (t) {
-                const auto texture_id = generateTexture((*t)->width(), (*t)->height(), (*t)->rawData());
-
-                //                std::lock_guard tl_lock(texture_link_mutex_);
-                texture_key_id_link_[key] = texture_id;
-            }
-        }
-    }
+    packTextures(textures);
 }
 
-auto Opengl::getTextureId(const size_t key) -> std::optional<u32> {
-    // std::lock_guard lock(texture_link_mutex_);
-    // auto it = std::find_if(texture_key_id_link_.begin(), texture_key_id_link_.end(), [&key](const std::pair<size_t, u32>& v) {
-    //     return v.first == key;
-    // });
-    // return (it != texture_key_id_link_.end()) ? std::optional<u32>(it->second) : std::nullopt;
+// Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
+// improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
+// So for now, keeping things simple.
+void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
+    // First previously used layers are cleared before reuse
+    auto empty_data = std::vector<u8>(texture_array_width * texture_array_height * 4);
+    for (auto i = 0; i <= texture_array_max_used_layer_; i++) {
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                        0,
+                        0,
+                        0,
+                        i,
+                        texture_array_width,
+                        texture_array_height,
+                        1,
+                        GLenum::GL_RGBA,
+                        GLenum::GL_UNSIGNED_BYTE,
+                        empty_data.data());
+    }
 
-    std::lock_guard lock(texture_link_mutex_);
-    const auto      it = texture_key_id_link_.find(key);
-    return (it == texture_key_id_link_.end()) ? std::nullopt : std::optional<u32>(it->second);
+    std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) {
+        return a.size.h > b.size.h;
+    });
+
+    auto current_layer          = u16{};
+    auto x_pos                  = u16{};
+    auto y_pos                  = u16{};
+    auto current_row_max_height = u16{};
+
+    for (auto& texture : textures) {
+        // if (texture.key == 0x8180518edf1c0411) DebugBreak();
+        // if (texture.key == 0xefc9178d67d050ee) DebugBreak();
+        if ((x_pos + texture.size.w) > texture_array_width) {
+            // Texture doesn't fit in the remaining space of the row ... looping around to next row using
+            // the maximum height from the previous row.
+            y_pos += current_row_max_height;
+            x_pos                  = 0;
+            current_row_max_height = 0;
+        }
+
+        if ((y_pos + texture.size.h) > texture_array_width) {
+            // Texture doesn't fit in the remaining space of the last row ... moving one layer forward.
+            ++current_layer;
+            x_pos                  = 0;
+            y_pos                  = 0;
+            current_row_max_height = 0;
+        }
+        // This is the position of the rectangle
+        textures_link_[texture.key].layer = current_layer;
+        textures_link_[texture.key].size  = texture.size;
+        textures_link_[texture.key].pos   = {x_pos, y_pos};
+
+        // Calculating the texture coordinates in the atlas
+        // (x1,y1)     (x2,y1)
+        //        .---.
+        //        |   |
+        //        .---.
+        // (x1,y2)     (x2,y2)
+
+        auto x1 = static_cast<float>(x_pos) / static_cast<float>(texture_array_width);
+        auto x2 = static_cast<float>(x_pos + texture.size.w) / static_cast<float>(texture_array_width);
+        auto y1 = static_cast<float>(y_pos) / static_cast<float>(texture_array_height);
+        auto y2 = static_cast<float>(y_pos + texture.size.h) / static_cast<float>(texture_array_height);
+
+        auto coords = std::vector{TextureCoordinates{x1, y1, static_cast<float>(current_layer)},
+                                  TextureCoordinates{x2, y1, static_cast<float>(current_layer)},
+                                  TextureCoordinates{x2, y2, static_cast<float>(current_layer)},
+                                  TextureCoordinates{x1, y2, static_cast<float>(current_layer)}};
+        textures_link_[texture.key].coords.swap(coords);
+
+        generateSubTexture(texture.key);
+
+        x_pos += texture.size.w; // Move along to the next spot in the row.
+
+        // Just saving the largest height in the new row
+        if (texture.size.h > current_row_max_height) { current_row_max_height = texture.size.h; }
+    }
+    texture_array_max_used_layer_ = current_layer;
+}
+
+auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
+    std::lock_guard lock(textures_link_mutex_);
+    const auto      it = textures_link_.find(key);
+    return (it == textures_link_.end()) ? std::nullopt : std::optional<OpenglTexture>(it->second);
+}
+
+auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
+    auto            details = std::string{};
+    std::lock_guard lock(textures_link_mutex_);
+    const auto      it = textures_link_.find(key);
+    if (it != textures_link_.end()) {
+        details += util::format("Key: 0x{:x}\n", it->second.key);
+        details += util::format("Position: {},{}\n", it->second.pos.x, it->second.pos.y);
+        details += util::format("Size: {},{}\n", it->second.size.w, it->second.size.h);
+        details += util::format("Layer: {}\n", it->second.layer);
+        details += util::format("X1: {},{},{}\n", it->second.coords[0].s, it->second.coords[0].t, it->second.coords[0].p);
+        details += util::format("X2: {},{},{}\n", it->second.coords[1].s, it->second.coords[1].t, it->second.coords[1].p);
+        details += util::format("Y2: {},{},{}\n", it->second.coords[2].s, it->second.coords[2].t, it->second.coords[2].p);
+        details += util::format("Y1: {},{},{}\n", it->second.coords[3].s, it->second.coords[3].t, it->second.coords[3].p);
+    }
+    return details;
+}
+
+void Opengl::generateSubTexture(const size_t key) {
+    const auto ogl_tex = getOpenglTexture(key);
+
+    if (ogl_tex) {
+        const auto tex = Texture::getTexture(key);
+        if (tex) {
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                            0,
+                            ogl_tex->pos.x,
+                            ogl_tex->pos.y,
+                            ogl_tex->layer,
+                            ogl_tex->size.w,
+                            ogl_tex->size.h,
+                            1,
+                            GLenum::GL_RGBA,
+                            GLenum::GL_UNSIGNED_BYTE,
+                            (*tex)->rawData().data());
+            checkGlError();
+        }
+    }
 }
 
 auto Opengl::isSaturnResolutionSet() -> bool {
     return (saturn_screen_resolution_.width == 0 || saturn_screen_resolution_.height == 0) ? false : true;
 }
+
+auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer, const size_t texture_key) -> u32 {
+    if (texture_array_debug_layer_id_ == 0) {
+        texture_array_debug_layer_id_ = generateTexture(texture_array_width, texture_array_height, std::vector<u8>{});
+    }
+
+    glCopyImageSubData(texture_array_id_,
+                       GL_TEXTURE_2D_ARRAY,
+                       0,
+                       0,
+                       0,
+                       layer,
+                       texture_array_debug_layer_id_,
+                       GL_TEXTURE_2D,
+                       0,
+                       0,
+                       0,
+                       0,
+                       texture_array_width,
+                       texture_array_height,
+                       1);
+
+    if (texture_key > 0) {
+        const auto& tex_ogl       = getOpenglTexture(texture_key);
+        const auto& tex           = Texture::getTexture(texture_key);
+        auto        original_data = (*tex)->rawData();
+        for (auto i = 0; i < original_data.size(); i += 4) {
+            original_data[i] = 0xff;
+        }
+
+        glBindTexture(GL_TEXTURE_2D, texture_array_debug_layer_id_);
+
+        glTexSubImage2D(GL_TEXTURE_2D,
+                        0,
+                        tex_ogl->pos.x,
+                        tex_ogl->pos.y,
+                        tex_ogl->size.w,
+                        tex_ogl->size.h,
+                        GLenum::GL_RGBA,
+                        GLenum::GL_UNSIGNED_BYTE,
+                        original_data.data());
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    return texture_array_debug_layer_id_;
+};
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
 
@@ -962,7 +1196,7 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 
             // texture coords pointer
             auto offset = GLintptr(sizeof(VertexPosition));
-            glVertexAttribPointer(1, 2, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+            glVertexAttribPointer(1, 3, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(1);
 
             // color pointer
@@ -1056,6 +1290,40 @@ void Opengl::initializeFbo(const FboType type) {
     glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
 }
 
+auto Opengl::initializeTextureArray() -> u32 {
+    auto texture = u32{};
+    glGenTextures(1, &texture);
+    glActiveTexture(GLenum::GL_TEXTURE0);
+    glBindTexture(GLenum::GL_TEXTURE_2D_ARRAY, texture);
+    // The `my_gl_format` represents your cpu-side channel layout.
+    // Both GL_RGBA and GL_BGRA are common. See the "format" section
+    // of this page: https://www.opengl.org/wiki/GLAPI/glTexImage3D
+    glTexImage3D(GL_TEXTURE_2D_ARRAY,
+                 0,                        // mipmap level
+                 GL_RGBA,                  // gpu texel format
+                 texture_array_width,      // width
+                 texture_array_height,     // height
+                 texture_array_depth,      // depth
+                 0,                        // border
+                 GLenum::GL_RGBA,          // cpu pixel format
+                 GLenum::GL_UNSIGNED_BYTE, // cpu pixel coord type
+                 nullptr);                 // no data for now
+
+    // set the texture wrapping parameters
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
+    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+
+    // disabling mipmaps
+    // glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_LINEAR);
+    // glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_LINEAR);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
+
+    return texture;
+}
+
 void Opengl::calculateFps() {
     using namespace std::literals::chrono_literals;
     static auto time_elapsed = micro{0};
@@ -1134,7 +1402,7 @@ auto isModernOpenglCapable() -> bool {
 
     glfwMakeContextCurrent(window);
 
-    glbinding::initialize(glfwGetProcAddress);
+    glbinding::initialize(glfwGetProcAddress, false);
     const auto version = glbinding::aux::ContextInfo::version();
 
     glfwDestroyWindow(window);
@@ -1155,6 +1423,56 @@ void windowCloseCallback(GLFWwindow* window) {
     using namespace std::chrono_literals; // ms
     const auto time_to_sleep = 20ms;
     sleep_for(time_to_sleep);
+}
+
+void glDebugOutput(gl::GLenum   source,
+                   gl::GLenum   type,
+                   unsigned int id,
+                   gl::GLenum   severity,
+                   gl::GLsizei  length,
+                   const char*  message,
+                   const void*  userParam) {
+    // ignore non-significant error/warning codes
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+    // Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
+    Log::warning(Logger::opengl, "---------------");
+    Log::warning(Logger::opengl, "Debug message ({}): {}", id, message);
+
+    auto source_str = std::string{};
+    switch (source) {
+        case GL_DEBUG_SOURCE_API: source_str = "API"; break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM: source_str = "Window System"; break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: source_str = "Shader Compiler"; break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY: source_str = "Third Party"; break;
+        case GL_DEBUG_SOURCE_APPLICATION: source_str = "Application"; break;
+        case GL_DEBUG_SOURCE_OTHER: source_str = "Other"; break;
+    }
+    Log::warning(Logger::opengl, "Source: {}", source_str);
+
+    auto type_str = std::string{};
+    switch (type) {
+        case GL_DEBUG_TYPE_ERROR: type_str = "Error"; break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: type_str = "Deprecated Behaviour"; break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: type_str = "Undefined Behaviour"; break;
+        case GL_DEBUG_TYPE_PORTABILITY: type_str = "Portability"; break;
+        case GL_DEBUG_TYPE_PERFORMANCE: type_str = "Performance"; break;
+        case GL_DEBUG_TYPE_MARKER: type_str = "Marker"; break;
+        case GL_DEBUG_TYPE_PUSH_GROUP: type_str = "Type: Push Group"; break;
+        case GL_DEBUG_TYPE_POP_GROUP: type_str = "Type: Pop Group"; break;
+        case GL_DEBUG_TYPE_OTHER: type_str = "Type: Other"; break;
+    }
+    Log::warning(Logger::opengl, "Type: {}", type_str);
+
+    auto severity_str = std::string{};
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH: severity_str = "high"; break;
+        case GL_DEBUG_SEVERITY_MEDIUM: severity_str = "medium"; break;
+        case GL_DEBUG_SEVERITY_LOW: severity_str = "low"; break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: severity_str = "notification"; break;
+    }
+    Log::warning(Logger::opengl, "Severity: {}", severity_str);
+    // std::cout << std::endl;
 }
 
 auto runOpengl(core::EmulatorContext& state) -> s32 {
@@ -1183,6 +1501,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         glfwWindowHint(GLFW_OPENGL_PROFILE,
                        GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
         // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
+
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     }
 #endif
     const std::string rendering_mode = (is_legacy_opengl) ? core::tr("Legacy") : core::tr("Modern");
@@ -1213,7 +1533,18 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
                                                   loadPngImage(ico_48.data(), ico_48.size())}};
     glfwSetWindowIcon(window, 3, icons.data());
 
+    int flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (toEnum<ContextFlagMask>(flags) == ContextFlagMask::GL_CONTEXT_FLAG_DEBUG_BIT) {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(glDebugOutput, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
+
     glbinding::initialize(glfwGetProcAddress);
+
+    // glCopyImageSubData()
 
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
@@ -1276,7 +1607,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two
+        // flags.
 
         glfwPollEvents();
 
@@ -1407,6 +1739,13 @@ void checkProgramCompilation(const u32 program) {
 
         Log::error(Logger::opengl, "Shader program link failed : {}", info);
         throw std::runtime_error("Opengl error !");
+    }
+}
+
+void checkGlError() {
+    if (check_gl_error) {
+        const auto error = glGetError();
+        if (error != GLenum::GL_NO_ERROR) { Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
     }
 }
 
