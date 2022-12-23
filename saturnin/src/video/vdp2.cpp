@@ -3131,7 +3131,7 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
 
 void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd, const ScreenOffset& cp_offset) {
     constexpr auto character_pattern_boundary = u8{0x20};
-    // if (pnd.character_number != 0x3000) __debugbreak();
+    // if (pnd.character_number != 0x3000 && pnd.character_number != 0x3345 && pnd.character_number != 0x3741) __debugbreak();
     const auto character_number_address = pnd.character_number * character_pattern_boundary;
     if (screen.character_pattern_size == CharacterSize::one_by_one) {
         readCell(screen, pnd, character_number_address, cp_offset);
