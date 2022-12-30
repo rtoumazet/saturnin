@@ -300,8 +300,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     auto parts_list = PartsList{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-        // const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
-        auto vdp2_parts = state.vdp2()->vdp2Parts(s);
+        const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
         if (!vdp2_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_parts.size());
             for (const auto& p : vdp2_parts) {
