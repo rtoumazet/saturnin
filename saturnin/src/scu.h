@@ -136,11 +136,11 @@ class Scu {
     // Constructors / Destructors
     Scu() = delete;
     Scu(EmulatorContext* ec);
-    Scu(const Scu&) = delete;
-    Scu(Scu&&)      = delete;
+    Scu(const Scu&)                      = delete;
+    Scu(Scu&&)                           = delete;
     auto operator=(const Scu&) & -> Scu& = delete;
-    auto operator=(Scu&&) & -> Scu& = delete;
-    ~Scu()                          = default;
+    auto operator=(Scu&&) & -> Scu&      = delete;
+    ~Scu()                               = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -495,17 +495,17 @@ class Scu {
     void sendDmaEndInterrupt(DmaLevel l);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::resetDmaEnable(const DmaConfiguration& dc);
+    /// \fn	void Scu::resetDmaEnable( DmaConfiguration& dc);
     ///
-    /// \brief  Reset dma enable value for the current dma level.
+    /// \brief	Reset dma enable value for the current dma level.
     ///
-    /// \author Runik
-    /// \date   05/08/2019
+    /// \author	Runik
+    /// \date	05/08/2019
     ///
-    /// \param [in] dc                  DMA configuration.
+    /// \param [in]	dc	DMA configuration.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void resetDmaEnable(const DmaConfiguration& dc);
+    void resetDmaEnable(DmaConfiguration& dc);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::dmaUpdateWriteAddress(DmaLevel l, u32 data);

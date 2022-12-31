@@ -761,7 +761,7 @@ void Scu::addDmaToQueue(const DmaConfiguration& dc) {
 void Scu::activateDma() {
     // Timing is not handled for now, DMA transfer is immediate
 
-    // This case should only happend when timing is handled
+    // This case should only happen when timing is handled
     if (dma_queue_.top().dma_status == DmaStatus::active) { return; }
 
     while (dma_queue_.top().dma_status == DmaStatus::queued) {
@@ -921,16 +921,17 @@ void Scu::sendDmaEndInterrupt(const DmaLevel l) {
     }
 }
 
-void Scu::resetDmaEnable(const DmaConfiguration& dc) {
+void Scu::resetDmaEnable(DmaConfiguration& dc) {
     if (dc.dma_enable == DmaEnable::enabled) {
         if (dc.starting_factor_select == StartingFactorSelect::dma_start_factor) {
-            switch (dc.dma_level) {
-                using enum DmaLevel;
-                case level_0: d0en_.dma_enable = 0; break;
-                case level_1: d1en_.dma_enable = 0; break;
-                case level_2: d2en_.dma_enable = 0; break;
-                case level_unknown: Log::warning(Logger::scu, "Unknown DMA level !");
-            }
+            dc.dma_enable = DmaEnable::disabled;
+            // switch (dc.dma_level) {
+            //     using enum DmaLevel;
+            //     case level_0: d0en_.dma_enable = 0; break;
+            //     case level_1: d1en_.dma_enable = 0; break;
+            //     case level_2: d2en_.dma_enable = 0; break;
+            //     case level_unknown: Log::warning(Logger::scu, "Unknown DMA level !");
+            // }
         }
     }
 }
