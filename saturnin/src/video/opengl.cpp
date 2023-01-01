@@ -1600,6 +1600,11 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // state.opengl()->initialize(window);
     state.opengl()->initialize();
 
+    Log::info(Logger::opengl, "Card : {}", (char*)glGetString(GL_RENDERER));
+    
+
+    // glGetString(GL_RENDERER);
+
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
         // Poll and handle events (inputs, window resize, etc.)

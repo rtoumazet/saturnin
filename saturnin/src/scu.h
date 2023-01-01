@@ -521,8 +521,20 @@ class Scu {
 
     void dmaUpdateWriteAddress(DmaLevel l, u32 data);
 
-    using DmaConfigurations = std::vector<DmaConfiguration>;
-    using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Scu::dmaSort();
+    ///
+    /// \brief  Sorts the DMA queue
+    ///
+    /// \author Runik
+    /// \date   01/01/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void dmaSort();
+
+    //using DmaConfigurations = std::vector<DmaConfiguration>;
+    //using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
+    using DmaQueue          = std::vector<DmaConfiguration>;
     DmaQueue dma_queue_;
 
     void activateDma();

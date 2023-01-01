@@ -611,6 +611,8 @@ auto Scu::isInterruptExecuting(const Interrupt& i) -> bool {
 }
 
 void Scu::sendStartFactor(const StartingFactorSelect sfs) {
+    dmaSort();
+    
     auto new_queue = DmaQueue{};
 
     while (!dma_queue_.empty()) {
@@ -620,7 +622,7 @@ void Scu::sendStartFactor(const StartingFactorSelect sfs) {
         if (dc.dma_status == DmaStatus::waiting_start_factor) {
             if (dc.starting_factor_select == sfs) { dc.dma_status = DmaStatus::queued; }
         }
-        new_queue.push(dc);
+        new_queue.push_back(dc);
     }
 
     if (!new_queue.empty()) {
@@ -755,10 +757,13 @@ void Scu::addDmaToQueue(const DmaConfiguration& dc) {
         case dma_start_factor: config.dma_status = DmaStatus::queued; break;
         default: config.dma_status = DmaStatus::waiting_start_factor;
     }
-    dma_queue_.push(config);
+    //dma_queue_.push(config);
+    dma_queue_.push_back(config);
 }
 
 void Scu::activateDma() {
+    dmaSort();
+
     // Timing is not handled for now, DMA transfer is immediate
 
     // This case should only happen when timing is handled
@@ -890,25 +895,25 @@ auto Scu::getScuRegion(const u32 address) -> ScuRegion {
 void Scu::dmaTest() {
     auto dc       = DmaConfiguration{};
     dc.dma_status = DmaStatus::finished;
-    dma_queue_.push(dc);
+    dma_queue_.push_back(dc);
     dc.dma_status = DmaStatus::queued;
-    dma_queue_.push(dc);
+    dma_queue_.push_back(dc);
     dc.starting_factor_select = StartingFactorSelect::h_blank_in;
     dc.dma_status             = DmaStatus::waiting_start_factor;
-    dma_queue_.push(dc);
+    dma_queue_.push_back(dc);
     dc.starting_factor_select = StartingFactorSelect::h_blank_in;
-    dma_queue_.push(dc);
+    dma_queue_.push_back(dc);
     dc.starting_factor_select = StartingFactorSelect::v_blank_out;
-    dma_queue_.push(dc);
+    dma_queue_.push_back(dc);
 
     sendStartFactor(StartingFactorSelect::h_blank_in);
 
     // activateDma();
 
-    while (!dma_queue_.empty()) {
-        // std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
-        dma_queue_.pop();
-    }
+    //while (!dma_queue_.empty()) {
+    //    // std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
+    //    dma_queue_.pop();
+    //}
 }
 
 void Scu::sendDmaEndInterrupt(const DmaLevel l) {
@@ -944,6 +949,12 @@ void Scu::dmaUpdateWriteAddress(const DmaLevel l, const u32 data) {
         case level_2: d2w_.raw = data; break;
         case level_unknown: Log::warning(Logger::scu, "Unknown DMA level !");
     }
+}
+
+void Scu::dmaSort() {
+    std::sort(dma_queue_.begin(), dma_queue_.end(), [](const DmaConfiguration& dc1, const DmaConfiguration& dc2) {
+        return dc1.dma_status < dc2.dma_status;
+    });
 }
 
 auto Scu::getTimer0CompareValue() -> u32 { return t0c_.timer_0_compare_data; }
