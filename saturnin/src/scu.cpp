@@ -611,25 +611,13 @@ auto Scu::isInterruptExecuting(const Interrupt& i) -> bool {
 }
 
 void Scu::sendStartFactor(const StartingFactorSelect sfs) {
-    dmaSort();
-    
-    auto new_queue = DmaQueue{};
-
-    while (!dma_queue_.empty()) {
-        auto dc{dma_queue_.top()}; // Disregard LNT1001 notice, copy is intended
-        dma_queue_.pop();
-
+    for (auto& dc : dma_queue_) {
         if (dc.dma_status == DmaStatus::waiting_start_factor) {
             if (dc.starting_factor_select == sfs) { dc.dma_status = DmaStatus::queued; }
         }
-        new_queue.push_back(dc);
     }
 
-    if (!new_queue.empty()) {
-        new_queue.swap(dma_queue_);
-
-        activateDma();
-    }
+    if (!dma_queue_.empty()) { activateDma();}
 }
 
 void Scu::clearInterruptFlag(const Interrupt& i) { interrupt_status_register_.reset(i.status); }
@@ -762,23 +750,23 @@ void Scu::addDmaToQueue(const DmaConfiguration& dc) {
 }
 
 void Scu::activateDma() {
+    // Check for emptiness is done before the call.
+
     dmaSort();
 
     // Timing is not handled for now, DMA transfer is immediate
 
     // This case should only happen when timing is handled
-    if (dma_queue_.top().dma_status == DmaStatus::active) { return; }
+    if (dma_queue_[0].dma_status == DmaStatus::active) { return; }
 
-    while (dma_queue_.top().dma_status == DmaStatus::queued) {
-        auto dc{dma_queue_.top()}; // Disregard LNT1001 notice, copy is intended
-        executeDma(dc);
-        if (dc.dma_enable == DmaEnable::enabled) {
-            dc.dma_status = DmaStatus::waiting_start_factor;
-        } else {
-            dc.dma_status = DmaStatus::finished;
+    for (auto& dc : dma_queue_) {
+        if (dc.dma_status == DmaStatus::queued) { executeDma(dc);
+            if (dc.dma_enable == DmaEnable::enabled) {
+                dc.dma_status = DmaStatus::waiting_start_factor;
+            } else {
+                dc.dma_status = DmaStatus::finished;
+            }
         }
-        dma_queue_.pop();
-        dma_queue_.push(dc);
     }
 }
 
