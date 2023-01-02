@@ -196,8 +196,25 @@ void EmulatorContext::startEmulation() {
     //     //     // sss.color_offset_red = -(~((u16)(a.raw + 1)));
     //     //     sss.color_offset_red = -((u16)(~a.raw) + 1);
     // }
+    /*using saturnin::utilities::swap_words;
+    using saturnin::utilities::swapEndianness;
+    using namespace std::literals;
 
-    // TESTING //
+    std::vector<u32>                                   test1;
+    std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
+    std::chrono::duration<double>                      elapsed_time{};
+    s32                                                iterations = 1000000;
+    u16                                                val        = 0x1234;
+    for (int i = 0; i < iterations; ++i) {
+        test1.push_back(swapEndianness<u16>(val));
+        val++;
+    }
+
+    auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+    elapsed_time = std::chrono::steady_clock::now() - start_time;
+    res          = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+    core::Log::warning(Logger::main, "swap_endianness {}µs"s, res);*/
+    //  TESTING //
 }
 
 void EmulatorContext::stopEmulation() {

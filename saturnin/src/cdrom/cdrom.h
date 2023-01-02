@@ -48,6 +48,7 @@ struct ScsiToc;
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
 using milli = std::chrono::duration<double, std::milli>;
+using saturnin::utilities::toUnderlying;
 
 namespace saturnin::cdrom {
 
@@ -761,7 +762,7 @@ class Cdrom {
 inline auto readCommand(BitField<8, 8> command) { return Command(static_cast<u16>(command)); };
 template<typename T>
 auto toBool(const T& e) -> bool {
-    return utilities::toUnderlying(e);
+    return toUnderlying(e);
 }
 
 } // namespace saturnin::cdrom

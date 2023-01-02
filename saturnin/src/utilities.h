@@ -169,36 +169,83 @@ void hashCombine(std::size_t& seed, const T& v, Rest... rest) {
 /// \return A T.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// inline T swap_endianness(T u) {
+//     union {
+//         T      u;
+//         int8_t u8[sizeof(T)];
+//     } source, dest;
+//
+//     source.u = u;
+//
+//     for (size_t k = 0; k < sizeof(T); k++)
+//         dest.u8[k] = source.u8[sizeof(T) - k - 1];
+//
+//     return dest.u;
+// }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	template<typename T> inline T swapEndianness(T value);
+///
+/// \brief	Swap endianness
+///
+/// \tparam	T	Generic type parameter.
+/// \param 	value	The value.
+///
+/// \returns	A T.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 template<typename T>
-T swap_endianness(T u) {
-    union {
-        T      u;
-        int8_t u8[sizeof(T)];
-    } source, dest;
+inline auto swapEndianness(T value) -> T;
 
-    source.u = u;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	template<> inline auto swapEndianness<u16>(u16 value) -> u16
+///
+/// \brief	Swaps endianness, 16 bits specialization.
+///
+/// \tparam	u16	Type of the value to swap.
+/// \param 	value	Value to swap.
+///
+/// \returns	Swapped value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    for (size_t k = 0; k < sizeof(T); k++)
-        dest.u8[k] = source.u8[sizeof(T) - k - 1];
-
-    return dest.u;
+template<>
+inline auto swapEndianness<u16>(u16 value) -> u16 {
+    return (value >> 8) | (value << 8);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn inline u32 swap_words(const u32 param)
+/// \fn	template<> inline u32 swapEndianness<u32>(u32 value)
 ///
-/// \brief  Swap words in a long.
+/// \brief	Swaps endianness, 32 bits specialization.
 ///
-/// \author Runik
-/// \date   07/05/2021
+/// \tparam	u32	Type of the value to swap.
+/// \param 	value	Value to swap.
 ///
-/// \param  param   The number to swap.
-///
-/// \returns    An u32.
+/// \returns	The swapped value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline u32 swap_words(const u32 param) {
-    return (param & bitmask_FFFF0000) >> displacement_16 | (param & bitmask_0000FFFF) << displacement_16;
+template<>
+inline u32 swapEndianness<u32>(u32 value) {
+    return u32(swapEndianness<u16>(value) << 16) | swapEndianness<u16>(value >> 16);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	inline u32 swapWords(const u32 param)
+///
+/// \brief	Swaps words in a long.
+///
+/// \author	Runik
+/// \date	07/05/2021
+///
+/// \param 	param	The value to swap.
+///
+/// \returns	The swapped value.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline u32 swapWords(const u32 param) {
+    // return (param & bitmask_FFFF0000) >> displacement_16 | (param & bitmask_0000FFFF) << displacement_16;
+    return (param & 0xFFFF0000) >> 16 | (param & 0x0000FFFF) << 16;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
