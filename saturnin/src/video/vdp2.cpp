@@ -1852,6 +1852,7 @@ void Vdp2::setCharacterPatternLimitations(const bool                            
                     allowed_cpd_timing[t0] = true;
                     allowed_cpd_timing[t1] = true;
                     allowed_cpd_timing[t2] = true;
+                    allowed_cpd_timing[t3] = true; // should be false
                     allowed_cpd_timing[t4] = true;
                     allowed_cpd_timing[t5] = true;
                     allowed_cpd_timing[t6] = true;
