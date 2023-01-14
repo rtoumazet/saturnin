@@ -1992,7 +1992,14 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
         // Some more restrictions can be applied when displaying NBG screens in high res when using 2*2 CP (cf sattechs #37 for
         // details)
         auto allowed_cpd_timing = std::array{false, false, false, false, false, false, false, false};
-        setCharacterPatternLimitations(is_screen_mode_normal, is_using_2_by_2_cp, pnd_timing_access, allowed_cpd_timing);
+
+        // Timings limitations are disabled for now (cf https://github.com/rtoumazet/saturnin/issues/255)
+        // setCharacterPatternLimitations(is_screen_mode_normal, is_using_2_by_2_cp, pnd_timing_access, allowed_cpd_timing);
+        if (is_screen_mode_normal) {
+            allowed_cpd_timing = std::array{true, true, true, true, true, true, true, true};
+        } else {
+            allowed_cpd_timing = std::array{true, true, true, true, false, false, false, false};
+        }
 
         // Step 3 : get the reads
         // First access not available are changed to no access
