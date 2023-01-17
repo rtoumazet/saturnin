@@ -19,6 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/memory.h>
+#include <algorithm>
 #include <filesystem> // filesystem
 #include <fstream>    // ifstream
 #include <sstream>    // stringstream
@@ -612,4 +613,6 @@ void Memory::installStvBiosBypass() {
         this->rom_[bypass_address_2 + 1] = 0x09;
     }
 }
+
+void Memory::installMinimumBiosRoutines() { std::copy_n(&rom_[0] + 0x600, 0x210, &workram_high_[0]); }
 } // namespace saturnin::core

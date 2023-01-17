@@ -531,6 +531,17 @@ class Memory {
     void installStvBiosBypass();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Memory::installMinimumBiosRoutines();
+    ///
+    /// \brief	Initializes the BIOS routines by directly copying them in memory.
+    ///
+    /// \author	Runik
+    /// \date	15/01/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void installMinimumBiosRoutines();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::initializeHandler(AddressRange& ar, ReadType<T> func)
     ///
     /// \brief  Binds the read function to a memory range in the Saturn memory.
