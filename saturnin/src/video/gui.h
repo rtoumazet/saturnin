@@ -129,102 +129,116 @@ void showStvWindow(core::EmulatorContext& state);
 void showLogWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showSh2DebugWindow(core::EmulatorContext& state, bool* opened);
+/// \fn	void showDebugSh2Window(core::EmulatorContext& state, bool* opened);
 ///
-/// \brief  Displays the debug window for both SH2.
+/// \brief	Displays the debug window for both SH2.
 ///
-/// \author Runik
-/// \date   06/04/2020
+/// \author	Runik
+/// \date	06/04/2020
 ///
-/// \param [in,out] state   The emulator context.
-/// \param [in,out] opened  True will display the window.
+/// \param [in,out]	state 	The emulator context.
+/// \param [in,out]	opened	True will display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showSh2DebugWindow(core::EmulatorContext& state, bool* opened);
+void showDebugSh2Window(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
+/// \fn	void showDebugMemoryEditorWindow(core::EmulatorContext& state, bool* opened);
 ///
-/// \brief  Displays the memory debug window
+/// \brief	Displays the memory editor window from the debug menu.
 ///
-/// \author Runik
-/// \date   27/04/2020
+/// \author	Runik
+/// \date	27/04/2020
 ///
-/// \param [in,out] state   The emulator state.
-/// \param [in,out] opened  If non-null, true if opened.
+/// \param [in,out]	state 	The emulator state.
+/// \param [in,out]	opened	If non-null, true if opened.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened);
+void showDebugMemoryEditorWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened);
+/// \fn	void showDebugMemoryDumpWindow(core::EmulatorContext& state, bool* opened);
 ///
-/// \brief  Displays the VDP1 debug window.
+/// \brief	Displays the memory dump window from the debug menu.
 ///
-/// \author Runik
-/// \date   10/06/2021
+/// \author	Runik
+/// \date	19/01/2023
 ///
-/// \param [in,out] state   The emulator state.
-/// \param [in,out] opened  If non-null, true if opened.
+/// \param [in,out]	state 	The emulator state.
+/// \param [in,out]	opened	If non-null, true if opened.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened);
+void showDebugMemoryDumpWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened);
+/// \fn	void showDebugVdp1Window(core::EmulatorContext& state, bool* opened);
 ///
-/// \brief  Displays the VDP2 debug window.
+/// \brief	Displays the VDP1 window from the debug menu.
 ///
-/// \author Runik
-/// \date   21/02/2021
+/// \author	Runik
+/// \date	10/06/2021
 ///
-/// \param [in,out] state   The emulator state.
-/// \param [in,out] opened  If non-null, true if opened.
+/// \param [in,out]	state 	The emulator state.
+/// \param [in,out]	opened	If non-null, true if opened.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened);
+void showDebugVdp1Window(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showSmpcDebugWindow(core::EmulatorContext& state, bool* opened);
+/// \fn	void showDebugVdp2Window(core::EmulatorContext& state, bool* opened);
 ///
-/// \brief  Displays the SMPC debug window.
+/// \brief	Displays the VDP2 window from the debug menu.
 ///
-/// \author Runik
-/// \date   21/02/2021
+/// \author	Runik
+/// \date	21/02/2021
 ///
-/// \param [in,out] state   The emulator state.
-/// \param [in,out] opened  If non-null, true if opened.
+/// \param [in,out]	state 	The emulator state.
+/// \param [in,out]	opened	If non-null, true if opened.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showSmpcDebugWindow(core::EmulatorContext& state, bool* opened);
+void showDebugVdp2Window(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened);
+/// \fn	void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened);
 ///
-/// \brief  Displays the textures debug window.
+/// \brief	Displays the SMPC window from the debug menu.
 ///
-/// \author Runik
-/// \date   22/04/2022
+/// \author	Runik
+/// \date	21/02/2021
 ///
-/// \param [in,out] state   The emulator state.
-/// \param [in,out] opened  If non-null, true if opened.
+/// \param [in,out]	state 	The emulator state.
+/// \param [in,out]	opened	If non-null, true if opened.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened);
+void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened);
+/// \fn	void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened);
 ///
-/// \brief  Displays the window to load binary files.
+/// \brief	Displays the textures window from the debug menu.
 ///
-/// \author Runik
-/// \date   12/08/2021
+/// \author	Runik
+/// \date	22/04/2022
 ///
-/// \param [in,out] state   The emulator state.
-/// \param [in,out] opened  If non-null, true if opened.
+/// \param [in,out]	state 	The emulator state.
+/// \param [in,out]	opened	If non-null, true if opened.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened);
+void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened);
+///
+/// \brief	Displays load binary window from the file menu.
+///
+/// \author	Runik
+/// \date	12/08/2021
+///
+/// \param [in,out]	state 	The emulator state.
+/// \param [in,out]	opened	If non-null, true if opened.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	void showBenchmarkWindow(core::EmulatorContext& state, bool* opened);

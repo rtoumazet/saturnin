@@ -614,5 +614,12 @@ void Memory::installStvBiosBypass() {
     }
 }
 
-void Memory::installMinimumBiosRoutines() { std::copy_n(&rom_[0] + 0x600, 0x210, &workram_high_[0]); }
+void Memory::installMinimumBiosRoutines() {
+    // Copying first raw block including start vectors and routines
+    std::copy_n(&rom_[0] + 0x600, 0xb00, &workram_high_[0]);
+
+    rawWrite<u16>(workram_high_, 0x236 & workram_high_memory_mask, 0x02ac);
+    rawWrite<u16>(workram_high_, 0x23a & workram_high_memory_mask, 0x02bc);
+    rawWrite<u16>(workram_high_, 0x23e & workram_high_memory_mask, 0x0350);
+}
 } // namespace saturnin::core

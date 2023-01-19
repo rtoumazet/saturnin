@@ -53,16 +53,17 @@ namespace video = saturnin::video;
 namespace saturnin::gui {
 
 // static bool show_load_stv     = false;
-static auto show_load_binary    = false;
-static auto show_debug_memory   = false;
-static auto show_debug_sh2      = false;
-static auto show_debug_smpc     = false;
-static auto show_debug_vdp1     = false;
-static auto show_debug_vdp2     = false;
-static auto show_debug_textures = false;
-static auto show_demo           = false;
-static auto show_log            = true;
-static auto show_benchmarks     = false;
+static auto show_file_load_binary    = false;
+static auto show_debug_memory_editor = false;
+static auto show_debug_memory_dump   = false;
+static auto show_debug_sh2           = false;
+static auto show_debug_smpc          = false;
+static auto show_debug_vdp1          = false;
+static auto show_debug_vdp2          = false;
+static auto show_debug_textures      = false;
+static auto show_demo                = false;
+static auto show_log                 = true;
+static auto show_benchmarks          = false;
 
 using core::Log;
 using core::Logger;
@@ -155,12 +156,12 @@ void showMainMenu(core::EmulatorContext& state) {
 
                 ImGui::EndMenu();
             };
-            if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_load_binary)) {}
+            if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_file_load_binary)) {}
             if (ImGui::MenuItem(tr("Exit").c_str())) { state.renderingStatus(core::RenderingStatus::stopped); }
 
             ImGui::EndMenu();
         }
-        if (show_load_binary) { showBinaryLoadWindow(state, &show_load_binary); };
+        if (show_file_load_binary) { showFileLoadBinaryWindow(state, &show_file_load_binary); };
 
         // Debug
         switch (state.emulationStatus()) {
@@ -168,7 +169,12 @@ void showMainMenu(core::EmulatorContext& state) {
             case running:
             case reset: {
                 if (ImGui::BeginMenu(tr("Debug").c_str())) {
-                    ImGui::MenuItem(tr("Memory editor").c_str(), nullptr, &show_debug_memory);
+                    // ImGui::MenuItem(tr("Memory editor").c_str(), nullptr, &show_debug_memory);
+                    if (ImGui::BeginMenu(tr("Memory").c_str())) {
+                        ImGui::MenuItem(tr("Editor").c_str(), nullptr, &show_debug_memory_editor);
+                        ImGui::MenuItem(tr("Dump").c_str(), nullptr, &show_debug_memory_dump);
+                        ImGui::EndMenu();
+                    }
                     ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
                     ImGui::MenuItem(tr("SMPC").c_str(), nullptr, &show_debug_smpc);
                     ImGui::MenuItem(tr("VDP1").c_str(), nullptr, &show_debug_vdp1);
@@ -177,12 +183,13 @@ void showMainMenu(core::EmulatorContext& state) {
                     ImGui::EndMenu();
                 }
 
-                if (show_debug_memory) { showMemoryDebugWindow(state, &show_debug_memory); };
-                if (show_debug_sh2) { showSh2DebugWindow(state, &show_debug_sh2); };
-                if (show_debug_smpc) { showSmpcDebugWindow(state, &show_debug_smpc); };
-                if (show_debug_vdp1) { showVdp1DebugWindow(state, &show_debug_vdp1); };
-                if (show_debug_vdp2) { showVdp2DebugWindow(state, &show_debug_vdp2); };
-                if (show_debug_textures) { showTexturesDebugWindow(state, &show_debug_textures); };
+                if (show_debug_memory_editor) { showDebugMemoryEditorWindow(state, &show_debug_memory_editor); };
+                if (show_debug_memory_dump) { showDebugMemoryDumpWindow(state, &show_debug_memory_dump); };
+                if (show_debug_sh2) { showDebugSh2Window(state, &show_debug_sh2); };
+                if (show_debug_smpc) { showDebugSmpcWindow(state, &show_debug_smpc); };
+                if (show_debug_vdp1) { showDebugVdp1Window(state, &show_debug_vdp1); };
+                if (show_debug_vdp2) { showDebugVdp2Window(state, &show_debug_vdp2); };
+                if (show_debug_textures) { showDebugTexturesWindow(state, &show_debug_textures); };
             }
             default: break;
         }
@@ -1031,7 +1038,7 @@ void showLogWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
-void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
+void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
     const auto window_size = ImVec2(670, 465);
     ImGui::SetNextWindowSize(window_size);
 
@@ -1299,7 +1306,7 @@ void showSh2DebugWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
-void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
+void showDebugMemoryEditorWindow(core::EmulatorContext& state, bool* opened) {
     const auto window_size = ImVec2(610, 320);
     ImGui::SetNextWindowSize(window_size);
 
@@ -1341,7 +1348,28 @@ void showMemoryDebugWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
-void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
+void showDebugMemoryDumpWindow(core::EmulatorContext& state, bool* opened) {
+    const auto window_size = ImVec2(300, 150);
+    ImGui::SetNextWindowSize(window_size);
+
+    auto window_flags
+        = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
+    ImGui::Begin(tr("Memory debug").c_str(), opened, window_flags);
+
+    static auto current_area = MemoryMapArea::rom;
+
+    static auto layers        = std::vector<std::string>{"0", "1", "2", "3", "4", "5"};
+    static auto current_layer = int{};
+    if (ImGui::Combo("Memory area to dump", &current_area, layers)) {}
+
+    for (const auto& [k, v] : state.memory()->memory_map_) {
+        if (ImGui::BeginTabItem(v.c_str())) { current_area = k; }
+    }
+
+    ImGui::End();
+}
+
+void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
     const auto window_size = ImVec2(860, 320);
     ImGui::SetNextWindowSize(window_size);
 
@@ -1473,7 +1501,7 @@ void showVdp1DebugWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
-void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
+void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
     enum class Vdp2DebugTab { none, global, vram, registers, scroll_screens };
     static auto current_tab = Vdp2DebugTab::none;
     if (current_tab == Vdp2DebugTab::none) { current_tab = Vdp2DebugTab::global; }
@@ -1735,7 +1763,7 @@ void showVdp2DebugWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
-void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
+void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
     const auto window_size = ImVec2(1040, 570);
     ImGui::SetNextWindowSize(window_size);
 
@@ -1888,7 +1916,7 @@ void showTexturesDebugWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
-void showSmpcDebugWindow(core::EmulatorContext& state, bool* opened) {
+void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened) {
     const auto window_size = ImVec2(810, 320);
     ImGui::SetNextWindowSize(window_size);
 
@@ -1926,7 +1954,7 @@ void showSmpcDebugWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
-void showBinaryLoadWindow(core::EmulatorContext& state, bool* opened) {
+void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
     const auto window_size = ImVec2(610, 60);
     ImGui::SetNextWindowSize(window_size);
 
