@@ -18,7 +18,6 @@
 //
 
 #include <saturnin/src/pch.h>
-#include <String.>
 #include <saturnin/lib/imgui/imgui_custom_controls.h>
 
 namespace ImGui {

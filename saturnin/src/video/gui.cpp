@@ -1349,21 +1349,48 @@ void showDebugMemoryEditorWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showDebugMemoryDumpWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(300, 150);
+    const auto window_size = ImVec2(350, 50);
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags
         = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
-    ImGui::Begin(tr("Memory debug").c_str(), opened, window_flags);
+    ImGui::Begin(tr("Memory dump").c_str(), opened, window_flags);
 
     static auto current_area = MemoryMapArea::rom;
 
-    static auto layers        = std::vector<std::string>{"0", "1", "2", "3", "4", "5"};
-    static auto current_layer = int{};
-    if (ImGui::Combo("Memory area to dump", &current_area, layers)) {}
+    ImGui::Text(tr("Memory area :").c_str());
+    ImGui::SameLine();
 
-    for (const auto& [k, v] : state.memory()->memory_map_) {
-        if (ImGui::BeginTabItem(v.c_str())) { current_area = k; }
+    if (ImGui::BeginCombo("##combo_memory_area", state.memory()->memory_map_[current_area].c_str())) {
+        for (const auto& [k, v] : state.memory()->memory_map_) {
+            const bool is_selected = (current_area == k);
+            if (ImGui::Selectable(v.c_str(), is_selected)) { current_area = k; }
+
+            if (is_selected) { ImGui::SetItemDefaultFocus(); }
+        }
+        ImGui::EndCombo();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button(tr("Dump").c_str())) {
+        auto area_data = state.memory()->getMemoryMapAreaData(current_area);
+
+        // std::ofstream output_file(bios_path, std::ios::binary);
+        // if (output_file) {
+        //     std::ofstream("myfile.bin", std::ios::binary).write(std::get<0>(area_data).data(), 100);
+        //     auto buffer = std::stringstream{};
+
+        //    std::get<0>(area_data) >> buffer;
+
+        //    buffer << input_file.rdbuf();
+        //    input_file.close();
+
+        //    const auto str = buffer.str();
+        //    std::move(str.begin(), str.end(), this->rom_.data());
+        //} else {
+        //    Log::warning(Logger::memory, tr("Bios file not found !"));
+        //}
     }
 
     ImGui::End();
