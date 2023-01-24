@@ -163,17 +163,27 @@ auto Memory::loadRom(const std::string& zip_name,
     return true;
 }
 
-void Memory::loadBinaryFile(const std::string& full_path, const u32 addr) {
-    Log::info(Logger::memory, tr("Loading binary file"));
-    std::ifstream input_file(full_path, std::ios::binary);
+void Memory::runBinaryFile(const BinaryFileConfiguration& file) {
+    constexpr auto load_address       = 0x6004000;
+    constexpr auto start_address      = 0x6004000;
+    constexpr auto breakpoint_address = 0x6004002;
+
+    // state.emulationStatus(core::EmulationStatus::stopped);
+    modules_.masterSh2()->setBinaryFileStartAddress(file.start_address);
+    // modules_.masterSh2()->breakpoint(0, breakpoint_address);
+
+    std::ifstream input_file(file.full_path, std::ios::binary);
     if (input_file) {
+        Log::info(Logger::memory, tr("Loading binary file"));
         auto buffer = std::stringstream{};
         buffer << input_file.rdbuf();
         input_file.close();
 
         const auto str = buffer.str();
 
-        std::move(str.begin(), str.end(), this->workram_high_.data() + (addr & workram_high_memory_mask));
+        std::move(str.begin(), str.end(), this->workram_high_.data() + (file.load_address & workram_high_memory_mask));
+
+        Log::info(Logger::main, tr("Binary file loaded"));
 
     } else {
         Log::warning(Logger::memory, tr("Binary file not found !"));
@@ -621,5 +631,32 @@ void Memory::installMinimumBiosRoutines() {
     rawWrite<u16>(workram_high_, 0x236 & workram_high_memory_mask, 0x02ac);
     rawWrite<u16>(workram_high_, 0x23a & workram_high_memory_mask, 0x02bc);
     rawWrite<u16>(workram_high_, 0x23e & workram_high_memory_mask, 0x0350);
+
+    rawWrite<u32>(workram_high_, 0x240 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1384));
+    rawWrite<u32>(workram_high_, 0x254 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1344));
+    rawWrite<u32>(workram_high_, 0x268 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1344));
+    rawWrite<u32>(workram_high_, 0x26c & workram_high_memory_mask, rawRead<u32>(rom_, 0x1348));
+    rawWrite<u32>(workram_high_, 0x284 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1358));
+    rawWrite<u32>(workram_high_, 0x288 & workram_high_memory_mask, rawRead<u32>(rom_, 0x134c));
+    rawWrite<u32>(workram_high_, 0x28c & workram_high_memory_mask, rawRead<u32>(rom_, 0x1350));
+    rawWrite<u32>(workram_high_, 0x29c & workram_high_memory_mask, rawRead<u32>(rom_, 0x1354));
+    rawWrite<u32>(workram_high_, 0x2c0 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1100));
+    rawWrite<u32>(workram_high_, 0x2c4 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1104));
+    rawWrite<u32>(workram_high_, 0x2c8 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1108));
+    rawWrite<u32>(workram_high_, 0x2cc & workram_high_memory_mask, rawRead<u32>(rom_, 0x110c));
+    rawWrite<u32>(workram_high_, 0x2d0 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1110));
+    rawWrite<u32>(workram_high_, 0x2d4 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1114));
+    rawWrite<u32>(workram_high_, 0x2d8 & workram_high_memory_mask, rawRead<u32>(rom_, 0x1118));
+    rawWrite<u32>(workram_high_, 0x2dc & workram_high_memory_mask, rawRead<u32>(rom_, 0x111c));
+
+    rawWrite<u16>(workram_high_, 0x328 & workram_high_memory_mask, 0x04c8);
+    rawWrite<u16>(workram_high_, 0x32c & workram_high_memory_mask, 0x1800);
+
+    for (int i = 0; i < 0x80; ++i) {
+        rawWrite<u32>(workram_high_, 0xa00 + i, 0x0600083c);
+    }
+    rawWrite<u32>(workram_high_, 0xa00, 0x06028d64);
+    rawWrite<u32>(workram_high_, 0xa04, 0x06028d9e);
+    rawWrite<u32>(workram_high_, 0xa1c, 0x0602bcc2);
 }
 } // namespace saturnin::core

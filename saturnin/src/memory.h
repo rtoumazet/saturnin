@@ -218,6 +218,12 @@ struct StvGameConfiguration {
     std::vector<StvRomFile> files;
 };
 
+struct BinaryFileConfiguration {
+    std::string full_path;
+    int         load_address;
+    int         start_address;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Memory
 ///
@@ -299,21 +305,22 @@ class Memory {
     /// Accessors / Mutators
     void selectedStvGame(const StvGameConfiguration game) { selected_stv_game_ = game; };
     auto selectedStvGame() const -> StvGameConfiguration { return selected_stv_game_; };
+    // void binaryFilePath(const std::string path) { binary_file_path_ = path; }
+    // auto binaryFilePath() const -> std::string { return binary_file_path_; }
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Memory::loadBinaryFile(const std::string& full_path, const u32 addr);
+    /// \fn	void Memory::runBinaryFile(const BinaryFileConfiguration& file);
     ///
-    /// \brief  Loads a binary file in Saturn memory.
+    /// \brief	Runs the specified Saturn binary file.
     ///
-    /// \author Runik
-    /// \date   12/08/2021
+    /// \author	Runik
+    /// \date	12/08/2021
     ///
-    /// \param  full_path   Full path of the filename to load.
-    /// \param  addr        The address to load the data to.
+    /// \param 	file	Configuration of the file to run.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void loadBinaryFile(const std::string& full_path, const u32 addr);
+    void runBinaryFile(const BinaryFileConfiguration& file);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::loadBios(saturnin::core::HardwareMode mode);
@@ -615,6 +622,8 @@ class Memory {
     u32 stv_protection_offset_{};
 
     StvGameConfiguration selected_stv_game_{}; ///< Currently selected ST-V set.
+
+    BinaryFileConfiguration selected_binary_file_{}; ///< Currently selected binary file.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

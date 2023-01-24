@@ -31,7 +31,7 @@
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
 
-//#include <condition_variable>
+// #include <condition_variable>
 #include <thread> // thread
 #include <saturnin/src/emulator_enums.h>
 #include <saturnin/src/stv_definitions.h>
@@ -303,6 +303,17 @@ class EmulatorContext {
     [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
 
   private:
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void EmulatorContext::emulationSetup();
+    ///
+    /// \brief	Sets up the various emulator modules.
+    ///
+    /// \author	Runik
+    /// \date	23/01/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void emulationSetup();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::emulationMainThread();
     ///

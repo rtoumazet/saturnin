@@ -224,22 +224,24 @@ void EmulatorContext::stopEmulation() {
 
 void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
 
+void EmulatorContext::emulationSetup() {
+    memory()->initialize(hardware_mode_);
+
+    sh2::initializeOpcodesLut();
+    masterSh2()->powerOnReset();
+    slaveSh2()->powerOnReset();
+    smpc()->initialize();
+    cdrom()->initialize();
+    vdp1()->initialize();
+    vdp2()->initialize();
+    scsp()->initialize();
+}
+
 void EmulatorContext::emulationMainThread() {
     try {
         Log::info(Logger::main, tr("Emulation main thread started"));
 
-        // opengl()->initialize(openglWindow());
-
-        memory()->initialize(hardware_mode_);
-
-        sh2::initializeOpcodesLut();
-        masterSh2()->powerOnReset();
-        slaveSh2()->powerOnReset();
-        smpc()->initialize();
-        cdrom()->initialize();
-        vdp1()->initialize();
-        vdp2()->initialize();
-        scsp()->initialize();
+        emulationSetup();
 
         while (emulationStatus() == EmulationStatus::running) {
             if (debugStatus() != DebugStatus::paused) {

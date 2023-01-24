@@ -65,6 +65,7 @@ static auto show_demo                = false;
 static auto show_log                 = true;
 static auto show_benchmarks          = false;
 
+using core::BinaryFileConfiguration;
 using core::Log;
 using core::Logger;
 using core::MemoryMapArea;
@@ -1334,9 +1335,9 @@ void showDebugMemoryEditorWindow(core::EmulatorContext& state, bool* opened) {
                         }
                         break;
                     default:
-                        auto        area_data = state.memory()->getMemoryMapAreaData(current_area);
-                        static auto editor    = MemoryEditor{}; // store your state somewhere
-                        editor.DrawContents(std::get<0>(area_data), std::get<1>(area_data), std::get<2>(area_data));
+                        const auto [data, size, start] = state.memory()->getMemoryMapAreaData(current_area);
+                        static auto editor             = MemoryEditor{}; // store your state somewhere
+                        editor.DrawContents(data, size, start);
                 }
                 ImGui::EndTabItem();
             }
@@ -1349,7 +1350,7 @@ void showDebugMemoryEditorWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showDebugMemoryDumpWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(350, 50);
+    const auto window_size = ImVec2(500, 100);
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags
@@ -1371,26 +1372,37 @@ void showDebugMemoryDumpWindow(core::EmulatorContext& state, bool* opened) {
         ImGui::EndCombo();
     }
 
-    ImGui::SameLine();
+    {
+        constexpr auto string_size = u8{255};
+        ImGui::TextUnformatted(tr("Dump to ").c_str());
+        ImGui::SameLine();
 
-    if (ImGui::Button(tr("Dump").c_str())) {
-        auto area_data = state.memory()->getMemoryMapAreaData(current_area);
+        static auto full_path    = std::string{};
+        auto        path_for_gui = uti::stringToVector(full_path, string_size);
+        const auto  flags        = ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_ReadOnly;
+        ImGui::InputText("##dump_file", path_for_gui.data(), path_for_gui.capacity(), flags);
 
-        // std::ofstream output_file(bios_path, std::ios::binary);
-        // if (output_file) {
-        //     std::ofstream("myfile.bin", std::ios::binary).write(std::get<0>(area_data).data(), 100);
-        //     auto buffer = std::stringstream{};
+        ImGui::SameLine();
+        auto        browser_flags = ImGuiFileBrowserFlags_CreateNewDir | ImGuiFileBrowserFlags_EnterNewFilename;
+        static auto select_dialog = ImGui::FileBrowser(browser_flags);
+        if (ImGui::Button("...##dump_file")) {
+            select_dialog.SetTitle(tr("Select a file to dump data to ..."));
+            select_dialog.SetTypeFilters({".bin", ".*"});
+            select_dialog.Open();
+        }
+        select_dialog.Display();
 
-        //    std::get<0>(area_data) >> buffer;
+        if (select_dialog.HasSelected()) { full_path = select_dialog.GetSelected().string(); }
 
-        //    buffer << input_file.rdbuf();
-        //    input_file.close();
+        ImGui::SameLine();
 
-        //    const auto str = buffer.str();
-        //    std::move(str.begin(), str.end(), this->rom_.data());
-        //} else {
-        //    Log::warning(Logger::memory, tr("Bios file not found !"));
-        //}
+        if (ImGui::Button(tr("Dump").c_str())) {
+            const auto [data, size, start] = state.memory()->getMemoryMapAreaData(current_area);
+
+            auto file = std::ofstream(full_path, std::ios::binary);
+            file.write(reinterpret_cast<char*>(data), size);
+            file.close();
+        }
     }
 
     ImGui::End();
@@ -2013,14 +2025,13 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::SameLine();
 
     if (ImGui::Button("Load")) {
-        constexpr auto load_address       = 0x6004000;
-        constexpr auto start_address      = 0x6004000;
-        constexpr auto breakpoint_address = 0x6004002;
-        state.emulationStatus(core::EmulationStatus::stopped);
-        state.masterSh2()->setBinaryFileStartAddress(start_address);
-        state.masterSh2()->breakpoint(0, breakpoint_address);
-        state.memory()->loadBinaryFile(full_path, load_address);
-        Log::info(Logger::main, tr("Binary file loaded."));
+        auto file_conf          = BinaryFileConfiguration{};
+        file_conf.full_path     = full_path;
+        file_conf.load_address  = 0x6004000;
+        file_conf.start_address = 0x6004000;
+
+        state.memory()->runBinaryFile(file_conf);
+        state.startEmulation();
     }
     ImGui::End();
 }
