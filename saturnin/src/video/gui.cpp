@@ -2030,8 +2030,7 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
         file_conf.load_address  = 0x6004000;
         file_conf.start_address = 0x6004000;
 
-        state.memory()->runBinaryFile(file_conf);
-        state.startEmulation();
+        state.memory()->selectedBinaryFile(file_conf);
     }
     ImGui::End();
 }

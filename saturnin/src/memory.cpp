@@ -163,11 +163,7 @@ auto Memory::loadRom(const std::string& zip_name,
     return true;
 }
 
-void Memory::runBinaryFile(const BinaryFileConfiguration& file) {
-    constexpr auto load_address       = 0x6004000;
-    constexpr auto start_address      = 0x6004000;
-    constexpr auto breakpoint_address = 0x6004002;
-
+void Memory::loadBinaryFile(const BinaryFileConfiguration& file) {
     // state.emulationStatus(core::EmulationStatus::stopped);
     modules_.masterSh2()->setBinaryFileStartAddress(file.start_address);
     // modules_.masterSh2()->breakpoint(0, breakpoint_address);
@@ -588,6 +584,12 @@ void Memory::initialize(saturnin::core::HardwareMode mode) {
 
     if (mode == HardwareMode::stv) {
         if (selectedStvGame().game_name != defaultStvGame().game_name) { loadStvGame(selectedStvGame()); }
+    } else {
+        if (!selectedBinaryFile().full_path.empty()) {
+            installMinimumBiosRoutines();
+            loadBinaryFile(selectedBinaryFile());
+            modules_.context()->debugStatus(DebugStatus::paused);
+        }
     }
 }
 

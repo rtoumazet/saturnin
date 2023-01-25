@@ -305,14 +305,14 @@ class Memory {
     /// Accessors / Mutators
     void selectedStvGame(const StvGameConfiguration game) { selected_stv_game_ = game; };
     auto selectedStvGame() const -> StvGameConfiguration { return selected_stv_game_; };
-    // void binaryFilePath(const std::string path) { binary_file_path_ = path; }
-    // auto binaryFilePath() const -> std::string { return binary_file_path_; }
+    void selectedBinaryFile(const BinaryFileConfiguration& file) { selected_binary_file_ = file; }
+    auto selectedBinaryFile() const -> BinaryFileConfiguration { return selected_binary_file_; }
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Memory::runBinaryFile(const BinaryFileConfiguration& file);
     ///
-    /// \brief	Runs the specified Saturn binary file.
+    /// \brief	Loads the specified Saturn binary file.
     ///
     /// \author	Runik
     /// \date	12/08/2021
@@ -320,7 +320,7 @@ class Memory {
     /// \param 	file	Configuration of the file to run.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void runBinaryFile(const BinaryFileConfiguration& file);
+    void loadBinaryFile(const BinaryFileConfiguration& file);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::loadBios(saturnin::core::HardwareMode mode);
