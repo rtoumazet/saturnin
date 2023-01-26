@@ -135,10 +135,15 @@ auto Sh2::readRegisters16(const u32 addr) -> u16 {
         /////////////
         // 7. BSC //
         /////////////
+        case bus_control_register1: return u16{0};
         case bus_control_register1 + 2: return bsc_bcr1_.lower_16_bits;
+        case bus_control_register2: return u16{0};
         case bus_control_register2 + 2: return bsc_bcr2_.lower_16_bits;
+        case wait_state_control_register: return u16{0};
         case wait_state_control_register + 2: return bsc_wcr_.lower_16_bits;
+        case individual_memory_control_register: return u16{0};
         case individual_memory_control_register + 2: return bsc_mcr_.lower_16_bits;
+        case refresh_timer_control_status_register: return u16{0};
         case refresh_timer_control_status_register + 2: return bsc_rtcsr_.lower_16_bits;
         case refresh_timer_counter + 2: return bsc_rtcnt_.lower_16_bits;
         case refresh_time_constant_register + 2: return bsc_rtcor_.lower_16_bits;
@@ -760,13 +765,6 @@ void Sh2::powerOnReset() {
     constexpr auto pc_start_vector = u32{0x00000008};
     constexpr auto sp_start_vector = u32{0x0000000C};
 
-    if (is_binary_file_loaded_) {
-        pc_                    = binary_file_start_address_;
-        is_binary_file_loaded_ = false;
-    } else {
-        pc_ = modules_.memory()->read<u32>(pc_start_vector);
-    }
-
     r_[sp_register_index]          = modules_.memory()->read<u32>(sp_start_vector);
     vbr_                           = 0;
     sr_.raw                        = {};
@@ -776,10 +774,18 @@ void Sh2::powerOnReset() {
     mach_                          = 0;
     macl_                          = 0;
     pr_                            = 0;
+    pc_                            = modules_.memory()->read<u32>(pc_start_vector);
 
     for (u8 i = 0; i < general_registers_number; ++i) {
         r_[i] = 0;
     }
+
+    if (is_binary_file_loaded_) {
+        pc_                    = binary_file_start_address_;
+        vbr_                   = 0x06000000;
+        is_binary_file_loaded_ = false;
+    }
+
     initializeOnChipRegisters();
 
     callstack_.clear();

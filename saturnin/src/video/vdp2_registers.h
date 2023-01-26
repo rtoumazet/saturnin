@@ -257,6 +257,8 @@ union TvScreenMode {
     BitField<6, 2> interlace_mode;        ///< Defines LSMDx bit.
     BitField<4, 2> vertical_resolution;   ///< Defines VRESOx bit.
     BitField<0, 3> horizontal_resolution; ///< Defines HRESOx bit.
+    BitField<8, 8> upper_8_bits;          ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;          ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -269,7 +271,9 @@ union TvScreenMode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ExternalSignalEnable {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -348,13 +352,15 @@ enum class TvStandardFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ScreenStatus {
-    u16         raw;                   ///< Raw representation.
-    BitField<9> external_latch_flag;   ///< Defines EXLTFG bit.
-    BitField<8> external_sync_flag;    ///< Defines EXSYFG bit.
-    BitField<3> vertical_blank_flag;   ///< Defines VBLANK bit.
-    BitField<2> horizontal_blank_flag; ///< Defines HBLANK bit.
-    BitField<1> scan_field_flag;       ///< Defines ODD bit.
-    BitField<0> tv_standard_flag;      ///< Defines PAL bit.
+    u16            raw;                   ///< Raw representation.
+    BitField<9>    external_latch_flag;   ///< Defines EXLTFG bit.
+    BitField<8>    external_sync_flag;    ///< Defines EXSYFG bit.
+    BitField<3>    vertical_blank_flag;   ///< Defines VBLANK bit.
+    BitField<2>    horizontal_blank_flag; ///< Defines HBLANK bit.
+    BitField<1>    scan_field_flag;       ///< Defines ODD bit.
+    BitField<0>    tv_standard_flag;      ///< Defines PAL bit.
+    BitField<8, 8> upper_8_bits;          ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;          ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,6 +387,8 @@ union VramSizeRegister {
     u16            raw;            ///< Raw representation.
     BitField<15>   vram_size;      ///< Defines VRAMSZ bit.
     BitField<0, 4> version_number; ///< Defines VERx bits.
+    BitField<8, 8> upper_8_bits;   ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;   ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -393,7 +401,9 @@ union VramSizeRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union HCounter {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -406,7 +416,9 @@ union HCounter {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union VCounter {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -419,7 +431,9 @@ union VCounter {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union Reserve {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -484,6 +498,8 @@ union RamControl {
     BitField<2, 2>  vram_a1_rotation_bank_select; ///< Defines RDBSA1x bits.
     BitField<4, 2>  vram_b0_rotation_bank_select; ///< Defines RDBSB0x bits.
     BitField<6, 2>  vram_b1_rotation_bank_select; ///< Defines RDBSB1x bits.
+    BitField<8, 8>  upper_8_bits;                 ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits;                 ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -520,11 +536,13 @@ enum class VramAccessCommand : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union VramCyclePatternBankLower {
-    u16             raw; ///< Raw representation.
-    BitField<12, 4> t0;  ///< Defines VCP0xxx bits.
-    BitField<8, 4>  t1;  ///< Defines VCP1xxx bits.
-    BitField<4, 4>  t2;  ///< Defines VCP2xxx bits.
-    BitField<0, 4>  t3;  ///< Defines VCP3xxx bits.
+    u16             raw;          ///< Raw representation.
+    BitField<12, 4> t0;           ///< Defines VCP0xxx bits.
+    BitField<8, 4>  t1;           ///< Defines VCP1xxx bits.
+    BitField<4, 4>  t2;           ///< Defines VCP2xxx bits.
+    BitField<0, 4>  t3;           ///< Defines VCP3xxx bits.
+    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -537,11 +555,13 @@ union VramCyclePatternBankLower {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union VramCyclePatternBankUpper {
-    u16             raw; ///< Raw representation.
-    BitField<12, 4> t4;  ///< Defines VCP4xxx bits.
-    BitField<8, 4>  t5;  ///< Defines VCP5xxx bits.
-    BitField<4, 4>  t6;  ///< Defines VCP6xxx bits.
-    BitField<0, 4>  t7;  ///< Defines VCP7xxx bits.
+    u16             raw;          ///< Raw representation.
+    BitField<12, 4> t4;           ///< Defines VCP4xxx bits.
+    BitField<8, 4>  t5;           ///< Defines VCP5xxx bits.
+    BitField<4, 4>  t6;           ///< Defines VCP6xxx bits.
+    BitField<0, 4>  t7;           ///< Defines VCP7xxx bits.
+    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -577,18 +597,20 @@ enum class ScreenDisplayEnableBit : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ScreenDisplayEnable {
-    u16          raw;                              ///< Raw representation.
-    BitField<12> transparency_display_enable_rbg0; ///< Defines R0TPON bit.
-    BitField<11> transparency_display_enable_nbg3; ///< Defines N3TPON bit.
-    BitField<10> transparency_display_enable_nbg2; ///< Defines N2TPON bit.
-    BitField<9>  transparency_display_enable_nbg1; ///< Defines N1TPON bit.
-    BitField<8>  transparency_display_enable_nbg0; ///< Defines N0TPON bit.
-    BitField<5>  screen_display_enable_rbg1;       ///< Defines R1ON bit.
-    BitField<4>  screen_display_enable_rbg0;       ///< Defines R0ON bit.
-    BitField<3>  screen_display_enable_nbg3;       ///< Defines N3ON bit.
-    BitField<2>  screen_display_enable_nbg2;       ///< Defines N2ON bit.
-    BitField<1>  screen_display_enable_nbg1;       ///< Defines N1ON bit.
-    BitField<0>  screen_display_enable_nbg0;       ///< Defines N0ON bit.
+    u16            raw;                              ///< Raw representation.
+    BitField<12>   transparency_display_enable_rbg0; ///< Defines R0TPON bit.
+    BitField<11>   transparency_display_enable_nbg3; ///< Defines N3TPON bit.
+    BitField<10>   transparency_display_enable_nbg2; ///< Defines N2TPON bit.
+    BitField<9>    transparency_display_enable_nbg1; ///< Defines N1TPON bit.
+    BitField<8>    transparency_display_enable_nbg0; ///< Defines N0TPON bit.
+    BitField<5>    screen_display_enable_rbg1;       ///< Defines R1ON bit.
+    BitField<4>    screen_display_enable_rbg0;       ///< Defines R0ON bit.
+    BitField<3>    screen_display_enable_nbg3;       ///< Defines N3ON bit.
+    BitField<2>    screen_display_enable_nbg2;       ///< Defines N2ON bit.
+    BitField<1>    screen_display_enable_nbg1;       ///< Defines N1ON bit.
+    BitField<0>    screen_display_enable_nbg0;       ///< Defines N0ON bit.
+    BitField<8, 8> upper_8_bits;                     ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;                     ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -601,7 +623,9 @@ union ScreenDisplayEnable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union MosaicControl {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -614,7 +638,9 @@ union MosaicControl {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union SpecialFunctionCodeSelect {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -627,7 +653,9 @@ union SpecialFunctionCodeSelect {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union SpecialFunctionCode {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -734,6 +762,8 @@ union CharacterControlA {
     BitField<2, 2>  bitmap_size_nbg0;            ///< Defines N0BMSZx bits.
     BitField<1>     bitmap_enable_nbg0;          ///< Defines N0BMEN bit.
     BitField<0>     character_size_nbg0;         ///< Defines N0CHSZ bit.
+    BitField<8, 8>  upper_8_bits;                ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits;                ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -755,6 +785,8 @@ union CharacterControlB {
     BitField<2>      bitmap_size_rbg0;            ///< Defines R0BMSZ bit.
     BitField<1>      character_color_number_nbg2; ///< Defines N2CHCNx bit.
     BitField<0>      character_size_nbg2;         ///< Defines N2CHSZ bit.
+    BitField<8, 8>   upper_8_bits;                ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>   lower_8_bits;                ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -774,6 +806,8 @@ union BitmapPaletteNumberA {
     BitField<5>    bitmap_special_priority_nbg0;          ///< Defines N0BMPR bit.
     BitField<4>    bitmap_special_color_calculation_nbg0; ///< Defines N0BMCC bit.
     BitField<0, 3> bitmap_palette_number_nbg0;            ///< Defines N0BMPx bit.
+    BitField<8, 8> upper_8_bits;                          ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;                          ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -790,6 +824,8 @@ union BitmapPaletteNumberB {
     BitField<5>    bitmap_special_priority_rbg0;          ///< Defines N0BMPR bit.
     BitField<4>    bitmap_special_color_calculation_rbg0; ///< Defines R0BMCC bit.
     BitField<0, 3> bitmap_palette_number_rbg0;            ///< Defines R0BMPx bit.
+    BitField<8, 8> upper_8_bits;                          ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;                          ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -832,6 +868,8 @@ union PatternNameControl {
     BitField<8>    special_color_calculation;      ///< Defines N0SCC bit.
     BitField<5, 3> supplementary_palette_number;   ///< Defines N0SPLTx bits.
     BitField<0, 5> supplementary_character_number; ///< Defines N0SCNx bits.
+    BitField<8, 8> upper_8_bits;                   ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;                   ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -883,6 +921,8 @@ union PlaneSizeRegister {
     BitField<4, 2>  plane_size_nbg2; ///< Defines N2PLSZx bits.
     BitField<2, 2>  plane_size_nbg1; ///< Defines N1PLSZx bits.
     BitField<0, 2>  plane_size_nbg0; ///< Defines N0PLSZx bits.
+    BitField<8, 8>  upper_8_bits;    ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits;    ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -900,6 +940,8 @@ union MapOffsetNbg {
     BitField<8, 3>  map_offset_nbg2; ///< Defines N2MPx bits.
     BitField<4, 3>  map_offset_nbg1; ///< Defines N1MPx bits.
     BitField<0, 3>  map_offset_nbg0; ///< Defines N0MPx bits.
+    BitField<8, 8>  upper_8_bits;    ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits;    ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -915,6 +957,8 @@ union MapOffsetRbg {
     u16            raw;            ///< Raw representation.
     BitField<4, 3> map_offset_rpb; ///< Defines RBMPx bits.
     BitField<0, 3> map_offset_rpa; ///< Defines RAMPx bits.
+    BitField<8, 8> upper_8_bits;   ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;   ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -927,9 +971,11 @@ union MapOffsetRbg {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union MapPlaneAB {
-    u16            raw;     ///< Raw representation.
-    BitField<0, 6> plane_a; ///< Defines N0MPAx bits.
-    BitField<8, 6> plane_b; ///< Defines N0MPBx bits.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 6> plane_a;      ///< Defines N0MPAx bits.
+    BitField<8, 6> plane_b;      ///< Defines N0MPBx bits.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -942,9 +988,11 @@ union MapPlaneAB {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union MapPlaneCD {
-    u16            raw;     ///< Raw representation.
-    BitField<0, 6> plane_c; ///< Defines N0MPAx bits.
-    BitField<8, 6> plane_d; ///< Defines N0MPBx bits.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 6> plane_c;      ///< Defines N0MPAx bits.
+    BitField<8, 6> plane_d;      ///< Defines N0MPBx bits.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -957,9 +1005,11 @@ union MapPlaneCD {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union MapPlaneEF {
-    u16            raw;     ///< Raw representation.
-    BitField<0, 6> plane_e; ///< Defines RxMPEx bits.
-    BitField<8, 6> plane_f; ///< Defines RxMPFx bits.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 6> plane_e;      ///< Defines RxMPEx bits.
+    BitField<8, 6> plane_f;      ///< Defines RxMPFx bits.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -972,9 +1022,11 @@ union MapPlaneEF {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union MapPlaneGH {
-    u16            raw;     ///< Raw representation.
-    BitField<0, 6> plane_g; ///< Defines RxMPGx bits.
-    BitField<8, 6> plane_h; ///< Defines RxMPHx bits.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 6> plane_g;      ///< Defines RxMPGx bits.
+    BitField<8, 6> plane_h;      ///< Defines RxMPHx bits.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -987,9 +1039,11 @@ union MapPlaneGH {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union MapPlaneIJ {
-    u16            raw;     ///< Raw representation.
-    BitField<0, 6> plane_i; ///< Defines RxMPIx bits.
-    BitField<8, 6> plane_j; ///< Defines RxMPJx bits.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 6> plane_i;      ///< Defines RxMPIx bits.
+    BitField<8, 6> plane_j;      ///< Defines RxMPJx bits.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1002,9 +1056,11 @@ union MapPlaneIJ {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union MapPlaneKL {
-    u16            raw;     ///< Raw representation.
-    BitField<0, 6> plane_k; ///< Defines RxMPIx bits.
-    BitField<8, 6> plane_l; ///< Defines RxMPJx bits.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 6> plane_k;      ///< Defines RxMPIx bits.
+    BitField<8, 6> plane_l;      ///< Defines RxMPJx bits.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1017,9 +1073,11 @@ union MapPlaneKL {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union MapPlaneMN {
-    u16            raw;     ///< Raw representation.
-    BitField<0, 6> plane_m; ///< Defines RxMPIx bits.
-    BitField<8, 6> plane_n; ///< Defines RxMPJx bits.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 6> plane_m;      ///< Defines RxMPIx bits.
+    BitField<8, 6> plane_n;      ///< Defines RxMPJx bits.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1032,9 +1090,11 @@ union MapPlaneMN {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union MapPlaneOP {
-    u16            raw;     ///< Raw representation.
-    BitField<0, 6> plane_o; ///< Defines RxMPIx bits.
-    BitField<8, 6> plane_p; ///< Defines RxMPJx bits.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 6> plane_o;      ///< Defines RxMPIx bits.
+    BitField<8, 6> plane_p;      ///< Defines RxMPJx bits.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1047,8 +1107,10 @@ union MapPlaneOP {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ScreenScrollValueIntegerPart {
-    u16             raw;     ///< Raw representation.
-    BitField<0, 11> integer; ///< Defines  NxSCxIx bits.
+    u16             raw;          ///< Raw representation.
+    BitField<0, 11> integer;      ///< Defines  NxSCxIx bits.
+    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1061,8 +1123,10 @@ union ScreenScrollValueIntegerPart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ScreenScrollValueFractionalPart {
-    u16            raw;        ///< Raw representation.
-    BitField<8, 8> fractional; ///< Defines  NxSCxDx bits.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> fractional;   ///< Defines  NxSCxDx bits.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1075,7 +1139,9 @@ union ScreenScrollValueFractionalPart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoordinateIncrementNbg0HorizontalIntegerPart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1088,7 +1154,9 @@ union CoordinateIncrementNbg0HorizontalIntegerPart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoordinateIncrementNbg0HorizontalFractionalPart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1101,7 +1169,9 @@ union CoordinateIncrementNbg0HorizontalFractionalPart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoordinateIncrementNbg0VerticalIntegerPart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1114,7 +1184,9 @@ union CoordinateIncrementNbg0VerticalIntegerPart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoordinateIncrementNbg0VerticalFractionalPart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1127,7 +1199,9 @@ union CoordinateIncrementNbg0VerticalFractionalPart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoordinateIncrementNbg1HorizontalIntegerPart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1140,7 +1214,9 @@ union CoordinateIncrementNbg1HorizontalIntegerPart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoordinateIncrementNbg1HorizontalFractionalPart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1153,7 +1229,9 @@ union CoordinateIncrementNbg1HorizontalFractionalPart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoordinateIncrementNbg1VerticalIntegerPart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1166,7 +1244,9 @@ union CoordinateIncrementNbg1VerticalIntegerPart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoordinateIncrementNbg1VerticalFractionalPart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1195,11 +1275,13 @@ enum class ZoomHalf : bool { none = 0, up_to_one_half = 1 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ReductionEnable {
-    u16         raw;               ///< Raw representation.
-    BitField<9> zoom_quarter_nbg1; ///< Defines N1ZMQT bits.
-    BitField<8> zoom_half_nbg1;    ///< Defines N1ZMHF bits.
-    BitField<1> zoom_quarter_nbg0; ///< Defines N0ZMQT bits.
-    BitField<0> zoom_half_nbg0;    ///< Defines N0ZMHF bits.
+    u16            raw;               ///< Raw representation.
+    BitField<9>    zoom_quarter_nbg1; ///< Defines N1ZMQT bits.
+    BitField<8>    zoom_half_nbg1;    ///< Defines N1ZMHF bits.
+    BitField<1>    zoom_quarter_nbg0; ///< Defines N0ZMQT bits.
+    BitField<0>    zoom_half_nbg0;    ///< Defines N0ZMHF bits.
+    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1212,7 +1294,9 @@ union ReductionEnable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineAndVerticalCellScrollControl {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1225,7 +1309,9 @@ union LineAndVerticalCellScrollControl {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union VerticalCellScrollTableAddressUpper {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1238,7 +1324,9 @@ union VerticalCellScrollTableAddressUpper {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union VerticalCellScrollTableAddressLower {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1251,7 +1339,9 @@ union VerticalCellScrollTableAddressLower {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineScrollTableAddressNbg0Upper {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1264,7 +1354,9 @@ union LineScrollTableAddressNbg0Upper {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineScrollTableAddressNbg0Lower {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1277,7 +1369,9 @@ union LineScrollTableAddressNbg0Lower {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineScrollTableAddressNbg1Upper {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1290,7 +1384,9 @@ union LineScrollTableAddressNbg1Upper {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineScrollTableAddressNbg1Lower {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1303,7 +1399,9 @@ union LineScrollTableAddressNbg1Lower {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineColorScreenTableAddressUpper {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1316,7 +1414,9 @@ union LineColorScreenTableAddressUpper {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineColorScreenTableAddressLower {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1329,7 +1429,9 @@ union LineColorScreenTableAddressLower {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union BackScreenTableAddressUpper {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1342,7 +1444,9 @@ union BackScreenTableAddressUpper {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union BackScreenTableAddressLower {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1355,7 +1459,9 @@ union BackScreenTableAddressLower {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union RotationParameterMode {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1368,7 +1474,9 @@ union RotationParameterMode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union RotationParameterReadControl {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1381,7 +1489,9 @@ union RotationParameterReadControl {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoefficientTableControl {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1394,7 +1504,9 @@ union CoefficientTableControl {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union CoefficientTableAddressOffset {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1407,7 +1519,9 @@ union CoefficientTableAddressOffset {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ScreenOverPatternNameA {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1420,7 +1534,9 @@ union ScreenOverPatternNameA {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ScreenOverPatternNameB {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1433,7 +1549,9 @@ union ScreenOverPatternNameB {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union RotationParameterTableAddressUpper {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1446,7 +1564,9 @@ union RotationParameterTableAddressUpper {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union RotationParameterTableAddressLower {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1459,7 +1579,9 @@ union RotationParameterTableAddressLower {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowPositionW0HorizontalStart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1472,7 +1594,9 @@ union WindowPositionW0HorizontalStart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowPositionW0VerticalStart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1485,7 +1609,9 @@ union WindowPositionW0VerticalStart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowPositionW0HorizontalEnd {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1498,7 +1624,9 @@ union WindowPositionW0HorizontalEnd {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowPositionW0VerticalEnd {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1511,7 +1639,9 @@ union WindowPositionW0VerticalEnd {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowPositionW1HorizontalStart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1524,7 +1654,9 @@ union WindowPositionW1HorizontalStart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowPositionW1VerticalStart {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1537,7 +1669,9 @@ union WindowPositionW1VerticalStart {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowPositionW1HorizontalEnd {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1550,7 +1684,9 @@ union WindowPositionW1HorizontalEnd {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowPositionW1VerticalEnd {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1563,7 +1699,9 @@ union WindowPositionW1VerticalEnd {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowControlA {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1576,7 +1714,9 @@ union WindowControlA {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowControlB {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1589,7 +1729,9 @@ union WindowControlB {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowControlC {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1602,7 +1744,9 @@ union WindowControlC {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union WindowControlD {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1615,7 +1759,9 @@ union WindowControlD {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineWindowTableAddressW0Upper {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1628,7 +1774,9 @@ union LineWindowTableAddressW0Upper {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineWindowTableAddressW0Lower {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1641,7 +1789,9 @@ union LineWindowTableAddressW0Lower {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineWindowTableAddressW1Upper {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1654,7 +1804,9 @@ union LineWindowTableAddressW1Upper {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineWindowTableAddressW1Lower {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1734,6 +1886,8 @@ union SpriteControl {
     BitField<5>     sprite_color_mode;                  ///< Defines SPCLMD bit.
     BitField<4>     sprite_window_enable;               ///< Defines SPWINEN bit.
     BitField<0, 4>  sprite_type;                        ///< Defines SPTYPEx bits.
+    BitField<8, 8>  upper_8_bits;                       ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits;                       ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1764,6 +1918,8 @@ union ColorRamAddressOffsetA {
     BitField<8, 3>  color_ram_address_offset_nbg2; ///< Defines N2CAOSx bits.
     BitField<4, 3>  color_ram_address_offset_nbg1; ///< Defines N1CAOSx bits.
     BitField<0, 3>  color_ram_address_offset_nbg0; ///< Defines N0CAOSx bits.
+    BitField<8, 8>  upper_8_bits;                  ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8>  lower_8_bits;                  ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1779,6 +1935,8 @@ union ColorRamAddressOffsetB {
     u16            raw;                             ///< Raw representation.
     BitField<4, 3> color_ram_address_offset_sprite; ///< Defines SPCAOSx bits.
     BitField<0, 3> color_ram_address_offset_rbg0;   ///< Defines R0CAOSx bits.
+    BitField<8, 8> upper_8_bits;                    ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;                    ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1791,7 +1949,9 @@ union ColorRamAddressOffsetB {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union LineColorScreenEnable {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1804,7 +1964,9 @@ union LineColorScreenEnable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union SpecialPriorityMode {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1817,7 +1979,9 @@ union SpecialPriorityMode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorCalculationControl {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1830,7 +1994,9 @@ union ColorCalculationControl {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union SpecialColorCalculationMode {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1846,6 +2012,8 @@ union PriorityNumberSpriteA {
     u16            raw;               ///< Raw representation.
     BitField<0, 3> sprite_register_0; ///< Defines S0PRINx bits.
     BitField<8, 3> sprite_register_1; ///< Defines S1PRINx bits.
+    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1861,6 +2029,8 @@ union PriorityNumberSpriteB {
     u16            raw;               ///< Raw representation.
     BitField<0, 3> sprite_register_2; ///< Defines S2PRINx bits.
     BitField<8, 3> sprite_register_3; ///< Defines S3PRINx bits.
+    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1876,6 +2046,8 @@ union PriorityNumberSpriteC {
     u16            raw;               ///< Raw representation.
     BitField<0, 3> sprite_register_4; ///< Defines S4PRINx bits.
     BitField<8, 3> sprite_register_5; ///< Defines S5PRINx bits.
+    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1891,6 +2063,8 @@ union PriorityNumberSpriteD {
     u16            raw;               ///< Raw representation.
     BitField<0, 3> sprite_register_6; ///< Defines S6PRINx bits.
     BitField<8, 3> sprite_register_7; ///< Defines S7PRINx bits.
+    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1903,9 +2077,11 @@ union PriorityNumberSpriteD {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union PriorityNumberA {
-    u16            raw;  ///< Raw representation.
-    BitField<8, 3> nbg1; ///< Defines the priority number of NBG1 (N1PRINx).
-    BitField<0, 3> nbg0; ///< Defines the priority number of NBG0 (N0PRINx).
+    u16            raw;          ///< Raw representation.
+    BitField<8, 3> nbg1;         ///< Defines the priority number of NBG1 (N1PRINx).
+    BitField<0, 3> nbg0;         ///< Defines the priority number of NBG0 (N0PRINx).
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1918,9 +2094,11 @@ union PriorityNumberA {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union PriorityNumberB {
-    u16            raw;  ///< Raw representation.
-    BitField<8, 3> nbg3; ///< Defines the priority number of NBG1 (N1PRINx).
-    BitField<0, 3> nbg2; ///< Defines the priority number of NBG0 (N0PRINx).
+    u16            raw;          ///< Raw representation.
+    BitField<8, 3> nbg3;         ///< Defines the priority number of NBG1 (N1PRINx).
+    BitField<0, 3> nbg2;         ///< Defines the priority number of NBG0 (N0PRINx).
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1933,8 +2111,10 @@ union PriorityNumberB {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union PriorityNumberR {
-    u16            raw;  ///< Raw representation.
-    BitField<0, 3> rbg0; ///< Defines the priority number of RBG0 (R0PRINx).
+    u16            raw;          ///< Raw representation.
+    BitField<0, 3> rbg0;         ///< Defines the priority number of RBG0 (R0PRINx).
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1947,7 +2127,9 @@ union PriorityNumberR {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorCalculationRatioSpriteA {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1960,7 +2142,9 @@ union ColorCalculationRatioSpriteA {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorCalculationRatioSpriteB {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1973,7 +2157,9 @@ union ColorCalculationRatioSpriteB {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorCalculationRatioSpriteC {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1986,7 +2172,9 @@ union ColorCalculationRatioSpriteC {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorCalculationRatioSpriteD {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1999,7 +2187,9 @@ union ColorCalculationRatioSpriteD {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorCalculationRatioNbg0Nbg1 {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2012,7 +2202,9 @@ union ColorCalculationRatioNbg0Nbg1 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorCalculationRatioNbg2Nbg3 {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2025,7 +2217,9 @@ union ColorCalculationRatioNbg2Nbg3 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorCalculationRatioRbg0 {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2038,7 +2232,9 @@ union ColorCalculationRatioRbg0 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorCalculationRatioLineColorBack {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2062,14 +2258,16 @@ enum class ColorOffsetEnableBit : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorOffsetEnable {
-    u16         raw;    ///< Raw representation.
-    BitField<0> nbg0;   ///< Defines N0COEN bit.
-    BitField<1> nbg1;   ///< Defines N1COEN bit.
-    BitField<2> nbg2;   ///< Defines N2COEN bit.
-    BitField<3> nbg3;   ///< Defines N3COEN bit.
-    BitField<4> rbg0;   ///< Defines R0COEN bit.
-    BitField<5> back;   ///< Defines BKCOEN bit.
-    BitField<6> sprite; ///< Defines SPCOEN bit.
+    u16            raw;          ///< Raw representation.
+    BitField<0>    nbg0;         ///< Defines N0COEN bit.
+    BitField<1>    nbg1;         ///< Defines N1COEN bit.
+    BitField<2>    nbg2;         ///< Defines N2COEN bit.
+    BitField<3>    nbg3;         ///< Defines N3COEN bit.
+    BitField<4>    rbg0;         ///< Defines R0COEN bit.
+    BitField<5>    back;         ///< Defines BKCOEN bit.
+    BitField<6>    sprite;       ///< Defines SPCOEN bit.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2093,14 +2291,16 @@ enum class ColorOffsetSelectBit : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorOffsetSelect {
-    u16         raw;    ///< Raw representation.
-    BitField<0> nbg0;   ///< Defines N0COSL bit.
-    BitField<1> nbg1;   ///< Defines N1COSL bit.
-    BitField<2> nbg2;   ///< Defines N2COSL bit.
-    BitField<3> nbg3;   ///< Defines N3COSL bit.
-    BitField<4> rbg0;   ///< Defines R0COSL bit.
-    BitField<5> back;   ///< Defines BKCOSL bit.
-    BitField<6> sprite; ///< Defines SPCOSL bit.
+    u16            raw;          ///< Raw representation.
+    BitField<0>    nbg0;         ///< Defines N0COSL bit.
+    BitField<1>    nbg1;         ///< Defines N1COSL bit.
+    BitField<2>    nbg2;         ///< Defines N2COSL bit.
+    BitField<3>    nbg3;         ///< Defines N3COSL bit.
+    BitField<4>    rbg0;         ///< Defines R0COSL bit.
+    BitField<5>    back;         ///< Defines BKCOSL bit.
+    BitField<6>    sprite;       ///< Defines SPCOSL bit.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2124,9 +2324,11 @@ enum class Sign : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorOffsetARed {
-    u16            raw;      ///< Raw representation.
-    BitField<0, 8> red_data; ///< Defines the color offset A red data (COARDx).
-    BitField<8>    sign;     ///< Sign of the data.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 8> red_data;     ///< Defines the color offset A red data (COARDx).
+    BitField<8>    sign;         ///< Sign of the data.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2139,9 +2341,11 @@ union ColorOffsetARed {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorOffsetAGreen {
-    u16            raw;        ///< Raw representation.
-    BitField<0, 8> green_data; ///< Defines the color offset A green data (COAGRx).
-    BitField<8>    sign;       ///< Sign of the data.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 8> green_data;   ///< Defines the color offset A green data (COAGRx).
+    BitField<8>    sign;         ///< Sign of the data.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2154,9 +2358,11 @@ union ColorOffsetAGreen {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorOffsetABlue {
-    u16            raw;       ///< Raw representation.
-    BitField<0, 8> blue_data; ///< Defines the color offset A red data (COABLx).
-    BitField<8>    sign;      ///< Sign of the data.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 8> blue_data;    ///< Defines the color offset A red data (COABLx).
+    BitField<8>    sign;         ///< Sign of the data.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2169,9 +2375,11 @@ union ColorOffsetABlue {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorOffsetBRed {
-    u16            raw;      ///< Raw representation.
-    BitField<0, 8> red_data; ///< Defines the color offset B red data (COBRDx).
-    BitField<8>    sign;     ///< Sign of the data.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 8> red_data;     ///< Defines the color offset B red data (COBRDx).
+    BitField<8>    sign;         ///< Sign of the data.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2184,9 +2392,11 @@ union ColorOffsetBRed {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorOffsetBGreen {
-    u16            raw;        ///< Raw representation.
-    BitField<0, 8> green_data; ///< Defines the color offset B green data (COBGRx).
-    BitField<8>    sign;       ///< Sign of the data.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 8> green_data;   ///< Defines the color offset B green data (COBGRx).
+    BitField<8>    sign;         ///< Sign of the data.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2199,9 +2409,11 @@ union ColorOffsetBGreen {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ColorOffsetBBlue {
-    u16            raw;       ///< Raw representation.
-    BitField<0, 8> blue_data; ///< Defines the color offset B red data (COBBLx).
-    BitField<8>    sign;      ///< Sign of the data.
+    u16            raw;          ///< Raw representation.
+    BitField<0, 8> blue_data;    ///< Defines the color offset B red data (COBBLx).
+    BitField<8>    sign;         ///< Sign of the data.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 } // namespace saturnin::video

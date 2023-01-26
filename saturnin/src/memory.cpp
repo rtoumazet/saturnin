@@ -166,6 +166,7 @@ auto Memory::loadRom(const std::string& zip_name,
 void Memory::loadBinaryFile(const BinaryFileConfiguration& file) {
     // state.emulationStatus(core::EmulationStatus::stopped);
     modules_.masterSh2()->setBinaryFileStartAddress(file.start_address);
+
     // modules_.masterSh2()->breakpoint(0, breakpoint_address);
 
     std::ifstream input_file(file.full_path, std::ios::binary);
