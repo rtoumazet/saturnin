@@ -1369,18 +1369,22 @@ auto Opengl::calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u3
 
     if (host_ratio >= saturn_ratio) {
         // Pillarbox display (wide viewport), use full height
-        const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
-        x                     = empty_zone * saturn_framebuffer_width / host_res.width / 2;
-        y                     = 0;
-        width                 = (host_res.width - empty_zone) * saturn_framebuffer_width / host_res.width;
-        height                = saturn_framebuffer_height;
+        if ((saturn_res.height != 0) && (host_res.width != 0)) {
+            const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
+            x                     = empty_zone * saturn_framebuffer_width / host_res.width / 2;
+            y                     = 0;
+            width                 = (host_res.width - empty_zone) * saturn_framebuffer_width / host_res.width;
+            height                = saturn_framebuffer_height;
+        }
     } else {
         // Letterbox display (tall viewport) use full width
-        const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
-        x                     = 0;
-        y                     = empty_zone * saturn_framebuffer_height / host_res.height / 2;
-        width                 = saturn_framebuffer_width;
-        height                = (host_res.height - empty_zone) * saturn_framebuffer_height / host_res.height;
+        if ((saturn_res.width != 0) && (host_res.height != 0)) {
+            const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
+            x                     = 0;
+            y                     = empty_zone * saturn_framebuffer_height / host_res.height / 2;
+            width                 = saturn_framebuffer_width;
+            height                = (host_res.height - empty_zone) * saturn_framebuffer_height / host_res.height;
+        }
     }
 
     return std::make_tuple(x, y, width, height);
@@ -1601,7 +1605,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     state.opengl()->initialize();
 
     Log::info(Logger::opengl, "Card : {}", (char*)glGetString(GL_RENDERER));
-    
 
     // glGetString(GL_RENDERER);
 
