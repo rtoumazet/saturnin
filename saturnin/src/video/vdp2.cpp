@@ -335,7 +335,7 @@ auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::read16(const u32 addr) const -> u16 {
-    switch (addr) {
+    switch (addr & core::vdp2_registers_memory_mask) {
         case tv_screen_mode: return tvmd_.raw;
         case external_signal_enable: return exten_.raw;
         case screen_status: return tvstat_.raw;
@@ -489,7 +489,7 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write8(const u32 addr, const u8 data) {
-    switch (addr & 0x2FFFFFFF) {
+    switch (addr & core::vdp2_registers_memory_mask) {
         case tv_screen_mode: tvmd_.upper_8_bits = data; break;
         case tv_screen_mode + 1: tvmd_.lower_8_bits = data; break;
         case external_signal_enable: exten_.upper_8_bits = data; break;
@@ -782,7 +782,7 @@ void Vdp2::write8(const u32 addr, const u8 data) {
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write16(const u32 addr, const u16 data) {
-    switch (addr) {
+    switch (addr & core::vdp2_registers_memory_mask) {
         case tv_screen_mode: tvmd_.raw = data; break;
         case external_signal_enable: exten_.raw = data; break;
         case vram_size: vrsize_.raw = data; break;
@@ -934,7 +934,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
 void Vdp2::write32(const u32 addr, const u32 data) {
     const auto h = static_cast<u16>(data >> displacement_16);
     const auto l = static_cast<u16>(data & bitmask_FFFF);
-    switch (addr) {
+    switch (addr & core::vdp2_registers_memory_mask) {
         case vram_cycle_pattern_bank_a0_lower:
             cyca0l_.raw = h;
             cyca0u_.raw = l;
