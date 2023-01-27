@@ -587,6 +587,12 @@ class Vdp2 {
         core::Log::warning(Logger::vdp2, core::tr("{}bits register write {:#0x}"), sizeof(T) * number_of_bits_8, addr);
     }
 
+    // 8 bits specialization
+    template<>
+    void writeRegisters<u8>(const u32 addr, const u8 data) {
+        write8(addr, data);
+    }
+
     // 16 bits specialization
     template<>
     void writeRegisters<u16>(const u32 addr, const u16 data) {
@@ -798,6 +804,7 @@ class Vdp2 {
     ///@{
     ///  \name Vdp2 registers accessors
     [[nodiscard]] auto read16(u32 addr) const -> u16;
+    void               write8(u32 addr, u8 data);
     void               write16(u32 addr, u16 data);
     void               write32(u32 addr, u32 data);
     ///@}

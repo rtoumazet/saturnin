@@ -1900,7 +1900,9 @@ union SpriteControl {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union ShadowControl {
-    u16 raw; ///< Raw representation.
+    u16            raw;          ///< Raw representation.
+    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
