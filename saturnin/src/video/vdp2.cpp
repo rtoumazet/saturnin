@@ -489,7 +489,7 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write8(const u32 addr, const u8 data) {
-    switch (addr) {
+    switch (addr & 0x2FFFFFFF) {
         case tv_screen_mode: tvmd_.upper_8_bits = data; break;
         case tv_screen_mode + 1: tvmd_.lower_8_bits = data; break;
         case external_signal_enable: exten_.upper_8_bits = data; break;
@@ -776,7 +776,7 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case color_offset_b_green + 1: cobg_.lower_8_bits = data; break;
         case color_offset_b_blue: cobb_.upper_8_bits = data; break;
         case color_offset_b_blue + 1: cobb_.lower_8_bits = data; break;
-        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (16) {:#010x}"), addr);
+        default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (8) {:#010x} {:#04x}"), addr, data);
     }
 }
 
