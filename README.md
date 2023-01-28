@@ -21,6 +21,7 @@ Saturnin is a Sega Saturn emulator
     
     List of used libraries for reference:
     
+    * [argagg](https://github.com/vietjtnguyen/argagg) : A simple C++11 command line argument parser.
     * [date](https://github.com/HowardHinnant/date) :  A date and time library based on the C++11/14/17 <chrono> header.
     * [embed](https://github.com/MKlimenko/embed) : std::embed implementation for the poor (C++17).
     * [glbinding](https://github.com/cginternals/glbinding) : A C++ binding for the OpenGL API, generated using the gl.xml specification.
