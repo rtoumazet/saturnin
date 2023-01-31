@@ -91,17 +91,20 @@ class EmulatorContext {
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto initialize() -> bool
+    /// \fn	auto EmulatorContext::initialize(int argc, char* argv[]) -> bool;
     ///
-    /// \brief  Initializes the emulator
+    /// \brief	Initializes the emulator
     ///
-    /// \author Runik
-    /// \date   26/09/2018
+    /// \author	Runik
+    /// \date	26/09/2018
     ///
-    /// \return True if the initialization went well.
+    /// \param 		   	argc	The argc.
+    /// \param [in,out]	argv	If non-null, the argv.
+    ///
+    /// \returns	True if the initialization went well.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto initialize() -> bool;
+    auto initialize(int argc, char* argv[]) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void EmulatorContext::reset();

@@ -19,6 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
+// #include <argagg/argagg.hpp>
 #include <istream>
 #include <saturnin/src/locale.h>      // tr
 #include <saturnin/src/log.h>         // Log
@@ -34,12 +35,28 @@ using core::tr;
 
 auto main(int argc, char* argv[]) -> int {
     try {
+        //// clang-format off
+        // argagg::parser parser{{
+        //     {"help", {"-h", "--help"}, "Shows this help message", 0},
+        //     {"file", {"-f", "--file"}, "Binary file to load", 1},
+        //     {"set-pc", {"-s", "--set-pc"}, "Address to set the PC after loading the binary file, in hex", 1},
+        //     {"load-address", {"-l", "--load-address"}, "Saturn memory address to load the binary file to, in hex", 1}
+        // }};
+        //// clang-format on
+        // argagg::parser_results args;
+        // args = parser.parse(argc, argv);
+        // if (args["help"]) {
+        //     std::cerr << parser;
+        //     std::exit(EXIT_SUCCESS);
+        // }
+
         auto state = EmulatorContext{};
         Log::initialize();
         ThreadPool::initialize();
+
         while (state.renderingStatus() != core::RenderingStatus::stopped) {
             if (state.renderingStatus() == core::RenderingStatus::reset) { state.reset(); }
-            if (!state.initialize()) {
+            if (!state.initialize(argc, argv)) {
                 Log::error(Logger::main, tr("Could not initialize the program ..."));
                 throw std::runtime_error("Main error !");
             }

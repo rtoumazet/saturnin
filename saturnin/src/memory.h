@@ -220,8 +220,8 @@ struct StvGameConfiguration {
 
 struct BinaryFileConfiguration {
     std::string full_path;
-    int         load_address;
-    int         start_address;
+    u32         load_address;
+    u32         start_address;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

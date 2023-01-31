@@ -25,6 +25,7 @@
 #include <iostream>
 #include <future>
 #include <chrono>
+#include <argagg/argagg.hpp>
 #include <saturnin/src/config.h>
 // #include <saturnin/src/locale.h>
 #include <saturnin/src/log.h>
@@ -87,11 +88,42 @@ auto EmulatorContext::vdp1() -> Vdp1* { return vdp1_.get(); };
 auto EmulatorContext::vdp2() -> Vdp2* { return vdp2_.get(); };
 auto EmulatorContext::opengl() -> Opengl* { return opengl_.get(); };
 
-auto EmulatorContext::initialize() -> bool {
+auto EmulatorContext::initialize(int argc, char* argv[]) -> bool {
     // Locale is defaulted to english to handle the case when there's no config file created yet.
     if (!Locale::getInstance().initialize("en")) { return false; }
 
     Log::info(Logger::main, tr("Max number of threads available : {}"), std::thread::hardware_concurrency());
+
+    // clang-format off
+    argagg::parser parser{{
+        {"help", {"-h", "--help"}, tr("Shows this help message"), 0}, 
+        {"file", {"-f", "--file"}, tr("Binary file to load"), 1},
+        {"set-pc", {"-s", "--set-pc"}, 
+            tr("Address to set the PC after loading the binary file, in hex. Default is 0x6004000."), 1},
+        {"load-address", {"-l", "--load-address"}, 
+            tr("Saturn memory address to load the binary file to, in hex. Default is 0x6004000."), 1}
+    }};
+    // clang-format on
+    argagg::parser_results args;
+    args = parser.parse(argc, argv);
+    if (args["help"]) {
+        std::stringstream usage;
+        usage << parser;
+        Log::info(Logger::main, usage.str());
+    }
+
+    if (args["file"]) {
+        BinaryFileConfiguration file{};
+        std::string             path = args["file"];
+        file.full_path               = path;
+        Log::info(Logger::main, tr("Loading binary file : {}"), file.full_path);
+
+        file.load_address  = std::stoul(args["load-address"].as<std::string>("0x6004000"), nullptr, 16);
+        file.start_address = std::stoul(args["set-pc"].as<std::string>("0x6004000"), nullptr, 16);
+
+        memory()->selectedBinaryFile(file);
+        memory()->loadBinaryFile(file);
+    }
 
     if (!this->config()->initialize(video::isModernOpenglCapable())) { return false; }
 

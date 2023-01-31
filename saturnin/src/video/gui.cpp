@@ -1994,7 +1994,7 @@ void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(610, 60);
+    const auto window_size = ImVec2(610, 100);
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags
@@ -2031,6 +2031,17 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
         file_conf.start_address = 0x6004000;
 
         state.memory()->selectedBinaryFile(file_conf);
+    }
+
+    {
+        ImGui::TextUnformatted(tr("Load address : 0x").c_str());
+        ImGui::SameLine();
+
+        static auto load_address    = std::string{};
+        auto        address_for_gui = uti::stringToVector(load_address, 8);
+        const auto  flags           = ImGuiInputTextFlags_CharsHexadecimal;
+        ImGui::SetNextItemWidth(60.f);
+        ImGui::InputText("##load_address", address_for_gui.data(), address_for_gui.capacity(), flags);
     }
     ImGui::End();
 }
