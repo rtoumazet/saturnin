@@ -283,34 +283,36 @@ If your function recursively meets the following criteria:
     * Rewriting expressions can reduce or eliminate the need for temporary objects. For example, if a, b, and 
 c are objects of class Matrix: 
     
-            #!C++
-            Matrix a;     // inefficient: don't create an object before it is really needed; 
-                          // default initialization can be expensive
-            a = b + c;    // inefficient: (b + c) creates a temporary
-                          // object and then assigns it to a
-            Matrix a = b; // better: no default initialization
-            a += c;       // better: no temporary objects created
+        ```cpp
+        Matrix a;     // inefficient: don't create an object before it is really needed; 
+                      // default initialization can be expensive
+        a = b + c;    // inefficient: (b + c) creates a temporary
+                      // object and then assigns it to a
+        Matrix a = b; // better: no default initialization
+        a += c;       // better: no temporary objects created
+        ```
 
     * Use the return value optimization to give the compiler a hint that temporary objects can be eliminated.
 
-            #!C++
-            const Rational operator * (Rational const & lhs, 
-                           Rational const & rhs) 
-            { 
-                return Rational(lhs.numerator() * rhs.numerator(), lhs.denominator() * rhs.denominator()); 
-            } 
+        ```cpp
+        const Rational operator * (Rational const & lhs, 
+                                   Rational const & rhs) { 
+            return Rational(lhs.numerator() * rhs.numerator(), lhs.denominator() * rhs.denominator()); 
+        } 
+        ```
+ 
 Less carefully written code might create a local Rational variable to hold the result of the calculation, use the assignment operator to copy it to a temporary variable holding the return value, then copy that into a variable in the calling function. 
 
-            #!C++
-            // not this way ... 
-            const Rational operator * (Rational const & lhs, Rational const & rhs) { 
-                Rational tmp;   // calls the default constructor (if any)
-                tmp.my_numerator   = lhs.numerator()   * rhs.numerator(); 
-                tmp.my_denominator = lhs.denominator() * rhs.denominator(); 
-                return tmp;     // copies tmp to the return value, which is 
-                                // then copied into the receiving variable
-            } 
-
+        ```cpp
+        // not this way ... 
+        const Rational operator * (Rational const & lhs, Rational const & rhs) { 
+            Rational tmp;   // calls the default constructor (if any)
+            tmp.my_numerator   = lhs.numerator()   * rhs.numerator(); 
+            tmp.my_denominator = lhs.denominator() * rhs.denominator(); 
+            return tmp;     // copies tmp to the return value, which is then copied into the receiving variable
+        } 
+        ```
+ 
     * Sometimes it is helpful to “widen” the interface for a class with functions that take different data types to prevent automatic conversions (such as adding an overload on char * to a function which takes an 
 std::string parameter)
 
@@ -441,8 +443,9 @@ std::string parameter)
 - **Pointer and Reference Expressions:** 
     When declaring a pointer variable or argument, place the asterisk / ampersand adjacent to the type:
     
-        #!C++
+        ```cpp
         const string& str;
+        ```
 
 * **General Naming Rules:** 
 names should be descriptive; avoid abbreviation.  
