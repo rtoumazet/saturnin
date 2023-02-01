@@ -301,7 +301,7 @@ c are objects of class Matrix:
         } 
         ```
  
-Less carefully written code might create a local Rational variable to hold the result of the calculation, use the assignment operator to copy it to a temporary variable holding the return value, then copy that into a variable in the calling function. 
+    * Less carefully written code might create a local Rational variable to hold the result of the calculation, use the assignment operator to copy it to a temporary variable holding the return value, then copy that into a variable in the calling function. 
 
         ```cpp
         // not this way ... 
@@ -312,9 +312,8 @@ Less carefully written code might create a local Rational variable to hold the r
             return tmp;     // copies tmp to the return value, which is then copied into the receiving variable
         } 
         ```
- 
-    * Sometimes it is helpful to “widen” the interface for a class with functions that take different data types to prevent automatic conversions (such as adding an overload on char * to a function which takes an 
-std::string parameter)
+
+    * Sometimes it is helpful to “widen” the interface for a class with functions that take different data types to prevent automatic conversions (such as adding an overload on char * to a function which takes a std::string parameter)
 
 * **Function Inlining**
     * As a rule of thumb, functions consisting of only one or two lines are generally good candidates for inlining.
@@ -442,7 +441,7 @@ std::string parameter)
 - **Loops and Switch Statements:** switch statements may use braces for blocks. Annotate non-trivial fall-through between cases. Braces are optional for single-statement loops. Empty loop bodies should use {} or continue.
 - **Pointer and Reference Expressions:** 
     When declaring a pointer variable or argument, place the asterisk / ampersand adjacent to the type:
-    
+ 
         ```cpp
         const string& str;
         ```
