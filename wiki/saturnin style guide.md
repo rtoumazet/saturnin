@@ -283,36 +283,37 @@ If your function recursively meets the following criteria:
     * Rewriting expressions can reduce or eliminate the need for temporary objects. For example, if a, b, and 
 c are objects of class Matrix: 
     
-            #!C++
-            Matrix a;     // inefficient: don't create an object before it is really needed; 
-                          // default initialization can be expensive
-            a = b + c;    // inefficient: (b + c) creates a temporary
-                          // object and then assigns it to a
-            Matrix a = b; // better: no default initialization
-            a += c;       // better: no temporary objects created
+        ```cpp
+        Matrix a;     // inefficient: don't create an object before it is really needed; 
+                      // default initialization can be expensive
+        a = b + c;    // inefficient: (b + c) creates a temporary
+                      // object and then assigns it to a
+        Matrix a = b; // better: no default initialization
+        a += c;       // better: no temporary objects created
+        ```
 
     * Use the return value optimization to give the compiler a hint that temporary objects can be eliminated.
 
-            #!C++
-            const Rational operator * (Rational const & lhs, 
-                           Rational const & rhs) 
-            { 
-                return Rational(lhs.numerator() * rhs.numerator(), lhs.denominator() * rhs.denominator()); 
-            } 
-Less carefully written code might create a local Rational variable to hold the result of the calculation, use the assignment operator to copy it to a temporary variable holding the return value, then copy that into a variable in the calling function. 
+        ```cpp
+        const Rational operator * (Rational const & lhs, 
+                                   Rational const & rhs) { 
+            return Rational(lhs.numerator() * rhs.numerator(), lhs.denominator() * rhs.denominator()); 
+        } 
+        ```
+ 
+    * Less carefully written code might create a local Rational variable to hold the result of the calculation, use the assignment operator to copy it to a temporary variable holding the return value, then copy that into a variable in the calling function. 
 
-            #!C++
-            // not this way ... 
-            const Rational operator * (Rational const & lhs, Rational const & rhs) { 
-                Rational tmp;   // calls the default constructor (if any)
-                tmp.my_numerator   = lhs.numerator()   * rhs.numerator(); 
-                tmp.my_denominator = lhs.denominator() * rhs.denominator(); 
-                return tmp;     // copies tmp to the return value, which is 
-                                // then copied into the receiving variable
-            } 
+        ```cpp
+        // not this way ... 
+        const Rational operator * (Rational const & lhs, Rational const & rhs) { 
+            Rational tmp;   // calls the default constructor (if any)
+            tmp.my_numerator   = lhs.numerator()   * rhs.numerator(); 
+            tmp.my_denominator = lhs.denominator() * rhs.denominator(); 
+            return tmp;     // copies tmp to the return value, which is then copied into the receiving variable
+        } 
+        ```
 
-    * Sometimes it is helpful to “widen” the interface for a class with functions that take different data types to prevent automatic conversions (such as adding an overload on char * to a function which takes an 
-std::string parameter)
+    * Sometimes it is helpful to “widen” the interface for a class with functions that take different data types to prevent automatic conversions (such as adding an overload on char * to a function which takes a std::string parameter)
 
 * **Function Inlining**
     * As a rule of thumb, functions consisting of only one or two lines are generally good candidates for inlining.
@@ -440,9 +441,10 @@ std::string parameter)
 - **Loops and Switch Statements:** switch statements may use braces for blocks. Annotate non-trivial fall-through between cases. Braces are optional for single-statement loops. Empty loop bodies should use {} or continue.
 - **Pointer and Reference Expressions:** 
     When declaring a pointer variable or argument, place the asterisk / ampersand adjacent to the type:
-    
-        #!C++
+ 
+        ```cpp
         const string& str;
+        ```
 
 * **General Naming Rules:** 
 names should be descriptive; avoid abbreviation.  
@@ -455,7 +457,7 @@ type names start with a capital letter and have a capital letter for each new wo
 * **Variable Names:** 
 the names of variables and data members are all lowercase, with underscores between words. Data members of classes (but not structs) additionally have trailing underscores. For instance: *a_local_variable*, *a_struct_data_member*, *a_class_data_member_*.
 
-        #!C++
+        ```cpp
         // Common variable names
         string table_name;  // OK - uses underscore.
         string tablename;   // OK - all lowercase.
@@ -478,13 +480,15 @@ the names of variables and data members are all lowercase, with underscores betw
           int num_entries;
           static Pool<UrlTableProperties>* pool;
         };
+         ```
 
 
 * **Constant Names:** 
 variables declared _constexpr_ or _const_, and whose value is fixed for the duration of the program, are all lowercase with underscores between words. For example:
 
-        #!C++
+        ```cpp
         const int elan_doree = 7;  
+        ```
 
     It's also encouraged to put them in a specific namespace
 
@@ -492,28 +496,29 @@ variables declared _constexpr_ or _const_, and whose value is fixed for the dura
 regular functions have mixed case.  
 Ordinarily, functions should use "camel case". Such names should not have underscores. Prefer to capitalize acronyms as single words (i.e. _StartRpc()_, not _StartRPC()_).
 
-        #!C++
+        ```cpp
         addTableEntry()
         deleteUrl()
         openFileOrDie()
+        ```
 
 * **Almost Always Auto:**
 use _auto_ whenever you can.  
 
-        #!C++
+        ```cpp
         auto val = getValue(); // type deduction
         auto s = std::string{"a string"}; // auto to stick : s is sure to be a std::string and not a const char *
         auto getValue() -> int; // function declaration
-        
+        ```
 
 * **Auto and const:**
 place _auto_ and  _const_ / _constexpr_ at the left most part of a declaration.  
 When both are present, start with _const_ / _constexpr_.
         
-        #!C++
+        ```cpp
         auto i = int{0};
         const auto j = 25.f;
-
+        ```
 
 ---------------
 
@@ -521,19 +526,20 @@ When both are present, start with _const_ / _constexpr_.
 - Do not use *using namespace* directive in .h files
 - Use project and modules namespaces
 
-        #!C++
+        ```cpp
         namespace saturnin {
         namespace core {
         void foo();
         }  
         }  
+        ```
 
 - Use unnamed namespace in *.cpp* files (to avoid link time naming conflicts), not in *.h* files.
 - Prefer grouping functions with a namespace instead of using a class as if it were a namespace.
 - The contents of namespaces are not indented. Namespaces do not add an extra level of indentation. 
 - Namespace names are all lower-case. Top-level namespace names are based on the project name.
 
-        #!C++
+        ```cpp
         namespace saturnin {
         namespace cdblock {
         
@@ -541,6 +547,7 @@ When both are present, start with _const_ / _constexpr_.
         
         }
         }
+        ```
 
 -------------
 
@@ -561,17 +568,19 @@ declaration comments describe use of the function; comments at the definition of
 in general the actual name of the variable should be descriptive enough to give a good idea of what the variable is used for. In certain cases, more comments are required
     *  Class Data members: each class data member (also called an instance variable or member variable) should have a comment describing what it is used for. If the variable can take sentinel values with special meanings, such as a null pointer or -1, document this. For example:
 
-            #!C++
+            ```cpp
             private:
              // Keeps track of the total number of entries in the table.
              // Used to ensure we do not go over the limit. -1 means
              // that we don't yet know how many entries the table has.
              int num_total_entries_;
+             ```
 
     *  Global variables: as with data members, all global variables should have a comment describing what they are and what they are used for. For example:
 
-            #!C++
+            ```cpp
             const std::uint8_t intructions_number = 142;	///< Total number of SH2 instructions used.
+            ```
 
 - **Implementation comments:**
 In your implementation you should have comments in tricky, non-obvious, interesting, or important parts of your code.
@@ -594,10 +603,11 @@ textual inclusion files should use *.inc* extension instead of *.h*.
 all header files should have #pragma once guard to prevent multiple inclusion.
 * **Order of includes:**  
 
-        #!C++
+        ```cpp
         // Current file header
         // System / external libraries includes (alphabetically ordered)
         // Project includes (alphabetically ordered)
+        ```
 
 ------------
 ## Other C++ Features
