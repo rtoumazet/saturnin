@@ -1994,7 +1994,13 @@ void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
-    const auto window_size = ImVec2(610, 100);
+    constexpr auto column_2_start             = 120;
+    constexpr auto address_input_width        = 70.f;
+    constexpr auto address_input_chars_number = 9; // 8 characters + '\0'
+    constexpr auto default_load_address       = "60040000";
+    constexpr auto default_start_address      = "60040000";
+    const auto     window_size                = ImVec2(700, 150);
+
     ImGui::SetNextWindowSize(window_size);
 
     auto window_flags
@@ -2004,7 +2010,7 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
 
     constexpr auto string_size = u8{255};
     ImGui::TextUnformatted(tr("Binary file").c_str());
-    ImGui::SameLine();
+    ImGui::SameLine(column_2_start);
 
     static auto full_path    = std::string{};
     auto        path_for_gui = uti::stringToVector(full_path, string_size);
@@ -2024,25 +2030,46 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
 
     ImGui::SameLine();
 
+    {
+        ImGui::TextUnformatted(tr("Load address").c_str());
+        ImGui::SameLine(column_2_start);
+
+        static auto load_address         = std::string{default_load_address};
+        static auto load_address_for_gui = uti::stringToVector(load_address, address_input_chars_number);
+        const auto  flags                = ImGuiInputTextFlags_CharsHexadecimal;
+        ImGui::SetNextItemWidth(address_input_width);
+        ImGui::InputText("##load_address", load_address_for_gui.data(), load_address_for_gui.capacity(), flags);
+    }
+    {
+        ImGui::TextUnformatted(tr("Set PC to").c_str());
+        ImGui::SameLine(column_2_start);
+
+        static auto start_address         = std::string{default_start_address};
+        static auto start_address_for_gui = uti::stringToVector(start_address, address_input_chars_number);
+        const auto  flags                 = ImGuiInputTextFlags_CharsHexadecimal;
+        ImGui::SetNextItemWidth(address_input_width);
+        ImGui::InputText("##start_address", start_address_for_gui.data(), start_address_for_gui.capacity(), flags);
+    }
+    {
+        ImGui::TextUnformatted(tr("Auto start").c_str());
+        ImGui::SameLine(column_2_start);
+
+        ImGui::SetNextItemWidth(address_input_width);
+        static auto auto_start = false;
+
+        ImGui::Checkbox("##auto_start", &auto_start);
+    }
+
     if (ImGui::Button("Load")) {
-        auto file_conf          = BinaryFileConfiguration{};
-        file_conf.full_path     = full_path;
-        file_conf.load_address  = 0x6004000;
-        file_conf.start_address = 0x6004000;
+        auto file_conf            = BinaryFileConfiguration{};
+        file_conf.full_path       = full_path;
+        file_conf.load_address    = 0x6004000;
+        file_conf.start_address   = 0x6004000;
+        file_conf.is_auto_started = false;
 
         state.memory()->selectedBinaryFile(file_conf);
     }
 
-    {
-        ImGui::TextUnformatted(tr("Load address : 0x").c_str());
-        ImGui::SameLine();
-
-        static auto load_address    = std::string{};
-        auto        address_for_gui = uti::stringToVector(load_address, 8);
-        const auto  flags           = ImGuiInputTextFlags_CharsHexadecimal;
-        ImGui::SetNextItemWidth(60.f);
-        ImGui::InputText("##load_address", address_for_gui.data(), address_for_gui.capacity(), flags);
-    }
     ImGui::End();
 }
 

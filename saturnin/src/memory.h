@@ -222,6 +222,7 @@ struct BinaryFileConfiguration {
     std::string full_path;
     u32         load_address;
     u32         start_address;
+    bool        is_auto_started;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
