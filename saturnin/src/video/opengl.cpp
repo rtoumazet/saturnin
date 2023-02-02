@@ -1606,6 +1606,11 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     Log::info(Logger::opengl, "Card : {}", (char*)glGetString(GL_RENDERER));
 
+    if (state.memory()->selectedBinaryFile().full_path.size() > 0) {
+        state.startEmulation();
+        if (!state.memory()->selectedBinaryFile().is_auto_started) { state.debugStatus(core::DebugStatus::paused); }
+    }
+
     // glGetString(GL_RENDERER);
 
     // Main loop

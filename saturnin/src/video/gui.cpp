@@ -1999,7 +1999,7 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
     constexpr auto address_input_chars_number = 9; // 8 characters + '\0'
     constexpr auto default_load_address       = "60040000";
     constexpr auto default_start_address      = "60040000";
-    const auto     window_size                = ImVec2(700, 150);
+    const auto     window_size                = ImVec2(600, 150);
 
     ImGui::SetNextWindowSize(window_size);
 
@@ -2028,44 +2028,45 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
 
     if (select_dialog.HasSelected()) { full_path = select_dialog.GetSelected().string(); }
 
-    ImGui::SameLine();
-
+    static auto load_address = std::string{default_load_address};
     {
         ImGui::TextUnformatted(tr("Load address").c_str());
         ImGui::SameLine(column_2_start);
 
-        static auto load_address         = std::string{default_load_address};
         static auto load_address_for_gui = uti::stringToVector(load_address, address_input_chars_number);
         const auto  flags                = ImGuiInputTextFlags_CharsHexadecimal;
         ImGui::SetNextItemWidth(address_input_width);
         ImGui::InputText("##load_address", load_address_for_gui.data(), load_address_for_gui.capacity(), flags);
     }
+
+    static auto start_address = std::string{default_start_address};
     {
         ImGui::TextUnformatted(tr("Set PC to").c_str());
         ImGui::SameLine(column_2_start);
 
-        static auto start_address         = std::string{default_start_address};
         static auto start_address_for_gui = uti::stringToVector(start_address, address_input_chars_number);
         const auto  flags                 = ImGuiInputTextFlags_CharsHexadecimal;
         ImGui::SetNextItemWidth(address_input_width);
         ImGui::InputText("##start_address", start_address_for_gui.data(), start_address_for_gui.capacity(), flags);
     }
+    static auto auto_start = false;
     {
         ImGui::TextUnformatted(tr("Auto start").c_str());
         ImGui::SameLine(column_2_start);
 
         ImGui::SetNextItemWidth(address_input_width);
-        static auto auto_start = false;
 
         ImGui::Checkbox("##auto_start", &auto_start);
     }
 
+    // ImGui::SameLine();
+
     if (ImGui::Button("Load")) {
         auto file_conf            = BinaryFileConfiguration{};
         file_conf.full_path       = full_path;
-        file_conf.load_address    = 0x6004000;
-        file_conf.start_address   = 0x6004000;
-        file_conf.is_auto_started = false;
+        file_conf.load_address    = stoul(load_address, nullptr, 16);
+        file_conf.start_address   = stoul(start_address, nullptr, 16);
+        file_conf.is_auto_started = auto_start;
 
         state.memory()->selectedBinaryFile(file_conf);
     }

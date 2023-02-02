@@ -101,7 +101,10 @@ auto EmulatorContext::initialize(int argc, char* argv[]) -> bool {
         {"set-pc", {"-s", "--set-pc"}, 
             tr("Address to set the PC after loading the binary file, in hex. Default is 0x6004000."), 1},
         {"load-address", {"-l", "--load-address"}, 
-            tr("Saturn memory address to load the binary file to, in hex. Default is 0x6004000."), 1}
+            tr("Saturn memory address to load the binary file to, in hex. Default is 0x6004000."), 1},
+        {"auto-start", {"-a", "--auto-start"}, 
+            tr("1 will auto start the emulator after loading, 0 will stay in pause. Default is 0."), 1},
+
     }};
     // clang-format on
     argagg::parser_results args;
@@ -118,8 +121,9 @@ auto EmulatorContext::initialize(int argc, char* argv[]) -> bool {
         file.full_path               = path;
         Log::info(Logger::main, tr("Loading binary file : {}"), file.full_path);
 
-        file.load_address  = std::stoul(args["load-address"].as<std::string>("0x6004000"), nullptr, 16);
-        file.start_address = std::stoul(args["set-pc"].as<std::string>("0x6004000"), nullptr, 16);
+        file.load_address    = std::stoul(args["load-address"].as<std::string>("0x6004000"), nullptr, 16);
+        file.start_address   = std::stoul(args["set-pc"].as<std::string>("0x6004000"), nullptr, 16);
+        file.is_auto_started = args["auto-start"].as<boolean>(false);
 
         memory()->selectedBinaryFile(file);
         memory()->loadBinaryFile(file);

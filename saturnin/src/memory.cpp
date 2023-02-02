@@ -589,7 +589,11 @@ void Memory::initialize(saturnin::core::HardwareMode mode) {
         if (!selectedBinaryFile().full_path.empty()) {
             installMinimumBiosRoutines();
             loadBinaryFile(selectedBinaryFile());
-            modules_.context()->debugStatus(DebugStatus::paused);
+            if (modules_.memory()->selectedBinaryFile().is_auto_started) {
+                modules_.context()->debugStatus(DebugStatus::disabled);
+            } else {
+                modules_.context()->debugStatus(DebugStatus::paused);
+            }
         }
     }
 }
