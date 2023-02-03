@@ -15,4 +15,4 @@ saturnin/My Inspector Results - saturnin/*
 GPUCache/*
 saturnin/VTune Profiler Results/*
 debug.log
-saturnin/saturnin.vcxproj.user
+*.user
