@@ -163,7 +163,7 @@ auto Memory::loadRom(const std::string& zip_name,
     return true;
 }
 
-void Memory::loadBinaryFile(const BinaryFileConfiguration& file) {
+auto Memory::loadBinaryFile(const BinaryFileConfiguration& file) -> bool {
     // state.emulationStatus(core::EmulationStatus::stopped);
     modules_.masterSh2()->setBinaryFileStartAddress(file.start_address);
 
@@ -181,9 +181,10 @@ void Memory::loadBinaryFile(const BinaryFileConfiguration& file) {
         std::move(str.begin(), str.end(), this->workram_high_.data() + (file.load_address & workram_high_memory_mask));
 
         Log::info(Logger::main, tr("Binary file loaded"));
-
+        return true;
     } else {
         Log::warning(Logger::memory, tr("Binary file not found !"));
+        return false;
     }
 }
 
@@ -565,6 +566,7 @@ auto listAvailableStvGames() -> std::vector<StvGameConfiguration> {
 }
 
 auto defaultStvGame() -> StvGameConfiguration { return StvGameConfiguration{.game_name = tr("No game selected")}; }
+auto defaultBinaryFile() -> BinaryFileConfiguration { return BinaryFileConfiguration{}; }
 
 inline auto isMasterSh2InOperation(const Memory& m) -> bool { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
 
@@ -586,14 +588,17 @@ void Memory::initialize(saturnin::core::HardwareMode mode) {
     if (mode == HardwareMode::stv) {
         if (selectedStvGame().game_name != defaultStvGame().game_name) { loadStvGame(selectedStvGame()); }
     } else {
-        if (!selectedBinaryFile().full_path.empty()) {
-            installMinimumBiosRoutines();
-            loadBinaryFile(selectedBinaryFile());
-            if (modules_.memory()->selectedBinaryFile().is_auto_started) {
-                modules_.context()->debugStatus(DebugStatus::disabled);
-            } else {
-                modules_.context()->debugStatus(DebugStatus::paused);
-            }
+        if (selectedBinaryFile().full_path != defaultBinaryFile().full_path) {
+//            if (loadBinaryFile(selectedBinaryFile())) {
+                installMinimumBiosRoutines();
+                if (modules_.memory()->selectedBinaryFile().is_auto_started) {
+                    modules_.context()->debugStatus(DebugStatus::disabled);
+                } else {
+                    modules_.context()->debugStatus(DebugStatus::paused);
+                }
+                //} else {
+                //    selectedBinaryFile(defaultBinaryFile());
+                //}
         }
     }
 }

@@ -125,8 +125,7 @@ auto EmulatorContext::initialize(int argc, char* argv[]) -> bool {
         file.start_address   = std::stoul(args["set-pc"].as<std::string>("0x6004000"), nullptr, 16);
         file.is_auto_started = args["auto-start"].as<boolean>(false);
 
-        memory()->selectedBinaryFile(file);
-        memory()->loadBinaryFile(file);
+        if (memory()->loadBinaryFile(file)) { memory()->selectedBinaryFile(file); }
     }
 
     if (!this->config()->initialize(video::isModernOpenglCapable())) { return false; }
