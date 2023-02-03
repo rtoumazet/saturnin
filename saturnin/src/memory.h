@@ -311,7 +311,7 @@ class Memory {
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Memory::runBinaryFile(const BinaryFileConfiguration& file);
+    /// \fn	auto Memory::runBinaryFile(const BinaryFileConfiguration& file) -> bool;
     ///
     /// \brief	Loads the specified Saturn binary file.
     ///
@@ -319,9 +319,11 @@ class Memory {
     /// \date	12/08/2021
     ///
     /// \param 	file	Configuration of the file to run.
+    ///
+    /// \return True if it succeeds.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void loadBinaryFile(const BinaryFileConfiguration& file);
+    auto loadBinaryFile(const BinaryFileConfiguration& file) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::loadBios(saturnin::core::HardwareMode mode);
@@ -669,6 +671,19 @@ auto listAvailableStvGames() -> std::vector<StvGameConfiguration>;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto defaultStvGame() -> StvGameConfiguration;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	auto defaultBinaryFile() -> BinaryFileConfiguration;
+///
+/// \brief	Returns the default binary file configuration.
+///
+/// \author	Runik
+/// \date	03/02/2023
+///
+/// \returns	Default binary file configuration.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto defaultBinaryFile() -> BinaryFileConfiguration;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T, typename U, size_t N> auto rawRead(const std::array<U, N>& arr, u32 addr) -> T
