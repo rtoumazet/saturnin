@@ -23,6 +23,7 @@
 #include <istream>
 #include <filesystem>       // path
 #include <imgui_internal.h> // ImGuiSelectableFlags_SelectOnNav
+#include <imgui_stdlib.h>
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_enums.h> // EmulationStatus
 #include <saturnin/src/locale.h>         // tr
@@ -1997,8 +1998,8 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
     constexpr auto column_2_start             = 120;
     constexpr auto address_input_width        = 70.f;
     constexpr auto address_input_chars_number = 9; // 8 characters + '\0'
-    constexpr auto default_load_address       = "60040000";
-    constexpr auto default_start_address      = "60040000";
+    constexpr auto default_load_address       = "6004000";
+    constexpr auto default_start_address      = "6004000";
     const auto     window_size                = ImVec2(600, 150);
 
     ImGui::SetNextWindowSize(window_size);
@@ -2028,28 +2029,26 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
 
     if (select_dialog.HasSelected()) { full_path = select_dialog.GetSelected().string(); }
 
-    static auto load_address = std::string{default_load_address};
+    static std::string load_address{default_load_address};
     {
         ImGui::TextUnformatted(tr("Load address").c_str());
         ImGui::SameLine(column_2_start);
 
-        static auto load_address_for_gui = uti::stringToVector(load_address, address_input_chars_number);
-        const auto  flags                = ImGuiInputTextFlags_CharsHexadecimal;
+        const auto flags = ImGuiInputTextFlags_CharsHexadecimal;
         ImGui::SetNextItemWidth(address_input_width);
-        ImGui::InputText("##load_address", load_address_for_gui.data(), load_address_for_gui.capacity(), flags);
+        ImGui::InputText("##load_address", &load_address, flags);
     }
 
-    static auto start_address = std::string{default_start_address};
+    static std::string start_address{default_start_address};
     {
         ImGui::TextUnformatted(tr("Set PC to").c_str());
         ImGui::SameLine(column_2_start);
 
-        static auto start_address_for_gui = uti::stringToVector(start_address, address_input_chars_number);
-        const auto  flags                 = ImGuiInputTextFlags_CharsHexadecimal;
+        const auto flags = ImGuiInputTextFlags_CharsHexadecimal;
         ImGui::SetNextItemWidth(address_input_width);
-        ImGui::InputText("##start_address", start_address_for_gui.data(), start_address_for_gui.capacity(), flags);
+        ImGui::InputText("##start_address", &start_address, flags);
     }
-    static auto auto_start = false;
+    static auto auto_start = bool{};
     {
         ImGui::TextUnformatted(tr("Auto start").c_str());
         ImGui::SameLine(column_2_start);
@@ -2069,6 +2068,9 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
         file_conf.is_auto_started = auto_start;
 
         state.memory()->selectedBinaryFile(file_conf);
+        if (!state.memory()->loadBinaryFile(file_conf)) { state.memory()->selectedBinaryFile(core::defaultBinaryFile()); }
+        state.startEmulation();
+        show_file_load_binary = false;
     }
 
     ImGui::End();

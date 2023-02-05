@@ -164,11 +164,6 @@ auto Memory::loadRom(const std::string& zip_name,
 }
 
 auto Memory::loadBinaryFile(const BinaryFileConfiguration& file) -> bool {
-    // state.emulationStatus(core::EmulationStatus::stopped);
-    modules_.masterSh2()->setBinaryFileStartAddress(file.start_address);
-
-    // modules_.masterSh2()->breakpoint(0, breakpoint_address);
-
     std::ifstream input_file(file.full_path, std::ios::binary);
     if (input_file) {
         Log::info(Logger::memory, tr("Loading binary file"));
@@ -179,6 +174,8 @@ auto Memory::loadBinaryFile(const BinaryFileConfiguration& file) -> bool {
         const auto str = buffer.str();
 
         std::move(str.begin(), str.end(), this->workram_high_.data() + (file.load_address & workram_high_memory_mask));
+
+        modules_.masterSh2()->setBinaryFileStartAddress(file.start_address);
 
         Log::info(Logger::main, tr("Binary file loaded"));
         return true;
@@ -589,16 +586,16 @@ void Memory::initialize(saturnin::core::HardwareMode mode) {
         if (selectedStvGame().game_name != defaultStvGame().game_name) { loadStvGame(selectedStvGame()); }
     } else {
         if (selectedBinaryFile().full_path != defaultBinaryFile().full_path) {
-//            if (loadBinaryFile(selectedBinaryFile())) {
-                installMinimumBiosRoutines();
-                if (modules_.memory()->selectedBinaryFile().is_auto_started) {
-                    modules_.context()->debugStatus(DebugStatus::disabled);
-                } else {
-                    modules_.context()->debugStatus(DebugStatus::paused);
-                }
-                //} else {
-                //    selectedBinaryFile(defaultBinaryFile());
-                //}
+            //            if (loadBinaryFile(selectedBinaryFile())) {
+            installMinimumBiosRoutines();
+            if (modules_.memory()->selectedBinaryFile().is_auto_started) {
+                modules_.context()->debugStatus(DebugStatus::disabled);
+            } else {
+                modules_.context()->debugStatus(DebugStatus::paused);
+            }
+            //} else {
+            //    selectedBinaryFile(defaultBinaryFile());
+            //}
         }
     }
 }
