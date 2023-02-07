@@ -617,7 +617,7 @@ void Scu::sendStartFactor(const StartingFactorSelect sfs) {
         }
     }
 
-    if (!dma_queue_.empty()) { activateDma();}
+    if (!dma_queue_.empty()) { activateDma(); }
 }
 
 void Scu::clearInterruptFlag(const Interrupt& i) { interrupt_status_register_.reset(i.status); }
@@ -745,7 +745,7 @@ void Scu::addDmaToQueue(const DmaConfiguration& dc) {
         case dma_start_factor: config.dma_status = DmaStatus::queued; break;
         default: config.dma_status = DmaStatus::waiting_start_factor;
     }
-    //dma_queue_.push(config);
+    // dma_queue_.push(config);
     dma_queue_.push_back(config);
 }
 
@@ -760,7 +760,8 @@ void Scu::activateDma() {
     if (dma_queue_[0].dma_status == DmaStatus::active) { return; }
 
     for (auto& dc : dma_queue_) {
-        if (dc.dma_status == DmaStatus::queued) { executeDma(dc);
+        if (dc.dma_status == DmaStatus::queued) {
+            executeDma(dc);
             if (dc.dma_enable == DmaEnable::enabled) {
                 dc.dma_status = DmaStatus::waiting_start_factor;
             } else {
@@ -898,10 +899,10 @@ void Scu::dmaTest() {
 
     // activateDma();
 
-    //while (!dma_queue_.empty()) {
-    //    // std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
-    //    dma_queue_.pop();
-    //}
+    // while (!dma_queue_.empty()) {
+    //     // std::cout << static_cast<uint32_t>(dma_queue_.top().dma_status) << std::endl;
+    //     dma_queue_.pop();
+    // }
 }
 
 void Scu::sendDmaEndInterrupt(const DmaLevel l) {
