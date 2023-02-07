@@ -17,3 +17,5 @@ saturnin/VTune Profiler Results/*
 debug.log
 *.user
 *.user
+*.user
+saturnin/saturnin.vcxproj.user

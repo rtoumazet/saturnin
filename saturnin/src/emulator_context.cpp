@@ -108,24 +108,29 @@ auto EmulatorContext::initialize(int argc, char* argv[]) -> bool {
     }};
     // clang-format on
     argagg::parser_results args;
-    args = parser.parse(argc, argv);
-    if (args["help"]) {
-        std::stringstream usage;
-        usage << parser;
-        Log::info(Logger::main, usage.str());
-    }
+    try {
+        args = parser.parse(argc, argv);
+        if (args["help"]) {
+            std::stringstream usage;
+            usage << parser;
+            Log::info(Logger::main, usage.str());
+        }
 
-    if (args["file"]) {
-        BinaryFileConfiguration file{};
-        std::string             path = args["file"];
-        file.full_path               = path;
-        Log::info(Logger::main, tr("Loading binary file : {}"), file.full_path);
+        if (args["file"]) {
+            BinaryFileConfiguration file{};
+            std::string             path = args["file"];
+            file.full_path               = path;
+            Log::info(Logger::main, tr("Loading binary file : {}"), file.full_path);
 
-        file.load_address    = std::stoul(args["load-address"].as<std::string>("0x6004000"), nullptr, 16);
-        file.start_address   = std::stoul(args["set-pc"].as<std::string>("0x6004000"), nullptr, 16);
-        file.is_auto_started = args["auto-start"].as<boolean>(false);
+            file.load_address    = std::stoul(args["load-address"].as<std::string>("0x6004000"), nullptr, 16);
+            file.start_address   = std::stoul(args["set-pc"].as<std::string>("0x6004000"), nullptr, 16);
+            file.is_auto_started = args["auto-start"].as<boolean>(false);
 
-        if (memory()->loadBinaryFile(file)) { memory()->selectedBinaryFile(file); }
+            if (memory()->loadBinaryFile(file)) { memory()->selectedBinaryFile(file); }
+        }
+    } catch (const std::exception& e) {
+        Log::error(Logger::main, tr("Error while parsing command line"));
+        Log::error(Logger::main, "{}", e.what());
     }
 
     if (!this->config()->initialize(video::isModernOpenglCapable())) { return false; }
