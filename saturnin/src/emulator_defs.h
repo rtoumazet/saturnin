@@ -339,4 +339,10 @@ struct Size {
     u16 w; ///< Width
     u16 h; ///< Height
 };
+
+// Memory map address ranges
+struct AddressRange {
+    u32 start;
+    u32 end;
+};
 }; // namespace saturnin

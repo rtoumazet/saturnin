@@ -27,6 +27,7 @@
 
 #include <array>     // array
 #include <map>       // map
+#include <optional>  // optional
 #include <string>    // string
 #include <tuple>     //tuple
 #include <vector>    // vector
@@ -61,6 +62,8 @@ class Scsp;
 namespace util = saturnin::utilities;
 
 namespace saturnin::core {
+
+using AreaMask = std::optional<std::pair<u8*, u32>>;
 
 // Forward declarations
 class EmulatorContext;
@@ -191,11 +194,29 @@ enum class MemoryMapArea {
     sh2_cache_data       ///< SH2 cache data
 };
 
-// Memory map address ranges
-struct AddressRange {
-    u32 start;
-    u32 end;
-};
+constexpr auto dummy_address        = AddressRange{0x00000000, 0xFFFFFFFF};
+constexpr auto rom_address          = AddressRange{0x00000000, 0x000FFFFF};
+constexpr auto smpc_address         = AddressRange{0x00100000, 0x0017FFFF};
+constexpr auto backup_ram_address   = AddressRange{0x00180000, 0x001FFFFF};
+constexpr auto workram_low_address  = AddressRange{0x00200000, 0x002FFFFF};
+constexpr auto stv_io_address       = AddressRange{0x00400000, 0x004FFFFF};
+constexpr auto cart_address         = AddressRange{0x02000000, 0x04FFFFFF};
+constexpr auto cd_block_address     = AddressRange{0x05800000, 0x058FFFFF};
+constexpr auto scsp_address         = AddressRange{0x05A00000, 0x05BFFFFF};
+constexpr auto vdp1_ram_address     = AddressRange{0x05C00000, 0x05C7FFFF};
+constexpr auto vdp1_fb_address      = AddressRange{0x05C80000, 0x05CBFFFF};
+constexpr auto vdp1_regs_address    = AddressRange{0x05D00000, 0x05D7FFFF};
+constexpr auto vdp2_vram_address    = AddressRange{0x05E00000, 0x05EFFFFF};
+constexpr auto vdp2_cram_address    = AddressRange{0x05F00000, 0x05F7FFFF};
+constexpr auto vdp2_regs_address    = AddressRange{0x05F80000, 0x05FBFFFF};
+constexpr auto scu_address          = AddressRange{0x05FE0000, 0x05FEFFFF};
+constexpr auto workram_high_address = AddressRange{0x06000000, 0x07FFFFFF};
+constexpr auto master_frt_address   = AddressRange{0x01800000, 0x01FFFFFF};
+constexpr auto slave_frt_address    = AddressRange{0x01000000, 0x017FFFFF};
+constexpr auto sh2_regs_address     = AddressRange{0xFFFFFE00, 0xFFFFFFFF};
+constexpr auto cache_address        = AddressRange{0x60000000, 0x6FFFFFFF};
+constexpr auto cache_data_1_address = AddressRange{0x80000000, 0x8FFFFFFF};
+constexpr auto cache_data_2_address = AddressRange{0xC0000000, 0xCFFFFFFF};
 
 // ST-V rom file description
 struct StvRomFile {
@@ -491,6 +512,36 @@ class Memory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     [[nodiscard]] auto getMemoryMapAreaData(MemoryMapArea area) -> std::tuple<u8*, size_t, u32> const;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Memory::getAreaData(u32 addr) -> AreaMask
+    ///
+    /// \brief	Gets memory area data for the specified address.
+    ///
+    /// \author	Runik
+    /// \date	12/02/2023
+    ///
+    /// \param 	addr	Address to test.
+    ///
+    /// \returns	The area data.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getAreaData(u32 addr) -> AreaMask;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Memory::burstCopy(const u32 source_address, const u32 destination_address, const u32 amount);
+    ///
+    /// \brief	Burst copy from one memory area to another.
+    ///
+    /// \author	Runik
+    /// \date	12/02/2023
+    ///
+    /// \param 	source_address	   	Source address.
+    /// \param 	destination_address	Destination address.
+    /// \param 	amount			   	Amount of data to copy.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void burstCopy(const u32 source_address, const u32 destination_address, const u32 amount);
 
     /// \name Context objects accessors
     //@{

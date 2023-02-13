@@ -264,4 +264,27 @@ auto format(std::string_view str, T&&... args) -> std::string {
     return fmt::format(fmt::runtime(str), std::forward<T>(args)...);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class	Range
+///
+/// \brief	Checks if a value is inside a range.
+/// 		Ex: if (range<0x10000, 0x1FFFFF>::contains(age)) { /****/ }
+///
+/// \author	Runik
+/// \date	12/02/2023
+///
+/// \tparam	min	Range minimum.
+/// \tparam	max	Range maximum.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// template<u32 min, u32 max>
+// class Range {
+//     static bool contains(u32 i) { return min <= i && i <= max; }
+// };
+
+template<AddressRange addr>
+struct Range {
+    static bool contains(u32 i) { return addr.start <= i && i <= addr.end; }
+};
+
 } // namespace saturnin::utilities

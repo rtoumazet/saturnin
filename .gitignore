@@ -20,3 +20,4 @@ debug.log
 *.user
 saturnin/saturnin.vcxproj.user
 saturnin/saturnin.vcxproj.user
+*.user

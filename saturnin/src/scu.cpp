@@ -209,7 +209,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
             Log::debug(Logger::scu, "Read address : {:#x}", read_address);
             Log::debug(Logger::scu, "Write address : {:#x}", write_address);
             Log::debug(Logger::scu, "Size : {:#x}", count);
-            Log::debug(Logger::scu, "Address add : {:#x}", read_address_add);
+            Log::debug(Logger::scu, "Read add : {:#x}", read_address_add);
 
             switch (dc.write_add_value) {
                 using enum WriteAddressAddValue;
@@ -222,6 +222,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
                 case add_64: write_address_add = address_add_64; break;
                 case add_128: write_address_add = address_add_128; break;
             }
+            Log::debug(Logger::scu, "Write add : {:#x}", write_address_add);
 
             auto byte_counter = u32{};
             auto word_counter = u32{};
@@ -258,12 +259,16 @@ void Scu::executeDma(DmaConfiguration& dc) {
                             if (write_address_add != 0) { write_address_add = 4; }
                             break;
                     }
+                    // auto source_array = modules_.memory()->getArray(read_address);
 
                     while (byte_counter < dc.transfer_byte_number) {
                         data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
                                                            + long_counter * read_address_add);
                         modules_.memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
 
+                        // auto source = (read_address & bitmask_7FFFFFFF) + read_offset + long_counter * read_address_add;
+                        // auto dest   = write_address + read_offset + long_counter * write_address_add;
+                        break;
                         ++read_offset;
 
                         if (read_offset == 4) {
@@ -288,23 +293,28 @@ void Scu::executeDma(DmaConfiguration& dc) {
 
                     auto write_offset = u32{};
 
-                    while (byte_counter < dc.transfer_byte_number) {
-                        data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
-                                                           + long_counter * read_address_add);
-                        modules_.memory()->write<u8>(write_address + write_offset + word_counter * write_address_add, data);
+                    if ((read_address_add == 4) && (write_address_add == 2)) {
+                        Log::debug(Logger::scu, "Burst copy");
+                        modules_.memory()->burstCopy(read_address, write_address, dc.transfer_byte_number);
+                    } else {
+                        while (byte_counter < dc.transfer_byte_number) {
+                            data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                                                               + long_counter * read_address_add);
+                            modules_.memory()->write<u8>(write_address + write_offset + word_counter * write_address_add, data);
 
-                        ++read_offset;
-                        ++write_offset;
+                            ++read_offset;
+                            ++write_offset;
 
-                        if (read_offset == 4) {
-                            read_offset = 0;
-                            ++long_counter;
+                            if (read_offset == 4) {
+                                read_offset = 0;
+                                ++long_counter;
+                            }
+                            if (write_offset == 2) {
+                                write_offset = 0;
+                                ++word_counter;
+                            }
+                            ++byte_counter;
                         }
-                        if (write_offset == 2) {
-                            write_offset = 0;
-                            ++word_counter;
-                        }
-                        ++byte_counter;
                     }
                     break;
                 }
@@ -386,7 +396,8 @@ void Scu::executeDma(DmaConfiguration& dc) {
                 Log::debug(Logger::scu, "Read address : {:#x}", read_address);
                 Log::debug(Logger::scu, "Write address : {:#x}", write_address);
                 Log::debug(Logger::scu, "Size : {:#x}", count);
-
+                Log::debug(Logger::scu, "Read add : {:#x}", read_address_add);
+                Log::debug(Logger::scu, "Write add : {:#x}", write_address_add);
                 auto byte_counter = u32{};
                 auto word_counter = u32{};
                 auto long_counter = u32{};

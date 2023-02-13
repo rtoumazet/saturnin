@@ -50,30 +50,6 @@ constexpr auto region_cart_address_not_interleaved  = u8{0x40};
 constexpr auto region_cart_address_odd_interleaved  = u8{0x81};
 constexpr auto region_cart_address_even_interleaved = u8{0x80};
 
-constexpr auto dummy_address        = AddressRange{0x00000000, 0xFFFFFFFF};
-constexpr auto rom_address          = AddressRange{0x00000000, 0x000FFFFF};
-constexpr auto smpc_address         = AddressRange{0x00100000, 0x0017FFFF};
-constexpr auto backup_ram_address   = AddressRange{0x00180000, 0x001FFFFF};
-constexpr auto workram_low_address  = AddressRange{0x00200000, 0x002FFFFF};
-constexpr auto stv_io_address       = AddressRange{0x00400000, 0x004FFFFF};
-constexpr auto cart_address         = AddressRange{0x02000000, 0x04FFFFFF};
-constexpr auto cd_block_address     = AddressRange{0x05800000, 0x058FFFFF};
-constexpr auto scsp_address         = AddressRange{0x05A00000, 0x05BFFFFF};
-constexpr auto vdp1_ram_address     = AddressRange{0x05C00000, 0x05C7FFFF};
-constexpr auto vdp1_fb_address      = AddressRange{0x05C80000, 0x05CBFFFF};
-constexpr auto vdp1_regs_address    = AddressRange{0x05D00000, 0x05D7FFFF};
-constexpr auto vdp2_vram_address    = AddressRange{0x05E00000, 0x05EFFFFF};
-constexpr auto vdp2_cram_address    = AddressRange{0x05F00000, 0x05F7FFFF};
-constexpr auto vdp2_regs_address    = AddressRange{0x05F80000, 0x05FBFFFF};
-constexpr auto scu_address          = AddressRange{0x05FE0000, 0x05FEFFFF};
-constexpr auto workram_high_address = AddressRange{0x06000000, 0x07FFFFFF};
-constexpr auto master_frt_address   = AddressRange{0x01800000, 0x01FFFFFF};
-constexpr auto slave_frt_address    = AddressRange{0x01000000, 0x017FFFFF};
-constexpr auto sh2_regs_address     = AddressRange{0xFFFFFE00, 0xFFFFFFFF};
-constexpr auto cache_address        = AddressRange{0x60000000, 0x6FFFFFFF};
-constexpr auto cache_data_1_address = AddressRange{0x80000000, 0x8FFFFFFF};
-constexpr auto cache_data_2_address = AddressRange{0xC0000000, 0xCFFFFFFF};
-
 auto Memory::loadRom(const std::string& zip_name,
                      const std::string& file_name,
                      u8*                destination,
@@ -667,5 +643,64 @@ void Memory::installMinimumBiosRoutines() {
     rawWrite<u32>(workram_high_, 0xa00, 0x06028d64);
     rawWrite<u32>(workram_high_, 0xa04, 0x06028d9e);
     rawWrite<u32>(workram_high_, 0xa1c, 0x0602bcc2);
+}
+
+auto Memory::getAreaData(u32 addr) -> AreaMask {
+    if (uti::Range<rom_address>::contains(addr)) {
+        return std::pair(rom_.data(), rom_memory_mask);
+    } else if (uti::Range<smpc_address>::contains(addr)) {
+        return std::pair(smpc_.data(), smpc_memory_mask);
+    } else if (uti::Range<backup_ram_address>::contains(addr)) {
+        return std::pair(backup_ram_.data(), backup_ram_memory_mask);
+    } else if (uti::Range<workram_low_address>::contains(addr)) {
+        return std::pair(workram_low_.data(), workram_low_memory_mask);
+    } else if (uti::Range<stv_io_address>::contains(addr)) {
+        return std::pair(stv_io_.data(), stv_io_memory_mask);
+    } else if (uti::Range<cart_address>::contains(addr)) {
+        return std::pair(cart_.data(), cart_memory_mask);
+    }
+    // else if (scsp_address.start <= addr <= scsp_address.end) {
+    //     return std::pair(sound_ram_.data());
+    // }
+    else if (uti::Range<vdp1_ram_address>::contains(addr)) {
+        return std::pair(vdp1_vram_.data(), vdp1_ram_memory_mask);
+    } else if (uti::Range<vdp1_fb_address>::contains(addr)) {
+        return std::pair(vdp1_framebuffer_.data(), vdp1_framebuffer_memory_mask);
+    } else if (uti::Range<vdp1_regs_address>::contains(addr)) {
+        return std::pair(vdp1_registers_.data(), vdp1_registers_memory_mask);
+    } else if (uti::Range<vdp2_vram_address>::contains(addr)) {
+        return std::pair(vdp2_vram_.data(), vdp2_vram_memory_mask);
+    } else if (uti::Range<vdp2_cram_address>::contains(addr)) {
+        return std::pair(vdp2_cram_.data(), vdp2_cram_memory_mask);
+    } else if (uti::Range<vdp2_regs_address>::contains(addr)) {
+        return std::pair(vdp2_registers_.data(), vdp2_registers_memory_mask);
+    } else if (uti::Range<scu_address>::contains(addr)) {
+        return std::pair(scu_.data(), scu_memory_mask);
+    } else if (uti::Range<workram_high_address>::contains(addr)) {
+        return std::pair(workram_high_.data(), workram_high_memory_mask);
+    }
+    Log::warning(Logger::memory, core::tr("Unknown address range {:#0x}"), addr);
+    return std::nullopt;
+}
+
+void Memory::burstCopy(const u32 source_address, const u32 destination_address, const u32 amount) {
+    auto source_area      = getAreaData(source_address);
+    auto destination_area = getAreaData(destination_address);
+
+    if (!source_area) {
+        Log::warning(Logger::memory, core::tr("Unknown source address for burst copy : {:#0x}"), source_address);
+        return;
+    }
+    if (!destination_area) {
+        Log::warning(Logger::memory, core::tr("Unknown destination address for burst copy : {:#0x}"), destination_address);
+        return;
+    }
+
+    const auto& [source, source_mask]     = *source_area;
+    auto& [destination, destination_mask] = *destination_area;
+
+    memcpy(destination + (destination_address & destination_mask), source + (source_address & source_mask), amount);
+
+    if (uti::Range<vdp2_regs_address>::contains(destination_address)) { modules_.vdp2()->refreshRegisters(); }
 }
 } // namespace saturnin::core

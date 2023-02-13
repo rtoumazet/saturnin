@@ -325,6 +325,13 @@ auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
     return color_offset;
 }
 
+void Vdp2::refreshRegisters() {
+    constexpr auto regs_max{0x120};
+    for (u32 i = 0; i < regs_max; i += 2) {
+        write16(i, modules_.memory()->vdp2_registers_[i] << 8 | modules_.memory()->vdp2_registers_[i + 1]);
+    }
+}
+
 //--------------------------------------------------------------------------------------------------------------
 // PRIVATE section
 //--------------------------------------------------------------------------------------------------------------
@@ -494,6 +501,8 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case tv_screen_mode + 1: tvmd_.lower_8_bits = data; break;
         case external_signal_enable: exten_.upper_8_bits = data; break;
         case external_signal_enable + 1: exten_.lower_8_bits = data; break;
+        case screen_status: tvstat_.upper_8_bits = data; break;
+        case screen_status + 1: tvstat_.lower_8_bits = data; break;
         case vram_size: vrsize_.upper_8_bits = data; break;
         case vram_size + 1: vrsize_.lower_8_bits = data; break;
         case h_counter: hcnt_.upper_8_bits = data; break;
@@ -785,6 +794,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
     switch (addr & core::vdp2_registers_memory_mask) {
         case tv_screen_mode: tvmd_.raw = data; break;
         case external_signal_enable: exten_.raw = data; break;
+        case screen_status: tvstat_.raw = data; break;
         case vram_size: vrsize_.raw = data; break;
         case h_counter: hcnt_.raw = data; break;
         case v_counter: vcnt_.raw = data; break;
