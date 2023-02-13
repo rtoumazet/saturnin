@@ -68,6 +68,7 @@ auto Sh2::readRegisters8(const u32 addr) -> u8 {
         //////////////
         // 8. Cache //
         //////////////
+        case cache_control_register: return cache_ccr_.raw;
 
         /////////////
         // 9. DMAC //
