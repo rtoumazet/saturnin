@@ -194,29 +194,30 @@ enum class MemoryMapArea {
     sh2_cache_data       ///< SH2 cache data
 };
 
-constexpr auto dummy_address        = AddressRange{0x00000000, 0xFFFFFFFF};
-constexpr auto rom_address          = AddressRange{0x00000000, 0x000FFFFF};
-constexpr auto smpc_address         = AddressRange{0x00100000, 0x0017FFFF};
-constexpr auto backup_ram_address   = AddressRange{0x00180000, 0x001FFFFF};
-constexpr auto workram_low_address  = AddressRange{0x00200000, 0x002FFFFF};
-constexpr auto stv_io_address       = AddressRange{0x00400000, 0x004FFFFF};
-constexpr auto cart_address         = AddressRange{0x02000000, 0x04FFFFFF};
-constexpr auto cd_block_address     = AddressRange{0x05800000, 0x058FFFFF};
-constexpr auto scsp_address         = AddressRange{0x05A00000, 0x05BFFFFF};
-constexpr auto vdp1_ram_address     = AddressRange{0x05C00000, 0x05C7FFFF};
-constexpr auto vdp1_fb_address      = AddressRange{0x05C80000, 0x05CBFFFF};
-constexpr auto vdp1_regs_address    = AddressRange{0x05D00000, 0x05D7FFFF};
-constexpr auto vdp2_vram_address    = AddressRange{0x05E00000, 0x05EFFFFF};
-constexpr auto vdp2_cram_address    = AddressRange{0x05F00000, 0x05F7FFFF};
-constexpr auto vdp2_regs_address    = AddressRange{0x05F80000, 0x05FBFFFF};
-constexpr auto scu_address          = AddressRange{0x05FE0000, 0x05FEFFFF};
-constexpr auto workram_high_address = AddressRange{0x06000000, 0x07FFFFFF};
-constexpr auto master_frt_address   = AddressRange{0x01800000, 0x01FFFFFF};
-constexpr auto slave_frt_address    = AddressRange{0x01000000, 0x017FFFFF};
-constexpr auto sh2_regs_address     = AddressRange{0xFFFFFE00, 0xFFFFFFFF};
-constexpr auto cache_address        = AddressRange{0x60000000, 0x6FFFFFFF};
-constexpr auto cache_data_1_address = AddressRange{0x80000000, 0x8FFFFFFF};
-constexpr auto cache_data_2_address = AddressRange{0xC0000000, 0xCFFFFFFF};
+constexpr auto dummy_area         = AddressRange{0x00000000, 0xFFFFFFFF};
+constexpr auto rom_area           = AddressRange{0x00000000, 0x000FFFFF};
+constexpr auto smpc_area          = AddressRange{0x00100000, 0x0017FFFF};
+constexpr auto backup_ram_area    = AddressRange{0x00180000, 0x001FFFFF};
+constexpr auto workram_low_area   = AddressRange{0x00200000, 0x002FFFFF};
+constexpr auto stv_io_area        = AddressRange{0x00400000, 0x004FFFFF};
+constexpr auto cart_area          = AddressRange{0x02000000, 0x04FFFFFF};
+constexpr auto cd_block_area      = AddressRange{0x05800000, 0x058FFFFF};
+constexpr auto scsp_area          = AddressRange{0x05A00000, 0x05BFFFFF};
+constexpr auto vdp1_ram_area      = AddressRange{0x05C00000, 0x05C7FFFF};
+constexpr auto vdp1_fb_area       = AddressRange{0x05C80000, 0x05CBFFFF};
+constexpr auto vdp1_regs_area     = AddressRange{0x05D00000, 0x05D7FFFF};
+constexpr auto vdp2_vram_area     = AddressRange{0x05E00000, 0x05EFFFFF};
+constexpr auto vdp2_cram_area     = AddressRange{0x05F00000, 0x05F7FFFF};
+constexpr auto vdp2_regs_area     = AddressRange{0x05F80000, 0x05FBFFFF};
+constexpr auto scu_area           = AddressRange{0x05FE0000, 0x05FEFFFF};
+constexpr auto workram_high_area  = AddressRange{0x06000000, 0x07FFFFFF};
+constexpr auto master_frt_area    = AddressRange{0x01800000, 0x01FFFFFF};
+constexpr auto slave_frt_area     = AddressRange{0x01000000, 0x017FFFFF};
+constexpr auto sh2_regs_area      = AddressRange{0xFFFFFE00, 0xFFFFFFFF};
+constexpr auto cache_purge_area   = AddressRange{0x40000000, 0x4FFFFFFF};
+constexpr auto cache_address_area = AddressRange{0x60000000, 0x6FFFFFFF};
+// constexpr auto cache_data_1_address = AddressRange{0x80000000, 0x8FFFFFFF};
+constexpr auto cache_data_area = AddressRange{0xC0000000, 0xCFFFFFFF};
 
 // ST-V rom file description
 struct StvRomFile {
@@ -1730,6 +1731,27 @@ template<>
 struct writeSlaveSh2Frt<u16> {
     operator Memory::WriteType<u16>() const {
         return [](Memory& m, const u32 addr, const u16 data) { m.sendFrtInterruptToSlave(); };
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	writeCachePurgeArea
+///
+/// \brief	Write to the cache purge area.
+///
+/// \author	Runik
+/// \date	15/02/2023
+///
+/// \tparam	T	Generic type parameter.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct writeCachePurgeArea {
+    operator Memory::WriteType<T>() const {
+        return [](Memory& m, const u32 addr, const T data) {
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCachePurgeArea<T>(addr, data); }
+            return m.modules_.slaveSh2()->writeCachePurgeArea<T>(addr, data);
+        };
     }
 };
 

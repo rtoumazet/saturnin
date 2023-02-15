@@ -670,6 +670,10 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
     }
 }
 
+void Sh2::writeCachePurgeArea(const u32 addr, const u32 data) {
+    // TODO
+}
+
 void Sh2::purgeCache() {
     // All the valid bits and LRU bits are initialized to 0
     constexpr auto cache_purge_mask = u32{0xFFFFFC0B};

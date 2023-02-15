@@ -26,7 +26,7 @@
 #pragma once
 
 #include <array>  // array
-#include <mutex> // mutex
+#include <mutex>  // mutex
 #include <vector> // vector
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/emulator_modules.h>
@@ -170,11 +170,11 @@ class Sh2 {
     // Constructors / Destructors
     Sh2() = delete;
     Sh2(Sh2Type st, EmulatorContext* ec);
-    Sh2(const Sh2&) = delete;
-    Sh2(Sh2&&)      = delete;
+    Sh2(const Sh2&)                      = delete;
+    Sh2(Sh2&&)                           = delete;
     auto operator=(const Sh2&) & -> Sh2& = delete;
-    auto operator=(Sh2&&) & -> Sh2& = delete;
-    ~Sh2()                          = default;
+    auto operator=(Sh2&&) & -> Sh2&      = delete;
+    ~Sh2()                               = default;
     //@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,6 +246,41 @@ class Sh2 {
     void writeRegisters<u32>(const u32 addr, const u32 data) {
         writeRegisters(addr, data);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	template<typename T> void Sh2::writeCachePurgeArea(const u32 addr, const T data)
+    ///
+    /// \brief	Cache purge area generic write.
+    ///
+    /// \tparam	T	Generic type parameter.
+    /// \param 	addr	Address to write to.
+    /// \param 	data	Data to write.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<typename T>
+    void writeCachePurgeArea(const u32 addr, const T data) {
+        constexpr auto bits_number = u8{8};
+        Log::warning(Logger::sh2, core::tr("{}bits write to the cache purge area !"), sizeof(T) * bits_number);
+    }
+
+    // 32 bits specialization
+    template<>
+    void writeCachePurgeArea<u32>(const u32 addr, const u32 data) {
+        writeCachePurgeArea(addr, data);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Sh2::writeCachePurgeArea(const u32 addr, const u32 data);
+    ///
+    /// \brief	Cache purge area write
+    ///
+    /// \author	Runik
+    /// \date	15/02/2023
+    ///
+    /// \param 	addr	Address to write to.
+    /// \param 	data	Data to write.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    void writeCachePurgeArea(const u32 addr, const u32 data);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> [[nodiscard]] auto Sh2::readCacheAddresses(const u32 addr) const -> T

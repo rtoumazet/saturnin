@@ -242,140 +242,140 @@ void Memory::swapCartArea() {
 
 void Memory::initializeHandlers() {
     // Dummy access
-    initializeHandlers<readDummy, u8, u16, u32>(dummy_address);
-    initializeHandlers<writeDummy, u8, u16, u32>(dummy_address);
+    initializeHandlers<readDummy, u8, u16, u32>(dummy_area);
+    initializeHandlers<writeDummy, u8, u16, u32>(dummy_area);
 
     // ROM access
-    initializeHandlers<readRom, u8, u16, u32>(rom_address);
-    initializeHandlers<readRom, u8, u16, u32>(getDirectAddress(rom_address));
+    initializeHandlers<readRom, u8, u16, u32>(rom_area);
+    initializeHandlers<readRom, u8, u16, u32>(getDirectAddress(rom_area));
 
     // SMPC access
-    initializeHandlers<readSmpc, u8, u16, u32>(smpc_address);
-    initializeHandlers<readSmpc, u8, u16, u32>(getDirectAddress(smpc_address));
+    initializeHandlers<readSmpc, u8, u16, u32>(smpc_area);
+    initializeHandlers<readSmpc, u8, u16, u32>(getDirectAddress(smpc_area));
 
-    initializeHandlers<writeSmpc, u8, u16, u32>(smpc_address);
-    initializeHandlers<writeSmpc, u8, u16, u32>(getDirectAddress(smpc_address));
+    initializeHandlers<writeSmpc, u8, u16, u32>(smpc_area);
+    initializeHandlers<writeSmpc, u8, u16, u32>(getDirectAddress(smpc_area));
 
     // Backup RAM access
-    initializeHandlers<readBackupRam, u8, u16, u32>(backup_ram_address);
-    initializeHandlers<readBackupRam, u8, u16, u32>(getDirectAddress(backup_ram_address));
+    initializeHandlers<readBackupRam, u8, u16, u32>(backup_ram_area);
+    initializeHandlers<readBackupRam, u8, u16, u32>(getDirectAddress(backup_ram_area));
 
-    initializeHandlers<writeBackupRam, u8, u16, u32>(backup_ram_address);
-    initializeHandlers<writeBackupRam, u8, u16, u32>(getDirectAddress(backup_ram_address));
+    initializeHandlers<writeBackupRam, u8, u16, u32>(backup_ram_area);
+    initializeHandlers<writeBackupRam, u8, u16, u32>(getDirectAddress(backup_ram_area));
 
     // Low workram access
-    initializeHandlers<readWorkramLow, u8, u16, u32>(workram_low_address);
-    initializeHandlers<readWorkramLow, u8, u16, u32>(getDirectAddress(workram_low_address));
+    initializeHandlers<readWorkramLow, u8, u16, u32>(workram_low_area);
+    initializeHandlers<readWorkramLow, u8, u16, u32>(getDirectAddress(workram_low_area));
 
-    initializeHandlers<writeWorkramLow, u8, u16, u32>(workram_low_address);
-    initializeHandlers<writeWorkramLow, u8, u16, u32>(getDirectAddress(workram_low_address));
+    initializeHandlers<writeWorkramLow, u8, u16, u32>(workram_low_area);
+    initializeHandlers<writeWorkramLow, u8, u16, u32>(getDirectAddress(workram_low_area));
 
     // STV I/O access
-    initializeHandlers<readStvIo, u8, u16, u32>(stv_io_address);
-    initializeHandlers<readStvIo, u8, u16, u32>(getDirectAddress(stv_io_address));
+    initializeHandlers<readStvIo, u8, u16, u32>(stv_io_area);
+    initializeHandlers<readStvIo, u8, u16, u32>(getDirectAddress(stv_io_area));
 
-    initializeHandlers<writeStvIo, u8, u16, u32>(stv_io_address);
-    initializeHandlers<writeStvIo, u8, u16, u32>(getDirectAddress(stv_io_address));
+    initializeHandlers<writeStvIo, u8, u16, u32>(stv_io_area);
+    initializeHandlers<writeStvIo, u8, u16, u32>(getDirectAddress(stv_io_area));
 
     // Cart access
-    initializeHandlers<readCart, u8, u16, u32>(cart_address);
-    initializeHandlers<readCart, u8, u16, u32>(getDirectAddress(cart_address));
+    initializeHandlers<readCart, u8, u16, u32>(cart_area);
+    initializeHandlers<readCart, u8, u16, u32>(getDirectAddress(cart_area));
 
-    initializeHandlers<writeCart, u8, u16, u32>(cart_address);
-    initializeHandlers<writeCart, u8, u16, u32>(getDirectAddress(cart_address));
+    initializeHandlers<writeCart, u8, u16, u32>(cart_area);
+    initializeHandlers<writeCart, u8, u16, u32>(getDirectAddress(cart_area));
 
     // CdBlock access
-    initializeHandlers<readCdBlock, u8, u16, u32>(cd_block_address);
-    initializeHandlers<readCdBlock, u8, u16, u32>(getDirectAddress(cd_block_address));
+    initializeHandlers<readCdBlock, u8, u16, u32>(cd_block_area);
+    initializeHandlers<readCdBlock, u8, u16, u32>(getDirectAddress(cd_block_area));
 
-    initializeHandlers<writeCdBlock, u8, u16, u32>(cd_block_address);
-    initializeHandlers<writeCdBlock, u8, u16, u32>(getDirectAddress(cd_block_address));
+    initializeHandlers<writeCdBlock, u8, u16, u32>(cd_block_area);
+    initializeHandlers<writeCdBlock, u8, u16, u32>(getDirectAddress(cd_block_area));
 
     // SCSP access
-    initializeHandlers<readScsp, u8, u16, u32>(scsp_address);
-    initializeHandlers<readScsp, u8, u16, u32>(getDirectAddress(scsp_address));
+    initializeHandlers<readScsp, u8, u16, u32>(scsp_area);
+    initializeHandlers<readScsp, u8, u16, u32>(getDirectAddress(scsp_area));
 
-    initializeHandlers<writeScsp, u8, u16, u32>(scsp_address);
-    initializeHandlers<writeScsp, u8, u16, u32>(getDirectAddress(scsp_address));
+    initializeHandlers<writeScsp, u8, u16, u32>(scsp_area);
+    initializeHandlers<writeScsp, u8, u16, u32>(getDirectAddress(scsp_area));
 
     // VDP1 RAM access
-    initializeHandlers<readVdp1Ram, u8, u16, u32>(vdp1_ram_address);
-    initializeHandlers<readVdp1Ram, u8, u16, u32>(getDirectAddress(vdp1_ram_address));
+    initializeHandlers<readVdp1Ram, u8, u16, u32>(vdp1_ram_area);
+    initializeHandlers<readVdp1Ram, u8, u16, u32>(getDirectAddress(vdp1_ram_area));
 
-    initializeHandlers<writeVdp1Ram, u8, u16, u32>(vdp1_ram_address);
-    initializeHandlers<writeVdp1Ram, u8, u16, u32>(getDirectAddress(vdp1_ram_address));
+    initializeHandlers<writeVdp1Ram, u8, u16, u32>(vdp1_ram_area);
+    initializeHandlers<writeVdp1Ram, u8, u16, u32>(getDirectAddress(vdp1_ram_area));
 
     // VDP1 framebuffer access
-    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(vdp1_fb_address);
-    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(getDirectAddress(vdp1_fb_address));
+    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(vdp1_fb_area);
+    initializeHandlers<readVdp1Framebuffer, u8, u16, u32>(getDirectAddress(vdp1_fb_area));
 
-    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(vdp1_fb_address);
-    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(getDirectAddress(vdp1_fb_address));
+    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(vdp1_fb_area);
+    initializeHandlers<writeVdp1Framebuffer, u8, u16, u32>(getDirectAddress(vdp1_fb_area));
 
     // VDP1 Registers access
-    initializeHandlers<readVdp1Registers, u8, u16, u32>(vdp1_regs_address);
-    initializeHandlers<readVdp1Registers, u8, u16, u32>(getDirectAddress(vdp1_regs_address));
+    initializeHandlers<readVdp1Registers, u8, u16, u32>(vdp1_regs_area);
+    initializeHandlers<readVdp1Registers, u8, u16, u32>(getDirectAddress(vdp1_regs_area));
 
-    initializeHandlers<writeVdp1Registers, u8, u16, u32>(vdp1_regs_address);
-    initializeHandlers<writeVdp1Registers, u8, u16, u32>(getDirectAddress(vdp1_regs_address));
+    initializeHandlers<writeVdp1Registers, u8, u16, u32>(vdp1_regs_area);
+    initializeHandlers<writeVdp1Registers, u8, u16, u32>(getDirectAddress(vdp1_regs_area));
 
     // VDP2 VRAM access
-    initializeHandlers<readVdp2Vram, u8, u16, u32>(vdp2_vram_address);
-    initializeHandlers<readVdp2Vram, u8, u16, u32>(getDirectAddress(vdp2_vram_address));
+    initializeHandlers<readVdp2Vram, u8, u16, u32>(vdp2_vram_area);
+    initializeHandlers<readVdp2Vram, u8, u16, u32>(getDirectAddress(vdp2_vram_area));
 
-    initializeHandlers<writeVdp2Vram, u8, u16, u32>(vdp2_vram_address);
-    initializeHandlers<writeVdp2Vram, u8, u16, u32>(getDirectAddress(vdp2_vram_address));
+    initializeHandlers<writeVdp2Vram, u8, u16, u32>(vdp2_vram_area);
+    initializeHandlers<writeVdp2Vram, u8, u16, u32>(getDirectAddress(vdp2_vram_area));
 
     // VDP2 CRAM access
-    initializeHandlers<readVdp2Cram, u8, u16, u32>(vdp2_cram_address);
-    initializeHandlers<readVdp2Cram, u8, u16, u32>(getDirectAddress(vdp2_cram_address));
+    initializeHandlers<readVdp2Cram, u8, u16, u32>(vdp2_cram_area);
+    initializeHandlers<readVdp2Cram, u8, u16, u32>(getDirectAddress(vdp2_cram_area));
 
-    initializeHandlers<writeVdp2Cram, u8, u16, u32>(vdp2_cram_address);
-    initializeHandlers<writeVdp2Cram, u8, u16, u32>(getDirectAddress(vdp2_cram_address));
+    initializeHandlers<writeVdp2Cram, u8, u16, u32>(vdp2_cram_area);
+    initializeHandlers<writeVdp2Cram, u8, u16, u32>(getDirectAddress(vdp2_cram_area));
 
     // VDP2 Registers access
-    initializeHandlers<readVdp2Registers, u8, u16, u32>(vdp2_regs_address);
-    initializeHandlers<readVdp2Registers, u8, u16, u32>(getDirectAddress(vdp2_regs_address));
+    initializeHandlers<readVdp2Registers, u8, u16, u32>(vdp2_regs_area);
+    initializeHandlers<readVdp2Registers, u8, u16, u32>(getDirectAddress(vdp2_regs_area));
 
-    initializeHandlers<writeVdp2Registers, u8, u16, u32>(vdp2_regs_address);
-    initializeHandlers<writeVdp2Registers, u8, u16, u32>(getDirectAddress(vdp2_regs_address));
+    initializeHandlers<writeVdp2Registers, u8, u16, u32>(vdp2_regs_area);
+    initializeHandlers<writeVdp2Registers, u8, u16, u32>(getDirectAddress(vdp2_regs_area));
 
     // SCU access
-    initializeHandlers<readScu, u8, u16, u32>(scu_address);
-    initializeHandlers<readScu, u8, u16, u32>(getDirectAddress(scu_address));
+    initializeHandlers<readScu, u8, u16, u32>(scu_area);
+    initializeHandlers<readScu, u8, u16, u32>(getDirectAddress(scu_area));
 
-    initializeHandlers<writeScu, u8, u16, u32>(scu_address);
-    initializeHandlers<writeScu, u8, u16, u32>(getDirectAddress(scu_address));
+    initializeHandlers<writeScu, u8, u16, u32>(scu_area);
+    initializeHandlers<writeScu, u8, u16, u32>(getDirectAddress(scu_area));
 
     // Workram high access
-    initializeHandlers<readWorkramHigh, u8, u16, u32>(workram_high_address);
-    initializeHandlers<readWorkramHigh, u8, u16, u32>(getDirectAddress(workram_high_address));
+    initializeHandlers<readWorkramHigh, u8, u16, u32>(workram_high_area);
+    initializeHandlers<readWorkramHigh, u8, u16, u32>(getDirectAddress(workram_high_area));
 
-    initializeHandlers<writeWorkramHigh, u8, u16, u32>(workram_high_address);
-    initializeHandlers<writeWorkramHigh, u8, u16, u32>(getDirectAddress(workram_high_address));
+    initializeHandlers<writeWorkramHigh, u8, u16, u32>(workram_high_area);
+    initializeHandlers<writeWorkramHigh, u8, u16, u32>(getDirectAddress(workram_high_area));
 
     // Master FRT access
-    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(master_frt_address);
-    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(getDirectAddress(master_frt_address));
+    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(master_frt_area);
+    initializeHandlers<writeMasterSh2Frt, u8, u16, u32>(getDirectAddress(master_frt_area));
 
     // Slave FRT access
-    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(slave_frt_address);
-    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(getDirectAddress(slave_frt_address));
+    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(slave_frt_area);
+    initializeHandlers<writeSlaveSh2Frt, u8, u16, u32>(getDirectAddress(slave_frt_area));
 
     // SH2 register access
-    initializeHandlers<readSh2Registers, u8, u16, u32>(sh2_regs_address);
-    initializeHandlers<writeSh2Registers, u8, u16, u32>(sh2_regs_address);
+    initializeHandlers<readSh2Registers, u8, u16, u32>(sh2_regs_area);
+    initializeHandlers<writeSh2Registers, u8, u16, u32>(sh2_regs_area);
+
+    // Cache purge area
+    initializeHandlers<writeCachePurgeArea, u8, u16, u32>(cache_purge_area);
 
     // Cache addresses access
-    initializeHandlers<readCacheAddresses, u8, u16, u32>(cache_address);
-    initializeHandlers<writeCacheAddresses, u8, u16, u32>(cache_address);
+    initializeHandlers<readCacheAddresses, u8, u16, u32>(cache_address_area);
+    initializeHandlers<writeCacheAddresses, u8, u16, u32>(cache_address_area);
 
     // Cache data access
-    initializeHandlers<readCacheData, u8, u16, u32>(cache_data_1_address);
-    initializeHandlers<readCacheData, u8, u16, u32>(cache_data_2_address);
-
-    initializeHandlers<writeCacheData, u8, u16, u32>(cache_data_1_address);
-    initializeHandlers<writeCacheData, u8, u16, u32>(cache_data_2_address);
+    initializeHandlers<readCacheData, u8, u16, u32>(cache_data_area);
+    initializeHandlers<writeCacheData, u8, u16, u32>(cache_data_area);
 }
 
 auto Memory::readStvProtection(const u32 addr, u32 data) const -> u32 {
@@ -464,22 +464,22 @@ void Memory::sendFrtInterruptToSlave() const { modules_.slaveSh2()->sendInterrup
 auto Memory::getMemoryMapAreaData(const MemoryMapArea area) -> std::tuple<u8*, size_t, u32> const {
     switch (area) {
         using enum MemoryMapArea;
-        case rom: return std::make_tuple(rom_.data(), rom_.size(), rom_address.start);
-        case smpc: return std::make_tuple(smpc_.data(), smpc_.size(), smpc_address.start);
-        case backup_ram: return std::make_tuple(backup_ram_.data(), backup_ram_.size(), backup_ram_address.start);
-        case workram_low: return std::make_tuple(workram_low_.data(), workram_low_.size(), workram_low_address.start);
-        case stv_io: return std::make_tuple(stv_io_.data(), stv_io_.size(), stv_io_address.start);
-        case cart: return std::make_tuple(cart_.data(), cart_.size(), cart_address.start);
-        // case cd_block: return std::make_tuple(.data(), .size(), cd_block_address.start);
-        case scsp: return std::make_tuple(sound_ram_.data(), sound_ram_.size(), scsp_address.start);
-        case vdp1_ram: return std::make_tuple(vdp1_vram_.data(), vdp1_vram_.size(), vdp1_ram_address.start);
-        case vdp1_framebuffer: return std::make_tuple(vdp1_framebuffer_.data(), vdp1_framebuffer_.size(), vdp1_fb_address.start);
-        case vdp1_registers: return std::make_tuple(vdp1_registers_.data(), vdp1_registers_.size(), vdp1_regs_address.start);
-        case vdp2_video_ram: return std::make_tuple(vdp2_vram_.data(), vdp2_vram_.size(), vdp2_vram_address.start);
-        case vdp2_color_ram: return std::make_tuple(vdp2_cram_.data(), vdp2_cram_.size(), vdp2_cram_address.start);
-        case vdp2_registers: return std::make_tuple(vdp2_registers_.data(), vdp2_registers_.size(), vdp2_regs_address.start);
-        case scu: return std::make_tuple(scu_.data(), scu_.size(), scu_address.start);
-        case workram_high: return std::make_tuple(workram_high_.data(), workram_high_.size(), workram_high_address.start);
+        case rom: return std::make_tuple(rom_.data(), rom_.size(), rom_area.start);
+        case smpc: return std::make_tuple(smpc_.data(), smpc_.size(), smpc_area.start);
+        case backup_ram: return std::make_tuple(backup_ram_.data(), backup_ram_.size(), backup_ram_area.start);
+        case workram_low: return std::make_tuple(workram_low_.data(), workram_low_.size(), workram_low_area.start);
+        case stv_io: return std::make_tuple(stv_io_.data(), stv_io_.size(), stv_io_area.start);
+        case cart: return std::make_tuple(cart_.data(), cart_.size(), cart_area.start);
+        // case cd_block: return std::make_tuple(.data(), .size(), cd_block_area.start);
+        case scsp: return std::make_tuple(sound_ram_.data(), sound_ram_.size(), scsp_area.start);
+        case vdp1_ram: return std::make_tuple(vdp1_vram_.data(), vdp1_vram_.size(), vdp1_ram_area.start);
+        case vdp1_framebuffer: return std::make_tuple(vdp1_framebuffer_.data(), vdp1_framebuffer_.size(), vdp1_fb_area.start);
+        case vdp1_registers: return std::make_tuple(vdp1_registers_.data(), vdp1_registers_.size(), vdp1_regs_area.start);
+        case vdp2_video_ram: return std::make_tuple(vdp2_vram_.data(), vdp2_vram_.size(), vdp2_vram_area.start);
+        case vdp2_color_ram: return std::make_tuple(vdp2_cram_.data(), vdp2_cram_.size(), vdp2_cram_area.start);
+        case vdp2_registers: return std::make_tuple(vdp2_registers_.data(), vdp2_registers_.size(), vdp2_regs_area.start);
+        case scu: return std::make_tuple(scu_.data(), scu_.size(), scu_area.start);
+        case workram_high: return std::make_tuple(workram_high_.data(), workram_high_.size(), workram_high_area.start);
         default: return std::make_tuple(nullptr, 0, 0);
     }
 };
@@ -646,37 +646,37 @@ void Memory::installMinimumBiosRoutines() {
 }
 
 auto Memory::getAreaData(u32 addr) -> AreaMask {
-    if (uti::Range<rom_address>::contains(addr)) {
+    if (uti::Range<rom_area>::contains(addr)) {
         return std::pair(rom_.data(), rom_memory_mask);
-    } else if (uti::Range<smpc_address>::contains(addr)) {
+    } else if (uti::Range<smpc_area>::contains(addr)) {
         return std::pair(smpc_.data(), smpc_memory_mask);
-    } else if (uti::Range<backup_ram_address>::contains(addr)) {
+    } else if (uti::Range<backup_ram_area>::contains(addr)) {
         return std::pair(backup_ram_.data(), backup_ram_memory_mask);
-    } else if (uti::Range<workram_low_address>::contains(addr)) {
+    } else if (uti::Range<workram_low_area>::contains(addr)) {
         return std::pair(workram_low_.data(), workram_low_memory_mask);
-    } else if (uti::Range<stv_io_address>::contains(addr)) {
+    } else if (uti::Range<stv_io_area>::contains(addr)) {
         return std::pair(stv_io_.data(), stv_io_memory_mask);
-    } else if (uti::Range<cart_address>::contains(addr)) {
+    } else if (uti::Range<cart_area>::contains(addr)) {
         return std::pair(cart_.data(), cart_memory_mask);
     }
     // else if (scsp_address.start <= addr <= scsp_address.end) {
     //     return std::pair(sound_ram_.data());
     // }
-    else if (uti::Range<vdp1_ram_address>::contains(addr)) {
+    else if (uti::Range<vdp1_ram_area>::contains(addr)) {
         return std::pair(vdp1_vram_.data(), vdp1_ram_memory_mask);
-    } else if (uti::Range<vdp1_fb_address>::contains(addr)) {
+    } else if (uti::Range<vdp1_fb_area>::contains(addr)) {
         return std::pair(vdp1_framebuffer_.data(), vdp1_framebuffer_memory_mask);
-    } else if (uti::Range<vdp1_regs_address>::contains(addr)) {
+    } else if (uti::Range<vdp1_regs_area>::contains(addr)) {
         return std::pair(vdp1_registers_.data(), vdp1_registers_memory_mask);
-    } else if (uti::Range<vdp2_vram_address>::contains(addr)) {
+    } else if (uti::Range<vdp2_vram_area>::contains(addr)) {
         return std::pair(vdp2_vram_.data(), vdp2_vram_memory_mask);
-    } else if (uti::Range<vdp2_cram_address>::contains(addr)) {
+    } else if (uti::Range<vdp2_cram_area>::contains(addr)) {
         return std::pair(vdp2_cram_.data(), vdp2_cram_memory_mask);
-    } else if (uti::Range<vdp2_regs_address>::contains(addr)) {
+    } else if (uti::Range<vdp2_regs_area>::contains(addr)) {
         return std::pair(vdp2_registers_.data(), vdp2_registers_memory_mask);
-    } else if (uti::Range<scu_address>::contains(addr)) {
+    } else if (uti::Range<scu_area>::contains(addr)) {
         return std::pair(scu_.data(), scu_memory_mask);
-    } else if (uti::Range<workram_high_address>::contains(addr)) {
+    } else if (uti::Range<workram_high_area>::contains(addr)) {
         return std::pair(workram_high_.data(), workram_high_memory_mask);
     }
     Log::warning(Logger::memory, core::tr("Unknown address range {:#0x}"), addr);
@@ -701,6 +701,6 @@ void Memory::burstCopy(const u32 source_address, const u32 destination_address, 
 
     memcpy(destination + (destination_address & destination_mask), source + (source_address & source_mask), amount);
 
-    if (uti::Range<vdp2_regs_address>::contains(destination_address)) { modules_.vdp2()->refreshRegisters(); }
+    if (uti::Range<vdp2_regs_area>::contains(destination_address)) { modules_.vdp2()->refreshRegisters(); }
 }
 } // namespace saturnin::core
