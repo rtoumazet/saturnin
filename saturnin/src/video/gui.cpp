@@ -1290,7 +1290,7 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
                               table_size)) {
             const auto callstack_mask = std::string{"{:#010x}"};
             auto       callstack      = current_sh2->callstack();
-            std::for_each(callstack.rbegin(), callstack.rend(), [&](const auto& item) {
+            std::for_each(callstack.begin(), callstack.end(), [&](const auto& item) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::TextUnformatted(uti::format(callstack_mask, item.call_address).c_str());
