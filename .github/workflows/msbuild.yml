@@ -33,6 +33,10 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: vcpkg integrate install
 
+    - name: Copy the Readmes
+      run: |
+          cp ./props/solution.props.template ./props/solution.props
+    
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
