@@ -33,7 +33,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: vcpkg integrate install
 
-    - name: Copy the Readmes
+    - name: Copy properties file
       run: |
           cp ./props/solution.props.template ./props/solution.props
     
