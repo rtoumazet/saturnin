@@ -15,7 +15,7 @@ env:
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_PLATFORM: x64
   BUILD_CONFIGURATION: DebugFast
-
+  
 permissions:
   contents: read
 
@@ -29,10 +29,17 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Restore vcpkg packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: vcpkg integrate install
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v10
+      with:
+        vcpkgGitCommitId: 'd15470bb6464a3bb0ce3d98d118190cfd5189080'
+        setupOnly: true
 
+    - name: Install vcpkg dependencies
+      run: |
+        $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog      
+      shell: bash 
+      
     - name: Copy properties file
       run: |
           cp props/solution.props.template props/solution.props
