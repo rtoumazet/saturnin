@@ -1,5 +1,6 @@
 Saturnin is a Sega Saturn emulator
 
+![GitHub](https://img.shields.io/github/license/rtoumazet/saturnin) 
 [![MSBuild](https://github.com/rtoumazet/saturnin/actions/workflows/msbuild.yml/badge.svg)](https://github.com/rtoumazet/saturnin/actions/workflows/msbuild.yml)
 
 ### How do I get set up? ###
