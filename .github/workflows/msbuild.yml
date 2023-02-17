@@ -34,7 +34,7 @@ jobs:
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: 'd15470bb6464a3bb0ce3d98d118190cfd5189080'
+        #vcpkgGitCommitId: 'd15470bb6464a3bb0ce3d98d118190cfd5189080'
         setupOnly: true
 
     - name: Install vcpkg dependencies
@@ -46,6 +46,10 @@ jobs:
       run: |
           cp props/solution.props.template props/solution.props
     
+    - name: Restore vcpkg packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: vcpkg integrate install
+
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
