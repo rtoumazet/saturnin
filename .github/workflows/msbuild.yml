@@ -37,6 +37,11 @@ jobs:
       run: |
           cp props/solution.props.template props/solution.props
     
+    - name: Open Web Client Directory
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+           dir
+    
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
