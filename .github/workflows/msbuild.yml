@@ -55,7 +55,7 @@ jobs:
     
     - name: Restore vcpkg packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: vcpkg integrate install --vcpkg-root
+      run: vcpkg integrate install --vcpkg-root=C:\vcpkg
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
