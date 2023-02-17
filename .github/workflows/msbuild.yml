@@ -16,6 +16,8 @@ env:
   BUILD_PLATFORM: x64
   BUILD_CONFIGURATION: DebugFast
   
+  VCPKG_DEFAULT_TRIPLET: x64-windows-static
+  
 permissions:
   contents: read
 
