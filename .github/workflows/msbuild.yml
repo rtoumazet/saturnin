@@ -31,24 +31,31 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v10
-      with:
-        vcpkgGitCommitId: '9aa0d66373ce3a6868d12353d0d4960db0d4bd18'
-        setupOnly: true
+#    - name: Setup vcpkg
+#      uses: lukka/run-vcpkg@v10
+#      with:
+#        vcpkgGitCommitId: '9aa0d66373ce3a6868d12353d0d4960db0d4bd18'
+#        setupOnly: true
 
-    - name: Install vcpkg dependencies
-      run: |
-        $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog      
-      shell: bash 
-      
+#    - name: Install vcpkg dependencies
+#      run: |
+#        $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog      
+#      shell: bash 
+    - name: vcpkg build
+      uses: johnwason/vcpkg-action@v4
+      id: vcpkg
+      with:
+        pkgs: argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog
+        triplet: x64-windows-static
+        token: ${{ github.token }}
+
     - name: Copy properties file
       run: |
           cp props/solution.props.template props/solution.props
     
     - name: Restore vcpkg packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: vcpkg integrate install
+      run: vcpkg integrate install --vcpkg-root
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
