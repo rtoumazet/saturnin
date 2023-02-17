@@ -53,9 +53,9 @@ jobs:
       run: |
           cp props/solution.props.template props/solution.props
     
-    - name: Restore vcpkg packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: vcpkg integrate install --vcpkg-root=C:\vcpkg
+#    - name: Restore vcpkg packages
+#      working-directory: ${{env.GITHUB_WORKSPACE}}
+#      run: vcpkg integrate install --vcpkg-root=C:\vcpkg
 
     - name: List installed packages
       run: vcpkg list --triplet x64-windows-static
