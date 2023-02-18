@@ -17,7 +17,6 @@ env:
   BUILD_CONFIGURATION: DebugFast
   
   VCPKG_DEFAULT_TRIPLET: x64-windows-static
-  #VCPKG_ROOT: c:\vcpkg
   
 permissions:
   contents: read
@@ -32,18 +31,10 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.1
 
-#    - name: vcpkg build
-#      uses: johnwason/vcpkg-action@v4
-#      id: vcpkg
-#      with:
-#        pkgs: argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog
-#        triplet: x64-windows-static
-#        token: ${{ github.token }}
-
     - name: Restore from cache and install vcpkg
       uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: '9aa0d66373ce3a6868d12353d0d4960db0d4bd18'
+        vcpkgGitCommitId: '9aa0d66373ce3a6868d12353d0d4960db0d4bd18' #2023.02.16
         vcpkgDirectory: D:\a\saturnin\saturnin\vcpkg
         
     - name: Install vcpkg dependencies
@@ -55,17 +46,11 @@ jobs:
       run: |
           cp props/solution.props.template props/solution.props
     
-    - name: List installed packages
-      run: |
-          $VCPKG_ROOT/vcpkg list --triplet x64-windows-static
-      shell: bash
-
     - name: Integrate vcpkg
       run: $VCPKG_ROOT/vcpkg integrate install
       shell: bash
 
     - name: Build
-      #working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Platform=${{env.BUILD_PLATFORM}}  /p:PlatformTarget=${{env.BUILD_PLATFORM}} /p:Configuration=${{env.BUILD_CONFIGURATION}}  ${{env.SOLUTION_FILE_PATH}}
