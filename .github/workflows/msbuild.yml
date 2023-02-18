@@ -17,7 +17,7 @@ env:
   BUILD_CONFIGURATION: DebugFast
   
   VCPKG_DEFAULT_TRIPLET: x64-windows-static
-  VCPKG_ROOT: c:\vcpkg
+  #VCPKG_ROOT: c:\vcpkg
   
 permissions:
   contents: read
@@ -48,6 +48,7 @@ jobs:
       with:
         setupOnly: true
         vcpkgGitCommitId: '9aa0d66373ce3a6868d12353d0d4960db0d4bd18'
+        vcpkgDirectory: ${{RUNVCPKG_VCPKG_ROOT}}
     
     - name: Install vcpkg dependencies
       run: |
