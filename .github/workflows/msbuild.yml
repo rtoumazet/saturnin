@@ -46,7 +46,6 @@ jobs:
     - name: Restore from cache and install vcpkg
       uses: lukka/run-vcpkg@v10
       with:
-        setupOnly: true
         vcpkgGitCommitId: '9aa0d66373ce3a6868d12353d0d4960db0d4bd18'
         vcpkgDirectory: D:\a\saturnin\saturnin\vcpkg
         
@@ -60,7 +59,7 @@ jobs:
           cp props/solution.props.template props/solution.props
     
     - name: List installed packages
-      run: ${{env.VCPKG_ROOT}}\vcpkg list --triplet x64-windows-static
+      run: $VCPKG_ROOT/vcpkg list --triplet x64-windows-static
     
 
     - name: Build
