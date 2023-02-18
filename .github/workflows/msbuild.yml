@@ -36,7 +36,8 @@ jobs:
       run: echo "VCPKG_INSTALLED_DIR=${{ github.workspace }}/deps/vcpkg_installed/${{ matrix.platform }}" >> $env:GITHUB_ENV
     
     - name: Show packages directory
-      run: echo '${{ env.VCPKG_INSTALLED_DIR }}'
+      #run: echo '${{ env.VCPKG_INSTALLED_DIR }}'
+      run: echo '${{VCPKG_INSTALLATION_ROOT}}'
 
 #    - name: Set environmental variables
  #     shell: bash
