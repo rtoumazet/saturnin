@@ -17,7 +17,7 @@ env:
   BUILD_CONFIGURATION: DebugFast
   
   VCPKG_DEFAULT_TRIPLET: x64-windows-static
-  VCPKG_ROOT: c:\vcpkg
+  #VCPKG_ROOT: c:\vcpkg
   
 permissions:
   contents: read
@@ -33,7 +33,8 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1
 
     - name: Integrate vcpkg
-      run: ${{env.VCPKG_ROOT}}\vcpkg.exe integrate install
+      #run: ${{env.VCPKG_ROOT}}\vcpkg.exe integrate install
+      run: ${{ runner.workspace }}/b/vcpkg/vcpkg.exe integrate install --vcpkg-root '${{ runner.workspace }}\b\vcpkg'
 
     - name: vcpkg build
       uses: johnwason/vcpkg-action@v4
@@ -48,7 +49,7 @@ jobs:
           cp props/solution.props.template props/solution.props
     
     - name: List installed packages
-      run: ${{env.VCPKG_ROOT}}\vcpkg.exe list --triplet x64-windows-static
+      run: ${{ runner.workspace }}/b/vcpkg/vcpkg.exe list --triplet x64-windows-static
       
     - name: Build
       #working-directory: ${{env.GITHUB_WORKSPACE}}
