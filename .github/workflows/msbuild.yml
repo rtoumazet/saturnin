@@ -33,7 +33,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1
 
     - name: Integrate vcpkg
-      run: $VCPKG_ROOT/vcpkg integrate install
+      run: ${{VCPKG_ROOT}}/vcpkg integrate install
 
     - name: vcpkg build
       uses: johnwason/vcpkg-action@v4
@@ -48,7 +48,7 @@ jobs:
           cp props/solution.props.template props/solution.props
     
     - name: List installed packages
-      run: $VCPKG_ROOT/vcpkg list --triplet x64-windows-static
+      run: ${{VCPKG_ROOT}}/vcpkg list --triplet x64-windows-static
       
     - name: Build
       #working-directory: ${{env.GITHUB_WORKSPACE}}
