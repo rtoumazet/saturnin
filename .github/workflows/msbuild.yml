@@ -54,7 +54,10 @@ jobs:
     
     - name: List installed packages
       run: vcpkg list --triplet x64-windows-static
-      
+    
+    - name: Show packages directory
+      run: echo '${{ env.VCPKG_INSTALLED_DIR }}'
+  
     - name: Build
       #working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
