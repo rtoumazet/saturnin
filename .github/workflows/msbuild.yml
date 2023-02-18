@@ -37,7 +37,7 @@ jobs:
     
     - name: Show packages directory
       #run: echo '${{ env.VCPKG_INSTALLED_DIR }}'
-      run: echo '${{VCPKG_INSTALLATION_ROOT}}'
+      run: echo '${{env.VCPKG_INSTALLATION_ROOT}}'
 
 #    - name: Set environmental variables
  #     shell: bash
