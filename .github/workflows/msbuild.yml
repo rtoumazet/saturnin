@@ -47,13 +47,13 @@ jobs:
     - name: Integrate vcpkg
       run: vcpkg integrate install
 
-    - name: vcpkg build
-      uses: johnwason/vcpkg-action@v4
-      id: vcpkg
-      with:
-        pkgs: argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog
-        triplet: x64-windows-static
-        token: ${{ github.token }}
+#    - name: vcpkg build
+#      uses: johnwason/vcpkg-action@v4
+#      id: vcpkg
+#      with:
+#        pkgs: argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog
+#        triplet: x64-windows-static
+#        token: ${{ github.token }}
 
     - name: Copy properties file
       run: |
