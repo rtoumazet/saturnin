@@ -48,8 +48,8 @@ jobs:
       with:
         setupOnly: true
         vcpkgGitCommitId: '9aa0d66373ce3a6868d12353d0d4960db0d4bd18'
-        vcpkgDirectory: ${{RUNVCPKG_VCPKG_ROOT}}
-    
+        vcpkgDirectory: D:\a\saturnin\saturnin\vcpkg
+        
     - name: Install vcpkg dependencies
       run: |
         $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog
