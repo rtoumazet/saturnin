@@ -32,9 +32,6 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.1
 
-#    - name: Integrate vcpkg
-#      run: vcpkg integrate install
-
 #    - name: vcpkg build
 #      uses: johnwason/vcpkg-action@v4
 #      id: vcpkg
@@ -62,7 +59,10 @@ jobs:
       run: |
           $VCPKG_ROOT/vcpkg list --triplet x64-windows-static
       shell: bash
-    
+
+    - name: Integrate vcpkg
+      run: $VCPKG_ROOT/vcpkg integrate install
+      shell: bash
 
     - name: Build
       #working-directory: ${{env.GITHUB_WORKSPACE}}
