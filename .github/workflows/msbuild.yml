@@ -60,7 +60,7 @@ jobs:
           cp props/solution.props.template props/solution.props
     
     - name: List installed packages
-      run: vcpkg list --triplet x64-windows-static
+      run: ${{env.VCPKG_ROOT}}\vcpkg list --triplet x64-windows-static
     
 
     - name: Build
