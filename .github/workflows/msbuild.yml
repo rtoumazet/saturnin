@@ -32,10 +32,16 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.1
 
-    - name: Set environmental variables
-      shell: bash
-      run: |
-        echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
+    - name: Set packages directory
+      run: echo "VCPKG_INSTALLED_DIR=${{ github.workspace }}/deps/vcpkg_installed/${{ matrix.platform }}" >> $env:GITHUB_ENV
+    
+    - name: Show packages directory
+      run: echo '${{ env.VCPKG_INSTALLED_DIR }}'
+
+#    - name: Set environmental variables
+ #     shell: bash
+  #    run: |
+   #     echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
     
     - name: Integrate vcpkg
       run: vcpkg integrate install
@@ -55,9 +61,7 @@ jobs:
     - name: List installed packages
       run: vcpkg list --triplet x64-windows-static
     
-    - name: Show packages directory
-      run: echo '${{ env.VCPKG_INSTALLED_DIR }}'
-  
+
     - name: Build
       #working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
