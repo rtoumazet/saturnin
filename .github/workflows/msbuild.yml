@@ -32,9 +32,13 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.1
 
+    - name: Set environmental variables
+      shell: bash
+      run: |
+        echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
+    
     - name: Integrate vcpkg
-      #run: ${{env.VCPKG_ROOT}}\vcpkg.exe integrate install
-      run: ${{ runner.workspace }}/b/vcpkg/vcpkg.exe integrate install --vcpkg-root '${{ runner.workspace }}\b\vcpkg'
+      run: vcpkg integrate install
 
     - name: vcpkg build
       uses: johnwason/vcpkg-action@v4
@@ -49,7 +53,7 @@ jobs:
           cp props/solution.props.template props/solution.props
     
     - name: List installed packages
-      run: ${{ runner.workspace }}/b/vcpkg/vcpkg.exe list --triplet x64-windows-static
+      run: vcpkg list --triplet x64-windows-static
       
     - name: Build
       #working-directory: ${{env.GITHUB_WORKSPACE}}
