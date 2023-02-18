@@ -32,20 +32,8 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.1
 
-    - name: Set packages directory
-      run: echo "VCPKG_INSTALLED_DIR=${{ github.workspace }}/deps/vcpkg_installed/${{ matrix.platform }}" >> $env:GITHUB_ENV
-    
-    - name: Show packages directory
-      #run: echo '${{ env.VCPKG_INSTALLED_DIR }}'
-      run: echo '${{env.VCPKG_INSTALLATION_ROOT}}'
-
-#    - name: Set environmental variables
- #     shell: bash
-  #    run: |
-   #     echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
-    
-    - name: Integrate vcpkg
-      run: vcpkg integrate install
+#    - name: Integrate vcpkg
+#      run: vcpkg integrate install
 
 #    - name: vcpkg build
 #      uses: johnwason/vcpkg-action@v4
@@ -54,6 +42,17 @@ jobs:
 #        pkgs: argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog
 #        triplet: x64-windows-static
 #        token: ${{ github.token }}
+
+    - name: Restore from cache and install vcpkg
+      uses: lukka/run-vcpkg@v10
+      with:
+        setupOnly: true
+        vcpkgGitCommitId: '9aa0d66373ce3a6868d12353d0d4960db0d4bd18'
+    
+    - name: Install vcpkg dependencies
+      run: |
+        $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog
+      shell: bash  
 
     - name: Copy properties file
       run: |
