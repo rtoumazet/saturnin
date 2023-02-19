@@ -57,21 +57,21 @@
 #include <stdio.h>
 #include "scsp_stef.h"
 #include <math.h>
-//#include "EmuState.h"
-//#include "SH2.h"
-//#include "Log.h"
+// #include "EmuState.h"
+// #include "SH2.h"
+// #include "Log.h"
 
-//#define SCSP_STEF_LOG
+// #define SCSP_STEF_LOG
 
 FILE* ff = 0;
 void  scsp_stef_log(char* out, ...) {
 #ifdef SCSP_STEF_LOG
-    va_list list;
-    char    temp[1024];
 
     if (!ff) ff = fopen("scsp.log", "ab");
     if (ff) {
+        va_list list;
         va_start(list, out);
+        char temp[1024];
         vsprintf(temp, out, list);
         va_end(list);
 
@@ -103,7 +103,7 @@ float oldSamples = 0;
 #define PI 3.14159265358979323846
 #endif
 
-//#define scsp_stef_log
+// #define scsp_stef_log
 
 #define SCSP_FREQ 44100 // SCSP frequency
 
@@ -139,9 +139,9 @@ float oldSamples = 0;
 #define SCSP_LFO_LEN  (1 << SCSP_LFO_HB) // LFO table len
 #define SCSP_LFO_MASK (SCSP_LFO_LEN - 1) // LFO table mask
 
-#define SCSP_ENV_AS 0 // Env Attack Start
-#define SCSP_ENV_DS (SCSP_ENV_LEN << SCSP_ENV_LB) // Env Decay Start
-#define SCSP_ENV_AE (SCSP_ENV_DS - 1) // Env Attack End
+#define SCSP_ENV_AS 0                                         // Env Attack Start
+#define SCSP_ENV_DS (SCSP_ENV_LEN << SCSP_ENV_LB)             // Env Decay Start
+#define SCSP_ENV_AE (SCSP_ENV_DS - 1)                         // Env Attack End
 #define SCSP_ENV_DE (((2 * SCSP_ENV_LEN) << SCSP_ENV_LB) - 1) // Env Decay End
 
 #define SCSP_ATTACK_R (unsigned long)(8 * 44100)
@@ -341,8 +341,6 @@ static void scsp_main_interrupt(unsigned long id) {
 }
 
 static void scsp_sound_interrupt(unsigned long id) {
-    unsigned long level;
-
     //	if (scsp.scipd & id) return;
 
     // scsp_stef_log("scsp sound interrupt %.4X\n", id);
@@ -350,7 +348,7 @@ static void scsp_sound_interrupt(unsigned long id) {
     scsp.scipd |= id;
 
     if (scsp.scieb & id) {
-        level = 0;
+        unsigned long level = 0;
         if (id > 0x80) id = 0x80;
 
         if (scsp.scilv0 & id) level |= 1;

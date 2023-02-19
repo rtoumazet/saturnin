@@ -719,21 +719,21 @@ auto runOpengl(core::EmulatorContext& state) -> s32;
 void updateMainWindowSizeAndRatio(GLFWwindow* window, u32 width, u32 height);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto createMainWindow(u32 width, u32 height, std::string title) -> GLFWwindow*;
+/// \fn	auto createMainWindow(u32 width, u32 height, const std::string& title) -> GLFWwindow*;
 ///
-/// \brief  Creates the main window.
+/// \brief	Creates the main window.
 ///
-/// \author Runik
-/// \date   25/01/2021
+/// \author	Runik
+/// \date	25/01/2021
 ///
-/// \param  width   The window's width.
-/// \param  height  The window's height.
-/// \param  title   The window's title.
+/// \param 	width 	The window's width.
+/// \param 	height	The window's height.
+/// \param 	title 	The window's title.
 ///
-/// \returns    Null if it fails, else the new main window.
+/// \returns	Null if it fails, else the new main window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto createMainWindow(u32 width, u32 height, std::string title) -> GLFWwindow*;
+auto createMainWindow(u32 width, u32 height, const std::string& title) -> GLFWwindow*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn auto loadPngImage(const char* filename) -> GLFWimage;

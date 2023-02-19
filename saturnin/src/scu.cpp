@@ -268,7 +268,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
 
                         // auto source = (read_address & bitmask_7FFFFFFF) + read_offset + long_counter * read_address_add;
                         // auto dest   = write_address + read_offset + long_counter * write_address_add;
-                        break;
+                        // break;
                         ++read_offset;
 
                         if (read_offset == 4) {

@@ -113,14 +113,13 @@ void Vdp1::populateRenderData() {
     auto return_address        = u32{};
     auto cmdctrl               = CmdCtrl{modules_.memory()->read<u16>(current_table_address + cmdctrl_offset)};
     auto cmdlink               = CmdLink{modules_.memory()->read<u16>(current_table_address + cmdlink_offset)};
-    auto skip_table            = false;
     vdp1_parts_.clear();
     // Texture::discardCache(modules_.opengl(), VdpType::vdp1);
 
     color_offset_ = modules_.vdp2()->getColorOffset(Layer::sprite);
 
     while (toEnum<EndBit>(cmdctrl.end_bit) == EndBit::command_selection_valid) {
-        skip_table = false;
+        auto skip_table = false;
         switch (toEnum<JumpSelect>(cmdctrl.jump_select)) {
             using enum JumpSelect;
             case jump_next: {

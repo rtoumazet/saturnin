@@ -1108,6 +1108,7 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
 
 void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
     if (dmaStartConditionsAreSatisfied(conf.channel)) {
+        auto       sh2_type       = sh2_type_name_.at(sh2_type_);
         const auto channel_number = static_cast<u8>((conf.channel == DmaChannel::channel_0) ? 0 : 1);
         if (toEnum<AutoRequestMode>(conf.chcr.auto_request_mode) == AutoRequestMode::module_request) {
             switch (toEnum<ResourceSelect>(conf.drcr.resource_select)) {
@@ -1115,29 +1116,36 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                 case dreq: {
                     // External request is immediately executed without waiting for an external signal.
                     // Not sure how to implement this, could be interesting to check on the console ...
-                    Log::debug(Logger::sh2, "DMAC - Channel {} external request", channel_number);
+                    Log::debug(Logger::sh2, "DMAC ({}) - Channel {} external request for {} SH2", sh2_type, channel_number);
                     break;
                 }
                 case txi: {
-                    Log::unimplemented("SH2 DMAC - Channel {} SCI transmit request not implemented !", channel_number);
+                    Log::unimplemented("SH2 DMAC - Channel {} SCI transmit request for {} SH2 not implemented !",
+                                       channel_number,
+                                       sh2_type);
                     return;
                 }
                 case rxi: {
-                    Log::unimplemented("SH2 DMAC - Channel {} SCI receive request not implemented !", channel_number);
+                    Log::unimplemented("SH2 DMAC - Channel {} SCI receive request for {} SH2 not implemented !",
+                                       channel_number,
+                                       sh2_type);
                     return;
                 }
                 default: {
-                    Log::warning(Logger::sh2, "DMAC - Channel {} module request setting prohibited !", channel_number);
+                    Log::warning(Logger::sh2,
+                                 "DMAC ({}) - Channel {} module request setting prohibited !",
+                                 sh2_type,
+                                 channel_number);
                     return;
                 }
             }
         } else {
-            Log::debug(Logger::sh2, "DMAC - Channel {} auto request", channel_number);
+            Log::debug(Logger::sh2, "DMAC ({}) - Channel {} auto request", sh2_type, channel_number);
         }
         auto counter     = u32{conf.counter};
         auto source      = u32{conf.source};
         auto destination = u32{conf.destination};
-        Log::debug(Logger::sh2, "DMAC - Channel {} transfer", channel_number);
+        Log::debug(Logger::sh2, "DMAC ({}) - Channel {} transfer", sh2_type, channel_number);
         Log::debug(Logger::sh2, "PC={:#0x}", pc_);
         Log::debug(Logger::sh2, "Source:{:#0x}", source);
         Log::debug(Logger::sh2, "Destination:{:#0x}", destination);
@@ -1216,7 +1224,7 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
         }
 
         if (toEnum<Sh2DmaInterruptEnable>(conf.chcr.interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
-            Log::debug(Logger::sh2, "DMAC - Sending DMA channel {} transfer end interrupt.", channel_number);
+            Log::debug(Logger::sh2, "DMAC ({}) - Sending DMA channel {} transfer end interrupt.", sh2_type, channel_number);
             // conf.interrupt.vector = intc_vcrc_.get(VectorNumberSettingRegisterDma::dma_transfert_end_vector);
             conf.interrupt.level = static_cast<u8>(intc_ipra_.dmac_level);
             sendInterrupt(conf.interrupt);

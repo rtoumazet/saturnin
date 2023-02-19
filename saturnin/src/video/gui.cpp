@@ -1833,7 +1833,6 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                 const auto area_3_width = ImGui::GetContentRegionMax().x - (area_1_width + area_2_width);
 
                 const auto half_height = ImGui::GetContentRegionAvail().y * 0.5f;
-                const auto full_height = ImGui::GetContentRegionAvail().y;
 
                 const auto details_window_pos = ImVec2(area_1_width, 0);
                 const auto preview_window_pos = ImVec2(area_1_width, ImGui::GetContentRegionAvail().y * 0.5f);
@@ -1995,12 +1994,11 @@ void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
-    constexpr auto column_2_start             = 120;
-    constexpr auto address_input_width        = 70.f;
-    constexpr auto address_input_chars_number = 9; // 8 characters + '\0'
-    constexpr auto default_load_address       = "6004000";
-    constexpr auto default_start_address      = "6004000";
-    const auto     window_size                = ImVec2(600, 150);
+    constexpr auto column_2_start        = 120;
+    constexpr auto address_input_width   = 70.f;
+    constexpr auto default_load_address  = "6004000";
+    constexpr auto default_start_address = "6004000";
+    const auto     window_size           = ImVec2(600, 150);
 
     ImGui::SetNextWindowSize(window_size);
 

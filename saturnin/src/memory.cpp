@@ -121,7 +121,6 @@ auto Memory::loadRom(const std::string& zip_name,
                 default: {
                     Log::warning(Logger::memory, uti::format(tr("Unknown rom type while loading {0}.zip"), zip_name));
                     return false;
-                    break;
                 }
             }
         } else {

@@ -1674,7 +1674,7 @@ void updateMainWindowSizeAndRatio(GLFWwindow* window, const u32 width, const u32
     glfwSetWindowSizeLimits(window, width, height, GLFW_DONT_CARE, GLFW_DONT_CARE);
 }
 
-auto createMainWindow(const u32 width, const u32 height, const std::string title) -> GLFWwindow* {
+auto createMainWindow(const u32 width, const u32 height, const std::string& title) -> GLFWwindow* {
     return glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 }
 
