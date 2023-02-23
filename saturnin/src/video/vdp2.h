@@ -1452,16 +1452,16 @@ class Vdp2 {
                                  const u8                  dot) {
         const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (palette_number + dot) * sizeof(T)};
         auto       color         = readColor<T>(color_address);
-        // if (screen.format == ScrollScreenFormat::bitmap) {
-        //    if (dot) DebugBreak();
-        //}
         if (!dot && screen.is_transparency_code_valid) color.a = 0;
 
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
-        // texture_data[texture_offset + 0] = color.r;
-        // texture_data[texture_offset + 1] = color.g;
-        // texture_data[texture_offset + 2] = color.b;
-        // texture_data[texture_offset + 3] = color.a;
+    };
+
+    void read32KDot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen, const u16 dot) const {
+        auto color = Color(dot);
+        if (!dot && screen.is_transparency_code_valid) color.a = 0;
+
+        texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1620,6 +1620,23 @@ class Vdp2 {
         //     outfile.write(reinterpret_cast<const char*>(texture_data.data()), sizeof(u8) * texture_data.size());
         //     outfile.close();
         // }
+    }
+
+    void read32KColorsBitmapData(std::vector<u8>& texture_data, const ScrollScreenStatus& screen) const {
+        constexpr auto offset          = u8{4};
+        auto           current_address = screen.bitmap_start_address;
+        const auto     end_address     = current_address + static_cast<u32>(texture_data.capacity()) / 4;
+
+        for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
+            auto row = Dots16Bits{modules_.memory()->read<u32>(current_address)};
+            read32KDot(texture_data, screen, row.dot_0);
+            read32KDot(texture_data, screen, row.dot_1);
+            current_address += offset;
+            row = Dots16Bits{modules_.memory()->read<u32>(current_address)};
+            read32KDot(texture_data, screen, row.dot_0);
+            read32KDot(texture_data, screen, row.dot_1);
+            current_address += offset;
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

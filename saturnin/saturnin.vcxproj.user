@@ -15,6 +15,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>-f C:\Dev\bin\msys64\home\Runik\vdp2-normal-bitmap\build\vdp2-normal-bitmap.bin</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
@@ -23,7 +24,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">
     <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>--file D:\Dev\Bin\MSYS2-64\home\Runik\vdp2-nbg0\build\vdp2-nbg0.bin --auto-start 1</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--file C:\Dev\bin\msys64\home\Runik\vdp2-normal-bitmap\build\vdp2-normal-bitmap.bin --auto-start</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup>
     <ShowAllFiles>true</ShowAllFiles>
