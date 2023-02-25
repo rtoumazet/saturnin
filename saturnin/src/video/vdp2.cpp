@@ -3309,9 +3309,9 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
             Log::warning(Logger::vdp2, tr("Bitmap size not set !"));
         }
     }
-    const auto      texture_size = texture_width * texture_height * 4;
+    // const auto      texture_size = texture_width * texture_height * 4;
     std::vector<u8> texture_data;
-    texture_data.reserve(texture_size);
+    // texture_data.reserve(texture_size);
     const auto key = Texture::calculateKey(VdpType::vdp2,
                                            screen.bitmap_start_address,
                                            toUnderlying(screen.character_color_number),
@@ -3326,6 +3326,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                     break;
                 }
                 case palette_256: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 4));
                     read256ColorsBitmapData<u32>(texture_data, screen);
                     break;
                 }
@@ -3333,6 +3334,8 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                     break;
                 }
                 case rgb_32k: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 8));
+                    read32KColorsBitmapData(texture_data, screen);
                     break;
                 }
                 case rgb_16m: {
@@ -3350,6 +3353,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                     break;
                 }
                 case palette_256: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 4));
                     read256ColorsBitmapData<u16>(texture_data, screen);
                     break;
                 }
@@ -3357,6 +3361,8 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                     break;
                 }
                 case rgb_32k: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 8));
+                    read32KColorsBitmapData(texture_data, screen);
                     break;
                 }
                 case rgb_16m: {

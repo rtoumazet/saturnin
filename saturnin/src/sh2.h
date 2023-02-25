@@ -34,8 +34,6 @@
 #include <saturnin/src/memory.h>
 #include <saturnin/src/sh2_registers.h>
 
-// namespace core = saturnin::core;
-
 // Forward declarations
 namespace saturnin::core {
 class EmulatorContext;
@@ -258,7 +256,7 @@ class Sh2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    void writeCachePurgeArea(const u32 addr, const T data) {
+    void writeCachePurgeArea([[maybe_unused]] const u32 addr, [[maybe_unused]] const T data) {
         constexpr auto bits_number = u8{8};
         Log::warning(Logger::sh2, core::tr("{}bits write to the cache purge area !"), sizeof(T) * bits_number);
     }
@@ -489,7 +487,7 @@ class Sh2 {
     void initializeSubroutineDepth() { step_over_subroutine_depth_ = callstack_.size(); };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::subroutineDepth() -> size_t
+    /// \fn auto Sh2::subroutineDepth() const -> size_t
     ///
     /// \brief  The saved subroutine depth.
     ///
@@ -499,11 +497,11 @@ class Sh2 {
     /// \returns    An u8.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto subroutineDepth() -> size_t { return step_over_subroutine_depth_; };
+    auto subroutineDepth() const -> size_t { return step_over_subroutine_depth_; };
 
     ///@{
     /// Breakpoints accessors
-    [[nodiscard]] void breakpoint(const u8 index, const u32 addr) { breakpoints_[index] = addr; };
+     void breakpoint(const u8 index, const u32 addr) { breakpoints_[index] = addr; };
     [[nodiscard]] auto breakpoint(const u8 index) const -> u32 { return breakpoints_[index]; };
     ///@}
 
@@ -885,9 +883,6 @@ class Sh2 {
     friend void stcmsr(Sh2& s);
     friend void stcmgbr(Sh2& s);
     friend void stcmvbr(Sh2& s);
-    // friend void stmsr(Sh2& s);
-    // friend void stmgbr(Sh2& s);
-    // friend void stmvbr(Sh2& s);
     friend void stsmach(Sh2& s);
     friend void stsmacl(Sh2& s);
     friend void stspr(Sh2& s);
