@@ -30,8 +30,6 @@
 #include <atomic> // atomic
 #include <memory> // unique_ptr, make_unique
 #include <string> // string
-
-// #include <condition_variable>
 #include <thread> // thread
 #include <saturnin/src/emulator_enums.h>
 #include <saturnin/src/stv_definitions.h>
@@ -216,17 +214,17 @@ class EmulatorContext {
     void emulationStatus(const EmulationStatus status) { emulation_status_ = status; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto EmulatorContext::emulationStatus()
+    /// \fn	auto EmulatorContext::emulationStatus() const
     ///
-    /// \brief  Gets the current emulation status
+    /// \brief	Gets the current emulation status
     ///
-    /// \author Runik
-    /// \date   07/04/2020
+    /// \author	Runik
+    /// \date	07/04/2020
     ///
-    /// \returns    The EmulationStatus.
+    /// \returns	The EmulationStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto emulationStatus() { return emulation_status_; };
+    auto emulationStatus() const { return emulation_status_; };
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::renderingStatus(const RenderingStatus status)
     ///
@@ -355,7 +353,7 @@ class EmulatorContext {
 
     Rom_stv stv_rom_{Rom_stv::none}; ///< Current ST-V ROM loaded.
 
-    std::thread emulation_main_thread_; ///< The emulation main thread.
+    std::jthread emulation_main_thread_; ///< The emulation main thread.
 
     GLFWwindow* opengl_window_; ///< The OpenGL window.
 };

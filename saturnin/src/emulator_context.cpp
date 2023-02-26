@@ -162,7 +162,7 @@ void EmulatorContext::startEmulation() {
         case stopped: {
             emulationStatus(EmulationStatus::running);
 
-            emulation_main_thread_ = std::thread(&EmulatorContext::emulationMainThread, this);
+            emulation_main_thread_ = std::jthread(&EmulatorContext::emulationMainThread, this);
             if (emulation_main_thread_.joinable()) { emulation_main_thread_.detach(); }
             break;
         }
