@@ -170,7 +170,6 @@ void Memory::loadBios(const HardwareMode mode) {
         default: {
             Log::error(Logger::memory, tr("Unknown hardware mode"));
             throw std::runtime_error("Config error !");
-            break;
         }
     }
 
