@@ -1459,7 +1459,14 @@ class Vdp2 {
 
     void read32KDot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen, const u16 dot) const {
         auto color = Color(dot);
-        if (!dot && screen.is_transparency_code_valid) color.a = 0;
+        if (!(dot & 0x8000) && screen.is_transparency_code_valid) color.a = 0;
+
+        texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
+    };
+
+    void read16MDot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen, const u32 dot) const {
+        auto color = Color(dot);
+        if (!(dot & 0x80000000) && screen.is_transparency_code_valid) color.a = 0;
 
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
     };
@@ -1639,6 +1646,16 @@ class Vdp2 {
         }
     }
 
+    void read16MColorsBitmapData(std::vector<u8>& texture_data, const ScrollScreenStatus& screen) const {
+        constexpr auto offset          = u8{4};
+        auto           current_address = screen.bitmap_start_address;
+        const auto     end_address     = current_address + static_cast<u32>(texture_data.capacity()) / 4;
+
+        for (u32 i = screen.bitmap_start_address; i < end_address; i += offset) {
+            auto dot = modules_.memory()->read<u32>(i);
+            read16MDot(texture_data, screen, dot);
+        }
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveBitmap(const ScrollScreenStatus& screen, std::vector<u8>& texture_data, const u16 width, const u16
     /// height, const size_t key);

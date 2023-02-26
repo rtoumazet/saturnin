@@ -6,14 +6,11 @@ saturnin/lib/vcpkg/vcpkg.cfg
 saturnin/compile_commands.json
 *.db-wal
 *.db-shm
-saturnin/src/cdrom/.clang-tidy.cpt_backup
-saturnin/src/.clang-tidy.cpt_backup
+*.clang-tidy.cpt_backup
 *.tmp
 saturnin/doxygen/generated/*
-saturnin/src/video/.clang-tidy.cpt_backup
 saturnin/My Inspector Results - saturnin/*
 GPUCache/*
 saturnin/VTune Profiler Results/*
 debug.log
-saturnin/saturnin.vcxproj.user
 saturnin/saturnin.vcxproj.user

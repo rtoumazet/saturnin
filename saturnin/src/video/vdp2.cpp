@@ -3339,6 +3339,9 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                     break;
                 }
                 case rgb_16m: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 16));
+                    read16MColorsBitmapData(texture_data, screen);
+
                     break;
                 }
                 default: {
@@ -3366,6 +3369,8 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                     break;
                 }
                 case rgb_16m: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 16));
+                    read16MColorsBitmapData(texture_data, screen);
                     break;
                 }
                 default: {
