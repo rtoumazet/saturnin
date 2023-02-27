@@ -52,10 +52,10 @@ jobs:
       run: $VCPKG_ROOT/vcpkg integrate install
       shell: bash
 
-    - name: Build
+   #- name: Build
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Platform=${{env.BUILD_PLATFORM}}  /p:PlatformTarget=${{env.BUILD_PLATFORM}} /p:Configuration=${{env.BUILD_CONFIGURATION}}  ${{env.SOLUTION_FILE_PATH}}
+      #run: msbuild /m /p:Platform=${{env.BUILD_PLATFORM}}  /p:PlatformTarget=${{env.BUILD_PLATFORM}} /p:Configuration=${{env.BUILD_CONFIGURATION}}  ${{env.SOLUTION_FILE_PATH}}
 
     - name: Install sonar-scanner and build-wrapper
       uses: SonarSource/sonarcloud-github-c-cpp@v1
