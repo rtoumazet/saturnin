@@ -170,7 +170,7 @@ struct BitRange {
     u8 first_bit_pos_;
     u8 last_bit_pos_;
 
-    BitRange(const u8 pos) : first_bit_pos_{pos}, last_bit_pos_{pos} {};
+    explicit BitRange(const u8 pos) : first_bit_pos_{pos}, last_bit_pos_{pos} {};
     BitRange(const u8 first, const u8 last) : first_bit_pos_{first}, last_bit_pos_{last} {};
 };
 
@@ -188,7 +188,7 @@ class Register {
   public:
     /// \name Constructors/Destructors.
     //@{
-    Register(const u32 v) : register_value(v){};
+    explicit Register(const u32 v) : register_value(v){};
     Register()                                     = default;
     Register(const Register&)                      = default;
     Register(Register&&)                           = default;

@@ -81,16 +81,11 @@ struct Color {
     u8 g;
     u8 b;
     u8 a{0xFF};
-    Color(const u16 raw_data) {
-        r = (raw_data & 0x1F) << 3;
-        g = (raw_data & 0x3E0) >> 2;
-        b = (raw_data & 0x7C00) >> 7;
-    };
-    Color(const u32 raw_data) {
-        r = (raw_data & 0x0000FF);
-        g = (raw_data & 0x00FF00) >> 8;
-        b = (raw_data & 0xFF0000) >> 16;
-    };
+    explicit Color(const u16 raw_data) :
+        r(static_cast<u8>((raw_data & 0x1F) << 3)),
+        g((raw_data & 0x3E0) >> 2),
+        b((raw_data & 0x7C00) >> 7){};
+    explicit Color(const u32 raw_data) : r(raw_data & 0x0000FF), g((raw_data & 0x00FF00) >> 8), b((raw_data & 0xFF0000) >> 16){};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,19 +98,14 @@ struct Color {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Gouraud {
-    s8 r;
-    s8 g;
-    s8 b;
-    Gouraud(const u16 raw_data) {
-        r = (raw_data & 0x1F) - 0x10;
-        g = ((raw_data & 0x3E0) >> 5) - 0x10;
-        b = ((raw_data & 0x7C00) >> 10) - 0x10;
-    }
-    Gouraud() {
-        r = 0;
-        g = 0;
-        b = 0;
-    }
+    s8 r = 0;
+    s8 g = 0;
+    s8 b = 0;
+    explicit Gouraud(const u16 raw_data) :
+        r((raw_data & 0x1F) - 0x10),
+        g(((raw_data & 0x3E0) >> 5) - 0x10),
+        b(((raw_data & 0x7C00) >> 10) - 0x10) {}
+    Gouraud() = default;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +148,8 @@ struct ColorF {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct VertexPosition {
-    s16 x, y;
+    s16 x;
+    s16 y;
     VertexPosition(const s16 x, const s16 y) : x(x), y(y){};
 };
 
@@ -172,7 +163,10 @@ struct VertexPosition {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct VertexColor {
-    u8 r, g, b, a; ///< Color.
+    u8 r; // red
+    u8 g; // green
+    u8 b; // blue
+    u8 a; // alpha
     VertexColor(const u8 r, const u8 g, const u8 b, const u8 a) : r(r), g(g), b(b), a(a){};
 };
 
@@ -186,7 +180,9 @@ struct VertexColor {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct TextureCoordinates {
-    float s, t, p; ///< Texture coordinates.
+    float s;
+    float t;
+    float p;
     TextureCoordinates(const float s, const float t, const float p) : s(s), t(t), p(p){};
     TextureCoordinates(const float s, const float t) : s(s), t(t), p(0.0f){};
 };
@@ -207,7 +203,9 @@ struct Vertex {
     Gouraud            gouraud;    ///< Gouraud color.
 
     Vertex(const s16 x, const s16 y, const float s, const float t) :
-        pos(VertexPosition(x, y)), tex_coords(TextureCoordinates(s, t, 0.0f)), color(VertexColor(0, 0, 0, 0)),
+        pos(VertexPosition(x, y)),
+        tex_coords(TextureCoordinates(s, t, 0.0f)),
+        color(VertexColor(0, 0, 0, 0)),
         gouraud(Gouraud()){};
 
     Vertex(const s16     x,
@@ -221,7 +219,9 @@ struct Vertex {
            const u8      a,
            const Gouraud grd) :
         pos(VertexPosition(x, y)),
-        tex_coords(TextureCoordinates(s, t, p)), color(VertexColor(r, g, b, a)), gouraud(grd){};
+        tex_coords(TextureCoordinates(s, t, p)),
+        color(VertexColor(r, g, b, a)),
+        gouraud(grd){};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -3012,6 +3012,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             case size_1_by_1: nb_of_planes = 1; break;
             case size_2_by_1:
             case size_2_by_2: nb_of_planes = 2; break;
+            default: nb_of_planes = 1;
         }
 
         return screen.screen_scroll_horizontal_integer % (plane_width * nb_of_planes);
@@ -3025,6 +3026,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             case size_1_by_1:
             case size_2_by_1: nb_of_planes = 1; break;
             case size_2_by_2: nb_of_planes = 2; break;
+            default: nb_of_planes = 1;
         }
 
         return screen.screen_scroll_vertical_integer % (plane_height * nb_of_planes);
