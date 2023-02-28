@@ -400,12 +400,12 @@ class Smpc {
     //@{
     // Constructors / Destructors
     Smpc() = delete;
-    Smpc(EmulatorContext* ec) : modules_(ec){};
-    Smpc(const Smpc&) = delete;
-    Smpc(Smpc&&)      = delete;
+    explicit Smpc(EmulatorContext* ec) : modules_(ec){};
+    Smpc(const Smpc&)                      = delete;
+    Smpc(Smpc&&)                           = delete;
     auto operator=(const Smpc&) & -> Smpc& = delete;
-    auto operator=(Smpc&&) & -> Smpc& = delete;
-    ~Smpc()                           = default;
+    auto operator=(Smpc&&) & -> Smpc&      = delete;
+    ~Smpc()                                = default;
     //@}
 
     auto read(u32 addr) -> u8;

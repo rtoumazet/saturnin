@@ -52,7 +52,7 @@ class Vdp1 {
     //@{
     // Constructors / Destructors
     Vdp1() = delete;
-    Vdp1(EmulatorContext* ec) : modules_(ec){};
+    explicit Vdp1(EmulatorContext* ec) : modules_(ec){};
     Vdp1(const Vdp1&)                      = delete;
     Vdp1(Vdp1&&)                           = delete;
     auto operator=(const Vdp1&) & -> Vdp1& = delete;

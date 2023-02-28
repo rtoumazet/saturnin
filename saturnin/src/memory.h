@@ -264,7 +264,7 @@ class Memory {
     //@{
     // Constructors / Destructors
     Memory() = delete;
-    Memory(EmulatorContext* ec) : modules_(ec){};
+    explicit Memory(EmulatorContext* ec) : modules_(ec){};
     Memory(const Memory&)                      = delete;
     Memory(Memory&&)                           = delete;
     auto operator=(const Memory&) & -> Memory& = delete;

@@ -262,7 +262,7 @@ class Cdrom {
     //@{
     // Constructors / Destructors
     Cdrom() = delete;
-    Cdrom(EmulatorContext* ec) : modules_(ec){};
+    explicit Cdrom(EmulatorContext* ec) : modules_(ec){};
     Cdrom(const Cdrom&)                      = delete;
     Cdrom(Cdrom&&)                           = delete;
     auto operator=(const Cdrom&) & -> Cdrom& = delete;

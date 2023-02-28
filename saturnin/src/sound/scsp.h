@@ -49,12 +49,12 @@ class Scsp {
     //@{
     // Constructors / Destructors
     Scsp() = delete;
-    Scsp(EmulatorContext* ec) : modules_(ec) { external_access_modules_ = ec; };
-    Scsp(const Scsp&) = delete;
-    Scsp(Scsp&&)      = delete;
+    explicit Scsp(EmulatorContext* ec) : modules_(ec) { external_access_modules_ = ec; };
+    Scsp(const Scsp&)                      = delete;
+    Scsp(Scsp&&)                           = delete;
     auto operator=(const Scsp&) & -> Scsp& = delete;
-    auto operator=(Scsp&&) & -> Scsp& = delete;
-    ~Scsp()                           = default;
+    auto operator=(Scsp&&) & -> Scsp&      = delete;
+    ~Scsp()                                = default;
     //@}
 
     template<typename T>

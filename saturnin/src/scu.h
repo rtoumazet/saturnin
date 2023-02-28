@@ -135,7 +135,7 @@ class Scu {
     //@{
     // Constructors / Destructors
     Scu() = delete;
-    Scu(EmulatorContext* ec);
+    explicit Scu(EmulatorContext* ec);
     Scu(const Scu&)                      = delete;
     Scu(Scu&&)                           = delete;
     auto operator=(const Scu&) & -> Scu& = delete;
@@ -532,9 +532,9 @@ class Scu {
 
     void dmaSort();
 
-    //using DmaConfigurations = std::vector<DmaConfiguration>;
-    //using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
-    using DmaQueue          = std::vector<DmaConfiguration>;
+    // using DmaConfigurations = std::vector<DmaConfiguration>;
+    // using DmaQueue          = std::priority_queue<DmaConfiguration, DmaConfigurations, DmaCompare>;
+    using DmaQueue = std::vector<DmaConfiguration>;
     DmaQueue dma_queue_;
 
     void activateDma();

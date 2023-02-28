@@ -131,8 +131,7 @@ class Config {
     //@{
     // Constructors / Destructors
     Config() = delete;
-    // Config(const std::string& configuration_filename);
-    Config(std::string_view configuration_filename);
+    explicit Config(std::string_view configuration_filename);
     Config(const Config&)                      = delete;
     Config(Config&&)                           = delete;
     auto operator=(const Config&) & -> Config& = delete;

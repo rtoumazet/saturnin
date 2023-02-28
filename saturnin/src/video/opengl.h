@@ -100,7 +100,7 @@ class Opengl {
     ///@{
     /// Constructors / Destructors
     Opengl() = delete;
-    Opengl(core::Config* config);
+    explicit Opengl(core::Config* config);
     Opengl(const Opengl&)                      = delete;
     Opengl(Opengl&&)                           = delete;
     auto operator=(const Opengl&) & -> Opengl& = delete;
