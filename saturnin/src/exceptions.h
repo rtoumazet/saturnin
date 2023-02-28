@@ -1,8 +1,8 @@
 //
-// interrupt_controller.cpp
+// exceptions.h
 // Saturnin
 //
-// Copyright (c) 2018-2019 Renaud Toumazet
+// Copyright (c) 2023 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,17 +15,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
-#include "interrupt_controller.h"
-#include "emulator_context.h"
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \file	exceptions.h
+///
+/// \brief	Declares the various exceptions used in Saturnin.
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace saturnin {
-namespace core {
+#pragma once
 
-Emulator_context* Interrupt_controller::emulatorContext() const { return emulator_context_; }
+#include <stdexcept>
+#include <string>
 
-void Interrupt_controller::run() {}
+namespace saturnin::exception {
+class ConfigError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
 
-} // namespace core
-} // namespace saturnin
+} // namespace saturnin::exception

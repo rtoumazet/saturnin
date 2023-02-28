@@ -31,6 +31,7 @@
 #include <optional>                   // optional
 #include <string>                     // string
 #include <vector>                     // vector
+#include <saturnin/src/exceptions.h>  // ConfigError
 #include <saturnin/src/memory.h>      // RomLoad, RomType
 #include <saturnin/src/smpc.h>        // for AreaCode, PeripheralKey, PortStatus
 #include <saturnin/src/utilities.h>   // toUnderlying
@@ -342,11 +343,9 @@ class Config {
             auto& setting = cfg_.lookup(full_keys_[key]);
             setting       = value;
         } catch (const libconfig::SettingNotFoundException& e) {
-            logError("Setting '{0}' not found !", e.getPath());
-            throw std::runtime_error("Config error !");
+            logError("Configuration : setting '{0}' not found !", e.getPath());
         } catch (const libconfig::SettingTypeException& e) {
-            logError("Setting '{0}' using the wrong type !", e.getPath());
-            throw std::runtime_error("Config error !");
+            logError("Configuration : setting '{0}' using the wrong type !", e.getPath());
         }
     }
 
@@ -361,11 +360,9 @@ class Config {
                 }
             }
         } catch (const libconfig::SettingNotFoundException& e) {
-            logError("Setting '{0}' not found !", e.getPath());
-            throw std::runtime_error("Config error !");
+            logError("Configuration : setting '{0}' not found !", e.getPath());
         } catch (const libconfig::SettingTypeException& e) {
-            logError("Setting '{0}' using the wrong type !", e.getPath());
-            throw std::runtime_error("Config error !");
+            logError("Configuration : setting '{0}' using the wrong type !", e.getPath());
         }
     }
 
@@ -452,19 +449,19 @@ class Config {
     auto listLogLevels() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::configToPortStatus(std::string value) -> PortStatus;
+    /// \fn	auto Config::configToPortStatus(const std::string& value) -> PortStatus;
     ///
-    /// \brief  Configuration entry to port status
+    /// \brief	Configuration entry to port status
     ///
-    /// \author Runik
-    /// \date   18/03/2020
+    /// \author	Runik
+    /// \date	18/03/2020
     ///
-    /// \param  value   The config value.
+    /// \param 	value	The config value.
     ///
-    /// \returns    A PortStatus.
+    /// \returns	A PortStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto configToPortStatus(std::string value) -> PortStatus;
+    auto configToPortStatus(const std::string& value) -> PortStatus;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn  template<class T> void Config::add(const std::string key, T default)

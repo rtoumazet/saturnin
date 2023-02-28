@@ -385,11 +385,11 @@ auto Config::listLogLevels() -> std::vector<std::string> {
     return levels;
 }
 
-auto Config::configToPortStatus(const std::string value) -> PortStatus { return port_status_[value]; }
+auto Config::configToPortStatus(const std::string& value) -> PortStatus { return port_status_[value]; }
 
-void logError(const std::string& error, const std::string& path) {
+[[noreturn]] void logError(const std::string& error, const std::string& path) {
     const auto str = uti::format(error, path);
-    Log::error(Logger::config, str);
+    throw exception::ConfigError(str);
 };
 
 }; // namespace saturnin::core
