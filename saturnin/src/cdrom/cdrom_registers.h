@@ -85,8 +85,8 @@ enum class Scdq {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Efls : bool {
-    file_system_in_progress = 0, ///< CD block file system in progress.
-    file_system_finished    = 1  ///< CD block file system finished.
+    file_system_in_progress = false, ///< CD block file system in progress.
+    file_system_finished    = true   ///< CD block file system finished.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,8 +96,8 @@ enum class Efls : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Ecpy : bool {
-    sector_copy_or_move_in_progress = 0, ///< Sector copy or move in progress.
-    sector_copy_or_move_finished    = 1  ///< Sector copy or move finished.
+    sector_copy_or_move_in_progress = false, ///< Sector copy or move in progress.
+    sector_copy_or_move_finished    = true   ///< Sector copy or move finished.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,8 +107,8 @@ enum class Ecpy : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Ehst : bool {
-    host_io_in_progress = 0, ///< Host I/O is in progress.
-    host_io_finished    = 1  ///< Host I/O has finished.
+    host_io_in_progress = false, ///< Host I/O is in progress.
+    host_io_finished    = true   ///< Host I/O has finished.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,8 +118,8 @@ enum class Ehst : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Esel : bool {
-    soft_reset_or_selector_set_in_progress = 0, ///< Soft reset or selector set in progress.
-    soft_reset_or_selector_set_finished    = 1  ///< Soft reset or selector set finished.
+    soft_reset_or_selector_set_in_progress = false, ///< Soft reset or selector set in progress.
+    soft_reset_or_selector_set_finished    = true   ///< Soft reset or selector set finished.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -129,8 +129,8 @@ enum class Esel : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Dchg : bool {
-    disk_has_not_changed = 0, ///< Disk has not changed.
-    disk_changed         = 1  ///< Disk has been changed (tray opened and closed).
+    disk_has_not_changed = false, ///< Disk has not changed.
+    disk_changed         = true   ///< Disk has been changed (tray opened and closed).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,8 +140,8 @@ enum class Dchg : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Pend : bool {
-    cd_play_in_progress = 0, ///< CD play has not ended.
-    cd_play_has_ended   = 1  ///< CD play has ended (FAD out of range).
+    cd_play_in_progress = false, ///< CD play has not ended.
+    cd_play_has_ended   = true   ///< CD play has ended (FAD out of range).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,8 +151,8 @@ enum class Pend : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Bful : bool {
-    buffer_not_full = 0, ///< CD buffer is not full.
-    buffer_full     = 1  ///< CD buffer is full.
+    buffer_not_full = false, ///< CD buffer is not full.
+    buffer_full     = true   ///< CD buffer is full.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -162,8 +162,8 @@ enum class Bful : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Csct : bool {
-    sector_not_stored = 0, ///< Sector has not been stored or been discarded.
-    sector_stored     = 1  ///< 1 sector has just been stored.
+    sector_not_stored = false, ///< Sector has not been stored or been discarded.
+    sector_stored     = true   ///< 1 sector has just been stored.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,8 +173,8 @@ enum class Csct : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Drdy : bool {
-    not_setup      = 0, ///< Not setup.
-    setup_complete = 1  ///< Data transfer setup complete, data can be read from fetch_data_pointer.
+    not_setup      = false, ///< Not setup.
+    setup_complete = true   ///< Data transfer setup complete, data can be read from fetch_data_pointer.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,8 +184,8 @@ enum class Drdy : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Cmok : bool {
-    processing = 0, ///< System still processing last command.
-    ready      = 1  ///< System ready for new command.
+    processing = false, ///< System still processing last command.
+    ready      = true   ///< System ready for new command.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,8 +219,8 @@ union HirqMaskRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum InterruptStatus : bool {
-    masked  = 0, ///< Interrupt is masked.
-    enabled = 1  ///< Interrupt is enabled.
+    masked  = false, ///< Interrupt is masked.
+    enabled = true   ///< Interrupt is enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
