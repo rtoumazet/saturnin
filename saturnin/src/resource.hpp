@@ -2,17 +2,17 @@
 
 #include <algorithm>
 #include <array>
-#include <cstdint>
-#include <functional>
 #include <iterator>
-#include "span.hpp"
+#include <span>   // span
+#include <string> // string
 #include <tuple>
 #include <vector>
+#include <saturnin/src/emulator_defs.h> // u8, u16, u32
 
 class Resource {
   public:
     template<typename T>
-    using span         = tcb::span<T>;
+    using span         = std::span<T>;
     using EmbeddedData = span<const std::uint8_t>;
 
   private:
@@ -24,7 +24,7 @@ class Resource {
     template<typename Container>
     Resource(const Container& arr_, std::string path_) : arr_view(arr_), path(std::move(path_)) {}
 
-    auto GetArray() const { return arr_view; }
+    auto GetArray() const noexcept { return arr_view; }
 
-    auto& GetPath() const { return path; }
+    auto& GetPath() const noexcept { return path; }
 };

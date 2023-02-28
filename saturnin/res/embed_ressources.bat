@@ -1,1 +1,2 @@
+rem https://mklimenko.github.io/english/2018/11/26/stdembed-for-the-poor/
 embed saturnin-ico-16.png saturnin-ico-32.png saturnin-ico-48.png saturnin-logo.png saturnin-icons.ttf -o "d:\Dev\Sources\github\saturnin\saturnin\src"
