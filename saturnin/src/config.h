@@ -105,20 +105,6 @@ using MapPortStatus   = std::map<const std::string, const PortStatus>; ///< MapP
 using MapLogLevel     = std::map<const std::string, const LogLevel>;   ///< MapLogLevel alias definition.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void throwConfigError(const std::string& error, const std::string& parameter);
-///
-/// \brief  Throws a configuration error.
-///
-/// \author Runik
-/// \date   12/12/2020
-///
-/// \param  error       The error message.
-/// \param  parameter   Parameter of the error message.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void throwConfigError(const std::string& error, const std::string& parameter);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Config
 ///
 /// \brief  Manages configuration of the emulator.
@@ -343,9 +329,9 @@ class Config {
             auto& setting = cfg_.lookup(full_keys_[key]);
             setting       = value;
         } catch (const libconfig::SettingNotFoundException& e) {
-            throwConfigError(tr("Configuration : setting '{0}' not found !"), e.getPath());
+            Log::exception(Logger::config, tr("Setting '{0}' not found !"), e.getPath());
         } catch (const libconfig::SettingTypeException& e) {
-            throwConfigError(tr("Configuration : setting '{0}' using the wrong type !"), e.getPath());
+            Log::exception(Logger::config, tr("Setting '{0}' using the wrong type !"), e.getPath());
         }
     }
 
@@ -360,9 +346,9 @@ class Config {
                 }
             }
         } catch (const libconfig::SettingNotFoundException& e) {
-            throwConfigError(tr("Configuration : setting '{0}' not found !"), e.getPath());
+            Log::exception(Logger::config, tr("Setting '{0}' not found !"), e.getPath());
         } catch (const libconfig::SettingTypeException& e) {
-            throwConfigError(tr("Configuration : setting '{0}' using the wrong type !"), e.getPath());
+            Log::exception(Logger::config, tr("Setting '{0}' using the wrong type !"), e.getPath());
         }
     }
 

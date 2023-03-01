@@ -175,6 +175,7 @@ class Log {
                     using enum Logger;
                     case cdrom: throw excpt::CdromError(str);
                     case config: throw excpt::ConfigError(str);
+                    case gui: throw excpt::GuiError(str);
                     case generic: throw excpt::GenericError(str);
                     case main: throw excpt::MainError(str);
                     case memory: throw excpt::MemoryError(str);

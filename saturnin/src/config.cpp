@@ -228,8 +228,7 @@ auto Config::readValue(const AccessKeys& value) -> libcfg::Setting& {
         if (!existsValue(value)) { createDefault(value); }
         return cfg_.lookup(full_keys_[value]);
     } catch (const libcfg::SettingNotFoundException& e) {
-        // throwConfigError(tr("Configuration : setting '{0}' not found !"), e.getPath());
-        Log::exception(Logger::config, tr("Configuration : setting '{0}' not found !"), e.getPath());
+        Log::exception(Logger::config, tr("Setting '{0}' not found !"), e.getPath());
     }
 }
 
@@ -283,7 +282,6 @@ void Config::createDefault(const AccessKeys& key) {
             break;
         case cfg_controls_stv_player_2: add(full_keys_[key], StvPlayerControls().toConfig(PeripheralLayout::empty_layout)); break;
         default: {
-            // throwConfigError(tr("Configuration : undefined default value '{}'!"), full_keys_[key]);
             Log::exception(Logger::config, tr("Configuration : undefined default value '{}'!"), full_keys_[key]);
         }
     }
@@ -385,10 +383,5 @@ auto Config::listLogLevels() -> std::vector<std::string> {
 }
 
 auto Config::configToPortStatus(const std::string& value) -> PortStatus { return port_status_[value]; }
-
-[[noreturn]] void throwConfigError(const std::string& error, const std::string& parameter) {
-    const auto str = uti::format(error, parameter);
-    throw exception::ConfigError(str);
-};
 
 }; // namespace saturnin::core
