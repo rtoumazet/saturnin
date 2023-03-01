@@ -11,7 +11,7 @@ Saturnin is a Sega Saturn emulator
 	
   Before doing anything after cloning the repository, remove template extensions from properties files in the **./props** directory.
 
-  Next, you must update user macros from properties sheets inside VS2019 to set up your directories. To do so, open the Property Manager first ( **View** | **Property Manager** ), then update the **solution** sheet macros according to your setup.
+  Next, you must update user macros from properties sheets inside VS2022 to set up your directories. To do so, open the Property Manager first ( **View** | **Property Manager** ), then update the **solution** sheet macros according to your setup.
 
   #### Dependencies ####
 
