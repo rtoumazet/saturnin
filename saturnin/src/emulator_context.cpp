@@ -278,29 +278,22 @@ void EmulatorContext::emulationSetup() {
 }
 
 void EmulatorContext::emulationMainThread() {
-    try {
-        Log::info(Logger::main, tr("Emulation main thread started"));
+    Log::info(Logger::main, tr("Emulation main thread started"));
 
-        emulationSetup();
+    emulationSetup();
 
-        while (emulationStatus() == EmulationStatus::running) {
-            if (debugStatus() != DebugStatus::paused) {
-                const auto cycles = masterSh2()->run();
-                if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
-                smpc()->run(cycles);
-                vdp1()->run(cycles);
-                vdp2()->run(cycles);
-                cdrom()->run(cycles);
-                scsp()->run(cycles);
-                //} else {
-                //    notifyRenderingDone();
-            }
+    while (emulationStatus() == EmulationStatus::running) {
+        if (debugStatus() != DebugStatus::paused) {
+            const auto cycles = masterSh2()->run();
+            if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
+            smpc()->run(cycles);
+            vdp1()->run(cycles);
+            vdp2()->run(cycles);
+            cdrom()->run(cycles);
+            scsp()->run(cycles);
         }
-        // opengl()->destroyRenderingContext();
-        Log::info(Logger::main, tr("Emulation main thread finished"));
-    } catch (const std::exception& e) { Log::error(Logger::exception, e.what()); } catch (...) {
-        Log::error(Logger::exception, tr("Uncaught exception !"));
     }
+    Log::info(Logger::main, tr("Emulation main thread finished"));
 }
 
 void EmulatorContext::startInterface() {
