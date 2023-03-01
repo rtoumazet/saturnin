@@ -40,9 +40,7 @@ Saturnin is a Sega Saturn emulator
 * [thread-pool](https://github.com/bshoshany/thread-pool) : A fast, lightweight, and easy-to-use C++17 thread pool library
 ### Contribution guidelines ###
 
-* [Saturnin Style Guide](wiki/saturnin%20style%20guide.md)
-* Code review
-* Other guidelines
+* [Saturnin Style Guide](https://github.com/rtoumazet/saturnin/wiki/Saturnin-style-guide)
 
 ### Who do I talk to? ###
 
