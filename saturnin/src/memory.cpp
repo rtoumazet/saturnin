@@ -168,8 +168,9 @@ void Memory::loadBios(const HardwareMode mode) {
         case saturn: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_saturn).c_str(); break;
         case stv: bios_path = modules_.config()->readValue(AccessKeys::cfg_paths_bios_stv).c_str(); break;
         default: {
-            Log::error(Logger::memory, tr("Unknown hardware mode"));
-            throw std::runtime_error("Config error !");
+            // Log::error(Logger::memory, tr("Unknown hardware mode"));
+            // throw std::runtime_error("Config error !");
+            throwConfigError(tr("Unknown hardware mode"), "");
         }
     }
 

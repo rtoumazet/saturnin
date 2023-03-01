@@ -36,8 +36,11 @@
 #include <spdlog/sinks/ostream_sink.h>
 #include <spdlog/sinks/ringbuffer_sink.h>
 // NOLINTNEXTLINE(modernize - deprecated - headers)
-#include <saturnin/src/locale.h>    // tr
-#include <saturnin/src/utilities.h> // format
+#include <saturnin/src/exceptions.h> // LogError
+#include <saturnin/src/locale.h>     // tr
+#include <saturnin/src/utilities.h>  // format
+
+namespace excpt = saturnin::exception;
 
 namespace saturnin::core {
 
@@ -59,7 +62,7 @@ enum class LogLevel {
 /// \brief  Values that represent the various loggers.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Logger { cdrom, config, main, memory, sh2, scu, vdp1, vdp2, opengl, exception, smpc, scsp, texture, unimplemented };
+enum class Logger { cdrom, config, gui, main, memory, sh2, scu, vdp1, vdp2, opengl, smpc, scsp, texture, unimplemented, generic };
 
 using MapLogger     = std::map<std::string, std::shared_ptr<spdlog::logger>>; ///< MapLogger alias definition.
 using MapLoggerName = std::map<const Logger, const std::string>;              ///< MapLoggerName alias definition.
@@ -110,7 +113,7 @@ class Log {
     static void shutdown();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template <typename... Args> static inline void Log::error(const std::string& logger_name, const std::string& value,
+    /// \fn template <typename... Args> static inline void Log::error(std::string_view logger_name, const std::string& value,
     /// const Args&... args)
     ///
     /// \brief  writes an error message to the specified logger.
@@ -125,20 +128,72 @@ class Log {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename... Args>
-    static inline void error(const Logger logger, const std::string& value, const Args&... args) {
+    static inline void error(const Logger logger, std::string_view value, const Args&... args) {
         try {
             const auto& logger_name = loggers_names_[logger];
             if (loggerExists(logger_name)) {
-                loggers_.at(logger_name)->error(fmt::runtime(value.c_str()), args...);
-                // errors are also logged to console, using original logger name
-                const auto message = std::string{"[{}] " + value};
+                loggers_.at(logger_name)->error(fmt::runtime(value), args...);
+
+                // Errors are also logged to console, using original logger name.
+                // Using append() here as operator '+' isn't available for string_view.
+                const auto& message = std::string{"[{}] "}.append(value);
                 loggers_.at("console")->error(fmt::runtime(message.c_str()), logger_name, args...);
             }
         } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template <typename... Args> static inline void Log::warning(const std::string& logger_name, const std::string&
+    /// \fn template <typename... Args> static inline void Log::error(std::string_view logger_name, const std::string& value,
+    /// const Args&... args)
+    ///
+    /// \brief  writes an error message to the specified logger and throws.
+    ///
+    /// \author Runik
+    /// \date   01/03/2023
+    ///
+    /// \tparam Args    Template arguments.
+    /// \param  logger  Type of the logger.
+    /// \param  value       Text to write.
+    /// \param  args        Variable arguments for formatting.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template<typename... Args>
+    [[noreturn]] static inline void exception(const Logger logger, std::string_view value, const Args&... args) {
+        try {
+            const auto& logger_name = loggers_names_[logger];
+            if (loggerExists(logger_name)) {
+                loggers_.at(logger_name)->critical(fmt::runtime(value), args...);
+
+                // Errors are also logged to console, using original logger name.
+                // Using append() here as operator '+' isn't available for string_view.
+                const auto& message = std::string{"[{}] "}.append(value);
+                loggers_.at("console")->critical(fmt::runtime(message.c_str()), logger_name, args...);
+
+                // Throwing the linked exception.
+                const auto str = utilities::format(value, args...);
+                switch (logger) {
+                    using enum Logger;
+                    case cdrom: throw excpt::CdromError(str);
+                    case config: throw excpt::ConfigError(str);
+                    case generic: throw excpt::GenericError(str);
+                    case main: throw excpt::MainError(str);
+                    case memory: throw excpt::MemoryError(str);
+                    case opengl: throw excpt::OpenglError(str);
+                    case scsp: throw excpt::ScspError(str);
+                    case scu: throw excpt::ScuError(str);
+                    case sh2: throw excpt::Sh2Error(str);
+                    case smpc: throw excpt::SmpcError(str);
+                    case texture: throw excpt::TextureError(str);
+                    case unimplemented: throw excpt::UnimplementedError(str);
+                    case vdp1: throw excpt::Vdp1Error(str);
+                    case vdp2: throw excpt::Vdp2Error(str);
+                }
+            }
+        } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn template <typename... Args> static inline void Log::warning(std::string_view logger_name, const std::string&
     /// value, const Args&... args)
     ///
     /// \brief  Writes a warning message to the specified logger.
@@ -153,13 +208,14 @@ class Log {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename... Args>
-    static inline void warning(const Logger logger, const std::string& value, const Args&... args) {
+    static inline void warning(const Logger logger, std::string_view value, const Args&... args) {
         try {
             const auto& logger_name = loggers_names_[logger];
             if (loggerExists(logger_name)) {
-                loggers_.at(logger_name)->warn(fmt::runtime(value.c_str()), args...);
-                // warnings are also logged to console, using original logger name
-                const auto message = std::string{"[{}] " + value};
+                loggers_.at(logger_name)->warn(fmt::runtime(value), args...);
+                // Warnings are also logged to console, using original logger name.
+                // Using append() here as operator '+' isn't available for string_view.
+                const auto& message = std::string{"[{}] "}.append(value);
                 loggers_.at("console")->warn(fmt::runtime(message.c_str()), logger_name, args...);
             }
         } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }
@@ -181,9 +237,9 @@ class Log {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename... Args>
-    static inline void info(const Logger logger, const std::string& value, const Args&... args) {
+    static inline void info(const Logger logger, std::string_view value, const Args&... args) {
         const auto& logger_name = loggers_names_[logger];
-        if (loggerExists(logger_name)) { loggers_.at(logger_name)->info(fmt::runtime(value.c_str()), args...); }
+        if (loggerExists(logger_name)) { loggers_.at(logger_name)->info(fmt::runtime(value), args...); }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,9 +258,9 @@ class Log {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename... Args>
-    static inline void debug(const Logger logger, const std::string& value, const Args&... args) {
+    static inline void debug(const Logger logger, std::string_view value, const Args&... args) {
         const auto& logger_name = loggers_names_[logger];
-        if (loggerExists(logger_name)) { loggers_.at(logger_name)->debug(fmt::runtime(value.c_str()), args...); }
+        if (loggerExists(logger_name)) { loggers_.at(logger_name)->debug(fmt::runtime(value), args...); }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +295,8 @@ class Log {
 
     static inline auto loggerExists(const std::string& logger_name) -> bool {
         if (loggers_.count(logger_name) == 0) {
-            throw std::runtime_error(utilities::format(tr("Log '{0}' is not defined !"), logger_name));
+            const auto error = utilities::format(tr("Log '{0}' is not defined !"), logger_name);
+            throw exception::LogError(error);
         }
         return true;
     }
@@ -299,7 +356,6 @@ class Log {
     /// \param  sink        The sink.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // static void createLogger(const std::string& logger_name, const std::shared_ptr<spdlog::sinks::basic_file_sink_mt>& sink);
     static void createLogger(const std::string& logger_name, const spdlog::sinks_init_list& sink);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

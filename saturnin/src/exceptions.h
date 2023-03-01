@@ -29,7 +29,68 @@
 #include <string>
 
 namespace saturnin::exception {
+
+class CdromError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
 class ConfigError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class GenericError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class GuiError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class MainError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class MemoryError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class Sh2Error : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class ScuError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class Vdp1Error : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class Vdp2Error : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class OpenglError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class SmpcError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class ScspError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class TextureError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class UnimplementedError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
+class LogError : public std::runtime_error {
     using runtime_error::runtime_error;
 };
 

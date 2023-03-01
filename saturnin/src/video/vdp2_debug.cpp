@@ -486,7 +486,7 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
 auto Vdp2::isLayerDisabled(const ScrollScreen s) -> bool {
     try {
         return disabled_scroll_screens_.at(s);
-    } catch (std::exception const& e) { Log::warning(Logger::exception, e.what()); }
+    } catch (std::exception const& e) { Log::exception(Logger::vdp2, e.what()); }
 
     return false;
 }

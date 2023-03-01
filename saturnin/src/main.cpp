@@ -20,11 +20,13 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <istream>
+#include <saturnin/src/exceptions.h>  // MainError
 #include <saturnin/src/locale.h>      // tr
 #include <saturnin/src/log.h>         // Log
 #include <saturnin/src/thread_pool.h> // TreadPool
 
-namespace core = saturnin::core;
+namespace core      = saturnin::core;
+namespace exception = saturnin::exception;
 
 using core::EmulatorContext;
 using core::Log;
@@ -37,20 +39,16 @@ auto main(int argc, char* argv[]) -> int {
         auto state = EmulatorContext{};
         Log::initialize();
         ThreadPool::initialize();
-
         while (state.renderingStatus() != core::RenderingStatus::stopped) {
             if (state.renderingStatus() == core::RenderingStatus::reset) { state.reset(); }
-            if (!state.initialize(argc, argv)) {
-                Log::error(Logger::main, tr("Could not initialize the program ..."));
-                throw std::runtime_error("Main error !");
-            }
+            if (!state.initialize(argc, argv)) { Log::exception(Logger::main, tr("Could not initialize the program ...")); }
             state.startInterface();
             state.stopEmulation();
         }
         Log::shutdown();
         ThreadPool::shutdown();
         std::exit(EXIT_SUCCESS);
-    } catch (const std::runtime_error& e) { Log::error(Logger::exception, e.what()); } catch (const std::exception& e) {
-        Log::error(Logger::exception, e.what());
-    } catch (...) { Log::error(Logger::exception, tr("Uncaught exception !")); }
+    } catch (const std::runtime_error& e) { Log::error(Logger::generic, e.what()); } catch (const std::exception& e) {
+        Log::error(Logger::generic, e.what());
+    } catch (...) { Log::error(Logger::generic, tr("Uncaught exception !")); }
 };

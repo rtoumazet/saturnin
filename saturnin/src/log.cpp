@@ -44,6 +44,8 @@ auto Log::initialize() -> bool {
 
     const auto loggers_names = std::vector<std::string>{"cdrom",
                                                         "config",
+                                                        "generic",
+                                                        "gui",
                                                         "main",
                                                         "memory",
                                                         "sh2",
@@ -51,7 +53,6 @@ auto Log::initialize() -> bool {
                                                         "vdp1",
                                                         "vdp2",
                                                         "opengl",
-                                                        "exception",
                                                         "smpc",
                                                         "scsp",
                                                         "texture",
@@ -63,6 +64,8 @@ auto Log::initialize() -> bool {
 
     loggers_names_ = {{Logger::cdrom, "cdrom"},
                       {Logger::config, "config"},
+                      {Logger::generic, "generic"},
+                      {Logger::gui, "gui"},
                       {Logger::main, "main"},
                       {Logger::memory, "memory"},
                       {Logger::sh2, "sh2"},
@@ -70,7 +73,6 @@ auto Log::initialize() -> bool {
                       {Logger::vdp1, "vdp1"},
                       {Logger::vdp2, "vdp2"},
                       {Logger::opengl, "opengl"},
-                      {Logger::exception, "exception"},
                       {Logger::smpc, "smpc"},
                       {Logger::scsp, "scsp"},
                       {Logger::texture, "texture"},
@@ -140,7 +142,7 @@ void Log::removeFile(const std::string& path) {
     fs::create_directories(full_path.parent_path());
     try {
         fs::remove(full_path);
-    } catch (const fs::filesystem_error& e) { Log::error(Logger::exception, e.what()); }
+    } catch (const fs::filesystem_error& e) { Log::exception(Logger::generic, e.what()); }
 }
 
 // static //

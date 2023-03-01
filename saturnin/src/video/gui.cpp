@@ -1266,7 +1266,7 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
                         const auto str        = std::string(bp_input[i].data());
                         const auto conv_input = str.empty() ? 0 : std::stoi(str, nullptr, 16);
                         current_sh2->breakpoint(i, conv_input);
-                    } catch (std::exception const& e) { Log::warning(Logger::exception, e.what()); }
+                    } catch (std::exception const& e) { Log::warning(Logger::gui, e.what()); }
                 }
             }
             ImGui::EndTable();
