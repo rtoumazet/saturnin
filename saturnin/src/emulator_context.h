@@ -358,4 +358,5 @@ class EmulatorContext {
     GLFWwindow* opengl_window_; ///< The OpenGL window.
 };
 
+void runTests();
 } // namespace saturnin::core

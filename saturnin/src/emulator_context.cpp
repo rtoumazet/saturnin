@@ -169,6 +169,58 @@ void EmulatorContext::startEmulation() {
         default: break;
     }
 
+    runTests();
+}
+
+void EmulatorContext::stopEmulation() {
+    emulation_status_ = core::EmulationStatus::stopped;
+    if (emulation_main_thread_.joinable()) { emulation_main_thread_.join(); }
+}
+
+void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
+
+void EmulatorContext::emulationSetup() {
+    memory()->initialize(hardware_mode_);
+
+    sh2::initializeOpcodesLut();
+    masterSh2()->powerOnReset();
+    slaveSh2()->powerOnReset();
+    smpc()->initialize();
+    cdrom()->initialize();
+    vdp1()->initialize();
+    vdp2()->initialize();
+    scsp()->initialize();
+}
+
+void EmulatorContext::emulationMainThread() {
+    Log::info(Logger::main, tr("Emulation main thread started"));
+
+    emulationSetup();
+
+    while (emulationStatus() == EmulationStatus::running) {
+        if (debugStatus() != DebugStatus::paused) {
+            const auto cycles = masterSh2()->run();
+            if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
+            smpc()->run(cycles);
+            vdp1()->run(cycles);
+            vdp2()->run(cycles);
+            cdrom()->run(cycles);
+            scsp()->run(cycles);
+        }
+    }
+    Log::info(Logger::main, tr("Emulation main thread finished"));
+}
+
+void EmulatorContext::startInterface() {
+    renderingStatus(core::RenderingStatus::running);
+    video::runOpengl(*this);
+}
+
+void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
+
+auto EmulatorContext::openglWindow() const -> GLFWwindow* { return opengl_window_; }
+
+void runTests() {
     // static std::thread emu_thread;
     // if (ImGui::Button("Play")) {
     //    std::thread local_thread(&core::EmulatorContext::startEmulation, &state);
@@ -255,54 +307,54 @@ void EmulatorContext::startEmulation() {
     res          = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
     core::Log::warning(Logger::main, "swap_endianness {}µs"s, res);*/
     //  TESTING //
-}
 
-void EmulatorContext::stopEmulation() {
-    emulation_status_ = core::EmulationStatus::stopped;
-    if (emulation_main_thread_.joinable()) { emulation_main_thread_.join(); }
-}
+    constexpr auto run_bitfields_benchmarks = true;
+    if constexpr (run_bitfields_benchmarks) {
+        using namespace saturnin::video;
 
-void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
+        {
+            auto                                               test       = std::vector<u32>{};
+            std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
+            std::chrono::duration<double>                      elapsed_time{};
+            constexpr auto                                     iterations{1000000};
+            constexpr auto                                     tvmd = TvScreenMode{0b1000000000000011};
+            auto                                               val  = u32{};
 
-void EmulatorContext::emulationSetup() {
-    memory()->initialize(hardware_mode_);
+            for (int i = 0; i < iterations; ++i) {
+                if (toEnum<HorizontalResolution>(tvmd.horizontal_resolution) == HorizontalResolution::hi_res_704) { ++val; }
+                test.push_back(val);
+            }
 
-    sh2::initializeOpcodesLut();
-    masterSh2()->powerOnReset();
-    slaveSh2()->powerOnReset();
-    smpc()->initialize();
-    cdrom()->initialize();
-    vdp1()->initialize();
-    vdp2()->initialize();
-    scsp()->initialize();
-}
+            elapsed_time = std::chrono::steady_clock::now() - start_time;
+            auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+            using namespace std::literals;
+            core::Log::warning(Logger::main, "Original bitfields {} µs"s, res);
+        }
 
-void EmulatorContext::emulationMainThread() {
-    Log::info(Logger::main, tr("Emulation main thread started"));
+        {
+            auto                                               test       = std::vector<u32>{};
+            std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
+            std::chrono::duration<double>                      elapsed_time{};
+            constexpr auto                                     iterations{1000000};
+            constexpr auto                                     raw = u16{0b1000000000000011};
+            auto                                               val = u32{};
 
-    emulationSetup();
+            // static_assert(bf::bit_field<3, 0>::get(raw) == 0b011);
 
-    while (emulationStatus() == EmulationStatus::running) {
-        if (debugStatus() != DebugStatus::paused) {
-            const auto cycles = masterSh2()->run();
-            if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
-            smpc()->run(cycles);
-            vdp1()->run(cycles);
-            vdp2()->run(cycles);
-            cdrom()->run(cycles);
-            scsp()->run(cycles);
+            // u8 a = 0;
+            // if (bf::bit_field<3, 0, bf::bit_field_config<u16>{}>::get(HorizontalResolution::hi_res_704) == 0b011) { a = 1; }
+
+            // for (int i = 0; i < iterations; ++i) {
+            //     if (toEnum<HorizontalResolution>(tvmd.horizontal_resolution) == HorizontalResolution::hi_res_704) { ++val; }
+            //     test.push_back(val);
+            // }
+
+            elapsed_time = std::chrono::steady_clock::now() - start_time;
+            auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+            using namespace std::literals;
+            core::Log::warning(Logger::main, "Revised bitfields {} µs"s, res);
         }
     }
-    Log::info(Logger::main, tr("Emulation main thread finished"));
 }
-
-void EmulatorContext::startInterface() {
-    renderingStatus(core::RenderingStatus::running);
-    video::runOpengl(*this);
-}
-
-void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
-
-auto EmulatorContext::openglWindow() const -> GLFWwindow* { return opengl_window_; }
 
 } // namespace saturnin::core
