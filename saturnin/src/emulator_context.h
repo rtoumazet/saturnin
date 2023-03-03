@@ -105,7 +105,7 @@ class EmulatorContext {
     auto initialize(int argc, char* argv[]) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void EmulatorContext::reset();
+    /// \fn	void EmulatorContext::reset() const;
     ///
     /// \brief	Resets this object
     ///
@@ -113,7 +113,7 @@ class EmulatorContext {
     /// \date	23/06/2022
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void reset();
+    void reset() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::startEmulation();
@@ -358,5 +358,4 @@ class EmulatorContext {
     GLFWwindow* opengl_window_; ///< The OpenGL window.
 };
 
-void runTests();
 } // namespace saturnin::core

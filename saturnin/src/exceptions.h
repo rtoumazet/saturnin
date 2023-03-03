@@ -238,4 +238,17 @@ class LogError : public std::runtime_error {
     using runtime_error::runtime_error;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class	TestError
+///
+/// \brief	Will be thrown when an error is detected during tests.
+///
+/// \author	Runik
+/// \date	03/03/2023
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class TestError : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
 } // namespace saturnin::exception

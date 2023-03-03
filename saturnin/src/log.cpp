@@ -55,6 +55,7 @@ auto Log::initialize() -> bool {
                                                         "opengl",
                                                         "smpc",
                                                         "scsp",
+                                                        "test",
                                                         "texture",
                                                         "unimplemented"};
     for (auto& n : loggers_names) {
@@ -75,6 +76,7 @@ auto Log::initialize() -> bool {
                       {Logger::opengl, "opengl"},
                       {Logger::smpc, "smpc"},
                       {Logger::scsp, "scsp"},
+                      {Logger::test, "test"},
                       {Logger::texture, "texture"},
                       {Logger::unimplemented, "unimplemented"}};
 

@@ -364,6 +364,7 @@
     <ClCompile Include="src\emulator_modules.cpp" />
     <ClInclude Include="src\exceptions.h" />
     <ClCompile Include="src\sound\scsp.cpp" />
+    <ClCompile Include="src\tests.cpp" />
     <ClCompile Include="src\thread_pool.cpp" />
     <ClCompile Include="src\video\texture.cpp" />
     <ClCompile Include="src\video\vdp1_part.cpp" />
@@ -446,6 +447,7 @@
     <ClInclude Include="src\resource.hpp" />
     <ClInclude Include="src\resource_holder.hpp" />
     <ClInclude Include="src\scu.h" />
+    <ClInclude Include="src\tests.h" />
     <ClInclude Include="src\thread_pool.h" />
     <ClInclude Include="src\video\base_rendering_part.h" />
     <ClInclude Include="src\video\texture.h" />

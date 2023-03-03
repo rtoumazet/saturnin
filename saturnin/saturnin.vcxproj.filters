@@ -144,6 +144,9 @@
     <ClCompile Include="src\thread_pool.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\tests.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -306,6 +309,9 @@
       <Filter>Fichiers sources</Filter>
     </ClInclude>
     <ClInclude Include="src\exceptions.h">
+      <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>

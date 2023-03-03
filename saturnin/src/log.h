@@ -62,7 +62,24 @@ enum class LogLevel {
 /// \brief  Values that represent the various loggers.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Logger { cdrom, config, gui, main, memory, sh2, scu, vdp1, vdp2, opengl, smpc, scsp, texture, unimplemented, generic };
+enum class Logger {
+    cdrom,
+    config,
+    gui,
+    main,
+    memory,
+    sh2,
+    scu,
+    vdp1,
+    vdp2,
+    opengl,
+    smpc,
+    scsp,
+    texture,
+    unimplemented,
+    generic,
+    test
+};
 
 using MapLogger     = std::map<std::string, std::shared_ptr<spdlog::logger>>; ///< MapLogger alias definition.
 using MapLoggerName = std::map<const Logger, const std::string>;              ///< MapLoggerName alias definition.
@@ -184,6 +201,7 @@ class Log {
                     case scu: throw excpt::ScuError(str);
                     case sh2: throw excpt::Sh2Error(str);
                     case smpc: throw excpt::SmpcError(str);
+                    case test: throw excpt::TestError(str);
                     case texture: throw excpt::TextureError(str);
                     case unimplemented: throw excpt::UnimplementedError(str);
                     case vdp1: throw excpt::Vdp1Error(str);
