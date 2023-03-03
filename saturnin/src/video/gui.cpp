@@ -146,8 +146,10 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 }
 
                 ImGui::EndMenu();
-            };
-            if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &conf.show_file_load_binary)) {}
+            }
+            if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &conf.show_file_load_binary)) {
+                // No code is needed here, the boolean will open the window
+            }
             if (ImGui::MenuItem(tr("Exit").c_str())) { state.renderingStatus(core::RenderingStatus::stopped); }
 
             ImGui::EndMenu();
@@ -173,13 +175,13 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                     ImGui::EndMenu();
                 }
 
-                if (conf.show_debug_memory_editor) { showDebugMemoryEditorWindow(state, &conf.show_debug_memory_editor); };
-                if (conf.show_debug_memory_dump) { showDebugMemoryDumpWindow(state, &conf.show_debug_memory_dump); };
-                if (conf.show_debug_sh2) { showDebugSh2Window(state, &conf.show_debug_sh2); };
-                if (conf.show_debug_smpc) { showDebugSmpcWindow(state, &conf.show_debug_smpc); };
-                if (conf.show_debug_vdp1) { showDebugVdp1Window(state, &conf.show_debug_vdp1); };
-                if (conf.show_debug_vdp2) { showDebugVdp2Window(state, &conf.show_debug_vdp2); };
-                if (conf.show_debug_textures) { showDebugTexturesWindow(state, &conf.show_debug_textures); };
+                if (conf.show_debug_memory_editor) { showDebugMemoryEditorWindow(state, &conf.show_debug_memory_editor); }
+                if (conf.show_debug_memory_dump) { showDebugMemoryDumpWindow(state, &conf.show_debug_memory_dump); }
+                if (conf.show_debug_sh2) { showDebugSh2Window(state, &conf.show_debug_sh2); }
+                if (conf.show_debug_smpc) { showDebugSmpcWindow(state, &conf.show_debug_smpc); }
+                if (conf.show_debug_vdp1) { showDebugVdp1Window(state, &conf.show_debug_vdp1); }
+                if (conf.show_debug_vdp2) { showDebugVdp2Window(state, &conf.show_debug_vdp2); }
+                if (conf.show_debug_textures) { showDebugTexturesWindow(state, &conf.show_debug_textures); }
             }
             default: break;
         }
@@ -200,14 +202,14 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                                                        {Header::rendering, tr("Rendering")},
                                                        {Header::path, tr("Paths")},
                                                        {Header::cd_rom, tr("CD-Rom")},
-                                                       {Header::sound, ("Sound")},
+                                                       {Header::sound, tr("Sound")},
                                                        {Header::peripherals, tr("Peripherals")},
                                                        {Header::logs, tr("Logs")}};
             static auto last_opened_header = Header::none;
             if (last_opened_header == Header::none) { last_opened_header = Header::general; }
             auto setHeaderState = [](const Header header) {
-                const auto state = (last_opened_header == header);
-                ImGui::SetNextItemOpen(state);
+                const auto header_state = (last_opened_header == header);
+                ImGui::SetNextItemOpen(header_state);
             };
 
             static auto    reset_rendering      = bool{}; // used to check if rendering has to be reset after changing the option
@@ -224,18 +226,18 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 static auto mode = int{util::toUnderlying(state.config()->getHardwareMode(hm))};
 
                 if (ImGui::RadioButton("Saturn", &mode, util::toUnderlying(core::HardwareMode::saturn))) {
-                    const auto hm = state.config()->getHardwareModeKey(core::HardwareMode::saturn);
-                    if (hm != std::nullopt) {
-                        state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
+                    const auto key = state.config()->getHardwareModeKey(core::HardwareMode::saturn);
+                    if (key != std::nullopt) {
+                        state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *key);
                     } else {
                         Log::warning(Logger::config, tr("Unknown hardware mode ..."));
                     }
                 }
                 ImGui::SameLine();
                 if (ImGui::RadioButton("ST-V", &mode, util::toUnderlying(core::HardwareMode::stv))) {
-                    const auto hm = state.config()->getHardwareModeKey(core::HardwareMode::stv);
-                    if (hm != std::nullopt) {
-                        state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *hm);
+                    const auto key = state.config()->getHardwareModeKey(core::HardwareMode::stv);
+                    if (key != std::nullopt) {
+                        state.config()->writeValue(core::AccessKeys::cfg_global_hardware_mode, *key);
                     } else {
                         Log::warning(Logger::config, tr("Unknown hardware mode ..."));
                     }
@@ -247,8 +249,8 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
 
                 static auto locales = core::Config::listAvailableLanguages();
                 std::string l       = state.config()->readValue(core::AccessKeys::cfg_global_language);
-                const auto  it      = std::find_if(locales.begin(), locales.end(), [&l](std::string& str) { return l == str; });
-                static auto index   = static_cast<s32>(it - locales.begin());
+                const auto  it = std::find_if(locales.begin(), locales.end(), [&l](const std::string& str) { return l == str; });
+                static auto index = static_cast<s32>(it - locales.begin());
                 if (ImGui::Combo("##language", &index, locales)) {
                     state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
                 }
@@ -257,9 +259,9 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 ImGui::TextUnformatted(tr("Area code").c_str());
                 ImGui::SameLine(second_column_offset);
 
-                static auto codes      = state.config()->listAreaCodes();
-                std::string c          = state.config()->readValue(core::AccessKeys::cfg_global_area_code);
-                const auto  it_code    = std::find_if(codes.begin(), codes.end(), [&c](std::string& str) { return c == str; });
+                static auto codes   = state.config()->listAreaCodes();
+                std::string c       = state.config()->readValue(core::AccessKeys::cfg_global_area_code);
+                const auto  it_code = std::find_if(codes.begin(), codes.end(), [&c](const std::string& str) { return c == str; });
                 static auto index_code = static_cast<s32>(it_code - codes.begin());
                 if (ImGui::Combo("##area_code", &index_code, codes)) {
                     state.config()->writeValue(core::AccessKeys::cfg_global_area_code, codes[index_code]);
@@ -421,9 +423,9 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 static auto current_item = int{};
                 const auto  drive_parts  = util::explode(drive, ':');
                 if (drive_parts.size() == 3) {
-                    current_item = cdrom::Cdrom::getDriveIndice(std::stoi(drive_parts[0]),
-                                                                std::stoi(drive_parts[1]),
-                                                                std::stoi(drive_parts[2]));
+                    current_item = cdrom::Cdrom::getDriveIndice(static_cast<u8>(std::stoi(drive_parts[0])),
+                                                                static_cast<u8>(std::stoi(drive_parts[1])),
+                                                                static_cast<u8>(std::stoi(drive_parts[2])));
                 }
 
                 if (ImGui::Combo("##combo_cddrive", &current_item, cdrom::Cdrom::scsi_drives_list)) {
@@ -508,7 +510,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
                             const auto  it_connection    = std::find_if(connections.begin(),
                                                                     connections.end(),
-                                                                    [&c](std::string& str) { return c == str; });
+                                                                    [&c](const std::string& str) { return c == str; });
                             static auto index_connection = static_cast<s32>(it_connection - connections.begin());
                             if (ImGui::Combo("##peripheral_connection_1", &index_connection, connections)) {
                                 state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
@@ -590,7 +592,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
                             const auto  it_connection    = std::find_if(connections.begin(),
                                                                     connections.end(),
-                                                                    [&c](std::string& str) { return c == str; });
+                                                                    [&c](const std::string& str) { return c == str; });
                             static auto index_connection = static_cast<s32>(it_connection - connections.begin());
                             if (ImGui::Combo("##peripheral_connection_2", &index_connection, connections)) {
                                 state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
@@ -806,26 +808,26 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                     ImGui::EndTabBar();
                     ImGui::PopStyleVar();
                 }
-                // ImGui::PopItemWidth();
             }
 
             // Logs header
             setHeaderState(Header::logs);
             if (ImGui::CollapsingHeader(headers.at(Header::logs).c_str())) {
-                last_opened_header = Header::logs;
-                static auto levels = state.config()->listLogLevels();
+                last_opened_header        = Header::logs;
+                static auto global_levels = state.config()->listLogLevels();
 
                 const auto setupLog
                     = [&state](const core::AccessKeys key, const std::string& combo_name, std::vector<std::string> levels) {
                           const std::string l = state.config()->readValue(key);
                           const auto        it_level
-                              = std::find_if(levels.begin(), levels.end(), [&l](std::string& str) { return l == str; });
+                              = std::find_if(levels.begin(), levels.end(), [&l](const std::string& str) { return l == str; });
                           auto index_level = static_cast<s32>(it_level - levels.begin());
                           if (ImGui::Combo(combo_name.c_str(), &index_level, levels)) {
                               state.config()->writeValue(key, levels[index_level]);
                           }
                       };
 
+                static auto levels = state.config()->listLogLevels();
                 // cdrom
                 ImGui::TextUnformatted(tr("CD-Rom").c_str());
                 ImGui::SameLine(second_column_offset);
@@ -919,13 +921,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
             ImGui::MenuItem(tr("Threads").c_str(), nullptr, &conf.show_benchmarks);
             ImGui::EndMenu();
         }
-        if (conf.show_benchmarks) {
-            //
-            //
-            //
-            // auto s = sizeof(state);
-            showBenchmarkWindow(state, &conf.show_benchmarks);
-        };
+        if (conf.show_benchmarks) { showBenchmarkWindow(state, &conf.show_benchmarks); };
 
         ImGui::EndMenuBar();
     }
@@ -963,12 +959,10 @@ void showRenderingWindow(core::EmulatorContext& state) {
         }
         const auto alpha = 0xff;
         gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(), width, height, alpha);
-        if (state.debugStatus() != core::DebugStatus::disabled) {
-            if (state.opengl()->isSaturnResolutionSet()) {
-                state.opengl()->renderVdp1DebugOverlay();
-                const auto overlay_alpha = 0x80;
-                gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
-            }
+        if ((state.debugStatus() != core::DebugStatus::disabled) && state.opengl()->isSaturnResolutionSet()) {
+            state.opengl()->renderVdp1DebugOverlay();
+            const auto overlay_alpha = 0x80;
+            gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
         }
     }
     ImGui::Text("%s", state.opengl()->fps().c_str());
@@ -978,20 +972,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
     ImGui::PopStyleVar();
 }
 
-void showStvWindow(core::EmulatorContext& state) {
-    // auto files = core::listStvConfigurationFiles();
-
-    // static auto listbox_item_current = int{1};
-
-    // ImGui::BeginChild("ST-V window");
-    // ImGui::Combo("", &listbox_item_current, files);
-    // ImGui::EndChild();
-    // ImGui::SameLine();
-    // const auto label_load = icon_step_out + tr("Step out");
-    // if (ImGui::Button(tr("load").c_str())) {}
-}
-
-void showLogWindow(core::EmulatorContext& state, bool* opened) {
+void showLogWindow(const core::EmulatorContext& state, bool* opened) {
     auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_None};
     window_flags |= ImGuiWindowFlags_NoResize;
     window_flags |= ImGuiWindowFlags_NoSavedSettings;
@@ -999,7 +980,6 @@ void showLogWindow(core::EmulatorContext& state, bool* opened) {
     const auto window_size = ImVec2(700, 150);
     ImGui::SetNextWindowSize(window_size);
 
-    // auto window = glfwGetCurrentContext();
     auto width  = s32{};
     auto height = s32{};
     glfwGetWindowSize(state.openglWindow(), &width, &height);
@@ -1043,7 +1023,7 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
     static auto local_pc   = u32{};
     if (ImGui::RadioButton(tr("Master").c_str(), sh2_type == Sh2Type::master)) { sh2_type = Sh2Type::master; }
     ImGui::SameLine();
-    if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) { sh2_type = Sh2Type::slave; };
+    if (ImGui::RadioButton(tr("Slave").c_str(), sh2_type == Sh2Type::slave)) { sh2_type = Sh2Type::slave; }
 
     sh2::Sh2* current_sh2{nullptr};
     switch (sh2_type) {
@@ -1108,14 +1088,21 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
                 ImGui::TextUnformatted(uti::format(mask, index + offset, current_sh2->getRegister(reg2)).c_str());
             };
 
-            addGeneralRegisters(i++, Sh2Register::r0, Sh2Register::r8);
-            addGeneralRegisters(i++, Sh2Register::r1, Sh2Register::r9);
-            addGeneralRegisters(i++, Sh2Register::r2, Sh2Register::r10);
-            addGeneralRegisters(i++, Sh2Register::r3, Sh2Register::r11);
-            addGeneralRegisters(i++, Sh2Register::r4, Sh2Register::r12);
-            addGeneralRegisters(i++, Sh2Register::r5, Sh2Register::r13);
-            addGeneralRegisters(i++, Sh2Register::r6, Sh2Register::r14);
-            addGeneralRegisters(i++, Sh2Register::r7, Sh2Register::r15);
+            addGeneralRegisters(i, Sh2Register::r0, Sh2Register::r8);
+            ++i;
+            addGeneralRegisters(i, Sh2Register::r1, Sh2Register::r9);
+            ++i;
+            addGeneralRegisters(i, Sh2Register::r2, Sh2Register::r10);
+            ++i;
+            addGeneralRegisters(i, Sh2Register::r3, Sh2Register::r11);
+            ++i;
+            addGeneralRegisters(i, Sh2Register::r4, Sh2Register::r12);
+            ++i;
+            addGeneralRegisters(i, Sh2Register::r5, Sh2Register::r13);
+            ++i;
+            addGeneralRegisters(i, Sh2Register::r6, Sh2Register::r14);
+            ++i;
+            addGeneralRegisters(i, Sh2Register::r7, Sh2Register::r15);
 
             ImGui::EndTable();
         }
@@ -1196,13 +1183,13 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
             ImGui::TableSetColumnIndex(0);
             ImGui::PushButtonRepeat(true);
             if (ImGui::ArrowButton("##up", ImGuiDir_Up)) {
-                if (local_pc == 0) { local_pc = current_pc; };
+                if (local_pc == 0) { local_pc = current_pc; }
                 local_pc -= 2;
             }
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
             if (ImGui::ArrowButton("##down", ImGuiDir_Down)) {
-                if (local_pc == 0) { local_pc = current_pc; };
+                if (local_pc == 0) { local_pc = current_pc; }
                 local_pc += 2;
             }
             ImGui::PopButtonRepeat();
@@ -1221,7 +1208,7 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
         if (ImGui::BeginTable("breakpoints", 1, ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_PadOuterX, table_size)) {
             constexpr auto                                         input_size = u8{9};
             std::array<std::vector<char>, sh2::breakpoints_number> bp_input;
-            for (u32 i = 0; i < sh2::breakpoints_number; ++i) {
+            for (u8 i = 0; i < sh2::breakpoints_number; ++i) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::AlignTextToFramePadding();
@@ -1457,14 +1444,10 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
 
                 if (ImGui::BeginMenuBar()) {
                     ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
-                    // ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "test");
 
                     ImGui::EndMenuBar();
                 }
-                // ImGui::TextWrapped(draw_list[current_part_idx].getDebugDetail().c_str());
                 ImGui::TextWithColors(draw_list[current_part_idx].getDebugDetail().c_str());
-                // ImGui::TextWithColors("normal {FF0000}red {00FF00}green {0000FF}blue {} normal");
-                //  state.vdp1()->partToHighlight(draw_list[current_part_idx]);
                 state.opengl()->partToHighlight(draw_list[current_part_idx]);
                 ImGui::EndChild();
             }
@@ -1497,15 +1480,6 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
                         opengl_id
                             = state.opengl()->generateTexture((*texture)->width(), (*texture)->height(), (*texture)->rawData());
                         ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(opengl_id)), preview_size);
-
-                        // const auto opengl_tex = state.opengl()->getOpenglTexture((*tex)->key());
-
-                        // ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
-                        // if (opengl_tex.has_value()) {
-                        //
-                        //    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>((*opengl_tex).opengl_id)),
-                        //    preview_size);
-                        //}
                     }
                 }
                 ImGui::EndChild();
@@ -1576,10 +1550,12 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                 for (const auto& [label, value] : state.vdp2()->getDebugRamMainData()) {
                     ImGui::TableNextRow();
                     auto column_index = u8{0};
-                    ImGui::TableSetColumnIndex(column_index++);
+                    ImGui::TableSetColumnIndex(column_index);
+                    ++column_index;
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
                     ImGui::TextUnformatted(label.c_str());
-                    ImGui::TableSetColumnIndex(column_index++);
+                    ImGui::TableSetColumnIndex(column_index);
+                    ++column_index;
                     if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
                 }
 
@@ -1591,7 +1567,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                 const auto  addCheckbox     = [&](const ScrollScreen ss) {
                     if (ImGui::Checkbox(scroll_screens.at(ss).c_str(), &disabled_layers[util::toUnderlying(ss)])) {
                         state.vdp2()->disableLayer(ss, disabled_layers[util::toUnderlying(ss)]);
-                    };
+                    }
                     ImGui::SameLine();
                     constexpr auto offset = 20;
                     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
@@ -1611,8 +1587,6 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                 ImGui::EndChild();
             }
 
-            // if (ImGui::Button(tr("Reload cache").c_str())) { video::Texture::discardCache(state.opengl(),
-            // video::VdpType::vdp2); }
             if (ImGui::Button(tr("Reload cache").c_str())) { video::Texture::discardCache(state.opengl()); }
 
             ImGui::EndTabItem();
@@ -1644,7 +1618,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                             ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
                             ImGui::TextUnformatted(banks_name[row].c_str());
                             continue;
-                        };
+                        }
                         const auto command_desc = Vdp2::getDebugVramAccessCommandDescription(banks[row][column - 1]);
                         ImGui::TextUnformatted(command_desc.first.c_str());
                         if (command_desc.second.has_value()) {
@@ -1660,7 +1634,6 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
         }
         if (ImGui::BeginTabItem(tr("Registers").c_str())) {
             current_tab = Vdp2DebugTab::registers;
-            // const auto child_size = ImVec2(600, 380);
             ImGui::BeginChild("vdp2_registers_child");
 
             static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
@@ -1675,10 +1648,12 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                 for (const auto& [address, desc] : registers) {
                     ImGui::TableNextRow();
                     auto column_index = u8{0};
-                    ImGui::TableSetColumnIndex(column_index++);
+                    ImGui::TableSetColumnIndex(column_index);
+                    ++column_index;
                     ImGui::TextUnformatted(uti::format("{:#010x}", address).c_str());
 
-                    ImGui::TableSetColumnIndex(column_index++);
+                    ImGui::TableSetColumnIndex(column_index);
+                    ++column_index;
                     ImGui::TextUnformatted(desc.c_str());
 
                     ImGui::TableSetColumnIndex(column_index);
@@ -1698,7 +1673,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                 // Scroll screens list
                 ImGui::BeginGroup();
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                const auto style = ImGui::GetStyle();
+                const auto& style = ImGui::GetStyle();
 
                 ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_ChildBg]);
                 const auto child_size = ImVec2(50, 110);
@@ -1737,10 +1712,12 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                             for (const auto& [label, value] : *screen_data) {
                                 ImGui::TableNextRow();
                                 auto column_index = u8{0};
-                                ImGui::TableSetColumnIndex(column_index++);
+                                ImGui::TableSetColumnIndex(column_index);
+                                ++column_index;
                                 ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, row_bg_color);
                                 ImGui::TextUnformatted(label.c_str());
-                                ImGui::TableSetColumnIndex(column_index++);
+                                ImGui::TableSetColumnIndex(column_index);
+                                ++column_index;
                                 if (value.has_value()) { ImGui::TextUnformatted((*value).c_str()); }
                             }
                             ImGui::EndTable();
@@ -1959,10 +1936,12 @@ void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened) {
         for (const auto& [address, desc] : registers) {
             ImGui::TableNextRow();
             auto column_index = u8{0};
-            ImGui::TableSetColumnIndex(column_index++);
+            ImGui::TableSetColumnIndex(column_index);
+            ++column_index;
             ImGui::TextUnformatted(uti::format("{:#010x}", address).c_str());
 
-            ImGui::TableSetColumnIndex(column_index++);
+            ImGui::TableSetColumnIndex(column_index);
+            ++column_index;
             ImGui::TextUnformatted(desc.c_str());
 
             ImGui::TableSetColumnIndex(column_index);
@@ -2037,8 +2016,6 @@ void showFileLoadBinaryWindow(GuiConfiguration& conf, core::EmulatorContext& sta
 
         ImGui::Checkbox("##auto_start", &auto_start);
     }
-
-    // ImGui::SameLine();
 
     if (ImGui::Button("Load")) {
         auto file_conf            = BinaryFileConfiguration{};

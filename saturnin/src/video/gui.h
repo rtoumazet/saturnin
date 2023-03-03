@@ -117,32 +117,18 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state);
 void showRenderingWindow(core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	void showStvWindow(core::EmulatorContext& state);
+/// \fn	void showLogWindow(const core::EmulatorContext& state, bool* opened);
 ///
-/// \brief	Displays the ST-V games choice window.
+/// \brief	Displays the log window.
 ///
 /// \author	Runik
 /// \date	24/10/2019
 ///
-/// \param [in,out]	state	The emulator context.
+/// \param 		   	state 	The emulator context.
+/// \param [in,out]	opened	True will display the window.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showStvWindow(core::EmulatorContext& state);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showLogWindow(core::EmulatorContext& state, bool* opened);
-///
-/// \brief  Displays the log window.
-///
-/// \author Runik
-/// \date   24/10/2019
-///
-/// \param [in,out] state   The emulator context.
-/// \param [in,out] opened  True will display the window.
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void showLogWindow(core::EmulatorContext& state, bool* opened);
+void showLogWindow(const core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	void showDebugSh2Window(core::EmulatorContext& state, bool* opened);
