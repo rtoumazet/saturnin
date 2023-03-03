@@ -43,25 +43,23 @@ void runTests() {
         using namespace saturnin::video;
         using namespace std::string_literals;
 
-        {
-            auto bitfield_original = Test();
+        auto bitfield_original = Test();
 
-            bitfield_original.startTest();
+        bitfield_original.startTest();
 
-            auto           test = std::vector<u32>{};
-            constexpr auto iterations{1000000};
-            constexpr auto tvmd = TvScreenMode{0b1000000000000011};
-            auto           val  = u32{};
+        auto           test = std::vector<u32>{};
+        constexpr auto iterations{1000000};
+        constexpr auto tvmd = TvScreenMode{0b1000000000000011};
+        auto           val  = u32{};
 
-            for (int i = 0; i < iterations; ++i) {
-                if (toEnum<HorizontalResolution>(tvmd.horizontal_resolution) == HorizontalResolution::hi_res_704) { ++val; }
-                test.push_back(val);
-            }
-
-            auto result = "Original bitfield "s;
-            result += bitfield_original.endTest();
-            core::Log::info(Logger::test, result);
+        for (int i = 0; i < iterations; ++i) {
+            if (toEnum<HorizontalResolution>(tvmd.horizontal_resolution) == HorizontalResolution::hi_res_704) { ++val; }
+            test.push_back(val);
         }
+
+        auto result = "Original bitfield "s;
+        result += bitfield_original.endTest();
+        core::Log::info(Logger::test, result);
     }
 }
 

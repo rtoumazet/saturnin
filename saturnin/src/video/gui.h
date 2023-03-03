@@ -48,6 +48,20 @@ constexpr auto icon_pause      = "\xEE\xA4\x86 ";
 constexpr auto icon_stop       = "\xEE\xA4\x87 ";
 constexpr auto icon_next_frame = "\xEE\xA4\x88 ";
 
+struct GuiConfiguration {
+    bool show_file_load_binary    = false;
+    bool show_debug_memory_editor = false;
+    bool show_debug_memory_dump   = false;
+    bool show_debug_sh2           = false;
+    bool show_debug_smpc          = false;
+    bool show_debug_vdp1          = false;
+    bool show_debug_vdp2          = false;
+    bool show_debug_textures      = false;
+    bool show_demo                = false;
+    bool show_log                 = true;
+    bool show_benchmarks          = true;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void showImguiDemoWindow(bool show_window);
 ///
@@ -62,40 +76,42 @@ constexpr auto icon_next_frame = "\xEE\xA4\x88 ";
 void showImguiDemoWindow(bool show_window);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showCoreWindow(core::EmulatorContext& state);
+/// \fn	void showCoreWindow(GuiConfiguration& conf, core::EmulatorContext& state);
 ///
-/// \brief  Displays the core window.
+/// \brief	Displays the core window.
 ///
-/// \author Runik
-/// \date   24/10/2019
+/// \author	Runik
+/// \date	24/10/2019
 ///
-/// \param [in,out] state   The emulator context.
+/// \param [in,out]	conf 	The GUI configuration.
+/// \param [in,out]	state	The emulator context.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showCoreWindow(core::EmulatorContext& state);
+void showCoreWindow(GuiConfiguration& conf, core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showMainMenu(core::EmulatorContext& state);
+/// \fn	void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state);
 ///
-/// \brief  Shows the main menu in the main window
+/// \brief	Shows the main menu in the main window
 ///
-/// \author Runik
-/// \date   10/02/2021
+/// \author	Runik
+/// \date	10/02/2021
 ///
-/// \param [in,out] state   The emulator context.
+/// \param [in,out]	conf 	The GUI configuration.
+/// \param [in,out]	state	The emulator context.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showMainMenu(core::EmulatorContext& state);
+void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void showRenderingWindow(core::EmulatorContext& state);
+/// \fn	void showRenderingWindow(core::EmulatorContext& state);
 ///
-/// \brief  Displays the rendering window.
+/// \brief	Displays the rendering window.
 ///
-/// \author Runik
-/// \date   24/10/2019
+/// \author	Runik
+/// \date	24/10/2019
 ///
-/// \param [in,out] state   The emulator context.
+/// \param [in,out]	state	The emulator context.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void showRenderingWindow(core::EmulatorContext& state);
@@ -227,32 +243,33 @@ void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened);
 void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened);
+/// \fn	void showFileLoadBinaryWindow(GuiConfiguration& conf, core::EmulatorContext& state, bool* opened);
 ///
 /// \brief	Displays load binary window from the file menu.
 ///
 /// \author	Runik
 /// \date	12/08/2021
 ///
+/// \param [in,out]	conf  	The GUI configuration.
 /// \param [in,out]	state 	The emulator state.
 /// \param [in,out]	opened	If non-null, true if opened.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened);
+void showFileLoadBinaryWindow(GuiConfiguration& conf, core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	void showBenchmarkWindow(core::EmulatorContext& state, bool* opened);
+/// \fn	void showBenchmarkWindow(const core::EmulatorContext& state, bool* opened);
 ///
 /// \brief	Shows the benchmark window
 ///
 /// \author	Runik
 /// \date	21/06/2022
 ///
-/// \param [in,out]	state 	The emulator context.
+/// \param 		   	state 	The emulator context.
 /// \param [in,out]	opened	If non-null, true if opened.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void showBenchmarkWindow(core::EmulatorContext& state, bool* opened);
+void showBenchmarkWindow(const core::EmulatorContext& state, bool* opened);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn void buildGui(core::EmulatorContext& state);

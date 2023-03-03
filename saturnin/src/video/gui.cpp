@@ -55,19 +55,6 @@ namespace test  = saturnin::tests;
 
 namespace saturnin::gui {
 
-// static bool show_load_stv     = false;
-static auto show_file_load_binary    = false;
-static auto show_debug_memory_editor = false;
-static auto show_debug_memory_dump   = false;
-static auto show_debug_sh2           = false;
-static auto show_debug_smpc          = false;
-static auto show_debug_vdp1          = false;
-static auto show_debug_vdp2          = false;
-static auto show_debug_textures      = false;
-static auto show_demo                = false;
-static auto show_log                 = true;
-static auto show_benchmarks          = true;
-
 using core::BinaryFileConfiguration;
 using core::Log;
 using core::Logger;
@@ -92,7 +79,7 @@ void showImguiDemoWindow(const bool show_window) {
     }
 }
 
-void showCoreWindow(core::EmulatorContext& state) {
+void showCoreWindow(GuiConfiguration& conf, core::EmulatorContext& state) {
     auto window_flags = ImGuiWindowFlags{ImGuiWindowFlags_MenuBar};
     window_flags |= ImGuiWindowFlags_NoCollapse;
     window_flags |= ImGuiWindowFlags_NoResize;
@@ -109,7 +96,7 @@ void showCoreWindow(core::EmulatorContext& state) {
 
     ImGui::Begin(tr("Core").c_str(), nullptr, window_flags);
 
-    showMainMenu(state);
+    showMainMenu(conf, state);
 
     const auto button_width = ImVec2(80, 0);
     const auto label_run    = icon_play + tr("Run");
@@ -121,13 +108,13 @@ void showCoreWindow(core::EmulatorContext& state) {
     const auto label_stop = icon_stop + tr("Stop");
     if (ImGui::Button(label_stop.c_str(), button_width)) {
         state.stopEmulation();
-        show_debug_sh2 = false;
+        conf.show_debug_sh2 = false;
     }
 
     ImGui::End();
 }
 
-void showMainMenu(core::EmulatorContext& state) {
+void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
     if (ImGui::BeginMenuBar()) {
         // File
         if (ImGui::BeginMenu(tr("File").c_str())) {
@@ -160,12 +147,12 @@ void showMainMenu(core::EmulatorContext& state) {
 
                 ImGui::EndMenu();
             };
-            if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &show_file_load_binary)) {}
+            if (ImGui::MenuItem(tr("Load binary file").c_str(), nullptr, &conf.show_file_load_binary)) {}
             if (ImGui::MenuItem(tr("Exit").c_str())) { state.renderingStatus(core::RenderingStatus::stopped); }
 
             ImGui::EndMenu();
         }
-        if (show_file_load_binary) { showFileLoadBinaryWindow(state, &show_file_load_binary); };
+        if (conf.show_file_load_binary) { showFileLoadBinaryWindow(conf, state, &conf.show_file_load_binary); };
 
         // Debug
         switch (state.emulationStatus()) {
@@ -173,27 +160,26 @@ void showMainMenu(core::EmulatorContext& state) {
             case running:
             case reset: {
                 if (ImGui::BeginMenu(tr("Debug").c_str())) {
-                    // ImGui::MenuItem(tr("Memory editor").c_str(), nullptr, &show_debug_memory);
                     if (ImGui::BeginMenu(tr("Memory").c_str())) {
-                        ImGui::MenuItem(tr("Editor").c_str(), nullptr, &show_debug_memory_editor);
-                        ImGui::MenuItem(tr("Dump").c_str(), nullptr, &show_debug_memory_dump);
+                        ImGui::MenuItem(tr("Editor").c_str(), nullptr, &conf.show_debug_memory_editor);
+                        ImGui::MenuItem(tr("Dump").c_str(), nullptr, &conf.show_debug_memory_dump);
                         ImGui::EndMenu();
                     }
-                    ImGui::MenuItem(tr("SH2").c_str(), nullptr, &show_debug_sh2);
-                    ImGui::MenuItem(tr("SMPC").c_str(), nullptr, &show_debug_smpc);
-                    ImGui::MenuItem(tr("VDP1").c_str(), nullptr, &show_debug_vdp1);
-                    ImGui::MenuItem(tr("VDP2").c_str(), nullptr, &show_debug_vdp2);
-                    ImGui::MenuItem(tr("Textures").c_str(), nullptr, &show_debug_textures);
+                    ImGui::MenuItem(tr("SH2").c_str(), nullptr, &conf.show_debug_sh2);
+                    ImGui::MenuItem(tr("SMPC").c_str(), nullptr, &conf.show_debug_smpc);
+                    ImGui::MenuItem(tr("VDP1").c_str(), nullptr, &conf.show_debug_vdp1);
+                    ImGui::MenuItem(tr("VDP2").c_str(), nullptr, &conf.show_debug_vdp2);
+                    ImGui::MenuItem(tr("Textures").c_str(), nullptr, &conf.show_debug_textures);
                     ImGui::EndMenu();
                 }
 
-                if (show_debug_memory_editor) { showDebugMemoryEditorWindow(state, &show_debug_memory_editor); };
-                if (show_debug_memory_dump) { showDebugMemoryDumpWindow(state, &show_debug_memory_dump); };
-                if (show_debug_sh2) { showDebugSh2Window(state, &show_debug_sh2); };
-                if (show_debug_smpc) { showDebugSmpcWindow(state, &show_debug_smpc); };
-                if (show_debug_vdp1) { showDebugVdp1Window(state, &show_debug_vdp1); };
-                if (show_debug_vdp2) { showDebugVdp2Window(state, &show_debug_vdp2); };
-                if (show_debug_textures) { showDebugTexturesWindow(state, &show_debug_textures); };
+                if (conf.show_debug_memory_editor) { showDebugMemoryEditorWindow(state, &conf.show_debug_memory_editor); };
+                if (conf.show_debug_memory_dump) { showDebugMemoryDumpWindow(state, &conf.show_debug_memory_dump); };
+                if (conf.show_debug_sh2) { showDebugSh2Window(state, &conf.show_debug_sh2); };
+                if (conf.show_debug_smpc) { showDebugSmpcWindow(state, &conf.show_debug_smpc); };
+                if (conf.show_debug_vdp1) { showDebugVdp1Window(state, &conf.show_debug_vdp1); };
+                if (conf.show_debug_vdp2) { showDebugVdp2Window(state, &conf.show_debug_vdp2); };
+                if (conf.show_debug_textures) { showDebugTexturesWindow(state, &conf.show_debug_textures); };
             }
             default: break;
         }
@@ -930,15 +916,15 @@ void showMainMenu(core::EmulatorContext& state) {
 
         // Tests
         if (ImGui::BeginMenu(tr("Benchmarks").c_str())) {
-            ImGui::MenuItem(tr("Threads").c_str(), nullptr, &show_benchmarks);
+            ImGui::MenuItem(tr("Threads").c_str(), nullptr, &conf.show_benchmarks);
             ImGui::EndMenu();
         }
-        if (show_benchmarks) {
+        if (conf.show_benchmarks) {
             //
             //
             //
             // auto s = sizeof(state);
-            showBenchmarkWindow(state, &show_benchmarks);
+            showBenchmarkWindow(state, &conf.show_benchmarks);
         };
 
         ImGui::EndMenuBar();
@@ -970,11 +956,8 @@ void showRenderingWindow(core::EmulatorContext& state) {
 
     ImGui::Begin("Video rendering", nullptr, flags);
 
-    // Log::info(Logger::main, "UI rendering.");
-
     if (state.opengl()->areFbosInitialized()) {
         if (state.opengl()->isThereSomethingToRender()) {
-            // Log::info(Logger::main, "Saturn rendering.");
             state.opengl()->generateTextures();
             state.opengl()->render();
         }
@@ -989,9 +972,6 @@ void showRenderingWindow(core::EmulatorContext& state) {
         }
     }
     ImGui::Text("%s", state.opengl()->fps().c_str());
-    // const auto mask = std::string{"{:#f}"};
-    // ImGui::TextUnformatted(format(mask, state.opengl()->fps());
-
     ImGui::End();
     ImGui::PopStyleVar();
     ImGui::PopStyleVar();
@@ -1995,7 +1975,7 @@ void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened) {
     ImGui::End();
 }
 
-void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
+void showFileLoadBinaryWindow(GuiConfiguration& conf, core::EmulatorContext& state, bool* opened) {
     constexpr auto column_2_start        = 120;
     constexpr auto address_input_width   = 70.f;
     constexpr auto default_load_address  = "6004000";
@@ -2070,13 +2050,13 @@ void showFileLoadBinaryWindow(core::EmulatorContext& state, bool* opened) {
         state.memory()->selectedBinaryFile(file_conf);
         if (!state.memory()->loadBinaryFile(file_conf)) { state.memory()->selectedBinaryFile(core::defaultBinaryFile()); }
         state.startEmulation();
-        show_file_load_binary = false;
+        conf.show_file_load_binary = false;
     }
 
     ImGui::End();
 }
 
-void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
+void showBenchmarkWindow([[maybe_unused]] const core::EmulatorContext& state, bool* opened) {
     const auto window_size = ImVec2(600, 345);
     ImGui::SetNextWindowSize(window_size);
 
@@ -2090,11 +2070,12 @@ void showBenchmarkWindow(core::EmulatorContext& state, bool* opened) {
 }
 
 void buildGui(core::EmulatorContext& state) {
-    showCoreWindow(state);
+    static auto gui_conf = GuiConfiguration{};
+    showCoreWindow(gui_conf, state);
     showRenderingWindow(state);
 
-    if (show_demo) { showImguiDemoWindow(show_demo); }
-    if (show_log) { showLogWindow(state, &show_log); }
+    if (gui_conf.show_demo) { showImguiDemoWindow(gui_conf.show_demo); }
+    if (gui_conf.show_log) { showLogWindow(state, &gui_conf.show_log); }
 }
 
 void addTextureToDrawList(s32 texture, const u32 width, const u32 height, const u8 alpha) {
