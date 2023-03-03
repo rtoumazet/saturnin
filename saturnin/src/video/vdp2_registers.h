@@ -184,8 +184,8 @@ constexpr auto color_offset_b_blue                      = u16{0x011e};
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Display : bool {
-    not_displayed = 0, ///< Picture is not displayed on TV screen.
-    displayed     = 1  ///< Picture is displayed on TV screen.
+    not_displayed = false, ///< Picture is not displayed on TV screen.
+    displayed     = true   ///< Picture is displayed on TV screen.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,8 +195,8 @@ enum class Display : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class BorderColorMode : bool {
-    displays_black       = 0, ///< Displays black.
-    displays_back_screen = 1  ///< Displays back screen.
+    displays_black       = false, ///< Displays black.
+    displays_back_screen = true   ///< Displays back screen.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -284,8 +284,8 @@ union ExternalSignalEnable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ExternalLatchFlag : bool {
-    not_latched_in_register = 0, ///< Not latched in register.
-    latched_in_register     = 1  ///< Latched in register.
+    not_latched_in_register = false, ///< Not latched in register.
+    latched_in_register     = true   ///< Latched in register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -295,8 +295,8 @@ enum class ExternalLatchFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ExternalSyncFlag : bool {
-    no_sync       = 0, ///< Not synchronized.
-    internal_sync = 1  ///< Internal circuit synchronized.
+    no_sync       = false, ///< Not synchronized.
+    internal_sync = true   ///< Internal circuit synchronized.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -306,8 +306,8 @@ enum class ExternalSyncFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class VerticalBlankFlag : bool {
-    during_vertical_scan    = 0, ///< During vertical scan.
-    during_vertical_retrace = 1  ///< During vertical retrace (vblank).
+    during_vertical_scan    = false, ///< During vertical scan.
+    during_vertical_retrace = true   ///< During vertical retrace (vblank).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -317,8 +317,8 @@ enum class VerticalBlankFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class HorizontalBlankFlag : bool {
-    during_horizontal_scan    = 0, ///< During horizontal scan.
-    during_horizontal_retrace = 1  ///< During horizontal retrace (hblank).
+    during_horizontal_scan    = false, ///< During horizontal scan.
+    during_horizontal_retrace = true   ///< During horizontal retrace (hblank).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -328,8 +328,8 @@ enum class HorizontalBlankFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ScanFieldFlag : bool {
-    during_even_field_scan = 0, ///< During even field scan.
-    during_odd_field_scan  = 1  ///< During odd field scan.
+    during_even_field_scan = false, ///< During even field scan.
+    during_odd_field_scan  = true   ///< During odd field scan.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -339,8 +339,8 @@ enum class ScanFieldFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TvStandardFlag : bool {
-    ntsc_standard = 0, ///< NTSC standard.
-    pal_standard  = 1  ///< PAL standard.
+    ntsc_standard = false, ///< NTSC standard.
+    pal_standard  = true   ///< PAL standard.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -371,8 +371,8 @@ union ScreenStatus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class VramSize : bool {
-    size_4_mbits = 0, ///< 4 Mbit.
-    size_8_mbits = 1  ///< 8 Mbit.
+    size_4_mbits = false, ///< 4 Mbit.
+    size_8_mbits = true   ///< 8 Mbit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -444,8 +444,8 @@ union Reserve {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CoefficientTableStorage : bool {
-    stored_in_vram      = 0, ///< Coefficient table is stored in VRAM.
-    stored_in_color_ram = 1  ///< Coefficient table is stored in color RAM.
+    stored_in_vram      = false, ///< Coefficient table is stored in VRAM.
+    stored_in_color_ram = true   ///< Coefficient table is stored in color RAM.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -469,8 +469,8 @@ enum class ColorRamMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class VramMode : bool {
-    no_partition         = 0, ///< Do not partition in 2 banks.
-    partition_in_2_banks = 1  ///< Partition in 2 banks.
+    no_partition         = false, ///< Do not partition in 2 banks.
+    partition_in_2_banks = true   ///< Partition in 2 banks.
 };
 
 enum class RotationDataBankSelect : u8 {
@@ -572,9 +572,9 @@ union VramCyclePatternBankUpper {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransparentDisplayEnable : bool {
-    transparency_code_valid = 0, ///< Validates transparency code (transparency code becomes valid).
+    transparency_code_valid = false, ///< Validates transparency code (transparency code becomes valid).
     transparency_code_invalid
-    = 1 ///< Invalidates transparency code (transparency code dots are displayed according to data values).
+    = true ///< Invalidates transparency code (transparency code dots are displayed according to data values).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -584,8 +584,8 @@ enum class TransparentDisplayEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ScreenDisplayEnableBit : bool {
-    cannot_display = 0, ///< Cannot display (Does not execute VRAM access for display).
-    can_display    = 1  ///< Can display.
+    cannot_display = false, ///< Cannot display (Does not execute VRAM access for display).
+    can_display    = true   ///< Can display.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -693,8 +693,8 @@ enum class CharacterColorNumber2Bits : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CharacterColorNumber1Bit : bool {
-    palette_16  = 0, ///< Palette format, 16 colors.
-    palette_256 = 1, ///< Palette format, 256 colors.
+    palette_16  = false, ///< Palette format, 16 colors.
+    palette_256 = 1,     ///< Palette format, 256 colors.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -718,8 +718,8 @@ enum class BitmapSize2Bits : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class BitmapSize1Bit : bool {
-    size_512_by_256 = 0, ///< 512 H dots* 256 V dots.
-    size_512_by_512 = 1  ///< 512 H dots* 512 V dots.
+    size_512_by_256 = false, ///< 512 H dots* 256 V dots.
+    size_512_by_512 = true   ///< 512 H dots* 512 V dots.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -729,8 +729,8 @@ enum class BitmapSize1Bit : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class BitmapEnable : bool {
-    cell_format   = 0, ///< Cell Format.
-    bitmap_format = 1  ///< Bitmap Format.
+    cell_format   = false, ///< Cell Format.
+    bitmap_format = true   ///< Bitmap Format.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -740,8 +740,8 @@ enum class BitmapEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CharacterSize : bool {
-    one_by_one = 0, ///< 1 H Cell x 1 V Cell.
-    two_by_two = 1  ///< 2 H Cells x 2 V Cells.
+    one_by_one = false, ///< 1 H Cell x 1 V Cell.
+    two_by_two = true   ///< 2 H Cells x 2 V Cells.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -836,8 +836,8 @@ union BitmapPaletteNumberB {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PatternNameDataSize : bool {
-    two_words = 0, ///< 2 Words.
-    one_word  = 1  ///< 1 Word.
+    two_words = false, ///< 2 Words.
+    one_word  = true   ///< 1 Word.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1256,7 +1256,7 @@ union CoordinateIncrementNbg1VerticalFractionalPart {
 /// \brief  NxZMQT bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ZoomQuarter : bool { none = 0, up_to_one_quarter = 1 };
+enum class ZoomQuarter : bool { none = false, up_to_one_quarter = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ZoomHalf
@@ -1264,7 +1264,7 @@ enum class ZoomQuarter : bool { none = 0, up_to_one_quarter = 1 };
 /// \brief  NxZMHF bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ZoomHalf : bool { none = 0, up_to_one_half = 1 };
+enum class ZoomHalf : bool { none = false, up_to_one_half = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	ReductionEnable
@@ -1830,8 +1830,8 @@ enum class SpriteColorCalculationCondition : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class SpriteColorMode : bool {
-    only_palette = 0, ///< Sprite data is all in palette format.
-    mixed        = 1  ///< Sprite data is in palette format and RGB format.
+    only_palette = false, ///< Sprite data is all in palette format.
+    mixed        = true   ///< Sprite data is in palette format and RGB format.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1841,8 +1841,8 @@ enum class SpriteColorMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class SpriteWindowEnable : bool {
-    does_not_use_sprite_window = 0, ///< Does not use sprite window.
-    uses_sprite_window         = 1  ///< Uses sprite window.
+    does_not_use_sprite_window = false, ///< Does not use sprite window.
+    uses_sprite_window         = true   ///< Uses sprite window.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2247,8 +2247,8 @@ union ColorCalculationRatioLineColorBack {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ColorOffsetEnableBit : bool {
-    disabled = 0, ///< Do not use color offset function.
-    enabled  = 1  ///< Use color offset function.
+    disabled = false, ///< Do not use color offset function.
+    enabled  = true   ///< Use color offset function.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2280,8 +2280,8 @@ union ColorOffsetEnable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ColorOffsetSelectBit : bool {
-    use_color_offset_a = 0, ///< Use color offset A.
-    use_color_offset_b = 1  ///< Use color offset B.
+    use_color_offset_a = false, ///< Use color offset A.
+    use_color_offset_b = true   ///< Use color offset B.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2313,8 +2313,8 @@ union ColorOffsetSelect {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Sign : bool {
-    positive = 0, ///< Sign is positive.
-    negative = 1  ///< Sign is negative.
+    positive = false, ///< Sign is positive.
+    negative = true   ///< Sign is negative.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

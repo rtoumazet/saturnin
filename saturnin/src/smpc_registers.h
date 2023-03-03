@@ -145,8 +145,8 @@ enum class PortMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ResetButtonStatus : bool {
-    button_off = 0, ///< Reset button off.
-    button_on  = 1  ///< Reset buton on.
+    button_off = false, ///< Reset button off.
+    button_on  = true   ///< Reset buton on.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +155,7 @@ enum class ResetButtonStatus : bool {
 /// \brief  Peripheral data remaining values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PeripheralDataRemaining : bool { no_remaining_peripheral_data = 0, remaining_peripheral_data = 1 };
+enum class PeripheralDataRemaining : bool { no_remaining_peripheral_data = false, remaining_peripheral_data = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralDataLocation
@@ -163,7 +163,7 @@ enum class PeripheralDataRemaining : bool { no_remaining_peripheral_data = 0, re
 /// \brief  SR - PDL bit values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PeripheralDataLocation : bool { second_or_above_peripheral_data = 0, first_peripheral_data = 1 };
+enum class PeripheralDataLocation : bool { second_or_above_peripheral_data = false, first_peripheral_data = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	StatusRegister
@@ -205,7 +205,7 @@ union StatusFlag {
 /// \brief  Intback Continue Request values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class IntbackContinueRequest : bool { not_requested = 0, requested = 1 };
+enum class IntbackContinueRequest : bool { not_requested = false, requested = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   IntbackBreakRequest
@@ -213,7 +213,7 @@ enum class IntbackContinueRequest : bool { not_requested = 0, requested = 1 };
 /// \brief  Intback Break Request values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class IntbackBreakRequest : bool { not_requested = 0, requested = 1 };
+enum class IntbackBreakRequest : bool { not_requested = false, requested = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   SmpcStatusAcquisition
@@ -221,7 +221,7 @@ enum class IntbackBreakRequest : bool { not_requested = 0, requested = 1 };
 /// \brief  Status acquisition values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class SmpcStatusAcquisition : bool { status_not_returned = 0, status_returned = 1 };
+enum class SmpcStatusAcquisition : bool { status_not_returned = false, status_returned = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   AcquisitionTimeOptimization
@@ -229,7 +229,7 @@ enum class SmpcStatusAcquisition : bool { status_not_returned = 0, status_return
 /// \brief  Acquisition time optimizations values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class AcquisitionTimeOptimization : bool { optimized = 0, not_optimized = 1 };
+enum class AcquisitionTimeOptimization : bool { optimized = false, not_optimized = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralDataEnable
@@ -237,7 +237,7 @@ enum class AcquisitionTimeOptimization : bool { optimized = 0, not_optimized = 1
 /// \brief  Peripheral data enable values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PeripheralDataEnable : bool { peripheral_data_not_returned = 0, peripheral_data_returned = 1 };
+enum class PeripheralDataEnable : bool { peripheral_data_not_returned = false, peripheral_data_returned = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	InputRegister
@@ -266,8 +266,8 @@ union InputRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ResetStatus : bool {
-    enabled  = 0, ///< Reset enabled.
-    disabled = 1  ///< Reset disabled.
+    enabled  = false, ///< Reset enabled.
+    disabled = true   ///< Reset disabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -277,8 +277,8 @@ enum class ResetStatus : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class SetTime : bool {
-    not_set_time = 0, ///< Not SETTIME after SMPC cold reset.
-    set_time     = 1  ///< SETTIME is done after SMPC cold reset.
+    not_set_time = false, ///< Not SETTIME after SMPC cold reset.
+    set_time     = true   ///< SETTIME is done after SMPC cold reset.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -311,8 +311,8 @@ union OutputRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ButtonStatus : bool {
-    pressed  = 0, ///< Button is pressed.
-    released = 1  ///< Button is released.
+    pressed  = false, ///< Button is pressed.
+    released = true   ///< Button is released.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -389,8 +389,8 @@ union PortDataRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PeripheralPortMode : bool {
-    smpc_control_mode = 0, ///< SMPC control mode. (initial)
-    sh2_direct_mode   = 1, ///< SH2 direct mode
+    smpc_control_mode = false, ///< SMPC control mode. (initial)
+    sh2_direct_mode   = true,  ///< SH2 direct mode
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -415,8 +415,8 @@ union IOSelect {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ExternalLatch : bool {
-    disabled = 0, ///< Disabled. (initial)
-    enabled  = 1, ///< Enabled
+    disabled = false, ///< Disabled. (initial)
+    enabled  = true,  ///< Enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

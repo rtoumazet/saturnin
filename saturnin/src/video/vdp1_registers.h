@@ -50,8 +50,8 @@ constexpr u32 mode_status                        = {0x25d00016};
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class VBlankEraseWriteEnable : bool {
-    no_erase_write_performed_during_vblank = 0, ///< Erase/Write is not performed during VBlank.
-    erase_write_performed_during_vblank    = 1  ///< Erase/Write is performed during VBlank.
+    no_erase_write_performed_during_vblank = false, ///< Erase/Write is not performed during VBlank.
+    erase_write_performed_during_vblank    = true   ///< Erase/Write is performed during VBlank.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,8 +61,8 @@ enum class VBlankEraseWriteEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class HdtvEnable : bool {
-    ntsc_pal  = 0, ///< NTSC, PAL.
-    hdtv_31kc = 1  ///< HDTV, 31KC.
+    ntsc_pal  = false, ///< NTSC, PAL.
+    hdtv_31kc = true   ///< HDTV, 31KC.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,8 +72,8 @@ enum class HdtvEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class FrameBufferRotationEnable : bool {
-    no_rotation = 0, ///< No rotation.
-    rotation    = 1  ///< Rotation.
+    no_rotation = false, ///< No rotation.
+    rotation    = true   ///< Rotation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,8 +83,8 @@ enum class FrameBufferRotationEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class BitDepthSelection : bool {
-    sixteen_bits_per_pixel = 0, ///< 16 bits / pixel.
-    eight_bits_per_pixel   = 1  ///< 8 bits / pixel.
+    sixteen_bits_per_pixel = false, ///< 16 bits / pixel.
+    eight_bits_per_pixel   = true   ///< 8 bits / pixel.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,8 +111,8 @@ union TvModeSelection {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class EvenOddCoordinateSelect : bool {
-    samples_pixels_at_even_coordinates = 0, ///< Samples only pixels at even coordinates.
-    samples_pixels_at_odd_coordinates  = 1  ///< Samples only pixels at odd coordinates.
+    samples_pixels_at_even_coordinates = false, ///< Samples only pixels at even coordinates.
+    samples_pixels_at_odd_coordinates  = true   ///< Samples only pixels at odd coordinates.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,8 +122,8 @@ enum class EvenOddCoordinateSelect : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DoubleInterlaceEnable : bool {
-    non_interlace_or_single_interlace = 0, ///< Non-interlace/single interlace.
-    double_interlace                  = 1  ///< Double interlace.
+    non_interlace_or_single_interlace = false, ///< Non-interlace/single interlace.
+    double_interlace                  = true   ///< Double interlace.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,8 +133,8 @@ enum class DoubleInterlaceEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DoubleInterlaceDrawLine : bool {
-    not_set = 0, ///< DIL bit not set.
-    set     = 1  ///< DIL bit set.
+    not_set = false, ///< DIL bit not set.
+    set     = true   ///< DIL bit set.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,8 +156,8 @@ enum class DoubleInterlaceBothBits : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class FrameBufferChangeModeBit : bool {
-    automatic_mode = 0, ///< Automatic mode change.
-    manual_mode    = 1  ///< Manual mode change.
+    automatic_mode = false, ///< Automatic mode change.
+    manual_mode    = true   ///< Manual mode change.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,8 +212,8 @@ enum class PlotTriggerMode : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PlotTriggerMode1 : bool {
-    cleared = 0, ///< Bit is cleared.
-    set     = 1  ///< Bit is set.
+    cleared = false, ///< Bit is cleared.
+    set     = true   ///< Bit is set.
 
 };
 
@@ -299,8 +299,8 @@ union DrawForcedTermination {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CurrentEndBitFetchStatus : bool {
-    end_bit_not_fetched = 0, ///< The end bit in current frame has not been fetched.
-    end_bit_fetched     = 1  ///< The end bit in current frame has been fetched and plotting is ended.
+    end_bit_not_fetched = false, ///< The end bit in current frame has not been fetched.
+    end_bit_fetched     = true   ///< The end bit in current frame has been fetched and plotting is ended.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -310,8 +310,8 @@ enum class CurrentEndBitFetchStatus : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class BeforeEndBitFetchStatus : bool {
-    end_bit_not_fetched = 0, ///< The end bit in previous frame has not been fetched.
-    end_bit_fetched     = 1  ///< The end bit in previous frame has been fetched and drawing is terminated.
+    end_bit_not_fetched = false, ///< The end bit in previous frame has not been fetched.
+    end_bit_fetched     = true   ///< The end bit in previous frame has been fetched and drawing is terminated.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -385,8 +385,8 @@ union ModeStatus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class EndBit : bool {
-    command_selection_valid = 0, ///< Command selection valid.
-    draw_ended              = 1  ///< Draw end command
+    command_selection_valid = false, ///< Command selection valid.
+    draw_ended              = true   ///< Draw end command
 };
 
 enum class JumpSelect : u8 {
@@ -488,8 +488,8 @@ union CmdLink {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class MsbOn : bool {
-    off = 0, ///< MSB is 0 on the framebuffer pixels that should be drawn.
-    on  = 1  ///< MSB is 1 on the framebuffer pixels that should be drawn.
+    off = false, ///< MSB is 0 on the framebuffer pixels that should be drawn.
+    on  = true   ///< MSB is 1 on the framebuffer pixels that should be drawn.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -499,8 +499,8 @@ enum class MsbOn : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class HighSpeedShrink : bool {
-    disabled = 0, ///< High Speed Shrink is disabled.
-    enabled  = 1  ///< High Speed Shrink is enabled.
+    disabled = false, ///< High Speed Shrink is disabled.
+    enabled  = true   ///< High Speed Shrink is enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -510,8 +510,8 @@ enum class HighSpeedShrink : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PreClippingDisable : bool {
-    pre_clipping    = 0, ///< Pre-clipping with horizontal inversion.
-    no_pre_clipping = 1  ///< No pre-clipping and no horizontal inversion.
+    pre_clipping    = false, ///< Pre-clipping with horizontal inversion.
+    no_pre_clipping = true   ///< No pre-clipping and no horizontal inversion.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -521,8 +521,8 @@ enum class PreClippingDisable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class UserClippingEnable : bool {
-    ignored = 0, ///< User clipping coordinates are ignored.
-    enabled = 1  ///< Part is clipped and drawn according to the user clipping coordinates and clipping mode bit.
+    ignored = false, ///< User clipping coordinates are ignored.
+    enabled = true   ///< Part is clipped and drawn according to the user clipping coordinates and clipping mode bit.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -532,8 +532,8 @@ enum class UserClippingEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class UserClippingMode : bool {
-    drawing_inside  = 0, ///< Drawing is performed inside the clipping area.
-    drawing_outside = 1  ///< Drawing is performed outside the clipping area.
+    drawing_inside  = false, ///< Drawing is performed inside the clipping area.
+    drawing_outside = true   ///< Drawing is performed outside the clipping area.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -543,8 +543,8 @@ enum class UserClippingMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class MeshEnable : bool {
-    disabled = 0, ///< Draw without mesh processing.
-    enabled  = 1  ///< Draw with mesh processing.
+    disabled = false, ///< Draw without mesh processing.
+    enabled  = true   ///< Draw with mesh processing.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -554,8 +554,8 @@ enum class MeshEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class EndCodeDisable : bool {
-    enabled  = 0, ///< End code is enabled.
-    disabled = 1  ///< End code is disabled.
+    enabled  = false, ///< End code is enabled.
+    disabled = true   ///< End code is disabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -565,8 +565,8 @@ enum class EndCodeDisable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransparentPixelDisable : bool {
-    transparent_pixel_enabled  = 0, ///< Transparent pixel is enabled.
-    transparent_pixel_disabled = 1  ///< Transparent pixel disabled.
+    transparent_pixel_enabled  = false, ///< Transparent pixel is enabled.
+    transparent_pixel_disabled = true   ///< Transparent pixel disabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -601,7 +601,7 @@ enum class ColorCalculation : u8 {
     mode_7 = 0b111, ///< Gouraud shading + half-transparent.
 };
 
-enum class GouraudShading : bool { disabled = 0, enabled = 1 };
+enum class GouraudShading : bool { disabled = false, enabled = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	CmdPmod

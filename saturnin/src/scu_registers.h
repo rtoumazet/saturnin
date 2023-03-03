@@ -145,8 +145,8 @@ union DmaLevel2TransferByteNumberRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ReadAddressAddValue : bool {
-    add_0 = 0, ///< Nothing is added.
-    add_4 = 1  ///< 4 bytes are added
+    add_0 = false, ///< Nothing is added.
+    add_4 = true   ///< 4 bytes are added
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,8 +188,8 @@ union DmaAddressAddValueRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DmaEnable : bool {
-    disabled = 0, ///< DMA is disabled.
-    enabled  = 1  ///< DMA is enabled.
+    disabled = false, ///< DMA is disabled.
+    enabled  = true   ///< DMA is enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,8 +199,8 @@ enum class DmaEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DmaStarting : bool {
-    not_started = 0, ///< DMA isn't started.
-    started     = 1  ///< DMA starts execution. Only relevant when start factor is DMA.
+    not_started = false, ///< DMA isn't started.
+    started     = true   ///< DMA starts execution. Only relevant when start factor is DMA.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -225,8 +225,8 @@ union DmaEnableRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DmaMode : bool {
-    direct   = 0, ///< Direct mode.
-    indirect = 1  ///< Indirect mode.
+    direct   = false, ///< Direct mode.
+    indirect = true   ///< Indirect mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,8 +236,8 @@ enum class DmaMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ReadAddressUpdate : bool {
-    save   = 0, ///< Saves the value.
-    update = 1  ///< Updates the value.
+    save   = false, ///< Saves the value.
+    update = true   ///< Updates the value.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -247,8 +247,8 @@ enum class ReadAddressUpdate : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class WriteAddressUpdate : bool {
-    save   = 0, ///< Saves the value.
-    update = 1  ///< Updates the value.
+    save   = false, ///< Saves the value.
+    update = true   ///< Updates the value.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,8 +293,8 @@ union DmaModeRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DspBusAccess : bool {
-    not_accessing = 0, ///< Not accessing the DSP Bus.
-    accessing     = 1  ///< Accessing the DSP Bus.
+    not_accessing = false, ///< Not accessing the DSP Bus.
+    accessing     = true   ///< Accessing the DSP Bus.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,8 +304,8 @@ enum class DspBusAccess : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class BBusAccess : bool {
-    not_accessing = 0, ///< Not accessing the B Bus.
-    accessing     = 1  ///< Accessing the B Bus.
+    not_accessing = false, ///< Not accessing the B Bus.
+    accessing     = true   ///< Accessing the B Bus.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -315,8 +315,8 @@ enum class BBusAccess : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ABusAccess : bool {
-    not_accessing = 0, ///< Not accessing the A Bus.
-    accessing     = 1  ///< Accessing the A Bus.
+    not_accessing = false, ///< Not accessing the A Bus.
+    accessing     = true   ///< Accessing the A Bus.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -326,8 +326,8 @@ enum class ABusAccess : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Level1DmaInterrupt : bool {
-    not_interrupted = 0, ///< Level 1 DMA isn't interrupted.
-    interrupted     = 1  ///< Level 1 DMA is interrupted.
+    not_interrupted = false, ///< Level 1 DMA isn't interrupted.
+    interrupted     = true   ///< Level 1 DMA is interrupted.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -337,8 +337,8 @@ enum class Level1DmaInterrupt : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Level0DmaInterrupt : bool {
-    not_interrupted = 0, ///< Level 0 DMA isn't interrupted.
-    interrupted     = 1  ///< Level 0 DMA is interrupted.
+    not_interrupted = false, ///< Level 0 DMA isn't interrupted.
+    interrupted     = true   ///< Level 0 DMA is interrupted.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -348,8 +348,8 @@ enum class Level0DmaInterrupt : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Level2DmaStandBy : bool {
-    not_on_standby = 0, ///< Level 2 DMA isn't on standby.
-    on_standby     = 1  ///< Level 2 DMA is on standby.
+    not_on_standby = false, ///< Level 2 DMA isn't on standby.
+    on_standby     = true   ///< Level 2 DMA is on standby.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -359,8 +359,8 @@ enum class Level2DmaStandBy : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Level2DmaOperation : bool {
-    not_in_operation = 0, ///< Level 2 DMA isn't in operation.
-    in_operation     = 1  ///< Level 2 DMA is in operation.
+    not_in_operation = false, ///< Level 2 DMA isn't in operation.
+    in_operation     = true   ///< Level 2 DMA is in operation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -370,8 +370,8 @@ enum class Level2DmaOperation : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Level1DmaStandBy : bool {
-    not_on_standby = 0, ///< Level 1 DMA isn't on standby.
-    on_standby     = 1  ///< Level 1 DMA is on standby.
+    not_on_standby = false, ///< Level 1 DMA isn't on standby.
+    on_standby     = true   ///< Level 1 DMA is on standby.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,8 +381,8 @@ enum class Level1DmaStandBy : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Level1DmaOperation : bool {
-    not_in_operation = 0, ///< Level 1 DMA isn't in operation.
-    in_operation     = 1  ///< Level 1 DMA is in operation.
+    not_in_operation = false, ///< Level 1 DMA isn't in operation.
+    in_operation     = true   ///< Level 1 DMA is in operation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -392,8 +392,8 @@ enum class Level1DmaOperation : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Level0DmaStandBy : bool {
-    not_on_standby = 0, ///< Level 0 DMA isn't on standby.
-    on_standby     = 1  ///< Level 0 DMA is on standby.
+    not_on_standby = false, ///< Level 0 DMA isn't on standby.
+    on_standby     = true   ///< Level 0 DMA is on standby.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -403,8 +403,8 @@ enum class Level0DmaStandBy : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Level0DmaOperation : bool {
-    not_in_operation = 0, ///< Level 0 DMA isn't in operation.
-    in_operation     = 1  ///< Level 0 DMA is in operation.
+    not_in_operation = false, ///< Level 0 DMA isn't in operation.
+    in_operation     = true   ///< Level 0 DMA is in operation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -414,8 +414,8 @@ enum class Level0DmaOperation : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DspDmaStandBy : bool {
-    not_on_standby = 0, ///< DSP DMA isn't on standby.
-    on_standby     = 1  ///< DSP DMA is on standby.
+    not_on_standby = false, ///< DSP DMA isn't on standby.
+    on_standby     = true   ///< DSP DMA is on standby.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -425,8 +425,8 @@ enum class DspDmaStandBy : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DspDmaOperation : bool {
-    not_in_operation = 0, ///< DSP DMA isn't in operation.
-    in_operation     = 1  ///< DSP DMA is in operation.
+    not_in_operation = false, ///< DSP DMA isn't in operation.
+    in_operation     = true   ///< DSP DMA is in operation.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -462,8 +462,8 @@ union DmaStatusRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class InterruptMask : bool {
-    not_masked = 0, ///< Interupt is not masked
-    masked     = 1  ///< Interrupt is masked
+    not_masked = false, ///< Interupt is not masked
+    masked     = true   ///< Interrupt is masked
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -513,42 +513,6 @@ class InterruptMaskRegister : public Register {
     inline static const auto undefined       = BitRange<InterruptMask>{14}; ///< Undefined value.
 };
 
-// union InterruptMaskRegister {
-//     u32          raw;             ///< Raw representation.
-//     BitField<31> external_15;     ///< Defines External interrupt 15 mask bit.
-//     BitField<30> external_14;     ///< Defines External interrupt 14 mask bit.
-//     BitField<29> external_13;     ///< Defines External interrupt 13 mask bit.
-//     BitField<28> external_12;     ///< Defines External interrupt 12 mask bit.
-//     BitField<27> external_11;     ///< Defines External interrupt 11 mask bit.
-//     BitField<26> external_10;     ///< Defines External interrupt 10 mask bit.
-//     BitField<25> external_09;     ///< Defines External interrupt 09 mask bit.
-//     BitField<24> external_08;     ///< Defines External interrupt 08 mask bit.
-//     BitField<23> external_07;     ///< Defines External interrupt 07 mask bit.
-//     BitField<22> external_06;     ///< Defines External interrupt 06 mask bit.
-//     BitField<21> external_05;     ///< Defines External interrupt 05 mask bit.
-//     BitField<20> external_04;     ///< Defines External interrupt 04 mask bit.
-//     BitField<19> external_03;     ///< Defines External interrupt 03 mask bit.
-//     BitField<18> external_02;     ///< Defines External interrupt 02 mask bit.
-//     BitField<17> external_01;     ///< Defines External interrupt 01 mask bit.
-//     BitField<16> external_00;     ///< Defines External interrupt 00 mask bit.
-//     BitField<15> a_bus;           ///< Defines A-Bus interrupt mask bit.
-//     BitField<13> sprite_draw_end; ///< Defines Sprite Draw End interrupt mask bit.
-//     BitField<12> dma_illegal;     ///< Defines DMA Illegal interrupt mask bit.
-//     BitField<11> level_0_dma;     ///< Defines Level 0 DMA interrupt mask bit.
-//     BitField<10> level_1_dma;     ///< Defines Level 1 DMA interrupt mask bit.
-//     BitField<9>  level_2_dma;     ///< Defines Level 2 DMA interrupt mask bit.
-//     BitField<8>  pad;             ///< Defines PAD interrupt mask bit.
-//     BitField<7>  system_manager;  ///< Defines System Manager interrupt mask bit.
-//     BitField<6>  sound_request;   ///< Defines Sound Request interrupt mask bit.
-//     BitField<5>  dsp_end;         ///< Defines DSP End interrupt mask bit.
-//     BitField<4>  timer_1;         ///< Defines Timer 1 interrupt mask bit.
-//     BitField<3>  timer_0;         ///< Defines Timer 0 interrupt mask bit.
-//     BitField<2>  h_blank_in;      ///< Defines H-Blank-In interrupt mask bit.
-//     BitField<1>  v_blank_out;     ///< Defines V-Blank-Out interrupt mask bit.
-//     BitField<0>  v_blank_in;      ///< Defines V-Blank-In interrupt mask bit.
-//     BitField<14> undefined;       ///< Undefined value.
-// };
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   InterruptEnable
 ///
@@ -556,8 +520,8 @@ class InterruptMaskRegister : public Register {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class InterruptEnable : bool {
-    disabled = 0, ///< Interrupt is disabled
-    enabled  = 1  ///< Interrupt is enabled
+    disabled = false, ///< Interrupt is disabled
+    enabled  = true   ///< Interrupt is enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -642,8 +606,8 @@ union Timer1SetDataRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Timer1Mode : bool {
-    interrupt_occurs_each_line     = 0, ///< Interrupt occurs at each line.
-    interrupt_occurs_only_at_timer = 1  ///< Interrupt occurs only at lines indicated by Timer 0.
+    interrupt_occurs_each_line     = false, ///< Interrupt occurs at each line.
+    interrupt_occurs_only_at_timer = true   ///< Interrupt occurs only at lines indicated by Timer 0.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -653,8 +617,8 @@ enum class Timer1Mode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TimerEnable : bool {
-    timer_operation_off = 0, ///< Timer operation off.
-    timer_operation_on  = 1  ///< Timer operation on.
+    timer_operation_off = false, ///< Timer operation off.
+    timer_operation_on  = true   ///< Timer operation on.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -679,8 +643,8 @@ union Timer1ModeRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ExecutePauseReset : bool {
-    no_change              = 0, ///< No condition change.
-    program_pause_is_reset = 1  ///< Program pause is reset when program execution begins.
+    no_change              = false, ///< No condition change.
+    program_pause_is_reset = true   ///< Program pause is reset when program execution begins.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -690,8 +654,8 @@ enum class ExecutePauseReset : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ExecutePause : bool {
-    no_change      = 0, ///< No condition change.
-    program_pauses = 1  ///< Program pauses when program execution begins.
+    no_change      = false, ///< No condition change.
+    program_pauses = true   ///< Program pauses when program execution begins.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -701,8 +665,8 @@ enum class ExecutePause : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class D0BusDmaExecution : bool {
-    no_dma           = 0, ///< No DMA is executing.
-    dma_is_executing = 1  ///< Executing DMA using the D0-Bus.
+    no_dma           = false, ///< No DMA is executing.
+    dma_is_executing = true   ///< Executing DMA using the D0-Bus.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -712,8 +676,8 @@ enum class D0BusDmaExecution : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Sign : bool {
-    operation_result_is_not_negative = 0, ///< Operation result isn't negative.
-    operation_result_is_negative     = 1  ///< Operation result is negative.
+    operation_result_is_not_negative = false, ///< Operation result isn't negative.
+    operation_result_is_negative     = true   ///< Operation result is negative.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -723,8 +687,8 @@ enum class Sign : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Zero : bool {
-    operation_result_is_not_zero = 0, ///< Operation result isn't 0.
-    operation_result_is_zero     = 1  ///< Operation result is 0.
+    operation_result_is_not_zero = false, ///< Operation result isn't 0.
+    operation_result_is_zero     = true   ///< Operation result is 0.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -734,8 +698,8 @@ enum class Zero : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Carry : bool {
-    operation_result_has_no_carry = 0, ///< Carry does not occurs in operation result.
-    operation_result_has_carry    = 1  ///< Carry occurs in operation result.
+    operation_result_has_no_carry = false, ///< Carry does not occurs in operation result.
+    operation_result_has_carry    = true   ///< Carry occurs in operation result.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -745,8 +709,8 @@ enum class Carry : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Overflow : bool {
-    operation_does_not_cause_overflow = 0, ///< Operation result does not cause overflow or underflow.
-    operation_causes_overflow         = 1  ///< Operation result causes overflow or underflow.
+    operation_does_not_cause_overflow = false, ///< Operation result does not cause overflow or underflow.
+    operation_causes_overflow         = true   ///< Operation result causes overflow or underflow.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -756,8 +720,8 @@ enum class Overflow : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ProgramEndInterrupt : bool {
-    program_not_ended_by_endi = 0, ///< Program not ended by ENDI command.
-    program_ended_by_endi     = 1  ///< Program ended by ENDI command detected.
+    program_not_ended_by_endi = false, ///< Program not ended by ENDI command.
+    program_ended_by_endi     = true   ///< Program ended by ENDI command detected.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -767,8 +731,8 @@ enum class ProgramEndInterrupt : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class StepExecuteControl : bool {
-    program_does_not_execute_one_step = 0, ///< Program does not execute one step.
-    program_executes_one_step         = 1  ///< Program executes one step if program is paused.
+    program_does_not_execute_one_step = false, ///< Program does not execute one step.
+    program_executes_one_step         = true   ///< Program executes one step if program is paused.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -778,8 +742,8 @@ enum class StepExecuteControl : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ProgramExecuteControl : bool {
-    program_execution_stops  = 0, ///< Program execution stops when writing 0.
-    program_execution_begins = 1  ///< Program execution begins when writing 1.
+    program_execution_stops  = false, ///< Program execution stops when writing 0.
+    program_execution_begins = true   ///< Program execution begins when writing 1.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -789,8 +753,8 @@ enum class ProgramExecuteControl : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ProgramCounterTransferEnable : bool {
-    program_ram_address_not_loaded_to_program_counter = 0, ///< The program RAM address is not loaded to the program counter.
-    program_ram_address_loaded_to_program_counter     = 1  ///< The program RAM address is loaded to the program counter.
+    program_ram_address_not_loaded_to_program_counter = false, ///< The program RAM address is not loaded to the program counter.
+    program_ram_address_loaded_to_program_counter     = true   ///< The program RAM address is loaded to the program counter.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
