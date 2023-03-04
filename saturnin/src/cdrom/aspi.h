@@ -24,13 +24,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <windows.h>
+#include <Windows.h>
 #include <string>
 #include <vector>
 #include <saturnin/src/emulator_defs.h>
-
-//#include <scsidefs.h>
-//#include <wnaspi32.h>
 
 namespace saturnin::cdrom {
 
@@ -110,7 +107,7 @@ class Aspi {
     static auto readSector(const u32& fad, const s32& nb) -> std::string;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static auto readToc(ScsiToc& toc_data) -> bool
+    /// \fn	static auto readToc(const ScsiToc& toc_data) -> bool
     ///
     /// \brief	Reads the CD TOC.
     ///
@@ -121,7 +118,7 @@ class Aspi {
     ///
     /// \return	true if successful.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    static auto readToc(ScsiToc& toc_data) -> bool;
+    static auto readToc(const ScsiToc& toc_data) -> bool;
 
   private:
     static HINSTANCE hWnAspi32; ///< Handle to the wnaspi32 dll.

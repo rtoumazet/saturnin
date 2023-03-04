@@ -26,7 +26,7 @@
 #include <array>      // array
 #include <functional> // function
 #include <string>     // string
-#include <windows.h>
+#include <Windows.h>
 #include <saturnin/src/emulator_defs.h>
 
 namespace saturnin::cdrom {

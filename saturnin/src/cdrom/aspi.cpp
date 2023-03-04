@@ -163,7 +163,7 @@ void Aspi::inquiry(ScsiDriveInfo& di) {
     ////delete[] byBuffer;
 }
 
-auto Aspi::readSector(const uint32_t& dwFAD, const int32_t& iNb) -> std::string {
+auto Aspi::readSector([[maybe_unused]] const u32& dwFAD, [[maybe_unused]] const s32& iNb) -> std::string {
     //// CDROM fad
     // uint32_t dwRealFAD = dwFAD - 150;
     // vector<int8_t> v(2048 * iNb);
@@ -205,34 +205,34 @@ auto Aspi::readSector(const uint32_t& dwFAD, const int32_t& iNb) -> std::string 
 }
 
 void Aspi::setTimeOut() {
-    //#ifdef _LOGS
-    //    //pLog->CdBlockWrite("Setting ASPI timeout");
-    //#endif
-    //    SRB_GetSetTimeouts srbTimeout;
-    //    memset(&srbTimeout, 0, sizeof(SRB_GetSetTimeouts));
-    //    srbTimeout.SRB_Cmd = SC_GETSET_TIMEOUTS;
-    //    srbTimeout.SRB_HaId = CCdRom::SCSI_Path;
-    //    srbTimeout.SRB_Flags = SRB_DIR_OUT;
-    //    srbTimeout.SRB_Target = CCdRom::SCSI_Target;
-    //    srbTimeout.SRB_Lun = CCdRom::SCSI_Lun;
-    //    srbTimeout.SRB_Timeout = 5 * 2; // 5 seconds
-    //    pfSendAspi32Command(static_cast<LPSRB>(&srbTimeout));
+    // #ifdef _LOGS
+    //     //pLog->CdBlockWrite("Setting ASPI timeout");
+    // #endif
+    //     SRB_GetSetTimeouts srbTimeout;
+    //     memset(&srbTimeout, 0, sizeof(SRB_GetSetTimeouts));
+    //     srbTimeout.SRB_Cmd = SC_GETSET_TIMEOUTS;
+    //     srbTimeout.SRB_HaId = CCdRom::SCSI_Path;
+    //     srbTimeout.SRB_Flags = SRB_DIR_OUT;
+    //     srbTimeout.SRB_Target = CCdRom::SCSI_Target;
+    //     srbTimeout.SRB_Lun = CCdRom::SCSI_Lun;
+    //     srbTimeout.SRB_Timeout = 5 * 2; // 5 seconds
+    //     pfSendAspi32Command(static_cast<LPSRB>(&srbTimeout));
     //
-    //    while (srbTimeout.SRB_Status == SS_PENDING) Sleep(10);
+    //     while (srbTimeout.SRB_Status == SS_PENDING) Sleep(10);
     //
-    //    if (srbTimeout.SRB_Status == SS_COMP)
-    //    {
-    //#ifdef _LOGS
-    //        //pLog->CdBlockWrite("Timeout set to 5 second");
-    //#endif
-    //    }
-    //    else
-    //    {
-    //#ifdef _LOGS
-    //        //pLog->CdBlockWrite("Error!");
-    //        //pLog->CdBlockWrite("srbTimeout.SRB_Status= 0x",srbTimeout.SRB_Status);
-    //#endif
-    //    }
+    //     if (srbTimeout.SRB_Status == SS_COMP)
+    //     {
+    // #ifdef _LOGS
+    //         //pLog->CdBlockWrite("Timeout set to 5 second");
+    // #endif
+    //     }
+    //     else
+    //     {
+    // #ifdef _LOGS
+    //         //pLog->CdBlockWrite("Error!");
+    //         //pLog->CdBlockWrite("srbTimeout.SRB_Status= 0x",srbTimeout.SRB_Status);
+    // #endif
+    //     }
 }
 
 void Aspi::resetBus() {
@@ -241,9 +241,9 @@ void Aspi::resetBus() {
     //
     //    heventSRB = CreateEvent(NULL, TRUE, FALSE, NULL);
     //    if (!heventSRB) {
-    //#ifdef _LOGS
+    // #ifdef _LOGS
     //        //pLog->CdBlockWrite("Error : ASPI event not created!");
-    //#endif
+    // #endif
     //    }
     //    else {
     //
@@ -262,24 +262,24 @@ void Aspi::resetBus() {
     //        }
     //        if (srbReset.SRB_Status == SS_COMP)
     //        {
-    //#ifdef _LOGS
+    // #ifdef _LOGS
     //            //pLog->CdBlockWrite("Reset OK!");
-    //#endif
+    // #endif
     //        }
     //        else
     //        {
-    //#ifdef _LOGS
+    // #ifdef _LOGS
     //            //pLog->CdBlockWrite("Error!");
     //            //pLog->CdBlockWrite("srbReset.SRB_Status= 0x",srbReset.SRB_Status);
     //            //pLog->CdBlockWrite("srbReset.SRB_HaStat= 0x",srbReset.SRB_HaStat);
     //            //pLog->CdBlockWrite("srbReset.SRB_TargStat= 0x",srbReset.SRB_TargStat);
-    //#endif
+    // #endif
     //        }
     //        CloseHandle(heventSRB);
     //    }
 }
 
-auto Aspi::readToc(ScsiToc& toc_data) -> bool {
+auto Aspi::readToc([[maybe_unused]] const ScsiToc& toc_data) -> bool {
     ////pLog->CdBlockWrite("Trying to read CD TOC..");
     ////BYTE TOCBuffer[1024];
     // uint8_t TOCBuffer[1024];

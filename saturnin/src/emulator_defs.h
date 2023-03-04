@@ -275,7 +275,7 @@ std::bitset<L - R + 1> slice(std::bitset<N> value) {
     size_t W = L - R + 1;
     if (W > sizeof(u64) * 8) {
         W = 31;
-        throw("Exceeding integer word size");
+        // need to add a check for overflow
     }
 
     u64 svalue = (value.to_ulong() >> R) & ((1 << W) - 1);

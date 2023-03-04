@@ -41,7 +41,7 @@ auto Spti::initialize() -> bool {
     Cdrom::di_list.clear();
     Cdrom::di_list       = Spti::scanBus();
     auto full_drive_name = std::string{};
-    for (auto& di : Cdrom::di_list) {
+    for (const auto& di : Cdrom::di_list) {
         full_drive_name = di.letter;
         full_drive_name += " ";
         full_drive_name += di.name;
@@ -52,7 +52,8 @@ auto Spti::initialize() -> bool {
 }
 
 /* static */
-void Spti::shutdown() {}
+void Spti::shutdown() { // nothing yet
+}
 
 /* static */
 auto Spti::scanBus() -> std::vector<ScsiDriveInfo> {
@@ -85,31 +86,28 @@ auto Spti::scanBus() -> std::vector<ScsiDriveInfo> {
 }
 
 /* static */
-void Spti::test() {}
-
-/* static */
-auto Spti::readOneSector(const uint32_t& fad) -> std::string {
-    constexpr auto sector_size              = u32{2048};
+auto Spti::readOneSector(const u32& fad) -> std::string {
+    constexpr auto local_sector_size        = u32{2048};
     constexpr auto cdb_length               = u8{12};
     constexpr auto timeout_value            = u8{60};
     constexpr auto command_code             = u8{0xBE};
     constexpr auto number_of_frames_to_read = u8{1};
     constexpr auto only_main_channel_data   = u8{0x10};
     const auto     real_fad                 = u32{fad - 150};
-    auto           output_buffer            = std::array<s8, sector_size>{};
+    auto           output_buffer            = std::array<s8, local_sector_size>{};
 
     auto input_buffer = SCSI_PASS_THROUGH_DIRECT{};
 
     input_buffer.Length             = sizeof(SCSI_PASS_THROUGH_DIRECT);
     input_buffer.CdbLength          = cdb_length;
-    input_buffer.DataTransferLength = sector_size;
+    input_buffer.DataTransferLength = local_sector_size;
     input_buffer.TimeOutValue       = timeout_value;
     input_buffer.DataBuffer         = &output_buffer[0];
     input_buffer.SenseInfoLength    = 0;
     input_buffer.PathId             = Cdrom::scsi_path;
     input_buffer.TargetId           = Cdrom::scsi_target;
     input_buffer.Lun                = Cdrom::scsi_lun;
-    input_buffer.SenseInfoOffset    = 0; // offsetof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER, ucSenseBuf);
+    input_buffer.SenseInfoOffset    = 0;
     input_buffer.DataIn             = SCSI_IOCTL_DATA_IN;
     input_buffer.Cdb[index_0]       = command_code;
     input_buffer.Cdb[index_2]       = static_cast<u8>(real_fad >> displacement_24);
