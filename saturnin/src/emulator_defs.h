@@ -270,6 +270,19 @@ const auto bits_0_15  = BitRange<u16>{0, 15};  ///< Defines the lower 16 bits ra
 const auto bits_16_31 = BitRange<u16>{16, 31}; ///< Defines the upper 16 bits range of the bitset.
 const auto bits_0_31  = BitRange<u32>{0, 31};  ///< Defines the 32 bits range of the bitset.
 
+template<int N, int L, int R>
+std::bitset<L - R + 1> slice(std::bitset<N> value) {
+    size_t W = L - R + 1;
+    if (W > sizeof(u64) * 8) {
+        W = 31;
+        throw("Exceeding integer word size");
+    }
+
+    u64 svalue = (value.to_ulong() >> R) & ((1 << W) - 1);
+
+    return std::bitset<L - R + 1>{svalue};
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct Coord
 ///

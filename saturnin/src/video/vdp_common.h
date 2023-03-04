@@ -311,4 +311,13 @@ union Dots16Bits {
     BitField<0, 16>  dot_1;
 };
 
+// Some testing
+class Dots16BitsRegister : public Register {
+  public:
+    using Register::Register;
+    inline static const BitRange<u32> raw{0, 31};
+    inline static const BitRange<u16> dot_0{16, 31};
+    inline static const BitRange<u16> dot_1{0, 15};
+};
+
 } // namespace saturnin::video
