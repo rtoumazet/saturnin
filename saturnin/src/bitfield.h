@@ -80,7 +80,6 @@ class BitField {
 
     operator T() const { return (value_ >> Index) & Mask; }
 
-    // explicit operator bool() const { return value_ & (Mask << Index); }
     explicit operator bool() const { return (value_ >> Index) & Mask; }
 
     BitField& operator++() { return *this = *this + 1; }

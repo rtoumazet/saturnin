@@ -283,8 +283,8 @@ union VectorNumberSettingRegisterDma {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class NmiInputLevel : bool {
-    low  = 0, ///< NMI input level is low
-    high = 1  ///< NMI input level is high
+    low  = false, ///< NMI input level is low
+    high = true   ///< NMI input level is high
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -294,8 +294,8 @@ enum class NmiInputLevel : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class NmiEdgeDetection : bool {
-    falling = 0, ///< Interrupt request detected on falling edge of NMI input (initial)
-    rising  = 1  ///< Interrupt request detected on rising edge of NMI input
+    falling = false, ///< Interrupt request detected on falling edge of NMI input (initial)
+    rising  = true   ///< Interrupt request detected on rising edge of NMI input
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -305,8 +305,8 @@ enum class NmiEdgeDetection : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class VectorMode : bool {
-    auto_vector     = 0, ///< Auto vector mode (initial)
-    external_vector = 1  ///< External vector mode
+    auto_vector     = false, ///< Auto vector mode (initial)
+    external_vector = true   ///< External vector mode
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -453,8 +453,8 @@ enum class WaySpecification : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CachePurge : bool {
-    normal_operation = 0, ///< Normal operation.
-    cache_purge      = 1  ///< Cache purge.
+    normal_operation = false, ///< Normal operation.
+    cache_purge      = true   ///< Cache purge.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -464,8 +464,8 @@ enum class CachePurge : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TwoWayMode : bool {
-    four_way = 0, ///< Four way mode (initial).
-    two_way  = 1  ///< Two way mode.
+    four_way = false, ///< Four way mode (initial).
+    two_way  = true   ///< Two way mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -475,8 +475,8 @@ enum class TwoWayMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DataReplacementDisable : bool {
-    normal_operation  = 0, ///< Normal operation (initial).
-    data_not_replaced = 1  ///< Data not replaced even when wache miss occurs in data access.
+    normal_operation  = false, ///< Normal operation (initial).
+    data_not_replaced = true   ///< Data not replaced even when wache miss occurs in data access.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -486,8 +486,8 @@ enum class DataReplacementDisable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class InstructionReplacementDisable : bool {
-    normal_operation  = 0, ///< Normal operation (initial).
-    data_not_replaced = 1  ///< Data not replaced even when wache miss occurs in instruction fetch.
+    normal_operation  = false, ///< Normal operation (initial).
+    data_not_replaced = true   ///< Data not replaced even when wache miss occurs in instruction fetch.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -497,8 +497,8 @@ enum class InstructionReplacementDisable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CacheEnable : bool {
-    cache_disabled = 0, ///< Cache disabled (initial).
-    cache_enabled  = 1  ///< Cache enabled.
+    cache_disabled = false, ///< Cache disabled (initial).
+    cache_enabled  = true   ///< Cache enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -609,8 +609,8 @@ enum class TransferSize : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class AutoRequestMode : bool {
-    module_request = 0, ///< Module request mode (initial).
-    auto_request   = 1, ///< Auto request mode.
+    module_request = false, ///< Module request mode (initial).
+    auto_request   = true   ///< Auto request mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -620,8 +620,8 @@ enum class AutoRequestMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class AcknowledgeMode : bool {
-    output_read  = 0, ///< DACK output in read cycle/transfer from memory to device (initial).
-    output_write = 1, ///< DACK output in write cycle/transfer from device to memory.
+    output_read  = false, ///< DACK output in read cycle/transfer from memory to device (initial).
+    output_write = true   ///< DACK output in write cycle/transfer from device to memory.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -631,8 +631,8 @@ enum class AcknowledgeMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class AcknowledgeLevel : bool {
-    active_low  = 0, ///< DACK signal is active low (initial).
-    active_high = 1, ///< DACK signal is active high.
+    active_low  = false, ///< DACK signal is active low (initial).
+    active_high = true   ///< DACK signal is active high.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -642,8 +642,8 @@ enum class AcknowledgeLevel : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DreqSelect : bool {
-    by_level = 0, ///< Detected by level (initial).
-    by_edge  = 1, ///< Detected by edge.
+    by_level = false, ///< Detected by level (initial).
+    by_edge  = true   ///< Detected by edge.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -653,8 +653,8 @@ enum class DreqSelect : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DreqLevel : bool {
-    low_level_or_fall  = 0, ///< DREQ detected by low level if 0, by fall if 1 (initial).
-    high_level_or_rise = 1, ///< DREQ detected by high level if 0, by rise if 1.
+    low_level_or_fall  = false, ///< DREQ detected by low level if 0, by fall if 1 (initial).
+    high_level_or_rise = true   ///< DREQ detected by high level if 0, by rise if 1.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -664,8 +664,8 @@ enum class DreqLevel : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransferBusMode : bool {
-    cycle_steal = 0, ///< Cycle steal mode (initial).
-    burst       = 1, ///< Burst mode.
+    cycle_steal = false, ///< Cycle steal mode (initial).
+    burst       = true   ///< Burst mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -675,8 +675,8 @@ enum class TransferBusMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransferAddressMode : bool {
-    dual_address   = 0, ///< Dual address mode (initial).
-    single_address = 1, ///< Single address mode.
+    dual_address   = false, ///< Dual address mode (initial).
+    single_address = true   ///< Single address mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -686,8 +686,8 @@ enum class TransferAddressMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Sh2DmaInterruptEnable : bool {
-    disabled = 0, ///< Interrupt disabled.
-    enabled  = 1  ///< Interrupt enabled.
+    disabled = false, ///< Interrupt disabled.
+    enabled  = true   ///< Interrupt enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -697,8 +697,8 @@ enum class Sh2DmaInterruptEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransferEndFlag : bool {
-    dma_not_ended_or_aborted = 0, ///< DMA has not ended or was aborted (initial).
-    dma_ended_normally       = 1  ///< DMA has ended normally.
+    dma_not_ended_or_aborted = false, ///< DMA has not ended or was aborted (initial).
+    dma_ended_normally       = true   ///< DMA has ended normally.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -708,8 +708,8 @@ enum class TransferEndFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Sh2DmaEnable : bool {
-    dma_transfer_disabled = 0, ///< DMA transfer disabled (initial).
-    dma_transfer_enabled  = 1  ///< DMA transfer enabled.
+    dma_transfer_disabled = false, ///< DMA transfer disabled (initial).
+    dma_transfer_enabled  = true   ///< DMA transfer enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -766,8 +766,8 @@ union DmaRequestResponseSelectionControlRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class PriorityMode : bool {
-    fixed       = 0, ///< Fixed priority (initial)
-    round_robin = 1, ///< Round robin
+    fixed       = false, ///< Fixed priority (initial)
+    round_robin = true   ///< Round robin
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -777,8 +777,8 @@ enum class PriorityMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class AddressErrorFlag : bool {
-    no_dmac_address_error = 0, ///< No DMAC address error (initial)
-    dmac_address_error    = 1, ///< Address error by DMAC
+    no_dmac_address_error = false, ///< No DMAC address error (initial)
+    dmac_address_error    = true   ///< Address error by DMAC
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -788,8 +788,8 @@ enum class AddressErrorFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class NmiFlag : bool {
-    no_nmif_interrupt      = 0, ///< No NMIF interrupt (initial)
-    nmif_interrupt_occured = 1, ///< NMIF has occurred
+    no_nmif_interrupt      = false, ///< No NMIF interrupt (initial)
+    nmif_interrupt_occured = true   ///< NMIF has occurred
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -799,8 +799,8 @@ enum class NmiFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class DmaMasterEnable : bool {
-    disabled = 0, ///< DMA transfers disabled on all channels (initial)
-    enabled  = 1, ///< DMA transfers enabled on all channels
+    disabled = false, ///< DMA transfers disabled on all channels (initial)
+    enabled  = true   ///< DMA transfers enabled on all channels
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -857,8 +857,8 @@ union DividendRegister32Bits {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OverflowFlag : bool {
-    no_overflow = 0, ///< No overflow has occurred (initial)
-    overflow    = 1  ///< Overflow has occurred
+    no_overflow = false, ///< No overflow has occurred (initial)
+    overflow    = true   ///< Overflow has occurred
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -915,8 +915,8 @@ union DividendRegisterL {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class InterruptCaptureInterruptEnable : bool {
-    interrupt_request_disabled = 0, ///< Interrupt request (ICI) caused by ICF disabled (initial)
-    interrupt_request_enabled  = 1  ///< Interrupt request (ICI) caused by ICF enabled
+    interrupt_request_disabled = false, ///< Interrupt request (ICI) caused by ICF disabled (initial)
+    interrupt_request_enabled  = true   ///< Interrupt request (ICI) caused by ICF enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -926,8 +926,8 @@ enum class InterruptCaptureInterruptEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareInterruptAEnable : bool {
-    interrupt_request_disabled = 0, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
-    interrupt_request_enabled  = 1  ///< Interrupt request (ICIA) caused by OCFA enabled
+    interrupt_request_disabled = false, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
+    interrupt_request_enabled  = true   ///< Interrupt request (ICIA) caused by OCFA enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -937,8 +937,8 @@ enum class OutputCompareInterruptAEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareInterruptBEnable : bool {
-    interrupt_request_disabled = 0, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
-    interrupt_request_enabled  = 1  ///< Interrupt request (ICIB) caused by OCFB enabled
+    interrupt_request_disabled = false, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
+    interrupt_request_enabled  = true   ///< Interrupt request (ICIB) caused by OCFB enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -948,8 +948,8 @@ enum class OutputCompareInterruptBEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TimerOverflowInterruptEnable : bool {
-    interrupt_request_disabled = 0, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
-    interrupt_request_enabled  = 1  ///< Interrupt request (FOVI) caused by OVF enabled
+    interrupt_request_disabled = false, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
+    interrupt_request_enabled  = true   ///< Interrupt request (FOVI) caused by OVF enabled
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -976,8 +976,8 @@ union TimerInterruptEnableRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class InputCaptureFlag : bool {
-    clear = 0, ///< Clear conditions: 0 is written when 1 is read
-    set   = 1  ///< Set conditions: when the FRC value is sent to ICR by the input capture signal
+    clear = false, ///< Clear conditions: 0 is written when 1 is read
+    set   = true   ///< Set conditions: when the FRC value is sent to ICR by the input capture signal
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -987,8 +987,8 @@ enum class InputCaptureFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareFlagA : bool {
-    clear = 0, ///< Clear conditions: 0 is written when 1 is read
-    set   = 1  ///< Set conditions: when the FRC value becomes equal to OCRA
+    clear = false, ///< Clear conditions: 0 is written when 1 is read
+    set   = true   ///< Set conditions: when the FRC value becomes equal to OCRA
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -998,8 +998,8 @@ enum class OutputCompareFlagA : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareFlagB : bool {
-    clear = 0, ///< Clear conditions: 0 is written when 1 is read
-    set   = 1  ///< Set conditions: when the FRC value becomes equal to OCRB
+    clear = false, ///< Clear conditions: 0 is written when 1 is read
+    set   = true   ///< Set conditions: when the FRC value becomes equal to OCRB
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1009,8 +1009,8 @@ enum class OutputCompareFlagB : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TimerOverflowFlag : bool {
-    clear = 0, ///< Clear conditions: 0 is written when 1 is read
-    set   = 1  ///< Set conditions: when the FRC value changes from 0xFFFF to 0x0000
+    clear = false, ///< Clear conditions: 0 is written when 1 is read
+    set   = true   ///< Set conditions: when the FRC value changes from 0xFFFF to 0x0000
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1020,8 +1020,8 @@ enum class TimerOverflowFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CounterClearA : bool {
-    clear_disabled   = 0, ///< FRC clear disabled (initial)
-    clear_on_compare = 1  ///< FRC cleared on compare match A
+    clear_disabled   = false, ///< FRC clear disabled (initial)
+    clear_on_compare = true   ///< FRC cleared on compare match A
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1079,8 +1079,8 @@ union OutputCompareRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class InputEdgeSelect : bool {
-    falling = 0, ///< Input captured on falling edge (initial)
-    rising  = 1  ///< Input captured on rising edge
+    falling = false, ///< Input captured on falling edge (initial)
+    rising  = true   ///< Input captured on rising edge
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1118,8 +1118,8 @@ union TimerControlRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputCompareRegisterSelect : bool {
-    ocra = 0, ///< Selects register OCRA
-    ocrb = 1  ///< Selects register OCRB
+    ocra = false, ///< Selects register OCRA
+    ocrb = true   ///< Selects register OCRB
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1129,8 +1129,8 @@ enum class OutputCompareRegisterSelect : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputLevelA : bool {
-    outputs_0 = 0, ///< Outputs 0 on compare match A
-    outputs_1 = 1  ///< Outputs 1 on compare match A
+    outputs_0 = false, ///< Outputs 0 on compare match A
+    outputs_1 = true   ///< Outputs 1 on compare match A
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1140,8 +1140,8 @@ enum class OutputLevelA : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OutputLevelB : bool {
-    outputs_0 = 0, ///< Outputs 0 on compare match B
-    outputs_1 = 1  ///< Outputs 1 on compare match B
+    outputs_0 = false, ///< Outputs 0 on compare match B
+    outputs_1 = true   ///< Outputs 1 on compare match B
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1199,8 +1199,8 @@ union WatchdogTimerCounter {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class WdtOverflowFlag : bool {
-    no_overflow = 0, ///< No overflow of WTCNT in interval timer mode (initial)
-    overflow    = 1  ///< WTCNT overflow in interval timer mode
+    no_overflow = false, ///< No overflow of WTCNT in interval timer mode (initial)
+    overflow    = true   ///< WTCNT overflow in interval timer mode
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1210,8 +1210,8 @@ enum class WdtOverflowFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TimerModeSelect : bool {
-    interval_timer_mode = 0, ///< Interval timer mode option
-    watchdog_timer_mode = 1  ///< Watchdog timer mode option
+    interval_timer_mode = false, ///< Interval timer mode option
+    watchdog_timer_mode = true   ///< Watchdog timer mode option
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1221,8 +1221,8 @@ enum class TimerModeSelect : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TimerEnable : bool {
-    timer_disabled = 0, ///< Timer disabled : WTCNT is initialized to 0x00 and count up stops. (initial)
-    timer_enabled  = 1, ///< Timer enabled : WTCNT starts counting.
+    timer_disabled = false, ///< Timer disabled : WTCNT is initialized to 0x00 and count up stops. (initial)
+    timer_enabled  = true   ///< Timer enabled : WTCNT starts counting.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1267,8 +1267,8 @@ union WatchdogTimerControlStatusRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class WatchdogTimerOverflowFlag : bool {
-    no_overflow = 0, ///< No WTCNT overflow in watchdof timer mode (initial).
-    overflow    = 1  ///< Set by WTCNT overflow in watchdog mode.
+    no_overflow = false, ///< No WTCNT overflow in watchdof timer mode (initial).
+    overflow    = true   ///< Set by WTCNT overflow in watchdog mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1278,8 +1278,8 @@ enum class WatchdogTimerOverflowFlag : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ResetEnable : bool {
-    not_reset_when_overflow = 0, ///< Not reset when WTCNT overflows (initial).
-    reset_when_overflow     = 1, ///< Reset when WTCNT overflows.
+    not_reset_when_overflow = false, ///< Not reset when WTCNT overflows (initial).
+    reset_when_overflow     = true   ///< Reset when WTCNT overflows.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1289,8 +1289,8 @@ enum class ResetEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ResetSelect : bool {
-    power_on_reset = 0, ///< Power-on reset (initial)
-    manual_reset   = 1  ///< Manual reset
+    power_on_reset = false, ///< Power-on reset (initial)
+    manual_reset   = true   ///< Manual reset
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1320,8 +1320,8 @@ union ResetControlStatusRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CommunicationMode : bool {
-    asynchronous        = 0, ///< Asynchronous mode (initial).
-    clocked_synchronous = 1, ///< Clocked synchronous mode.
+    asynchronous        = false, ///< Asynchronous mode (initial).
+    clocked_synchronous = true   ///< Clocked synchronous mode.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1331,8 +1331,8 @@ enum class CommunicationMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CharacterLength : bool {
-    eight_bit_data = 0, ///< 8-bit data (initial).
-    seven_bit_data = 1, ///< 7-bit data.
+    eight_bit_data = false, ///< 8-bit data (initial).
+    seven_bit_data = true   ///< 7-bit data.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1342,8 +1342,8 @@ enum class CharacterLength : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ParityEnable : bool {
-    parity_bit_not_added = 0, ///< Parity bit not added or checked (initial).
-    parity_bit_added     = 1, ///< Parity bit added and checked.
+    parity_bit_not_added = false, ///< Parity bit not added or checked (initial).
+    parity_bit_added     = true   ///< Parity bit added and checked.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1353,8 +1353,8 @@ enum class ParityEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ParityMode : bool {
-    even_parity = 0, ///< Even parity (initial).
-    odd_parity  = 1, ///< Odd parity.
+    even_parity = false, ///< Even parity (initial).
+    odd_parity  = true   ///< Odd parity.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1364,8 +1364,8 @@ enum class ParityMode : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class StopBitLength : bool {
-    one_stop_bit  = 0, ///< One stop bit (initial).
-    two_stop_bits = 1, ///< Two stop bits.
+    one_stop_bit  = false, ///< One stop bit (initial).
+    two_stop_bits = true   ///< Two stop bits.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1375,8 +1375,8 @@ enum class StopBitLength : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class MultiprocessorMode : bool {
-    multiprocessor_function_disabled = 0, ///< Multiprocessor mode enabled (initial).
-    multiprocessor_function_enabled  = 1, ///< Multiprocessor mode disabled.
+    multiprocessor_function_disabled = false, ///< Multiprocessor mode enabled (initial).
+    multiprocessor_function_enabled  = true   ///< Multiprocessor mode disabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1432,8 +1432,8 @@ union BitRateRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransmitInterruptEnable : bool {
-    interrupt_disabled = 0, ///< TXI request is disabled (initial).
-    interrupt_enabled  = 1  ///< TXI request is enabled.
+    interrupt_disabled = false, ///< TXI request is disabled (initial).
+    interrupt_enabled  = true   ///< TXI request is enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1443,8 +1443,8 @@ enum class TransmitInterruptEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ReceiveInterruptEnable : bool {
-    interrupts_disabled = 0, ///< RXI and ERI requests are disabled (initial).
-    interrupts_enabled  = 1  ///< RXI and ERI requests are enabled.
+    interrupts_disabled = false, ///< RXI and ERI requests are disabled (initial).
+    interrupts_enabled  = true   ///< RXI and ERI requests are enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1454,8 +1454,8 @@ enum class ReceiveInterruptEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransmitEnable : bool {
-    transmitter_disabled = 0, ///< Transmitter disabled (initial).
-    transmitter_enabled  = 1  ///< Transmitter enabled.
+    transmitter_disabled = false, ///< Transmitter disabled (initial).
+    transmitter_enabled  = true   ///< Transmitter enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1465,8 +1465,8 @@ enum class TransmitEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ReceiveEnable : bool {
-    receiver_disabled = 0, ///< Receiver disabled (initial).
-    receiver_enabled  = 1  ///< Receiver enabled.
+    receiver_disabled = false, ///< Receiver disabled (initial).
+    receiver_enabled  = true   ///< Receiver enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1476,8 +1476,8 @@ enum class ReceiveEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class MultiprocessorInterruptEnable : bool {
-    interrupt_disabled = 0, ///< Multiprocessor interrupts are disabled (initial).
-    interrupt_enabled  = 1  ///< Multiprocessor interrupts are enabled.
+    interrupt_disabled = false, ///< Multiprocessor interrupts are disabled (initial).
+    interrupt_enabled  = true   ///< Multiprocessor interrupts are enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1487,8 +1487,8 @@ enum class MultiprocessorInterruptEnable : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransmitEndInterruptEnable : bool {
-    interrupt_disabled = 0, ///< Transmit end interrupt (TEI) requests are disabled (initial).
-    interrupt_enabled  = 1  ///< Transmit end interrupt (TEI) requests are enabled.
+    interrupt_disabled = false, ///< Transmit end interrupt (TEI) requests are disabled (initial).
+    interrupt_enabled  = true   ///< Transmit end interrupt (TEI) requests are enabled.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1557,8 +1557,8 @@ union TransmitShiftRegister {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransmitDataRegisterEmpty : bool {
-    contains_valid_data         = 0, ///< TDR contains valid transmit data (initial).
-    does_not_contain_valid_data = 1  ///< TDR does not contain valid transmit data.
+    contains_valid_data         = false, ///< TDR contains valid transmit data (initial).
+    does_not_contain_valid_data = true   ///< TDR does not contain valid transmit data.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1568,8 +1568,8 @@ enum class TransmitDataRegisterEmpty : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ReceiveDataRegisterFull : bool {
-    no_valid_data_received = 0, ///< RDR does not contain valid received data (initial).
-    valid_data_received    = 1  ///< RDR contains valid received data.
+    no_valid_data_received = false, ///< RDR does not contain valid received data (initial).
+    valid_data_received    = true   ///< RDR contains valid received data.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1579,8 +1579,8 @@ enum class ReceiveDataRegisterFull : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class OverrunError : bool {
-    in_progress_or_ended_normally = 0, ///< Receiving is in progress or has ended normally (initial).
-    error_occurred                = 1  ///< A receive overrun error occurred.
+    in_progress_or_ended_normally = false, ///< Receiving is in progress or has ended normally (initial).
+    error_occurred                = true   ///< A receive overrun error occurred.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1590,8 +1590,8 @@ enum class OverrunError : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class FramingError : bool {
-    in_progress_or_ended_normally = 0, ///< Receiving is in progress or has ended normally (initial).
-    error_occurred                = 1  ///< A receive framing error occurred.
+    in_progress_or_ended_normally = false, ///< Receiving is in progress or has ended normally (initial).
+    error_occurred                = true   ///< A receive framing error occurred.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1601,8 +1601,8 @@ enum class FramingError : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class ParityError : bool {
-    in_progress_or_ended_normally = 0, ///< Receiving is in progress or has ended normally (initial).
-    error_occurred                = 1  ///< A receive parity error occurred.
+    in_progress_or_ended_normally = false, ///< Receiving is in progress or has ended normally (initial).
+    error_occurred                = true   ///< A receive parity error occurred.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1612,8 +1612,8 @@ enum class ParityError : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class TransmitEnd : bool {
-    transmission_in_progress = 0, ///< Transmission is in progress.
-    end_of_transmission      = 1  ///< End of transmission (initial).
+    transmission_in_progress = false, ///< Transmission is in progress.
+    end_of_transmission      = true   ///< End of transmission (initial).
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1623,8 +1623,8 @@ enum class TransmitEnd : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class MultiprocessorBit : bool {
-    bit_value_0 = 0, ///< Multiprocessor bit value in receive data is 0 (initial).
-    bit_value_1 = 1  ///< Multiprocessor bit value in receive data is 1.
+    bit_value_0 = false, ///< Multiprocessor bit value in receive data is 0 (initial).
+    bit_value_1 = true   ///< Multiprocessor bit value in receive data is 1.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1634,8 +1634,8 @@ enum class MultiprocessorBit : bool {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class MultiprocessorBitTransfer : bool {
-    bit_value_0 = 0, ///< Multiprocessor bit value in transmit data is 0 (initial).
-    bit_value_1 = 1  ///< Multiprocessor bit value in transmit data is 1.
+    bit_value_0 = false, ///< Multiprocessor bit value in transmit data is 0 (initial).
+    bit_value_1 = true   ///< Multiprocessor bit value in transmit data is 1.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

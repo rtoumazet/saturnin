@@ -694,7 +694,7 @@ enum class CharacterColorNumber2Bits : u8 {
 
 enum class CharacterColorNumber1Bit : bool {
     palette_16  = false, ///< Palette format, 16 colors.
-    palette_256 = 1,     ///< Palette format, 256 colors.
+    palette_256 = true   ///< Palette format, 256 colors.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -848,8 +848,8 @@ enum class PatternNameDataSize : bool {
 
 enum class CharacterNumberSupplementMode : bool {
     character_number_10_bits
-    = 0b0, ///< Character number in pattern name data is 10 bits. Flip function can be selected in character units.
-    character_number_12_bits = 0b1 ///< Character number in pattern name data is 12 bits. Flip function cannot be used.
+    = false, ///< Character number in pattern name data is 10 bits. Flip function can be selected in character units.
+    character_number_12_bits = true ///< Character number in pattern name data is 12 bits. Flip function cannot be used.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
