@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <windows.h> // removes C4005 warning
+#include <Windows.h> // removes C4005 warning
 #include <imgui.h>
 #include <map>    // map
 #include <mutex>  // mutex
@@ -99,12 +99,12 @@ class Opengl {
   public:
     ///@{
     /// Constructors / Destructors
-    Opengl() = delete;
+    Opengl() = default;
     explicit Opengl(core::Config* config);
-    Opengl(const Opengl&)                      = delete;
-    Opengl(Opengl&&)                           = delete;
-    auto operator=(const Opengl&) & -> Opengl& = delete;
-    auto operator=(Opengl&&) & -> Opengl&      = delete;
+    Opengl(const Opengl&)                      = default;
+    Opengl(Opengl&&)                           = default;
+    auto operator=(const Opengl&) & -> Opengl& = default;
+    auto operator=(Opengl&&) & -> Opengl&      = default;
     ~Opengl();
     ///@}
 
@@ -140,7 +140,7 @@ class Opengl {
     void initialize();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::shutdown();
+    /// \fn void Opengl::shutdown() const;
     ///
     /// \brief  Shuts down this object and frees any resources it is using
     ///
@@ -148,7 +148,7 @@ class Opengl {
     /// \date   08/04/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void shutdown();
+    void shutdown() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::preRender();

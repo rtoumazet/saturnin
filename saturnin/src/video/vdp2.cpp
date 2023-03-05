@@ -3099,13 +3099,13 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
                 if (character_size == CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003f};
                     constexpr auto mask_8mb = u16{0x007f};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_2000;
                 } else {
                     // CharacterSize::two_by_two
                     constexpr auto mask_4mb = u16{0x00ff};
                     constexpr auto mask_8mb = u16{0x01ff};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_800;
                 }
             } else {
@@ -3113,13 +3113,13 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
                 if (character_size == CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x001f};
                     constexpr auto mask_8mb = u16{0x003f};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_4000;
                 } else {
                     // CharacterSize::two_by_two
                     constexpr auto mask_4mb = u16{0x007f};
                     constexpr auto mask_8mb = u16{0x00ff};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_1000;
                 }
             }
@@ -3130,13 +3130,13 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
                 if (character_size == CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003e};
                     constexpr auto mask_8mb = u16{0x007e};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_4000;
                 } else {
                     // CharacterSize::two_by_two
                     constexpr auto mask_4mb = u16{0x00fe};
                     constexpr auto mask_8mb = u16{0x01fe};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_1000;
                 }
             } else {
@@ -3144,13 +3144,13 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
                 if (character_size == CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x001e};
                     constexpr auto mask_8mb = u16{0x003e};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_8000;
                 } else {
                     // CharacterSize::two_by_two
                     constexpr auto mask_4mb = u16{0x007e};
                     constexpr auto mask_8mb = u16{0x00fe};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_2000;
                 }
             }

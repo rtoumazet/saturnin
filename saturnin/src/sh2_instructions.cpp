@@ -500,7 +500,7 @@ void div1(Sh2& s) {
                     s.r_[xn00(s)] -= s.r_[x0n0(s)];
                     tmp1 = (static_cast<u32>(s.r_[xn00(s)]) > tmp0);
                     switch (static_cast<u32>(static_cast<bool>(s.sr_.q))) {
-                        case 0: (tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
+                        case 0: tmp1 ? s.sr_.q = true : s.sr_.q = false; break;
                         case 1: (!tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
                     }
                     break;
@@ -510,7 +510,7 @@ void div1(Sh2& s) {
                     tmp1 = (static_cast<u32>(s.r_[xn00(s)]) < tmp0);
                     switch (static_cast<u32>(static_cast<bool>(s.sr_.q))) {
                         case 0: (!tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
-                        case 1: (tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
+                        case 1: tmp1 ? s.sr_.q = true : s.sr_.q = false; break;
                     }
                     break;
             }
@@ -522,7 +522,7 @@ void div1(Sh2& s) {
                     s.r_[xn00(s)] += s.r_[x0n0(s)];
                     tmp1 = (static_cast<uint32_t>(s.r_[xn00(s)]) < tmp0);
                     switch (static_cast<u32>(static_cast<bool>(s.sr_.q))) {
-                        case 0: (tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
+                        case 0: tmp1 ? s.sr_.q = true : s.sr_.q = false; break;
                         case 1: (!tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
                     }
                     break;
@@ -532,7 +532,7 @@ void div1(Sh2& s) {
                     tmp1 = (static_cast<u32>(s.r_[xn00(s)]) > tmp0);
                     switch (static_cast<u32>(static_cast<bool>(s.sr_.q))) {
                         case 0: (!tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
-                        case 1: (tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
+                        case 1: tmp1 ? s.sr_.q = true : s.sr_.q = false; break;
                     }
                     break;
             }

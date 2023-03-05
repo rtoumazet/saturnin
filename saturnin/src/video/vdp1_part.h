@@ -129,7 +129,7 @@ class Vdp1Part final : public BaseRenderingPart {
                                         ///@}
     ///@{
     /// Accessors / mutators
-    void debugHeader(const std::string& s) { debug_header_ = s; }
+    void debugHeader(std::string_view s) { debug_header_ = s; }
     auto debugHeader() const -> std::string { return debug_header_; }
     ///@}
 

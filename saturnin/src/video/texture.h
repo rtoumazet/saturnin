@@ -54,7 +54,7 @@ class Texture {
     Texture(Texture&&)                           = default;
     auto operator=(const Texture&) & -> Texture& = default;
     auto operator=(Texture&&) & -> Texture&      = default;
-    ~Texture();
+    ~Texture() { shutdown(); };
     ///@}
 
     ///@{
@@ -69,6 +69,17 @@ class Texture {
     void isRecentlyUsed(const bool used) { is_recently_used_ = used; }
     auto vdpType() const { return vdp_type_; }
     ///@}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Texture::shutdown();
+    ///
+    /// \brief  Releases ressources.
+    ///
+    /// \author Runik
+    /// \date   29/03/2021
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void shutdown();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::storeTexture(Texture& t) -> size_t;

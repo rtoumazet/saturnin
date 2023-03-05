@@ -96,7 +96,7 @@ auto Memory::loadRom(const std::string& zip_name,
                         }
                         case odd_interleaved: { // Data is loaded on odd bytes only
                             for (u32 i = 0; i < size; ++i) {
-                                destination[(i * 2 + 1)] = data[i];
+                                destination[i * 2 + 1] = data[i];
                             }
 
                             region_cart_address = region_cart_address_odd_interleaved;
@@ -420,21 +420,21 @@ auto Memory::readStvProtection(const u32 addr, u32 data) const -> u32 {
     return data;
 }
 
-void Memory::writeStvProtection(const u32 addr, u32 data) {
+void Memory::writeStvProtection([[maybe_unused]] const u32 addr, [[maybe_unused]] u32 data) {
     const auto relative_addr = calculateRelativeCartAddress(stv_protection_register_address);
     const auto index         = rawRead<u32>(this->cart_, relative_addr);
     switch (index) {
         // Astra Superstars
-        case 0x01230000:                                    // NOLINT(readability-magic-numbers)
-            this->stv_protection_offset_ = (0x0400000) - 4; // NOLINT(readability-magic-numbers)
+        case 0x01230000:                                  // NOLINT(readability-magic-numbers)
+            this->stv_protection_offset_ = 0x0400000 - 4; // NOLINT(readability-magic-numbers)
             break;
             // Final Fight Revenge
-        case 0x10d70000:                                   // NOLINT(readability-magic-numbers)
-        case 0x10da0000:                                   // NOLINT(readability-magic-numbers)
-            this->stv_protection_offset_ = (0x02B994) - 4; // NOLINT(readability-magic-numbers)
+        case 0x10d70000:                                 // NOLINT(readability-magic-numbers)
+        case 0x10da0000:                                 // NOLINT(readability-magic-numbers)
+            this->stv_protection_offset_ = 0x02B994 - 4; // NOLINT(readability-magic-numbers)
             break;
             // Streep Slope Sliders
-        case 0x2c5b0000: this->stv_protection_offset_ = (0x145ffac) - 4; break;           // NOLINT(readability-magic-numbers)
+        case 0x2c5b0000: this->stv_protection_offset_ = 0x145ffac - 4; break;             // NOLINT(readability-magic-numbers)
         case 0x47F10000: this->stv_protection_offset_ = (0x145ffac + 0xbaf0) - 4; break;  // NOLINT(readability-magic-numbers)
         case 0xfcda0000: this->stv_protection_offset_ = (0x145ffac + 0x12fd0) - 4; break; // NOLINT(readability-magic-numbers)
         case 0xb5e60000: this->stv_protection_offset_ = (0x145ffac + 0x1a4c4) - 4; break; // NOLINT(readability-magic-numbers)

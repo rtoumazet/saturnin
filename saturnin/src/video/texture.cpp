@@ -44,11 +44,13 @@ Texture::Texture(const VdpType    vp,
                  const u16        width,
                  const u16        height) :
     vdp_type_(vp),
-    width_(width), height_(height), raw_data_(std::move(texture)) {
+    width_(width),
+    height_(height),
+    raw_data_(std::move(texture)) {
     key_ = calculateKey(vp, address, color_count, palette_number);
 };
 
-Texture::~Texture() {
+void Texture::shutdown() {
     std::vector<u8>().swap(raw_data_); // Allocated texture data is deleted.
 }
 

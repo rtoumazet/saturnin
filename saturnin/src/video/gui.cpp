@@ -249,8 +249,8 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
 
                 static auto locales = core::Config::listAvailableLanguages();
                 std::string l       = state.config()->readValue(core::AccessKeys::cfg_global_language);
-                const auto  it = std::find_if(locales.begin(), locales.end(), [&l](const std::string& str) { return l == str; });
-                static auto index = static_cast<s32>(it - locales.begin());
+                const auto  it      = std::ranges::find_if(locales, [&l](std::string_view str) { return l == str; });
+                static auto index   = static_cast<s32>(it - locales.begin());
                 if (ImGui::Combo("##language", &index, locales)) {
                     state.config()->writeValue(core::AccessKeys::cfg_global_language, locales[index]);
                 }
@@ -259,9 +259,9 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 ImGui::TextUnformatted(tr("Area code").c_str());
                 ImGui::SameLine(second_column_offset);
 
-                static auto codes   = state.config()->listAreaCodes();
-                std::string c       = state.config()->readValue(core::AccessKeys::cfg_global_area_code);
-                const auto  it_code = std::find_if(codes.begin(), codes.end(), [&c](const std::string& str) { return c == str; });
+                static auto codes      = state.config()->listAreaCodes();
+                std::string c          = state.config()->readValue(core::AccessKeys::cfg_global_area_code);
+                const auto  it_code    = std::ranges::find_if(codes, [&c](std::string_view str) { return c == str; });
                 static auto index_code = static_cast<s32>(it_code - codes.begin());
                 if (ImGui::Combo("##area_code", &index_code, codes)) {
                     state.config()->writeValue(core::AccessKeys::cfg_global_area_code, codes[index_code]);
@@ -508,9 +508,8 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             ImGui::SameLine(second_column_offset);
                             static auto connections = state.config()->listPeripheralConnections();
                             std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
-                            const auto  it_connection    = std::find_if(connections.begin(),
-                                                                    connections.end(),
-                                                                    [&c](const std::string& str) { return c == str; });
+                            const auto  it_connection
+                                = std::ranges::find_if(connections, [&c](std::string_view str) { return c == str; });
                             static auto index_connection = static_cast<s32>(it_connection - connections.begin());
                             if (ImGui::Combo("##peripheral_connection_1", &index_connection, connections)) {
                                 state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
@@ -590,9 +589,8 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             ImGui::SameLine(second_column_offset);
                             static auto connections = state.config()->listPeripheralConnections();
                             std::string c = state.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_2_connection);
-                            const auto  it_connection    = std::find_if(connections.begin(),
-                                                                    connections.end(),
-                                                                    [&c](const std::string& str) { return c == str; });
+                            const auto  it_connection
+                                = std::ranges::find_if(connections, [&c](std::string_view str) { return c == str; });
                             static auto index_connection = static_cast<s32>(it_connection - connections.begin());
                             if (ImGui::Combo("##peripheral_connection_2", &index_connection, connections)) {
                                 state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,

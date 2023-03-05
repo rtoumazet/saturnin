@@ -19,7 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/cdrom/cdrom.h>
-#include <windows.h>
+#include <Windows.h>
 #include <istream>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/locale.h>

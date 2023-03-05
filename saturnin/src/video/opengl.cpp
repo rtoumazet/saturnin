@@ -19,7 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/opengl.h>
-#include <windows.h> // removes C4005 warning
+#include <Windows.h> // removes C4005 warning
 #include <algorithm>
 #include <fstream>    // ifstream
 #include <filesystem> // filesystem
@@ -117,7 +117,7 @@ void Opengl::initialize() {
     //  gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
 }
 
-void Opengl::shutdown() {
+void Opengl::shutdown() const {
     glDeleteProgram(program_shader_);
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -1131,7 +1131,7 @@ void Opengl::deleteTexture(const u32 texture) {
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
 auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char* {
-    const auto glsl_version = (is_legacy_opengl_) ? GlslVersion::glsl_120 : GlslVersion::glsl_330;
+    const auto glsl_version = is_legacy_opengl_ ? GlslVersion::glsl_120 : GlslVersion::glsl_330;
     return shaders_list_[{glsl_version, type, name}];
 }
 
@@ -1508,7 +1508,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     }
 #endif
-    const std::string rendering_mode = (is_legacy_opengl) ? core::tr("Legacy") : core::tr("Modern");
+    const std::string rendering_mode = is_legacy_opengl ? core::tr("Legacy") : core::tr("Modern");
     const std::string window_title
         = util::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
@@ -1568,7 +1568,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // ImGui::StyleColorsClassic();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    (is_legacy_opengl) ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
+    is_legacy_opengl ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
     // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)

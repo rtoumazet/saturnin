@@ -37,17 +37,16 @@ namespace {
 
 template<size_t LastBit>
 struct MinimumTypeHelper {
-    typedef typename std::conditional<
+    using type = typename std::conditional_t<
         LastBit == 0,
         void,
-        typename std::conditional<
+        typename std::conditional_t<
             LastBit <= 8,
             u8,
-            typename std::conditional<
+            typename std::conditional_t<
                 LastBit <= 16,
                 u16,
-                typename std::conditional<LastBit <= 32, u32, typename std::conditional<LastBit <= 64, u64, void>::type>::type>::
-                type>::type>::type type;
+                typename std::conditional_t<LastBit <= 32, u32, typename std::conditional_t<LastBit <= 64, u64, void>>>>>;
 };
 
 } // namespace
@@ -69,7 +68,7 @@ class BitField {
   private:
     enum { Mask = (1u << Bits) - 1u };
 
-    typedef typename MinimumTypeHelper<Index + Bits>::type T;
+    using T = typename MinimumTypeHelper<Index + Bits>::type;
 
   public:
     template<class T2>
@@ -118,7 +117,7 @@ class BitField<Index, 1> {
   private:
     enum { Bits = 1, Mask = 0x01 };
 
-    typedef typename MinimumTypeHelper<Index + Bits>::type T;
+    using T = typename MinimumTypeHelper<Index + Bits>::type;
 
   public:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +151,7 @@ class BitField<Index, 1> {
     /// \returns    A shallow copy of this object.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template<class T, class = typename std::enable_if<std::is_enum<T>::value>::type>
+    template<class T, class = typename std::enable_if_t<std::is_enum_v<T>>>
     BitField& operator=(T e) {
         auto value = static_cast<typename std::underlying_type<T>::type>(e);
         value_     = (value_ & ~(Mask << Index)) | (value << Index);
@@ -160,7 +159,6 @@ class BitField<Index, 1> {
     }
 
     explicit operator bool() const { return value_ & (Mask << Index); }
-    //         operator T() const { return static_cast<T>(value_ & (Mask << Index)); }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	template<class T2, typename = std::enable_if_t<std::is_integral_v<T2>>> bool 1>::operator==(T2 val)

@@ -647,7 +647,7 @@ void Scu::initializeRegisters() {
     d1md_.raw                                = mode_default_value;
     d2md_.raw                                = mode_default_value;
     rawWrite<u32>(modules_.memory()->scu_, dma_forced_stop & scu_memory_mask, 0x00000000);
-    rawWrite<u32>(modules_.memory()->scu_, (dma_status_register)&scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dma_status_register & scu_memory_mask, 0x00000000);
 
     // DSP
     rawWrite<u32>(modules_.memory()->scu_, dsp_program_control_port & scu_memory_mask, 0x00000000);

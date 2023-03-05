@@ -399,7 +399,7 @@ void Smpc::setCommandDuration() {
             constexpr auto intback_duration = micro(50);
             constexpr auto normal_duration  = micro(1500);
             command_remaining_cycles_
-                = (is_intback_processing_) ? calculateCyclesNumber(intback_duration) : calculateCyclesNumber(normal_duration);
+                = is_intback_processing_ ? calculateCyclesNumber(intback_duration) : calculateCyclesNumber(normal_duration);
 
             break;
         }

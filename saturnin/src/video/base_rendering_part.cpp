@@ -19,5 +19,3 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/base_rendering_part.h>
-
-namespace saturnin::video {}; // namespace saturnin::video
