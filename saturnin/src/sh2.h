@@ -263,7 +263,7 @@ class Sh2 {
 
     // 32 bits specialization
     template<>
-    void writeCachePurgeArea<u32>(const u32 addr, const u32 data) {
+    void writeCachePurgeArea<u32>(const u32 addr, [[maybe_unused]] const u32 data) {
         writeCachePurgeArea(addr, data);
     }
 

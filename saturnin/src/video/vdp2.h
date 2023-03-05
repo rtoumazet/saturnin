@@ -1722,7 +1722,7 @@ class Vdp2 {
     /// \param  screen  The scroll screen to manage.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void discardCache(const ScrollScreen screen);
+    void discardCache(const ScrollScreen screen) const;
 
     EmulatorModules modules_;
 
