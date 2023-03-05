@@ -159,7 +159,7 @@ void Opengl::preRender() {
     glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
 };
 
-void Opengl::postRender() {
+void Opengl::postRender() const {
     // Framebuffer is released
     checkGlError();
     if (is_legacy_opengl_) {
@@ -629,9 +629,9 @@ auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u
     return batch_vertex_size;
 }
 
-auto Opengl::isThereSomethingToRender() -> bool { return !parts_list_.empty(); }
+auto Opengl::isThereSomethingToRender() const -> bool { return !parts_list_.empty(); }
 
-auto Opengl::getRenderedBufferTextureId() -> u32 { return getFboTextureId(current_rendered_buffer_); }
+auto Opengl::getRenderedBufferTextureId() const -> u32 { return getFboTextureId(current_rendered_buffer_); }
 
 void Opengl::renderVdp1DebugOverlay() {
     //----------- Pre render -----------//
@@ -993,7 +993,7 @@ void Opengl::generateSubTexture(const size_t key) {
     }
 }
 
-auto Opengl::isSaturnResolutionSet() -> bool {
+auto Opengl::isSaturnResolutionSet() const -> bool {
     return (saturn_screen_resolution_.width == 0 || saturn_screen_resolution_.height == 0) ? false : true;
 }
 
@@ -1044,8 +1044,6 @@ auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer, const size_t 
 };
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
-
-void Opengl::updateScreenResolution() {}
 
 auto Opengl::createVertexShader(const ShaderName name) -> u32 {
     const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -1135,7 +1133,7 @@ auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> co
     return shaders_list_[{glsl_version, type, name}];
 }
 
-auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4 {
+auto Opengl::calculateDisplayViewportMatrix() const -> glm::highp_mat4 {
     const auto host_res     = hostScreenResolution();
     const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
     const auto saturn_res   = saturnScreenResolution();
@@ -1289,7 +1287,7 @@ void Opengl::initializeFbo(const FboType type) {
     glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
 }
 
-auto Opengl::initializeTextureArray() -> u32 {
+auto Opengl::initializeTextureArray() const -> u32 {
     auto texture = u32{};
     glGenTextures(1, &texture);
     glActiveTexture(GLenum::GL_TEXTURE0);

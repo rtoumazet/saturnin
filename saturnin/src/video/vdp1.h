@@ -72,19 +72,6 @@ class Vdp1 {
     void initialize();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::run(u8 sh2_cycles);
-    ///
-    /// \brief  Runs the VDP2 for the given number of SH2 cycles
-    ///
-    /// \author Runik
-    /// \date   17/05/2020
-    ///
-    /// \param  cycles  The cycles to run.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void run(u8 cycles);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp1::onVblankIn();
     ///
     /// \brief  Handles everything that needs to be done on VBlankIn.
@@ -96,7 +83,7 @@ class Vdp1 {
     void onVblankIn();
 
     template<typename T>
-    void writeRegisters(const u32 addr, const T data) {
+    void writeRegisters(const u32 addr, [[maybe_unused]] const T data) {
         core::Log::warning(Logger::vdp1, core::tr("{}bits register write {:#0x}"), sizeof(T) * number_of_bits_8, addr);
     }
 
@@ -118,7 +105,7 @@ class Vdp1 {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp1::vdp2() -> const Vdp2*
+    /// \fn auto Vdp1::vdp2() const -> const Vdp2*
     ///
     /// \brief  Pointer to the VDP2 module, will be used by VDP1 parts.
     ///
@@ -128,7 +115,7 @@ class Vdp1 {
     /// \returns    A const pointer to Vdp2.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto vdp2() -> const Vdp2* { return modules_.vdp2(); }
+    auto vdp2() const -> const Vdp2* { return modules_.vdp2(); }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::getColorRamAddressOffset() -> u16
@@ -141,10 +128,10 @@ class Vdp1 {
     /// \returns    The color ram address offset.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getColorRamAddressOffset() -> u16 { return color_ram_address_offset_; }
+    auto getColorRamAddressOffset() const -> u16 { return color_ram_address_offset_; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp1::getTvModeSelectionRegister() -> TvModeSelection
+    /// \fn auto Vdp1::getTvModeSelectionRegister() const -> TvModeSelection
     ///
     /// \brief  Gets TV mode selection register
     ///
@@ -154,10 +141,10 @@ class Vdp1 {
     /// \returns    The TV mode selection register.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getTvModeSelectionRegister() -> TvModeSelection { return tvmr_; }
+    auto getTvModeSelectionRegister() const -> TvModeSelection { return tvmr_; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp1::vdp1Parts() -> const std::vector<Vdp1Part>
+    /// \fn auto Vdp1::vdp1Parts() const -> const std::vector<Vdp1Part>
     ///
     /// \brief  Returns the current VDP1 draw list.
     ///
@@ -167,7 +154,7 @@ class Vdp1 {
     /// \returns    A reference to a const std::vector&lt;Vdp1Part&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto vdp1Parts() -> const std::vector<Vdp1Part> { return vdp1_parts_; }
+    auto vdp1Parts() const -> std::vector<Vdp1Part> { return vdp1_parts_; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::getDebugDrawList() const -> std::vector<std::string>;
@@ -188,17 +175,6 @@ class Vdp1 {
     void               write16(u32 addr, u16 data);
     [[nodiscard]] auto read16(u32 addr) const -> u16;
     //@}
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn   void Vdp2::reset();
-    ///
-    /// \brief    Resets the VPD2
-    ///
-    /// \author   Runik
-    /// \date 16/05/2020
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void reset();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::intializeFramebuffer() -> bool;

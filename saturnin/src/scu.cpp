@@ -733,7 +733,7 @@ void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegist
     dc.write_add_value = toEnum<WriteAddressAddValue>(reg.write_add_value);
 }
 
-void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc) {
+void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc) const {
     switch (dc.dma_level) {
         using enum DmaLevel;
         case level_0: dc.transfer_byte_number = d0c_.transfer_byte_number; break;
@@ -926,18 +926,9 @@ void Scu::sendDmaEndInterrupt(const DmaLevel l) {
     }
 }
 
-void Scu::resetDmaEnable(DmaConfiguration& dc) {
-    if (dc.dma_enable == DmaEnable::enabled) {
-        if (dc.starting_factor_select == StartingFactorSelect::dma_start_factor) {
-            dc.dma_enable = DmaEnable::disabled;
-            // switch (dc.dma_level) {
-            //     using enum DmaLevel;
-            //     case level_0: d0en_.dma_enable = 0; break;
-            //     case level_1: d1en_.dma_enable = 0; break;
-            //     case level_2: d2en_.dma_enable = 0; break;
-            //     case level_unknown: Log::warning(Logger::scu, "Unknown DMA level !");
-            // }
-        }
+void Scu::resetDmaEnable(DmaConfiguration& dc) const {
+    if (dc.dma_enable == DmaEnable::enabled && dc.starting_factor_select == StartingFactorSelect::dma_start_factor) {
+        dc.dma_enable = DmaEnable::disabled;
     }
 }
 
@@ -952,14 +943,15 @@ void Scu::dmaUpdateWriteAddress(const DmaLevel l, const u32 data) {
 }
 
 void Scu::dmaSort() {
-    std::sort(dma_queue_.begin(), dma_queue_.end(), [](const DmaConfiguration& dc1, const DmaConfiguration& dc2) {
-        return dc1.dma_status < dc2.dma_status;
-    });
+    std::ranges::sort(dma_queue_,
+                      [](const DmaConfiguration& dc1, const DmaConfiguration& dc2) { return dc1.dma_status < dc2.dma_status; });
 }
 
-auto Scu::getTimer0CompareValue() -> u32 { return t0c_.timer_0_compare_data; }
+auto Scu::getTimer0CompareValue() const -> u32 { return t0c_.timer_0_compare_data; }
 
-auto Scu::isTimer1Enabled() -> bool { return (toEnum<TimerEnable>(t1md_.timer_enable) == TimerEnable::timer_operation_on); };
+auto Scu::isTimer1Enabled() const -> bool {
+    return (toEnum<TimerEnable>(t1md_.timer_enable) == TimerEnable::timer_operation_on);
+};
 
 void Scu::onVblankIn() {
     generateInterrupt(interrupt_source::v_blank_in);

@@ -664,7 +664,7 @@ class Vdp2 {
     void onVblankIn();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::vdp2Parts(const ScrollScreen s) -> const std::vector<std::unique_ptr<video::BaseRenderingPart>>
+    /// \fn auto Vdp2::vdp2Parts(const ScrollScreen s)  const -> const std::vector<std::unique_ptr<video::BaseRenderingPart>>
     ///
     /// \brief  Returns the VDP2 parts of a scroll screen.
     ///
@@ -676,7 +676,7 @@ class Vdp2 {
     /// \returns    A reference to a const std::vector&lt;Vdp2Part&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto vdp2Parts(const ScrollScreen s) -> const std::vector<video::Vdp2Part>& {
+    auto vdp2Parts(const ScrollScreen s) const -> const std::vector<video::Vdp2Part>& {
         return vdp2_parts_[utilities::toUnderlying(s)];
     }
 
@@ -720,7 +720,7 @@ class Vdp2 {
     auto getSpriteControlRegister() const -> SpriteControl { return spctl_; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::getSpritePriority(const u8 register_number) -> u8;
+    /// \fn auto Vdp2::getSpritePriority(const u8 register_number) const -> u8;
     ///
     /// \brief  Gets sprite priority from the register number.
     ///
@@ -732,7 +732,7 @@ class Vdp2 {
     /// \returns    The sprite priority.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getSpritePriority(const u8 register_number) -> u8;
+    auto getSpritePriority(const u8 register_number) const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset;
@@ -796,14 +796,14 @@ class Vdp2 {
     ///@{
     /// \name Various Vdp2 debug functions
     auto        getDebugGlobalMainData() const -> std::vector<LabelValue>;
-    auto        getDebugRamMainData() -> std::vector<LabelValue>;
+    auto        getDebugRamMainData() const -> std::vector<LabelValue>;
     auto        getDebugVramAccessMainData() -> std::vector<LabelValue>;
     auto        getDebugVramAccessBanks() -> std::vector<VramTiming>;
-    auto        getDebugVramAccessBanksUsed() -> std::array<bool, vram_banks_number>;
+    auto        getDebugVramAccessBanksUsed() const -> std::array<bool, vram_banks_number>;
     auto        getDebugVramAccessBanksName() -> std::vector<std::string>;
     static auto getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue;
     auto        getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>>;
-    auto        screenInDebug() -> ScrollScreen;
+    auto        screenInDebug() const -> ScrollScreen;
     void        screenInDebug(const ScrollScreen s);
     auto        isLayerDisabled(const ScrollScreen s) -> bool;
     void        disableLayer(const ScrollScreen s, const bool is_disabled);
@@ -826,17 +826,6 @@ class Vdp2 {
     //--------------------------------------------------------------------------------------------------------------
     // MISC methods
     //--------------------------------------------------------------------------------------------------------------
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn   void Vdp2::reset();
-    ///
-    /// \brief    Resets the VPD2
-    ///
-    /// \author   Runik
-    /// \date 16/05/2020
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void reset();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::addToRegisterNameMap(u32 addr, const std::string& name);
@@ -930,7 +919,7 @@ class Vdp2 {
     auto isScreenDisplayed(ScrollScreen s) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool;
+    /// \fn auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool;
     ///
     /// \brief  Query if reduction setting prevents scroll screen 's' to be displayed
     ///
@@ -942,7 +931,7 @@ class Vdp2 {
     /// \returns    True if reduction prevents the scroll screen to be displayed.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool;
+    auto isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8;
@@ -962,7 +951,7 @@ class Vdp2 {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getVramBitmapReads(const VramTiming& bank_a0, const VramTiming& bank_a1,
-    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command) -> u8;
+    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command) const -> u8;
     ///
     /// \brief  Gets VRAM bitmap reads
     ///
@@ -982,11 +971,11 @@ class Vdp2 {
                             const VramTiming&       bank_a1,
                             const VramTiming&       bank_b0,
                             const VramTiming&       bank_b1,
-                            const VramAccessCommand command) -> u8;
+                            const VramAccessCommand command) const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getVramPatternNameDataReads(const VramTiming& bank_a0, const VramTiming& bank_a1,
-    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command) -> u8;
+    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command) const -> u8;
     ///
     /// \brief  Gets VRAM pattern name data reads
     ///
@@ -1006,7 +995,7 @@ class Vdp2 {
                                      const VramTiming&       bank_a1,
                                      const VramTiming&       bank_b0,
                                      const VramTiming&       bank_b1,
-                                     const VramAccessCommand command) -> u8;
+                                     const VramAccessCommand command) const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Vdp2::getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
@@ -1694,10 +1683,10 @@ class Vdp2 {
     /// \returns    The color ram address offset.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getColorRamAddressOffset(const u8 register_offset) -> u16;
+    auto getColorRamAddressOffset(const u8 register_offset) const -> u16;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::resetCacheState();
+    /// \fn void Vdp2::resetCacheState() const;
     ///
     /// \brief  Resets the cache state.
     ///
@@ -1705,7 +1694,7 @@ class Vdp2 {
     /// \date   07/10/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void resetCacheState();
+    void resetCacheState() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::isCacheDirty(const ScrollScreen screen) -> bool;
@@ -1723,7 +1712,7 @@ class Vdp2 {
     auto isCacheDirty(const ScrollScreen screen) -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::discardCache(const ScrollScreen screen);
+    /// \fn void Vdp2::discardCache(const ScrollScreen screen) const;
     ///
     /// \brief  Discards cache data for the scroll screen.
     ///

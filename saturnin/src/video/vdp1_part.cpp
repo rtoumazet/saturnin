@@ -323,7 +323,7 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     priority(modules.vdp2()->getSpritePriority(priority_number_register));
 }
 
-auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const u8 priority) -> u8 {
+auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const u8 priority) const -> u8 {
     const auto color_mode = toEnum<ColorMode>(cmdpmod_.color_mode);
     switch (color_mode) {
         using enum ColorMode;

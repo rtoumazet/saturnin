@@ -1386,7 +1386,7 @@ void Cdrom::executeCommand() {
 //	return cdDriveStatus;
 //}
 //
-auto Cdrom::isCdInserted() -> bool {
+auto Cdrom::isCdInserted() const -> bool {
     // verified by trying to read the TOC
     // bool bReturn = Scsi::readToc(TOCData);
     //// AspiTOC=(Aspi_TOC*)&TOCData;
@@ -1779,7 +1779,7 @@ auto Cdrom::read32(const u32 addr) const -> u32 {
     return 0;
 }
 
-void Cdrom::write8(const u32 addr, const u8 data) {
+void Cdrom::write8(const u32 addr, const u8 data) const {
     Log::warning(Logger::cdrom, "Unmapped write access {:#010x} {:#04x}", addr, data);
 }
 
@@ -1809,7 +1809,7 @@ void Cdrom::write16(const u32 addr, const u16 data) {
     }
 }
 
-void Cdrom::write32(const u32 addr, const u32 data) {
+void Cdrom::write32(const u32 addr, const u32 data) const {
     switch (addr) {
         case fetch_data_pointer_address:
             //			{

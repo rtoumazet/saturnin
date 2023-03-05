@@ -281,7 +281,7 @@ class Scu {
     void clearInterruptFlag(const Interrupt& i);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Scu::getTimer0CompareValue()->u32;
+    /// \fn auto Scu::getTimer0CompareValue() const->u32;
     ///
     /// \brief  Gets timer 0 compare value
     ///
@@ -291,10 +291,10 @@ class Scu {
     /// \returns    The timer 0 compare value.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getTimer0CompareValue() -> u32;
+    auto getTimer0CompareValue() const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Scu::isTimer1Enabled() -> bool;
+    /// \fn auto Scu::isTimer1Enabled() const -> bool;
     ///
     /// \brief  Queries if Timer 1 is enabled.
     ///
@@ -304,7 +304,7 @@ class Scu {
     /// \returns    True if Timer 1 is enabled.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto isTimer1Enabled() -> bool;
+    auto isTimer1Enabled() const -> bool;
 
     /// \name Functions handling various interrupt events
     //@{
@@ -350,7 +350,7 @@ class Scu {
     auto configureDmaTransfer(DmaLevel level) -> DmaConfiguration;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc);
+    /// \fn void Scu::initializeDmaTransferByteNumber(DmaConfiguration& dc) const;
     ///
     /// \brief  Initializes the DMA transfer byte number part of DMA configuration.
     ///
@@ -360,7 +360,7 @@ class Scu {
     /// \param [in,out] dc                  DMA configuration.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeDmaTransferByteNumber(DmaConfiguration& dc);
+    void initializeDmaTransferByteNumber(DmaConfiguration& dc) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Scu::initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg);
@@ -495,7 +495,7 @@ class Scu {
     void sendDmaEndInterrupt(DmaLevel l);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Scu::resetDmaEnable( DmaConfiguration& dc);
+    /// \fn	void Scu::resetDmaEnable( DmaConfiguration& dc) const;
     ///
     /// \brief	Reset dma enable value for the current dma level.
     ///
@@ -505,7 +505,7 @@ class Scu {
     /// \param [in]	dc	DMA configuration.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void resetDmaEnable(DmaConfiguration& dc);
+    void resetDmaEnable(DmaConfiguration& dc) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::dmaUpdateWriteAddress(DmaLevel l, u32 data);

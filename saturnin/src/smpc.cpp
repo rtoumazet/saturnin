@@ -32,8 +32,6 @@ namespace saturnin::core {
 
 namespace uti = saturnin::utilities;
 
-// using sound::Scsp;
-
 using MapKeyboardLayout = std::map<PeripheralKey, const std::string>;
 auto keyboard_layout    = MapKeyboardLayout{{PeripheralKey::key_space, "space"},
                                             {PeripheralKey::key_apostrophe, "'"},
@@ -143,7 +141,7 @@ auto keyboard_layout    = MapKeyboardLayout{{PeripheralKey::key_space, "space"},
                                             {PeripheralKey::key_right_super, "right super"},
                                             {PeripheralKey::key_menu, "menu"}};
 
-auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
+auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) const -> std::vector<PeripheralKey> {
     switch (layout) {
         using enum PeripheralLayout;
         case empty_layout:
@@ -191,8 +189,7 @@ auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) -> std::vector<Pe
     }
 }
 void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
-    constexpr auto param_number = u8{13};
-    if (config.size() != param_number) {
+    if (constexpr auto param_number = u8{13}; config.size() != param_number) {
         Log::warning(Logger::smpc, tr("Incorrect Saturn pad data"));
         const auto v   = SaturnDigitalPad().toConfig(PeripheralLayout::empty_layout);
         auto       pad = SaturnDigitalPad{};
@@ -216,7 +213,7 @@ void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
     button_start          = config[index_12];
 }
 
-auto StvPlayerControls::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
+auto StvPlayerControls::toConfig(const PeripheralLayout layout) const -> std::vector<PeripheralKey> {
     switch (layout) {
         using enum PeripheralLayout;
         case empty_layout:
@@ -269,7 +266,7 @@ void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
     button_4        = config[index_7];
 }
 
-auto StvBoardControls::toConfig(const PeripheralLayout layout) -> std::vector<PeripheralKey> {
+auto StvBoardControls::toConfig(const PeripheralLayout layout) const -> std::vector<PeripheralKey> {
     switch (layout) {
         using enum PeripheralLayout;
         case empty_layout:
@@ -346,13 +343,13 @@ void Smpc::reset() {
     port_2_status_  = modules_.config()->configToPortStatus(p2c);
 }
 
-auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32 {
+auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) const -> u32 {
     using seconds             = std::chrono::duration<double>;
     const auto cycle_duration = seconds{(static_cast<double>(1) / static_cast<double>(uti::toUnderlying(clock_)))};
     return static_cast<u32>(d / cycle_duration);
 }
 
-auto Smpc::getSystemClock() -> u32 { return uti::toUnderlying(clock_); }
+auto Smpc::getSystemClock() const -> u32 { return uti::toUnderlying(clock_); }
 
 auto Smpc::getRegisters() const -> const AddressToNameMap& { return address_to_name_; };
 
@@ -969,9 +966,9 @@ void Smpc::initializePeripheralMappings() {
     stv_mapping_.player_2.fromConfig(modules_.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
 }
 
-auto Smpc::getSaturnPeripheralMapping() -> SaturnPeripheralMapping { return saturn_mapping_; }
+auto Smpc::getSaturnPeripheralMapping() const -> SaturnPeripheralMapping { return saturn_mapping_; }
 
-auto Smpc::getStvPeripheralMapping() -> StvPeripheralMapping { return stv_mapping_; }
+auto Smpc::getStvPeripheralMapping() const -> StvPeripheralMapping { return stv_mapping_; }
 
 void Smpc::initialize() {
     Log::info(Logger::smpc, tr("SMPC initialization"));

@@ -106,7 +106,7 @@ auto Scsp::read32(const u32 addr) const -> u32 {
     return 0;
 }
 
-void Scsp::write8(const u32 addr, const u8 data) {
+void Scsp::write8(const u32 addr, const u8 data) const {
     auto local_addr = addr & sound_ram_mask;
     if (local_addr < sound_ram_upper_boundary) {
         rawWrite<u8>(Scsp::ram(), local_addr ^ 1, data);
@@ -115,7 +115,7 @@ void Scsp::write8(const u32 addr, const u8 data) {
     }
 }
 
-void Scsp::write16(const u32 addr, const u16 data) {
+void Scsp::write16(const u32 addr, const u16 data) const {
     auto local_addr = addr & sound_ram_mask;
     if (local_addr < sound_ram_upper_boundary) {
         rawWrite<u16>(Scsp::ram(), local_addr, swapEndianness<u16>(data));
@@ -124,7 +124,7 @@ void Scsp::write16(const u32 addr, const u16 data) {
     }
 }
 
-void Scsp::write32(const u32 addr, const u32 data) {
+void Scsp::write32(const u32 addr, const u32 data) const {
     auto local_addr = addr & sound_ram_mask;
     if (local_addr < sound_ram_upper_boundary) {
         rawWrite<u32>(Scsp::ram(), local_addr, swapEndianness<u32>(swapWords(data)));

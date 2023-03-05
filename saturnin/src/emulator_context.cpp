@@ -194,7 +194,6 @@ void EmulatorContext::emulationMainThread() {
             const auto cycles = masterSh2()->run();
             if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
             smpc()->run(cycles);
-            vdp1()->run(cycles);
             vdp2()->run(cycles);
             cdrom()->run(cycles);
             scsp()->run(cycles);

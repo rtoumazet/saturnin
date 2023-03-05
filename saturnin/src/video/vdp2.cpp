@@ -233,7 +233,7 @@ void Vdp2::onVblankIn() {
 auto Vdp2::getSpriteColorAddressOffset() -> u16 { return getColorRamAddressOffset(craofb_.color_ram_address_offset_sprite); }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::getSpritePriority(const u8 register_number) -> u8 {
+auto Vdp2::getSpritePriority(const u8 register_number) const -> u8 {
     // Next line works from LLVM version 14.0.0
     // NOLINTBEGIN(readability-magic-numbers)
     switch (register_number) {
@@ -1221,14 +1221,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
     }
 }
 
-auto Vdp2::screenInDebug() -> ScrollScreen { return screen_in_debug_; }
+auto Vdp2::screenInDebug() const -> ScrollScreen { return screen_in_debug_; }
 void Vdp2::screenInDebug(const ScrollScreen s) { screen_in_debug_ = s; }
 
 //--------------------------------------------------------------------------------------------------------------
 // MISC methods
 //--------------------------------------------------------------------------------------------------------------
-
-void Vdp2::reset() {}
 
 void Vdp2::addToRegisterNameMap(const u32 addr, const std::string& name) {
     address_to_name_.insert(AddressToNameMap::value_type(addr, name));
@@ -1770,7 +1768,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) -> bool {
+auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool {
     switch (s) {
         using enum ScrollScreen;
         case nbg2: {
@@ -1926,7 +1924,7 @@ auto Vdp2::getVramBitmapReads(const VramTiming&       bank_a0,
                               const VramTiming&       bank_a1,
                               const VramTiming&       bank_b0,
                               const VramTiming&       bank_b1,
-                              const VramAccessCommand command) -> u8 {
+                              const VramAccessCommand command) const -> u8 {
     auto bitmap_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
     if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks) {
         bitmap_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
@@ -1943,7 +1941,7 @@ auto Vdp2::getVramPatternNameDataReads(const VramTiming&       bank_a0,
                                        const VramTiming&       bank_a1,
                                        const VramTiming&       bank_b0,
                                        const VramTiming&       bank_b1,
-                                       const VramAccessCommand command) -> u8 {
+                                       const VramAccessCommand command) const -> u8 {
     // Pattern name data (PND) read access during 1 cycle must be set to a maximum of 2 banks, one being either
     // VRAM-A0 or VRAM-B0, the other being VRAM-A1 or VRAM-B1. When the VRAM is not divided in 2 partitions, VRAM-A0
     // is used as VRAM-A and VRAM-B0 as VRAM-B.
@@ -3872,7 +3870,7 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
                                                                        screen.color_offset.as_float);
 }
 
-auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {
+auto Vdp2::getColorRamAddressOffset(const u8 register_offset) const -> u16 {
     constexpr auto color_size_2_bytes = u8{2};
     constexpr auto color_size_4_bytes = u8{4};
     auto           color_size         = u8{};
@@ -3902,7 +3900,7 @@ auto Vdp2::getColorRamAddressOffset(const u8 register_offset) -> u16 {
 // CACHE methods
 //--------------------------------------------------------------------------------------------------------------
 
-void Vdp2::resetCacheState() {
+void Vdp2::resetCacheState() const {
     modules_.memory()->was_vdp2_cram_accessed_ = false;
     for (auto& accessed : modules_.memory()->was_vdp2_page_accessed_) {
         accessed = false;
@@ -3948,7 +3946,7 @@ auto Vdp2::isCacheDirty(const ScrollScreen screen) -> bool {
     return false;
 }
 
-void Vdp2::discardCache(const ScrollScreen screen) {
+void Vdp2::discardCache([[maybe_unused]] const ScrollScreen screen) const {
     // 1) Textures used by the vdp2 parts of the screen are discarded
     Texture::discardCache(modules_.opengl(), VdpType::vdp2);
 

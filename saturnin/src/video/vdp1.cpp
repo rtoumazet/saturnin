@@ -73,8 +73,6 @@ auto Vdp1::intializeFramebuffer() -> bool {
     return true;
 }
 
-void Vdp1::run(const u8 cycles) {}
-
 void Vdp1::onVblankIn() {
     Texture::cleanCache(modules_.opengl(), VdpType::vdp1);
     Texture::setCache(VdpType::vdp1);

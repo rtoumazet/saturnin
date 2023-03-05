@@ -358,26 +358,26 @@ auto Config::listAvailableLanguages() -> std::vector<std::string> {
     return files;
 }
 
-auto Config::listAreaCodes() -> std::vector<std::string> {
+auto Config::listAreaCodes() const -> std::vector<std::string> {
     auto codes = std::vector<std::string>{};
-    for (const auto& code : area_code_) {
-        codes.push_back(code.first);
+    for (const auto& [key, value] : area_code_) {
+        codes.push_back(key);
     }
     return codes;
 }
 
-auto Config::listPeripheralConnections() -> std::vector<std::string> {
+auto Config::listPeripheralConnections() const -> std::vector<std::string> {
     auto connections = std::vector<std::string>{};
-    for (const auto& connection : port_status_) {
-        connections.push_back(connection.first);
+    for (const auto& [key, value] : port_status_) {
+        connections.push_back(key);
     }
     return connections;
 }
 
-auto Config::listLogLevels() -> std::vector<std::string> {
+auto Config::listLogLevels() const -> std::vector<std::string> {
     auto levels = std::vector<std::string>{};
-    for (const auto& level : log_level_) {
-        levels.push_back(level.first);
+    for (const auto& [key, value] : log_level_) {
+        levels.push_back(key);
     }
     return levels;
 }

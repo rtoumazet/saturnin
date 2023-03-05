@@ -154,7 +154,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
 
             ImGui::EndMenu();
         }
-        if (conf.show_file_load_binary) { showFileLoadBinaryWindow(conf, state, &conf.show_file_load_binary); };
+        if (conf.show_file_load_binary) { showFileLoadBinaryWindow(conf, state, &conf.show_file_load_binary); }
 
         // Debug
         switch (state.emulationStatus()) {
@@ -816,10 +816,9 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
 
                 const auto setupLog
                     = [&state](const core::AccessKeys key, const std::string& combo_name, std::vector<std::string> levels) {
-                          const std::string l = state.config()->readValue(key);
-                          const auto        it_level
-                              = std::find_if(levels.begin(), levels.end(), [&l](const std::string& str) { return l == str; });
-                          auto index_level = static_cast<s32>(it_level - levels.begin());
+                          const std::string l    = state.config()->readValue(key);
+                          const auto it_level    = std::ranges::find_if(levels, [&l](std::string_view str) { return l == str; });
+                          auto       index_level = static_cast<s32>(it_level - levels.begin());
                           if (ImGui::Combo(combo_name.c_str(), &index_level, levels)) {
                               state.config()->writeValue(key, levels[index_level]);
                           }
@@ -919,7 +918,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
             ImGui::MenuItem(tr("Threads").c_str(), nullptr, &conf.show_benchmarks);
             ImGui::EndMenu();
         }
-        if (conf.show_benchmarks) { showBenchmarkWindow(state, &conf.show_benchmarks); };
+        if (conf.show_benchmarks) { showBenchmarkWindow(state, &conf.show_benchmarks); }
 
         ImGui::EndMenuBar();
     }

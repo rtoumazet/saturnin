@@ -220,7 +220,7 @@ struct SaturnDigitalPad {
     PeripheralKey button_z;
     PeripheralKey button_start;
 
-    auto toConfig(PeripheralLayout layout) -> std::vector<PeripheralKey>;
+    auto toConfig(PeripheralLayout layout) const -> std::vector<PeripheralKey>;
     void fromConfig(std::vector<PeripheralKey> config);
 };
 
@@ -257,7 +257,7 @@ struct StvPlayerControls {
     PeripheralKey button_3;
     PeripheralKey button_4;
 
-    auto toConfig(PeripheralLayout layout) -> std::vector<PeripheralKey>;
+    auto toConfig(PeripheralLayout layout) const -> std::vector<PeripheralKey>;
     void fromConfig(std::vector<PeripheralKey> config);
 };
 
@@ -278,7 +278,7 @@ struct StvBoardControls {
     PeripheralKey p1_start;
     PeripheralKey p2_start;
 
-    auto toConfig(PeripheralLayout layout) -> std::vector<PeripheralKey>;
+    auto toConfig(PeripheralLayout layout) const -> std::vector<PeripheralKey>;
     void fromConfig(std::vector<PeripheralKey> config);
 };
 
@@ -377,13 +377,13 @@ struct RtcTime {
     std::bitset<4> second_10_bcd;
     std::bitset<4> second_1_bcd;
 
-    auto getUpperYear() -> u8 { return concat(year_1000_bcd, year_100_bcd); }
-    auto getLowerYear() -> u8 { return concat(year_10_bcd, year_1_bcd); }
-    auto getDayMonth() -> u8 { return concat(day_hex, month_hex); }
-    auto getDays() -> u8 { return concat(day_10_bcd, day_1_bcd); }
-    auto getHours() -> u8 { return concat(hour_10_bcd, hour_1_bcd); }
-    auto getMinutes() -> u8 { return concat(minute_10_bcd, minute_1_bcd); }
-    auto getSeconds() -> u8 { return concat(second_10_bcd, second_1_bcd); }
+    auto getUpperYear() const -> u8 { return concat(year_1000_bcd, year_100_bcd); }
+    auto getLowerYear() const -> u8 { return concat(year_10_bcd, year_1_bcd); }
+    auto getDayMonth() const -> u8 { return concat(day_hex, month_hex); }
+    auto getDays() const -> u8 { return concat(day_10_bcd, day_1_bcd); }
+    auto getHours() const -> u8 { return concat(hour_10_bcd, hour_1_bcd); }
+    auto getMinutes() const -> u8 { return concat(minute_10_bcd, minute_1_bcd); }
+    auto getSeconds() const -> u8 { return concat(second_10_bcd, second_1_bcd); }
 
   private:
     static auto concat(std::bitset<4> upper, std::bitset<4> lower) -> u8 {
@@ -437,7 +437,7 @@ class Smpc {
     void initializePeripheralMappings();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Smpc::getSaturnPeripheralMapping() -> SaturnPeripheralMapping;
+    /// \fn auto Smpc::getSaturnPeripheralMapping() const -> SaturnPeripheralMapping;
     ///
     /// \brief  Returns the current Saturn peripheral mapping.
     ///
@@ -447,10 +447,10 @@ class Smpc {
     /// \return The saturn peripheral mapping.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getSaturnPeripheralMapping() -> SaturnPeripheralMapping;
+    auto getSaturnPeripheralMapping() const -> SaturnPeripheralMapping;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Smpc::getStvPeripheralMapping() -> StvPeripheralMapping;
+    /// \fn auto Smpc::getStvPeripheralMapping() const -> StvPeripheralMapping;
     ///
     /// \brief  Returns the current ST-V peripheral mapping.
     ///
@@ -460,7 +460,7 @@ class Smpc {
     /// \return The stv peripheral mapping.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getStvPeripheralMapping() -> StvPeripheralMapping;
+    auto getStvPeripheralMapping() const -> StvPeripheralMapping;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Smpc::initialize();
@@ -475,8 +475,8 @@ class Smpc {
 
     /// \name SMPC status accessors
     ///@{
-    auto isSlaveSh2On() -> bool { return is_slave_sh2_on_; };
-    auto isSoundOn() -> bool { return is_sound_on_; };
+    auto isSlaveSh2On() const -> bool { return is_slave_sh2_on_; };
+    auto isSoundOn() const -> bool { return is_sound_on_; };
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -495,7 +495,7 @@ class Smpc {
     [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
+    /// \fn auto Smpc::calculateCyclesNumber(const std::chrono::duration<double>& d) const -> u32;
     ///
     /// \brief  Calculates the number of cycles needed for the duration specified.
     ///
@@ -507,10 +507,10 @@ class Smpc {
     /// \return The number of cycles needed for the duration specified.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateCyclesNumber(const std::chrono::duration<double>& d) -> u32;
+    auto calculateCyclesNumber(const std::chrono::duration<double>& d) const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Smpc::getSystemClock() -> u32;
+    /// \fn auto Smpc::getSystemClock() const -> u32;
     ///
     /// \brief  Gets current system clock.
     ///
@@ -520,7 +520,7 @@ class Smpc {
     /// \returns    The system clock in Hz.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getSystemClock() -> u32;
+    auto getSystemClock() const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Smpc::getRegisters() const -> const AddressToNameMap&;

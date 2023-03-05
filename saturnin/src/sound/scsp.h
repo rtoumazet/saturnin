@@ -175,9 +175,9 @@ class Scsp {
   private:
     /// \name SCSP memory accessors
     ///@{
-    void               write8(u32 addr, u8 data);
-    void               write16(u32 addr, u16 data);
-    void               write32(u32 addr, u32 data);
+    void               write8(u32 addr, u8 data) const;
+    void               write16(u32 addr, u16 data) const;
+    void               write32(u32 addr, u32 data) const;
     [[nodiscard]] auto read8(u32 addr) const -> u8;
     [[nodiscard]] auto read16(u32 addr) const -> u16;
     [[nodiscard]] auto read32(u32 addr) const -> u32;

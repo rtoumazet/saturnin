@@ -339,14 +339,14 @@ class Cdrom {
     void executeCommand();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void RefreshPeriod()
+    /// \fn	void RefreshPeriod() const
     ///
     /// \brief	Calls UpdatePeriod().
     ///
     /// \author	Runik
     /// \date	01/03/2010
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void refreshPeriod(){};
+    void refreshPeriod() const {};
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     ///// \fn void Cdrom::SetSectorBurstSize(u32 size);
@@ -459,9 +459,9 @@ class Cdrom {
   private:
     /// \name CD block memory accessors
     //@{
-    void               write8(u32 addr, u8 data);
+    void               write8(u32 addr, u8 data) const;
     void               write16(u32 addr, u16 data);
-    void               write32(u32 addr, u32 data);
+    void               write32(u32 addr, u32 data) const;
     [[nodiscard]] auto read8(u32 addr) const -> u8;
     [[nodiscard]] auto read16(u32 addr) -> u16;
     [[nodiscard]] auto read32(u32 addr) const -> u32;
@@ -683,7 +683,7 @@ class Cdrom {
     // u32  sectorBurstSize{}; ///< Sector burst read size.
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Cdrom::isCdInserted() -> bool;
+    /// \fn auto Cdrom::isCdInserted() const -> bool;
     ///
     /// \brief  Checks if a CD is present in the CD drive. //// \author Runik // \date
     ///
@@ -693,7 +693,7 @@ class Cdrom {
     /// \returns    True if a CD is inserted.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto isCdInserted() -> bool;
+    auto isCdInserted() const -> bool;
 
     // AspiToc* AspiTOC{}; ///< ASPI TOC.
 

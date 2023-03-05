@@ -119,7 +119,7 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
     return values;
 }
 
-auto Vdp2::getDebugRamMainData() -> std::vector<LabelValue> {
+auto Vdp2::getDebugRamMainData() const -> std::vector<LabelValue> {
     auto values = std::vector<LabelValue>{};
 
     const auto getVramSize = [](const VramSize sz) {
@@ -253,7 +253,7 @@ auto Vdp2::getDebugVramAccessBanks() -> std::vector<VramTiming> {
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::getDebugVramAccessBanksUsed() -> std::array<bool, vram_banks_number> {
+auto Vdp2::getDebugVramAccessBanksUsed() const -> std::array<bool, vram_banks_number> {
     // Bank A/A0 and B/B0 are always used
     auto banks = std::array{true, false, true, false};
     if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_a1_index] = true; }

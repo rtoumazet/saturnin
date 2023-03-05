@@ -29,7 +29,7 @@
 #include <saturnin/src/interrupt_controller.h> // Interrupt
 #include <saturnin/src/scu_registers.h>        //InterruptMaskRegister, InterruptStatusRegister
 
-namespace saturnin::core {
+namespace saturnin::core::interrupt_source {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \namespace  InterruptSource
@@ -37,7 +37,6 @@ namespace saturnin::core {
 /// \brief  Regroups all the interrupt sources that can be sent by the system.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace interrupt_source {
 // clang-format off
 static constexpr auto vector_nmi               =u8{ 0xB };
 static constexpr auto vector_user_break        =u8{ 0xC };
@@ -127,6 +126,6 @@ static auto sh2_frt_input_capture            =Interrupt{ vector_frt_input_captur
 static auto sh2_frt_output_compare_flag_a_set=Interrupt{ 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 static auto sh2_frt_output_compare_flag_b_set=Interrupt{ 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
 static auto sh2_frt_overflow_flag_set        =Interrupt{ 0, 0 , InterruptMaskRegister::undefined, InterruptStatusRegister::undefined };
-}
+
 // clang-format on
-} // namespace saturnin::core
+} // namespace saturnin::core::interrupt_source

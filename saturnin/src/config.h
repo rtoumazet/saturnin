@@ -396,7 +396,7 @@ class Config {
     static auto listAvailableLanguages() -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::listAreaCodes() -> std::vector<std::string>;
+    /// \fn auto saturnin::core::Config::listAreaCodes() const -> std::vector<std::string>;
     ///
     /// \brief  Returns a vector populated with area codes.
     ///
@@ -406,10 +406,10 @@ class Config {
     /// \returns    A std::vector&lt;std::string&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto listAreaCodes() -> std::vector<std::string>;
+    auto listAreaCodes() const -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::listPeripheralConnections() -> std::vector<std::string>;
+    /// \fn auto saturnin::core::Config::listPeripheralConnections() const -> std::vector<std::string>;
     ///
     /// \brief  Returns a vector populated with peripheral connections.
     ///
@@ -419,10 +419,10 @@ class Config {
     /// \returns    A std::vector&lt;std::string&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto listPeripheralConnections() -> std::vector<std::string>;
+    auto listPeripheralConnections() const -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::listLogLevels() -> std::vector<std::string>;
+    /// \fn auto Config::listLogLevels() const -> std::vector<std::string>;
     ///
     /// \brief  Returns a vector populated with the different log levels.
     ///
@@ -432,7 +432,7 @@ class Config {
     /// \returns    A std::vector&lt;std::string&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto listLogLevels() -> std::vector<std::string>;
+    auto listLogLevels() const -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Config::configToPortStatus(const std::string& value) -> PortStatus;

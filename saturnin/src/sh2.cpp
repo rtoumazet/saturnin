@@ -40,7 +40,7 @@ using core::Logger;
 
 Sh2::Sh2(Sh2Type st, core::EmulatorContext* ec) : modules_(ec), sh2_type_(st) { reset(); }
 
-auto Sh2::readRegisters8(const u32 addr) -> u8 {
+auto Sh2::readRegisters8(const u32 addr) const -> u8 {
     switch (addr) {
         /////////////
         // 5. INTC //
@@ -117,7 +117,7 @@ auto Sh2::readRegisters8(const u32 addr) -> u8 {
     }
 }
 
-auto Sh2::readRegisters16(const u32 addr) -> u16 {
+auto Sh2::readRegisters16(const u32 addr) const -> u16 {
     switch (addr) {
         /////////////
         // 5. INTC //
@@ -187,7 +187,7 @@ auto Sh2::readRegisters16(const u32 addr) -> u16 {
     }
 }
 
-auto Sh2::readRegisters32(const u32 addr) -> u32 {
+auto Sh2::readRegisters32(const u32 addr) const -> u32 {
     switch (addr) {
         /////////////
         // 5. INTC //
@@ -670,8 +670,9 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
     }
 }
 
-void Sh2::writeCachePurgeArea(const u32 addr, const u32 data) {
+void Sh2::writeCachePurgeArea(const u32 addr, const u32 data) const {
     // TODO
+    // Const will have to be removed
 }
 
 void Sh2::purgeCache() {
@@ -1052,7 +1053,8 @@ void Sh2::executeDma() {
     }
 }
 
-auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLINT(readability-convert-member-functions-to-static)
+auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) const
+    -> bool { // NOLINT(readability-convert-member-functions-to-static)
     // DE=1 TE=0 NMIF=0 AE=0
     switch (dc) {
         using enum DmaChannel;
@@ -1079,7 +1081,7 @@ auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) -> bool { // NOLIN
     return false;
 }
 
-auto Sh2::configureDmaTransfer(const DmaChannel dc) -> Sh2DmaConfiguration {
+auto Sh2::configureDmaTransfer(const DmaChannel dc) const -> Sh2DmaConfiguration {
     auto conf = Sh2DmaConfiguration{};
     switch (dc) {
         using enum DmaChannel;

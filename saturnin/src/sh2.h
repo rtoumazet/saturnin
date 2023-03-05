@@ -268,7 +268,7 @@ class Sh2 {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Sh2::writeCachePurgeArea(const u32 addr, const u32 data);
+    /// \fn	void Sh2::writeCachePurgeArea(const u32 addr, const u32 data) const;
     ///
     /// \brief	Cache purge area write
     ///
@@ -278,7 +278,7 @@ class Sh2 {
     /// \param 	addr	Address to write to.
     /// \param 	data	Data to write.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void writeCachePurgeArea(const u32 addr, const u32 data);
+    void writeCachePurgeArea(const u32 addr, const u32 data) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> [[nodiscard]] auto Sh2::readCacheAddresses(const u32 addr) const -> T
@@ -501,7 +501,7 @@ class Sh2 {
 
     ///@{
     /// Breakpoints accessors
-     void breakpoint(const u8 index, const u32 addr) { breakpoints_[index] = addr; };
+    void               breakpoint(const u8 index, const u32 addr) { breakpoints_[index] = addr; };
     [[nodiscard]] auto breakpoint(const u8 index) const -> u32 { return breakpoints_[index]; };
     ///@}
 
@@ -522,7 +522,7 @@ class Sh2 {
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::readRegisters8(u32 addr) -> u8;
+    /// \fn auto Sh2::readRegisters8(u32 addr) const -> u8;
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -534,10 +534,10 @@ class Sh2 {
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto readRegisters8(u32 addr) -> u8;
+    auto readRegisters8(u32 addr) const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::readRegisters16(u32 addr) -> u16;
+    /// \fn auto Sh2::readRegisters16(u32 addr) const -> u16;
     ///
     /// \brief  Reads from the registers area.
     ///
@@ -549,7 +549,7 @@ class Sh2 {
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto readRegisters16(u32 addr) -> u16;
+    auto readRegisters16(u32 addr) const -> u16;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Sh2::readRegisters32(u32 addr) -> u32;
@@ -564,7 +564,7 @@ class Sh2 {
     /// \return Data read.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto readRegisters32(u32 addr) -> u32;
+    auto readRegisters32(u32 addr) const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::writeRegisters(u32 addr, u8 data);
@@ -665,7 +665,7 @@ class Sh2 {
     void executeDma();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::dmaStartConditionsAreSatisfied(DmaChannel dc) -> bool;
+    /// \fn auto Sh2::dmaStartConditionsAreSatisfied(DmaChannel dc) const -> bool;
     ///
     /// \brief  Checks if the DMA channel start conditions are satisfied.
     ///
@@ -677,10 +677,10 @@ class Sh2 {
     /// \return True if it succeeds, false if it fails.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto dmaStartConditionsAreSatisfied(DmaChannel dc) -> bool;
+    auto dmaStartConditionsAreSatisfied(DmaChannel dc) const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::configureDmaTransfer(DmaChannel dc) -> Sh2DmaConfiguration;
+    /// \fn auto Sh2::configureDmaTransfer(DmaChannel dc) const -> Sh2DmaConfiguration;
     ///
     /// \brief  Returns a struct configured for the DMA channel passed as parameter.
     ///
@@ -692,7 +692,7 @@ class Sh2 {
     /// \return A Sh2DmaConfiguration.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto configureDmaTransfer(DmaChannel dc) -> Sh2DmaConfiguration;
+    auto configureDmaTransfer(DmaChannel dc) const -> Sh2DmaConfiguration;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf);

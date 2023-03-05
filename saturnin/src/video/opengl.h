@@ -114,7 +114,7 @@ class Opengl {
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };
-    [[nodiscard]] auto vdp2DebugLayerTextureId() -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
+    [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
     [[nodiscard]] auto fps() const { return fps_; };
     void               fps(std::string fps) { fps_ = fps; };
     void               saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
@@ -162,7 +162,7 @@ class Opengl {
     void preRender();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::postRender();
+    /// \fn void Opengl::postRender() const;
     ///
     /// \brief  Processing done after rendering.
     ///
@@ -170,7 +170,7 @@ class Opengl {
     /// \date   08/04/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void postRender();
+    void postRender() const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::initializeShaders();
@@ -209,17 +209,6 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void onWindowResize(const u16 width, const u16 height);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::updateScreenResolution();
-    ///
-    /// \brief  Updates the screen resolution
-    ///
-    /// \author Runik
-    /// \date   10/02/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void updateScreenResolution();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::createVertexShader(const ShaderName name) -> u32;
@@ -311,7 +300,7 @@ class Opengl {
     static void deleteTexture(const u32 texture);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::areFbosInitialized() ->bool
+    /// \fn auto Opengl::areFbosInitialized() const ->bool
     ///
     /// \brief  Are framebuffer objects initialized.
     ///
@@ -321,7 +310,7 @@ class Opengl {
     /// \returns    True if framebuffer objects are initialized.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto areFbosInitialized() -> bool { return !fbo_list_.empty(); }
+    auto areFbosInitialized() const -> bool { return !fbo_list_.empty(); }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::render();
@@ -335,7 +324,7 @@ class Opengl {
     void render();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::video::Opengl::isThereSomethingToRender() -> bool;
+    /// \fn auto saturnin::video::Opengl::isThereSomethingToRender() const -> bool;
     ///
     /// \brief  Is there something to render
     ///
@@ -345,10 +334,10 @@ class Opengl {
     /// \returns   True if there is something to render.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto isThereSomethingToRender() -> bool;
+    auto isThereSomethingToRender() const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getRenderedBufferTextureId() -> u32;
+    /// \fn auto Opengl::getRenderedBufferTextureId() const -> u32;
     ///
     /// \brief  Gets the texture ID of the buffer currently rendered to.
     ///
@@ -358,7 +347,7 @@ class Opengl {
     /// \returns    The rendered buffer texture identifier.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getRenderedBufferTextureId() -> u32;
+    auto getRenderedBufferTextureId() const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::renderVdp1DebugOverlay();
@@ -438,7 +427,7 @@ class Opengl {
     auto getOpenglTexture(const size_t key) -> std::optional<OpenglTexture>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::isSaturnResolutionSet();
+    /// \fn auto Opengl::isSaturnResolutionSet() const;
     ///
     /// \brief  Checks if the Saturn resolution is set.
     ///
@@ -448,7 +437,7 @@ class Opengl {
     /// \returns    Returns true if the saturn screen resolution is set.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto isSaturnResolutionSet() -> bool;
+    auto isSaturnResolutionSet() const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer, const size_t texture_key) -> u32;
@@ -499,7 +488,7 @@ class Opengl {
     auto getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::calculateDisplayViewportMatrix() -> glm::highp_mat4;
+    /// \fn auto Opengl::calculateDisplayViewportMatrix() const -> glm::highp_mat4;
     ///
     /// \brief  Calculates the display viewport matrix, adding letterbox or pillarbox when the display isn't exactly like the
     /// Saturn resolution.
@@ -510,7 +499,7 @@ class Opengl {
     /// \returns    The calculated display viewport matrix.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateDisplayViewportMatrix() -> glm::highp_mat4;
+    auto calculateDisplayViewportMatrix() const -> glm::highp_mat4;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32>;
@@ -552,7 +541,7 @@ class Opengl {
     void initializeFbo(const FboType type);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::initializeTextureArray() -> u32;
+    /// \fn	auto Opengl::initializeTextureArray() const -> u32;
     ///
     /// \brief	Initializes the texture array.
     ///
@@ -562,7 +551,7 @@ class Opengl {
     /// \returns	The generated texture array id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto initializeTextureArray() -> u32;
+    auto initializeTextureArray() const -> u32;
 
     void calculateFps();
 
