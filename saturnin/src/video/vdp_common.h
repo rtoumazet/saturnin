@@ -27,6 +27,7 @@
 
 #include <saturnin/src/emulator_defs.h> // u8, u16, u32
 #include <saturnin/src/bitfield.h>
+#include <saturnin/src/regbits.h>
 
 namespace saturnin::video {
 
@@ -319,5 +320,18 @@ class Dots16BitsRegister : public Register {
     inline static const BitRange<u16> dot_0{16, 31};
     inline static const BitRange<u16> dot_1{0, 15};
 };
+
+struct Dots16BitsRegbit {
+    struct Config {
+        using pos_t = regbits::Pos<u32, Config>;
+
+        static constexpr pos_t upper16 = pos_t(16);
+        static constexpr pos_t lower16 = pos_t(0);
+
+        static const u32 upper16_mask = 0xFFFF;
+        static const u32 lower16_mask = 0xFFFF;
+    };
+};
+// static_assert(sizeof(Dots16BitsRegbit) == 36, "Dots16BitsRegbit size");
 
 } // namespace saturnin::video

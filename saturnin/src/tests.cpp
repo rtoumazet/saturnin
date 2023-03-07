@@ -21,10 +21,14 @@
 #include <saturnin/src/tests.h>
 
 #include <chrono>
+#include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/regbits.h>
 #include <saturnin/src/utilities.h>
 #include <saturnin/src/video/vdp2.h>
 
 namespace saturnin::tests {
+
+using namespace regbits;
 
 void Test::startTest() { start_time_ = std::chrono::steady_clock::now(); }
 
@@ -115,6 +119,25 @@ void runTests() {
         result = "Slice "s;
         result += reg.endTest();
         core::Log::info(Logger::test, result);
+
+        // 4
+        reg.startTest();
+
+        std::vector<u32>().swap(test);
+        auto row_slice2 = std::bitset<32>{0x80004000};
+        val             = 0;
+        for (int i = 0; i < iterations; ++i) {
+            val += make_slice<16, 16>(row_slice2).operator std::bitset<16Ui64>().to_ulong();
+            val += make_slice<0, 16>(row_slice2). operator std::bitset<16Ui64>().to_ulong();
+            test.push_back(val);
+        }
+
+        result = "Slice2 "s;
+        result += reg.endTest();
+        core::Log::info(Logger::test, result);
+
+
+
     }
 }
 

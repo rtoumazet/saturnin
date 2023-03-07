@@ -283,6 +283,60 @@ std::bitset<L - R + 1> slice(std::bitset<N> value) {
     return std::bitset<L - R + 1>{svalue};
 }
 
+template<unsigned Width, unsigned Offset, std::size_t SrcBitWidth>
+struct bit_slice {
+  private:
+    std::bitset<SrcBitWidth>* bits;
+
+  public:
+    // cast to `bitset`:
+    operator std::bitset<Width>() const {
+        std::bitset<Width> retval;
+        for (unsigned i = 0; i < Offset; ++i) {
+            retval[i] = (*this)[i];
+        }
+        return retval;
+    }
+    typedef typename std::bitset<SrcBitWidth>::reference reference;
+    reference                                            operator[](size_t pos) {
+        // TODO: check that pos < Width?
+        return (*bits)[pos + Offset];
+    }
+    constexpr bool operator[](size_t pos) const {
+        // TODO: check that pos < Width?
+        return (*bits)[pos + Offset];
+    }
+    typedef bit_slice<Width, Offset, SrcBitWidth> self_type;
+    // can be assigned to from any bit_slice with the same width:
+    template<unsigned O_Offset, unsigned O_SrcBitWidth>
+    self_type& operator=(bit_slice<Width, O_Offset, O_SrcBitWidth>&& o) {
+        for (unsigned i = 0; i < Width; ++i) {
+            (*this)[i] = o[i];
+        }
+        return *this;
+    }
+    // can be assigned from a `std::bitset<Width>` of the same size:
+    self_type& operator=(std::bitset<Width> const& o) {
+        for (unsigned i = 0; i < Width; ++i) {
+            (*this)[i] = o[i];
+        }
+        return *this;
+    }
+    explicit bit_slice(std::bitset<SrcBitWidth>& src) : bits(&src) {}
+    bit_slice(self_type const&) = default;
+    bit_slice(self_type&&)      = default;
+    bit_slice(self_type& o) : bit_slice(const_cast<self_type const&>(o)) {}
+    // I suspect, but am not certain, the the default move/copy ctor would do...
+    // dtor not needed, as there is nothing to destroy
+
+    // TODO: reimplement rest of std::bitset's interface that you care about
+};
+
+template<unsigned offset, unsigned width, std::size_t src_width>
+bit_slice<width, offset, src_width> make_slice(std::bitset<src_width>& src) {
+    return bit_slice<width, offset, src_width>(src);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct Coord
 ///

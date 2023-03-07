@@ -264,11 +264,11 @@ class Sh2 {
     // 32 bits specialization
     template<>
     void writeCachePurgeArea<u32>(const u32 addr, [[maybe_unused]] const u32 data) {
-        writeCachePurgeArea(addr, data);
+        write32CachePurgeArea(addr, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Sh2::writeCachePurgeArea(const u32 addr, const u32 data) const;
+    /// \fn	void Sh2::write32CachePurgeArea(const u32 addr, const u32 data) const;
     ///
     /// \brief	Cache purge area write
     ///
@@ -278,7 +278,7 @@ class Sh2 {
     /// \param 	addr	Address to write to.
     /// \param 	data	Data to write.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    void writeCachePurgeArea(const u32 addr, const u32 data) const;
+    void write32CachePurgeArea(const u32 addr, const u32 data) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> [[nodiscard]] auto Sh2::readCacheAddresses(const u32 addr) const -> T

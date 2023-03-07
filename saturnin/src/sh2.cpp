@@ -670,7 +670,7 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
     }
 }
 
-void Sh2::writeCachePurgeArea(const u32 addr, const u32 data) const {
+void Sh2::write32CachePurgeArea(const u32 addr, const u32 data) const {
     // TODO
     // Const will have to be removed
 }
