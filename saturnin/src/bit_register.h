@@ -363,8 +363,8 @@ class Reg {
     // Constructors
     Reg<DATA, CLASS>() = default;
     explicit constexpr Reg<DATA, CLASS>(const DATA data) : data_(data) {}
-    constexpr Reg<DATA, CLASS>(const BitsType bits) : data_(bits.bits()) {}
-    constexpr Reg<DATA, CLASS>(const MaskedType mskd) : data_(mskd.bits()) {}
+    explicit constexpr Reg<DATA, CLASS>(const BitsType bits) : data_(bits.bits()) {}
+    explicit constexpr Reg<DATA, CLASS>(const MaskedType mskd) : data_(mskd.bits()) {}
     Reg(const RegType& other) = default;
     ~Reg()                    = default;
 
