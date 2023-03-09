@@ -27,7 +27,8 @@
 
 #include <saturnin/src/emulator_defs.h> // u8, u16, u32
 #include <saturnin/src/bitfield.h>
-#include <saturnin/src/regbits.h>
+// #include <saturnin/src/regbits.h>
+#include <saturnin/src/bit_register.h>
 
 namespace saturnin::video {
 
@@ -322,15 +323,26 @@ class Dots16BitsRegister : public Register {
 };
 
 struct Dots16BitsRegbit {
-    struct Config {
-        using pos_t = regbits::Pos<u32, Config>;
+    struct Data {
+        using pos_t = Pos<u32, Data>;
 
-        static constexpr pos_t upper16 = pos_t(16);
-        static constexpr pos_t lower16 = pos_t(0);
+        static constexpr pos_t upper16_pos = pos_t(16);
+        static constexpr pos_t lower16_pos = pos_t(0);
 
-        static const u32 upper16_mask = 0xFFFF;
-        static const u32 lower16_mask = 0xFFFF;
+        static constexpr u16 word_mask = 0xFFFF;
+
+        using bits_t = Bits<u32, Data>;
+        using mskd_t = Masked<u32, Data>;
+        using shft_t = Shifted<u32, Data>;
+
+        static constexpr mskd_t upper16 = mskd_t(word_mask, 0, upper16_pos);
+        static constexpr mskd_t lower16 = mskd_t(word_mask, 0, lower16_pos);
+
+        static constexpr shft_t upper16_shft = shft_t(word_mask, upper16_pos);
+        static constexpr shft_t lower16_shft = shft_t(word_mask, lower16_pos);
     };
+    using data_t = Reg<u32, Data>;
+    data_t data;
 };
 // static_assert(sizeof(Dots16BitsRegbit) == 36, "Dots16BitsRegbit size");
 

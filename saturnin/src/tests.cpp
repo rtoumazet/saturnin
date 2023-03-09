@@ -22,13 +22,11 @@
 
 #include <chrono>
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/regbits.h>
+#include <saturnin/src/bit_register.h>
 #include <saturnin/src/utilities.h>
 #include <saturnin/src/video/vdp2.h>
 
 namespace saturnin::tests {
-
-using namespace regbits;
 
 void Test::startTest() { start_time_ = std::chrono::steady_clock::now(); }
 
@@ -136,8 +134,23 @@ void runTests() {
         result += reg.endTest();
         core::Log::info(Logger::test, result);
 
+        // 5
+        reg.startTest();
 
+        std::vector<u32>().swap(test);
+        Dots16BitsRegbit regbit;
+        regbit.data = 0x12345678;
 
+        val = 0;
+        for (int i = 0; i < iterations; ++i) {
+            val += regbit.data >> Dots16BitsRegbit::Data::upper16_shft;
+            val += regbit.data >> Dots16BitsRegbit::Data::lower16_shft;
+            test.push_back(val);
+        }
+
+        result = "Regbit "s;
+        result += reg.endTest();
+        core::Log::info(Logger::test, result);
     }
 }
 
