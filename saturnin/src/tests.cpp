@@ -70,7 +70,6 @@ void runTests() {
 
         reg.startTest();
 
-        auto               test = std::vector<u32>{};
         constexpr auto     iterations{1000000};
         Dots16BitsRegister reg32{};
         reg32.set(Dots16BitsRegister::raw, 0x80000000);
@@ -79,7 +78,6 @@ void runTests() {
         for (int i = 0; i < iterations; ++i) {
             val += reg32.get(Dots16BitsRegister::dot_0);
             val += reg32.get(Dots16BitsRegister::dot_1);
-            test.push_back(val);
         }
 
         auto result = "Register "s;
@@ -89,13 +87,11 @@ void runTests() {
         // 2
         reg.startTest();
 
-        std::vector<u32>().swap(test);
         auto row = Dots16Bits{0x80000000};
         val      = 0;
         for (int i = 0; i < iterations; ++i) {
             val += row.dot_0;
             val += row.dot_1;
-            test.push_back(val);
         }
 
         result = "BitField "s;
@@ -105,13 +101,11 @@ void runTests() {
         // 3
         reg.startTest();
 
-        std::vector<u32>().swap(test);
         auto row_slice = std::bitset<32>{0x80004000};
         val            = 0;
         for (int i = 0; i < iterations; ++i) {
             val += slice<32, 31, 16>(row_slice).to_ulong();
             val += slice<32, 15, 0>(row_slice).to_ulong();
-            test.push_back(val);
         }
 
         result = "Slice "s;
@@ -121,13 +115,11 @@ void runTests() {
         // 4
         reg.startTest();
 
-        std::vector<u32>().swap(test);
         auto row_slice2 = std::bitset<32>{0x80004000};
         val             = 0;
         for (int i = 0; i < iterations; ++i) {
             val += make_slice<16, 16>(row_slice2).operator std::bitset<16Ui64>().to_ulong();
             val += make_slice<0, 16>(row_slice2). operator std::bitset<16Ui64>().to_ulong();
-            test.push_back(val);
         }
 
         result = "Slice2 "s;
@@ -137,7 +129,6 @@ void runTests() {
         // 5
         reg.startTest();
 
-        std::vector<u32>().swap(test);
         Dots16BitsRegbit regbit;
         regbit.data = 0x12345678;
 
@@ -145,7 +136,6 @@ void runTests() {
         for (int i = 0; i < iterations; ++i) {
             val += regbit.data >> Dots16BitsRegbit::Data::upper16_shft;
             val += regbit.data >> Dots16BitsRegbit::Data::lower16_shft;
-            test.push_back(val);
         }
 
         result = "Regbit "s;

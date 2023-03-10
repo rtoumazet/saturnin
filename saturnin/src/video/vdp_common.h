@@ -27,7 +27,6 @@
 
 #include <saturnin/src/emulator_defs.h> // u8, u16, u32
 #include <saturnin/src/bitfield.h>
-// #include <saturnin/src/regbits.h>
 #include <saturnin/src/bit_register.h>
 
 namespace saturnin::video {
@@ -344,6 +343,5 @@ struct Dots16BitsRegbit {
     using data_t = Reg<u32, Data>;
     data_t data;
 };
-// static_assert(sizeof(Dots16BitsRegbit) == 36, "Dots16BitsRegbit size");
 
 } // namespace saturnin::video

@@ -36,7 +36,7 @@ class Reg;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class	Pos
 ///
-/// \brief	Represents a position in a register.
+/// \brief	Position in a register.
 ///
 /// \author	Runik
 /// \date	09/03/2023
@@ -92,7 +92,7 @@ class Pos {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class	Bits
 ///
-/// \brief	A single bit of a register.
+/// \brief	Single bit of a register.
 ///
 /// \author	Runik
 /// \date	09/03/2023
@@ -188,7 +188,7 @@ class Bits {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class	Masked
 ///
-/// \brief	A continuous bit span of a register, including a mask.
+/// \brief	Continuous bit span of a register, including a mask.
 ///
 /// \author	Runik
 /// \date	09/03/2023
@@ -293,7 +293,7 @@ class Masked {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class	Shifted
 ///
-/// \brief	A right shifting of bits of a register.
+/// \brief	Right shifting of bits of a register.
 ///
 /// \author	Runik
 /// \date	09/03/2023
@@ -433,5 +433,34 @@ class Reg {
     DATA data_;
 
 }; // template<typename BITS, typename MASKED> class Reg
+
+// Macro for generating functions returning Bits.
+// PosType and BitsType must have been 'using' defined in the class.
+#define REGBITS_BITS_RANGE(CLASS, CONSTEXPR_NAME, RUNTIME_NAME, DATA)                                      \
+    template<unsigned BIT_NUM>                                                                             \
+    static constexpr BitsType CONSTEXPR_NAME() {                                                           \
+        static_assert(BIT_NUM < sizeof(DATA) * 8, CLASS "::" #CONSTEXPR_NAME "<BIT_NUM> is out of range"); \
+        return BitsType(1, pos_t(BIT_NUM));                                                                \
+    }                                                                                                      \
+                                                                                                           \
+    static const BitsType RUNTIME_NAME(const unsigned bit_num) { return BitsType(1, PosType(bit_num)); }   \
+                                                                                                           \
+    static bool RUNTIME_NAME##_valid(const unsigned bit_num) { return bit_num < sizeof(DATA) * 4; }
+
+// Macro for generating functions returning Masked.
+// ShiftedType and MaskedType must have been 'using' defined in the class.
+//
+#define REGBITS_MSKD_RANGE(CLASS, CONSTEXPR_NAME, RUNTIME_NAME, MASK, POS, LIMIT)                                          \
+    static constexpr ShiftedType CONSTEXPR_NAME##_SHFT = ShiftedType(MASK, POS);                                           \
+                                                                                                                           \
+    template<unsigned BITS>                                                                                                \
+    static constexpr MaskedType CONSTEXPR_NAME() {                                                                         \
+        static_assert(BITS <= (LIMIT), CLASS "::" #CONSTEXPR_NAME "<BITS> is out of range");                               \
+        return MaskedType(MASK, BITS, POS);                                                                                \
+    }                                                                                                                      \
+                                                                                                                           \
+    static const MaskedType RUNTIME_NAME(const unsigned bits) { return MaskedType(MASK << POS.pos(), bits << POS.pos()); } \
+                                                                                                                           \
+    static bool RUNTIME_NAME##_valid(const unsigned bits) { return bits <= (LIMIT); }
 
 } // namespace saturnin

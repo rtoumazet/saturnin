@@ -323,8 +323,8 @@ struct bit_slice {
         return *this;
     }
     explicit bit_slice(std::bitset<SrcBitWidth>& src) : bits(&src) {}
-    bit_slice(self_type const&) = default;
-    bit_slice(self_type&&)      = default;
+    bit_slice(self_type const&)     = default;
+    bit_slice(self_type&&) noexcept = default;
     bit_slice(self_type& o) : bit_slice(const_cast<self_type const&>(o)) {}
     // I suspect, but am not certain, the the default move/copy ctor would do...
     // dtor not needed, as there is nothing to destroy
