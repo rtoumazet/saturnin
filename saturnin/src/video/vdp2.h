@@ -1483,18 +1483,18 @@ class Vdp2 {
                               const u32                 cell_address) {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
-        // constexpr auto palette_disp    = u8{4};
-        // const auto     palette         = palette_number << palette_disp;
+        auto           row             = DataExtraction{};
         for (u32 i = 0; i < 8; ++i) {
-            auto row = Dots4Bits{modules_.memory()->read<u32>(current_address)};
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.dot_0);
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.dot_1);
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.dot_2);
-            readPalette16Dot<T>(texture_data, screen, palette_number, row.dot_3);
-            readPalette16Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_4));
-            readPalette16Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_5));
-            readPalette16Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_6));
-            readPalette16Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_7));
+            // auto row = Dots4Bits{modules_.memory()->read<u32>(current_address)};
+            row.as_4bits = modules_.memory()->read<u32>(current_address);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot0_shift);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot1_shift);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot2_shift);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot3_shift);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot4_shift);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot5_shift);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot6_shift);
+            readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot7_shift);
             current_address += row_offset;
         }
     }

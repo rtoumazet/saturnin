@@ -476,16 +476,49 @@ void readColorBankMode16Colors(const EmulatorModules& modules,
         return;
     }
     checkColorCalculation(part);
+    auto row = DataExtraction{};
     for (u32 i = start_address; i < (start_address + texture_size); i += one_read_offset) {
-        auto row = Dots4Bits{modules.memory()->read<u32>(i)};
-        readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, row.dot_0);
-        readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, row.dot_1);
-        readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, row.dot_2);
-        readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, row.dot_3);
-        readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, static_cast<u8>(row.dot_4));
-        readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, static_cast<u8>(row.dot_5));
-        readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, static_cast<u8>(row.dot_6));
-        readDotColorBank16<T>(modules, texture_data, color_ram_address_offset, part, static_cast<u8>(row.dot_7));
+        row.as_4bits = modules.memory()->read<u32>(i);
+        readDotColorBank16<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_4bits >> DataExtraction::As4Bits::dot0_shift);
+        readDotColorBank16<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_4bits >> DataExtraction::As4Bits::dot1_shift);
+        readDotColorBank16<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_4bits >> DataExtraction::As4Bits::dot2_shift);
+        readDotColorBank16<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_4bits >> DataExtraction::As4Bits::dot3_shift);
+        readDotColorBank16<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_4bits >> DataExtraction::As4Bits::dot4_shift);
+        readDotColorBank16<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_4bits >> DataExtraction::As4Bits::dot5_shift);
+        readDotColorBank16<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_4bits >> DataExtraction::As4Bits::dot6_shift);
+        readDotColorBank16<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_4bits >> DataExtraction::As4Bits::dot7_shift);
     }
 }
 
@@ -515,16 +548,17 @@ void readLookUpTable16Colors(const EmulatorModules& modules,
         return;
     }
     checkColorCalculation(part);
+    auto row = DataExtraction{};
     for (u32 i = start_address; i < (start_address + texture_size / one_read_offset * 2); i += one_read_offset) {
-        auto row = Dots4Bits{modules.memory()->read<u32>(i)};
-        readDotLookUpTable16<T>(modules, texture_data, part, row.dot_0);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.dot_1);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.dot_2);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.dot_3);
-        readDotLookUpTable16<T>(modules, texture_data, part, static_cast<u8>(row.dot_4));
-        readDotLookUpTable16<T>(modules, texture_data, part, static_cast<u8>(row.dot_5));
-        readDotLookUpTable16<T>(modules, texture_data, part, static_cast<u8>(row.dot_6));
-        readDotLookUpTable16<T>(modules, texture_data, part, static_cast<u8>(row.dot_7));
+        row.as_4bits = modules.memory()->read<u32>(i);
+        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot0_shift);
+        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot1_shift);
+        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot2_shift);
+        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot3_shift);
+        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot4_shift);
+        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot5_shift);
+        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot6_shift);
+        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot7_shift);
     }
 }
 
@@ -556,12 +590,29 @@ void readColorBankMode64Colors(const EmulatorModules& modules,
         return;
     }
     checkColorCalculation(part);
+    auto row = DataExtraction{};
     for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
-        auto row = Dots6Bits{modules.memory()->read<u32>(i)};
-        readDotColorBank64<T>(modules, texture_data, color_ram_address_offset, part, row.dot_0);
-        readDotColorBank64<T>(modules, texture_data, color_ram_address_offset, part, row.dot_1);
-        readDotColorBank64<T>(modules, texture_data, color_ram_address_offset, part, static_cast<u8>(row.dot_2));
-        readDotColorBank64<T>(modules, texture_data, color_ram_address_offset, part, static_cast<u8>(row.dot_3));
+        row.as_6bits = modules.memory()->read<u32>(i);
+        readDotColorBank64<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_6bits >> DataExtraction::As6Bits::dot0_shift);
+        readDotColorBank64<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_6bits >> DataExtraction::As6Bits::dot1_shift);
+        readDotColorBank64<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_6bits >> DataExtraction::As6Bits::dot2_shift);
+        readDotColorBank64<T>(modules,
+                              texture_data,
+                              color_ram_address_offset,
+                              part,
+                              row.as_6bits >> DataExtraction::As6Bits::dot3_shift);
     }
 }
 
@@ -593,12 +644,29 @@ void readColorBankMode128Colors(const EmulatorModules& modules,
         return;
     }
     checkColorCalculation(part);
+    auto row = DataExtraction{};
     for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
-        auto row = Dots7Bits{modules.memory()->read<u32>(i)};
-        readDotColorBank128<T>(modules, texture_data, color_ram_address_offset, part, row.dot_0);
-        readDotColorBank128<T>(modules, texture_data, color_ram_address_offset, part, row.dot_1);
-        readDotColorBank128<T>(modules, texture_data, color_ram_address_offset, part, static_cast<u8>(row.dot_2));
-        readDotColorBank128<T>(modules, texture_data, color_ram_address_offset, part, row.dot_3);
+        row.as_7bits = modules.memory()->read<u32>(i);
+        readDotColorBank128<T>(modules,
+                               texture_data,
+                               color_ram_address_offset,
+                               part,
+                               row.as_7bits >> DataExtraction::As7Bits::dot0_shift);
+        readDotColorBank128<T>(modules,
+                               texture_data,
+                               color_ram_address_offset,
+                               part,
+                               row.as_7bits >> DataExtraction::As7Bits::dot1_shift);
+        readDotColorBank128<T>(modules,
+                               texture_data,
+                               color_ram_address_offset,
+                               part,
+                               row.as_7bits >> DataExtraction::As7Bits::dot2_shift);
+        readDotColorBank128<T>(modules,
+                               texture_data,
+                               color_ram_address_offset,
+                               part,
+                               row.as_7bits >> DataExtraction::As7Bits::dot3_shift);
     }
 }
 

@@ -225,61 +225,6 @@ struct Vertex {
         gouraud(grd){};
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	Dots4Bits
-///
-/// \brief	32 bits register splitted in 4 bits dots components.
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union Dots4Bits {
-    u32             raw; ///< Raw representation.
-    BitField<28, 4> dot_0;
-    BitField<24, 4> dot_1;
-    BitField<20, 4> dot_2;
-    BitField<16, 4> dot_3;
-    BitField<12, 4> dot_4;
-    BitField<8, 4>  dot_5;
-    BitField<4, 4>  dot_6;
-    BitField<0, 4>  dot_7;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	Dots6Bits
-///
-/// \brief	32 bits register splitted in 6 bits dots components.
-///
-/// \author	Runik
-/// \date	26/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union Dots6Bits {
-    u32             raw; ///< Raw representation.
-    BitField<24, 6> dot_0;
-    BitField<16, 6> dot_1;
-    BitField<8, 6>  dot_2;
-    BitField<0, 6>  dot_3;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	Dots7Bits
-///
-/// \brief	32 bits register splitted in 7 bits dots components.
-///
-/// \author	Runik
-/// \date	26/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union Dots7Bits {
-    u32             raw; ///< Raw representation.
-    BitField<24, 7> dot_0;
-    BitField<16, 7> dot_1;
-    BitField<8, 7>  dot_2;
-    BitField<0, 7>  dot_3;
-};
-
 // Some testing
 class Dots16BitsRegister : public Register {
   public:
