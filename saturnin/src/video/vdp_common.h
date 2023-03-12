@@ -280,38 +280,6 @@ union Dots7Bits {
     BitField<0, 7>  dot_3;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	Dots8Bits
-///
-/// \brief	32 bits register splitted in 8 bits dots components.
-///
-/// \author	Runik
-/// \date	26/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union Dots8Bits {
-    u32             raw; ///< Raw representation.
-    BitField<24, 8> dot_0;
-    BitField<16, 8> dot_1;
-    BitField<8, 8>  dot_2;
-    BitField<0, 8>  dot_3;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	Dots16Bits
-///
-/// \brief	32 bits register splitted in 16 bits dots components..
-///
-/// \author	Runik
-/// \date	26/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union Dots16Bits {
-    u32              raw; ///< Raw representation.
-    BitField<16, 16> dot_0;
-    BitField<0, 16>  dot_1;
-};
-
 // Some testing
 class Dots16BitsRegister : public Register {
   public:
@@ -321,27 +289,160 @@ class Dots16BitsRegister : public Register {
     inline static const BitRange<u16> dot_1{0, 15};
 };
 
-struct Dots16BitsRegbit {
-    struct Data {
-        using pos_t = Pos<u32, Data>;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	DataExtraction
+///
+/// \brief	Utility to extract data from a 32 bits register.
+///
+/// \author	Runik
+/// \date	11/03/2023
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static constexpr pos_t upper16_pos = pos_t(16);
-        static constexpr pos_t lower16_pos = pos_t(0);
+struct DataExtraction {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	As16Bits
+    ///
+    /// \brief	Extracts 16 bits chunks of data from a 32 bits register.
+    ///
+    /// \author	Runik
+    /// \date	11/03/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        static constexpr u16 word_mask = 0xFFFF;
+    struct As16Bits {
+        using PosType     = Pos<u32, As16Bits>;
+        using BitsType    = Bits<u32, As16Bits>;
+        using MaskedType  = Masked<u32, As16Bits>;
+        using ShiftedType = Shifted<u32, As16Bits>;
 
-        using bits_t = Bits<u32, Data>;
-        using mskd_t = Masked<u32, Data>;
-        using shft_t = Shifted<u32, Data>;
+        static constexpr PosType dot0_pos = PosType(16);
+        static constexpr PosType dot1_pos = PosType(0);
 
-        static constexpr mskd_t upper16 = mskd_t(word_mask, 0, upper16_pos);
-        static constexpr mskd_t lower16 = mskd_t(word_mask, 0, lower16_pos);
+        static constexpr u32 data_mask = 0xFFFF;
 
-        static constexpr shft_t upper16_shft = shft_t(word_mask, upper16_pos);
-        static constexpr shft_t lower16_shft = shft_t(word_mask, lower16_pos);
+        static constexpr ShiftedType dot0_shift = ShiftedType(data_mask, dot0_pos);
+        static constexpr ShiftedType dot1_shift = ShiftedType(data_mask, dot1_pos);
     };
-    using data_t = Reg<u32, Data>;
-    data_t data;
+    using As16BitsType = Reg<u32, As16Bits>;
+    As16BitsType as_16bits;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	As8Bits
+    ///
+    /// \brief	Extracts 8 bits chunks of data from a 32 bits register.
+    ///
+    /// \author	Runik
+    /// \date	11/03/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct As8Bits {
+        using PosType     = Pos<u32, As8Bits>;
+        using BitsType    = Bits<u32, As8Bits>;
+        using MaskedType  = Masked<u32, As8Bits>;
+        using ShiftedType = Shifted<u32, As8Bits>;
+
+        static constexpr PosType dot0_pos = PosType(24);
+        static constexpr PosType dot1_pos = PosType(16);
+        static constexpr PosType dot2_pos = PosType(8);
+        static constexpr PosType dot3_pos = PosType(0);
+
+        static constexpr u32 data_mask = 0xFF;
+
+        static constexpr ShiftedType dot0_shift = ShiftedType(data_mask, dot0_pos);
+        static constexpr ShiftedType dot1_shift = ShiftedType(data_mask, dot1_pos);
+        static constexpr ShiftedType dot2_shift = ShiftedType(data_mask, dot2_pos);
+        static constexpr ShiftedType dot3_shift = ShiftedType(data_mask, dot3_pos);
+    };
+    using As8BitsType = Reg<u32, As8Bits>;
+    As8BitsType as_8bits;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	As7Bits
+    ///
+    /// \brief	Extracts 7 bits chunks of data from a 32 bits register.
+    ///
+    /// \author	Runik
+    /// \date	11/03/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct As7Bits {
+        using PosType     = Pos<u32, As7Bits>;
+        using BitsType    = Bits<u32, As7Bits>;
+        using MaskedType  = Masked<u32, As7Bits>;
+        using ShiftedType = Shifted<u32, As7Bits>;
+
+        static constexpr PosType dot0_pos = PosType(24);
+        static constexpr PosType dot1_pos = PosType(16);
+        static constexpr PosType dot2_pos = PosType(8);
+        static constexpr PosType dot3_pos = PosType(0);
+
+        static constexpr u32 data_mask = 0x7F;
+
+        static constexpr ShiftedType dot0_shift = ShiftedType(data_mask, dot0_pos);
+        static constexpr ShiftedType dot1_shift = ShiftedType(data_mask, dot1_pos);
+        static constexpr ShiftedType dot2_shift = ShiftedType(data_mask, dot2_pos);
+        static constexpr ShiftedType dot3_shift = ShiftedType(data_mask, dot3_pos);
+    };
+    using As7BitsType = Reg<u32, As7Bits>;
+    As7BitsType as_7bits;
+
+    struct As6Bits {
+        using PosType     = Pos<u32, As6Bits>;
+        using BitsType    = Bits<u32, As6Bits>;
+        using MaskedType  = Masked<u32, As6Bits>;
+        using ShiftedType = Shifted<u32, As6Bits>;
+
+        static constexpr PosType dot0_pos = PosType(24);
+        static constexpr PosType dot1_pos = PosType(16);
+        static constexpr PosType dot2_pos = PosType(8);
+        static constexpr PosType dot3_pos = PosType(0);
+
+        static constexpr u32 data_mask = 0x3F;
+
+        static constexpr ShiftedType dot0_shift = ShiftedType(data_mask, dot0_pos);
+        static constexpr ShiftedType dot1_shift = ShiftedType(data_mask, dot1_pos);
+        static constexpr ShiftedType dot2_shift = ShiftedType(data_mask, dot2_pos);
+        static constexpr ShiftedType dot3_shift = ShiftedType(data_mask, dot3_pos);
+    };
+    using As6BitsType = Reg<u32, As6Bits>;
+    As6BitsType as_6bits;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	As4Bits
+    ///
+    /// \brief	Extracts 4 bits chunks of data from a 32 bits register.
+    ///
+    /// \author	Runik
+    /// \date	11/03/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct As4Bits {
+        using PosType     = Pos<u32, As4Bits>;
+        using BitsType    = Bits<u32, As4Bits>;
+        using MaskedType  = Masked<u32, As4Bits>;
+        using ShiftedType = Shifted<u32, As4Bits>;
+
+        static constexpr PosType dot0_pos = PosType(28);
+        static constexpr PosType dot1_pos = PosType(24);
+        static constexpr PosType dot2_pos = PosType(20);
+        static constexpr PosType dot3_pos = PosType(16);
+        static constexpr PosType dot4_pos = PosType(12);
+        static constexpr PosType dot5_pos = PosType(8);
+        static constexpr PosType dot6_pos = PosType(4);
+        static constexpr PosType dot7_pos = PosType(0);
+
+        static constexpr u32 data_mask = 0xF;
+
+        static constexpr ShiftedType dot0_shift = ShiftedType(data_mask, dot0_pos);
+        static constexpr ShiftedType dot1_shift = ShiftedType(data_mask, dot1_pos);
+        static constexpr ShiftedType dot2_shift = ShiftedType(data_mask, dot2_pos);
+        static constexpr ShiftedType dot3_shift = ShiftedType(data_mask, dot3_pos);
+        static constexpr ShiftedType dot4_shift = ShiftedType(data_mask, dot4_pos);
+        static constexpr ShiftedType dot5_shift = ShiftedType(data_mask, dot5_pos);
+        static constexpr ShiftedType dot6_shift = ShiftedType(data_mask, dot6_pos);
+        static constexpr ShiftedType dot7_shift = ShiftedType(data_mask, dot7_pos);
+    };
+    using As4BitsType = Reg<u32, As4Bits>;
+    As4BitsType as_4bits;
 };
 
 } // namespace saturnin::video

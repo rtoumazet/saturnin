@@ -79,7 +79,7 @@ class Pos {
     }
 
     // Accessor
-    constexpr auto pos() -> DATA { return pos_; }
+    constexpr auto pos() const -> DATA { return pos_; }
 
     // Comparison
     constexpr auto operator==(const PosType other) -> bool { return other.pos_ == pos_; }
@@ -147,7 +147,7 @@ class Bits {
     }
 
     // Accessor
-    constexpr auto bits() -> DATA { return bits_; }
+    constexpr auto bits() const -> DATA { return bits_; }
 
     // Bitwise operators
     constexpr auto operator|(const BitsType other) -> BitsType { return BitsType(bits_ | other.bits_); }
@@ -240,8 +240,8 @@ class Masked {
     }
 
     // Accessors
-    constexpr auto mask() -> DATA { return mask_; }
-    constexpr auto bits() -> DATA { return bits_; }
+    constexpr auto mask() const -> DATA { return mask_; }
+    constexpr auto bits() const -> DATA { return bits_; }
 
     // Bitwise operators
     constexpr auto operator|(const MaskedType other) -> MaskedType {
@@ -327,7 +327,7 @@ class Shifted {
 
     // Accessors
     auto mask() const -> u32 { return mask_; }
-    auto pos() -> PosType { return pos_; }
+    auto pos() const -> PosType { return pos_; }
 
   protected:
     u32     mask_;
@@ -436,7 +436,7 @@ class Reg {
 
 // Macro for generating functions returning Bits.
 // PosType and BitsType must have been 'using' defined in the class.
-#define REGBITS_BITS_RANGE(CLASS, CONSTEXPR_NAME, RUNTIME_NAME, DATA)                                      \
+#define GENERATE_BITS_RANGE(CLASS, CONSTEXPR_NAME, RUNTIME_NAME, DATA)                                     \
     template<unsigned BIT_NUM>                                                                             \
     static constexpr BitsType CONSTEXPR_NAME() {                                                           \
         static_assert(BIT_NUM < sizeof(DATA) * 8, CLASS "::" #CONSTEXPR_NAME "<BIT_NUM> is out of range"); \
@@ -449,8 +449,7 @@ class Reg {
 
 // Macro for generating functions returning Masked.
 // ShiftedType and MaskedType must have been 'using' defined in the class.
-//
-#define REGBITS_MSKD_RANGE(CLASS, CONSTEXPR_NAME, RUNTIME_NAME, MASK, POS, LIMIT)                                          \
+#define GENERATE_MASKED_RANGE(CLASS, CONSTEXPR_NAME, RUNTIME_NAME, MASK, POS, LIMIT)                                       \
     static constexpr ShiftedType CONSTEXPR_NAME##_SHFT = ShiftedType(MASK, POS);                                           \
                                                                                                                            \
     template<unsigned BITS>                                                                                                \

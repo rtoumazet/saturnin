@@ -37,7 +37,6 @@
 // Forward declarations
 namespace saturnin::core {
 class EmulatorModules;
-// class Memory;
 } // namespace saturnin::core
 
 namespace saturnin::video {
@@ -631,12 +630,29 @@ void readColorBankMode256Colors(const EmulatorModules& modules,
         return;
     }
     checkColorCalculation(part);
+    auto row = DataExtraction{};
     for (u32 i = start_address; i < (start_address + texture_size); i += one_read_offset) {
-        auto row = Dots8Bits{modules.memory()->read<u32>(i)};
-        readDotColorBank256<T>(modules, texture_data, color_ram_address_offset, part, row.dot_0);
-        readDotColorBank256<T>(modules, texture_data, color_ram_address_offset, part, row.dot_1);
-        readDotColorBank256<T>(modules, texture_data, color_ram_address_offset, part, static_cast<u8>(row.dot_2));
-        readDotColorBank256<T>(modules, texture_data, color_ram_address_offset, part, row.dot_3);
+        row.as_8bits = modules.memory()->read<u32>(i);
+        readDotColorBank256<T>(modules,
+                               texture_data,
+                               color_ram_address_offset,
+                               part,
+                               row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+        readDotColorBank256<T>(modules,
+                               texture_data,
+                               color_ram_address_offset,
+                               part,
+                               row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+        readDotColorBank256<T>(modules,
+                               texture_data,
+                               color_ram_address_offset,
+                               part,
+                               row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+        readDotColorBank256<T>(modules,
+                               texture_data,
+                               color_ram_address_offset,
+                               part,
+                               row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
     }
 }
 
@@ -665,10 +681,11 @@ void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_d
     checkColorCalculation(part);
 
     const auto max_size = static_cast<u32>(start_address + texture_size);
+    auto       row      = DataExtraction{};
     for (u32 i = start_address; i < max_size; i += one_read_offset_in_bytes) {
-        auto row = Dots16Bits{modules.memory()->read<u32>(i)};
-        readDotRgb<T>(modules, texture_data, part, row.dot_0);
-        readDotRgb<T>(modules, texture_data, part, row.dot_1);
+        row.as_16bits = modules.memory()->read<u32>(i);
+        readDotRgb<T>(modules, texture_data, part, row.as_16bits >> DataExtraction::As16Bits::dot0_shift);
+        readDotRgb<T>(modules, texture_data, part, row.as_16bits >> DataExtraction::As16Bits::dot1_shift);
     }
 }
 

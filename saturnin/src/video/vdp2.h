@@ -761,7 +761,7 @@ class Vdp2 {
     void refreshRegisters();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<typename T> auto Vdp2::readColor(const u32 color_address) -> const Color
+    /// \fn template<typename T> auto Vdp2::readColor(const u32 color_address) -> Color
     ///
     /// \brief  Reads a color
     ///
@@ -772,7 +772,7 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template<typename T>
-    auto readColor(const u32 color_address) -> const Color {
+    auto readColor(const u32 color_address) -> Color {
         return Color(modules_.memory()->read<T>(color_address));
     };
 
@@ -1506,22 +1506,19 @@ class Vdp2 {
                                const u32                 cell_address) {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
-        constexpr auto palette_disp    = u8{8};
-        // const auto     palette         = palette_number << palette_disp;
-        // const auto palette = palette_number;
-
+        auto           row             = DataExtraction{};
         for (u32 i = 0; i < 8; ++i) {
-            auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_0);
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_1);
-            readPalette256Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_3);
+            row.as_8bits = modules_.memory()->read<u32>(current_address);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
             current_address += row_offset;
-            row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_0);
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_1);
-            readPalette256Dot<T>(texture_data, screen, palette_number, static_cast<u8>(row.dot_2));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.dot_3);
+            row.as_8bits = modules_.memory()->read<u32>(current_address);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
             current_address += row_offset;
         }
     }
@@ -1577,21 +1574,33 @@ class Vdp2 {
             auto       local_texture      = std::vector<u8>{};
             const auto local_texture_size = chunk_size / offset * 0x10;
             local_texture.reserve(local_texture_size);
-            // core::Log::warning(Logger::vdp2, u8"start {:#x}, offset {:#x}", start_address, texture_offset);
             auto local_offset = texture_offset;
+            auto row          = DataExtraction{};
             for (u32 i = start_address; i < (start_address + chunk_size); i += offset) {
-                auto row = Dots8Bits{modules_.memory()->read<u32>(i)};
-                readPalette256DotBitmap<T>(local_texture, local_offset - texture_offset, screen, palette, row.dot_0);
-                local_offset += 4;
-                readPalette256DotBitmap<T>(local_texture, local_offset - texture_offset, screen, palette, row.dot_1);
+                row.as_8bits = modules_.memory()->read<u32>(i);
+                readPalette256DotBitmap<T>(local_texture,
+                                           local_offset - texture_offset,
+                                           screen,
+                                           palette,
+                                           row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
                 local_offset += 4;
                 readPalette256DotBitmap<T>(local_texture,
                                            local_offset - texture_offset,
                                            screen,
                                            palette,
-                                           static_cast<u8>(row.dot_2));
+                                           row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
                 local_offset += 4;
-                readPalette256DotBitmap<T>(local_texture, local_offset - texture_offset, screen, palette, row.dot_3);
+                readPalette256DotBitmap<T>(local_texture,
+                                           local_offset - texture_offset,
+                                           screen,
+                                           palette,
+                                           row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+                local_offset += 4;
+                readPalette256DotBitmap<T>(local_texture,
+                                           local_offset - texture_offset,
+                                           screen,
+                                           palette,
+                                           row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
                 local_offset += 4;
             }
             std::copy(local_texture.begin(), local_texture.end(), &texture_data[0] + texture_offset * 4);
@@ -1625,15 +1634,17 @@ class Vdp2 {
         constexpr auto offset          = u8{4};
         auto           current_address = screen.bitmap_start_address;
         const auto     end_address     = current_address + static_cast<u32>(texture_data.capacity()) / 4;
-
+        auto           row             = DataExtraction{};
         for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
-            auto row = Dots16Bits{modules_.memory()->read<u32>(current_address)};
-            read32KDot(texture_data, screen, row.dot_0);
-            read32KDot(texture_data, screen, row.dot_1);
+            // auto row = Dots16Bits{modules_.memory()->read<u32>(current_address)};
+            row.as_16bits = modules_.memory()->read<u32>(current_address);
+            read32KDot(texture_data, screen, static_cast<u16>(row.as_16bits >> DataExtraction::As16Bits::dot0_shift));
+            read32KDot(texture_data, screen, static_cast<u16>(row.as_16bits >> DataExtraction::As16Bits::dot1_shift));
             current_address += offset;
-            row = Dots16Bits{modules_.memory()->read<u32>(current_address)};
-            read32KDot(texture_data, screen, row.dot_0);
-            read32KDot(texture_data, screen, row.dot_1);
+            // row = Dots16Bits{modules_.memory()->read<u32>(current_address)};
+            row.as_16bits = modules_.memory()->read<u32>(current_address);
+            read32KDot(texture_data, screen, static_cast<u16>(row.as_16bits >> DataExtraction::As16Bits::dot0_shift));
+            read32KDot(texture_data, screen, static_cast<u16>(row.as_16bits >> DataExtraction::As16Bits::dot1_shift));
             current_address += offset;
         }
     }

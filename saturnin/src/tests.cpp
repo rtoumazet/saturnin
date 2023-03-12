@@ -2,7 +2,7 @@
 // tests.cpp
 // Saturnin
 //
-// Copyright (c) 2018 Renaud Toumazet
+// Copyright (c) 2023 Renaud Toumazet
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -62,11 +62,11 @@ void runTests() {
         core::Log::info(Logger::test, result);
     }
 
-    if constexpr (constexpr auto run_registers_benchmarks = true) {
+    if constexpr (constexpr auto run_registers_benchmarks = false) {
         using namespace saturnin::video;
         using namespace std::string_literals;
-
-        auto reg = Test();
+        auto result = "{} {} {}";
+        auto reg    = Test();
 
         reg.startTest();
 
@@ -80,67 +80,45 @@ void runTests() {
             val += reg32.get(Dots16BitsRegister::dot_1);
         }
 
-        auto result = "Register "s;
-        result += reg.endTest();
-        core::Log::info(Logger::test, result);
-
-        // 2
-        reg.startTest();
-
-        auto row = Dots16Bits{0x80000000};
-        val      = 0;
-        for (int i = 0; i < iterations; ++i) {
-            val += row.dot_0;
-            val += row.dot_1;
-        }
-
-        result = "BitField "s;
-        result += reg.endTest();
-        core::Log::info(Logger::test, result);
+        core::Log::info(Logger::test, result, "Register"s, reg.endTest(), val);
 
         // 3
         reg.startTest();
 
-        auto row_slice = std::bitset<32>{0x80004000};
+        auto row_slice = std::bitset<32>{0x12345678};
         val            = 0;
         for (int i = 0; i < iterations; ++i) {
             val += slice<32, 31, 16>(row_slice).to_ulong();
             val += slice<32, 15, 0>(row_slice).to_ulong();
         }
 
-        result = "Slice "s;
-        result += reg.endTest();
-        core::Log::info(Logger::test, result);
+        core::Log::info(Logger::test, result, "Slice"s, reg.endTest(), val);
 
         // 4
         reg.startTest();
 
-        auto row_slice2 = std::bitset<32>{0x80004000};
+        auto row_slice2 = std::bitset<32>{0x12345678};
         val             = 0;
         for (int i = 0; i < iterations; ++i) {
             val += make_slice<16, 16>(row_slice2).operator std::bitset<16Ui64>().to_ulong();
             val += make_slice<0, 16>(row_slice2). operator std::bitset<16Ui64>().to_ulong();
         }
 
-        result = "Slice2 "s;
-        result += reg.endTest();
-        core::Log::info(Logger::test, result);
+        core::Log::info(Logger::test, result, "Slice2"s, reg.endTest(), val);
 
         // 5
         reg.startTest();
 
-        Dots16BitsRegbit regbit;
-        regbit.data = 0x12345678;
+        DataExtraction data{};
+        data.as_16bits = 0x12345678;
 
         val = 0;
         for (int i = 0; i < iterations; ++i) {
-            val += regbit.data >> Dots16BitsRegbit::Data::upper16_shft;
-            val += regbit.data >> Dots16BitsRegbit::Data::lower16_shft;
+            val += data.as_16bits >> DataExtraction::As16Bits::dot0_shift;
+            val += data.as_16bits >> DataExtraction::As16Bits::dot1_shift;
         }
 
-        result = "Regbit "s;
-        result += reg.endTest();
-        core::Log::info(Logger::test, result);
+        core::Log::info(Logger::test, result, "BitReg"s, reg.endTest(), val);
     }
 }
 
