@@ -32,132 +32,134 @@ namespace saturnin::core {
 
 namespace uti = saturnin::utilities;
 
-using MapKeyboardLayout = std::map<PeripheralKey, const std::string>;
-auto keyboard_layout    = MapKeyboardLayout{{PeripheralKey::key_space, "space"},
-                                            {PeripheralKey::key_apostrophe, "'"},
-                                            {PeripheralKey::key_comma, ","},
-                                            {PeripheralKey::key_minus, "-"},
-                                            {PeripheralKey::key_period, "."},
-                                            {PeripheralKey::key_slash, "/"},
-                                            {PeripheralKey::key_semicolon, ";"},
-                                            {PeripheralKey::key_equal, "="},
-                                            {PeripheralKey::key_0, "0"},
-                                            {PeripheralKey::key_1, "1"},
-                                            {PeripheralKey::key_2, "2"},
-                                            {PeripheralKey::key_3, "3"},
-                                            {PeripheralKey::key_4, "4"},
-                                            {PeripheralKey::key_5, "5"},
-                                            {PeripheralKey::key_6, "6"},
-                                            {PeripheralKey::key_7, "7"},
-                                            {PeripheralKey::key_8, "8"},
-                                            {PeripheralKey::key_9, "9"},
-                                            {PeripheralKey::key_a, "a"},
-                                            {PeripheralKey::key_b, "b"},
-                                            {PeripheralKey::key_c, "c"},
-                                            {PeripheralKey::key_d, "d"},
-                                            {PeripheralKey::key_e, "e"},
-                                            {PeripheralKey::key_f, "f"},
-                                            {PeripheralKey::key_g, "g"},
-                                            {PeripheralKey::key_h, "h"},
-                                            {PeripheralKey::key_i, "i"},
-                                            {PeripheralKey::key_j, "j"},
-                                            {PeripheralKey::key_k, "k"},
-                                            {PeripheralKey::key_l, "l"},
-                                            {PeripheralKey::key_m, "m"},
-                                            {PeripheralKey::key_n, "n"},
-                                            {PeripheralKey::key_o, "o"},
-                                            {PeripheralKey::key_p, "p"},
-                                            {PeripheralKey::key_q, "q"},
-                                            {PeripheralKey::key_r, "r"},
-                                            {PeripheralKey::key_s, "s"},
-                                            {PeripheralKey::key_t, "t"},
-                                            {PeripheralKey::key_u, "u"},
-                                            {PeripheralKey::key_v, "v"},
-                                            {PeripheralKey::key_w, "w"},
-                                            {PeripheralKey::key_x, "x"},
-                                            {PeripheralKey::key_y, "y"},
-                                            {PeripheralKey::key_z, "z"},
-                                            {PeripheralKey::key_left_bracket, "["},
-                                            {PeripheralKey::key_backslash, "\\"},
-                                            {PeripheralKey::key_right_bracket, "]"},
-                                            {PeripheralKey::key_grave_accent, "`"},
+using MapKeyboardLayout    = std::map<PeripheralKey, const std::string>;
+const auto keyboard_layout = MapKeyboardLayout{{PeripheralKey::key_space, "space"},
+                                               {PeripheralKey::key_apostrophe, "'"},
+                                               {PeripheralKey::key_comma, ","},
+                                               {PeripheralKey::key_minus, "-"},
+                                               {PeripheralKey::key_period, "."},
+                                               {PeripheralKey::key_slash, "/"},
+                                               {PeripheralKey::key_semicolon, ";"},
+                                               {PeripheralKey::key_equal, "="},
+                                               {PeripheralKey::key_0, "0"},
+                                               {PeripheralKey::key_1, "1"},
+                                               {PeripheralKey::key_2, "2"},
+                                               {PeripheralKey::key_3, "3"},
+                                               {PeripheralKey::key_4, "4"},
+                                               {PeripheralKey::key_5, "5"},
+                                               {PeripheralKey::key_6, "6"},
+                                               {PeripheralKey::key_7, "7"},
+                                               {PeripheralKey::key_8, "8"},
+                                               {PeripheralKey::key_9, "9"},
+                                               {PeripheralKey::key_a, "a"},
+                                               {PeripheralKey::key_b, "b"},
+                                               {PeripheralKey::key_c, "c"},
+                                               {PeripheralKey::key_d, "d"},
+                                               {PeripheralKey::key_e, "e"},
+                                               {PeripheralKey::key_f, "f"},
+                                               {PeripheralKey::key_g, "g"},
+                                               {PeripheralKey::key_h, "h"},
+                                               {PeripheralKey::key_i, "i"},
+                                               {PeripheralKey::key_j, "j"},
+                                               {PeripheralKey::key_k, "k"},
+                                               {PeripheralKey::key_l, "l"},
+                                               {PeripheralKey::key_m, "m"},
+                                               {PeripheralKey::key_n, "n"},
+                                               {PeripheralKey::key_o, "o"},
+                                               {PeripheralKey::key_p, "p"},
+                                               {PeripheralKey::key_q, "q"},
+                                               {PeripheralKey::key_r, "r"},
+                                               {PeripheralKey::key_s, "s"},
+                                               {PeripheralKey::key_t, "t"},
+                                               {PeripheralKey::key_u, "u"},
+                                               {PeripheralKey::key_v, "v"},
+                                               {PeripheralKey::key_w, "w"},
+                                               {PeripheralKey::key_x, "x"},
+                                               {PeripheralKey::key_y, "y"},
+                                               {PeripheralKey::key_z, "z"},
+                                               {PeripheralKey::key_left_bracket, "["},
+                                               {PeripheralKey::key_backslash, "\\"},
+                                               {PeripheralKey::key_right_bracket, "]"},
+                                               {PeripheralKey::key_grave_accent, "`"},
 
-                                         /* Function keys */
-                                            {PeripheralKey::key_escape, "esc"},
-                                            {PeripheralKey::key_enter, "enter"},
-                                            {PeripheralKey::key_tab, "tab"},
-                                            {PeripheralKey::key_backspace, "backspace"},
-                                            {PeripheralKey::key_insert, "insert"},
-                                            {PeripheralKey::key_delete, "del"},
-                                            {PeripheralKey::key_right, "right"},
-                                            {PeripheralKey::key_left, "left"},
-                                            {PeripheralKey::key_down, "down"},
-                                            {PeripheralKey::key_up, "up"},
-                                            {PeripheralKey::key_page_up, "page up"},
-                                            {PeripheralKey::key_page_down, "page down"},
-                                            {PeripheralKey::key_home, "home"},
-                                            {PeripheralKey::key_end, "end"},
-                                            {PeripheralKey::key_caps_lock, "caps lock"},
-                                            {PeripheralKey::key_scroll_lock, "scroll lock"},
-                                            {PeripheralKey::key_num_lock, "num lock"},
-                                            {PeripheralKey::key_print_screen, "print screen"},
-                                            {PeripheralKey::key_pause, "pause"},
-                                            {PeripheralKey::key_f1, "f1"},
-                                            {PeripheralKey::key_f2, "f2"},
-                                            {PeripheralKey::key_f3, "f3"},
-                                            {PeripheralKey::key_f4, "f4"},
-                                            {PeripheralKey::key_f5, "f5"},
-                                            {PeripheralKey::key_f6, "f6"},
-                                            {PeripheralKey::key_f7, "f7"},
-                                            {PeripheralKey::key_f8, "f8"},
-                                            {PeripheralKey::key_f9, "f9"},
-                                            {PeripheralKey::key_f10, "f10"},
-                                            {PeripheralKey::key_f11, "f11"},
-                                            {PeripheralKey::key_f12, "f12"},
-                                            {PeripheralKey::key_kp_0, "keypad 0"},
-                                            {PeripheralKey::key_kp_1, "keypad 1"},
-                                            {PeripheralKey::key_kp_2, "keypad 2"},
-                                            {PeripheralKey::key_kp_3, "keypad 3"},
-                                            {PeripheralKey::key_kp_4, "keypad 4"},
-                                            {PeripheralKey::key_kp_5, "keypad 5"},
-                                            {PeripheralKey::key_kp_6, "keypad 6"},
-                                            {PeripheralKey::key_kp_7, "keypad 7"},
-                                            {PeripheralKey::key_kp_8, "keypad 8"},
-                                            {PeripheralKey::key_kp_9, "keypad 9"},
-                                            {PeripheralKey::key_kp_decimal, "keypad ."},
-                                            {PeripheralKey::key_kp_divide, "keypad /"},
-                                            {PeripheralKey::key_kp_multiply, "keypad *"},
-                                            {PeripheralKey::key_kp_substract, "keypad -"},
-                                            {PeripheralKey::key_kp_add, "keypad +"},
-                                            {PeripheralKey::key_kp_enter, "keypad enter"},
-                                            {PeripheralKey::key_kp_equal, "keypad ="},
-                                            {PeripheralKey::key_left_shift, "left shift"},
-                                            {PeripheralKey::key_left_control, "left control"},
-                                            {PeripheralKey::key_left_alt, "left alt"},
-                                            {PeripheralKey::key_left_super, "left super"},
-                                            {PeripheralKey::key_right_shift, "right shift"},
-                                            {PeripheralKey::key_right_control, "right control"},
-                                            {PeripheralKey::key_right_alt, "right alt"},
-                                            {PeripheralKey::key_right_super, "right super"},
-                                            {PeripheralKey::key_menu, "menu"}};
+                                               /* Function keys */
+                                               {PeripheralKey::key_escape, "esc"},
+                                               {PeripheralKey::key_enter, "enter"},
+                                               {PeripheralKey::key_tab, "tab"},
+                                               {PeripheralKey::key_backspace, "backspace"},
+                                               {PeripheralKey::key_insert, "insert"},
+                                               {PeripheralKey::key_delete, "del"},
+                                               {PeripheralKey::key_right, "right"},
+                                               {PeripheralKey::key_left, "left"},
+                                               {PeripheralKey::key_down, "down"},
+                                               {PeripheralKey::key_up, "up"},
+                                               {PeripheralKey::key_page_up, "page up"},
+                                               {PeripheralKey::key_page_down, "page down"},
+                                               {PeripheralKey::key_home, "home"},
+                                               {PeripheralKey::key_end, "end"},
+                                               {PeripheralKey::key_caps_lock, "caps lock"},
+                                               {PeripheralKey::key_scroll_lock, "scroll lock"},
+                                               {PeripheralKey::key_num_lock, "num lock"},
+                                               {PeripheralKey::key_print_screen, "print screen"},
+                                               {PeripheralKey::key_pause, "pause"},
+                                               {PeripheralKey::key_f1, "f1"},
+                                               {PeripheralKey::key_f2, "f2"},
+                                               {PeripheralKey::key_f3, "f3"},
+                                               {PeripheralKey::key_f4, "f4"},
+                                               {PeripheralKey::key_f5, "f5"},
+                                               {PeripheralKey::key_f6, "f6"},
+                                               {PeripheralKey::key_f7, "f7"},
+                                               {PeripheralKey::key_f8, "f8"},
+                                               {PeripheralKey::key_f9, "f9"},
+                                               {PeripheralKey::key_f10, "f10"},
+                                               {PeripheralKey::key_f11, "f11"},
+                                               {PeripheralKey::key_f12, "f12"},
+                                               {PeripheralKey::key_kp_0, "keypad 0"},
+                                               {PeripheralKey::key_kp_1, "keypad 1"},
+                                               {PeripheralKey::key_kp_2, "keypad 2"},
+                                               {PeripheralKey::key_kp_3, "keypad 3"},
+                                               {PeripheralKey::key_kp_4, "keypad 4"},
+                                               {PeripheralKey::key_kp_5, "keypad 5"},
+                                               {PeripheralKey::key_kp_6, "keypad 6"},
+                                               {PeripheralKey::key_kp_7, "keypad 7"},
+                                               {PeripheralKey::key_kp_8, "keypad 8"},
+                                               {PeripheralKey::key_kp_9, "keypad 9"},
+                                               {PeripheralKey::key_kp_decimal, "keypad ."},
+                                               {PeripheralKey::key_kp_divide, "keypad /"},
+                                               {PeripheralKey::key_kp_multiply, "keypad *"},
+                                               {PeripheralKey::key_kp_substract, "keypad -"},
+                                               {PeripheralKey::key_kp_add, "keypad +"},
+                                               {PeripheralKey::key_kp_enter, "keypad enter"},
+                                               {PeripheralKey::key_kp_equal, "keypad ="},
+                                               {PeripheralKey::key_left_shift, "left shift"},
+                                               {PeripheralKey::key_left_control, "left control"},
+                                               {PeripheralKey::key_left_alt, "left alt"},
+                                               {PeripheralKey::key_left_super, "left super"},
+                                               {PeripheralKey::key_right_shift, "right shift"},
+                                               {PeripheralKey::key_right_control, "right control"},
+                                               {PeripheralKey::key_right_alt, "right alt"},
+                                               {PeripheralKey::key_right_super, "right super"},
+                                               {PeripheralKey::key_menu, "menu"}};
 
 auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) const -> std::vector<PeripheralKey> {
     switch (layout) {
         using enum PeripheralLayout;
+        using enum PeripheralKey;
         case empty_layout:
-            return std::vector<PeripheralKey>{PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown};
+
+            return std::vector<PeripheralKey>{key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown};
         case current_layout:
             return std::vector<PeripheralKey>{direction_left,
                                               direction_right,
@@ -173,19 +175,19 @@ auto SaturnDigitalPad::toConfig(const PeripheralLayout layout) const -> std::vec
                                               button_z,
                                               button_start};
         default:
-            return std::vector<PeripheralKey>{PeripheralKey::key_left,
-                                              PeripheralKey::key_right,
-                                              PeripheralKey::key_up,
-                                              PeripheralKey::key_down,
-                                              PeripheralKey::key_z,
-                                              PeripheralKey::key_e,
-                                              PeripheralKey::key_s,
-                                              PeripheralKey::key_d,
-                                              PeripheralKey::key_f,
-                                              PeripheralKey::key_x,
-                                              PeripheralKey::key_c,
-                                              PeripheralKey::key_v,
-                                              PeripheralKey::key_enter};
+            return std::vector<PeripheralKey>{key_left,
+                                              key_right,
+                                              key_up,
+                                              key_down,
+                                              key_z,
+                                              key_e,
+                                              key_s,
+                                              key_d,
+                                              key_f,
+                                              key_x,
+                                              key_c,
+                                              key_v,
+                                              key_enter};
     }
 }
 void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
@@ -216,15 +218,16 @@ void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
 auto StvPlayerControls::toConfig(const PeripheralLayout layout) const -> std::vector<PeripheralKey> {
     switch (layout) {
         using enum PeripheralLayout;
+        using enum PeripheralKey;
         case empty_layout:
-            return std::vector<PeripheralKey>{PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown};
+            return std::vector<PeripheralKey>{key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown,
+                                              key_unknown};
         case current_layout:
             return std::vector<PeripheralKey>{direction_left,
                                               direction_right,
@@ -234,21 +237,12 @@ auto StvPlayerControls::toConfig(const PeripheralLayout layout) const -> std::ve
                                               button_2,
                                               button_3,
                                               button_4};
-        default:
-            return std::vector<PeripheralKey>{PeripheralKey::key_left,
-                                              PeripheralKey::key_right,
-                                              PeripheralKey::key_up,
-                                              PeripheralKey::key_down,
-                                              PeripheralKey::key_s,
-                                              PeripheralKey::key_d,
-                                              PeripheralKey::key_f,
-                                              PeripheralKey::key_g};
+        default: return std::vector<PeripheralKey>{key_left, key_right, key_up, key_down, key_s, key_d, key_f, key_g};
     }
 }
 
 void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
-    constexpr auto param_number = u8{8};
-    if (config.size() != param_number) {
+    if (constexpr auto param_number = 8; config.size() != param_number) {
         Log::warning(Logger::smpc, tr("Incorrect ST-V player control data"));
         const auto v       = StvPlayerControls().toConfig(PeripheralLayout::empty_layout);
         auto       control = StvPlayerControls{};
@@ -269,28 +263,17 @@ void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
 auto StvBoardControls::toConfig(const PeripheralLayout layout) const -> std::vector<PeripheralKey> {
     switch (layout) {
         using enum PeripheralLayout;
+        using enum PeripheralKey;
         case empty_layout:
-            return std::vector<PeripheralKey>{PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown,
-                                              PeripheralKey::key_unknown};
+            return std::vector<PeripheralKey>{key_unknown, key_unknown, key_unknown, key_unknown, key_unknown, key_unknown};
         case current_layout:
             return std::vector<PeripheralKey>{service_switch, test_switch, p1_coin_switch, p2_coin_switch, p1_start, p2_start};
-        default:
-            return std::vector<PeripheralKey>{PeripheralKey::key_1,
-                                              PeripheralKey::key_2,
-                                              PeripheralKey::key_5,
-                                              PeripheralKey::key_6,
-                                              PeripheralKey::key_7,
-                                              PeripheralKey::key_8};
+        default: return std::vector<PeripheralKey>{key_1, key_2, key_5, key_6, key_7, key_8};
     }
 }
 
 void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
-    constexpr auto param_number = u8{6};
-    if (config.size() != param_number) {
+    if (constexpr auto param_number = u8{6}; config.size() != param_number) {
         Log::warning(Logger::smpc, tr("Incorrect ST-V board control data"));
         const auto v       = StvBoardControls().toConfig(PeripheralLayout::empty_layout);
         auto       control = StvBoardControls{};
@@ -307,21 +290,21 @@ void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
 }
 
 void Smpc::reset() {
-    comreg_.raw = {};
-    sr_.raw     = {};
-    sf_.raw     = {};
+    registers_.comreg = {};
+    registers_.sr     = {};
+    registers_.sf     = {};
     for (u8 i = 0; i < input_registers_number; ++i) {
         ireg_[i].raw = {};
     }
     for (u8 i = 0; i < output_registers_number; ++i) {
         oreg_[i].raw = {};
     }
-    pdr1_.raw  = {};
-    pdr2_.raw  = {};
-    ddr1_.raw  = {};
-    ddr2_.raw  = {};
-    iosel_.raw = {};
-    exle_.raw  = {};
+    registers_.pdr1  = {};
+    registers_.pdr2  = {};
+    ddr1_.raw        = {};
+    ddr2_.raw        = {};
+    registers_.iosel = {};
+    registers_.exle  = {};
 
     for (u8 i = 0; i < 4; ++i) {
         smem_[i] = 0;
@@ -356,188 +339,199 @@ auto Smpc::getRegisters() const -> const AddressToNameMap& { return address_to_n
 void Smpc::setCommandDuration() {
     using micro = std::chrono::duration<double, std::micro>;
     using milli = std::chrono::duration<double, std::milli>;
-    switch (toEnum<SmpcCommand>(comreg_.raw)) {
-        using enum SmpcCommand;
-        case master_sh2_on:
-        case slave_sh2_on:
-        case slave_sh2_off:
-        case sound_on:
-        case sound_off:
-        case nmi_request:
-        case reset_enable:
-        case reset_disable: {
-            constexpr auto duration   = micro(30);
-            command_remaining_cycles_ = calculateCyclesNumber(duration);
-            break;
-        }
-        case cd_on:
-        case cd_off:
-        case smpc_memory_setting: {
-            constexpr auto duration   = micro(40);
-            command_remaining_cycles_ = calculateCyclesNumber(duration);
-            break;
-        }
-        case reset_entire_system:
-        case clock_change_320:
-        case clock_change_352: {
-            // Alpha is fixed to 0
-            constexpr auto duration   = milli(100);
-            command_remaining_cycles_ = calculateCyclesNumber(duration);
-            break;
-        }
-        case time_setting: {
-            constexpr auto duration   = micro(70);
-            command_remaining_cycles_ = calculateCyclesNumber(duration);
-            break;
-        }
-        case interrupt_back: {
-            // intback_remaining_cycles_ = calculateCyclesNumber(milli(320));
-            // Values are from previous Saturnin version, not sure how accurate they are ...
-            constexpr auto intback_duration = micro(50);
-            constexpr auto normal_duration  = micro(1500);
-            command_remaining_cycles_
-                = is_intback_processing_ ? calculateCyclesNumber(intback_duration) : calculateCyclesNumber(normal_duration);
+    if (registers_.comreg.is(SmpcRegisters::CommandRegister::master_sh2_on)
+        || registers_.comreg.is(SmpcRegisters::CommandRegister::slave_sh2_on)
+        || registers_.comreg.is(SmpcRegisters::CommandRegister::slave_sh2_off)
+        || registers_.comreg.is(SmpcRegisters::CommandRegister::sound_on)
+        || registers_.comreg.is(SmpcRegisters::CommandRegister::sound_off)
+        || registers_.comreg.is(SmpcRegisters::CommandRegister::nmi_request)
+        || registers_.comreg.is(SmpcRegisters::CommandRegister::reset_enable)
+        || registers_.comreg.is(SmpcRegisters::CommandRegister::reset_disable)) {
+        constexpr auto duration   = micro(30);
+        command_remaining_cycles_ = calculateCyclesNumber(duration);
+        return;
 
-            break;
-        }
-        default: break;
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::cd_on)
+               || registers_.comreg.is(SmpcRegisters::CommandRegister::cd_off)
+               || registers_.comreg.is(SmpcRegisters::CommandRegister::smpc_memory_setting)) {
+        constexpr auto duration   = micro(40);
+        command_remaining_cycles_ = calculateCyclesNumber(duration);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_entire_system)
+               || registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320)
+               || registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_352)) {
+        // Alpha is fixed to 0
+        constexpr auto duration   = milli(100);
+        command_remaining_cycles_ = calculateCyclesNumber(duration);
+        return;
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::time_setting)) {
+        constexpr auto duration   = micro(70);
+        command_remaining_cycles_ = calculateCyclesNumber(duration);
+        return;
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::interrupt_back)) {
+        // intback_remaining_cycles_ = calculateCyclesNumber(milli(320));
+        // Values are from previous Saturnin version, not sure how accurate they are ...
+        constexpr auto intback_duration = micro(50);
+        constexpr auto normal_duration  = micro(1500);
+        command_remaining_cycles_
+            = is_intback_processing_ ? calculateCyclesNumber(intback_duration) : calculateCyclesNumber(normal_duration);
+        return;
     }
+
+    Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), registers_.comreg.data());
 }
 
 void Smpc::executeCommand() {
     std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-    auto        command{toEnum<SmpcCommand>(comreg_.raw)};
-    switch (command) {
-        using enum SmpcCommand;
-        case master_sh2_on:
-            is_master_sh2_on_ = true;
-            Log::debug(Logger::smpc, tr("-=Master SH2 ON=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case slave_sh2_on:
-            is_slave_sh2_on_ = true;
-            modules_.slaveSh2()->powerOnReset();
-            Log::debug(Logger::smpc, tr("-=Slave SH2 ON=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case slave_sh2_off:
-            is_slave_sh2_on_ = false;
-            Log::debug(Logger::smpc, tr("-=Slave SH2 OFF=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case sound_on:
-            is_sound_on_ = true;
-            modules_.scsp()->reset();
-            Log::debug(Logger::smpc, tr("-=Sound ON=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case sound_off:
-            is_sound_on_ = false;
-            // emulator_context_->scsp()->setSound(false);
-            Log::debug(Logger::smpc, tr("-=Sound OFF=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case cd_on:
-            is_cd_on_ = true;
-            Log::debug(Logger::smpc, tr("-=CD ON=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case cd_off:
-            is_cd_on_ = false;
-            Log::debug(Logger::smpc, tr("-=CD OFF=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case reset_entire_system:
-            modules_.masterSh2()->powerOnReset();
-            modules_.slaveSh2()->powerOnReset();
-            // emulator_context_->scsp()->reset();
-            Log::debug(Logger::smpc, tr("-=Reset Entire System=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case clock_change_320:
-        case clock_change_352:
-            // -> VDP1, VDP2, SCU, SCSP : default power on value
-            // -> Master SH2 : unknown
-            // -> Slave SH2 : OFF
-            // -> CD block kept
-            // -> Work RAM kept
-            // -> VRAM emptied
-            switch (modules_.config()->getTvStandard(ts)) {
-                using enum video::TvStandard;
-                case pal:
-                    clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::pal_320 : SystemClock::pal_352;
-                    break;
-                case ntsc: clock_ = (command == SmpcCommand::clock_change_320) ? SystemClock::ntsc_320 : SystemClock::ntsc_352;
-                default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = SystemClock::not_set;
-            }
-            is_slave_sh2_on_ = false;
-            modules_.slaveSh2()->powerOnReset();
-            modules_.cdrom()->refreshPeriod();
-            modules_.vdp2()->onSystemClockUpdate();
-            if (command == SmpcCommand::clock_change_320) {
-                is_horizontal_res_352 = false;
-                Log::debug(Logger::smpc, tr("-=Clock Change 320 Mode=- command executed"));
-            }
-            if (command == SmpcCommand::clock_change_352) {
-                is_horizontal_res_352 = true;
-                Log::debug(Logger::smpc, tr("-=Clock Change 352 Mode=- command executed"));
-            }
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case nmi_request:
-            modules_.scu()->generateInterrupt(interrupt_source::nmi);
-            Log::debug(Logger::smpc, tr("-=NMI Request=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case reset_enable:
-            is_soft_reset_allowed_ = true;
-            Log::debug(Logger::smpc, tr("-=Reset Enable=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case reset_disable:
-            is_soft_reset_allowed_ = false;
-            Log::debug(Logger::smpc, tr("-=Reset Disable=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case interrupt_back:
-            executeIntback();
-            // sf_.reset();
-            break;
-        case smpc_memory_setting:
-            for (u8 i = 0; i < 4; ++i) {
-                smem_[i] = ireg_[i].raw;
-            }
-            Log::debug(Logger::smpc, tr("-=SMPC Memory Setting=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        case time_setting:
-            Log::debug(Logger::smpc, tr("-=Time Setting=- command executed"));
-            oreg_[index_31].raw = uti::toUnderlying(command);
-            sf_.sf              = false;
-            break;
-        default: Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), uti::toUnderlying(command));
+
+    if (registers_.comreg.is(SmpcRegisters::CommandRegister::master_sh2_on)) {
+        is_master_sh2_on_ = true;
+        Log::debug(Logger::smpc, tr("-=Master SH2 ON=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::slave_sh2_on)) {
+        is_slave_sh2_on_ = true;
+        modules_.slaveSh2()->powerOnReset();
+        Log::debug(Logger::smpc, tr("-=Slave SH2 ON=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::slave_sh2_off)) {
+        is_slave_sh2_on_ = false;
+        Log::debug(Logger::smpc, tr("-=Slave SH2 OFF=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::sound_on)) {
+        is_sound_on_ = true;
+        modules_.scsp()->reset();
+        Log::debug(Logger::smpc, tr("-=Sound ON=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::sound_off)) {
+        is_sound_on_ = false;
+        // emulator_context_->scsp()->setSound(false);
+        Log::debug(Logger::smpc, tr("-=Sound OFF=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::cd_on)) {
+        is_cd_on_ = true;
+        Log::debug(Logger::smpc, tr("-=CD ON=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::cd_on)) {
+        is_cd_on_ = false;
+        Log::debug(Logger::smpc, tr("-=CD OFF=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_entire_system)) {
+        modules_.masterSh2()->powerOnReset();
+        modules_.slaveSh2()->powerOnReset();
+        // emulator_context_->scsp()->reset();
+        Log::debug(Logger::smpc, tr("-=Reset Entire System=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320)
+               || registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_352)) {
+        // -> VDP1, VDP2, SCU, SCSP : default power on value
+        // -> Master SH2 : unknown
+        // -> Slave SH2 : OFF
+        // -> CD block kept
+        // -> Work RAM kept
+        // -> VRAM emptied
+        switch (modules_.config()->getTvStandard(ts)) {
+            using enum video::TvStandard;
+            case pal:
+                clock_ = registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320) ? SystemClock::pal_320
+                                                                                                : SystemClock::pal_352;
+                break;
+            case ntsc:
+                clock_ = registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320) ? SystemClock::ntsc_320
+                                                                                                : SystemClock::ntsc_352;
+            default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = SystemClock::not_set;
+        }
+        is_slave_sh2_on_ = false;
+        modules_.slaveSh2()->powerOnReset();
+        modules_.cdrom()->refreshPeriod();
+        modules_.vdp2()->onSystemClockUpdate();
+        if (registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320)) {
+            is_horizontal_res_352 = false;
+            Log::debug(Logger::smpc, tr("-=Clock Change 320 Mode=- command executed"));
+        }
+        if (registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_352)) {
+            is_horizontal_res_352 = true;
+            Log::debug(Logger::smpc, tr("-=Clock Change 352 Mode=- command executed"));
+        }
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::nmi_request)) {
+        modules_.scu()->generateInterrupt(interrupt_source::nmi);
+        Log::debug(Logger::smpc, tr("-=NMI Request=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_enable)) {
+        is_soft_reset_allowed_ = true;
+        Log::debug(Logger::smpc, tr("-=Reset Enable=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_disable)) {
+        is_soft_reset_allowed_ = false;
+        Log::debug(Logger::smpc, tr("-=Reset Disable=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::interrupt_back)) {
+        executeIntback();
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::smpc_memory_setting)) {
+        for (u8 i = 0; i < 4; ++i) {
+            smem_[i] = ireg_[i].raw;
+        }
+        Log::debug(Logger::smpc, tr("-=SMPC Memory Setting=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
+
+    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::time_setting)) {
+        Log::debug(Logger::smpc, tr("-=Time Setting=- command executed"));
+        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        return;
     }
+
+    Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), registers_.comreg.data());
 }
 
 void Smpc::executeIntback() {
     if (is_intback_processing_) {
         getPeripheralData();
-        next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
-        sf_.sf                  = false;
-        oreg_[index_31].raw     = uti::toUnderlying(SmpcCommand::interrupt_back);
+        // next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
+        registers_.sr.clr(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+        oreg_[index_31].raw = SmpcRegisters::CommandRegister::interrupt_back.bits();
         Log::debug(Logger::smpc, tr("Interrupt request"));
         modules_.scu()->generateInterrupt(interrupt_source::system_manager);
         return;
@@ -555,35 +549,37 @@ void Smpc::executeIntback() {
         getStatus();
 
         if (is_peripheral_data_returned) {
-            next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
-            is_intback_processing_  = true;
+            // next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
+            registers_.sr.set(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+            is_intback_processing_ = true;
         } else {
             is_intback_processing_ = false;
         }
     } else {
         // Peripheral data only.
         getPeripheralData();
-        next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
-        is_intback_processing_  = true;
+        // next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
+        registers_.sr.set(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+        is_intback_processing_ = true;
     }
 
     Log::debug(Logger::smpc, tr("Interrupt request"));
     modules_.scu()->generateInterrupt(interrupt_source::system_manager);
 
-    sf_.sf = false;
+    registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
 };
 
 void Smpc::getStatus() {
     Log::debug(Logger::smpc, tr("INTBACK returning status data"));
-    sr_.raw                          = {};
-    sr_.bit_7                        = false;
-    sr_.bit_6                        = true;
+    registers_.sr = {};
+    registers_.sr.clr(SmpcRegisters::StatusRegister::bit_7);
+    registers_.sr.set(SmpcRegisters::StatusRegister::bit_6);
     auto is_peripheral_data_returned = bool{toEnum<PeripheralDataEnable>(ireg_[index_1].ireg1_peripheral_data_enable)
                                             == PeripheralDataEnable::peripheral_data_returned};
     if (is_peripheral_data_returned) {
-        sr_.peripheral_data_remaining = PeripheralDataRemaining::remaining_peripheral_data;
+        registers_.sr.set(SmpcRegisters::StatusRegister::peripheral_data_remaining);
     } else {
-        sr_.peripheral_data_remaining = PeripheralDataRemaining::no_remaining_peripheral_data;
+        registers_.sr.clr(SmpcRegisters::StatusRegister::peripheral_data_remaining);
     }
 
     for (u8 i = 0; i < output_registers_number; ++i) {
@@ -665,11 +661,13 @@ void Smpc::getPeripheralData() {
     // [Saturn Peripheral Type | Data Size]
 
     // SR page 66
-    sr_.raw                      = {};
-    sr_.bit_7                    = true;
-    sr_.peripheral_data_location = next_peripheral_return_;
-    sr_.port_2_mode              = ireg_[index_1].ireg1_port_2_mode;
-    sr_.port_1_mode              = ireg_[index_1].ireg1_port_1_mode;
+    registers_.sr = {};
+    registers_.sr.set(SmpcRegisters::StatusRegister::bit_7);
+    // sr_.peripheral_data_location = next_peripheral_return_;
+
+    // TODO
+    // sr_.port_2_mode = ireg_[index_1].ireg1_port_2_mode;
+    // sr_.port_1_mode = ireg_[index_1].ireg1_port_1_mode;
 
     for (u32 i = 0; i < output_registers_number; ++i) {
         oreg_[i].raw = {};
@@ -756,14 +754,14 @@ void Smpc::getPeripheralData() {
         full_peripheral_data_table_.erase(full_peripheral_data_table_.begin(),
                                           full_peripheral_data_table_.begin() + output_registers_number);
 
-        sr_.peripheral_data_remaining = PeripheralDataRemaining::remaining_peripheral_data;
+        registers_.sr.set(SmpcRegisters::StatusRegister::peripheral_data_remaining);
     } else {
         for (u32 i = 0; i < full_peripheral_data_table_.size(); ++i) {
             oreg_[i].raw = full_peripheral_data_table_[i];
         }
         full_peripheral_data_table_.clear();
 
-        sr_.peripheral_data_remaining = PeripheralDataRemaining::no_remaining_peripheral_data;
+        registers_.sr.clr(SmpcRegisters::StatusRegister::peripheral_data_remaining);
     }
 
 } // namespace saturnin::core
@@ -815,8 +813,8 @@ auto Smpc::read(const u32 addr) -> u8 {
                 constexpr auto default_stv_data = u8{0xcf};
                 return default_stv_data;
             }
-            return sr_.raw;
-        case status_flag: return sf_.raw;
+            return registers_.sr.data();
+        case status_flag: return registers_.sr.data();
         case output_register_0: return oreg_[index_0].raw;
         case output_register_1: return oreg_[index_1].raw;
         case output_register_2: return oreg_[index_2].raw;
@@ -854,10 +852,11 @@ auto Smpc::read(const u32 addr) -> u8 {
                 constexpr auto default_stv_data = u8{0xff};
                 return default_stv_data;
             }
-            return pdr1_.pdr;
+            return registers_.pdr1.shifted(SmpcRegisters::PortDataRegister::pdr_shft);
         case port_data_register_2:
             if (modules_.context()->hardwareMode() == HardwareMode::stv) {
-                pdr2_.pdr = 0;
+                registers_.pdr2 = 0;
+
                 // const auto controls = getStvPeripheralMapping().board_controls;
                 // controls.test_switch;
                 //    if (glfwGetKey(glfwGetCurrentContext(), uti::toUnderlying(stv_mapping_.board_controls.test_switch)) ==
@@ -865,9 +864,9 @@ auto Smpc::read(const u32 addr) -> u8 {
 
                 //    }
             }
-            pdr2_.raw = u8_max;
+            registers_.pdr2 = 0xFF;
 
-            return pdr2_.pdr;
+            return registers_.pdr2.shifted(SmpcRegisters::PortDataRegister::pdr_shft);
 
         default: return 0;
     }
@@ -889,17 +888,17 @@ auto Smpc::rawRead(const u32 addr) -> u8 {
 void Smpc::write(const u32 addr, const u8 data) {
     switch (addr) {
         case command_register:
-            comreg_.raw = data;
+            registers_.comreg = data;
             setCommandDuration();
             break;
-        case status_flag: sf_.raw = data; break;
+        case status_flag: registers_.sf = data; break;
         case input_register_0: {
             auto old_ireg0     = ireg_[index_0];
             ireg_[index_0].raw = data;
             if (is_intback_processing_) {
                 if (toEnum<IntbackBreakRequest>(ireg_[index_0].ireg0_break_request) == IntbackBreakRequest::requested) {
                     Log::debug(Logger::smpc, tr("INTBACK break request"));
-                    sr_.raw &= bitmask_0F;
+                    registers_.sr.clr(SmpcRegisters::StatusRegister::upper_nibble);
                     is_intback_processing_ = false;
                     break;
                 }
@@ -908,7 +907,7 @@ void Smpc::write(const u32 addr, const u8 data) {
                 if (new_continue != old_continue) {
                     Log::debug(Logger::smpc, tr("INTBACK continue request"));
                     setCommandDuration();
-                    sf_.sf = true;
+                    registers_.sf.set(SmpcRegisters::StatusFlag::sf);
                     break;
                 }
                 is_intback_processing_ = false;
@@ -921,7 +920,8 @@ void Smpc::write(const u32 addr, const u8 data) {
         case input_register_4: ireg_[index_4].raw = data; break;
         case input_register_5: ireg_[index_5].raw = data; break;
         case input_register_6: ireg_[index_6].raw = data; break;
-        case port_data_register_1: pdr1_.pdr = data; break;
+        // case port_data_register_1: pdr1_.pdr = data; break;
+        case port_data_register_1: registers_.pdr1.ins(SmpcRegisters::PortDataRegister::pdr(data)); break;
         case port_data_register_2:
             if (modules_.context()->hardwareMode() == HardwareMode::stv) {
                 constexpr auto sound_status = u8{0x10};
@@ -936,12 +936,12 @@ void Smpc::write(const u32 addr, const u8 data) {
                     modules_.scsp()->reset();
                 }
             }
-            pdr2_.pdr = data;
+            registers_.pdr2.ins(SmpcRegisters::PortDataRegister::pdr(data));
             break;
         case data_direction_register_1: ddr1_.ddr = data; break;
         case data_direction_register_2: ddr2_.ddr = data; break;
-        case io_select_register: iosel_.raw = data; break;
-        case external_latch_register: exle_.exle = data; break;
+        case io_select_register: registers_.iosel = data; break;
+        case external_latch_register: registers_.exle = data; break;
         default: break;
     }
 }
@@ -1034,7 +1034,7 @@ void Smpc::initializeRegisterNameMap() {
     addToRegisterNameMap(output_register_31, "OREG31");
 }
 
-auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout[pk]; }
+auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout.at(pk); }
 
 auto getRtcTime() -> RtcTime {
     using namespace date;

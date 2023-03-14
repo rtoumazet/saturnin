@@ -649,17 +649,18 @@ class Smpc {
 
     //@{
     // Internal registers
-    CommandRegister                                     comreg_;
-    StatusRegister                                      sr_;
-    StatusFlag                                          sf_;
+    // CommandRegister                                     comreg_;
+    SmpcRegisters registers_;
+    // StatusRegister                                      sr_;
+    // StatusFlag                                          sf_;
     std::array<InputRegister, input_registers_number>   ireg_;
     std::array<OutputRegister, output_registers_number> oreg_;
-    PortDataRegister                                    pdr1_;
-    PortDataRegister                                    pdr2_;
-    DataDirectionRegister                               ddr1_;
-    DataDirectionRegister                               ddr2_;
-    IOSelect                                            iosel_;
-    ExternalLatchEnable                                 exle_;
+    // PortDataRegister                                    pdr1_;
+    // PortDataRegister                                    pdr2_;
+    DataDirectionRegister ddr1_;
+    DataDirectionRegister ddr2_;
+    // IOSelect                                            iosel_;
+    //  ExternalLatchEnable                                 exle_;
     //@}
 
     SystemClock clock_{SystemClock::not_set};
@@ -677,11 +678,10 @@ class Smpc {
     bool is_cd_on_{false};              ///< CD status
 
     bool is_intback_processing_{false}; ///< Intback status
-    // bool is_first_peripheral_return{ false }; ///< True for the first peripheral return
-    PeripheralDataLocation next_peripheral_return_;
-    PortStatus             port_1_status_{PortStatus::not_connected}; ///< The port 1 status
-    PortStatus             port_2_status_{PortStatus::not_connected}; ///< The port 2 status
-    std::vector<u8>        full_peripheral_data_table_;               ///< The full peripheral data table
+    // PeripheralDataLocation                  next_peripheral_return_;
+    PortStatus      port_1_status_{PortStatus::not_connected}; ///< The port 1 status
+    PortStatus      port_2_status_{PortStatus::not_connected}; ///< The port 2 status
+    std::vector<u8> full_peripheral_data_table_;               ///< The full peripheral data table
 
     std::array<u8, 0x4> smem_; ///< SMPC battery backupable memory (4B).
 

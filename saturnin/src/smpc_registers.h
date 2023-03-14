@@ -27,6 +27,7 @@
 
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/bitfield.h>
+#include <saturnin/src/bit_register.h>
 
 namespace saturnin::core {
 
@@ -82,47 +83,143 @@ constexpr auto io_select_register        = u32{0x2010007D};
 constexpr auto external_latch_register   = u32{0x2010007F};
 //@}
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SmpcCommand
-///
-/// \brief  SMPC commands definition.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+struct SmpcRegisters {
+    struct CommandRegister {
+        using PosType    = Pos<u8, CommandRegister>;
+        using MaskedType = Masked<u8, CommandRegister>;
 
-enum class SmpcCommand : u8 {
-    // Resetable commands
-    master_sh2_on       = 0x00, ///< MSHON command
-    slave_sh2_on        = 0x02, ///< SSHON command
-    slave_sh2_off       = 0x03, ///< SSHOFF command
-    sound_on            = 0x06, ///< SNDON command
-    sound_off           = 0x07, ///< SNDOFF command
-    cd_on               = 0x08, ///< CDDN command
-    cd_off              = 0x09, ///< CDOFF command
-    reset_entire_system = 0x0d, ///< SYSRES command
-    clock_change_352    = 0x0e, ///< CKCHG352 command
-    clock_change_320    = 0x0f, ///< CKCHG320 command
-    nmi_request         = 0x18, ///< NMIREQ command
-    reset_enable        = 0x19, ///< RESENAB command
-    reset_disable       = 0x1a, ///< RESDISA command
+        static constexpr PosType comreg_pos = PosType(0);
 
-    // Non resetable commands
-    interrupt_back      = 0x10, ///< INTBACK command
-    smpc_memory_setting = 0x17, ///< SETSMEM command
+        static constexpr u8 comreg_mask = 0x1F;
 
-    // RTC command
-    time_setting = 0x16 ///< SETTIME command
-};
+        // Resetable commands
+        static constexpr MaskedType master_sh2_on       = MaskedType(comreg_mask, 0x00, comreg_pos);
+        static constexpr MaskedType slave_sh2_on        = MaskedType(comreg_mask, 0x02, comreg_pos);
+        static constexpr MaskedType slave_sh2_off       = MaskedType(comreg_mask, 0x03, comreg_pos);
+        static constexpr MaskedType sound_on            = MaskedType(comreg_mask, 0x06, comreg_pos);
+        static constexpr MaskedType sound_off           = MaskedType(comreg_mask, 0x07, comreg_pos);
+        static constexpr MaskedType cd_on               = MaskedType(comreg_mask, 0x08, comreg_pos);
+        static constexpr MaskedType cd_off              = MaskedType(comreg_mask, 0x09, comreg_pos);
+        static constexpr MaskedType reset_entire_system = MaskedType(comreg_mask, 0x0d, comreg_pos);
+        static constexpr MaskedType clock_change_352    = MaskedType(comreg_mask, 0x0e, comreg_pos);
+        static constexpr MaskedType clock_change_320    = MaskedType(comreg_mask, 0x0f, comreg_pos);
+        static constexpr MaskedType nmi_request         = MaskedType(comreg_mask, 0x18, comreg_pos);
+        static constexpr MaskedType reset_enable        = MaskedType(comreg_mask, 0x19, comreg_pos);
+        static constexpr MaskedType reset_disable       = MaskedType(comreg_mask, 0x1a, comreg_pos);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CommandRegister
-///
-/// \brief	Command Register (COMREG).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Non resetable commands
+        static constexpr MaskedType interrupt_back      = MaskedType(comreg_mask, 0x10, comreg_pos);
+        static constexpr MaskedType smpc_memory_setting = MaskedType(comreg_mask, 0x17, comreg_pos);
 
-union CommandRegister {
-    u8 raw; ///< Raw representation.
+        // RTC command
+        static constexpr MaskedType time_setting = MaskedType(comreg_mask, 0x16, comreg_pos);
+    };
+    using CommandRegisterType = Reg<u8, CommandRegister>;
+    CommandRegisterType comreg;
+
+    struct StatusRegister {
+        using PosType     = Pos<u8, StatusRegister>;
+        using BitsType    = Bits<u8, StatusRegister>;
+        using MaskedType  = Masked<u8, StatusRegister>;
+        using ShiftedType = Shifted<u8, StatusRegister>;
+
+        static constexpr PosType port_1_mode_pos               = PosType(0); // P1MD
+        static constexpr PosType port_2_mode_pos               = PosType(2); // P2MD
+        static constexpr PosType upper_nibble_pos              = PosType(4);
+        static constexpr PosType reset_button_status_pos       = PosType(4); // RESB
+        static constexpr PosType peripheral_data_remaining_pos = PosType(5); // PDE
+        static constexpr PosType peripheral_data_location_pos  = PosType(6); // PDL
+        static constexpr PosType bit_6_pos                     = PosType(6); // Bit 6
+        static constexpr PosType bit_7_pos                     = PosType(7); // Bit 7
+
+        static constexpr u8 port_1_mode_mask  = 0x03;
+        static constexpr u8 port_2_mode_mask  = 0x03;
+        static constexpr u8 upper_nibble_mask = 0x0F;
+
+        static constexpr BitsType reset_button_status       = BitsType(1, reset_button_status_pos);
+        static constexpr BitsType peripheral_data_remaining = BitsType(1, peripheral_data_remaining_pos);
+        static constexpr BitsType peripheral_data_location
+            = BitsType(1, peripheral_data_location_pos); // 1: first, 0: second or above.
+        static constexpr BitsType bit_6 = BitsType(1, bit_6_pos);
+        static constexpr BitsType bit_7 = BitsType(1, bit_7_pos);
+
+        static constexpr MaskedType port_1_mode_15_bytes  = MaskedType(port_1_mode_mask, 0b00, port_1_mode_pos);
+        static constexpr MaskedType port_1_mode_255_bytes = MaskedType(port_1_mode_mask, 0b01, port_1_mode_pos);
+        static constexpr MaskedType port_1_mode_reserved  = MaskedType(port_1_mode_mask, 0b10, port_1_mode_pos);
+        static constexpr MaskedType port_1_mode_0_byte    = MaskedType(port_1_mode_mask, 0b11, port_1_mode_pos);
+
+        static constexpr MaskedType port_2_mode_15_bytes  = MaskedType(port_2_mode_mask, 0b00, port_2_mode_pos);
+        static constexpr MaskedType port_2_mode_255_bytes = MaskedType(port_2_mode_mask, 0b01, port_2_mode_pos);
+        static constexpr MaskedType port_2_mode_reserved  = MaskedType(port_2_mode_mask, 0b10, port_2_mode_pos);
+        static constexpr MaskedType port_2_mode_0_byte    = MaskedType(port_2_mode_mask, 0b11, port_2_mode_pos);
+
+        static constexpr MaskedType upper_nibble = MaskedType(upper_nibble_mask, 0xF, upper_nibble_pos);
+    };
+    using StatusRegisterType = Reg<u8, StatusRegister>;
+    StatusRegisterType sr;
+
+    struct StatusFlag {
+        using PosType  = Pos<u8, StatusFlag>;
+        using BitsType = Bits<u8, StatusFlag>;
+
+        static constexpr PosType sf_pos = PosType(0);
+
+        static constexpr BitsType sf = BitsType(1, sf_pos);
+    };
+    using StatusFlagType = Reg<u8, StatusFlag>;
+    StatusFlagType sf;
+
+    // /////////////////////////////////////////////
+    struct PortDataRegister {
+        using PosType  = Pos<u8, PortDataRegister>;
+        using BitsType = Bits<u8, PortDataRegister>;
+        using MaskedType  = Masked<u8, PortDataRegister>;
+        using ShiftedType  = Shifted<u8, PortDataRegister>;
+
+        static constexpr PosType pdr_pos = PosType(0);
+
+        static constexpr u8 pdr_mask  = 0x3F;
+
+        static constexpr ShiftedType pdr_shft = ShiftedType(pdr_mask, pdr_pos);
+
+        GENERATE_MASKED_RANGE("SmpcRegisters::PortDataRegister",
+                       PDR,
+                       pdr,
+                       pdr_mask,
+                       pdr_pos,
+                       pdr_mask);
+    };
+    using PortDataRegisterType = Reg<u8, PortDataRegister>;
+    PortDataRegisterType pdr1;
+    PortDataRegisterType pdr2;
+
+
+    struct IOSelect {
+        using PosType  = Pos<u8, IOSelect>;
+        using BitsType = Bits<u8, IOSelect>;
+
+        static constexpr PosType peripheral_port_1_mode_pos = PosType(0);
+        static constexpr PosType peripheral_port_2_mode_pos = PosType(1);
+
+        // 1: SH2 direct mode, 0: SMPC control mode
+        static constexpr BitsType peripheral_port_1_mode = BitsType(1, peripheral_port_1_mode_pos); // IOSEL1
+        static constexpr BitsType peripheral_port_2_mode = BitsType(1, peripheral_port_2_mode_pos); // IOSEL2
+    };
+    using IOSelectType = Reg<u8, IOSelect>;
+    IOSelectType iosel;
+
+    struct ExternalLatchEnable {
+        using PosType  = Pos<u8, ExternalLatchEnable>;
+        using BitsType = Bits<u8, ExternalLatchEnable>;
+
+        static constexpr PosType external_latch_1_enable_pos = PosType(0);
+        static constexpr PosType external_latch_2_enable_pos = PosType(1);
+
+        static constexpr BitsType external_latch_1_enable = BitsType(1, external_latch_1_enable_pos); // EXLE1
+        static constexpr BitsType external_latch_2_enable = BitsType(1, external_latch_2_enable_pos); // EXLE2
+    };
+    using ExternalLatchEnableType = Reg<u8, ExternalLatchEnable>;
+    ExternalLatchEnableType exle;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,10 +241,10 @@ enum class PortMode : u8 {
 /// \brief  Reset button status values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ResetButtonStatus : bool {
-    button_off = false, ///< Reset button off.
-    button_on  = true   ///< Reset buton on.
-};
+// enum class ResetButtonStatus : bool {
+//     button_off = false, ///< Reset button off.
+//     button_on  = true   ///< Reset buton on.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralDataRemaining
@@ -155,7 +252,7 @@ enum class ResetButtonStatus : bool {
 /// \brief  Peripheral data remaining values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PeripheralDataRemaining : bool { no_remaining_peripheral_data = false, remaining_peripheral_data = true };
+// enum class PeripheralDataRemaining : bool { no_remaining_peripheral_data = false, remaining_peripheral_data = true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralDataLocation
@@ -174,16 +271,16 @@ enum class PeripheralDataLocation : bool { second_or_above_peripheral_data = fal
 /// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union StatusRegister {
-    u8             raw;                       ///< Raw representation.
-    BitField<0, 2> port_1_mode;               ///< Defines port 1 mode (P1MD).
-    BitField<2, 2> port_2_mode;               ///< Defines port 2 mode (P2MD).
-    BitField<4>    reset_button_status;       ///< Defines RESB bit.
-    BitField<5>    peripheral_data_remaining; ///< Defines PDE bit.
-    BitField<6>    peripheral_data_location;  ///< Defines PDL bit.
-    BitField<6>    bit_6;                     ///< Bit 6 access.
-    BitField<7>    bit_7;                     ///< Bit 7 access.
-};
+// union StatusRegister {
+//     u8             raw;                       ///< Raw representation.
+//     BitField<0, 2> port_1_mode;               ///< Defines port 1 mode (P1MD).
+//     BitField<2, 2> port_2_mode;               ///< Defines port 2 mode (P2MD).
+//     BitField<4>    reset_button_status;       ///< Defines RESB bit.
+//     BitField<5>    peripheral_data_remaining; ///< Defines PDE bit.
+//     BitField<6>    peripheral_data_location;  ///< Defines PDL bit.
+//     BitField<6>    bit_6;                     ///< Bit 6 access.
+//     BitField<7>    bit_7;                     ///< Bit 7 access.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	StatusFlag
@@ -194,10 +291,10 @@ union StatusRegister {
 /// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union StatusFlag {
-    u8          raw; ///< Raw representation.
-    BitField<0> sf;  ///< SF value.
-};
+// union StatusFlag {
+//     u8          raw; ///< Raw representation.
+//     BitField<0> sf;  ///< SF value.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   IntbackContinueRequest
@@ -377,10 +474,10 @@ union DataDirectionRegister {
 /// \date   14/12/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PortDataRegister {
-    u8             raw; ///< Raw representation.
-    BitField<0, 6> pdr; ///< Used bits in the register.
-};
+// union PortDataRegister {
+//     u8             raw; ///< Raw representation.
+//     BitField<0, 6> pdr; ///< Used bits in the register.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   PeripheralPortMode
@@ -388,10 +485,10 @@ union PortDataRegister {
 /// \brief  IOSEL values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PeripheralPortMode : bool {
-    smpc_control_mode = false, ///< SMPC control mode. (initial)
-    sh2_direct_mode   = true,  ///< SH2 direct mode
-};
+// enum class PeripheralPortMode : bool {
+//     smpc_control_mode = false, ///< SMPC control mode. (initial)
+//     sh2_direct_mode   = true,  ///< SH2 direct mode
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	IOSelect
@@ -402,37 +499,10 @@ enum class PeripheralPortMode : bool {
 /// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union IOSelect {
-    u8          raw;                    ///< Raw representation.
-    BitField<1> peripheral_port_2_mode; ///< IOSEL2 bit.
-    BitField<0> peripheral_port_1_mode; ///< IOSEL1 bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ExternalLatch
-///
-/// \brief  EXLE values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ExternalLatch : bool {
-    disabled = false, ///< Disabled. (initial)
-    enabled  = true,  ///< Enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  ExternalLatchEnable
-///
-/// \brief  External Latch Enable (EXLE).
-///
-/// \author Runik
-/// \date   14/12/2019
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ExternalLatchEnable {
-    u8             raw;                     ///< Raw representation.
-    BitField<1>    external_latch_2_enable; ///< EXLE2 bit.
-    BitField<0>    external_latch_1_enable; ///< EXLE1 bit.
-    BitField<0, 2> exle;                    ///< Used bits in the register.
-};
+//union IOSelect {
+//    u8          raw;                    ///< Raw representation.
+//    BitField<1> peripheral_port_2_mode; ///< IOSEL2 bit.
+//    BitField<0> peripheral_port_1_mode; ///< IOSEL1 bit.
+//};
 
 } // namespace saturnin::core
