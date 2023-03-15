@@ -38,9 +38,7 @@ auto Locale::initialize(const std::string& country = "") -> bool { // NOLINT(rea
 
     cat_ = std::make_unique<spiritless_po::Catalog>();
     if (!cat_->Add(ifs)) {
-        // for (const auto& s : cat_->GetError()) {
-        //    cerr << argv[ii + 1] << ": " << s << endl;
-        //}
+        // No error handling for now
     }
 
     return true;

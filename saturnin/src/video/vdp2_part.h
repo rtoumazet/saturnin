@@ -63,29 +63,11 @@ class Vdp2Part final : public BaseRenderingPart {
     ~Vdp2Part()                                    = default;
     ///@}
 
-    // void renderPart() override;
-
-    // void displayCell();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2Part::getTextureKey() const -> const size_t
-    ///
-    /// \brief  Gets texture key
-    ///
-    /// \author Runik
-    /// \date   04/04/2021
-    ///
-    /// \returns    The texture key.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // auto getTextureKey() const -> const size_t { return texture_key_; };
-
   private:
     ScreenPos scroll_screen_pos_{};       ///< Position in the scroll screen.
     u16       character_number_{};        ///< The character number.
     u16       palette_number_{};          ///< The palette number.
     bool      is_horizontally_flipped_{}; ///< True if the part is horizontally flipped.
     bool      is_vertically_flipped_{};   ///< True if the part is vertically flipped.
-    // size_t    texture_key_{};             ///< Link to the texture.
 };
 } // namespace saturnin::video

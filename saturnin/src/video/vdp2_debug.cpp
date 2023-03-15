@@ -40,81 +40,58 @@ using core::tr;
 auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
     auto values = std::vector<LabelValue>{};
 
-    { // Resolution
-        if (tv_screen_status_.screen_mode == ScreenMode::not_set) {
-            values.emplace_back(tr("Resolution"), tr("Not set"));
-        } else {
-            auto screen_mode = std::string{};
-            switch (tv_screen_status_.screen_mode) {
-                using enum ScreenMode;
-                case normal_320_224:
-                case normal_320_240:
-                case normal_320_256:
-                case normal_320_448:
-                case normal_320_480:
-                case normal_320_512: screen_mode = tr("Normal Graphic A"); break;
-                case normal_352_224:
-                case normal_352_240:
-                case normal_352_256:
-                case normal_352_448:
-                case normal_352_480:
-                case normal_352_512: screen_mode = tr("Normal Graphic B"); break;
-                case hi_res_640_224:
-                case hi_res_640_240:
-                case hi_res_640_256:
-                case hi_res_640_448:
-                case hi_res_640_480:
-                case hi_res_640_512: screen_mode = tr("Hi-Res Graphic A"); break;
-                case hi_res_704_224:
-                case hi_res_704_240:
-                case hi_res_704_256:
-                case hi_res_704_448:
-                case hi_res_704_480:
-                case hi_res_704_512: screen_mode = tr("Hi-Res Graphic B"); break;
-                case exclusive_320_480: screen_mode = tr("Exclusive Normal Graphic A"); break;
-                case exclusive_352_480: screen_mode = tr("Exclusive Normal Graphic B"); break;
-                case exclusive_640_480: screen_mode = tr("Exclusive Hi-Res Graphic A"); break;
-                case exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
-                default: screen_mode = tr("Unknown");
-            }
-            values.emplace_back(tr("Resolution"),
-                                utilities::format("{:d}x{:d} - {:s}",
-                                                  tv_screen_status_.horizontal_res,
-                                                  tv_screen_status_.vertical_res,
-                                                  screen_mode));
+    // Resolution
+    if (tv_screen_status_.screen_mode == ScreenMode::not_set) {
+        values.emplace_back(tr("Resolution"), tr("Not set"));
+    } else {
+        auto screen_mode = std::string{};
+        switch (tv_screen_status_.screen_mode) {
+            using enum ScreenMode;
+            case normal_320_224:
+            case normal_320_240:
+            case normal_320_256:
+            case normal_320_448:
+            case normal_320_480:
+            case normal_320_512: screen_mode = tr("Normal Graphic A"); break;
+            case normal_352_224:
+            case normal_352_240:
+            case normal_352_256:
+            case normal_352_448:
+            case normal_352_480:
+            case normal_352_512: screen_mode = tr("Normal Graphic B"); break;
+            case hi_res_640_224:
+            case hi_res_640_240:
+            case hi_res_640_256:
+            case hi_res_640_448:
+            case hi_res_640_480:
+            case hi_res_640_512: screen_mode = tr("Hi-Res Graphic A"); break;
+            case hi_res_704_224:
+            case hi_res_704_240:
+            case hi_res_704_256:
+            case hi_res_704_448:
+            case hi_res_704_480:
+            case hi_res_704_512: screen_mode = tr("Hi-Res Graphic B"); break;
+            case exclusive_320_480: screen_mode = tr("Exclusive Normal Graphic A"); break;
+            case exclusive_352_480: screen_mode = tr("Exclusive Normal Graphic B"); break;
+            case exclusive_640_480: screen_mode = tr("Exclusive Hi-Res Graphic A"); break;
+            case exclusive_704_480: screen_mode = tr("Exclusive Hi-Res Graphic B"); break;
+            default: screen_mode = tr("Unknown");
         }
+        values.emplace_back(
+            tr("Resolution"),
+            utilities::format("{:d}x{:d} - {:s}", tv_screen_status_.horizontal_res, tv_screen_status_.vertical_res, screen_mode));
     }
 
-    { // Interlace mode
-        auto mode = std::string{};
-        switch (tv_screen_status_.interlace_mode) {
-            using enum InterlaceMode;
-            case non_interlace: mode = tr("Non interlace"); break;
-            case single_density: mode = tr("Single density"); break;
-            case double_density: mode = tr("Double density"); break;
-            default: mode = tr("Not allowed"); break;
-        }
-        values.emplace_back(tr("Interlace mode"), mode);
+    // Interlace mode
+    auto mode = std::string{};
+    switch (tv_screen_status_.interlace_mode) {
+        using enum InterlaceMode;
+        case non_interlace: mode = tr("Non interlace"); break;
+        case single_density: mode = tr("Single density"); break;
+        case double_density: mode = tr("Double density"); break;
+        default: mode = tr("Not allowed"); break;
     }
-
-    //{ // Screen display enable
-
-    //    auto nbgDisplayStatus = [&](const ScrollScreen s) {
-    //        const auto& nbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
-    //        values.emplace_back(format("NBG{}", toUnderlying(s)), nbg);
-    //    };
-    //    nbgDisplayStatus(ScrollScreen::nbg0);
-    //    nbgDisplayStatus(ScrollScreen::nbg1);
-    //    nbgDisplayStatus(ScrollScreen::nbg2);
-    //    nbgDisplayStatus(ScrollScreen::nbg3);
-
-    //    auto rbgDisplayStatus = [&](const ScrollScreen s) {
-    //        const auto& rbg = getScreen(s).is_display_enabled ? tr("Can display") : tr("Cannot display");
-    //        values.emplace_back(format("RBG{}", toUnderlying(s) - 4), rbg);
-    //    };
-    //    rbgDisplayStatus(ScrollScreen::rbg0);
-    //    rbgDisplayStatus(ScrollScreen::rbg1);
-    //}
+    values.emplace_back(tr("Interlace mode"), mode);
 
     return values;
 }
@@ -182,7 +159,7 @@ auto Vdp2::getDebugRamMainData() const -> std::vector<LabelValue> {
     return values;
 }
 
-auto Vdp2::getDebugVramAccessMainData() -> std::vector<LabelValue> {
+auto Vdp2::getDebugVramAccessMainData() const -> std::vector<LabelValue> {
     auto values = std::vector<LabelValue>{};
 
     const auto banks_used   = getDebugVramAccessBanksUsed();
@@ -199,7 +176,8 @@ auto Vdp2::getDebugVramAccessMainData() -> std::vector<LabelValue> {
     return values;
 }
 
-auto Vdp2::getDebugVramAccessBanks() -> std::vector<VramTiming> {
+auto Vdp2::getDebugVramAccessBanks() const -> std::vector<VramTiming> {
+    using enum VramAccessCommand;
     auto is_normal_mode = (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_320);
     is_normal_mode |= (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_352);
 
@@ -210,10 +188,10 @@ auto Vdp2::getDebugVramAccessBanks() -> std::vector<VramTiming> {
                                 toEnum<VramAccessCommand>(cyca0l_.t1),
                                 toEnum<VramAccessCommand>(cyca0l_.t2),
                                 toEnum<VramAccessCommand>(cyca0l_.t3),
-                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t4) : VramAccessCommand::no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t5) : VramAccessCommand::no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t6) : VramAccessCommand::no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t7) : VramAccessCommand::no_access};
+                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t4) : no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t5) : no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t6) : no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t7) : no_access};
     banks.emplace_back(bank_a0);
 
     if (banks_used[vram_bank_a1_index]) {
@@ -221,10 +199,10 @@ auto Vdp2::getDebugVramAccessBanks() -> std::vector<VramTiming> {
                                     toEnum<VramAccessCommand>(cyca1l_.t1),
                                     toEnum<VramAccessCommand>(cyca1l_.t2),
                                     toEnum<VramAccessCommand>(cyca1l_.t3),
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t4) : VramAccessCommand::no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t5) : VramAccessCommand::no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t6) : VramAccessCommand::no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t7) : VramAccessCommand::no_access};
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t4) : no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t5) : no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t6) : no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t7) : no_access};
         banks.emplace_back(bank_a1);
     }
 
@@ -232,10 +210,10 @@ auto Vdp2::getDebugVramAccessBanks() -> std::vector<VramTiming> {
                                 toEnum<VramAccessCommand>(cycb0l_.t1),
                                 toEnum<VramAccessCommand>(cycb0l_.t2),
                                 toEnum<VramAccessCommand>(cycb0l_.t3),
-                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t4) : VramAccessCommand::no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t5) : VramAccessCommand::no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t6) : VramAccessCommand::no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t7) : VramAccessCommand::no_access};
+                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t4) : no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t5) : no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t6) : no_access,
+                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t7) : no_access};
     banks.emplace_back(bank_b0);
 
     if (banks_used[vram_bank_a1_index]) {
@@ -243,10 +221,10 @@ auto Vdp2::getDebugVramAccessBanks() -> std::vector<VramTiming> {
                                     toEnum<VramAccessCommand>(cycb1l_.t1),
                                     toEnum<VramAccessCommand>(cycb1l_.t2),
                                     toEnum<VramAccessCommand>(cycb1l_.t3),
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t4) : VramAccessCommand::no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t5) : VramAccessCommand::no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t6) : VramAccessCommand::no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : VramAccessCommand::no_access};
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t4) : no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t5) : no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t6) : no_access,
+                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : no_access};
         banks.emplace_back(bank_b1);
     }
     return banks;
@@ -262,7 +240,7 @@ auto Vdp2::getDebugVramAccessBanksUsed() const -> std::array<bool, vram_banks_nu
     return banks;
 }
 
-auto Vdp2::getDebugVramAccessBanksName() -> std::vector<std::string> {
+auto Vdp2::getDebugVramAccessBanksName() const -> std::vector<std::string> {
     const auto banks_used = getDebugVramAccessBanksUsed();
     auto       banks_name = std::vector<std::string>{};
 
@@ -284,24 +262,25 @@ auto Vdp2::getDebugVramAccessBanksName() -> std::vector<std::string> {
 
 // static
 auto Vdp2::getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue {
-    using VramCommandsDescription         = std::map<VramAccessCommand, LabelValue>;
+    using VramCommandsDescription = std::map<VramAccessCommand, LabelValue>;
+    using enum VramAccessCommand;
     const auto vram_commands_descriptions = VramCommandsDescription{
-        {VramAccessCommand::nbg0_pattern_name_read, {"N0PN", tr("NBG0 Pattern Name Data Read")}},
-        {VramAccessCommand::nbg1_pattern_name_read, {"N1PN", tr("NBG1 Pattern Name Data Read")}},
-        {VramAccessCommand::nbg2_pattern_name_read, {"N2PN", tr("NBG2 Pattern Name Data Read")}},
-        {VramAccessCommand::nbg3_pattern_name_read, {"N3PN", tr("NBG3 Pattern Name Data Read")}},
-        {VramAccessCommand::nbg0_character_pattern_data_read, {"N0CG", tr("NBG0 Character Pattern Data Read")}},
-        {VramAccessCommand::nbg1_character_pattern_data_read, {"N1CG", tr("NBG1 Character Pattern Data Read")}},
-        {VramAccessCommand::nbg2_character_pattern_data_read, {"N2CG", tr("NBG2 Character Pattern Data Read")}},
-        {VramAccessCommand::nbg3_character_pattern_data_read, {"N3CG", tr("NBG3 Character Pattern Data Read")}},
-        {VramAccessCommand::setting_not_allowed_1, {"XXX", tr("Setting not allowed")}},
-        {VramAccessCommand::setting_not_allowed_2, {"XXX", tr("Setting not allowed")}},
-        {VramAccessCommand::setting_not_allowed_3, {"XXX", tr("Setting not allowed")}},
-        {VramAccessCommand::setting_not_allowed_4, {"XXX", tr("Setting not allowed")}},
-        {VramAccessCommand::nbg0_vertical_cell_scroll_table_data_read, {"N0CE", tr("NBG0 Vertical Cell Scroll Table Data Read")}},
-        {VramAccessCommand::nbg1_vertical_cell_scroll_table_data_read, {"N1CE", tr("NBG1 Vertical Cell Scroll Table Data Read")}},
-        {VramAccessCommand::cpu_read_write, {"CPU", tr("CPU Read/Write")}},
-        {VramAccessCommand::no_access, {"NA", tr("No Access")}}};
+        {nbg0_pattern_name_read, {"N0PN", tr("NBG0 Pattern Name Data Read")}},
+        {nbg1_pattern_name_read, {"N1PN", tr("NBG1 Pattern Name Data Read")}},
+        {nbg2_pattern_name_read, {"N2PN", tr("NBG2 Pattern Name Data Read")}},
+        {nbg3_pattern_name_read, {"N3PN", tr("NBG3 Pattern Name Data Read")}},
+        {nbg0_character_pattern_data_read, {"N0CG", tr("NBG0 Character Pattern Data Read")}},
+        {nbg1_character_pattern_data_read, {"N1CG", tr("NBG1 Character Pattern Data Read")}},
+        {nbg2_character_pattern_data_read, {"N2CG", tr("NBG2 Character Pattern Data Read")}},
+        {nbg3_character_pattern_data_read, {"N3CG", tr("NBG3 Character Pattern Data Read")}},
+        {setting_not_allowed_1, {"XXX", tr("Setting not allowed")}},
+        {setting_not_allowed_2, {"XXX", tr("Setting not allowed")}},
+        {setting_not_allowed_3, {"XXX", tr("Setting not allowed")}},
+        {setting_not_allowed_4, {"XXX", tr("Setting not allowed")}},
+        {nbg0_vertical_cell_scroll_table_data_read, {"N0CE", tr("NBG0 Vertical Cell Scroll Table Data Read")}},
+        {nbg1_vertical_cell_scroll_table_data_read, {"N1CE", tr("NBG1 Vertical Cell Scroll Table Data Read")}},
+        {cpu_read_write, {"CPU", tr("CPU Read/Write")}},
+        {no_access, {"NA", tr("No Access")}}};
 
     return vram_commands_descriptions.at(command);
 }
@@ -357,13 +336,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     // Format
     values.emplace_back(tr("Format"), tr("Cell"));
 
-    // Scroll size
-    // const auto size = screen.page_size * screen.plane_size * screen.map_size;
-    // values.emplace_back(tr("Total screen size"), format("{:#x}", size));
-
     // Map size
-    const auto mapSize = [](const ScrollScreen s) {
-        switch (s) {
+    const auto mapSize = [](const ScrollScreen& ss) {
+        switch (ss) {
             using enum ScrollScreen;
             case rbg0:
             case rbg1: return tr("4x4 planes");
@@ -373,8 +348,8 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     values.emplace_back(tr("Map size"), mapSize(s));
 
     // Plane size
-    const auto planeSize = [](const ScrollScreenStatus s) {
-        switch (s.plane_size) {
+    const auto planeSize = [](const ScrollScreenStatus& sss) {
+        switch (sss.plane_size) {
             using enum PlaneSize;
             case size_1_by_1: return tr("1x1 page");
             case size_2_by_1: return tr("2x1 pages");
@@ -423,8 +398,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     values.emplace_back(tr("Plane B start address"), uti::format("{:#010x}", screen.plane_b_start_address));
     values.emplace_back(tr("Plane C start address"), uti::format("{:#010x}", screen.plane_c_start_address));
     values.emplace_back(tr("Plane D start address"), uti::format("{:#010x}", screen.plane_d_start_address));
-    const auto rotation_screens = std::array{ScrollScreen::rbg0, ScrollScreen::rbg1};
-    if (std::any_of(rotation_screens.begin(), rotation_screens.end(), [&s](const ScrollScreen rss) { return rss == s; })) {
+
+    if (auto rotation_screens = std::array{ScrollScreen::rbg0, ScrollScreen::rbg1};
+        std::ranges::any_of(rotation_screens, [&s](const ScrollScreen rss) { return rss == s; })) {
         values.emplace_back(tr("Plane E start address"), uti::format("{:#010x}", screen.plane_e_start_address));
         values.emplace_back(tr("Plane F start address"), uti::format("{:#010x}", screen.plane_f_start_address));
         values.emplace_back(tr("Plane G start address"), uti::format("{:#010x}", screen.plane_g_start_address));
@@ -473,10 +449,6 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
                                         screen.color_offset.as_s16.r,
                                         screen.color_offset.as_s16.g,
                                         screen.color_offset.as_s16.b));
-        // values.emplace_back(
-        //     tr("  R:G:B"),
-        //     format("R:{:+d} G:{:+d} B:{:+d}", screen.color_offset_red, screen.color_offset_green,
-        //     screen.color_offset_blue));
     } else {
         values.emplace_back(tr("Color offset"), tr("Disabled"));
     }

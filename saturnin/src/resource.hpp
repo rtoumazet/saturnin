@@ -22,7 +22,7 @@ class Resource {
   public:
     Resource() = default;
     template<typename Container>
-    Resource(const Container& arr_, std::string path_) noexcept : arr_view(arr_), path(std::move(path_)) {}
+    Resource(const Container& arr_, std::string path_) noexcept : arr_view(arr_), path(std::move(path_)){};
 
     auto GetArray() const noexcept { return arr_view; }
 

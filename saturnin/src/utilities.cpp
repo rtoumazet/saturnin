@@ -30,8 +30,7 @@ auto stringToVector(const std::string& source, const u32 reserved_size) -> std::
 }
 
 auto getLastErrorMessage() -> std::string {
-    const auto error = GetLastError();
-    if (error != 0) {
+    if (auto error = GetLastError(); error != 0) {
         auto       buffer = LPVOID{};
         const auto buf_len
             = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
