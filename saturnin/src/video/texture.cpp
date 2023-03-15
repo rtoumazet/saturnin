@@ -54,56 +54,44 @@ void Texture::shutdown() {
     std::vector<u8>().swap(raw_data_); // Allocated texture data is deleted.
 }
 
-// static //
 auto Texture::storeTexture(Texture t) -> size_t {
-    {
-        //        std::lock_guard lock(storage_mutex_);
-        UpdatableLock lock(storage_mutex_);
-        texture_storage_.erase(t.key());
-        texture_storage_.emplace(t.key(), std::move(t));
-    }
+    UpdatableLock lock(storage_mutex_);
+    texture_storage_.erase(t.key());
+    texture_storage_.try_emplace(t.key(), std::move(t));
+
     return t.key();
 }
 
-// static //
 void Texture::storeTextures(std::vector<Texture>& textures) {
-    {
-        UpdatableLock lock(storage_mutex_);
-        for (auto& t : textures) {
-            texture_storage_.erase(t.key());
-            texture_storage_.emplace(t.key(), std::move(t));
-        }
+    UpdatableLock lock(storage_mutex_);
+    for (auto& t : textures) {
+        texture_storage_.erase(t.key());
+        texture_storage_.try_emplace(t.key(), std::move(t));
     }
 }
 
-// static //
 auto Texture::getTexture(const size_t key) -> std::optional<Texture*> {
-    {
-        ReadOnlyLock lock(storage_mutex_);
-        try {
-            auto& t = texture_storage_.at(key);
-            return &t;
-        } catch (const std::out_of_range& oor) {
-            Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ({})"), key, oor.what());
-            return std::nullopt;
-        }
+    ReadOnlyLock lock(storage_mutex_);
+    try {
+        auto& t = texture_storage_.at(key);
+        return &t;
+    } catch (const std::out_of_range& oor) {
+        Log::error(Logger::texture, tr("Texture with key {:#x} wasn't found ({})"), key, oor.what());
+        return std::nullopt;
     }
 }
 
-// static //
 void Texture::deleteTextureData(Texture& t) {
     std::vector<u8>().swap(t.raw_data_); // Allocated texture data is deleted.
 }
 
-// static //
 auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
     {
         ReadOnlyLock lock(storage_mutex_);
-        if (texture_storage_.count(key) == 0) { return true; }
+        if (!texture_storage_.contains(key)) { return true; }
     }
 
-    auto t = Texture::getTexture(key);
-    if (t) {
+    if (auto t = Texture::getTexture(key); t) {
         if ((*t)->isDiscarded()) {
             (*t)->isDiscarded(false);
             return true;
@@ -115,62 +103,57 @@ auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
     return true;
 }
 
-// static
 auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_count, const u16 palette_number) -> size_t {
     auto key = size_t{0};
     uti::hashCombine(key, vp, address, color_count, palette_number);
     return key;
 }
 
-// static
-void Texture::discardCache(Opengl* ogl, const VdpType t) {
-    //    std::lock_guard lock(storage_mutex_);
+void Texture::discardCache(const VdpType t) {
     UpdatableLock lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
-        auto discard_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
+        const auto is_found    = ((value.vdpType() == t) ? true : false);
+        const auto discard_elt = (t == VdpType::not_set) ? true : is_found;
         if (discard_elt) { value.isDiscarded(true); }
     }
 }
 
-// static
 void Texture::setCache(const VdpType t) {
-    //    std::lock_guard lock(storage_mutex_);
     UpdatableLock lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
-        auto set_elt = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
+        const auto is_found = ((value.vdpType() == t) ? true : false);
+        auto       set_elt  = (t == VdpType::not_set) ? true : is_found;
         if (set_elt) { value.isRecentlyUsed(false); }
     }
 }
 
-// static
 void Texture::cleanCache(Opengl* ogl, const VdpType t) {
-    //    std::lock_guard lock(storage_mutex_);
     UpdatableLock                                     lock(storage_mutex_);
     std::vector<decltype(texture_storage_)::key_type> keys_to_erase;
-    for (auto& [key, value] : texture_storage_) {
-        auto is_elt_selected = (t == VdpType::not_set) ? true : ((value.vdpType() == t) ? true : false);
+    for (const auto& [key, value] : texture_storage_) {
+        const auto is_found        = ((value.vdpType() == t) ? true : false);
+        const auto is_elt_selected = (t == VdpType::not_set) ? true : is_found;
         if (is_elt_selected) {
             if (!(value.isRecentlyUsed())) {
                 keys_to_erase.emplace_back(key);
-            } else {
-                if (value.isDiscarded()) {
-                    // WIP
-                    ogl->addOrUpdateTexture(value.key());
-                    keys_to_erase.emplace_back(key);
-                }
+                return;
+            }
+
+            if (value.isDiscarded()) {
+                // WIP
+                ogl->addOrUpdateTexture(value.key());
+                keys_to_erase.emplace_back(key);
             }
         }
     }
 
-    for (auto&& key : keys_to_erase) {
+    for (const auto& key : keys_to_erase) {
         texture_storage_.erase(key);
         ogl->removeTextureLink(key);
     }
 }
 
-// static
 void Texture::deleteCache() {
-    //    std::lock_guard lock(storage_mutex_);
     UpdatableLock lock(storage_mutex_);
     for (auto& [key, value] : texture_storage_) {
         deleteTextureData(value);
@@ -178,7 +161,6 @@ void Texture::deleteCache() {
     texture_storage_.clear();
 }
 
-// static
 auto Texture::keysList() -> std::vector<DebugKey> {
     auto         list = std::vector<DebugKey>{};
     const auto   mask = std::string("{:x}");
@@ -189,7 +171,6 @@ auto Texture::keysList() -> std::vector<DebugKey> {
     return list;
 }
 
-// static
 auto Texture::calculateTextureSize(const Size& max_size, const size_t texture_key) -> Size {
     auto       ratio   = 0.0;
     const auto texture = getTexture(texture_key);
@@ -210,23 +191,19 @@ auto Texture::calculateTextureSize(const Size& max_size, const size_t texture_ke
     const auto height = (*texture)->height() % max_size.h * ratio;
 
     return Size{static_cast<u16>(width), static_cast<u16>(height)};
-    // return Size{};
 }
 
-// static
 auto Texture::statistics() -> std::vector<std::string> {
     ReadOnlyLock lock(storage_mutex_);
     auto         stats = std::vector<std::string>{};
     stats.push_back(uti::format("Total number of textures : {}", texture_storage_.size()));
 
-    const auto vdp1_nb = std::count_if(texture_storage_.begin(), texture_storage_.end(), [](const auto& t) {
-        return t.second.vdpType() == VdpType::vdp1;
-    });
+    const auto vdp1_nb
+        = std::ranges::count_if(texture_storage_, [](const auto& t) { return t.second.vdpType() == VdpType::vdp1; });
     stats.push_back(uti::format("Number of VDP1 textures : {}", vdp1_nb));
 
-    const auto vdp2_nb = std::count_if(texture_storage_.begin(), texture_storage_.end(), [](const auto& t) {
-        return t.second.vdpType() == VdpType::vdp2;
-    });
+    const auto vdp2_nb
+        = std::ranges::count_if(texture_storage_, [](const auto& t) { return t.second.vdpType() == VdpType::vdp2; });
     stats.push_back(uti::format("Number of VDP2 textures : {}", vdp2_nb));
 
     auto max_width  = 0;

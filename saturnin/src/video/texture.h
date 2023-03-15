@@ -198,7 +198,7 @@ class Texture {
     /// \param  t   (Optional) A VdpType textures to discard.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void discardCache(Opengl* ogl, const VdpType t = VdpType::not_set);
+    static void discardCache(const VdpType t = VdpType::not_set);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void setCache(const VdpType t = VdpType::not_set);

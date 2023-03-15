@@ -99,7 +99,7 @@ constexpr auto toUnderlying(E e) noexcept {
 
 template<typename M, typename V>
 auto getKeyFromValue(const M& map, const V find_value) {
-    return std::find_if(map.begin(), map.end(), [find_value](const typename M::value_type& p) { return p.second == find_value; });
+    return std::ranges::find_if(map, [find_value](const typename M::value_type& p) { return p.second == find_value; });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,35 +156,6 @@ void hashCombine(std::size_t& seed, const T& v, Rest... rest) {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template <typename T> T swap_endian(T u)
-///
-/// \brief  Template to swap data. Usage : swap_endianness<type>(value)
-///
-/// \author Runik
-/// \date   27/09/2013
-///
-/// \tparam T   Generic type parameter.
-/// \param  u   The T to process.
-///
-/// \return A T.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// template<typename T>
-// inline T swap_endianness(T u) {
-//     union {
-//         T      u;
-//         int8_t u8[sizeof(T)];
-//     } source, dest;
-//
-//     source.u = u;
-//
-//     for (size_t k = 0; k < sizeof(T); k++)
-//         dest.u8[k] = source.u8[sizeof(T) - k - 1];
-//
-//     return dest.u;
-// }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	template<typename T> inline T swapEndianness(T value);
 ///
 /// \brief	Swap endianness
@@ -211,7 +182,7 @@ inline auto swapEndianness(T value) -> T;
 
 template<>
 inline auto swapEndianness<u16>(u16 value) -> u16 {
-    return (value >> 8) | (value << 8);
+    return static_cast<u16>((value >> 8) | (value << 8));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +198,7 @@ inline auto swapEndianness<u16>(u16 value) -> u16 {
 
 template<>
 inline u32 swapEndianness<u32>(u32 value) {
-    return u32(swapEndianness<u16>(value) << 16) | swapEndianness<u16>(value >> 16);
+    return static_cast<u32>(swapEndianness<u16>(static_cast<u16>(value)) << 16) | swapEndianness<u16>(value >> 16);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -243,10 +214,7 @@ inline u32 swapEndianness<u32>(u32 value) {
 /// \returns	The swapped value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline u32 swapWords(const u32 param) {
-    // return (param & bitmask_FFFF0000) >> displacement_16 | (param & bitmask_0000FFFF) << displacement_16;
-    return (param & 0xFFFF0000) >> 16 | (param & 0x0000FFFF) << 16;
-}
+inline u32 swapWords(const u32 param) { return (param & 0xFFFF0000) >> 16 | (param & 0x0000FFFF) << 16; }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename... T> auto format(std::string_view str, T&&... args) -> std::string
@@ -268,7 +236,7 @@ auto format(std::string_view str, T&&... args) -> std::string {
 /// \class	Range
 ///
 /// \brief	Checks if a value is inside a range.
-/// 		Ex: if (range<0x10000, 0x1FFFFF>::contains(age)) { /****/ }
+/// 		Ex: if (range<0x10000, 0x1FFFFF>::contains(age)) { ... }
 ///
 /// \author	Runik
 /// \date	12/02/2023
@@ -276,11 +244,6 @@ auto format(std::string_view str, T&&... args) -> std::string {
 /// \tparam	min	Range minimum.
 /// \tparam	max	Range maximum.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// template<u32 min, u32 max>
-// class Range {
-//     static bool contains(u32 i) { return min <= i && i <= max; }
-// };
 
 template<AddressRange addr>
 struct Range {
