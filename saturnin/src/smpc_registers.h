@@ -83,6 +83,10 @@ constexpr auto io_select_register        = u32{0x2010007D};
 constexpr auto external_latch_register   = u32{0x2010007F};
 //@}
 
+constexpr u8 input_registers_number{7};
+constexpr u8 output_registers_number{32};
+
+
 struct SmpcRegisters {
     struct CommandRegister {
         using PosType    = Pos<u8, CommandRegister>;
@@ -123,35 +127,34 @@ struct SmpcRegisters {
         using MaskedType  = Masked<u8, StatusRegister>;
         using ShiftedType = Shifted<u8, StatusRegister>;
 
-        static constexpr PosType port_1_mode_pos               = PosType(0); // P1MD
-        static constexpr PosType port_2_mode_pos               = PosType(2); // P2MD
-        static constexpr PosType upper_nibble_pos              = PosType(4);
-        static constexpr PosType reset_button_status_pos       = PosType(4); // RESB
-        static constexpr PosType peripheral_data_remaining_pos = PosType(5); // PDE
-        static constexpr PosType peripheral_data_location_pos  = PosType(6); // PDL
-        static constexpr PosType bit_6_pos                     = PosType(6); // Bit 6
-        static constexpr PosType bit_7_pos                     = PosType(7); // Bit 7
+        static constexpr PosType p1md_pos         = PosType(0); // Port 1 mode.
+        static constexpr PosType p2md_pos         = PosType(2); // Port 2 mode.
+        static constexpr PosType upper_nibble_pos = PosType(4);
+        static constexpr PosType resb_pos         = PosType(4); // Reset button status.
+        static constexpr PosType pde_pos          = PosType(5); // Peripheral data remaining.
+        static constexpr PosType pdl_pos          = PosType(6); // Peripheral data location (1: first, 0: second or above).
+        static constexpr PosType bit_6_pos        = PosType(6); // Bit 6
+        static constexpr PosType bit_7_pos        = PosType(7); // Bit 7
 
-        static constexpr u8 port_1_mode_mask  = 0x03;
-        static constexpr u8 port_2_mode_mask  = 0x03;
+        static constexpr u8 p1md_mask         = 0x03;
+        static constexpr u8 p2md_mask         = 0x03;
         static constexpr u8 upper_nibble_mask = 0x0F;
 
-        static constexpr BitsType reset_button_status       = BitsType(1, reset_button_status_pos);
-        static constexpr BitsType peripheral_data_remaining = BitsType(1, peripheral_data_remaining_pos);
-        static constexpr BitsType peripheral_data_location
-            = BitsType(1, peripheral_data_location_pos); // 1: first, 0: second or above.
+        static constexpr BitsType resb  = BitsType(1, resb_pos);
+        static constexpr BitsType pde   = BitsType(1, pde_pos);
+        static constexpr BitsType pdl   = BitsType(1, pdl_pos);
         static constexpr BitsType bit_6 = BitsType(1, bit_6_pos);
         static constexpr BitsType bit_7 = BitsType(1, bit_7_pos);
 
-        static constexpr MaskedType port_1_mode_15_bytes  = MaskedType(port_1_mode_mask, 0b00, port_1_mode_pos);
-        static constexpr MaskedType port_1_mode_255_bytes = MaskedType(port_1_mode_mask, 0b01, port_1_mode_pos);
-        static constexpr MaskedType port_1_mode_reserved  = MaskedType(port_1_mode_mask, 0b10, port_1_mode_pos);
-        static constexpr MaskedType port_1_mode_0_byte    = MaskedType(port_1_mode_mask, 0b11, port_1_mode_pos);
+        static constexpr MaskedType port_1_mode_15_bytes  = MaskedType(p1md_mask, 0b00, p1md_pos);
+        static constexpr MaskedType port_1_mode_255_bytes = MaskedType(p1md_mask, 0b01, p1md_pos);
+        static constexpr MaskedType port_1_mode_reserved  = MaskedType(p1md_mask, 0b10, p1md_pos);
+        static constexpr MaskedType port_1_mode_0_byte    = MaskedType(p1md_mask, 0b11, p1md_pos);
 
-        static constexpr MaskedType port_2_mode_15_bytes  = MaskedType(port_2_mode_mask, 0b00, port_2_mode_pos);
-        static constexpr MaskedType port_2_mode_255_bytes = MaskedType(port_2_mode_mask, 0b01, port_2_mode_pos);
-        static constexpr MaskedType port_2_mode_reserved  = MaskedType(port_2_mode_mask, 0b10, port_2_mode_pos);
-        static constexpr MaskedType port_2_mode_0_byte    = MaskedType(port_2_mode_mask, 0b11, port_2_mode_pos);
+        static constexpr MaskedType port_2_mode_15_bytes  = MaskedType(p2md_mask, 0b00, p1md_pos);
+        static constexpr MaskedType port_2_mode_255_bytes = MaskedType(p2md_mask, 0b01, p1md_pos);
+        static constexpr MaskedType port_2_mode_reserved  = MaskedType(p2md_mask, 0b10, p1md_pos);
+        static constexpr MaskedType port_2_mode_0_byte    = MaskedType(p2md_mask, 0b11, p1md_pos);
 
         static constexpr MaskedType upper_nibble = MaskedType(upper_nibble_mask, 0xF, upper_nibble_pos);
     };
@@ -170,40 +173,90 @@ struct SmpcRegisters {
     StatusFlagType sf;
 
     // /////////////////////////////////////////////
+  
+    struct InputRegister {
+        using PosType     = Pos<u8, InputRegister>;
+        using BitsType    = Bits<u8, InputRegister>;
+        using MaskedType  = Masked<u8, InputRegister>;
+        using ShiftedType = Shifted<u8, InputRegister>;
+
+        static constexpr PosType ireg0_status_acquisition_pos   = PosType(0); // Defines SMPC status acquisition (IREG0).
+        static constexpr PosType ireg0_br_pos                   = PosType(6); // Defines Intback break request (IREG0).
+        static constexpr PosType ireg0_cont_pos                 = PosType(7); // Defines Intback continue request (IREG0).
+        static constexpr PosType ireg1_ope_pos                  = PosType(1); // Defines if peripheral acquisition time is optimized (IREG1).
+        static constexpr PosType ireg1_pen_pos                  = PosType(3); // Defines if peripheral data is enabled (IREG1).
+        static constexpr PosType ireg1_p1md_pos                 = PosType(4); // Defines port 1 mode (IREG1).
+        static constexpr PosType ireg1_p2md_pos                 = PosType(6); // Defines port 2 mode (IREG1).
+
+        static constexpr u8 p1md_mask         = 0x03;
+        static constexpr u8 p2md_mask         = 0x03;
+
+        static constexpr BitsType ireg0_status_acquisition  = BitsType(1, ireg0_status_acquisition_pos);
+        static constexpr BitsType ireg0_br                  = BitsType(1, ireg0_br_pos);
+        static constexpr BitsType ireg0_cont                = BitsType(1, ireg0_cont_pos);
+        static constexpr BitsType ireg1_ope                 = BitsType(1, ireg1_ope_pos);
+        static constexpr BitsType ireg1_pen                 = BitsType(1, ireg1_pen_pos);
+
+        static constexpr MaskedType port_1_mode_15_bytes  = MaskedType(p1md_mask, 0b00, ireg1_p1md_pos);
+        static constexpr MaskedType port_1_mode_255_bytes = MaskedType(p1md_mask, 0b01, ireg1_p1md_pos);
+        static constexpr MaskedType port_1_mode_reserved  = MaskedType(p1md_mask, 0b10, ireg1_p1md_pos);
+        static constexpr MaskedType port_1_mode_0_byte    = MaskedType(p1md_mask, 0b11, ireg1_p1md_pos);
+
+        static constexpr MaskedType port_2_mode_15_bytes  = MaskedType(p2md_mask, 0b00, ireg1_p2md_pos);
+        static constexpr MaskedType port_2_mode_255_bytes = MaskedType(p2md_mask, 0b01, ireg1_p2md_pos);
+        static constexpr MaskedType port_2_mode_reserved  = MaskedType(p2md_mask, 0b10, ireg1_p2md_pos);
+        static constexpr MaskedType port_2_mode_0_byte    = MaskedType(p2md_mask, 0b11, ireg1_p2md_pos);
+
+    };
+    using InputRegisterType = Reg<u8, InputRegister>;
+    std::array<InputRegisterType, input_registers_number> ireg;
+
+    struct DataDirectionRegister {
+        using PosType     = Pos<u8, DataDirectionRegister>;
+        using BitsType    = Bits<u8, DataDirectionRegister>;
+        using MaskedType  = Masked<u8, DataDirectionRegister>;
+        using ShiftedType = Shifted<u8, DataDirectionRegister>;
+
+        static constexpr PosType ddr_pos = PosType(0);
+
+        static constexpr u8 ddr_mask = 0x3F;
+
+        static constexpr ShiftedType ddr_shft = ShiftedType(ddr_mask, ddr_pos);
+
+        GENERATE_MASKED_RANGE("SmpcRegisters::DataDirectionRegister ", DDR, ddr, ddr_mask, ddr_pos, ddr_mask);
+    };
+    using DataDirectionRegisterType = Reg<u8, DataDirectionRegister>;
+    DataDirectionRegisterType ddr1;
+    DataDirectionRegisterType ddr2;
+
     struct PortDataRegister {
-        using PosType  = Pos<u8, PortDataRegister>;
-        using BitsType = Bits<u8, PortDataRegister>;
+        using PosType     = Pos<u8, PortDataRegister>;
+        using BitsType    = Bits<u8, PortDataRegister>;
         using MaskedType  = Masked<u8, PortDataRegister>;
-        using ShiftedType  = Shifted<u8, PortDataRegister>;
+        using ShiftedType = Shifted<u8, PortDataRegister>;
 
         static constexpr PosType pdr_pos = PosType(0);
 
-        static constexpr u8 pdr_mask  = 0x3F;
+        static constexpr u8 pdr_mask = 0x3F;
 
         static constexpr ShiftedType pdr_shft = ShiftedType(pdr_mask, pdr_pos);
 
-        GENERATE_MASKED_RANGE("SmpcRegisters::PortDataRegister",
-                       PDR,
-                       pdr,
-                       pdr_mask,
-                       pdr_pos,
-                       pdr_mask);
+        GENERATE_MASKED_RANGE("SmpcRegisters::PortDataRegister", PDR, pdr, pdr_mask, pdr_pos, pdr_mask);
     };
     using PortDataRegisterType = Reg<u8, PortDataRegister>;
     PortDataRegisterType pdr1;
     PortDataRegisterType pdr2;
 
-
     struct IOSelect {
         using PosType  = Pos<u8, IOSelect>;
         using BitsType = Bits<u8, IOSelect>;
 
-        static constexpr PosType peripheral_port_1_mode_pos = PosType(0);
-        static constexpr PosType peripheral_port_2_mode_pos = PosType(1);
+        static constexpr PosType iosel1_pos = PosType(0);
+        static constexpr PosType iosel2_pos = PosType(1);
 
         // 1: SH2 direct mode, 0: SMPC control mode
-        static constexpr BitsType peripheral_port_1_mode = BitsType(1, peripheral_port_1_mode_pos); // IOSEL1
-        static constexpr BitsType peripheral_port_2_mode = BitsType(1, peripheral_port_2_mode_pos); // IOSEL2
+        static constexpr BitsType iosel1 = BitsType(1, iosel1_pos); // Peripheral port 1 mode.
+        static constexpr BitsType iosel2 = BitsType(1, iosel2_pos); // Peripheral port 2 mode.
     };
     using IOSelectType = Reg<u8, IOSelect>;
     IOSelectType iosel;
@@ -212,14 +265,77 @@ struct SmpcRegisters {
         using PosType  = Pos<u8, ExternalLatchEnable>;
         using BitsType = Bits<u8, ExternalLatchEnable>;
 
-        static constexpr PosType external_latch_1_enable_pos = PosType(0);
-        static constexpr PosType external_latch_2_enable_pos = PosType(1);
+        static constexpr PosType exle1_pos = PosType(0);
+        static constexpr PosType exle2_pos = PosType(1);
 
-        static constexpr BitsType external_latch_1_enable = BitsType(1, external_latch_1_enable_pos); // EXLE1
-        static constexpr BitsType external_latch_2_enable = BitsType(1, external_latch_2_enable_pos); // EXLE2
+        static constexpr BitsType exle1 = BitsType(1, exle1_pos); // External latch 1 enable.
+        static constexpr BitsType exle2 = BitsType(1, exle2_pos); // External latch 2 enable.
     };
     using ExternalLatchEnableType = Reg<u8, ExternalLatchEnable>;
     ExternalLatchEnableType exle;
+};
+
+struct SaturnPadData {
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	SaturnStandardPad1stData
+    ///
+    /// \brief	First part of the standard Saturn PAD data.
+    ///
+    /// \author	Runik
+    /// \date	16/03/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct SaturnStandardPad1stData {
+        using PosType  = Pos<u8, SaturnStandardPad1stData>;
+        using BitsType = Bits<u8, SaturnStandardPad1stData>;
+
+        static constexpr PosType button_b_pos  = PosType(0);
+        static constexpr PosType button_c_pos  = PosType(1);
+        static constexpr PosType button_a_pos       = PosType(2);
+        static constexpr PosType button_start_pos  = PosType(3);
+        static constexpr PosType direction_up_pos              = PosType(4);
+        static constexpr PosType direction_down_pos              = PosType(5);
+        static constexpr PosType direction_left_pos              = PosType(6);
+        static constexpr PosType direction_right_pos = PosType(7);
+
+        static constexpr BitsType button_b        = BitsType(1, button_b_pos);
+        static constexpr BitsType button_c        = BitsType(1, button_c_pos);
+        static constexpr BitsType button_a        = BitsType(1, button_a_pos);
+        static constexpr BitsType button_start    = BitsType(1, button_start_pos);
+        static constexpr BitsType direction_up    = BitsType(1, direction_up_pos);
+        static constexpr BitsType direction_down  = BitsType(1, direction_down_pos);
+        static constexpr BitsType direction_left  = BitsType(1, direction_left_pos);
+        static constexpr BitsType direction_right = BitsType(1, direction_right_pos);
+    };
+    using SaturnStandardPad1stDataType = Reg<u8, SaturnStandardPad1stData>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	SaturnStandardPad2ndData
+    ///
+    /// \brief	Second part of the standard Saturn PAD data.
+    ///
+    /// \author	Runik
+    /// \date	16/03/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct SaturnStandardPad2ndData {
+        using PosType  = Pos<u8, SaturnStandardPad2ndData>;
+        using BitsType = Bits<u8, SaturnStandardPad2ndData>;
+
+        static constexpr PosType button_shoulder_left_pos  = PosType(3);
+        static constexpr PosType button_z_pos              = PosType(4);
+        static constexpr PosType button_y_pos              = PosType(5);
+        static constexpr PosType button_x_pos              = PosType(6);
+        static constexpr PosType button_shoulder_right_pos = PosType(7);
+
+        static constexpr BitsType button_shoulder_left  = BitsType(1, button_shoulder_left_pos);
+        static constexpr BitsType button_z              = BitsType(1, button_z_pos);
+        static constexpr BitsType button_y              = BitsType(1, button_y_pos);
+        static constexpr BitsType button_x              = BitsType(1, button_x_pos);
+        static constexpr BitsType button_shoulder_right = BitsType(1, button_shoulder_right_pos);
+    };
+    using SaturnStandardPad2ndDataType = Reg<u8, SaturnStandardPad2ndData>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -345,16 +461,16 @@ enum class PeripheralDataEnable : bool { peripheral_data_not_returned = false, p
 /// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union InputRegister {
-    u8             raw;                                 ///< Raw representation.
-    BitField<7>    ireg0_continue_request;              ///< Defines Intback continue request (IREG0).
-    BitField<6>    ireg0_break_request;                 ///< Defines Intback break request (IREG0).
-    BitField<0>    ireg0_status_acquisition;            ///< Defines SMPC status acquisition (IREG0).
-    BitField<6, 2> ireg1_port_2_mode;                   ///< Defines port 2 mode (IREG1).
-    BitField<4, 2> ireg1_port_1_mode;                   ///< Defines port 1 mode (IREG1).
-    BitField<3>    ireg1_peripheral_data_enable;        ///< Defines if peripheral data is enabled (IREG1).
-    BitField<1>    ireg1_acquisition_time_optimization; ///< Defines if peripheral acquisition time is optimized (IREG1).
-};
+// union InputRegister {
+//     u8             raw;                                 ///< Raw representation.
+//     BitField<7>    ireg0_continue_request;              ///< Defines Intback continue request (IREG0).
+//     BitField<6>    ireg0_break_request;                 ///< Defines Intback break request (IREG0).
+//     BitField<0>    ireg0_status_acquisition;            ///< Defines SMPC status acquisition (IREG0).
+//     BitField<6, 2> ireg1_port_2_mode;                   ///< Defines port 2 mode (IREG1).
+//     BitField<4, 2> ireg1_port_1_mode;                   ///< Defines port 1 mode (IREG1).
+//     BitField<3>    ireg1_peripheral_data_enable;        ///< Defines if peripheral data is enabled (IREG1).
+//     BitField<1>    ireg1_acquisition_time_optimization; ///< Defines if peripheral acquisition time is optimized (IREG1).
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   ResetStatus
@@ -407,10 +523,10 @@ union OutputRegister {
 /// \brief  Reset button status values.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ButtonStatus : bool {
-    pressed  = false, ///< Button is pressed.
-    released = true   ///< Button is released.
-};
+// enum class ButtonStatus : bool {
+//     pressed  = false, ///< Button is pressed.
+//     released = true   ///< Button is released.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	SaturnStandardPad1stData
@@ -421,17 +537,17 @@ enum class ButtonStatus : bool {
 /// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union SaturnStandardPad1stData {
-    u8          raw;             ///< Raw representation.
-    BitField<7> direction_right; ///< Right direction.
-    BitField<6> direction_left;  ///< Left direction.
-    BitField<5> direction_down;  ///< Down direction.
-    BitField<4> direction_up;    ///< Up direction.
-    BitField<3> button_start;    ///< Start button.
-    BitField<2> button_a;        ///< A button.
-    BitField<1> button_c;        ///< C button.
-    BitField<0> button_b;        ///< B button.
-};
+// union SaturnStandardPad1stData {
+//     u8          raw;             ///< Raw representation.
+//     BitField<7> direction_right; ///< Right direction.
+//     BitField<6> direction_left;  ///< Left direction.
+//     BitField<5> direction_down;  ///< Down direction.
+//     BitField<4> direction_up;    ///< Up direction.
+//     BitField<3> button_start;    ///< Start button.
+//     BitField<2> button_a;        ///< A button.
+//     BitField<1> button_c;        ///< C button.
+//     BitField<0> button_b;        ///< B button.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	SaturnStandardPad2ndData
@@ -442,14 +558,14 @@ union SaturnStandardPad1stData {
 /// \date	20/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union SaturnStandardPad2ndData {
-    u8          raw;                   ///< Raw representation.
-    BitField<7> button_shoulder_right; ///< Right shoulder button.
-    BitField<6> button_x;              ///< X button.
-    BitField<5> button_y;              ///< Y button.
-    BitField<4> button_z;              ///< Z button.
-    BitField<3> button_shoulder_left;  ///< Left shoulder button.
-};
+// union SaturnStandardPad2ndData {
+//     u8          raw;                   ///< Raw representation.
+//     BitField<7> button_shoulder_right; ///< Right shoulder button.
+//     BitField<6> button_x;              ///< X button.
+//     BitField<5> button_y;              ///< Y button.
+//     BitField<4> button_z;              ///< Z button.
+//     BitField<3> button_shoulder_left;  ///< Left shoulder button.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	DataDirectionRegister
@@ -460,10 +576,10 @@ union SaturnStandardPad2ndData {
 /// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union DataDirectionRegister {
-    u8             raw; ///< Raw representation.
-    BitField<0, 6> ddr; ///< Used bits in the register.
-};
+// union DataDirectionRegister {
+//     u8             raw; ///< Raw representation.
+//     BitField<0, 6> ddr; ///< Used bits in the register.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  PortDataRegister
@@ -499,10 +615,10 @@ union DataDirectionRegister {
 /// \date	21/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//union IOSelect {
-//    u8          raw;                    ///< Raw representation.
-//    BitField<1> peripheral_port_2_mode; ///< IOSEL2 bit.
-//    BitField<0> peripheral_port_1_mode; ///< IOSEL1 bit.
-//};
+// union IOSelect {
+//     u8          raw;                    ///< Raw representation.
+//     BitField<1> peripheral_port_2_mode; ///< IOSEL2 bit.
+//     BitField<0> peripheral_port_1_mode; ///< IOSEL1 bit.
+// };
 
 } // namespace saturnin::core

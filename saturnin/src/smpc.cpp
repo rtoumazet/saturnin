@@ -294,15 +294,15 @@ void Smpc::reset() {
     registers_.sr     = {};
     registers_.sf     = {};
     for (u8 i = 0; i < input_registers_number; ++i) {
-        ireg_[i].raw = {};
+        registers_.ireg[i] = {};
     }
     for (u8 i = 0; i < output_registers_number; ++i) {
         oreg_[i].raw = {};
     }
     registers_.pdr1  = {};
     registers_.pdr2  = {};
-    ddr1_.raw        = {};
-    ddr2_.raw        = {};
+    registers_.ddr1  = {};
+    registers_.ddr2  = {};
     registers_.iosel = {};
     registers_.exle  = {};
 
@@ -508,7 +508,7 @@ void Smpc::executeCommand() {
 
     } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::smpc_memory_setting)) {
         for (u8 i = 0; i < 4; ++i) {
-            smem_[i] = ireg_[i].raw;
+            smem_[i] = registers_.ireg[i].data();
         }
         Log::debug(Logger::smpc, tr("-=SMPC Memory Setting=- command executed"));
         oreg_[index_31].raw = registers_.comreg.data();
@@ -528,8 +528,7 @@ void Smpc::executeCommand() {
 void Smpc::executeIntback() {
     if (is_intback_processing_) {
         getPeripheralData();
-        // next_peripheral_return_ = PeripheralDataLocation::second_or_above_peripheral_data;
-        registers_.sr.clr(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+        registers_.sr.clr(SmpcRegisters::StatusRegister::pde);
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         oreg_[index_31].raw = SmpcRegisters::CommandRegister::interrupt_back.bits();
         Log::debug(Logger::smpc, tr("Interrupt request"));
@@ -540,17 +539,14 @@ void Smpc::executeIntback() {
     Log::debug(Logger::smpc, tr("INTBACK started"));
     oreg_[index_31].raw = {};
 
-    auto is_status_returned
-        = bool{toEnum<SmpcStatusAcquisition>(ireg_[index_0].ireg0_status_acquisition) == SmpcStatusAcquisition::status_returned};
-    auto is_peripheral_data_returned = bool{toEnum<PeripheralDataEnable>(ireg_[index_1].ireg1_peripheral_data_enable)
-                                            == PeripheralDataEnable::peripheral_data_returned};
+    auto is_status_returned          = registers_.ireg[0].is(SmpcRegisters::InputRegister::ireg0_status_acquisition);
+    auto is_peripheral_data_returned = registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_pen);
 
     if (is_status_returned) {
         getStatus();
 
         if (is_peripheral_data_returned) {
-            // next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
-            registers_.sr.set(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+            registers_.sr.set(SmpcRegisters::StatusRegister::pde);
             is_intback_processing_ = true;
         } else {
             is_intback_processing_ = false;
@@ -558,8 +554,7 @@ void Smpc::executeIntback() {
     } else {
         // Peripheral data only.
         getPeripheralData();
-        // next_peripheral_return_ = PeripheralDataLocation::first_peripheral_data;
-        registers_.sr.set(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+        registers_.sr.set(SmpcRegisters::StatusRegister::pde);
         is_intback_processing_ = true;
     }
 
@@ -574,12 +569,13 @@ void Smpc::getStatus() {
     registers_.sr = {};
     registers_.sr.clr(SmpcRegisters::StatusRegister::bit_7);
     registers_.sr.set(SmpcRegisters::StatusRegister::bit_6);
-    auto is_peripheral_data_returned = bool{toEnum<PeripheralDataEnable>(ireg_[index_1].ireg1_peripheral_data_enable)
-                                            == PeripheralDataEnable::peripheral_data_returned};
-    if (is_peripheral_data_returned) {
-        registers_.sr.set(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+    //  auto is_peripheral_data_returned = bool{toEnum<PeripheralDataEnable>(ireg_[index_1].ireg1_peripheral_data_enable)
+    //                                            == PeripheralDataEnable::peripheral_data_returned};
+
+    if (registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_pen)) {
+        registers_.sr.set(SmpcRegisters::StatusRegister::pde);
     } else {
-        registers_.sr.clr(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+        registers_.sr.clr(SmpcRegisters::StatusRegister::pde);
     }
 
     for (u8 i = 0; i < output_registers_number; ++i) {
@@ -673,7 +669,9 @@ void Smpc::getPeripheralData() {
         oreg_[i].raw = {};
     }
 
-    switch (toEnum<PortMode>(ireg_[index_1].ireg1_port_1_mode)) {
+    // WIP BITREGS
+    // switch (toEnum<PortMode>(ireg_[index_1].ireg1_port_1_mode)) {
+    switch (toEnum<PortMode>(0)) {
         using enum PortMode;
         case mode_0_byte: break; // no data returned
         case mode_15_byte:
@@ -710,7 +708,9 @@ void Smpc::getPeripheralData() {
         default: Log::warning(Logger::smpc, tr("Port Status reserved"));
     }
 
-    switch (toEnum<PortMode>(ireg_[index_1].ireg1_port_2_mode)) {
+    // WIP BITREGS
+    // switch (toEnum<PortMode>(ireg_[index_1].ireg1_port_2_mode)) {
+    switch (toEnum<PortMode>(0)) {
         using enum PortMode;
         case mode_0_byte: break; // no data returned
         case mode_15_byte:
@@ -754,14 +754,14 @@ void Smpc::getPeripheralData() {
         full_peripheral_data_table_.erase(full_peripheral_data_table_.begin(),
                                           full_peripheral_data_table_.begin() + output_registers_number);
 
-        registers_.sr.set(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+        registers_.sr.set(SmpcRegisters::StatusRegister::pde);
     } else {
         for (u32 i = 0; i < full_peripheral_data_table_.size(); ++i) {
             oreg_[i].raw = full_peripheral_data_table_[i];
         }
         full_peripheral_data_table_.clear();
 
-        registers_.sr.clr(SmpcRegisters::StatusRegister::peripheral_data_remaining);
+        registers_.sr.clr(SmpcRegisters::StatusRegister::pde);
     }
 
 } // namespace saturnin::core
@@ -776,26 +776,40 @@ auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData
     switch (id) {
         using enum SaturnPeripheralId;
         case saturn_standard_pad: {
-            auto first_data = SaturnStandardPad1stData{};
-            first_data.raw  = u8_max;
-            if (isKeyPressed(p1.direction_right, openglWindow())) { first_data.direction_right = false; }
-            if (isKeyPressed(p1.direction_left, openglWindow())) { first_data.direction_left = false; }
-            if (isKeyPressed(p1.direction_down, openglWindow())) { first_data.direction_down = false; }
-            if (isKeyPressed(p1.direction_up, openglWindow())) { first_data.direction_up = false; }
-            if (isKeyPressed(p1.button_start, openglWindow())) { first_data.button_start = false; }
-            if (isKeyPressed(p1.button_a, openglWindow())) { first_data.button_a = false; }
-            if (isKeyPressed(p1.button_c, openglWindow())) { first_data.button_c = false; }
-            if (isKeyPressed(p1.button_b, openglWindow())) { first_data.button_b = false; }
-            peripheral_data.peripheral_data_table.push_back(first_data.raw);
+            auto first_data = SaturnPadData::SaturnStandardPad1stDataType{};
+            first_data      = u8_max;
+            if (isKeyPressed(p1.direction_right, openglWindow())) {
+                first_data.clr(SaturnPadData::SaturnStandardPad1stData::direction_right);
+            }
+            if (isKeyPressed(p1.direction_left, openglWindow())) {
+                first_data.clr(SaturnPadData::SaturnStandardPad1stData::direction_left);
+            }
+            if (isKeyPressed(p1.direction_down, openglWindow())) {
+                first_data.clr(SaturnPadData::SaturnStandardPad1stData::direction_down);
+            }
+            if (isKeyPressed(p1.direction_up, openglWindow())) {
+                first_data.clr(SaturnPadData::SaturnStandardPad1stData::direction_up);
+            }
+            if (isKeyPressed(p1.button_start, openglWindow())) {
+                first_data.clr(SaturnPadData::SaturnStandardPad1stData::button_start);
+            }
+            if (isKeyPressed(p1.button_a, openglWindow())) { first_data.clr(SaturnPadData::SaturnStandardPad1stData::button_a); }
+            if (isKeyPressed(p1.button_c, openglWindow())) { first_data.clr(SaturnPadData::SaturnStandardPad1stData::button_c); }
+            if (isKeyPressed(p1.button_b, openglWindow())) { first_data.clr(SaturnPadData::SaturnStandardPad1stData::button_b); }
+            peripheral_data.peripheral_data_table.push_back(first_data.data());
 
-            auto second_data = SaturnStandardPad2ndData{};
-            second_data.raw  = u8_max;
-            if (isKeyPressed(p1.button_shoulder_right, openglWindow())) { second_data.button_shoulder_right = false; }
-            if (isKeyPressed(p1.button_x, openglWindow())) { second_data.button_x = false; }
-            if (isKeyPressed(p1.button_y, openglWindow())) { second_data.button_y = false; }
-            if (isKeyPressed(p1.button_z, openglWindow())) { second_data.button_z = false; }
-            if (isKeyPressed(p1.button_shoulder_left, openglWindow())) { second_data.button_shoulder_left = false; }
-            peripheral_data.peripheral_data_table.push_back(second_data.raw);
+            auto second_data = SaturnPadData::SaturnStandardPad2ndDataType{};
+            second_data      = u8_max;
+            if (isKeyPressed(p1.button_shoulder_right, openglWindow())) {
+                second_data.clr(SaturnPadData::SaturnStandardPad2ndData::button_shoulder_right);
+            }
+            if (isKeyPressed(p1.button_x, openglWindow())) { second_data.clr(SaturnPadData::SaturnStandardPad2ndData::button_x); }
+            if (isKeyPressed(p1.button_y, openglWindow())) { second_data.clr(SaturnPadData::SaturnStandardPad2ndData::button_y); }
+            if (isKeyPressed(p1.button_z, openglWindow())) { second_data.clr(SaturnPadData::SaturnStandardPad2ndData::button_z); }
+            if (isKeyPressed(p1.button_shoulder_left, openglWindow())) {
+                second_data.clr(SaturnPadData::SaturnStandardPad2ndData::button_shoulder_left);
+            }
+            peripheral_data.peripheral_data_table.push_back(second_data.data());
             break;
         }
         default: {
@@ -874,13 +888,13 @@ auto Smpc::read(const u32 addr) -> u8 {
 
 auto Smpc::rawRead(const u32 addr) -> u8 {
     switch (addr) {
-        case input_register_0: return ireg_[index_0].raw;
-        case input_register_1: return ireg_[index_1].raw;
-        case input_register_2: return ireg_[index_2].raw;
-        case input_register_3: return ireg_[index_3].raw;
-        case input_register_4: return ireg_[index_4].raw;
-        case input_register_5: return ireg_[index_5].raw;
-        case input_register_6: return ireg_[index_6].raw;
+        case input_register_0: return registers_.ireg[0].data();
+        case input_register_1: return registers_.ireg[1].data();
+        case input_register_2: return registers_.ireg[2].data();
+        case input_register_3: return registers_.ireg[3].data();
+        case input_register_4: return registers_.ireg[4].data();
+        case input_register_5: return registers_.ireg[5].data();
+        case input_register_6: return registers_.ireg[6].data();
         default: return read(addr);
     }
 }
@@ -893,33 +907,37 @@ void Smpc::write(const u32 addr, const u8 data) {
             break;
         case status_flag: registers_.sf = data; break;
         case input_register_0: {
-            auto old_ireg0     = ireg_[index_0];
-            ireg_[index_0].raw = data;
+            auto old_ireg0     = registers_.ireg[0];
+            registers_.ireg[0] = data;
             if (is_intback_processing_) {
-                if (toEnum<IntbackBreakRequest>(ireg_[index_0].ireg0_break_request) == IntbackBreakRequest::requested) {
-                    Log::debug(Logger::smpc, tr("INTBACK break request"));
-                    registers_.sr.clr(SmpcRegisters::StatusRegister::upper_nibble);
-                    is_intback_processing_ = false;
-                    break;
-                }
-                auto old_continue = old_ireg0.ireg0_continue_request;
-                auto new_continue = ireg_[index_0].ireg0_continue_request;
-                if (new_continue != old_continue) {
-                    Log::debug(Logger::smpc, tr("INTBACK continue request"));
-                    setCommandDuration();
-                    registers_.sf.set(SmpcRegisters::StatusFlag::sf);
-                    break;
-                }
+                // WIP BITREGS
+                // if (toEnum<IntbackBreakRequest>(ireg_[index_0].ireg0_break_request) == IntbackBreakRequest::requested) {
+                //    Log::debug(Logger::smpc, tr("INTBACK break request"));
+                //    registers_.sr.clr(SmpcRegisters::StatusRegister::upper_nibble);
+                //    is_intback_processing_ = false;
+                //    break;
+                //}
+
+                // WIP BITREGS
+                // auto old_continue = old_ireg0.ireg0_continue_request;
+                // auto old_continue = old_ireg0.ireg0_continue_request;
+                // auto new_continue = ireg_[index_0].ireg0_continue_request;
+                // if (new_continue != old_continue) {
+                //    Log::debug(Logger::smpc, tr("INTBACK continue request"));
+                //    setCommandDuration();
+                //    registers_.sf.set(SmpcRegisters::StatusFlag::sf);
+                //    break;
+                //}
                 is_intback_processing_ = false;
             }
             break;
         }
-        case input_register_1: ireg_[index_1].raw = data; break;
-        case input_register_2: ireg_[index_2].raw = data; break;
-        case input_register_3: ireg_[index_3].raw = data; break;
-        case input_register_4: ireg_[index_4].raw = data; break;
-        case input_register_5: ireg_[index_5].raw = data; break;
-        case input_register_6: ireg_[index_6].raw = data; break;
+        case input_register_1: registers_.ireg[1] = data; break;
+        case input_register_2: registers_.ireg[2] = data; break;
+        case input_register_3: registers_.ireg[3] = data; break;
+        case input_register_4: registers_.ireg[4] = data; break;
+        case input_register_5: registers_.ireg[5] = data; break;
+        case input_register_6: registers_.ireg[6] = data; break;
         // case port_data_register_1: pdr1_.pdr = data; break;
         case port_data_register_1: registers_.pdr1.ins(SmpcRegisters::PortDataRegister::pdr(data)); break;
         case port_data_register_2:
@@ -938,8 +956,9 @@ void Smpc::write(const u32 addr, const u8 data) {
             }
             registers_.pdr2.ins(SmpcRegisters::PortDataRegister::pdr(data));
             break;
-        case data_direction_register_1: ddr1_.ddr = data; break;
-        case data_direction_register_2: ddr2_.ddr = data; break;
+        // case data_direction_register_1: ddr1_.ddr = data; break;
+        case data_direction_register_1: registers_.ddr1.ins(SmpcRegisters::DataDirectionRegister::ddr(data)); break;
+        case data_direction_register_2: registers_.ddr2.ins(SmpcRegisters::DataDirectionRegister::ddr(data)); break;
         case io_select_register: registers_.iosel = data; break;
         case external_latch_register: registers_.exle = data; break;
         default: break;

@@ -653,12 +653,12 @@ class Smpc {
     SmpcRegisters registers_;
     // StatusRegister                                      sr_;
     // StatusFlag                                          sf_;
-    std::array<InputRegister, input_registers_number>   ireg_;
+    // std::array<InputRegister, input_registers_number>   ireg_;
     std::array<OutputRegister, output_registers_number> oreg_;
     // PortDataRegister                                    pdr1_;
     // PortDataRegister                                    pdr2_;
-    DataDirectionRegister ddr1_;
-    DataDirectionRegister ddr2_;
+    // DataDirectionRegister ddr1_;
+    // DataDirectionRegister ddr2_;
     // IOSelect                                            iosel_;
     //  ExternalLatchEnable                                 exle_;
     //@}

@@ -22,7 +22,6 @@
 #include <GLFW/glfw3.h> // GLFW_KEYS
 #include <filesystem>
 #include <iostream> // cout
-// #include <saturnin/src/locale.h> //NOLINT(modernize-deprecated-headers)
 #include <saturnin/src/log.h>
 
 namespace libcfg = libconfig;
