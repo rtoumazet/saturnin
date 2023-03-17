@@ -39,11 +39,11 @@ using core::Logger;
 constexpr u32 ignored_delay_slot_address{0x20000202};
 constexpr u32 sr_bitmask{0x3f3};
 
-auto xn00(Sh2& s) -> u16 { return (s.current_opcode_ & bitmask_0F00) >> displacement_8; }
-auto x0n0(Sh2& s) -> u16 { return (s.current_opcode_ & bitmask_00F0) >> displacement_4; }
-auto x00n(Sh2& s) -> u16 { return s.current_opcode_ & bitmask_000F; }
-auto xnnn(Sh2& s) -> u16 { return s.current_opcode_ & bitmask_0FFF; }
-auto x0nn(Sh2& s) -> u16 { return s.current_opcode_ & bitmask_00FF; }
+auto xn00(Sh2& s) -> u16 { return (s.current_opcode_ & 0x0F00) >> 8; }
+auto x0n0(Sh2& s) -> u16 { return (s.current_opcode_ & 0x00F0) >> 4; }
+auto x00n(Sh2& s) -> u16 { return s.current_opcode_ & 0x000F; }
+auto xnnn(Sh2& s) -> u16 { return s.current_opcode_ & 0x0FFF; }
+auto x0nn(Sh2& s) -> u16 { return s.current_opcode_ & 0x00FF; }
 
 void delaySlot(Sh2& s, const u32 addr) {
     // Algorithm :
@@ -395,7 +395,7 @@ void cmpgt(Sh2& s) {
 
 void cmphi(Sh2& s) {
     // If Rn > Rm without sign, T=1
-    (static_cast<u32>(s.r_[xn00(s)]) > static_cast<u32>(s.r_[x0n0(s)])) ? s.sr_.t = true : s.sr_.t = false;
+    (s.r_[xn00(s)] > s.r_[x0n0(s)]) ? s.sr_.t = true : s.sr_.t = false;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -403,7 +403,7 @@ void cmphi(Sh2& s) {
 
 void cmphs(Sh2& s) {
     // If Rn > Rm without sign, T=1
-    (static_cast<u32>(s.r_[xn00(s)]) >= static_cast<u32>(s.r_[x0n0(s)])) ? s.sr_.t = true : s.sr_.t = false;
+    (s.r_[xn00(s)] >= s.r_[x0n0(s)]) ? s.sr_.t = true : s.sr_.t = false;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -435,14 +435,6 @@ void cmpstr(Sh2& s) {
      || (rm & bitmask_0000FF00) == (rn & bitmask_0000FF00) || (rm & bitmask_000000FF) == (rn & bitmask_000000FF))
         ? s.sr_.t = true
         : s.sr_.t = false;
-
-    // u32 temp{s.r_[xn00(s)] ^ s.r_[x0n0(s)]};
-    // s32 hh{(temp >> 12) & 0x000000FF};
-    // s32 hl{(temp >> 8) & 0x000000FF};
-    // s32 lh{(temp >> 4) & 0x000000FF};
-    // s32 ll{temp & 0x000000FF};
-    // hh = hh && hl && lh && ll;
-    //(hh == 0) ? s.sr_.t = true : s.sr_.t = false;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -487,57 +479,60 @@ void div1(Sh2& s) {
     auto tmp0 = u32{};
     auto tmp1 = bool{};
 
-    const auto old_q = static_cast<u32>(static_cast<bool>(s.sr_.q));
+    const auto old_q = static_cast<bool>(s.sr_.q);
     ((sign_bit_32_mask & s.r_[xn00(s)]) != 0) ? s.sr_.q = true : s.sr_.q = false;
 
     s.r_[xn00(s)] <<= 1;
     s.r_[xn00(s)] |= static_cast<u32>(static_cast<bool>(s.sr_.t));
-    switch (old_q) {
-        case 0:
-            switch (static_cast<u32>(static_cast<bool>(s.sr_.m))) {
-                case 0:
-                    tmp0 = s.r_[xn00(s)];
-                    s.r_[xn00(s)] -= s.r_[x0n0(s)];
-                    tmp1 = (static_cast<u32>(s.r_[xn00(s)]) > tmp0);
-                    switch (static_cast<u32>(static_cast<bool>(s.sr_.q))) {
-                        case 0: tmp1 ? s.sr_.q = true : s.sr_.q = false; break;
-                        case 1: (!tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
-                    }
-                    break;
-                case 1:
-                    tmp0 = s.r_[xn00(s)];
-                    s.r_[xn00(s)] += s.r_[x0n0(s)];
-                    tmp1 = (static_cast<u32>(s.r_[xn00(s)]) < tmp0);
-                    switch (static_cast<u32>(static_cast<bool>(s.sr_.q))) {
-                        case 0: (!tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
-                        case 1: tmp1 ? s.sr_.q = true : s.sr_.q = false; break;
-                    }
-                    break;
+
+    if (old_q) {
+        if (static_cast<bool>(s.sr_.m)) {
+            tmp0 = s.r_[xn00(s)];
+            s.r_[xn00(s)] -= s.r_[x0n0(s)];
+            tmp1 = (s.r_[xn00(s)] > tmp0);
+
+            if (static_cast<bool>(s.sr_.q)) {
+                tmp1 ? s.sr_.q = true : s.sr_.q = false;
+            } else {
+                (!tmp1) ? s.sr_.q = true : s.sr_.q = false;
             }
-            break;
-        case 1:
-            switch (static_cast<u32>(static_cast<bool>(s.sr_.m))) {
-                case 0:
-                    tmp0 = s.r_[xn00(s)];
-                    s.r_[xn00(s)] += s.r_[x0n0(s)];
-                    tmp1 = (static_cast<uint32_t>(s.r_[xn00(s)]) < tmp0);
-                    switch (static_cast<u32>(static_cast<bool>(s.sr_.q))) {
-                        case 0: tmp1 ? s.sr_.q = true : s.sr_.q = false; break;
-                        case 1: (!tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
-                    }
-                    break;
-                case 1:
-                    tmp0 = s.r_[xn00(s)];
-                    s.r_[xn00(s)] -= s.r_[x0n0(s)];
-                    tmp1 = (static_cast<u32>(s.r_[xn00(s)]) > tmp0);
-                    switch (static_cast<u32>(static_cast<bool>(s.sr_.q))) {
-                        case 0: (!tmp1) ? s.sr_.q = true : s.sr_.q = false; break;
-                        case 1: tmp1 ? s.sr_.q = true : s.sr_.q = false; break;
-                    }
-                    break;
+
+        } else {
+            tmp0 = s.r_[xn00(s)];
+            s.r_[xn00(s)] += s.r_[x0n0(s)];
+            tmp1 = s.r_[xn00(s)] < tmp0;
+
+            if (static_cast<bool>(s.sr_.q)) {
+                (!tmp1) ? s.sr_.q = true : s.sr_.q = false;
+            } else {
+                tmp1 ? s.sr_.q = true : s.sr_.q = false;
             }
-            break;
+        }
+    } else {
+        if (static_cast<bool>(s.sr_.m)) {
+            tmp0 = s.r_[xn00(s)];
+            s.r_[xn00(s)] += s.r_[x0n0(s)];
+            tmp1 = (s.r_[xn00(s)]) < tmp0;
+
+            if (static_cast<bool>(s.sr_.q)) {
+                tmp1 ? s.sr_.q = true : s.sr_.q = false;
+            } else {
+                (!tmp1) ? s.sr_.q = true : s.sr_.q = false;
+            }
+
+        } else {
+            tmp0 = s.r_[xn00(s)];
+            s.r_[xn00(s)] -= s.r_[x0n0(s)];
+            tmp1 = (s.r_[xn00(s)]) > tmp0;
+
+            if (static_cast<bool>(s.sr_.q)) {
+                (!tmp1) ? s.sr_.q = true : s.sr_.q = false;
+            } else {
+                tmp1 ? s.sr_.q = true : s.sr_.q = false;
+            }
+        }
     }
+
     (s.sr_.q == s.sr_.m) ? s.sr_.t = true : s.sr_.t = false;
 
     s.pc_ += 2;
@@ -1209,7 +1204,7 @@ void negc(Sh2& s) {
     auto temp     = u32{0 - s.r_[x0n0(s)]};
     s.r_[xn00(s)] = temp - static_cast<u32>(static_cast<bool>(s.sr_.t));
     (0 < temp) ? s.sr_.t = true : s.sr_.t = false;
-    if (temp < static_cast<u32>(s.r_[xn00(s)])) { s.sr_.t = true; }
+    if (temp < s.r_[xn00(s)]) { s.sr_.t = true; }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -1286,13 +1281,12 @@ void rotcr(Sh2& s) {
 
 void rotl(Sh2& s) {
     // T <- Rn <- MSB
-    // NOLINTNEXTLINE(readability-magic-numbers)
     ((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? s.sr_.t = false : s.sr_.t = true;
     s.r_[xn00(s)] <<= 1;
     if (s.sr_.t == 1) {
         s.r_[xn00(s)] |= 0x00000001;
     } else {
-        s.r_[xn00(s)] &= bitmask_FFFFFFFE;
+        s.r_[xn00(s)] &= 0xFFFFFFFE;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1359,9 +1353,10 @@ void rts(Sh2& s) {
 
     s.popFromCallstack();
     switch (s.modules_.context()->debugStatus()) {
-        case core::DebugStatus::step_out:
-        case core::DebugStatus::wait_end_of_routine: {
-            if (s.subroutineDepth() == s.callstack().size()) { s.modules_.context()->debugStatus(core::DebugStatus::paused); }
+        using enum core::DebugStatus;
+        case step_out:
+        case wait_end_of_routine: {
+            if (s.subroutineDepth() == s.callstack().size()) { s.modules_.context()->debugStatus(paused); }
             break;
         }
         default: break;
@@ -1603,7 +1598,7 @@ void subc(Sh2& s) {
     const auto tmp0 = u32{s.r_[xn00(s)]};
     s.r_[xn00(s)]   = tmp1 - static_cast<u32>(static_cast<bool>(s.sr_.t));
     (tmp0 < tmp1) ? s.sr_.t = true : s.sr_.t = false;
-    if (tmp1 < static_cast<u32>(s.r_[xn00(s)])) { s.sr_.t = true; }
+    if (tmp1 < s.r_[xn00(s)]) { s.sr_.t = true; }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -1776,9 +1771,7 @@ void execute(Sh2& s) {
 
     opcodes_lut[s.current_opcode_](s);
 
-    if (std::any_of(s.breakpoints_.begin(), s.breakpoints_.end(), [&s](const u32 bp) {
-            return s.getRegister(Sh2Register::pc) == bp;
-        })) {
+    if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
         s.modules_.context()->debugStatus(core::DebugStatus::paused);
         Log::info(Logger::sh2, core::tr("Breakpoint reached !"));
     }

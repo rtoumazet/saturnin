@@ -86,10 +86,8 @@ void Texture::deleteTextureData(Texture& t) {
 }
 
 auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
-    {
-        ReadOnlyLock lock(storage_mutex_);
-        if (!texture_storage_.contains(key)) { return true; }
-    }
+    ReadOnlyLock lock(storage_mutex_);
+    if (!texture_storage_.contains(key)) { return true; }
 
     if (auto t = Texture::getTexture(key); t) {
         if ((*t)->isDiscarded()) {
@@ -208,10 +206,10 @@ auto Texture::statistics() -> std::vector<std::string> {
 
     auto max_width  = 0;
     auto max_height = 0;
-    for (const auto& t : texture_storage_) {
-        if (t.second.vdpType() == VdpType::vdp1) {
-            if (t.second.height() > max_height) { max_height = t.second.height(); }
-            if (t.second.width() > max_width) { max_width = t.second.width(); }
+    for (const auto& [key, value] : texture_storage_) {
+        if (value.vdpType() == VdpType::vdp1) {
+            if (value.height() > max_height) { max_height = value.height(); }
+            if (value.width() > max_width) { max_width = value.width(); }
         }
     }
     stats.push_back(uti::format("Maximum VDP1 texture size : {}x{}", max_height, max_width));
