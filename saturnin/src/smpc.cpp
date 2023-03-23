@@ -200,19 +200,19 @@ void SaturnDigitalPad::fromConfig(std::vector<PeripheralKey> config) {
         return;
     }
 
-    direction_left        = config[index_0];
-    direction_right       = config[index_1];
-    direction_up          = config[index_2];
-    direction_down        = config[index_3];
-    button_shoulder_left  = config[index_4];
-    button_shoulder_right = config[index_5];
-    button_a              = config[index_6];
-    button_b              = config[index_7];
-    button_c              = config[index_8];
-    button_x              = config[index_9];
-    button_y              = config[index_10];
-    button_z              = config[index_11];
-    button_start          = config[index_12];
+    direction_left        = config[0];
+    direction_right       = config[1];
+    direction_up          = config[2];
+    direction_down        = config[3];
+    button_shoulder_left  = config[4];
+    button_shoulder_right = config[5];
+    button_a              = config[6];
+    button_b              = config[7];
+    button_c              = config[8];
+    button_x              = config[9];
+    button_y              = config[10];
+    button_z              = config[11];
+    button_start          = config[12];
 }
 
 auto StvPlayerControls::toConfig(const PeripheralLayout layout) const -> std::vector<PeripheralKey> {
@@ -250,14 +250,14 @@ void StvPlayerControls::fromConfig(std::vector<PeripheralKey> config) {
         *this = control;
         return;
     }
-    direction_left  = config[index_0];
-    direction_right = config[index_1];
-    direction_up    = config[index_2];
-    direction_down  = config[index_3];
-    button_1        = config[index_4];
-    button_2        = config[index_5];
-    button_3        = config[index_6];
-    button_4        = config[index_7];
+    direction_left  = config[0];
+    direction_right = config[1];
+    direction_up    = config[2];
+    direction_down  = config[3];
+    button_1        = config[4];
+    button_2        = config[5];
+    button_3        = config[6];
+    button_4        = config[7];
 }
 
 auto StvBoardControls::toConfig(const PeripheralLayout layout) const -> std::vector<PeripheralKey> {
@@ -281,12 +281,12 @@ void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
         *this = control;
         return;
     }
-    service_switch = config[index_0];
-    test_switch    = config[index_1];
-    p1_coin_switch = config[index_2];
-    p2_coin_switch = config[index_3];
-    p1_start       = config[index_4];
-    p2_start       = config[index_5];
+    service_switch = config[0];
+    test_switch    = config[1];
+    p1_coin_switch = config[2];
+    p2_coin_switch = config[3];
+    p1_start       = config[4];
+    p2_start       = config[5];
 }
 
 void Smpc::reset() {
@@ -297,7 +297,7 @@ void Smpc::reset() {
         registers_.ireg[i] = {};
     }
     for (u8 i = 0; i < output_registers_number; ++i) {
-        oreg_[i].raw = {};
+        registers_.oreg[i] = {};
     }
     registers_.pdr1  = {};
     registers_.pdr2  = {};
@@ -311,12 +311,13 @@ void Smpc::reset() {
     }
 
     // System clock is 320 at reset.
-    std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-    switch (modules_.config()->getTvStandard(ts)) {
+    switch (std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+            modules_.config()->getTvStandard(ts)) {
         using enum video::TvStandard;
-        case pal: clock_ = SystemClock::pal_320; break;
-        case ntsc: clock_ = SystemClock::ntsc_320; break;
-        default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = SystemClock::not_set;
+        using enum SystemClock;
+        case pal: clock_ = pal_320; break;
+        case ntsc: clock_ = ntsc_320; break;
+        default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = not_set;
     }
 
     std::string p1c = modules_.config()->readValue(core::AccessKeys::cfg_controls_saturn_player_1_connection);
@@ -370,7 +371,6 @@ void Smpc::setCommandDuration() {
         command_remaining_cycles_ = calculateCyclesNumber(duration);
         return;
     } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::interrupt_back)) {
-        // intback_remaining_cycles_ = calculateCyclesNumber(milli(320));
         // Values are from previous Saturnin version, not sure how accurate they are ...
         constexpr auto intback_duration = micro(50);
         constexpr auto normal_duration  = micro(1500);
@@ -388,7 +388,7 @@ void Smpc::executeCommand() {
     if (registers_.comreg.is(SmpcRegisters::CommandRegister::master_sh2_on)) {
         is_master_sh2_on_ = true;
         Log::debug(Logger::smpc, tr("-=Master SH2 ON=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
@@ -396,14 +396,14 @@ void Smpc::executeCommand() {
         is_slave_sh2_on_ = true;
         modules_.slaveSh2()->powerOnReset();
         Log::debug(Logger::smpc, tr("-=Slave SH2 ON=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
     } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::slave_sh2_off)) {
         is_slave_sh2_on_ = false;
         Log::debug(Logger::smpc, tr("-=Slave SH2 OFF=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
@@ -411,7 +411,7 @@ void Smpc::executeCommand() {
         is_sound_on_ = true;
         modules_.scsp()->reset();
         Log::debug(Logger::smpc, tr("-=Sound ON=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
@@ -419,21 +419,21 @@ void Smpc::executeCommand() {
         is_sound_on_ = false;
         // emulator_context_->scsp()->setSound(false);
         Log::debug(Logger::smpc, tr("-=Sound OFF=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
     } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::cd_on)) {
         is_cd_on_ = true;
         Log::debug(Logger::smpc, tr("-=CD ON=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
     } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::cd_on)) {
         is_cd_on_ = false;
         Log::debug(Logger::smpc, tr("-=CD OFF=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
@@ -442,7 +442,7 @@ void Smpc::executeCommand() {
         modules_.slaveSh2()->powerOnReset();
         // emulator_context_->scsp()->reset();
         Log::debug(Logger::smpc, tr("-=Reset Entire System=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
@@ -477,28 +477,28 @@ void Smpc::executeCommand() {
             is_horizontal_res_352 = true;
             Log::debug(Logger::smpc, tr("-=Clock Change 352 Mode=- command executed"));
         }
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
     } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::nmi_request)) {
         modules_.scu()->generateInterrupt(interrupt_source::nmi);
         Log::debug(Logger::smpc, tr("-=NMI Request=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
     } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_enable)) {
         is_soft_reset_allowed_ = true;
         Log::debug(Logger::smpc, tr("-=Reset Enable=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
     } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_disable)) {
         is_soft_reset_allowed_ = false;
         Log::debug(Logger::smpc, tr("-=Reset Disable=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
@@ -511,13 +511,13 @@ void Smpc::executeCommand() {
             smem_[i] = registers_.ireg[i].data();
         }
         Log::debug(Logger::smpc, tr("-=SMPC Memory Setting=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
 
     } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::time_setting)) {
         Log::debug(Logger::smpc, tr("-=Time Setting=- command executed"));
-        oreg_[index_31].raw = registers_.comreg.data();
+        registers_.oreg[31] = registers_.comreg.data();
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
         return;
     }
@@ -528,16 +528,16 @@ void Smpc::executeCommand() {
 void Smpc::executeIntback() {
     if (is_intback_processing_) {
         getPeripheralData();
-        registers_.sr.clr(SmpcRegisters::StatusRegister::pde);
+        registers_.sr.clr(SmpcRegisters::StatusRegister::pdl);
         registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        oreg_[index_31].raw = SmpcRegisters::CommandRegister::interrupt_back.bits();
+        registers_.oreg[31] = SmpcRegisters::OutputRegister::interrupt_back;
         Log::debug(Logger::smpc, tr("Interrupt request"));
         modules_.scu()->generateInterrupt(interrupt_source::system_manager);
         return;
     }
 
     Log::debug(Logger::smpc, tr("INTBACK started"));
-    oreg_[index_31].raw = {};
+    registers_.oreg[31] = {};
 
     auto is_status_returned          = registers_.ireg[0].is(SmpcRegisters::InputRegister::ireg0_status_acquisition);
     auto is_peripheral_data_returned = registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_pen);
@@ -546,7 +546,7 @@ void Smpc::executeIntback() {
         getStatus();
 
         if (is_peripheral_data_returned) {
-            registers_.sr.set(SmpcRegisters::StatusRegister::pde);
+            registers_.sr.set(SmpcRegisters::StatusRegister::pdl);
             is_intback_processing_ = true;
         } else {
             is_intback_processing_ = false;
@@ -554,7 +554,7 @@ void Smpc::executeIntback() {
     } else {
         // Peripheral data only.
         getPeripheralData();
-        registers_.sr.set(SmpcRegisters::StatusRegister::pde);
+        registers_.sr.set(SmpcRegisters::StatusRegister::pdl);
         is_intback_processing_ = true;
     }
 
@@ -569,8 +569,6 @@ void Smpc::getStatus() {
     registers_.sr = {};
     registers_.sr.clr(SmpcRegisters::StatusRegister::bit_7);
     registers_.sr.set(SmpcRegisters::StatusRegister::bit_6);
-    //  auto is_peripheral_data_returned = bool{toEnum<PeripheralDataEnable>(ireg_[index_1].ireg1_peripheral_data_enable)
-    //                                            == PeripheralDataEnable::peripheral_data_returned};
 
     if (registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_pen)) {
         registers_.sr.set(SmpcRegisters::StatusRegister::pde);
@@ -579,50 +577,47 @@ void Smpc::getStatus() {
     }
 
     for (u8 i = 0; i < output_registers_number; ++i) {
-        oreg_[i].raw = {};
+        registers_.oreg[i] = {};
     }
     if (is_soft_reset_allowed_) {
-        oreg_[index_0].oreg0_reset_status = ResetStatus::enabled;
+        registers_.oreg[0].clr(SmpcRegisters::OutputRegister::oreg0_resd);
     } else {
-        oreg_[index_0].oreg0_reset_status = ResetStatus::disabled;
+        registers_.oreg[0].set(SmpcRegisters::OutputRegister::oreg0_resd);
     }
 
-    const bool is_time_set        = modules_.config()->readValue(core::AccessKeys::cfg_global_set_time);
-    const auto set_time_value     = is_time_set ? SetTime::set_time : SetTime::not_set_time;
-    oreg_[index_0].oreg0_set_time = set_time_value;
+    const bool is_time_set    = modules_.config()->readValue(core::AccessKeys::cfg_global_set_time);
+    const auto set_time_value = is_time_set ? SetTime::set_time : SetTime::not_set_time;
+    registers_.oreg[0].upd(SmpcRegisters::OutputRegister::setTime(set_time_value));
 
     auto rtc           = getRtcTime();
-    oreg_[index_1].raw = rtc.getUpperYear();
-    oreg_[index_2].raw = rtc.getLowerYear();
-    oreg_[index_3].raw = rtc.getDayMonth();
-    oreg_[index_4].raw = rtc.getDays();
-    oreg_[index_5].raw = rtc.getHours();
-    oreg_[index_6].raw = rtc.getMinutes();
-    oreg_[index_7].raw = rtc.getSeconds();
-    oreg_[index_8].raw = {}; // No cartridge code handling for now
+    registers_.oreg[1] = rtc.getUpperYear();
+    registers_.oreg[2] = rtc.getLowerYear();
+    registers_.oreg[3] = rtc.getDayMonth();
+    registers_.oreg[4] = rtc.getDays();
+    registers_.oreg[5] = rtc.getHours();
+    registers_.oreg[6] = rtc.getMinutes();
+    registers_.oreg[7] = rtc.getSeconds();
+    registers_.oreg[8] = {}; // No cartridge code handling for now
 
     std::string ac     = modules_.config()->readValue(core::AccessKeys::cfg_global_area_code);
-    oreg_[index_9].raw = uti::toUnderlying(modules_.config()->getAreaCode(ac));
+    registers_.oreg[9] = uti::toUnderlying(modules_.config()->getAreaCode(ac));
 
-    oreg_[index_10].bit_7 = false;
-    oreg_[index_10].bit_6 = is_horizontal_res_352;
-    oreg_[index_10].bit_5 = true;
-    oreg_[index_10].bit_4 = true;
-    oreg_[index_10].bit_3 = is_soft_reset_allowed_;
-    oreg_[index_10].bit_2 = true;
-    oreg_[index_10].bit_1 = false; // SYSRES is never triggered by software
-    oreg_[index_10].bit_0 = is_sound_on_;
+    registers_.oreg[10].clr(SmpcRegisters::OutputRegister::bit_7);
+    registers_.oreg[10].upd(SmpcRegisters::OutputRegister::horizontalRes(is_horizontal_res_352));
+    registers_.oreg[10].set(SmpcRegisters::OutputRegister::bit_5);
+    registers_.oreg[10].set(SmpcRegisters::OutputRegister::bit_4);
+    registers_.oreg[10].upd(SmpcRegisters::OutputRegister::softResetAllowed(is_soft_reset_allowed_));
+    registers_.oreg[10].set(SmpcRegisters::OutputRegister::bit_2);
+    registers_.oreg[10].clr(SmpcRegisters::OutputRegister::bit_1); // SYSRES is never triggered by software
+    registers_.oreg[10].upd(SmpcRegisters::OutputRegister::soundOn(is_sound_on_));
 
-    // oreg_[index_11].reset();
     //  oreg_[index_11][bit_6] = is_cd_on_;
-    oreg_[index_11].bit_6 = false;
+    registers_.oreg[11].clr(SmpcRegisters::OutputRegister::bit_6);
 
-    oreg_[index_12].raw = smem_[0];
-    oreg_[index_13].raw = smem_[1];
-    oreg_[index_14].raw = smem_[2];
-    oreg_[index_15].raw = smem_[3];
-
-    // oreg_[index_31].reset();
+    registers_.oreg[12] = smem_[0];
+    registers_.oreg[13] = smem_[1];
+    registers_.oreg[14] = smem_[2];
+    registers_.oreg[15] = smem_[3];
 };
 
 void Smpc::getPeripheralData() {
@@ -659,19 +654,15 @@ void Smpc::getPeripheralData() {
     // SR page 66
     registers_.sr = {};
     registers_.sr.set(SmpcRegisters::StatusRegister::bit_7);
-    // sr_.peripheral_data_location = next_peripheral_return_;
 
-    // TODO
-    // sr_.port_2_mode = ireg_[index_1].ireg1_port_2_mode;
-    // sr_.port_1_mode = ireg_[index_1].ireg1_port_1_mode;
+    registers_.sr.upd(SmpcRegisters::StatusRegister::p2md(registers_.ireg[1] >> SmpcRegisters::InputRegister::p2md_shft));
+    registers_.sr.upd(SmpcRegisters::StatusRegister::p1md(registers_.ireg[1] >> SmpcRegisters::InputRegister::p1md_shft));
 
     for (u32 i = 0; i < output_registers_number; ++i) {
-        oreg_[i].raw = {};
+        registers_.oreg[i] = {};
     }
 
-    // WIP BITREGS
-    // switch (toEnum<PortMode>(ireg_[index_1].ireg1_port_1_mode)) {
-    switch (toEnum<PortMode>(0)) {
+    switch (toEnum<PortMode>(registers_.ireg[1] >> SmpcRegisters::InputRegister::p1md_shft)) {
         using enum PortMode;
         case mode_0_byte: break; // no data returned
         case mode_15_byte:
@@ -681,9 +672,9 @@ void Smpc::getPeripheralData() {
             switch (port_1_status_) {
                 case PortStatus::not_connected: {
                     full_peripheral_data_table_.emplace_back(uti::toUnderlying(port_1_status_));
-                    full_peripheral_data_table_.emplace_back(u8_max);
-                    full_peripheral_data_table_.emplace_back(u8_max);
-                    full_peripheral_data_table_.emplace_back(u8_max);
+                    full_peripheral_data_table_.emplace_back(0xff);
+                    full_peripheral_data_table_.emplace_back(0xff);
+                    full_peripheral_data_table_.emplace_back(0xff);
                     break;
                 }
                 case PortStatus::direct_connection: {
@@ -708,9 +699,7 @@ void Smpc::getPeripheralData() {
         default: Log::warning(Logger::smpc, tr("Port Status reserved"));
     }
 
-    // WIP BITREGS
-    // switch (toEnum<PortMode>(ireg_[index_1].ireg1_port_2_mode)) {
-    switch (toEnum<PortMode>(0)) {
+    switch (toEnum<PortMode>(registers_.ireg[1] >> SmpcRegisters::InputRegister::p2md_shft)) {
         using enum PortMode;
         case mode_0_byte: break; // no data returned
         case mode_15_byte:
@@ -721,9 +710,9 @@ void Smpc::getPeripheralData() {
                 using enum PortStatus;
                 case not_connected: {
                     full_peripheral_data_table_.emplace_back(uti::toUnderlying(port_2_status_));
-                    full_peripheral_data_table_.emplace_back(u8_max);
-                    full_peripheral_data_table_.emplace_back(u8_max);
-                    full_peripheral_data_table_.emplace_back(u8_max);
+                    full_peripheral_data_table_.emplace_back(0xff);
+                    full_peripheral_data_table_.emplace_back(0xff);
+                    full_peripheral_data_table_.emplace_back(0xff);
                     break;
                 }
                 case direct_connection: {
@@ -749,7 +738,7 @@ void Smpc::getPeripheralData() {
     // Checking if there's more data to send than existing OREG registers
     if (full_peripheral_data_table_.size() > output_registers_number) {
         for (u32 i = 0; i < output_registers_number; ++i) {
-            oreg_[i].raw = full_peripheral_data_table_[i];
+            registers_.oreg[i] = full_peripheral_data_table_[i];
         }
         full_peripheral_data_table_.erase(full_peripheral_data_table_.begin(),
                                           full_peripheral_data_table_.begin() + output_registers_number);
@@ -757,7 +746,7 @@ void Smpc::getPeripheralData() {
         registers_.sr.set(SmpcRegisters::StatusRegister::pde);
     } else {
         for (u32 i = 0; i < full_peripheral_data_table_.size(); ++i) {
-            oreg_[i].raw = full_peripheral_data_table_[i];
+            registers_.oreg[i] = full_peripheral_data_table_[i];
         }
         full_peripheral_data_table_.clear();
 
@@ -769,7 +758,7 @@ void Smpc::getPeripheralData() {
 auto Smpc::generatePeripheralData(const SaturnPeripheralId id) -> PeripheralData {
     auto peripheral_data                 = PeripheralData{};
     peripheral_data.saturn_peripheral_id = id;
-    peripheral_data.data_size            = uti::toUnderlying(id) & bitmask_0F;
+    peripheral_data.data_size            = uti::toUnderlying(id) & 0x0F;
     if (peripheral_data.data_size != 0) { peripheral_data.extension_data_size = 0; }
 
     const auto p1 = getSaturnPeripheralMapping().player_1;
@@ -828,39 +817,39 @@ auto Smpc::read(const u32 addr) -> u8 {
                 return default_stv_data;
             }
             return registers_.sr.data();
-        case status_flag: return registers_.sr.data();
-        case output_register_0: return oreg_[index_0].raw;
-        case output_register_1: return oreg_[index_1].raw;
-        case output_register_2: return oreg_[index_2].raw;
-        case output_register_3: return oreg_[index_3].raw;
-        case output_register_4: return oreg_[index_4].raw;
-        case output_register_5: return oreg_[index_5].raw;
-        case output_register_6: return oreg_[index_6].raw;
-        case output_register_7: return oreg_[index_7].raw;
-        case output_register_8: return oreg_[index_8].raw;
-        case output_register_9: return oreg_[index_9].raw;
-        case output_register_10: return oreg_[index_10].raw;
-        case output_register_11: return oreg_[index_11].raw;
-        case output_register_12: return oreg_[index_12].raw;
-        case output_register_13: return oreg_[index_13].raw;
-        case output_register_14: return oreg_[index_14].raw;
-        case output_register_15: return oreg_[index_15].raw;
-        case output_register_16: return oreg_[index_16].raw;
-        case output_register_17: return oreg_[index_17].raw;
-        case output_register_18: return oreg_[index_18].raw;
-        case output_register_19: return oreg_[index_19].raw;
-        case output_register_20: return oreg_[index_20].raw;
-        case output_register_21: return oreg_[index_21].raw;
-        case output_register_22: return oreg_[index_22].raw;
-        case output_register_23: return oreg_[index_23].raw;
-        case output_register_24: return oreg_[index_24].raw;
-        case output_register_25: return oreg_[index_25].raw;
-        case output_register_26: return oreg_[index_26].raw;
-        case output_register_27: return oreg_[index_27].raw;
-        case output_register_28: return oreg_[index_28].raw;
-        case output_register_29: return oreg_[index_29].raw;
-        case output_register_30: return oreg_[index_30].raw;
-        case output_register_31: return oreg_[index_31].raw;
+        case status_flag: return registers_.sf.data();
+        case output_register_0: return registers_.oreg[0].data();
+        case output_register_1: return registers_.oreg[1].data();
+        case output_register_2: return registers_.oreg[2].data();
+        case output_register_3: return registers_.oreg[3].data();
+        case output_register_4: return registers_.oreg[4].data();
+        case output_register_5: return registers_.oreg[5].data();
+        case output_register_6: return registers_.oreg[6].data();
+        case output_register_7: return registers_.oreg[7].data();
+        case output_register_8: return registers_.oreg[8].data();
+        case output_register_9: return registers_.oreg[9].data();
+        case output_register_10: return registers_.oreg[10].data();
+        case output_register_11: return registers_.oreg[11].data();
+        case output_register_12: return registers_.oreg[12].data();
+        case output_register_13: return registers_.oreg[13].data();
+        case output_register_14: return registers_.oreg[14].data();
+        case output_register_15: return registers_.oreg[15].data();
+        case output_register_16: return registers_.oreg[16].data();
+        case output_register_17: return registers_.oreg[17].data();
+        case output_register_18: return registers_.oreg[18].data();
+        case output_register_19: return registers_.oreg[19].data();
+        case output_register_20: return registers_.oreg[20].data();
+        case output_register_21: return registers_.oreg[21].data();
+        case output_register_22: return registers_.oreg[22].data();
+        case output_register_23: return registers_.oreg[23].data();
+        case output_register_24: return registers_.oreg[24].data();
+        case output_register_25: return registers_.oreg[25].data();
+        case output_register_26: return registers_.oreg[26].data();
+        case output_register_27: return registers_.oreg[27].data();
+        case output_register_28: return registers_.oreg[28].data();
+        case output_register_29: return registers_.oreg[29].data();
+        case output_register_30: return registers_.oreg[30].data();
+        case output_register_31: return registers_.oreg[31].data();
         case port_data_register_1:
             if (modules_.context()->hardwareMode() == HardwareMode::stv) {
                 constexpr auto default_stv_data = u8{0xff};
@@ -910,24 +899,21 @@ void Smpc::write(const u32 addr, const u8 data) {
             auto old_ireg0     = registers_.ireg[0];
             registers_.ireg[0] = data;
             if (is_intback_processing_) {
-                // WIP BITREGS
-                // if (toEnum<IntbackBreakRequest>(ireg_[index_0].ireg0_break_request) == IntbackBreakRequest::requested) {
-                //    Log::debug(Logger::smpc, tr("INTBACK break request"));
-                //    registers_.sr.clr(SmpcRegisters::StatusRegister::upper_nibble);
-                //    is_intback_processing_ = false;
-                //    break;
-                //}
+                if (registers_.ireg[0].is(SmpcRegisters::InputRegister::ireg0_break_request)) {
+                    Log::debug(Logger::smpc, tr("INTBACK break request"));
+                    registers_.sr.clr(SmpcRegisters::StatusRegister::upper_nibble);
+                    is_intback_processing_ = false;
+                    break;
+                }
 
-                // WIP BITREGS
-                // auto old_continue = old_ireg0.ireg0_continue_request;
-                // auto old_continue = old_ireg0.ireg0_continue_request;
-                // auto new_continue = ireg_[index_0].ireg0_continue_request;
-                // if (new_continue != old_continue) {
-                //    Log::debug(Logger::smpc, tr("INTBACK continue request"));
-                //    setCommandDuration();
-                //    registers_.sf.set(SmpcRegisters::StatusFlag::sf);
-                //    break;
-                //}
+                auto old_continue = old_ireg0 >> SmpcRegisters::InputRegister::continue_request_shft;
+                auto new_continue = registers_.ireg[0] >> SmpcRegisters::InputRegister::continue_request_shft;
+                if (new_continue != old_continue) {
+                    Log::debug(Logger::smpc, tr("INTBACK continue request"));
+                    setCommandDuration();
+                    registers_.sf.set(SmpcRegisters::StatusFlag::sf);
+                    break;
+                }
                 is_intback_processing_ = false;
             }
             break;
@@ -938,8 +924,7 @@ void Smpc::write(const u32 addr, const u8 data) {
         case input_register_4: registers_.ireg[4] = data; break;
         case input_register_5: registers_.ireg[5] = data; break;
         case input_register_6: registers_.ireg[6] = data; break;
-        // case port_data_register_1: pdr1_.pdr = data; break;
-        case port_data_register_1: registers_.pdr1.ins(SmpcRegisters::PortDataRegister::pdr(data)); break;
+        case port_data_register_1: registers_.pdr1.upd(SmpcRegisters::PortDataRegister::pdr(data)); break;
         case port_data_register_2:
             if (modules_.context()->hardwareMode() == HardwareMode::stv) {
                 constexpr auto sound_status = u8{0x10};
@@ -954,11 +939,10 @@ void Smpc::write(const u32 addr, const u8 data) {
                     modules_.scsp()->reset();
                 }
             }
-            registers_.pdr2.ins(SmpcRegisters::PortDataRegister::pdr(data));
+            registers_.pdr2.upd(SmpcRegisters::PortDataRegister::pdr(data));
             break;
-        // case data_direction_register_1: ddr1_.ddr = data; break;
-        case data_direction_register_1: registers_.ddr1.ins(SmpcRegisters::DataDirectionRegister::ddr(data)); break;
-        case data_direction_register_2: registers_.ddr2.ins(SmpcRegisters::DataDirectionRegister::ddr(data)); break;
+        case data_direction_register_1: registers_.ddr1.upd(SmpcRegisters::DataDirectionRegister::ddr(data)); break;
+        case data_direction_register_2: registers_.ddr2.upd(SmpcRegisters::DataDirectionRegister::ddr(data)); break;
         case io_select_register: registers_.iosel = data; break;
         case external_latch_register: registers_.exle = data; break;
         default: break;

@@ -403,7 +403,7 @@ class Reg {
     void flp(const MaskedType& mskd) { data_ ^= mskd.bits_; }
 
     void operator/=(const MaskedType& mskd) { data_ = (data_ & ~mskd.mask_) | mskd.bits_; }
-    void ins(const MaskedType& mskd) { data_ = (data_ & ~mskd.mask_) | mskd.bits_; }
+    void upd(const MaskedType& mskd) { data_ = (data_ & ~mskd.mask_) | mskd.bits_; }
 
     // Extractors
     auto operator&(BitsType bits) const -> BitsType { return BitsType(data_ & bits.bits_); }

@@ -28,8 +28,11 @@
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/bitfield.h>
 #include <saturnin/src/bit_register.h>
+#include <saturnin/src/utilities.h>
 
 namespace saturnin::core {
+
+namespace uti = saturnin::utilities;
 
 /// \name SH2 interface registers addresses
 //@{
@@ -86,6 +89,16 @@ constexpr auto external_latch_register   = u32{0x2010007F};
 constexpr u8 input_registers_number{7};
 constexpr u8 output_registers_number{32};
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   SetTime
+///
+/// \brief  Defines OREG0 - STE bit values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class SetTime : bool {
+    not_set_time = false, ///< Not SETTIME after SMPC cold reset.
+    set_time     = true   ///< SETTIME is done after SMPC cold reset.
+};
 
 struct SmpcRegisters {
     struct CommandRegister {
@@ -157,6 +170,9 @@ struct SmpcRegisters {
         static constexpr MaskedType port_2_mode_0_byte    = MaskedType(p2md_mask, 0b11, p1md_pos);
 
         static constexpr MaskedType upper_nibble = MaskedType(upper_nibble_mask, 0xF, upper_nibble_pos);
+
+        GENERATE_MASKED_RANGE("SmpcRegisters::StatusRegister ", P1MD, p1md, p1md_mask, p1md_pos, 4);
+        GENERATE_MASKED_RANGE("SmpcRegisters::StatusRegister ", P2MD, p2md, p2md_mask, p2md_pos, 4);
     };
     using StatusRegisterType = Reg<u8, StatusRegister>;
     StatusRegisterType sr;
@@ -173,43 +189,100 @@ struct SmpcRegisters {
     StatusFlagType sf;
 
     // /////////////////////////////////////////////
-  
+
     struct InputRegister {
         using PosType     = Pos<u8, InputRegister>;
         using BitsType    = Bits<u8, InputRegister>;
         using MaskedType  = Masked<u8, InputRegister>;
         using ShiftedType = Shifted<u8, InputRegister>;
 
-        static constexpr PosType ireg0_status_acquisition_pos   = PosType(0); // Defines SMPC status acquisition (IREG0).
-        static constexpr PosType ireg0_br_pos                   = PosType(6); // Defines Intback break request (IREG0).
-        static constexpr PosType ireg0_cont_pos                 = PosType(7); // Defines Intback continue request (IREG0).
-        static constexpr PosType ireg1_ope_pos                  = PosType(1); // Defines if peripheral acquisition time is optimized (IREG1).
-        static constexpr PosType ireg1_pen_pos                  = PosType(3); // Defines if peripheral data is enabled (IREG1).
-        static constexpr PosType ireg1_p1md_pos                 = PosType(4); // Defines port 1 mode (IREG1).
-        static constexpr PosType ireg1_p2md_pos                 = PosType(6); // Defines port 2 mode (IREG1).
+        static constexpr PosType ireg0_status_acquisition_pos = PosType(0); // Defines SMPC status acquisition (IREG0).
+        static constexpr PosType ireg0_break_request_pos      = PosType(6); // Defines Intback break request (IREG0).
+        static constexpr PosType ireg0_continue_request_pos   = PosType(7); // Defines Intback continue request (IREG0).
+        static constexpr PosType ireg1_ope_pos  = PosType(1); // Defines if peripheral acquisition time is optimized (IREG1).
+        static constexpr PosType ireg1_pen_pos  = PosType(3); // Defines if peripheral data is enabled (IREG1).
+        static constexpr PosType ireg1_p1md_pos = PosType(4); // Defines port 1 mode (IREG1).
+        static constexpr PosType ireg1_p2md_pos = PosType(6); // Defines port 2 mode (IREG1).
 
-        static constexpr u8 p1md_mask         = 0x03;
-        static constexpr u8 p2md_mask         = 0x03;
+        static constexpr u8 p1md_mask             = 0x03;
+        static constexpr u8 p2md_mask             = 0x03;
+        static constexpr u8 continue_request_mask = 0x01;
 
-        static constexpr BitsType ireg0_status_acquisition  = BitsType(1, ireg0_status_acquisition_pos);
-        static constexpr BitsType ireg0_br                  = BitsType(1, ireg0_br_pos);
-        static constexpr BitsType ireg0_cont                = BitsType(1, ireg0_cont_pos);
-        static constexpr BitsType ireg1_ope                 = BitsType(1, ireg1_ope_pos);
-        static constexpr BitsType ireg1_pen                 = BitsType(1, ireg1_pen_pos);
+        static constexpr BitsType ireg0_status_acquisition = BitsType(1, ireg0_status_acquisition_pos);
+        static constexpr BitsType ireg0_break_request      = BitsType(1, ireg0_break_request_pos);
+        static constexpr BitsType ireg0_continue_request   = BitsType(1, ireg0_continue_request_pos);
+        static constexpr BitsType ireg1_ope                = BitsType(1, ireg1_ope_pos);
+        static constexpr BitsType ireg1_pen                = BitsType(1, ireg1_pen_pos);
 
-        static constexpr MaskedType port_1_mode_15_bytes  = MaskedType(p1md_mask, 0b00, ireg1_p1md_pos);
-        static constexpr MaskedType port_1_mode_255_bytes = MaskedType(p1md_mask, 0b01, ireg1_p1md_pos);
-        static constexpr MaskedType port_1_mode_reserved  = MaskedType(p1md_mask, 0b10, ireg1_p1md_pos);
-        static constexpr MaskedType port_1_mode_0_byte    = MaskedType(p1md_mask, 0b11, ireg1_p1md_pos);
+        static constexpr ShiftedType p1md_shft             = ShiftedType(p1md_mask, ireg1_p1md_pos);
+        static constexpr ShiftedType p2md_shft             = ShiftedType(p2md_mask, ireg1_p2md_pos);
+        static constexpr ShiftedType continue_request_shft = ShiftedType(continue_request_mask, ireg0_continue_request_pos);
 
-        static constexpr MaskedType port_2_mode_15_bytes  = MaskedType(p2md_mask, 0b00, ireg1_p2md_pos);
-        static constexpr MaskedType port_2_mode_255_bytes = MaskedType(p2md_mask, 0b01, ireg1_p2md_pos);
-        static constexpr MaskedType port_2_mode_reserved  = MaskedType(p2md_mask, 0b10, ireg1_p2md_pos);
-        static constexpr MaskedType port_2_mode_0_byte    = MaskedType(p2md_mask, 0b11, ireg1_p2md_pos);
-
+        GENERATE_MASKED_RANGE("SmpcRegisters::InputRegister ", P1MD, p1md, p1md_mask, ireg1_p1md_pos, 4);
+        GENERATE_MASKED_RANGE("SmpcRegisters::InputRegister ", P2MD, p2md, p2md_mask, ireg1_p2md_pos, 4);
     };
     using InputRegisterType = Reg<u8, InputRegister>;
     std::array<InputRegisterType, input_registers_number> ireg;
+
+    struct OutputRegister {
+        using PosType     = Pos<u8, OutputRegister>;
+        using BitsType    = Bits<u8, OutputRegister>;
+        using MaskedType  = Masked<u8, OutputRegister>;
+        using ShiftedType = Shifted<u8, OutputRegister>;
+
+        static constexpr PosType bit_0_pos      = PosType(0); // Bit 0 access.
+        static constexpr PosType bit_1_pos      = PosType(1); // Bit 1 access.
+        static constexpr PosType bit_2_pos      = PosType(2); // Bit 2 access.
+        static constexpr PosType bit_3_pos      = PosType(3); // Bit 3 access.
+        static constexpr PosType bit_4_pos      = PosType(4); // Bit 4 access.
+        static constexpr PosType bit_5_pos      = PosType(5); // Bit 5 access.
+        static constexpr PosType bit_6_pos      = PosType(6); // Bit 6 access.
+        static constexpr PosType bit_7_pos      = PosType(7); // Bit 7 access.
+        static constexpr PosType oreg0_resd_pos = PosType(6); // Defines Reset Status (OREG0).
+        static constexpr PosType oreg0_ste_pos  = PosType(7); // Defines Set Time (OREG0).
+
+        static constexpr BitsType bit_0      = BitsType(1, bit_0_pos);
+        static constexpr BitsType bit_1      = BitsType(1, bit_1_pos);
+        static constexpr BitsType bit_2      = BitsType(1, bit_2_pos);
+        static constexpr BitsType bit_3      = BitsType(1, bit_3_pos);
+        static constexpr BitsType bit_4      = BitsType(1, bit_4_pos);
+        static constexpr BitsType bit_5      = BitsType(1, bit_5_pos);
+        static constexpr BitsType bit_6      = BitsType(1, bit_6_pos);
+        static constexpr BitsType bit_7      = BitsType(1, bit_7_pos);
+        static constexpr BitsType oreg0_resd = BitsType(1, oreg0_resd_pos);
+        static constexpr BitsType oreg0_ste  = BitsType(1, oreg0_ste_pos);
+
+        static constexpr std::byte set_time_mask{0x01};
+        static constexpr std::byte sound_on_mask{0x01};
+        static constexpr std::byte soft_reset_mask{0x01};
+        static constexpr std::byte horizontal_res_mask{0x01};
+
+        static inline auto horizontalRes(const bool is_horizontal_res_352) -> MaskedType {
+            return MaskedType(std::to_integer<u8>(horizontal_res_mask << bit_6_pos.pos()),
+                              std::to_integer<u8>(std::byte{is_horizontal_res_352} << bit_6_pos.pos()));
+        }
+
+        static inline auto softResetAllowed(const bool is_soft_reset_allowed) -> MaskedType {
+            return MaskedType(std::to_integer<u8>(soft_reset_mask << bit_3_pos.pos()),
+                              std::to_integer<u8>(std::byte{is_soft_reset_allowed} << bit_3_pos.pos()));
+        }
+
+        static inline auto soundOn(const bool is_sound_on) -> MaskedType {
+            return MaskedType(std::to_integer<u8>(sound_on_mask << bit_0_pos.pos()),
+                              std::to_integer<u8>(std::byte{is_sound_on} << bit_0_pos.pos()));
+        }
+
+        static inline auto setTime(const SetTime set_time) -> MaskedType {
+            return MaskedType(std::to_integer<u8>(set_time_mask << oreg0_ste_pos.pos()),
+                              std::to_integer<u8>(std::byte{uti::toUnderlying(set_time)} << oreg0_ste_pos.pos()));
+        }
+
+        static constexpr PosType    comreg_pos     = PosType(0);
+        static constexpr u8         comreg_mask    = 0x1F;
+        static constexpr MaskedType interrupt_back = MaskedType(comreg_mask, 0x10, comreg_pos);
+    };
+    using OutputRegisterType = Reg<u8, OutputRegister>;
+    std::array<OutputRegisterType, output_registers_number> oreg;
 
     struct DataDirectionRegister {
         using PosType     = Pos<u8, DataDirectionRegister>;
@@ -276,7 +349,6 @@ struct SmpcRegisters {
 };
 
 struct SaturnPadData {
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \struct	SaturnStandardPad1stData
     ///
@@ -290,13 +362,13 @@ struct SaturnPadData {
         using PosType  = Pos<u8, SaturnStandardPad1stData>;
         using BitsType = Bits<u8, SaturnStandardPad1stData>;
 
-        static constexpr PosType button_b_pos  = PosType(0);
-        static constexpr PosType button_c_pos  = PosType(1);
-        static constexpr PosType button_a_pos       = PosType(2);
-        static constexpr PosType button_start_pos  = PosType(3);
-        static constexpr PosType direction_up_pos              = PosType(4);
-        static constexpr PosType direction_down_pos              = PosType(5);
-        static constexpr PosType direction_left_pos              = PosType(6);
+        static constexpr PosType button_b_pos        = PosType(0);
+        static constexpr PosType button_c_pos        = PosType(1);
+        static constexpr PosType button_a_pos        = PosType(2);
+        static constexpr PosType button_start_pos    = PosType(3);
+        static constexpr PosType direction_up_pos    = PosType(4);
+        static constexpr PosType direction_down_pos  = PosType(5);
+        static constexpr PosType direction_left_pos  = PosType(6);
         static constexpr PosType direction_right_pos = PosType(7);
 
         static constexpr BitsType button_b        = BitsType(1, button_b_pos);
@@ -399,20 +471,6 @@ enum class PeripheralDataLocation : bool { second_or_above_peripheral_data = fal
 // };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	StatusFlag
-///
-/// \brief	Status Flag (SF).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union StatusFlag {
-//     u8          raw; ///< Raw representation.
-//     BitField<0> sf;  ///< SF value.
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   IntbackContinueRequest
 ///
 /// \brief  Intback Continue Request values.
@@ -484,17 +542,6 @@ enum class ResetStatus : bool {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SetTime
-///
-/// \brief  Defines OREG0 - STE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class SetTime : bool {
-    not_set_time = false, ///< Not SETTIME after SMPC cold reset.
-    set_time     = true   ///< SETTIME is done after SMPC cold reset.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  OutputRegister
 ///
 /// \brief  Output Register (OREGx).
@@ -503,68 +550,18 @@ enum class SetTime : bool {
 /// \date   14/12/2019
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union OutputRegister {
-    u8          raw;                ///< Raw representation.
-    BitField<7> oreg0_set_time;     ///< Defines STE bit (OREG0).
-    BitField<6> oreg0_reset_status; ///< Defines RESD bit (OREG0).
-    BitField<7> bit_7;              ///< Bit 7 access.
-    BitField<6> bit_6;              ///< Bit 6 access.
-    BitField<5> bit_5;              ///< Bit 5 access.
-    BitField<4> bit_4;              ///< Bit 4 access.
-    BitField<3> bit_3;              ///< Bit 3 access.
-    BitField<2> bit_2;              ///< Bit 2 access.
-    BitField<1> bit_1;              ///< Bit 1 access.
-    BitField<0> bit_0;              ///< Bit 0 access.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ResetButtonStatus
-///
-/// \brief  Reset button status values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// enum class ButtonStatus : bool {
-//     pressed  = false, ///< Button is pressed.
-//     released = true   ///< Button is released.
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SaturnStandardPad1stData
-///
-/// \brief	First part of the standard Saturn PAD data.
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union SaturnStandardPad1stData {
-//     u8          raw;             ///< Raw representation.
-//     BitField<7> direction_right; ///< Right direction.
-//     BitField<6> direction_left;  ///< Left direction.
-//     BitField<5> direction_down;  ///< Down direction.
-//     BitField<4> direction_up;    ///< Up direction.
-//     BitField<3> button_start;    ///< Start button.
-//     BitField<2> button_a;        ///< A button.
-//     BitField<1> button_c;        ///< C button.
-//     BitField<0> button_b;        ///< B button.
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SaturnStandardPad2ndData
-///
-/// \brief	Second part of the standard Saturn PAD data.
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union SaturnStandardPad2ndData {
-//     u8          raw;                   ///< Raw representation.
-//     BitField<7> button_shoulder_right; ///< Right shoulder button.
-//     BitField<6> button_x;              ///< X button.
-//     BitField<5> button_y;              ///< Y button.
-//     BitField<4> button_z;              ///< Z button.
-//     BitField<3> button_shoulder_left;  ///< Left shoulder button.
+// union OutputRegister {
+//     u8          raw;                ///< Raw representation.
+//     BitField<7> oreg0_set_time;     ///< Defines STE bit (OREG0).
+//     BitField<6> oreg0_reset_status; ///< Defines RESD bit (OREG0).
+//     BitField<7> bit_7;              ///< Bit 7 access.
+//     BitField<6> bit_6;              ///< Bit 6 access.
+//     BitField<5> bit_5;              ///< Bit 5 access.
+//     BitField<4> bit_4;              ///< Bit 4 access.
+//     BitField<3> bit_3;              ///< Bit 3 access.
+//     BitField<2> bit_2;              ///< Bit 2 access.
+//     BitField<1> bit_1;              ///< Bit 1 access.
+//     BitField<0> bit_0;              ///< Bit 0 access.
 // };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

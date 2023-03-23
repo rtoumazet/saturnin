@@ -59,7 +59,7 @@ struct GuiConfiguration {
     bool show_debug_textures      = false;
     bool show_demo                = false;
     bool show_log                 = true;
-    bool show_benchmarks          = true;
+    bool show_benchmarks          = false;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
