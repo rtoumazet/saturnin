@@ -89,17 +89,6 @@ constexpr auto external_latch_register   = u32{0x2010007F};
 constexpr u8 input_registers_number{7};
 constexpr u8 output_registers_number{32};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SetTime
-///
-/// \brief  Defines OREG0 - STE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class SetTime : bool {
-    not_set_time = false, ///< Not SETTIME after SMPC cold reset.
-    set_time     = true   ///< SETTIME is done after SMPC cold reset.
-};
-
 struct SmpcRegisters {
     struct CommandRegister {
         using PosType    = Pos<u8, CommandRegister>;
@@ -197,29 +186,28 @@ struct SmpcRegisters {
         using ShiftedType = Shifted<u8, InputRegister>;
 
         static constexpr PosType ireg0_status_acquisition_pos = PosType(0); // Defines SMPC status acquisition (IREG0).
-        static constexpr PosType ireg0_break_request_pos      = PosType(6); // Defines Intback break request (IREG0).
-        static constexpr PosType ireg0_continue_request_pos   = PosType(7); // Defines Intback continue request (IREG0).
+        static constexpr PosType ireg0_br_pos                 = PosType(6); // Defines Intback break request (IREG0).
+        static constexpr PosType ireg0_cont_pos               = PosType(7); // Defines Intback continue request (IREG0).
         static constexpr PosType ireg1_ope_pos  = PosType(1); // Defines if peripheral acquisition time is optimized (IREG1).
         static constexpr PosType ireg1_pen_pos  = PosType(3); // Defines if peripheral data is enabled (IREG1).
         static constexpr PosType ireg1_p1md_pos = PosType(4); // Defines port 1 mode (IREG1).
         static constexpr PosType ireg1_p2md_pos = PosType(6); // Defines port 2 mode (IREG1).
 
-        static constexpr u8 p1md_mask             = 0x03;
-        static constexpr u8 p2md_mask             = 0x03;
+        static constexpr u8 port_mode_mask        = 0x03;
         static constexpr u8 continue_request_mask = 0x01;
 
-        static constexpr BitsType ireg0_status_acquisition = BitsType(1, ireg0_status_acquisition_pos);
-        static constexpr BitsType ireg0_break_request      = BitsType(1, ireg0_break_request_pos);
-        static constexpr BitsType ireg0_continue_request   = BitsType(1, ireg0_continue_request_pos);
-        static constexpr BitsType ireg1_ope                = BitsType(1, ireg1_ope_pos);
-        static constexpr BitsType ireg1_pen                = BitsType(1, ireg1_pen_pos);
+        static constexpr BitsType ireg0_status_acquisition         = BitsType(1, ireg0_status_acquisition_pos);
+        static constexpr BitsType ireg0_break_request              = BitsType(1, ireg0_br_pos);
+        static constexpr BitsType ireg0_continue_request           = BitsType(1, ireg0_cont_pos);
+        static constexpr BitsType ireg1_acquisition_time_optimized = BitsType(1, ireg1_ope_pos);
+        static constexpr BitsType ireg1_peripheral_data_returned   = BitsType(1, ireg1_pen_pos);
 
-        static constexpr ShiftedType p1md_shft             = ShiftedType(p1md_mask, ireg1_p1md_pos);
-        static constexpr ShiftedType p2md_shft             = ShiftedType(p2md_mask, ireg1_p2md_pos);
-        static constexpr ShiftedType continue_request_shft = ShiftedType(continue_request_mask, ireg0_continue_request_pos);
+        static constexpr ShiftedType p1md_shft             = ShiftedType(port_mode_mask, ireg1_p1md_pos);
+        static constexpr ShiftedType p2md_shft             = ShiftedType(port_mode_mask, ireg1_p2md_pos);
+        static constexpr ShiftedType continue_request_shft = ShiftedType(continue_request_mask, ireg0_cont_pos);
 
-        GENERATE_MASKED_RANGE("SmpcRegisters::InputRegister ", P1MD, p1md, p1md_mask, ireg1_p1md_pos, 4);
-        GENERATE_MASKED_RANGE("SmpcRegisters::InputRegister ", P2MD, p2md, p2md_mask, ireg1_p2md_pos, 4);
+        GENERATE_MASKED_RANGE("SmpcRegisters::InputRegister ", P1MD, p1md, port_mode_mask, ireg1_p1md_pos, 4);
+        GENERATE_MASKED_RANGE("SmpcRegisters::InputRegister ", P2MD, p2md, port_mode_mask, ireg1_p2md_pos, 4);
     };
     using InputRegisterType = Reg<u8, InputRegister>;
     std::array<InputRegisterType, input_registers_number> ireg;
@@ -241,16 +229,16 @@ struct SmpcRegisters {
         static constexpr PosType oreg0_resd_pos = PosType(6); // Defines Reset Status (OREG0).
         static constexpr PosType oreg0_ste_pos  = PosType(7); // Defines Set Time (OREG0).
 
-        static constexpr BitsType bit_0      = BitsType(1, bit_0_pos);
-        static constexpr BitsType bit_1      = BitsType(1, bit_1_pos);
-        static constexpr BitsType bit_2      = BitsType(1, bit_2_pos);
-        static constexpr BitsType bit_3      = BitsType(1, bit_3_pos);
-        static constexpr BitsType bit_4      = BitsType(1, bit_4_pos);
-        static constexpr BitsType bit_5      = BitsType(1, bit_5_pos);
-        static constexpr BitsType bit_6      = BitsType(1, bit_6_pos);
-        static constexpr BitsType bit_7      = BitsType(1, bit_7_pos);
-        static constexpr BitsType oreg0_resd = BitsType(1, oreg0_resd_pos);
-        static constexpr BitsType oreg0_ste  = BitsType(1, oreg0_ste_pos);
+        static constexpr BitsType bit_0               = BitsType(1, bit_0_pos);
+        static constexpr BitsType bit_1               = BitsType(1, bit_1_pos);
+        static constexpr BitsType bit_2               = BitsType(1, bit_2_pos);
+        static constexpr BitsType bit_3               = BitsType(1, bit_3_pos);
+        static constexpr BitsType bit_4               = BitsType(1, bit_4_pos);
+        static constexpr BitsType bit_5               = BitsType(1, bit_5_pos);
+        static constexpr BitsType bit_6               = BitsType(1, bit_6_pos);
+        static constexpr BitsType bit_7               = BitsType(1, bit_7_pos);
+        static constexpr BitsType oreg0_reset_disable = BitsType(1, oreg0_resd_pos);
+        static constexpr BitsType oreg0_set_time      = BitsType(1, oreg0_ste_pos);
 
         static constexpr std::byte set_time_mask{0x01};
         static constexpr std::byte sound_on_mask{0x01};
@@ -272,9 +260,9 @@ struct SmpcRegisters {
                               std::to_integer<u8>(std::byte{is_sound_on} << bit_0_pos.pos()));
         }
 
-        static inline auto setTime(const SetTime set_time) -> MaskedType {
+        static inline auto setTime(const bool is_time_set) -> MaskedType {
             return MaskedType(std::to_integer<u8>(set_time_mask << oreg0_ste_pos.pos()),
-                              std::to_integer<u8>(std::byte{uti::toUnderlying(set_time)} << oreg0_ste_pos.pos()));
+                              std::to_integer<u8>(std::byte{is_time_set} << oreg0_ste_pos.pos()));
         }
 
         static constexpr PosType    comreg_pos     = PosType(0);
@@ -409,213 +397,5 @@ struct SaturnPadData {
     };
     using SaturnStandardPad2ndDataType = Reg<u8, SaturnStandardPad2ndData>;
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PortMode
-///
-/// \brief  Port mode values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class PortMode : u8 {
-    mode_15_byte  = 0b00, ///< 15-byte mode.
-    mode_255_byte = 0b01, ///< 255-byte mode.
-    mode_reserved = 0b10, ///< Sega reserved.
-    mode_0_byte   = 0b11  ///< 0-byte mode.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ResetButtonStatus
-///
-/// \brief  Reset button status values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// enum class ResetButtonStatus : bool {
-//     button_off = false, ///< Reset button off.
-//     button_on  = true   ///< Reset buton on.
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PeripheralDataRemaining
-///
-/// \brief  Peripheral data remaining values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// enum class PeripheralDataRemaining : bool { no_remaining_peripheral_data = false, remaining_peripheral_data = true };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PeripheralDataLocation
-///
-/// \brief  SR - PDL bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class PeripheralDataLocation : bool { second_or_above_peripheral_data = false, first_peripheral_data = true };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	StatusRegister
-///
-/// \brief	Status Register (SR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union StatusRegister {
-//     u8             raw;                       ///< Raw representation.
-//     BitField<0, 2> port_1_mode;               ///< Defines port 1 mode (P1MD).
-//     BitField<2, 2> port_2_mode;               ///< Defines port 2 mode (P2MD).
-//     BitField<4>    reset_button_status;       ///< Defines RESB bit.
-//     BitField<5>    peripheral_data_remaining; ///< Defines PDE bit.
-//     BitField<6>    peripheral_data_location;  ///< Defines PDL bit.
-//     BitField<6>    bit_6;                     ///< Bit 6 access.
-//     BitField<7>    bit_7;                     ///< Bit 7 access.
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   IntbackContinueRequest
-///
-/// \brief  Intback Continue Request values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class IntbackContinueRequest : bool { not_requested = false, requested = true };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   IntbackBreakRequest
-///
-/// \brief  Intback Break Request values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class IntbackBreakRequest : bool { not_requested = false, requested = true };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SmpcStatusAcquisition
-///
-/// \brief  Status acquisition values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class SmpcStatusAcquisition : bool { status_not_returned = false, status_returned = true };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   AcquisitionTimeOptimization
-///
-/// \brief  Acquisition time optimizations values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class AcquisitionTimeOptimization : bool { optimized = false, not_optimized = true };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PeripheralDataEnable
-///
-/// \brief  Peripheral data enable values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class PeripheralDataEnable : bool { peripheral_data_not_returned = false, peripheral_data_returned = true };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	InputRegister
-///
-/// \brief	Input Register (IREGx).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union InputRegister {
-//     u8             raw;                                 ///< Raw representation.
-//     BitField<7>    ireg0_continue_request;              ///< Defines Intback continue request (IREG0).
-//     BitField<6>    ireg0_break_request;                 ///< Defines Intback break request (IREG0).
-//     BitField<0>    ireg0_status_acquisition;            ///< Defines SMPC status acquisition (IREG0).
-//     BitField<6, 2> ireg1_port_2_mode;                   ///< Defines port 2 mode (IREG1).
-//     BitField<4, 2> ireg1_port_1_mode;                   ///< Defines port 1 mode (IREG1).
-//     BitField<3>    ireg1_peripheral_data_enable;        ///< Defines if peripheral data is enabled (IREG1).
-//     BitField<1>    ireg1_acquisition_time_optimization; ///< Defines if peripheral acquisition time is optimized (IREG1).
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ResetStatus
-///
-/// \brief  Defines OREG0 - RESD bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ResetStatus : bool {
-    enabled  = false, ///< Reset enabled.
-    disabled = true   ///< Reset disabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  OutputRegister
-///
-/// \brief  Output Register (OREGx).
-///
-/// \author Runik
-/// \date   14/12/2019
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union OutputRegister {
-//     u8          raw;                ///< Raw representation.
-//     BitField<7> oreg0_set_time;     ///< Defines STE bit (OREG0).
-//     BitField<6> oreg0_reset_status; ///< Defines RESD bit (OREG0).
-//     BitField<7> bit_7;              ///< Bit 7 access.
-//     BitField<6> bit_6;              ///< Bit 6 access.
-//     BitField<5> bit_5;              ///< Bit 5 access.
-//     BitField<4> bit_4;              ///< Bit 4 access.
-//     BitField<3> bit_3;              ///< Bit 3 access.
-//     BitField<2> bit_2;              ///< Bit 2 access.
-//     BitField<1> bit_1;              ///< Bit 1 access.
-//     BitField<0> bit_0;              ///< Bit 0 access.
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DataDirectionRegister
-///
-/// \brief	Data Direction Register (DDRx).
-///
-/// \author	Runik
-/// \date	21/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union DataDirectionRegister {
-//     u8             raw; ///< Raw representation.
-//     BitField<0, 6> ddr; ///< Used bits in the register.
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PortDataRegister
-///
-/// \brief  Port Data Register (PDRx).
-///
-/// \author Runik
-/// \date   14/12/2019
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union PortDataRegister {
-//     u8             raw; ///< Raw representation.
-//     BitField<0, 6> pdr; ///< Used bits in the register.
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PeripheralPortMode
-///
-/// \brief  IOSEL values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// enum class PeripheralPortMode : bool {
-//     smpc_control_mode = false, ///< SMPC control mode. (initial)
-//     sh2_direct_mode   = true,  ///< SH2 direct mode
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	IOSelect
-///
-/// \brief	I/O Select (IOSEL).
-///
-/// \author	Runik
-/// \date	21/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union IOSelect {
-//     u8          raw;                    ///< Raw representation.
-//     BitField<1> peripheral_port_2_mode; ///< IOSEL2 bit.
-//     BitField<0> peripheral_port_1_mode; ///< IOSEL1 bit.
-// };
 
 } // namespace saturnin::core

@@ -32,6 +32,19 @@ namespace saturnin::core {
 
 namespace uti = saturnin::utilities;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum   PortMode
+///
+/// \brief  Port mode values.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class PortMode : u8 {
+    mode_15_byte  = 0b00, ///< 15-byte mode.
+    mode_255_byte = 0b01, ///< 255-byte mode.
+    mode_reserved = 0b10, ///< Sega reserved.
+    mode_0_byte   = 0b11  ///< 0-byte mode.
+};
+
 using MapKeyboardLayout    = std::map<PeripheralKey, const std::string>;
 const auto keyboard_layout = MapKeyboardLayout{{PeripheralKey::key_space, "space"},
                                                {PeripheralKey::key_apostrophe, "'"},
@@ -540,7 +553,7 @@ void Smpc::executeIntback() {
     registers_.oreg[31] = {};
 
     auto is_status_returned          = registers_.ireg[0].is(SmpcRegisters::InputRegister::ireg0_status_acquisition);
-    auto is_peripheral_data_returned = registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_pen);
+    auto is_peripheral_data_returned = registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_peripheral_data_returned);
 
     if (is_status_returned) {
         getStatus();
@@ -570,7 +583,7 @@ void Smpc::getStatus() {
     registers_.sr.clr(SmpcRegisters::StatusRegister::bit_7);
     registers_.sr.set(SmpcRegisters::StatusRegister::bit_6);
 
-    if (registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_pen)) {
+    if (registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_peripheral_data_returned)) {
         registers_.sr.set(SmpcRegisters::StatusRegister::pde);
     } else {
         registers_.sr.clr(SmpcRegisters::StatusRegister::pde);
@@ -580,14 +593,13 @@ void Smpc::getStatus() {
         registers_.oreg[i] = {};
     }
     if (is_soft_reset_allowed_) {
-        registers_.oreg[0].clr(SmpcRegisters::OutputRegister::oreg0_resd);
+        registers_.oreg[0].clr(SmpcRegisters::OutputRegister::oreg0_reset_disable);
     } else {
-        registers_.oreg[0].set(SmpcRegisters::OutputRegister::oreg0_resd);
+        registers_.oreg[0].set(SmpcRegisters::OutputRegister::oreg0_reset_disable);
     }
 
-    const bool is_time_set    = modules_.config()->readValue(core::AccessKeys::cfg_global_set_time);
-    const auto set_time_value = is_time_set ? SetTime::set_time : SetTime::not_set_time;
-    registers_.oreg[0].upd(SmpcRegisters::OutputRegister::setTime(set_time_value));
+    const bool is_time_set = modules_.config()->readValue(core::AccessKeys::cfg_global_set_time);
+    registers_.oreg[0].upd(SmpcRegisters::OutputRegister::setTime(is_time_set));
 
     auto rtc           = getRtcTime();
     registers_.oreg[1] = rtc.getUpperYear();

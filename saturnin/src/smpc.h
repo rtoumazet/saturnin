@@ -647,23 +647,9 @@ class Smpc {
 
     EmulatorModules modules_;
 
-    //@{
-    // Internal registers
-    // CommandRegister                                     comreg_;
-    SmpcRegisters registers_;
-    // StatusRegister                                      sr_;
-    // StatusFlag                                          sf_;
-    // std::array<InputRegister, input_registers_number>   ireg_;
-    // std::array<OutputRegister, output_registers_number> oreg_;
-    // PortDataRegister                                    pdr1_;
-    // PortDataRegister                                    pdr2_;
-    // DataDirectionRegister ddr1_;
-    // DataDirectionRegister ddr2_;
-    // IOSelect                                            iosel_;
-    //  ExternalLatchEnable                                 exle_;
-    //@}
+    SmpcRegisters registers_; ///< Internal registers
 
-    SystemClock clock_{SystemClock::not_set};
+    SystemClock clock_{SystemClock::not_set}; ///< The system clock.
 
     SaturnPeripheralMapping saturn_mapping_; ///< Saturn paripheral mapping
     StvPeripheralMapping    stv_mapping_;    ///< ST-V peripheral mapping
@@ -677,8 +663,7 @@ class Smpc {
     bool is_horizontal_res_352{false};  ///< Horizontal resolution (320/352)
     bool is_cd_on_{false};              ///< CD status
 
-    bool is_intback_processing_{false}; ///< Intback status
-    // PeripheralDataLocation                  next_peripheral_return_;
+    bool            is_intback_processing_{false};             ///< Intback status
     PortStatus      port_1_status_{PortStatus::not_connected}; ///< The port 1 status
     PortStatus      port_2_status_{PortStatus::not_connected}; ///< The port 2 status
     std::vector<u8> full_peripheral_data_table_;               ///< The full peripheral data table
