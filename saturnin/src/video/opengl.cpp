@@ -243,12 +243,7 @@ void Opengl::initializeShaders() {
                 out_color = frg_color;
             }
             out_color.rgb += color_offset.rgb;
-            if(out_color.r > 1.0) out_color.r = 1.0;
-            if(out_color.g > 1.0) out_color.g = 1.0;
-            if(out_color.b > 1.0) out_color.b = 1.0;
-            if(out_color.r < 0.0) out_color.r = 0.0;
-            if(out_color.g < 0.0) out_color.g = 0.0;
-            if(out_color.b < 0.0) out_color.b = 0.0;
+            out_color.rgb = clamp(out_color.rgb, vec3(0.0), vec3(1.0));
 
             gl_FragColor = out_color;
    
@@ -281,13 +276,7 @@ void Opengl::initializeShaders() {
             }
             out_color.rgb += frg_grd_color.rgb;
             out_color.rgb += color_offset.rgb;
-
-            if(out_color.r > 1.0) out_color.r = 1.0;
-            if(out_color.g > 1.0) out_color.g = 1.0;
-            if(out_color.b > 1.0) out_color.b = 1.0;
-            if(out_color.r < 0.0) out_color.r = 0.0;
-            if(out_color.g < 0.0) out_color.g = 0.0;
-            if(out_color.b < 0.0) out_color.b = 0.0;
+            out_color.rgb = clamp(out_color.rgb, vec3(0.0), vec3(1.0));
 
         } 
     )");
