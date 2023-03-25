@@ -771,16 +771,15 @@ void Sh2::powerOnReset() {
     constexpr auto pc_start_vector = u32{0x00000008};
     constexpr auto sp_start_vector = u32{0x0000000C};
 
-    r_[sp_register_index]          = modules_.memory()->read<u32>(sp_start_vector);
-    vbr_                           = 0;
-    sr_.raw                        = {};
-    constexpr auto i_default_value = u8{0b1111};
-    sr_.i                          = i_default_value;
-    gbr_                           = 0;
-    mach_                          = 0;
-    macl_                          = 0;
-    pr_                            = 0;
-    pc_                            = modules_.memory()->read<u32>(pc_start_vector);
+    r_[sp_register_index] = modules_.memory()->read<u32>(sp_start_vector);
+    vbr_                  = 0;
+    registers_.sr         = {};
+    registers_.sr.set(Sh2Registers::StatusRegister::i_default_value);
+    gbr_  = 0;
+    mach_ = 0;
+    macl_ = 0;
+    pr_   = 0;
+    pc_   = modules_.memory()->read<u32>(pc_start_vector);
 
     for (u8 i = 0; i < general_registers_number; ++i) {
         r_[i] = 0;
@@ -902,7 +901,7 @@ void Sh2::start64bitsDivision() {
 void Sh2::runInterruptController() {
     if (!is_interrupted_) {
         if (!pending_interrupts_.empty()) {
-            const auto  interrupt_mask = sr_.i;
+            const auto  interrupt_mask = (registers_.sr >> Sh2Registers::StatusRegister::i_shft);
             const auto& interrupt      = pending_interrupts_.front();
             if ((interrupt.level > interrupt_mask) || interrupt == is::nmi) {
                 Log::debug(Logger::sh2,
@@ -918,12 +917,13 @@ void Sh2::runInterruptController() {
                 constexpr auto sr_stack_offset = u8{4};
                 constexpr auto pc_stack_offset = u8{8};
 
-                modules_.memory()->write(r_[sp_register_index] - sr_stack_offset, sr_.raw);
+                modules_.memory()->write(r_[sp_register_index] - sr_stack_offset, registers_.sr.data());
                 modules_.memory()->write(r_[sp_register_index] - pc_stack_offset, pc_);
 
-                r_[sp_register_index] = r_[sp_register_index] - displacement_8; // Stack pointer is updated.
+                r_[sp_register_index] = r_[sp_register_index] - 8; // Stack pointer is updated.
 
-                sr_.i = interrupt.level;
+                // sr_.i = interrupt.level;
+                registers_.sr.upd(Sh2Registers::StatusRegister::interrupt_mask(interrupt.level));
 
                 if (interrupt != is::nmi) {
                     is_interrupted_    = true; // Entering interrupt mode.
@@ -1181,8 +1181,7 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                     modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
                     modules_.memory()->write<u32>(destination + displacement_4,
                                                   modules_.memory()->read<u32>(source + displacement_4));
-                    modules_.memory()->write<u32>(destination + displacement_8,
-                                                  modules_.memory()->read<u32>(source + displacement_8));
+                    modules_.memory()->write<u32>(destination + 8, modules_.memory()->read<u32>(source + 8));
                     modules_.memory()->write<u32>(destination + displacement_12,
                                                   modules_.memory()->read<u32>(source + displacement_12));
                     transfer_size = transfer_byte_size_16;
@@ -1305,7 +1304,7 @@ auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
         case mach: return mach_; break;
         case vbr: return vbr_; break;
         case gbr: return gbr_; break;
-        case sr: return sr_.raw; break;
+        case sr: return registers_.sr.data(); break;
         case r0: return r_[index_0]; break;
         case r1: return r_[index_1]; break;
         case r2: return r_[index_2]; break;

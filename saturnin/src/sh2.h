@@ -916,14 +916,15 @@ class Sh2 {
 
     /// \name Processor registers
     //@{
-    u32                                       pc_;    ///< Program Counter
-    u32                                       pr_;    ///< Procedure Register
-    u32                                       macl_;  ///< Multiply and ACummulate register Low (0x48)
-    u32                                       mach_;  ///< Multiply and ACummulate register High (0x4C)
-    u32                                       vbr_;   ///< Vector Base Register (0x50)
-    u32                                       gbr_;   ///< Global Base Register (0x54)
-    StatusRegister                            sr_{0}; ///< Status Register (0x58)
-    std::array<u32, general_registers_number> r_;     ///< General registers, last one is the stack pointer (SP) (0x5C)
+    Sh2Registers registers_;
+    u32          pc_;   ///< Program Counter
+    u32          pr_;   ///< Procedure Register
+    u32          macl_; ///< Multiply and ACummulate register Low (0x48)
+    u32          mach_; ///< Multiply and ACummulate register High (0x4C)
+    u32          vbr_;  ///< Vector Base Register (0x50)
+    u32          gbr_;  ///< Global Base Register (0x54)
+    // StatusRegister                            sr_{0}; ///< Status Register (0x58)
+    std::array<u32, general_registers_number> r_; ///< General registers, last one is the stack pointer (SP) (0x5C)
     //@}
 
     u8  cycles_elapsed_; ///< CPU cycles used by the last instruction.

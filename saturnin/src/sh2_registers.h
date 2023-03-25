@@ -105,6 +105,40 @@ constexpr auto refresh_timer_counter                             = u32{0xFFFFFFF
 constexpr auto refresh_time_constant_register                    = u32{0xFFFFFFF8};
 //@}
 
+struct Sh2Registers {
+    struct StatusRegister {
+        using PosType     = Pos<u32, StatusRegister>;
+        using BitsType    = Bits<u32, StatusRegister>;
+        using MaskedType  = Masked<u32, StatusRegister>;
+        using ShiftedType = Shifted<u32, StatusRegister>;
+
+        static constexpr PosType t_pos = PosType(0);
+        static constexpr PosType s_pos = PosType(1);
+        static constexpr PosType i_pos = PosType(4);
+        static constexpr PosType q_pos = PosType(8);
+        static constexpr PosType m_pos = PosType(9);
+
+        static constexpr BitsType t = BitsType(1, t_pos);
+        static constexpr BitsType s = BitsType(1, s_pos);
+        static constexpr BitsType q = BitsType(1, q_pos);
+        static constexpr BitsType m = BitsType(1, m_pos);
+
+        static constexpr u32         one_bit_mask = 0x01;
+        static constexpr ShiftedType t_shft       = ShiftedType(one_bit_mask, t_pos);
+        static constexpr ShiftedType s_shft       = ShiftedType(one_bit_mask, s_pos);
+        static constexpr ShiftedType q_shft       = ShiftedType(one_bit_mask, q_pos);
+        static constexpr ShiftedType m_shft       = ShiftedType(one_bit_mask, m_pos);
+
+        static constexpr u32        i_mask          = 0xF;
+        static constexpr MaskedType i_default_value = MaskedType(i_mask, 0b1111, i_pos);
+
+        static constexpr ShiftedType i_shft = ShiftedType(i_mask, i_pos);
+        GENERATE_MASKED_RANGE("Sh2Registers::StatusRegister ", INTERRUPT_MASK, interrupt_mask, i_mask, i_pos, i_mask);
+    };
+    using StatusRegisterType = Reg<u32, StatusRegister>;
+    StatusRegisterType sr;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union  StatusRegister
 ///

@@ -139,10 +139,10 @@ void add(Sh2& s) {
 
 void addi(Sh2& s) {
     // Rn + imm -> Rn
-    if ((x0nn(s) & sign_bit_8_mask) == 0) {
-        s.r_[xn00(s)] += (bitmask_000000FF & static_cast<u32>(x0nn(s))); // #imm positive, 32bits sign extension
+    if ((x0nn(s) & 0x80) == 0) {
+        s.r_[xn00(s)] += (0xFF & static_cast<u32>(x0nn(s))); // #imm positive, 32bits sign extension
     } else {
-        s.r_[xn00(s)] += (bitmask_FFFFFF00 | static_cast<u32>(x0nn(s))); // #imm negative, 32bits sign extension
+        s.r_[xn00(s)] += (0xFFFFFF00 | static_cast<u32>(x0nn(s))); // #imm negative, 32bits sign extension
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -153,11 +153,11 @@ void addc(Sh2& s) {
 
     const auto tmp1 = static_cast<s32>(s.r_[xn00(s)] + s.r_[x0n0(s)]);
     const auto tmp0 = static_cast<s32>(s.r_[xn00(s)]);
-    s.r_[xn00(s)]   = tmp1 + static_cast<u32>(static_cast<bool>(s.sr_.t));
+    s.r_[xn00(s)]   = tmp1 + (s.registers_.sr >> Sh2Registers::StatusRegister::t_shft);
 
-    (tmp0 > tmp1) ? s.sr_.t = true : s.sr_.t = false;
+    (tmp0 > tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
-    if (tmp1 > static_cast<s32>(s.r_[xn00(s)])) { s.sr_.t = true; }
+    if (tmp1 > static_cast<s32>(s.r_[xn00(s)])) { s.registers_.sr.set(Sh2Registers::StatusRegister::t); }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -165,19 +165,19 @@ void addc(Sh2& s) {
 void addv(Sh2& s) {
     // Rn + Rm -> Rn, overflow -> T
 
-    const auto dest = s32{(s.r_[xn00(s)] >= 0) ? 0 : 1};
-    auto       src  = s32{(s.r_[x0n0(s)] >= 0) ? 0 : 1};
+    const auto dest = s32{(static_cast<s32>(s.r_[xn00(s)]) >= 0) ? 0 : 1};
+    auto       src  = s32{(static_cast<s32>(s.r_[x0n0(s)]) >= 0) ? 0 : 1};
 
     src += dest;
     s.r_[xn00(s)] += s.r_[x0n0(s)];
 
-    auto ans = s32{(s.r_[xn00(s)] >= 0) ? 0 : 1};
+    auto ans = s32{(static_cast<s32>(s.r_[xn00(s)]) >= 0) ? 0 : 1};
 
     ans += dest;
     if (src == 0 || src == 2) {
-        (ans == 1) ? s.sr_.t = true : s.sr_.t = false;
+        (ans == 1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
     } else {
-        s.sr_.t = false;
+        s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -192,7 +192,7 @@ void and_op(Sh2& s) {
 
 void andi(Sh2& s) {
     // R0 & imm -> R0
-    s.r_[0] &= (bitmask_000000FF & x0nn(s));
+    s.r_[0] &= (0xFF & x0nn(s));
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -201,7 +201,7 @@ void andm(Sh2& s) {
     //(R0 + GBR) & imm -> (R0 + GBR)
 
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
-    temp &= (bitmask_000000FF & x0nn(s));
+    temp &= (0xFF & x0nn(s));
     s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -209,15 +209,14 @@ void andm(Sh2& s) {
 
 void bf(Sh2& s) {
     // If T = 0, disp*2 + PC -> PC
-    // Si T = 1, nop
+    // If T = 1, nop
 
-    // if (static_cast<bool>(s.sr_.t) == 0) {
-    if (s.sr_.t == 0) {
+    if (!s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
         auto disp = u32{};
-        if ((x0nn(s) & sign_bit_8_mask) == 0) {
-            disp = (bitmask_000000FF & x0nn(s));
+        if ((x0nn(s) & 0x80) == 0) {
+            disp = (0xFF & x0nn(s));
         } else {
-            disp = (bitmask_FFFFFF00 | x0nn(s));
+            disp = (0xFFFFFF00 | x0nn(s));
         }
         s.pc_             = s.pc_ + (disp << 1) + 4;
         s.cycles_elapsed_ = 3;
@@ -232,12 +231,12 @@ void bfs(Sh2& s) {
     // If T=1, nop
     // Modified using SH4 manual
 
-    if (s.sr_.t == 0) {
+    if (!s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
         auto disp = u32{};
         if ((x0nn(s) & sign_bit_8_mask) == 0) {
-            disp = (bitmask_000000FF & x0nn(s));
+            disp = (0xFF & x0nn(s));
         } else {
-            disp = (bitmask_FFFFFF00 | x0nn(s));
+            disp = (0xFFFFFF00 | x0nn(s));
         }
         const auto saved_pc = u32{s.pc_};
         delaySlot(s, s.pc_ + 2);
@@ -255,9 +254,9 @@ void bra(Sh2& s) {
 
     auto disp = u32{};
     if ((xnnn(s) & sign_bit_12_mask) == 0) {
-        disp = (bitmask_00000FFF & xnnn(s));
+        disp = (0x00000FFF & xnnn(s));
     } else {
-        disp = (bitmask_FFFFF000 | xnnn(s));
+        disp = (0xFFFFF000 | xnnn(s));
     }
     const auto saved_pc = u32{s.pc_};
     delaySlot(s, s.pc_ + 2);
@@ -283,9 +282,9 @@ void bsr(Sh2& s) {
 
     auto disp = u32{};
     if ((xnnn(s) & sign_bit_12_mask) == 0) {
-        disp = (bitmask_00000FFF & xnnn(s));
+        disp = (0x00000FFF & xnnn(s));
     } else {
-        disp = (bitmask_FFFFF000 | xnnn(s));
+        disp = (0xFFFFF000 | xnnn(s));
     }
     s.pr_             = s.pc_ + 4;
     const auto old_pc = u32{s.pc_};
@@ -316,12 +315,12 @@ void bt(Sh2& s) {
     // If T=1, disp*2 + PC -> PC;
     // If T=0=, nop
 
-    if (s.sr_.t == 1) {
+    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
         u32 disp{};
         if ((x0nn(s) & sign_bit_8_mask) == 0) {
-            disp = (bitmask_000000FF & x0nn(s));
+            disp = (0xFF & x0nn(s));
         } else {
-            disp = (bitmask_FFFFFF00 | x0nn(s));
+            disp = (0xFFFFFF00 | x0nn(s));
         }
         s.pc_             = s.pc_ + (disp << 1) + 4;
         s.cycles_elapsed_ = 3;
@@ -335,12 +334,12 @@ void bts(Sh2& s) {
     // If T=1, disp*2 + PC -> PC
     // If T=0, nop
     // Modified using SH4 manual
-    if (s.sr_.t == 1) {
+    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
         auto disp = u32{};
         if ((x0nn(s) & sign_bit_8_mask) == 0) {
-            disp = (bitmask_000000FF & x0nn(s));
+            disp = (0xFF & x0nn(s));
         } else {
-            disp = (bitmask_FFFFFF00 | x0nn(s));
+            disp = (0xFFFFFF00 | x0nn(s));
         }
         const auto old_pc = u32{s.pc_};
         delaySlot(s, s.pc_ + 2);
@@ -363,7 +362,7 @@ void clrmac(Sh2& s) {
 
 void clrt(Sh2& s) {
     // 0 -> T
-    s.sr_.t = false;
+    s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -371,7 +370,8 @@ void clrt(Sh2& s) {
 
 void cmpeq(Sh2& s) {
     // If Rn = Rm, T=1
-    (s.r_[xn00(s)] == s.r_[x0n0(s)]) ? s.sr_.t = true : s.sr_.t = false;
+    (s.r_[xn00(s)] == s.r_[x0n0(s)]) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -379,7 +379,8 @@ void cmpeq(Sh2& s) {
 
 void cmpge(Sh2& s) {
     // If Rn >= Rm with sign, T=1
-    (static_cast<s32>(s.r_[xn00(s)]) >= static_cast<s32>(s.r_[x0n0(s)])) ? s.sr_.t = true : s.sr_.t = false;
+    (static_cast<s32>(s.r_[xn00(s)]) >= static_cast<s32>(s.r_[x0n0(s)])) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                                                                         : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -387,7 +388,8 @@ void cmpge(Sh2& s) {
 
 void cmpgt(Sh2& s) {
     // If Rn > Rm with sign, T=1
-    (static_cast<s32>(s.r_[xn00(s)]) > static_cast<s32>(s.r_[x0n0(s)])) ? s.sr_.t = true : s.sr_.t = false;
+    (static_cast<s32>(s.r_[xn00(s)]) > static_cast<s32>(s.r_[x0n0(s)])) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                                                                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -395,7 +397,8 @@ void cmpgt(Sh2& s) {
 
 void cmphi(Sh2& s) {
     // If Rn > Rm without sign, T=1
-    (s.r_[xn00(s)] > s.r_[x0n0(s)]) ? s.sr_.t = true : s.sr_.t = false;
+    (s.r_[xn00(s)] > s.r_[x0n0(s)]) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                                    : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -403,7 +406,8 @@ void cmphi(Sh2& s) {
 
 void cmphs(Sh2& s) {
     // If Rn > Rm without sign, T=1
-    (s.r_[xn00(s)] >= s.r_[x0n0(s)]) ? s.sr_.t = true : s.sr_.t = false;
+    (s.r_[xn00(s)] >= s.r_[x0n0(s)]) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -411,7 +415,8 @@ void cmphs(Sh2& s) {
 
 void cmppl(Sh2& s) {
     // If Rn > 0, T=1
-    (static_cast<s32>(s.r_[xn00(s)]) > 0) ? s.sr_.t = true : s.sr_.t = false;
+    (static_cast<s32>(s.r_[xn00(s)]) > 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                                          : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -419,7 +424,8 @@ void cmppl(Sh2& s) {
 
 void cmppz(Sh2& s) {
     // If Rn >= 0, T=1
-    (static_cast<s32>(s.r_[xn00(s)]) >= 0) ? s.sr_.t = true : s.sr_.t = false;
+    (static_cast<s32>(s.r_[xn00(s)]) >= 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                                           : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -431,24 +437,26 @@ void cmpstr(Sh2& s) {
     auto rm = u32{s.r_[xn00(s)]};
     auto rn = u32{s.r_[x0n0(s)]};
 
-    ((rm & bitmask_FF000000) == (rn & bitmask_FF000000) || (rm & bitmask_00FF0000) == (rn & bitmask_00FF0000)
-     || (rm & bitmask_0000FF00) == (rn & bitmask_0000FF00) || (rm & bitmask_000000FF) == (rn & bitmask_000000FF))
-        ? s.sr_.t = true
-        : s.sr_.t = false;
+    ((rm & 0xFF000000) == (rn & 0xFF000000) || (rm & 0x00FF0000) == (rn & 0x00FF0000)
+     || (rm & bitmask_0000FF00) == (rn & bitmask_0000FF00) || (rm & 0xFF) == (rn & 0xFF))
+        ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+        : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
 void cmpim(Sh2& s) {
-    // If R0 = imm, T=1
+    // ex: If R0 = imm, T=1
+
     auto imm = u32{};
     if ((x0nn(s) & sign_bit_8_mask) == 0) {
-        imm = (bitmask_000000FF & x0nn(s));
+        imm = (0xFF & x0nn(s));
     } else {
-        imm = (bitmask_FFFFFF00 | x0nn(s));
+        imm = (0xFFFFFF00 | x0nn(s));
     }
-    (s.r_[0] == imm) ? s.sr_.t = true : s.sr_.t = false;
+    (s.r_[0] == imm) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -456,9 +464,13 @@ void cmpim(Sh2& s) {
 
 void div0s(Sh2& s) {
     // Rn MSB -> Q, Rm MSB -> M, M^Q -> T
-    ((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? s.sr_.q = false : s.sr_.q = true;
-    ((s.r_[x0n0(s)] & sign_bit_32_mask) == 0) ? s.sr_.m = false : s.sr_.m = true;
-    (s.sr_.m == s.sr_.q) ? s.sr_.t = false : s.sr_.t = true;
+    ((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::q)
+                                              : s.registers_.sr.set(Sh2Registers::StatusRegister::q);
+    ((s.r_[x0n0(s)] & sign_bit_32_mask) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::m)
+                                              : s.registers_.sr.set(Sh2Registers::StatusRegister::m);
+    ((s.registers_.sr >> Sh2Registers::StatusRegister::m_shft) == (s.registers_.sr >> Sh2Registers::StatusRegister::q_shft))
+        ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
+        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -466,9 +478,9 @@ void div0s(Sh2& s) {
 
 void div0u(Sh2& s) {
     // 0 -> M/Q/T
-    s.sr_.m = false;
-    s.sr_.q = false;
-    s.sr_.t = false;
+    s.registers_.sr.clr(Sh2Registers::StatusRegister::m);
+    s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+    s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -479,22 +491,25 @@ void div1(Sh2& s) {
     auto tmp0 = u32{};
     auto tmp1 = bool{};
 
-    const auto old_q = static_cast<bool>(s.sr_.q);
-    ((sign_bit_32_mask & s.r_[xn00(s)]) != 0) ? s.sr_.q = true : s.sr_.q = false;
+    const auto old_q = s.registers_.sr.any(Sh2Registers::StatusRegister::q);
+    ((sign_bit_32_mask & s.r_[xn00(s)]) != 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
+                                              : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
 
     s.r_[xn00(s)] <<= 1;
-    s.r_[xn00(s)] |= static_cast<u32>(static_cast<bool>(s.sr_.t));
+    s.r_[xn00(s)] |= (s.registers_.sr >> Sh2Registers::StatusRegister::t_shft);
 
     if (old_q) {
-        if (static_cast<bool>(s.sr_.m)) {
+        if (s.registers_.sr.any(Sh2Registers::StatusRegister::m)) {
             tmp0 = s.r_[xn00(s)];
             s.r_[xn00(s)] -= s.r_[x0n0(s)];
             tmp1 = (s.r_[xn00(s)] > tmp0);
 
-            if (static_cast<bool>(s.sr_.q)) {
-                tmp1 ? s.sr_.q = true : s.sr_.q = false;
+            if (s.registers_.sr.any(Sh2Registers::StatusRegister::q)) {
+                tmp1 ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
+                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
             } else {
-                (!tmp1) ? s.sr_.q = true : s.sr_.q = false;
+                (!tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
+                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
             }
 
         } else {
@@ -502,22 +517,26 @@ void div1(Sh2& s) {
             s.r_[xn00(s)] += s.r_[x0n0(s)];
             tmp1 = s.r_[xn00(s)] < tmp0;
 
-            if (static_cast<bool>(s.sr_.q)) {
-                (!tmp1) ? s.sr_.q = true : s.sr_.q = false;
+            if (s.registers_.sr.any(Sh2Registers::StatusRegister::q)) {
+                (!tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
+                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
             } else {
-                tmp1 ? s.sr_.q = true : s.sr_.q = false;
+                tmp1 ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
+                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
             }
         }
     } else {
-        if (static_cast<bool>(s.sr_.m)) {
+        if (s.registers_.sr.any(Sh2Registers::StatusRegister::m)) {
             tmp0 = s.r_[xn00(s)];
             s.r_[xn00(s)] += s.r_[x0n0(s)];
             tmp1 = (s.r_[xn00(s)]) < tmp0;
 
-            if (static_cast<bool>(s.sr_.q)) {
-                tmp1 ? s.sr_.q = true : s.sr_.q = false;
+            if (s.registers_.sr.any(Sh2Registers::StatusRegister::q)) {
+                tmp1 ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
+                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
             } else {
-                (!tmp1) ? s.sr_.q = true : s.sr_.q = false;
+                (!tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
+                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
             }
 
         } else {
@@ -525,15 +544,19 @@ void div1(Sh2& s) {
             s.r_[xn00(s)] -= s.r_[x0n0(s)];
             tmp1 = (s.r_[xn00(s)]) > tmp0;
 
-            if (static_cast<bool>(s.sr_.q)) {
-                (!tmp1) ? s.sr_.q = true : s.sr_.q = false;
+            if (s.registers_.sr.any(Sh2Registers::StatusRegister::q)) {
+                (!tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
+                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
             } else {
-                tmp1 ? s.sr_.q = true : s.sr_.q = false;
+                tmp1 ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
+                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
             }
         }
     }
 
-    (s.sr_.q == s.sr_.m) ? s.sr_.t = true : s.sr_.t = false;
+    ((s.registers_.sr >> Sh2Registers::StatusRegister::m_shft) == (s.registers_.sr >> Sh2Registers::StatusRegister::q_shft))
+        ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+        : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -544,7 +567,7 @@ void dmuls(Sh2& s) {
 
     // Arranged using SH4 manual
     const auto result = static_cast<s64>(static_cast<s32>(s.r_[x0n0(s)])) * static_cast<s32>(s.r_[xn00(s)]);
-    s.mach_           = result >> displacement_32;
+    s.mach_           = result >> 32;
     s.macl_           = static_cast<u32>(result);
 
     s.pc_ += 2;
@@ -558,7 +581,7 @@ void dmulu(Sh2& s) {
 
     // Arranged using SH4 manual
     const auto result = u64{static_cast<u64>(s.r_[x0n0(s)]) * static_cast<u64>(s.r_[xn00(s)])};
-    s.mach_           = static_cast<u32>(result >> displacement_32);
+    s.mach_           = static_cast<u32>(result >> 32);
     s.macl_           = static_cast<u32>(result & u32_max);
 
     s.pc_ += 2;
@@ -570,7 +593,8 @@ void dt(Sh2& s) {
     // Si R[n] = 0, T=1
     // Sinon T=0
     --s.r_[xn00(s)];
-    (s.r_[xn00(s)] == 0) ? s.sr_.t = true : s.sr_.t = false;
+    (s.r_[xn00(s)] == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                         : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -579,10 +603,10 @@ void dt(Sh2& s) {
 void extsb(Sh2& s) {
     // Rm sign extension (byte) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
-    if ((s.r_[x0n0(s)] & sign_bit_8_mask) == 0) {
-        s.r_[xn00(s)] &= bitmask_000000FF;
+    if ((s.r_[x0n0(s)] & 0x80) == 0) {
+        s.r_[xn00(s)] &= 0xFF;
     } else {
-        s.r_[xn00(s)] |= bitmask_FFFFFF00;
+        s.r_[xn00(s)] |= 0xFFFFFF00;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -591,10 +615,10 @@ void extsb(Sh2& s) {
 void extsw(Sh2& s) {
     // Rm sign extension (word) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
-    if ((s.r_[x0n0(s)] & sign_bit_16_mask) == 0) {
-        s.r_[xn00(s)] &= bitmask_0000FFFF;
+    if ((s.r_[x0n0(s)] & 0x8000) == 0) {
+        s.r_[xn00(s)] &= 0x0000FFFF;
     } else {
-        s.r_[xn00(s)] |= bitmask_FFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -603,7 +627,7 @@ void extsw(Sh2& s) {
 void extub(Sh2& s) {
     // Rm is 0 extended (byte) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
-    s.r_[xn00(s)] &= bitmask_000000FF;
+    s.r_[xn00(s)] &= 0xFF;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -612,7 +636,7 @@ void extub(Sh2& s) {
 void extuw(Sh2& s) {
     // Rm is 0 extended (word) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
-    s.r_[xn00(s)] &= bitmask_0000FFFF;
+    s.r_[xn00(s)] &= 0x0000FFFF;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -645,7 +669,7 @@ void jsr(Sh2& s) {
 
 void ldcsr(Sh2& s) {
     // Rm -> SR
-    s.sr_.raw = static_cast<u16>(s.r_[xn00(s)] & sr_bitmask);
+    s.registers_.sr = (s.r_[xn00(s)] & sr_bitmask);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -669,7 +693,7 @@ void ldcvbr(Sh2& s) {
 
 void ldcmsr(Sh2& s) {
     // (Rm) -> SR, Rm + 4 -> Rm
-    s.sr_.raw = static_cast<u16>(s.modules_.memory()->read<u32>(s.r_[xn00(s)]) & sr_bitmask);
+    s.registers_.sr = static_cast<u16>(s.modules_.memory()->read<u32>(s.r_[xn00(s)]) & sr_bitmask);
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -757,15 +781,15 @@ void mac(Sh2& s) {
     const auto mul = s64{src_m * src_n};
 
     auto mac = s64{s.mach_};
-    mac <<= displacement_32;
+    mac <<= 32;
     mac |= s.macl_;
     mac += mul;
 
-    if (s.sr_.s == 1) {
+    if (s.registers_.sr.any(Sh2Registers::StatusRegister::s)) {
         if (mac < u47_min_64_extended) { mac = u47_min_64_extended; }
-        if (mac > sign_bit_48_mask) { mac = u47_max; }
+        if (mac > 0x800000000000) { mac = u47_max; }
     }
-    s.mach_ = static_cast<u32>(mac >> displacement_32);
+    s.mach_ = static_cast<u32>(mac >> 32);
     s.macl_ = static_cast<u32>(mac & u32_max);
 
     s.pc_ += 2;
@@ -783,16 +807,16 @@ void macw(Sh2& s) {
 
     const auto mul = s64{src_m * src_n};
     auto       mac = s64{};
-    if (s.sr_.s == 0) {
+    if (!s.registers_.sr.any(Sh2Registers::StatusRegister::s)) {
         mac = s.mach_;
-        mac <<= displacement_32;
+        mac <<= 32;
         mac |= s.macl_;
         mac += mul;
-        s.mach_ = static_cast<u32>(mac >> displacement_32);
+        s.mach_ = static_cast<u32>(mac >> 32);
         s.macl_ = static_cast<u32>(mac & u32_max);
     } else {
-        if ((s.macl_ & sign_bit_32_mask) > 0) {
-            mac = static_cast<s64>(s.macl_ | bitmask_FFFFFFFF00000000);
+        if ((s.macl_ & 0x80000000) > 0) {
+            mac = static_cast<s64>(s.macl_ | 0xFFFFFFFF00000000);
         } else {
             mac = static_cast<s64>(s.macl_ & u32_max);
         }
@@ -802,9 +826,9 @@ void macw(Sh2& s) {
             s.macl_ = u31_max;
         } else if (mac < u31_min_64_extended) {
             s.mach_ |= 0x00000001;
-            s.macl_ = sign_bit_32_mask;
+            s.macl_ = 0x80000000;
         } else {
-            s.mach_ &= bitmask_FFFFFFFE;
+            s.mach_ &= 0xFFFFFFFE;
             s.macl_ = static_cast<u32>(mac & u32_max);
         }
     }
@@ -848,10 +872,10 @@ void movls(Sh2& s) {
 void movbl(Sh2& s) {
     // (Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u8>(s.r_[x0n0(s)]);
-    if ((s.r_[xn00(s)] & sign_bit_8_mask) == 0) {
-        s.r_[xn00(s)] &= bitmask_000000FF;
+    if ((s.r_[xn00(s)] & 0x80) == 0) {
+        s.r_[xn00(s)] &= 0xFF;
     } else {
-        s.r_[xn00(s)] |= bitmask_FFFFFF00;
+        s.r_[xn00(s)] |= 0xFFFFFF00;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -860,10 +884,10 @@ void movbl(Sh2& s) {
 void movwl(Sh2& s) {
     // (Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.r_[x0n0(s)]);
-    if ((s.r_[xn00(s)] & sign_bit_16_mask) == 0) {
-        s.r_[xn00(s)] &= bitmask_0000FFFF;
+    if ((s.r_[xn00(s)] & 0x8000) == 0) {
+        s.r_[xn00(s)] &= 0x0000FFFF;
     } else {
-        s.r_[xn00(s)] |= bitmask_FFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -907,10 +931,10 @@ void movlm(Sh2& s) {
 void movbp(Sh2& s) {
     // (Rm) -> sign extension -> Rn, Rm + 1 -> Rm
     s.r_[xn00(s)] = s.modules_.memory()->read<u8>(s.r_[x0n0(s)]);
-    if ((s.r_[xn00(s)] & sign_bit_8_mask) == 0) {
-        s.r_[xn00(s)] &= bitmask_000000FF;
+    if ((s.r_[xn00(s)] & 0x80) == 0) {
+        s.r_[xn00(s)] &= 0xFF;
     } else {
-        s.r_[xn00(s)] |= bitmask_FFFFFF00;
+        s.r_[xn00(s)] |= 0xFFFFFF00;
     }
     if (xn00(s) != x0n0(s)) { ++s.r_[x0n0(s)]; }
     s.pc_ += 2;
@@ -920,10 +944,10 @@ void movbp(Sh2& s) {
 void movwp(Sh2& s) {
     // (Rm) -> sign extension -> Rn, Rm + 2 -> Rm
     s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.r_[x0n0(s)]);
-    if ((s.r_[xn00(s)] & sign_bit_16_mask) == 0) {
-        s.r_[xn00(s)] &= bitmask_0000FFFF;
+    if ((s.r_[xn00(s)] & 0x8000) == 0) {
+        s.r_[xn00(s)] &= 0x0000FFFF;
     } else {
-        s.r_[xn00(s)] |= bitmask_FFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000;
     }
     if (xn00(s) != x0n0(s)) { s.r_[x0n0(s)] += 2; }
     s.pc_ += 2;
@@ -965,10 +989,10 @@ void movls0(Sh2& s) {
 void movbl0(Sh2& s) {
     // (R0 + Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u8>(s.r_[x0n0(s)] + s.r_[0]);
-    if ((s.r_[xn00(s)] & sign_bit_8_mask) == 0) {
-        s.r_[xn00(s)] &= bitmask_000000FF;
+    if ((s.r_[xn00(s)] & 0x80) == 0) {
+        s.r_[xn00(s)] &= 0xFF;
     } else {
-        s.r_[xn00(s)] |= bitmask_FFFFFF00;
+        s.r_[xn00(s)] |= 0xFFFFFF00;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -977,10 +1001,10 @@ void movbl0(Sh2& s) {
 void movwl0(Sh2& s) {
     // (R0 + Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.r_[x0n0(s)] + s.r_[0]);
-    if ((s.r_[xn00(s)] & sign_bit_16_mask) == 0) {
-        s.r_[xn00(s)] &= bitmask_0000FFFF;
+    if ((s.r_[xn00(s)] & 0x8000) == 0) {
+        s.r_[xn00(s)] &= 0x0000FFFF;
     } else {
-        s.r_[xn00(s)] |= bitmask_FFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -996,10 +1020,10 @@ void movll0(Sh2& s) {
 
 void movi(Sh2& s) {
     // imm -> sign extension -> Rn
-    if ((x0nn(s) & sign_bit_8_mask) == 0) {
-        s.r_[xn00(s)] = (bitmask_000000FF & x0nn(s));
+    if ((x0nn(s) & 0x80) == 0) {
+        s.r_[xn00(s)] = (0xFF & x0nn(s));
     } else {
-        s.r_[xn00(s)] = (bitmask_FFFFFF00 | x0nn(s));
+        s.r_[xn00(s)] = (0xFFFFFF00 | x0nn(s));
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1007,12 +1031,12 @@ void movi(Sh2& s) {
 
 void movwi(Sh2& s) {
     //(disp * 2 + PC) -> sign extension -> Rn
-    auto disp     = u32{(bitmask_000000FF & x0nn(s))};
+    auto disp     = u32{(0xFFu & x0nn(s))};
     s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.pc_ + (disp << 1) + 4); // + 4 added
-    if ((s.r_[xn00(s)] & sign_bit_16_mask) == 0) {
-        s.r_[xn00(s)] &= bitmask_0000FFFF;
+    if ((s.r_[xn00(s)] & 0x8000) == 0) {
+        s.r_[xn00(s)] &= 0x0000FFFF;
     } else {
-        s.r_[xn00(s)] |= bitmask_FFFF0000;
+        s.r_[xn00(s)] |= 0xFFFF0000;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1020,8 +1044,8 @@ void movwi(Sh2& s) {
 
 void movli(Sh2& s) {
     //(disp * 4 + PC) -> Rn
-    auto disp     = u32{(bitmask_000000FF & x0nn(s))};
-    s.r_[xn00(s)] = s.modules_.memory()->read<u32>((s.pc_ & bitmask_FFFFFFFC) + (disp << 2) + 4); // + 4 added
+    auto disp     = u32{(0xFFu & x0nn(s))};
+    s.r_[xn00(s)] = s.modules_.memory()->read<u32>((s.pc_ & 0xFFFFFFFC) + (disp << 2) + 4); // + 4 added
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1029,12 +1053,12 @@ void movli(Sh2& s) {
 
 void movblg(Sh2& s) {
     //(disp + GBR) -> sign extension -> R0
-    auto disp = u32{(bitmask_000000FF & x0nn(s))};
+    auto disp = u32{(0xFFu & x0nn(s))};
     s.r_[0]   = s.modules_.memory()->read<u8>(s.gbr_ + disp);
-    if ((s.r_[0] & sign_bit_8_mask) == 0) {
-        s.r_[0] &= bitmask_000000FF;
+    if ((s.r_[0] & 0x80) == 0) {
+        s.r_[0] &= 0xFF;
     } else {
-        s.r_[0] |= bitmask_FFFFFF00;
+        s.r_[0] |= 0xFFFFFF00;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1042,12 +1066,12 @@ void movblg(Sh2& s) {
 
 void movwlg(Sh2& s) {
     // (disp *2 + BGR) -> sign extension -> R0
-    auto disp = u32{(bitmask_000000FF & x0nn(s))};
+    auto disp = u32{(0xFFu & x0nn(s))};
     s.r_[0]   = s.modules_.memory()->read<u16>(s.gbr_ + (disp << 1));
-    if ((s.r_[0] & sign_bit_16_mask) == 0) {
-        s.r_[0] &= bitmask_0000FFFF;
+    if ((s.r_[0] & 0x8000) == 0) {
+        s.r_[0] &= 0x0000FFFF;
     } else {
-        s.r_[0] |= bitmask_FFFF0000;
+        s.r_[0] |= 0xFFFF0000;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1055,7 +1079,7 @@ void movwlg(Sh2& s) {
 
 void movllg(Sh2& s) {
     // (disp *4 + GBR) -> R0
-    auto disp = u32{(bitmask_000000FF & x0nn(s))};
+    auto disp = u32{(0xFFu & x0nn(s))};
     s.r_[0]   = s.modules_.memory()->read<u32>(s.gbr_ + (disp << 2));
 
     s.pc_ += 2;
@@ -1064,7 +1088,7 @@ void movllg(Sh2& s) {
 
 void movbsg(Sh2& s) {
     // R0 -> (disp + GBR)
-    auto disp = u32{(bitmask_000000FF & x0nn(s))};
+    auto disp = u32{(0xFFu & x0nn(s))};
     s.modules_.memory()->write<u8>(s.gbr_ + disp, static_cast<u8>(s.r_[0]));
 
     s.pc_ += 2;
@@ -1073,7 +1097,7 @@ void movbsg(Sh2& s) {
 
 void movwsg(Sh2& s) {
     // R0 -> (disp *2 + GBR)
-    auto disp = u32{(bitmask_000000FF & x0nn(s))};
+    auto disp = u32{(0xFFu & x0nn(s))};
     s.modules_.memory()->write<u16>(s.gbr_ + (disp << 1), static_cast<u16>(s.r_[0]));
 
     s.pc_ += 2;
@@ -1082,7 +1106,7 @@ void movwsg(Sh2& s) {
 
 void movlsg(Sh2& s) {
     // R0 -> (disp *4 + GBR)
-    auto disp = u32{(bitmask_000000FF & x0nn(s))};
+    auto disp = u32{(0xFFu & x0nn(s))};
     s.modules_.memory()->write<u32>(s.gbr_ + (disp << 2), s.r_[0]);
 
     s.pc_ += 2;
@@ -1091,7 +1115,7 @@ void movlsg(Sh2& s) {
 
 inline void movbs4(Sh2& s) {
     // R0 -> (disp + Rn)
-    auto disp = u32{(bitmask_0000000F & x00n(s))};
+    auto disp = u32{(0xFu & x00n(s))};
     s.modules_.memory()->write<u8>(s.r_[x0n0(s)] + disp, static_cast<u8>(s.r_[0]));
 
     s.pc_ += 2;
@@ -1100,7 +1124,7 @@ inline void movbs4(Sh2& s) {
 
 void movws4(Sh2& s) {
     // R0 -> (disp *2 + Rn)
-    auto disp = u32{(bitmask_0000000F & x00n(s))};
+    auto disp = u32{(0xFu & x00n(s))};
     s.modules_.memory()->write<u16>(s.r_[x0n0(s)] + (disp << 1), static_cast<u16>(s.r_[0]));
 
     s.pc_ += 2;
@@ -1109,7 +1133,7 @@ void movws4(Sh2& s) {
 
 void movls4(Sh2& s) {
     // Rm -> (disp *4 + Rn)
-    auto disp = u32{(bitmask_0000000F & x00n(s))};
+    auto disp = u32{(0xFu & x00n(s))};
     s.modules_.memory()->write<u32>(s.r_[xn00(s)] + (disp << 2), s.r_[x0n0(s)]);
 
     s.pc_ += 2;
@@ -1118,12 +1142,12 @@ void movls4(Sh2& s) {
 
 void movbl4(Sh2& s) {
     // (disp + Rm)-> sign extension ->R0
-    auto disp = u32{bitmask_0000000F & x00n(s)};
+    auto disp = u32{0xFu & x00n(s)};
     s.r_[0]   = s.modules_.memory()->read<u8>(s.r_[x0n0(s)] + disp);
-    if ((s.r_[0] & sign_bit_8_mask) == 0) {
-        s.r_[0] &= bitmask_000000FF;
+    if ((s.r_[0] & 0x80) == 0) {
+        s.r_[0] &= 0xFF;
     } else {
-        s.r_[0] |= bitmask_FFFFFF00;
+        s.r_[0] |= 0xFFFFFF00;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1131,12 +1155,12 @@ void movbl4(Sh2& s) {
 
 void movwl4(Sh2& s) {
     // (disp *2 + Rm)-> sign extension ->R0
-    auto disp = u32{bitmask_0000000F & x00n(s)};
+    auto disp = u32{0xFu & x00n(s)};
     s.r_[0]   = s.modules_.memory()->read<u16>(s.r_[x0n0(s)] + (disp << 1));
-    if ((s.r_[0] & sign_bit_16_mask) == 0) {
-        s.r_[0] &= bitmask_0000FFFF;
+    if ((s.r_[0] & 0x8000) == 0) {
+        s.r_[0] &= 0x0000FFFF;
     } else {
-        s.r_[0] |= bitmask_FFFF0000;
+        s.r_[0] |= 0xFFFF0000;
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1144,7 +1168,7 @@ void movwl4(Sh2& s) {
 
 void movll4(Sh2& s) {
     // (disp *4 +Rm) -> Rn
-    auto disp     = u32{bitmask_0000000F & x00n(s)};
+    auto disp     = u32{0xFu & x00n(s)};
     s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[x0n0(s)] + (disp << 2));
 
     s.pc_ += 2;
@@ -1153,8 +1177,8 @@ void movll4(Sh2& s) {
 
 void mova(Sh2& s) {
     // disp *4 + PC -> R0
-    auto disp = u32{bitmask_000000FF & x0nn(s)};
-    s.r_[0]   = (s.pc_ & bitmask_FFFFFFFC) + (disp << 2) + 4; // + 4 added
+    auto disp = u32{0xFFu & x0nn(s)};
+    s.r_[0]   = (s.pc_ & 0xFFFFFFFC) + (disp << 2) + 4; // + 4 added
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1162,7 +1186,7 @@ void mova(Sh2& s) {
 
 void movt(Sh2& s) {
     // T -> Rn
-    s.r_[xn00(s)] = static_cast<u32>(static_cast<bool>(s.sr_.t));
+    s.r_[xn00(s)] = s.registers_.sr >> Sh2Registers::StatusRegister::t_shft;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1202,9 +1226,9 @@ void neg(Sh2& s) {
 
 void negc(Sh2& s) {
     auto temp     = u32{0 - s.r_[x0n0(s)]};
-    s.r_[xn00(s)] = temp - static_cast<u32>(static_cast<bool>(s.sr_.t));
-    (0 < temp) ? s.sr_.t = true : s.sr_.t = false;
-    if (temp < s.r_[xn00(s)]) { s.sr_.t = true; }
+    s.r_[xn00(s)] = temp - (s.registers_.sr >> Sh2Registers::StatusRegister::t_shft);
+    (0 < temp) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    if (temp < s.r_[xn00(s)]) { s.registers_.sr.set(Sh2Registers::StatusRegister::t); }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -1233,7 +1257,7 @@ void or_op(Sh2& s) {
 
 void ori(Sh2& s) {
     // R0 | imm -> R0
-    s.r_[0] |= (bitmask_000000FF & x0nn(s));
+    s.r_[0] |= (0xFF & x0nn(s));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1242,7 +1266,7 @@ void ori(Sh2& s) {
 void orm(Sh2& s) {
     // (R0 + GBR) | imm -> (R0 + GBR)
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
-    temp |= (bitmask_000000FF & x0nn(s));
+    temp |= (0xFF & x0nn(s));
     s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
 
     s.pc_ += 2;
@@ -1251,14 +1275,14 @@ void orm(Sh2& s) {
 
 void rotcl(Sh2& s) {
     // T <- Rn <- T
-    auto temp = s32{((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? 0 : 1};
+    auto temp = s32{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1};
     s.r_[xn00(s)] <<= 1;
-    if (s.sr_.t == 1) {
+    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
         s.r_[xn00(s)] |= 0x00000001;
     } else {
-        s.r_[xn00(s)] &= bitmask_FFFFFFFE;
+        s.r_[xn00(s)] &= 0xFFFFFFFE;
     }
-    (temp == 1) ? s.sr_.t = true : s.sr_.t = false;
+    (temp == 1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1268,12 +1292,12 @@ void rotcr(Sh2& s) {
     // T -> Rn -> T
     auto temp = s32{((s.r_[xn00(s)] & 0x00000001) == 0) ? 0 : 1};
     s.r_[xn00(s)] >>= 1;
-    if (s.sr_.t == 1) {
-        s.r_[xn00(s)] |= sign_bit_32_mask;
+    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+        s.r_[xn00(s)] |= 0x80000000;
     } else {
         s.r_[xn00(s)] &= u31_max;
     }
-    (temp == 1) ? s.sr_.t = true : s.sr_.t = false;
+    (temp == 1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1281,9 +1305,10 @@ void rotcr(Sh2& s) {
 
 void rotl(Sh2& s) {
     // T <- Rn <- MSB
-    ((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? s.sr_.t = false : s.sr_.t = true;
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
+                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
     s.r_[xn00(s)] <<= 1;
-    if (s.sr_.t == 1) {
+    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
         s.r_[xn00(s)] |= 0x00000001;
     } else {
         s.r_[xn00(s)] &= 0xFFFFFFFE;
@@ -1294,10 +1319,11 @@ void rotl(Sh2& s) {
 
 void rotr(Sh2& s) {
     // LSB -> Rn -> T
-    ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.sr_.t = false : s.sr_.t = true;
+    ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
+                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
     s.r_[xn00(s)] >>= 1;
-    if (s.sr_.t == 1) {
-        s.r_[xn00(s)] |= sign_bit_32_mask;
+    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+        s.r_[xn00(s)] |= 0x80000000;
     } else {
         s.r_[xn00(s)] &= u31_max;
     }
@@ -1311,7 +1337,7 @@ void rte(Sh2& s) {
     delaySlot(s, s.pc_ + 2);
     s.pc_ = s.modules_.memory()->read<u32>(s.r_[sp_register_index]);
     s.r_[sp_register_index] += 4;
-    s.sr_.raw = static_cast<u16>(s.modules_.memory()->read<u16>(s.r_[sp_register_index] + 2) & sr_bitmask);
+    s.registers_.sr = static_cast<u16>(s.modules_.memory()->read<u16>(s.r_[sp_register_index] + 2) & sr_bitmask);
     s.r_[sp_register_index] += 4;
     s.cycles_elapsed_ = 4;
 
@@ -1368,7 +1394,7 @@ void rts(Sh2& s) {
 
 void sett(Sh2& s) {
     // 1 -> T
-    s.sr_.t = true;
+    s.registers_.sr.set(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1376,7 +1402,8 @@ void sett(Sh2& s) {
 
 void shal(Sh2& s) {
     // T <- Rn <- 0
-    ((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? s.sr_.t = false : s.sr_.t = true;
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
+                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
     s.r_[xn00(s)] <<= 1;
 
     s.pc_ += 2;
@@ -1385,11 +1412,12 @@ void shal(Sh2& s) {
 
 void shar(Sh2& s) {
     // MSB -> Rn -> T
-    ((s.r_[xn00(s)] & 0x0000001) == 0) ? s.sr_.t = false : s.sr_.t = true;
-    auto temp = s32{((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? 0 : 1};
+    ((s.r_[xn00(s)] & 0x0000001) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
+                                       : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
+    auto temp = s32{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1};
     s.r_[xn00(s)] >>= 1;
     if (temp == 1) {
-        s.r_[xn00(s)] |= sign_bit_32_mask;
+        s.r_[xn00(s)] |= 0x80000000;
     } else {
         s.r_[xn00(s)] &= u31_max;
     }
@@ -1399,7 +1427,8 @@ void shar(Sh2& s) {
 
 void shll(Sh2& s) {
     // T <- Rn <- 0
-    ((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? s.sr_.t = false : s.sr_.t = true;
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
+                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
     s.r_[xn00(s)] <<= 1;
 
     s.pc_ += 2;
@@ -1416,7 +1445,7 @@ void shll2(Sh2& s) {
 
 void shll8(Sh2& s) {
     // Rn << 8 -> Rn
-    s.r_[xn00(s)] <<= displacement_8;
+    s.r_[xn00(s)] <<= 8;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1424,7 +1453,7 @@ void shll8(Sh2& s) {
 
 void shll16(Sh2& s) {
     // Rn << 16 -> Rn
-    s.r_[xn00(s)] <<= displacement_16;
+    s.r_[xn00(s)] <<= 16;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1432,7 +1461,8 @@ void shll16(Sh2& s) {
 
 void shlr(Sh2& s) {
     // 0 -> Rn -> T
-    ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.sr_.t = false : s.sr_.t = true;
+    ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
+                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
     s.r_[xn00(s)] >>= 1;
     s.r_[xn00(s)] &= u31_max;
 
@@ -1451,8 +1481,8 @@ void shlr2(Sh2& s) {
 
 void shlr8(Sh2& s) {
     // Rn >> 8 -> Rn
-    s.r_[xn00(s)] >>= displacement_8;
-    s.r_[xn00(s)] &= bitmask_00FFFFFF;
+    s.r_[xn00(s)] >>= 8;
+    s.r_[xn00(s)] &= 0x00FFFFFF;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1460,8 +1490,8 @@ void shlr8(Sh2& s) {
 
 void shlr16(Sh2& s) {
     // Rn >> 16 -> Rn
-    s.r_[xn00(s)] >>= displacement_16;
-    s.r_[xn00(s)] &= bitmask_0000FFFF;
+    s.r_[xn00(s)] >>= 16;
+    s.r_[xn00(s)] &= 0x0000FFFF;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1484,7 +1514,7 @@ void sleep(Sh2& s) {
 
 void stcsr(Sh2& s) {
     // SR -> Rn
-    s.r_[xn00(s)] = s.sr_.raw;
+    s.r_[xn00(s)] = s.registers_.sr.data();
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1509,7 +1539,7 @@ void stcvbr(Sh2& s) {
 void stcmsr(Sh2& s) {
     // Rn-4 -> Rn, SR -> (Rn)
     s.r_[xn00(s)] -= 4;
-    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.sr_.raw);
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.registers_.sr.data());
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -1596,9 +1626,9 @@ void subc(Sh2& s) {
     // Rn - Rm - T -> Rn, Carry -> T
     const auto tmp1 = u32{s.r_[xn00(s)] - s.r_[x0n0(s)]};
     const auto tmp0 = u32{s.r_[xn00(s)]};
-    s.r_[xn00(s)]   = tmp1 - static_cast<u32>(static_cast<bool>(s.sr_.t));
-    (tmp0 < tmp1) ? s.sr_.t = true : s.sr_.t = false;
-    if (tmp1 < s.r_[xn00(s)]) { s.sr_.t = true; }
+    s.r_[xn00(s)]   = tmp1 - (s.registers_.sr >> Sh2Registers::StatusRegister::t_shft);
+    (tmp0 < tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    if (tmp1 < s.r_[xn00(s)]) { s.registers_.sr.set(Sh2Registers::StatusRegister::t); }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -1613,9 +1643,9 @@ void subv(Sh2& s) {
     ans += dest;
 
     if (src == 1) {
-        (ans == 1) ? s.sr_.t = true : s.sr_.t = false;
+        (ans == 1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
     } else {
-        s.sr_.t = false;
+        s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1623,9 +1653,9 @@ void subv(Sh2& s) {
 
 void swapb(Sh2& s) {
     // Rm -> bytes swap -> Rn
-    const auto temp0 = u32{s.r_[x0n0(s)] & bitmask_FFFF0000};
-    const auto temp1 = u32{(s.r_[x0n0(s)] & bitmask_000000FF) << displacement_8};
-    s.r_[xn00(s)]    = (s.r_[x0n0(s)] >> displacement_8) & bitmask_000000FF;
+    const auto temp0 = u32{s.r_[x0n0(s)] & 0xFFFF0000};
+    const auto temp1 = u32{(s.r_[x0n0(s)] & 0xFF) << 8};
+    s.r_[xn00(s)]    = (s.r_[x0n0(s)] >> 8) & 0xFF;
     s.r_[xn00(s)]    = s.r_[xn00(s)] | temp1 | temp0;
 
     s.pc_ += 2;
@@ -1634,8 +1664,8 @@ void swapb(Sh2& s) {
 
 void swapw(Sh2& s) {
     // Rm -> words swap -> Rn
-    const auto temp = u32{(s.r_[x0n0(s)] >> displacement_16) & bitmask_0000FFFF};
-    s.r_[xn00(s)]   = s.r_[x0n0(s)] << displacement_16;
+    const auto temp = u32{(s.r_[x0n0(s)] >> 16) & 0x0000FFFF};
+    s.r_[xn00(s)]   = s.r_[x0n0(s)] << 16;
     s.r_[xn00(s)] |= temp;
 
     s.pc_ += 2;
@@ -1645,8 +1675,8 @@ void swapw(Sh2& s) {
 void tas(Sh2& s) {
     // If (Rn) = 0, 1 -> T, 1 -> MSB of (Rn)
     auto temp = u32{s.modules_.memory()->read<u8>(s.r_[xn00(s)])};
-    (temp == 0) ? s.sr_.t = true : s.sr_.t = false;
-    temp |= sign_bit_8_mask;
+    (temp == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    temp |= 0x80;
     s.modules_.memory()->write<u8>(s.r_[xn00(s)], static_cast<u8>(temp));
 
     s.pc_ += 2;
@@ -1655,9 +1685,9 @@ void tas(Sh2& s) {
 
 void trapa(Sh2& s) {
     // PC/SR -> stack, (imm*4 + VBR) -> PC
-    const auto imm = u32{(bitmask_000000FF & x0nn(s))};
+    const auto imm = u32{(0xFFu & x0nn(s))};
     s.r_[sp_register_index] -= 4;
-    s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.sr_.raw);
+    s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.registers_.sr.data());
     s.r_[sp_register_index] -= 4;
     s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.pc_ + 2);
 
@@ -1667,7 +1697,8 @@ void trapa(Sh2& s) {
 
 void tst(Sh2& s) {
     // Rn & Rm, if result = 0, 1 -> T
-    ((s.r_[xn00(s)] & s.r_[x0n0(s)]) == 0) ? s.sr_.t = true : s.sr_.t = false;
+    ((s.r_[xn00(s)] & s.r_[x0n0(s)]) == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                                           : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1675,7 +1706,8 @@ void tst(Sh2& s) {
 
 void tsti(Sh2& s) {
     // R0 & imm, if result is 0, 1 -> T
-    ((s.r_[0] & (bitmask_000000FF & x0nn(s))) == 0) ? s.sr_.t = true : s.sr_.t = false;
+    ((s.r_[0] & (0xFF & x0nn(s))) == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
+                                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1684,8 +1716,8 @@ void tsti(Sh2& s) {
 void tstm(Sh2& s) {
     // (R0 + GBR) & imm, if result is 0, 1 -> T
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
-    temp &= (bitmask_000000FF & x0nn(s));
-    (temp == 0) ? s.sr_.t = true : s.sr_.t = false;
+    temp &= (0xFF & x0nn(s));
+    (temp == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -1701,7 +1733,7 @@ void xor_op(Sh2& s) {
 
 void xori(Sh2& s) {
     // R0 ^imm -> R0
-    s.r_[0] ^= (bitmask_000000FF & x0nn(s));
+    s.r_[0] ^= (0xFF & x0nn(s));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1710,7 +1742,7 @@ void xori(Sh2& s) {
 void xorm(Sh2& s) {
     // (R0 + GBR)^imm -> (R0 + GBR)
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
-    temp ^= (bitmask_000000FF & x0nn(s));
+    temp ^= (0xFF & x0nn(s));
     s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
 
     s.pc_ += 2;
@@ -1719,8 +1751,8 @@ void xorm(Sh2& s) {
 
 void xtrct(Sh2& s) {
     // Middle 32 bits of Rm and Rn -> Rn
-    const auto temp = u32{(s.r_[x0n0(s)] << displacement_16) & bitmask_FFFF0000};
-    s.r_[xn00(s)]   = (s.r_[xn00(s)] >> displacement_16) & bitmask_0000FFFF;
+    const auto temp = u32{(s.r_[x0n0(s)] << 16) & 0xFFFF0000};
+    s.r_[xn00(s)]   = (s.r_[xn00(s)] >> 16) & 0x0000FFFF;
     s.r_[xn00(s)] |= temp;
 
     s.pc_ += 2;
@@ -1769,6 +1801,7 @@ void execute(Sh2& s) {
         default: break;
     }
 
+    // Log::info(Logger::test, disasm(s.pc_, s.current_opcode_));
     opcodes_lut[s.current_opcode_](s);
 
     if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
