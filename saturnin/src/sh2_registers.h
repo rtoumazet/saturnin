@@ -212,67 +212,107 @@ struct Sh2Regs {
         };
         using IprbType = Reg<u16, Iprb>;
         IprbType iprb;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Vcra
+        ///
+        /// \brief	Vector Number Setting Register A (VCRA).
+        ///
+        /// \author	Runik
+        /// \date	26/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Vcra {
+            using PosType     = Pos<u16, Vcra>;
+            using BitsType    = Bits<u16, Vcra>;
+            using MaskedType  = Masked<u16, Vcra>;
+            using ShiftedType = Shifted<u16, Vcra>;
+
+            static constexpr PosType srxv_pos    = PosType(0); ///< Defines SCI receive data full interrupt vector number.
+            static constexpr PosType serv_pos    = PosType(8); ///< Defines SCI receive error interrupt vector number.
+            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr u16 srxv_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcra", SRXV, srxv, srxv_mask, srxv_pos, srxv_mask);
+
+            static constexpr u16 serv_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcra", SERV, serv, serv_mask, serv_pos, serv_mask);
+
+            static constexpr u8 byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcra", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcra", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using VcraType = Reg<u16, Vcra>;
+        VcraType vcra;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Vcrb
+        ///
+        /// \brief	Vector Number Setting Register B (VCRB).
+        ///
+        /// \author	Runik
+        /// \date	26/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Vcrb {
+            using PosType     = Pos<u16, Vcrb>;
+            using BitsType    = Bits<u16, Vcrb>;
+            using MaskedType  = Masked<u16, Vcrb>;
+            using ShiftedType = Shifted<u16, Vcrb>;
+
+            static constexpr PosType stev_pos    = PosType(0); ///< Defines SCI transmit end interrupt vector number.
+            static constexpr PosType stxv_pos    = PosType(8); ///< Defines SCI transmit data empty interrupt vector number.
+            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr u16 stev_pos_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", STEV, stev, stev_pos_mask, stev_pos, stev_pos_mask);
+
+            static constexpr u16 stxv_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", STXV, stxv, stxv_mask, stxv_pos, stxv_mask);
+
+            static constexpr u8 byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using VcrbType = Reg<u16, Vcrb>;
+        VcrbType vcrb;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Vcrc
+        ///
+        /// \brief	Vector Number Setting Register C (VCRC).
+        ///
+        /// \author	Runik
+        /// \date	26/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Vcrc {
+            using PosType     = Pos<u16, Vcrc>;
+            using BitsType    = Bits<u16, Vcrc>;
+            using MaskedType  = Masked<u16, Vcrc>;
+            using ShiftedType = Shifted<u16, Vcrc>;
+
+            static constexpr PosType focv_pos    = PosType(0); ///< Defines FRT output compare interrupt vector number.
+            static constexpr PosType ficv_pos    = PosType(8); ///< Defines FRT input capture interrupt vector number.
+            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr u16 focv_pos_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", FOCV, focv, focv_pos_mask, focv_pos, focv_pos_mask);
+
+            static constexpr u16 ficv_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", FICV, ficv, ficv_mask, ficv_pos, ficv_mask);
+
+            static constexpr u8 byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using VcrcType = Reg<u16, Vcrc>;
+        VcrcType vcrc;
     };
     Intc intc;
-};
-
-// union InterruptPriorityLevelSettingRegisterB {
-//     u16             raw;          ///< Raw representation.
-//     BitField<12, 4> sci_level;    ///< Defines SCI priority level.
-//     BitField<8, 4>  frt_level;    ///< Defines FRT priority level.
-//     BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-//     BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-// };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VectorNumberSettingRegisterA
-///
-/// \brief	Vector Number Setting Register A (VCRA).
-///
-/// \author	Runik
-/// \date	17/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union VectorNumberSettingRegisterA {
-    u16            raw;                          ///< Raw representation.
-    BitField<8, 7> sci_receive_error_vector;     ///< Defines SCI receive error interrupt vector number.
-    BitField<0, 7> sci_receive_data_full_vector; ///< Defines SCI receive data full interrupt vector number.
-    BitField<8, 8> upper_8_bits;                 ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;                 ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VectorNumberSettingRegisterB
-///
-/// \brief	Vector Number Setting Register B (VCRB).
-///
-/// \author	Runik
-/// \date	17/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union VectorNumberSettingRegisterB {
-    u16            raw;                            ///< Raw representation.
-    BitField<8, 7> sci_transmit_data_empty_vector; ///< Defines SCI transmit data empty interrupt vector number.
-    BitField<0, 7> sci_transmit_end_vector;        ///< Defines SCI transmit end interrupt vector number.
-    BitField<8, 8> upper_8_bits;                   ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;                   ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VectorNumberSettingRegisterC
-///
-/// \brief	Vector Number Setting Register C (VCRC).
-///
-/// \author	Runik
-/// \date	17/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union VectorNumberSettingRegisterC {
-    u16            raw;                       ///< Raw representation.
-    BitField<8, 7> frt_input_capture_vector;  ///< Defines FRT input capture interrupt vector number.
-    BitField<0, 7> frt_output_compare_vector; ///< Defines FRT output compare interrupt vector number.
-    BitField<8, 8> upper_8_bits;              ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;              ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
