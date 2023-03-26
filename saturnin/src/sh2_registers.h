@@ -311,24 +311,37 @@ struct Sh2Regs {
         };
         using VcrcType = Reg<u16, Vcrc>;
         VcrcType vcrc;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Vcrd
+        ///
+        /// \brief	Vector Number Setting Register D (VCRD).
+        ///
+        /// \author	Runik
+        /// \date	26/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Vcrd {
+            using PosType     = Pos<u16, Vcrd>;
+            using BitsType    = Bits<u16, Vcrd>;
+            using MaskedType  = Masked<u16, Vcrd>;
+            using ShiftedType = Shifted<u16, Vcrd>;
+
+            static constexpr PosType fovv_pos    = PosType(8); ///< Defines FRT overflow interrupt vector number.
+            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr u16 fovv_pos_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrd", FOVV, fovv, fovv_pos_mask, fovv_pos, fovv_pos_mask);
+
+            static constexpr u8 byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrd", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using VcrdType = Reg<u16, Vcrd>;
+        VcrdType vcrd;
     };
     Intc intc;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VectorNumberSettingRegisterD
-///
-/// \brief	Vector Number Setting Register D (VCRD).
-///
-/// \author	Runik
-/// \date	17/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union VectorNumberSettingRegisterD {
-    u16            raw;                 ///< Raw representation.
-    BitField<8, 7> frt_overflow_vector; ///< Defines FRT overflow interrupt vector number.
-    BitField<8, 8> upper_8_bits;        ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;        ///< Defines the range of the lower 8 bits of the register.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

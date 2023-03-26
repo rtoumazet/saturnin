@@ -59,8 +59,8 @@ auto Sh2::readRegisters8(const u32 addr) const -> u8 {
         case vector_number_setting_register_b + 1: return static_cast<u8>(regs_.intc.vcrb >> Sh2Regs::Intc::Vcrb::LO_BYTE_SHFT);
         case vector_number_setting_register_c: return static_cast<u8>(regs_.intc.vcrc >> Sh2Regs::Intc::Vcrc::HI_BYTE_SHFT);
         case vector_number_setting_register_c + 1: return static_cast<u8>(regs_.intc.vcrc >> Sh2Regs::Intc::Vcrc::LO_BYTE_SHFT);
-        case vector_number_setting_register_d: return static_cast<u8>(intc_vcrd_.upper_8_bits);
-        case vector_number_setting_register_d + 1: return intc_vcrd_.lower_8_bits;
+        case vector_number_setting_register_d: return static_cast<u8>(regs_.intc.vcrd >> Sh2Regs::Intc::Vcrd::HI_BYTE_SHFT);
+        case vector_number_setting_register_d + 1: return static_cast<u8>(regs_.intc.vcrd >> Sh2Regs::Intc::Vcrd::LO_BYTE_SHFT);
         case vector_number_setting_register_wdt: return static_cast<u8>(intc_vcrwdt_.upper_8_bits);
         case vector_number_setting_register_wdt + 1: return intc_vcrwdt_.lower_8_bits;
         case interrupt_control_register: return static_cast<u8>(intc_icr_.upper_8_bits);
@@ -131,7 +131,7 @@ auto Sh2::readRegisters16(const u32 addr) const -> u16 {
         case vector_number_setting_register_a: return regs_.intc.vcra.data();
         case vector_number_setting_register_b: return regs_.intc.vcrb.data();
         case vector_number_setting_register_c: return regs_.intc.vcrc.data();
-        case vector_number_setting_register_d: return intc_vcrd_.raw;
+        case vector_number_setting_register_d: return regs_.intc.vcrd.data();
         case vector_number_setting_register_wdt: return intc_vcrwdt_.raw;
         case interrupt_control_register: return intc_icr_.raw;
         case vector_number_setting_register_div: return intc_vcrdiv_.upper_16_bits;
@@ -291,7 +291,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case vector_number_setting_register_b + 1: regs_.intc.vcrb.upd(Sh2Regs::Intc::Vcrb::loByte(data)); break;
         case vector_number_setting_register_c: regs_.intc.vcrc.upd(Sh2Regs::Intc::Vcrc::hiByte(data)); break;
         case vector_number_setting_register_c + 1: regs_.intc.vcrc.upd(Sh2Regs::Intc::Vcrc::loByte(data)); break;
-        case vector_number_setting_register_d: intc_vcrd_.upper_8_bits = data; break;
+        case vector_number_setting_register_d: regs_.intc.vcrd.upd(Sh2Regs::Intc::Vcrd::hiByte(data)); break;
         case vector_number_setting_register_d + 1: break; // Read only
         case vector_number_setting_register_wdt: intc_vcrwdt_.upper_8_bits = data; break;
         case vector_number_setting_register_wdt + 1: intc_vcrwdt_.lower_8_bits = data; break;
@@ -417,7 +417,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         case vector_number_setting_register_a: regs_.intc.vcra = data; break;
         case vector_number_setting_register_b: regs_.intc.vcrb = data; break;
         case vector_number_setting_register_c: regs_.intc.vcrc = data; break;
-        case vector_number_setting_register_d: intc_vcrd_.raw = data; break;
+        case vector_number_setting_register_d: regs_.intc.vcrd = data; break;
         case vector_number_setting_register_wdt: intc_vcrwdt_.raw = data; break;
         case vector_number_setting_register_div: break; // Read only access
         case vector_number_setting_register_div + 2: intc_vcrdiv_.lower_16_bits = (data & bitmask_7F); break;
@@ -699,7 +699,7 @@ void Sh2::initializeOnChipRegisters() {
     regs_.intc.vcra   = {};
     regs_.intc.vcrb   = {};
     regs_.intc.vcrc   = {};
-    intc_vcrd_.raw    = {};
+    regs_.intc.vcrd   = {};
     intc_vcrwdt_.raw  = {};
     intc_vcrdiv_.raw  = {}; // lower 16 bits are undefined
     intc_vcrdma0_.raw = {}; // lower 8 bits are undefined
@@ -994,7 +994,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
             if (toEnum<TimerOverflowInterruptEnable>(frt_tier_.timer_overflow_interrupt_enable)
                 == TimerOverflowInterruptEnable::interrupt_request_enabled) {
                 Log::debug(Logger::sh2, "FRT - Sending overflow interrupt");
-                is::sh2_frt_overflow_flag_set.vector = static_cast<u8>(intc_vcrd_.frt_overflow_vector);
+                is::sh2_frt_overflow_flag_set.vector = static_cast<u8>(regs_.intc.vcrd >> Sh2Regs::Intc::Vcrd::FOVV_SHFT);
                 is::sh2_frt_overflow_flag_set.level  = static_cast<u8>(regs_.intc.iprb >> Sh2Regs::Intc::Iprb::FRT_LEVEL_SHFT);
                 sendInterrupt(is::sh2_frt_overflow_flag_set);
             }

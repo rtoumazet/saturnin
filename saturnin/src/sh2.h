@@ -948,7 +948,7 @@ class Sh2 {
     // VectorNumberSettingRegisterA   intc_vcra_;
     // VectorNumberSettingRegisterB   intc_vcrb_;
     // VectorNumberSettingRegisterC   intc_vcrc_;
-    VectorNumberSettingRegisterD   intc_vcrd_;
+    // VectorNumberSettingRegisterD   intc_vcrd_;
     VectorNumberSettingRegisterWdt intc_vcrwdt_;
     VectorNumberSettingRegisterDiv intc_vcrdiv_;
     VectorNumberSettingRegisterDma intc_vcrdma0_;
