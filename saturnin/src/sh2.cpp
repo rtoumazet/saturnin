@@ -45,8 +45,10 @@ auto Sh2::readRegisters8(const u32 addr) const -> u8 {
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a: return static_cast<u8>(intc_ipra_.upper_8_bits);
-        case interrupt_priority_level_setting_register_a + 1: return intc_ipra_.lower_8_bits;
+        case interrupt_priority_level_setting_register_a:
+            return static_cast<u8>(regs_.intc.ipra >> Sh2Regs::Intc::Ipra::HI_BYTE_SHFT);
+        case interrupt_priority_level_setting_register_a + 1:
+            return static_cast<u8>(regs_.intc.ipra >> Sh2Regs::Intc::Ipra::LO_BYTE_SHFT);
         case interrupt_priority_level_setting_register_b: return static_cast<u8>(intc_iprb_.upper_8_bits);
         case interrupt_priority_level_setting_register_b + 1: return intc_iprb_.lower_8_bits;
         case vector_number_setting_register_a: return static_cast<u8>(intc_vcra_.upper_8_bits);
@@ -122,7 +124,7 @@ auto Sh2::readRegisters16(const u32 addr) const -> u16 {
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a: return intc_ipra_.raw;
+        case interrupt_priority_level_setting_register_a: return regs_.intc.ipra.data();
         case interrupt_priority_level_setting_register_b: return intc_iprb_.raw;
         case vector_number_setting_register_a: return intc_vcra_.raw;
         case vector_number_setting_register_b: return intc_vcrb_.raw;
@@ -277,8 +279,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a: intc_ipra_.upper_8_bits = data; break;
-        case interrupt_priority_level_setting_register_a + 1: intc_ipra_.lower_8_bits = data; break;
+        case interrupt_priority_level_setting_register_a: regs_.intc.ipra.upd(Sh2Regs::Intc::Ipra::hiByte(data)); break;
+        case interrupt_priority_level_setting_register_a + 1: regs_.intc.ipra.upd(Sh2Regs::Intc::Ipra::loByte(data)); break;
         case interrupt_priority_level_setting_register_b: intc_iprb_.upper_8_bits = data; break;
         case vector_number_setting_register_a: intc_vcra_.upper_8_bits = data; break;
         case vector_number_setting_register_a + 1: intc_vcra_.lower_8_bits = data; break;
@@ -407,7 +409,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         /////////////
         // 5. INTC //
         /////////////
-        case interrupt_priority_level_setting_register_a: intc_ipra_.raw = data; break;
+        case interrupt_priority_level_setting_register_a: regs_.intc.ipra = data; break;
         case interrupt_priority_level_setting_register_b: intc_iprb_.raw = data; break;
         case vector_number_setting_register_a: intc_vcra_.raw = data; break;
         case vector_number_setting_register_b: intc_vcrb_.raw = data; break;
@@ -420,15 +422,16 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
             auto new_icr = InterruptControlRegister{data};
             switch (toEnum<NmiEdgeDetection>(intc_icr_.nmi_edge_detection)) {
                 using enum NmiEdgeDetection;
+                using enum NmiInputLevel;
                 case falling:
-                    if ((toEnum<NmiInputLevel>(intc_icr_.nmi_input_level) == NmiInputLevel::high)
-                        && (toEnum<NmiInputLevel>(new_icr.nmi_input_level) == NmiInputLevel::low)) {
+                    if ((toEnum<NmiInputLevel>(intc_icr_.nmi_input_level) == high)
+                        && (toEnum<NmiInputLevel>(new_icr.nmi_input_level) == low)) {
                         Log::warning(Logger::sh2, "Falling edge NMI, not implemented !");
                     }
                     break;
                 case rising:
-                    if ((toEnum<NmiInputLevel>(intc_icr_.nmi_input_level) == NmiInputLevel::low)
-                        && (toEnum<NmiInputLevel>(new_icr.nmi_input_level) == NmiInputLevel::high)) {
+                    if ((toEnum<NmiInputLevel>(intc_icr_.nmi_input_level) == low)
+                        && (toEnum<NmiInputLevel>(new_icr.nmi_input_level) == high)) {
                         Log::warning(Logger::sh2, "Rising edge NMI, not implemented !");
                     }
                     break;
@@ -688,7 +691,7 @@ void Sh2::purgeCache() {
 
 void Sh2::initializeOnChipRegisters() {
     // Interrupt Control
-    intc_ipra_.raw    = {};
+    regs_.intc.ipra   = {};
     intc_iprb_.raw    = {};
     intc_vcra_.raw    = {};
     intc_vcrb_.raw    = {};
@@ -773,8 +776,8 @@ void Sh2::powerOnReset() {
 
     r_[sp_register_index] = modules_.memory()->read<u32>(sp_start_vector);
     vbr_                  = 0;
-    registers_.sr         = {};
-    registers_.sr.set(Sh2Registers::StatusRegister::i_default_value);
+    regs_.sr              = {};
+    regs_.sr.set(Sh2Regs::StatusRegister::i_default_value);
     gbr_  = 0;
     mach_ = 0;
     macl_ = 0;
@@ -901,7 +904,7 @@ void Sh2::start64bitsDivision() {
 void Sh2::runInterruptController() {
     if (!is_interrupted_) {
         if (!pending_interrupts_.empty()) {
-            const auto  interrupt_mask = (registers_.sr >> Sh2Registers::StatusRegister::i_shft);
+            const auto  interrupt_mask = (regs_.sr >> Sh2Regs::StatusRegister::i_shft);
             const auto& interrupt      = pending_interrupts_.front();
             if ((interrupt.level > interrupt_mask) || interrupt == is::nmi) {
                 Log::debug(Logger::sh2,
@@ -917,13 +920,13 @@ void Sh2::runInterruptController() {
                 constexpr auto sr_stack_offset = u8{4};
                 constexpr auto pc_stack_offset = u8{8};
 
-                modules_.memory()->write(r_[sp_register_index] - sr_stack_offset, registers_.sr.data());
+                modules_.memory()->write(r_[sp_register_index] - sr_stack_offset, regs_.sr.data());
                 modules_.memory()->write(r_[sp_register_index] - pc_stack_offset, pc_);
 
                 r_[sp_register_index] = r_[sp_register_index] - 8; // Stack pointer is updated.
 
                 // sr_.i = interrupt.level;
-                registers_.sr.upd(Sh2Registers::StatusRegister::interrupt_mask(interrupt.level));
+                regs_.sr.upd(Sh2Regs::StatusRegister::interruptMask(interrupt.level));
 
                 if (interrupt != is::nmi) {
                     is_interrupted_    = true; // Entering interrupt mode.
@@ -950,7 +953,7 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
             if (toEnum<core::InterruptEnable>(divu_dvcr_.interrupt_enable) == core::InterruptEnable::enabled) {
                 Log::debug(Logger::sh2, "DIVU - Sending division overflow interrupt");
                 is::sh2_division_overflow.vector = intc_vcrdiv_.divu_interrupt_vector;
-                is::sh2_division_overflow.level  = static_cast<u8>(intc_ipra_.divu_level);
+                is::sh2_division_overflow.level  = static_cast<u8>(regs_.intc.ipra >> Sh2Regs::Intc::Ipra::DIVU_LEVEL_SHFT);
                 sendInterrupt(is::sh2_division_overflow);
             }
             divu_dvcr_.overflow_flag = false;
@@ -1226,8 +1229,7 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
 
         if (toEnum<Sh2DmaInterruptEnable>(conf.chcr.interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
             Log::debug(Logger::sh2, "DMAC ({}) - Sending DMA channel {} transfer end interrupt.", sh2_type, channel_number);
-            // conf.interrupt.vector = intc_vcrc_.get(VectorNumberSettingRegisterDma::dma_transfert_end_vector);
-            conf.interrupt.level = static_cast<u8>(intc_ipra_.dmac_level);
+            conf.interrupt.level = static_cast<u8>(regs_.intc.ipra >> Sh2Regs::Intc::Ipra::DMAC_LEVEL_SHFT);
             sendInterrupt(conf.interrupt);
         }
     };
@@ -1304,7 +1306,7 @@ auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
         case mach: return mach_; break;
         case vbr: return vbr_; break;
         case gbr: return gbr_; break;
-        case sr: return registers_.sr.data(); break;
+        case sr: return regs_.sr.data(); break;
         case r0: return r_[index_0]; break;
         case r1: return r_[index_1]; break;
         case r2: return r_[index_2]; break;

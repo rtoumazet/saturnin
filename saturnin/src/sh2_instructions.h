@@ -210,8 +210,8 @@ inline void xtrct(Sh2& s);
 constexpr auto instructions_number = u8{142};      ///< Total number of SH2 instructions used.
 constexpr auto opcodes_lut_size    = u32{0x10000}; ///< Size of the opcodes lookup table
 
-using ExecuteType = void (*)(Sh2&);                              ///< Type of execute functions
-using DisasmType  = auto (*)(u32 pc, u16 opcode) -> std::string; ///< Type of disassembly functions
+using ExecuteType = void (*)(Sh2&);                             ///< Type of execute functions
+using DisasmType  = auto(*)(u32 pc, u16 opcode) -> std::string; ///< Type of disassembly functions
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	Sh2Instruction

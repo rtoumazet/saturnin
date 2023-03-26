@@ -75,57 +75,12 @@ auto isInstructionIllegal(const u16 inst) -> bool {
     // 'Illegal Slot' detection
     // Returns true if an ISI (illegal slot instruction) is detected
     return illegal_instruction_lut[inst];
-    // switch (xn000(inst)) {
-    //    case 0b0000:
-    //        switch (x000n(inst)) {
-    //            case 0b0011:
-    //                switch (x00n0(inst)) {
-    //                    case 0b0000: return true; // BSRF Rm*2
-    //                    case 0b0010: return true; // BRAF Rm*2
-    //                }
-    //                break;
-    //            case 0xb1011:
-    //                switch (x00n0(inst)) {
-    //                    case 0b0000: return true; // RTS
-    //                    case 0b0010: return true; // RTE
-    //                }
-    //                break;
-    //        }
-    //        break;
-    //    case 0b0100:
-    //        switch (x000n(inst)) {
-    //            case 0b1011:
-    //                switch (x00n0(inst)) {
-    //                    case 0b0000: return true; // JSR @Rm
-    //                    case 0b0010: return true; // JMP @Rm
-    //                }
-    //                break;
-    //        }
-    //        break;
-    //    case 0b1000:
-    //        switch (x0n00(inst)) {
-    //            case 0b1001: return true; // BT label
-    //            case 0b1011: return true; // BF label
-    //            case 0x1101: return true; // BT/S label*2
-    //            case 0x1111: return true; // BF/S label*2
-    //        }
-    //        break;
-    //    case 0b1010: return true; // BRA label
-    //    case 0b1011: return true; // BSR label
-    //    case 0b1100:
-    //        switch (x0n00(inst)) {
-    //            case 0x0011: return true; // TRAPA #imm
-    //        }
-    //        break;
-    //}
-    // return false;
 }
 
 void badOpcode(Sh2& s) {
     const auto type = std::string{(s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave"};
     Log::error(Logger::sh2, "Unexpected opcode({} SH2). Opcode = {:#06x}. PC = {:#010x}", type, s.current_opcode_, s.pc_);
 
-    // s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
     s.modules_.context()->debugStatus(core::DebugStatus::paused);
 }
 
@@ -153,11 +108,11 @@ void addc(Sh2& s) {
 
     const auto tmp1 = static_cast<s32>(s.r_[xn00(s)] + s.r_[x0n0(s)]);
     const auto tmp0 = static_cast<s32>(s.r_[xn00(s)]);
-    s.r_[xn00(s)]   = tmp1 + (s.registers_.sr >> Sh2Registers::StatusRegister::t_shft);
+    s.r_[xn00(s)]   = tmp1 + (s.regs_.sr >> Sh2Regs::StatusRegister::t_shft);
 
-    (tmp0 > tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (tmp0 > tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
-    if (tmp1 > static_cast<s32>(s.r_[xn00(s)])) { s.registers_.sr.set(Sh2Registers::StatusRegister::t); }
+    if (tmp1 > static_cast<s32>(s.r_[xn00(s)])) { s.regs_.sr.set(Sh2Regs::StatusRegister::t); }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -175,9 +130,9 @@ void addv(Sh2& s) {
 
     ans += dest;
     if (src == 0 || src == 2) {
-        (ans == 1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+        (ans == 1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
     } else {
-        s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+        s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -211,7 +166,7 @@ void bf(Sh2& s) {
     // If T = 0, disp*2 + PC -> PC
     // If T = 1, nop
 
-    if (!s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+    if (!s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
         auto disp = u32{};
         if ((x0nn(s) & 0x80) == 0) {
             disp = (0xFF & x0nn(s));
@@ -231,7 +186,7 @@ void bfs(Sh2& s) {
     // If T=1, nop
     // Modified using SH4 manual
 
-    if (!s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+    if (!s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
         auto disp = u32{};
         if ((x0nn(s) & sign_bit_8_mask) == 0) {
             disp = (0xFF & x0nn(s));
@@ -315,7 +270,7 @@ void bt(Sh2& s) {
     // If T=1, disp*2 + PC -> PC;
     // If T=0=, nop
 
-    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
         u32 disp{};
         if ((x0nn(s) & sign_bit_8_mask) == 0) {
             disp = (0xFF & x0nn(s));
@@ -334,7 +289,7 @@ void bts(Sh2& s) {
     // If T=1, disp*2 + PC -> PC
     // If T=0, nop
     // Modified using SH4 manual
-    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
         auto disp = u32{};
         if ((x0nn(s) & sign_bit_8_mask) == 0) {
             disp = (0xFF & x0nn(s));
@@ -362,7 +317,7 @@ void clrmac(Sh2& s) {
 
 void clrt(Sh2& s) {
     // 0 -> T
-    s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -370,8 +325,7 @@ void clrt(Sh2& s) {
 
 void cmpeq(Sh2& s) {
     // If Rn = Rm, T=1
-    (s.r_[xn00(s)] == s.r_[x0n0(s)]) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (s.r_[xn00(s)] == s.r_[x0n0(s)]) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -379,8 +333,8 @@ void cmpeq(Sh2& s) {
 
 void cmpge(Sh2& s) {
     // If Rn >= Rm with sign, T=1
-    (static_cast<s32>(s.r_[xn00(s)]) >= static_cast<s32>(s.r_[x0n0(s)])) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                                                                         : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (static_cast<s32>(s.r_[xn00(s)]) >= static_cast<s32>(s.r_[x0n0(s)])) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+                                                                         : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -388,8 +342,8 @@ void cmpge(Sh2& s) {
 
 void cmpgt(Sh2& s) {
     // If Rn > Rm with sign, T=1
-    (static_cast<s32>(s.r_[xn00(s)]) > static_cast<s32>(s.r_[x0n0(s)])) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                                                                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (static_cast<s32>(s.r_[xn00(s)]) > static_cast<s32>(s.r_[x0n0(s)])) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+                                                                        : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -397,8 +351,7 @@ void cmpgt(Sh2& s) {
 
 void cmphi(Sh2& s) {
     // If Rn > Rm without sign, T=1
-    (s.r_[xn00(s)] > s.r_[x0n0(s)]) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                                    : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (s.r_[xn00(s)] > s.r_[x0n0(s)]) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -406,8 +359,7 @@ void cmphi(Sh2& s) {
 
 void cmphs(Sh2& s) {
     // If Rn > Rm without sign, T=1
-    (s.r_[xn00(s)] >= s.r_[x0n0(s)]) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (s.r_[xn00(s)] >= s.r_[x0n0(s)]) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -415,8 +367,8 @@ void cmphs(Sh2& s) {
 
 void cmppl(Sh2& s) {
     // If Rn > 0, T=1
-    (static_cast<s32>(s.r_[xn00(s)]) > 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                                          : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (static_cast<s32>(s.r_[xn00(s)]) > 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+                                          : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -424,8 +376,8 @@ void cmppl(Sh2& s) {
 
 void cmppz(Sh2& s) {
     // If Rn >= 0, T=1
-    (static_cast<s32>(s.r_[xn00(s)]) >= 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                                           : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (static_cast<s32>(s.r_[xn00(s)]) >= 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+                                           : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -439,8 +391,8 @@ void cmpstr(Sh2& s) {
 
     ((rm & 0xFF000000) == (rn & 0xFF000000) || (rm & 0x00FF0000) == (rn & 0x00FF0000)
      || (rm & bitmask_0000FF00) == (rn & bitmask_0000FF00) || (rm & 0xFF) == (rn & 0xFF))
-        ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-        : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+        ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+        : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -455,8 +407,7 @@ void cmpim(Sh2& s) {
     } else {
         imm = (0xFFFFFF00 | x0nn(s));
     }
-    (s.r_[0] == imm) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (s.r_[0] == imm) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -464,13 +415,13 @@ void cmpim(Sh2& s) {
 
 void div0s(Sh2& s) {
     // Rn MSB -> Q, Rm MSB -> M, M^Q -> T
-    ((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::q)
-                                              : s.registers_.sr.set(Sh2Registers::StatusRegister::q);
-    ((s.r_[x0n0(s)] & sign_bit_32_mask) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::m)
-                                              : s.registers_.sr.set(Sh2Registers::StatusRegister::m);
-    ((s.registers_.sr >> Sh2Registers::StatusRegister::m_shft) == (s.registers_.sr >> Sh2Registers::StatusRegister::q_shft))
-        ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
-        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
+    ((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::q)
+                                              : s.regs_.sr.set(Sh2Regs::StatusRegister::q);
+    ((s.r_[x0n0(s)] & sign_bit_32_mask) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::m)
+                                              : s.regs_.sr.set(Sh2Regs::StatusRegister::m);
+    ((s.regs_.sr >> Sh2Regs::StatusRegister::m_shft) == (s.regs_.sr >> Sh2Regs::StatusRegister::q_shft))
+        ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t)
+        : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -478,9 +429,9 @@ void div0s(Sh2& s) {
 
 void div0u(Sh2& s) {
     // 0 -> M/Q/T
-    s.registers_.sr.clr(Sh2Registers::StatusRegister::m);
-    s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
-    s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    s.regs_.sr.clr(Sh2Regs::StatusRegister::m);
+    s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+    s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -491,25 +442,23 @@ void div1(Sh2& s) {
     auto tmp0 = u32{};
     auto tmp1 = bool{};
 
-    const auto old_q = s.registers_.sr.any(Sh2Registers::StatusRegister::q);
-    ((sign_bit_32_mask & s.r_[xn00(s)]) != 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
-                                              : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+    const auto old_q = s.regs_.sr.any(Sh2Regs::StatusRegister::q);
+    ((sign_bit_32_mask & s.r_[xn00(s)]) != 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q)
+                                              : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
 
     s.r_[xn00(s)] <<= 1;
-    s.r_[xn00(s)] |= (s.registers_.sr >> Sh2Registers::StatusRegister::t_shft);
+    s.r_[xn00(s)] |= (s.regs_.sr >> Sh2Regs::StatusRegister::t_shft);
 
     if (old_q) {
-        if (s.registers_.sr.any(Sh2Registers::StatusRegister::m)) {
+        if (s.regs_.sr.any(Sh2Regs::StatusRegister::m)) {
             tmp0 = s.r_[xn00(s)];
             s.r_[xn00(s)] -= s.r_[x0n0(s)];
             tmp1 = (s.r_[xn00(s)] > tmp0);
 
-            if (s.registers_.sr.any(Sh2Registers::StatusRegister::q)) {
-                tmp1 ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
-                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+            if (s.regs_.sr.any(Sh2Regs::StatusRegister::q)) {
+                tmp1 ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
             } else {
-                (!tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
-                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+                (!tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
             }
 
         } else {
@@ -517,26 +466,22 @@ void div1(Sh2& s) {
             s.r_[xn00(s)] += s.r_[x0n0(s)];
             tmp1 = s.r_[xn00(s)] < tmp0;
 
-            if (s.registers_.sr.any(Sh2Registers::StatusRegister::q)) {
-                (!tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
-                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+            if (s.regs_.sr.any(Sh2Regs::StatusRegister::q)) {
+                (!tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
             } else {
-                tmp1 ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
-                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+                tmp1 ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
             }
         }
     } else {
-        if (s.registers_.sr.any(Sh2Registers::StatusRegister::m)) {
+        if (s.regs_.sr.any(Sh2Regs::StatusRegister::m)) {
             tmp0 = s.r_[xn00(s)];
             s.r_[xn00(s)] += s.r_[x0n0(s)];
             tmp1 = (s.r_[xn00(s)]) < tmp0;
 
-            if (s.registers_.sr.any(Sh2Registers::StatusRegister::q)) {
-                tmp1 ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
-                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+            if (s.regs_.sr.any(Sh2Regs::StatusRegister::q)) {
+                tmp1 ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
             } else {
-                (!tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
-                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+                (!tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
             }
 
         } else {
@@ -544,19 +489,17 @@ void div1(Sh2& s) {
             s.r_[xn00(s)] -= s.r_[x0n0(s)];
             tmp1 = (s.r_[xn00(s)]) > tmp0;
 
-            if (s.registers_.sr.any(Sh2Registers::StatusRegister::q)) {
-                (!tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
-                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+            if (s.regs_.sr.any(Sh2Regs::StatusRegister::q)) {
+                (!tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
             } else {
-                tmp1 ? s.registers_.sr.set(Sh2Registers::StatusRegister::q)
-                     : s.registers_.sr.clr(Sh2Registers::StatusRegister::q);
+                tmp1 ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
             }
         }
     }
 
-    ((s.registers_.sr >> Sh2Registers::StatusRegister::m_shft) == (s.registers_.sr >> Sh2Registers::StatusRegister::q_shft))
-        ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-        : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    ((s.regs_.sr >> Sh2Regs::StatusRegister::m_shft) == (s.regs_.sr >> Sh2Regs::StatusRegister::q_shft))
+        ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+        : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -593,8 +536,7 @@ void dt(Sh2& s) {
     // Si R[n] = 0, T=1
     // Sinon T=0
     --s.r_[xn00(s)];
-    (s.r_[xn00(s)] == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                         : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (s.r_[xn00(s)] == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -669,7 +611,7 @@ void jsr(Sh2& s) {
 
 void ldcsr(Sh2& s) {
     // Rm -> SR
-    s.registers_.sr = (s.r_[xn00(s)] & sr_bitmask);
+    s.regs_.sr = (s.r_[xn00(s)] & sr_bitmask);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -693,7 +635,7 @@ void ldcvbr(Sh2& s) {
 
 void ldcmsr(Sh2& s) {
     // (Rm) -> SR, Rm + 4 -> Rm
-    s.registers_.sr = static_cast<u16>(s.modules_.memory()->read<u32>(s.r_[xn00(s)]) & sr_bitmask);
+    s.regs_.sr = static_cast<u16>(s.modules_.memory()->read<u32>(s.r_[xn00(s)]) & sr_bitmask);
     s.r_[xn00(s)] += 4;
 
     s.pc_ += 2;
@@ -785,7 +727,7 @@ void mac(Sh2& s) {
     mac |= s.macl_;
     mac += mul;
 
-    if (s.registers_.sr.any(Sh2Registers::StatusRegister::s)) {
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::s)) {
         if (mac < u47_min_64_extended) { mac = u47_min_64_extended; }
         if (mac > 0x800000000000) { mac = u47_max; }
     }
@@ -807,7 +749,7 @@ void macw(Sh2& s) {
 
     const auto mul = s64{src_m * src_n};
     auto       mac = s64{};
-    if (!s.registers_.sr.any(Sh2Registers::StatusRegister::s)) {
+    if (!s.regs_.sr.any(Sh2Regs::StatusRegister::s)) {
         mac = s.mach_;
         mac <<= 32;
         mac |= s.macl_;
@@ -1186,7 +1128,7 @@ void mova(Sh2& s) {
 
 void movt(Sh2& s) {
     // T -> Rn
-    s.r_[xn00(s)] = s.registers_.sr >> Sh2Registers::StatusRegister::t_shft;
+    s.r_[xn00(s)] = s.regs_.sr >> Sh2Regs::StatusRegister::t_shft;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1226,9 +1168,9 @@ void neg(Sh2& s) {
 
 void negc(Sh2& s) {
     auto temp     = u32{0 - s.r_[x0n0(s)]};
-    s.r_[xn00(s)] = temp - (s.registers_.sr >> Sh2Registers::StatusRegister::t_shft);
-    (0 < temp) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
-    if (temp < s.r_[xn00(s)]) { s.registers_.sr.set(Sh2Registers::StatusRegister::t); }
+    s.r_[xn00(s)] = temp - (s.regs_.sr >> Sh2Regs::StatusRegister::t_shft);
+    (0 < temp) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+    if (temp < s.r_[xn00(s)]) { s.regs_.sr.set(Sh2Regs::StatusRegister::t); }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -1277,12 +1219,12 @@ void rotcl(Sh2& s) {
     // T <- Rn <- T
     auto temp = s32{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1};
     s.r_[xn00(s)] <<= 1;
-    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
         s.r_[xn00(s)] |= 0x00000001;
     } else {
         s.r_[xn00(s)] &= 0xFFFFFFFE;
     }
-    (temp == 1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (temp == 1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1292,12 +1234,12 @@ void rotcr(Sh2& s) {
     // T -> Rn -> T
     auto temp = s32{((s.r_[xn00(s)] & 0x00000001) == 0) ? 0 : 1};
     s.r_[xn00(s)] >>= 1;
-    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
         s.r_[xn00(s)] |= 0x80000000;
     } else {
         s.r_[xn00(s)] &= u31_max;
     }
-    (temp == 1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (temp == 1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1305,10 +1247,9 @@ void rotcr(Sh2& s) {
 
 void rotl(Sh2& s) {
     // T <- Rn <- MSB
-    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
-                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] <<= 1;
-    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
         s.r_[xn00(s)] |= 0x00000001;
     } else {
         s.r_[xn00(s)] &= 0xFFFFFFFE;
@@ -1319,10 +1260,9 @@ void rotl(Sh2& s) {
 
 void rotr(Sh2& s) {
     // LSB -> Rn -> T
-    ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
-                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
+    ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] >>= 1;
-    if (s.registers_.sr.any(Sh2Registers::StatusRegister::t)) {
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
         s.r_[xn00(s)] |= 0x80000000;
     } else {
         s.r_[xn00(s)] &= u31_max;
@@ -1337,33 +1277,35 @@ void rte(Sh2& s) {
     delaySlot(s, s.pc_ + 2);
     s.pc_ = s.modules_.memory()->read<u32>(s.r_[sp_register_index]);
     s.r_[sp_register_index] += 4;
-    s.registers_.sr = static_cast<u16>(s.modules_.memory()->read<u16>(s.r_[sp_register_index] + 2) & sr_bitmask);
+    s.regs_.sr = static_cast<u16>(s.modules_.memory()->read<u16>(s.r_[sp_register_index] + 2) & sr_bitmask);
     s.r_[sp_register_index] += 4;
     s.cycles_elapsed_ = 4;
 
     if (s.is_interrupted_) {
         // Current sh2 is interrupted, we get back to regular flow
         if (s.sh2_type_ == Sh2Type::master) {
+            using enum Logger;
             s.modules_.scu()->clearInterruptFlag(s.current_interrupt_);
             Log::debug(Logger::sh2, "*** Back from interrupt ***");
             switch (s.current_interrupt_.vector) {
-                case is::vector_v_blank_in: Log::debug(Logger::sh2, "VBlank-In interrupt routine finished"); break;
-                case is::vector_v_blank_out: Log::debug(Logger::sh2, "VBlank-Out interrupt routine finished"); break;
-                case is::vector_h_blank_in: Log::debug(Logger::sh2, "HBlank-In interrupt routine finished"); break;
-                case is::vector_timer_0: Log::debug(Logger::sh2, "Timer 0 interrupt routine finished"); break;
-                case is::vector_timer_1: Log::debug(Logger::sh2, "Timer 1 interrupt routine finished"); break;
-                case is::vector_dsp_end: Log::debug(Logger::sh2, "DSP End interrupt routine finished"); break;
-                case is::vector_sound_request: Log::debug(Logger::sh2, "Sound Request interrupt routine finished"); break;
-                case is::vector_system_manager: Log::debug(Logger::sh2, "System Manager interrupt routine finished"); break;
-                case is::vector_pad_interrupt: Log::debug(Logger::sh2, "Pad interrupt routine finished"); break;
-                case is::vector_level_2_dma_end: Log::debug(Logger::sh2, "Level 2 DMA End interrupt routine finished"); break;
-                case is::vector_level_1_dma_end: Log::debug(Logger::sh2, "Level 1 DMA End interrupt routine finished"); break;
-                case is::vector_level_0_dma_end: Log::debug(Logger::sh2, "Level 0 DMA End interrupt routine finished"); break;
-                case is::vector_dma_illegal: Log::debug(Logger::sh2, "DMA Illegal interrupt routine finished"); break;
-                case is::vector_sprite_draw_end: Log::debug(Logger::sh2, "Sprite Draw End interrupt routine finished"); break;
+                case is::vector_v_blank_in: Log::debug(sh2, "VBlank-In interrupt routine finished"); break;
+                case is::vector_v_blank_out: Log::debug(sh2, "VBlank-Out interrupt routine finished"); break;
+                case is::vector_h_blank_in: Log::debug(sh2, "HBlank-In interrupt routine finished"); break;
+                case is::vector_timer_0: Log::debug(sh2, "Timer 0 interrupt routine finished"); break;
+                case is::vector_timer_1: Log::debug(sh2, "Timer 1 interrupt routine finished"); break;
+                case is::vector_dsp_end: Log::debug(sh2, "DSP End interrupt routine finished"); break;
+                case is::vector_sound_request: Log::debug(sh2, "Sound Request interrupt routine finished"); break;
+                case is::vector_system_manager: Log::debug(sh2, "System Manager interrupt routine finished"); break;
+                case is::vector_pad_interrupt: Log::debug(sh2, "Pad interrupt routine finished"); break;
+                case is::vector_level_2_dma_end: Log::debug(sh2, "Level 2 DMA End interrupt routine finished"); break;
+                case is::vector_level_1_dma_end: Log::debug(sh2, "Level 1 DMA End interrupt routine finished"); break;
+                case is::vector_level_0_dma_end: Log::debug(sh2, "Level 0 DMA End interrupt routine finished"); break;
+                case is::vector_dma_illegal: Log::debug(sh2, "DMA Illegal interrupt routine finished"); break;
+                case is::vector_sprite_draw_end: Log::debug(sh2, "Sprite Draw End interrupt routine finished"); break;
+                default: Log::warning(sh2, "Unknow interrupt vector:{:#0x}", s.current_interrupt_.level);
             }
 
-            Log::debug(Logger::sh2, "Level:{:#0x}", s.current_interrupt_.level);
+            Log::debug(sh2, "Level:{:#0x}", s.current_interrupt_.level);
         }
 
         s.is_interrupted_                                   = false;
@@ -1394,7 +1336,7 @@ void rts(Sh2& s) {
 
 void sett(Sh2& s) {
     // 1 -> T
-    s.registers_.sr.set(Sh2Registers::StatusRegister::t);
+    s.regs_.sr.set(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1402,8 +1344,7 @@ void sett(Sh2& s) {
 
 void shal(Sh2& s) {
     // T <- Rn <- 0
-    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
-                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] <<= 1;
 
     s.pc_ += 2;
@@ -1412,8 +1353,7 @@ void shal(Sh2& s) {
 
 void shar(Sh2& s) {
     // MSB -> Rn -> T
-    ((s.r_[xn00(s)] & 0x0000001) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
-                                       : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
+    ((s.r_[xn00(s)] & 0x0000001) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     auto temp = s32{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1};
     s.r_[xn00(s)] >>= 1;
     if (temp == 1) {
@@ -1427,8 +1367,7 @@ void shar(Sh2& s) {
 
 void shll(Sh2& s) {
     // T <- Rn <- 0
-    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
-                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
+    ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] <<= 1;
 
     s.pc_ += 2;
@@ -1461,8 +1400,7 @@ void shll16(Sh2& s) {
 
 void shlr(Sh2& s) {
     // 0 -> Rn -> T
-    ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.registers_.sr.clr(Sh2Registers::StatusRegister::t)
-                                        : s.registers_.sr.set(Sh2Registers::StatusRegister::t);
+    ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] >>= 1;
     s.r_[xn00(s)] &= u31_max;
 
@@ -1514,7 +1452,7 @@ void sleep(Sh2& s) {
 
 void stcsr(Sh2& s) {
     // SR -> Rn
-    s.r_[xn00(s)] = s.registers_.sr.data();
+    s.r_[xn00(s)] = s.regs_.sr.data();
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1539,7 +1477,7 @@ void stcvbr(Sh2& s) {
 void stcmsr(Sh2& s) {
     // Rn-4 -> Rn, SR -> (Rn)
     s.r_[xn00(s)] -= 4;
-    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.registers_.sr.data());
+    s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.regs_.sr.data());
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 2;
@@ -1626,9 +1564,9 @@ void subc(Sh2& s) {
     // Rn - Rm - T -> Rn, Carry -> T
     const auto tmp1 = u32{s.r_[xn00(s)] - s.r_[x0n0(s)]};
     const auto tmp0 = u32{s.r_[xn00(s)]};
-    s.r_[xn00(s)]   = tmp1 - (s.registers_.sr >> Sh2Registers::StatusRegister::t_shft);
-    (tmp0 < tmp1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
-    if (tmp1 < s.r_[xn00(s)]) { s.registers_.sr.set(Sh2Registers::StatusRegister::t); }
+    s.r_[xn00(s)]   = tmp1 - (s.regs_.sr >> Sh2Regs::StatusRegister::t_shft);
+    (tmp0 < tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+    if (tmp1 < s.r_[xn00(s)]) { s.regs_.sr.set(Sh2Regs::StatusRegister::t); }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -1643,9 +1581,9 @@ void subv(Sh2& s) {
     ans += dest;
 
     if (src == 1) {
-        (ans == 1) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+        (ans == 1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
     } else {
-        s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+        s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1675,7 +1613,7 @@ void swapw(Sh2& s) {
 void tas(Sh2& s) {
     // If (Rn) = 0, 1 -> T, 1 -> MSB of (Rn)
     auto temp = u32{s.modules_.memory()->read<u8>(s.r_[xn00(s)])};
-    (temp == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (temp == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
     temp |= 0x80;
     s.modules_.memory()->write<u8>(s.r_[xn00(s)], static_cast<u8>(temp));
 
@@ -1687,7 +1625,7 @@ void trapa(Sh2& s) {
     // PC/SR -> stack, (imm*4 + VBR) -> PC
     const auto imm = u32{(0xFFu & x0nn(s))};
     s.r_[sp_register_index] -= 4;
-    s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.registers_.sr.data());
+    s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.regs_.sr.data());
     s.r_[sp_register_index] -= 4;
     s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.pc_ + 2);
 
@@ -1697,8 +1635,8 @@ void trapa(Sh2& s) {
 
 void tst(Sh2& s) {
     // Rn & Rm, if result = 0, 1 -> T
-    ((s.r_[xn00(s)] & s.r_[x0n0(s)]) == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                                           : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    ((s.r_[xn00(s)] & s.r_[x0n0(s)]) == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+                                           : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1706,8 +1644,7 @@ void tst(Sh2& s) {
 
 void tsti(Sh2& s) {
     // R0 & imm, if result is 0, 1 -> T
-    ((s.r_[0] & (0xFF & x0nn(s))) == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t)
-                                        : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    ((s.r_[0] & (0xFF & x0nn(s))) == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1717,7 +1654,7 @@ void tstm(Sh2& s) {
     // (R0 + GBR) & imm, if result is 0, 1 -> T
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
     temp &= (0xFF & x0nn(s));
-    (temp == 0) ? s.registers_.sr.set(Sh2Registers::StatusRegister::t) : s.registers_.sr.clr(Sh2Registers::StatusRegister::t);
+    (temp == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
@@ -1764,14 +1701,12 @@ void initializeOpcodesLut() {
     while (counter < opcodes_lut_size) {
         for (u32 i = 0; i < instructions_number; ++i) {
             if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
-                //                nextInstructionLut[counter] = OpcodeInfoTable[i].goNext;
                 opcodes_lut[counter]             = opcodes_table[i].execute;
                 opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
                 illegal_instruction_lut[counter] = opcodes_table[i].illegal_instruction_slot;
                 calls_subroutine_lut[counter]    = opcodes_table[i].is_subroutine_call;
                 break;
             }
-            //            nextInstructionLut[counter] = false;
             opcodes_lut[counter]             = &badOpcode;
             opcodes_disasm_lut[counter]      = &badOpcode_d;
             illegal_instruction_lut[counter] = false;

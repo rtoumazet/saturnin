@@ -105,7 +105,7 @@ constexpr auto refresh_timer_counter                             = u32{0xFFFFFFF
 constexpr auto refresh_time_constant_register                    = u32{0xFFFFFFF8};
 //@}
 
-struct Sh2Registers {
+struct Sh2Regs {
     struct StatusRegister {
         using PosType     = Pos<u32, StatusRegister>;
         using BitsType    = Bits<u32, StatusRegister>;
@@ -133,50 +133,54 @@ struct Sh2Registers {
         static constexpr MaskedType i_default_value = MaskedType(i_mask, 0b1111, i_pos);
 
         static constexpr ShiftedType i_shft = ShiftedType(i_mask, i_pos);
-        GENERATE_MASKED_RANGE("Sh2Registers::StatusRegister ", INTERRUPT_MASK, interrupt_mask, i_mask, i_pos, i_mask);
+        GENERATE_MASKED_RANGE("Sh2Reg::StatusRegister", INTERRUPT_MASK, interruptMask, i_mask, i_pos, i_mask);
     };
     using StatusRegisterType = Reg<u32, StatusRegister>;
     StatusRegisterType sr;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union  StatusRegister
-///
-/// \brief  Status Register (SR).
-///
-/// \author Runik
-/// \date   16/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////
+    // 5. Interrupt Controller (INTC)  //
+    /////////////////////////////////////
 
-union StatusRegister {
-    u32            raw; ///< Raw representation.
-    BitField<9>    m;   ///< Defines M bit.
-    BitField<8>    q;   ///< Defines Q bit.
-    BitField<4, 4> i;   ///< Defines interrupt mask bits (I0-I3).
-    BitField<1>    s;   ///< Defines S bit.
-    BitField<0>    t;   ///< Defines T bit.
-};
+    struct Intc {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Ipra
+        ///
+        /// \brief	Interrupt Priority Level Setting Register A (IPRA).
+        ///
+        /// \author	Runik
+        /// \date	25/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////
-// 5. Interrupt Controller (INTC)  //
-/////////////////////////////////////
+        struct Ipra {
+            using PosType     = Pos<u16, Ipra>;
+            using BitsType    = Bits<u16, Ipra>;
+            using MaskedType  = Masked<u16, Ipra>;
+            using ShiftedType = Shifted<u16, Ipra>;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union  InterruptPriorityLevelSettingRegisterA
-///
-/// \brief  Interrupt Priority Level Setting Register A (IPRA).
-///
-/// \author Runik
-/// \date   17/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            static constexpr PosType wdt_level_pos  = PosType(4);  ///< Defines WDT/DRAM refresh priority level.
+            static constexpr PosType dmac_level_pos = PosType(8);  ///< Defines DMAC0/DMAC1 priority level.
+            static constexpr PosType divu_level_pos = PosType(12); ///< Defines DIVU refresh priority level.
+            static constexpr PosType lo_byte_pos    = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
+            static constexpr PosType hi_byte_pos    = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
 
-union InterruptPriorityLevelSettingRegisterA {
-    u16             raw;          ///< Raw representation.
-    BitField<12, 4> divu_level;   ///< Defines DIVU priority level.
-    BitField<8, 4>  dmac_level;   ///< Defines DMAC0/DMAC1 priority level.
-    BitField<4, 4>  wdt_level;    ///< Defines WDT/DRAM refresh priority level.
-    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+            static constexpr u16 wdt_level_mask = 0xF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", WDT_LEVEL, wdtLevel, wdt_level_mask, wdt_level_pos, wdt_level_mask);
+
+            static constexpr u16 dmac_level_mask = 0xF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", DMAC_LEVEL, dmacLevel, dmac_level_mask, dmac_level_pos, dmac_level_mask);
+
+            static constexpr u16 divu_level_mask = 0xF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", DIVU_LEVEL, divuLevel, divu_level_mask, divu_level_pos, divu_level_mask);
+
+            static constexpr u8 byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using IpraType = Reg<u16, Ipra>;
+        IpraType ipra;
+    };
+    Intc intc;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
