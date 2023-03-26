@@ -179,26 +179,50 @@ struct Sh2Regs {
         };
         using IpraType = Reg<u16, Ipra>;
         IpraType ipra;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Iprb
+        ///
+        /// \brief	Interrupt Priority Level Setting Register B (IPRB).
+        ///
+        /// \author	Runik
+        /// \date	26/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Iprb {
+            using PosType     = Pos<u16, Iprb>;
+            using BitsType    = Bits<u16, Iprb>;
+            using MaskedType  = Masked<u16, Iprb>;
+            using ShiftedType = Shifted<u16, Iprb>;
+
+            static constexpr PosType frt_level_pos = PosType(8);  ///< Defines FRT priority level.
+            static constexpr PosType sci_level_pos = PosType(12); ///< Defines SCI priority level.
+            static constexpr PosType lo_byte_pos   = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
+            static constexpr PosType hi_byte_pos   = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr u16 frt_level_mask = 0xF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Iprb", FRT_LEVEL, frtLevel, frt_level_mask, frt_level_pos, frt_level_mask);
+
+            static constexpr u16 sci_level_mask = 0xF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Iprb", SCI_LEVEL, sciLevel, sci_level_mask, sci_level_pos, sci_level_mask);
+
+            static constexpr u8 byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Iprb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Iprb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using IprbType = Reg<u16, Iprb>;
+        IprbType iprb;
     };
     Intc intc;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union  InterruptPriorityLevelSettingRegisterB
-///
-/// \brief  Interrupt Priority Level Setting Register B (IPRB).
-///
-/// \author Runik
-/// \date   17/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union InterruptPriorityLevelSettingRegisterB {
-    u16             raw;          ///< Raw representation.
-    BitField<12, 4> sci_level;    ///< Defines SCI priority level.
-    BitField<8, 4>  frt_level;    ///< Defines FRT priority level.
-    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+// union InterruptPriorityLevelSettingRegisterB {
+//     u16             raw;          ///< Raw representation.
+//     BitField<12, 4> sci_level;    ///< Defines SCI priority level.
+//     BitField<8, 4>  frt_level;    ///< Defines FRT priority level.
+//     BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+//     BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	VectorNumberSettingRegisterA

@@ -49,8 +49,10 @@ auto Sh2::readRegisters8(const u32 addr) const -> u8 {
             return static_cast<u8>(regs_.intc.ipra >> Sh2Regs::Intc::Ipra::HI_BYTE_SHFT);
         case interrupt_priority_level_setting_register_a + 1:
             return static_cast<u8>(regs_.intc.ipra >> Sh2Regs::Intc::Ipra::LO_BYTE_SHFT);
-        case interrupt_priority_level_setting_register_b: return static_cast<u8>(intc_iprb_.upper_8_bits);
-        case interrupt_priority_level_setting_register_b + 1: return intc_iprb_.lower_8_bits;
+        case interrupt_priority_level_setting_register_b:
+            return static_cast<u8>(regs_.intc.iprb >> Sh2Regs::Intc::Iprb::HI_BYTE_SHFT);
+        case interrupt_priority_level_setting_register_b + 1:
+            return static_cast<u8>(regs_.intc.iprb >> Sh2Regs::Intc::Iprb::LO_BYTE_SHFT);
         case vector_number_setting_register_a: return static_cast<u8>(intc_vcra_.upper_8_bits);
         case vector_number_setting_register_a + 1: return intc_vcra_.lower_8_bits;
         case vector_number_setting_register_b: return static_cast<u8>(intc_vcrb_.upper_8_bits);
@@ -125,7 +127,7 @@ auto Sh2::readRegisters16(const u32 addr) const -> u16 {
         // 5. INTC //
         /////////////
         case interrupt_priority_level_setting_register_a: return regs_.intc.ipra.data();
-        case interrupt_priority_level_setting_register_b: return intc_iprb_.raw;
+        case interrupt_priority_level_setting_register_b: return regs_.intc.iprb.data();
         case vector_number_setting_register_a: return intc_vcra_.raw;
         case vector_number_setting_register_b: return intc_vcrb_.raw;
         case vector_number_setting_register_c: return intc_vcrc_.raw;
@@ -281,8 +283,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         /////////////
         case interrupt_priority_level_setting_register_a: regs_.intc.ipra.upd(Sh2Regs::Intc::Ipra::hiByte(data)); break;
         case interrupt_priority_level_setting_register_a + 1: regs_.intc.ipra.upd(Sh2Regs::Intc::Ipra::loByte(data)); break;
-        case interrupt_priority_level_setting_register_b: intc_iprb_.upper_8_bits = data; break;
-        case vector_number_setting_register_a: intc_vcra_.upper_8_bits = data; break;
+        case interrupt_priority_level_setting_register_b: regs_.intc.iprb.upd(Sh2Regs::Intc::Iprb::hiByte(data)); break;
+        case vector_number_setting_register_a: regs_.intc.iprb.upd(Sh2Regs::Intc::Iprb::loByte(data)); break;
         case vector_number_setting_register_a + 1: intc_vcra_.lower_8_bits = data; break;
         case vector_number_setting_register_b: intc_vcrb_.upper_8_bits = data; break;
         case vector_number_setting_register_b + 1: intc_vcrb_.lower_8_bits = data; break;
@@ -410,7 +412,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         // 5. INTC //
         /////////////
         case interrupt_priority_level_setting_register_a: regs_.intc.ipra = data; break;
-        case interrupt_priority_level_setting_register_b: intc_iprb_.raw = data; break;
+        case interrupt_priority_level_setting_register_b: regs_.intc.iprb = data; break;
         case vector_number_setting_register_a: intc_vcra_.raw = data; break;
         case vector_number_setting_register_b: intc_vcrb_.raw = data; break;
         case vector_number_setting_register_c: intc_vcrc_.raw = data; break;
@@ -692,7 +694,7 @@ void Sh2::purgeCache() {
 void Sh2::initializeOnChipRegisters() {
     // Interrupt Control
     regs_.intc.ipra   = {};
-    intc_iprb_.raw    = {};
+    regs_.intc.iprb   = {};
     intc_vcra_.raw    = {};
     intc_vcrb_.raw    = {};
     intc_vcrc_.raw    = {};
@@ -992,7 +994,7 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
                 == TimerOverflowInterruptEnable::interrupt_request_enabled) {
                 Log::debug(Logger::sh2, "FRT - Sending overflow interrupt");
                 is::sh2_frt_overflow_flag_set.vector = static_cast<u8>(intc_vcrd_.frt_overflow_vector);
-                is::sh2_frt_overflow_flag_set.level  = static_cast<u8>(intc_iprb_.frt_level);
+                is::sh2_frt_overflow_flag_set.level  = static_cast<u8>(regs_.intc.iprb >> Sh2Regs::Intc::Iprb::FRT_LEVEL_SHFT);
                 sendInterrupt(is::sh2_frt_overflow_flag_set);
             }
         }
@@ -1005,7 +1007,8 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
                 == OutputCompareInterruptAEnable::interrupt_request_enabled) {
                 Log::debug(Logger::sh2, "FRT - OCRA match");
                 is::sh2_frt_output_compare_flag_a_set.vector = intc_vcrc_.frt_output_compare_vector;
-                is::sh2_frt_output_compare_flag_a_set.level  = static_cast<u8>(intc_iprb_.frt_level);
+                is::sh2_frt_output_compare_flag_a_set.level
+                    = static_cast<u8>(regs_.intc.iprb >> Sh2Regs::Intc::Iprb::FRT_LEVEL_SHFT);
                 sendInterrupt(is::sh2_frt_output_compare_flag_a_set);
             }
             if (toEnum<CounterClearA>(frt_ftcsr_.counter_clear_a) == CounterClearA::clear_on_compare) { frt_frc_.raw = {}; }
@@ -1019,7 +1022,8 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
                 == OutputCompareInterruptBEnable::interrupt_request_enabled) {
                 Log::debug(Logger::sh2, "FRT - OCRB match");
                 is::sh2_frt_output_compare_flag_b_set.vector = intc_vcrc_.frt_output_compare_vector;
-                is::sh2_frt_output_compare_flag_b_set.level  = static_cast<u8>(intc_iprb_.frt_level);
+                is::sh2_frt_output_compare_flag_b_set.level
+                    = static_cast<u8>(regs_.intc.iprb >> Sh2Regs::Intc::Iprb::FRT_LEVEL_SHFT);
                 sendInterrupt(is::sh2_frt_output_compare_flag_b_set);
             }
         }
@@ -1279,7 +1283,7 @@ void Sh2::sendInterruptCaptureSignal() {
     if (toEnum<InterruptCaptureInterruptEnable>(frt_tier_.interrupt_capture_interrupt_enable)
         == InterruptCaptureInterruptEnable::interrupt_request_enabled) {
         is::sh2_frt_input_capture.vector = static_cast<u8>(intc_vcrc_.frt_input_capture_vector);
-        is::sh2_frt_input_capture.level  = static_cast<u8>(intc_iprb_.frt_level);
+        is::sh2_frt_input_capture.level  = static_cast<u8>(regs_.intc.iprb >> Sh2Regs::Intc::Iprb::FRT_LEVEL_SHFT);
         sendInterrupt(is::sh2_frt_input_capture);
     }
 

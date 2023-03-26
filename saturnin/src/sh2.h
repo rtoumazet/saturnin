@@ -944,16 +944,16 @@ class Sh2 {
 
     ///  \name INTC (Interrupt Controller)
     //@{
-    InterruptPriorityLevelSettingRegisterB intc_iprb_;
-    VectorNumberSettingRegisterA           intc_vcra_;
-    VectorNumberSettingRegisterB           intc_vcrb_;
-    VectorNumberSettingRegisterC           intc_vcrc_;
-    VectorNumberSettingRegisterD           intc_vcrd_;
-    VectorNumberSettingRegisterWdt         intc_vcrwdt_;
-    VectorNumberSettingRegisterDiv         intc_vcrdiv_;
-    VectorNumberSettingRegisterDma         intc_vcrdma0_;
-    VectorNumberSettingRegisterDma         intc_vcrdma1_;
-    InterruptControlRegister               intc_icr_;
+    // InterruptPriorityLevelSettingRegisterB intc_iprb_;
+    VectorNumberSettingRegisterA   intc_vcra_;
+    VectorNumberSettingRegisterB   intc_vcrb_;
+    VectorNumberSettingRegisterC   intc_vcrc_;
+    VectorNumberSettingRegisterD   intc_vcrd_;
+    VectorNumberSettingRegisterWdt intc_vcrwdt_;
+    VectorNumberSettingRegisterDiv intc_vcrdiv_;
+    VectorNumberSettingRegisterDma intc_vcrdma0_;
+    VectorNumberSettingRegisterDma intc_vcrdma1_;
+    InterruptControlRegister       intc_icr_;
     //@}
 
     /// \name BSC (Bus State Controller)
