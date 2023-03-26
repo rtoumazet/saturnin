@@ -266,8 +266,8 @@ struct Sh2Regs {
             static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
             static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 stev_pos_mask = 0x7F;
-            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", STEV, stev, stev_pos_mask, stev_pos, stev_pos_mask);
+            static constexpr u16 stev_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", STEV, stev, stev_mask, stev_pos, stev_mask);
 
             static constexpr u16 stxv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", STXV, stxv, stxv_mask, stxv_pos, stxv_mask);
@@ -299,8 +299,8 @@ struct Sh2Regs {
             static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
             static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 focv_pos_mask = 0x7F;
-            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", FOCV, focv, focv_pos_mask, focv_pos, focv_pos_mask);
+            static constexpr u16 focv_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", FOCV, focv, focv_mask, focv_pos, focv_mask);
 
             static constexpr u16 ficv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", FICV, ficv, ficv_mask, ficv_pos, ficv_mask);
@@ -331,8 +331,8 @@ struct Sh2Regs {
             static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
             static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 fovv_pos_mask = 0x7F;
-            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrd", FOVV, fovv, fovv_pos_mask, fovv_pos, fovv_pos_mask);
+            static constexpr u16 fovv_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrd", FOVV, fovv, fovv_mask, fovv_pos, fovv_mask);
 
             static constexpr u8 byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -340,55 +340,100 @@ struct Sh2Regs {
         };
         using VcrdType = Reg<u16, Vcrd>;
         VcrdType vcrd;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Vcrwdt
+        ///
+        /// \brief	Vector Number Setting Register WDT (VCRWDT).
+        ///
+        /// \author	Runik
+        /// \date	26/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Vcrwdt {
+            using PosType     = Pos<u16, Vcrwdt>;
+            using BitsType    = Bits<u16, Vcrwdt>;
+            using MaskedType  = Masked<u16, Vcrwdt>;
+            using ShiftedType = Shifted<u16, Vcrwdt>;
+
+            static constexpr PosType bcmv_pos    = PosType(0); ///< Defines BSC compare match interrupt vector number.
+            static constexpr PosType witv_pos    = PosType(8); ///< Defines WDT interval interrupt vector number.
+            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr u16 bcmv_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrwdt", BCMV, bcmv, bcmv_mask, bcmv_pos, bcmv_mask);
+
+            static constexpr u16 witv_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrwdt", WITV, witv, witv_mask, witv_pos, witv_mask);
+
+            static constexpr u8 byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrwdt", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrwdt", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using VcrwdtType = Reg<u16, Vcrwdt>;
+        VcrwdtType vcrwdt;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Vcrdiv
+        ///
+        /// \brief	Vector Number Setting Register Div (VCRDIV).
+        ///
+        /// \author	Runik
+        /// \date	26/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Vcrdiv {
+            using PosType     = Pos<u32, Vcrdiv>;
+            using BitsType    = Bits<u32, Vcrdiv>;
+            using MaskedType  = Masked<u32, Vcrdiv>;
+            using ShiftedType = Shifted<u32, Vcrdiv>;
+
+            static constexpr PosType divuv_pos   = PosType(0);  ///< Defines DIVU interrupt vector number.
+            static constexpr PosType lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
+            static constexpr PosType hi_word_pos = PosType(16); ///< Defines the range of the lower 16 bits of the register.
+
+            static constexpr u8 divuv_mask = 0x7F;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdiv", DIVUV, divuv, divuv_mask, divuv_pos, divuv_mask);
+
+            static constexpr u16 word_mask = 0xFFFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdiv", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdiv", HI_WORD, hiWord, word_mask, hi_word_pos, word_mask);
+        };
+        using VcrdivType = Reg<u32, Vcrdiv>;
+        VcrdivType vcrdiv;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Vcrdma0
+        ///
+        /// \brief	Vector Number Setting Register DMA (VCRDMAx).
+        ///
+        /// \author	Runik
+        /// \date	26/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Vcrdma {
+            using PosType     = Pos<u32, Vcrdma>;
+            using BitsType    = Bits<u32, Vcrdma>;
+            using MaskedType  = Masked<u32, Vcrdma>;
+            using ShiftedType = Shifted<u32, Vcrdma>;
+
+            static constexpr PosType vc_pos      = PosType(0);  ///< Defines DMACx transfer end interrupt vector number.
+            static constexpr PosType lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
+            static constexpr PosType hi_word_pos = PosType(16); ///< Defines the range of the lower 16 bits of the register.
+
+            static constexpr u8 vc_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdma", VC, vc, vc_mask, vc_pos, vc_mask);
+
+            static constexpr u16 word_mask = 0xFFFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdma", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdma", HI_WORD, hiWord, word_mask, hi_word_pos, word_mask);
+        };
+        using VcrdmaType = Reg<u32, Vcrdma>;
+        VcrdmaType vcrdma0;
+        VcrdmaType vcrdma1;
     };
     Intc intc;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VectorNumberSettingRegisterWdt
-///
-/// \brief	Vector Number Setting Register WDT (VCRWDT).
-///
-/// \author	Runik
-/// \date	18/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union VectorNumberSettingRegisterWdt {
-    u16            raw;                      ///< Raw representation.
-    BitField<8, 7> wdt_interval_vector;      ///< Defines WDT interval interrupt vector number.
-    BitField<0, 7> wdt_compare_match_vector; ///< Defines WDT compare match interrupt vector number.
-    BitField<8, 8> upper_8_bits;             ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;             ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VectorNumberSettingRegisterDiv
-///
-/// \brief	Vector Number Setting Register Div (VCRDIV).
-///
-/// \author	Runik
-/// \date	18/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union VectorNumberSettingRegisterDiv {
-    u32              raw;                   ///< Raw representation.
-    BitField<0, 7>   divu_interrupt_vector; ///< Defines DIVU vector number.
-    BitField<16, 16> upper_16_bits;         ///< Defines the range of the upper 16 bits of the register.
-    BitField<0, 16>  lower_16_bits;         ///< Defines the range of the lower 16 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VectorNumberSettingRegisterDma
-///
-/// \brief	Vector Number Setting Register DMA (VCRDMAx).
-///
-/// \author	Runik
-/// \date	18/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union VectorNumberSettingRegisterDma {
-    u32            raw;                      ///< Raw representation.
-    BitField<0, 8> dma_transfert_end_vector; ///< Defines DMACx vector number.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -61,8 +61,9 @@ auto Sh2::readRegisters8(const u32 addr) const -> u8 {
         case vector_number_setting_register_c + 1: return static_cast<u8>(regs_.intc.vcrc >> Sh2Regs::Intc::Vcrc::LO_BYTE_SHFT);
         case vector_number_setting_register_d: return static_cast<u8>(regs_.intc.vcrd >> Sh2Regs::Intc::Vcrd::HI_BYTE_SHFT);
         case vector_number_setting_register_d + 1: return static_cast<u8>(regs_.intc.vcrd >> Sh2Regs::Intc::Vcrd::LO_BYTE_SHFT);
-        case vector_number_setting_register_wdt: return static_cast<u8>(intc_vcrwdt_.upper_8_bits);
-        case vector_number_setting_register_wdt + 1: return intc_vcrwdt_.lower_8_bits;
+        case vector_number_setting_register_wdt: return static_cast<u8>(regs_.intc.vcrwdt >> Sh2Regs::Intc::Vcrwdt::HI_BYTE_SHFT);
+        case vector_number_setting_register_wdt + 1:
+            return static_cast<u8>(regs_.intc.vcrwdt >> Sh2Regs::Intc::Vcrwdt::LO_BYTE_SHFT);
         case interrupt_control_register: return static_cast<u8>(intc_icr_.upper_8_bits);
         case interrupt_control_register + 1: return intc_icr_.lower_8_bits;
         /////////////
@@ -132,10 +133,12 @@ auto Sh2::readRegisters16(const u32 addr) const -> u16 {
         case vector_number_setting_register_b: return regs_.intc.vcrb.data();
         case vector_number_setting_register_c: return regs_.intc.vcrc.data();
         case vector_number_setting_register_d: return regs_.intc.vcrd.data();
-        case vector_number_setting_register_wdt: return intc_vcrwdt_.raw;
+        case vector_number_setting_register_wdt: return regs_.intc.vcrwdt.data();
         case interrupt_control_register: return intc_icr_.raw;
-        case vector_number_setting_register_div: return intc_vcrdiv_.upper_16_bits;
-        case vector_number_setting_register_div + 2: return intc_vcrdiv_.lower_16_bits;
+        case vector_number_setting_register_div:
+            return static_cast<u16>(regs_.intc.vcrdiv >> Sh2Regs::Intc::Vcrdiv::HI_WORD_SHFT);
+        case vector_number_setting_register_div + 2:
+            return static_cast<u16>(regs_.intc.vcrdiv >> Sh2Regs::Intc::Vcrdiv::LO_WORD_SHFT);
 
         /////////////
         // 7. BSC //
@@ -196,9 +199,9 @@ auto Sh2::readRegisters32(const u32 addr) const -> u32 {
         /////////////
         // 5. INTC //
         /////////////
-        case vector_number_setting_register_div: return intc_vcrdiv_.raw;
-        case dma_vector_number_register_0: return intc_vcrdma0_.raw;
-        case dma_vector_number_register_1: return intc_vcrdma1_.raw;
+        case vector_number_setting_register_div: return regs_.intc.vcrdiv.data();
+        case dma_vector_number_register_0: return regs_.intc.vcrdma0.data();
+        case dma_vector_number_register_1: return regs_.intc.vcrdma1.data();
 
         /////////////
         // 7. BSC //
@@ -293,8 +296,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case vector_number_setting_register_c + 1: regs_.intc.vcrc.upd(Sh2Regs::Intc::Vcrc::loByte(data)); break;
         case vector_number_setting_register_d: regs_.intc.vcrd.upd(Sh2Regs::Intc::Vcrd::hiByte(data)); break;
         case vector_number_setting_register_d + 1: break; // Read only
-        case vector_number_setting_register_wdt: intc_vcrwdt_.upper_8_bits = data; break;
-        case vector_number_setting_register_wdt + 1: intc_vcrwdt_.lower_8_bits = data; break;
+        case vector_number_setting_register_wdt: regs_.intc.vcrwdt.upd(Sh2Regs::Intc::Vcrwdt::hiByte(data)); break;
+        case vector_number_setting_register_wdt + 1: regs_.intc.vcrwdt.upd(Sh2Regs::Intc::Vcrwdt::loByte(data)); break;
         case interrupt_control_register: intc_icr_.upper_8_bits = data; break;
         case interrupt_control_register + 1: intc_icr_.lower_8_bits = data; break;
 
@@ -418,9 +421,9 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         case vector_number_setting_register_b: regs_.intc.vcrb = data; break;
         case vector_number_setting_register_c: regs_.intc.vcrc = data; break;
         case vector_number_setting_register_d: regs_.intc.vcrd = data; break;
-        case vector_number_setting_register_wdt: intc_vcrwdt_.raw = data; break;
+        case vector_number_setting_register_wdt: regs_.intc.vcrwdt = data; break;
         case vector_number_setting_register_div: break; // Read only access
-        case vector_number_setting_register_div + 2: intc_vcrdiv_.lower_16_bits = (data & bitmask_7F); break;
+        case vector_number_setting_register_div + 2: regs_.intc.vcrdiv.upd(Sh2Regs::Intc::Vcrdiv::divuv(data)); break;
         case interrupt_control_register: {
             auto new_icr = InterruptControlRegister{data};
             switch (toEnum<NmiEdgeDetection>(intc_icr_.nmi_edge_detection)) {
@@ -536,9 +539,9 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         /////////////
         // 5. INTC //
         /////////////
-        case vector_number_setting_register_div: intc_vcrdiv_.raw = data; break;
-        case dma_vector_number_register_0: intc_vcrdma0_.raw = data; break;
-        case dma_vector_number_register_1: intc_vcrdma1_.raw = data; break;
+        case vector_number_setting_register_div: regs_.intc.vcrdiv = data; break;
+        case dma_vector_number_register_0: regs_.intc.vcrdma0 = data; break;
+        case dma_vector_number_register_1: regs_.intc.vcrdma1 = data; break;
 
         /////////////
         // 7. BSC //
@@ -694,17 +697,17 @@ void Sh2::purgeCache() {
 
 void Sh2::initializeOnChipRegisters() {
     // Interrupt Control
-    regs_.intc.ipra   = {};
-    regs_.intc.iprb   = {};
-    regs_.intc.vcra   = {};
-    regs_.intc.vcrb   = {};
-    regs_.intc.vcrc   = {};
-    regs_.intc.vcrd   = {};
-    intc_vcrwdt_.raw  = {};
-    intc_vcrdiv_.raw  = {}; // lower 16 bits are undefined
-    intc_vcrdma0_.raw = {}; // lower 8 bits are undefined
-    intc_vcrdma1_.raw = {}; // lower 8 bits are undefined
-    intc_icr_.raw     = {};
+    regs_.intc.ipra    = {};
+    regs_.intc.iprb    = {};
+    regs_.intc.vcra    = {};
+    regs_.intc.vcrb    = {};
+    regs_.intc.vcrc    = {};
+    regs_.intc.vcrd    = {};
+    regs_.intc.vcrwdt  = {};
+    regs_.intc.vcrdiv  = {}; // lower 16 bits are undefined
+    regs_.intc.vcrdma0 = {}; // lower 8 bits are undefined
+    regs_.intc.vcrdma1 = {}; // lower 8 bits are undefined
+    intc_icr_.raw      = {};
 
     // Bus State Controler registers
     constexpr auto bsc_bcr1_master_default_value = u32{0x000003F0};
@@ -955,7 +958,7 @@ void Sh2::runDivisionUnit(const u8 cycles_to_run) {
         if (toEnum<OverflowFlag>(divu_dvcr_.overflow_flag) == OverflowFlag::overflow) {
             if (toEnum<core::InterruptEnable>(divu_dvcr_.interrupt_enable) == core::InterruptEnable::enabled) {
                 Log::debug(Logger::sh2, "DIVU - Sending division overflow interrupt");
-                is::sh2_division_overflow.vector = intc_vcrdiv_.divu_interrupt_vector;
+                is::sh2_division_overflow.vector = static_cast<u8>(regs_.intc.vcrdiv >> Sh2Regs::Intc::Vcrdiv::DIVUV_SHFT);
                 is::sh2_division_overflow.level  = static_cast<u8>(regs_.intc.ipra >> Sh2Regs::Intc::Ipra::DIVU_LEVEL_SHFT);
                 sendInterrupt(is::sh2_division_overflow);
             }
@@ -1220,14 +1223,14 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                 dmac_sar0_.raw                = source;
                 dmac_dar0_.raw                = destination;
                 dmac_chcr0_.transfer_end_flag = true;
-                conf.interrupt.vector         = intc_vcrdma0_.dma_transfert_end_vector;
+                conf.interrupt.vector         = static_cast<u8>(regs_.intc.vcrdma0 >> Sh2Regs::Intc::Vcrdma::VC_SHFT);
                 break;
             case DmaChannel::channel_1:
                 dmac_tcr1_.raw                = counter;
                 dmac_sar1_.raw                = source;
                 dmac_dar1_.raw                = destination;
                 dmac_chcr1_.transfer_end_flag = true;
-                conf.interrupt.vector         = intc_vcrdma1_.dma_transfert_end_vector;
+                conf.interrupt.vector         = static_cast<u8>(regs_.intc.vcrdma1 >> Sh2Regs::Intc::Vcrdma::VC_SHFT);
                 break;
             case DmaChannel::channel_unknown: Log::warning(Logger::sh2, "Unknown DMA channel used !");
         }
