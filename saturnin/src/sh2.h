@@ -942,11 +942,6 @@ class Sh2 {
     Interrupt                             current_interrupt_{is::undefined}; ///< Interrupt in execution
     //@}
 
-    ///  \name INTC (Interrupt Controller)
-    //@{
-    InterruptControlRegister intc_icr_;
-    //@}
-
     /// \name BSC (Bus State Controller)
     //@{
     BusControlRegister1              bsc_bcr1_;

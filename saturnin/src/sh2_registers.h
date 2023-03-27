@@ -432,59 +432,40 @@ struct Sh2Regs {
         using VcrdmaType = Reg<u32, Vcrdma>;
         VcrdmaType vcrdma0;
         VcrdmaType vcrdma1;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Icr
+        ///
+        /// \brief	Interrupt Control Register (ICR).
+        ///
+        /// \author	Runik
+        /// \date	26/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Icr {
+            using PosType     = Pos<u16, Icr>;
+            using BitsType    = Bits<u16, Icr>;
+            using MaskedType  = Masked<u16, Icr>;
+            using ShiftedType = Shifted<u16, Icr>;
+
+            static constexpr PosType vecmd_pos   = PosType(0);  ///< Defines VECMD bit.
+            static constexpr PosType nmie_pos    = PosType(8);  ///< Defines NMIE bit.
+            static constexpr PosType nmil_pos    = PosType(15); ///< Defines NMIL bit.
+            static constexpr PosType lo_byte_pos = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
+            static constexpr PosType hi_byte_pos = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr BitsType vector_mode_external = BitsType(1, vecmd_pos);
+            static constexpr BitsType nmi_edge_rising      = BitsType(1, nmie_pos);
+            static constexpr BitsType nmi_input_level_high = BitsType(1, nmil_pos);
+
+            static constexpr u8 byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Icr", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Intc::Icr", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using IcrType = Reg<u16, Icr>;
+        IcrType icr;
     };
     Intc intc;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   NmiInputLevel
-///
-/// \brief  ICR - NMIL bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class NmiInputLevel : bool {
-    low  = false, ///< NMI input level is low
-    high = true   ///< NMI input level is high
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   NmiEdgeDetection
-///
-/// \brief  ICR - NMIE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class NmiEdgeDetection : bool {
-    falling = false, ///< Interrupt request detected on falling edge of NMI input (initial)
-    rising  = true   ///< Interrupt request detected on rising edge of NMI input
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   VectorMode
-///
-/// \brief  ICR - VECMD bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class VectorMode : bool {
-    auto_vector     = false, ///< Auto vector mode (initial)
-    external_vector = true   ///< External vector mode
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	InterruptControlRegister
-///
-/// \brief	Interrupt Control Register (ICR).
-///
-/// \author	Runik
-/// \date	18/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union InterruptControlRegister {
-    u16            raw;                ///< Raw representation.
-    BitField<15>   nmi_input_level;    ///< Defines NMIL bit
-    BitField<8>    nmi_edge_detection; ///< Defines NMIE bit.
-    BitField<0>    vector_mode;        ///< Defines VECMD  bit.
-    BitField<8, 8> upper_8_bits;       ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;       ///< Defines the range of the lower 8 bits of the register.
 };
 
 //////////////////////////////////
