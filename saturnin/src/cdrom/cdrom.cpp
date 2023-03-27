@@ -651,7 +651,7 @@ void Cdrom::executeCommand() {
             //		case 0x30: // Set CD Device Connection
             //			currentFilter=CR3>>8;
             //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("CD device connection set to filter n°",currentFilter);
+            //			EmuState::pLog->CdBlockWrite("CD device connection set to filter no",currentFilter);
             //			#endif
             //
             //			HIRQREQ|=CMOK|ESEL;

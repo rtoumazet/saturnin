@@ -144,17 +144,18 @@ auto Sh2::readRegisters16(const u32 addr) const -> u16 {
         // 7. BSC //
         /////////////
         case bus_control_register1: return u16{0};
-        case bus_control_register1 + 2: return bsc_bcr1_.lower_16_bits;
+        case bus_control_register1 + 2: return static_cast<u16>(regs_.bsc.bcr1 >> Sh2Regs::Bsc::Bcr::LO_WORD_SHFT);
         case bus_control_register2: return u16{0};
-        case bus_control_register2 + 2: return bsc_bcr2_.lower_16_bits;
+        case bus_control_register2 + 2: return static_cast<u16>(regs_.bsc.bcr2 >> Sh2Regs::Bsc::Bcr::LO_WORD_SHFT);
         case wait_state_control_register: return u16{0};
-        case wait_state_control_register + 2: return bsc_wcr_.lower_16_bits;
+        case wait_state_control_register + 2: return static_cast<u16>(regs_.bsc.wcr >> Sh2Regs::Bsc::Wcr::LO_WORD_SHFT);
         case individual_memory_control_register: return u16{0};
-        case individual_memory_control_register + 2: return bsc_mcr_.lower_16_bits;
+        case individual_memory_control_register + 2: return static_cast<u16>(regs_.bsc.mcr >> Sh2Regs::Bsc::Mcr::LO_WORD_SHFT);
         case refresh_timer_control_status_register: return u16{0};
-        case refresh_timer_control_status_register + 2: return bsc_rtcsr_.lower_16_bits;
-        case refresh_timer_counter + 2: return bsc_rtcnt_.lower_16_bits;
-        case refresh_time_constant_register + 2: return bsc_rtcor_.lower_16_bits;
+        case refresh_timer_control_status_register + 2:
+            return static_cast<u16>(regs_.bsc.rtcsr >> Sh2Regs::Bsc::Rtcsr::LO_WORD_SHFT);
+        case refresh_timer_counter + 2: return static_cast<u16>(regs_.bsc.rtcnt >> Sh2Regs::Bsc::Rtcnt::LO_WORD_SHFT);
+        case refresh_time_constant_register + 2: return static_cast<u16>(regs_.bsc.rtcor >> Sh2Regs::Bsc::Rtcor::LO_WORD_SHFT);
 
         //////////////
         // 8. Cache //
@@ -207,13 +208,13 @@ auto Sh2::readRegisters32(const u32 addr) const -> u32 {
         // 7. BSC //
         /////////////
         // Upper 16 bits are 0x0000, but as they're initialized and never written to after that, no need to mask the return value.
-        case bus_control_register1: return bsc_bcr1_.raw;
-        case bus_control_register2: return bsc_bcr2_.raw;
-        case wait_state_control_register: return bsc_wcr_.raw;
-        case individual_memory_control_register: return bsc_mcr_.raw;
-        case refresh_timer_control_status_register: return bsc_rtcsr_.raw;
-        case refresh_timer_counter: return bsc_rtcnt_.raw;
-        case refresh_time_constant_register: return bsc_rtcor_.raw;
+        case bus_control_register1: return regs_.bsc.bcr1.data();
+        case bus_control_register2: return regs_.bsc.bcr2.data();
+        case wait_state_control_register: return regs_.bsc.wcr.data();
+        case individual_memory_control_register: return regs_.bsc.mcr.data();
+        case refresh_timer_control_status_register: return regs_.bsc.rtcsr.data();
+        case refresh_timer_counter: return regs_.bsc.rtcnt.data();
+        case refresh_time_constant_register: return regs_.bsc.rtcor.data();
 
         //////////////
         // 8. Cache //
@@ -425,13 +426,14 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         case vector_number_setting_register_div: break; // Read only access
         case vector_number_setting_register_div + 2: regs_.intc.vcrdiv.upd(Sh2Regs::Intc::Vcrdiv::divuv(data)); break;
         case interrupt_control_register: {
-            auto new_level = Sh2Regs::Intc::IcrType{data}.any(Sh2Regs::Intc::Icr::nmi_input_level_high);
-            auto old_level = regs_.intc.icr.any(Sh2Regs::Intc::Icr::nmi_input_level_high);
+            auto new_level         = Sh2Regs::Intc::IcrType{data}.any(Sh2Regs::Intc::Icr::nmi_input_level_high);
+            auto old_level         = regs_.intc.icr.any(Sh2Regs::Intc::Icr::nmi_input_level_high);
+            auto has_level_changed = (new_level != old_level);
 
             if (regs_.intc.icr.any(Sh2Regs::Intc::Icr::nmi_edge_rising)) {
-                if (new_level != old_level) { Log::warning(Logger::sh2, "Rising edge NMI, not implemented !"); }
+                if (has_level_changed) { Log::warning(Logger::sh2, "Rising edge NMI, not implemented !"); }
             } else {
-                if (new_level != old_level) { Log::warning(Logger::sh2, "Falling edge NMI, not implemented !"); }
+                if (has_level_changed) { Log::warning(Logger::sh2, "Falling edge NMI, not implemented !"); }
             }
 
             // Will force exit from the Sleep instruction. Will have to be adapted using Power Down modes.
@@ -445,29 +447,30 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         /////////////
         case bus_control_register1 + 2: {
             constexpr auto write_mask = u16{0b0001111111110111};
-            bsc_bcr1_.lower_16_bits   = (data & write_mask);
+            regs_.bsc.bcr1.upd(Sh2Regs::Bsc::Bcr::loWord(data & write_mask));
             break;
         }
         case bus_control_register2 + 2: {
             constexpr auto write_mask = u16{0b0000000011111100};
-            bsc_bcr2_.lower_16_bits   = (data & write_mask);
+            regs_.bsc.bcr2.upd(Sh2Regs::Bsc::Bcr::loWord(data & write_mask));
             break;
         }
-        case wait_state_control_register + 2: bsc_wcr_.lower_16_bits = data; break;
-        case individual_memory_control_register + 2: bsc_mcr_.lower_16_bits = data; break;
+        case wait_state_control_register + 2: regs_.bsc.wcr.upd(Sh2Regs::Bsc::Wcr::loWord(data)); break;
+        case individual_memory_control_register + 2: regs_.bsc.mcr.upd(Sh2Regs::Bsc::Mcr::loWord(data)); break;
         case refresh_timer_control_status_register + 2: {
             constexpr auto write_mask = u16{0b0000000011111000};
-            bsc_rtcsr_.lower_16_bits  = (data & write_mask);
+            regs_.bsc.rtcsr.upd(Sh2Regs::Bsc::Rtcsr::loWord(data & write_mask));
             break;
         }
         case refresh_timer_counter + 2: {
             constexpr auto write_mask = u16{0b0000000011111111};
-            bsc_rtcnt_.lower_16_bits  = (data & write_mask);
+            regs_.bsc.rtcnt.upd(Sh2Regs::Bsc::Rtcnt::loWord(data & write_mask));
             break;
         }
         case refresh_time_constant_register + 2: {
             constexpr auto write_mask = u16{0b0000000011111111};
-            bsc_rtcor_.lower_16_bits  = (data & write_mask);
+            regs_.bsc.rtcor.upd(Sh2Regs::Bsc::Rtcor::loWord(data & write_mask));
+
             break;
         }
         //////////////
@@ -538,39 +541,39 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         // 7. BSC //
         /////////////
         case bus_control_register1:
-            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
+            if ((data & 0xFFFF0000) == allow_bsc_write_mask) {
                 constexpr auto write_mask = u16{0b0001111111110111};
-                bsc_bcr1_.lower_16_bits   = (data & write_mask);
+                regs_.bsc.bcr1.upd(Sh2Regs::Bsc::Bcr::loWord(data & write_mask));
             }
             break;
         case bus_control_register2:
-            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
+            if ((data & 0xFFFF0000) == allow_bsc_write_mask) {
                 constexpr auto write_mask = u16{0b0000000011111100};
-                bsc_bcr2_.lower_16_bits   = (data & write_mask);
+                regs_.bsc.bcr2.upd(Sh2Regs::Bsc::Bcr::loWord(data & write_mask));
             }
             break;
         case wait_state_control_register:
-            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) { bsc_wcr_.lower_16_bits = data; }
+            if ((data & 0xFFFF0000) == allow_bsc_write_mask) { regs_.bsc.wcr.upd(Sh2Regs::Bsc::Wcr::loWord(data)); }
             break;
         case individual_memory_control_register:
-            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) { bsc_mcr_.lower_16_bits = data; }
+            if ((data & 0xFFFF0000) == allow_bsc_write_mask) { regs_.bsc.mcr.upd(Sh2Regs::Bsc::Mcr::loWord(data)); }
             break;
         case refresh_timer_control_status_register:
-            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
+            if ((data & 0xFFFF0000) == allow_bsc_write_mask) {
                 constexpr auto write_mask = u16{0b0000000011111000};
-                bsc_rtcsr_.lower_16_bits  = (data & write_mask);
+                regs_.bsc.rtcsr.upd(Sh2Regs::Bsc::Rtcsr::loWord(data & write_mask));
             }
             break;
         case refresh_timer_counter:
-            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
+            if ((data & 0xFFFF0000) == allow_bsc_write_mask) {
                 constexpr auto write_mask = u16{0b0000000011111111};
-                bsc_rtcnt_.lower_16_bits  = (data & write_mask);
+                regs_.bsc.rtcnt.upd(Sh2Regs::Bsc::Rtcnt::loWord(data & write_mask));
             }
             break;
         case refresh_time_constant_register:
-            if ((data & bitmask_FFFF0000) == allow_bsc_write_mask) {
+            if ((data & 0xFFFF0000) == allow_bsc_write_mask) {
                 constexpr auto write_mask = u16{0b0000000011111111};
-                bsc_rtcor_.lower_16_bits  = (data & write_mask);
+                regs_.bsc.rtcor.upd(Sh2Regs::Bsc::Rtcor::loWord(data & write_mask));
             }
             break;
 
@@ -707,13 +710,13 @@ void Sh2::initializeOnChipRegisters() {
     constexpr auto bsc_wcr_default_value         = u32{0x0000AAFFu};
     const auto default_bcr1 = u32{(sh2_type_ == Sh2Type::master) ? bsc_bcr1_master_default_value : bsc_bcr1_slave_default_value};
 
-    bsc_bcr1_.raw  = default_bcr1;
-    bsc_bcr2_.raw  = bsc_bcr2_default_value;
-    bsc_wcr_.raw   = bsc_wcr_default_value;
-    bsc_mcr_.raw   = {};
-    bsc_rtcsr_.raw = {};
-    bsc_rtcnt_.raw = {};
-    bsc_rtcor_.raw = {};
+    regs_.bsc.bcr1  = default_bcr1;
+    regs_.bsc.bcr2  = bsc_bcr2_default_value;
+    regs_.bsc.wcr   = bsc_wcr_default_value;
+    regs_.bsc.mcr   = {};
+    regs_.bsc.rtcsr = {};
+    regs_.bsc.rtcnt = {};
+    regs_.bsc.rtcor = {};
 
     // Cache registers
     cache_ccr_.raw = {};

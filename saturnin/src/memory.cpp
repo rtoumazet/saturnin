@@ -407,7 +407,7 @@ auto Memory::readStvProtection(const u32 addr, u32 data) const -> u32 {
             case 0x77770000: // NOLINT(readability-magic-numbers)
                 data = 0;
                 break;
-                // Elan Doreé
+                // Elan Doree
             case 0xff7f0000:                           // NOLINT(readability-magic-numbers)
             case 0xf9ff0000:                           // NOLINT(readability-magic-numbers)
             case 0xffbf0000: data = 0x02002000; break; // NOLINT(readability-magic-numbers)

@@ -466,108 +466,151 @@ struct Sh2Regs {
         IcrType icr;
     };
     Intc intc;
-};
 
-//////////////////////////////////
-// 7. Bus State Controler (BSC) //
-//////////////////////////////////
+    //////////////////////////////////
+    // 7. Bus State Controler (BSC) //
+    //////////////////////////////////
+    struct Bsc {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Bcr
+        ///
+        /// \brief	Bus Control Register (BCR1 and BCR2).
+        ///
+        /// \author	Runik
+        /// \date	27/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	BusControlRegister1
-///
-/// \brief	Bus Control Register 1 (BCR1).
-///
-/// \author	Runik
-/// \date	18/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        struct Bcr {
+            using PosType     = Pos<u32, Bcr>;
+            using BitsType    = Bits<u32, Bcr>;
+            using MaskedType  = Masked<u32, Bcr>;
+            using ShiftedType = Shifted<u32, Bcr>;
 
-union BusControlRegister1 {
-    u32             raw;           ///< Raw representation.
-    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
-};
+            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	BusControlRegister2
-///
-/// \brief	Bus Control Register 2 (BCR2).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            static constexpr u16 word_mask = 0xFFFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Bcr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
+        };
+        using BcrType = Reg<u32, Bcr>;
+        BcrType bcr1;
+        BcrType bcr2;
 
-union BusControlRegister2 {
-    u32             raw;           ///< Raw representation.
-    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Wcr
+        ///
+        /// \brief	Wait Control Register (WCR).
+        ///
+        /// \author	Runik
+        /// \date	27/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WaitControlRegister
-///
-/// \brief	Wait Control Register (WCR).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        struct Wcr {
+            using PosType     = Pos<u32, Wcr>;
+            using BitsType    = Bits<u32, Wcr>;
+            using MaskedType  = Masked<u32, Wcr>;
+            using ShiftedType = Shifted<u32, Wcr>;
 
-union WaitControlRegister {
-    u32             raw;           ///< Raw representation.
-    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
-};
+            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	IndividualMemoryControlRegister
-///
-/// \brief	Individual Memory Control Register (MCR).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            static constexpr u16 word_mask = 0xFFFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Wcr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
+        };
+        using WcrType = Reg<u32, Wcr>;
+        WcrType wcr;
 
-union IndividualMemoryControlRegister {
-    u32             raw;           ///< Raw representation.
-    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Mcr
+        ///
+        /// \brief	Individual Memory Control Register (MCR).
+        ///
+        /// \author	Runik
+        /// \date	27/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	RefreshTimeControlStatusRegister
-///
-/// \brief	Refresh Time Control/Status Register (RTCSR).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        struct Mcr {
+            using PosType     = Pos<u32, Mcr>;
+            using BitsType    = Bits<u32, Mcr>;
+            using MaskedType  = Masked<u32, Mcr>;
+            using ShiftedType = Shifted<u32, Mcr>;
 
-union RefreshTimeControlStatusRegister {
-    u32             raw;           ///< Raw representation.
-    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
-};
+            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	RefreshTimerCounter
-///
-/// \brief	Refresh Timer Counter (RTCNT).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            static constexpr u16 word_mask = 0xFFFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Mcr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
+        };
+        using McrType = Reg<u32, Mcr>;
+        McrType mcr;
 
-union RefreshTimerCounter {
-    u32             raw;           ///< Raw representation.
-    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Rtcsr
+        ///
+        /// \brief	Refresh Time Control/Status Register (RTCSR).
+        ///
+        /// \author	Runik
+        /// \date	27/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	RefreshTimerConstantRegister
-///
-/// \brief	Refresh Timer Constant Register (RTCOR).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        struct Rtcsr {
+            using PosType     = Pos<u32, Rtcsr>;
+            using BitsType    = Bits<u32, Rtcsr>;
+            using MaskedType  = Masked<u32, Rtcsr>;
+            using ShiftedType = Shifted<u32, Rtcsr>;
 
-union RefreshTimerConstantRegister {
-    u32             raw;           ///< Raw representation.
-    BitField<0, 16> lower_16_bits; ///< Defines the range of the lower 16 bits of the register.
+            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
+
+            static constexpr u16 word_mask = 0xFFFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Rtcsr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
+        };
+        using RtcsrType = Reg<u32, Rtcsr>;
+        RtcsrType rtcsr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Rtcnt
+        ///
+        /// \brief	A rtcnt.
+        ///
+        /// \author	Runik
+        /// \date	27/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Rtcnt {
+            using PosType     = Pos<u32, Rtcnt>;
+            using BitsType    = Bits<u32, Rtcnt>;
+            using MaskedType  = Masked<u32, Rtcnt>;
+            using ShiftedType = Shifted<u32, Rtcnt>;
+
+            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
+
+            static constexpr u16 word_mask = 0xFFFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Rtcnt", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
+        };
+        using RtcntType = Reg<u32, Rtcnt>;
+        RtcntType rtcnt;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Rtcor
+        ///
+        /// \brief	Refresh Timer Constant Register (RTCOR).
+        ///
+        /// \author	Runik
+        /// \date	27/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Rtcor {
+            using PosType     = Pos<u32, Rtcor>;
+            using BitsType    = Bits<u32, Rtcor>;
+            using MaskedType  = Masked<u32, Rtcor>;
+            using ShiftedType = Shifted<u32, Rtcor>;
+
+            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
+
+            static constexpr u16 word_mask = 0xFFFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Rtcor", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
+        };
+        using RtcorType = Reg<u32, Rtcor>;
+        RtcorType rtcor;
+    };
+    Bsc bsc;
 };
 
 //////////////

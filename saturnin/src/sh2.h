@@ -942,17 +942,6 @@ class Sh2 {
     Interrupt                             current_interrupt_{is::undefined}; ///< Interrupt in execution
     //@}
 
-    /// \name BSC (Bus State Controller)
-    //@{
-    BusControlRegister1              bsc_bcr1_;
-    BusControlRegister2              bsc_bcr2_;
-    WaitControlRegister              bsc_wcr_;
-    IndividualMemoryControlRegister  bsc_mcr_;
-    RefreshTimeControlStatusRegister bsc_rtcsr_;
-    RefreshTimerCounter              bsc_rtcnt_;
-    RefreshTimerConstantRegister     bsc_rtcor_;
-    //@}
-
     /// \name Cache
     //@{
     CacheControlRegister cache_ccr_;
