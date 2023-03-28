@@ -73,7 +73,7 @@ auto Sh2::readRegisters8(const u32 addr) const -> u8 {
         //////////////
         // 8. Cache //
         //////////////
-        case cache_control_register: return cache_ccr_.raw;
+        case cache_control_register: return regs_.cache.ccr.data();
 
         /////////////
         // 9. DMAC //
@@ -312,12 +312,12 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         case cache_control_register:
             Log::debug(Logger::sh2, "CCR byte write: {}", data);
 
-            cache_ccr_.raw = data;
-            if (toEnum<CachePurge>(cache_ccr_.cache_purge) == CachePurge::cache_purge) {
+            regs_.cache.ccr = data;
+            if (regs_.cache.ccr.any(Sh2Regs::Cache::Ccr::cache_purge)) {
                 purgeCache();
 
                 // cache purge bit is cleared after operation
-                cache_ccr_.cache_purge = false;
+                regs_.cache.ccr.clr(Sh2Regs::Cache::Ccr::cache_purge);
             }
             break;
 
@@ -719,7 +719,7 @@ void Sh2::initializeOnChipRegisters() {
     regs_.bsc.rtcor = {};
 
     // Cache registers
-    cache_ccr_.raw = {};
+    regs_.cache.ccr = {};
 
     // Direct Memory Access Controler registers
     dmac_tcr0_.raw  = {}; // lower 24 bits are undefined

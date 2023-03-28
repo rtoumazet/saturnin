@@ -611,97 +611,41 @@ struct Sh2Regs {
         RtcorType rtcor;
     };
     Bsc bsc;
-};
 
-//////////////
-// 8. Cache //
-//////////////
+    //////////////
+    // 8. Cache //
+    //////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   WaySpecification
-///
-/// \brief  CCR - Wx bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Cache {
+        struct Ccr {
+            using PosType     = Pos<u8, Ccr>;
+            using BitsType    = Bits<u8, Ccr>;
+            using MaskedType  = Masked<u8, Ccr>;
+            using ShiftedType = Shifted<u8, Ccr>;
 
-enum class WaySpecification : u8 {
-    way_0 = 0b00, ///< Way 0 (initial value).
-    way_1 = 0b01, ///< Way 1
-    way_2 = 0b10, ///< Way 2
-    way_3 = 0b11  ///< Way 3
-};
+            static constexpr PosType ce_pos = PosType(0); ///< (Immutable) Cache enable.
+            static constexpr PosType id_pos = PosType(1); ///< (Immutable) Instruction replacement disable.
+            static constexpr PosType od_pos = PosType(2); ///< (Immutable) Data replacement disable.
+            static constexpr PosType tw_pos = PosType(3); ///< (Immutable) Two way mode.
+            static constexpr PosType cp_pos = PosType(4); ///< (Immutable) Cache purge.
+            static constexpr PosType wx_pos = PosType(6); ///< (Immutable) Way specification.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CachePurge
-///
-/// \brief  CCR - CP bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            static constexpr BitsType cache_enabled                          = BitsType(1, ce_pos);
+            static constexpr BitsType instruction_not_replaced_on_cache_miss = BitsType(1, id_pos);
+            static constexpr BitsType data_not_replaced_on_cache_miss        = BitsType(1, od_pos);
+            static constexpr BitsType two_way_mode                           = BitsType(1, tw_pos);
+            static constexpr BitsType cache_purge                            = BitsType(1, cp_pos);
 
-enum class CachePurge : bool {
-    normal_operation = false, ///< Normal operation.
-    cache_purge      = true   ///< Cache purge.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TwoWayMode
-///
-/// \brief  CCR - CP bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TwoWayMode : bool {
-    four_way = false, ///< Four way mode (initial).
-    two_way  = true   ///< Two way mode.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DataReplacementDisable
-///
-/// \brief  CCR - OD bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class DataReplacementDisable : bool {
-    normal_operation  = false, ///< Normal operation (initial).
-    data_not_replaced = true   ///< Data not replaced even when wache miss occurs in data access.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InstructionReplacementDisable
-///
-/// \brief  CCR - ID bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class InstructionReplacementDisable : bool {
-    normal_operation  = false, ///< Normal operation (initial).
-    data_not_replaced = true   ///< Data not replaced even when wache miss occurs in instruction fetch.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CacheEnable
-///
-/// \brief  CCR - CE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class CacheEnable : bool {
-    cache_disabled = false, ///< Cache disabled (initial).
-    cache_enabled  = true   ///< Cache enabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CacheControlRegister
-///
-/// \brief	Cache Control Register (CCR).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union CacheControlRegister {
-    u8             raw;                             ///< Raw representation.
-    BitField<6, 2> way_specification;               ///< Defines Wx bits.
-    BitField<4>    cache_purge;                     ///< Defines CP bit.
-    BitField<3>    two_way_mode;                    ///< Defines TW bits.
-    BitField<2>    data_replacement_disable;        ///< Defines OD bits.
-    BitField<1>    instruction_replacement_disable; ///< Defines ID bits.
-    BitField<0>    cache_enable;                    ///< Defines CE bits.
+            static constexpr u8         wx_mask = 0x03;
+            static constexpr MaskedType way_0   = MaskedType(wx_mask, 0b00, wx_pos);
+            static constexpr MaskedType way_1   = MaskedType(wx_mask, 0b01, wx_pos);
+            static constexpr MaskedType way_2   = MaskedType(wx_mask, 0b10, wx_pos);
+            static constexpr MaskedType way_3   = MaskedType(wx_mask, 0b11, wx_pos);
+        };
+        using CcrType = Reg<u8, Ccr>;
+        CcrType ccr;
+    };
+    Cache cache;
 };
 
 //////////////////////////////////////////////

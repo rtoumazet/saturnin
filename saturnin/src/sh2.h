@@ -942,11 +942,6 @@ class Sh2 {
     Interrupt                             current_interrupt_{is::undefined}; ///< Interrupt in execution
     //@}
 
-    /// \name Cache
-    //@{
-    CacheControlRegister cache_ccr_;
-    //@}
-
     /// \name DMAC (Direct Memory Access Controller)
     //@{
     DmaNextTransferPriority dmac_next_transfer_priority_{DmaNextTransferPriority::channel_0_first};
