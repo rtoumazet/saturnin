@@ -674,7 +674,7 @@ void Smpc::getPeripheralData() {
         registers_.oreg[i] = {};
     }
 
-    switch (toEnum<PortMode>(registers_.ireg[1] >> SmpcRegisters::InputRegister::p1md_shft)) {
+    switch (uti::toEnum<PortMode>(registers_.ireg[1] >> SmpcRegisters::InputRegister::p1md_shft)) {
         using enum PortMode;
         case mode_0_byte: break; // no data returned
         case mode_15_byte:
@@ -711,7 +711,7 @@ void Smpc::getPeripheralData() {
         default: Log::warning(Logger::smpc, tr("Port Status reserved"));
     }
 
-    switch (toEnum<PortMode>(registers_.ireg[1] >> SmpcRegisters::InputRegister::p2md_shft)) {
+    switch (uti::toEnum<PortMode>(registers_.ireg[1] >> SmpcRegisters::InputRegister::p2md_shft)) {
         using enum PortMode;
         case mode_0_byte: break; // no data returned
         case mode_15_byte:

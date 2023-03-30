@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <saturnin/src/utilities.h>
+
 namespace saturnin {
 
 // Forward declarations
@@ -55,6 +57,8 @@ class Pos {
     friend class Masked;
     template<typename SHIFT_DATA, typename SHIFT_CLASS>
     friend class Shifted;
+    template<typename ENUM_DATA, typename ENUM_CLASS, typename ENUM_ENUM>
+    friend class Enum;
     template<typename REG_DATA, typename REG_CLASS>
     friend class Reg;
 
@@ -336,6 +340,51 @@ class Shifted {
 }; // template<typename DATA, typename CLASS> class Shifted
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \class	Enum
+///
+/// \brief	Right shifting of bits of a register to a scoped enum.
+///
+/// \author	Runik
+/// \date	30/03/2023
+///
+/// \tparam	DATA 	Data type.
+/// \tparam	CLASS	Class type.
+/// \tparam	ENUM 	Scoped enum type.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename DATA, typename CLASS, typename ENUM>
+class Enum {
+  public:
+    // Friends
+    template<typename REG_DATA, typename REG_CLASS>
+    friend class Reg;
+
+    using PosType  = Pos<DATA, CLASS>;
+    using EnumType = Enum<DATA, CLASS, ENUM>;
+
+    // Constructors / destructors
+    explicit constexpr Enum() : mask_(static_cast<DATA>(0)), pos_(static_cast<DATA>(0)) {}
+    constexpr Enum(const DATA mask, const PosType pos) : mask_(mask << pos.pos_), pos_(pos) {}
+    Enum(const EnumType& other) = default;
+    ~Enum()                     = default;
+
+    // Reset
+    auto operator()(const DATA mask, const DATA pos) -> EnumType& {
+        mask_ = mask;
+        pos_  = pos;
+        return *this;
+    }
+
+    // Accessors
+    auto mask() const -> u32 { return mask_; }
+    auto pos() const -> PosType { return pos_; }
+
+  protected:
+    u32     mask_;
+    PosType pos_;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class	Reg
 ///
 /// \brief	A register.
@@ -410,8 +459,18 @@ class Reg {
     auto operator&(MaskedType mskd) const -> MaskedType { return MaskedType(data_ & mskd.mask_, mskd.mask_); }
     auto operator>>(const Shifted<DATA, CLASS> shft) const -> DATA { return (data_ & shft.mask_) >> shft.pos_.pos_; }
     auto shifted(const Shifted<DATA, CLASS> shft) const -> DATA { return (data_ & shft.mask_) >> shft.pos_.pos_; }
+    template<typename ENUM>
+    auto operator>>(const Enum<DATA, CLASS, ENUM> shft) const -> ENUM {
+        static_assert(std::is_enum_v<ENUM>);
+        return utilities::toEnum<ENUM>((data_ & shft.mask_) >> shft.pos_.pos_);
+    }
+    template<typename ENUM>
+    auto shifted(const Enum<DATA, CLASS, ENUM> shft) const -> ENUM {
+        static_assert(std::is_enum_v<ENUM>);
+        return utilities::toEnum<ENUM>((data_ & shft.mask_) >> shft.pos_.pos_);
+    }
 
-    // Comparisons
+    //  Comparisons
     bool is(const DATA data) const { return data == data_; }
     bool is(const BitsType bits) const { return data_ == bits.bits_; }
     bool is(const MaskedType mskd) const { return data_ == mskd.bits_; }

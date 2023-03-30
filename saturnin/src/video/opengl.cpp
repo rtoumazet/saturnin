@@ -1525,7 +1525,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     int flags;
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    if (toEnum<ContextFlagMask>(flags) == ContextFlagMask::GL_CONTEXT_FLAG_DEBUG_BIT) {
+    if (uti::toEnum<ContextFlagMask>(flags) == ContextFlagMask::GL_CONTEXT_FLAG_DEBUG_BIT) {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(glDebugOutput, nullptr);

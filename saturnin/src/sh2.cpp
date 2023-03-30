@@ -78,8 +78,8 @@ auto Sh2::readRegisters8(const u32 addr) const -> u8 {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_request_response_selection_control_register_0: return dmac_drcr0_.raw;
-        case dma_request_response_selection_control_register_1: return dmac_drcr1_.raw;
+        case dma_request_response_selection_control_register_0: return regs_.dmac.drcr0.data();
+        case dma_request_response_selection_control_register_1: return regs_.dmac.drcr1.data();
         //////////////
         // 10. DIVU //
         //////////////
@@ -223,15 +223,15 @@ auto Sh2::readRegisters32(const u32 addr) const -> u32 {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_source_address_register_0: return dmac_sar0_.raw;
-        case dma_source_address_register_1: return dmac_sar1_.raw;
-        case dma_destination_address_register_0: return dmac_dar0_.raw;
-        case dma_destination_address_register_1: return dmac_dar1_.raw;
-        case dma_tranfer_count_register_0: return dmac_tcr0_.raw;
-        case dma_tranfer_count_register_1: return dmac_tcr1_.raw;
-        case dma_channel_control_register_0: return dmac_chcr0_.raw;
-        case dma_channel_control_register_1: return dmac_chcr1_.raw;
-        case dma_operation_register: return dmac_dmaor_.raw;
+        case dma_source_address_register_0: return regs_.dmac.sar0.data();
+        case dma_source_address_register_1: return regs_.dmac.sar1.data();
+        case dma_destination_address_register_0: return regs_.dmac.dar0.data();
+        case dma_destination_address_register_1: return regs_.dmac.dar1.data();
+        case dma_tranfer_count_register_0: return regs_.dmac.tcr0.data();
+        case dma_tranfer_count_register_1: return regs_.dmac.tcr0.data();
+        case dma_channel_control_register_0: return regs_.dmac.chcr0.data();
+        case dma_channel_control_register_1: return regs_.dmac.chcr1.data();
+        case dma_operation_register: return regs_.dmac.dmaor.data();
 
         //////////////
         // 10. DIVU //
@@ -324,8 +324,8 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_request_response_selection_control_register_0: dmac_drcr0_.raw = data; break;
-        case dma_request_response_selection_control_register_1: dmac_drcr1_.raw = data; break;
+        case dma_request_response_selection_control_register_0: regs_.dmac.drcr0 = data; break;
+        case dma_request_response_selection_control_register_1: regs_.dmac.drcr1 = data; break;
 
         //////////////
         // 10. DIVU //
@@ -584,28 +584,28 @@ void Sh2::writeRegisters(u32 addr, u32 data) {
         /////////////
         // 9. DMAC //
         /////////////
-        case dma_source_address_register_0: dmac_sar0_.raw = data; break;
-        case dma_source_address_register_1: dmac_sar1_.raw = data; break;
-        case dma_destination_address_register_0: dmac_dar0_.raw = data; break;
-        case dma_destination_address_register_1: dmac_dar1_.raw = data; break;
-        case dma_tranfer_count_register_0: dmac_tcr0_.raw = (data & bitmask_00FFFFFF); break;
-        case dma_tranfer_count_register_1: dmac_tcr1_.raw = (data & bitmask_00FFFFFF); break;
+        case dma_source_address_register_0: regs_.dmac.sar0 = data; break;
+        case dma_source_address_register_1: regs_.dmac.sar1 = data; break;
+        case dma_destination_address_register_0: regs_.dmac.dar0 = data; break;
+        case dma_destination_address_register_1: regs_.dmac.dar1 = data; break;
+        case dma_tranfer_count_register_0: regs_.dmac.tcr0 = (data & 0x00FFFFFF); break;
+        case dma_tranfer_count_register_1: regs_.dmac.tcr1 = (data & 0x00FFFFFF); break;
         case dma_channel_control_register_0:
-            dmac_chcr0_.raw = (data & bitmask_0000FFFF);
+            regs_.dmac.chcr0 = (data & 0x0000FFFF);
             executeDma();
             break;
         case dma_channel_control_register_1:
-            dmac_chcr1_.raw = (data & bitmask_0000FFFF);
+            regs_.dmac.chcr1 = (data & 0x0000FFFF);
             executeDma();
             break;
         case dma_operation_register: {
-            auto new_dmaor = DmaOperationRegister{data & bitmask_0F};
-            if (dmac_dmaor_.priority_mode != new_dmaor.priority_mode) {
-                dmac_next_transfer_priority_ = (toEnum<PriorityMode>(new_dmaor.priority_mode) == PriorityMode::fixed)
+            auto new_priority = Sh2Regs::Dmac::DmaorType{data & 0xF} >> Sh2Regs::Dmac::Dmaor::pr_enum;
+            if (auto old_priority = regs_.dmac.dmaor >> Sh2Regs::Dmac::Dmaor::pr_enum; new_priority != old_priority) {
+                dmac_next_transfer_priority_ = (new_priority == Sh2Regs::Dmac::Dmaor::PriorityMode::fixed)
                                                    ? DmaNextTransferPriority::channel_0_first
                                                    : DmaNextTransferPriority::channel_1_first;
             }
-            dmac_dmaor_ = new_dmaor;
+            regs_.dmac.dmaor = (data & 0xF);
             executeDma();
         } break;
 
@@ -722,13 +722,13 @@ void Sh2::initializeOnChipRegisters() {
     regs_.cache.ccr = {};
 
     // Direct Memory Access Controler registers
-    dmac_tcr0_.raw  = {}; // lower 24 bits are undefined
-    dmac_tcr1_.raw  = {}; // lower 24 bits are undefined
-    dmac_chcr0_.raw = {};
-    dmac_chcr1_.raw = {};
-    dmac_drcr0_.raw = {};
-    dmac_drcr1_.raw = {};
-    dmac_dmaor_.raw = {};
+    regs_.dmac.tcr0  = {}; // lower 24 bits are undefined
+    regs_.dmac.tcr1  = {}; // lower 24 bits are undefined
+    regs_.dmac.chcr0 = {};
+    regs_.dmac.chcr1 = {};
+    regs_.dmac.drcr0 = {};
+    regs_.dmac.drcr1 = {};
+    regs_.dmac.dmaor = {};
 
     // Division Unit
     divu_dvcr_.raw = {};
@@ -1032,7 +1032,8 @@ void Sh2::runFreeRunningTimer(const u8 cycles_to_run) {
 }
 
 void Sh2::executeDma() {
-    if (toEnum<DmaMasterEnable>(dmac_dmaor_.dma_master_enable) == DmaMasterEnable::disabled) { return; }
+    using Dmaor = Sh2Regs::Dmac::Dmaor;
+    if ((regs_.dmac.dmaor >> Dmaor::dme_enum) == Dmaor::DmaMasterEnable::disabled) { return; }
 
     auto conf_channel_0{configureDmaTransfer(DmaChannel::channel_0)};
     auto conf_channel_1{configureDmaTransfer(DmaChannel::channel_1)};
@@ -1049,7 +1050,8 @@ void Sh2::executeDma() {
             break;
     }
 
-    if (toEnum<PriorityMode>(dmac_dmaor_.priority_mode) == PriorityMode::round_robin) {
+    // if (!regs_.dmac.dmaor.any(Sh2Regs::Dmac::Dmaor::priority_round_robin)) {
+    if ((regs_.dmac.dmaor >> Sh2Regs::Dmac::Dmaor::pr_enum) == Sh2Regs::Dmac::Dmaor::PriorityMode::fixed) {
         switch (dmac_next_transfer_priority_) {
             using enum DmaNextTransferPriority;
             case channel_0_first: dmac_next_transfer_priority_ = DmaNextTransferPriority::channel_1_first; break;
@@ -1060,26 +1062,26 @@ void Sh2::executeDma() {
 
 auto Sh2::dmaStartConditionsAreSatisfied(const DmaChannel dc) const
     -> bool { // NOLINT(readability-convert-member-functions-to-static)
+    using Chcr  = Sh2Regs::Dmac::Chcr;
+    using Dmaor = Sh2Regs::Dmac::Dmaor;
     // DE=1 TE=0 NMIF=0 AE=0
     switch (dc) {
         using enum DmaChannel;
         case channel_0: {
-            auto channel_0_is_set = bool{toEnum<Sh2DmaEnable>(dmac_chcr0_.dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
-            channel_0_is_set
-                &= toEnum<TransferEndFlag>(dmac_chcr0_.transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
-            channel_0_is_set &= toEnum<NmiFlag>(dmac_dmaor_.nmi_flag) == NmiFlag::no_nmif_interrupt;
-            channel_0_is_set
-                &= toEnum<AddressErrorFlag>(dmac_dmaor_.address_error_flag) == AddressErrorFlag::no_dmac_address_error;
-            return channel_0_is_set;
+            auto de   = regs_.dmac.chcr0.any(Sh2Regs::Dmac::Chcr::de);
+            auto te   = regs_.dmac.chcr0.any(Sh2Regs::Dmac::Chcr::te);
+            auto nmif = regs_.dmac.dmaor.any(Dmaor::nmif);
+            auto ae   = regs_.dmac.dmaor.any(Dmaor::ae);
+
+            return (de && !te && !nmif && !ae);
         }
         case channel_1: {
-            auto channel_1_is_set = bool{toEnum<Sh2DmaEnable>(dmac_chcr1_.dma_enable) == Sh2DmaEnable::dma_transfer_enabled};
-            channel_1_is_set
-                &= toEnum<TransferEndFlag>(dmac_chcr1_.transfer_end_flag) == TransferEndFlag::dma_not_ended_or_aborted;
-            channel_1_is_set &= toEnum<NmiFlag>(dmac_dmaor_.nmi_flag) == NmiFlag::no_nmif_interrupt;
-            channel_1_is_set
-                &= toEnum<AddressErrorFlag>(dmac_dmaor_.address_error_flag) == AddressErrorFlag::no_dmac_address_error;
-            return channel_1_is_set;
+            auto de   = regs_.dmac.chcr1.any(Sh2Regs::Dmac::Chcr::de);
+            auto te   = regs_.dmac.chcr1.any(Sh2Regs::Dmac::Chcr::te);
+            auto nmif = regs_.dmac.dmaor.any(Dmaor::nmif);
+            auto ae   = regs_.dmac.dmaor.any(Dmaor::ae);
+
+            return (de && !te && !nmif && !ae);
         }
         case channel_unknown: return false;
     }
@@ -1092,20 +1094,20 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) const -> Sh2DmaConfiguration
         using enum DmaChannel;
         case channel_0:
             conf.channel     = DmaChannel::channel_0;
-            conf.counter     = dmac_tcr0_.raw & bitmask_00FFFFFF;
-            conf.source      = dmac_sar0_.raw;
-            conf.destination = dmac_dar0_.raw;
-            conf.chcr        = dmac_chcr0_;
-            conf.drcr        = dmac_drcr0_;
+            conf.counter     = regs_.dmac.tcr0.data() & 0x00FFFFFF;
+            conf.source      = regs_.dmac.sar0.data();
+            conf.destination = regs_.dmac.dar0.data();
+            conf.chcr        = regs_.dmac.chcr0.data();
+            conf.drcr        = regs_.dmac.drcr0.data();
             conf.interrupt   = is::sh2_dma_0_transfer_end;
             break;
         case channel_1:
             conf.channel     = DmaChannel::channel_1;
-            conf.counter     = dmac_tcr1_.raw & bitmask_00FFFFFF;
-            conf.source      = dmac_sar1_.raw;
-            conf.destination = dmac_dar1_.raw;
-            conf.chcr        = dmac_chcr1_;
-            conf.drcr        = dmac_drcr1_;
+            conf.counter     = regs_.dmac.tcr1.data() & 0x00FFFFFF;
+            conf.source      = regs_.dmac.sar1.data();
+            conf.destination = regs_.dmac.dar1.data();
+            conf.chcr        = regs_.dmac.chcr1.data();
+            conf.drcr        = regs_.dmac.drcr1.data();
             conf.interrupt   = is::sh2_dma_1_transfer_end;
             break;
         default: Log::warning(Logger::sh2, "DMAC - Unknown DMA channel");
@@ -1114,12 +1116,14 @@ auto Sh2::configureDmaTransfer(const DmaChannel dc) const -> Sh2DmaConfiguration
 }
 
 void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
+    using Drcr = Sh2Regs::Dmac::Drcr;
+    using Chcr = Sh2Regs::Dmac::Chcr;
     if (dmaStartConditionsAreSatisfied(conf.channel)) {
         auto       sh2_type       = sh2_type_name_.at(sh2_type_);
         const auto channel_number = static_cast<u8>((conf.channel == DmaChannel::channel_0) ? 0 : 1);
-        if (toEnum<AutoRequestMode>(conf.chcr.auto_request_mode) == AutoRequestMode::module_request) {
-            switch (toEnum<ResourceSelect>(conf.drcr.resource_select)) {
-                using enum ResourceSelect;
+        if ((conf.chcr >> Chcr::ar_enum) == Chcr::AutoRequestMode::module_request) {
+            switch (conf.drcr >> Drcr::rs_enum) {
+                using enum Drcr::ResourceSelect;
                 case dreq: {
                     // External request is immediately executed without waiting for an external signal.
                     // Not sure how to implement this, could be interesting to check on the console ...
@@ -1165,8 +1169,8 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
 
         while (counter > 0) {
             auto transfer_size = u8{};
-            switch (toEnum<TransferSize>(conf.chcr.transfer_size)) {
-                using enum TransferSize;
+            switch (conf.chcr >> Chcr::ts_enum) {
+                using enum Chcr::TransferSize;
                 case one_byte_unit:
                     modules_.memory()->write<u8>(destination, modules_.memory()->read<u8>(source));
                     transfer_size = transfer_byte_size_1;
@@ -1194,16 +1198,17 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                     break;
             }
 
-            switch (toEnum<SourceAddressMode>(conf.chcr.source_address_mode)) {
-                using enum SourceAddressMode;
+            switch (conf.chcr >> Chcr::sm_enum) {
+                using enum Chcr::SourceAddressMode;
                 case fixed: break;
                 case incremented: source += transfer_size; break;
                 case decremented: source -= transfer_size; break;
                 case reserved: Log::warning(Logger::sh2, "Reserved source address mode used !");
             }
 
-            switch (toEnum<DestinationAddressMode>(conf.chcr.destination_address_mode)) {
-                using enum DestinationAddressMode;
+            // switch (toEnum<DestinationAddressMode>(conf.chcr.destination_address_mode)) {
+            switch (conf.chcr >> Chcr::dm_enum) {
+                using enum Chcr::DestinationAddressMode;
                 case fixed: break;
                 case incremented: destination += transfer_size; break;
                 case decremented: destination -= transfer_size; break;
@@ -1213,23 +1218,24 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
 
         switch (conf.channel) {
             case DmaChannel::channel_0:
-                dmac_tcr0_.raw                = counter;
-                dmac_sar0_.raw                = source;
-                dmac_dar0_.raw                = destination;
-                dmac_chcr0_.transfer_end_flag = true;
-                conf.interrupt.vector         = static_cast<u8>(regs_.intc.vcrdma0 >> Sh2Regs::Intc::Vcrdma::VC_SHFT);
+                regs_.dmac.tcr0 = counter;
+                regs_.dmac.sar0 = source;
+                regs_.dmac.dar0 = destination;
+                regs_.dmac.chcr0.set(Chcr::te);
+                conf.interrupt.vector = static_cast<u8>(regs_.intc.vcrdma0 >> Sh2Regs::Intc::Vcrdma::VC_SHFT);
                 break;
             case DmaChannel::channel_1:
-                dmac_tcr1_.raw                = counter;
-                dmac_sar1_.raw                = source;
-                dmac_dar1_.raw                = destination;
-                dmac_chcr1_.transfer_end_flag = true;
-                conf.interrupt.vector         = static_cast<u8>(regs_.intc.vcrdma1 >> Sh2Regs::Intc::Vcrdma::VC_SHFT);
+                regs_.dmac.tcr1 = counter;
+                regs_.dmac.sar1 = source;
+                regs_.dmac.dar1 = destination;
+                regs_.dmac.chcr1.set(Chcr::te);
+                conf.interrupt.vector = static_cast<u8>(regs_.intc.vcrdma1 >> Sh2Regs::Intc::Vcrdma::VC_SHFT);
                 break;
             case DmaChannel::channel_unknown: Log::warning(Logger::sh2, "Unknown DMA channel used !");
         }
 
-        if (toEnum<Sh2DmaInterruptEnable>(conf.chcr.interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
+        // if (toEnum<Sh2DmaInterruptEnable>(conf.chcr.interrupt_enable) == Sh2DmaInterruptEnable::enabled) {
+        if ((conf.chcr >> Chcr::ie_enum) == Chcr::Sh2DmaInterruptEnable::enabled) {
             Log::debug(Logger::sh2, "DMAC ({}) - Sending DMA channel {} transfer end interrupt.", sh2_type, channel_number);
             conf.interrupt.level = static_cast<u8>(regs_.intc.ipra >> Sh2Regs::Intc::Ipra::DMAC_LEVEL_SHFT);
             sendInterrupt(conf.interrupt);

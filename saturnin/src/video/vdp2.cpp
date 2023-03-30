@@ -1598,7 +1598,7 @@ void Vdp2::updateResolution() {
 };
 
 void Vdp2::updateRamStatus() {
-    ram_status_.vram_size      = toEnum<VramSize>(static_cast<bool>(vrsize_.vram_size));
+    ram_status_.vram_size      = util::toEnum<VramSize>(static_cast<bool>(vrsize_.vram_size));
     ram_status_.vram_a_mode    = toEnum<VramMode>(ramctl_.vram_a_mode);
     ram_status_.vram_b_mode    = toEnum<VramMode>(ramctl_.vram_b_mode);
     ram_status_.color_ram_mode = toEnum<ColorRamMode>(ramctl_.color_ram_mode);

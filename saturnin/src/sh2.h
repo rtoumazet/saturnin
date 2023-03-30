@@ -128,13 +128,13 @@ enum class DmaNextTransferPriority {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Sh2DmaConfiguration {
-    DmaChannel                                 channel;
-    u32                                        counter;
-    u32                                        source;
-    u32                                        destination;
-    DmaChannelControlRegister                  chcr;
-    DmaRequestResponseSelectionControlRegister drcr;
-    Interrupt                                  interrupt{is::undefined};
+    DmaChannel              channel;
+    u32                     counter;
+    u32                     source;
+    u32                     destination;
+    Sh2Regs::Dmac::ChcrType chcr;
+    Sh2Regs::Dmac::DrcrType drcr;
+    Interrupt               interrupt{is::undefined};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -946,17 +946,17 @@ class Sh2 {
     //@{
     DmaNextTransferPriority dmac_next_transfer_priority_{DmaNextTransferPriority::channel_0_first};
 
-    DmaSourceAddressRegister                   dmac_sar0_;
-    DmaSourceAddressRegister                   dmac_sar1_;
-    DmaDestinationAddressRegister              dmac_dar0_;
-    DmaDestinationAddressRegister              dmac_dar1_;
-    DmaTransferCountRegister                   dmac_tcr0_;
-    DmaTransferCountRegister                   dmac_tcr1_;
-    DmaChannelControlRegister                  dmac_chcr0_;
-    DmaChannelControlRegister                  dmac_chcr1_;
-    DmaRequestResponseSelectionControlRegister dmac_drcr0_;
-    DmaRequestResponseSelectionControlRegister dmac_drcr1_;
-    DmaOperationRegister                       dmac_dmaor_;
+    // DmaSourceAddressRegister                   dmac_sar0_;
+    // DmaSourceAddressRegister                   dmac_sar1_;
+    // DmaDestinationAddressRegister              dmac_dar0_;
+    // DmaDestinationAddressRegister              dmac_dar1_;
+    // DmaTransferCountRegister                   dmac_tcr0_;
+    // DmaTransferCountRegister                   dmac_tcr1_;
+    // DmaChannelControlRegister                  dmac_chcr0_;
+    // DmaChannelControlRegister                  dmac_chcr1_;
+    // DmaRequestResponseSelectionControlRegister dmac_drcr0_;
+    // DmaRequestResponseSelectionControlRegister dmac_drcr1_;
+    // DmaOperationRegister                       dmac_dmaor_;
     //@}
 
     /// \name DIVU (Division unit)

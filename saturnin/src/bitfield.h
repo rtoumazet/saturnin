@@ -235,9 +235,4 @@ constexpr auto toEnum(BitField<Index, Size> b) noexcept {
     return static_cast<E>(static_cast<std::underlying_type_t<E>>(b));
 }
 
-template<typename E, class T>
-constexpr auto toEnum(T t) noexcept {
-    return static_cast<E>(static_cast<std::underlying_type_t<E>>(t));
-}
-
 } // namespace saturnin

@@ -81,6 +81,11 @@ constexpr auto toUnderlying(E e) noexcept {
     return static_cast<std::underlying_type_t<E>>(e);
 }
 
+template<typename E, class T>
+constexpr auto toEnum(T t) noexcept {
+    return static_cast<E>(static_cast<std::underlying_type_t<E>>(t));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template <typename M, typename V> auto getKeyFromValue(const M& map, const V find_value)
 ///

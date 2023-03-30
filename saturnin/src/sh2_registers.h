@@ -567,7 +567,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \struct	Rtcnt
         ///
-        /// \brief	A rtcnt.
+        /// \brief	Refresh Timer Counter (RTCNT).
         ///
         /// \author	Runik
         /// \date	27/03/2023
@@ -615,8 +615,16 @@ struct Sh2Regs {
     //////////////
     // 8. Cache //
     //////////////
-
     struct Cache {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Ccr
+        ///
+        /// \brief	Cache control register (CCR).
+        ///
+        /// \author	Runik
+        /// \date	28/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         struct Ccr {
             using PosType     = Pos<u8, Ccr>;
             using BitsType    = Bits<u8, Ccr>;
@@ -646,198 +654,414 @@ struct Sh2Regs {
         CcrType ccr;
     };
     Cache cache;
-};
 
-//////////////////////////////////////////////
-// 9. Direct Memory Access Controler (DMAC) //
-//////////////////////////////////////////////
+    //////////////////////////////////////////////
+    // 9. Direct Memory Access Controler (DMAC) //
+    //////////////////////////////////////////////
+    struct Dmac {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Sar
+        ///
+        /// \brief	Dma Source Address Register (SAR0,SAR1).
+        ///
+        /// \author	Runik
+        /// \date	28/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DmaSourceAddressRegister
-///
-/// \brief	Dma Source Address Register (SAR0,SAR1).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        struct Sar {};
+        using SarType = Reg<u32, Sar>;
+        SarType sar0;
+        SarType sar1;
 
-union DmaSourceAddressRegister {
-    u32 raw; ///< Raw representation.
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Dar
+        ///
+        /// \brief	Dma Destination Address Register (DAR0/DAR1).
+        ///
+        /// \author	Runik
+        /// \date	28/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DmaDestinationAddressRegister
-///
-/// \brief	Dma Destination Address Register (DAR0/DAR1).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        struct Dar {};
+        using DarType = Reg<u32, Dar>;
+        DarType dar0;
+        DarType dar1;
 
-union DmaDestinationAddressRegister {
-    u32 raw; ///< Raw representation.
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Tcr
+        ///
+        /// \brief	Dma Transfer Count Register (TCR0 / TCR1).
+        ///
+        /// \author	Runik
+        /// \date	28/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DmaTransferCountRegister
-///
-/// \brief	Dma Transfer Count Register (TCR0 / TCR1).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        struct Tcr {};
+        using TcrType = Reg<u32, Tcr>;
+        TcrType tcr0;
+        TcrType tcr1;
 
-union DmaTransferCountRegister {
-    u32 raw; ///< Raw representation.
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Chcr
+        ///
+        /// \brief	DMA Channel Control Register (CHCR0/CHCR1).
+        ///
+        /// \author	Runik
+        /// \date	28/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DestinationAddressMode
-///
-/// \brief  CHCR0 - DMx bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        struct Chcr {
+            using PosType    = Pos<u32, Chcr>;
+            using BitsType   = Bits<u32, Chcr>;
+            using MaskedType = Masked<u32, Chcr>;
+            template<typename E>
+            using EnumType = Enum<u32, Chcr, E>;
 
-enum class DestinationAddressMode : u8 {
-    fixed       = 0b00, ///< Fixed destination address (initial).
-    incremented = 0b01, ///< Destination address is incremented.
-    decremented = 0b10, ///< Destination address is decremented.
-    reserved    = 0b11  ///< Reserved.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   DestinationAddressMode
+            ///
+            /// \brief  CHCR - DMx bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SourceAddressMode
-///
-/// \brief  CHCR0 - SMx bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class DestinationAddressMode : u8 {
+                fixed       = 0b00, ///< Fixed destination address (initial).
+                incremented = 0b01, ///< Destination address is incremented.
+                decremented = 0b10, ///< Destination address is decremented.
+                reserved    = 0b11  ///< Reserved.
+            };
 
-enum class SourceAddressMode : u8 {
-    fixed       = 0b00, ///< Fixed source address (initial).
-    incremented = 0b01, ///< Source address is incremented.
-    decremented = 0b10, ///< Source address is decremented.
-    reserved    = 0b11  ///< Reserved.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   SourceAddressMode
+            ///
+            /// \brief  CHCR - SMx bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransferSize
-///
-/// \brief  CHCR0 - TSx bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class SourceAddressMode : u8 {
+                fixed       = 0b00, ///< Fixed source address (initial).
+                incremented = 0b01, ///< Source address is incremented.
+                decremented = 0b10, ///< Source address is decremented.
+                reserved    = 0b11  ///< Reserved.
+            };
 
-enum class TransferSize : u8 {
-    one_byte_unit     = 0b00, ///< Byte unit (initial).
-    two_byte_unit     = 0b01, ///< Word unit.
-    four_byte_unit    = 0b10, ///< Long unit.
-    sixteen_byte_unit = 0b11  ///< 16-byte unit (4 longword transfers).
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TransferSize
+            ///
+            /// \brief  CHCR - TSx bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   AutoRequestMode
-///
-/// \brief  CHCR0 - AR bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class TransferSize : u8 {
+                one_byte_unit     = 0b00, ///< Byte unit (initial).
+                two_byte_unit     = 0b01, ///< Word unit.
+                four_byte_unit    = 0b10, ///< Long unit.
+                sixteen_byte_unit = 0b11  ///< 16-byte unit (4 longword transfers).
+            };
 
-enum class AutoRequestMode : bool {
-    module_request = false, ///< Module request mode (initial).
-    auto_request   = true   ///< Auto request mode.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   AutoRequestMode
+            ///
+            /// \brief  CHCR - AR bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   AcknowledgeMode
-///
-/// \brief  CHCR0 - AM bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class AutoRequestMode : bool {
+                module_request = false, ///< Module request mode (initial).
+                auto_request   = true   ///< Auto request mode.
+            };
 
-enum class AcknowledgeMode : bool {
-    output_read  = false, ///< DACK output in read cycle/transfer from memory to device (initial).
-    output_write = true   ///< DACK output in write cycle/transfer from device to memory.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   AcknowledgeMode
+            ///
+            /// \brief  CHCR - AM bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   AcknowledgeLevel
-///
-/// \brief  CHCR0 - AL bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class AcknowledgeMode : bool {
+                output_read  = false, ///< DACK output in read cycle/transfer from memory to device (initial).
+                output_write = true   ///< DACK output in write cycle/transfer from device to memory.
+            };
 
-enum class AcknowledgeLevel : bool {
-    active_low  = false, ///< DACK signal is active low (initial).
-    active_high = true   ///< DACK signal is active high.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   AcknowledgeLevel
+            ///
+            /// \brief  CHCR - AL bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DreqSelect
-///
-/// \brief  CHCR0 - DS bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class AcknowledgeLevel : bool {
+                active_low  = false, ///< DACK signal is active low (initial).
+                active_high = true   ///< DACK signal is active high.
+            };
 
-enum class DreqSelect : bool {
-    by_level = false, ///< Detected by level (initial).
-    by_edge  = true   ///< Detected by edge.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   DreqSelect
+            ///
+            /// \brief  CHCR - DS bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DreqLevel
-///
-/// \brief  CHCR0 - DL bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class DreqSelect : bool {
+                by_level = false, ///< Detected by level (initial).
+                by_edge  = true   ///< Detected by edge.
+            };
 
-enum class DreqLevel : bool {
-    low_level_or_fall  = false, ///< DREQ detected by low level if 0, by fall if 1 (initial).
-    high_level_or_rise = true   ///< DREQ detected by high level if 0, by rise if 1.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   DreqLevel
+            ///
+            /// \brief  CHCR - DL bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransferBusMode
-///
-/// \brief  CHCR0 - TB bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class DreqLevel : bool {
+                low_level_or_fall  = false, ///< DREQ detected by low level if 0, by fall if 1 (initial).
+                high_level_or_rise = true   ///< DREQ detected by high level if 0, by rise if 1.
+            };
 
-enum class TransferBusMode : bool {
-    cycle_steal = false, ///< Cycle steal mode (initial).
-    burst       = true   ///< Burst mode.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TransferBusMode
+            ///
+            /// \brief  CHCR - TB bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransferAddressMode
-///
-/// \brief  CHCR0 - TA bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class TransferBusMode : bool {
+                cycle_steal = false, ///< Cycle steal mode (initial).
+                burst       = true   ///< Burst mode.
+            };
 
-enum class TransferAddressMode : bool {
-    dual_address   = false, ///< Dual address mode (initial).
-    single_address = true   ///< Single address mode.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TransferAddressMode
+            ///
+            /// \brief  CHCR - TA bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InterruptEnable
-///
-/// \brief  CHCR0 - IE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class TransferAddressMode : bool {
+                dual_address   = false, ///< Dual address mode (initial).
+                single_address = true   ///< Single address mode.
+            };
 
-enum class Sh2DmaInterruptEnable : bool {
-    disabled = false, ///< Interrupt disabled.
-    enabled  = true   ///< Interrupt enabled.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   InterruptEnable
+            ///
+            /// \brief  CHCR - IE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransferEndFlag
-///
-/// \brief  CHCR0 - TE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class Sh2DmaInterruptEnable : bool {
+                disabled = false, ///< Interrupt disabled.
+                enabled  = true   ///< Interrupt enabled.
+            };
 
-enum class TransferEndFlag : bool {
-    dma_not_ended_or_aborted = false, ///< DMA has not ended or was aborted (initial).
-    dma_ended_normally       = true   ///< DMA has ended normally.
-};
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TransferEndFlag
+            ///
+            /// \brief  CHCR - TE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaEnable
-///
-/// \brief  CHCR0 - DE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class TransferEndFlag : bool {
+                dma_not_ended_or_aborted = false, ///< DMA has not ended or was aborted (initial).
+                dma_ended_normally       = true   ///< DMA has ended normally.
+            };
 
-enum class Sh2DmaEnable : bool {
-    dma_transfer_disabled = false, ///< DMA transfer disabled (initial).
-    dma_transfer_enabled  = true   ///< DMA transfer enabled.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   DmaEnable
+            ///
+            /// \brief  CHCR - DE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class Sh2DmaEnable : bool {
+                dma_transfer_disabled = false, ///< DMA transfer disabled (initial).
+                dma_transfer_enabled  = true   ///< DMA transfer enabled.
+            };
+
+            static constexpr auto de_pos = PosType(0);  ///< (Immutable) DMA enable.
+            static constexpr auto te_pos = PosType(1);  ///< (Immutable) Transfer end flag.
+            static constexpr auto ie_pos = PosType(2);  ///< (Immutable) Interrupt enable.
+            static constexpr auto ta_pos = PosType(3);  ///< (Immutable) Transfer address mode.
+            static constexpr auto tb_pos = PosType(4);  ///< (Immutable) Transfer bus mode.
+            static constexpr auto dl_pos = PosType(5);  ///< (Immutable) Dreq level.
+            static constexpr auto ds_pos = PosType(6);  ///< (Immutable) Dreq select.
+            static constexpr auto al_pos = PosType(7);  ///< (Immutable) Acknowledge level.
+            static constexpr auto am_pos = PosType(8);  ///< (Immutable) Acknowledge mode.
+            static constexpr auto ar_pos = PosType(9);  ///< (Immutable) Auto request mode.
+            static constexpr auto ts_pos = PosType(10); ///< (Immutable) Transfer size.
+            static constexpr auto sm_pos = PosType(12); ///< (Immutable) Source address mode.
+            static constexpr auto dm_pos = PosType(14); ///< (Immutable) Destination address mode.
+
+            static constexpr auto de = BitsType(1, de_pos);
+            static constexpr auto te = BitsType(1, te_pos);
+            static constexpr auto ie = BitsType(1, ie_pos);
+            static constexpr auto ta = BitsType(1, ta_pos);
+            static constexpr auto tb = BitsType(1, tb_pos);
+            static constexpr auto dl = BitsType(1, dl_pos);
+            static constexpr auto ds = BitsType(1, ds_pos);
+            static constexpr auto al = BitsType(1, al_pos);
+            static constexpr auto am = BitsType(1, am_pos);
+            static constexpr auto ar = BitsType(1, ar_pos);
+
+            static constexpr auto de_mask = 0b1;
+            static constexpr auto te_mask = 0b1;
+            static constexpr auto ie_mask = 0b1;
+            static constexpr auto ta_mask = 0b1;
+            static constexpr auto tb_mask = 0b1;
+            static constexpr auto dl_mask = 0b1;
+            static constexpr auto ds_mask = 0b1;
+            static constexpr auto al_mask = 0b1;
+            static constexpr auto am_mask = 0b1;
+            static constexpr auto ar_mask = 0b1;
+            static constexpr auto ts_mask = 0b11;
+            static constexpr auto sm_mask = 0b11;
+            static constexpr auto dm_mask = 0b11;
+
+            static constexpr auto de_enum = EnumType<Sh2DmaEnable>(de_mask, de_pos);
+            static constexpr auto te_enum = EnumType<TransferEndFlag>(te_mask, te_pos);
+            static constexpr auto ie_enum = EnumType<Sh2DmaInterruptEnable>(ie_mask, ie_pos);
+            static constexpr auto ta_enum = EnumType<TransferAddressMode>(ta_mask, ta_pos);
+            static constexpr auto tb_enum = EnumType<TransferBusMode>(tb_mask, tb_pos);
+            static constexpr auto dl_enum = EnumType<DreqLevel>(dl_mask, dl_pos);
+            static constexpr auto ds_enum = EnumType<DreqSelect>(ds_mask, ds_pos);
+            static constexpr auto al_enum = EnumType<AcknowledgeLevel>(al_mask, al_pos);
+            static constexpr auto am_enum = EnumType<AcknowledgeMode>(am_mask, am_pos);
+            static constexpr auto ar_enum = EnumType<AutoRequestMode>(ar_mask, ar_pos);
+            static constexpr auto ts_enum = EnumType<TransferSize>(ts_mask, ts_pos);
+            static constexpr auto sm_enum = EnumType<SourceAddressMode>(sm_mask, sm_pos);
+            static constexpr auto dm_enum = EnumType<DestinationAddressMode>(dm_mask, dm_pos);
+
+            // static constexpr MaskedType transfer_size_1_byte_unit  = MaskedType(ts_mask, 0b00, ts_pos);
+            // static constexpr MaskedType transfer_size_2_byte_unit  = MaskedType(ts_mask, 0b01, ts_pos);
+            // static constexpr MaskedType transfer_size_4_byte_unit  = MaskedType(ts_mask, 0b10, ts_pos);
+            // static constexpr MaskedType transfer_size_16_byte_unit = MaskedType(ts_mask, 0b11, ts_pos);
+
+            // static constexpr u8         sm_mask                    = 0x03;
+            // static constexpr MaskedType source_address_fixed       = MaskedType(sm_mask, 0b00, sm_pos);
+            // static constexpr MaskedType source_address_incremented = MaskedType(sm_mask, 0b01, sm_pos);
+            // static constexpr MaskedType source_address_decremented = MaskedType(sm_mask, 0b10, sm_pos);
+            // static constexpr MaskedType source_address_reserved    = MaskedType(sm_mask, 0b11, sm_pos);
+
+            // static constexpr u8         dm_mask                         = 0x03;
+            // static constexpr MaskedType destination_address_fixed       = MaskedType(dm_mask, 0b00, dm_pos);
+            // static constexpr MaskedType destination_address_incremented = MaskedType(dm_mask, 0b01, dm_pos);
+            // static constexpr MaskedType destination_address_decremented = MaskedType(dm_mask, 0b10, dm_pos);
+            // static constexpr MaskedType destination_address_reserved    = MaskedType(dm_mask, 0b11, dm_pos);
+        };
+        using ChcrType = Reg<u32, Chcr>;
+        ChcrType chcr0;
+        ChcrType chcr1;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Drcr
+        ///
+        /// \brief	Dma Request/Response Selection Control Register (DRCR0 / DRCR1).
+        ///
+        /// \author	Runik
+        /// \date	28/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Drcr {
+            using PosType    = Pos<u8, Drcr>;
+            using BitsType   = Bits<u8, Drcr>;
+            using MaskedType = Masked<u8, Drcr>;
+            template<typename E>
+            using EnumType = Enum<u8, Drcr, E>;
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum	ResourceSelect
+            ///
+            /// \brief	DRCR - RSx bits.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ResourceSelect : u8 {
+                dreq     = 0b00, ///< DREQ (external request) (initial).
+                rxi      = 0b01, ///< RXI (on chip SCI receive data full interrupt transfer request).
+                txi      = 0b10, ///< TXI (on chip SCI transmit data empty interrupt transfer request).
+                reserved = 0b11  ///< Reserved (setting prohibited)
+            };
+
+            static constexpr auto rs_pos = PosType(0); ///< (Immutable) Resource select.
+
+            static constexpr auto rs_mask = 0b11;
+            static constexpr auto rs_enum = EnumType<ResourceSelect>(rs_mask, rs_pos);
+        };
+        using DrcrType = Reg<u8, Drcr>;
+        DrcrType drcr0;
+        DrcrType drcr1;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Dmaor
+        ///
+        /// \brief	DMA Operation Register (DMAOR).
+        ///
+        /// \author	Runik
+        /// \date	29/03/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Dmaor {
+            using PosType    = Pos<u32, Dmaor>;
+            using BitsType   = Bits<u32, Dmaor>;
+            using MaskedType = Masked<u32, Dmaor>;
+            template<typename E>
+            using EnumType = Enum<u32, Dmaor, E>;
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   DmaMasterEnable
+            ///
+            /// \brief  DMAOR - DME bit.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class DmaMasterEnable : bool {
+                disabled = false, ///< DMA transfers disabled on all channels (initial)
+                enabled  = true   ///< DMA transfers enabled on all channels
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   NmiFlag
+            ///
+            /// \brief  DMAOR - NMIF bit.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class NmiFlag : bool {
+                no_nmif_interrupt      = false, ///< No NMIF interrupt (initial)
+                nmif_interrupt_occured = true   ///< NMIF has occurred
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   AddressErrorFlag
+            ///
+            /// \brief  DMAOR - AE bit.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class AddressErrorFlag : bool {
+                no_dmac_address_error = false, ///< No DMAC address error (initial)
+                dmac_address_error    = true   ///< Address error by DMAC
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   PriorityMode
+            ///
+            /// \brief  DMAOR - PR bit.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class PriorityMode : bool {
+                fixed       = false, ///< Fixed priority (initial)
+                round_robin = true   ///< Round robin
+            };
+
+            static constexpr auto dme_pos  = PosType(0); ///< (Immutable) DMA master enable.
+            static constexpr auto nmif_pos = PosType(1); ///< (Immutable) NMI flag.
+            static constexpr auto ae_pos   = PosType(2); ///< (Immutable) Address error flag.
+            static constexpr auto pr_pos   = PosType(3); ///< (Immutable) Priority mode.
+
+            static constexpr auto dme  = BitsType(1, dme_pos);
+            static constexpr auto nmif = BitsType(1, nmif_pos);
+            static constexpr auto ae   = BitsType(1, ae_pos);
+            static constexpr auto pr   = BitsType(1, pr_pos);
+
+            static constexpr auto dme_mask  = 0b1;
+            static constexpr auto nmif_mask = 0b1;
+            static constexpr auto ae_mask   = 0b1;
+            static constexpr auto pr_mask   = 0b1;
+
+            static constexpr auto dme_enum  = EnumType<DmaMasterEnable>(dme_mask, dme_pos);
+            static constexpr auto nmif_enum = EnumType<NmiFlag>(nmif_mask, nmif_pos);
+            static constexpr auto ae_enum   = EnumType<AddressErrorFlag>(ae_mask, ae_pos);
+            static constexpr auto pr_enum   = EnumType<PriorityMode>(pr_mask, pr_pos);
+        };
+        using DmaorType = Reg<u32, Dmaor>;
+        DmaorType dmaor;
+    };
+    Dmac dmac;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -866,13 +1090,6 @@ union DmaChannelControlRegister {
     BitField<0>     dma_enable;               ///< Defines DE bit.
 };
 
-enum class ResourceSelect : u8 {
-    dreq     = 0b00, ///< DREQ (external request) (initial).
-    rxi      = 0b01, ///< RXI (on chip SCI receive data full interrupt transfer request).
-    txi      = 0b10, ///< TXI (on chip SCI transmit data empty interrupt transfer request).
-    reserved = 0b11  ///< Reserved (setting prohibited)
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	DmaRequestResponseSelectionControlRegister
 ///
@@ -882,71 +1099,10 @@ enum class ResourceSelect : u8 {
 /// \date	19/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union DmaRequestResponseSelectionControlRegister {
-    u8             raw;             ///< Raw representation.
-    BitField<0, 2> resource_select; ///< Defines RSx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PriorityMode
-///
-/// \brief  DMAOR - PR bit.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class PriorityMode : bool {
-    fixed       = false, ///< Fixed priority (initial)
-    round_robin = true   ///< Round robin
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   AddressErrorFlag
-///
-/// \brief  DMAOR - AE bit.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class AddressErrorFlag : bool {
-    no_dmac_address_error = false, ///< No DMAC address error (initial)
-    dmac_address_error    = true   ///< Address error by DMAC
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   NmiFlag
-///
-/// \brief  DMAOR - NMIF bit.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class NmiFlag : bool {
-    no_nmif_interrupt      = false, ///< No NMIF interrupt (initial)
-    nmif_interrupt_occured = true   ///< NMIF has occurred
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DmaMasterEnable
-///
-/// \brief  DMAOR - DME bit.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class DmaMasterEnable : bool {
-    disabled = false, ///< DMA transfers disabled on all channels (initial)
-    enabled  = true   ///< DMA transfers enabled on all channels
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DmaOperationRegister
-///
-/// \brief	DMA Operation Register (DMAOR).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union DmaOperationRegister {
-    u32         raw;                ///< Raw representation.
-    BitField<3> priority_mode;      ///< Defines PR bit.
-    BitField<2> address_error_flag; ///< Defines AE bit.
-    BitField<1> nmi_flag;           ///< Defines NMIF bit.
-    BitField<0> dma_master_enable;  ///< Defines DME bit.
-};
+// union DmaRequestResponseSelectionControlRegister {
+//     u8             raw;             ///< Raw representation.
+//     BitField<0, 2> resource_select; ///< Defines RSx bits.
+// };
 
 //////////////////////////////
 // 10. Division Unit (DIVU) //
