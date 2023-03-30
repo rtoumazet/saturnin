@@ -112,27 +112,27 @@ struct Sh2Regs {
         using MaskedType  = Masked<u32, StatusRegister>;
         using ShiftedType = Shifted<u32, StatusRegister>;
 
-        static constexpr PosType t_pos = PosType(0);
-        static constexpr PosType s_pos = PosType(1);
-        static constexpr PosType i_pos = PosType(4);
-        static constexpr PosType q_pos = PosType(8);
-        static constexpr PosType m_pos = PosType(9);
+        static constexpr auto t_pos = PosType(0);
+        static constexpr auto s_pos = PosType(1);
+        static constexpr auto i_pos = PosType(4);
+        static constexpr auto q_pos = PosType(8);
+        static constexpr auto m_pos = PosType(9);
 
-        static constexpr BitsType t = BitsType(1, t_pos);
-        static constexpr BitsType s = BitsType(1, s_pos);
-        static constexpr BitsType q = BitsType(1, q_pos);
-        static constexpr BitsType m = BitsType(1, m_pos);
+        static constexpr auto t = BitsType(1, t_pos);
+        static constexpr auto s = BitsType(1, s_pos);
+        static constexpr auto q = BitsType(1, q_pos);
+        static constexpr auto m = BitsType(1, m_pos);
 
-        static constexpr u32         one_bit_mask = 0x01;
-        static constexpr ShiftedType t_shft       = ShiftedType(one_bit_mask, t_pos);
-        static constexpr ShiftedType s_shft       = ShiftedType(one_bit_mask, s_pos);
-        static constexpr ShiftedType q_shft       = ShiftedType(one_bit_mask, q_pos);
-        static constexpr ShiftedType m_shft       = ShiftedType(one_bit_mask, m_pos);
+        static constexpr auto one_bit_mask = 0x01;
+        static constexpr auto t_shft       = ShiftedType(one_bit_mask, t_pos);
+        static constexpr auto s_shft       = ShiftedType(one_bit_mask, s_pos);
+        static constexpr auto q_shft       = ShiftedType(one_bit_mask, q_pos);
+        static constexpr auto m_shft       = ShiftedType(one_bit_mask, m_pos);
 
-        static constexpr u32        i_mask          = 0xF;
-        static constexpr MaskedType i_default_value = MaskedType(i_mask, 0b1111, i_pos);
+        static constexpr auto i_mask          = 0xF;
+        static constexpr auto i_default_value = MaskedType(i_mask, 0b1111, i_pos);
 
-        static constexpr ShiftedType i_shft = ShiftedType(i_mask, i_pos);
+        static constexpr auto i_shft = ShiftedType(i_mask, i_pos);
         GENERATE_MASKED_RANGE("Sh2Reg::StatusRegister", INTERRUPT_MASK, interruptMask, i_mask, i_pos, i_mask);
     };
     using StatusRegisterType = Reg<u32, StatusRegister>;
@@ -158,22 +158,22 @@ struct Sh2Regs {
             using MaskedType  = Masked<u16, Ipra>;
             using ShiftedType = Shifted<u16, Ipra>;
 
-            static constexpr PosType wdt_level_pos  = PosType(4);  ///< Defines WDT/DRAM refresh priority level.
-            static constexpr PosType dmac_level_pos = PosType(8);  ///< Defines DMAC0/DMAC1 priority level.
-            static constexpr PosType divu_level_pos = PosType(12); ///< Defines DIVU refresh priority level.
-            static constexpr PosType lo_byte_pos    = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
-            static constexpr PosType hi_byte_pos    = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
+            static constexpr auto wdt_level_pos  = PosType(4);  ///< Defines WDT/DRAM refresh priority level.
+            static constexpr auto dmac_level_pos = PosType(8);  ///< Defines DMAC0/DMAC1 priority level.
+            static constexpr auto divu_level_pos = PosType(12); ///< Defines DIVU refresh priority level.
+            static constexpr auto lo_byte_pos    = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos    = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 wdt_level_mask = 0xF;
+            static constexpr auto wdt_level_mask = 0xF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", WDT_LEVEL, wdtLevel, wdt_level_mask, wdt_level_pos, wdt_level_mask);
 
-            static constexpr u16 dmac_level_mask = 0xF;
+            static constexpr auto dmac_level_mask = 0xF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", DMAC_LEVEL, dmacLevel, dmac_level_mask, dmac_level_pos, dmac_level_mask);
 
-            static constexpr u16 divu_level_mask = 0xF;
+            static constexpr auto divu_level_mask = 0xF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", DIVU_LEVEL, divuLevel, divu_level_mask, divu_level_pos, divu_level_mask);
 
-            static constexpr u8 byte_mask = 0xFF;
+            static constexpr auto byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Ipra", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
         };
@@ -195,18 +195,18 @@ struct Sh2Regs {
             using MaskedType  = Masked<u16, Iprb>;
             using ShiftedType = Shifted<u16, Iprb>;
 
-            static constexpr PosType frt_level_pos = PosType(8);  ///< Defines FRT priority level.
-            static constexpr PosType sci_level_pos = PosType(12); ///< Defines SCI priority level.
-            static constexpr PosType lo_byte_pos   = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
-            static constexpr PosType hi_byte_pos   = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
+            static constexpr auto frt_level_pos = PosType(8);  ///< Defines FRT priority level.
+            static constexpr auto sci_level_pos = PosType(12); ///< Defines SCI priority level.
+            static constexpr auto lo_byte_pos   = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos   = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 frt_level_mask = 0xF;
+            static constexpr auto frt_level_mask = 0xF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Iprb", FRT_LEVEL, frtLevel, frt_level_mask, frt_level_pos, frt_level_mask);
 
-            static constexpr u16 sci_level_mask = 0xF;
+            static constexpr auto sci_level_mask = 0xF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Iprb", SCI_LEVEL, sciLevel, sci_level_mask, sci_level_pos, sci_level_mask);
 
-            static constexpr u8 byte_mask = 0xFF;
+            static constexpr auto byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Iprb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Iprb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
         };
@@ -228,18 +228,18 @@ struct Sh2Regs {
             using MaskedType  = Masked<u16, Vcra>;
             using ShiftedType = Shifted<u16, Vcra>;
 
-            static constexpr PosType srxv_pos    = PosType(0); ///< Defines SCI receive data full interrupt vector number.
-            static constexpr PosType serv_pos    = PosType(8); ///< Defines SCI receive error interrupt vector number.
-            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
-            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+            static constexpr auto srxv_pos    = PosType(0); ///< Defines SCI receive data full interrupt vector number.
+            static constexpr auto serv_pos    = PosType(8); ///< Defines SCI receive error interrupt vector number.
+            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 srxv_mask = 0x7F;
+            static constexpr auto srxv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcra", SRXV, srxv, srxv_mask, srxv_pos, srxv_mask);
 
-            static constexpr u16 serv_mask = 0x7F;
+            static constexpr auto serv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcra", SERV, serv, serv_mask, serv_pos, serv_mask);
 
-            static constexpr u8 byte_mask = 0xFF;
+            static constexpr auto byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcra", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcra", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
         };
@@ -261,18 +261,18 @@ struct Sh2Regs {
             using MaskedType  = Masked<u16, Vcrb>;
             using ShiftedType = Shifted<u16, Vcrb>;
 
-            static constexpr PosType stev_pos    = PosType(0); ///< Defines SCI transmit end interrupt vector number.
-            static constexpr PosType stxv_pos    = PosType(8); ///< Defines SCI transmit data empty interrupt vector number.
-            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
-            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+            static constexpr auto stev_pos    = PosType(0); ///< Defines SCI transmit end interrupt vector number.
+            static constexpr auto stxv_pos    = PosType(8); ///< Defines SCI transmit data empty interrupt vector number.
+            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 stev_mask = 0x7F;
+            static constexpr auto stev_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", STEV, stev, stev_mask, stev_pos, stev_mask);
 
-            static constexpr u16 stxv_mask = 0x7F;
+            static constexpr auto stxv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", STXV, stxv, stxv_mask, stxv_pos, stxv_mask);
 
-            static constexpr u8 byte_mask = 0xFF;
+            static constexpr auto byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
         };
@@ -294,18 +294,18 @@ struct Sh2Regs {
             using MaskedType  = Masked<u16, Vcrc>;
             using ShiftedType = Shifted<u16, Vcrc>;
 
-            static constexpr PosType focv_pos    = PosType(0); ///< Defines FRT output compare interrupt vector number.
-            static constexpr PosType ficv_pos    = PosType(8); ///< Defines FRT input capture interrupt vector number.
-            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
-            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+            static constexpr auto focv_pos    = PosType(0); ///< Defines FRT output compare interrupt vector number.
+            static constexpr auto ficv_pos    = PosType(8); ///< Defines FRT input capture interrupt vector number.
+            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 focv_mask = 0x7F;
+            static constexpr auto focv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", FOCV, focv, focv_mask, focv_pos, focv_mask);
 
-            static constexpr u16 ficv_mask = 0x7F;
+            static constexpr auto ficv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", FICV, ficv, ficv_mask, ficv_pos, ficv_mask);
 
-            static constexpr u8 byte_mask = 0xFF;
+            static constexpr auto byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrc", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
         };
@@ -327,14 +327,14 @@ struct Sh2Regs {
             using MaskedType  = Masked<u16, Vcrd>;
             using ShiftedType = Shifted<u16, Vcrd>;
 
-            static constexpr PosType fovv_pos    = PosType(8); ///< Defines FRT overflow interrupt vector number.
-            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
-            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+            static constexpr auto fovv_pos    = PosType(8); ///< Defines FRT overflow interrupt vector number.
+            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 fovv_mask = 0x7F;
+            static constexpr auto fovv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrd", FOVV, fovv, fovv_mask, fovv_pos, fovv_mask);
 
-            static constexpr u8 byte_mask = 0xFF;
+            static constexpr auto byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrd", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
         };
@@ -356,18 +356,18 @@ struct Sh2Regs {
             using MaskedType  = Masked<u16, Vcrwdt>;
             using ShiftedType = Shifted<u16, Vcrwdt>;
 
-            static constexpr PosType bcmv_pos    = PosType(0); ///< Defines BSC compare match interrupt vector number.
-            static constexpr PosType witv_pos    = PosType(8); ///< Defines WDT interval interrupt vector number.
-            static constexpr PosType lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
-            static constexpr PosType hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+            static constexpr auto bcmv_pos    = PosType(0); ///< Defines BSC compare match interrupt vector number.
+            static constexpr auto witv_pos    = PosType(8); ///< Defines WDT interval interrupt vector number.
+            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr u16 bcmv_mask = 0x7F;
+            static constexpr auto bcmv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrwdt", BCMV, bcmv, bcmv_mask, bcmv_pos, bcmv_mask);
 
-            static constexpr u16 witv_mask = 0x7F;
+            static constexpr auto witv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrwdt", WITV, witv, witv_mask, witv_pos, witv_mask);
 
-            static constexpr u8 byte_mask = 0xFF;
+            static constexpr auto byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrwdt", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrwdt", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
         };
@@ -389,14 +389,14 @@ struct Sh2Regs {
             using MaskedType  = Masked<u32, Vcrdiv>;
             using ShiftedType = Shifted<u32, Vcrdiv>;
 
-            static constexpr PosType divuv_pos   = PosType(0);  ///< Defines DIVU interrupt vector number.
-            static constexpr PosType lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
-            static constexpr PosType hi_word_pos = PosType(16); ///< Defines the range of the lower 16 bits of the register.
+            static constexpr auto divuv_pos   = PosType(0);  ///< Defines DIVU interrupt vector number.
+            static constexpr auto lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto hi_word_pos = PosType(16); ///< Defines the range of the lower 16 bits of the register.
 
-            static constexpr u8 divuv_mask = 0x7F;
+            static constexpr auto divuv_mask = 0x7F;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdiv", DIVUV, divuv, divuv_mask, divuv_pos, divuv_mask);
 
-            static constexpr u16 word_mask = 0xFFFF;
+            static constexpr auto word_mask = 0xFFFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdiv", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdiv", HI_WORD, hiWord, word_mask, hi_word_pos, word_mask);
         };
@@ -418,14 +418,14 @@ struct Sh2Regs {
             using MaskedType  = Masked<u32, Vcrdma>;
             using ShiftedType = Shifted<u32, Vcrdma>;
 
-            static constexpr PosType vc_pos      = PosType(0);  ///< Defines DMACx transfer end interrupt vector number.
-            static constexpr PosType lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
-            static constexpr PosType hi_word_pos = PosType(16); ///< Defines the range of the lower 16 bits of the register.
+            static constexpr auto vc_pos      = PosType(0);  ///< Defines DMACx transfer end interrupt vector number.
+            static constexpr auto lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto hi_word_pos = PosType(16); ///< Defines the range of the lower 16 bits of the register.
 
-            static constexpr u8 vc_mask = 0xFF;
+            static constexpr auto vc_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdma", VC, vc, vc_mask, vc_pos, vc_mask);
 
-            static constexpr u16 word_mask = 0xFFFF;
+            static constexpr auto word_mask = 0xFFFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdma", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Vcrdma", HI_WORD, hiWord, word_mask, hi_word_pos, word_mask);
         };
@@ -447,18 +447,61 @@ struct Sh2Regs {
             using BitsType    = Bits<u16, Icr>;
             using MaskedType  = Masked<u16, Icr>;
             using ShiftedType = Shifted<u16, Icr>;
+            template<typename E>
+            using EnumType = Enum<u16, Icr, E>;
 
-            static constexpr PosType vecmd_pos   = PosType(0);  ///< Defines VECMD bit.
-            static constexpr PosType nmie_pos    = PosType(8);  ///< Defines NMIE bit.
-            static constexpr PosType nmil_pos    = PosType(15); ///< Defines NMIL bit.
-            static constexpr PosType lo_byte_pos = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
-            static constexpr PosType hi_byte_pos = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   NmiInputLevel
+            ///
+            /// \brief  ICR - NMIL bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            static constexpr BitsType vector_mode_external = BitsType(1, vecmd_pos);
-            static constexpr BitsType nmi_edge_rising      = BitsType(1, nmie_pos);
-            static constexpr BitsType nmi_input_level_high = BitsType(1, nmil_pos);
+            enum class NmiInputLevel : bool {
+                low  = false, ///< NMI input level is low
+                high = true   ///< NMI input level is high
+            };
 
-            static constexpr u8 byte_mask = 0xFF;
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   NmiEdgeDetection
+            ///
+            /// \brief  ICR - NMIE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class NmiEdgeDetection : bool {
+                falling = false, ///< Interrupt request detected on falling edge of NMI input (initial)
+                rising  = true   ///< Interrupt request detected on rising edge of NMI input
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   VectorMode
+            ///
+            /// \brief  ICR - VECMD bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class VectorMode : bool {
+                auto_vector     = false, ///< Auto vector mode (initial)
+                external_vector = true   ///< External vector mode
+            };
+
+            static constexpr auto vecmd_pos   = PosType(0);  ///< (Immutable) Vector mode.
+            static constexpr auto nmie_pos    = PosType(8);  ///< (Immutable) NMI edge detection.
+            static constexpr auto nmil_pos    = PosType(15); ///< (Immutable) NMI input level.
+            static constexpr auto lo_byte_pos = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr auto vecmd = BitsType(1, vecmd_pos);
+            static constexpr auto nmie  = BitsType(1, nmie_pos);
+            static constexpr auto nmil  = BitsType(1, nmil_pos);
+
+            static constexpr auto vecmd_mask = 0b1;
+            static constexpr auto nmie_mask  = 0b1;
+            static constexpr auto nmil_mask  = 0b1;
+
+            static constexpr auto vecmd_enum = EnumType<VectorMode>(vecmd_mask, vecmd_pos);
+            static constexpr auto nmie_enum  = EnumType<NmiEdgeDetection>(nmie_mask, nmie_pos);
+            static constexpr auto nmil_enum  = EnumType<NmiInputLevel>(nmil_mask, nmil_pos);
+
+            static constexpr auto byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Icr", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Icr", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
         };
@@ -486,9 +529,9 @@ struct Sh2Regs {
             using MaskedType  = Masked<u32, Bcr>;
             using ShiftedType = Shifted<u32, Bcr>;
 
-            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
-            static constexpr u16 word_mask = 0xFFFF;
+            static constexpr auto word_mask = 0xFFFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Bcr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
         };
         using BcrType = Reg<u32, Bcr>;
@@ -510,9 +553,9 @@ struct Sh2Regs {
             using MaskedType  = Masked<u32, Wcr>;
             using ShiftedType = Shifted<u32, Wcr>;
 
-            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
-            static constexpr u16 word_mask = 0xFFFF;
+            static constexpr auto word_mask = 0xFFFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Wcr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
         };
         using WcrType = Reg<u32, Wcr>;
@@ -533,9 +576,9 @@ struct Sh2Regs {
             using MaskedType  = Masked<u32, Mcr>;
             using ShiftedType = Shifted<u32, Mcr>;
 
-            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
-            static constexpr u16 word_mask = 0xFFFF;
+            static constexpr auto word_mask = 0xFFFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Mcr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
         };
         using McrType = Reg<u32, Mcr>;
@@ -556,9 +599,9 @@ struct Sh2Regs {
             using MaskedType  = Masked<u32, Rtcsr>;
             using ShiftedType = Shifted<u32, Rtcsr>;
 
-            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
-            static constexpr u16 word_mask = 0xFFFF;
+            static constexpr auto word_mask = 0xFFFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Rtcsr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
         };
         using RtcsrType = Reg<u32, Rtcsr>;
@@ -579,9 +622,9 @@ struct Sh2Regs {
             using MaskedType  = Masked<u32, Rtcnt>;
             using ShiftedType = Shifted<u32, Rtcnt>;
 
-            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
-            static constexpr u16 word_mask = 0xFFFF;
+            static constexpr auto word_mask = 0xFFFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Rtcnt", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
         };
         using RtcntType = Reg<u32, Rtcnt>;
@@ -602,9 +645,9 @@ struct Sh2Regs {
             using MaskedType  = Masked<u32, Rtcor>;
             using ShiftedType = Shifted<u32, Rtcor>;
 
-            static constexpr PosType lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
-            static constexpr u16 word_mask = 0xFFFF;
+            static constexpr auto word_mask = 0xFFFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Bsc::Rtcor", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
         };
         using RtcorType = Reg<u32, Rtcor>;
@@ -626,29 +669,105 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Ccr {
-            using PosType     = Pos<u8, Ccr>;
-            using BitsType    = Bits<u8, Ccr>;
-            using MaskedType  = Masked<u8, Ccr>;
-            using ShiftedType = Shifted<u8, Ccr>;
+            using PosType  = Pos<u8, Ccr>;
+            using BitsType = Bits<u8, Ccr>;
+            template<typename E>
+            using EnumType = Enum<u8, Ccr, E>;
 
-            static constexpr PosType ce_pos = PosType(0); ///< (Immutable) Cache enable.
-            static constexpr PosType id_pos = PosType(1); ///< (Immutable) Instruction replacement disable.
-            static constexpr PosType od_pos = PosType(2); ///< (Immutable) Data replacement disable.
-            static constexpr PosType tw_pos = PosType(3); ///< (Immutable) Two way mode.
-            static constexpr PosType cp_pos = PosType(4); ///< (Immutable) Cache purge.
-            static constexpr PosType wx_pos = PosType(6); ///< (Immutable) Way specification.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   WaySpecification
+            ///
+            /// \brief  CCR - Wx bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            static constexpr BitsType cache_enabled                          = BitsType(1, ce_pos);
-            static constexpr BitsType instruction_not_replaced_on_cache_miss = BitsType(1, id_pos);
-            static constexpr BitsType data_not_replaced_on_cache_miss        = BitsType(1, od_pos);
-            static constexpr BitsType two_way_mode                           = BitsType(1, tw_pos);
-            static constexpr BitsType cache_purge                            = BitsType(1, cp_pos);
+            enum class WaySpecification : u8 {
+                way_0 = 0b00, ///< Way 0 (initial value).
+                way_1 = 0b01, ///< Way 1
+                way_2 = 0b10, ///< Way 2
+                way_3 = 0b11  ///< Way 3
+            };
 
-            static constexpr u8         wx_mask = 0x03;
-            static constexpr MaskedType way_0   = MaskedType(wx_mask, 0b00, wx_pos);
-            static constexpr MaskedType way_1   = MaskedType(wx_mask, 0b01, wx_pos);
-            static constexpr MaskedType way_2   = MaskedType(wx_mask, 0b10, wx_pos);
-            static constexpr MaskedType way_3   = MaskedType(wx_mask, 0b11, wx_pos);
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   CachePurge
+            ///
+            /// \brief  CCR - CP bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class CachePurge : bool {
+                normal_operation = false, ///< Normal operation.
+                cache_purge      = true   ///< Cache purge.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TwoWayMode
+            ///
+            /// \brief  CCR - TW bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TwoWayMode : bool {
+                four_way = false, ///< Four way mode (initial).
+                two_way  = true   ///< Two way mode.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   DataReplacementDisable
+            ///
+            /// \brief  CCR - OD bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class DataReplacementDisable : bool {
+                normal_operation  = false, ///< Normal operation (initial).
+                data_not_replaced = true   ///< Data not replaced even when wache miss occurs in data access.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   InstructionReplacementDisable
+            ///
+            /// \brief  CCR - ID bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class InstructionReplacementDisable : bool {
+                normal_operation  = false, ///< Normal operation (initial).
+                data_not_replaced = true   ///< Data not replaced even when wache miss occurs in instruction fetch.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   CacheEnable
+            ///
+            /// \brief  CCR - CE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class CacheEnable : bool {
+                cache_disabled = false, ///< Cache disabled (initial).
+                cache_enabled  = true   ///< Cache enabled.
+            };
+
+            static constexpr auto ce_pos = PosType(0); ///< (Immutable) Cache enable.
+            static constexpr auto id_pos = PosType(1); ///< (Immutable) Instruction replacement disable.
+            static constexpr auto od_pos = PosType(2); ///< (Immutable) Data replacement disable.
+            static constexpr auto tw_pos = PosType(3); ///< (Immutable) Two way mode.
+            static constexpr auto cp_pos = PosType(4); ///< (Immutable) Cache purge.
+            static constexpr auto wx_pos = PosType(6); ///< (Immutable) Way specification.
+
+            static constexpr auto ce = BitsType(1, ce_pos);
+            static constexpr auto id = BitsType(1, id_pos);
+            static constexpr auto od = BitsType(1, od_pos);
+            static constexpr auto tw = BitsType(1, tw_pos);
+            static constexpr auto cp = BitsType(1, cp_pos);
+
+            static constexpr auto ce_mask = 0b1;
+            static constexpr auto id_mask = 0b1;
+            static constexpr auto od_mask = 0b1;
+            static constexpr auto tw_mask = 0b1;
+            static constexpr auto cp_mask = 0b1;
+            static constexpr auto wx_mask = 0b11;
+
+            static constexpr auto ce_enum = EnumType<CacheEnable>(ce_mask, ce_pos);
+            static constexpr auto id_enum = EnumType<InstructionReplacementDisable>(id_mask, id_pos);
+            static constexpr auto od_enum = EnumType<DataReplacementDisable>(od_mask, od_pos);
+            static constexpr auto tw_enum = EnumType<TwoWayMode>(tw_mask, tw_pos);
+            static constexpr auto cp_enum = EnumType<CachePurge>(cp_mask, cp_pos);
+            static constexpr auto wx_enum = EnumType<WaySpecification>(wx_mask, wx_pos);
         };
         using CcrType = Reg<u8, Ccr>;
         CcrType ccr;
@@ -918,23 +1037,6 @@ struct Sh2Regs {
             static constexpr auto ts_enum = EnumType<TransferSize>(ts_mask, ts_pos);
             static constexpr auto sm_enum = EnumType<SourceAddressMode>(sm_mask, sm_pos);
             static constexpr auto dm_enum = EnumType<DestinationAddressMode>(dm_mask, dm_pos);
-
-            // static constexpr MaskedType transfer_size_1_byte_unit  = MaskedType(ts_mask, 0b00, ts_pos);
-            // static constexpr MaskedType transfer_size_2_byte_unit  = MaskedType(ts_mask, 0b01, ts_pos);
-            // static constexpr MaskedType transfer_size_4_byte_unit  = MaskedType(ts_mask, 0b10, ts_pos);
-            // static constexpr MaskedType transfer_size_16_byte_unit = MaskedType(ts_mask, 0b11, ts_pos);
-
-            // static constexpr u8         sm_mask                    = 0x03;
-            // static constexpr MaskedType source_address_fixed       = MaskedType(sm_mask, 0b00, sm_pos);
-            // static constexpr MaskedType source_address_incremented = MaskedType(sm_mask, 0b01, sm_pos);
-            // static constexpr MaskedType source_address_decremented = MaskedType(sm_mask, 0b10, sm_pos);
-            // static constexpr MaskedType source_address_reserved    = MaskedType(sm_mask, 0b11, sm_pos);
-
-            // static constexpr u8         dm_mask                         = 0x03;
-            // static constexpr MaskedType destination_address_fixed       = MaskedType(dm_mask, 0b00, dm_pos);
-            // static constexpr MaskedType destination_address_incremented = MaskedType(dm_mask, 0b01, dm_pos);
-            // static constexpr MaskedType destination_address_decremented = MaskedType(dm_mask, 0b10, dm_pos);
-            // static constexpr MaskedType destination_address_reserved    = MaskedType(dm_mask, 0b11, dm_pos);
         };
         using ChcrType = Reg<u32, Chcr>;
         ChcrType chcr0;
@@ -1063,46 +1165,6 @@ struct Sh2Regs {
     };
     Dmac dmac;
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DmaChannelControlRegister
-///
-/// \brief	DMA Channel Control Register (CHCR0/CHCR1).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union DmaChannelControlRegister {
-    u32             raw;                      ///< Raw representation.
-    BitField<14, 2> destination_address_mode; ///< Defines AMx bits.
-    BitField<12, 2> source_address_mode;      ///< Defines SMx bits.
-    BitField<10, 2> transfer_size;            ///< Defines TSx bit.
-    BitField<9>     auto_request_mode;        ///< Defines AR bit.
-    BitField<8>     acknowledge_mode;         ///< Defines AM bit.
-    BitField<7>     acknowledge_level;        ///< Defines AL bit.
-    BitField<6>     dreq_select;              ///< Defines DS bit.
-    BitField<5>     dreq_level;               ///< Defines DL bit.
-    BitField<4>     transfer_busMode;         ///< Defines TB bit.
-    BitField<3>     transfer_address_mode;    ///< Defines TA bit.
-    BitField<2>     interrupt_enable;         ///< Defines IE bit.
-    BitField<1>     transfer_end_flag;        ///< Defines TE bit.
-    BitField<0>     dma_enable;               ///< Defines DE bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DmaRequestResponseSelectionControlRegister
-///
-/// \brief	Dma Request/Response Selection Control Register (DRCR0 / DRCR1).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union DmaRequestResponseSelectionControlRegister {
-//     u8             raw;             ///< Raw representation.
-//     BitField<0, 2> resource_select; ///< Defines RSx bits.
-// };
 
 //////////////////////////////
 // 10. Division Unit (DIVU) //

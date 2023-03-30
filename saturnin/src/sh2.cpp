@@ -310,14 +310,15 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
         // 8. Cache //
         //////////////
         case cache_control_register:
+            using Ccr = Sh2Regs::Cache::Ccr;
             Log::debug(Logger::sh2, "CCR byte write: {}", data);
 
             regs_.cache.ccr = data;
-            if (regs_.cache.ccr.any(Sh2Regs::Cache::Ccr::cache_purge)) {
+            if ((regs_.cache.ccr >> Ccr::cp_enum) == Ccr::CachePurge::cache_purge) {
                 purgeCache();
 
                 // cache purge bit is cleared after operation
-                regs_.cache.ccr.clr(Sh2Regs::Cache::Ccr::cache_purge);
+                regs_.cache.ccr.clr(Sh2Regs::Cache::Ccr::cp);
             }
             break;
 
@@ -426,11 +427,12 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
         case vector_number_setting_register_div: break; // Read only access
         case vector_number_setting_register_div + 2: regs_.intc.vcrdiv.upd(Sh2Regs::Intc::Vcrdiv::divuv(data)); break;
         case interrupt_control_register: {
-            auto new_level         = Sh2Regs::Intc::IcrType{data}.any(Sh2Regs::Intc::Icr::nmi_input_level_high);
-            auto old_level         = regs_.intc.icr.any(Sh2Regs::Intc::Icr::nmi_input_level_high);
+            using Icr              = Sh2Regs::Intc::Icr;
+            auto new_level         = Sh2Regs::Intc::IcrType{data}.any(Icr::nmil);
+            auto old_level         = regs_.intc.icr.any(Icr::nmil);
             auto has_level_changed = (new_level != old_level);
 
-            if (regs_.intc.icr.any(Sh2Regs::Intc::Icr::nmi_edge_rising)) {
+            if ((regs_.intc.icr >> Icr::nmie_enum) == Icr::NmiEdgeDetection::rising) {
                 if (has_level_changed) { Log::warning(Logger::sh2, "Rising edge NMI, not implemented !"); }
             } else {
                 if (has_level_changed) { Log::warning(Logger::sh2, "Falling edge NMI, not implemented !"); }
