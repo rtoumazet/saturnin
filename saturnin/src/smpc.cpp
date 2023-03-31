@@ -303,21 +303,21 @@ void StvBoardControls::fromConfig(std::vector<PeripheralKey> config) {
 }
 
 void Smpc::reset() {
-    registers_.comreg = {};
-    registers_.sr     = {};
-    registers_.sf     = {};
+    regs_.comreg = {};
+    regs_.sr     = {};
+    regs_.sf     = {};
     for (u8 i = 0; i < input_registers_number; ++i) {
-        registers_.ireg[i] = {};
+        regs_.ireg[i] = {};
     }
     for (u8 i = 0; i < output_registers_number; ++i) {
-        registers_.oreg[i] = {};
+        regs_.oreg[i] = {};
     }
-    registers_.pdr1  = {};
-    registers_.pdr2  = {};
-    registers_.ddr1  = {};
-    registers_.ddr2  = {};
-    registers_.iosel = {};
-    registers_.exle  = {};
+    regs_.pdr1  = {};
+    regs_.pdr2  = {};
+    regs_.ddr1  = {};
+    regs_.ddr2  = {};
+    regs_.iosel = {};
+    regs_.exle  = {};
 
     for (u8 i = 0; i < 4; ++i) {
         smem_[i] = 0;
@@ -351,215 +351,260 @@ auto Smpc::getSystemClock() const -> u32 { return uti::toUnderlying(clock_); }
 auto Smpc::getRegisters() const -> const AddressToNameMap& { return address_to_name_; };
 
 void Smpc::setCommandDuration() {
-    using micro = std::chrono::duration<double, std::micro>;
-    using milli = std::chrono::duration<double, std::milli>;
-    if (registers_.comreg.is(SmpcRegisters::CommandRegister::master_sh2_on)
-        || registers_.comreg.is(SmpcRegisters::CommandRegister::slave_sh2_on)
-        || registers_.comreg.is(SmpcRegisters::CommandRegister::slave_sh2_off)
-        || registers_.comreg.is(SmpcRegisters::CommandRegister::sound_on)
-        || registers_.comreg.is(SmpcRegisters::CommandRegister::sound_off)
-        || registers_.comreg.is(SmpcRegisters::CommandRegister::nmi_request)
-        || registers_.comreg.is(SmpcRegisters::CommandRegister::reset_enable)
-        || registers_.comreg.is(SmpcRegisters::CommandRegister::reset_disable)) {
-        constexpr auto duration   = micro(30);
-        command_remaining_cycles_ = calculateCyclesNumber(duration);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::cd_on)
-               || registers_.comreg.is(SmpcRegisters::CommandRegister::cd_off)
-               || registers_.comreg.is(SmpcRegisters::CommandRegister::smpc_memory_setting)) {
-        constexpr auto duration   = micro(40);
-        command_remaining_cycles_ = calculateCyclesNumber(duration);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_entire_system)
-               || registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320)
-               || registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_352)) {
-        // Alpha is fixed to 0
-        constexpr auto duration   = milli(100);
-        command_remaining_cycles_ = calculateCyclesNumber(duration);
-        return;
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::time_setting)) {
-        constexpr auto duration   = micro(70);
-        command_remaining_cycles_ = calculateCyclesNumber(duration);
-        return;
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::interrupt_back)) {
-        // Values are from previous Saturnin version, not sure how accurate they are ...
-        constexpr auto intback_duration = micro(50);
-        constexpr auto normal_duration  = micro(1500);
-        command_remaining_cycles_
-            = is_intback_processing_ ? calculateCyclesNumber(intback_duration) : calculateCyclesNumber(normal_duration);
-        return;
+    using micro  = std::chrono::duration<double, std::micro>;
+    using milli  = std::chrono::duration<double, std::milli>;
+    using Comreg = SmpcRegs::Comreg;
+    switch (regs_.comreg >> Comreg::comreg_enum) {
+        using enum Comreg::SmpcCommand;
+        case master_sh2_on:
+        case slave_sh2_on:
+        case slave_sh2_off:
+        case sound_on:
+        case sound_off:
+        case nmi_request:
+        case reset_enable:
+        case reset_disable: {
+            constexpr auto duration   = micro(30);
+            command_remaining_cycles_ = calculateCyclesNumber(duration);
+            return;
+        }
+        case cd_on:
+        case cd_off:
+        case smpc_memory_setting: {
+            constexpr auto duration   = micro(40);
+            command_remaining_cycles_ = calculateCyclesNumber(duration);
+            return;
+        }
+        case reset_entire_system:
+        case clock_change_352:
+        case clock_change_320: {
+            // Alpha is fixed to 0
+            constexpr auto duration   = milli(100);
+            command_remaining_cycles_ = calculateCyclesNumber(duration);
+            return;
+        }
+        case time_setting: {
+            constexpr auto duration   = micro(70);
+            command_remaining_cycles_ = calculateCyclesNumber(duration);
+            return;
+        }
+        case interrupt_back: {
+            // Values are from previous Saturnin version, not sure how accurate they are ...
+            constexpr auto intback_duration = micro(50);
+            constexpr auto normal_duration  = micro(1500);
+            command_remaining_cycles_
+                = is_intback_processing_ ? calculateCyclesNumber(intback_duration) : calculateCyclesNumber(normal_duration);
+            return;
+        }
     }
 
-    Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), registers_.comreg.data());
+    Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), regs_.comreg.data());
+
+    // if (regs_.comreg.is(SmpcRegs::CommandRegister::master_sh2_on) || regs_.comreg.is(SmpcRegs::CommandRegister::slave_sh2_on)
+    //     || regs_.comreg.is(SmpcRegs::CommandRegister::slave_sh2_off) || regs_.comreg.is(SmpcRegs::CommandRegister::sound_on)
+    //     || regs_.comreg.is(SmpcRegs::CommandRegister::sound_off) || regs_.comreg.is(SmpcRegs::CommandRegister::nmi_request)
+    //     || regs_.comreg.is(SmpcRegs::CommandRegister::reset_enable)
+    //     || regs_.comreg.is(SmpcRegs::CommandRegister::reset_disable)) {
+    //     constexpr auto duration   = micro(30);
+    //     command_remaining_cycles_ = calculateCyclesNumber(duration);
+    //     return;
+
+    //} else if (regs_.comreg.is(SmpcRegs::CommandRegister::cd_on) || regs_.comreg.is(SmpcRegs::CommandRegister::cd_off)
+    //           || regs_.comreg.is(SmpcRegs::CommandRegister::smpc_memory_setting)) {
+    //    constexpr auto duration   = micro(40);
+    //    command_remaining_cycles_ = calculateCyclesNumber(duration);
+    //    return;
+
+    //} else if (regs_.comreg.is(SmpcRegs::CommandRegister::reset_entire_system)
+    //           || regs_.comreg.is(SmpcRegs::CommandRegister::clock_change_320)
+    //           || regs_.comreg.is(SmpcRegs::CommandRegister::clock_change_352)) {
+    //    // Alpha is fixed to 0
+    //    constexpr auto duration   = milli(100);
+    //    command_remaining_cycles_ = calculateCyclesNumber(duration);
+    //    return;
+    //} else if (regs_.comreg.is(SmpcRegs::CommandRegister::time_setting)) {
+    //    constexpr auto duration   = micro(70);
+    //    command_remaining_cycles_ = calculateCyclesNumber(duration);
+    //    return;
+    //} else if (regs_.comreg.is(SmpcRegs::CommandRegister::interrupt_back)) {
+    //    // Values are from previous Saturnin version, not sure how accurate they are ...
+    //    constexpr auto intback_duration = micro(50);
+    //    constexpr auto normal_duration  = micro(1500);
+    //    command_remaining_cycles_
+    //        = is_intback_processing_ ? calculateCyclesNumber(intback_duration) : calculateCyclesNumber(normal_duration);
+    //    return;
+    //}
+
+    // Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), regs_.comreg.data());
 }
 
 void Smpc::executeCommand() {
+    using Comreg   = SmpcRegs::Comreg;
+    using Sf       = SmpcRegs::Sf;
     std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
 
-    if (registers_.comreg.is(SmpcRegisters::CommandRegister::master_sh2_on)) {
-        is_master_sh2_on_ = true;
-        Log::debug(Logger::smpc, tr("-=Master SH2 ON=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::slave_sh2_on)) {
-        is_slave_sh2_on_ = true;
-        modules_.slaveSh2()->powerOnReset();
-        Log::debug(Logger::smpc, tr("-=Slave SH2 ON=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::slave_sh2_off)) {
-        is_slave_sh2_on_ = false;
-        Log::debug(Logger::smpc, tr("-=Slave SH2 OFF=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::sound_on)) {
-        is_sound_on_ = true;
-        modules_.scsp()->reset();
-        Log::debug(Logger::smpc, tr("-=Sound ON=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::sound_off)) {
-        is_sound_on_ = false;
-        // emulator_context_->scsp()->setSound(false);
-        Log::debug(Logger::smpc, tr("-=Sound OFF=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::cd_on)) {
-        is_cd_on_ = true;
-        Log::debug(Logger::smpc, tr("-=CD ON=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::cd_on)) {
-        is_cd_on_ = false;
-        Log::debug(Logger::smpc, tr("-=CD OFF=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_entire_system)) {
-        modules_.masterSh2()->powerOnReset();
-        modules_.slaveSh2()->powerOnReset();
-        // emulator_context_->scsp()->reset();
-        Log::debug(Logger::smpc, tr("-=Reset Entire System=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320)
-               || registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_352)) {
-        // -> VDP1, VDP2, SCU, SCSP : default power on value
-        // -> Master SH2 : unknown
-        // -> Slave SH2 : OFF
-        // -> CD block kept
-        // -> Work RAM kept
-        // -> VRAM emptied
-        switch (modules_.config()->getTvStandard(ts)) {
-            using enum video::TvStandard;
-            case pal:
-                clock_ = registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320) ? SystemClock::pal_320
-                                                                                                : SystemClock::pal_352;
-                break;
-            case ntsc:
-                clock_ = registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320) ? SystemClock::ntsc_320
-                                                                                                : SystemClock::ntsc_352;
-            default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = SystemClock::not_set;
+    switch (regs_.comreg >> Comreg::comreg_enum) {
+        using enum Comreg::SmpcCommand;
+        case master_sh2_on: {
+            is_master_sh2_on_ = true;
+            Log::debug(Logger::smpc, tr("-=Master SH2 ON=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
         }
-        is_slave_sh2_on_ = false;
-        modules_.slaveSh2()->powerOnReset();
-        modules_.cdrom()->refreshPeriod();
-        modules_.vdp2()->onSystemClockUpdate();
-        if (registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_320)) {
-            is_horizontal_res_352 = false;
-            Log::debug(Logger::smpc, tr("-=Clock Change 320 Mode=- command executed"));
+        case slave_sh2_on: {
+            is_slave_sh2_on_ = true;
+            modules_.slaveSh2()->powerOnReset();
+            Log::debug(Logger::smpc, tr("-=Slave SH2 ON=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
         }
-        if (registers_.comreg.is(SmpcRegisters::CommandRegister::clock_change_352)) {
-            is_horizontal_res_352 = true;
-            Log::debug(Logger::smpc, tr("-=Clock Change 352 Mode=- command executed"));
+        case slave_sh2_off: {
+            is_slave_sh2_on_ = false;
+            Log::debug(Logger::smpc, tr("-=Slave SH2 OFF=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
         }
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::nmi_request)) {
-        modules_.scu()->generateInterrupt(interrupt_source::nmi);
-        Log::debug(Logger::smpc, tr("-=NMI Request=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_enable)) {
-        is_soft_reset_allowed_ = true;
-        Log::debug(Logger::smpc, tr("-=Reset Enable=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::reset_disable)) {
-        is_soft_reset_allowed_ = false;
-        Log::debug(Logger::smpc, tr("-=Reset Disable=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::interrupt_back)) {
-        executeIntback();
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::smpc_memory_setting)) {
-        for (u8 i = 0; i < 4; ++i) {
-            smem_[i] = registers_.ireg[i].data();
+        case sound_on: {
+            is_sound_on_ = true;
+            modules_.scsp()->reset();
+            Log::debug(Logger::smpc, tr("-=Sound ON=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
         }
-        Log::debug(Logger::smpc, tr("-=SMPC Memory Setting=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
-
-    } else if (registers_.comreg.is(SmpcRegisters::CommandRegister::time_setting)) {
-        Log::debug(Logger::smpc, tr("-=Time Setting=- command executed"));
-        registers_.oreg[31] = registers_.comreg.data();
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        return;
+        case sound_off: {
+            is_sound_on_ = false;
+            // emulator_context_->scsp()->setSound(false);
+            Log::debug(Logger::smpc, tr("-=Sound OFF=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
+        case cd_on: {
+            is_cd_on_ = true;
+            Log::debug(Logger::smpc, tr("-=CD ON=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
+        case cd_off: {
+            is_cd_on_ = false;
+            Log::debug(Logger::smpc, tr("-=CD OFF=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
+        case reset_entire_system: {
+            modules_.masterSh2()->powerOnReset();
+            modules_.slaveSh2()->powerOnReset();
+            // emulator_context_->scsp()->reset();
+            Log::debug(Logger::smpc, tr("-=Reset Entire System=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
+        case clock_change_320:
+        case clock_change_352: {
+            // -> VDP1, VDP2, SCU, SCSP : default power on value
+            // -> Master SH2 : unknown
+            // -> Slave SH2 : OFF
+            // -> CD block kept
+            // -> Work RAM kept
+            // -> VRAM emptied
+            switch (modules_.config()->getTvStandard(ts)) {
+                using enum video::TvStandard;
+                using enum SystemClock;
+                case pal: clock_ = (regs_.comreg >> Comreg::comreg_enum) == clock_change_320 ? pal_320 : pal_352; break;
+                case ntsc: clock_ = (regs_.comreg >> Comreg::comreg_enum) == clock_change_320 ? ntsc_320 : ntsc_352;
+                default: Log::warning(Logger::smpc, tr("Could not set system clock !")); clock_ = not_set;
+            }
+            is_slave_sh2_on_ = false;
+            modules_.slaveSh2()->powerOnReset();
+            modules_.cdrom()->refreshPeriod();
+            modules_.vdp2()->onSystemClockUpdate();
+            if ((regs_.comreg >> Comreg::comreg_enum) == clock_change_320) {
+                is_horizontal_res_352 = false;
+                Log::debug(Logger::smpc, tr("-=Clock Change 320 Mode=- command executed"));
+            }
+            if ((regs_.comreg >> Comreg::comreg_enum) == clock_change_352) {
+                is_horizontal_res_352 = true;
+                Log::debug(Logger::smpc, tr("-=Clock Change 352 Mode=- command executed"));
+            }
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
+        case nmi_request: {
+            modules_.scu()->generateInterrupt(interrupt_source::nmi);
+            Log::debug(Logger::smpc, tr("-=NMI Request=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
+        case reset_enable: {
+            is_soft_reset_allowed_ = true;
+            Log::debug(Logger::smpc, tr("-=Reset Enable=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
+        case reset_disable: {
+            is_soft_reset_allowed_ = false;
+            Log::debug(Logger::smpc, tr("-=Reset Disable=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
+        case interrupt_back: {
+            executeIntback();
+            return;
+        }
+        case smpc_memory_setting: {
+            for (u8 i = 0; i < 4; ++i) {
+                smem_[i] = regs_.ireg[i].data();
+            }
+            Log::debug(Logger::smpc, tr("-=SMPC Memory Setting=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
+        case time_setting: {
+            Log::debug(Logger::smpc, tr("-=Time Setting=- command executed"));
+            regs_.oreg[31] = regs_.comreg.data();
+            regs_.sf.clr(Sf::sf);
+            return;
+        }
     }
-
-    Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), registers_.comreg.data());
+    Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), regs_.comreg.data());
 }
 
 void Smpc::executeIntback() {
+    using Ireg = SmpcRegs::Ireg;
+    using Oreg = SmpcRegs::Oreg;
+    using Sr   = SmpcRegs::Sr;
+    using Sf   = SmpcRegs::Sf;
     if (is_intback_processing_) {
         getPeripheralData();
-        registers_.sr.clr(SmpcRegisters::StatusRegister::pdl);
-        registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
-        registers_.oreg[31] = SmpcRegisters::OutputRegister::interrupt_back;
+        regs_.sr.clr(Sr::pdl);
+        regs_.sf.clr(Sf::sf);
+        regs_.oreg[31] = Oreg::interrupt_back;
         Log::debug(Logger::smpc, tr("Interrupt request"));
         modules_.scu()->generateInterrupt(interrupt_source::system_manager);
         return;
     }
 
     Log::debug(Logger::smpc, tr("INTBACK started"));
-    registers_.oreg[31] = {};
+    regs_.oreg[31] = {};
 
-    auto is_status_returned          = registers_.ireg[0].is(SmpcRegisters::InputRegister::ireg0_status_acquisition);
-    auto is_peripheral_data_returned = registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_peripheral_data_returned);
-
-    if (is_status_returned) {
+    if ((regs_.ireg[0] >> Ireg::stac_enum) == Ireg::SmpcStatusAcquisition::status_returned) {
         getStatus();
 
-        if (is_peripheral_data_returned) {
-            registers_.sr.set(SmpcRegisters::StatusRegister::pdl);
+        // if (is_peripheral_data_returned) {
+        if ((regs_.ireg[1] >> Ireg::pen_enum) == Ireg::PeripheralDataEnable::peripheral_data_returned) {
+            regs_.sr.set(Sr::pdl);
             is_intback_processing_ = true;
         } else {
             is_intback_processing_ = false;
@@ -567,72 +612,79 @@ void Smpc::executeIntback() {
     } else {
         // Peripheral data only.
         getPeripheralData();
-        registers_.sr.set(SmpcRegisters::StatusRegister::pdl);
+        regs_.sr.set(Sr::pdl);
         is_intback_processing_ = true;
     }
 
     Log::debug(Logger::smpc, tr("Interrupt request"));
     modules_.scu()->generateInterrupt(interrupt_source::system_manager);
 
-    registers_.sf.clr(SmpcRegisters::StatusFlag::sf);
+    regs_.sf.clr(Sf::sf);
 };
 
 void Smpc::getStatus() {
-    Log::debug(Logger::smpc, tr("INTBACK returning status data"));
-    registers_.sr = {};
-    registers_.sr.clr(SmpcRegisters::StatusRegister::bit_7);
-    registers_.sr.set(SmpcRegisters::StatusRegister::bit_6);
+    using Sr   = SmpcRegs::Sr;
+    using Ireg = SmpcRegs::Ireg;
+    using Oreg = SmpcRegs::Oreg;
 
-    if (registers_.ireg[1].is(SmpcRegisters::InputRegister::ireg1_peripheral_data_returned)) {
-        registers_.sr.set(SmpcRegisters::StatusRegister::pde);
+    Log::debug(Logger::smpc, tr("INTBACK returning status data"));
+    regs_.sr = {};
+    regs_.sr.clr(Sr::bit_7);
+    regs_.sr.set(Sr::bit_6);
+
+    if ((regs_.ireg[1] >> Ireg::pen_enum) == Ireg::PeripheralDataEnable::peripheral_data_returned) {
+        regs_.sr.set(Sr::pde);
     } else {
-        registers_.sr.clr(SmpcRegisters::StatusRegister::pde);
+        regs_.sr.clr(Sr::pde);
     }
 
     for (u8 i = 0; i < output_registers_number; ++i) {
-        registers_.oreg[i] = {};
+        regs_.oreg[i] = {};
     }
     if (is_soft_reset_allowed_) {
-        registers_.oreg[0].clr(SmpcRegisters::OutputRegister::oreg0_reset_disable);
+        regs_.oreg[0].clr(Oreg::resd);
     } else {
-        registers_.oreg[0].set(SmpcRegisters::OutputRegister::oreg0_reset_disable);
+        regs_.oreg[0].set(Oreg::resd);
     }
 
     const bool is_time_set = modules_.config()->readValue(core::AccessKeys::cfg_global_set_time);
-    registers_.oreg[0].upd(SmpcRegisters::OutputRegister::setTime(is_time_set));
+    regs_.oreg[0].upd(Oreg::setTime(is_time_set));
 
-    auto rtc           = getRtcTime();
-    registers_.oreg[1] = rtc.getUpperYear();
-    registers_.oreg[2] = rtc.getLowerYear();
-    registers_.oreg[3] = rtc.getDayMonth();
-    registers_.oreg[4] = rtc.getDays();
-    registers_.oreg[5] = rtc.getHours();
-    registers_.oreg[6] = rtc.getMinutes();
-    registers_.oreg[7] = rtc.getSeconds();
-    registers_.oreg[8] = {}; // No cartridge code handling for now
+    auto rtc      = getRtcTime();
+    regs_.oreg[1] = rtc.getUpperYear();
+    regs_.oreg[2] = rtc.getLowerYear();
+    regs_.oreg[3] = rtc.getDayMonth();
+    regs_.oreg[4] = rtc.getDays();
+    regs_.oreg[5] = rtc.getHours();
+    regs_.oreg[6] = rtc.getMinutes();
+    regs_.oreg[7] = rtc.getSeconds();
+    regs_.oreg[8] = {}; // No cartridge code handling for now
 
-    std::string ac     = modules_.config()->readValue(core::AccessKeys::cfg_global_area_code);
-    registers_.oreg[9] = uti::toUnderlying(modules_.config()->getAreaCode(ac));
+    std::string ac = modules_.config()->readValue(core::AccessKeys::cfg_global_area_code);
+    regs_.oreg[9]  = uti::toUnderlying(modules_.config()->getAreaCode(ac));
 
-    registers_.oreg[10].clr(SmpcRegisters::OutputRegister::bit_7);
-    registers_.oreg[10].upd(SmpcRegisters::OutputRegister::horizontalRes(is_horizontal_res_352));
-    registers_.oreg[10].set(SmpcRegisters::OutputRegister::bit_5);
-    registers_.oreg[10].set(SmpcRegisters::OutputRegister::bit_4);
-    registers_.oreg[10].upd(SmpcRegisters::OutputRegister::softResetAllowed(is_soft_reset_allowed_));
-    registers_.oreg[10].set(SmpcRegisters::OutputRegister::bit_2);
-    registers_.oreg[10].clr(SmpcRegisters::OutputRegister::bit_1); // SYSRES is never triggered by software
-    registers_.oreg[10].upd(SmpcRegisters::OutputRegister::soundOn(is_sound_on_));
+    regs_.oreg[10].clr(Oreg::bit_7);
+    regs_.oreg[10].upd(Oreg::horizontalRes(is_horizontal_res_352));
+    regs_.oreg[10].set(Oreg::bit_5);
+    regs_.oreg[10].set(Oreg::bit_4);
+    regs_.oreg[10].upd(Oreg::softResetAllowed(is_soft_reset_allowed_));
+    regs_.oreg[10].set(Oreg::bit_2);
+    regs_.oreg[10].clr(Oreg::bit_1); // SYSRES is never triggered by software
+    regs_.oreg[10].upd(Oreg::soundOn(is_sound_on_));
 
     //  oreg_[index_11][bit_6] = is_cd_on_;
-    registers_.oreg[11].clr(SmpcRegisters::OutputRegister::bit_6);
+    regs_.oreg[11].clr(Oreg::bit_6);
 
-    registers_.oreg[12] = smem_[0];
-    registers_.oreg[13] = smem_[1];
-    registers_.oreg[14] = smem_[2];
-    registers_.oreg[15] = smem_[3];
+    regs_.oreg[12] = smem_[0];
+    regs_.oreg[13] = smem_[1];
+    regs_.oreg[14] = smem_[2];
+    regs_.oreg[15] = smem_[3];
 };
 
 void Smpc::getPeripheralData() {
+    using Sr   = SmpcRegs::Sr;
+    using Ireg = SmpcRegs::Ireg;
+
     Log::debug(Logger::smpc, tr("INTBACK returning peripheral data"));
 
     // SMPC Peripheral result :
@@ -664,17 +716,17 @@ void Smpc::getPeripheralData() {
     // [Saturn Peripheral Type | Data Size]
 
     // SR page 66
-    registers_.sr = {};
-    registers_.sr.set(SmpcRegisters::StatusRegister::bit_7);
+    regs_.sr = {};
+    regs_.sr.set(Sr::bit_7);
 
-    registers_.sr.upd(SmpcRegisters::StatusRegister::p2md(registers_.ireg[1] >> SmpcRegisters::InputRegister::p2md_shft));
-    registers_.sr.upd(SmpcRegisters::StatusRegister::p1md(registers_.ireg[1] >> SmpcRegisters::InputRegister::p1md_shft));
+    regs_.sr.upd(Sr::p2md(regs_.ireg[1] >> Ireg::p2md_shft));
+    regs_.sr.upd(Sr::p1md(regs_.ireg[1] >> Ireg::p1md_shft));
 
     for (u32 i = 0; i < output_registers_number; ++i) {
-        registers_.oreg[i] = {};
+        regs_.oreg[i] = {};
     }
 
-    switch (uti::toEnum<PortMode>(registers_.ireg[1] >> SmpcRegisters::InputRegister::p1md_shft)) {
+    switch (uti::toEnum<PortMode>(regs_.ireg[1] >> Ireg::p1md_shft)) {
         using enum PortMode;
         case mode_0_byte: break; // no data returned
         case mode_15_byte:
@@ -711,7 +763,7 @@ void Smpc::getPeripheralData() {
         default: Log::warning(Logger::smpc, tr("Port Status reserved"));
     }
 
-    switch (uti::toEnum<PortMode>(registers_.ireg[1] >> SmpcRegisters::InputRegister::p2md_shft)) {
+    switch (uti::toEnum<PortMode>(regs_.ireg[1] >> Ireg::p2md_shft)) {
         using enum PortMode;
         case mode_0_byte: break; // no data returned
         case mode_15_byte:
@@ -750,19 +802,19 @@ void Smpc::getPeripheralData() {
     // Checking if there's more data to send than existing OREG registers
     if (full_peripheral_data_table_.size() > output_registers_number) {
         for (u32 i = 0; i < output_registers_number; ++i) {
-            registers_.oreg[i] = full_peripheral_data_table_[i];
+            regs_.oreg[i] = full_peripheral_data_table_[i];
         }
         full_peripheral_data_table_.erase(full_peripheral_data_table_.begin(),
                                           full_peripheral_data_table_.begin() + output_registers_number);
 
-        registers_.sr.set(SmpcRegisters::StatusRegister::pde);
+        regs_.sr.set(Sr::pde);
     } else {
         for (u32 i = 0; i < full_peripheral_data_table_.size(); ++i) {
-            registers_.oreg[i] = full_peripheral_data_table_[i];
+            regs_.oreg[i] = full_peripheral_data_table_[i];
         }
         full_peripheral_data_table_.clear();
 
-        registers_.sr.clr(SmpcRegisters::StatusRegister::pde);
+        regs_.sr.clr(Sr::pde);
     }
 
 } // namespace saturnin::core
@@ -828,49 +880,49 @@ auto Smpc::read(const u32 addr) -> u8 {
                 constexpr auto default_stv_data = u8{0xcf};
                 return default_stv_data;
             }
-            return registers_.sr.data();
-        case status_flag: return registers_.sf.data();
-        case output_register_0: return registers_.oreg[0].data();
-        case output_register_1: return registers_.oreg[1].data();
-        case output_register_2: return registers_.oreg[2].data();
-        case output_register_3: return registers_.oreg[3].data();
-        case output_register_4: return registers_.oreg[4].data();
-        case output_register_5: return registers_.oreg[5].data();
-        case output_register_6: return registers_.oreg[6].data();
-        case output_register_7: return registers_.oreg[7].data();
-        case output_register_8: return registers_.oreg[8].data();
-        case output_register_9: return registers_.oreg[9].data();
-        case output_register_10: return registers_.oreg[10].data();
-        case output_register_11: return registers_.oreg[11].data();
-        case output_register_12: return registers_.oreg[12].data();
-        case output_register_13: return registers_.oreg[13].data();
-        case output_register_14: return registers_.oreg[14].data();
-        case output_register_15: return registers_.oreg[15].data();
-        case output_register_16: return registers_.oreg[16].data();
-        case output_register_17: return registers_.oreg[17].data();
-        case output_register_18: return registers_.oreg[18].data();
-        case output_register_19: return registers_.oreg[19].data();
-        case output_register_20: return registers_.oreg[20].data();
-        case output_register_21: return registers_.oreg[21].data();
-        case output_register_22: return registers_.oreg[22].data();
-        case output_register_23: return registers_.oreg[23].data();
-        case output_register_24: return registers_.oreg[24].data();
-        case output_register_25: return registers_.oreg[25].data();
-        case output_register_26: return registers_.oreg[26].data();
-        case output_register_27: return registers_.oreg[27].data();
-        case output_register_28: return registers_.oreg[28].data();
-        case output_register_29: return registers_.oreg[29].data();
-        case output_register_30: return registers_.oreg[30].data();
-        case output_register_31: return registers_.oreg[31].data();
+            return regs_.sr.data();
+        case status_flag: return regs_.sf.data();
+        case output_register_0: return regs_.oreg[0].data();
+        case output_register_1: return regs_.oreg[1].data();
+        case output_register_2: return regs_.oreg[2].data();
+        case output_register_3: return regs_.oreg[3].data();
+        case output_register_4: return regs_.oreg[4].data();
+        case output_register_5: return regs_.oreg[5].data();
+        case output_register_6: return regs_.oreg[6].data();
+        case output_register_7: return regs_.oreg[7].data();
+        case output_register_8: return regs_.oreg[8].data();
+        case output_register_9: return regs_.oreg[9].data();
+        case output_register_10: return regs_.oreg[10].data();
+        case output_register_11: return regs_.oreg[11].data();
+        case output_register_12: return regs_.oreg[12].data();
+        case output_register_13: return regs_.oreg[13].data();
+        case output_register_14: return regs_.oreg[14].data();
+        case output_register_15: return regs_.oreg[15].data();
+        case output_register_16: return regs_.oreg[16].data();
+        case output_register_17: return regs_.oreg[17].data();
+        case output_register_18: return regs_.oreg[18].data();
+        case output_register_19: return regs_.oreg[19].data();
+        case output_register_20: return regs_.oreg[20].data();
+        case output_register_21: return regs_.oreg[21].data();
+        case output_register_22: return regs_.oreg[22].data();
+        case output_register_23: return regs_.oreg[23].data();
+        case output_register_24: return regs_.oreg[24].data();
+        case output_register_25: return regs_.oreg[25].data();
+        case output_register_26: return regs_.oreg[26].data();
+        case output_register_27: return regs_.oreg[27].data();
+        case output_register_28: return regs_.oreg[28].data();
+        case output_register_29: return regs_.oreg[29].data();
+        case output_register_30: return regs_.oreg[30].data();
+        case output_register_31: return regs_.oreg[31].data();
         case port_data_register_1:
             if (modules_.context()->hardwareMode() == HardwareMode::stv) {
                 constexpr auto default_stv_data = u8{0xff};
                 return default_stv_data;
             }
-            return registers_.pdr1.shifted(SmpcRegisters::PortDataRegister::pdr_shft);
+            return regs_.pdr1 >> SmpcRegs::Pdr::pdr_shft;
         case port_data_register_2:
             if (modules_.context()->hardwareMode() == HardwareMode::stv) {
-                registers_.pdr2 = 0;
+                regs_.pdr2 = 0;
 
                 // const auto controls = getStvPeripheralMapping().board_controls;
                 // controls.test_switch;
@@ -879,9 +931,9 @@ auto Smpc::read(const u32 addr) -> u8 {
 
                 //    }
             }
-            registers_.pdr2 = 0xFF;
+            regs_.pdr2 = 0xFF;
 
-            return registers_.pdr2.shifted(SmpcRegisters::PortDataRegister::pdr_shft);
+            return regs_.pdr2 >> SmpcRegs::Pdr::pdr_shft;
 
         default: return 0;
     }
@@ -889,54 +941,58 @@ auto Smpc::read(const u32 addr) -> u8 {
 
 auto Smpc::rawRead(const u32 addr) -> u8 {
     switch (addr) {
-        case input_register_0: return registers_.ireg[0].data();
-        case input_register_1: return registers_.ireg[1].data();
-        case input_register_2: return registers_.ireg[2].data();
-        case input_register_3: return registers_.ireg[3].data();
-        case input_register_4: return registers_.ireg[4].data();
-        case input_register_5: return registers_.ireg[5].data();
-        case input_register_6: return registers_.ireg[6].data();
+        case input_register_0: return regs_.ireg[0].data();
+        case input_register_1: return regs_.ireg[1].data();
+        case input_register_2: return regs_.ireg[2].data();
+        case input_register_3: return regs_.ireg[3].data();
+        case input_register_4: return regs_.ireg[4].data();
+        case input_register_5: return regs_.ireg[5].data();
+        case input_register_6: return regs_.ireg[6].data();
         default: return read(addr);
     }
 }
 
 void Smpc::write(const u32 addr, const u8 data) {
+    using Sr   = SmpcRegs::Sr;
+    using Sf   = SmpcRegs::Sf;
+    using Ireg = SmpcRegs::Ireg;
+    using Ddr  = SmpcRegs::Ddr;
+    using Pdr  = SmpcRegs::Pdr;
     switch (addr) {
         case command_register:
-            registers_.comreg = data;
+            regs_.comreg = data;
             setCommandDuration();
             break;
-        case status_flag: registers_.sf = data; break;
+        case status_flag: regs_.sf = data; break;
         case input_register_0: {
-            auto old_ireg0     = registers_.ireg[0];
-            registers_.ireg[0] = data;
+            auto old_ireg0 = regs_.ireg[0];
+            regs_.ireg[0]  = data;
             if (is_intback_processing_) {
-                if (registers_.ireg[0].is(SmpcRegisters::InputRegister::ireg0_break_request)) {
+                if ((regs_.ireg[0] >> Ireg::br_enum) == Ireg::IntbackBreakRequest::requested) {
                     Log::debug(Logger::smpc, tr("INTBACK break request"));
-                    registers_.sr.clr(SmpcRegisters::StatusRegister::upper_nibble);
+                    regs_.sr.clr(Sr::upper_nibble);
                     is_intback_processing_ = false;
                     break;
                 }
 
-                auto old_continue = old_ireg0 >> SmpcRegisters::InputRegister::continue_request_shft;
-                auto new_continue = registers_.ireg[0] >> SmpcRegisters::InputRegister::continue_request_shft;
-                if (new_continue != old_continue) {
+                auto old_continue = old_ireg0 >> SmpcRegs::Ireg::cont_shft;
+                if (auto new_continue = regs_.ireg[0] >> Ireg::cont_shft; new_continue != old_continue) {
                     Log::debug(Logger::smpc, tr("INTBACK continue request"));
                     setCommandDuration();
-                    registers_.sf.set(SmpcRegisters::StatusFlag::sf);
+                    regs_.sf.set(Sf::sf);
                     break;
                 }
                 is_intback_processing_ = false;
             }
             break;
         }
-        case input_register_1: registers_.ireg[1] = data; break;
-        case input_register_2: registers_.ireg[2] = data; break;
-        case input_register_3: registers_.ireg[3] = data; break;
-        case input_register_4: registers_.ireg[4] = data; break;
-        case input_register_5: registers_.ireg[5] = data; break;
-        case input_register_6: registers_.ireg[6] = data; break;
-        case port_data_register_1: registers_.pdr1.upd(SmpcRegisters::PortDataRegister::pdr(data)); break;
+        case input_register_1: regs_.ireg[1] = data; break;
+        case input_register_2: regs_.ireg[2] = data; break;
+        case input_register_3: regs_.ireg[3] = data; break;
+        case input_register_4: regs_.ireg[4] = data; break;
+        case input_register_5: regs_.ireg[5] = data; break;
+        case input_register_6: regs_.ireg[6] = data; break;
+        case port_data_register_1: regs_.pdr1.upd(Pdr::pdr(data)); break;
         case port_data_register_2:
             if (modules_.context()->hardwareMode() == HardwareMode::stv) {
                 constexpr auto sound_status = u8{0x10};
@@ -951,12 +1007,12 @@ void Smpc::write(const u32 addr, const u8 data) {
                     modules_.scsp()->reset();
                 }
             }
-            registers_.pdr2.upd(SmpcRegisters::PortDataRegister::pdr(data));
+            regs_.pdr2.upd(Pdr::pdr(data));
             break;
-        case data_direction_register_1: registers_.ddr1.upd(SmpcRegisters::DataDirectionRegister::ddr(data)); break;
-        case data_direction_register_2: registers_.ddr2.upd(SmpcRegisters::DataDirectionRegister::ddr(data)); break;
-        case io_select_register: registers_.iosel = data; break;
-        case external_latch_register: registers_.exle = data; break;
+        case data_direction_register_1: regs_.ddr1.upd(Ddr::ddr(data)); break;
+        case data_direction_register_2: regs_.ddr2.upd(Ddr::ddr(data)); break;
+        case io_select_register: regs_.iosel = data; break;
+        case external_latch_register: regs_.exle = data; break;
         default: break;
     }
 }

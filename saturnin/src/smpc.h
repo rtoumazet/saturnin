@@ -647,7 +647,7 @@ class Smpc {
 
     EmulatorModules modules_;
 
-    SmpcRegisters registers_; ///< Internal registers
+    SmpcRegs regs_; ///< Internal registers
 
     SystemClock clock_{SystemClock::not_set}; ///< The system clock.
 
