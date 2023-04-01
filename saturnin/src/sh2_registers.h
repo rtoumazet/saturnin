@@ -1164,90 +1164,121 @@ struct Sh2Regs {
         DmaorType dmaor;
     };
     Dmac dmac;
-};
 
-//////////////////////////////
-// 10. Division Unit (DIVU) //
-//////////////////////////////
+    //////////////////////////////
+    // 10. Division Unit (DIVU) //
+    //////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DivisorRegister
-///
-/// \brief	Divisor Register (DVSR).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Divu {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Dvsr
+        ///
+        /// \brief	Divisor Register (DVSR).
+        ///
+        /// \author	Runik
+        /// \date	01/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union DivisorRegister {
-    u32 raw; ///< Raw representation.
-};
+        struct Dvsr {};
+        using DvsrType = Reg<u32, Dvsr>;
+        DvsrType dvsr;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DividendRegister32Bits
-///
-/// \brief	Dividend Register L for 32 bits Division (DVDNT).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Dvdnt
+        ///
+        /// \brief	Dividend Register L for 32 bits Division (DVDNT).
+        ///
+        /// \author	Runik
+        /// \date	01/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union DividendRegister32Bits {
-    u32 raw; ///< Raw representation.
-};
+        struct Dvdnt {};
+        using DvdntType = Reg<u32, Dvdnt>;
+        DvdntType dvdnt;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OverflowFlag
-///
-/// \brief  DVCR - OVF bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Dvcr
+        ///
+        /// \brief	Division Control Register (DVCR).
+        ///
+        /// \author	Runik
+        /// \date	01/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class OverflowFlag : bool {
-    no_overflow = false, ///< No overflow has occurred (initial)
-    overflow    = true   ///< Overflow has occurred
-};
+        struct Dvcr {
+            using PosType     = Pos<u32, Dvcr>;
+            using BitsType    = Bits<u32, Dvcr>;
+            using MaskedType  = Masked<u32, Dvcr>;
+            using ShiftedType = Shifted<u32, Dvcr>;
+            template<typename E>
+            using EnumType = Enum<u32, Dvcr, E>;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DivisionControlRegister
-///
-/// \brief	Division Control Register (DVCR).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   OverflowFlag
+            ///
+            /// \brief  DVCR - OVF bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union DivisionControlRegister {
-    u32              raw;              ///< Raw representation.
-    BitField<1>      interrupt_enable; ///< Defines OVFIE bit.
-    BitField<0>      overflow_flag;    ///< Defines OVF bit.
-    BitField<16, 16> upper_16_bits;    ///< Defines the range of the upper 16 bits of the register.
-    BitField<0, 16>  lower_16_bits;    ///< Defines the range of the lower 16 bits of the register.
-};
+            enum class OverflowFlag : bool {
+                no_overflow = false, ///< No overflow has occurred (initial)
+                overflow    = true   ///< Overflow has occurred
+            };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DividendRegisterH
-///
-/// \brief	Dividend Register H (DVDNTH).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            enum class InterruptRequestUponOverflow : bool {
+                disabled = false, ///< Interrupt request (OVFI) caused by OVF disabled (initial)
+                enabled  = true   ///< Interrupt request (OVFI) caused by OVF enabled.
+            };
 
-union DividendRegisterH {
-    u32 raw; ///< Raw representation.
-};
+            static constexpr auto ovf_pos     = PosType(0);  ///< (Immutable) Overflow flag.
+            static constexpr auto ovfie_pos   = PosType(1);  ///< (Immutable) Interrupt request caused by overflow.
+            static constexpr auto lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto hi_word_pos = PosType(16); ///< Defines the range of the lower 16 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	DividendRegisterL
-///
-/// \brief	Dividend Register L.
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+            static constexpr auto ovf   = BitsType(1, ovf_pos);
+            static constexpr auto ovfie = BitsType(1, ovfie_pos);
 
-union DividendRegisterL {
-    u32 raw; ///< Raw representation.
+            static constexpr auto ovf_mask   = 0b1;
+            static constexpr auto ovfie_mask = 0b1;
+
+            static constexpr auto ovf_enum   = EnumType<OverflowFlag>(ovf_mask, ovf_pos);
+            static constexpr auto ovfie_enum = EnumType<InterruptRequestUponOverflow>(ovfie_mask, ovfie_pos);
+
+            static constexpr auto word_mask = 0xFFFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Divu::Dvcr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Divu::Dvcr", HI_WORD, hiWord, word_mask, hi_word_pos, word_mask);
+        };
+        using DvcrType = Reg<u32, Dvcr>;
+        DvcrType dvcr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Dvdnth
+        ///
+        /// \brief	Dividend Register H (DVDNTH).
+        ///
+        /// \author	Runik
+        /// \date	01/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Dvdnth {};
+        using DvdnthType = Reg<u32, Dvdnth>;
+        DvdnthType dvdnth;
+        DvdnthType dvdnth_shadow;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Dvdntl
+        ///
+        /// \brief	Dividend Register L.
+        ///
+        /// \author	Runik
+        /// \date	01/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Dvdntl {};
+        using DvdntlType = Reg<u32, Dvdntl>;
+        DvdntlType dvdntl;
+        DvdntlType dvdntl_shadow;
+    };
+    Divu divu;
 };
 
 //////////////////////////////////////////

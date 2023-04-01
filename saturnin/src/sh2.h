@@ -969,13 +969,13 @@ class Sh2 {
     s32 divu_quot_{};               ///< Quotient of the division
     s32 divu_rem_{};                ///< Remainder of the division
 
-    DivisorRegister         divu_dvsr_;
-    DividendRegister32Bits  divu_dvdnt_;
-    DivisionControlRegister divu_dvcr_;
-    DividendRegisterH       divu_dvdnth_;
-    DividendRegisterH       divu_dvdnth_shadow_;
-    DividendRegisterL       divu_dvdntl_;
-    DividendRegisterL       divu_dvdntl_shadow_;
+    // DivisorRegister         divu_dvsr_;
+    // DividendRegister32Bits  divu_dvdnt_;
+    // DivisionControlRegister divu_dvcr_;
+    // DividendRegisterH divu_dvdnth_;
+    // DividendRegisterH divu_dvdnth_shadow_;
+    // DividendRegisterL divu_dvdntl_;
+    // DividendRegisterL divu_dvdntl_shadow_;
     //@}
 
     /// \name FRT (Free Running Timer)
