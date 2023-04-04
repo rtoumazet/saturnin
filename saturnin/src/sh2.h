@@ -945,18 +945,6 @@ class Sh2 {
     /// \name DMAC (Direct Memory Access Controller)
     //@{
     DmaNextTransferPriority dmac_next_transfer_priority_{DmaNextTransferPriority::channel_0_first};
-
-    // DmaSourceAddressRegister                   dmac_sar0_;
-    // DmaSourceAddressRegister                   dmac_sar1_;
-    // DmaDestinationAddressRegister              dmac_dar0_;
-    // DmaDestinationAddressRegister              dmac_dar1_;
-    // DmaTransferCountRegister                   dmac_tcr0_;
-    // DmaTransferCountRegister                   dmac_tcr1_;
-    // DmaChannelControlRegister                  dmac_chcr0_;
-    // DmaChannelControlRegister                  dmac_chcr1_;
-    // DmaRequestResponseSelectionControlRegister dmac_drcr0_;
-    // DmaRequestResponseSelectionControlRegister dmac_drcr1_;
-    // DmaOperationRegister                       dmac_dmaor_;
     //@}
 
     /// \name DIVU (Division unit)
@@ -968,14 +956,6 @@ class Sh2 {
     u8  divu_remaining_cycles_{};   ///< Remaining cycles to end current division
     s32 divu_quot_{};               ///< Quotient of the division
     s32 divu_rem_{};                ///< Remainder of the division
-
-    // DivisorRegister         divu_dvsr_;
-    // DividendRegister32Bits  divu_dvdnt_;
-    // DivisionControlRegister divu_dvcr_;
-    // DividendRegisterH divu_dvdnth_;
-    // DividendRegisterH divu_dvdnth_shadow_;
-    // DividendRegisterL divu_dvdntl_;
-    // DividendRegisterL divu_dvdntl_shadow_;
     //@}
 
     /// \name FRT (Free Running Timer)
@@ -984,39 +964,6 @@ class Sh2 {
     u8   frt_clock_divisor_{};  ///< FRT clock divisor.
     u8   frt_mask_{};           ///< FRT mask.
     bool frt_current_ocr_{};    ///< Current Output Compare Register.
-
-    TimerInterruptEnableRegister          frt_tier_;
-    FreeRunningTimerControlStatusRegister frt_ftcsr_;
-    FreeRunningCounter                    frt_frc_;
-    OutputCompareRegister                 frt_ocra_;
-    OutputCompareRegister                 frt_ocrb_;
-    TimerControlRegister                  frt_tcr_;
-    TimerOutputCompareControlRegister     frt_tocr_;
-    InputCaptureRegister                  frt_icr_;
-    //@}
-
-    /// \name WDT (Watchdog Timer)
-    //@{
-    WatchdogTimerControlStatusRegister wdt_wtcsr_;
-    WatchdogTimerCounter               wdt_wtcnt_;
-    ResetControlStatusRegister         wdt_rstcsr_;
-    //@}
-
-    /// \name SCI (Serial Communication Interface)
-    //@{
-    ReceiveShiftRegister  sci_rsr_;
-    ReceiveDataRegister   sci_rdr_;
-    TransmitShiftRegister sci_tsr_;
-    TransmitDataRegister  sci_tdr_;
-    SerialModeRegister    sci_smr_;
-    SerialControlRegister sci_scr_;
-    SerialStatusRegister  sci_ssr_;
-    BitRateRegister       sci_brr_;
-    //@}
-
-    /// \name Power-Down modes
-    //@{
-    StandbyControlRegister sbycr_;
     //@}
 
     std::vector<CallstackItem>          callstack_;                    ///< Callstack of the processor

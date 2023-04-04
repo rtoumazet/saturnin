@@ -90,7 +90,6 @@ constexpr u8 input_registers_number{7};
 constexpr u8 output_registers_number{32};
 
 struct SmpcRegs {
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \struct	CommandRegister
     ///
@@ -101,17 +100,14 @@ struct SmpcRegs {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Comreg {
-        using PosType    = Pos<u8, Comreg>;
-        using MaskedType = Masked<u8, Comreg>;
-        template<typename E>
-        using EnumType = Enum<u8, Comreg, E>;
+        GENERATE_USING(Comreg, u8);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \enum   SmpcCommand
         ///
         /// \brief  SMPC commands definition.
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+
         enum class SmpcCommand : u8 {
             // Resetable commands
             master_sh2_on       = 0x00, ///< MSHON command
@@ -136,11 +132,7 @@ struct SmpcRegs {
             time_setting = 0x16 ///< SETTIME command
         };
 
-        static constexpr auto comreg_pos = PosType(0);
-
-        static constexpr auto comreg_mask = 0x1F;
-
-        static constexpr auto comreg_enum = EnumType<SmpcCommand>(comreg_mask, comreg_pos);
+        GENERATE_BIT_WITH_ENUM(comreg, 0, 0x1F, SmpcCommand); ///< SMPC command.
     };
     using ComregType = Reg<u8, Comreg>;
     ComregType comreg;
@@ -155,10 +147,7 @@ struct SmpcRegs {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Sr {
-        using PosType     = Pos<u8, Sr>;
-        using BitsType    = Bits<u8, Sr>;
-        using MaskedType  = Masked<u8, Sr>;
-        using ShiftedType = Shifted<u8, Sr>;
+        GENERATE_USING(Sr, u8);
 
         static constexpr auto p1md_pos         = PosType(0); // Port 1 mode.
         static constexpr auto p2md_pos         = PosType(2); // Port 2 mode.
@@ -178,16 +167,6 @@ struct SmpcRegs {
         static constexpr auto pdl   = BitsType(1, pdl_pos);
         static constexpr auto bit_6 = BitsType(1, bit_6_pos);
         static constexpr auto bit_7 = BitsType(1, bit_7_pos);
-
-        static constexpr auto port_1_mode_15_bytes  = MaskedType(p1md_mask, 0b00, p1md_pos);
-        static constexpr auto port_1_mode_255_bytes = MaskedType(p1md_mask, 0b01, p1md_pos);
-        static constexpr auto port_1_mode_reserved  = MaskedType(p1md_mask, 0b10, p1md_pos);
-        static constexpr auto port_1_mode_0_byte    = MaskedType(p1md_mask, 0b11, p1md_pos);
-
-        static constexpr auto port_2_mode_15_bytes  = MaskedType(p2md_mask, 0b00, p1md_pos);
-        static constexpr auto port_2_mode_255_bytes = MaskedType(p2md_mask, 0b01, p1md_pos);
-        static constexpr auto port_2_mode_reserved  = MaskedType(p2md_mask, 0b10, p1md_pos);
-        static constexpr auto port_2_mode_0_byte    = MaskedType(p2md_mask, 0b11, p1md_pos);
 
         static constexpr auto upper_nibble = MaskedType(upper_nibble_mask, 0xF, upper_nibble_pos);
 
@@ -227,12 +206,7 @@ struct SmpcRegs {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Ireg {
-        using PosType     = Pos<u8, Ireg>;
-        using BitsType    = Bits<u8, Ireg>;
-        using MaskedType  = Masked<u8, Ireg>;
-        using ShiftedType = Shifted<u8, Ireg>;
-        template<typename E>
-        using EnumType = Enum<u8, Ireg, E>;
+        GENERATE_USING(Ireg, u8);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \enum   IntbackContinueRequest
@@ -275,18 +249,18 @@ struct SmpcRegs {
         enum class PeripheralDataEnable : bool { peripheral_data_not_returned = false, peripheral_data_returned = true };
 
         static constexpr auto stac_pos = PosType(0); // Defines SMPC status acquisition (IREG0).
-        static constexpr auto br_pos                       = PosType(6); // Defines Intback break request (IREG0).
-        static constexpr auto cont_pos                     = PosType(7); // Defines Intback continue request (IREG0).
+        static constexpr auto br_pos   = PosType(6); // Defines Intback break request (IREG0).
+        static constexpr auto cont_pos = PosType(7); // Defines Intback continue request (IREG0).
         static constexpr auto ope_pos  = PosType(1); // Defines if peripheral acquisition time is optimized (IREG1).
         static constexpr auto pen_pos  = PosType(3); // Defines if peripheral data is enabled (IREG1).
         static constexpr auto p1md_pos = PosType(4); // Defines port 1 mode (IREG1).
         static constexpr auto p2md_pos = PosType(6); // Defines port 2 mode (IREG1).
 
-        static constexpr auto stac         = BitsType(1, stac_pos);
-        static constexpr auto br                               = BitsType(1, br_pos);
-        static constexpr auto cont                             = BitsType(1, cont_pos);
-        static constexpr auto ope = BitsType(1, ope_pos);
-        static constexpr auto pen   = BitsType(1, pen_pos);
+        static constexpr auto stac = BitsType(1, stac_pos);
+        static constexpr auto br   = BitsType(1, br_pos);
+        static constexpr auto cont = BitsType(1, cont_pos);
+        static constexpr auto ope  = BitsType(1, ope_pos);
+        static constexpr auto pen  = BitsType(1, pen_pos);
 
         static constexpr auto stac_mask      = 0b1;
         static constexpr auto br_mask        = 0b1;
@@ -303,10 +277,10 @@ struct SmpcRegs {
         GENERATE_MASKED_RANGE("SmpcRegs::Ireg", P2MD, p2md, port_mode_mask, p2md_pos, 4);
 
         static constexpr auto stac_enum = EnumType<SmpcStatusAcquisition>(stac_mask, stac_pos);
-        static constexpr auto br_enum = EnumType<IntbackBreakRequest>(br_mask, br_pos);
+        static constexpr auto br_enum   = EnumType<IntbackBreakRequest>(br_mask, br_pos);
         static constexpr auto cont_enum = EnumType<IntbackContinueRequest>(cont_mask, cont_pos);
-        static constexpr auto ope_enum = EnumType<AcquisitionTimeOptimization>(ope_mask, ope_pos);
-        static constexpr auto pen_enum = EnumType<PeripheralDataEnable>(pen_mask, pen_pos);
+        static constexpr auto ope_enum  = EnumType<AcquisitionTimeOptimization>(ope_mask, ope_pos);
+        static constexpr auto pen_enum  = EnumType<PeripheralDataEnable>(pen_mask, pen_pos);
     };
     using IregType = Reg<u8, Ireg>;
     std::array<IregType, input_registers_number> ireg;
@@ -321,12 +295,7 @@ struct SmpcRegs {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Oreg {
-        using PosType     = Pos<u8, Oreg>;
-        using BitsType    = Bits<u8, Oreg>;
-        using MaskedType  = Masked<u8, Oreg>;
-        using ShiftedType = Shifted<u8, Oreg>;
-        template<typename E>
-        using EnumType = Enum<u8, Oreg, E>;
+        GENERATE_USING(Oreg, u8);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \enum   ResetStatus
@@ -414,10 +383,7 @@ struct SmpcRegs {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Ddr {
-        using PosType     = Pos<u8, Ddr>;
-        using BitsType    = Bits<u8, Ddr>;
-        using MaskedType  = Masked<u8, Ddr>;
-        using ShiftedType = Shifted<u8, Ddr>;
+        GENERATE_USING(Ddr, u8);
 
         static constexpr auto ddr_pos = PosType(0);
 
@@ -441,10 +407,7 @@ struct SmpcRegs {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Pdr {
-        using PosType     = Pos<u8, Pdr>;
-        using BitsType    = Bits<u8, Pdr>;
-        using MaskedType  = Masked<u8, Pdr>;
-        using ShiftedType = Shifted<u8, Pdr>;
+        GENERATE_USING(Pdr, u8);
 
         static constexpr auto pdr_pos = PosType(0);
 
@@ -468,10 +431,7 @@ struct SmpcRegs {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct IOSelect {
-        using PosType  = Pos<u8, IOSelect>;
-        using BitsType = Bits<u8, IOSelect>;
-        template<typename E>
-        using EnumType = Enum<u8, IOSelect, E>;
+        GENERATE_USING(IOSelect, u8);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \enum   PeripheralPortMode
@@ -484,18 +444,8 @@ struct SmpcRegs {
             sh2_direct_mode   = true,  ///< SH2 direct mode
         };
 
-        static constexpr auto iosel1_pos = PosType(0); ///< (Immutable) Peripheral port 1 mode.
-        static constexpr auto iosel2_pos = PosType(1); ///< (Immutable) Peripheral port 2 mode.
-
-        // 1: SH2 direct mode, 0: SMPC control mode
-        static constexpr auto iosel1 = BitsType(1, iosel1_pos);
-        static constexpr auto iosel2 = BitsType(1, iosel2_pos);
-
-        static constexpr auto iosel1_mask = 0b1;
-        static constexpr auto iosel2_mask = 0b1;
-
-        static constexpr auto iosel1_enum = EnumType<PeripheralPortMode>(iosel1_mask, iosel1_pos);
-        static constexpr auto iosel2_enum = EnumType<PeripheralPortMode>(iosel2_mask, iosel2_pos);
+        GENERATE_BIT_WITH_ENUM(iosel1, 0, 0b1, PeripheralPortMode); ///< Peripheral port 1 mode.
+        GENERATE_BIT_WITH_ENUM(iosel2, 1, 0b1, PeripheralPortMode); ///< Peripheral port 2 mode.
     };
     using IOSelectType = Reg<u8, IOSelect>;
     IOSelectType iosel;
@@ -510,10 +460,7 @@ struct SmpcRegs {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Exle {
-        using PosType  = Pos<u8, Exle>;
-        using BitsType = Bits<u8, Exle>;
-        template<typename E>
-        using EnumType = Enum<u8, Exle, E>;
+        GENERATE_USING(Exle, u8);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// \enum   ExternalLatch
@@ -526,17 +473,8 @@ struct SmpcRegs {
             enabled  = true,  ///< Enabled
         };
 
-        static constexpr auto exle1_pos = PosType(0); ///< (Immutable) External latch 1 enable.
-        static constexpr auto exle2_pos = PosType(1); ///< (Immutable) External latch 2 enable.
-
-        static constexpr auto exle1 = BitsType(1, exle1_pos);
-        static constexpr auto exle2 = BitsType(1, exle2_pos);
-
-        static constexpr auto exle1_mask = 0b1;
-        static constexpr auto exle2_mask = 0b1;
-
-        static constexpr auto exle1_enum = EnumType<ExternalLatch>(exle1_mask, exle1_pos);
-        static constexpr auto exle2_enum = EnumType<ExternalLatch>(exle2_mask, exle2_pos);
+        GENERATE_BIT_WITH_ENUM(exle1, 0, 0b1, ExternalLatch); ///< External latch 1 enable.
+        GENERATE_BIT_WITH_ENUM(exle2, 1, 0b1, ExternalLatch); ///< External latch 2 enable.
     };
     using ExleType = Reg<u8, Exle>;
     ExleType exle;

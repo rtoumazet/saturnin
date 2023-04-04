@@ -521,4 +521,19 @@ class Reg {
                                                                                                                            \
     static bool RUNTIME_NAME##_valid(const unsigned bits) { return bits <= (LIMIT); }
 
+#define GENERATE_BIT_WITH_ENUM(NAME, POS, MASK, SCOPED_ENUM)                  \
+    static constexpr auto NAME##_pos  = PosType(POS);                         \
+    static constexpr auto NAME        = BitsType(1, NAME##_pos);              \
+    static constexpr auto NAME##_mask = MASK;                                 \
+    static constexpr auto NAME##_shft = ShiftedType(NAME##_mask, NAME##_pos); \
+    static constexpr auto NAME##_enum = EnumType<SCOPED_ENUM>(NAME##_mask, NAME##_pos);
+
+#define GENERATE_USING(NAME, TYPE)           \
+    using PosType     = Pos<TYPE, NAME>;     \
+    using MaskedType  = Masked<TYPE, NAME>;  \
+    using BitsType    = Bits<TYPE, NAME>;    \
+    using ShiftedType = Shifted<TYPE, NAME>; \
+    template<typename E>                     \
+    using EnumType = Enum<TYPE, NAME, E>;
+
 } // namespace saturnin

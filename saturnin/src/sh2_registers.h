@@ -107,10 +107,7 @@ constexpr auto refresh_time_constant_register                    = u32{0xFFFFFFF
 
 struct Sh2Regs {
     struct StatusRegister {
-        using PosType     = Pos<u32, StatusRegister>;
-        using BitsType    = Bits<u32, StatusRegister>;
-        using MaskedType  = Masked<u32, StatusRegister>;
-        using ShiftedType = Shifted<u32, StatusRegister>;
+        GENERATE_USING(StatusRegister, u32);
 
         static constexpr auto t_pos = PosType(0);
         static constexpr auto s_pos = PosType(1);
@@ -153,10 +150,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Ipra {
-            using PosType     = Pos<u16, Ipra>;
-            using BitsType    = Bits<u16, Ipra>;
-            using MaskedType  = Masked<u16, Ipra>;
-            using ShiftedType = Shifted<u16, Ipra>;
+            GENERATE_USING(Ipra, u16);
 
             static constexpr auto wdt_level_pos  = PosType(4);  ///< Defines WDT/DRAM refresh priority level.
             static constexpr auto dmac_level_pos = PosType(8);  ///< Defines DMAC0/DMAC1 priority level.
@@ -190,10 +184,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Iprb {
-            using PosType     = Pos<u16, Iprb>;
-            using BitsType    = Bits<u16, Iprb>;
-            using MaskedType  = Masked<u16, Iprb>;
-            using ShiftedType = Shifted<u16, Iprb>;
+            GENERATE_USING(Iprb, u16);
 
             static constexpr auto frt_level_pos = PosType(8);  ///< Defines FRT priority level.
             static constexpr auto sci_level_pos = PosType(12); ///< Defines SCI priority level.
@@ -223,10 +214,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Vcra {
-            using PosType     = Pos<u16, Vcra>;
-            using BitsType    = Bits<u16, Vcra>;
-            using MaskedType  = Masked<u16, Vcra>;
-            using ShiftedType = Shifted<u16, Vcra>;
+            GENERATE_USING(Vcra, u16);
 
             static constexpr auto srxv_pos    = PosType(0); ///< Defines SCI receive data full interrupt vector number.
             static constexpr auto serv_pos    = PosType(8); ///< Defines SCI receive error interrupt vector number.
@@ -256,10 +244,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Vcrb {
-            using PosType     = Pos<u16, Vcrb>;
-            using BitsType    = Bits<u16, Vcrb>;
-            using MaskedType  = Masked<u16, Vcrb>;
-            using ShiftedType = Shifted<u16, Vcrb>;
+            GENERATE_USING(Vcrb, u16);
 
             static constexpr auto stev_pos    = PosType(0); ///< Defines SCI transmit end interrupt vector number.
             static constexpr auto stxv_pos    = PosType(8); ///< Defines SCI transmit data empty interrupt vector number.
@@ -289,10 +274,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Vcrc {
-            using PosType     = Pos<u16, Vcrc>;
-            using BitsType    = Bits<u16, Vcrc>;
-            using MaskedType  = Masked<u16, Vcrc>;
-            using ShiftedType = Shifted<u16, Vcrc>;
+            GENERATE_USING(Vcrc, u16);
 
             static constexpr auto focv_pos    = PosType(0); ///< Defines FRT output compare interrupt vector number.
             static constexpr auto ficv_pos    = PosType(8); ///< Defines FRT input capture interrupt vector number.
@@ -322,10 +304,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Vcrd {
-            using PosType     = Pos<u16, Vcrd>;
-            using BitsType    = Bits<u16, Vcrd>;
-            using MaskedType  = Masked<u16, Vcrd>;
-            using ShiftedType = Shifted<u16, Vcrd>;
+            GENERATE_USING(Vcrd, u16);
 
             static constexpr auto fovv_pos    = PosType(8); ///< Defines FRT overflow interrupt vector number.
             static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
@@ -351,10 +330,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Vcrwdt {
-            using PosType     = Pos<u16, Vcrwdt>;
-            using BitsType    = Bits<u16, Vcrwdt>;
-            using MaskedType  = Masked<u16, Vcrwdt>;
-            using ShiftedType = Shifted<u16, Vcrwdt>;
+            GENERATE_USING(Vcrwdt, u16);
 
             static constexpr auto bcmv_pos    = PosType(0); ///< Defines BSC compare match interrupt vector number.
             static constexpr auto witv_pos    = PosType(8); ///< Defines WDT interval interrupt vector number.
@@ -388,6 +364,7 @@ struct Sh2Regs {
             using BitsType    = Bits<u32, Vcrdiv>;
             using MaskedType  = Masked<u32, Vcrdiv>;
             using ShiftedType = Shifted<u32, Vcrdiv>;
+            GENERATE_USING(Vcrdiv, u32);
 
             static constexpr auto divuv_pos   = PosType(0);  ///< Defines DIVU interrupt vector number.
             static constexpr auto lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
@@ -413,10 +390,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Vcrdma {
-            using PosType     = Pos<u32, Vcrdma>;
-            using BitsType    = Bits<u32, Vcrdma>;
-            using MaskedType  = Masked<u32, Vcrdma>;
-            using ShiftedType = Shifted<u32, Vcrdma>;
+            GENERATE_USING(Vcrdma, u32);
 
             static constexpr auto vc_pos      = PosType(0);  ///< Defines DMACx transfer end interrupt vector number.
             static constexpr auto lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
@@ -443,12 +417,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Icr {
-            using PosType     = Pos<u16, Icr>;
-            using BitsType    = Bits<u16, Icr>;
-            using MaskedType  = Masked<u16, Icr>;
-            using ShiftedType = Shifted<u16, Icr>;
-            template<typename E>
-            using EnumType = Enum<u16, Icr, E>;
+            GENERATE_USING(Icr, u16);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////
             /// \enum   NmiInputLevel
@@ -483,23 +452,12 @@ struct Sh2Regs {
                 external_vector = true   ///< External vector mode
             };
 
-            static constexpr auto vecmd_pos   = PosType(0);  ///< (Immutable) Vector mode.
-            static constexpr auto nmie_pos    = PosType(8);  ///< (Immutable) NMI edge detection.
-            static constexpr auto nmil_pos    = PosType(15); ///< (Immutable) NMI input level.
-            static constexpr auto lo_byte_pos = PosType(0);  ///< Defines the range of the upper 8 bits of the register.
-            static constexpr auto hi_byte_pos = PosType(8);  ///< Defines the range of the lower 8 bits of the register.
+            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-            static constexpr auto vecmd = BitsType(1, vecmd_pos);
-            static constexpr auto nmie  = BitsType(1, nmie_pos);
-            static constexpr auto nmil  = BitsType(1, nmil_pos);
-
-            static constexpr auto vecmd_mask = 0b1;
-            static constexpr auto nmie_mask  = 0b1;
-            static constexpr auto nmil_mask  = 0b1;
-
-            static constexpr auto vecmd_enum = EnumType<VectorMode>(vecmd_mask, vecmd_pos);
-            static constexpr auto nmie_enum  = EnumType<NmiEdgeDetection>(nmie_mask, nmie_pos);
-            static constexpr auto nmil_enum  = EnumType<NmiInputLevel>(nmil_mask, nmil_pos);
+            GENERATE_BIT_WITH_ENUM(vecmd, 0, 0b1, VectorMode);      ///< Vector mode.
+            GENERATE_BIT_WITH_ENUM(nmie, 8, 0b1, NmiEdgeDetection); ///< NMI edge detection.
+            GENERATE_BIT_WITH_ENUM(nmil, 15, 0b1, NmiInputLevel);   ///< NMI input level.
 
             static constexpr auto byte_mask = 0xFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Intc::Icr", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -524,10 +482,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Bcr {
-            using PosType     = Pos<u32, Bcr>;
-            using BitsType    = Bits<u32, Bcr>;
-            using MaskedType  = Masked<u32, Bcr>;
-            using ShiftedType = Shifted<u32, Bcr>;
+            GENERATE_USING(Bcr, u32);
 
             static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
@@ -548,10 +503,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Wcr {
-            using PosType     = Pos<u32, Wcr>;
-            using BitsType    = Bits<u32, Wcr>;
-            using MaskedType  = Masked<u32, Wcr>;
-            using ShiftedType = Shifted<u32, Wcr>;
+            GENERATE_USING(Wcr, u32);
 
             static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
@@ -571,10 +523,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Mcr {
-            using PosType     = Pos<u32, Mcr>;
-            using BitsType    = Bits<u32, Mcr>;
-            using MaskedType  = Masked<u32, Mcr>;
-            using ShiftedType = Shifted<u32, Mcr>;
+            GENERATE_USING(Mcr, u32);
 
             static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
@@ -594,10 +543,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Rtcsr {
-            using PosType     = Pos<u32, Rtcsr>;
-            using BitsType    = Bits<u32, Rtcsr>;
-            using MaskedType  = Masked<u32, Rtcsr>;
-            using ShiftedType = Shifted<u32, Rtcsr>;
+            GENERATE_USING(Rtcsr, u32);
 
             static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
@@ -617,10 +563,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Rtcnt {
-            using PosType     = Pos<u32, Rtcnt>;
-            using BitsType    = Bits<u32, Rtcnt>;
-            using MaskedType  = Masked<u32, Rtcnt>;
-            using ShiftedType = Shifted<u32, Rtcnt>;
+            GENERATE_USING(Rtcnt, u32);
 
             static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
@@ -640,10 +583,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Rtcor {
-            using PosType     = Pos<u32, Rtcor>;
-            using BitsType    = Bits<u32, Rtcor>;
-            using MaskedType  = Masked<u32, Rtcor>;
-            using ShiftedType = Shifted<u32, Rtcor>;
+            GENERATE_USING(Rtcor, u32);
 
             static constexpr auto lo_word_pos = PosType(0); ///< Defines the range of the upper 16 bits of the register.
 
@@ -669,10 +609,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Ccr {
-            using PosType  = Pos<u8, Ccr>;
-            using BitsType = Bits<u8, Ccr>;
-            template<typename E>
-            using EnumType = Enum<u8, Ccr, E>;
+            GENERATE_USING(Ccr, u8);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////
             /// \enum   WaySpecification
@@ -742,32 +679,12 @@ struct Sh2Regs {
                 cache_enabled  = true   ///< Cache enabled.
             };
 
-            static constexpr auto ce_pos = PosType(0); ///< (Immutable) Cache enable.
-            static constexpr auto id_pos = PosType(1); ///< (Immutable) Instruction replacement disable.
-            static constexpr auto od_pos = PosType(2); ///< (Immutable) Data replacement disable.
-            static constexpr auto tw_pos = PosType(3); ///< (Immutable) Two way mode.
-            static constexpr auto cp_pos = PosType(4); ///< (Immutable) Cache purge.
-            static constexpr auto wx_pos = PosType(6); ///< (Immutable) Way specification.
-
-            static constexpr auto ce = BitsType(1, ce_pos);
-            static constexpr auto id = BitsType(1, id_pos);
-            static constexpr auto od = BitsType(1, od_pos);
-            static constexpr auto tw = BitsType(1, tw_pos);
-            static constexpr auto cp = BitsType(1, cp_pos);
-
-            static constexpr auto ce_mask = 0b1;
-            static constexpr auto id_mask = 0b1;
-            static constexpr auto od_mask = 0b1;
-            static constexpr auto tw_mask = 0b1;
-            static constexpr auto cp_mask = 0b1;
-            static constexpr auto wx_mask = 0b11;
-
-            static constexpr auto ce_enum = EnumType<CacheEnable>(ce_mask, ce_pos);
-            static constexpr auto id_enum = EnumType<InstructionReplacementDisable>(id_mask, id_pos);
-            static constexpr auto od_enum = EnumType<DataReplacementDisable>(od_mask, od_pos);
-            static constexpr auto tw_enum = EnumType<TwoWayMode>(tw_mask, tw_pos);
-            static constexpr auto cp_enum = EnumType<CachePurge>(cp_mask, cp_pos);
-            static constexpr auto wx_enum = EnumType<WaySpecification>(wx_mask, wx_pos);
+            GENERATE_BIT_WITH_ENUM(ce, 0, 0b1, CacheEnable);                   ///< Cache enable.
+            GENERATE_BIT_WITH_ENUM(id, 1, 0b1, InstructionReplacementDisable); ///< Instruction replacement disable.
+            GENERATE_BIT_WITH_ENUM(od, 2, 0b1, DataReplacementDisable);        ///< Data replacement disable.
+            GENERATE_BIT_WITH_ENUM(tw, 3, 0b1, TwoWayMode);                    ///< Two way mode.
+            GENERATE_BIT_WITH_ENUM(cp, 4, 0b1, CachePurge);                    ///< Cache purge.
+            GENERATE_BIT_WITH_ENUM(wx, 6, 0b11, WaySpecification);             ///< Way specification.
         };
         using CcrType = Reg<u8, Ccr>;
         CcrType ccr;
@@ -830,11 +747,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Chcr {
-            using PosType    = Pos<u32, Chcr>;
-            using BitsType   = Bits<u32, Chcr>;
-            using MaskedType = Masked<u32, Chcr>;
-            template<typename E>
-            using EnumType = Enum<u32, Chcr, E>;
+            GENERATE_USING(Chcr, u32);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////
             /// \enum   DestinationAddressMode
@@ -985,58 +898,19 @@ struct Sh2Regs {
                 dma_transfer_enabled  = true   ///< DMA transfer enabled.
             };
 
-            static constexpr auto de_pos = PosType(0);  ///< (Immutable) DMA enable.
-            static constexpr auto te_pos = PosType(1);  ///< (Immutable) Transfer end flag.
-            static constexpr auto ie_pos = PosType(2);  ///< (Immutable) Interrupt enable.
-            static constexpr auto ta_pos = PosType(3);  ///< (Immutable) Transfer address mode.
-            static constexpr auto tb_pos = PosType(4);  ///< (Immutable) Transfer bus mode.
-            static constexpr auto dl_pos = PosType(5);  ///< (Immutable) Dreq level.
-            static constexpr auto ds_pos = PosType(6);  ///< (Immutable) Dreq select.
-            static constexpr auto al_pos = PosType(7);  ///< (Immutable) Acknowledge level.
-            static constexpr auto am_pos = PosType(8);  ///< (Immutable) Acknowledge mode.
-            static constexpr auto ar_pos = PosType(9);  ///< (Immutable) Auto request mode.
-            static constexpr auto ts_pos = PosType(10); ///< (Immutable) Transfer size.
-            static constexpr auto sm_pos = PosType(12); ///< (Immutable) Source address mode.
-            static constexpr auto dm_pos = PosType(14); ///< (Immutable) Destination address mode.
-
-            static constexpr auto de = BitsType(1, de_pos);
-            static constexpr auto te = BitsType(1, te_pos);
-            static constexpr auto ie = BitsType(1, ie_pos);
-            static constexpr auto ta = BitsType(1, ta_pos);
-            static constexpr auto tb = BitsType(1, tb_pos);
-            static constexpr auto dl = BitsType(1, dl_pos);
-            static constexpr auto ds = BitsType(1, ds_pos);
-            static constexpr auto al = BitsType(1, al_pos);
-            static constexpr auto am = BitsType(1, am_pos);
-            static constexpr auto ar = BitsType(1, ar_pos);
-
-            static constexpr auto de_mask = 0b1;
-            static constexpr auto te_mask = 0b1;
-            static constexpr auto ie_mask = 0b1;
-            static constexpr auto ta_mask = 0b1;
-            static constexpr auto tb_mask = 0b1;
-            static constexpr auto dl_mask = 0b1;
-            static constexpr auto ds_mask = 0b1;
-            static constexpr auto al_mask = 0b1;
-            static constexpr auto am_mask = 0b1;
-            static constexpr auto ar_mask = 0b1;
-            static constexpr auto ts_mask = 0b11;
-            static constexpr auto sm_mask = 0b11;
-            static constexpr auto dm_mask = 0b11;
-
-            static constexpr auto de_enum = EnumType<Sh2DmaEnable>(de_mask, de_pos);
-            static constexpr auto te_enum = EnumType<TransferEndFlag>(te_mask, te_pos);
-            static constexpr auto ie_enum = EnumType<Sh2DmaInterruptEnable>(ie_mask, ie_pos);
-            static constexpr auto ta_enum = EnumType<TransferAddressMode>(ta_mask, ta_pos);
-            static constexpr auto tb_enum = EnumType<TransferBusMode>(tb_mask, tb_pos);
-            static constexpr auto dl_enum = EnumType<DreqLevel>(dl_mask, dl_pos);
-            static constexpr auto ds_enum = EnumType<DreqSelect>(ds_mask, ds_pos);
-            static constexpr auto al_enum = EnumType<AcknowledgeLevel>(al_mask, al_pos);
-            static constexpr auto am_enum = EnumType<AcknowledgeMode>(am_mask, am_pos);
-            static constexpr auto ar_enum = EnumType<AutoRequestMode>(ar_mask, ar_pos);
-            static constexpr auto ts_enum = EnumType<TransferSize>(ts_mask, ts_pos);
-            static constexpr auto sm_enum = EnumType<SourceAddressMode>(sm_mask, sm_pos);
-            static constexpr auto dm_enum = EnumType<DestinationAddressMode>(dm_mask, dm_pos);
+            GENERATE_BIT_WITH_ENUM(de, 0, 0b1, Sh2DmaEnable);             ///< DMA enable.
+            GENERATE_BIT_WITH_ENUM(te, 1, 0b1, TransferEndFlag);          ///< Transfer end flag.
+            GENERATE_BIT_WITH_ENUM(ie, 2, 0b1, Sh2DmaInterruptEnable);    ///< Interrupt enable.
+            GENERATE_BIT_WITH_ENUM(ta, 3, 0b1, TransferAddressMode);      ///< Transfer address mode.
+            GENERATE_BIT_WITH_ENUM(tb, 4, 0b1, TransferBusMode);          ///< Transfer bus mode.
+            GENERATE_BIT_WITH_ENUM(dl, 5, 0b1, DreqLevel);                ///< Dreq level.
+            GENERATE_BIT_WITH_ENUM(ds, 6, 0b1, DreqSelect);               ///< Dreq select.
+            GENERATE_BIT_WITH_ENUM(al, 7, 0b1, AcknowledgeLevel);         ///< Acknowledge level.
+            GENERATE_BIT_WITH_ENUM(am, 8, 0b1, AcknowledgeMode);          ///< Acknowledge mode.
+            GENERATE_BIT_WITH_ENUM(ar, 9, 0b1, AutoRequestMode);          ///< Auto request mode.
+            GENERATE_BIT_WITH_ENUM(ts, 10, 0b11, TransferSize);           ///< Transfer size.
+            GENERATE_BIT_WITH_ENUM(sm, 12, 0b11, SourceAddressMode);      ///< Source address mode.
+            GENERATE_BIT_WITH_ENUM(dm, 14, 0b11, DestinationAddressMode); ///< Destination address mode.
         };
         using ChcrType = Reg<u32, Chcr>;
         ChcrType chcr0;
@@ -1052,11 +926,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Drcr {
-            using PosType    = Pos<u8, Drcr>;
-            using BitsType   = Bits<u8, Drcr>;
-            using MaskedType = Masked<u8, Drcr>;
-            template<typename E>
-            using EnumType = Enum<u8, Drcr, E>;
+            GENERATE_USING(Drcr, u8);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////
             /// \enum	ResourceSelect
@@ -1071,10 +941,7 @@ struct Sh2Regs {
                 reserved = 0b11  ///< Reserved (setting prohibited)
             };
 
-            static constexpr auto rs_pos = PosType(0); ///< (Immutable) Resource select.
-
-            static constexpr auto rs_mask = 0b11;
-            static constexpr auto rs_enum = EnumType<ResourceSelect>(rs_mask, rs_pos);
+            GENERATE_BIT_WITH_ENUM(rs, 0, 0b11, ResourceSelect); ///< Resource select.
         };
         using DrcrType = Reg<u8, Drcr>;
         DrcrType drcr0;
@@ -1090,11 +957,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Dmaor {
-            using PosType    = Pos<u32, Dmaor>;
-            using BitsType   = Bits<u32, Dmaor>;
-            using MaskedType = Masked<u32, Dmaor>;
-            template<typename E>
-            using EnumType = Enum<u32, Dmaor, E>;
+            GENERATE_USING(Dmaor, u32);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////
             /// \enum   DmaMasterEnable
@@ -1140,25 +1003,10 @@ struct Sh2Regs {
                 round_robin = true   ///< Round robin
             };
 
-            static constexpr auto dme_pos  = PosType(0); ///< (Immutable) DMA master enable.
-            static constexpr auto nmif_pos = PosType(1); ///< (Immutable) NMI flag.
-            static constexpr auto ae_pos   = PosType(2); ///< (Immutable) Address error flag.
-            static constexpr auto pr_pos   = PosType(3); ///< (Immutable) Priority mode.
-
-            static constexpr auto dme  = BitsType(1, dme_pos);
-            static constexpr auto nmif = BitsType(1, nmif_pos);
-            static constexpr auto ae   = BitsType(1, ae_pos);
-            static constexpr auto pr   = BitsType(1, pr_pos);
-
-            static constexpr auto dme_mask  = 0b1;
-            static constexpr auto nmif_mask = 0b1;
-            static constexpr auto ae_mask   = 0b1;
-            static constexpr auto pr_mask   = 0b1;
-
-            static constexpr auto dme_enum  = EnumType<DmaMasterEnable>(dme_mask, dme_pos);
-            static constexpr auto nmif_enum = EnumType<NmiFlag>(nmif_mask, nmif_pos);
-            static constexpr auto ae_enum   = EnumType<AddressErrorFlag>(ae_mask, ae_pos);
-            static constexpr auto pr_enum   = EnumType<PriorityMode>(pr_mask, pr_pos);
+            GENERATE_BIT_WITH_ENUM(dme, 0, 0b1, DmaMasterEnable); ///< DMA master enable.
+            GENERATE_BIT_WITH_ENUM(nmif, 1, 0b1, NmiFlag);        ///< NMI flag.
+            GENERATE_BIT_WITH_ENUM(ae, 2, 0b1, AddressErrorFlag); ///< Address error flag.
+            GENERATE_BIT_WITH_ENUM(pr, 3, 0b1, PriorityMode);     ///< Priority mode.
         };
         using DmaorType = Reg<u32, Dmaor>;
         DmaorType dmaor;
@@ -1206,12 +1054,7 @@ struct Sh2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         struct Dvcr {
-            using PosType     = Pos<u32, Dvcr>;
-            using BitsType    = Bits<u32, Dvcr>;
-            using MaskedType  = Masked<u32, Dvcr>;
-            using ShiftedType = Shifted<u32, Dvcr>;
-            template<typename E>
-            using EnumType = Enum<u32, Dvcr, E>;
+            GENERATE_USING(Dvcr, u32);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////
             /// \enum   OverflowFlag
@@ -1229,19 +1072,11 @@ struct Sh2Regs {
                 enabled  = true   ///< Interrupt request (OVFI) caused by OVF enabled.
             };
 
-            static constexpr auto ovf_pos     = PosType(0);  ///< (Immutable) Overflow flag.
-            static constexpr auto ovfie_pos   = PosType(1);  ///< (Immutable) Interrupt request caused by overflow.
             static constexpr auto lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
             static constexpr auto hi_word_pos = PosType(16); ///< Defines the range of the lower 16 bits of the register.
 
-            static constexpr auto ovf   = BitsType(1, ovf_pos);
-            static constexpr auto ovfie = BitsType(1, ovfie_pos);
-
-            static constexpr auto ovf_mask   = 0b1;
-            static constexpr auto ovfie_mask = 0b1;
-
-            static constexpr auto ovf_enum   = EnumType<OverflowFlag>(ovf_mask, ovf_pos);
-            static constexpr auto ovfie_enum = EnumType<InterruptRequestUponOverflow>(ovfie_mask, ovfie_pos);
+            GENERATE_BIT_WITH_ENUM(ovf, 0, 0b1, OverflowFlag);                   ///< Overflow flag.
+            GENERATE_BIT_WITH_ENUM(ovfie, 1, 0b1, InterruptRequestUponOverflow); ///< Interrupt request caused by overflow.
 
             static constexpr auto word_mask = 0xFFFF;
             GENERATE_MASKED_RANGE("Sh2Regs::Divu::Dvcr", LO_WORD, loWord, word_mask, lo_word_pos, word_mask);
@@ -1279,800 +1114,865 @@ struct Sh2Regs {
         DvdntlType dvdntl_shadow;
     };
     Divu divu;
-};
-
-//////////////////////////////////////////
-// 11. 16 Bits Free Running Timer (FRT) //
-//////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InterruptCaptureInterruptEnable
-///
-/// \brief  TIER - ICIE values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class InterruptCaptureInterruptEnable : bool {
-    interrupt_request_disabled = false, ///< Interrupt request (ICI) caused by ICF disabled (initial)
-    interrupt_request_enabled  = true   ///< Interrupt request (ICI) caused by ICF enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputCompareInterruptAEnable
-///
-/// \brief  TIER - OCIAE values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OutputCompareInterruptAEnable : bool {
-    interrupt_request_disabled = false, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
-    interrupt_request_enabled  = true   ///< Interrupt request (ICIA) caused by OCFA enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputCompareInterruptBEnable
-///
-/// \brief  TIER - OCIBE values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OutputCompareInterruptBEnable : bool {
-    interrupt_request_disabled = false, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
-    interrupt_request_enabled  = true   ///< Interrupt request (ICIB) caused by OCFB enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TimerOverflowInterruptEnable
-///
-/// \brief  TIER - OVIE values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TimerOverflowInterruptEnable : bool {
-    interrupt_request_disabled = false, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
-    interrupt_request_enabled  = true   ///< Interrupt request (FOVI) caused by OVF enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	TimerInterruptEnableRegister
-///
-/// \brief	Timer Interrupt Enable Register (TIER).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union TimerInterruptEnableRegister {
-    u8          raw;                                ///< Raw representation.
-    BitField<7> interrupt_capture_interrupt_enable; ///< Defines ICIE bit.
-    BitField<3> output_compare_interrupt_a_enable;  ///< Defines OCIAE bit.
-    BitField<2> output_compare_interrupt_b_enable;  ///< Defines OCIBE bit.
-    BitField<1> timer_overflow_interrupt_enable;    ///< Defines OVIE bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InputCaptureFlag
-///
-/// \brief  FTCSR - ICF values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class InputCaptureFlag : bool {
-    clear = false, ///< Clear conditions: 0 is written when 1 is read
-    set   = true   ///< Set conditions: when the FRC value is sent to ICR by the input capture signal
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputCompareFlagA
-///
-/// \brief  FTCSR - OCFA values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OutputCompareFlagA : bool {
-    clear = false, ///< Clear conditions: 0 is written when 1 is read
-    set   = true   ///< Set conditions: when the FRC value becomes equal to OCRA
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputCompareFlagB
-///
-/// \brief  FTCSR - OCFB values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OutputCompareFlagB : bool {
-    clear = false, ///< Clear conditions: 0 is written when 1 is read
-    set   = true   ///< Set conditions: when the FRC value becomes equal to OCRB
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TimerOverflowFlag
-///
-/// \brief  FTCSR - OVF values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TimerOverflowFlag : bool {
-    clear = false, ///< Clear conditions: 0 is written when 1 is read
-    set   = true   ///< Set conditions: when the FRC value changes from 0xFFFF to 0x0000
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CounterClearA
-///
-/// \brief  FTCSR - CCLRA values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class CounterClearA : bool {
-    clear_disabled   = false, ///< FRC clear disabled (initial)
-    clear_on_compare = true   ///< FRC cleared on compare match A
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	FreeRunningTimerControlStatusRegister
-///
-/// \brief	Free Running Timer Control/Status register (FTCSR).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union FreeRunningTimerControlStatusRegister {
-    u8          raw;                   ///< Raw representation.
-    BitField<7> input_capture_flag;    ///< Defines ICF bit.
-    BitField<3> output_compare_flag_a; ///< Defines OCFA bit.
-    BitField<2> output_compare_flag_b; ///< Defines OCFB bit.
-    BitField<1> timer_overflow_flag;   ///< Defines OVF bit.
-    BitField<0> counter_clear_a;       ///< Defines CCLRA bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	FreeRunningCounter
-///
-/// \brief	Free Running Counter (FRC).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union FreeRunningCounter {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	OutputCompareRegister
-///
-/// \brief	Output Compare Register (OCRA / OCRB).
-///
-/// \author	Runik
-/// \date	19/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union OutputCompareRegister {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InputEdgeSelect
-///
-/// \brief  TCR - IEDG bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class InputEdgeSelect : bool {
-    falling = false, ///< Input captured on falling edge (initial)
-    rising  = true   ///< Input captured on rising edge
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   FrtClockSelect
-///
-/// \brief  TCR - CKSx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class FrtClockSelect : u8 {
-    internal_divided_by_8   = 0b00, ///< Internal clock /8 (initial)
-    internal_divided_by_32  = 0b01, ///< Internal clock /32
-    internal_divided_by_128 = 0b10, ///< Internal clock /128
-    external                = 0b11  ///< External clock
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	TimerControlRegister
-///
-/// \brief	Timer Control Register (TCR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union TimerControlRegister {
-    u8             raw;               ///< Raw representation.
-    BitField<7>    input_edge_select; ///< Defines IEDG bit.
-    BitField<0, 2> clock_select;      ///< Defines CKSx bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputCompareRegisterSelect
-///
-/// \brief  TOCR - OCRS bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OutputCompareRegisterSelect : bool {
-    ocra = false, ///< Selects register OCRA
-    ocrb = true   ///< Selects register OCRB
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputLevelA
-///
-/// \brief  TOCR - OLVLA bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OutputLevelA : bool {
-    outputs_0 = false, ///< Outputs 0 on compare match A
-    outputs_1 = true   ///< Outputs 1 on compare match A
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OutputLevelB
-///
-/// \brief  TOCR - OLVLB bit value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OutputLevelB : bool {
-    outputs_0 = false, ///< Outputs 0 on compare match B
-    outputs_1 = true   ///< Outputs 1 on compare match B
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	TimerOutputCompareControlRegister
-///
-/// \brief	Timer Output Compare Control Register (TOCR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union TimerOutputCompareControlRegister {
-    u8          raw;                            ///< Raw representation.
-    BitField<4> output_compare_register_select; ///< Defines OCRS bit.
-    BitField<1> output_level_a;                 ///< Defines OLVLA bit.
-    BitField<0> output_level_b;                 ///< Defines OLVLB bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	InputCaptureRegister
-///
-/// \brief	Input Capture Register (ICR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union InputCaptureRegister {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-///////////////////////////////
-// 12. Watch Dog Timer (WDT) //
-///////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WatchdogTimerCounter
-///
-/// \brief	Watchdog Timer Counter (WTCNT).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union WatchdogTimerCounter {
-    u8 raw; ///< Raw representation.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   WdtOverflowFlag
-///
-/// \brief  WTCSR - OVF value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class WdtOverflowFlag : bool {
-    no_overflow = false, ///< No overflow of WTCNT in interval timer mode (initial)
-    overflow    = true   ///< WTCNT overflow in interval timer mode
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TimerModeSelect
-///
-/// \brief WTCSR - (WT /IT) value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TimerModeSelect : bool {
-    interval_timer_mode = false, ///< Interval timer mode option
-    watchdog_timer_mode = true   ///< Watchdog timer mode option
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TimerEnable
-///
-/// \brief  WTCSR - TME value.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TimerEnable : bool {
-    timer_disabled = false, ///< Timer disabled : WTCNT is initialized to 0x00 and count up stops. (initial)
-    timer_enabled  = true   ///< Timer enabled : WTCNT starts counting.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   WdtClockSelect
-///
-/// \brief  WTCSR - CKSx values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class WdtClockSelect : u8 {
-    divided_by_2    = 0b000, ///< System clock divided by 2 (initial)
-    divided_by_64   = 0b001, ///< System clock divided by 64
-    divided_by_128  = 0b010, ///< System clock divided by 128
-    divided_by_256  = 0b011, ///< System clock divided by 256
-    divided_by_512  = 0b100, ///< System clock divided by 512
-    divided_by_1024 = 0b101, ///< System clock divided by 1024
-    divided_by_4096 = 0b110, ///< System clock divided by 4096
-    divided_by_8192 = 0b111, ///< System clock divided by 8192
-
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WatchdogTimerControlStatusRegister
-///
-/// \brief	Watchdog Timer Control/Status Register (WTCSR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union WatchdogTimerControlStatusRegister {
-    u8             raw;               ///< Raw representation.
-    BitField<7>    overflow_flag;     ///< Defines OVF bit.
-    BitField<6>    timer_mode_select; ///< Defines WT/IT bit.
-    BitField<5>    timer_enable;      ///< Defines TME bit.
-    BitField<0, 3> clock_select;      ///< Defines CKSx bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   WatchdogTimerOverflowFlag
-///
-/// \brief  RSTCSR - WOVF bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class WatchdogTimerOverflowFlag : bool {
-    no_overflow = false, ///< No WTCNT overflow in watchdof timer mode (initial).
-    overflow    = true   ///< Set by WTCNT overflow in watchdog mode.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ResetEnable
-///
-/// \brief  RSTCSR - RSTE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ResetEnable : bool {
-    not_reset_when_overflow = false, ///< Not reset when WTCNT overflows (initial).
-    reset_when_overflow     = true   ///< Reset when WTCNT overflows.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ResetSelect
-///
-/// \brief  RSTCSR - RSTS bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ResetSelect : bool {
-    power_on_reset = false, ///< Power-on reset (initial)
-    manual_reset   = true   ///< Manual reset
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ResetControlStatusRegister
-///
-/// \brief	Reset Control Status Register (RSTCSR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ResetControlStatusRegister {
-    u8          raw;                          ///< Raw representation.
-    BitField<7> watchdog_timer_overflow_flag; ///< Defines WOVF bit.
-    BitField<6> reset_enable;                 ///< Defines RSTE bit.
-    BitField<5> reset_select;                 ///< Defines RSTS bit.
-};
-
-/////////////////////////////////////////////
-// 13.Serial Communication Interface (SCI) //
-/////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CommunicationMode
-///
-/// \brief  SMR - C/A bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class CommunicationMode : bool {
-    asynchronous        = false, ///< Asynchronous mode (initial).
-    clocked_synchronous = true   ///< Clocked synchronous mode.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CharacterLength
-///
-/// \brief  SMR - CHR bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class CharacterLength : bool {
-    eight_bit_data = false, ///< 8-bit data (initial).
-    seven_bit_data = true   ///< 7-bit data.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ParityMode
-///
-/// \brief  SMR - O/E bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ParityEnable : bool {
-    parity_bit_not_added = false, ///< Parity bit not added or checked (initial).
-    parity_bit_added     = true   ///< Parity bit added and checked.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ParityMode
-///
-/// \brief  SMR - O/E bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ParityMode : bool {
-    even_parity = false, ///< Even parity (initial).
-    odd_parity  = true   ///< Odd parity.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   StopBitLength
-///
-/// \brief  SMR - STOP bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class StopBitLength : bool {
-    one_stop_bit  = false, ///< One stop bit (initial).
-    two_stop_bits = true   ///< Two stop bits.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   MultiprocessorMode
-///
-/// \brief  SMR - MP bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class MultiprocessorMode : bool {
-    multiprocessor_function_disabled = false, ///< Multiprocessor mode enabled (initial).
-    multiprocessor_function_enabled  = true   ///< Multiprocessor mode disabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SciClockSelect
-///
-/// \brief  SMR - CKSx bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class SciClockSelect : u8 {
-    divided_by_4   = 0b00, ///< Clock divided by 4 (initial).
-    divided_by_16  = 0b01, ///< Clock divided by 16.
-    divided_by_64  = 0b10, ///< Clock divided by 64.
-    divided_by_256 = 0b11, ///< Clock divided by 256.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SerialModeRegister
-///
-/// \brief	Serial Mode Register (SMR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union SerialModeRegister {
-    u8             raw;                 ///< Raw representation.
-    BitField<7>    communication_mode;  ///< Defines C/A bit.
-    BitField<6>    character_length;    ///< Defines CHR bit.
-    BitField<5>    parity_enable;       ///< Defines PE bit.
-    BitField<4>    parity_mode;         ///< Defines O/E bit.
-    BitField<3>    stop_bit_length;     ///< Defines STOP bit.
-    BitField<2>    multiprocessor_mode; ///< Defines MP bit.
-    BitField<0, 2> clock_select;        ///< Defines CKSx bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	BitRateRegister
-///
-/// \brief	Bit Rate Register (BRR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union BitRateRegister {
-    u8 raw; ///< Raw representation.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransmitInterruptEnable
-///
-/// \brief  SCR - TIE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TransmitInterruptEnable : bool {
-    interrupt_disabled = false, ///< TXI request is disabled (initial).
-    interrupt_enabled  = true   ///< TXI request is enabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ReceiveInterruptEnable
-///
-/// \brief  SCR - REI bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ReceiveInterruptEnable : bool {
-    interrupts_disabled = false, ///< RXI and ERI requests are disabled (initial).
-    interrupts_enabled  = true   ///< RXI and ERI requests are enabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransmitEnable
-///
-/// \brief  SCR - TE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TransmitEnable : bool {
-    transmitter_disabled = false, ///< Transmitter disabled (initial).
-    transmitter_enabled  = true   ///< Transmitter enabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ReceiveEnable
-///
-/// \brief  SCR - RE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ReceiveEnable : bool {
-    receiver_disabled = false, ///< Receiver disabled (initial).
-    receiver_enabled  = true   ///< Receiver enabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   MultiprocessorInterruptEnable
-///
-/// \brief  SCR - MPIE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class MultiprocessorInterruptEnable : bool {
-    interrupt_disabled = false, ///< Multiprocessor interrupts are disabled (initial).
-    interrupt_enabled  = true   ///< Multiprocessor interrupts are enabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransmitEndInterruptEnable
-///
-/// \brief  SCR - TEIE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TransmitEndInterruptEnable : bool {
-    interrupt_disabled = false, ///< Transmit end interrupt (TEI) requests are disabled (initial).
-    interrupt_enabled  = true   ///< Transmit end interrupt (TEI) requests are enabled.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CommunicationMode
-///
-/// \brief  SCR - CKEx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ClockEnable : u8 {
-    value_00 = 0b00, ///< Value 0b00 (initial).
-    value_01 = 0b01, ///< Value 0b01.
-    value_10 = 0b10, ///< Value 0b10.
-    value_11 = 0b11  ///< Value 0b11.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SerialControlRegister
-///
-/// \brief	Serial Control Register (SCR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union SerialControlRegister {
-    u8             raw;                             ///< Raw representation.
-    BitField<7>    transmit_interrupt_enable;       ///< Defines TIE bit.
-    BitField<6>    receive_interrupts_enable;       ///< Defines RIE bit.
-    BitField<5>    transmit_enable;                 ///< Defines TE bit.
-    BitField<4>    receive_enable;                  ///< Defines ORE bit.
-    BitField<3>    multiprocessor_interrupt_enable; ///< Defines MPIE bit.
-    BitField<2>    transmit_end_interrupt_enable;   ///< Defines TEIE bit.
-    BitField<0, 2> clock_enable;                    ///< Defines CKEx bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	TransmitDataRegister
-///
-/// \brief	Transmit Data Register (TDR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union TransmitDataRegister {
-    u8 raw; ///< Raw representation.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	TransmitShiftRegister
-///
-/// \brief	Transmit Shift Register (TSR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union TransmitShiftRegister {
-    u8 raw; ///< Raw representation.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransmitDataRegisterEmpty
-///
-/// \brief  SSR - TDRE bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TransmitDataRegisterEmpty : bool {
-    contains_valid_data         = false, ///< TDR contains valid transmit data (initial).
-    does_not_contain_valid_data = true   ///< TDR does not contain valid transmit data.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ReceiveDataRegisterFull
-///
-/// \brief  SSR - RDRF bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ReceiveDataRegisterFull : bool {
-    no_valid_data_received = false, ///< RDR does not contain valid received data (initial).
-    valid_data_received    = true   ///< RDR contains valid received data.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   OverrunError
-///
-/// \brief  SSR - ORER bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class OverrunError : bool {
-    in_progress_or_ended_normally = false, ///< Receiving is in progress or has ended normally (initial).
-    error_occurred                = true   ///< A receive overrun error occurred.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   FramingError
-///
-/// \brief  SSR - FER bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class FramingError : bool {
-    in_progress_or_ended_normally = false, ///< Receiving is in progress or has ended normally (initial).
-    error_occurred                = true   ///< A receive framing error occurred.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ParityError
-///
-/// \brief  SSR - PER bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ParityError : bool {
-    in_progress_or_ended_normally = false, ///< Receiving is in progress or has ended normally (initial).
-    error_occurred                = true   ///< A receive parity error occurred.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransmitEnd
-///
-/// \brief  SSR - TEND bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class TransmitEnd : bool {
-    transmission_in_progress = false, ///< Transmission is in progress.
-    end_of_transmission      = true   ///< End of transmission (initial).
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   MultiprocessorBit
-///
-/// \brief  SSR - MPB bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class MultiprocessorBit : bool {
-    bit_value_0 = false, ///< Multiprocessor bit value in receive data is 0 (initial).
-    bit_value_1 = true   ///< Multiprocessor bit value in receive data is 1.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   MultiprocessorBitTransfer
-///
-/// \brief  SSR - MPBT bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class MultiprocessorBitTransfer : bool {
-    bit_value_0 = false, ///< Multiprocessor bit value in transmit data is 0 (initial).
-    bit_value_1 = true   ///< Multiprocessor bit value in transmit data is 1.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SerialStatusRegister
-///
-/// \brief	Serial Status Register (SSR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union SerialStatusRegister {
-    u8          raw;                          ///< Raw representation.
-    BitField<7> transmit_data_register_empty; ///< Defines TDRE bit.
-    BitField<6> receive_data_register_full;   ///< Defines RDRF bit.
-    BitField<5> overrun_error;                ///< Defines ORER bit.
-    BitField<4> framing_error;                ///< Defines FER bit.
-    BitField<3> parity_error;                 ///< Defines PER bit.
-    BitField<2> transmit_end;                 ///< Defines TEND bit.
-    BitField<1> multiprocessor_bit;           ///< Defines MPB bit.
-    BitField<0> multiprocessor_bit_transfer;  ///< Defines MPBT bit.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ReceiveDataRegister
-///
-/// \brief	Receive Data Register (RDR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ReceiveDataRegister {
-    u8 raw; ///< Raw representation.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ReceiveShiftRegister
-///
-/// \brief	Receive Shift Register (RSR).
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ReceiveShiftRegister {
-    u8 raw; ///< Raw representation.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	StandbyControlRegister
-///
-/// \brief	Standby Control Register (SCR)
-///
-/// \author	Runik
-/// \date	20/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union StandbyControlRegister {
-    u8 raw; ///< Raw representation.
+
+    //////////////////////////////////////////
+    // 11. 16 Bits Free Running Timer (FRT) //
+    //////////////////////////////////////////
+
+    struct Frt {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Tier
+        ///
+        /// \brief	Timer Interrupt Enable Register (TIER).
+        ///
+        /// \author	Runik
+        /// \date	02/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Tier {
+            GENERATE_USING(Tier, u8);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   InterruptCaptureInterruptEnable
+            ///
+            /// \brief  TIER - ICIE values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class InterruptCaptureInterruptEnable : bool {
+                interrupt_request_disabled = false, ///< Interrupt request (ICI) caused by ICF disabled (initial)
+                interrupt_request_enabled  = true   ///< Interrupt request (ICI) caused by ICF enabled
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   OutputCompareInterruptAEnable
+            ///
+            /// \brief  TIER - OCIAE values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class OutputCompareInterruptAEnable : bool {
+                interrupt_request_disabled = false, ///< Interrupt request (ICIA) caused by OCFA disabled (initial)
+                interrupt_request_enabled  = true   ///< Interrupt request (ICIA) caused by OCFA enabled
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   OutputCompareInterruptBEnable
+            ///
+            /// \brief  TIER - OCIBE values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class OutputCompareInterruptBEnable : bool {
+                interrupt_request_disabled = false, ///< Interrupt request (ICIB) caused by OCFB disabled (initial)
+                interrupt_request_enabled  = true   ///< Interrupt request (ICIB) caused by OCFB enabled
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TimerOverflowInterruptEnable
+            ///
+            /// \brief  TIER - OVIE values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TimerOverflowInterruptEnable : bool {
+                interrupt_request_disabled = false, ///< Interrupt request (FOVI) caused by OVF disabled (initial)
+                interrupt_request_enabled  = true   ///< Interrupt request (FOVI) caused by OVF enabled
+            };
+
+            GENERATE_BIT_WITH_ENUM(ovie, 1, 0b1, TimerOverflowInterruptEnable);    ///< Timer overflow interrupt enable.
+            GENERATE_BIT_WITH_ENUM(ocibe, 2, 0b1, OutputCompareInterruptBEnable);  ///< Output compare interrupt B enable.
+            GENERATE_BIT_WITH_ENUM(ociae, 3, 0b1, OutputCompareInterruptAEnable);  ///< Output compare interrupt A enable.
+            GENERATE_BIT_WITH_ENUM(icie, 7, 0b1, InterruptCaptureInterruptEnable); ///< Interrupt capture interrupt enable.
+        };
+        using TierType = Reg<u8, Tier>;
+        TierType tier;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Ftcsr
+        ///
+        /// \brief	Free Running Timer Control/Status register (FTCSR).
+        ///
+        /// \author	Runik
+        /// \date	02/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Ftcsr {
+            GENERATE_USING(Ftcsr, u8);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   InputCaptureFlag
+            ///
+            /// \brief  FTCSR - ICF values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class InputCaptureFlag : bool {
+                clear = false, ///< Clear conditions: 0 is written when 1 is read
+                set   = true   ///< Set conditions: when the FRC value is sent to ICR by the input capture signal
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   OutputCompareFlagA
+            ///
+            /// \brief  FTCSR - OCFA values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class OutputCompareFlagA : bool {
+                clear = false, ///< Clear conditions: 0 is written when 1 is read
+                set   = true   ///< Set conditions: when the FRC value becomes equal to OCRA
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   OutputCompareFlagB
+            ///
+            /// \brief  FTCSR - OCFB values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class OutputCompareFlagB : bool {
+                clear = false, ///< Clear conditions: 0 is written when 1 is read
+                set   = true   ///< Set conditions: when the FRC value becomes equal to OCRB
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TimerOverflowFlag
+            ///
+            /// \brief  FTCSR - OVF values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TimerOverflowFlag : bool {
+                clear = false, ///< Clear conditions: 0 is written when 1 is read
+                set   = true   ///< Set conditions: when the FRC value changes from 0xFFFF to 0x0000
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   CounterClearA
+            ///
+            /// \brief  FTCSR - CCLRA values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class CounterClearA : bool {
+                clear_disabled   = false, ///< FRC clear disabled (initial)
+                clear_on_compare = true   ///< FRC cleared on compare match A
+            };
+
+            GENERATE_BIT_WITH_ENUM(cclra, 0, 0b1, CounterClearA);     ///< Counter clear A.
+            GENERATE_BIT_WITH_ENUM(ocfa, 1, 0b1, TimerOverflowFlag);  ///< Timer overflow flag.
+            GENERATE_BIT_WITH_ENUM(ocfb, 2, 0b1, OutputCompareFlagB); ///< Output compare flag B.
+            GENERATE_BIT_WITH_ENUM(ovf, 3, 0b1, OutputCompareFlagA);  ///< Output compare flag A.
+            GENERATE_BIT_WITH_ENUM(icf, 7, 0b1, InputCaptureFlag);    ///< Input capture flag.
+        };
+        using FtcsrType = Reg<u8, Ftcsr>;
+        FtcsrType ftcsr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Frc
+        ///
+        /// \brief	Free Running Counter (FRC).
+        ///
+        /// \author	Runik
+        /// \date	02/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Frc {
+            GENERATE_USING(Frc, u16);
+
+            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr auto byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Frt::Frc", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Frt::Frc", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using FrcType = Reg<u16, Frc>;
+        FrcType frc;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Ocr
+        ///
+        /// \brief	Output Compare Register (OCRA / OCRB).
+        ///
+        /// \author	Runik
+        /// \date	02/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Ocr {
+            GENERATE_USING(Ocr, u16);
+
+            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr auto byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Frt::Ocr", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Frt::Ocr", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using OcrType = Reg<u16, Ocr>;
+        OcrType ocra;
+        OcrType ocrb;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Tcr
+        ///
+        /// \brief	Timer Control Register (TCR).
+        ///
+        /// \author	Runik
+        /// \date	03/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Tcr {
+            GENERATE_USING(Tcr, u8);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   InputEdgeSelect
+            ///
+            /// \brief  TCR - IEDG bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class InputEdgeSelect : bool {
+                falling = false, ///< Input captured on falling edge (initial)
+                rising  = true   ///< Input captured on rising edge
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   FrtClockSelect
+            ///
+            /// \brief  TCR - CKSx bits values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class FrtClockSelect : u8 {
+                internal_divided_by_8   = 0b00, ///< Internal clock /8 (initial)
+                internal_divided_by_32  = 0b01, ///< Internal clock /32
+                internal_divided_by_128 = 0b10, ///< Internal clock /128
+                external                = 0b11  ///< External clock
+            };
+
+            GENERATE_BIT_WITH_ENUM(cks, 0, 0b11, FrtClockSelect);  ///< Clock select.
+            GENERATE_BIT_WITH_ENUM(iedg, 7, 0b1, InputEdgeSelect); ///< Input edge select.
+        };
+        using TcrType = Reg<u8, Tcr>;
+        TcrType tcr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Tocr
+        ///
+        /// \brief	Timer Output Compare Control Register (TOCR).
+        ///
+        /// \author	Runik
+        /// \date	03/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Tocr {
+            GENERATE_USING(Tocr, u8);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   OutputCompareRegisterSelect
+            ///
+            /// \brief  TOCR - OCRS bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class OutputCompareRegisterSelect : bool {
+                ocra = false, ///< Selects register OCRA
+                ocrb = true   ///< Selects register OCRB
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   OutputLevelA
+            ///
+            /// \brief  TOCR - OLVLA bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class OutputLevelA : bool {
+                outputs_0 = false, ///< Outputs 0 on compare match A
+                outputs_1 = true   ///< Outputs 1 on compare match A
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   OutputLevelB
+            ///
+            /// \brief  TOCR - OLVLB bit value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class OutputLevelB : bool {
+                outputs_0 = false, ///< Outputs 0 on compare match B
+                outputs_1 = true   ///< Outputs 1 on compare match B
+            };
+
+            GENERATE_BIT_WITH_ENUM(olvlb, 0, 0b1, OutputLevelB);               ///< Output level B.
+            GENERATE_BIT_WITH_ENUM(olvla, 1, 0b1, OutputLevelA);               ///< Output level A.
+            GENERATE_BIT_WITH_ENUM(ocrs, 4, 0b1, OutputCompareRegisterSelect); ///< Output compare register select.
+        };
+        using TocrType = Reg<u8, Tocr>;
+        TocrType tocr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Icr
+        ///
+        /// \brief	Input Capture Register (ICR).
+        ///
+        /// \author	Runik
+        /// \date	03/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Icr {
+            GENERATE_USING(Icr, u16);
+
+            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+            static constexpr auto byte_mask = 0xFF;
+            GENERATE_MASKED_RANGE("Sh2Regs::Frt::Icr", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+            GENERATE_MASKED_RANGE("Sh2Regs::Frt::Icr", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        };
+        using IcrType = Reg<u16, Icr>;
+        IcrType icr;
+    };
+    Frt frt;
+
+    ///////////////////////////////
+    // 12. Watch Dog Timer (WDT) //
+    ///////////////////////////////
+
+    struct Wdt {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Wtcnt
+        ///
+        /// \brief	Watchdog Timer Counter (WTCNT).
+        ///
+        /// \author	Runik
+        /// \date	03/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Wtcnt {};
+        using WtcntType = Reg<u8, Wtcnt>;
+        WtcntType wtcnt;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Wtcsr
+        ///
+        /// \brief	Watchdog Timer Control/Status Register (WTCSR).
+        ///
+        /// \author	Runik
+        /// \date	03/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Wtcsr {
+            GENERATE_USING(Wtcsr, u8);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   WdtOverflowFlag
+            ///
+            /// \brief  WTCSR - OVF value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class WdtOverflowFlag : bool {
+                no_overflow = false, ///< No overflow of WTCNT in interval timer mode (initial)
+                overflow    = true   ///< WTCNT overflow in interval timer mode
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TimerModeSelect
+            ///
+            /// \brief WTCSR - (WT /IT) value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TimerModeSelect : bool {
+                interval_timer_mode = false, ///< Interval timer mode option
+                watchdog_timer_mode = true   ///< Watchdog timer mode option
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TimerEnable
+            ///
+            /// \brief  WTCSR - TME value.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TimerEnable : bool {
+                timer_disabled = false, ///< Timer disabled : WTCNT is initialized to 0x00 and count up stops. (initial)
+                timer_enabled  = true   ///< Timer enabled : WTCNT starts counting.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   WdtClockSelect
+            ///
+            /// \brief  WTCSR - CKSx values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class WdtClockSelect : u8 {
+                divided_by_2    = 0b000, ///< System clock divided by 2 (initial)
+                divided_by_64   = 0b001, ///< System clock divided by 64
+                divided_by_128  = 0b010, ///< System clock divided by 128
+                divided_by_256  = 0b011, ///< System clock divided by 256
+                divided_by_512  = 0b100, ///< System clock divided by 512
+                divided_by_1024 = 0b101, ///< System clock divided by 1024
+                divided_by_4096 = 0b110, ///< System clock divided by 4096
+                divided_by_8192 = 0b111, ///< System clock divided by 8192
+
+            };
+
+            GENERATE_BIT_WITH_ENUM(cks, 0, 0b111, WdtClockSelect); ///< Clock select.
+            GENERATE_BIT_WITH_ENUM(tme, 5, 0b1, TimerEnable);      ///< Timer enable.
+            GENERATE_BIT_WITH_ENUM(wtit, 6, 0b1, TimerModeSelect); ///< Timer mode select.
+            GENERATE_BIT_WITH_ENUM(ovf, 7, 0b1, WdtOverflowFlag);  ///< Overflow flag.
+        };
+        using WtcsrType = Reg<u8, Wtcsr>;
+        WtcsrType wtcsr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Rstcsr
+        ///
+        /// \brief	Reset Control Status Register (RSTCSR).
+        ///
+        /// \author	Runik
+        /// \date	03/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Rstcsr {
+            GENERATE_USING(Rstcsr, u8);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   WatchdogTimerOverflowFlag
+            ///
+            /// \brief  RSTCSR - WOVF bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class WatchdogTimerOverflowFlag : bool {
+                no_overflow = false, ///< No WTCNT overflow in watchdof timer mode (initial).
+                overflow    = true   ///< Set by WTCNT overflow in watchdog mode.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   ResetEnable
+            ///
+            /// \brief  RSTCSR - RSTE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ResetEnable : bool {
+                not_reset_when_overflow = false, ///< Not reset when WTCNT overflows (initial).
+                reset_when_overflow     = true   ///< Reset when WTCNT overflows.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   ResetSelect
+            ///
+            /// \brief  RSTCSR - RSTS bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ResetSelect : bool {
+                power_on_reset = false, ///< Power-on reset (initial)
+                manual_reset   = true   ///< Manual reset
+            };
+
+            GENERATE_BIT_WITH_ENUM(rsts, 5, 0b1, ResetSelect);               ///< Reset select.
+            GENERATE_BIT_WITH_ENUM(rste, 6, 0b1, ResetEnable);               ///< Reset enable.
+            GENERATE_BIT_WITH_ENUM(wovf, 7, 0b1, WatchdogTimerOverflowFlag); ///< Watchdog timer overflow flag
+        };
+        using RstcsrType = Reg<u8, Rstcsr>;
+        RstcsrType rstcsr;
+    };
+    Wdt wdt;
+
+    /////////////////////////////////////////////
+    // 13.Serial Communication Interface (SCI) //
+    /////////////////////////////////////////////
+
+    struct Sci {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Smr
+        ///
+        /// \brief	Serial Mode Register (SMR).
+        ///
+        /// \author	Runik
+        /// \date	03/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Smr {
+            GENERATE_USING(Smr, u8);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   CommunicationMode
+            ///
+            /// \brief  SMR - C/A bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class CommunicationMode : bool {
+                asynchronous        = false, ///< Asynchronous mode (initial).
+                clocked_synchronous = true   ///< Clocked synchronous mode.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   CharacterLength
+            ///
+            /// \brief  SMR - CHR bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class CharacterLength : bool {
+                eight_bit_data = false, ///< 8-bit data (initial).
+                seven_bit_data = true   ///< 7-bit data.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   ParityMode
+            ///
+            /// \brief  SMR - O/E bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ParityEnable : bool {
+                parity_bit_not_added = false, ///< Parity bit not added or checked (initial).
+                parity_bit_added     = true   ///< Parity bit added and checked.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   ParityMode
+            ///
+            /// \brief  SMR - O/E bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ParityMode : bool {
+                even_parity = false, ///< Even parity (initial).
+                odd_parity  = true   ///< Odd parity.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   StopBitLength
+            ///
+            /// \brief  SMR - STOP bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class StopBitLength : bool {
+                one_stop_bit  = false, ///< One stop bit (initial).
+                two_stop_bits = true   ///< Two stop bits.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   MultiprocessorMode
+            ///
+            /// \brief  SMR - MP bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class MultiprocessorMode : bool {
+                multiprocessor_function_disabled = false, ///< Multiprocessor mode enabled (initial).
+                multiprocessor_function_enabled  = true   ///< Multiprocessor mode disabled.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   SciClockSelect
+            ///
+            /// \brief  SMR - CKSx bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class SciClockSelect : u8 {
+                divided_by_4   = 0b00, ///< Clock divided by 4 (initial).
+                divided_by_16  = 0b01, ///< Clock divided by 16.
+                divided_by_64  = 0b10, ///< Clock divided by 64.
+                divided_by_256 = 0b11, ///< Clock divided by 256.
+            };
+
+            GENERATE_BIT_WITH_ENUM(cks, 0, 0b11, SciClockSelect);   ///< Clock select.
+            GENERATE_BIT_WITH_ENUM(mp, 2, 0b1, MultiprocessorMode); ///< Multiprocessor mode.
+            GENERATE_BIT_WITH_ENUM(stop, 3, 0b1, StopBitLength);    ///< Stop bit length.
+            GENERATE_BIT_WITH_ENUM(oe, 4, 0b1, ParityMode);         ///< Parity mode.
+            GENERATE_BIT_WITH_ENUM(pe, 5, 0b1, ParityEnable);       ///< Parity enable.
+            GENERATE_BIT_WITH_ENUM(chr, 6, 0b1, CharacterLength);   ///< Character length.
+            GENERATE_BIT_WITH_ENUM(ca, 7, 0b1, CommunicationMode);  ///< Communication mode.
+        };
+        using SmrType = Reg<u8, Smr>;
+        SmrType smr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Brr
+        ///
+        /// \brief	Bit Rate Register (BRR).
+        ///
+        /// \author	Runik
+        /// \date	04/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Brr {};
+        using BrrType = Reg<u8, Brr>;
+        BrrType brr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Scr
+        ///
+        /// \brief	Serial Control Register (SCR).
+        ///
+        /// \author	Runik
+        /// \date	04/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Scr {
+            GENERATE_USING(Scr, u8);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TransmitInterruptEnable
+            ///
+            /// \brief  SCR - TIE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TransmitInterruptEnable : bool {
+                interrupt_disabled = false, ///< TXI request is disabled (initial).
+                interrupt_enabled  = true   ///< TXI request is enabled.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   ReceiveInterruptEnable
+            ///
+            /// \brief  SCR - REI bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ReceiveInterruptEnable : bool {
+                interrupts_disabled = false, ///< RXI and ERI requests are disabled (initial).
+                interrupts_enabled  = true   ///< RXI and ERI requests are enabled.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TransmitEnable
+            ///
+            /// \brief  SCR - TE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TransmitEnable : bool {
+                transmitter_disabled = false, ///< Transmitter disabled (initial).
+                transmitter_enabled  = true   ///< Transmitter enabled.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   ReceiveEnable
+            ///
+            /// \brief  SCR - RE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ReceiveEnable : bool {
+                receiver_disabled = false, ///< Receiver disabled (initial).
+                receiver_enabled  = true   ///< Receiver enabled.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   MultiprocessorInterruptEnable
+            ///
+            /// \brief  SCR - MPIE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class MultiprocessorInterruptEnable : bool {
+                interrupt_disabled = false, ///< Multiprocessor interrupts are disabled (initial).
+                interrupt_enabled  = true   ///< Multiprocessor interrupts are enabled.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TransmitEndInterruptEnable
+            ///
+            /// \brief  SCR - TEIE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TransmitEndInterruptEnable : bool {
+                interrupt_disabled = false, ///< Transmit end interrupt (TEI) requests are disabled (initial).
+                interrupt_enabled  = true   ///< Transmit end interrupt (TEI) requests are enabled.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   CommunicationMode
+            ///
+            /// \brief  SCR - CKEx bits values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ClockEnable : u8 {
+                value_00 = 0b00, ///< Value 0b00 (initial).
+                value_01 = 0b01, ///< Value 0b01.
+                value_10 = 0b10, ///< Value 0b10.
+                value_11 = 0b11  ///< Value 0b11.
+            };
+
+            GENERATE_BIT_WITH_ENUM(cke, 0, 0b11, ClockEnable);                   ///< Clock enable.
+            GENERATE_BIT_WITH_ENUM(teie, 2, 0b1, TransmitEndInterruptEnable);    ///< Transmit end interrupt enable.
+            GENERATE_BIT_WITH_ENUM(mpie, 3, 0b1, MultiprocessorInterruptEnable); ///< Multiprocessor interrupt enable.
+            GENERATE_BIT_WITH_ENUM(ore, 4, 0b1, ReceiveEnable);                  ///< Receiver enabled.
+            GENERATE_BIT_WITH_ENUM(te, 5, 0b1, TransmitEnable);                  ///< Transmitter enabled.
+            GENERATE_BIT_WITH_ENUM(rie, 6, 0b1, ReceiveInterruptEnable);         ///< Receive interrupt enabled.
+            GENERATE_BIT_WITH_ENUM(tie, 7, 0b1, TransmitInterruptEnable);        ///< Transmit interrupt enabled.
+        };
+        using ScrType = Reg<u8, Scr>;
+        ScrType scr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Tdr
+        ///
+        /// \brief	Transmit Data Register (TDR).
+        ///
+        /// \author	Runik
+        /// \date	04/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Tdr {};
+        using TdrType = Reg<u8, Tdr>;
+        TdrType tdr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Tsr
+        ///
+        /// \brief	Transmit Shift Register (TSR).
+        ///
+        /// \author	Runik
+        /// \date	04/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Tsr {};
+        using TsrType = Reg<u8, Tsr>;
+        TsrType tsr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Ssr
+        ///
+        /// \brief	Serial Status Register (SSR).
+        ///
+        /// \author	Runik
+        /// \date	04/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Ssr {
+            GENERATE_USING(Ssr, u8);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TransmitDataRegisterEmpty
+            ///
+            /// \brief  SSR - TDRE bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TransmitDataRegisterEmpty : bool {
+                contains_valid_data         = false, ///< TDR contains valid transmit data (initial).
+                does_not_contain_valid_data = true   ///< TDR does not contain valid transmit data.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   ReceiveDataRegisterFull
+            ///
+            /// \brief  SSR - RDRF bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ReceiveDataRegisterFull : bool {
+                no_valid_data_received = false, ///< RDR does not contain valid received data (initial).
+                valid_data_received    = true   ///< RDR contains valid received data.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   OverrunError
+            ///
+            /// \brief  SSR - ORER bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class OverrunError : bool {
+                in_progress_or_ended_normally = false, ///< Receiving is in progress or has ended normally (initial).
+                error_occurred                = true   ///< A receive overrun error occurred.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   FramingError
+            ///
+            /// \brief  SSR - FER bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class FramingError : bool {
+                in_progress_or_ended_normally = false, ///< Receiving is in progress or has ended normally (initial).
+                error_occurred                = true   ///< A receive framing error occurred.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   ParityError
+            ///
+            /// \brief  SSR - PER bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class ParityError : bool {
+                in_progress_or_ended_normally = false, ///< Receiving is in progress or has ended normally (initial).
+                error_occurred                = true   ///< A receive parity error occurred.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   TransmitEnd
+            ///
+            /// \brief  SSR - TEND bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class TransmitEnd : bool {
+                transmission_in_progress = false, ///< Transmission is in progress.
+                end_of_transmission      = true   ///< End of transmission (initial).
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   MultiprocessorBit
+            ///
+            /// \brief  SSR - MPB bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class MultiprocessorBit : bool {
+                bit_value_0 = false, ///< Multiprocessor bit value in receive data is 0 (initial).
+                bit_value_1 = true   ///< Multiprocessor bit value in receive data is 1.
+            };
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// \enum   MultiprocessorBitTransfer
+            ///
+            /// \brief  SSR - MPBT bit values.
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            enum class MultiprocessorBitTransfer : bool {
+                bit_value_0 = false, ///< Multiprocessor bit value in transmit data is 0 (initial).
+                bit_value_1 = true   ///< Multiprocessor bit value in transmit data is 1.
+            };
+
+            GENERATE_BIT_WITH_ENUM(mpbt, 0, 0b1, MultiprocessorBitTransfer); ///< Multiprocessor bit in transmit data.
+            GENERATE_BIT_WITH_ENUM(mpb, 1, 0b1, MultiprocessorBit);          ///< Multiprocessor bit in receive data.
+            GENERATE_BIT_WITH_ENUM(tend, 2, 0b1, TransmitEnd);               ///< Transmission has ended.
+            GENERATE_BIT_WITH_ENUM(per, 3, 0b1, ParityError);                ///< Parity error.
+            GENERATE_BIT_WITH_ENUM(fer, 4, 0b1, FramingError);               ///< Framing error.
+            GENERATE_BIT_WITH_ENUM(orer, 5, 0b1, OverrunError);              ///< Overrun error.
+            GENERATE_BIT_WITH_ENUM(rdrf, 6, 0b1, ReceiveDataRegisterFull);   ///< Receive data register full.
+            GENERATE_BIT_WITH_ENUM(tdre, 7, 0b1, TransmitDataRegisterEmpty); ///< Transmit data register empty.
+        };
+        using SsrType = Reg<u8, Ssr>;
+        SsrType ssr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Rdr
+        ///
+        /// \brief	Receive Data Register (RDR).
+        ///
+        /// \author	Runik
+        /// \date	04/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Rdr {};
+        using RdrType = Reg<u8, Rdr>;
+        RdrType rdr;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Rsr
+        ///
+        /// \brief	Receive Shift Register (RSR).
+        ///
+        /// \author	Runik
+        /// \date	04/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Rsr {};
+        using RsrType = Reg<u8, Rsr>;
+        RsrType rsr;
+    };
+    Sci sci;
+
+    /////////////////////////////////////////////
+    // 14.Power-Down Modes                     //
+    /////////////////////////////////////////////
+
+    struct PowerDownModes {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \struct	Sbycr
+        ///
+        /// \brief	Standby Control Register (SBYCR)
+        ///
+        /// \author	Runik
+        /// \date	04/04/2023
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct Sbycr {};
+        using SbycrType = Reg<u8, Sbycr>;
+        SbycrType sbycr;
+    };
+    PowerDownModes pdm;
 };
 
 } // namespace saturnin::sh2
