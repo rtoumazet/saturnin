@@ -36,6 +36,21 @@ using core::Log;
 using core::Logger;
 using core::tr;
 
+using HIrqReq  = CdromRegs::HIrqReq;
+using HIrqMask = CdromRegs::HIrqMask;
+using Cr       = CdromRegs::Cr;
+using Cmok     = HIrqReq::Cmok;
+using Scdq     = HIrqReq::Scdq;
+using Efls     = HIrqReq::Efls;
+using Ecpy     = HIrqReq::Ecpy;
+using Ehst     = HIrqReq::Ehst;
+using Esel     = HIrqReq::Esel;
+using Dchg     = HIrqReq::Dchg;
+using Pend     = HIrqReq::Pend;
+using Bful     = HIrqReq::Bful;
+using Csct     = HIrqReq::Csct;
+using Drdy     = HIrqReq::Drdy;
+
 // Static variables initialization
 CdromAccessMethod Cdrom::access_method = CdromAccessMethod::spti;
 
@@ -161,1208 +176,1202 @@ auto Cdrom::getDriveIndice(const s8 path, const s8 target, const s8 lun) -> u8 {
 //
 //
 void Cdrom::executeCommand() {
-    switch (readCommand(cr1_.command)) {
-        using enum Command;
+    switch (regs_.cr1 >> Cr::command_enum) {
+        using enum Cr::Command;
         case get_status: getStatus(); break;
-        case get_hardware_info:
-            getHardwareInfo();
-            break;
-            //		case 0x2: // Get TOC
-            //			// Status(8) | Upper byte of word count(8)
-            //			// Lower word of word count(16) (Max 204 words)
-            //			// 0x0000
-            //			// 0x0000
-            //			cdDriveStatus|=STAT_TRNS;
-            //			CR1=cdDriveStatus<<8 | 0x00;
-            //			CR2=0x00CC;
-            //			CR3=0x0000;
-            //			CR4=0x0000;
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get TOC=- executed");
-            //			#endif
-            //
-            //			// building the saturn TOC
-            //			Scsi::readToc(TOCData);
-            //			//AspiTOC=(Aspi_TOC*)&TOCData;
-            //			AspiTOC=reinterpret_cast<Aspi_TOC*>(&TOCData);
-            //
-            //			BuildSaturnTOC();
-            //
-            //			dataBuffer = saturnTOC;
-            //			bytesTransfered = 0;
-            //			posInDataBuffer = 0;
-            //			dataBufferSize = 0xCC;
-            //
-            //			// flags setup
-            //			HIRQREQ|=CMOK|DRDY;
-            //
-            //			break;
-            //		case 0x3: // Get Session Info
-            //			// Status(8) | 0x00
-            //			// 0x0000
-            //			// Upper word of sesson info(16)
-            //			// Lower word of sesson info(16)
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get Session Info=- executed");
-            //			#endif
-            //
-            //			// only supports single session CD
-            //			switch (CR1&0xFF)
-            //			{
-            //				case 0:
-            //					{
-            //						// lead out is 2 sec after the last track
-            //						int32_t fad=(AspiTOC->track[AspiTOC->last].addr[1]<<16)|
-            //								(AspiTOC->track[AspiTOC->last].addr[1]<<8)|
-            //								AspiTOC->track[AspiTOC->last].addr[3];
-            //						fad+=150;
-            //						CR1=static_cast<uint16_t>(cdDriveStatus<<8);
-            //						CR2=0x0000;
-            //						CR3=0x0100|static_cast<uint16_t>(fad>>16);
-            //						CR4=static_cast<uint16_t>(fad);
-            //					}
-            //					break;
-            //				case 1:
-            //					CR1=cdDriveStatus<<8;
-            //					CR2=0x0000;
-            //					CR3=0x0100;
-            //					CR4=0x0000;
-            //					break;
-            //				default:
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Invalid session number");
-            //					#endif
-            //					CR1=cdDriveStatus<<8;
-            //					CR2=0x0000;
-            //					CR3=0xFFFF;
-            //					CR4=0xFFFF;
-            //					break;
-            //			}
-            //
-            //
-            //			// flags setup
-            //			HIRQREQ|=CMOK;
-            //			break;
-            //		case 0x4: // Initialize CD System
-            //			// Status(8) | Flags(4) | Rep Cnt(4)
-            //			// Ctrl Addr(8) | Track No(8)
-            //			// Index No(8) | Upper Byte of curre,t FAD (8)
-            //			// Lower word of current FAD
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Initialize CD System=- executed");
-            //
-            //			if(!(CR1 & 0x80))
-            //			{
-            //				EmuState::pLog->CdBlockWrite("change initialization flag");
-            //				(CR1&0x1) ? EmuState::pLog->CdBlockWrite("software reset"):EmuState::pLog->CdBlockWrite("no software
-            // reset"); 				(CR1&0x2) ? EmuState::pLog->CdBlockWrite("decode subcode
-            // RW"):EmuState::pLog->CdBlockWrite("no
-            // decode subcode RW"); 				(CR1&0x4) ? EmuState::pLog->CdBlockWrite("no recognize mode 2
-            // subheader"):EmuState::pLog->CdBlockWrite("recognize
-            // mode 2 subheader"); 				(CR1&0x8) ? EmuState::pLog->CdBlockWrite("retry form 2
-            // read"):EmuState::pLog->CdBlockWrite("no retry form 2 read"); 				(CR1&0x80) ?
-            // EmuState::pLog->CdBlockWrite("no change"):EmuState::pLog->CdBlockWrite("change"); }else
-            // EmuState::pLog->CdBlockWrite("don't change initialization flag"); #endif
-            //
-            //			switch(CR1 & 0x3)
-            //			{
-            //			case 0:
-            //			case 2:
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("Drive speed : 2X");
-            //				#endif
-            //				driveSpeed = DBL_PLAY_SPEED;
-            //				UpdatePeriod();
-            //				break;
-            //			case 1:
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("Drive speed : 1X");
-            //				#endif
-            //				driveSpeed = STD_PLAY_SPEED;
-            //				UpdatePeriod();
-            //				break;
-            //			default:
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("Invalid drive speed");
-            //				#endif
-            //				break;
-            //			}
-            //
-            //			// standby time
-            //			switch (CR2)
-            //			{
-            //				case 0:
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Default standby time (180s)");
-            //					#endif
-            //					standbyTime=180;
-            //					break;
-            //				case 0xFFFF:
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("No standby time change");
-            //					#endif
-            //					break;
-            //				default:
-            //					standbyTime=CR2;
-            //					//log("new standby time: %ds\n",standbyTime);
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("New standby time : ",standbyTime);
-            //					#endif
-            //					break;
-            //			}
-            //
-            //			// ECC setup
-            //			switch (CR4>>8)
-            //			{
-            //				case 0:
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Default ECC setup frequency (1 time)");
-            //					#endif
-            //					ECCFreq=1;
-            //					break;
-            //				case 0x80:
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("No ECC setup");
-            //					#endif
-            //					ECCFreq=0;
-            //					break;
-            //				case 0xFF:
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("No ECC setup frequency change");
-            //					#endif
-            //					break;
-            //				default:
-            //					ECCFreq=CR4>>8;
-            //					if (ECCFreq<2) ECCFreq=2;
-            //					else if (ECCFreq>6) ECCFreq=6;
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("ECC setup frequency changed : ",ECCFreq);
-            //					#endif
-            //					break;
-            //			}
-            //
-            //			// retry frequency
-            //			if (!(CR4&0xF0))
-            //			{
-            //				if (!(CR4&0x0F)) {
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Stops data output without retrying when error");
-            //					#endif
-            //					retryFreq=RETRY_FREQ_NO_RETRY; }
-            //				else {
-            //					retryFreq=CR4&0xF;
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("No data output with new retry value when error");
-            //					#endif
-            //				}
-            //			}
-            //			else if (CR4&0x80)
-            //			{
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("Infinite retry frequency");
-            //				#endif
-            //				retryFreq=RETRY_FREQ_INFINITE;
-            //			}
-            //			else if (CR4&0x40)
-            //			{
-            //				if (CR4==0x40) {
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Data output without retry when error");
-            //					#endif
-            //					retryFreq=RETRY_FREQ_DATA_OUT_NO_RETRY; }
-            //				else {
-            //					retryFreq=CR4&0xF;
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Data output with new retry value when error : ", retryFreq);
-            //					#endif
-            //				}
-            //			}
-            //			#ifdef _LOGS
-            //			else if ((CR4&0xFF)==0xFF) EmuState::pLog->CdBlockWrite("No retry frequency change");
-            //			#endif
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			SendStatus();
-            //			break;
-            //		case 0x5: // Open CD Tray
-            //			// Status(8) | Flags(4) | Rep Cnt(4)
-            //			// Ctrl Addr(8) | Track No(8)
-            //			// Index No(8) | Upper Byte of current FAD (8)
-            //			// Lower word of current FAD
-            //
-            //			// flags setup
-            //			//HIrqReg = EmuState::pMem->ReadWord(0x25890008);
-            //			//HIrqReg |= CMOK; // CMOK
-            //			//EmuState::pMem->WriteWord(0x25890008,HIrqReg,EmuState::pSh2m->DisplayPC());
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockU("-=Open CD Tray=-");
-            //			EmuState::pLog->CdBlockWrite("-=Open CD Tray=- executed (UNIMPLEMENTED)");
-            //			#endif
-            //			break;
+        case get_hardware_info: getHardwareInfo(); break;
+        //		case 0x2: // Get TOC
+        //			// Status(8) | Upper byte of word count(8)
+        //			// Lower word of word count(16) (Max 204 words)
+        //			// 0x0000
+        //			// 0x0000
+        //			cdDriveStatus|=STAT_TRNS;
+        //			CR1=cdDriveStatus<<8 | 0x00;
+        //			CR2=0x00CC;
+        //			CR3=0x0000;
+        //			CR4=0x0000;
+        //
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get TOC=- executed");
+        //			#endif
+        //
+        //			// building the saturn TOC
+        //			Scsi::readToc(TOCData);
+        //			//AspiTOC=(Aspi_TOC*)&TOCData;
+        //			AspiTOC=reinterpret_cast<Aspi_TOC*>(&TOCData);
+        //
+        //			BuildSaturnTOC();
+        //
+        //			dataBuffer = saturnTOC;
+        //			bytesTransfered = 0;
+        //			posInDataBuffer = 0;
+        //			dataBufferSize = 0xCC;
+        //
+        //			// flags setup
+        //			HIRQREQ|=CMOK|DRDY;
+        //
+        //			break;
+        //		case 0x3: // Get Session Info
+        //			// Status(8) | 0x00
+        //			// 0x0000
+        //			// Upper word of sesson info(16)
+        //			// Lower word of sesson info(16)
+        //
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get Session Info=- executed");
+        //			#endif
+        //
+        //			// only supports single session CD
+        //			switch (CR1&0xFF)
+        //			{
+        //				case 0:
+        //					{
+        //						// lead out is 2 sec after the last track
+        //						int32_t fad=(AspiTOC->track[AspiTOC->last].addr[1]<<16)|
+        //								(AspiTOC->track[AspiTOC->last].addr[1]<<8)|
+        //								AspiTOC->track[AspiTOC->last].addr[3];
+        //						fad+=150;
+        //						CR1=static_cast<uint16_t>(cdDriveStatus<<8);
+        //						CR2=0x0000;
+        //						CR3=0x0100|static_cast<uint16_t>(fad>>16);
+        //						CR4=static_cast<uint16_t>(fad);
+        //					}
+        //					break;
+        //				case 1:
+        //					CR1=cdDriveStatus<<8;
+        //					CR2=0x0000;
+        //					CR3=0x0100;
+        //					CR4=0x0000;
+        //					break;
+        //				default:
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Invalid session number");
+        //					#endif
+        //					CR1=cdDriveStatus<<8;
+        //					CR2=0x0000;
+        //					CR3=0xFFFF;
+        //					CR4=0xFFFF;
+        //					break;
+        //			}
+        //
+        //
+        //			// flags setup
+        //			HIRQREQ|=CMOK;
+        //			break;
+        //		case 0x4: // Initialize CD System
+        //			// Status(8) | Flags(4) | Rep Cnt(4)
+        //			// Ctrl Addr(8) | Track No(8)
+        //			// Index No(8) | Upper Byte of curre,t FAD (8)
+        //			// Lower word of current FAD
+        //
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Initialize CD System=- executed");
+        //
+        //			if(!(CR1 & 0x80))
+        //			{
+        //				EmuState::pLog->CdBlockWrite("change initialization flag");
+        //				(CR1&0x1) ? EmuState::pLog->CdBlockWrite("software reset"):EmuState::pLog->CdBlockWrite("no software
+        // reset"); 				(CR1&0x2) ? EmuState::pLog->CdBlockWrite("decode subcode
+        // RW"):EmuState::pLog->CdBlockWrite("no
+        // decode subcode RW"); 				(CR1&0x4) ? EmuState::pLog->CdBlockWrite("no recognize mode 2
+        // subheader"):EmuState::pLog->CdBlockWrite("recognize
+        // mode 2 subheader"); 				(CR1&0x8) ? EmuState::pLog->CdBlockWrite("retry form 2
+        // read"):EmuState::pLog->CdBlockWrite("no retry form 2 read"); 				(CR1&0x80) ?
+        // EmuState::pLog->CdBlockWrite("no change"):EmuState::pLog->CdBlockWrite("change"); }else
+        // EmuState::pLog->CdBlockWrite("don't change initialization flag"); #endif
+        //
+        //			switch(CR1 & 0x3)
+        //			{
+        //			case 0:
+        //			case 2:
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("Drive speed : 2X");
+        //				#endif
+        //				driveSpeed = DBL_PLAY_SPEED;
+        //				UpdatePeriod();
+        //				break;
+        //			case 1:
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("Drive speed : 1X");
+        //				#endif
+        //				driveSpeed = STD_PLAY_SPEED;
+        //				UpdatePeriod();
+        //				break;
+        //			default:
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("Invalid drive speed");
+        //				#endif
+        //				break;
+        //			}
+        //
+        //			// standby time
+        //			switch (CR2)
+        //			{
+        //				case 0:
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Default standby time (180s)");
+        //					#endif
+        //					standbyTime=180;
+        //					break;
+        //				case 0xFFFF:
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("No standby time change");
+        //					#endif
+        //					break;
+        //				default:
+        //					standbyTime=CR2;
+        //					//log("new standby time: %ds\n",standbyTime);
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("New standby time : ",standbyTime);
+        //					#endif
+        //					break;
+        //			}
+        //
+        //			// ECC setup
+        //			switch (CR4>>8)
+        //			{
+        //				case 0:
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Default ECC setup frequency (1 time)");
+        //					#endif
+        //					ECCFreq=1;
+        //					break;
+        //				case 0x80:
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("No ECC setup");
+        //					#endif
+        //					ECCFreq=0;
+        //					break;
+        //				case 0xFF:
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("No ECC setup frequency change");
+        //					#endif
+        //					break;
+        //				default:
+        //					ECCFreq=CR4>>8;
+        //					if (ECCFreq<2) ECCFreq=2;
+        //					else if (ECCFreq>6) ECCFreq=6;
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("ECC setup frequency changed : ",ECCFreq);
+        //					#endif
+        //					break;
+        //			}
+        //
+        //			// retry frequency
+        //			if (!(CR4&0xF0))
+        //			{
+        //				if (!(CR4&0x0F)) {
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Stops data output without retrying when error");
+        //					#endif
+        //					retryFreq=RETRY_FREQ_NO_RETRY; }
+        //				else {
+        //					retryFreq=CR4&0xF;
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("No data output with new retry value when error");
+        //					#endif
+        //				}
+        //			}
+        //			else if (CR4&0x80)
+        //			{
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("Infinite retry frequency");
+        //				#endif
+        //				retryFreq=RETRY_FREQ_INFINITE;
+        //			}
+        //			else if (CR4&0x40)
+        //			{
+        //				if (CR4==0x40) {
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Data output without retry when error");
+        //					#endif
+        //					retryFreq=RETRY_FREQ_DATA_OUT_NO_RETRY; }
+        //				else {
+        //					retryFreq=CR4&0xF;
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Data output with new retry value when error : ", retryFreq);
+        //					#endif
+        //				}
+        //			}
+        //			#ifdef _LOGS
+        //			else if ((CR4&0xFF)==0xFF) EmuState::pLog->CdBlockWrite("No retry frequency change");
+        //			#endif
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			SendStatus();
+        //			break;
+        //		case 0x5: // Open CD Tray
+        //			// Status(8) | Flags(4) | Rep Cnt(4)
+        //			// Ctrl Addr(8) | Track No(8)
+        //			// Index No(8) | Upper Byte of current FAD (8)
+        //			// Lower word of current FAD
+        //
+        //			// flags setup
+        //			//HIrqReg = EmuState::pMem->ReadWord(0x25890008);
+        //			//HIrqReg |= CMOK; // CMOK
+        //			//EmuState::pMem->WriteWord(0x25890008,HIrqReg,EmuState::pSh2m->DisplayPC());
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockU("-=Open CD Tray=-");
+        //			EmuState::pLog->CdBlockWrite("-=Open CD Tray=- executed (UNIMPLEMENTED)");
+        //			#endif
+        //			break;
         case end_data_transfer: {
             endDataTransfer();
             break;
         }
-            //		case 0x10: // Play Disc
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Play Disc=- executed");
-            //			#endif
-            //
-            //			if (CR1==0x1000)
-            //			{
-            //				// track mode
-            //				currentPlayMode=PLAY_MODE_TRACK;
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("track mode");
-            //				EmuState::pLog->CdBlockU("track mode");
-            //				#endif
-            //
-            //				HIRQREQ&=~SCDQ;
-            //				HIRQREQ&=~CSCT;
-            //				HIRQREQ&=~PEND;
-            //				HIRQREQ&=~DRDY;
-            //				cdDriveStatus &=~STAT_TRNS;
-            //
-            //			}
-            //			else
-            //			{
-            //				// FAD mode
-            //				currentPlayMode=PLAY_MODE_FAD;
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("FAD mode\n");
-            //				#endif
-            //				uint32_t newFAD=((CR1&0x7F)<<16)|CR2;
-            //				uint32_t numOfFAD=CR4;
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("FAD: 0x",newFAD);
-            //				EmuState::pLog->CdBlockWrite("number of FADs to play through: ",numOfFAD);
-            //				#endif
-            //
-            //				if (numOfFAD==0xFFFF) MessageBox(NULL,L"unimplemented",L"unimplemented",MB_ICONWARNING);
-            //
-            //				if (numOfFAD)
-            //				{
-            //					// play
-            //					cdDriveStatus=STAT_PLAY;
-            //					flag=FLAG_CDROM;
-            //
-            //					HIRQREQ&=~SCDQ;
-            //					HIRQREQ&=~CSCT;
-            //					HIRQREQ&=~PEND;
-            //					HIRQREQ&=~DRDY;
-            //
-            //					remainingFADs=numOfFAD;
-            //					FAD=newFAD;
-            //					playFADStart=FAD;
-            //				}
-            //				else
-            //				{
-            //					// pause
-            //					cdDriveStatus=STAT_PAUSE;
-            //
-            //					HIRQREQ&=~SCDQ;
-            //					HIRQREQ&=~CSCT;
-            //					HIRQREQ|=PEND;
-            //				}
-            //			}
-            //
-            //			uint8_t playMode;
-            //			playMode=CR3>>8;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("play mode: 0x",playMode);
-            //			#endif
-            //
-            //			if (playMode==CDC_PM_NOCHG)
-            //			{
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("no change in play mode");
-            //				#endif
-            //			}
-            //			else
-            //			{
-            //				switch (playMode&0x7F)
-            //				{
-            //					case 0x00:
-            //						#ifdef _LOGS
-            //						EmuState::pLog->CdBlockWrite("no repeat (plays only one time)");
-            //						#endif
-            //						repCnt=0;
-            //						break;
-            //					case 0x0F:
-            //						#ifdef _LOGS
-            //						EmuState::pLog->CdBlockWrite("infinite repetition");
-            //						#endif
-            //						repCnt=0xF;
-            //						break;
-            //					case CDC_PM_REP_NOCHG:
-            //						#ifdef _LOGS
-            //						EmuState::pLog->CdBlockWrite("doesn't change maximum repeat count");
-            //						#endif
-            //						break;
-            //					default:
-            //						#ifdef _LOGS
-            //						EmuState::pLog->CdBlockWrite("repeat count: ",playMode&0xF);
-            //						#endif
-            //						repCnt=playMode&0xF;
-            //						break;
-            //				}
-            //				// pickup move?
-            //				#ifdef _LOGS
-            //				if (playMode&CDC_PM_PIC_NOCHG)
-            //				{
-            //					EmuState::pLog->CdBlockWrite("doesn't move pickup to start position");
-            //				}
-            //				else
-            //				{
-            //					EmuState::pLog->CdBlockWrite("play again");
-            //				}
-            //				#endif
-            //			}
-            //
-            //			HIRQREQ|=CMOK;
-            //			SendStatus();
-            //			break;
-            //		case 0x11: // Disc Seek
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Disc Seek=- executed");
-            //			#endif
-            //
-            //			if ((CR1&0xFF)==0xFF)
-            //			{
-            //				// pause
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("pause");
-            //				#endif
-            //				cdDriveStatus=STAT_PAUSE;
-            //				uint32_t  newFad=((CR1&0x7F)<<16)|CR2;
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("fad mode");
-            //				EmuState::pLog->CdBlockWrite("fad: 0x",newFad);
-            //				#endif
-            //				if (newFad==0x7FFFFF)
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("seek home directory");
-            //					#endif
-            //					//FAD=150;
-            //					FAD = 0;
-            //					// debug
-            //					tno=1;
-            //				}
-            //				else FAD=newFad;
-            //				// stop current transfert if any
-            //				if (remainingFADs)
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("cancel current play!");
-            //					#endif
-            //					remainingFADs=0;
-            //				}
-            //				HIRQREQ|=PEND|DRDY;
-            //				HIRQREQ|=EHST|EFLS;
-            //				cdDriveStatus |=STAT_TRNS;
-            //			}
-            //			else if (CR1==0x1100)
-            //			{
-            //				cdDriveStatus=STAT_PAUSE;
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("track mode");
-            //				EmuState::pLog->CdBlockWrite("start track: ",CR2>>8);
-            //				EmuState::pLog->CdBlockWrite("start index: ",CR2&0xFF);
-            //				#endif
-            //
-            //				tno=CR2>>8;
-            //				// set corresponding fad
-            //				uint32_t newFAD;
-            //				newFAD=saturnTOC[(tno-1)*4+1];
-            //				newFAD<<=8;
-            //				newFAD|=saturnTOC[(tno-1)*4+2];
-            //				newFAD<<=8;
-            //				newFAD|=saturnTOC[(tno-1)*4+3];
-            //
-            //				FAD=newFAD;
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("start track: 0x",newFAD);
-            //				#endif
-            //			}
-            //			else
-            //			{
-            //				cdDriveStatus=STAT_PAUSE;
-            //				uint32_t newFad=((CR1&0x7F)<<16)|CR2;
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("fad mode");
-            //				EmuState::pLog->CdBlockWrite("fad: 0x",newFad);
-            //				#endif
-            //				if (newFad==0x7FFFFF)
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("seek home directory");
-            //					#endif
-            //					FAD=150;
-            //				}
-            //				else FAD=newFad;
-            //				// stop current transfert if any
-            //				if (remainingFADs)
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("cancel current play!");
-            //					#endif
-            //					remainingFADs=0;
-            //				}
-            //				HIRQREQ|=PEND|DRDY;
-            //				HIRQREQ|=EHST|EFLS;
-            //				cdDriveStatus |=STAT_TRNS;
-            //			}
-            //
-            //			HIRQREQ|=CMOK;
-            //			SendStatus();
-            //			break;
-            //		case 0x12: // CD Scan
-            //			MessageBox(NULL,L"CDScan",L"unimplemented",MB_ICONWARNING);
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockU("-=Cd Scan=-");
-            //			EmuState::pLog->CdBlockWrite("-=Cd Scan=- executed");
-            //			#endif
-            //			break;
-            //		case 0x20: // Get Current Subcode Q / RW
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get Current Subcode Q/RW=- executed");
-            //			#endif
-            //			if((CR2&0xFF)==0x01)
-            //			{ // Subcode RW
-            //				MessageBox(NULL,L"Executing GetCurrentSubcodeRW\n",L"not implemented",MB_ICONWARNING);
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockU("-=Get Current Subcode RW=-");
-            //				#endif
-            //			}else{ // Subcode Q
-            //				cdDriveStatus|=STAT_TRNS;
-            //				CR1=cdDriveStatus<<8;
-            //				CR2=5;
-            //				CR3=0;
-            //				CR4=0;
-            //
-            //				HIRQREQ|=CMOK|DRDY;
-            //			}
-            //
-            //			break;
-            //		case 0x30: // Set CD Device Connection
-            //			currentFilter=CR3>>8;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("CD device connection set to filter no",currentFilter);
-            //			#endif
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			SendStatus();
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Set CD Device Connection=- executed");
-            //			#endif
-            //			break;
-            //		case 0x31: // Get CD Device Connection
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get CD Device Connection=- executed");
-            //			EmuState::pLog->CdBlockU("-=Get CD Device Connection=-");
-            //			#endif
-            //			break;
-            //		case 0x32: // Get Last Buffer Destination
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get Last Buffer Destination=- executed");
-            //			#endif
-            //
-            //			CR1=cdDriveStatus<<8;
-            //			CR2=0;
-            //			CR3=static_cast<uint16_t>(lastFetchedBuffer<<8);
-            //			CR4=0;
-            //
-            //			//HIRQREQ|=CMOK|ESEL;
-            //			HIRQREQ|=CMOK;
-            //			break;
-            //		case 0x40: // Set Filter Range
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Set Filter Range=- executed");
-            //			#endif
-            //
-            //			uint8_t filterNum;
-            //			filterNum=CR3>>8;
-            //
-            //			filters[filterNum].FAD=((CR1&0xFF)<<16)|CR2;
-            //			filters[filterNum].FADRange=((CR3&0xFF)<<16)|CR4;
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			SendStatus();
-            //			break;
-            //		case 0x41: // Get Filter Range
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get Filter Range=- executed");
-            //			EmuState::pLog->CdBlockU("-=Get Filter Range=-");
-            //			#endif
-            //			break;
-            //		case 0x42: // Set Filter Subheader Conditions
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Set Filter Subheader Conditions=- executed");
-            //			#endif
-            //
-            //			filterNum=CR3>>8;
-            //
-            //			filters[filterNum].fileNumber=CR3&0xFF;
-            //			filters[filterNum].channelNumber=CR1&0xFF;
-            //			filters[filterNum].subModeMask=CR2>>8;
-            //			filters[filterNum].subModeCompValue=CR4>>8;
-            //			filters[filterNum].codingInfoMask=CR2&0xFF;
-            //			filters[filterNum].codingInfoCompValue=CR4&0xFF;
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("conditions:");
-            //			EmuState::pLog->CdBlockWrite("fileNumber: 0x",filters[filterNum].fileNumber);
-            //			EmuState::pLog->CdBlockWrite("channelNumber: 0x",filters[filterNum].channelNumber);
-            //			EmuState::pLog->CdBlockWrite("subModeMask: 0x",filters[filterNum].subModeMask);
-            //			EmuState::pLog->CdBlockWrite("subModeCompValue: 0x",filters[filterNum].subModeCompValue);
-            //			EmuState::pLog->CdBlockWrite("codingInfoMask: 0x",filters[filterNum].codingInfoMask);
-            //			EmuState::pLog->CdBlockWrite("codingInfoCompValue: 0x",filters[filterNum].codingInfoCompValue);
-            //			#endif
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			SendStatus();
-            //			break;
-            //		case 0x43: // Get Filter Subheader Conditions
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get Filter Subheader Conditions=- executed");
-            //			EmuState::pLog->CdBlockU("-=Get Filter Subheader Conditions=-");
-            //			#endif
-            //			break;
-            //		case 0x44: // Set Filter Mode
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Set Filter Mode=- executed");
-            //			#endif
-            //			uint8_t mode;
-            //			mode=CR1&0xFF;
-            //			filterNum=CR3>>8;
-            //
-            //			if (mode&0x80)
-            //			{
-            //				// initialise filter conditions
-            //				filters[filterNum].trueOutput=filterNum;
-            //				filters[filterNum].falseOutput=FILTER_NOT_CONNECTED;
-            //				filters[filterNum].mode=0;
-            //				filters[filterNum].FAD=0;
-            //				filters[filterNum].FADRange=0;
-            //				filters[filterNum].fileNumber=0;
-            //				filters[filterNum].channelNumber=0;
-            //				filters[filterNum].subModeMask=0;
-            //				filters[filterNum].subModeCompValue=0;
-            //				filters[filterNum].codingInfoMask=0;
-            //				filters[filterNum].codingInfoCompValue=0;
-            //			}
-            //			else filters[filterNum].mode=mode;
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			SendStatus();
-            //			break;
-            //		case 0x45: // Get Filter Mode
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Set Filter Mode=- executed");
-            //			EmuState::pLog->CdBlockU("-=Set Filter Mode=-");
-            //			#endif
-            //			break;
-            //		case 0x46: // Set Filter Connection
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Set Filter Connection=- executed");
-            //			#endif
-            //			uint8_t buffNum,falsec;
-            //			filterNum=CR3>>8;
-            //			buffNum=CR2>>8;
-            //			falsec=CR2&0xFF;
-            //
-            //			if (CR1&0x1) filters[filterNum].trueOutput=buffNum;
-            //			if (CR1&0x1) filters[filterNum].falseOutput=falsec;
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			SendStatus();
-            //			break;
-            //		case 0x47: // Get Filter Connection
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockU("-=Get Filter Connection=-");
-            //			EmuState::pLog->CdBlockWrite("-=Get Filter Connection=- executed");
-            //			#endif
-            //			break;
-            //		case 0x48: // Reset Selector
-            //			// Status(8) | Flags(4) | Rep Cnt(4)
-            //			// Ctrl Addr(8) | Track No(8)
-            //			// Index No(8) | Upper Byte of curre,t FAD (8)
-            //			// Lower word of current FAD
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Reset Selector=- executed");
-            //			#endif
-            //
-            //			uint8_t resetFlag;
-            //			resetFlag=CR1&0xFF;
-            //
-            //			if (resetFlag==0)
-            //			{
-            //				// all specified buffer partition data is cleared
-            //				int32_t buffPart=CR3>>8;
-            //
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("Clearing buffer partition data of buffer n°",buffPart);
-            //				#endif
-            //
-            //				for (int32_t j=0;j<MAX_SECTORS;j++)
-            //				{
-            //					if (bufferPartitions[buffPart].sectors[j])
-            //					{
-            //						// we erase corresponding sector in the sector buffer
-            //						#ifdef _LOGS
-            //						EmuState::pLog->CdBlockWrite("Erasing in sector buffer sector n°",j);
-            //						#endif
-            //
-            //						memset(bufferPartitions[buffPart].sectors[j]->data,0,SECTOR_SIZE);
-            //						bufferPartitions[buffPart].sectors[j]->size=0;
-            //						bufferPartitions[buffPart].sectors[j]->FAD=INVALID_FAD;
-            //						bufferPartitions[buffPart].sectors[j]->fileNumber=0;
-            //						bufferPartitions[buffPart].sectors[j]->subMode=0;
-            //						bufferPartitions[buffPart].sectors[j]->codingInfo=0;
-            //
-            //						bufferPartitions[buffPart].sectors[j]=NULL;
-            //						bufferPartitions[buffPart].size--;
-            //					}
-            //				}
-            //			}
-            //			else
-            //			{
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("Buffer partition number is ignored");
-            //				#endif
-            //
-            //				if (resetFlag&0x4)
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Initialize data of all buffer partitions");
-            //					#endif
-            //					for (int32_t i=0;i<MAX_SELECTORS;i++)
-            //					{
-            //						for (int32_t j=0;j<MAX_SECTORS;j++) bufferPartitions[i].sectors[j]=NULL;
-            //						bufferPartitions[i].size=0;
-            //					}
-            //					for (int32_t j=0;j<MAX_SECTORS;j++)
-            //					{
-            //						memset(sectorsBuffer[j].data,0,SECTOR_SIZE);
-            //						sectorsBuffer[j].size=0;
-            //						sectorsBuffer[j].FAD=INVALID_FAD;
-            //						sectorsBuffer[j].fileNumber=0;
-            //						sectorsBuffer[j].subMode=0;
-            //						sectorsBuffer[j].codingInfo=0;
-            //					}
-            //				}
-            //				if (resetFlag&0x8) EmuState::pLog->CdBlockWrite("Initialize data of all buffer partitions output
-            // connectors (unsupported)");// ?? 				if (resetFlag&0x10)
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Initialize all filter conditions");
-            //					#endif
-            //					for (int32_t i=0;i<MAX_SELECTORS;i++)
-            //					{
-            //						filters[i].FAD=0;
-            //						filters[i].FADRange=0;
-            //						filters[i].fileNumber=0;
-            //						filters[i].channelNumber=0;
-            //						filters[i].subModeMask=0;
-            //						filters[i].subModeCompValue=0;
-            //						filters[i].codingInfoMask=0;
-            //						filters[i].codingInfoCompValue=0;
-            //					}
-            //				}
-            //				#ifdef _LOGS
-            //				if (resetFlag&0x20) EmuState::pLog->CdBlockWrite("Initialize all filter input connectors
-            //(unsupported)");//
-            //?? 				#endif 				if (resetFlag&0x40)
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Initialize true output connectors of all filters");
-            //					#endif
-            //					for (int32_t i=0;i<MAX_SELECTORS;i++) filters[i].trueOutput=i;
-            //				}
-            //				if (resetFlag&0x80)
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("Initialize false output connectors of all filters");
-            //					#endif
-            //					for (int32_t i=0;i<MAX_SELECTORS;i++) filters[i].falseOutput=FILTER_NOT_CONNECTED;
-            //				}
-            //			}
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			SendStatus();
-            //			break;
-            //		case 0x50: // Get CD Block size
-            //			CR1=cdDriveStatus<<8;
-            //			CR2=static_cast<uint16_t>(FreeNumOfSectorsInBuffer());
-            //			CR3=0x18<<8;
-            //			CR4=0xC8;
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			//HIRQREQ|=CMOK;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get CD Block Size=- executed");
-            //			EmuState::pLog->CdBlockWrite("number of free sectors: 0x",CR2);
-            //			#endif
-            //			break;
-            //		case 0x51: // Get buffer size
-            //			int32_t buffNum2;
-            //			buffNum2=CR3>>8;
-            //
-            //			CR1=cdDriveStatus<<8;
-            //			CR2=0x0000;
-            //			CR3=0x0000;
-            //			CR4=static_cast<uint16_t>(bufferPartitions[buffNum2].size);
-            //
-            //			if(CR4) cdDriveStatus |= STAT_TRNS;
-            //			//HIRQREQ|=CMOK|ESEL;
-            //			HIRQREQ|=CMOK;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get buffer size=- executed");
-            //			EmuState::pLog->CdBlockWrite("buffer n° 0x",buffNum2);
-            //			EmuState::pLog->CdBlockWrite("size = 0x",bufferPartitions[buffNum2].size);
-            //			#endif
-            //			break;
-            //		case 0x52: // Calculate actual size
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Calculate actual size=- executed");
-            //			#endif
-            //
-            //			uint16_t sectorPosInBuffer;
-            //			uint8_t buffer;
-            //			uint16_t numberOfSectors;
-            //
-            //			sectorPosInBuffer=CR2;
-            //			buffer=CR3>>8;
-            //			numberOfSectors=CR4;
-            //
-            //			if (sectorPosInBuffer==0xFFFF) MessageBox(NULL,L"CalculateActualSize:
-            // sectorPosInBuffer==0xFFFF",L"unimplemented",MB_ICONWARNING); 			if (numberOfSectors==0xFFFF)
-            // MessageBox(NULL,L"CalculateActualSize: numberOfSectors==0xFFFF",L"unimplemented",MB_ICONWARNING);
-            //
-            //			actualSize=0;
-            //			/*for (int32_t i=sectorPosInBuffer;i<(sectorPosInBuffer+numberOfSectors);i++)
-            //			{
-            //				if (bufferPartitions[buffer].sectors[i]) actualSize+=bufferPartitions[buffer].sectors[i]->size;
-            //			}*/
-            //
-            //			// Is the range included in one partition
-            //			int32_t i;
-            //			if((sectorPosInBuffer+numberOfSectors) <= bufferPartitions[buffer].size){
-            //				for(i=sectorPosInBuffer; i<(sectorPosInBuffer+numberOfSectors);i++){
-            //					if(bufferPartitions[buffer].sectors[i]) actualSize+=bufferPartitions[buffer].sectors[i]->size;
-            //				}
-            //			}else{
-            //				// Range exceeds one partition
-            //				#ifdef _LOGS
-            //				EmuState::pLog->CdBlockWrite("Range exceeded !!!");
-            //				EmuState::pLog->CdBlockU("Range exceeded !!!");
-            //				#endif
-            //				if((sectorPosInBuffer+numberOfSectors) <= bufferPartitions[buffer].size){
-            //					for(i=sectorPosInBuffer; i<(sectorPosInBuffer+numberOfSectors);i++){
-            //						if(bufferPartitions[buffer].sectors[i]) actualSize+=bufferPartitions[buffer].sectors[i]->size;
-            //					}
-            //				}
-            //			}
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("buffer partition number: 0x",buffer);
-            //			EmuState::pLog->CdBlockWrite("sector position: 0x",sectorPosInBuffer);
-            //			EmuState::pLog->CdBlockWrite("sector number: 0x",numberOfSectors);
-            //			EmuState::pLog->CdBlockWrite("actual size: 0x",actualSize);
-            //			#endif
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			SendStatus();
-            //			break;
-            //		case 0x53: // Get actual block size
-            //			CR1=cdDriveStatus<<8;
-            //			CR1|=((actualSize/2)>>16)&0xFF;
-            //			//CR2=(actualSize/2)&0xFFFF;
-            //			CR2=static_cast<uint16_t>(actualSize/2);
-            //			CR3=0;
-            //			CR4=0;
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get actual block size=- executed");
-            //			#endif
-            //			break;
-            //		case 0x54: // Get sector info (added 09/01/2005)
-            //			uint8_t sectorNum;
-            //			sectorNum = CR2 & 0xFF;
-            //			uint8_t bufferNum;
-            //			bufferNum = CR3>>8;
-            //
-            //			CR1=cdDriveStatus<<8;
-            //			CR1|=bufferPartitions[bufferNum].sectors[sectorNum]->FAD>>16;
-            //			CR2=(uint16_t)(bufferPartitions[bufferNum].sectors[sectorNum]->FAD & 0xFFFF);
-            //			CR3=bufferPartitions[bufferNum].sectors[sectorNum]->fileNumber << 8 |
-            // bufferPartitions[bufferNum].sectors[sectorNum]->channelNumber;
-            // CR4=bufferPartitions[bufferNum].sectors[sectorNum]->subMode
-            // << 8 | bufferPartitions[bufferNum].sectors[sectorNum]->codingInfo;
-            //
-            //			HIRQREQ|=CMOK|ESEL;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get sector info=- executed");
-            //			#endif
-            //			break;
-            //		case 0x55: // Execute FAD Search
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockU("-=Execute FAD Search=-");
-            //			EmuState::pLog->CdBlockWrite("-=Execute FAD Search=- executed (UNIMPLEMENTED)");
-            //			#endif
-            //			break;
-            //		case 0x56: // Get FAD Search Results
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockU("-=Get FAD Search Results=-");
-            //			EmuState::pLog->CdBlockWrite("-=Get FAD Search Results=- executed  (UNIMPLEMENTEE)");
-            //			#endif
-            //			break;
-            //		case 0x60: // Set Sector Length
-            //			// Status(8) | Flags(4) | Rep Cnt(4)
-            //			// Ctrl Addr(8) | Track No(8)
-            //			// Index No(8) | Upper Byte of curre,t FAD (8)
-            //			// Lower word of current FAD
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Set Sector Length=- executed");
-            //			#endif
-            //
-            //			// get length
-            //			switch (CR1&0xFF)
-            //			{
-            //				case SLEN_2048:
-            //					getSectorLength=2048;
-            //					break;
-            //				case SLEN_2336:
-            //					getSectorLength=2336;
-            //					MessageBox(NULL,L"sector length set to 2336",L"unimplemented",MB_ICONWARNING);
-            //					break;
-            //				case SLEN_2340:
-            //					getSectorLength=2340;
-            //					MessageBox(NULL,L"sector length set to 2340",L"unimplemented",MB_ICONWARNING);
-            //					break;
-            //				case SLEN_2352:
-            //					getSectorLength=2352;
-            //					MessageBox(NULL,L"sector length set to 2352",L"unimplemented",MB_ICONWARNING);
-            //					break;
-            //				case 0xFF:
-            //					break;
-            //			}
-            //			// set length
-            //			switch (CR2>>8)
-            //			{
-            //				case SLEN_2048:
-            //					putSectorLength=2048;
-            //					break;
-            //				case SLEN_2336:
-            //					putSectorLength=2336;
-            //					break;
-            //				case SLEN_2340:
-            //					putSectorLength=2340;
-            //					break;
-            //				case SLEN_2352:
-            //					putSectorLength=2352;
-            //					break;
-            //				case 0xFF:
-            //					break;
-            //			}
-            //			EmuState::pLog->CdBlockWrite("Get sector length: ",getSectorLength);
-            //			EmuState::pLog->CdBlockWrite("put sector length: ",putSectorLength);
-            //
-            //			// flags setup
-            //			HIRQREQ|=CMOK|ESEL;
-            //			SendStatus();
-            //			break;
-            //		case 0x61: // Get Sector Data
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get Sector Data=- executed");
-            //			#endif
-            //
-            //			int32_t sectorNumber;
-            //
-            //			sectorNumInBuffer=CR2;
-            //			sectorNumber=CR4;
-            //			fetchedBuffer=CR3>>8;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("buffer partition number:0x",fetchedBuffer);
-            //			EmuState::pLog->CdBlockWrite("sector position:0x",sectorNumInBuffer);
-            //			EmuState::pLog->CdBlockWrite("sector number:0x",sectorNumber);
-            //			#endif
-            //
-            //			// initiate data transfert from CD block to host
-            //			posInSector=0;
-            //			bytesTransfered=0;
-            //
-            //			cdDriveStatus|=STAT_TRNS;
-            //			HIRQREQ|=CMOK|EHST|DRDY;// DRDY??
-            //			SendStatus();
-            //			break;
-            //		case 0x62: // Delete Sector Data
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Delete Sector Data=- executed");
-            //			#endif
-            //
-            //			sectorNumInBuffer=CR2;
-            //			sectorNumber=CR4;
-            //			fetchedBuffer=CR3>>8;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("buffer partition number:0x",fetchedBuffer);
-            //			EmuState::pLog->CdBlockWrite("sector position:0x",sectorNumInBuffer);
-            //			EmuState::pLog->CdBlockWrite("sector number:0x",sectorNumber);
-            //			#endif
-            //
-            //			// data must be deleted after
-            //			numberOfSectorsToDelete=sectorNumber;
-            //			posOfSectorsToDelete=sectorNumInBuffer;
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("*deleting sectors in buffer partition n°0x",fetchedBuffer);
-            //			EmuState::pLog->CdBlockWrite("old buffer size (in sectors): 0x",bufferPartitions[fetchedBuffer].size);
-            //			EmuState::pLog->CdBlockWrite("position of sector to delete in buffer: 0x",posOfSectorsToDelete);
-            //			EmuState::pLog->CdBlockWrite("number of sectors to delete: 0x",numberOfSectorsToDelete);
-            //			#endif
-            //			int32_t oldSize;
-            //			oldSize=bufferPartitions[fetchedBuffer].size;
-            //
-            //			for (int32_t j=posOfSectorsToDelete; j<(posOfSectorsToDelete+numberOfSectorsToDelete); j++)
-            //			{
-            //				if (j>MAX_SECTORS)
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("end of buffer partition reached");
-            //					#endif
-            //					break;
-            //				}
-            //				if (bufferPartitions[fetchedBuffer].sectors[j])
-            //				{
-            //					#ifdef _LOGS
-            //					EmuState::pLog->CdBlockWrite("deleting in buffer partion sector n°",j);
-            //					#endif
-            //					bufferPartitions[fetchedBuffer].sectors[j]->size=0;
-            //					bufferPartitions[fetchedBuffer].sectors[j]=NULL;
-            //					bufferPartitions[fetchedBuffer].size--;
-            //				}
-            //				else break;
-            //			}
-            //
-            //			// we shift the sectors in buffer partition if necessary
-            //			if (numberOfSectorsToDelete<oldSize)
-            //			{
-            //				// we did not erase all the sectors
-            //				// we check if there a hole in buffer partition
-            //				EmuState::pLog->CdBlockWrite("all sectors haven't been deleted, checking for hole");
-            //				int32_t holeStart=0;
-            //				for (;holeStart<MAX_SECTORS;holeStart++)
-            //				{
-            //					if (!bufferPartitions[fetchedBuffer].sectors[holeStart]) break;
-            //				}
-            //				// holeStart contains the position of the hole
-            //				// let's check if the hole is positioned before the end of used sectors
-            //				if (holeStart<bufferPartitions[fetchedBuffer].size)
-            //				{
-            //					//log("there is a hole at sector n°%d\n",holeStart);
-            //					// let's get the position of the end of the hole
-            //					int32_t holeEnd=holeStart;
-            //					for (;holeEnd<MAX_SECTORS;holeEnd++)
-            //					{
-            //						if (bufferPartitions[fetchedBuffer].sectors[holeEnd]) break;
-            //					}
-            //					// we shift the sectors
-            //					int32_t k=0;
-            //					//for (i=0;(i+holeEnd)<MAX_SECTORS;i++)
-            //					for (k=0; (k+holeEnd)<(holeEnd+bufferPartitions[fetchedBuffer].size); k++)
-            //					{
-            //						if ((k+holeEnd)>MAX_SECTORS) break;
-            //						bufferPartitions[fetchedBuffer].sectors[holeStart+k]=bufferPartitions[fetchedBuffer].sectors[holeEnd+k];
-            //						//EmuState::pLog->CdBlockWrite("sector n°%d shifted to sector n°%d\n",holeEnd+i,holeStart+i);
-            //					}
-            //					for (;k<MAX_SECTORS;k++)
-            //					{
-            //						bufferPartitions[fetchedBuffer].sectors[k]=NULL;
-            //					}
-            //				}
-            //			}
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("new buffer size: 0x",bufferPartitions[fetchedBuffer].size);
-            //			#endif
-            //			// buffer should not be full
-            //			//HIRQREQ&=~BFUL;
-            //
-            //			HIRQREQ|=CMOK|EHST; //  DRDY ??
-            //			SendStatus();
-            //			break;
-            //		case 0x63: // Get Then Delete Sector Data
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get Then Delete Sector Data=- executed");
-            //			#endif
-            //
-            //			sectorNumInBuffer=CR2;
-            //			sectorNumber=CR4;
-            //			fetchedBuffer=CR3>>8;
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("Buffer partition number: ",fetchedBuffer);
-            //			EmuState::pLog->CdBlockWrite("sector position: ",sectorNumInBuffer);
-            //			EmuState::pLog->CdBlockWrite("sector number: ",sectorNumber);
-            //			#endif
-            //
-            //			// initiate data transfert from CD block to host
-            //			posInSector=0;
-            //			bytesTransfered=0;
-            //
-            //			// data must be deleted after
-            //			DeleteSectorDataExecuted=true;
-            //			numberOfSectorsToDelete=sectorNumber;
-            //			posOfSectorsToDelete=sectorNumInBuffer;
-            //
-            //			HIRQREQ|=CMOK|EHST|DRDY;
-            //			cdDriveStatus|=STAT_TRNS;
-            //			SendStatus();
-            //			break;
-            //		case 0x65: // Copy Sector Data
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockU("-=Copy Sector Data=-");
-            //			EmuState::pLog->CdBlockWrite("-=Copy Sector Data=- executed (UNIMPLEMENTED)");
-            //			#endif
-            //			break;
-            //		case 0x66: // Move Sector Data
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockU("-=Move Sector Data=-");
-            //			EmuState::pLog->CdBlockWrite("-=Move Sector Data=- executed (UNIMPLEMENTED)");
-            //			#endif
-            //			break;
-        case get_copy_error:
-            getCopyError();
-            break;
-            //		case 0x70: // Change Directory
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Change Directory=- executed");
-            //			#endif
-            //			int32_t fileId;
-            //			fileId=((CR3&0xFF)<<16)|CR4;
-            //
-            //			switch (fileId)
-            //			{
-            //				case 0xFFFFFF:
-            //					// move to root directory
-            //					SendStatus();
-            //					break;
-            //				default:
-            //					MessageBox(NULL,L"ChangeDirectory: change to another directory than root
-            // directory",L"warning",MB_ICONWARNING); 					break;
-            //			}
-            //
-            //			HIRQREQ|=CMOK|EFLS;
-            //			SendStatus();
-            //			break;
-            //		case 0x71: // Read Directory
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockU("-=Read Directory=-");
-            //			EmuState::pLog->CdBlockWrite("-=Read Directory=- executed (UNIMPLEMENTED)");
-            //			#endif
-            //			break;
-            //		case 0x72: // Get File System Scope
-            //			CR1=cdDriveStatus<<8;
-            //			CR2=0x0063;
-            //			CR3=0x0100;
-            //			CR4=0x0002;
-            //
-            //			HIRQREQ|=CMOK|EFLS;
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get File System Scope=- executed");
-            //			#endif
-            //			break;
-            //		case 0x73: // Get File Info
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Get File Info=- executed");
-            //			#endif
-            //
-            //			//uint32_t fileId;
-            //			fileId=((CR3&0xFF)<<16)|CR4;
-            //
-            //			if (fileId==0xFFFFFF)
-            //			{
-            //				MessageBox(NULL,L"GetFileInfo: return all 256 files info",L"unimplemented",MB_ICONWARNING);
-            //			}
-            //			else
-            //			{
-            //				BuildFileInfos(fileId);
-            //				dataBufferSize=6;
-            //			}
-            //
-            //			bytesTransfered=0;
-            //			posInDataBuffer=0;
-            //			dataBuffer=filesInfos;
-            //
-            //			cdDriveStatus|=STAT_TRNS;
-            //			CR1=cdDriveStatus<<8;
-            //			CR2=6;
-            //			CR3=0;
-            //			CR4=0;
-            //
-            //			HIRQREQ|=CMOK|DRDY;
-            //			break;
-            //		case 0x74: // Read File
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=Read File=- executed");
-            //			#endif
-            //
-            //			uint32_t offset;
-            //			offset=((CR1&0xFF)<<16)|CR2;
-            //			//uint32_t fileId;
-            //			fileId=((CR3&0xFF)<<16)|CR4;
-            //			uint8_t filter;
-            //			filter=CR3>>8;
-            //
-            //			// we must set play mode parameters
-            //			currentPlayMode=PLAY_MODE_FAD;
-            //			FAD=filesOnCD[fileId].LSN;
-            //			remainingFADs=filesOnCD[fileId].dataLength/0x800+1;
-            //			playFADStart=FAD;
-            //
-            //			cdDriveStatus=STAT_PLAY;
-            //			flag=FLAG_CDROM;
-            //
-            //			//HIRQREQ|=CMOK|EFLS;
-            //			HIRQREQ|=CMOK;
-            //			SendStatus();
-            //			break;
+        //		case 0x10: // Play Disc
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Play Disc=- executed");
+        //			#endif
+        //
+        //			if (CR1==0x1000)
+        //			{
+        //				// track mode
+        //				currentPlayMode=PLAY_MODE_TRACK;
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("track mode");
+        //				EmuState::pLog->CdBlockU("track mode");
+        //				#endif
+        //
+        //				HIRQREQ&=~SCDQ;
+        //				HIRQREQ&=~CSCT;
+        //				HIRQREQ&=~PEND;
+        //				HIRQREQ&=~DRDY;
+        //				cdDriveStatus &=~STAT_TRNS;
+        //
+        //			}
+        //			else
+        //			{
+        //				// FAD mode
+        //				currentPlayMode=PLAY_MODE_FAD;
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("FAD mode\n");
+        //				#endif
+        //				uint32_t newFAD=((CR1&0x7F)<<16)|CR2;
+        //				uint32_t numOfFAD=CR4;
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("FAD: 0x",newFAD);
+        //				EmuState::pLog->CdBlockWrite("number of FADs to play through: ",numOfFAD);
+        //				#endif
+        //
+        //				if (numOfFAD==0xFFFF) MessageBox(NULL,L"unimplemented",L"unimplemented",MB_ICONWARNING);
+        //
+        //				if (numOfFAD)
+        //				{
+        //					// play
+        //					cdDriveStatus=STAT_PLAY;
+        //					flag=FLAG_CDROM;
+        //
+        //					HIRQREQ&=~SCDQ;
+        //					HIRQREQ&=~CSCT;
+        //					HIRQREQ&=~PEND;
+        //					HIRQREQ&=~DRDY;
+        //
+        //					remainingFADs=numOfFAD;
+        //					FAD=newFAD;
+        //					playFADStart=FAD;
+        //				}
+        //				else
+        //				{
+        //					// pause
+        //					cdDriveStatus=STAT_PAUSE;
+        //
+        //					HIRQREQ&=~SCDQ;
+        //					HIRQREQ&=~CSCT;
+        //					HIRQREQ|=PEND;
+        //				}
+        //			}
+        //
+        //			uint8_t playMode;
+        //			playMode=CR3>>8;
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("play mode: 0x",playMode);
+        //			#endif
+        //
+        //			if (playMode==CDC_PM_NOCHG)
+        //			{
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("no change in play mode");
+        //				#endif
+        //			}
+        //			else
+        //			{
+        //				switch (playMode&0x7F)
+        //				{
+        //					case 0x00:
+        //						#ifdef _LOGS
+        //						EmuState::pLog->CdBlockWrite("no repeat (plays only one time)");
+        //						#endif
+        //						repCnt=0;
+        //						break;
+        //					case 0x0F:
+        //						#ifdef _LOGS
+        //						EmuState::pLog->CdBlockWrite("infinite repetition");
+        //						#endif
+        //						repCnt=0xF;
+        //						break;
+        //					case CDC_PM_REP_NOCHG:
+        //						#ifdef _LOGS
+        //						EmuState::pLog->CdBlockWrite("doesn't change maximum repeat count");
+        //						#endif
+        //						break;
+        //					default:
+        //						#ifdef _LOGS
+        //						EmuState::pLog->CdBlockWrite("repeat count: ",playMode&0xF);
+        //						#endif
+        //						repCnt=playMode&0xF;
+        //						break;
+        //				}
+        //				// pickup move?
+        //				#ifdef _LOGS
+        //				if (playMode&CDC_PM_PIC_NOCHG)
+        //				{
+        //					EmuState::pLog->CdBlockWrite("doesn't move pickup to start position");
+        //				}
+        //				else
+        //				{
+        //					EmuState::pLog->CdBlockWrite("play again");
+        //				}
+        //				#endif
+        //			}
+        //
+        //			HIRQREQ|=CMOK;
+        //			SendStatus();
+        //			break;
+        //		case 0x11: // Disc Seek
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Disc Seek=- executed");
+        //			#endif
+        //
+        //			if ((CR1&0xFF)==0xFF)
+        //			{
+        //				// pause
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("pause");
+        //				#endif
+        //				cdDriveStatus=STAT_PAUSE;
+        //				uint32_t  newFad=((CR1&0x7F)<<16)|CR2;
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("fad mode");
+        //				EmuState::pLog->CdBlockWrite("fad: 0x",newFad);
+        //				#endif
+        //				if (newFad==0x7FFFFF)
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("seek home directory");
+        //					#endif
+        //					//FAD=150;
+        //					FAD = 0;
+        //					// debug
+        //					tno=1;
+        //				}
+        //				else FAD=newFad;
+        //				// stop current transfert if any
+        //				if (remainingFADs)
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("cancel current play!");
+        //					#endif
+        //					remainingFADs=0;
+        //				}
+        //				HIRQREQ|=PEND|DRDY;
+        //				HIRQREQ|=EHST|EFLS;
+        //				cdDriveStatus |=STAT_TRNS;
+        //			}
+        //			else if (CR1==0x1100)
+        //			{
+        //				cdDriveStatus=STAT_PAUSE;
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("track mode");
+        //				EmuState::pLog->CdBlockWrite("start track: ",CR2>>8);
+        //				EmuState::pLog->CdBlockWrite("start index: ",CR2&0xFF);
+        //				#endif
+        //
+        //				tno=CR2>>8;
+        //				// set corresponding fad
+        //				uint32_t newFAD;
+        //				newFAD=saturnTOC[(tno-1)*4+1];
+        //				newFAD<<=8;
+        //				newFAD|=saturnTOC[(tno-1)*4+2];
+        //				newFAD<<=8;
+        //				newFAD|=saturnTOC[(tno-1)*4+3];
+        //
+        //				FAD=newFAD;
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("start track: 0x",newFAD);
+        //				#endif
+        //			}
+        //			else
+        //			{
+        //				cdDriveStatus=STAT_PAUSE;
+        //				uint32_t newFad=((CR1&0x7F)<<16)|CR2;
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("fad mode");
+        //				EmuState::pLog->CdBlockWrite("fad: 0x",newFad);
+        //				#endif
+        //				if (newFad==0x7FFFFF)
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("seek home directory");
+        //					#endif
+        //					FAD=150;
+        //				}
+        //				else FAD=newFad;
+        //				// stop current transfert if any
+        //				if (remainingFADs)
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("cancel current play!");
+        //					#endif
+        //					remainingFADs=0;
+        //				}
+        //				HIRQREQ|=PEND|DRDY;
+        //				HIRQREQ|=EHST|EFLS;
+        //				cdDriveStatus |=STAT_TRNS;
+        //			}
+        //
+        //			HIRQREQ|=CMOK;
+        //			SendStatus();
+        //			break;
+        //		case 0x12: // CD Scan
+        //			MessageBox(NULL,L"CDScan",L"unimplemented",MB_ICONWARNING);
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockU("-=Cd Scan=-");
+        //			EmuState::pLog->CdBlockWrite("-=Cd Scan=- executed");
+        //			#endif
+        //			break;
+        //		case 0x20: // Get Current Subcode Q / RW
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get Current Subcode Q/RW=- executed");
+        //			#endif
+        //			if((CR2&0xFF)==0x01)
+        //			{ // Subcode RW
+        //				MessageBox(NULL,L"Executing GetCurrentSubcodeRW\n",L"not implemented",MB_ICONWARNING);
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockU("-=Get Current Subcode RW=-");
+        //				#endif
+        //			}else{ // Subcode Q
+        //				cdDriveStatus|=STAT_TRNS;
+        //				CR1=cdDriveStatus<<8;
+        //				CR2=5;
+        //				CR3=0;
+        //				CR4=0;
+        //
+        //				HIRQREQ|=CMOK|DRDY;
+        //			}
+        //
+        //			break;
+        //		case 0x30: // Set CD Device Connection
+        //			currentFilter=CR3>>8;
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("CD device connection set to filter no",currentFilter);
+        //			#endif
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			SendStatus();
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Set CD Device Connection=- executed");
+        //			#endif
+        //			break;
+        //		case 0x31: // Get CD Device Connection
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get CD Device Connection=- executed");
+        //			EmuState::pLog->CdBlockU("-=Get CD Device Connection=-");
+        //			#endif
+        //			break;
+        //		case 0x32: // Get Last Buffer Destination
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get Last Buffer Destination=- executed");
+        //			#endif
+        //
+        //			CR1=cdDriveStatus<<8;
+        //			CR2=0;
+        //			CR3=static_cast<uint16_t>(lastFetchedBuffer<<8);
+        //			CR4=0;
+        //
+        //			//HIRQREQ|=CMOK|ESEL;
+        //			HIRQREQ|=CMOK;
+        //			break;
+        //		case 0x40: // Set Filter Range
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Set Filter Range=- executed");
+        //			#endif
+        //
+        //			uint8_t filterNum;
+        //			filterNum=CR3>>8;
+        //
+        //			filters[filterNum].FAD=((CR1&0xFF)<<16)|CR2;
+        //			filters[filterNum].FADRange=((CR3&0xFF)<<16)|CR4;
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			SendStatus();
+        //			break;
+        //		case 0x41: // Get Filter Range
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get Filter Range=- executed");
+        //			EmuState::pLog->CdBlockU("-=Get Filter Range=-");
+        //			#endif
+        //			break;
+        //		case 0x42: // Set Filter Subheader Conditions
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Set Filter Subheader Conditions=- executed");
+        //			#endif
+        //
+        //			filterNum=CR3>>8;
+        //
+        //			filters[filterNum].fileNumber=CR3&0xFF;
+        //			filters[filterNum].channelNumber=CR1&0xFF;
+        //			filters[filterNum].subModeMask=CR2>>8;
+        //			filters[filterNum].subModeCompValue=CR4>>8;
+        //			filters[filterNum].codingInfoMask=CR2&0xFF;
+        //			filters[filterNum].codingInfoCompValue=CR4&0xFF;
+        //
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("conditions:");
+        //			EmuState::pLog->CdBlockWrite("fileNumber: 0x",filters[filterNum].fileNumber);
+        //			EmuState::pLog->CdBlockWrite("channelNumber: 0x",filters[filterNum].channelNumber);
+        //			EmuState::pLog->CdBlockWrite("subModeMask: 0x",filters[filterNum].subModeMask);
+        //			EmuState::pLog->CdBlockWrite("subModeCompValue: 0x",filters[filterNum].subModeCompValue);
+        //			EmuState::pLog->CdBlockWrite("codingInfoMask: 0x",filters[filterNum].codingInfoMask);
+        //			EmuState::pLog->CdBlockWrite("codingInfoCompValue: 0x",filters[filterNum].codingInfoCompValue);
+        //			#endif
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			SendStatus();
+        //			break;
+        //		case 0x43: // Get Filter Subheader Conditions
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get Filter Subheader Conditions=- executed");
+        //			EmuState::pLog->CdBlockU("-=Get Filter Subheader Conditions=-");
+        //			#endif
+        //			break;
+        //		case 0x44: // Set Filter Mode
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Set Filter Mode=- executed");
+        //			#endif
+        //			uint8_t mode;
+        //			mode=CR1&0xFF;
+        //			filterNum=CR3>>8;
+        //
+        //			if (mode&0x80)
+        //			{
+        //				// initialise filter conditions
+        //				filters[filterNum].trueOutput=filterNum;
+        //				filters[filterNum].falseOutput=FILTER_NOT_CONNECTED;
+        //				filters[filterNum].mode=0;
+        //				filters[filterNum].FAD=0;
+        //				filters[filterNum].FADRange=0;
+        //				filters[filterNum].fileNumber=0;
+        //				filters[filterNum].channelNumber=0;
+        //				filters[filterNum].subModeMask=0;
+        //				filters[filterNum].subModeCompValue=0;
+        //				filters[filterNum].codingInfoMask=0;
+        //				filters[filterNum].codingInfoCompValue=0;
+        //			}
+        //			else filters[filterNum].mode=mode;
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			SendStatus();
+        //			break;
+        //		case 0x45: // Get Filter Mode
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Set Filter Mode=- executed");
+        //			EmuState::pLog->CdBlockU("-=Set Filter Mode=-");
+        //			#endif
+        //			break;
+        //		case 0x46: // Set Filter Connection
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Set Filter Connection=- executed");
+        //			#endif
+        //			uint8_t buffNum,falsec;
+        //			filterNum=CR3>>8;
+        //			buffNum=CR2>>8;
+        //			falsec=CR2&0xFF;
+        //
+        //			if (CR1&0x1) filters[filterNum].trueOutput=buffNum;
+        //			if (CR1&0x1) filters[filterNum].falseOutput=falsec;
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			SendStatus();
+        //			break;
+        //		case 0x47: // Get Filter Connection
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockU("-=Get Filter Connection=-");
+        //			EmuState::pLog->CdBlockWrite("-=Get Filter Connection=- executed");
+        //			#endif
+        //			break;
+        //		case 0x48: // Reset Selector
+        //			// Status(8) | Flags(4) | Rep Cnt(4)
+        //			// Ctrl Addr(8) | Track No(8)
+        //			// Index No(8) | Upper Byte of curre,t FAD (8)
+        //			// Lower word of current FAD
+        //
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Reset Selector=- executed");
+        //			#endif
+        //
+        //			uint8_t resetFlag;
+        //			resetFlag=CR1&0xFF;
+        //
+        //			if (resetFlag==0)
+        //			{
+        //				// all specified buffer partition data is cleared
+        //				int32_t buffPart=CR3>>8;
+        //
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("Clearing buffer partition data of buffer n°",buffPart);
+        //				#endif
+        //
+        //				for (int32_t j=0;j<MAX_SECTORS;j++)
+        //				{
+        //					if (bufferPartitions[buffPart].sectors[j])
+        //					{
+        //						// we erase corresponding sector in the sector buffer
+        //						#ifdef _LOGS
+        //						EmuState::pLog->CdBlockWrite("Erasing in sector buffer sector n°",j);
+        //						#endif
+        //
+        //						memset(bufferPartitions[buffPart].sectors[j]->data,0,SECTOR_SIZE);
+        //						bufferPartitions[buffPart].sectors[j]->size=0;
+        //						bufferPartitions[buffPart].sectors[j]->FAD=INVALID_FAD;
+        //						bufferPartitions[buffPart].sectors[j]->fileNumber=0;
+        //						bufferPartitions[buffPart].sectors[j]->subMode=0;
+        //						bufferPartitions[buffPart].sectors[j]->codingInfo=0;
+        //
+        //						bufferPartitions[buffPart].sectors[j]=NULL;
+        //						bufferPartitions[buffPart].size--;
+        //					}
+        //				}
+        //			}
+        //			else
+        //			{
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("Buffer partition number is ignored");
+        //				#endif
+        //
+        //				if (resetFlag&0x4)
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Initialize data of all buffer partitions");
+        //					#endif
+        //					for (int32_t i=0;i<MAX_SELECTORS;i++)
+        //					{
+        //						for (int32_t j=0;j<MAX_SECTORS;j++) bufferPartitions[i].sectors[j]=NULL;
+        //						bufferPartitions[i].size=0;
+        //					}
+        //					for (int32_t j=0;j<MAX_SECTORS;j++)
+        //					{
+        //						memset(sectorsBuffer[j].data,0,SECTOR_SIZE);
+        //						sectorsBuffer[j].size=0;
+        //						sectorsBuffer[j].FAD=INVALID_FAD;
+        //						sectorsBuffer[j].fileNumber=0;
+        //						sectorsBuffer[j].subMode=0;
+        //						sectorsBuffer[j].codingInfo=0;
+        //					}
+        //				}
+        //				if (resetFlag&0x8) EmuState::pLog->CdBlockWrite("Initialize data of all buffer partitions output
+        // connectors (unsupported)");// ?? 				if (resetFlag&0x10)
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Initialize all filter conditions");
+        //					#endif
+        //					for (int32_t i=0;i<MAX_SELECTORS;i++)
+        //					{
+        //						filters[i].FAD=0;
+        //						filters[i].FADRange=0;
+        //						filters[i].fileNumber=0;
+        //						filters[i].channelNumber=0;
+        //						filters[i].subModeMask=0;
+        //						filters[i].subModeCompValue=0;
+        //						filters[i].codingInfoMask=0;
+        //						filters[i].codingInfoCompValue=0;
+        //					}
+        //				}
+        //				#ifdef _LOGS
+        //				if (resetFlag&0x20) EmuState::pLog->CdBlockWrite("Initialize all filter input connectors
+        //(unsupported)");//
+        //?? 				#endif 				if (resetFlag&0x40)
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Initialize true output connectors of all filters");
+        //					#endif
+        //					for (int32_t i=0;i<MAX_SELECTORS;i++) filters[i].trueOutput=i;
+        //				}
+        //				if (resetFlag&0x80)
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("Initialize false output connectors of all filters");
+        //					#endif
+        //					for (int32_t i=0;i<MAX_SELECTORS;i++) filters[i].falseOutput=FILTER_NOT_CONNECTED;
+        //				}
+        //			}
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			SendStatus();
+        //			break;
+        //		case 0x50: // Get CD Block size
+        //			CR1=cdDriveStatus<<8;
+        //			CR2=static_cast<uint16_t>(FreeNumOfSectorsInBuffer());
+        //			CR3=0x18<<8;
+        //			CR4=0xC8;
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			//HIRQREQ|=CMOK;
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get CD Block Size=- executed");
+        //			EmuState::pLog->CdBlockWrite("number of free sectors: 0x",CR2);
+        //			#endif
+        //			break;
+        //		case 0x51: // Get buffer size
+        //			int32_t buffNum2;
+        //			buffNum2=CR3>>8;
+        //
+        //			CR1=cdDriveStatus<<8;
+        //			CR2=0x0000;
+        //			CR3=0x0000;
+        //			CR4=static_cast<uint16_t>(bufferPartitions[buffNum2].size);
+        //
+        //			if(CR4) cdDriveStatus |= STAT_TRNS;
+        //			//HIRQREQ|=CMOK|ESEL;
+        //			HIRQREQ|=CMOK;
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get buffer size=- executed");
+        //			EmuState::pLog->CdBlockWrite("buffer n° 0x",buffNum2);
+        //			EmuState::pLog->CdBlockWrite("size = 0x",bufferPartitions[buffNum2].size);
+        //			#endif
+        //			break;
+        //		case 0x52: // Calculate actual size
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Calculate actual size=- executed");
+        //			#endif
+        //
+        //			uint16_t sectorPosInBuffer;
+        //			uint8_t buffer;
+        //			uint16_t numberOfSectors;
+        //
+        //			sectorPosInBuffer=CR2;
+        //			buffer=CR3>>8;
+        //			numberOfSectors=CR4;
+        //
+        //			if (sectorPosInBuffer==0xFFFF) MessageBox(NULL,L"CalculateActualSize:
+        // sectorPosInBuffer==0xFFFF",L"unimplemented",MB_ICONWARNING); 			if (numberOfSectors==0xFFFF)
+        // MessageBox(NULL,L"CalculateActualSize: numberOfSectors==0xFFFF",L"unimplemented",MB_ICONWARNING);
+        //
+        //			actualSize=0;
+        //			/*for (int32_t i=sectorPosInBuffer;i<(sectorPosInBuffer+numberOfSectors);i++)
+        //			{
+        //				if (bufferPartitions[buffer].sectors[i]) actualSize+=bufferPartitions[buffer].sectors[i]->size;
+        //			}*/
+        //
+        //			// Is the range included in one partition
+        //			int32_t i;
+        //			if((sectorPosInBuffer+numberOfSectors) <= bufferPartitions[buffer].size){
+        //				for(i=sectorPosInBuffer; i<(sectorPosInBuffer+numberOfSectors);i++){
+        //					if(bufferPartitions[buffer].sectors[i]) actualSize+=bufferPartitions[buffer].sectors[i]->size;
+        //				}
+        //			}else{
+        //				// Range exceeds one partition
+        //				#ifdef _LOGS
+        //				EmuState::pLog->CdBlockWrite("Range exceeded !!!");
+        //				EmuState::pLog->CdBlockU("Range exceeded !!!");
+        //				#endif
+        //				if((sectorPosInBuffer+numberOfSectors) <= bufferPartitions[buffer].size){
+        //					for(i=sectorPosInBuffer; i<(sectorPosInBuffer+numberOfSectors);i++){
+        //						if(bufferPartitions[buffer].sectors[i]) actualSize+=bufferPartitions[buffer].sectors[i]->size;
+        //					}
+        //				}
+        //			}
+        //
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("buffer partition number: 0x",buffer);
+        //			EmuState::pLog->CdBlockWrite("sector position: 0x",sectorPosInBuffer);
+        //			EmuState::pLog->CdBlockWrite("sector number: 0x",numberOfSectors);
+        //			EmuState::pLog->CdBlockWrite("actual size: 0x",actualSize);
+        //			#endif
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			SendStatus();
+        //			break;
+        //		case 0x53: // Get actual block size
+        //			CR1=cdDriveStatus<<8;
+        //			CR1|=((actualSize/2)>>16)&0xFF;
+        //			//CR2=(actualSize/2)&0xFFFF;
+        //			CR2=static_cast<uint16_t>(actualSize/2);
+        //			CR3=0;
+        //			CR4=0;
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get actual block size=- executed");
+        //			#endif
+        //			break;
+        //		case 0x54: // Get sector info (added 09/01/2005)
+        //			uint8_t sectorNum;
+        //			sectorNum = CR2 & 0xFF;
+        //			uint8_t bufferNum;
+        //			bufferNum = CR3>>8;
+        //
+        //			CR1=cdDriveStatus<<8;
+        //			CR1|=bufferPartitions[bufferNum].sectors[sectorNum]->FAD>>16;
+        //			CR2=(uint16_t)(bufferPartitions[bufferNum].sectors[sectorNum]->FAD & 0xFFFF);
+        //			CR3=bufferPartitions[bufferNum].sectors[sectorNum]->fileNumber << 8 |
+        // bufferPartitions[bufferNum].sectors[sectorNum]->channelNumber;
+        // CR4=bufferPartitions[bufferNum].sectors[sectorNum]->subMode
+        // << 8 | bufferPartitions[bufferNum].sectors[sectorNum]->codingInfo;
+        //
+        //			HIRQREQ|=CMOK|ESEL;
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get sector info=- executed");
+        //			#endif
+        //			break;
+        //		case 0x55: // Execute FAD Search
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockU("-=Execute FAD Search=-");
+        //			EmuState::pLog->CdBlockWrite("-=Execute FAD Search=- executed (UNIMPLEMENTED)");
+        //			#endif
+        //			break;
+        //		case 0x56: // Get FAD Search Results
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockU("-=Get FAD Search Results=-");
+        //			EmuState::pLog->CdBlockWrite("-=Get FAD Search Results=- executed  (UNIMPLEMENTEE)");
+        //			#endif
+        //			break;
+        //		case 0x60: // Set Sector Length
+        //			// Status(8) | Flags(4) | Rep Cnt(4)
+        //			// Ctrl Addr(8) | Track No(8)
+        //			// Index No(8) | Upper Byte of curre,t FAD (8)
+        //			// Lower word of current FAD
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Set Sector Length=- executed");
+        //			#endif
+        //
+        //			// get length
+        //			switch (CR1&0xFF)
+        //			{
+        //				case SLEN_2048:
+        //					getSectorLength=2048;
+        //					break;
+        //				case SLEN_2336:
+        //					getSectorLength=2336;
+        //					MessageBox(NULL,L"sector length set to 2336",L"unimplemented",MB_ICONWARNING);
+        //					break;
+        //				case SLEN_2340:
+        //					getSectorLength=2340;
+        //					MessageBox(NULL,L"sector length set to 2340",L"unimplemented",MB_ICONWARNING);
+        //					break;
+        //				case SLEN_2352:
+        //					getSectorLength=2352;
+        //					MessageBox(NULL,L"sector length set to 2352",L"unimplemented",MB_ICONWARNING);
+        //					break;
+        //				case 0xFF:
+        //					break;
+        //			}
+        //			// set length
+        //			switch (CR2>>8)
+        //			{
+        //				case SLEN_2048:
+        //					putSectorLength=2048;
+        //					break;
+        //				case SLEN_2336:
+        //					putSectorLength=2336;
+        //					break;
+        //				case SLEN_2340:
+        //					putSectorLength=2340;
+        //					break;
+        //				case SLEN_2352:
+        //					putSectorLength=2352;
+        //					break;
+        //				case 0xFF:
+        //					break;
+        //			}
+        //			EmuState::pLog->CdBlockWrite("Get sector length: ",getSectorLength);
+        //			EmuState::pLog->CdBlockWrite("put sector length: ",putSectorLength);
+        //
+        //			// flags setup
+        //			HIRQREQ|=CMOK|ESEL;
+        //			SendStatus();
+        //			break;
+        //		case 0x61: // Get Sector Data
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get Sector Data=- executed");
+        //			#endif
+        //
+        //			int32_t sectorNumber;
+        //
+        //			sectorNumInBuffer=CR2;
+        //			sectorNumber=CR4;
+        //			fetchedBuffer=CR3>>8;
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("buffer partition number:0x",fetchedBuffer);
+        //			EmuState::pLog->CdBlockWrite("sector position:0x",sectorNumInBuffer);
+        //			EmuState::pLog->CdBlockWrite("sector number:0x",sectorNumber);
+        //			#endif
+        //
+        //			// initiate data transfert from CD block to host
+        //			posInSector=0;
+        //			bytesTransfered=0;
+        //
+        //			cdDriveStatus|=STAT_TRNS;
+        //			HIRQREQ|=CMOK|EHST|DRDY;// DRDY??
+        //			SendStatus();
+        //			break;
+        //		case 0x62: // Delete Sector Data
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Delete Sector Data=- executed");
+        //			#endif
+        //
+        //			sectorNumInBuffer=CR2;
+        //			sectorNumber=CR4;
+        //			fetchedBuffer=CR3>>8;
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("buffer partition number:0x",fetchedBuffer);
+        //			EmuState::pLog->CdBlockWrite("sector position:0x",sectorNumInBuffer);
+        //			EmuState::pLog->CdBlockWrite("sector number:0x",sectorNumber);
+        //			#endif
+        //
+        //			// data must be deleted after
+        //			numberOfSectorsToDelete=sectorNumber;
+        //			posOfSectorsToDelete=sectorNumInBuffer;
+        //
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("*deleting sectors in buffer partition n°0x",fetchedBuffer);
+        //			EmuState::pLog->CdBlockWrite("old buffer size (in sectors): 0x",bufferPartitions[fetchedBuffer].size);
+        //			EmuState::pLog->CdBlockWrite("position of sector to delete in buffer: 0x",posOfSectorsToDelete);
+        //			EmuState::pLog->CdBlockWrite("number of sectors to delete: 0x",numberOfSectorsToDelete);
+        //			#endif
+        //			int32_t oldSize;
+        //			oldSize=bufferPartitions[fetchedBuffer].size;
+        //
+        //			for (int32_t j=posOfSectorsToDelete; j<(posOfSectorsToDelete+numberOfSectorsToDelete); j++)
+        //			{
+        //				if (j>MAX_SECTORS)
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("end of buffer partition reached");
+        //					#endif
+        //					break;
+        //				}
+        //				if (bufferPartitions[fetchedBuffer].sectors[j])
+        //				{
+        //					#ifdef _LOGS
+        //					EmuState::pLog->CdBlockWrite("deleting in buffer partion sector n°",j);
+        //					#endif
+        //					bufferPartitions[fetchedBuffer].sectors[j]->size=0;
+        //					bufferPartitions[fetchedBuffer].sectors[j]=NULL;
+        //					bufferPartitions[fetchedBuffer].size--;
+        //				}
+        //				else break;
+        //			}
+        //
+        //			// we shift the sectors in buffer partition if necessary
+        //			if (numberOfSectorsToDelete<oldSize)
+        //			{
+        //				// we did not erase all the sectors
+        //				// we check if there a hole in buffer partition
+        //				EmuState::pLog->CdBlockWrite("all sectors haven't been deleted, checking for hole");
+        //				int32_t holeStart=0;
+        //				for (;holeStart<MAX_SECTORS;holeStart++)
+        //				{
+        //					if (!bufferPartitions[fetchedBuffer].sectors[holeStart]) break;
+        //				}
+        //				// holeStart contains the position of the hole
+        //				// let's check if the hole is positioned before the end of used sectors
+        //				if (holeStart<bufferPartitions[fetchedBuffer].size)
+        //				{
+        //					//log("there is a hole at sector n°%d\n",holeStart);
+        //					// let's get the position of the end of the hole
+        //					int32_t holeEnd=holeStart;
+        //					for (;holeEnd<MAX_SECTORS;holeEnd++)
+        //					{
+        //						if (bufferPartitions[fetchedBuffer].sectors[holeEnd]) break;
+        //					}
+        //					// we shift the sectors
+        //					int32_t k=0;
+        //					//for (i=0;(i+holeEnd)<MAX_SECTORS;i++)
+        //					for (k=0; (k+holeEnd)<(holeEnd+bufferPartitions[fetchedBuffer].size); k++)
+        //					{
+        //						if ((k+holeEnd)>MAX_SECTORS) break;
+        //						bufferPartitions[fetchedBuffer].sectors[holeStart+k]=bufferPartitions[fetchedBuffer].sectors[holeEnd+k];
+        //						//EmuState::pLog->CdBlockWrite("sector n°%d shifted to sector n°%d\n",holeEnd+i,holeStart+i);
+        //					}
+        //					for (;k<MAX_SECTORS;k++)
+        //					{
+        //						bufferPartitions[fetchedBuffer].sectors[k]=NULL;
+        //					}
+        //				}
+        //			}
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("new buffer size: 0x",bufferPartitions[fetchedBuffer].size);
+        //			#endif
+        //			// buffer should not be full
+        //			//HIRQREQ&=~BFUL;
+        //
+        //			HIRQREQ|=CMOK|EHST; //  DRDY ??
+        //			SendStatus();
+        //			break;
+        //		case 0x63: // Get Then Delete Sector Data
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get Then Delete Sector Data=- executed");
+        //			#endif
+        //
+        //			sectorNumInBuffer=CR2;
+        //			sectorNumber=CR4;
+        //			fetchedBuffer=CR3>>8;
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("Buffer partition number: ",fetchedBuffer);
+        //			EmuState::pLog->CdBlockWrite("sector position: ",sectorNumInBuffer);
+        //			EmuState::pLog->CdBlockWrite("sector number: ",sectorNumber);
+        //			#endif
+        //
+        //			// initiate data transfert from CD block to host
+        //			posInSector=0;
+        //			bytesTransfered=0;
+        //
+        //			// data must be deleted after
+        //			DeleteSectorDataExecuted=true;
+        //			numberOfSectorsToDelete=sectorNumber;
+        //			posOfSectorsToDelete=sectorNumInBuffer;
+        //
+        //			HIRQREQ|=CMOK|EHST|DRDY;
+        //			cdDriveStatus|=STAT_TRNS;
+        //			SendStatus();
+        //			break;
+        //		case 0x65: // Copy Sector Data
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockU("-=Copy Sector Data=-");
+        //			EmuState::pLog->CdBlockWrite("-=Copy Sector Data=- executed (UNIMPLEMENTED)");
+        //			#endif
+        //			break;
+        //		case 0x66: // Move Sector Data
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockU("-=Move Sector Data=-");
+        //			EmuState::pLog->CdBlockWrite("-=Move Sector Data=- executed (UNIMPLEMENTED)");
+        //			#endif
+        //			break;
+        case get_copy_error: getCopyError(); break;
+        //		case 0x70: // Change Directory
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Change Directory=- executed");
+        //			#endif
+        //			int32_t fileId;
+        //			fileId=((CR3&0xFF)<<16)|CR4;
+        //
+        //			switch (fileId)
+        //			{
+        //				case 0xFFFFFF:
+        //					// move to root directory
+        //					SendStatus();
+        //					break;
+        //				default:
+        //					MessageBox(NULL,L"ChangeDirectory: change to another directory than root
+        // directory",L"warning",MB_ICONWARNING); 					break;
+        //			}
+        //
+        //			HIRQREQ|=CMOK|EFLS;
+        //			SendStatus();
+        //			break;
+        //		case 0x71: // Read Directory
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockU("-=Read Directory=-");
+        //			EmuState::pLog->CdBlockWrite("-=Read Directory=- executed (UNIMPLEMENTED)");
+        //			#endif
+        //			break;
+        //		case 0x72: // Get File System Scope
+        //			CR1=cdDriveStatus<<8;
+        //			CR2=0x0063;
+        //			CR3=0x0100;
+        //			CR4=0x0002;
+        //
+        //			HIRQREQ|=CMOK|EFLS;
+        //
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get File System Scope=- executed");
+        //			#endif
+        //			break;
+        //		case 0x73: // Get File Info
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Get File Info=- executed");
+        //			#endif
+        //
+        //			//uint32_t fileId;
+        //			fileId=((CR3&0xFF)<<16)|CR4;
+        //
+        //			if (fileId==0xFFFFFF)
+        //			{
+        //				MessageBox(NULL,L"GetFileInfo: return all 256 files info",L"unimplemented",MB_ICONWARNING);
+        //			}
+        //			else
+        //			{
+        //				BuildFileInfos(fileId);
+        //				dataBufferSize=6;
+        //			}
+        //
+        //			bytesTransfered=0;
+        //			posInDataBuffer=0;
+        //			dataBuffer=filesInfos;
+        //
+        //			cdDriveStatus|=STAT_TRNS;
+        //			CR1=cdDriveStatus<<8;
+        //			CR2=6;
+        //			CR3=0;
+        //			CR4=0;
+        //
+        //			HIRQREQ|=CMOK|DRDY;
+        //			break;
+        //		case 0x74: // Read File
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=Read File=- executed");
+        //			#endif
+        //
+        //			uint32_t offset;
+        //			offset=((CR1&0xFF)<<16)|CR2;
+        //			//uint32_t fileId;
+        //			fileId=((CR3&0xFF)<<16)|CR4;
+        //			uint8_t filter;
+        //			filter=CR3>>8;
+        //
+        //			// we must set play mode parameters
+        //			currentPlayMode=PLAY_MODE_FAD;
+        //			FAD=filesOnCD[fileId].LSN;
+        //			remainingFADs=filesOnCD[fileId].dataLength/0x800+1;
+        //			playFADStart=FAD;
+        //
+        //			cdDriveStatus=STAT_PLAY;
+        //			flag=FLAG_CDROM;
+        //
+        //			//HIRQREQ|=CMOK|EFLS;
+        //			HIRQREQ|=CMOK;
+        //			SendStatus();
+        //			break;
         case abort_file: abortFile(); break;
-        case get_device_authentication_status:
-            getDeviceAuthenticationStatus();
-            break;
-            //		case 0xE0:
-            //			HIRQREQ|=CMOK|EFLS;
-            //			SendStatus();
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=E0=- executed");
-            //			#endif
-            //
-            //			break;
-            //		case 0x93:
-            //			CR1=(cdDriveStatus<<8)|0x0001;
-            //			CR2=0x0101;
-            //			CR3=0x0001;
-            //			CR4=0x0001;
-            //
-            //			HIRQREQ|=CMOK|0x0800;// mpeg enabled?
-            //
-            //			#ifdef _LOGS
-            //			EmuState::pLog->CdBlockWrite("-=0x93=- executed");
-            //			#endif
-            //
-            //			break;
+        case get_device_authentication_status: getDeviceAuthenticationStatus(); break;
+        //		case 0xE0:
+        //			HIRQREQ|=CMOK|EFLS;
+        //			SendStatus();
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=E0=- executed");
+        //			#endif
+        //
+        //			break;
+        //		case 0x93:
+        //			CR1=(cdDriveStatus<<8)|0x0001;
+        //			CR2=0x0101;
+        //			CR3=0x0001;
+        //			CR4=0x0001;
+        //
+        //			HIRQREQ|=CMOK|0x0800;// mpeg enabled?
+        //
+        //			#ifdef _LOGS
+        //			EmuState::pLog->CdBlockWrite("-=0x93=- executed");
+        //			#endif
+        //
+        //			break;
         default:
             //			#ifdef _LOGS
             //			EmuState::pLog->CdBlockWrite("Unknown command : ",CR1>>8);
             //			EmuState::pLog->CdBlockU("Unknown command : ",CR1>>8);
             //			#endif
-            Log::unimplemented("Cdblock command {:04x}", cr1_.command);
+            Log::unimplemented("Cdblock command {:04x}", regs_.cr1 >> Cr::command_shft);
             break;
     }
     executed_commands_++;
@@ -1372,7 +1381,7 @@ void Cdrom::executeCommand() {
 
     // if (executed_commands_ > max_number_of_commands_) hirq_status_reg_.reset(HirqStatusRegister::cmok);
     // if (executed_commands_ > max_number_of_commands_) { hirq_status_reg_.cmok = Cmok::processing; }
-    if (executed_commands_ > max_number_of_commands_) { hirq_status_reg_.cmok = Cmok::processing; }
+    if (executed_commands_ > max_number_of_commands_) { regs_.hirqreq.upd(HIrqReq::cmok_enum, HIrqReq::Cmok::processing); }
 }
 //
 //
@@ -1719,16 +1728,16 @@ auto Cdrom::read8(const u32 addr) const -> u8 {
 auto Cdrom::read16(const u32 addr) -> u16 {
     switch (addr) {
         case hirq_register_address:
-            Log::debug(Logger::cdrom, "HIrqReg={:#06x}", hirq_status_reg_.raw);
-            return hirq_status_reg_.raw;
-        case hirq_mask_register_address: return hirq_mask_reg_.raw;
-        case command_register_1_address: return cr1_.raw;
-        case command_register_2_address: return cr2_.raw;
-        case command_register_3_address: return cr3_.raw;
+            Log::debug(Logger::cdrom, "HIrqReg={:#06x}", regs_.hirqreq.data());
+            return regs_.hirqreq.data();
+        case hirq_mask_register_address: return regs_.hirqmask.data();
+        case command_register_1_address: return regs_.cr1.data();
+        case command_register_2_address: return regs_.cr2.data();
+        case command_register_3_address: return regs_.cr3.data();
         case command_register_4_address:
             // firstReading = false;
             is_initialization_done_ = true;
-            return cr4_.raw;
+            return regs_.cr4.data();
         case toc_data_pointer_address:
             //			{
             //				uint16_t data=0;
@@ -1785,23 +1794,22 @@ void Cdrom::write8(const u32 addr, const u8 data) const {
 
 void Cdrom::write16(const u32 addr, const u16 data) {
     switch (addr) {
-        // case hirq_register_address: hirq_status_reg_ &= data; break;
-        case hirq_register_address: hirq_status_reg_.raw &= data; break;
-        case hirq_mask_register_address: hirq_mask_reg_.raw = data; break;
+        case hirq_register_address: regs_.hirqreq = (regs_.hirqreq.data() & data); break;
+        case hirq_mask_register_address: regs_.hirqmask = data; break;
         case command_register_1_address:
-            cr1_.raw                      = data;
+            regs_.cr1                     = data;
             is_command_being_initialized_ = true;
             break;
         case command_register_2_address:
-            cr2_.raw                      = data;
+            regs_.cr2                     = data;
             is_command_being_initialized_ = true;
             break;
         case command_register_3_address:
-            cr3_.raw                      = data;
+            regs_.cr3                     = data;
             is_command_being_initialized_ = true;
             break;
         case command_register_4_address:
-            cr4_.raw                      = data;
+            regs_.cr4                     = data;
             is_command_being_initialized_ = false;
             executeCommand();
             break;
@@ -1876,7 +1884,7 @@ void Cdrom::run(const u8 cycles) {
         Log::debug(Logger::cdrom, "Sending periodic response");
         executed_commands_ = 0;
 
-        hirq_status_reg_.cmok = Cmok::ready;
+        regs_.hirqreq.upd(HIrqReq::cmok_enum, Cmok::ready);
 
         elapsed_cycles_ += periodic_response_duration_;
 
@@ -1917,11 +1925,10 @@ void Cdrom::run(const u8 cycles) {
         if (is_command_being_initialized_) { return; }
 
         sendStatus();
-        // cr1_ |= (utilities::toUnderlying(CdDriveStatus::periodical_response) << displacement_8);
-        cr1_.status |= CdDriveStatus::periodical_response;
+        regs_.cr1.upd(Cr::status_enum, Cr::CdDriveStatus::periodical_response);
 
         // periodic response timing is the same as SCDQ update timing
-        hirq_status_reg_.scdq = Scdq::subcode_q_decoded;
+        regs_.hirqreq.upd(HIrqReq::scdq_enum, Scdq::subcode_q_decoded);
 
         //		if (FindFreeSector()==NO_FREE_SECTOR){
         //
@@ -1938,12 +1945,12 @@ void Cdrom::run(const u8 cycles) {
 
 auto Cdrom::getRegisters() -> std::vector<std::string> {
     std::vector<std::string> registers;
-    registers.emplace_back(uti::format("HIrq Status Register : {:#06x}", hirq_status_reg_.raw));
-    registers.emplace_back(uti::format("HIrq Mask Register : {:#06x}", hirq_mask_reg_.raw));
-    registers.emplace_back(uti::format("Command Register 1 : {:#06x}", cr1_.raw));
-    registers.emplace_back(uti::format("Command Register 2 : {:#06x}", cr2_.raw));
-    registers.emplace_back(uti::format("Command Register 3 : {:#06x}", cr3_.raw));
-    registers.emplace_back(uti::format("Command Register 4 : {:#06x}", cr4_.raw));
+    registers.emplace_back(uti::format("HIrq Status Register : {:#06x}", regs_.hirqreq.data()));
+    registers.emplace_back(uti::format("HIrq Mask Register : {:#06x}", regs_.hirqmask.data()));
+    registers.emplace_back(uti::format("Command Register 1 : {:#06x}", regs_.cr1.data()));
+    registers.emplace_back(uti::format("Command Register 2 : {:#06x}", regs_.cr2.data()));
+    registers.emplace_back(uti::format("Command Register 3 : {:#06x}", regs_.cr3.data()));
+    registers.emplace_back(uti::format("Command Register 4 : {:#06x}", regs_.cr4.data()));
 
     return registers;
 }
@@ -2084,31 +2091,32 @@ auto Cdrom::getRegisters() -> std::vector<std::string> {
 
 void Cdrom::reset() {
     // CD-BLOCK registers initialization
-    hirq_status_reg_      = {};
-    hirq_status_reg_.scdq = Scdq::subcode_q_decoded;
-    hirq_status_reg_.efls = Efls::file_system_finished;
-    hirq_status_reg_.ecpy = Ecpy::sector_copy_or_move_finished;
-    hirq_status_reg_.ehst = Ehst::host_io_finished;
-    hirq_status_reg_.esel = Esel::soft_reset_or_selector_set_finished;
-    hirq_status_reg_.dchg = Dchg::disk_has_not_changed;
-    hirq_status_reg_.pend = Pend::cd_play_has_ended;
-    hirq_status_reg_.bful = Bful::buffer_not_full;
-    hirq_status_reg_.csct = Csct::sector_not_stored;
-    hirq_status_reg_.drdy = Drdy::setup_complete;
-    hirq_status_reg_.cmok = Cmok::ready;
 
-    hirq_mask_reg_ = {u16_max};
+    regs_.hirqreq = {};
+    regs_.hirqreq.upd(HIrqReq::scdq_enum, Scdq::subcode_q_decoded);
+    regs_.hirqreq.upd(HIrqReq::efls_enum, Efls::file_system_finished);
+    regs_.hirqreq.upd(HIrqReq::ecpy_enum, Ecpy::sector_copy_or_move_finished);
+    regs_.hirqreq.upd(HIrqReq::ehst_enum, Ehst::host_io_finished);
+    regs_.hirqreq.upd(HIrqReq::esel_enum, Esel::soft_reset_or_selector_set_finished);
+    regs_.hirqreq.upd(HIrqReq::dchg_enum, Dchg::disk_has_not_changed);
+    regs_.hirqreq.upd(HIrqReq::pend_enum, Pend::cd_play_has_ended);
+    regs_.hirqreq.upd(HIrqReq::bful_enum, Bful::buffer_not_full);
+    regs_.hirqreq.upd(HIrqReq::csct_enum, Csct::sector_not_stored);
+    regs_.hirqreq.upd(HIrqReq::drdy_enum, Drdy::setup_complete);
+    regs_.hirqreq.upd(HIrqReq::cmok_enum, Cmok::ready);
+
+    regs_.hirqmask = {u16_max};
 
     constexpr auto cr1_default = u8{0x43}; // 'C'
-    cr1_.low_8_bits            = cr1_default;
+    regs_.cr1.upd(Cr::loByte(cr1_default));
     constexpr auto cr2_default = u16{0x4442}; // 'DB'
-    cr2_.raw                   = cr2_default;
+    regs_.cr2                  = cr2_default;
     constexpr auto cr3_default = u16{0x4C4F}; // 'LO'
-    cr3_.raw                   = cr3_default;
+    regs_.cr3                  = cr3_default;
     constexpr auto cr4_default = u16{0x434B}; // 'CK'
-    cr4_.raw                   = cr4_default;
+    regs_.cr4                  = cr4_default;
 
-    cd_drive_status_    = CdDriveStatus::no_disc_inserted;
+    cd_drive_status_    = Cr::CdDriveStatus::no_disc_inserted;
     cd_drive_play_mode_ = CdDrivePlayMode::standby;
 
     periodic_response_duration_ = calculatePeriodicResponseDuration();
@@ -2139,18 +2147,17 @@ auto Cdrom::calculatePeriodicResponseDuration() -> u32 {
 // CDBLOCK COMMANDS methods
 //--------------------------------------------------------------------------------------------------------------
 void Cdrom::sendStatus() {
-    // CR1 = cd_drive_status_ << 8; // CR1-H
-    cr1_.status = cd_drive_status_;
+    regs_.cr1.upd(Cr::status_enum, cd_drive_status_);
     switch (cd_drive_status_) {
-        using enum CdDriveStatus;
+        using enum Cr::CdDriveStatus;
         case drive_is_open:
         case no_disc_inserted:
         case error:
             // CR1 |= 0xFF;
-            cr1_.low_8_bits = u8_max;
-            cr2_.raw        = u16_max;
-            cr3_.raw        = u16_max;
-            cr4_.raw        = u16_max;
+            regs_.cr1.upd(Cr::loByte(u8_max));
+            regs_.cr2 = u16_max;
+            regs_.cr3 = u16_max;
+            regs_.cr4 = u16_max;
             break;
         default:
             // CR1 |= ((flag & 0xF) << 4) | (repCnt & 0xF);
@@ -2169,7 +2176,7 @@ void Cdrom::getStatus() {
 
     sendStatus();
 
-    hirq_status_reg_.cmok = Cmok::ready;
+    regs_.hirqreq.upd(HIrqReq::cmok_enum, Cmok::ready);
 
     Log::debug(Logger::cdrom, "Get Status executed");
 }
@@ -2180,13 +2187,13 @@ void Cdrom::getHardwareInfo() {
     // 0x00 | Mpeg Version (8)
     // Driver Version(8) | Revision(8)
 
-    cr1_.status     = cd_drive_status_;
-    cr1_.low_8_bits = u8{0};
-    cr2_.raw        = u16{0x0001};
-    cr3_.raw        = u16{0x0000};
-    cr4_.raw        = u16{0x0102};
+    regs_.cr1.upd(Cr::status_enum, cd_drive_status_);
+    regs_.cr1.upd(Cr::loByte(0));
+    regs_.cr2 = u16{0x0001};
+    regs_.cr3 = u16{0x0000};
+    regs_.cr4 = u16{0x0102};
 
-    hirq_status_reg_.cmok = Cmok::ready;
+    regs_.hirqreq.upd(HIrqReq::cmok_enum, Cmok::ready);
 
     Log::debug(Logger::cdrom, "Get Hardware Info executed");
 }
@@ -2308,14 +2315,14 @@ void Cdrom::endDataTransfer() {
     //			HIRQREQ|=CMOK | EHST;
     //			//HIRQREQ|=DRDY;
 
-    cr1_.status     = cd_drive_status_;
-    cr1_.low_8_bits = u8{0};
-    cr2_.raw        = u16{0};
-    cr3_.raw        = u16{0};
-    cr4_.raw        = u16{0};
+    regs_.cr1.upd(Cr::status_enum, cd_drive_status_);
+    regs_.cr1.upd(Cr::loByte(0));
+    regs_.cr2 = u16{0};
+    regs_.cr3 = u16{0};
+    regs_.cr4 = u16{0};
 
-    hirq_status_reg_.cmok = Cmok::ready;
-    hirq_status_reg_.drdy = Drdy::setup_complete;
+    regs_.hirqreq.upd(HIrqReq::cmok_enum, Cmok::ready);
+    regs_.hirqreq.upd(HIrqReq::drdy_enum, Drdy::setup_complete);
 
     Log::debug(Logger::cdrom, "End Data Transfer executed");
 }
@@ -2326,10 +2333,10 @@ void Cdrom::abortFile() {
     // Index No(8) | Upper Byte of curre,t FAD (8)
     // Lower word of current FAD
 
-    cd_drive_status_ = isCdInserted() ? CdDriveStatus::paused : CdDriveStatus::no_disc_inserted;
+    cd_drive_status_ = isCdInserted() ? Cr::CdDriveStatus::paused : Cr::CdDriveStatus::no_disc_inserted;
 
-    hirq_status_reg_.cmok = Cmok::ready;
-    hirq_status_reg_.efls = Efls::file_system_finished;
+    regs_.hirqreq.upd(HIrqReq::cmok_enum, Cmok::ready);
+    regs_.hirqreq.upd(HIrqReq::efls_enum, Efls::file_system_finished);
 
     sendStatus();
 
@@ -2342,26 +2349,26 @@ void Cdrom::getCopyError() {
     // 0x0000
     // 0x0000
 
-    cr1_.status     = cd_drive_status_;
-    cr1_.low_8_bits = u8{0};
-    cr2_.raw        = u16{0};
-    cr3_.raw        = u16{0};
-    cr4_.raw        = u16{0};
+    regs_.cr1.upd(Cr::status_enum, cd_drive_status_);
+    regs_.cr1.upd(Cr::loByte(0));
+    regs_.cr2 = u16{0};
+    regs_.cr3 = u16{0};
+    regs_.cr4 = u16{0};
 
-    hirq_status_reg_.cmok = Cmok::ready;
-    hirq_status_reg_.ecpy = Ecpy::sector_copy_or_move_finished;
+    regs_.hirqreq.upd(HIrqReq::cmok_enum, Cmok::ready);
+    regs_.hirqreq.upd(HIrqReq::ecpy_enum, Ecpy::sector_copy_or_move_finished);
 
     Log::debug(Logger::cdrom, "Get Copy Error executed");
 }
 
 void Cdrom::getDeviceAuthenticationStatus() {
-    cr1_.status     = cd_drive_status_;
-    cr1_.low_8_bits = u8{0};
-    cr2_.raw        = u16{0x0004};
-    cr3_.raw        = u16{0};
-    cr4_.raw        = u16{0};
+    regs_.cr1.upd(Cr::status_enum, cd_drive_status_);
+    regs_.cr1.upd(Cr::loByte(0));
+    regs_.cr2 = u16{0x0004};
+    regs_.cr3 = u16{0};
+    regs_.cr4 = u16{0};
 
-    hirq_status_reg_.cmok = Cmok::ready;
+    regs_.hirqreq.upd(HIrqReq::cmok_enum, Cmok::ready);
 
     Log::debug(Logger::cdrom, "Get Device Authentication Status executed");
 }

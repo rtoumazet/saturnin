@@ -453,6 +453,11 @@ class Reg {
 
     void operator/=(const MaskedType& mskd) { data_ = (data_ & ~mskd.mask_) | mskd.bits_; }
     void upd(const MaskedType& mskd) { data_ = (data_ & ~mskd.mask_) | mskd.bits_; }
+    template<typename ENUM>
+    void upd(const Enum<DATA, CLASS, ENUM> e, const ENUM v) {
+        static_assert(std::is_enum_v<ENUM>);
+        data_ = (data_ & ~e.mask_) | (utilities::toUnderlying(v) << e.pos_.pos_);
+    }
 
     // Extractors
     auto operator&(BitsType bits) const -> BitsType { return BitsType(data_ & bits.bits_); }

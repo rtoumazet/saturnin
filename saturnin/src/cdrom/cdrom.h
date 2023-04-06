@@ -740,29 +740,18 @@ class Cdrom {
 
     EmulatorModules modules_;
 
-    HirqStatusRegister hirq_status_reg_; ///< HIrq status register.
-    HirqMaskRegister   hirq_mask_reg_;   ///< HIrq mask register.
-    CommandRegister    cr1_;             ///< Command register 1.
-    CommandRegister    cr2_;             ///< Command register 2.
-    CommandRegister    cr3_;             ///< Command register 3.
-    CommandRegister    cr4_;             ///< Command register 4.
+    CdromRegs regs_;
 
     s32  elapsed_cycles_;                      ///< The elapsed cycles
     bool is_command_being_initialized_{false}; ///< True if a command is being initialized, ie command registers are written
     bool is_initialization_done_{false};       ///< Prevents writing to command registers while init string hasn't been read
 
-    CdDriveStatus   cd_drive_status_;
-    CdDrivePlayMode cd_drive_play_mode_;
+    CdromRegs::Cr::CdDriveStatus cd_drive_status_;
+    CdDrivePlayMode              cd_drive_play_mode_;
 
     u8  max_number_of_commands_{};     ///< The maximum number of executable commands by the cd block.
     u8  executed_commands_{};          ///< Number of commands executed.
     u32 periodic_response_duration_{}; ///< Periodic response duration.
 };
-
-inline auto readCommand(BitField<8, 8> command) { return Command(static_cast<u16>(command)); };
-template<typename T>
-auto toBool(const T& e) -> bool {
-    return toUnderlying(e);
-}
 
 } // namespace saturnin::cdrom
