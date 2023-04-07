@@ -48,7 +48,7 @@ using core::Log;
 using core::Logger;
 using core::rawRead;
 using core::Smpc;
-using core::StartingFactorSelect;
+// using core::StartingFactorSelect;
 using core::tr;
 
 void Vdp1::initialize() {
@@ -252,10 +252,9 @@ void Vdp1::populateRenderData() {
     edsr_.before_end_bit_fetch_status  = BeforeEndBitFetchStatus::end_bit_fetched; // Needs rework
 
     using namespace saturnin::core::interrupt_source;
-    using saturnin::core::StartingFactorSelect;
     Log::debug(Logger::vdp1, tr("Interrupt request"));
     modules_.scu()->generateInterrupt(sprite_draw_end);
-    modules_.scu()->sendStartFactor(StartingFactorSelect::sprite_draw_end);
+    modules_.scu()->sendStartFactor(core::ScuRegs::Dxmd::StartingFactorSelect::sprite_draw_end);
 }
 
 auto Vdp1::read16(const u32 addr) const -> u16 {

@@ -40,8 +40,8 @@ using core::Config;
 using core::EmulatorContext;
 using core::Log;
 using core::Logger;
-using core::StartingFactorSelect;
 using core::tr;
+// using core::ScuRegs::Dxmd::StartingFactorSelect;
 using util::toUnderlying;
 
 using LockGuard = std::lock_guard<Mutex>;

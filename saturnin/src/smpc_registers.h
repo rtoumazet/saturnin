@@ -26,7 +26,6 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/bitfield.h>
 #include <saturnin/src/bit_register.h>
 #include <saturnin/src/utilities.h>
 
@@ -170,8 +169,8 @@ struct SmpcRegs {
 
         static constexpr auto upper_nibble = MaskedType(upper_nibble_mask, 0xF, upper_nibble_pos);
 
-        GENERATE_MASKED_RANGE("SmpcRegs::Sr", P1MD, p1md, p1md_mask, p1md_pos, 4);
-        GENERATE_MASKED_RANGE("SmpcRegs::Sr", P2MD, p2md, p2md_mask, p2md_pos, 4);
+        GENERATE_MASKED_RANGE("SmpcRegs::Sr", P1MD, p1md, p1md_mask, p1md_pos, p1md_mask);
+        GENERATE_MASKED_RANGE("SmpcRegs::Sr", P2MD, p2md, p2md_mask, p2md_pos, p2md_mask);
     };
     using SrType = Reg<u8, Sr>;
     SrType sr;
@@ -273,8 +272,8 @@ struct SmpcRegs {
         static constexpr auto p2md_shft = ShiftedType(port_mode_mask, p2md_pos);
         static constexpr auto cont_shft = ShiftedType(cont_mask, cont_pos);
 
-        GENERATE_MASKED_RANGE("SmpcRegs::Ireg", P1MD, p1md, port_mode_mask, p1md_pos, 4);
-        GENERATE_MASKED_RANGE("SmpcRegs::Ireg", P2MD, p2md, port_mode_mask, p2md_pos, 4);
+        GENERATE_MASKED_RANGE("SmpcRegs::Ireg", P1MD, p1md, port_mode_mask, p1md_pos, port_mode_mask);
+        GENERATE_MASKED_RANGE("SmpcRegs::Ireg", P2MD, p2md, port_mode_mask, p2md_pos, port_mode_mask);
 
         static constexpr auto stac_enum = EnumType<SmpcStatusAcquisition>(stac_mask, stac_pos);
         static constexpr auto br_enum   = EnumType<IntbackBreakRequest>(br_mask, br_pos);

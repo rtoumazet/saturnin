@@ -115,19 +115,19 @@ enum class ScuRegion {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct DmaConfiguration {
-    DmaLevel             dma_level;
-    DmaStatus            dma_status;
-    u32                  read_address;
-    u32                  write_address;
-    u32                  transfer_byte_number;
-    ReadAddressAddValue  read_add_value;
-    WriteAddressAddValue write_add_value;
-    DmaEnable            dma_enable;
-    DmaStarting          dma_starting;
-    DmaMode              dma_mode;
-    ReadAddressUpdate    read_address_update;
-    WriteAddressUpdate   write_address_update;
-    StartingFactorSelect starting_factor_select;
+    DmaLevel                            dma_level;
+    DmaStatus                           dma_status;
+    u32                                 read_address;
+    u32                                 write_address;
+    u32                                 transfer_byte_number;
+    ScuRegs::Dxad::ReadAddressAddValue  read_add_value;
+    ScuRegs::Dxad::WriteAddressAddValue write_add_value;
+    ScuRegs::Dxen::DmaEnable            dma_enable;
+    ScuRegs::Dxen::DmaStarting          dma_starting;
+    ScuRegs::Dxmd::DmaMode              dma_mode;
+    ScuRegs::Dxmd::ReadAddressUpdate    read_address_update;
+    ScuRegs::Dxmd::WriteAddressUpdate   write_address_update;
+    ScuRegs::Dxmd::StartingFactorSelect starting_factor_select;
 };
 
 class Scu {
@@ -265,7 +265,7 @@ class Scu {
     /// \param  sfs Start factor sent.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void sendStartFactor(StartingFactorSelect sfs);
+    void sendStartFactor(ScuRegs::Dxmd::StartingFactorSelect sfs);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn bool Scu::clearInterruptFlag(const Interrupt& i);
@@ -363,74 +363,74 @@ class Scu {
     void initializeDmaTransferByteNumber(DmaConfiguration& dc) const;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Scu::initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg);
+    /// \fn	static void Scu::initializeDmaMode(DmaConfiguration& dc, const ScuRegs::DxmdType& reg);
     ///
-    /// \brief  Initializes the DMA mode part of DMA configuration.
+    /// \brief	Initializes the DMA mode part of DMA configuration.
     ///
-    /// \author Runik
-    /// \date   02/02/2019
+    /// \author	Runik
+    /// \date	02/02/2019
     ///
-    /// \param [in,out] dc      DMA configuration.
-    /// \param          reg     Internal register to read data from.
+    /// \param [in,out]	dc 	DMA configuration.
+    /// \param 		   	reg	Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void initializeDmaMode(DmaConfiguration& dc, DmaModeRegister& reg);
+    static void initializeDmaMode(DmaConfiguration& dc, const ScuRegs::DxmdType& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void static Scu::initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg);
+    /// \fn	static void Scu::initializeDmaEnable(DmaConfiguration& dc, const ScuRegs::DxenType& reg);
     ///
-    /// \brief  Initializes the DMA enable part of DMA configuration.
+    /// \brief	Initializes the DMA enable part of DMA configuration.
     ///
-    /// \author Runik
-    /// \date   02/02/2019
+    /// \author	Runik
+    /// \date	02/02/2019
     ///
-    /// \param [in,out] dc     DMA configuration.
-    /// \param          reg    Internal register to read data from.
+    /// \param [in,out]	dc 	DMA configuration.
+    /// \param 		   	reg	Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void initializeDmaEnable(DmaConfiguration& dc, DmaEnableRegister& reg);
+    static void initializeDmaEnable(DmaConfiguration& dc, const ScuRegs::DxenType& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg);
+    /// \fn	static void Scu::initializeDmaAddressAdd(DmaConfiguration& dc, const ScuRegs::DxadType& reg);
     ///
-    /// \brief  Initializes the DMA address add part of DMA configuration.
+    /// \brief	Initializes the DMA address add part of DMA configuration.
     ///
-    /// \author Runik
-    /// \date   02/02/2019
+    /// \author	Runik
+    /// \date	02/02/2019
     ///
-    /// \param [in,out] dc     DMA configuration.
-    /// \param          reg    Internal register to read data from.
+    /// \param [in,out]	dc 	DMA configuration.
+    /// \param 		   	reg	Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void initializeDmaAddressAdd(DmaConfiguration& dc, DmaAddressAddValueRegister& reg);
+    static void initializeDmaAddressAdd(DmaConfiguration& dc, const ScuRegs::DxadType& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg);
+    /// \fn	static void Scu::initializeDmaWriteAddress(DmaConfiguration& dc, const ScuRegs::DxwType& reg);
     ///
-    /// \brief  Initializes the DMA write address part of DMA configuration.
+    /// \brief	Initializes the DMA write address part of DMA configuration.
     ///
-    /// \author Runik
-    /// \date   02/02/2019
+    /// \author	Runik
+    /// \date	02/02/2019
     ///
-    /// \param [in,out] dc     DMA configuration.
-    /// \param          reg    Internal register to read data from.
+    /// \param [in,out]	dc 	DMA configuration.
+    /// \param 		   	reg	Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void initializeDmaWriteAddress(DmaConfiguration& dc, DmaWriteAddressRegister& reg);
+    static void initializeDmaWriteAddress(DmaConfiguration& dc, const ScuRegs::DxwType& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Scu::initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg);
+    /// \fn	static void Scu::initializeDmaReadAddress(DmaConfiguration& dc, const ScuRegs::DxrType& reg);
     ///
-    /// \brief  Initializes the DMA read address part of DMA configuration.
+    /// \brief	Initializes the DMA read address part of DMA configuration.
     ///
-    /// \author Runik
-    /// \date   02/02/2019
+    /// \author	Runik
+    /// \date	02/02/2019
     ///
-    /// \param [ins] dc     DMA configuration.
-    /// \param       reg    Internal register to read data from.
+    /// \param [ins]	dc 	DMA configuration.
+    /// \param 			reg	Internal register to read data from.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void initializeDmaReadAddress(DmaConfiguration& dc, DmaReadAddressRegister& reg);
+    static void initializeDmaReadAddress(DmaConfiguration& dc, const ScuRegs::DxrType& reg);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Scu::addDmaToQueue(const DmaConfiguration& dc);
@@ -546,34 +546,35 @@ class Scu {
 
     //{@
     // Scu memory registers
-    DmaEnableRegister                   d0en_;
-    DmaEnableRegister                   d1en_;
-    DmaEnableRegister                   d2en_;
-    DmaAddressAddValueRegister          d0ad_;
-    DmaAddressAddValueRegister          d1ad_;
-    DmaAddressAddValueRegister          d2ad_;
-    DmaReadAddressRegister              d0r_;
-    DmaReadAddressRegister              d1r_;
-    DmaReadAddressRegister              d2r_;
-    DmaWriteAddressRegister             d0w_;
-    DmaWriteAddressRegister             d1w_;
-    DmaWriteAddressRegister             d2w_;
-    DmaModeRegister                     d0md_;
-    DmaModeRegister                     d1md_;
-    DmaModeRegister                     d2md_;
-    DmaLevel0TransferByteNumberRegister d0c_;
-    DmaLevel1TransferByteNumberRegister d1c_;
-    DmaLevel2TransferByteNumberRegister d2c_;
-    DmaStatusRegister                   dsta_;
-    InterruptStatusRegister             interrupt_status_register_;
-    InterruptMaskRegister               interrupt_mask_register_;
-    Timer0CompareRegister               t0c_;
-    Timer1SetDataRegister               t1s_;
-    Timer1ModeRegister                  t1md_;
-    DspProgramControlPort               ppaf_;
-    DspProgramDataPort                  ppd_;
-    DspDataRamAddressPort               ppa_;
-    DspDataRamDataPort                  pdd_;
+    ScuRegs regs_;
+    // DmaEnableRegister d0en_;
+    // DmaEnableRegister d1en_;
+    // DmaEnableRegister d2en_;
+    //  DmaAddressAddValueRegister d0ad_;
+    //  DmaAddressAddValueRegister d1ad_;
+    //  DmaAddressAddValueRegister d2ad_;
+    //   DmaReadAddressRegister              d0r_;
+    //   DmaReadAddressRegister              d1r_;
+    //   DmaReadAddressRegister              d2r_;
+    //   DmaWriteAddressRegister             d0w_;
+    //   DmaWriteAddressRegister             d1w_;
+    //   DmaWriteAddressRegister             d2w_;
+    // DmaModeRegister d0md_;
+    // DmaModeRegister d1md_;
+    // DmaModeRegister d2md_;
+    // DmaLevel0TransferByteNumberRegister d0c_;
+    // DmaLevel1TransferByteNumberRegister d1c_;
+    // DmaLevel2TransferByteNumberRegister d2c_;
+    // DmaStatusRegister       dsta_;
+    InterruptStatusRegister interrupt_status_register_;
+    InterruptMaskRegister   interrupt_mask_register_;
+    // Timer0CompareRegister   t0c_;
+    // Timer1SetDataRegister t1s_;
+    // Timer1ModeRegister    t1md_;
+    // DspProgramControlPort ppaf_;
+    // DspProgramDataPort    ppd_;
+    // DspDataRamAddressPort ppa_;
+    // DspDataRamDataPort pdd_;
     //@}
 };
 

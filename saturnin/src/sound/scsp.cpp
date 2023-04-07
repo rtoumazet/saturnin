@@ -21,6 +21,7 @@
 #include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/config.h>
 #include <saturnin/src/interrupt_sources.h>
+#include <saturnin/src/scu_registers.h>
 #include <saturnin/src/locale.h> // tr
 #include <saturnin/src/memory.h>
 extern "C" {
@@ -76,11 +77,10 @@ void Scsp::run(const u32 cycles) {
 
 void Scsp::scspHostInterruptHandler() {
     using namespace saturnin::core::interrupt_source;
-    using saturnin::core::StartingFactorSelect;
 
     Log::debug(Logger::scsp, tr("Interrupt request"));
     external_access_modules_.scu()->generateInterrupt(sound_request);
-    external_access_modules_.scu()->sendStartFactor(StartingFactorSelect::sound_req);
+    external_access_modules_.scu()->sendStartFactor(core::ScuRegs::Dxmd::StartingFactorSelect::sound_req);
 }
 
 void Scsp::scsp68kInterruptHandler(const u32 level) { m68k_set_irq(level); }
