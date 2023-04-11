@@ -130,7 +130,7 @@ struct Sh2Regs {
         static constexpr auto i_default_value = MaskedType(i_mask, 0b1111, i_pos);
 
         static constexpr auto i_shft = ShiftedType(i_mask, i_pos);
-        GENERATE_MASKED_RANGE("Sh2Reg::StatusRegister", INTERRUPT_MASK, interruptMask, i_mask, i_pos, i_mask);
+        GENERATE_MASKED_RANGE("Sh2Regs::StatusRegister", INTERRUPT_MASK, interruptMask, i_mask, i_pos, i_mask);
     };
     using StatusRegisterType = Reg<u32, StatusRegister>;
     StatusRegisterType sr;
@@ -452,8 +452,8 @@ struct Sh2Regs {
                 external_vector = true   ///< External vector mode
             };
 
-            static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
-            static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+            static constexpr auto lo_byte_pos = PosType(0);         ///< Defines the range of the upper 8 bits of the register.
+            static constexpr auto hi_byte_pos = PosType(8);         ///< Defines the range of the lower 8 bits of the register.
 
             GENERATE_BIT_WITH_ENUM(vecmd, 0, 0b1, VectorMode);      ///< Vector mode.
             GENERATE_BIT_WITH_ENUM(nmie, 8, 0b1, NmiEdgeDetection); ///< NMI edge detection.
@@ -1072,10 +1072,10 @@ struct Sh2Regs {
                 enabled  = true   ///< Interrupt request (OVFI) caused by OVF enabled.
             };
 
-            static constexpr auto lo_word_pos = PosType(0);  ///< Defines the range of the upper 16 bits of the register.
-            static constexpr auto hi_word_pos = PosType(16); ///< Defines the range of the lower 16 bits of the register.
+            static constexpr auto lo_word_pos = PosType(0);    ///< Defines the range of the upper 16 bits of the register.
+            static constexpr auto hi_word_pos = PosType(16);   ///< Defines the range of the lower 16 bits of the register.
 
-            GENERATE_BIT_WITH_ENUM(ovf, 0, 0b1, OverflowFlag);                   ///< Overflow flag.
+            GENERATE_BIT_WITH_ENUM(ovf, 0, 0b1, OverflowFlag); ///< Overflow flag.
             GENERATE_BIT_WITH_ENUM(ovfie, 1, 0b1, InterruptRequestUponOverflow); ///< Interrupt request caused by overflow.
 
             static constexpr auto word_mask = 0xFFFF;

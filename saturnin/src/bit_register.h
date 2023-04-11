@@ -533,6 +533,12 @@ class Reg {
     static constexpr auto NAME##_shft = ShiftedType(NAME##_mask, NAME##_pos); \
     static constexpr auto NAME##_enum = EnumType<SCOPED_ENUM>(NAME##_mask, NAME##_pos);
 
+#define GENERATE_BIT_WITHOUT_ENUM(NAME, POS, MASK)               \
+    static constexpr auto NAME##_pos  = PosType(POS);            \
+    static constexpr auto NAME        = BitsType(1, NAME##_pos); \
+    static constexpr auto NAME##_mask = MASK;                    \
+    static constexpr auto NAME##_shft = ShiftedType(NAME##_mask, NAME##_pos);
+
 #define GENERATE_USING(NAME, TYPE)           \
     using PosType     = Pos<TYPE, NAME>;     \
     using MaskedType  = Masked<TYPE, NAME>;  \

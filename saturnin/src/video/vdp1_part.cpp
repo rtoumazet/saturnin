@@ -42,15 +42,15 @@ constexpr auto horizontal_multiplier = u8{8};
 s16 Vdp1Part::local_coordinate_x_;
 s16 Vdp1Part::local_coordinate_y_;
 
-Vdp1Part::Vdp1Part(EmulatorModules& modules,
-                   const DrawType   type,
-                   const u32        table_address,
-                   const CmdCtrl&   cmdctrl,
-                   const CmdLink&   cmdlink,
-                   const ColorF&    color_offset) :
+Vdp1Part::Vdp1Part(EmulatorModules&   modules,
+                   const DrawType     type,
+                   const u32          table_address,
+                   const CmdCtrlType& cmdctrl,
+                   const CmdLinkType& cmdlink,
+                   const ColorF&      color_offset) :
     BaseRenderingPart(VdpType::vdp1, type, 0, 0, color_offset) {
-    cmdctrl_       = std::move(cmdctrl);
-    cmdlink_       = std::move(cmdlink);
+    cmdctrl_       = cmdctrl;
+    cmdlink_       = cmdlink;
     table_address_ = table_address;
     readParameters(modules.memory(), table_address);
     calculatePriority(modules);
@@ -58,83 +58,83 @@ Vdp1Part::Vdp1Part(EmulatorModules& modules,
 };
 
 void Vdp1Part::readParameters(Memory* m, const u32 address) {
-    switch (toEnum<CommandSelect>(cmdctrl_.command_select)) {
-        using enum CommandSelect;
+    switch (cmdctrl_ >> CmdCtrl::comm_enum) {
+        using enum CmdCtrl::CommandSelect;
         case system_clipping: {
-            cmdxc_.raw = m->read<u16>(address + cmdxc_offset);
-            cmdyc_.raw = m->read<u16>(address + cmdyc_offset);
+            cmdxc_ = m->read<u16>(address + cmdxc_offset);
+            cmdyc_ = m->read<u16>(address + cmdyc_offset);
             break;
         }
         case user_clipping: {
-            cmdxa_.raw = m->read<u16>(address + cmdxa_offset);
-            cmdya_.raw = m->read<u16>(address + cmdya_offset);
-            cmdxc_.raw = m->read<u16>(address + cmdxc_offset);
-            cmdyc_.raw = m->read<u16>(address + cmdyc_offset);
+            cmdxa_ = m->read<u16>(address + cmdxa_offset);
+            cmdya_ = m->read<u16>(address + cmdya_offset);
+            cmdxc_ = m->read<u16>(address + cmdxc_offset);
+            cmdyc_ = m->read<u16>(address + cmdyc_offset);
             break;
         }
         case local_coordinate: {
-            cmdxa_.raw = m->read<u16>(address + cmdxa_offset);
-            cmdya_.raw = m->read<u16>(address + cmdya_offset);
+            cmdxa_ = m->read<u16>(address + cmdxa_offset);
+            cmdya_ = m->read<u16>(address + cmdya_offset);
             break;
         }
         case normal_sprite_draw: {
-            cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_.raw = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_.raw = m->read<u16>(address + cmdsize_offset);
-            cmdxa_.raw   = m->read<u16>(address + cmdxa_offset);
-            cmdya_.raw   = m->read<u16>(address + cmdya_offset);
-            cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
+            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
+            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
+            cmdsize_ = m->read<u16>(address + cmdsize_offset);
+            cmdxa_   = m->read<u16>(address + cmdxa_offset);
+            cmdya_   = m->read<u16>(address + cmdya_offset);
+            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
             break;
         }
         case scaled_sprite_draw: {
-            cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_.raw = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_.raw = m->read<u16>(address + cmdsize_offset);
-            cmdxa_.raw   = m->read<u16>(address + cmdxa_offset);
-            cmdya_.raw   = m->read<u16>(address + cmdya_offset);
-            cmdxb_.raw   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_.raw   = m->read<u16>(address + cmdyb_offset);
-            cmdxc_.raw   = m->read<u16>(address + cmdxc_offset);
-            cmdyc_.raw   = m->read<u16>(address + cmdyc_offset);
-            cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
+            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
+            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
+            cmdsize_ = m->read<u16>(address + cmdsize_offset);
+            cmdxa_   = m->read<u16>(address + cmdxa_offset);
+            cmdya_   = m->read<u16>(address + cmdya_offset);
+            cmdxb_   = m->read<u16>(address + cmdxb_offset);
+            cmdyb_   = m->read<u16>(address + cmdyb_offset);
+            cmdxc_   = m->read<u16>(address + cmdxc_offset);
+            cmdyc_   = m->read<u16>(address + cmdyc_offset);
+            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
             break;
         }
         case distorted_sprite_draw:
         case polygon_draw:
         case polyline_draw: {
-            cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_.raw = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_.raw = m->read<u16>(address + cmdsize_offset);
-            cmdxa_.raw   = m->read<u16>(address + cmdxa_offset);
-            cmdya_.raw   = m->read<u16>(address + cmdya_offset);
-            cmdxb_.raw   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_.raw   = m->read<u16>(address + cmdyb_offset);
-            cmdxc_.raw   = m->read<u16>(address + cmdxc_offset);
-            cmdyc_.raw   = m->read<u16>(address + cmdyc_offset);
-            cmdxd_.raw   = m->read<u16>(address + cmdxd_offset);
-            cmdyd_.raw   = m->read<u16>(address + cmdyd_offset);
-            cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
+            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
+            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
+            cmdsize_ = m->read<u16>(address + cmdsize_offset);
+            cmdxa_   = m->read<u16>(address + cmdxa_offset);
+            cmdya_   = m->read<u16>(address + cmdya_offset);
+            cmdxb_   = m->read<u16>(address + cmdxb_offset);
+            cmdyb_   = m->read<u16>(address + cmdyb_offset);
+            cmdxc_   = m->read<u16>(address + cmdxc_offset);
+            cmdyc_   = m->read<u16>(address + cmdyc_offset);
+            cmdxd_   = m->read<u16>(address + cmdxd_offset);
+            cmdyd_   = m->read<u16>(address + cmdyd_offset);
+            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
             break;
         }
         case line_draw: {
-            cmdpmod_.raw = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_.raw = m->read<u16>(address + cmdcolr_offset);
-            cmdxa_.raw   = m->read<u16>(address + cmdxa_offset);
-            cmdya_.raw   = m->read<u16>(address + cmdya_offset);
-            cmdxb_.raw   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_.raw   = m->read<u16>(address + cmdyb_offset);
-            cmdgrda_.raw = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
+            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
+            cmdxa_   = m->read<u16>(address + cmdxa_offset);
+            cmdya_   = m->read<u16>(address + cmdya_offset);
+            cmdxb_   = m->read<u16>(address + cmdxb_offset);
+            cmdyb_   = m->read<u16>(address + cmdyb_offset);
+            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
             break;
         }
     }
 }
 
 void Vdp1Part::generatePartData(const EmulatorModules& modules) {
-    switch (toEnum<CommandSelect>(cmdctrl_.command_select)) {
-        using enum CommandSelect;
+    switch (cmdctrl_ >> CmdCtrl::comm_enum) {
+        using enum CmdCtrl::CommandSelect;
         case system_clipping: {
             // Not implemented
             debug_header_ = tr("Set system clipping coordinates");
@@ -146,7 +146,7 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             break;
         }
         case local_coordinate: {
-            SetLocalCoordinates(twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            SetLocalCoordinates(twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
             debug_header_ = tr("Set local coordinates");
             break;
         }
@@ -189,16 +189,18 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     // calculation overhead is too big for now, and you can't have a one pixel granularity using OpenGL.
     // That will have to be reworked later.
 
+    using Tvmr = Vdp1Regs::Tvmr;
+
     auto       spctl           = modules.vdp2()->getSpriteControlRegister();
     auto       tvmr            = modules.vdp1()->getTvModeSelectionRegister();
     const auto sprite_type     = static_cast<SpriteType>(static_cast<u8>(spctl.sprite_type));
-    auto       sprite_register = SpriteTypeRegister{cmdcolr_.raw};
+    auto       sprite_register = SpriteTypeRegister{cmdcolr_.data()};
     // sprite_type.
     auto           priority_number_register = u8{};
     constexpr auto disp_priority_on_2_bits  = u8{1};
     constexpr auto disp_priority_on_1_bit   = u8{2};
 
-    if (toEnum<BitDepthSelection>(tvmr.tvm_bit_depth_selection) == BitDepthSelection::sixteen_bits_per_pixel) {
+    if ((tvmr >> Tvmr::tvm0_enum) == Tvmr::BitDepthSelection::sixteen_bits_per_pixel) {
         const auto is_data_mixed
             = static_cast<SpriteColorMode>(static_cast<bool>(spctl.sprite_color_mode)) == SpriteColorMode::mixed;
 
@@ -324,14 +326,13 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
 }
 
 auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const u8 priority) const -> u8 {
-    const auto color_mode = toEnum<ColorMode>(cmdpmod_.color_mode);
-    switch (color_mode) {
-        using enum ColorMode;
+    switch (cmdpmod_ >> CmdPmod::cm_enum) {
+        using enum CmdPmod::ColorMode;
         case mode_5_32k_colors_rgb: {
             return 0;
         }
         case mode_1_16_colors_lookup: {
-            const auto lut_address = u32{vdp1_ram_start_address + cmdsrca_.raw * vdp1_address_multiplier};
+            const auto lut_address = u32{vdp1_ram_start_address + cmdsrca_.data() * vdp1_address_multiplier};
             auto       reg         = SpriteTypeRegister{modules.memory()->read<u16>(lut_address)};
             return (reg.msb == 1) ? 0 : priority;
         }
@@ -351,9 +352,9 @@ void Vdp1Part::SetLocalCoordinates(const s16 x, const s16 y) {
 auto Vdp1Part::getDebugDetail() -> std::string {
     auto part_detail = uti::format("Table address: [cccccc]{:#x}[]\n", table_address_);
 
-    const auto getZoomPoint = [](const ZoomPoint zp) {
+    const auto getZoomPoint = [](const CmdCtrl::ZoomPoint zp) {
         switch (zp) {
-            using enum ZoomPoint;
+            using enum CmdCtrl::ZoomPoint;
             case center_center: return "Zoom point: [cccccc]center-center[]\n";
             case center_left: return "Zoom point: [cccccc]center-left[]\n";
             case center_right: return "Zoom point: [cccccc]center-right[]\n";
@@ -368,9 +369,9 @@ auto Vdp1Part::getDebugDetail() -> std::string {
         }
     };
 
-    const auto getCharacterReadDirection = [](const CharacterReadDirection crd) {
+    const auto getCharacterReadDirection = [](const CmdCtrl::CharacterReadDirection crd) {
         switch (crd) {
-            using enum CharacterReadDirection;
+            using enum CmdCtrl::CharacterReadDirection;
             case h_invertion: return "Read direction: [cccccc]horizontally inverted[]\n";
             case not_inverted: return "Read direction: [cccccc]not inverted[]\n";
             case vh_invertion: return "Read direction: [cccccc]horizontally and vertically inverted[]\n";
@@ -379,9 +380,9 @@ auto Vdp1Part::getDebugDetail() -> std::string {
         return "";
     };
 
-    const auto getColorMode = [](const ColorMode cm) {
+    const auto getColorMode = [](const CmdPmod::ColorMode cm) {
         switch (cm) {
-            using enum ColorMode;
+            using enum CmdPmod::ColorMode;
             case mode_0_16_colors_bank: return "Color mode: [cccccc]mode 0, 16 colors, color bank, 4 bits/pixel[]\n";
             case mode_1_16_colors_lookup: return "Color mode: [cccccc]mode 1, 16 colors, lookup table, 4 bits / pixel[]\n";
             case mode_2_64_colors_bank: return "Color mode: [cccccc]mode 2, 64 colors, color bank, 8 bits/pixel[]\n";
@@ -392,9 +393,9 @@ auto Vdp1Part::getDebugDetail() -> std::string {
         return "";
     };
 
-    const auto getColorCalculation = [](const ColorCalculation cc) {
+    const auto getColorCalculation = [](const CmdPmod::ColorCalculation cc) {
         switch (cc) {
-            using enum ColorCalculation;
+            using enum CmdPmod::ColorCalculation;
             case mode_0: return "Color calculation: [cccccc]mode 0, replace[]\n";
             case mode_1: return "Color calculation: [cccccc]mode 1, cannot rewrite / shadow[]\n";
             case mode_2: return "Color calculation: [cccccc]mode 2, half-luminance[]\n";
@@ -407,58 +408,55 @@ auto Vdp1Part::getDebugDetail() -> std::string {
         return "";
     };
 
-    const auto getDrawMode = [&getColorMode, &getColorCalculation](CmdPmod& cp) {
+    const auto getDrawMode = [&getColorMode, &getColorCalculation](CmdPmodType& cp) {
         auto s = std::string{};
-        s += uti::format("MSB: {}[]\n", (toEnum<MsbOn>(cp.msb_on) == MsbOn::on) ? "[00ff00]on" : "[ff0000]off");
+        s += uti::format("MSB: {}[]\n", ((cp >> CmdPmod::mon_enum) == CmdPmod::MsbOn::on) ? "[00ff00]on" : "[ff0000]off");
 
         s += uti::format("High speed shrink: {}[]\n",
-                         (toEnum<HighSpeedShrink>(cp.high_speed_shrink) == HighSpeedShrink::enabled) ? "[00ff00]enabled"
-                                                                                                     : "[ff0000]disabled");
+                         ((cp >> CmdPmod::hss_enum) == CmdPmod::HighSpeedShrink::enabled) ? "[00ff00]enabled"
+                                                                                          : "[ff0000]disabled");
         s += uti::format("Pre-clipping: {}[]\n",
-                         (toEnum<PreClippingDisable>(cp.pre_clipping_disable) == PreClippingDisable::pre_clipping)
-                             ? "[00ff00]enabled"
-                             : "[ff0000]disabled");
+                         ((cp >> CmdPmod::pclp_enum) == CmdPmod::PreClippingDisable::pre_clipping) ? "[00ff00]enabled"
+                                                                                                   : "[ff0000]disabled");
 
         s += "User clipping ";
-        if (toEnum<UserClippingEnable>(cp.user_clipping_enable) == UserClippingEnable::enabled) {
+        if ((cp >> CmdPmod::clip_enum) == CmdPmod::UserClippingEnable::enabled) {
             s += "[00ff00]enabled[]\n";
             s += "\tUser clipping: ";
-            s += (toEnum<UserClippingMode>(cp.user_clipping_mode) == UserClippingMode::drawing_inside)
-                     ? "[cccccc]drawing inside[]\n"
-                     : "[cccccc]drawing outside[]\n";
+            s += ((cp >> CmdPmod::cmod_enum) == CmdPmod::UserClippingMode::drawing_inside) ? "[cccccc]drawing inside[]\n"
+                                                                                           : "[cccccc]drawing outside[]\n";
         } else {
             s += "[ff0000]ignored[]\n";
         }
         s += uti::format("Draw {}[] mesh processing[]\n",
-                         (toEnum<MeshEnable>(cp.mesh_enable) == MeshEnable::enabled) ? "[00ff00]with" : "[ff0000]without");
+                         ((cp >> CmdPmod::mesh_enum) == CmdPmod::MeshEnable::enabled) ? "[00ff00]with" : "[ff0000]without");
         s += uti::format("End code: {}[]\n",
-                         (toEnum<EndCodeDisable>(cp.end_code_disable) == EndCodeDisable::enabled) ? "[00ff00]enabled"
-                                                                                                  : "[ff0000]disabled");
-        s += uti::format(
-            "Transparent pixel: {}[]\n",
-            (toEnum<TransparentPixelDisable>(cp.transparent_pixel_disable) == TransparentPixelDisable::transparent_pixel_enabled)
-                ? "[00ff00]enabled"
-                : "[ff0000]disabled");
+                         ((cp >> CmdPmod::ecd_enum) == CmdPmod::EndCodeDisable::enabled) ? "[00ff00]enabled"
+                                                                                         : "[ff0000]disabled");
+        s += uti::format("Transparent pixel: {}[]\n",
+                         ((cp >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled)
+                             ? "[00ff00]enabled"
+                             : "[ff0000]disabled");
 
-        s += getColorMode(toEnum<ColorMode>(cp.color_mode));
-        s += getColorCalculation(toEnum<ColorCalculation>(cp.color_calculation));
+        s += getColorMode(cp >> CmdPmod::cm_enum);
+        s += getColorCalculation(cp >> CmdPmod::cc_enum);
 
         return s;
     };
 
     const auto getGouraudShadingData = [&]() {
-        if (toEnum<GouraudShading>(cmdpmod_.gouraud_shading) == GouraudShading::enabled) {
+        if ((cmdpmod_ >> CmdPmod::gs_enum) == CmdPmod::GouraudShading::enabled) {
             return uti::format(R"(
 Gouraud shading 
     Table address [cccccc]{:#x}[]
 )",
-                               vdp1_ram_start_address + cmdgrda_.raw * vdp1_address_multiplier);
+                               vdp1_ram_start_address + cmdgrda_.data() * vdp1_address_multiplier);
         }
         return std::string{};
     };
 
-    switch (toEnum<CommandSelect>(cmdctrl_.command_select)) {
-        using enum CommandSelect;
+    switch (cmdctrl_ >> CmdCtrl::comm_enum) {
+        using enum CmdCtrl::CommandSelect;
         case system_clipping: {
             // cmdxc_ = m->read<u16>(address + cmdxc_offset);
             // cmdyc_ = m->read<u16>(address + cmdyc_offset);
@@ -472,81 +470,81 @@ Gouraud shading
             break;
         }
         case local_coordinate: {
-            part_detail += uti::format("[cccccc]x = {}, y = {}[]\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail
+                += uti::format("[cccccc]x = {}, y = {}[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
             break;
         }
         case normal_sprite_draw: {
-            part_detail += uti::format("Vertex A [cccccc]({}, {})[]", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
             part_detail
-                += uti::format("{}\n",
-                               getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
+                += uti::format("Vertex A [cccccc]({}, {})[]", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
+            part_detail += uti::format("{}\n", getCharacterReadDirection(cmdctrl_ >> CmdCtrl::dir_enum));
             part_detail += uti::format("Character size: [cccccc]{} * {}[]\n",
-                                       cmdsize_.character_size_x * horizontal_multiplier,
-                                       cmdsize_.character_size_y);
+                                       (cmdsize_ >> CmdSize::chszx_shft) * horizontal_multiplier,
+                                       (cmdsize_ >> CmdSize::chszy_shft));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
             part_detail += uti::format("Texture key: [cccccc]{:#x}[]", textureKey());
             break;
         }
         case scaled_sprite_draw: {
-            part_detail += getZoomPoint(toEnum<ZoomPoint>(cmdctrl_.zoom_point));
-            part_detail += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
+            part_detail += getZoomPoint(cmdctrl_ >> CmdCtrl::zp_enum);
             part_detail
-                += uti::format("{}\n",
-                               getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
+                += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
+            part_detail += uti::format("{}\n", getCharacterReadDirection(cmdctrl_ >> CmdCtrl::dir_enum));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
             part_detail += uti::format("Texture key: [cccccc]{:#x}[]", textureKey());
-            // cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            // cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            // cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            // cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            // cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            // cmdya_   = m->read<u16>(address + cmdya_offset);
-            // cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            // cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            // cmdxc_   = m->read<u16>(address + cmdxc_offset);
-            // cmdyc_   = m->read<u16>(address + cmdyc_offset);
-            // cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
             break;
         }
         case distorted_sprite_draw: {
-            part_detail += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            part_detail += uti::format("Vertex C [cccccc]({}, {})[]\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
-            part_detail += uti::format("Vertex D [cccccc]({}, {})[]\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
             part_detail
-                += uti::format("{}",
-                               getCharacterReadDirection(toEnum<CharacterReadDirection>(cmdctrl_.character_read_direction)));
+                += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
+            part_detail
+                += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.data()), twosComplement(cmdyb_.data()));
+            part_detail
+                += uti::format("Vertex C [cccccc]({}, {})[]\n", twosComplement(cmdxc_.data()), twosComplement(cmdyc_.data()));
+            part_detail
+                += uti::format("Vertex D [cccccc]({}, {})[]\n", twosComplement(cmdxd_.data()), twosComplement(cmdyd_.data()));
+            part_detail += uti::format("{}", getCharacterReadDirection(cmdctrl_ >> CmdCtrl::dir_enum));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
             part_detail += uti::format("Texture key: [cccccc]{:#x}[]", textureKey());
             break;
         }
         case polygon_draw: {
-            part_detail += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            part_detail += uti::format("Vertex C [cccccc]({}, {})[]\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
-            part_detail += uti::format("Vertex D [cccccc]({}, {})[]\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
-            auto color = Color(cmdcolr_.raw);
+            part_detail
+                += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
+            part_detail
+                += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.data()), twosComplement(cmdyb_.data()));
+            part_detail
+                += uti::format("Vertex C [cccccc]({}, {})[]\n", twosComplement(cmdxc_.data()), twosComplement(cmdyc_.data()));
+            part_detail
+                += uti::format("Vertex D [cccccc]({}, {})[]\n", twosComplement(cmdxd_.data()), twosComplement(cmdyd_.data()));
+            auto color = Color(cmdcolr_.data());
             part_detail += uti::format("Color [cccccc]({}, {}, {}, {})[]\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }
         case polyline_draw: {
-            part_detail += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            part_detail += uti::format("Vertex C [cccccc]({}, {})[]\n", twosComplement(cmdxc_.raw), twosComplement(cmdyc_.raw));
-            part_detail += uti::format("Vertex D [cccccc]({}, {})[]\n", twosComplement(cmdxd_.raw), twosComplement(cmdyd_.raw));
-            auto color = Color(cmdcolr_.raw);
+            part_detail
+                += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
+            part_detail
+                += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.data()), twosComplement(cmdyb_.data()));
+            part_detail
+                += uti::format("Vertex C [cccccc]({}, {})[]\n", twosComplement(cmdxc_.data()), twosComplement(cmdyc_.data()));
+            part_detail
+                += uti::format("Vertex D [cccccc]({}, {})[]\n", twosComplement(cmdxd_.data()), twosComplement(cmdyd_.data()));
+            auto color = Color(cmdcolr_.data());
             part_detail += uti::format("Color [cccccc]({}, {}, {}, {})[]\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
         }
         case line_draw: {
-            part_detail += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.raw), twosComplement(cmdya_.raw));
-            part_detail += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.raw), twosComplement(cmdyb_.raw));
-            auto color = Color(cmdcolr_.raw);
+            part_detail
+                += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
+            part_detail
+                += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.data()), twosComplement(cmdyb_.data()));
+            auto color = Color(cmdcolr_.data());
             part_detail += uti::format("Color [cccccc]({}, {}, {}, {})[]\n", color.r, color.g, color.b, color.a);
             part_detail += getGouraudShadingData();
             break;
@@ -556,19 +554,19 @@ Gouraud shading
     return part_detail;
 }
 
-auto Vdp1Part::calculatedXA() const -> s16 { return twosComplement(cmdxa_.raw) + local_coordinate_x_; }
-auto Vdp1Part::calculatedYA() const -> s16 { return twosComplement(cmdya_.raw) + local_coordinate_y_; }
-auto Vdp1Part::calculatedXB() const -> s16 { return twosComplement(cmdxb_.raw) + local_coordinate_x_; }
-auto Vdp1Part::calculatedYB() const -> s16 { return twosComplement(cmdyb_.raw) + local_coordinate_y_; }
-auto Vdp1Part::calculatedXC() const -> s16 { return twosComplement(cmdxc_.raw) + local_coordinate_x_; }
-auto Vdp1Part::calculatedYC() const -> s16 { return twosComplement(cmdyc_.raw) + local_coordinate_y_; }
-auto Vdp1Part::calculatedXD() const -> s16 { return twosComplement(cmdxd_.raw) + local_coordinate_x_; }
-auto Vdp1Part::calculatedYD() const -> s16 { return twosComplement(cmdyd_.raw) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXA() const -> s16 { return twosComplement(cmdxa_.data()) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYA() const -> s16 { return twosComplement(cmdya_.data()) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXB() const -> s16 { return twosComplement(cmdxb_.data()) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYB() const -> s16 { return twosComplement(cmdyb_.data()) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXC() const -> s16 { return twosComplement(cmdxc_.data()) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYC() const -> s16 { return twosComplement(cmdyc_.data()) + local_coordinate_y_; }
+auto Vdp1Part::calculatedXD() const -> s16 { return twosComplement(cmdxd_.data()) + local_coordinate_x_; }
+auto Vdp1Part::calculatedYD() const -> s16 { return twosComplement(cmdyd_.data()) + local_coordinate_y_; }
 
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Normal sprite draw"));
-    const auto size_x = static_cast<s16>(part.cmdsize_.character_size_x * horizontal_multiplier);
-    const auto size_y = static_cast<s16>(part.cmdsize_.character_size_y);
+    const auto size_x = static_cast<s16>((part.cmdsize_ >> CmdSize::chszx_shft) * horizontal_multiplier);
+    const auto size_y = static_cast<s16>(part.cmdsize_ >> CmdSize::chszy_shft);
 
     loadTextureData(modules, part);
 
@@ -579,7 +577,7 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     VertexPosition c{static_cast<s16>(part.calculatedXA() + size_x), static_cast<s16>(part.calculatedYA() + size_y)};
     VertexPosition d{part.calculatedXA(), static_cast<s16>(part.calculatedYA() + size_y)};
 
-    const auto coords = getTextureCoordinates(toEnum<CharacterReadDirection>(part.cmdctrl_.character_read_direction));
+    const auto coords = getTextureCoordinates(part.cmdctrl_ >> CmdCtrl::dir_enum);
     if (coords.size() != 4) {
         Log::error(Logger::vdp1, tr("VDP1 normal sprite draw coordinates error"));
         throw std::runtime_error("VDP1 normal sprite draw coordinates error !");
@@ -616,14 +614,14 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     std::vector<VertexPosition> vertexes_pos;
 
-    const auto width  = twosComplement(part.cmdxb_.raw);
-    const auto height = twosComplement(part.cmdyb_.raw);
+    const auto width  = twosComplement(part.cmdxb_.data());
+    const auto height = twosComplement(part.cmdyb_.data());
     vertexes_pos.reserve(4);
-    switch (toEnum<ZoomPoint>(part.cmdctrl_.zoom_point)) {
-        using enum ZoomPoint;
+    switch (part.cmdctrl_ >> CmdCtrl::zp_enum) {
+        using enum CmdCtrl::ZoomPoint;
         case two_coordinates: {
-            const auto size_x = static_cast<s16>(part.cmdsize_.character_size_x * 8);
-            const auto size_y = static_cast<s16>(part.cmdsize_.character_size_y);
+            const auto size_x = static_cast<s16>((part.cmdsize_ >> CmdSize::chszx_shft) * 8);
+            const auto size_y = static_cast<s16>(part.cmdsize_ >> CmdSize::chszy_shft);
             Log::debug(Logger::vdp1, "Character size {} * {}", size_x, size_y);
             vertexes_pos.emplace_back(part.calculatedXA(), part.calculatedYA());
             vertexes_pos.emplace_back(part.calculatedXA() + size_x, part.calculatedYA());
@@ -696,7 +694,7 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
         }
     }
 
-    const auto coords = getTextureCoordinates(toEnum<CharacterReadDirection>(part.cmdctrl_.character_read_direction));
+    const auto coords = getTextureCoordinates(part.cmdctrl_ >> CmdCtrl::dir_enum);
     if (coords.size() != 4) {
         Log::error(Logger::vdp1, tr("VDP1 scaled sprite draw coordinates error"));
         throw std::runtime_error("VDP1 scaled sprite draw coordinates error !");
@@ -704,14 +702,6 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     auto       color          = Color{u16{}};
     const auto gouraud_values = readGouraudData(modules, part);
-    // part.vertexes_.emplace_back(
-    //     Vertex{vertexes_pos[0], coords[0], {color.r, color.g, color.b, color.a}, gouraud_values[0]}); // lower left
-    // part.vertexes_.emplace_back(
-    //     Vertex{vertexes_pos[1], coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
-    // part.vertexes_.emplace_back(
-    //     Vertex{vertexes_pos[2], coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
-    // part.vertexes_.emplace_back(
-    //     Vertex{vertexes_pos[3], coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
     part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(vertexes_pos[0].x,
                                 vertexes_pos[0].y,
@@ -762,7 +752,7 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     auto color = Color{u16{}};
 
-    const auto coords = getTextureCoordinates(toEnum<CharacterReadDirection>(part.cmdctrl_.character_read_direction));
+    const auto coords = getTextureCoordinates(part.cmdctrl_ >> CmdCtrl::dir_enum);
     if (coords.size() != 4) {
         Log::error(Logger::vdp1, tr("VDP1 distorted sprite draw coordinates error"));
         throw std::runtime_error("VDP1 distorted sprite draw coordinates error !");
@@ -817,8 +807,8 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
 
-    auto color = Color(part.cmdcolr_.raw);
-    if (part.cmdcolr_.raw == 0) { color.a = 0; }
+    auto color = Color(part.cmdcolr_.data());
+    if (part.cmdcolr_.is(0)) { color.a = 0; }
     const auto gouraud_values = readGouraudData(modules, part);
 
     part.vertexes_.reserve(4);
@@ -867,27 +857,11 @@ void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
 
-    auto color = Color(part.cmdcolr_.raw);
-    if (part.cmdcolr_.raw == 0) { color.a = 0; }
+    auto color = Color(part.cmdcolr_.data());
+    if (part.cmdcolr_.is(0)) { color.a = 0; }
 
     const auto gouraud_values = readGouraudData(modules, part);
 
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
-    //                                    {0.0, 0.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[0]}); // lower left
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
-    //                                    {1.0, 0.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[1]}); // lower right
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXC(), part.calculatedYC()},
-    //                                    {1.0, 1.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[2]}); // upper right
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXD(), part.calculatedYD()},
-    //                                    {0.0, 1.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[3]}); // upper left
     part.vertexes_.reserve(4);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
@@ -934,19 +908,11 @@ void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Line draw"));
 
-    auto color = Color(part.cmdcolr_.raw);
-    if (part.cmdcolr_.raw == 0) { color.a = 0; }
+    auto color = Color(part.cmdcolr_.data());
+    if (part.cmdcolr_.is(0)) { color.a = 0; }
 
     const auto gouraud_values = readGouraudData(modules, part);
 
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXA(), part.calculatedYA()},
-    //                                    {0.0, 0.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[0]}); // lower left
-    // part.vertexes_.emplace_back(Vertex{{part.calculatedXB(), part.calculatedYB()},
-    //                                    {1.0, 0.0},
-    //                                    {color.r, color.g, color.b, color.a},
-    //                                    gouraud_values[1]}); // lower right
     part.vertexes_.reserve(2);
     part.vertexes_.emplace_back(part.calculatedXA(),
                                 part.calculatedYA(),
@@ -972,21 +938,20 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
     const auto      color_ram_address_offset = modules.vdp1()->getColorRamAddressOffset();
-    auto            start_address            = vdp1_vram_start_address + part.cmdsrca_.raw * vdp1_address_multiplier;
-    const auto      texture_width            = part.cmdsize_.character_size_x * 8;
-    const auto      texture_height           = part.cmdsize_.character_size_y;
-    const auto      color_mode               = toEnum<ColorMode>(part.cmdpmod_.color_mode);
+    auto            start_address            = vdp1_vram_start_address + part.cmdsrca_.data() * vdp1_address_multiplier;
+    const auto      texture_width            = (part.cmdsize_ >> CmdSize::chszx_shft) * 8;
+    const auto      texture_height           = part.cmdsize_ >> CmdSize::chszy_shft;
+    const auto      color_mode               = part.cmdpmod_ >> CmdPmod::cm_enum;
     const auto      texture_size             = static_cast<u32>(texture_width * texture_height * 4);
     std::vector<u8> texture_data;
     texture_data.reserve(texture_size);
     const auto key = Texture::calculateKey(VdpType::vdp1, start_address, toUnderlying(color_mode));
-    // if (key == 0xa57b381a6e5b28d0) DebugBreak();
 
     if (Texture::isTextureLoadingNeeded(key)) {
         if (modules.vdp2()->getColorRamMode() == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (color_mode) {
-                using enum ColorMode;
+                using enum CmdPmod::ColorMode;
                 case mode_0_16_colors_bank: {
                     readColorBankMode16Colors<u32>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
@@ -1017,7 +982,7 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
         } else {
             // 16 bits access to color RAM
             switch (color_mode) {
-                using enum ColorMode;
+                using enum CmdPmod::ColorMode;
                 case mode_0_16_colors_bank: {
                     readColorBankMode16Colors<u16>(modules, texture_data, start_address, color_ram_address_offset, part);
                     break;
@@ -1054,8 +1019,8 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
 
 auto readGouraudData(const EmulatorModules& modules, const Vdp1Part& part) -> std::vector<Gouraud> {
     auto gouraud_values = std::vector<Gouraud>{};
-    if (toEnum<GouraudShading>(part.cmdpmod_.gouraud_shading) == GouraudShading::enabled) {
-        const auto grd_table_address = vdp1_ram_start_address + part.cmdgrda_.raw * 8;
+    if ((part.cmdpmod_ >> CmdPmod::gs_enum) == CmdPmod::GouraudShading::enabled) {
+        const auto grd_table_address = vdp1_ram_start_address + part.cmdgrda_.data() * 8;
 
         constexpr auto max_values = u8{4};
         for (u8 i = 0; i < max_values; i++) {
@@ -1067,10 +1032,10 @@ auto readGouraudData(const EmulatorModules& modules, const Vdp1Part& part) -> st
     return gouraud_values;
 }
 
-auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<TextureCoordinates> {
+auto getTextureCoordinates(const CmdCtrl::CharacterReadDirection crd) -> std::vector<TextureCoordinates> {
     auto coords = std::vector<TextureCoordinates>{};
     switch (crd) {
-        using enum CharacterReadDirection;
+        using enum CmdCtrl::CharacterReadDirection;
         case h_invertion: {
             coords.emplace_back(TextureCoordinates{1.0, 0.0}); // lower left
             coords.emplace_back(TextureCoordinates{0.0, 0.0}); // lower right
@@ -1103,12 +1068,12 @@ auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<Text
 }
 
 void checkColorCalculation(Vdp1Part& part) {
-    switch (toEnum<ColorCalculation>(part.cmdpmod_.color_calculation)) {
-        using enum ColorCalculation;
+    switch (part.cmdpmod_ >> CmdPmod::cc_enum) {
+        using enum CmdPmod::ColorCalculation;
         case mode_0: break;
         case mode_4: break;
         default: {
-            Log::unimplemented("Vdp1 - Color calculation {}", part.cmdpmod_.color_calculation);
+            Log::unimplemented("Vdp1 - Color calculation {}", part.cmdpmod_ >> CmdPmod::cc_shft);
         }
     }
 }

@@ -78,12 +78,12 @@ class Vdp1Part final : public BaseRenderingPart {
     ///@{
     /// Constructors / Destructors
     Vdp1Part() = default;
-    Vdp1Part(EmulatorModules& modules,
-             const DrawType   type,
-             const u32        table_address,
-             const CmdCtrl&   cmdctrl,
-             const CmdLink&   cmdlink,
-             const ColorF&    color_offset);
+    Vdp1Part(EmulatorModules&   modules,
+             const DrawType     type,
+             const u32          table_address,
+             const CmdCtrlType& cmdctrl,
+             const CmdLinkType& cmdlink,
+             const ColorF&      color_offset);
     Vdp1Part(const Vdp1Part&)                      = default;
     Vdp1Part(Vdp1Part&&)                           = default;
     auto operator=(const Vdp1Part&) & -> Vdp1Part& = default;
@@ -109,23 +109,23 @@ class Vdp1Part final : public BaseRenderingPart {
 
     ///@{
     /// \name  Part registers
-    CmdCtrl             cmdctrl_;       ///< Control words.
-    CmdLink             cmdlink_;       ///< Link specification.
-    CmdPmod             cmdpmod_;       ///< Draw mode words.
-    CmdColr             cmdcolr_;       ///< Color control word.
-    CmdSrca             cmdsrca_;       ///< Character address.
-    CmdSize             cmdsize_;       ///< Character size.
-    CmdVertexCoordinate cmdxa_;         ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdya_;         ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdxb_;         ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdyb_;         ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdxc_;         ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdyc_;         ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdxd_;         ///< Vertex coordinate data.
-    CmdVertexCoordinate cmdyd_;         ///< Vertex coordinate data.
-    CmdGrda             cmdgrda_;       ///< Gouraud shading table.
-    u32                 table_address_; ///< The table address.
-                                        ///@}
+    CmdCtrlType             cmdctrl_;       ///< Control words.
+    CmdLinkType             cmdlink_;       ///< Link specification.
+    CmdPmodType             cmdpmod_;       ///< Draw mode words.
+    CmdColrType             cmdcolr_;       ///< Color control word.
+    CmdSrcaType             cmdsrca_;       ///< Character address.
+    CmdSizeType             cmdsize_;       ///< Character size.
+    CmdVertexCoordinateType cmdxa_;         ///< Vertex coordinate data.
+    CmdVertexCoordinateType cmdya_;         ///< Vertex coordinate data.
+    CmdVertexCoordinateType cmdxb_;         ///< Vertex coordinate data.
+    CmdVertexCoordinateType cmdyb_;         ///< Vertex coordinate data.
+    CmdVertexCoordinateType cmdxc_;         ///< Vertex coordinate data.
+    CmdVertexCoordinateType cmdyc_;         ///< Vertex coordinate data.
+    CmdVertexCoordinateType cmdxd_;         ///< Vertex coordinate data.
+    CmdVertexCoordinateType cmdyd_;         ///< Vertex coordinate data.
+    CmdGrdaType             cmdgrda_;       ///< Gouraud shading table.
+    u32                     table_address_; ///< The table address.
+                                            ///@}
     ///@{
     /// Accessors / mutators
     void debugHeader(std::string_view s) { debug_header_ = s; }
@@ -272,13 +272,12 @@ void readDotColorBank16(const EmulatorModules& modules,
                         const u8               dot) {
     constexpr auto color_bank_mask = u16{0x0FF0};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.raw & color_bank_mask) | dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
-        == TransparentPixelDisable::transparent_pixel_enabled) {
+    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -300,14 +299,12 @@ void readDotColorBank16(const EmulatorModules& modules,
 
 template<typename T>
 void readDotLookUpTable16(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot) {
-    // const auto color_address = u32{vdp1_vram_start_address + (part.cmdcolr_.toU16() * address_multiplier + dot) * sizeof(T)};
-    const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.raw * vdp1_address_multiplier + dot * sizeof(T)};
+    const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.data() * vdp1_address_multiplier + dot * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
-        == TransparentPixelDisable::transparent_pixel_enabled) {
+    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -336,13 +333,12 @@ void readDotColorBank64(const EmulatorModules& modules,
                         const u8               dot) {
     constexpr auto color_bank_mask = u16{0x0FC0};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.raw & color_bank_mask) | dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
-        == TransparentPixelDisable::transparent_pixel_enabled) {
+    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -371,13 +367,12 @@ void readDotColorBank128(const EmulatorModules& modules,
                          const u8               dot) {
     constexpr auto color_bank_mask = u16{0x0F80};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.raw & color_bank_mask) | dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
-        == TransparentPixelDisable::transparent_pixel_enabled) {
+    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -406,13 +401,12 @@ void readDotColorBank256(const EmulatorModules& modules,
                          const u8               dot) {
     constexpr auto color_bank_mask = u16{0xFF00};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.raw & color_bank_mask) | dot) * sizeof(T)};
+        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
 
     auto color = modules.vdp2()->readColor<T>(color_address);
 
     // Checking transparency.
-    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
-        == TransparentPixelDisable::transparent_pixel_enabled) {
+    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -438,8 +432,7 @@ void readDotRgb(const EmulatorModules& modules, std::vector<u8>& texture_data, V
     auto color = Color(dot);
 
     // Checking transparency.
-    if (toEnum<TransparentPixelDisable>(part.cmdpmod_.transparent_pixel_disable)
-        == TransparentPixelDisable::transparent_pixel_enabled) {
+    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
         if (!dot) color.a = 0;
     }
 
@@ -757,6 +750,6 @@ void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_d
     }
 }
 
-auto getTextureCoordinates(const CharacterReadDirection crd) -> std::vector<TextureCoordinates>;
+auto getTextureCoordinates(const CmdCtrl::CharacterReadDirection crd) -> std::vector<TextureCoordinates>;
 
 } // namespace saturnin::video

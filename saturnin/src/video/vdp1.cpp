@@ -48,20 +48,19 @@ using core::Log;
 using core::Logger;
 using core::rawRead;
 using core::Smpc;
-// using core::StartingFactorSelect;
 using core::tr;
 
 void Vdp1::initialize() {
-    tvmr_.raw = {}; // Undefined after power on or reset.
-    fbcr_.raw = {}; // Undefined after power on or reset.
-    ptmr_.raw = {};
-    ewdr_.reset();                          // Undefined after power on or reset.
-    endr_.raw                         = {}; // Write only
-    edsr_.raw                         = {}; // Unknown at power on or reset.
-    lopr_.raw                         = {}; // Unknown at power on or reset.
-    copr_.raw                         = {}; // Unknown at power on or reset.
+    regs_.tvmr                        = {}; // Undefined after power on or reset.
+    regs_.fbcr                        = {}; // Undefined after power on or reset.
+    regs_.ptmr                        = {};
+    regs_.ewdr                        = {}; // Undefined after power on or reset.
+    regs_.endr                        = {}; // Write only
+    regs_.edsr                        = {}; // Unknown at power on or reset.
+    regs_.lopr                        = {}; // Unknown at power on or reset.
+    regs_.copr                        = {}; // Unknown at power on or reset.
     constexpr auto copr_default_value = u16{1000};
-    modr_.raw                         = copr_default_value;
+    regs_.modr                        = copr_default_value;
 }
 
 auto Vdp1::intializeFramebuffer() -> bool {
@@ -74,12 +73,14 @@ auto Vdp1::intializeFramebuffer() -> bool {
 }
 
 void Vdp1::onVblankIn() {
+    using Ptmr = Vdp1Regs::Ptmr;
+
     Texture::cleanCache(modules_.opengl(), VdpType::vdp1);
     Texture::setCache(VdpType::vdp1);
     updateResolution();
 
-    switch (toEnum<PlotTriggerMode>(ptmr_.plot_trigger_mode)) {
-        using enum PlotTriggerMode;
+    switch (regs_.ptmr >> Ptmr::ptm_enum) {
+        using enum Ptmr::PlotTriggerMode;
         case idle_at_frame_change: {
             Log::debug(Logger::vdp1, tr("Idle at frame change"));
             break;
@@ -109,17 +110,17 @@ void Vdp1::populateRenderData() {
     auto current_table_address = vdp1_ram_start_address;
     auto next_table_address    = current_table_address;
     auto return_address        = u32{};
-    auto cmdctrl               = CmdCtrl{modules_.memory()->read<u16>(current_table_address + cmdctrl_offset)};
-    auto cmdlink               = CmdLink{modules_.memory()->read<u16>(current_table_address + cmdlink_offset)};
+    auto cmdctrl               = CmdCtrlType{modules_.memory()->read<u16>(current_table_address + cmdctrl_offset)};
+    auto cmdlink               = CmdLinkType{modules_.memory()->read<u16>(current_table_address + cmdlink_offset)};
     vdp1_parts_.clear();
     // Texture::discardCache(modules_.opengl(), VdpType::vdp1);
 
     color_offset_ = modules_.vdp2()->getColorOffset(Layer::sprite);
 
-    while (toEnum<EndBit>(cmdctrl.end_bit) == EndBit::command_selection_valid) {
+    while ((cmdctrl >> CmdCtrl::end_enum) == CmdCtrl::EndBit::command_selection_valid) {
         auto skip_table = false;
-        switch (toEnum<JumpSelect>(cmdctrl.jump_select)) {
-            using enum JumpSelect;
+        switch (cmdctrl >> CmdCtrl::js_enum) {
+            using enum CmdCtrl::JumpSelect;
             case jump_next: {
                 Log::debug(Logger::vdp1, tr("Jump next"));
                 next_table_address += table_size;
@@ -127,12 +128,12 @@ void Vdp1::populateRenderData() {
             }
             case jump_assign: {
                 Log::debug(Logger::vdp1, tr("Jump assign"));
-                next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.data() * vdp1_address_multiplier;
                 break;
             }
             case jump_call: {
                 Log::debug(Logger::vdp1, tr("Jump call"));
-                next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.data() * vdp1_address_multiplier;
                 return_address     = current_table_address + table_size;
                 break;
             }
@@ -150,13 +151,13 @@ void Vdp1::populateRenderData() {
             }
             case skip_assign: {
                 Log::debug(Logger::vdp1, tr("Skip assign"));
-                next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.data() * vdp1_address_multiplier;
                 skip_table         = true;
                 break;
             }
             case skip_call: {
                 Log::debug(Logger::vdp1, tr("Skip call"));
-                next_table_address = vdp1_ram_start_address + cmdlink.raw * vdp1_address_multiplier;
+                next_table_address = vdp1_ram_start_address + cmdlink.data() * vdp1_address_multiplier;
                 return_address     = current_table_address + table_size;
                 skip_table         = true;
                 break;
@@ -171,8 +172,8 @@ void Vdp1::populateRenderData() {
         }
 
         if (!skip_table) {
-            switch (toEnum<CommandSelect>(cmdctrl.command_select)) {
-                using enum CommandSelect;
+            switch (cmdctrl >> CmdCtrl::comm_enum) {
+                using enum CmdCtrl::CommandSelect;
                 case system_clipping: {
                     Log::unimplemented(tr("VDP1 command - System clipping coordinate set"));
                     break;
@@ -182,58 +183,62 @@ void Vdp1::populateRenderData() {
                     break;
                 }
                 case local_coordinate: {
-                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
-                                                      DrawType::not_drawable,
-                                                      current_table_address,
-                                                      cmdctrl,
-                                                      cmdlink,
-                                                      color_offset_.as_float));
+                    vdp1_parts_.emplace_back(modules_,
+                                             DrawType::not_drawable,
+                                             current_table_address,
+                                             cmdctrl,
+                                             cmdlink,
+                                             color_offset_.as_float);
                     break;
                 }
                 case normal_sprite_draw: {
-                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
-                                                      DrawType::textured_polygon,
-                                                      current_table_address,
-                                                      cmdctrl,
-                                                      cmdlink,
-                                                      color_offset_.as_float));
+                    vdp1_parts_.emplace_back(modules_,
+                                             DrawType::textured_polygon,
+                                             current_table_address,
+                                             cmdctrl,
+                                             cmdlink,
+                                             color_offset_.as_float);
                     break;
                 }
                 case scaled_sprite_draw: {
-                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
-                                                      DrawType::textured_polygon,
-                                                      current_table_address,
-                                                      cmdctrl,
-                                                      cmdlink,
-                                                      color_offset_.as_float));
+                    vdp1_parts_.emplace_back(modules_,
+                                             DrawType::textured_polygon,
+                                             current_table_address,
+                                             cmdctrl,
+                                             cmdlink,
+                                             color_offset_.as_float);
                     break;
                 }
                 case distorted_sprite_draw: {
-                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
-                                                      DrawType::textured_polygon,
-                                                      current_table_address,
-                                                      cmdctrl,
-                                                      cmdlink,
-                                                      color_offset_.as_float));
+                    vdp1_parts_.emplace_back(modules_,
+                                             DrawType::textured_polygon,
+                                             current_table_address,
+                                             cmdctrl,
+                                             cmdlink,
+                                             color_offset_.as_float);
                     break;
                 }
                 case polygon_draw: {
-                    vdp1_parts_.emplace_back(Vdp1Part(modules_,
-                                                      DrawType::non_textured_polygon,
-                                                      current_table_address,
-                                                      cmdctrl,
-                                                      cmdlink,
-                                                      color_offset_.as_float));
+                    vdp1_parts_.emplace_back(modules_,
+                                             DrawType::non_textured_polygon,
+                                             current_table_address,
+                                             cmdctrl,
+                                             cmdlink,
+                                             color_offset_.as_float);
                     break;
                 }
                 case polyline_draw: {
-                    vdp1_parts_.emplace_back(
-                        Vdp1Part(modules_, DrawType::polyline, current_table_address, cmdctrl, cmdlink, color_offset_.as_float));
+                    vdp1_parts_.emplace_back(modules_,
+                                             DrawType::polyline,
+                                             current_table_address,
+                                             cmdctrl,
+                                             cmdlink,
+                                             color_offset_.as_float);
                     break;
                 }
                 case line_draw: {
-                    vdp1_parts_.emplace_back(
-                        Vdp1Part(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink, color_offset_.as_float));
+                    vdp1_parts_
+                        .emplace_back(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink, color_offset_.as_float);
                     break;
                 }
                 default: {
@@ -241,15 +246,16 @@ void Vdp1::populateRenderData() {
                 }
             }
         }
-        cmdctrl               = CmdCtrl{modules_.memory()->read<u16>(next_table_address + cmdctrl_offset)};
-        cmdlink               = CmdLink{modules_.memory()->read<u16>(next_table_address + cmdlink_offset)};
+        cmdctrl               = modules_.memory()->read<u16>(next_table_address + cmdctrl_offset);
+        cmdlink               = CmdLinkType{modules_.memory()->read<u16>(next_table_address + cmdlink_offset)};
         current_table_address = next_table_address;
     }
 
     Log::debug(Logger::vdp1, tr("-= Draw End command =-"));
 
-    edsr_.current_end_bit_fetch_status = CurrentEndBitFetchStatus::end_bit_fetched;
-    edsr_.before_end_bit_fetch_status  = BeforeEndBitFetchStatus::end_bit_fetched; // Needs rework
+    using Edsr = Vdp1Regs::Edsr;
+    regs_.edsr.upd(Edsr::cef_enum, Edsr::CurrentEndBitFetchStatus::end_bit_fetched);
+    regs_.edsr.upd(Edsr::bef_enum, Edsr::BeforeEndBitFetchStatus::end_bit_fetched); // Needs rework
 
     using namespace saturnin::core::interrupt_source;
     Log::debug(Logger::vdp1, tr("Interrupt request"));
@@ -259,10 +265,10 @@ void Vdp1::populateRenderData() {
 
 auto Vdp1::read16(const u32 addr) const -> u16 {
     switch (addr) {
-        case transfer_end_status: return edsr_.raw;
-        case last_operation_command_address: return lopr_.raw;
-        case current_operation_command_address: return copr_.raw;
-        case mode_status: return modr_.raw;
+        case transfer_end_status: return regs_.edsr.data();
+        case last_operation_command_address: return regs_.lopr.data();
+        case current_operation_command_address: return regs_.copr.data();
+        case mode_status: return regs_.modr.data();
         default: Log::warning(Logger::vdp1, core::tr("Unimplemented register read {:#010x}"), addr);
     }
 
@@ -271,20 +277,21 @@ auto Vdp1::read16(const u32 addr) const -> u16 {
 
 void Vdp1::write16(const u32 addr, const u16 data) {
     switch (addr) {
-        case tv_mode_selection: tvmr_.raw = data; break;
-        case frame_buffer_change_mode: fbcr_.raw = data; break;
+        case tv_mode_selection: regs_.tvmr = data; break;
+        case frame_buffer_change_mode: regs_.fbcr = data; break;
         case plot_trigger:
-            ptmr_.raw = data;
-            if (toEnum<PlotTriggerMode>(ptmr_.plot_trigger_mode) == PlotTriggerMode::starts_drawing_when_written) {
+            using Ptmr = Vdp1Regs::Ptmr;
+            regs_.ptmr = data;
+            if ((regs_.ptmr >> Ptmr::ptm_enum) == Ptmr::PlotTriggerMode::starts_drawing_when_written) {
                 // Drawing starts from the beginning of the table
                 Log::debug(Logger::vdp1, tr("Drawing started at register write"));
                 populateRenderData();
             }
             break;
-        case erase_write_data: ewdr_.set(bits_0_15, data); break;
-        case erase_write_upper_left_coordinate: ewlr_.raw = data; break;
-        case erase_write_lower_right_coordinate: ewlr_.raw = data; break;
-        case draw_forced_termination: endr_.raw = data; break;
+        case erase_write_data: regs_.ewdr = data; break;
+        case erase_write_upper_left_coordinate: regs_.ewlr = data; break;
+        case erase_write_lower_right_coordinate: regs_.ewrr = data; break;
+        case draw_forced_termination: regs_.endr = data; break;
         default: Log::warning(Logger::vdp1, core::tr("Unimplemented register write {:#010x}"), addr);
     }
 }
