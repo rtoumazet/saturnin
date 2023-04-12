@@ -766,156 +766,75 @@ using CmdGrdaType = Reg<u16, CmdGrda>;
 struct SpriteTypeRegister {
     GENERATE_USING(SpriteTypeRegister, u16);
 
-    GENERATE_BIT_WITHOUT_ENUM(type_0_priority_palette, 14, 0b11)       ///< Priority for Type 0 sprites on palette only fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_0_priority_mixed, 14, 0b1)          ///< Priority for Type 0 sprites on mixed fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_0_color_calculation, 11, 0b11)      ///< Color calculation for Type 0 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_0_dot_color, 0, 0b11111111111) ///< Dot color for Type 0 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_0_priority_palette, 14, 0b11);   ///< Priority for Type 0 sprites on palette only fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_0_priority_mixed, 14, 0b1);      ///< Priority for Type 0 sprites on mixed fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_0_color_calculation, 11, 0b11);  ///< Color calculation for Type 0 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_0_dot_color, 0, 0b11111111111);  ///< Dot color for Type 0 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_1_priority_palette, 13, 0b111)      ///< Priority for Type 1 sprites on palette only fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_1_priority_mixed, 13, 0b11)         ///< Priority for Type 1 sprites on mixed fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_1_color_calculation, 11, 0b11)      ///< Color calculation for Type 1 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_1_dot_color, 0, 0b11111111111)      ///< Dot color for Type 1 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_1_priority_palette, 13, 0b111);  ///< Priority for Type 1 sprites on palette only fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_1_priority_mixed, 13, 0b11);     ///< Priority for Type 1 sprites on mixed fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_1_color_calculation, 11, 0b11);  ///< Color calculation for Type 1 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_1_dot_color, 0, 0b11111111111);  ///< Dot color for Type 1 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_2_priority, 14, 0b1)                 ///< Priority for Type 2 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_2_shadow_palette, 15, 0b1)         ///< Shadow for Type 2 sprites on palette only fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_2_color_calculation, 11, 0b111)      ///< Color calculation for Type 2 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_2_dot_color, 0, 0b11111111111)      ///< Dot color for Type 2 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_2_priority, 14, 0b1);            ///< Priority for Type 2 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_2_shadow_palette, 15, 0b1);      ///< Shadow for Type 2 sprites on palette only fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_2_color_calculation, 11, 0b111); ///< Color calculation for Type 2 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_2_dot_color, 0, 0b11111111111);  ///< Dot color for Type 2 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_3_shadow_palette, 15,0b1 )  ///< Shadow for Type 3 sprites on palette only fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_3_priority, 13, 0b11)                ///< Priority for Type 3 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_3_color_calculation, 11, 0b11)        ///< Color calculation for Type 3 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_3_dot_color, 0, 0b11111111111)               ///< Dot color for Type 3 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_3_shadow_palette, 15, 0b1);      ///< Shadow for Type 3 sprites on palette only fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_3_priority, 13, 0b11);           ///< Priority for Type 3 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_3_color_calculation, 11, 0b11);  ///< Color calculation for Type 3 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_3_dot_color, 0, 0b11111111111);  ///< Dot color for Type 3 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_4_shadow_palette, 15,0b1 )       ///< Shadow for Type 4 sprites on palette only fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_4_priority, 13, 0b11)            ///< Priority for Type 4 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_4_color_calculation, 10, 0b111)  ///< Color calculation for Type 4 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_4_dot_color, 0, 0b1111111111)    ///< Dot color for Type 4 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_4_shadow_palette, 15, 0b1);      ///< Shadow for Type 4 sprites on palette only fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_4_priority, 13, 0b11);           ///< Priority for Type 4 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_4_color_calculation, 10, 0b111); ///< Color calculation for Type 4 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_4_dot_color, 0, 0b1111111111);   ///< Dot color for Type 4 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_5_shadow_palette, 15,0b1 )        ///< Shadow for Type 5 sprites on palette only fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_5_priority, 12, 0b111)            ///< Priority for Type 5 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_5_color_calculation, 11, 0b1)     ///< Color calculation for Type 5 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_5_dot_color, 0, 0b11111111111)    ///< Dot color for Type 5 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_5_shadow_palette, 15, 0b1);      ///< Shadow for Type 5 sprites on palette only fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_5_priority, 12, 0b111);          ///< Priority for Type 5 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_5_color_calculation, 11, 0b1);   ///< Color calculation for Type 5 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_5_dot_color, 0, 0b11111111111);  ///< Dot color for Type 5 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_6_shadow_palette, 15,0b1 )        ///< Shadow for Type 6 sprites on palette only fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_6_priority, 12, 0b111)            ///< Priority for Type 6 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_6_color_calculation, 10, 0b11)    ///< Color calculation for Type 6 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_6_dot_color, 0, 0b1111111111)     ///< Dot color for Type 6 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_6_shadow_palette, 15, 0b1);      ///< Shadow for Type 6 sprites on palette only fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_6_priority, 12, 0b111);          ///< Priority for Type 6 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_6_color_calculation, 10, 0b11);  ///< Color calculation for Type 6 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_6_dot_color, 0, 0b1111111111);   ///< Dot color for Type 6 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_7_shadow_palette, 15,0b1 )        ///< Shadow for Type 7 sprites on palette only fb.
-    GENERATE_BIT_WITHOUT_ENUM(type_7_priority, 12, 0b111)            ///< Priority for Type 7 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_7_color_calculation, 9, 0b111)    ///< Color calculation for Type 7 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_7_dot_color, 0, 0b111111111)      ///< Dot color for Type 7 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_7_shadow_palette, 15, 0b1);      ///< Shadow for Type 7 sprites on palette only fb.
+    GENERATE_BIT_WITHOUT_ENUM(type_7_priority, 12, 0b111);          ///< Priority for Type 7 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_7_color_calculation, 9, 0b111);  ///< Color calculation for Type 7 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_7_dot_color, 0, 0b111111111);    ///< Dot color for Type 7 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_8_priority, 7,0b1 )        ///< Priority for Type 8 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_8_dot_color, 0, 0b1111111) ///< Dot color for Type 8 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_8_priority, 7, 0b1);             ///< Priority for Type 8 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_8_dot_color, 0, 0b1111111);      ///< Dot color for Type 8 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_9_priority, 7,0b1 )          ///< Priority for Type 9 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_9_color_calculation, 6, 0b1) ///< Color calculation for Type 9 sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_8_dot_color, 0, 0b111111)    ///< Dot color for Type 9 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_9_priority, 7, 0b1);             ///< Priority for Type 9 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_9_color_calculation, 6, 0b1);    ///< Color calculation for Type 9 sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_9_dot_color, 0, 0b111111);       ///< Dot color for Type 9 sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_a_priority, 6,0b11 )      ///< Priority for Type A sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_a_dot_color, 0, 0b111111) ///< Dot color for Type A sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_a_priority, 6, 0b11);            ///< Priority for Type A sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_a_dot_color, 0, 0b111111);       ///< Dot color for Type A sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_b_color_calculation, 6,0b11 )  ///< Color calculation for Type B sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_b_dot_color, 0, 0b111111)      ///< Dot color for Type B sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_b_color_calculation, 6, 0b11);   ///< Color calculation for Type B sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_b_dot_color, 0, 0b111111);       ///< Dot color for Type B sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_c_priority, 7,0b1 )         ///< Priority for Type C sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_c_dot_color, 0, 0b11111111) ///< Dot color for Type C sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_c_priority, 7, 0b1);             ///< Priority for Type C sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_c_dot_color, 0, 0b11111111);     ///< Dot color for Type C sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_d_priority, 7,0b1 )          ///< Priority for Type D sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_d_color_calculation, 6, 0b1) ///< Color calculation for Type D sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_d_dot_color, 0, 0b11111111)  ///< Dot color for Type D sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_d_priority, 7, 0b1);             ///< Priority for Type D sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_d_color_calculation, 6, 0b1);    ///< Color calculation for Type D sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_d_dot_color, 0, 0b11111111);     ///< Dot color for Type D sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_e_priority, 6,0b11 )        ///< Priority for Type E sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_e_dot_color, 0, 0b11111111) ///< Dot color for Type E sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_e_priority, 6, 0b11);            ///< Priority for Type E sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_e_dot_color, 0, 0b11111111);     ///< Dot color for Type E sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(type_f_color_calculation, 6,0b11 ) ///< Color calculation for Type F sprites.
-    GENERATE_BIT_WITHOUT_ENUM(type_f_dot_color, 0, 0b11111111)   ///< Dot color for Type F sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_f_color_calculation, 6, 0b11);   ///< Color calculation for Type F sprites.
+    GENERATE_BIT_WITHOUT_ENUM(type_f_dot_color, 0, 0b11111111);     ///< Dot color for Type F sprites.
 
-    GENERATE_BIT_WITHOUT_ENUM(msb, 15,0b1 )        ///< MSB, RGB or palette discriminant.
+    GENERATE_BIT_WITHOUT_ENUM(msb, 15, 0b1);                        ///< MSB, RGB or palette discriminant.
 };
 using SpriteTypeRegisterType = Reg<u16, SpriteTypeRegister>;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SpriteTypeRegister
-///
-/// \brief	Sprite type register.
-///
-/// \author	Runik
-/// \date	22/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union SpriteTypeRegister {
-//     u16 raw;                                  ///< Raw representation.
-//
-//     BitField<14, 2> type_0_priority_palette;  ///< Priority for Type 0 sprites on palette only fb.
-//     BitField<14>    type_0_priority_mixed;    ///< Priority for Type 0 sprites on mixed fb.
-//     BitField<11, 2> type_0_color_calculation; ///< Color calculation for Type 0 sprites.
-//     BitField<0, 11> type_0_dot_color;         ///< Dot color for Type 0 sprites.
-//
-//     BitField<13, 3> type_1_priority_palette;  ///< Priority for Type 1 sprites on palette only fb.
-//     BitField<13, 2> type_1_priority_mixed;    ///< Priority for Type 1 sprites on mixed fb.
-//     BitField<11, 2> type_1_color_calculation; ///< Color calculation for Type 1 sprites.
-//     BitField<0, 11> type_1_dot_color;         ///< Dot color for Type 1 sprites.
-//
-//     BitField<14>    type_2_priority;          ///< Priority for Type 2 sprites.
-//     BitField<15>    type_2_shadow_palette;    ///< Shadow for Type 2 sprites on palette only fb.
-//     BitField<11, 3> type_2_color_calculation; ///< Color calculation for Type 2 sprites.
-//     BitField<0, 11> type_2_dot_color;         ///< Dot color for Type 2 sprites.
-//
-//     BitField<15>    type_3_shadow_palette;    ///< Shadow for Type 3 sprites on palette only fb.
-//     BitField<13, 2> type_3_priority;          ///< Priority for Type 3 sprites.
-//     BitField<11, 2> type_3_color_calculation; ///< Color calculation for Type 3 sprites.
-//     BitField<0, 11> type_3_dot_color;         ///< Dot color for Type 3 sprites.
-//
-//     BitField<15>    type_4_shadow_palette;    ///< Shadow for Type 4 sprites on palette only fb.
-//     BitField<13, 2> type_4_priority;          ///< Priority for Type 4 sprites.
-//     BitField<10, 3> type_4_color_calculation; ///< Color calculation for Type 4 sprites.
-//     BitField<0, 10> type_4_dot_color;         ///< Dot color for Type 4 sprites.
-//
-//     BitField<15>    type_5_shadow_palette;    ///< Shadow for Type 5 sprites on palette only fb.
-//     BitField<12, 3> type_5_priority;          ///< Priority for Type 5 sprites.
-//     BitField<11>    type_5_color_calculation; ///< Color calculation for Type 5 sprites.
-//     BitField<0, 11> type_5_dot_color;         ///< Dot color for Type 5 sprites.
-//
-//     BitField<15>    type_6_shadow_palette;    ///< Shadow for Type 6 sprites on palette only fb.
-//     BitField<12, 3> type_6_priority;          ///< Priority for Type 6 sprites.
-//     BitField<10, 2> type_6_color_calculation; ///< Color calculation for Type 6 sprites.
-//     BitField<0, 10> type_6_dot_color;         ///< Dot color for Type 6 sprites.
-//
-//     BitField<15>    type_7_shadow_palette;    ///< Shadow for Type 7 sprites on palette only fb.
-//     BitField<12, 3> type_7_priority;          ///< Priority for Type 7 sprites.
-//     BitField<9, 3>  type_7_color_calculation; ///< Color calculation for Type 7 sprites.
-//     BitField<0, 9>  type_7_dot_color;         ///< Dot color for Type 7 sprites.
-//
-//     BitField<7>    type_8_priority;           ///< Priority for Type 8 sprites.
-//     BitField<0, 7> type_8_dot_color;          ///< Dot color for Type 8 sprites.
-//
-//     BitField<7>    type_9_priority;           ///< Priority for Type 9 sprites.
-//     BitField<6>    type_9_color_calculation;  ///< Color calculation for Type 9 sprites.
-//     BitField<0, 6> type_9_dot_color;          ///< Dot color for Type 9 sprites.
-//
-//     BitField<6, 2> type_a_priority;           ///< Priority for Type A sprites.
-//     BitField<0, 6> type_a_dot_color;          ///< Dot color for Type A sprites.
-//
-//     BitField<6, 2> type_b_color_calculation;  ///< Color calculation for Type B sprites.
-//     BitField<0, 6> type_b_dot_color;          ///< Dot color for Type B sprites.
-//
-//     BitField<7>    type_c_priority;           ///< Priority for Type C sprites.
-//     BitField<0, 8> type_c_dot_color;          ///< Dot color for Type C sprites.
-//
-//     BitField<7>    type_d_priority;           ///< Priority for Type D sprites.
-//     BitField<6>    type_d_color_calculation;  ///< Color calculation for Type D sprites.
-//     BitField<0, 8> type_d_dot_color;          ///< Dot color for Type D sprites.
-//
-//     BitField<6, 2> type_e_priority;           ///< Priority for Type E sprites.
-//     BitField<0, 8> type_e_dot_color;          ///< Dot color for Type E sprites.
-//
-//     BitField<6, 2> type_f_color_calculation;  ///< Color calculation for Type F sprites.
-//     BitField<0, 8> type_f_dot_color;          ///< Dot color for Type F sprites.
-//
-//     BitField<15> msb;                         ///< MSB, RGB or palette discriminant.
-// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	inline auto twosComplement(u16 value) -> s16
