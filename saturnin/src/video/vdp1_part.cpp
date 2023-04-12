@@ -27,7 +27,8 @@
 #include <saturnin/src/locale.h>    // tr
 #include <saturnin/src/utilities.h> // format, toUnderlying
 
-namespace uti = saturnin::utilities;
+namespace uti   = saturnin::utilities;
+namespace excpt = saturnin::exception;
 
 namespace saturnin::video {
 
@@ -42,12 +43,12 @@ constexpr auto horizontal_multiplier = u8{8};
 s16 Vdp1Part::local_coordinate_x_;
 s16 Vdp1Part::local_coordinate_y_;
 
-Vdp1Part::Vdp1Part(EmulatorModules&   modules,
-                   const DrawType     type,
-                   const u32          table_address,
-                   const CmdCtrlType& cmdctrl,
-                   const CmdLinkType& cmdlink,
-                   const ColorF&      color_offset) :
+Vdp1Part::Vdp1Part(const EmulatorModules& modules,
+                   const DrawType         type,
+                   const u32              table_address,
+                   const CmdCtrlType&     cmdctrl,
+                   const CmdLinkType&     cmdlink,
+                   const ColorF&          color_offset) :
     BaseRenderingPart(VdpType::vdp1, type, 0, 0, color_offset) {
     cmdctrl_       = cmdctrl;
     cmdlink_       = cmdlink;
@@ -594,7 +595,7 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     const auto coords = getTextureCoordinates(part.cmdctrl_ >> CmdCtrl::dir_enum);
     if (coords.size() != 4) {
         Log::error(Logger::vdp1, tr("VDP1 normal sprite draw coordinates error"));
-        throw std::runtime_error("VDP1 normal sprite draw coordinates error !");
+        throw excpt::Vdp1Error("VDP1 normal sprite draw coordinates error !");
     }
     // part.vertexes_.emplace_back(Vertex{a, coords[0], {color.r, color.g, color.b, color.a}, gouraud_values[0]}); // lower left
     // part.vertexes_.emplace_back(Vertex{b, coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
@@ -711,7 +712,7 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     const auto coords = getTextureCoordinates(part.cmdctrl_ >> CmdCtrl::dir_enum);
     if (coords.size() != 4) {
         Log::error(Logger::vdp1, tr("VDP1 scaled sprite draw coordinates error"));
-        throw std::runtime_error("VDP1 scaled sprite draw coordinates error !");
+        throw excpt::Vdp1Error("VDP1 scaled sprite draw coordinates error !");
     }
 
     auto       color          = Color{u16{}};
@@ -769,7 +770,7 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     const auto coords = getTextureCoordinates(part.cmdctrl_ >> CmdCtrl::dir_enum);
     if (coords.size() != 4) {
         Log::error(Logger::vdp1, tr("VDP1 distorted sprite draw coordinates error"));
-        throw std::runtime_error("VDP1 distorted sprite draw coordinates error !");
+        throw excpt::Vdp1Error("VDP1 distorted sprite draw coordinates error !");
     }
 
     const auto gouraud_values = readGouraudData(modules, part);
@@ -1081,7 +1082,7 @@ auto getTextureCoordinates(const CmdCtrl::CharacterReadDirection crd) -> std::ve
     return coords;
 }
 
-void checkColorCalculation(Vdp1Part& part) {
+void checkColorCalculation(const Vdp1Part& part) {
     switch (part.cmdpmod_ >> CmdPmod::cc_enum) {
         using enum CmdPmod::ColorCalculation;
         case mode_0: break;

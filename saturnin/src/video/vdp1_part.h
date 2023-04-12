@@ -78,20 +78,18 @@ class Vdp1Part final : public BaseRenderingPart {
     ///@{
     /// Constructors / Destructors
     Vdp1Part() = default;
-    Vdp1Part(EmulatorModules&   modules,
-             const DrawType     type,
-             const u32          table_address,
-             const CmdCtrlType& cmdctrl,
-             const CmdLinkType& cmdlink,
-             const ColorF&      color_offset);
+    Vdp1Part(const EmulatorModules& modules,
+             const DrawType         type,
+             const u32              table_address,
+             const CmdCtrlType&     cmdctrl,
+             const CmdLinkType&     cmdlink,
+             const ColorF&          color_offset);
     Vdp1Part(const Vdp1Part&)                      = default;
     Vdp1Part(Vdp1Part&&)                           = default;
     auto operator=(const Vdp1Part&) & -> Vdp1Part& = default;
     auto operator=(Vdp1Part&&) & -> Vdp1Part&      = default;
-    ~Vdp1Part()                                    = default;
+    ~Vdp1Part() override                           = default;
     ///@}
-
-    // void renderPart(){};
 
     static void SetLocalCoordinates(const s16 x, const s16 y);
 
@@ -414,13 +412,12 @@ void readDotColorBank256(const EmulatorModules& modules,
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readDotRgb(const EmulatorModules& modules, std::vector<u8>& texture_data, const u16
-/// color_ram_offset, Vdp1Part& part, const u8 dot)
+/// \fn template<typename T> void readDotRgb(std::vector<u8>& texture_data, const u16
+/// color_ram_offset, const Vdp1Part& part, const u8 dot)
 ///
 /// \brief  Reads one dot in RGB 32K colors format.
 ///
 /// \tparam T   Generic type parameter.
-/// \param          modules             Emulator modules.
 /// \param [in,out] texture_data        Raw texture data.
 /// \param          color_ram_offset    The color ram offset.
 /// \param [in,out] part                The Vdp1Part being processed.
@@ -428,18 +425,18 @@ void readDotColorBank256(const EmulatorModules& modules,
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-void readDotRgb(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u16 dot) {
+void readDotRgb(std::vector<u8>& texture_data, const Vdp1Part& part, const u16 dot) {
     auto color = Color(dot);
 
     // Checking transparency.
-    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
-        if (!dot) color.a = 0;
+    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled && !dot) {
+        color.a = 0;
     }
 
     texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
 };
 
-void checkColorCalculation(Vdp1Part& part);
+void checkColorCalculation(const Vdp1Part& part);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T> void readColorBankMode16Colors(const Memory* m, std::vector<u8>& texture_data, const u32
@@ -745,8 +742,8 @@ void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_d
     auto       row      = DataExtraction{};
     for (u32 i = start_address; i < max_size; i += one_read_offset_in_bytes) {
         row.as_16bits = modules.memory()->read<u32>(i);
-        readDotRgb<T>(modules, texture_data, part, row.as_16bits >> DataExtraction::As16Bits::dot0_shift);
-        readDotRgb<T>(modules, texture_data, part, row.as_16bits >> DataExtraction::As16Bits::dot1_shift);
+        readDotRgb<T>(texture_data, part, row.as_16bits >> DataExtraction::As16Bits::dot0_shift);
+        readDotRgb<T>(texture_data, part, row.as_16bits >> DataExtraction::As16Bits::dot1_shift);
     }
 }
 

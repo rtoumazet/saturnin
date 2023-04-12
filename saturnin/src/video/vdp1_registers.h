@@ -718,15 +718,6 @@ struct CmdSize {
 
     GENERATE_BIT_WITHOUT_ENUM(chszy, 0, 0xFF); ///< Character Size Y.
     GENERATE_BIT_WITHOUT_ENUM(chszx, 8, 0x3F); ///< Character Size X divided by 8.
-
-    // static constexpr auto chszy_pos = PosType(0);
-    // static constexpr auto chszx_pos = PosType(8); ///< Character Size X divided by 8.
-
-    // static constexpr auto chszy_mask = 0xFF;
-    // static constexpr auto chszx_mask = 0x3F;
-
-    // static constexpr auto chszy_shft = ShiftedType(chszy_mask, chszy_pos);
-    // static constexpr auto chszx_shft = ShiftedType(chszx_mask, chszx_pos);
 };
 using CmdSizeType = Reg<u16, CmdSize>;
 
