@@ -60,7 +60,7 @@ class Vdp2Part final : public BaseRenderingPart {
     Vdp2Part(Vdp2Part&&)                           = default;
     auto operator=(const Vdp2Part&) & -> Vdp2Part& = default;
     auto operator=(Vdp2Part&&) & -> Vdp2Part&      = default;
-    ~Vdp2Part()                                    = default;
+    ~Vdp2Part() override                           = default;
     ///@}
 
   private:

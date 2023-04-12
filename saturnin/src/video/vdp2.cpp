@@ -1228,9 +1228,7 @@ void Vdp2::screenInDebug(const ScrollScreen s) { screen_in_debug_ = s; }
 // MISC methods
 //--------------------------------------------------------------------------------------------------------------
 
-void Vdp2::addToRegisterNameMap(const u32 addr, const std::string& name) {
-    address_to_name_.insert(AddressToNameMap::value_type(addr, name));
-}
+void Vdp2::addToRegisterNameMap(const u32 addr, const std::string& name) { address_to_name_.try_emplace(addr, name); }
 
 void Vdp2::initializeRegisterNameMap() {
     addToRegisterNameMap(tv_screen_mode, "TV Screen Mode");
