@@ -34,10 +34,10 @@
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
 #include <saturnin/src/memory.h>
-#include <saturnin/src/thread_pool.h> // ThreadPool
-#include <saturnin/src/utilities.h>   // toUnderlying
+#include <saturnin/src/thread_pool.h>      // ThreadPool
+#include <saturnin/src/utilities.h>        // toUnderlying
 #include <saturnin/src/video/vdp_common.h>
-#include <saturnin/src/video/vdp2_part.h> // ScrollScreenPos
+#include <saturnin/src/video/vdp2_part.h>  // ScrollScreenPos
 #include <saturnin/src/video/vdp2_registers.h>
 
 // Forward declarations
@@ -288,10 +288,10 @@ struct ColorOffset {
 /// \date   23/02/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScrollScreenStatus {
-    ScrollScreen scroll_screen{};                    ///< The scroll screen value
-    bool         is_display_enabled{};               ///< True when displayed.
-    bool         is_transparency_code_valid{};       ///< True when transparency code is valid.
-    bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
+    ScrollScreen scroll_screen{};                                   ///< The scroll screen value
+    bool         is_display_enabled{};                              ///< True when displayed.
+    bool         is_transparency_code_valid{};                      ///< True when transparency code is valid.
+    bool         is_transparency_code_valid_dirty{};                ///< True when transparency code was changed.
 
     ScrollScreenFormat format{ScrollScreenFormat::cell};            ///< Cell or bitmap.
     ColorCount         character_color_number{ColorCount::not_set}; ///< Color number.
@@ -327,10 +327,10 @@ struct ScrollScreenStatus {
     ScreenOffset character_pattern_screen_offset{}; ///< Offset of one character pattern in cell units.
     ScreenOffset cell_screen_offset{8, 8};          ///< Offset of one cell in cell units.
 
-    u32 plane_a_start_address{}; ///< The plane A start address
-    u32 plane_b_start_address{}; ///< The plane B start address
-    u32 plane_c_start_address{}; ///< The plane C start address
-    u32 plane_d_start_address{}; ///< The plane D start address
+    u32 plane_a_start_address{};                    ///< The plane A start address
+    u32 plane_b_start_address{};                    ///< The plane B start address
+    u32 plane_c_start_address{};                    ///< The plane C start address
+    u32 plane_d_start_address{};                    ///< The plane D start address
 
     // Rotation specifics
     u32 plane_e_start_address{}; ///< The plane E start address
@@ -358,8 +358,8 @@ struct ScrollScreenStatus {
     bool        is_color_offset_enabled{}; ///< True when color offset is enabled.
     ColorOffset color_offset;              ///< Color offset data.
 
-    u16 total_screen_scroll_width{};  ///< Width of the screen scroll in pixels.
-    u16 total_screen_scroll_height{}; ///< Height of the screen scroll in pixels.
+    u16 total_screen_scroll_width{};       ///< Width of the screen scroll in pixels.
+    u16 total_screen_scroll_height{};      ///< Height of the screen scroll in pixels.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -402,151 +402,169 @@ struct CellData {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PatternNameData2Words
+/// \struct	PatternNameData2Words
 ///
 /// \brief	Pattern Name Data - 2 words configuration.
 ///
 /// \author	Runik
-/// \date	22/01/2022
+/// \date	12/04/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameData2Words {
-    u32             raw;                       ///< Raw representation.
-    BitField<31>    vertical_flip;             ///< Defines the vertical flip bit.
-    BitField<30>    horizontal_flip;           ///< Defines the horizontal flip bit.
-    BitField<29>    special_priority;          ///< Defines the special priority bit.
-    BitField<28>    special_color_calculation; ///< Defines the special color calculation bit.
-    BitField<16, 7> palette_number;            ///< Defines the palette number.
-    BitField<0, 15> character_number;          ///< Defines the character number.
+struct PatternNameData2Words {
+    GENERATE_USING(PatternNameData2Words, u32);
+
+    GENERATE_BIT_WITHOUT_ENUM(vertical_flip, 31, 0x1);             ///< Defines the vertical flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(horizontal_flip, 30, 0x1);           ///< Defines the horizontal flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(special_priority, 29, 0x1);          ///< Defines the special priority bit.
+    GENERATE_BIT_WITHOUT_ENUM(special_color_calculation, 28, 0x1); ///< Defines the special color calculation bit.
+    GENERATE_BIT_WITHOUT_ENUM(palette_number, 16, 0x7F);           ///< Defines the palette number.
+    GENERATE_BIT_WITHOUT_ENUM(character_number, 0, 0x7FFF);        ///< Defines the character number.
 };
+using PatternNameData2WordsType = Reg<u32, PatternNameData2Words>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PatternNameData1Word1Cell16Colors10Bits
+/// \struct	PatternNameData1Word1Cell16Colors10Bits
 ///
 /// \brief	Pattern Name Data - 1 word, 1 cell, 16 colors, 10 bits configuration.
 ///
 /// \author	Runik
-/// \date	22/01/2022
+/// \date	12/04/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameData1Word1Cell16Colors10Bits {
-    u32             raw;              ///< Raw representation.
-    BitField<11>    vertical_flip;    ///< Defines the vertical flip bit.
-    BitField<10>    horizontal_flip;  ///< Defines the horizontal flip bit.
-    BitField<12, 4> palette_number;   ///< Defines the palette number.
-    BitField<0, 10> character_number; ///< Defines the character number.
+struct PatternNameData1Word1Cell16Colors10Bits {
+    GENERATE_USING(PatternNameData1Word1Cell16Colors10Bits, u32);
+
+    GENERATE_BIT_WITHOUT_ENUM(palette_number, 12, 0b1111); ///< Defines the palette number.
+    GENERATE_BIT_WITHOUT_ENUM(vertical_flip, 11, 0b1);     ///< Defines the vertical flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(horizontal_flip, 10, 0b1);   ///< Defines the horizontal flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(character_number, 0, 0x3FF); ///< Defines the character number.
 };
+using PatternNameData1Word1Cell16Colors10BitsType = Reg<u32, PatternNameData1Word1Cell16Colors10Bits>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PatternNameData1Word1Cell16Colors12Bits
+/// \struct	PatternNameData1Word1Cell16Colors12Bits
 ///
 /// \brief	Pattern Name Data - 1 word, 1 cell, 16 colors, 12 bits configuration.
 ///
 /// \author	Runik
-/// \date	22/01/2022
+/// \date	13/04/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameData1Word1Cell16Colors12Bits {
-    u32             raw;              ///< Raw representation.
-    BitField<12, 4> palette_number;   ///< Defines the palette number.
-    BitField<0, 12> character_number; ///< Defines the character number.
+struct PatternNameData1Word1Cell16Colors12Bits {
+    GENERATE_USING(PatternNameData1Word1Cell16Colors12Bits, u32);
+
+    GENERATE_BIT_WITHOUT_ENUM(palette_number, 12, 0b1111); ///< Defines the palette number.
+    GENERATE_BIT_WITHOUT_ENUM(character_number, 0, 0xFFF); ///< Defines the character number.
 };
+using PatternNameData1Word1Cell16Colors12BitsType = Reg<u32, PatternNameData1Word1Cell16Colors12Bits>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PatternNameData1Word1CellOver16Colors10Bits
+/// \struct	PatternNameData1Word1CellOver16Colors10Bits
 ///
 /// \brief	Pattern Name Data - 1 word, 1 cell, over 16 colors, 10 bits configuration.
 ///
 /// \author	Runik
-/// \date	22/01/2022
+/// \date	13/04/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameData1Word1CellOver16Colors10Bits {
-    u32             raw;              ///< Raw representation.
-    BitField<11>    vertical_flip;    ///< Defines the vertical flip bit.
-    BitField<10>    horizontal_flip;  ///< Defines the horizontal flip bit.
-    BitField<12, 3> palette_number;   ///< Defines the palette number.
-    BitField<0, 10> character_number; ///< Defines the character number.
+struct PatternNameData1Word1CellOver16Colors10Bits {
+    GENERATE_USING(PatternNameData1Word1CellOver16Colors10Bits, u32);
+
+    GENERATE_BIT_WITHOUT_ENUM(palette_number, 12, 0b111);  ///< Defines the palette number.
+    GENERATE_BIT_WITHOUT_ENUM(vertical_flip, 11, 0b1);     ///< Defines the vertical flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(horizontal_flip, 10, 0b1);   ///< Defines the horizontal flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(character_number, 0, 0x3FF); ///< Defines the character number.
 };
+using PatternNameData1Word1CellOver16Colors10BitsType = Reg<u32, PatternNameData1Word1CellOver16Colors10Bits>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PatternNameData1Word1CellOver16Colors12Bits
+/// \struct	PatternNameData1Word1CellOver16Colors12Bits
 ///
 /// \brief	Pattern Name Data - 1 word, 1 cell, over 16 colors, 10 bits configuration.
 ///
 /// \author	Runik
-/// \date	22/01/2022
+/// \date	13/04/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameData1Word1CellOver16Colors12Bits {
-    u32             raw;              ///< Raw representation.
-    BitField<12, 3> palette_number;   ///< Defines the palette number.
-    BitField<0, 12> character_number; ///< Defines the character number.
+struct PatternNameData1Word1CellOver16Colors12Bits {
+    GENERATE_USING(PatternNameData1Word1CellOver16Colors12Bits, u32);
+
+    GENERATE_BIT_WITHOUT_ENUM(palette_number, 12, 0b111);  ///< Defines the palette number.
+    GENERATE_BIT_WITHOUT_ENUM(character_number, 0, 0xFFF); ///< Defines the character number.
 };
+using PatternNameData1Word1CellOver16Colors12BitsType = Reg<u32, PatternNameData1Word1CellOver16Colors12Bits>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PatternNameData1Word4Cells16Colors10Bits
+/// \struct	PatternNameData1Word4Cells16Colors10Bits
 ///
 /// \brief	Pattern Name Data - 1 word, 4 cells, 16 colors, 10 bits configuration.
 ///
 /// \author	Runik
-/// \date	22/01/2022
+/// \date	13/04/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameData1Word4Cells16Colors10Bits {
-    u32             raw;              ///< Raw representation.
-    BitField<11>    vertical_flip;    ///< Defines the vertical flip bit.
-    BitField<10>    horizontal_flip;  ///< Defines the horizontal flip bit.
-    BitField<12, 4> palette_number;   ///< Defines the palette number.
-    BitField<0, 10> character_number; ///< Defines the character number.
+struct PatternNameData1Word4Cells16Colors10Bits {
+    GENERATE_USING(PatternNameData1Word4Cells16Colors10Bits, u32);
+
+    GENERATE_BIT_WITHOUT_ENUM(palette_number, 12, 0b1111); ///< Defines the palette number.
+    GENERATE_BIT_WITHOUT_ENUM(vertical_flip, 11, 0b1);     ///< Defines the vertical flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(horizontal_flip, 10, 0b1);   ///< Defines the horizontal flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(character_number, 0, 0x3FF); ///< Defines the character number.
 };
+using PatternNameData1Word4Cells16Colors10BitsType = Reg<u32, PatternNameData1Word4Cells16Colors10Bits>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PatternNameData1Word4Cells16Colors12Bits
+/// \struct	PatternNameData1Word4Cells16Colors12Bits
 ///
 /// \brief	Pattern Name Data - 1 word, 4 cells, 16 colors, 12 bits configuration.
 ///
 /// \author	Runik
-/// \date	22/01/2022
+/// \date	13/04/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameData1Word4Cells16Colors12Bits {
-    u32             raw;              ///< Raw representation.
-    BitField<12, 4> palette_number;   ///< Defines the palette number.
-    BitField<0, 12> character_number; ///< Defines the character number.
+struct PatternNameData1Word4Cells16Colors12Bits {
+    GENERATE_USING(PatternNameData1Word4Cells16Colors12Bits, u32);
+
+    GENERATE_BIT_WITHOUT_ENUM(palette_number, 12, 0b1111); ///< Defines the palette number.
+    GENERATE_BIT_WITHOUT_ENUM(character_number, 0, 0xFFF); ///< Defines the character number.
 };
+using PatternNameData1Word4Cells16Colors12BitsType = Reg<u32, PatternNameData1Word4Cells16Colors12Bits>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PatternNameData1Word4CellsOver16Colors10Bits
+/// \struct	PatternNameData1Word4CellsOver16Colors10Bits
 ///
-/// \brief  Pattern Name Data - 1 word, 4 cells, over 16 colors, 10 bits configuration.
+/// \brief	Pattern Name Data - 1 word, 4 cells, over 16 colors, 10 bits configuration.
 ///
-/// \author Runik
-/// \date   15/03/2021
+/// \author	Runik
+/// \date	13/04/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameData1Word4CellsOver16Colors10Bits {
-    u32             raw;              ///< Raw representation.
-    BitField<11>    vertical_flip;    ///< Defines the vertical flip bit.
-    BitField<10>    horizontal_flip;  ///< Defines the horizontal flip bit.
-    BitField<12, 3> palette_number;   ///< Defines the palette number.
-    BitField<0, 10> character_number; ///< Defines the character number.
+struct PatternNameData1Word4CellsOver16Colors10Bits {
+    GENERATE_USING(PatternNameData1Word4CellsOver16Colors10Bits, u32);
+
+    GENERATE_BIT_WITHOUT_ENUM(palette_number, 12, 0b111);  ///< Defines the palette number.
+    GENERATE_BIT_WITHOUT_ENUM(vertical_flip, 11, 0b1);     ///< Defines the vertical flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(horizontal_flip, 10, 0b1);   ///< Defines the horizontal flip bit.
+    GENERATE_BIT_WITHOUT_ENUM(character_number, 0, 0x3FF); ///< Defines the character number.
 };
+using PatternNameData1Word4CellsOver16Colors10BitsType = Reg<u32, PatternNameData1Word4CellsOver16Colors10Bits>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PatternNameData1Word4CellsOver16Colors12Bits
+/// \struct	PatternNameData1Word4CellsOver16Colors12Bits
 ///
 /// \brief	Pattern Name Data - 1 word, 4 cells, 16 colors, 12 bits configuration.
 ///
 /// \author	Runik
-/// \date	22/01/2022
+/// \date	13/04/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameData1Word4CellsOver16Colors12Bits {
-    u32             raw;              ///< Raw representation.
-    BitField<12, 3> palette_number;   ///< Defines the palette number.
-    BitField<0, 12> character_number; ///< Defines the character number.
+struct PatternNameData1Word4CellsOver16Colors12Bits {
+    GENERATE_USING(PatternNameData1Word4CellsOver16Colors12Bits, u32);
+
+    GENERATE_BIT_WITHOUT_ENUM(palette_number, 12, 0b111);  ///< Defines the palette number.
+    GENERATE_BIT_WITHOUT_ENUM(character_number, 0, 0xFFF); ///< Defines the character number.
 };
+using PatternNameData1Word4CellsOver16Colors12BitsType = Reg<u32, PatternNameData1Word4CellsOver16Colors12Bits>;
 
 class Vdp2 {
   public:
@@ -1737,38 +1755,38 @@ class Vdp2 {
 
     EmulatorModules modules_;
 
-    AddressToNameMap address_to_name_; ///< Link between a register address and its name.
+    AddressToNameMap address_to_name_;           ///< Link between a register address and its name.
 
-    u32 elapsed_frame_cycles_{}; ///< Elapsed cycles for the current frame.
-    u32 elapsed_line_cycles_{};  ///< Elapsed cycles for the current line.
+    u32 elapsed_frame_cycles_{};                 ///< Elapsed cycles for the current frame.
+    u32 elapsed_line_cycles_{};                  ///< Elapsed cycles for the current line.
 
-    u32 cycles_per_frame_{};   ///< Number of SH2 cycles needed to display one frame (active + blanking).
-    u32 cycles_per_vblank_{};  ///< Number of SH2 cycles needed for VBlank duration.
-    u32 cycles_per_vactive_{}; ///< Number of SH2 cycles needed to display the visible part of the frame
+    u32 cycles_per_frame_{};                     ///< Number of SH2 cycles needed to display one frame (active + blanking).
+    u32 cycles_per_vblank_{};                    ///< Number of SH2 cycles needed for VBlank duration.
+    u32 cycles_per_vactive_{};                   ///< Number of SH2 cycles needed to display the visible part of the frame
 
-    u32 cycles_per_line_{};    ///< Number of SH2 cycles needed to display one line (active + blanking).
-    u32 cycles_per_hblank_{};  ///< Number of SH2 cycles needed for HBlank duration.
-    u32 cycles_per_hactive_{}; ///< Number of SH2 cycles needed to display the visible part of a line.
+    u32 cycles_per_line_{};                      ///< Number of SH2 cycles needed to display one line (active + blanking).
+    u32 cycles_per_hblank_{};                    ///< Number of SH2 cycles needed for HBlank duration.
+    u32 cycles_per_hactive_{};                   ///< Number of SH2 cycles needed to display the visible part of a line.
 
-    bool is_vblank_current_{}; ///< True if VBlank is current.
-    bool is_hblank_current_{}; ///< True if HBlank is current.
+    bool is_vblank_current_{};                   ///< True if VBlank is current.
+    bool is_hblank_current_{};                   ///< True if HBlank is current.
 
-    u16 timer_0_counter_{}; ///< Timer 0 counter.
-    u16 timer_1_counter_{}; ///< Timer 1 counter.
+    u16 timer_0_counter_{};                      ///< Timer 0 counter.
+    u16 timer_1_counter_{};                      ///< Timer 1 counter.
 
-    TvScreenStatus tv_screen_status_; ///< The TV screen status.
-    RamStatus      ram_status_;       ///< The RAM status
+    TvScreenStatus tv_screen_status_;            ///< The TV screen status.
+    RamStatus      ram_status_;                  ///< The RAM status
 
     std::array<ScrollScreenStatus, 6> bg_;       ///< The backgrounds status.
     std::array<ScrollScreenStatus, 6> saved_bg_; /// \brief  The backgrounds status from the previous frame.
 
     // Pre calculated modulo values used for character patterns positionning
-    std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
-    std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
+    std::vector<u32> pre_calculated_modulo_64_{};              ///< The pre calculated modulo 64
+    std::vector<u32> pre_calculated_modulo_32_{};              ///< The pre calculated modulo 32
 
-    Mutex                 vdp2_parts_mutex_;     ///< Mutex to handle access to the shared vector between threads.
-    std::vector<Vdp2Part> vdp2_parts_[6];        ///< Storage of rendering parts for each scroll cell.
-    std::vector<CellData> cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
+    Mutex                 vdp2_parts_mutex_;                   ///< Mutex to handle access to the shared vector between threads.
+    std::vector<Vdp2Part> vdp2_parts_[6];                      ///< Storage of rendering parts for each scroll cell.
+    std::vector<CellData> cell_data_to_process_;               ///< Will store cell data before parallelized read for one scroll.
 
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.

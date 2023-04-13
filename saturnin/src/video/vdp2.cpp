@@ -1923,13 +1923,13 @@ auto Vdp2::getVramBitmapReads(const VramTiming&       bank_a0,
                               const VramTiming&       bank_b0,
                               const VramTiming&       bank_b1,
                               const VramAccessCommand command) const -> u8 {
-    auto bitmap_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
+    auto bitmap_reads = std::ranges::count(bank_a0, command);
     if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks) {
-        bitmap_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
+        bitmap_reads += std::ranges::count(bank_a1, command);
     }
-    bitmap_reads += std::count(bank_b0.begin(), bank_b0.end(), command);
+    bitmap_reads += std::ranges::count(bank_b0, command);
     if (toEnum<VramMode>(ramctl_.vram_b_mode) == VramMode::partition_in_2_banks) {
-        bitmap_reads += std::count(bank_b1.begin(), bank_b1.end(), command);
+        bitmap_reads += std::ranges::count(bank_b1, command);
     }
     return static_cast<u8>(bitmap_reads);
 }
@@ -1955,16 +1955,16 @@ auto Vdp2::getVramPatternNameDataReads(const VramTiming&       bank_a0,
     auto pnd_reads = ptrdiff_t{};
     if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks
         && (toEnum<VramMode>(ramctl_.vram_b_mode) == VramMode::partition_in_2_banks)) {
-        auto pnd_reads_bank_0 = std::count(bank_a0.begin(), bank_a0.end(), command);
-        pnd_reads_bank_0 += std::count(bank_b0.begin(), bank_b0.end(), command);
+        auto pnd_reads_bank_0 = std::ranges::count(bank_a0, command);
+        pnd_reads_bank_0 += std::ranges::count(bank_b0, command);
 
-        auto pnd_reads_bank_1 = std::count(bank_a1.begin(), bank_a1.end(), command);
-        pnd_reads_bank_1 += std::count(bank_b1.begin(), bank_b1.end(), command);
+        auto pnd_reads_bank_1 = std::ranges::count(bank_a1, command);
+        pnd_reads_bank_1 += std::ranges::count(bank_b1, command);
 
         pnd_reads = (pnd_reads_bank_0 > pnd_reads_bank_1) ? pnd_reads_bank_0 : pnd_reads_bank_1;
     } else {
-        pnd_reads += std::count(bank_a0.begin(), bank_a0.end(), command);
-        pnd_reads += std::count(bank_b0.begin(), bank_b0.end(), command);
+        pnd_reads += std::ranges::count(bank_a0, command);
+        pnd_reads += std::ranges::count(bank_b0, command);
     }
     return static_cast<u8>(pnd_reads);
 }
@@ -2143,7 +2143,7 @@ void Vdp2::setCharacterPatternLimitations(const bool                            
     constexpr auto t7 = u8{7};
 
     // For each pnd access set, allowed timing is set for cpd
-    auto it = std::find(pnd_access.begin(), pnd_access.end(), true);
+    auto it = std::ranges::find(pnd_access, true);
     while (it != pnd_access.end()) {
         switch (std::distance(pnd_access.begin(), it)) {
             case t0: {
@@ -2274,10 +2274,10 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
     // observe selection limits for every access.
     auto are_limitations_applied = bool{true};
     if (reduction == ReductionSetting::none) {
-        auto unlimited_cpd_reads = std::count(bank_a0.begin(), bank_a0.end(), command);
-        unlimited_cpd_reads += std::count(bank_b0.begin(), bank_b0.end(), command);
-        unlimited_cpd_reads += std::count(bank_a1.begin(), bank_a1.end(), command);
-        unlimited_cpd_reads += std::count(bank_b1.begin(), bank_b1.end(), command);
+        auto unlimited_cpd_reads = std::ranges::count(bank_a0, command);
+        unlimited_cpd_reads += std::ranges::count(bank_b0, command);
+        unlimited_cpd_reads += std::ranges::count(bank_a1, command);
+        unlimited_cpd_reads += std::ranges::count(bank_b1, command);
         if (unlimited_cpd_reads < 2) { are_limitations_applied = false; }
     }
 
@@ -2302,7 +2302,7 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
 
         // Step 3 : get the reads
         // First access not available are changed to no access
-        auto it = std::find(allowed_cpd_timing.begin(), allowed_cpd_timing.end(), false);
+        auto it = std::ranges::find(allowed_cpd_timing, false);
         while (it != allowed_cpd_timing.end()) {
             limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
             limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
@@ -2313,10 +2313,10 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
         }
     }
     // Counting cpd access
-    auto cpd_reads = std::count(limited_bank_a0.begin(), limited_bank_a0.end(), command);
-    cpd_reads += std::count(limited_bank_b0.begin(), limited_bank_b0.end(), command);
-    cpd_reads += std::count(limited_bank_a1.begin(), limited_bank_a1.end(), command);
-    cpd_reads += std::count(limited_bank_b1.begin(), limited_bank_b1.end(), command);
+    auto cpd_reads = std::ranges::count(limited_bank_a0, command);
+    cpd_reads += std::ranges::count(limited_bank_b0, command);
+    cpd_reads += std::ranges::count(limited_bank_a1, command);
+    cpd_reads += std::ranges::count(limited_bank_b1, command);
 
     return static_cast<u8>(cpd_reads);
 };
@@ -2395,16 +2395,14 @@ auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
         }
         case nbg2: {
             const auto colors_preventing_display = std::array{ColorCount::palette_2048, ColorCount::rgb_32k, ColorCount::rgb_16m};
-            return std::none_of(colors_preventing_display.begin(),
-                                colors_preventing_display.end(),
-                                [&nbg0_color_nb](const ColorCount cc) { return cc == nbg0_color_nb; });
+            return std::ranges::none_of(colors_preventing_display,
+                                        [&nbg0_color_nb](const ColorCount cc) { return cc == nbg0_color_nb; });
         }
         case nbg3: {
             if (nbg0_color_nb == ColorCount::rgb_16m) { return false; }
             const auto colors_preventing_display = std::array{ColorCount::palette_2048, ColorCount::rgb_32k};
-            return std::none_of(colors_preventing_display.begin(),
-                                colors_preventing_display.end(),
-                                [&nbg1_color_nb](const ColorCount cc) { return cc == nbg1_color_nb; });
+            return std::ranges::none_of(colors_preventing_display,
+                                        [&nbg1_color_nb](const ColorCount cc) { return cc == nbg1_color_nb; });
         }
         default: return true;
     }
@@ -3212,7 +3210,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         const auto offset_x         = screen.plane_screen_offset.x;
         const auto offset_y         = screen.plane_screen_offset.y;
         const auto rotation_screens = std::array{ScrollScreen::rbg0, ScrollScreen::rbg1};
-        if (std::none_of(rotation_screens.begin(), rotation_screens.end(), [&s](const ScrollScreen rss) { return rss == s; })) {
+        if (std::ranges::none_of(rotation_screens, [&s](const ScrollScreen rss) { return rss == s; })) {
             // For NBG
             addPlane(screen.plane_a_start_address, ScreenOffset{0, 0});
             addPlane(screen.plane_b_start_address, ScreenOffset{offset_x, 0});
@@ -3957,48 +3955,47 @@ void Vdp2::discardCache([[maybe_unused]] const ScrollScreen screen) const {
 
 auto getPatternNameData2Words(const u32 data, [[maybe_unused]] const ScrollScreenStatus& screen) -> PatternNameData {
     auto pattern_name_data                      = PatternNameData{};
-    auto reg                                    = PatternNameData2Words{data};
-    pattern_name_data.character_number          = reg.character_number;
-    pattern_name_data.palette_number            = reg.palette_number;
-    pattern_name_data.special_color_calculation = static_cast<u8>(static_cast<bool>(reg.special_color_calculation));
-    pattern_name_data.special_priority          = static_cast<u8>(static_cast<bool>(reg.special_priority));
-    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
+    auto reg                                    = PatternNameData2WordsType{data};
+    pattern_name_data.character_number          = static_cast<u16>(reg >> PatternNameData2Words::character_number_shft);
+    pattern_name_data.palette_number            = static_cast<u16>(reg >> PatternNameData2Words::palette_number_shft);
+    pattern_name_data.special_color_calculation = static_cast<u8>(reg >> PatternNameData2Words::special_color_calculation_shft);
+    pattern_name_data.special_priority          = static_cast<u8>(reg >> PatternNameData2Words::special_priority_shft);
+    pattern_name_data.is_horizontally_flipped   = reg >> PatternNameData2Words::horizontal_flip_shft;
+    pattern_name_data.is_vertically_flipped     = reg >> PatternNameData2Words::vertical_flip_shft;
     return pattern_name_data;
 };
 
 auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
+    using std::byte;
     auto pattern_name_data = PatternNameData{};
-    auto reg               = PatternNameData1Word1Cell16Colors10Bits{data};
+    auto reg               = PatternNameData1Word1Cell16Colors10BitsType{data};
 
-    constexpr auto cn_disp             = u8{10};
-    pattern_name_data.character_number = (screen.supplementary_character_number << cn_disp);
-    pattern_name_data.character_number |= reg.character_number;
+    pattern_name_data.character_number = static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) << 10);
+    pattern_name_data.character_number |= reg >> PatternNameData1Word1Cell16Colors10Bits::character_number_shft;
 
-    constexpr auto pn_disp           = u8{4};
-    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-    pattern_name_data.palette_number |= reg.palette_number;
+    pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 4);
+    pattern_name_data.palette_number |= reg >> PatternNameData1Word1Cell16Colors10Bits::palette_number_shft;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
-    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
+    pattern_name_data.is_horizontally_flipped   = reg >> PatternNameData1Word1Cell16Colors10Bits::horizontal_flip_shft;
+    pattern_name_data.is_vertically_flipped     = reg >> PatternNameData1Word1Cell16Colors10Bits::vertical_flip_shft;
 
     return pattern_name_data;
 };
 
 auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
+    using std::byte;
+
     auto pattern_name_data = PatternNameData{};
-    auto reg               = PatternNameData1Word1Cell16Colors12Bits{data};
+    auto reg               = PatternNameData1Word1Cell16Colors12BitsType{data};
 
-    constexpr auto cn_disp             = u8{10};
-    constexpr auto cn_mask             = u8{0x1C};
-    pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
-    pattern_name_data.character_number |= reg.character_number;
+    pattern_name_data.character_number
+        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x1C}) << 10);
+    pattern_name_data.character_number |= reg >> PatternNameData1Word1Cell16Colors12Bits::character_number_shft;
 
-    constexpr auto pn_disp           = u8{4};
-    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-    pattern_name_data.palette_number |= reg.palette_number;
+    pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 4);
+    pattern_name_data.palette_number |= reg >> PatternNameData1Word1Cell16Colors12Bits::palette_number_shft;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
@@ -4009,35 +4006,37 @@ auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScre
 };
 
 auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
+    using std::byte;
+
     auto pattern_name_data = PatternNameData{};
-    auto reg               = PatternNameData1Word1CellOver16Colors10Bits{data};
+    auto reg               = PatternNameData1Word1CellOver16Colors10BitsType{data};
 
-    constexpr auto cn_disp             = u8{10};
-    pattern_name_data.character_number = (reg.palette_number << cn_disp);
-    pattern_name_data.character_number |= reg.character_number;
+    pattern_name_data.character_number
+        = static_cast<u16>(reg >> PatternNameData1Word1CellOver16Colors10Bits::palette_number_shft << 10);
+    pattern_name_data.character_number |= reg >> PatternNameData1Word1CellOver16Colors10Bits::character_number_shft;
 
-    constexpr auto pn_disp           = u8{8};
-    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
+    pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 8);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
-    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
+    pattern_name_data.is_horizontally_flipped   = reg >> PatternNameData1Word1CellOver16Colors10Bits::horizontal_flip_shft;
+    pattern_name_data.is_vertically_flipped     = reg >> PatternNameData1Word1CellOver16Colors10Bits::vertical_flip_shft;
 
     return pattern_name_data;
 };
 
 auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
+    using std::byte;
+
     auto pattern_name_data = PatternNameData{};
-    auto reg               = PatternNameData1Word1CellOver16Colors12Bits{data};
+    auto reg               = PatternNameData1Word1CellOver16Colors12BitsType{data};
 
-    constexpr auto cn_disp             = u8{10};
-    constexpr auto cn_mask             = u8{0x1C};
-    pattern_name_data.character_number = ((screen.supplementary_character_number & cn_mask) << cn_disp);
-    pattern_name_data.character_number |= reg.character_number;
+    pattern_name_data.character_number
+        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x1C}) << 10);
+    pattern_name_data.character_number |= reg >> PatternNameData1Word1CellOver16Colors12Bits::character_number_shft;
 
-    constexpr auto pn_disp           = u8{8};
-    pattern_name_data.palette_number = (reg.palette_number << pn_disp);
+    pattern_name_data.palette_number
+        = static_cast<u16>((reg >> PatternNameData1Word1CellOver16Colors12Bits::palette_number_shft) << 8);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
@@ -4048,44 +4047,40 @@ auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const Scroll
 };
 
 auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
+    using std::byte;
+
     auto pattern_name_data = PatternNameData{};
-    auto reg               = PatternNameData1Word4Cells16Colors10Bits{data};
+    auto reg               = PatternNameData1Word4Cells16Colors10BitsType{data};
 
-    constexpr auto cn_disp_1           = u8{10};
-    constexpr auto cn_mask_1           = u8{0x1C};
-    pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
-    constexpr auto cn_disp_2           = u8{2};
-    pattern_name_data.character_number |= (reg.character_number << cn_disp_2);
-    constexpr auto cn_mask_2 = u8{0x3};
-    pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+    pattern_name_data.character_number
+        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x1C}) << 10);
+    pattern_name_data.character_number |= (reg >> PatternNameData1Word4Cells16Colors10Bits::character_number_shft << 2);
+    pattern_name_data.character_number |= static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) & byte{0x3});
 
-    constexpr auto pn_disp           = u8{4};
-    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-    pattern_name_data.palette_number |= reg.palette_number;
+    pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 4);
+    pattern_name_data.palette_number |= reg >> PatternNameData1Word4Cells16Colors10Bits::palette_number_shft;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
-    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
+    pattern_name_data.is_horizontally_flipped   = reg >> PatternNameData1Word4Cells16Colors10Bits::horizontal_flip_shft;
+    pattern_name_data.is_vertically_flipped     = reg >> PatternNameData1Word4Cells16Colors10Bits::vertical_flip_shft;
 
     return pattern_name_data;
 };
 
 auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
+    using std::byte;
+
     auto pattern_name_data = PatternNameData{};
-    auto reg               = PatternNameData1Word4Cells16Colors12Bits{data};
+    auto reg               = PatternNameData1Word4Cells16Colors12BitsType{data};
 
-    constexpr auto cn_disp_1           = u8{10};
-    constexpr auto cn_mask_1           = u8{0x10};
-    pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
-    constexpr auto cn_disp_2           = u8{2};
-    pattern_name_data.character_number |= (reg.character_number << cn_disp_2);
-    constexpr auto cn_mask_2 = u8{0x3};
-    pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+    pattern_name_data.character_number
+        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x10}) << 10);
+    pattern_name_data.character_number |= (reg >> PatternNameData1Word4Cells16Colors12Bits::character_number_shft << 2);
+    pattern_name_data.character_number |= static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) & byte{0x3});
 
-    constexpr auto pn_disp           = u8{4};
-    pattern_name_data.palette_number = (screen.supplementary_palette_number << pn_disp);
-    pattern_name_data.palette_number |= reg.palette_number;
+    pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 4);
+    pattern_name_data.palette_number |= reg >> PatternNameData1Word4Cells16Colors12Bits::palette_number_shft;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
@@ -4096,42 +4091,42 @@ auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScr
 };
 
 auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
+    using std::byte;
+
     auto pattern_name_data = PatternNameData{};
-    auto reg               = PatternNameData1Word4CellsOver16Colors10Bits{data};
+    auto reg               = PatternNameData1Word4CellsOver16Colors10BitsType{data};
 
-    constexpr auto cn_disp_1           = u8{10};
-    constexpr auto cn_mask_1           = u8{0x1C};
-    pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
-    constexpr auto cn_disp_2           = u8{2};
-    pattern_name_data.character_number |= (reg.character_number << cn_disp_2);
-    constexpr auto cn_mask_2 = u8{0x3};
-    pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+    pattern_name_data.character_number
+        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x1C}) << 10);
+    constexpr auto cn_disp_2 = u8{2};
+    pattern_name_data.character_number
+        |= (reg >> PatternNameData1Word4CellsOver16Colors10Bits::character_number_shft << cn_disp_2);
+    pattern_name_data.character_number |= static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) & byte{0x3});
 
-    constexpr auto pn_disp           = u8{8};
-    pattern_name_data.palette_number = (reg.palette_number << pn_disp);
+    pattern_name_data.palette_number
+        = static_cast<u16>(reg >> PatternNameData1Word4CellsOver16Colors10Bits::palette_number_shft << 8);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
-    pattern_name_data.is_horizontally_flipped   = static_cast<bool>(reg.horizontal_flip);
-    pattern_name_data.is_vertically_flipped     = static_cast<bool>(reg.vertical_flip);
+    pattern_name_data.is_horizontally_flipped   = reg >> PatternNameData1Word4CellsOver16Colors10Bits::horizontal_flip_shft;
+    pattern_name_data.is_vertically_flipped     = reg >> PatternNameData1Word4CellsOver16Colors10Bits::vertical_flip_shft;
 
     return pattern_name_data;
 };
 
 auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData {
+    using std::byte;
+
     auto pattern_name_data = PatternNameData{};
-    auto reg               = PatternNameData1Word4CellsOver16Colors12Bits{data};
+    auto reg               = PatternNameData1Word4CellsOver16Colors12BitsType{data};
 
-    constexpr auto cn_disp_1           = u8{10};
-    constexpr auto cn_mask_1           = u8{0x10};
-    pattern_name_data.character_number = (screen.supplementary_character_number & cn_mask_1) << cn_disp_1;
-    constexpr auto cn_disp_2           = u8{2};
-    pattern_name_data.character_number |= (reg.character_number << cn_disp_2);
-    constexpr auto cn_mask_2 = u8{0x3};
-    pattern_name_data.character_number |= (screen.supplementary_character_number & cn_mask_2);
+    pattern_name_data.character_number
+        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x10}) << 10);
+    pattern_name_data.character_number |= (reg >> PatternNameData1Word4CellsOver16Colors12Bits::character_number_shft << 2);
+    pattern_name_data.character_number |= static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) & byte{0x3});
 
-    constexpr auto pn_disp           = u8{8};
-    pattern_name_data.palette_number = (reg.palette_number << pn_disp);
+    pattern_name_data.palette_number
+        = static_cast<u16>(reg >> PatternNameData1Word4CellsOver16Colors12Bits::palette_number_shft << 8);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
