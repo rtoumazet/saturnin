@@ -42,6 +42,7 @@ void runTests() {
     if constexpr (constexpr auto run_bitfields_benchmarks = false) {
         using namespace saturnin::video;
         using namespace std::string_literals;
+        using Tvmd = Vdp2Regs::Tvmd;
 
         auto bitfield_original = Test();
 
@@ -49,11 +50,11 @@ void runTests() {
 
         auto           test = std::vector<u32>{};
         constexpr auto iterations{1000000};
-        constexpr auto tvmd = TvScreenMode{0b1000000000000011};
+        constexpr auto tvmd = Vdp2Regs::TvmdType{0b1000000000000011};
         auto           val  = u32{};
 
         for (int i = 0; i < iterations; ++i) {
-            if (toEnum<HorizontalResolution>(tvmd.horizontal_resolution) == HorizontalResolution::hi_res_704) { ++val; }
+            if ((tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::hi_res_704) { ++val; }
             test.push_back(val);
         }
 
@@ -101,7 +102,7 @@ void runTests() {
         val             = 0;
         for (int i = 0; i < iterations; ++i) {
             val += make_slice<16, 16>(row_slice2).operator std::bitset<16Ui64>().to_ulong();
-            val += make_slice<0, 16>(row_slice2). operator std::bitset<16Ui64>().to_ulong();
+            val += make_slice<0, 16>(row_slice2).operator std::bitset<16Ui64>().to_ulong();
         }
 
         core::Log::info(Logger::test, result, "Slice2"s, reg.endTest(), val);

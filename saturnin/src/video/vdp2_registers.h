@@ -177,89 +177,99 @@ constexpr auto color_offset_b_blue                      = u16{0x011e};
 
 } // namespace vdp2_register_address
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   Display
-///
-/// \brief  DISP bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+struct Vdp2Regs {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Tvmd
+    ///
+    /// \brief	TV screen mode register (TVMD).
+    ///
+    /// \author	Runik
+    /// \date	13/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Display : bool {
-    not_displayed = false, ///< Picture is not displayed on TV screen.
-    displayed     = true   ///< Picture is displayed on TV screen.
-};
+    struct Tvmd {
+        GENERATE_USING(Tvmd, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   BorderColorMode
-///
-/// \brief  BDCLMD bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   Display
+        ///
+        /// \brief  DISP bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BorderColorMode : bool {
-    displays_black       = false, ///< Displays black.
-    displays_back_screen = true   ///< Displays back screen.
-};
+        enum class Display : bool {
+            not_displayed = false, ///< Picture is not displayed on TV screen.
+            displayed     = true   ///< Picture is displayed on TV screen.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InterlaceMode
-///
-/// \brief  LSMDx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   BorderColorMode
+        ///
+        /// \brief  BDCLMD bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class InterlaceMode : u8 {
-    non_interlace  = 0b00, ///< Non-interlace.
-    not_allowed    = 0b01, ///< Not allowed.
-    single_density = 0b10, ///< Single-density interlace.
-    double_density = 0b11  ///< Single-density interlace.
-};
+        enum class BorderColorMode : bool {
+            displays_black       = false, ///< Displays black.
+            displays_back_screen = true   ///< Displays back screen.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   VerticalResolution
-///
-/// \brief  VRESOx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   InterlaceMode
+        ///
+        /// \brief  LSMDx bits values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VerticalResolution : u8 {
-    lines_nb_224 = 0b00, ///< 224 lines, NTSC or PAL.
-    lines_nb_240 = 0b01, ///< 240 lines, NTSC or PAL.
-    lines_nb_256 = 0b10, ///< 256, PAL only.
-    not_allowed  = 0b11  ///< Not allowed.
-};
+        enum class InterlaceMode : u8 {
+            non_interlace  = 0b00, ///< Non-interlace.
+            not_allowed    = 0b01, ///< Not allowed.
+            single_density = 0b10, ///< Single-density interlace.
+            double_density = 0b11  ///< Single-density interlace.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   HorizontalResolution
-///
-/// \brief  HRESOx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   VerticalResolution
+        ///
+        /// \brief  VRESOx bits values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class HorizontalResolution : u8 {
-    normal_320           = 0b000, ///< 320 pixels, normal graphic A, PAL or NTSC.
-    normal_352           = 0b001, ///< 352 pixels, normal graphic B, PAL or NTSC.
-    hi_res_640           = 0b010, ///< 640 pixels, hi-res graphic A, PAL or NTSC.
-    hi_res_704           = 0b011, ///< 704 pixels, hi-res graphic B, PAL or NTSC.
-    exclusive_normal_320 = 0b100, ///< 320 pixels, exclusive normal graphic A, 31KHz monitor.
-    exclusive_normal_352 = 0b101, ///< 352 pixels, exclusive normal graphic B, Hi-vision monitor.
-    exclusive_hi_res_640 = 0b110, ///< 640 pixels, exclusive normal graphic A, 31KHz monitor.
-    exclusive_hi_res_704 = 0b111, ///< 704 pixels, exclusive normal graphic B, Hi-vision monitor.
-};
+        enum class VerticalResolution : u8 {
+            lines_nb_224 = 0b00, ///< 224 lines, NTSC or PAL.
+            lines_nb_240 = 0b01, ///< 240 lines, NTSC or PAL.
+            lines_nb_256 = 0b10, ///< 256, PAL only.
+            not_allowed  = 0b11  ///< Not allowed.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  TvScreenMode
-///
-/// \brief  TV screen mode register (TVMD).
-///
-/// \author Runik
-/// \date   17/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   HorizontalResolution
+        ///
+        /// \brief  HRESOx bits values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union TvScreenMode {
-    u16            raw;                   ///< Raw representation.
-    BitField<15>   display;               ///< Defines DISP bit.
-    BitField<8>    border_color_mode;     ///< Defines BDCLMD bit.
-    BitField<6, 2> interlace_mode;        ///< Defines LSMDx bit.
-    BitField<4, 2> vertical_resolution;   ///< Defines VRESOx bit.
-    BitField<0, 3> horizontal_resolution; ///< Defines HRESOx bit.
-    BitField<8, 8> upper_8_bits;          ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;          ///< Defines the range of the lower 8 bits of the register.
+        enum class HorizontalResolution : u8 {
+            normal_320           = 0b000, ///< 320 pixels, normal graphic A, PAL or NTSC.
+            normal_352           = 0b001, ///< 352 pixels, normal graphic B, PAL or NTSC.
+            hi_res_640           = 0b010, ///< 640 pixels, hi-res graphic A, PAL or NTSC.
+            hi_res_704           = 0b011, ///< 704 pixels, hi-res graphic B, PAL or NTSC.
+            exclusive_normal_320 = 0b100, ///< 320 pixels, exclusive normal graphic A, 31KHz monitor.
+            exclusive_normal_352 = 0b101, ///< 352 pixels, exclusive normal graphic B, Hi-vision monitor.
+            exclusive_hi_res_640 = 0b110, ///< 640 pixels, exclusive normal graphic A, 31KHz monitor.
+            exclusive_hi_res_704 = 0b111, ///< 704 pixels, exclusive normal graphic B, Hi-vision monitor.
+        };
+
+        GENERATE_BIT_WITH_ENUM(disp, 15, 0b1, Display);                ///< Defines DISP bit.
+        GENERATE_BIT_WITH_ENUM(bdclmd, 8, 0b1, BorderColorMode);       ///< Defines BDCLMD bit.
+        GENERATE_BIT_WITH_ENUM(lsmd, 6, 0b11, InterlaceMode);          ///< Defines LSMDx bit.
+        GENERATE_BIT_WITH_ENUM(vreso, 4, 0b11, VerticalResolution);    ///< Defines VRESOx bit.
+        GENERATE_BIT_WITH_ENUM(hreso, 0, 0b111, HorizontalResolution); ///< Defines HRESOx bit.
+
+        static constexpr auto lo_byte_pos = PosType(0);                ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);                ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Tvmd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("VdpRegs::Tvmd", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using TvmdType = Reg<u16, Tvmd>;
+    TvmdType tvmd;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

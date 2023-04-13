@@ -38,6 +38,8 @@ using core::tr;
 //--------------------------------------------------------------------------------------------------------------
 
 auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
+    using Tvmd = Vdp2Regs::Tvmd;
+
     auto values = std::vector<LabelValue>{};
 
     // Resolution
@@ -85,7 +87,7 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
     // Interlace mode
     auto mode = std::string{};
     switch (tv_screen_status_.interlace_mode) {
-        using enum InterlaceMode;
+        using enum Tvmd::InterlaceMode;
         case non_interlace: mode = tr("Non interlace"); break;
         case single_density: mode = tr("Single density"); break;
         case double_density: mode = tr("Double density"); break;
@@ -178,8 +180,9 @@ auto Vdp2::getDebugVramAccessMainData() const -> std::vector<LabelValue> {
 
 auto Vdp2::getDebugVramAccessBanks() const -> std::vector<VramTiming> {
     using enum VramAccessCommand;
-    auto is_normal_mode = (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_320);
-    is_normal_mode |= (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_352);
+    using Tvmd          = Vdp2Regs::Tvmd;
+    auto is_normal_mode = (regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_320;
+    is_normal_mode |= (regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_352;
 
     const auto banks_used = getDebugVramAccessBanksUsed();
     auto       banks      = std::vector<VramTiming>{};

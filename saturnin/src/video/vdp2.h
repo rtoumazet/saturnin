@@ -244,13 +244,13 @@ enum class PatternNameDataEnum {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct TvScreenStatus {
-    bool            is_picture_displayed{false};
-    BorderColorMode border_color_mode{BorderColorMode::displays_black};
-    InterlaceMode   interlace_mode{InterlaceMode::non_interlace};
-    ScreenMode      screen_mode{ScreenMode::not_set};
-    ScreenModeType  screen_mode_type{ScreenModeType::not_set};
-    u16             horizontal_res{};
-    u16             vertical_res{};
+    bool                            is_picture_displayed{false};
+    Vdp2Regs::Tvmd::BorderColorMode border_color_mode{Vdp2Regs::Tvmd::BorderColorMode::displays_black};
+    Vdp2Regs::Tvmd::InterlaceMode   interlace_mode{Vdp2Regs::Tvmd::InterlaceMode::non_interlace};
+    ScreenMode                      screen_mode{ScreenMode::not_set};
+    ScreenModeType                  screen_mode_type{ScreenModeType::not_set};
+    u16                             horizontal_res{};
+    u16                             vertical_res{};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1796,7 +1796,8 @@ class Vdp2 {
 
     ///@{
     /// \name VDP2 registers
-    TvScreenMode                                    tvmd_;
+    Vdp2Regs regs_;
+    // TvScreenMode                                    tvmd_;
     ExternalSignalEnable                            exten_;
     ScreenStatus                                    tvstat_;
     VramSizeRegister                                vrsize_;

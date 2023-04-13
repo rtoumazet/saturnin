@@ -76,13 +76,14 @@ void Vdp2::initialize() {
 }
 
 void Vdp2::run(const u8 cycles) {
+    using Tvmd = Vdp2Regs::Tvmd;
     elapsed_frame_cycles_ += cycles;
     if (elapsed_frame_cycles_ > cycles_per_vactive_) {
         if (!is_vblank_current_) {
             // Entering vertical blanking
             is_vblank_current_          = true;
             tvstat_.vertical_blank_flag = VerticalBlankFlag::during_vertical_retrace;
-            tvmd_.display               = Display::not_displayed;
+            regs_.tvmd.upd(Tvmd::disp_enum, Tvmd::Display::not_displayed);
 
             Log::debug(Logger::vdp2, tr("VBlankIn interrupt request"));
 
@@ -113,7 +114,7 @@ void Vdp2::run(const u8 cycles) {
         is_hblank_current_            = false;
         tvstat_.horizontal_blank_flag = HorizontalBlankFlag::during_horizontal_scan;
 
-        tvmd_.display = Display::displayed;
+        regs_.tvmd.upd(Tvmd::disp_enum, Tvmd::Display::displayed);
 
         Log::debug(Logger::vdp2, tr("VBlankOut interrupt request"));
         modules_.scu()->onVblankOut();
@@ -162,6 +163,8 @@ void Vdp2::calculateDisplayDuration() {
     constexpr auto lines_240 = u16{240};
     constexpr auto lines_256 = u16{256};
 
+    using Tvmd = Vdp2Regs::Tvmd;
+
     std::string ts = modules_.context()->config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (modules_.context()->config()->getTvStandard(ts)) {
         using enum video::TvStandard;
@@ -171,8 +174,9 @@ void Vdp2::calculateDisplayDuration() {
 
             constexpr auto total_lines   = u16{313};
             auto           visible_lines = u16{};
-            switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                using enum VerticalResolution;
+            // switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
+            switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                using enum Tvmd::VerticalResolution;
                 case lines_nb_224: visible_lines = lines_224; break;
                 case lines_nb_240: visible_lines = lines_240; break;
                 case lines_nb_256: visible_lines = lines_256; break;
@@ -200,8 +204,8 @@ void Vdp2::calculateDisplayDuration() {
 
             constexpr auto total_lines   = u16{263};
             auto           visible_lines = u16{};
-            switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                using enum VerticalResolution;
+            switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                using enum Tvmd::VerticalResolution;
                 case lines_nb_224: visible_lines = lines_224; break;
                 case lines_nb_240: visible_lines = lines_240; break;
                 default: core::Log::warning(Logger::vdp2, core::tr("Unknown NTSC vertical resolution."));
@@ -343,7 +347,7 @@ void Vdp2::refreshRegisters() {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::read16(const u32 addr) const -> u16 {
     switch (addr & core::vdp2_registers_memory_mask) {
-        case tv_screen_mode: return tvmd_.raw;
+        case tv_screen_mode: return regs_.tvmd.data();
         case external_signal_enable: return exten_.raw;
         case screen_status: return tvstat_.raw;
         case vram_size: return vrsize_.raw;
@@ -497,8 +501,9 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write8(const u32 addr, const u8 data) {
     switch (addr & core::vdp2_registers_memory_mask) {
-        case tv_screen_mode: tvmd_.upper_8_bits = data; break;
-        case tv_screen_mode + 1: tvmd_.lower_8_bits = data; break;
+        // case tv_screen_mode: tvmd_.upper_8_bits = data; break;
+        case tv_screen_mode: regs_.tvmd.upd(Vdp2Regs::Tvmd::hiByte(data)); break;
+        case tv_screen_mode + 1: regs_.tvmd.upd(Vdp2Regs::Tvmd::loByte(data)); break;
         case external_signal_enable: exten_.upper_8_bits = data; break;
         case external_signal_enable + 1: exten_.lower_8_bits = data; break;
         case screen_status: tvstat_.upper_8_bits = data; break;
@@ -792,7 +797,7 @@ void Vdp2::write8(const u32 addr, const u8 data) {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write16(const u32 addr, const u16 data) {
     switch (addr & core::vdp2_registers_memory_mask) {
-        case tv_screen_mode: tvmd_.raw = data; break;
+        case tv_screen_mode: regs_.tvmd = data; break;
         case external_signal_enable: exten_.raw = data; break;
         case screen_status: tvstat_.raw = data; break;
         case vram_size: vrsize_.raw = data; break;
@@ -1402,18 +1407,20 @@ void Vdp2::calculateLineDuration(const micro& total_line_duration, const micro& 
 }
 
 void Vdp2::updateResolution() {
-    tv_screen_status_.is_picture_displayed = (toEnum<Display>(tvmd_.display) == Display::displayed);
-    tv_screen_status_.border_color_mode    = toEnum<BorderColorMode>(tvmd_.border_color_mode);
-    tv_screen_status_.interlace_mode       = toEnum<InterlaceMode>(tvmd_.interlace_mode);
+    using Tvmd = Vdp2Regs::Tvmd;
 
-    switch (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution)) {
-        using enum HorizontalResolution;
+    tv_screen_status_.is_picture_displayed = ((regs_.tvmd >> Tvmd::disp_enum) == Tvmd::Display::displayed);
+    tv_screen_status_.border_color_mode    = regs_.tvmd >> Tvmd::bdclmd_enum;
+    tv_screen_status_.interlace_mode       = regs_.tvmd >> Tvmd::lsmd_enum;
+
+    switch (regs_.tvmd >> Tvmd::hreso_enum) {
+        using enum Tvmd::HorizontalResolution;
         case normal_320:
             tv_screen_status_.horizontal_res   = horizontal_res_320;
             tv_screen_status_.screen_mode_type = ScreenModeType::normal;
-            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    using enum VerticalResolution;
+            if (tv_screen_status_.interlace_mode == Tvmd::InterlaceMode::non_interlace) {
+                switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                    using enum Tvmd::VerticalResolution;
                     case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_224;
@@ -1429,8 +1436,8 @@ void Vdp2::updateResolution() {
                     default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
-                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    using enum VerticalResolution;
+                switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                    using enum Tvmd::VerticalResolution;
                     case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_320_448;
@@ -1451,9 +1458,9 @@ void Vdp2::updateResolution() {
         case normal_352:
             tv_screen_status_.horizontal_res   = horizontal_res_352;
             tv_screen_status_.screen_mode_type = ScreenModeType::normal;
-            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    using enum VerticalResolution;
+            if (tv_screen_status_.interlace_mode == Tvmd::InterlaceMode::non_interlace) {
+                switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                    using enum Tvmd::VerticalResolution;
                     case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_224;
@@ -1469,8 +1476,8 @@ void Vdp2::updateResolution() {
                     default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
-                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    using enum VerticalResolution;
+                switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                    using enum Tvmd::VerticalResolution;
                     case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::normal_352_448;
@@ -1491,9 +1498,9 @@ void Vdp2::updateResolution() {
         case hi_res_640:
             tv_screen_status_.horizontal_res   = horizontal_res_640;
             tv_screen_status_.screen_mode_type = ScreenModeType::hi_res;
-            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    using enum VerticalResolution;
+            if (tv_screen_status_.interlace_mode == Tvmd::InterlaceMode::non_interlace) {
+                switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                    using enum Tvmd::VerticalResolution;
                     case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_224;
@@ -1509,8 +1516,8 @@ void Vdp2::updateResolution() {
                     default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
-                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    using enum VerticalResolution;
+                switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                    using enum Tvmd::VerticalResolution;
                     case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_640_448;
@@ -1530,9 +1537,9 @@ void Vdp2::updateResolution() {
         case hi_res_704:
             tv_screen_status_.horizontal_res   = horizontal_res_704;
             tv_screen_status_.screen_mode_type = ScreenModeType::hi_res;
-            if (tv_screen_status_.interlace_mode == InterlaceMode::non_interlace) {
-                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    using enum VerticalResolution;
+            if (tv_screen_status_.interlace_mode == Tvmd::InterlaceMode::non_interlace) {
+                switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                    using enum Tvmd::VerticalResolution;
                     case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_224;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_224;
@@ -1548,8 +1555,8 @@ void Vdp2::updateResolution() {
                     default: tv_screen_status_.vertical_res = 0; tv_screen_status_.screen_mode = ScreenMode::not_set;
                 }
             } else {
-                switch (toEnum<VerticalResolution>(tvmd_.vertical_resolution)) {
-                    using enum VerticalResolution;
+                switch (regs_.tvmd >> Tvmd::vreso_enum) {
+                    using enum Tvmd::VerticalResolution;
                     case lines_nb_224:
                         tv_screen_status_.vertical_res = vertical_res_448;
                         tv_screen_status_.screen_mode  = ScreenMode::hi_res_704_448;
@@ -1804,9 +1811,10 @@ auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool {
 auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8 {
     constexpr auto vram_timing_size = u8{8};
     using VramTiming                = std::array<VramAccessCommand, vram_timing_size>;
+    using Tvmd                      = Vdp2Regs::Tvmd;
 
-    auto is_normal_mode = (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_320);
-    is_normal_mode |= (toEnum<HorizontalResolution>(tvmd_.horizontal_resolution) == HorizontalResolution::normal_352);
+    auto is_normal_mode = ((regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_320);
+    is_normal_mode |= ((regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_352);
 
     VramTiming bank_a0 = {toEnum<VramAccessCommand>(cyca0l_.t0),
                           toEnum<VramAccessCommand>(cyca0l_.t1),
