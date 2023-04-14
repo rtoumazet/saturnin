@@ -270,181 +270,227 @@ struct Vdp2Regs {
     };
     using TvmdType = Reg<u16, Tvmd>;
     TvmdType tvmd;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ExternalSignalEnable
-///
-/// \brief	External Signal Enable register (EXTEN).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Exten
+    ///
+    /// \brief	External Signal Enable register (EXTEN).
+    ///
+    /// \author	Runik
+    /// \date	14/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union ExternalSignalEnable {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Exten {
+        GENERATE_USING(Exten, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ExternalLatchFlag
-///
-/// \brief  EXLTFG bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-enum class ExternalLatchFlag : bool {
-    not_latched_in_register = false, ///< Not latched in register.
-    latched_in_register     = true   ///< Latched in register.
-};
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Exten", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Exten", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ExtenType = Reg<u16, Exten>;
+    ExtenType exten;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ExternalSyncFlag
-///
-/// \brief  EXSYFG bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Tvstat
+    ///
+    /// \brief	Screen Status register (TVSTAT).
+    ///
+    /// \author	Runik
+    /// \date	14/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ExternalSyncFlag : bool {
-    no_sync       = false, ///< Not synchronized.
-    internal_sync = true   ///< Internal circuit synchronized.
-};
+    struct Tvstat {
+        GENERATE_USING(Tvstat, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   VerticalBlankFlag
-///
-/// \brief  VBLANK bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ExternalLatchFlag
+        ///
+        /// \brief  EXLTFG bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VerticalBlankFlag : bool {
-    during_vertical_scan    = false, ///< During vertical scan.
-    during_vertical_retrace = true   ///< During vertical retrace (vblank).
-};
+        enum class ExternalLatchFlag : bool {
+            not_latched_in_register = false, ///< Not latched in register.
+            latched_in_register     = true   ///< Latched in register.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   HorizontalBlankFlag
-///
-/// \brief  HBLANK bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ExternalSyncFlag
+        ///
+        /// \brief  EXSYFG bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class HorizontalBlankFlag : bool {
-    during_horizontal_scan    = false, ///< During horizontal scan.
-    during_horizontal_retrace = true   ///< During horizontal retrace (hblank).
-};
+        enum class ExternalSyncFlag : bool {
+            no_sync       = false, ///< Not synchronized.
+            internal_sync = true   ///< Internal circuit synchronized.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ScanFieldFlag
-///
-/// \brief  ODD bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   VerticalBlankFlag
+        ///
+        /// \brief  VBLANK bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ScanFieldFlag : bool {
-    during_even_field_scan = false, ///< During even field scan.
-    during_odd_field_scan  = true   ///< During odd field scan.
-};
+        enum class VerticalBlankFlag : bool {
+            during_vertical_scan    = false, ///< During vertical scan.
+            during_vertical_retrace = true   ///< During vertical retrace (vblank).
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TvStandardFlag
-///
-/// \brief  PAL bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   HorizontalBlankFlag
+        ///
+        /// \brief  HBLANK bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class TvStandardFlag : bool {
-    ntsc_standard = false, ///< NTSC standard.
-    pal_standard  = true   ///< PAL standard.
-};
+        enum class HorizontalBlankFlag : bool {
+            during_horizontal_scan    = false, ///< During horizontal scan.
+            during_horizontal_retrace = true   ///< During horizontal retrace (hblank).
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ScreenStatus
-///
-/// \brief	Screen Status register (TVSTAT).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ScanFieldFlag
+        ///
+        /// \brief  ODD bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union ScreenStatus {
-    u16            raw;                   ///< Raw representation.
-    BitField<9>    external_latch_flag;   ///< Defines EXLTFG bit.
-    BitField<8>    external_sync_flag;    ///< Defines EXSYFG bit.
-    BitField<3>    vertical_blank_flag;   ///< Defines VBLANK bit.
-    BitField<2>    horizontal_blank_flag; ///< Defines HBLANK bit.
-    BitField<1>    scan_field_flag;       ///< Defines ODD bit.
-    BitField<0>    tv_standard_flag;      ///< Defines PAL bit.
-    BitField<8, 8> upper_8_bits;          ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;          ///< Defines the range of the lower 8 bits of the register.
-};
+        enum class ScanFieldFlag : bool {
+            during_even_field_scan = false, ///< During even field scan.
+            during_odd_field_scan  = true   ///< During odd field scan.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TvStandardFlag
-///
-/// \brief  PAL bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   TvStandardFlag
+        ///
+        /// \brief  PAL bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VramSize : bool {
-    size_4_mbits = false, ///< 4 Mbit.
-    size_8_mbits = true   ///< 8 Mbit.
-};
+        enum class TvStandardFlag : bool {
+            ntsc_standard = false, ///< NTSC standard.
+            pal_standard  = true   ///< PAL standard.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VramSizeRegister
-///
-/// \brief	VRAM Size register (VRSIZE).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITH_ENUM(exltfg, 9, 0b1, ExternalLatchFlag);   ///< External latch flag.
+        GENERATE_BIT_WITH_ENUM(exsyfg, 8, 0b1, ExternalSyncFlag);    ///< External sync flag.
+        GENERATE_BIT_WITH_ENUM(vblank, 3, 0b1, VerticalBlankFlag);   ///< Vertical blank flag.
+        GENERATE_BIT_WITH_ENUM(hblank, 2, 0b1, HorizontalBlankFlag); ///< Horizontal blank flag.
+        GENERATE_BIT_WITH_ENUM(odd, 1, 0b1, ScanFieldFlag);          ///< Scan field flag.
+        GENERATE_BIT_WITH_ENUM(pal, 0, 0b1, TvStandardFlag);         ///< TV standard flag.
 
-union VramSizeRegister {
-    u16            raw;            ///< Raw representation.
-    BitField<15>   vram_size;      ///< Defines VRAMSZ bit.
-    BitField<0, 4> version_number; ///< Defines VERx bits.
-    BitField<8, 8> upper_8_bits;   ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;   ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0);              ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);              ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	HCounter
-///
-/// \brief	H-Counter register.
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Exten", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Exten", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using TvstatType = Reg<u16, Tvstat>;
+    TvstatType tvstat;
 
-union HCounter {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Vrsize
+    ///
+    /// \brief	VRAM Size register (VRSIZE).
+    ///
+    /// \author	Runik
+    /// \date	14/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VCounter
-///
-/// \brief	V-Counter register (VCNT).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Vrsize {
+        GENERATE_USING(Vrsize, u16);
 
-union VCounter {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   TvStandardFlag
+        ///
+        /// \brief  PAL bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	Reserve
-///
-/// \brief	Reserve register.
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        enum class VramSize : bool {
+            size_4_mbits = false, ///< 4 Mbit.
+            size_8_mbits = true   ///< 8 Mbit.
+        };
 
-union Reserve {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+        GENERATE_BIT_WITH_ENUM(vramsz, 15, 0b1, VramSize); ///< VRAM size.
+
+        GENERATE_BIT_WITHOUT_ENUM(ver, 0, 0b1111);         ///< Version number.
+
+        static constexpr auto lo_byte_pos = PosType(0);    ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);    ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Vrsize", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Vrsize", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using VrsizeType = Reg<u16, Vrsize>;
+    VrsizeType vrsize;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Hcnt
+    ///
+    /// \brief	H-Counter register.
+    ///
+    /// \author	Runik
+    /// \date	14/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Hcnt {
+        GENERATE_USING(Hcnt, u16);
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Hcnt", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Hcnt", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using HcntType = Reg<u16, Hcnt>;
+    HcntType hcnt;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Vcnt
+    ///
+    /// \brief	V-Counter register.
+    ///
+    /// \author	Runik
+    /// \date	14/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Vcnt {
+        GENERATE_USING(Vcnt, u16);
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Vcnt", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Vcnt", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using VcntType = Reg<u16, Vcnt>;
+    VcntType vcnt;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Reserve
+    ///
+    /// \brief	Reserve register.
+    ///
+    /// \author	Runik
+    /// \date	14/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Reserve {
+        GENERATE_USING(Reserve, u16);
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Reserve", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Reserve", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ReserveType = Reg<u16, Reserve>;
+    ReserveType rsv1;
+    ReserveType rsv2;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

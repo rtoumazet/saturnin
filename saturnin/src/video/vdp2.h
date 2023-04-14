@@ -263,15 +263,15 @@ struct TvScreenStatus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct RamStatus {
-    VramSize                vram_size{VramSize::size_4_mbits};
-    VramMode                vram_a_mode{VramMode::no_partition};
-    VramMode                vram_b_mode{VramMode::no_partition};
-    ColorRamMode            color_ram_mode{ColorRamMode::not_set};
-    CoefficientTableStorage coefficient_table_storage{CoefficientTableStorage::stored_in_vram};
-    RotationDataBankSelect  vram_a0_rotation_bank_select{RotationDataBankSelect::not_used};
-    RotationDataBankSelect  vram_a1_rotation_bank_select{RotationDataBankSelect::not_used};
-    RotationDataBankSelect  vram_b0_rotation_bank_select{RotationDataBankSelect::not_used};
-    RotationDataBankSelect  vram_b1_rotation_bank_select{RotationDataBankSelect::not_used};
+    Vdp2Regs::Vrsize::VramSize vram_size{Vdp2Regs::Vrsize::VramSize::size_4_mbits};
+    VramMode                   vram_a_mode{VramMode::no_partition};
+    VramMode                   vram_b_mode{VramMode::no_partition};
+    ColorRamMode               color_ram_mode{ColorRamMode::not_set};
+    CoefficientTableStorage    coefficient_table_storage{CoefficientTableStorage::stored_in_vram};
+    RotationDataBankSelect     vram_a0_rotation_bank_select{RotationDataBankSelect::not_used};
+    RotationDataBankSelect     vram_a1_rotation_bank_select{RotationDataBankSelect::not_used};
+    RotationDataBankSelect     vram_b0_rotation_bank_select{RotationDataBankSelect::not_used};
+    RotationDataBankSelect     vram_b1_rotation_bank_select{RotationDataBankSelect::not_used};
 };
 
 struct ColorOffset {
@@ -1798,13 +1798,13 @@ class Vdp2 {
     /// \name VDP2 registers
     Vdp2Regs regs_;
     // TvScreenMode                                    tvmd_;
-    ExternalSignalEnable                            exten_;
-    ScreenStatus                                    tvstat_;
-    VramSizeRegister                                vrsize_;
-    HCounter                                        hcnt_;
-    VCounter                                        vcnt_;
-    RamControl                                      ramctl_;
-    Reserve                                         rsv1_;
+    // ExternalSignalEnable                            exten_;
+    // ScreenStatus                                    tvstat_;
+    // VramSizeRegister                                vrsize_;
+    // HCounter                                        hcnt_;
+    // VCounter                                        vcnt_;
+    RamControl ramctl_;
+    // Reserve                                         rsv1_;
     VramCyclePatternBankLower                       cyca0l_;
     VramCyclePatternBankUpper                       cyca0u_;
     VramCyclePatternBankLower                       cyca1l_;
@@ -1924,23 +1924,23 @@ class Vdp2 {
     PriorityNumberA                                 prina_;
     PriorityNumberB                                 prinb_;
     PriorityNumberR                                 prir_;
-    Reserve                                         rsv2_;
-    ColorCalculationRatioSpriteA                    ccrsa_;
-    ColorCalculationRatioSpriteB                    ccrsb_;
-    ColorCalculationRatioSpriteC                    ccrsc_;
-    ColorCalculationRatioSpriteD                    ccrsd_;
-    ColorCalculationRatioNbg0Nbg1                   ccrna_;
-    ColorCalculationRatioNbg2Nbg3                   ccrnb_;
-    ColorCalculationRatioRbg0                       ccrr_;
-    ColorCalculationRatioLineColorBack              ccrlb_;
-    ColorOffsetEnable                               clofen_;
-    ColorOffsetSelect                               clofsl_;
-    ColorOffsetARed                                 coar_;
-    ColorOffsetAGreen                               coag_;
-    ColorOffsetABlue                                coab_;
-    ColorOffsetBRed                                 cobr_;
-    ColorOffsetBGreen                               cobg_;
-    ColorOffsetBBlue                                cobb_;
+    // Reserve                                         rsv2_;
+    ColorCalculationRatioSpriteA       ccrsa_;
+    ColorCalculationRatioSpriteB       ccrsb_;
+    ColorCalculationRatioSpriteC       ccrsc_;
+    ColorCalculationRatioSpriteD       ccrsd_;
+    ColorCalculationRatioNbg0Nbg1      ccrna_;
+    ColorCalculationRatioNbg2Nbg3      ccrnb_;
+    ColorCalculationRatioRbg0          ccrr_;
+    ColorCalculationRatioLineColorBack ccrlb_;
+    ColorOffsetEnable                  clofen_;
+    ColorOffsetSelect                  clofsl_;
+    ColorOffsetARed                    coar_;
+    ColorOffsetAGreen                  coag_;
+    ColorOffsetABlue                   coab_;
+    ColorOffsetBRed                    cobr_;
+    ColorOffsetBGreen                  cobg_;
+    ColorOffsetBBlue                   cobb_;
     ///@}
 };
 

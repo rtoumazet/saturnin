@@ -99,11 +99,13 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
 }
 
 auto Vdp2::getDebugRamMainData() const -> std::vector<LabelValue> {
+    using Vrsize = Vdp2Regs::Vrsize;
+
     auto values = std::vector<LabelValue>{};
 
-    const auto getVramSize = [](const VramSize sz) {
+    const auto getVramSize = [](const Vrsize::VramSize sz) {
         switch (sz) {
-            using enum VramSize;
+            using enum Vdp2Regs::Vrsize::VramSize;
             case size_4_mbits: return tr("4 mbits");
             case size_8_mbits: return tr("8 mbits");
             default: return tr("Not set");

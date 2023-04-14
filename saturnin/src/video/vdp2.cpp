@@ -53,14 +53,16 @@ constexpr auto use_concurrent_read_for_cells = bool{false};
 //--------------------------------------------------------------------------------------------------------------
 
 void Vdp2::initialize() {
+    using Tvstat = Vdp2Regs::Tvstat;
+
     initializeRegisterNameMap();
     computePrecalculatedData();
 
     const std::string ts = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
     switch (modules_.config()->getTvStandard(ts)) {
         using enum video::TvStandard;
-        case pal: tvstat_.tv_standard_flag = TvStandardFlag::pal_standard; break;
-        case ntsc: tvstat_.tv_standard_flag = TvStandardFlag::ntsc_standard; break;
+        case pal: regs_.tvstat.upd(Tvstat::pal_enum, Tvstat::TvStandardFlag::pal_standard); break;
+        case ntsc: regs_.tvstat.upd(Tvstat::pal_enum, Tvstat::TvStandardFlag::ntsc_standard); break;
         default: Log::warning(Logger::vdp2, tr("Unknown TV standard"));
     }
     calculateDisplayDuration();
@@ -76,13 +78,15 @@ void Vdp2::initialize() {
 }
 
 void Vdp2::run(const u8 cycles) {
-    using Tvmd = Vdp2Regs::Tvmd;
+    using Tvmd   = Vdp2Regs::Tvmd;
+    using Tvstat = Vdp2Regs::Tvstat;
+
     elapsed_frame_cycles_ += cycles;
     if (elapsed_frame_cycles_ > cycles_per_vactive_) {
         if (!is_vblank_current_) {
             // Entering vertical blanking
-            is_vblank_current_          = true;
-            tvstat_.vertical_blank_flag = VerticalBlankFlag::during_vertical_retrace;
+            is_vblank_current_ = true;
+            regs_.tvstat.upd(Tvstat::vblank_enum, Tvstat::VerticalBlankFlag::during_vertical_retrace);
             regs_.tvmd.upd(Tvmd::disp_enum, Tvmd::Display::not_displayed);
 
             Log::debug(Logger::vdp2, tr("VBlankIn interrupt request"));
@@ -106,13 +110,13 @@ void Vdp2::run(const u8 cycles) {
 
     if (elapsed_frame_cycles_ > cycles_per_frame_) {
         // End of the frame display (active + vblank)
-        elapsed_frame_cycles_       = 0;
-        is_vblank_current_          = false;
-        tvstat_.vertical_blank_flag = VerticalBlankFlag::during_vertical_scan;
+        elapsed_frame_cycles_ = 0;
+        is_vblank_current_    = false;
+        regs_.tvstat.upd(Tvstat::vblank_enum, Tvstat::VerticalBlankFlag::during_vertical_scan);
 
-        elapsed_line_cycles_          = 0;
-        is_hblank_current_            = false;
-        tvstat_.horizontal_blank_flag = HorizontalBlankFlag::during_horizontal_scan;
+        elapsed_line_cycles_ = 0;
+        is_hblank_current_   = false;
+        regs_.tvstat.upd(Tvstat::hblank_enum, Tvstat::HorizontalBlankFlag::during_horizontal_scan);
 
         regs_.tvmd.upd(Tvmd::disp_enum, Tvmd::Display::displayed);
 
@@ -129,8 +133,8 @@ void Vdp2::run(const u8 cycles) {
     if (elapsed_line_cycles_ > cycles_per_hactive_) {
         if (!is_hblank_current_) {
             // Entering horizontal blanking
-            is_hblank_current_            = true;
-            tvstat_.horizontal_blank_flag = HorizontalBlankFlag::during_horizontal_retrace;
+            is_hblank_current_ = true;
+            regs_.tvstat.upd(Tvstat::hblank_enum, Tvstat::HorizontalBlankFlag::during_horizontal_retrace);
 
             modules_.scu()->onHblankIn();
 
@@ -142,9 +146,9 @@ void Vdp2::run(const u8 cycles) {
 
     if (elapsed_line_cycles_ > cycles_per_line_) {
         // End of line display (active + hblank)
-        elapsed_line_cycles_          = 0;
-        is_hblank_current_            = false;
-        tvstat_.horizontal_blank_flag = HorizontalBlankFlag::during_horizontal_scan;
+        elapsed_line_cycles_ = 0;
+        is_hblank_current_   = false;
+        regs_.tvstat.upd(Tvstat::hblank_enum, Tvstat::HorizontalBlankFlag::during_horizontal_scan);
     }
 
     // Yet to implement : H Counter, V Counter, Timer 1
@@ -348,12 +352,12 @@ void Vdp2::refreshRegisters() {
 auto Vdp2::read16(const u32 addr) const -> u16 {
     switch (addr & core::vdp2_registers_memory_mask) {
         case tv_screen_mode: return regs_.tvmd.data();
-        case external_signal_enable: return exten_.raw;
-        case screen_status: return tvstat_.raw;
-        case vram_size: return vrsize_.raw;
-        case h_counter: return hcnt_.raw;
-        case v_counter: return vcnt_.raw;
-        case reserve_1: return rsv1_.raw;
+        case external_signal_enable: return regs_.exten.data();
+        case screen_status: return regs_.tvstat.data();
+        case vram_size: return regs_.vrsize.data();
+        case h_counter: return regs_.hcnt.data();
+        case v_counter: return regs_.vcnt.data();
+        case reserve_1: return regs_.rsv1.data();
         case ram_control: return ramctl_.raw;
         case vram_cycle_pattern_bank_a0_lower: return cyca0l_.raw;
         case vram_cycle_pattern_bank_a0_upper: return cyca0u_.raw;
@@ -474,7 +478,7 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case priority_number_nbg0_nbg1: return prina_.raw;
         case priority_number_nbg2_nbg3: return prinb_.raw;
         case priority_number_rbg0: return prir_.raw;
-        case reserve_2: return rsv2_.raw;
+        case reserve_2: return regs_.rsv2.data();
         case color_calculation_ratio_sprite_0_1: return ccrsa_.raw;
         case color_calculation_ratio_sprite_2_3: return ccrsb_.raw;
         case color_calculation_ratio_sprite_4_5: return ccrsc_.raw;
@@ -504,18 +508,18 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         // case tv_screen_mode: tvmd_.upper_8_bits = data; break;
         case tv_screen_mode: regs_.tvmd.upd(Vdp2Regs::Tvmd::hiByte(data)); break;
         case tv_screen_mode + 1: regs_.tvmd.upd(Vdp2Regs::Tvmd::loByte(data)); break;
-        case external_signal_enable: exten_.upper_8_bits = data; break;
-        case external_signal_enable + 1: exten_.lower_8_bits = data; break;
-        case screen_status: tvstat_.upper_8_bits = data; break;
-        case screen_status + 1: tvstat_.lower_8_bits = data; break;
-        case vram_size: vrsize_.upper_8_bits = data; break;
-        case vram_size + 1: vrsize_.lower_8_bits = data; break;
-        case h_counter: hcnt_.upper_8_bits = data; break;
-        case h_counter + 1: hcnt_.lower_8_bits = data; break;
-        case v_counter: vcnt_.upper_8_bits = data; break;
-        case v_counter + 1: vcnt_.lower_8_bits = data; break;
-        case reserve_1: rsv1_.upper_8_bits = data; break;
-        case reserve_1 + 1: rsv1_.lower_8_bits = data; break;
+        case external_signal_enable: regs_.exten.upd(Vdp2Regs::Exten::hiByte(data)); break;
+        case external_signal_enable + 1: regs_.exten.upd(Vdp2Regs::Exten::loByte(data)); break;
+        case screen_status: regs_.tvstat.upd(Vdp2Regs::Tvstat::hiByte(data)); break;
+        case screen_status + 1: regs_.tvstat.upd(Vdp2Regs::Tvstat::loByte(data)); break;
+        case vram_size: regs_.vrsize.upd(Vdp2Regs::Vrsize::hiByte(data)); break;
+        case vram_size + 1: regs_.vrsize.upd(Vdp2Regs::Vrsize::loByte(data)); break;
+        case h_counter: regs_.hcnt.upd(Vdp2Regs::Hcnt::hiByte(data)); break;
+        case h_counter + 1: regs_.hcnt.upd(Vdp2Regs::Hcnt::loByte(data)); break;
+        case v_counter: regs_.vcnt.upd(Vdp2Regs::Vcnt::hiByte(data)); break;
+        case v_counter + 1: regs_.vcnt.upd(Vdp2Regs::Vcnt::loByte(data)); break;
+        case reserve_1: regs_.rsv1.upd(Vdp2Regs::Reserve::hiByte(data)); break;
+        case reserve_1 + 1: regs_.rsv1.upd(Vdp2Regs::Reserve::loByte(data)); break;
         case ram_control: ramctl_.upper_8_bits = data; break;
         case ram_control + 1: ramctl_.lower_8_bits = data; break;
         case vram_cycle_pattern_bank_a0_lower: cyca0l_.upper_8_bits = data; break;
@@ -756,8 +760,8 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case priority_number_nbg2_nbg3 + 1: prinb_.lower_8_bits = data; break;
         case priority_number_rbg0: prir_.upper_8_bits = data; break;
         case priority_number_rbg0 + 1: prir_.lower_8_bits = data; break;
-        case reserve_2: rsv2_.upper_8_bits = data; break;
-        case reserve_2 + 1: rsv2_.lower_8_bits = data; break;
+        case reserve_2: regs_.rsv2.upd(Vdp2Regs::Reserve::hiByte(data)); break;
+        case reserve_2 + 1: regs_.rsv2.upd(Vdp2Regs::Reserve::loByte(data)); break;
         case color_calculation_ratio_sprite_0_1: ccrsa_.upper_8_bits = data; break;
         case color_calculation_ratio_sprite_0_1 + 1: ccrsa_.lower_8_bits = data; break;
         case color_calculation_ratio_sprite_2_3: ccrsb_.upper_8_bits = data; break;
@@ -798,12 +802,12 @@ void Vdp2::write8(const u32 addr, const u8 data) {
 void Vdp2::write16(const u32 addr, const u16 data) {
     switch (addr & core::vdp2_registers_memory_mask) {
         case tv_screen_mode: regs_.tvmd = data; break;
-        case external_signal_enable: exten_.raw = data; break;
-        case screen_status: tvstat_.raw = data; break;
-        case vram_size: vrsize_.raw = data; break;
-        case h_counter: hcnt_.raw = data; break;
-        case v_counter: vcnt_.raw = data; break;
-        case reserve_1: rsv1_.raw = data; break;
+        case external_signal_enable: regs_.exten = data; break;
+        case screen_status: regs_.tvstat = data; break;
+        case vram_size: regs_.vrsize = data; break;
+        case h_counter: regs_.hcnt = data; break;
+        case v_counter: regs_.vcnt = data; break;
+        case reserve_1: regs_.rsv1 = data; break;
         case ram_control: ramctl_.raw = data; break;
         case vram_cycle_pattern_bank_a0_lower: cyca0l_.raw = data; break;
         case vram_cycle_pattern_bank_a0_upper: cyca0u_.raw = data; break;
@@ -924,7 +928,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case priority_number_nbg0_nbg1: prina_.raw = data; break;
         case priority_number_nbg2_nbg3: prinb_.raw = data; break;
         case priority_number_rbg0: prir_.raw = data; break;
-        case reserve_2: rsv2_.raw = data; break;
+        case reserve_2: regs_.rsv2 = data; break;
         case color_calculation_ratio_sprite_0_1: ccrsa_.raw = data; break;
         case color_calculation_ratio_sprite_2_3: ccrsb_.raw = data; break;
         case color_calculation_ratio_sprite_4_5: ccrsc_.raw = data; break;
@@ -1187,8 +1191,8 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             prinb_.raw = l;
             break;
         case priority_number_rbg0:
-            prir_.raw = h;
-            rsv2_.raw = l;
+            prir_.raw  = h;
+            regs_.rsv2 = l;
             break;
         case color_calculation_ratio_sprite_0_1:
             ccrsa_.raw = h;
@@ -1603,13 +1607,12 @@ void Vdp2::updateResolution() {
 };
 
 void Vdp2::updateRamStatus() {
-    ram_status_.vram_size      = util::toEnum<VramSize>(static_cast<bool>(vrsize_.vram_size));
-    ram_status_.vram_a_mode    = toEnum<VramMode>(ramctl_.vram_a_mode);
-    ram_status_.vram_b_mode    = toEnum<VramMode>(ramctl_.vram_b_mode);
-    ram_status_.color_ram_mode = toEnum<ColorRamMode>(ramctl_.color_ram_mode);
-    // memory()->vdp2_cram_memory_mask_         = (ram_status_.color_ram_mode == ColorRamMode::mode_1_rgb_5_bits_2048_colors)
-    //                                               ? core::vdp2_cram_32Kb_memory_mask
-    //                                               : core::vdp2_cram_16Kb_memory_mask;
+    using Vrsize = Vdp2Regs::Vrsize;
+
+    ram_status_.vram_size                    = regs_.vrsize >> Vrsize::vramsz_enum;
+    ram_status_.vram_a_mode                  = toEnum<VramMode>(ramctl_.vram_a_mode);
+    ram_status_.vram_b_mode                  = toEnum<VramMode>(ramctl_.vram_b_mode);
+    ram_status_.color_ram_mode               = toEnum<ColorRamMode>(ramctl_.color_ram_mode);
     ram_status_.coefficient_table_storage    = toEnum<CoefficientTableStorage>(ramctl_.coefficient_table_storage);
     ram_status_.vram_a0_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_a0_rotation_bank_select);
     ram_status_.vram_a1_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_a1_rotation_bank_select);
@@ -3043,6 +3046,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) -> u32 {
+    using Vrsize = Vdp2Regs::Vrsize;
+
     constexpr auto multiplier_800   = u32{0x800};
     constexpr auto multiplier_1000  = u32{0x1000};
     constexpr auto multiplier_2000  = u32{0x2000};
@@ -3051,7 +3056,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     constexpr auto multiplier_10000 = u32{0x10000};
 
     auto&      screen                 = getScreen(s);
-    const auto is_vram_size_4mb       = toEnum<VramSize>(vrsize_.vram_size) == VramSize::size_4_mbits;
+    const auto is_vram_size_4mb       = (regs_.vrsize >> Vrsize::vramsz_enum) == Vrsize::VramSize::size_4_mbits;
     auto       plane_size             = PlaneSize{};
     auto       pattern_name_data_size = PatternNameDataSize{};
     auto       character_size         = CharacterSize{};
@@ -3443,6 +3448,9 @@ void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_addre
 
 void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address, const ScreenOffset& page_offset) {
     // Getting the right function depending on the pattern name data configuration.
+
+    using Vrsize = Vdp2Regs::Vrsize;
+
     static auto current_pnd_config = PatternNameDataEnum{};
 
     if (screen.pattern_name_data_size == PatternNameDataSize::two_words) {
@@ -3529,7 +3537,7 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
     };
 
     const auto character_number_mask
-        = (ram_status_.vram_size == VramSize::size_4_mbits) ? bitmask_vdp2_vram_4mb : bitmask_vdp2_vram_8mb;
+        = (ram_status_.vram_size == Vrsize::VramSize::size_4_mbits) ? bitmask_vdp2_vram_4mb : bitmask_vdp2_vram_8mb;
 
     for (u32 i = 0; i < cp_number; ++i) {
         const auto raw_data
