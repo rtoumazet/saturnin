@@ -975,50 +975,62 @@ struct Vdp2Regs {
     };
     using BmpnbType = Reg<u16, Bmpnb>;
     BmpnbType bmpnb;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PatternNameDataSize
-///
-/// \brief  PNCNx / PNCR bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Pcnxx
+    ///
+    /// \brief	Pattern Name Control (NBGx, RBG0) register (PNCxx).
+    ///
+    /// \author	Runik
+    /// \date	15/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PatternNameDataSize : bool {
-    two_words = false, ///< 2 Words.
-    one_word  = true   ///< 1 Word.
-};
+    struct Pcnxx {
+        GENERATE_USING(Pcnxx, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CharacterNumberSupplementMode
-///
-/// \brief  NxCNSM / R0CNSM bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   PatternNameDataSize
+        ///
+        /// \brief  PNCNx / PNCR bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CharacterNumberSupplementMode : bool {
-    character_number_10_bits
-    = false, ///< Character number in pattern name data is 10 bits. Flip function can be selected in character units.
-    character_number_12_bits = true ///< Character number in pattern name data is 12 bits. Flip function cannot be used.
-};
+        enum class PatternNameDataSize : bool {
+            two_words = false, ///< 2 Words.
+            one_word  = true   ///< 1 Word.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PatternNameControlNbg0
-///
-/// \brief	Pattern Name Control (NBGx, RBG0) register (PNCxx).
-///
-/// \author	Runik
-/// \date	24/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   CharacterNumberSupplementMode
+        ///
+        /// \brief  NxCNSM / R0CNSM bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PatternNameControl {
-    u16            raw;                            ///< Raw representation.
-    BitField<15>   pattern_name_data_size;         ///< Defines N0PNB bit.
-    BitField<14>   character_number_mode;          ///< Defines N0CNSM bit.
-    BitField<9>    special_priority;               ///< Defines N0SPR bit.
-    BitField<8>    special_color_calculation;      ///< Defines N0SCC bit.
-    BitField<5, 3> supplementary_palette_number;   ///< Defines N0SPLTx bits.
-    BitField<0, 5> supplementary_character_number; ///< Defines N0SCNx bits.
-    BitField<8, 8> upper_8_bits;                   ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;                   ///< Defines the range of the lower 8 bits of the register.
+        enum class CharacterNumberSupplementMode : bool {
+            character_number_10_bits
+            = false, ///< Character number in pattern name data is 10 bits. Flip function can be selected in character units.
+            character_number_12_bits = true ///< Character number in pattern name data is 12 bits. Flip function cannot be used.
+        };
+
+        GENERATE_BIT_WITH_ENUM(pnb, 15, 0b1, PatternNameDataSize);            ///< Pattern name data size.
+        GENERATE_BIT_WITH_ENUM(cnsm, 14, 0b1, CharacterNumberSupplementMode); ///< Character number mode.
+        GENERATE_BIT_WITHOUT_ENUM(spr, 9, 0b1);                               ///< Special priority.
+        GENERATE_BIT_WITHOUT_ENUM(scc, 8, 0b1);                               ///< Special color calculation.
+        GENERATE_BIT_WITHOUT_ENUM(splt, 5, 0b111);                            ///< Supplementary palette number.
+        GENERATE_BIT_WITHOUT_ENUM(scn, 0, 0b11111);                           ///< Supplementary character number.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Pcnxx", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Pcnxx", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using PcnxxType = Reg<u16, Pcnxx>;
+    PcnxxType pncn0;
+    PcnxxType pncn1;
+    PcnxxType pncn2;
+    PcnxxType pncn3;
+    PcnxxType pncr;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -375,11 +375,11 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case character_control_b: return regs_.chctlb.data();
         case bitmap_palette_number_a: return regs_.bmpna.data();
         case bitmap_palette_number_b: return regs_.bmpnb.data();
-        case pattern_name_control_nbg0: return pncn0_.raw;
-        case pattern_name_control_nbg1: return pncn1_.raw;
-        case pattern_name_control_nbg2: return pncn2_.raw;
-        case pattern_name_control_nbg3: return pncn3_.raw;
-        case pattern_name_control_rbg0: return pncr_.raw;
+        case pattern_name_control_nbg0: return regs_.pncn0.data();
+        case pattern_name_control_nbg1: return regs_.pncn1.data();
+        case pattern_name_control_nbg2: return regs_.pncn2.data();
+        case pattern_name_control_nbg3: return regs_.pncn3.data();
+        case pattern_name_control_rbg0: return regs_.pncr.data();
         case plane_size: return plsz_.raw;
         case map_offset_n: return mpofn_.raw;
         case map_offset_r: return mpofr_.raw;
@@ -554,16 +554,16 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case bitmap_palette_number_a + 1: regs_.bmpna.upd(Vdp2Regs::Bmpna::loByte(data)); break;
         case bitmap_palette_number_b: regs_.bmpnb.upd(Vdp2Regs::Bmpnb::hiByte(data)); break;
         case bitmap_palette_number_b + 1: regs_.bmpnb.upd(Vdp2Regs::Bmpnb::loByte(data)); break;
-        case pattern_name_control_nbg0: pncn0_.upper_8_bits = data; break;
-        case pattern_name_control_nbg0 + 1: pncn0_.lower_8_bits = data; break;
-        case pattern_name_control_nbg1: pncn1_.upper_8_bits = data; break;
-        case pattern_name_control_nbg1 + 1: pncn1_.lower_8_bits = data; break;
-        case pattern_name_control_nbg2: pncn2_.upper_8_bits = data; break;
-        case pattern_name_control_nbg2 + 1: pncn2_.lower_8_bits = data; break;
-        case pattern_name_control_nbg3: pncn3_.upper_8_bits = data; break;
-        case pattern_name_control_nbg3 + 1: pncn3_.lower_8_bits = data; break;
-        case pattern_name_control_rbg0: pncr_.upper_8_bits = data; break;
-        case pattern_name_control_rbg0 + 1: pncr_.lower_8_bits = data; break;
+        case pattern_name_control_nbg0: regs_.pncn0.upd(Vdp2Regs::Pcnxx::hiByte(data)); break;
+        case pattern_name_control_nbg0 + 1: regs_.pncn0.upd(Vdp2Regs::Pcnxx::loByte(data)); break;
+        case pattern_name_control_nbg1: regs_.pncn1.upd(Vdp2Regs::Pcnxx::hiByte(data)); break;
+        case pattern_name_control_nbg1 + 1: regs_.pncn1.upd(Vdp2Regs::Pcnxx::loByte(data)); break;
+        case pattern_name_control_nbg2: regs_.pncn2.upd(Vdp2Regs::Pcnxx::hiByte(data)); break;
+        case pattern_name_control_nbg2 + 1: regs_.pncn2.upd(Vdp2Regs::Pcnxx::loByte(data)); break;
+        case pattern_name_control_nbg3: regs_.pncn3.upd(Vdp2Regs::Pcnxx::hiByte(data)); break;
+        case pattern_name_control_nbg3 + 1: regs_.pncn3.upd(Vdp2Regs::Pcnxx::loByte(data)); break;
+        case pattern_name_control_rbg0: regs_.pncr.upd(Vdp2Regs::Pcnxx::hiByte(data)); break;
+        case pattern_name_control_rbg0 + 1: regs_.pncr.upd(Vdp2Regs::Pcnxx::loByte(data)); break;
         case plane_size: plsz_.upper_8_bits = data; break;
         case plane_size + 1: plsz_.lower_8_bits = data; break;
         case map_offset_n: mpofn_.upper_8_bits = data; break;
@@ -825,11 +825,11 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case character_control_b: regs_.chctlb = data; break;
         case bitmap_palette_number_a: regs_.bmpna = data; break;
         case bitmap_palette_number_b: regs_.bmpnb = data; break;
-        case pattern_name_control_nbg0: pncn0_.raw = data; break;
-        case pattern_name_control_nbg1: pncn1_.raw = data; break;
-        case pattern_name_control_nbg2: pncn2_.raw = data; break;
-        case pattern_name_control_nbg3: pncn3_.raw = data; break;
-        case pattern_name_control_rbg0: pncr_.raw = data; break;
+        case pattern_name_control_nbg0: regs_.pncn0 = data; break;
+        case pattern_name_control_nbg1: regs_.pncn1 = data; break;
+        case pattern_name_control_nbg2: regs_.pncn2 = data; break;
+        case pattern_name_control_nbg3: regs_.pncn3 = data; break;
+        case pattern_name_control_rbg0: regs_.pncr = data; break;
         case plane_size: plsz_.raw = data; break;
         case map_offset_n: mpofn_.raw = data; break;
         case map_offset_r: mpofr_.raw = data; break;
@@ -987,16 +987,16 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.bmpnb = l;
             break;
         case pattern_name_control_nbg0:
-            pncn0_.raw = h;
-            pncn1_.raw = l;
+            regs_.pncn0 = h;
+            regs_.pncn1 = l;
             break;
         case pattern_name_control_nbg2:
-            pncn2_.raw = h;
-            pncn3_.raw = l;
+            regs_.pncn2 = h;
+            regs_.pncn3 = l;
             break;
         case pattern_name_control_rbg0:
-            pncr_.raw = h;
-            plsz_.raw = l;
+            regs_.pncr = h;
+            plsz_.raw  = l;
             break;
         case map_offset_n:
             mpofn_.raw = h;
@@ -2436,6 +2436,8 @@ auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
+    using Pcnxx = Vdp2Regs::Pcnxx;
+
     constexpr auto map_size_nbg = u8{2 * 2};
     constexpr auto map_size_rbg = u8{4 * 4};
     constexpr auto cell_size    = u8{8 * 8};
@@ -2502,10 +2504,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             default: return dot_size_32;
         }
     };
-    const auto getPageSize = [](const PatternNameDataSize pnd_sz, const Vdp2Regs::CharacterSize ch_sz) {
+    const auto getPageSize = [](const Pcnxx::PatternNameDataSize pnd_sz, const Vdp2Regs::CharacterSize ch_sz) {
         constexpr auto boundary_1_word_1_by_1_cell  = u16{0x2000};
         constexpr auto boundary_1_word_2_by_2_cells = u16{0x800};
-        if (pnd_sz == PatternNameDataSize::one_word) {
+        if (pnd_sz == Pcnxx::PatternNameDataSize::one_word) {
             return (ch_sz == Vdp2Regs::CharacterSize::one_by_one) ? boundary_1_word_1_by_1_cell : boundary_1_word_2_by_2_cells;
         }
 
@@ -2569,16 +2571,15 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn0_.plane_d);
 
             // Page
-            screen.page_size
-                = getPageSize(toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size), regs_.chctla >> Chctla::n0chsz_enum);
+            screen.page_size = getPageSize(regs_.pncn0 >> Pcnxx::pnb_enum, regs_.chctla >> Chctla::n0chsz_enum);
 
             // Pattern name data
-            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
-            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn0_.character_number_mode);
-            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn0_.special_priority));
-            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn0_.special_color_calculation));
-            screen.supplementary_palette_number     = pncn0_.supplementary_palette_number;
-            screen.supplementary_character_number   = pncn0_.supplementary_character_number;
+            screen.pattern_name_data_size           = regs_.pncn0 >> Pcnxx::pnb_enum;
+            screen.character_number_supplement_mode = regs_.pncn0 >> Pcnxx::cnsm_enum;
+            screen.special_priority                 = static_cast<u8>(regs_.pncn0 >> Pcnxx::spr_shft);
+            screen.special_color_calculation        = static_cast<u8>(regs_.pncn0 >> Pcnxx::scc_shft);
+            screen.supplementary_palette_number     = static_cast<u8>(regs_.pncn0 >> Pcnxx::splt_shft);
+            screen.supplementary_character_number   = static_cast<u8>(regs_.pncn0 >> Pcnxx::scn_shft);
 
             // Character pattern
             screen.character_pattern_size = regs_.chctla >> Chctla::n0chsz_enum;
@@ -2628,16 +2629,15 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn1_.plane_d);
 
             // Page
-            screen.page_size
-                = getPageSize(toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size), regs_.chctla >> Chctla::n1chsz_enum);
+            screen.page_size = getPageSize(regs_.pncn1 >> Pcnxx::pnb_enum, regs_.chctla >> Chctla::n1chsz_enum);
 
             // Pattern name data
-            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size);
-            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn1_.character_number_mode);
-            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn1_.special_priority));
-            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn1_.special_color_calculation));
-            screen.supplementary_palette_number     = pncn1_.supplementary_palette_number;
-            screen.supplementary_character_number   = pncn1_.supplementary_character_number;
+            screen.pattern_name_data_size           = regs_.pncn1 >> Pcnxx::pnb_enum;
+            screen.character_number_supplement_mode = regs_.pncn1 >> Pcnxx::cnsm_enum;
+            screen.special_priority                 = static_cast<u8>(regs_.pncn1 >> Pcnxx::spr_shft);
+            screen.special_color_calculation        = static_cast<u8>(regs_.pncn1 >> Pcnxx::scc_shft);
+            screen.supplementary_palette_number     = static_cast<u8>(regs_.pncn1 >> Pcnxx::splt_shft);
+            screen.supplementary_character_number   = static_cast<u8>(regs_.pncn1 >> Pcnxx::scn_shft);
 
             // Character pattern
             screen.character_pattern_size = regs_.chctla >> Chctla::n1chsz_enum;
@@ -2687,16 +2687,15 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn2_.plane_d);
 
             // Page
-            screen.page_size
-                = getPageSize(toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size), regs_.chctlb >> Chctlb::n2chsz_enum);
+            screen.page_size = getPageSize(regs_.pncn2 >> Pcnxx::pnb_enum, regs_.chctlb >> Chctlb::n2chsz_enum);
 
             // Pattern name data
-            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size);
-            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn2_.character_number_mode);
-            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn2_.special_priority));
-            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn2_.special_color_calculation));
-            screen.supplementary_palette_number     = pncn2_.supplementary_palette_number;
-            screen.supplementary_character_number   = pncn2_.supplementary_character_number;
+            screen.pattern_name_data_size           = regs_.pncn2 >> Pcnxx::pnb_enum;
+            screen.character_number_supplement_mode = regs_.pncn2 >> Pcnxx::cnsm_enum;
+            screen.special_priority                 = static_cast<u8>(regs_.pncn2 >> Pcnxx::spr_shft);
+            screen.special_color_calculation        = static_cast<u8>(regs_.pncn2 >> Pcnxx::scc_shft);
+            screen.supplementary_palette_number     = static_cast<u8>(regs_.pncn2 >> Pcnxx::splt_shft);
+            screen.supplementary_character_number   = static_cast<u8>(regs_.pncn2 >> Pcnxx::scn_shft);
 
             // Character pattern
             screen.character_pattern_size = regs_.chctlb >> Chctlb::n2chsz_enum;
@@ -2740,16 +2739,15 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn3_.plane_d);
 
             // Page
-            screen.page_size
-                = getPageSize(toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size), regs_.chctlb >> Chctlb::n3chsz_enum);
+            screen.page_size = getPageSize(regs_.pncn3 >> Pcnxx::pnb_enum, regs_.chctlb >> Chctlb::n3chsz_enum);
 
             // Pattern name data
-            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size);
-            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn3_.character_number_mode);
-            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn3_.special_priority));
-            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn3_.special_color_calculation));
-            screen.supplementary_palette_number     = pncn3_.supplementary_palette_number;
-            screen.supplementary_character_number   = pncn3_.supplementary_character_number;
+            screen.pattern_name_data_size           = regs_.pncn3 >> Pcnxx::pnb_enum;
+            screen.character_number_supplement_mode = regs_.pncn3 >> Pcnxx::cnsm_enum;
+            screen.special_priority                 = static_cast<u8>(regs_.pncn3 >> Pcnxx::spr_shft);
+            screen.special_color_calculation        = static_cast<u8>(regs_.pncn3 >> Pcnxx::scc_shft);
+            screen.supplementary_palette_number     = static_cast<u8>(regs_.pncn3 >> Pcnxx::splt_shft);
+            screen.supplementary_character_number   = static_cast<u8>(regs_.pncn3 >> Pcnxx::scn_shft);
 
             // Character pattern
             screen.character_pattern_size = regs_.chctlb >> Chctlb::n3chsz_enum;
@@ -2803,16 +2801,15 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_p_start_address = calculatePlaneStartAddress(s, mpopra_.plane_p);
 
             // Page
-            screen.page_size
-                = getPageSize(toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size), regs_.chctlb >> Chctlb::r0chsz_enum);
+            screen.page_size = getPageSize(regs_.pncr >> Pcnxx::pnb_enum, regs_.chctlb >> Chctlb::r0chsz_enum);
 
             // Pattern name data
-            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size);
-            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncr_.character_number_mode);
-            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncr_.special_priority));
-            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncr_.special_color_calculation));
-            screen.supplementary_palette_number     = pncr_.supplementary_palette_number;
-            screen.supplementary_character_number   = pncr_.supplementary_character_number;
+            screen.pattern_name_data_size           = regs_.pncr >> Pcnxx::pnb_enum;
+            screen.character_number_supplement_mode = regs_.pncr >> Pcnxx::cnsm_enum;
+            screen.special_priority                 = static_cast<u8>(regs_.pncr >> Pcnxx::spr_shft);
+            screen.special_color_calculation        = static_cast<u8>(regs_.pncr >> Pcnxx::scc_shft);
+            screen.supplementary_palette_number     = static_cast<u8>(regs_.pncr >> Pcnxx::splt_shft);
+            screen.supplementary_character_number   = static_cast<u8>(regs_.pncr >> Pcnxx::scn_shft);
 
             // Character pattern
             screen.character_pattern_size = regs_.chctlb >> Chctlb::r0chsz_enum;
@@ -2870,16 +2867,15 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_p_start_address = calculatePlaneStartAddress(s, mpoprb_.plane_p);
 
             // Page
-            screen.page_size
-                = getPageSize(toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size), regs_.chctla >> Chctla::n0chsz_enum);
+            screen.page_size = getPageSize(regs_.pncn0 >> Pcnxx::pnb_enum, regs_.chctla >> Chctla::n0chsz_enum);
 
             // Pattern name data
-            screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
-            screen.character_number_supplement_mode = toEnum<CharacterNumberSupplementMode>(pncn0_.character_number_mode);
-            screen.special_priority                 = static_cast<u8>(static_cast<bool>(pncn0_.special_priority));
-            screen.special_color_calculation        = static_cast<u8>(static_cast<bool>(pncn0_.special_color_calculation));
-            screen.supplementary_palette_number     = pncn0_.supplementary_palette_number;
-            screen.supplementary_character_number   = pncn0_.supplementary_character_number;
+            screen.pattern_name_data_size           = regs_.pncn0 >> Pcnxx::pnb_enum;
+            screen.character_number_supplement_mode = regs_.pncn0 >> Pcnxx::cnsm_enum;
+            screen.special_priority                 = static_cast<u8>(regs_.pncn0 >> Pcnxx::spr_shft);
+            screen.special_color_calculation        = static_cast<u8>(regs_.pncn0 >> Pcnxx::scc_shft);
+            screen.supplementary_palette_number     = static_cast<u8>(regs_.pncn0 >> Pcnxx::splt_shft);
+            screen.supplementary_character_number   = static_cast<u8>(regs_.pncn0 >> Pcnxx::scn_shft);
 
             // Character pattern
             screen.character_pattern_size = regs_.chctla >> Chctla::n0chsz_enum;
@@ -3039,6 +3035,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     using Vrsize = Vdp2Regs::Vrsize;
     using Chctla = Vdp2Regs::Chctla;
     using Chctlb = Vdp2Regs::Chctlb;
+    using Pcnxx  = Vdp2Regs::Pcnxx;
 
     constexpr auto multiplier_800   = u32{0x800};
     constexpr auto multiplier_1000  = u32{0x1000};
@@ -3050,7 +3047,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     auto&      screen                 = getScreen(s);
     const auto is_vram_size_4mb       = (regs_.vrsize >> Vrsize::vramsz_enum) == Vrsize::VramSize::size_4_mbits;
     auto       plane_size             = PlaneSize{};
-    auto       pattern_name_data_size = PatternNameDataSize{};
+    auto       pattern_name_data_size = Pcnxx::PatternNameDataSize{};
     auto       character_size         = Vdp2Regs::CharacterSize{};
     auto       start_address          = u32{screen.map_offset << 6 | map_addr};
 
@@ -3058,32 +3055,32 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
         using enum ScrollScreen;
         case nbg0:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg0);
-            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
+            pattern_name_data_size = regs_.pncn0 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctla >> Chctla::n0chsz_enum;
             break;
         case nbg1:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg1);
-            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size);
+            pattern_name_data_size = regs_.pncn1 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctla >> Chctla::n1chsz_enum;
             break;
         case nbg2:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg2);
-            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size);
+            pattern_name_data_size = regs_.pncn2 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctlb >> Chctlb::n2chsz_enum;
             break;
         case nbg3:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg3);
-            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size);
+            pattern_name_data_size = regs_.pncn3 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctlb >> Chctlb::n3chsz_enum;
             break;
         case rbg0:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpa);
-            pattern_name_data_size = toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size);
+            pattern_name_data_size = regs_.pncr >> Pcnxx::pnb_enum;
             character_size         = regs_.chctlb >> Chctlb::r0chsz_enum;
             break;
         case rbg1:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpb);
-            pattern_name_data_size = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
+            pattern_name_data_size = regs_.pncn0 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctla >> Chctla::n0chsz_enum;
             break;
         default: break;
@@ -3094,7 +3091,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     switch (plane_size) {
         using enum PlaneSize;
         case size_1_by_1:
-            if (pattern_name_data_size == PatternNameDataSize::one_word) {
+            if (pattern_name_data_size == Pcnxx::PatternNameDataSize::one_word) {
                 if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003f};
                     constexpr auto mask_8mb = u16{0x007f};
@@ -3125,7 +3122,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             return vram_start_address + (start_address & mask) * multiplier;
             break;
         case size_2_by_1:
-            if (pattern_name_data_size == PatternNameDataSize::one_word) {
+            if (pattern_name_data_size == Pcnxx::PatternNameDataSize::one_word) {
                 if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003e};
                     constexpr auto mask_8mb = u16{0x007e};
@@ -3156,7 +3153,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             return vram_start_address + ((start_address & mask) >> 1) * multiplier;
             break;
         case size_2_by_2:
-            if (pattern_name_data_size == PatternNameDataSize::one_word) {
+            if (pattern_name_data_size == Pcnxx::PatternNameDataSize::one_word) {
                 if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003c};
                     constexpr auto mask_8mb = u16{0x007c};
@@ -3442,21 +3439,22 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
     // Getting the right function depending on the pattern name data configuration.
 
     using Vrsize = Vdp2Regs::Vrsize;
+    using Pcnxx  = Vdp2Regs::Pcnxx;
 
     static auto current_pnd_config = PatternNameDataEnum{};
 
-    if (screen.pattern_name_data_size == PatternNameDataSize::two_words) {
+    if (screen.pattern_name_data_size == Pcnxx::PatternNameDataSize::two_words) {
         current_pnd_config = PatternNameDataEnum::two_words;
     } else {
         if (screen.character_pattern_size == Vdp2Regs::CharacterSize::one_by_one) {
             if (screen.character_color_number == ColorCount::palette_16) {
-                if (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits) {
+                if (screen.character_number_supplement_mode == Pcnxx::CharacterNumberSupplementMode::character_number_10_bits) {
                     current_pnd_config = PatternNameDataEnum::one_word_1_cell_16_colors_10_bits;
                 } else { // CharacterNumberSupplementMode::character_number_12_bits
                     current_pnd_config = PatternNameDataEnum::one_word_1_cell_16_colors_12_bits;
                 }
             } else { // Over 16 colors
-                if (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits) {
+                if (screen.character_number_supplement_mode == Pcnxx::CharacterNumberSupplementMode::character_number_10_bits) {
                     current_pnd_config = PatternNameDataEnum::one_word_1_cell_over_16_colors_10_bits;
                 } else { // CharacterNumberSupplementMode::character_number_12_bits
                     current_pnd_config = PatternNameDataEnum::one_word_1_cell_over_16_colors_12_bits;
@@ -3464,13 +3462,13 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
             }
         } else { // CharacterSize::two_by_two
             if (screen.character_color_number == ColorCount::palette_16) {
-                if (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits) {
+                if (screen.character_number_supplement_mode == Pcnxx::CharacterNumberSupplementMode::character_number_10_bits) {
                     current_pnd_config = PatternNameDataEnum::one_word_4_cells_16_colors_10_bits;
                 } else { // CharacterNumberSupplementMode::character_number_12_bits
                     current_pnd_config = PatternNameDataEnum::one_word_4_cells_16_colors_12_bits;
                 }
             } else { // Over 16 colors
-                if (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits) {
+                if (screen.character_number_supplement_mode == Pcnxx::CharacterNumberSupplementMode::character_number_10_bits) {
                     current_pnd_config = PatternNameDataEnum::one_word_4_cells_over_16_colors_10_bits;
                 } else { // CharacterNumberSupplementMode::character_number_12_bits
                     current_pnd_config = PatternNameDataEnum::one_word_4_cells_over_16_colors_12_bits;
@@ -3515,7 +3513,7 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
     const auto cp_number   = (screen.character_pattern_size == Vdp2Regs::CharacterSize::one_by_one) ? u32{64 * 64} : u32{32 * 32};
     const auto cp_width    = (screen.character_pattern_size == Vdp2Regs::CharacterSize::one_by_one) ? u32{1} : u32{2};
     const auto cp_height   = cp_width;
-    const auto pnd_size    = (screen.pattern_name_data_size == PatternNameDataSize::one_word) ? 2 : 4;
+    const auto pnd_size    = (screen.pattern_name_data_size == Pcnxx::PatternNameDataSize::one_word) ? 2 : 4;
     auto       pnd_address = page_address;
     auto       cp_offset   = page_offset;
 

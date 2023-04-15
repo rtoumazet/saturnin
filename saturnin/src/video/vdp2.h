@@ -306,20 +306,20 @@ struct ScrollScreenStatus {
     u32        bitmap_start_address{0};            ///< The bitmap start address.
 
     // Cell
-    u8                            map_size{};                     ///< Size of the map (2*2 for NBG / 4*4 for RBG)
-    u8                            map_offset{};                   ///< The map offset
-    PlaneSize                     plane_size{PlaneSize::not_set}; ///< Size of the plane (1*1, 2*1 or 2*2 pages)
-    u16                           page_size{};                    ///< Size of the page / pattern name table
-    u32                           cells_number{};                 ///< Total number of cells
-    PatternNameDataSize           pattern_name_data_size{};       ///< Size of the pattern name data (1 or 2 words)
-    CharacterNumberSupplementMode character_number_supplement_mode{
-        CharacterNumberSupplementMode::character_number_10_bits}; ///< 10 bits/12 bits
-    u8                      special_priority{};                   ///< Special priority bit
-    u8                      special_color_calculation{};          ///< Special color calculation bit
-    u8                      supplementary_palette_number{};       ///< Supplementary palette number bit
-    u8                      supplementary_character_number{};     ///< Supplementary character number bit
-    Vdp2Regs::CharacterSize character_pattern_size{};             ///< Size of the character pattern (1*1 or 2*2 cells)
-    u16                     cell_size{};                          ///< Size of the cell (8*8 dots)
+    u8                                             map_size{};   ///< Size of the map (2*2 for NBG / 4*4 for RBG)
+    u8                                             map_offset{}; ///< The map offset
+    PlaneSize                                      plane_size{PlaneSize::not_set}; ///< Size of the plane (1*1, 2*1 or 2*2 pages)
+    u16                                            page_size{};                    ///< Size of the page / pattern name table
+    u32                                            cells_number{};                 ///< Total number of cells
+    Vdp2Regs::Pcnxx::PatternNameDataSize           pattern_name_data_size{}; ///< Size of the pattern name data (1 or 2 words)
+    Vdp2Regs::Pcnxx::CharacterNumberSupplementMode character_number_supplement_mode{
+        Vdp2Regs::Pcnxx::CharacterNumberSupplementMode::character_number_10_bits}; ///< 10 bits/12 bits
+    u8                      special_priority{};                                    ///< Special priority bit
+    u8                      special_color_calculation{};                           ///< Special color calculation bit
+    u8                      supplementary_palette_number{};                        ///< Supplementary palette number bit
+    u8                      supplementary_character_number{};                      ///< Supplementary character number bit
+    Vdp2Regs::CharacterSize character_pattern_size{}; ///< Size of the character pattern (1*1 or 2*2 cells)
+    u16                     cell_size{};              ///< Size of the cell (8*8 dots)
 
     // Positioning variables
     ScreenOffset plane_screen_offset{};             ///< Offset of one plane in cell units.
@@ -1826,11 +1826,11 @@ class Vdp2 {
     // CharacterControlB                               chctlb_;
     // BitmapPaletteNumberA                            bmpna_;
     // BitmapPaletteNumberB                            bmpnb_;
-    PatternNameControl                              pncn0_;
-    PatternNameControl                              pncn1_;
-    PatternNameControl                              pncn2_;
-    PatternNameControl                              pncn3_;
-    PatternNameControl                              pncr_;
+    // PatternNameControl                              pncn0_;
+    // PatternNameControl                              pncn1_;
+    // PatternNameControl                              pncn2_;
+    // PatternNameControl                              pncn3_;
+    // PatternNameControl                              pncr_;
     PlaneSizeRegister                               plsz_;
     MapOffsetNbg                                    mpofn_;
     MapOffsetRbg                                    mpofr_;

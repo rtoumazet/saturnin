@@ -369,15 +369,16 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     values.emplace_back(tr("Plane size"), planeSize(screen));
 
     // Pattern Name Data size
-    const auto& pnd_size = screen.pattern_name_data_size == PatternNameDataSize::one_word ? tr("1 word") : tr("2 words");
+    const auto& pnd_size
+        = screen.pattern_name_data_size == Vdp2Regs::Pcnxx::PatternNameDataSize::one_word ? tr("1 word") : tr("2 words");
     values.emplace_back(tr("Pattern Name Data size"), pnd_size);
 
-    if (screen.pattern_name_data_size == PatternNameDataSize::one_word) {
+    if (screen.pattern_name_data_size == Vdp2Regs::Pcnxx::PatternNameDataSize::one_word) {
         // Character number supplement mode
-        const auto& character_mode
-            = (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits)
-                  ? tr("10 bits, can flip")
-                  : tr("12 bits, cannot flip");
+        const auto& character_mode = (screen.character_number_supplement_mode
+                                      == Vdp2Regs::Pcnxx::CharacterNumberSupplementMode::character_number_10_bits)
+                                         ? tr("10 bits, can flip")
+                                         : tr("12 bits, cannot flip");
         values.emplace_back(tr("Character number supplement mode"), character_mode);
         values.emplace_back(tr("Special priority bit"), uti::format("{:#x}", screen.special_priority));
         values.emplace_back(tr("Special color calculation bit"), uti::format("{:#x}", screen.special_color_calculation));
