@@ -358,21 +358,21 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case h_counter: return regs_.hcnt.data();
         case v_counter: return regs_.vcnt.data();
         case reserve_1: return regs_.rsv1.data();
-        case ram_control: return ramctl_.raw;
-        case vram_cycle_pattern_bank_a0_lower: return cyca0l_.raw;
-        case vram_cycle_pattern_bank_a0_upper: return cyca0u_.raw;
-        case vram_cycle_pattern_bank_a1_lower: return cyca1l_.raw;
-        case vram_cycle_pattern_bank_a1_upper: return cyca1u_.raw;
-        case vram_cycle_pattern_bank_b0_lower: return cycb0l_.raw;
-        case vram_cycle_pattern_bank_b0_upper: return cycb0u_.raw;
-        case vram_cycle_pattern_bank_b1_lower: return cycb1l_.raw;
-        case vram_cycle_pattern_bank_b1_upper: return cycb1u_.raw;
-        case screen_display_enable: return bgon_.raw;
-        case mosaic_control: return mzctl_.raw;
-        case special_function_code_select: return sfsel_.raw;
-        case special_function_code: return sfcode_.raw;
-        case character_control_a: return chctla_.raw;
-        case character_control_b: return chctlb_.raw;
+        case ram_control: return regs_.ramctl.data();
+        case vram_cycle_pattern_bank_a0_lower: return regs_.cyca0l.data();
+        case vram_cycle_pattern_bank_a0_upper: return regs_.cyca0u.data();
+        case vram_cycle_pattern_bank_a1_lower: return regs_.cyca1l.data();
+        case vram_cycle_pattern_bank_a1_upper: return regs_.cyca1u.data();
+        case vram_cycle_pattern_bank_b0_lower: return regs_.cycb0l.data();
+        case vram_cycle_pattern_bank_b0_upper: return regs_.cycb0u.data();
+        case vram_cycle_pattern_bank_b1_lower: return regs_.cycb1l.data();
+        case vram_cycle_pattern_bank_b1_upper: return regs_.cycb1u.data();
+        case screen_display_enable: return regs_.bgon.data();
+        case mosaic_control: return regs_.mzctl.data();
+        case special_function_code_select: return regs_.sfsel.data();
+        case special_function_code: return regs_.sfcode.data();
+        case character_control_a: return regs_.chctla.data();
+        case character_control_b: return regs_.chctlb.data();
         case bitmap_palette_number_a: return bmpna_.raw;
         case bitmap_palette_number_b: return bmpnb_.raw;
         case pattern_name_control_nbg0: return pncn0_.raw;
@@ -520,36 +520,36 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case v_counter + 1: regs_.vcnt.upd(Vdp2Regs::Vcnt::loByte(data)); break;
         case reserve_1: regs_.rsv1.upd(Vdp2Regs::Reserve::hiByte(data)); break;
         case reserve_1 + 1: regs_.rsv1.upd(Vdp2Regs::Reserve::loByte(data)); break;
-        case ram_control: ramctl_.upper_8_bits = data; break;
-        case ram_control + 1: ramctl_.lower_8_bits = data; break;
-        case vram_cycle_pattern_bank_a0_lower: cyca0l_.upper_8_bits = data; break;
-        case vram_cycle_pattern_bank_a0_lower + 1: cyca0l_.lower_8_bits = data; break;
-        case vram_cycle_pattern_bank_a0_upper: cyca0u_.upper_8_bits = data; break;
-        case vram_cycle_pattern_bank_a0_upper + 1: cyca0u_.lower_8_bits = data; break;
-        case vram_cycle_pattern_bank_a1_lower: cyca1l_.upper_8_bits = data; break;
-        case vram_cycle_pattern_bank_a1_lower + 1: cyca1l_.lower_8_bits = data; break;
-        case vram_cycle_pattern_bank_a1_upper: cyca1u_.upper_8_bits = data; break;
-        case vram_cycle_pattern_bank_a1_upper + 1: cyca1u_.lower_8_bits = data; break;
-        case vram_cycle_pattern_bank_b0_lower: cycb0l_.upper_8_bits = data; break;
-        case vram_cycle_pattern_bank_b0_lower + 1: cycb0l_.lower_8_bits = data; break;
-        case vram_cycle_pattern_bank_b0_upper: cycb0u_.upper_8_bits = data; break;
-        case vram_cycle_pattern_bank_b0_upper + 1: cycb0u_.lower_8_bits = data; break;
-        case vram_cycle_pattern_bank_b1_lower: cycb1l_.upper_8_bits = data; break;
-        case vram_cycle_pattern_bank_b1_lower + 1: cycb1l_.lower_8_bits = data; break;
-        case vram_cycle_pattern_bank_b1_upper: cycb1u_.upper_8_bits = data; break;
-        case vram_cycle_pattern_bank_b1_upper + 1: cycb1u_.lower_8_bits = data; break;
-        case screen_display_enable: bgon_.upper_8_bits = data; break;
-        case screen_display_enable + 1: bgon_.lower_8_bits = data; break;
-        case mosaic_control: mzctl_.upper_8_bits = data; break;
-        case mosaic_control + 1: mzctl_.lower_8_bits = data; break;
-        case special_function_code_select: sfsel_.upper_8_bits = data; break;
-        case special_function_code_select + 1: sfsel_.lower_8_bits = data; break;
-        case special_function_code: sfcode_.upper_8_bits = data; break;
-        case special_function_code + 1: sfcode_.lower_8_bits = data; break;
-        case character_control_a: chctla_.upper_8_bits = data; break;
-        case character_control_a + 1: chctla_.lower_8_bits = data; break;
-        case character_control_b: chctlb_.upper_8_bits = data; break;
-        case character_control_b + 1: chctlb_.lower_8_bits = data; break;
+        case ram_control: regs_.ramctl.upd(Vdp2Regs::Ramctl::hiByte(data)); break;
+        case ram_control + 1: regs_.ramctl.upd(Vdp2Regs::Ramctl::loByte(data)); break;
+        case vram_cycle_pattern_bank_a0_lower: regs_.cyca0l.upd(Vdp2Regs::Cycxxl::hiByte(data)); break;
+        case vram_cycle_pattern_bank_a0_lower + 1: regs_.cyca0l.upd(Vdp2Regs::Cycxxl::loByte(data)); break;
+        case vram_cycle_pattern_bank_a0_upper: regs_.cyca0u.upd(Vdp2Regs::Cycxxu::hiByte(data)); break;
+        case vram_cycle_pattern_bank_a0_upper + 1: regs_.cyca0u.upd(Vdp2Regs::Cycxxu::loByte(data)); break;
+        case vram_cycle_pattern_bank_a1_lower: regs_.cyca1l.upd(Vdp2Regs::Cycxxl::hiByte(data)); break;
+        case vram_cycle_pattern_bank_a1_lower + 1: regs_.cyca1l.upd(Vdp2Regs::Cycxxl::loByte(data)); break;
+        case vram_cycle_pattern_bank_a1_upper: regs_.cyca1u.upd(Vdp2Regs::Cycxxu::hiByte(data)); break;
+        case vram_cycle_pattern_bank_a1_upper + 1: regs_.cyca1u.upd(Vdp2Regs::Cycxxu::loByte(data)); break;
+        case vram_cycle_pattern_bank_b0_lower: regs_.cycb0l.upd(Vdp2Regs::Cycxxl::hiByte(data)); break;
+        case vram_cycle_pattern_bank_b0_lower + 1: regs_.cycb0l.upd(Vdp2Regs::Cycxxl::loByte(data)); break;
+        case vram_cycle_pattern_bank_b0_upper: regs_.cycb0u.upd(Vdp2Regs::Cycxxu::hiByte(data)); break;
+        case vram_cycle_pattern_bank_b0_upper + 1: regs_.cycb0u.upd(Vdp2Regs::Cycxxu::loByte(data)); break;
+        case vram_cycle_pattern_bank_b1_lower: regs_.cycb1l.upd(Vdp2Regs::Cycxxl::hiByte(data)); break;
+        case vram_cycle_pattern_bank_b1_lower + 1: regs_.cycb1l.upd(Vdp2Regs::Cycxxl::loByte(data)); break;
+        case vram_cycle_pattern_bank_b1_upper: regs_.cycb1u.upd(Vdp2Regs::Cycxxu::hiByte(data)); break;
+        case vram_cycle_pattern_bank_b1_upper + 1: regs_.cycb1u.upd(Vdp2Regs::Cycxxu::loByte(data)); break;
+        case screen_display_enable: regs_.bgon.upd(Vdp2Regs::Bgon::hiByte(data)); break;
+        case screen_display_enable + 1: regs_.bgon.upd(Vdp2Regs::Bgon::loByte(data)); break;
+        case mosaic_control: regs_.mzctl.upd(Vdp2Regs::Mzctl::hiByte(data)); break;
+        case mosaic_control + 1: regs_.mzctl.upd(Vdp2Regs::Mzctl::loByte(data)); break;
+        case special_function_code_select: regs_.sfsel.upd(Vdp2Regs::Sfsel::hiByte(data)); break;
+        case special_function_code_select + 1: regs_.sfsel.upd(Vdp2Regs::Sfsel::loByte(data)); break;
+        case special_function_code: regs_.sfcode.upd(Vdp2Regs::Sfcode::hiByte(data)); break;
+        case special_function_code + 1: regs_.sfcode.upd(Vdp2Regs::Sfcode::loByte(data)); break;
+        case character_control_a: regs_.chctla.upd(Vdp2Regs::Chctla::hiByte(data)); break;
+        case character_control_a + 1: regs_.chctla.upd(Vdp2Regs::Chctla::loByte(data)); break;
+        case character_control_b: regs_.chctlb.upd(Vdp2Regs::Chctlb::hiByte(data)); break;
+        case character_control_b + 1: regs_.chctlb.upd(Vdp2Regs::Chctlb::loByte(data)); break;
         case bitmap_palette_number_a: bmpna_.upper_8_bits = data; break;
         case bitmap_palette_number_a + 1: bmpna_.lower_8_bits = data; break;
         case bitmap_palette_number_b: bmpnb_.upper_8_bits = data; break;
@@ -808,21 +808,21 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case h_counter: regs_.hcnt = data; break;
         case v_counter: regs_.vcnt = data; break;
         case reserve_1: regs_.rsv1 = data; break;
-        case ram_control: ramctl_.raw = data; break;
-        case vram_cycle_pattern_bank_a0_lower: cyca0l_.raw = data; break;
-        case vram_cycle_pattern_bank_a0_upper: cyca0u_.raw = data; break;
-        case vram_cycle_pattern_bank_a1_lower: cyca1l_.raw = data; break;
-        case vram_cycle_pattern_bank_a1_upper: cyca1u_.raw = data; break;
-        case vram_cycle_pattern_bank_b0_lower: cycb0l_.raw = data; break;
-        case vram_cycle_pattern_bank_b0_upper: cycb0u_.raw = data; break;
-        case vram_cycle_pattern_bank_b1_lower: cycb1l_.raw = data; break;
-        case vram_cycle_pattern_bank_b1_upper: cycb1u_.raw = data; break;
-        case screen_display_enable: bgon_.raw = data; break;
-        case mosaic_control: mzctl_.raw = data; break;
-        case special_function_code_select: sfsel_.raw = data; break;
-        case special_function_code: sfcode_.raw = data; break;
-        case character_control_a: chctla_.raw = data; break;
-        case character_control_b: chctlb_.raw = data; break;
+        case ram_control: regs_.ramctl = data; break;
+        case vram_cycle_pattern_bank_a0_lower: regs_.cyca0l = data; break;
+        case vram_cycle_pattern_bank_a0_upper: regs_.cyca0u = data; break;
+        case vram_cycle_pattern_bank_a1_lower: regs_.cyca1l = data; break;
+        case vram_cycle_pattern_bank_a1_upper: regs_.cyca1u = data; break;
+        case vram_cycle_pattern_bank_b0_lower: regs_.cycb0l = data; break;
+        case vram_cycle_pattern_bank_b0_upper: regs_.cycb0u = data; break;
+        case vram_cycle_pattern_bank_b1_lower: regs_.cycb1l = data; break;
+        case vram_cycle_pattern_bank_b1_upper: regs_.cycb1u = data; break;
+        case screen_display_enable: regs_.bgon = data; break;
+        case mosaic_control: regs_.mzctl = data; break;
+        case special_function_code_select: regs_.sfsel = data; break;
+        case special_function_code: regs_.sfcode = data; break;
+        case character_control_a: regs_.chctla = data; break;
+        case character_control_b: regs_.chctlb = data; break;
         case bitmap_palette_number_a: bmpna_.raw = data; break;
         case bitmap_palette_number_b: bmpnb_.raw = data; break;
         case pattern_name_control_nbg0: pncn0_.raw = data; break;
@@ -955,32 +955,32 @@ void Vdp2::write32(const u32 addr, const u32 data) {
     const auto l = static_cast<u16>(data & bitmask_FFFF);
     switch (addr & core::vdp2_registers_memory_mask) {
         case vram_cycle_pattern_bank_a0_lower:
-            cyca0l_.raw = h;
-            cyca0u_.raw = l;
+            regs_.cyca0l = h;
+            regs_.cyca0u = l;
             break;
         case vram_cycle_pattern_bank_a1_lower:
-            cyca1l_.raw = h;
-            cyca1u_.raw = l;
+            regs_.cyca1l = h;
+            regs_.cyca1u = l;
             break;
         case vram_cycle_pattern_bank_b0_lower:
-            cycb0l_.raw = h;
-            cycb0u_.raw = l;
+            regs_.cycb0l = h;
+            regs_.cycb0u = l;
             break;
         case vram_cycle_pattern_bank_b1_lower:
-            cycb1l_.raw = h;
-            cycb1u_.raw = l;
+            regs_.cycb1l = h;
+            regs_.cycb1u = l;
             break;
         case screen_display_enable:
-            bgon_.raw  = h;
-            mzctl_.raw = l;
+            regs_.bgon  = h;
+            regs_.mzctl = l;
             break;
         case special_function_code_select:
-            sfsel_.raw  = h;
-            sfcode_.raw = l;
+            regs_.sfsel  = h;
+            regs_.sfcode = l;
             break;
         case character_control_a:
-            chctla_.raw = h;
-            chctlb_.raw = l;
+            regs_.chctla = h;
+            regs_.chctlb = l;
             break;
         case bitmap_palette_number_a:
             bmpna_.raw = h;
@@ -1608,16 +1608,17 @@ void Vdp2::updateResolution() {
 
 void Vdp2::updateRamStatus() {
     using Vrsize = Vdp2Regs::Vrsize;
+    using Ramctl = Vdp2Regs::Ramctl;
 
     ram_status_.vram_size                    = regs_.vrsize >> Vrsize::vramsz_enum;
-    ram_status_.vram_a_mode                  = toEnum<VramMode>(ramctl_.vram_a_mode);
-    ram_status_.vram_b_mode                  = toEnum<VramMode>(ramctl_.vram_b_mode);
-    ram_status_.color_ram_mode               = toEnum<ColorRamMode>(ramctl_.color_ram_mode);
-    ram_status_.coefficient_table_storage    = toEnum<CoefficientTableStorage>(ramctl_.coefficient_table_storage);
-    ram_status_.vram_a0_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_a0_rotation_bank_select);
-    ram_status_.vram_a1_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_a1_rotation_bank_select);
-    ram_status_.vram_b0_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_b0_rotation_bank_select);
-    ram_status_.vram_b1_rotation_bank_select = toEnum<RotationDataBankSelect>(ramctl_.vram_b1_rotation_bank_select);
+    ram_status_.vram_a_mode                  = regs_.ramctl >> Ramctl::vramd_enum;
+    ram_status_.vram_b_mode                  = regs_.ramctl >> Ramctl::vrbmd_enum;
+    ram_status_.color_ram_mode               = regs_.ramctl >> Ramctl::crmd_enum;
+    ram_status_.coefficient_table_storage    = regs_.ramctl >> Ramctl::crkte_enum;
+    ram_status_.vram_a0_rotation_bank_select = regs_.ramctl >> Ramctl::rdbsa0_enum;
+    ram_status_.vram_a1_rotation_bank_select = regs_.ramctl >> Ramctl::rdbsa1_enum;
+    ram_status_.vram_b0_rotation_bank_select = regs_.ramctl >> Ramctl::rdbsb0_enum;
+    ram_status_.vram_b1_rotation_bank_select = regs_.ramctl >> Ramctl::rdbsb1_enum;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -1639,80 +1640,80 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     // - TO-T7 in bank VRAM-A or VRAM-B (case where no bank is splitted)
     // In Hi-Res or Exclusive mode, selectable timing is reduced to T0-T3, the bank access is identical.
 
+    using Bgon   = Vdp2Regs::Bgon;
+    using Chctla = Vdp2Regs::Chctla;
+    using Chctlb = Vdp2Regs::Chctlb;
+
     getScreen(s).is_display_enabled = false;
 
     switch (s) {
         using enum ScrollScreen;
         case nbg0: {
-            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg0) == ScreenDisplayEnableBit::cannot_display) {
-                return false;
-            }
+            if ((regs_.bgon >> Bgon::n0on_enum) == Bgon::ScreenDisplayEnableBit::cannot_display) { return false; }
 
             // Pattern name data reads depend on the reduction setting of the screen
             const auto reduction = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg0)),
                                                        static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg0)));
 
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
-            if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
+            if ((regs_.chctla >> Chctla::n0bmen_enum) == Vdp2Regs::BitmapEnable::bitmap_format) {
                 // Bitmap format needs only bitmap pattern data.
-                const auto color_number = toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0);
+                const auto color_number = regs_.chctla >> Chctla::n0chcn_enum;
                 const auto required_bpd_reads
                     = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
                 const auto current_bdp_reads
-                    = getVramAccessByCommand(VramAccessCommand::nbg0_character_pattern_data_read, reduction);
+                    = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg0_character_pattern_data_read, reduction);
                 if (current_bdp_reads < required_bpd_reads) { return false; }
             } else {
                 // Character format needs character pattern data (cpd) and pattern name data (pnd).
                 const auto required_pnd_reads = util::toUnderlying(calculateRequiredVramPatternNameReads(reduction));
-                const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg0_pattern_name_read, reduction);
+                const auto current_pnd_reads
+                    = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg0_pattern_name_read, reduction);
                 if (current_pnd_reads < required_pnd_reads) { return false; }
 
-                const auto color_number = toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0);
+                const auto color_number = regs_.chctla >> Chctla::n0chcn_enum;
                 const auto required_cpd_reads
                     = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
                 const auto current_cpd_reads
-                    = getVramAccessByCommand(VramAccessCommand::nbg0_character_pattern_data_read, reduction);
+                    = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg0_character_pattern_data_read, reduction);
                 if (current_cpd_reads < required_cpd_reads) { return false; }
             }
             break;
         }
         case nbg1: {
-            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg1) == ScreenDisplayEnableBit::cannot_display) {
-                return false;
-            }
+            if ((regs_.bgon >> Bgon::n1on_enum) == Bgon::ScreenDisplayEnableBit::cannot_display) { return false; }
             // Pattern name data reads depend on the reduction setting of the screen
             const auto reduction = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg1)),
                                                        static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg1)));
 
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
-            if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
+            if ((regs_.chctla >> Chctla::n1bmen_enum) == Vdp2Regs::BitmapEnable::bitmap_format) {
                 // Bitmap format needs only bitmap pattern data.
-                const auto color_number = toEnum<CharacterColorNumber2Bits>(chctla_.character_color_number_nbg1);
+                const auto color_number = regs_.chctla >> Chctla::n1chcn_enum;
                 const auto required_bpd_reads
                     = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
                 const auto current_bdp_reads
-                    = getVramAccessByCommand(VramAccessCommand::nbg1_character_pattern_data_read, reduction);
+                    = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg1_character_pattern_data_read, reduction);
                 if (current_bdp_reads < required_bpd_reads) { return false; }
             } else {
                 // Character format needs character pattern data (cpd) and pattern name data (pnd).
                 const auto required_pnd_reads = util::toUnderlying(calculateRequiredVramPatternNameReads(reduction));
-                const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg1_pattern_name_read, reduction);
+                const auto current_pnd_reads
+                    = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg1_pattern_name_read, reduction);
                 if (current_pnd_reads < required_pnd_reads) { return false; }
 
-                const auto color_number = toEnum<CharacterColorNumber2Bits>(chctla_.character_color_number_nbg1);
+                const auto color_number = regs_.chctla >> Chctla::n1chcn_enum;
                 const auto required_cpd_reads
                     = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
                 const auto current_cpd_reads
-                    = getVramAccessByCommand(VramAccessCommand::nbg1_character_pattern_data_read, reduction);
+                    = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg1_character_pattern_data_read, reduction);
                 if (current_cpd_reads < required_cpd_reads) { return false; }
             }
 
             break;
         }
         case nbg2: {
-            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg2) == ScreenDisplayEnableBit::cannot_display) {
-                return false;
-            }
+            if ((regs_.bgon >> Bgon::n2on_enum) == Bgon::ScreenDisplayEnableBit::cannot_display) { return false; }
 
             if (isScreenDisplayLimitedByReduction(s)) { return false; }
 
@@ -1720,48 +1721,44 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 
             // Character format needs character pattern data (cpd) and pattern name data (pnd).
             const auto required_pnd_reads = util::toUnderlying(calculateRequiredVramPatternNameReads(reduction));
-            const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg2_pattern_name_read, reduction);
+            const auto current_pnd_reads = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg2_pattern_name_read, reduction);
             if (current_pnd_reads < required_pnd_reads) { return false; }
 
-            const auto color_number = toEnum<CharacterColorNumber1Bit>(chctlb_.character_color_number_nbg2);
+            const auto color_number = regs_.chctlb >> Chctlb::n2chcn_enum;
             const auto required_cpd_reads
                 = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
-            const auto current_cpd_reads = getVramAccessByCommand(VramAccessCommand::nbg2_character_pattern_data_read, reduction);
+            const auto current_cpd_reads
+                = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg2_character_pattern_data_read, reduction);
             if (current_cpd_reads < required_cpd_reads) { return false; }
 
             break;
         }
         case nbg3: {
-            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_nbg3) == ScreenDisplayEnableBit::cannot_display) {
-                return false;
-            }
+            if ((regs_.bgon >> Bgon::n3on_enum) == Bgon::ScreenDisplayEnableBit::cannot_display) { return false; }
             if (isScreenDisplayLimitedByReduction(s)) { return false; }
 
             const auto reduction = ReductionSetting::none;
 
             // Character format needs character pattern data (cpd) and pattern name data (pnd).
             const auto required_pnd_reads = util::toUnderlying(calculateRequiredVramPatternNameReads(reduction));
-            const auto current_pnd_reads  = getVramAccessByCommand(VramAccessCommand::nbg3_pattern_name_read, reduction);
+            const auto current_pnd_reads = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg3_pattern_name_read, reduction);
             if (current_pnd_reads < required_pnd_reads) { return false; }
 
-            const auto color_number = toEnum<CharacterColorNumber1Bit>(chctlb_.character_color_number_nbg3);
+            const auto color_number = regs_.chctlb >> Chctlb::n3chcn_enum;
             const auto required_cpd_reads
                 = util::toUnderlying(calculateRequiredVramCharacterPatternReads(reduction, color_number));
-            const auto current_cpd_reads = getVramAccessByCommand(VramAccessCommand::nbg3_character_pattern_data_read, reduction);
+            const auto current_cpd_reads
+                = getVramAccessByCommand(Vdp2Regs::VramAccessCommand::nbg3_character_pattern_data_read, reduction);
             if (current_cpd_reads < required_cpd_reads) { return false; }
             break;
         }
         case rbg0: {
-            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_rbg0) == ScreenDisplayEnableBit::cannot_display) {
-                return false;
-            }
+            if ((regs_.bgon >> Bgon::r0on_enum) == Bgon::ScreenDisplayEnableBit::cannot_display) { return false; }
             core::Log::unimplemented(core::tr("VDP2 RBG0 display"));
             break;
         }
         case rbg1: {
-            if (toEnum<ScreenDisplayEnableBit>(bgon_.screen_display_enable_rbg1) == ScreenDisplayEnableBit::cannot_display) {
-                return false;
-            }
+            if ((regs_.bgon >> Bgon::r1on_enum) == Bgon::ScreenDisplayEnableBit::cannot_display) { return false; }
             core::Log::unimplemented(core::tr("VDP2 RBG1 display"));
             break;
         }
@@ -1777,17 +1774,22 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool {
+    using Chctla = Vdp2Regs::Chctla;
+    using Chctlb = Vdp2Regs::Chctlb;
+
     switch (s) {
         using enum ScrollScreen;
         case nbg2: {
             const auto reduction    = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg0)),
                                                        static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg0)));
-            const auto color_number = toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0);
+            const auto color_number = regs_.chctla >> Chctla::n0chcn_enum;
 
-            if ((reduction == ReductionSetting::up_to_one_quarter) && (color_number == CharacterColorNumber3Bits::palette_16)) {
+            if ((reduction == ReductionSetting::up_to_one_quarter)
+                && (color_number == Vdp2Regs::CharacterColorNumber3Bits::palette_16)) {
                 return true;
             }
-            if ((reduction == ReductionSetting::up_to_one_half) && (color_number == CharacterColorNumber3Bits::palette_256)) {
+            if ((reduction == ReductionSetting::up_to_one_half)
+                && (color_number == Vdp2Regs::CharacterColorNumber3Bits::palette_256)) {
                 return true;
             }
             break;
@@ -1795,12 +1797,14 @@ auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool {
         case nbg3: {
             const auto reduction    = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg1)),
                                                        static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg1)));
-            const auto color_number = toEnum<CharacterColorNumber2Bits>(chctla_.character_color_number_nbg1);
+            const auto color_number = regs_.chctla >> Chctla::n1chcn_enum;
 
-            if ((reduction == ReductionSetting::up_to_one_quarter) && (color_number == CharacterColorNumber2Bits::palette_16)) {
+            if ((reduction == ReductionSetting::up_to_one_quarter)
+                && (color_number == Vdp2Regs::CharacterColorNumber2Bits::palette_16)) {
                 return true;
             }
-            if ((reduction == ReductionSetting::up_to_one_half) && (color_number == CharacterColorNumber2Bits::palette_256)) {
+            if ((reduction == ReductionSetting::up_to_one_half)
+                && (color_number == Vdp2Regs::CharacterColorNumber2Bits::palette_256)) {
                 return true;
             }
             break;
@@ -1811,57 +1815,62 @@ auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool {
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8 {
+auto Vdp2::getVramAccessByCommand(const Vdp2Regs::VramAccessCommand command, const ReductionSetting reduction) -> u8 {
     constexpr auto vram_timing_size = u8{8};
-    using VramTiming                = std::array<VramAccessCommand, vram_timing_size>;
+    using VramTiming                = std::array<Vdp2Regs::VramAccessCommand, vram_timing_size>;
     using Tvmd                      = Vdp2Regs::Tvmd;
+    using Cycxxl                    = Vdp2Regs::Cycxxl;
+    using Cycxxu                    = Vdp2Regs::Cycxxu;
 
     auto is_normal_mode = ((regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_320);
     is_normal_mode |= ((regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_352);
 
-    VramTiming bank_a0 = {toEnum<VramAccessCommand>(cyca0l_.t0),
-                          toEnum<VramAccessCommand>(cyca0l_.t1),
-                          toEnum<VramAccessCommand>(cyca0l_.t2),
-                          toEnum<VramAccessCommand>(cyca0l_.t3),
-                          is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t4) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t5) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t6) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t7) : VramAccessCommand::no_access};
+    VramTiming bank_a0 = {regs_.cyca0l >> Cycxxl::t0_enum,
+                          regs_.cyca0l >> Cycxxl::t1_enum,
+                          regs_.cyca0l >> Cycxxl::t2_enum,
+                          regs_.cyca0l >> Cycxxl::t3_enum,
+                          is_normal_mode ? regs_.cyca0u >> Cycxxu::t4_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cyca0u >> Cycxxu::t5_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cyca0u >> Cycxxu::t6_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cyca0u >> Cycxxu::t7_enum : Vdp2Regs::VramAccessCommand::no_access};
 
-    VramTiming bank_a1 = {toEnum<VramAccessCommand>(cyca1l_.t0),
-                          toEnum<VramAccessCommand>(cyca1l_.t1),
-                          toEnum<VramAccessCommand>(cyca1l_.t2),
-                          toEnum<VramAccessCommand>(cyca1l_.t3),
-                          is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t4) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t5) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t6) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t7) : VramAccessCommand::no_access};
+    VramTiming bank_a1 = {regs_.cyca1l >> Cycxxl::t0_enum,
+                          regs_.cyca1l >> Cycxxl::t1_enum,
+                          regs_.cyca1l >> Cycxxl::t2_enum,
+                          regs_.cyca1l >> Cycxxl::t3_enum,
+                          is_normal_mode ? regs_.cyca1u >> Cycxxu::t4_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cyca1u >> Cycxxu::t5_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cyca1u >> Cycxxu::t6_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cyca1u >> Cycxxu::t7_enum : Vdp2Regs::VramAccessCommand::no_access};
 
-    VramTiming bank_b0 = {toEnum<VramAccessCommand>(cycb0l_.t0),
-                          toEnum<VramAccessCommand>(cycb0l_.t1),
-                          toEnum<VramAccessCommand>(cycb0l_.t2),
-                          toEnum<VramAccessCommand>(cycb0l_.t3),
-                          is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t4) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t5) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t6) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t7) : VramAccessCommand::no_access};
+    VramTiming bank_b0 = {regs_.cycb0l >> Cycxxl::t0_enum,
+                          regs_.cycb0l >> Cycxxl::t1_enum,
+                          regs_.cycb0l >> Cycxxl::t2_enum,
+                          regs_.cycb0l >> Cycxxl::t3_enum,
+                          is_normal_mode ? regs_.cycb0u >> Cycxxu::t4_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cycb0u >> Cycxxu::t5_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cycb0u >> Cycxxu::t6_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cycb0u >> Cycxxu::t7_enum : Vdp2Regs::VramAccessCommand::no_access};
 
-    VramTiming bank_b1 = {toEnum<VramAccessCommand>(cycb1l_.t0),
-                          toEnum<VramAccessCommand>(cycb1l_.t1),
-                          toEnum<VramAccessCommand>(cycb1l_.t2),
-                          toEnum<VramAccessCommand>(cycb1l_.t3),
-                          is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t4) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t5) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t6) : VramAccessCommand::no_access,
-                          is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : VramAccessCommand::no_access};
+    VramTiming bank_b1 = {regs_.cycb1l >> Cycxxl::t0_enum,
+                          regs_.cycb1l >> Cycxxl::t1_enum,
+                          regs_.cycb1l >> Cycxxl::t2_enum,
+                          regs_.cycb1l >> Cycxxl::t3_enum,
+                          is_normal_mode ? regs_.cycb1u >> Cycxxu::t4_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cycb1u >> Cycxxu::t5_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cycb1u >> Cycxxu::t6_enum : Vdp2Regs::VramAccessCommand::no_access,
+                          is_normal_mode ? regs_.cycb1u >> Cycxxu::t7_enum : Vdp2Regs::VramAccessCommand::no_access};
+
+    using Chctla = Vdp2Regs::Chctla;
+    using Chctlb = Vdp2Regs::Chctlb;
 
     switch (command) {
-        using enum VramAccessCommand;
+        using enum Vdp2Regs::VramAccessCommand;
         case nbg0_character_pattern_data_read: {
-            if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg0) == BitmapEnable::bitmap_format) {
+            if ((regs_.chctla >> Chctla::n0bmen_enum) == Vdp2Regs::BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
-            const auto cp_size = toEnum<CharacterSize>(chctla_.character_size_nbg0);
+            const auto cp_size = regs_.chctla >> Chctla::n0chsz_enum;
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
                                                     bank_b0,
@@ -1869,13 +1878,13 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     command,
                                                     reduction,
                                                     is_normal_mode,
-                                                    (cp_size == CharacterSize::two_by_two));
+                                                    (cp_size == Vdp2Regs::CharacterSize::two_by_two));
         }
         case nbg1_character_pattern_data_read: {
-            if (toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg1) == BitmapEnable::bitmap_format) {
+            if ((regs_.chctla >> Chctla::n1bmen_enum) == Vdp2Regs::BitmapEnable::bitmap_format) {
                 return getVramBitmapReads(bank_a0, bank_a1, bank_b0, bank_b1, command);
             }
-            const auto cp_size = toEnum<CharacterSize>(chctla_.character_size_nbg1);
+            const auto cp_size = regs_.chctla >> Chctla::n1chsz_enum;
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
                                                     bank_b0,
@@ -1883,10 +1892,10 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     command,
                                                     reduction,
                                                     is_normal_mode,
-                                                    (cp_size == CharacterSize::two_by_two));
+                                                    (cp_size == Vdp2Regs::CharacterSize::two_by_two));
         }
         case nbg2_character_pattern_data_read: {
-            const auto cp_size = toEnum<CharacterSize>(chctlb_.character_size_nbg2);
+            const auto cp_size = regs_.chctlb >> Chctlb::n2chsz_enum;
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
                                                     bank_b0,
@@ -1894,10 +1903,10 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     command,
                                                     reduction,
                                                     is_normal_mode,
-                                                    (cp_size == CharacterSize::two_by_two));
+                                                    (cp_size == Vdp2Regs::CharacterSize::two_by_two));
         }
         case nbg3_character_pattern_data_read: {
-            const auto cp_size = toEnum<CharacterSize>(chctlb_.character_size_nbg3);
+            const auto cp_size = regs_.chctlb >> Chctlb::n3chsz_enum;
             return getVramCharacterPatternDataReads(bank_a0,
                                                     bank_a1,
                                                     bank_b0,
@@ -1905,7 +1914,7 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
                                                     command,
                                                     reduction,
                                                     is_normal_mode,
-                                                    (cp_size == CharacterSize::two_by_two));
+                                                    (cp_size == Vdp2Regs::CharacterSize::two_by_two));
         }
         case nbg0_pattern_name_read:
         case nbg1_pattern_name_read:
@@ -1929,28 +1938,29 @@ auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const Reducti
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::getVramBitmapReads(const VramTiming&       bank_a0,
-                              const VramTiming&       bank_a1,
-                              const VramTiming&       bank_b0,
-                              const VramTiming&       bank_b1,
-                              const VramAccessCommand command) const -> u8 {
+auto Vdp2::getVramBitmapReads(const VramTiming&                 bank_a0,
+                              const VramTiming&                 bank_a1,
+                              const VramTiming&                 bank_b0,
+                              const VramTiming&                 bank_b1,
+                              const Vdp2Regs::VramAccessCommand command) const -> u8 {
+    using Ramctl      = Vdp2Regs::Ramctl;
     auto bitmap_reads = std::ranges::count(bank_a0, command);
-    if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks) {
+    if ((regs_.ramctl >> Ramctl::vramd_enum) == Ramctl::VramMode::partition_in_2_banks) {
         bitmap_reads += std::ranges::count(bank_a1, command);
     }
     bitmap_reads += std::ranges::count(bank_b0, command);
-    if (toEnum<VramMode>(ramctl_.vram_b_mode) == VramMode::partition_in_2_banks) {
+    if ((regs_.ramctl >> Ramctl::vrbmd_enum) == Ramctl::VramMode::partition_in_2_banks) {
         bitmap_reads += std::ranges::count(bank_b1, command);
     }
     return static_cast<u8>(bitmap_reads);
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::getVramPatternNameDataReads(const VramTiming&       bank_a0,
-                                       const VramTiming&       bank_a1,
-                                       const VramTiming&       bank_b0,
-                                       const VramTiming&       bank_b1,
-                                       const VramAccessCommand command) const -> u8 {
+auto Vdp2::getVramPatternNameDataReads(const VramTiming&                 bank_a0,
+                                       const VramTiming&                 bank_a1,
+                                       const VramTiming&                 bank_b0,
+                                       const VramTiming&                 bank_b1,
+                                       const Vdp2Regs::VramAccessCommand command) const -> u8 {
     // Pattern name data (PND) read access during 1 cycle must be set to a maximum of 2 banks, one being either
     // VRAM-A0 or VRAM-B0, the other being VRAM-A1 or VRAM-B1. When the VRAM is not divided in 2 partitions, VRAM-A0
     // is used as VRAM-A and VRAM-B0 as VRAM-B.
@@ -1963,9 +1973,10 @@ auto Vdp2::getVramPatternNameDataReads(const VramTiming&       bank_a0,
     // |    no     |   yes     | A0, B0          |
     // |   yes     |   yes     | A0, B0 or A1,B1 |
     // -------------------------------------------
+    using Ramctl   = Vdp2Regs::Ramctl;
     auto pnd_reads = ptrdiff_t{};
-    if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks
-        && (toEnum<VramMode>(ramctl_.vram_b_mode) == VramMode::partition_in_2_banks)) {
+    if ((regs_.ramctl >> Ramctl::vramd_enum) == Ramctl::VramMode::partition_in_2_banks
+        && ((regs_.ramctl >> Ramctl::vrbmd_enum) == Ramctl::VramMode::partition_in_2_banks)) {
         auto pnd_reads_bank_0 = std::ranges::count(bank_a0, command);
         pnd_reads_bank_0 += std::ranges::count(bank_b0, command);
 
@@ -1988,9 +1999,10 @@ auto Vdp2::getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting 
 };
 
 // static
-auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3Bits ccn) -> VramAccessNumber {
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber3Bits ccn)
+    -> VramAccessNumber {
     switch (ccn) {
-        using enum CharacterColorNumber3Bits;
+        using enum Vdp2Regs::CharacterColorNumber3Bits;
         case palette_16:
             switch (r) {
                 using enum ReductionSetting;
@@ -2034,9 +2046,10 @@ auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Charac
 }
 
 // static
-auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2Bits ccn) -> VramAccessNumber {
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber2Bits ccn)
+    -> VramAccessNumber {
     switch (ccn) {
-        using enum CharacterColorNumber2Bits;
+        using enum Vdp2Regs::CharacterColorNumber2Bits;
         case palette_16:
             switch (r) {
                 using enum ReductionSetting;
@@ -2073,9 +2086,10 @@ auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Charac
 }
 
 // static
-auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1Bit ccn) -> VramAccessNumber {
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber1Bit ccn)
+    -> VramAccessNumber {
     switch (ccn) {
-        using enum CharacterColorNumber1Bit;
+        using enum Vdp2Regs::CharacterColorNumber1Bit;
         case palette_16:
             switch (r) {
                 using enum ReductionSetting;
@@ -2108,28 +2122,29 @@ auto Vdp2::calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAcce
 };
 
 // static
-auto Vdp2::getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand {
+auto Vdp2::getPatternNameFromCharacterPattern(const Vdp2Regs::VramAccessCommand character_pattern)
+    -> Vdp2Regs::VramAccessCommand {
     switch (character_pattern) {
-        using enum VramAccessCommand;
+        using enum Vdp2Regs::VramAccessCommand;
         case nbg0_character_pattern_data_read: {
-            return VramAccessCommand::nbg0_pattern_name_read;
+            return Vdp2Regs::VramAccessCommand::nbg0_pattern_name_read;
         }
         case nbg1_character_pattern_data_read: {
-            return VramAccessCommand::nbg1_pattern_name_read;
+            return Vdp2Regs::VramAccessCommand::nbg1_pattern_name_read;
         }
         case nbg2_character_pattern_data_read: {
-            return VramAccessCommand::nbg2_pattern_name_read;
+            return Vdp2Regs::VramAccessCommand::nbg2_pattern_name_read;
         }
         case nbg3_character_pattern_data_read: {
-            return VramAccessCommand::nbg3_pattern_name_read;
+            return Vdp2Regs::VramAccessCommand::nbg3_pattern_name_read;
         }
-        default: return VramAccessCommand::no_access;
+        default: return Vdp2Regs::VramAccessCommand::no_access;
     }
 }
 
 // static
 void Vdp2::setPatternNameAccess(const VramTiming&                   bank,
-                                const VramAccessCommand             pattern,
+                                const Vdp2Regs::VramAccessCommand   pattern,
                                 std::array<bool, vram_timing_size>& pnd_access) {
     auto it = std::find(bank.begin(), bank.end(), pattern);
     while (it != bank.end()) {
@@ -2261,14 +2276,14 @@ void Vdp2::setCharacterPatternLimitations(const bool                            
 }
 
 // static
-auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
-                                            const VramTiming&       bank_a1,
-                                            const VramTiming&       bank_b0,
-                                            const VramTiming&       bank_b1,
-                                            const VramAccessCommand command,
-                                            const ReductionSetting  reduction,
-                                            const bool              is_screen_mode_normal,
-                                            const bool              is_using_2_by_2_cp) -> u8 {
+auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&                 bank_a0,
+                                            const VramTiming&                 bank_a1,
+                                            const VramTiming&                 bank_b0,
+                                            const VramTiming&                 bank_b1,
+                                            const Vdp2Regs::VramAccessCommand command,
+                                            const ReductionSetting            reduction,
+                                            const bool                        is_screen_mode_normal,
+                                            const bool                        is_using_2_by_2_cp) -> u8 {
     // From the command we must use the linked Pattern Name Data. The limitations are based on the PND read position.
     // Step 1 : find PND reads for the current command
     const auto pnd = getPatternNameFromCharacterPattern(command);
@@ -2315,10 +2330,10 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
         // First access not available are changed to no access
         auto it = std::ranges::find(allowed_cpd_timing, false);
         while (it != allowed_cpd_timing.end()) {
-            limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
-            limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = VramAccessCommand::no_access;
+            limited_bank_a0[std::distance(allowed_cpd_timing.begin(), it)] = Vdp2Regs::VramAccessCommand::no_access;
+            limited_bank_b0[std::distance(allowed_cpd_timing.begin(), it)] = Vdp2Regs::VramAccessCommand::no_access;
+            limited_bank_a1[std::distance(allowed_cpd_timing.begin(), it)] = Vdp2Regs::VramAccessCommand::no_access;
+            limited_bank_b1[std::distance(allowed_cpd_timing.begin(), it)] = Vdp2Regs::VramAccessCommand::no_access;
             ++it;
             it = std::find(it, allowed_cpd_timing.end(), false);
         }
@@ -2425,9 +2440,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     constexpr auto map_size_rbg = u8{4 * 4};
     constexpr auto cell_size    = u8{8 * 8};
 
-    const auto getCharacterColorNumber3Bits = [](const CharacterColorNumber3Bits c, const ScreenModeType t) {
+    const auto getCharacterColorNumber3Bits = [](const Vdp2Regs::CharacterColorNumber3Bits c, const ScreenModeType t) {
         switch (c) {
-            using enum CharacterColorNumber3Bits;
+            using enum Vdp2Regs::CharacterColorNumber3Bits;
             case palette_16: return ColorCount::palette_16;
             case palette_256: return ColorCount::palette_256;
             case palette_2048: return ColorCount::palette_2048;
@@ -2438,9 +2453,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             default: return ColorCount::not_allowed;
         }
     };
-    const auto getCharacterColorNumber2Bits = [](const CharacterColorNumber2Bits c, const ScreenModeType t) {
+    const auto getCharacterColorNumber2Bits = [](const Vdp2Regs::CharacterColorNumber2Bits c, const ScreenModeType t) {
         switch (c) {
-            using enum CharacterColorNumber2Bits;
+            using enum Vdp2Regs::CharacterColorNumber2Bits;
             case palette_16: return ColorCount::palette_16;
             case palette_256: return ColorCount::palette_256;
             case palette_2048: return ColorCount::palette_2048;
@@ -2450,19 +2465,19 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             default: return ColorCount::not_allowed;
         }
     };
-    const auto getCharacterColorNumber1Bit = [](const CharacterColorNumber1Bit c) {
+    const auto getCharacterColorNumber1Bit = [](const Vdp2Regs::CharacterColorNumber1Bit c) {
         switch (c) {
-            using enum CharacterColorNumber1Bit;
+            using enum Vdp2Regs::CharacterColorNumber1Bit;
             case palette_16: return ColorCount::palette_16;
             case palette_256: return ColorCount::palette_256;
             default: return ColorCount::not_allowed;
         }
     };
-    const auto getCharacterColorNumberRbg0 = [](const CharacterColorNumber3Bits c, const ScreenModeType t) {
+    const auto getCharacterColorNumberRbg0 = [](const Vdp2Regs::CharacterColorNumber3Bits c, const ScreenModeType t) {
         if (t == ScreenModeType::exclusive) { return ColorCount::cannot_display; }
 
         switch (c) {
-            using enum CharacterColorNumber3Bits;
+            using enum Vdp2Regs::CharacterColorNumber3Bits;
             case palette_16: return ColorCount::palette_16;
             case palette_256: return ColorCount::palette_256;
             case palette_2048: return ColorCount::palette_2048;
@@ -2487,26 +2502,26 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             default: return dot_size_32;
         }
     };
-    const auto getPageSize = [](const PatternNameDataSize pnd_sz, const CharacterSize ch_sz) {
+    const auto getPageSize = [](const PatternNameDataSize pnd_sz, const Vdp2Regs::CharacterSize ch_sz) {
         constexpr auto boundary_1_word_1_by_1_cell  = u16{0x2000};
         constexpr auto boundary_1_word_2_by_2_cells = u16{0x800};
         if (pnd_sz == PatternNameDataSize::one_word) {
-            return (ch_sz == CharacterSize::one_by_one) ? boundary_1_word_1_by_1_cell : boundary_1_word_2_by_2_cells;
+            return (ch_sz == Vdp2Regs::CharacterSize::one_by_one) ? boundary_1_word_1_by_1_cell : boundary_1_word_2_by_2_cells;
         }
 
         // The other case is 2 words.
         constexpr auto boundary_2_words_1_by_1_cell  = u16{0x4000};
         constexpr auto boundary_2_words_2_by_2_cells = u16{0x1000};
-        return (ch_sz == CharacterSize::one_by_one) ? boundary_2_words_1_by_1_cell : boundary_2_words_2_by_2_cells;
+        return (ch_sz == Vdp2Regs::CharacterSize::one_by_one) ? boundary_2_words_1_by_1_cell : boundary_2_words_2_by_2_cells;
     };
 
-    const auto getScrollScreenFormat = [](const BitmapEnable be) {
-        return (be == BitmapEnable::cell_format) ? ScrollScreenFormat::cell : ScrollScreenFormat::bitmap;
+    const auto getScrollScreenFormat = [](const Vdp2Regs::BitmapEnable be) {
+        return (be == Vdp2Regs::BitmapEnable::cell_format) ? ScrollScreenFormat::cell : ScrollScreenFormat::bitmap;
     };
 
-    const auto getBitmapSize = [](const BitmapSize2Bits sz) {
+    const auto getBitmapSize = [](const Vdp2Regs::BitmapSize2Bits sz) {
         switch (sz) {
-            using enum BitmapSize2Bits;
+            using enum Vdp2Regs::BitmapSize2Bits;
             case size_512_by_256: return BitmapSize::size_512_by_256;
             case size_512_by_512: return BitmapSize::size_512_by_512;
             case size_1024_by_256: return BitmapSize::size_1024_by_256;
@@ -2520,28 +2535,12 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return vram_start_address + map_offset * boundary;
     };
 
-    // const auto setColorOffset
-    //     = [&](ScrollScreenStatus& s, const ColorOffsetEnableBit enable_bit, const ColorOffsetSelectBit select_bit) {
-    //           s.is_color_offset_enabled = (enable_bit == ColorOffsetEnableBit::enabled);
-    //           s.color_offset            = {};
-    //           if (s.is_color_offset_enabled) {
-    //               if (select_bit == ColorOffsetSelectBit::use_color_offset_a) {
-    //                   s.color_offset.as_s16.r = static_cast<s16>(coar_.raw);
-    //                   s.color_offset.as_s16.g = static_cast<s16>(coag_.raw);
-    //                   s.color_offset.as_s16.b = static_cast<s16>(coab_.raw);
-    //               } else {
-    //                   s.color_offset.as_s16.r = static_cast<s16>(cobr_.raw);
-    //                   s.color_offset.as_s16.g = static_cast<s16>(cobg_.raw);
-    //                   s.color_offset.as_s16.b = static_cast<s16>(cobb_.raw);
-    //               }
-    //               s.color_offset.as_float.r = static_cast<float>(s.color_offset.as_s16.r) / static_cast<float>(u16_max);
-    //               s.color_offset.as_float.g = static_cast<float>(s.color_offset.as_s16.g) / static_cast<float>(u16_max);
-    //               s.color_offset.as_float.b = static_cast<float>(s.color_offset.as_s16.b) / static_cast<float>(u16_max);
-    //           }
-    //       };
-
     auto& screen         = getScreen(s);
     screen.scroll_screen = s;
+
+    using Bgon   = Vdp2Regs::Bgon;
+    using Chctla = Vdp2Regs::Chctla;
+    using Chctlb = Vdp2Regs::Chctlb;
 
     switch (s) {
         using enum ScrollScreen;
@@ -2550,8 +2549,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
 
             // Transparency
-            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg0)
-                                                 == TransparentDisplayEnable::transparency_code_valid);
+            screen.is_transparency_code_valid
+                = ((regs_.bgon >> Bgon::n0tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
             screen.priority_number = prina_.nbg0;
@@ -2568,8 +2567,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn0_.plane_d);
 
             // Page
-            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size),
-                                           toEnum<CharacterSize>(chctla_.character_size_nbg0));
+            screen.page_size
+                = getPageSize(toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size), regs_.chctla >> Chctla::n0chsz_enum);
 
             // Pattern name data
             screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
@@ -2580,19 +2579,17 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn0_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = toEnum<CharacterSize>(chctla_.character_size_nbg0);
+            screen.character_pattern_size = regs_.chctla >> Chctla::n0chsz_enum;
             screen.character_color_number
-                = getCharacterColorNumber3Bits(toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0),
-                                               tv_screen_status_.screen_mode_type);
-            screen.format = getScrollScreenFormat(toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg0));
+                = getCharacterColorNumber3Bits(regs_.chctla >> Chctla::n0chcn_enum, tv_screen_status_.screen_mode_type);
+            screen.format = getScrollScreenFormat(regs_.chctla >> Chctla::n0bmen_enum);
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
-            screen.bitmap_size           = getBitmapSize(toEnum<BitmapSize2Bits>(chctla_.bitmap_size_nbg0));
-            screen.bitmap_palette_number = bmpna_.bitmap_palette_number_nbg0;
-            // screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_priority_nbg0));
+            screen.bitmap_size             = getBitmapSize(regs_.chctla >> Chctla::n0bmsz_enum);
+            screen.bitmap_palette_number   = bmpna_.bitmap_palette_number_nbg0;
             screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_priority_nbg0));
             screen.bitmap_special_color_calculation
                 = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_color_calculation_nbg0));
@@ -2613,8 +2610,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg1);
 
             // Transparency
-            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg1)
-                                                 == TransparentDisplayEnable::transparency_code_valid);
+            screen.is_transparency_code_valid
+                = ((regs_.bgon >> Bgon::n1tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
             // Priority
             screen.priority_number = static_cast<u8>(prina_.nbg1);
 
@@ -2630,8 +2627,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn1_.plane_d);
 
             // Page
-            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size),
-                                           toEnum<CharacterSize>(chctla_.character_size_nbg1));
+            screen.page_size
+                = getPageSize(toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size), regs_.chctla >> Chctla::n1chsz_enum);
 
             // Pattern name data
             screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size);
@@ -2642,17 +2639,16 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn1_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = toEnum<CharacterSize>(chctla_.character_size_nbg1);
+            screen.character_pattern_size = regs_.chctla >> Chctla::n1chsz_enum;
             screen.character_color_number
-                = getCharacterColorNumber2Bits(toEnum<CharacterColorNumber2Bits>(chctla_.character_color_number_nbg1),
-                                               tv_screen_status_.screen_mode_type);
-            screen.format = getScrollScreenFormat(toEnum<BitmapEnable>(chctla_.bitmap_enable_nbg1));
+                = getCharacterColorNumber2Bits(regs_.chctla >> Chctla::n1chcn_enum, tv_screen_status_.screen_mode_type);
+            screen.format = getScrollScreenFormat(regs_.chctla >> Chctla::n1bmen_enum);
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
-            screen.bitmap_size             = getBitmapSize(toEnum<BitmapSize2Bits>(chctla_.bitmap_size_nbg1));
+            screen.bitmap_size             = getBitmapSize(regs_.chctla >> Chctla::n1bmsz_enum);
             screen.bitmap_palette_number   = static_cast<u8>(bmpna_.bitmap_palette_number_nbg1);
             screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_priority_nbg1));
             screen.bitmap_special_color_calculation
@@ -2673,8 +2669,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg2));
 
             // Transparency
-            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg2)
-                                                 == TransparentDisplayEnable::transparency_code_valid);
+            screen.is_transparency_code_valid
+                = ((regs_.bgon >> Bgon::n2tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
             screen.priority_number = prinb_.nbg2;
@@ -2691,8 +2687,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn2_.plane_d);
 
             // Page
-            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size),
-                                           toEnum<CharacterSize>(chctlb_.character_size_nbg2));
+            screen.page_size
+                = getPageSize(toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size), regs_.chctlb >> Chctlb::n2chsz_enum);
 
             // Pattern name data
             screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size);
@@ -2703,11 +2699,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn2_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = toEnum<CharacterSize>(chctlb_.character_size_nbg2);
-            screen.character_color_number
-                = getCharacterColorNumber1Bit(toEnum<CharacterColorNumber1Bit>(chctlb_.character_color_number_nbg2));
-            screen.bitmap_size          = BitmapSize::not_set;
-            screen.bitmap_start_address = 0;
+            screen.character_pattern_size = regs_.chctlb >> Chctlb::n2chsz_enum;
+            screen.character_color_number = getCharacterColorNumber1Bit(regs_.chctlb >> Chctlb::n2chcn_enum);
+            screen.bitmap_size            = BitmapSize::not_set;
+            screen.bitmap_start_address   = 0;
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
@@ -2727,8 +2722,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg3));
 
             // Transparency
-            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg3)
-                                                 == TransparentDisplayEnable::transparency_code_valid);
+            screen.is_transparency_code_valid
+                = ((regs_.bgon >> Bgon::n3tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
             screen.priority_number = static_cast<u8>(prinb_.nbg3);
@@ -2745,8 +2740,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn3_.plane_d);
 
             // Page
-            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size),
-                                           toEnum<CharacterSize>(chctlb_.character_size_nbg3));
+            screen.page_size
+                = getPageSize(toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size), regs_.chctlb >> Chctlb::n3chsz_enum);
 
             // Pattern name data
             screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size);
@@ -2757,20 +2752,17 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn3_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = toEnum<CharacterSize>(chctlb_.character_size_nbg3);
-            screen.character_color_number
-                = getCharacterColorNumber1Bit(toEnum<CharacterColorNumber1Bit>(chctlb_.character_color_number_nbg3));
-            screen.bitmap_size          = BitmapSize::not_set;
-            screen.bitmap_start_address = 0;
+            screen.character_pattern_size = regs_.chctlb >> Chctlb::n3chsz_enum;
+            screen.character_color_number = getCharacterColorNumber1Bit(regs_.chctlb >> Chctlb::n3chcn_enum);
+            screen.bitmap_size            = BitmapSize::not_set;
+            screen.bitmap_start_address   = 0;
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Scroll screen
             screen.screen_scroll_horizontal_integer = scxn3_.integer;
-            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
-            screen.screen_scroll_vertical_integer = scyn3_.integer;
-            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
+            screen.screen_scroll_vertical_integer   = scyn3_.integer;
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg3);
@@ -2781,8 +2773,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset = getColorRamAddressOffset(craofb_.color_ram_address_offset_rbg0);
 
             // Transparency
-            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_rbg0)
-                                                 == TransparentDisplayEnable::transparency_code_valid);
+            screen.is_transparency_code_valid
+                = ((regs_.bgon >> Bgon::r0tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
             screen.priority_number = prir_.rbg0;
@@ -2811,8 +2803,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_p_start_address = calculatePlaneStartAddress(s, mpopra_.plane_p);
 
             // Page
-            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size),
-                                           toEnum<CharacterSize>(chctlb_.character_size_rbg0));
+            screen.page_size
+                = getPageSize(toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size), regs_.chctlb >> Chctlb::r0chsz_enum);
 
             // Pattern name data
             screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size);
@@ -2823,17 +2815,17 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncr_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = toEnum<CharacterSize>(chctlb_.character_size_rbg0);
+            screen.character_pattern_size = regs_.chctlb >> Chctlb::r0chsz_enum;
             screen.character_color_number
-                = getCharacterColorNumberRbg0(toEnum<CharacterColorNumber3Bits>(chctlb_.character_color_number_rbg0),
-                                              tv_screen_status_.screen_mode_type);
-            screen.format = getScrollScreenFormat(toEnum<BitmapEnable>(chctlb_.bitmap_enable_rbg0));
+                = getCharacterColorNumberRbg0(regs_.chctlb >> Chctlb::r0chcn_enum, tv_screen_status_.screen_mode_type);
+            screen.format = getScrollScreenFormat(regs_.chctlb >> Chctlb::r0bmen_enum);
 
             // Cell
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
-            screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(toEnum<BitmapSize1Bit>(chctlb_.bitmap_size_rbg0)));
+            // screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(toEnum<BitmapSize1Bit>(chctlb_.bitmap_size_rbg0)));
+            screen.bitmap_size = getBitmapSize(static_cast<Vdp2Regs::BitmapSize2Bits>(regs_.chctlb >> Chctlb::r0bmsz_enum));
             screen.bitmap_palette_number   = bmpnb_.bitmap_palette_number_rbg0;
             screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpnb_.bitmap_special_priority_rbg0));
             screen.bitmap_special_color_calculation
@@ -2849,8 +2841,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
 
             // Transparency
-            screen.is_transparency_code_valid = (toEnum<TransparentDisplayEnable>(bgon_.transparency_display_enable_nbg0)
-                                                 == TransparentDisplayEnable::transparency_code_valid);
+            screen.is_transparency_code_valid
+                = ((regs_.bgon >> Bgon::n0tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
             screen.priority_number = prina_.nbg0;
@@ -2879,8 +2871,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.plane_p_start_address = calculatePlaneStartAddress(s, mpoprb_.plane_p);
 
             // Page
-            screen.page_size = getPageSize(toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size),
-                                           toEnum<CharacterSize>(chctla_.character_size_nbg0));
+            screen.page_size
+                = getPageSize(toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size), regs_.chctla >> Chctla::n0chsz_enum);
 
             // Pattern name data
             screen.pattern_name_data_size           = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
@@ -2891,10 +2883,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.supplementary_character_number   = pncn0_.supplementary_character_number;
 
             // Character pattern
-            screen.character_pattern_size = toEnum<CharacterSize>(chctla_.character_size_nbg0);
+            screen.character_pattern_size = regs_.chctla >> Chctla::n0chsz_enum;
             screen.character_color_number
-                = getCharacterColorNumber3Bits(toEnum<CharacterColorNumber3Bits>(chctla_.character_color_number_nbg0),
-                                               tv_screen_status_.screen_mode_type);
+                = getCharacterColorNumber3Bits(regs_.chctla >> Chctla::n0chcn_enum, tv_screen_status_.screen_mode_type);
             screen.bitmap_size          = BitmapSize::not_set;
             screen.bitmap_start_address = 0;
 
@@ -2910,8 +2901,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     // Position calculation helpers
     constexpr auto cells_nb_64             = u16{64};
     constexpr auto cells_nb_128            = u16{128};
-    screen.character_pattern_screen_offset = [](const CharacterSize sz) {
-        return (sz == CharacterSize::one_by_one) ? ScreenOffset{1, 1} : ScreenOffset{2, 2};
+    screen.character_pattern_screen_offset = [](const Vdp2Regs::CharacterSize sz) {
+        return (sz == Vdp2Regs::CharacterSize::one_by_one) ? ScreenOffset{1, 1} : ScreenOffset{2, 2};
     }(screen.character_pattern_size);
     screen.page_screen_offset  = {cells_nb_64, cells_nb_64};
     screen.plane_screen_offset = [&](const PlaneSize sz) {
@@ -3047,6 +3038,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) -> u32 {
     using Vrsize = Vdp2Regs::Vrsize;
+    using Chctla = Vdp2Regs::Chctla;
+    using Chctlb = Vdp2Regs::Chctlb;
 
     constexpr auto multiplier_800   = u32{0x800};
     constexpr auto multiplier_1000  = u32{0x1000};
@@ -3059,40 +3052,40 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     const auto is_vram_size_4mb       = (regs_.vrsize >> Vrsize::vramsz_enum) == Vrsize::VramSize::size_4_mbits;
     auto       plane_size             = PlaneSize{};
     auto       pattern_name_data_size = PatternNameDataSize{};
-    auto       character_size         = CharacterSize{};
-    auto       start_address          = u32{screen.map_offset << displacement_6 | map_addr};
+    auto       character_size         = Vdp2Regs::CharacterSize{};
+    auto       start_address          = u32{screen.map_offset << 6 | map_addr};
 
     switch (s) {
         using enum ScrollScreen;
         case nbg0:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg0);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
-            character_size         = toEnum<CharacterSize>(chctla_.character_size_nbg0);
+            character_size         = regs_.chctla >> Chctla::n0chsz_enum;
             break;
         case nbg1:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg1);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn1_.pattern_name_data_size);
-            character_size         = toEnum<CharacterSize>(chctla_.character_size_nbg1);
+            character_size         = regs_.chctla >> Chctla::n1chsz_enum;
             break;
         case nbg2:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg2);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn2_.pattern_name_data_size);
-            character_size         = toEnum<CharacterSize>(chctlb_.character_size_nbg2);
+            character_size         = regs_.chctlb >> Chctlb::n2chsz_enum;
             break;
         case nbg3:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg3);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn3_.pattern_name_data_size);
-            character_size         = toEnum<CharacterSize>(chctlb_.character_size_nbg3);
+            character_size         = regs_.chctlb >> Chctlb::n3chsz_enum;
             break;
         case rbg0:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpa);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncr_.pattern_name_data_size);
-            character_size         = toEnum<CharacterSize>(chctlb_.character_size_rbg0);
+            character_size         = regs_.chctlb >> Chctlb::r0chsz_enum;
             break;
         case rbg1:
             plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpb);
             pattern_name_data_size = toEnum<PatternNameDataSize>(pncn0_.pattern_name_data_size);
-            character_size         = toEnum<CharacterSize>(chctla_.character_size_nbg0);
+            character_size         = regs_.chctla >> Chctla::n0chsz_enum;
             break;
         default: break;
     }
@@ -3103,7 +3096,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
         using enum PlaneSize;
         case size_1_by_1:
             if (pattern_name_data_size == PatternNameDataSize::one_word) {
-                if (character_size == CharacterSize::one_by_one) {
+                if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003f};
                     constexpr auto mask_8mb = u16{0x007f};
                     mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
@@ -3117,7 +3110,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
                 }
             } else {
                 // PatternNameDataSize::two_words
-                if (character_size == CharacterSize::one_by_one) {
+                if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x001f};
                     constexpr auto mask_8mb = u16{0x003f};
                     mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
@@ -3134,7 +3127,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             break;
         case size_2_by_1:
             if (pattern_name_data_size == PatternNameDataSize::one_word) {
-                if (character_size == CharacterSize::one_by_one) {
+                if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003e};
                     constexpr auto mask_8mb = u16{0x007e};
                     mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
@@ -3148,7 +3141,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
                 }
             } else {
                 // PatternNameDataSize::two_words
-                if (character_size == CharacterSize::one_by_one) {
+                if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x001e};
                     constexpr auto mask_8mb = u16{0x003e};
                     mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
@@ -3165,7 +3158,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
             break;
         case size_2_by_2:
             if (pattern_name_data_size == PatternNameDataSize::one_word) {
-                if (character_size == CharacterSize::one_by_one) {
+                if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003c};
                     constexpr auto mask_8mb = u16{0x007c};
                     mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
@@ -3179,7 +3172,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
                 }
             } else {
                 // PatternNameDataSize::two_words
-                if (character_size == CharacterSize::one_by_one) {
+                if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x001c};
                     constexpr auto mask_8mb = u16{0x003c};
                     mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
@@ -3326,7 +3319,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                                            screen.bitmap_palette_number);
 
     if (Texture::isTextureLoadingNeeded(key)) {
-        if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+        if (ram_status_.color_ram_mode == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (screen.character_color_number) {
                 using enum ColorCount;
@@ -3456,7 +3449,7 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
     if (screen.pattern_name_data_size == PatternNameDataSize::two_words) {
         current_pnd_config = PatternNameDataEnum::two_words;
     } else {
-        if (screen.character_pattern_size == CharacterSize::one_by_one) {
+        if (screen.character_pattern_size == Vdp2Regs::CharacterSize::one_by_one) {
             if (screen.character_color_number == ColorCount::palette_16) {
                 if (screen.character_number_supplement_mode == CharacterNumberSupplementMode::character_number_10_bits) {
                     current_pnd_config = PatternNameDataEnum::one_word_1_cell_16_colors_10_bits;
@@ -3520,16 +3513,17 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
             break;
     }
 
-    const auto cp_number   = (screen.character_pattern_size == CharacterSize::one_by_one) ? u32{64 * 64} : u32{32 * 32};
-    const auto cp_width    = (screen.character_pattern_size == CharacterSize::one_by_one) ? u32{1} : u32{2};
+    const auto cp_number   = (screen.character_pattern_size == Vdp2Regs::CharacterSize::one_by_one) ? u32{64 * 64} : u32{32 * 32};
+    const auto cp_width    = (screen.character_pattern_size == Vdp2Regs::CharacterSize::one_by_one) ? u32{1} : u32{2};
     const auto cp_height   = cp_width;
     const auto pnd_size    = (screen.pattern_name_data_size == PatternNameDataSize::one_word) ? 2 : 4;
     auto       pnd_address = page_address;
     auto       cp_offset   = page_offset;
 
     // Choosing the right precalculated modulo check function
-    const auto& modulo_values
-        = (screen.character_pattern_size == CharacterSize::one_by_one) ? pre_calculated_modulo_64_ : pre_calculated_modulo_32_;
+    const auto& modulo_values = (screen.character_pattern_size == Vdp2Regs::CharacterSize::one_by_one)
+                                    ? pre_calculated_modulo_64_
+                                    : pre_calculated_modulo_32_;
 
     const auto isEndOfRowReached = [](const std::vector<u32>& modulos, const u32 val) {
         // Value 0 isn't added to the vector.
@@ -3562,7 +3556,7 @@ void Vdp2::readCharacterPattern(const ScrollScreenStatus& screen, const PatternN
     constexpr auto character_pattern_boundary = u8{0x20};
     // if (pnd.character_number != 0x3000 && pnd.character_number != 0x3345 && pnd.character_number != 0x3741) __debugbreak();
     const auto character_number_address = pnd.character_number * character_pattern_boundary;
-    if (screen.character_pattern_size == CharacterSize::one_by_one) {
+    if (screen.character_pattern_size == Vdp2Regs::CharacterSize::one_by_one) {
         readCell(screen, pnd, character_number_address, cp_offset);
     } else { // CharacterSize::two_by_two
 
@@ -3639,7 +3633,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
             std::vector<u8> texture_data;
             texture_data.reserve(texture_size);
 
-            if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+            if (ram_status_.color_ram_mode == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
                 // 32 bits access to color RAM
                 switch (screen.character_color_number) {
                     using enum ColorCount;
@@ -3715,7 +3709,7 @@ void Vdp2::concurrentReadCell(const ScrollScreenStatus screen,
         std::vector<u8> texture_data;
         texture_data.reserve(texture_size);
 
-        if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+        if (ram_status_.color_ram_mode == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (screen.character_color_number) {
                 using enum ColorCount;
@@ -3792,7 +3786,7 @@ void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus              screen,
             std::vector<u8> texture_data;
             texture_data.reserve(texture_size);
 
-            if (ram_status_.color_ram_mode == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+            if (ram_status_.color_ram_mode == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
                 // 32 bits access to color RAM
                 switch (screen.character_color_number) {
                     using enum ColorCount;
@@ -3890,7 +3884,7 @@ auto Vdp2::getColorRamAddressOffset(const u8 register_offset) const -> u16 {
     constexpr auto mask_3_bits        = u8{0x7};
     auto           register_mask      = u8{};
     switch (ram_status_.color_ram_mode) {
-        using enum ColorRamMode;
+        using enum Vdp2Regs::Ramctl::ColorRamMode;
         case mode_0_rgb_5_bits_1024_colors:
             color_size    = color_size_2_bytes;
             register_mask = mask_2_bits;

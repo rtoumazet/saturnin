@@ -42,7 +42,6 @@
 
 // Forward declarations
 namespace saturnin::core {
-// class Memory;
 class Scu;
 } // namespace saturnin::core
 
@@ -55,7 +54,6 @@ using saturnin::core::EmulatorModules;
 using saturnin::core::Log;
 using saturnin::core::Logger;
 using saturnin::core::ThreadPool;
-// using AddressToNameMap = std::map<u32, std::string>;
 
 using namespace std::chrono;
 using seconds = duration<double>;
@@ -68,7 +66,7 @@ constexpr auto vram_bank_a1_index = u8{1};
 constexpr auto vram_bank_b0_index = u8{2};
 constexpr auto vram_bank_b1_index = u8{3};
 constexpr auto vram_timing_size   = u8{8};
-using VramTiming                  = std::array<VramAccessCommand, vram_timing_size>;
+using VramTiming                  = std::array<Vdp2Regs::VramAccessCommand, vram_timing_size>;
 
 constexpr auto saturn_framebuffer_width  = u16{2048};
 constexpr auto saturn_framebuffer_height = u16{2048};
@@ -263,15 +261,17 @@ struct TvScreenStatus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct RamStatus {
-    Vdp2Regs::Vrsize::VramSize vram_size{Vdp2Regs::Vrsize::VramSize::size_4_mbits};
-    VramMode                   vram_a_mode{VramMode::no_partition};
-    VramMode                   vram_b_mode{VramMode::no_partition};
-    ColorRamMode               color_ram_mode{ColorRamMode::not_set};
-    CoefficientTableStorage    coefficient_table_storage{CoefficientTableStorage::stored_in_vram};
-    RotationDataBankSelect     vram_a0_rotation_bank_select{RotationDataBankSelect::not_used};
-    RotationDataBankSelect     vram_a1_rotation_bank_select{RotationDataBankSelect::not_used};
-    RotationDataBankSelect     vram_b0_rotation_bank_select{RotationDataBankSelect::not_used};
-    RotationDataBankSelect     vram_b1_rotation_bank_select{RotationDataBankSelect::not_used};
+    using Vrsize = Vdp2Regs::Vrsize;
+    using Ramctl = Vdp2Regs::Ramctl;
+    Vrsize::VramSize                vram_size{Vrsize::VramSize::size_4_mbits};
+    Ramctl::VramMode                vram_a_mode{Ramctl::VramMode::no_partition};
+    Ramctl::VramMode                vram_b_mode{Ramctl::VramMode::no_partition};
+    Ramctl::ColorRamMode            color_ram_mode{Ramctl::ColorRamMode::not_set};
+    Ramctl::CoefficientTableStorage coefficient_table_storage{Ramctl::CoefficientTableStorage::stored_in_vram};
+    Ramctl::RotationDataBankSelect  vram_a0_rotation_bank_select{Ramctl::RotationDataBankSelect::not_used};
+    Ramctl::RotationDataBankSelect  vram_a1_rotation_bank_select{Ramctl::RotationDataBankSelect::not_used};
+    Ramctl::RotationDataBankSelect  vram_b0_rotation_bank_select{Ramctl::RotationDataBankSelect::not_used};
+    Ramctl::RotationDataBankSelect  vram_b1_rotation_bank_select{Ramctl::RotationDataBankSelect::not_used};
 };
 
 struct ColorOffset {
@@ -314,12 +314,12 @@ struct ScrollScreenStatus {
     PatternNameDataSize           pattern_name_data_size{};       ///< Size of the pattern name data (1 or 2 words)
     CharacterNumberSupplementMode character_number_supplement_mode{
         CharacterNumberSupplementMode::character_number_10_bits}; ///< 10 bits/12 bits
-    u8            special_priority{};                             ///< Special priority bit
-    u8            special_color_calculation{};                    ///< Special color calculation bit
-    u8            supplementary_palette_number{};                 ///< Supplementary palette number bit
-    u8            supplementary_character_number{};               ///< Supplementary character number bit
-    CharacterSize character_pattern_size{};                       ///< Size of the character pattern (1*1 or 2*2 cells)
-    u16           cell_size{};                                    ///< Size of the cell (8*8 dots)
+    u8                      special_priority{};                   ///< Special priority bit
+    u8                      special_color_calculation{};          ///< Special color calculation bit
+    u8                      supplementary_palette_number{};       ///< Supplementary palette number bit
+    u8                      supplementary_character_number{};     ///< Supplementary character number bit
+    Vdp2Regs::CharacterSize character_pattern_size{};             ///< Size of the character pattern (1*1 or 2*2 cells)
+    u16                     cell_size{};                          ///< Size of the cell (8*8 dots)
 
     // Positioning variables
     ScreenOffset plane_screen_offset{};             ///< Offset of one plane in cell units.
@@ -722,7 +722,7 @@ class Vdp2 {
     /// \returns    The color ram mode.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getColorRamMode() const -> ColorRamMode { return ram_status_.color_ram_mode; }
+    auto getColorRamMode() const -> Vdp2Regs::Ramctl::ColorRamMode { return ram_status_.color_ram_mode; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getSpriteControlRegister() const -> SpriteControl
@@ -819,7 +819,7 @@ class Vdp2 {
     auto        getDebugVramAccessBanks() const -> std::vector<VramTiming>;
     auto        getDebugVramAccessBanksUsed() const -> std::array<bool, vram_banks_number>;
     auto        getDebugVramAccessBanksName() const -> std::vector<std::string>;
-    static auto getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue;
+    static auto getDebugVramAccessCommandDescription(const Vdp2Regs::VramAccessCommand command) -> LabelValue;
     auto        getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::vector<LabelValue>>;
     auto        screenInDebug() const -> ScrollScreen;
     void        screenInDebug(const ScrollScreen s);
@@ -952,68 +952,68 @@ class Vdp2 {
     auto isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8;
+    /// \fn	auto Vdp2::getVramAccessByCommand(const Vdp2Regs::VramAccessCommand command, const ReductionSetting reduction) -> u8;
     ///
-    /// \brief  Gets VRAM access corresponding to the command taking into account limitations.
+    /// \brief	Gets VRAM access corresponding to the command taking into account limitations.
     ///
-    /// \author Runik
-    /// \date   21/12/2020
+    /// \author	Runik
+    /// \date	21/12/2020
     ///
-    /// \param  command     The access command.
-    /// \param  reduction   The current screen reduction.
+    /// \param 	command  	The access command.
+    /// \param 	reduction	The current screen reduction.
     ///
-    /// \returns    Number of VRAM access for the command.
+    /// \returns	Number of VRAM access for the command.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getVramAccessByCommand(const VramAccessCommand command, const ReductionSetting reduction) -> u8;
+    auto getVramAccessByCommand(const Vdp2Regs::VramAccessCommand command, const ReductionSetting reduction) -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::getVramBitmapReads(const VramTiming& bank_a0, const VramTiming& bank_a1,
-    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command) const -> u8;
+    /// \fn	auto Vdp2::getVramBitmapReads(const VramTiming& bank_a0, const VramTiming& bank_a1, const VramTiming& bank_b0, const
+    /// VramTiming& bank_b1, const Vdp2Regs::VramAccessCommand command) const -> u8;
     ///
-    /// \brief  Gets VRAM bitmap reads
+    /// \brief	Gets VRAM bitmap reads
     ///
-    /// \author Runik
-    /// \date   22/12/2020
+    /// \author	Runik
+    /// \date	22/12/2020
     ///
-    /// \param  bank_a0 VRAM bank a0.
-    /// \param  bank_a1 VRAM bank a1.
-    /// \param  bank_b0 VRAM bank b0.
-    /// \param  bank_b1 VRAM bank b1.
-    /// \param  command The VRAM access command.
+    /// \param 	bank_a0	VRAM bank a0.
+    /// \param 	bank_a1	VRAM bank a1.
+    /// \param 	bank_b0	VRAM bank b0.
+    /// \param 	bank_b1	VRAM bank b1.
+    /// \param 	command	The VRAM access command.
     ///
-    /// \returns    The VRAM bitmap reads.
+    /// \returns	The VRAM bitmap reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getVramBitmapReads(const VramTiming&       bank_a0,
-                            const VramTiming&       bank_a1,
-                            const VramTiming&       bank_b0,
-                            const VramTiming&       bank_b1,
-                            const VramAccessCommand command) const -> u8;
+    auto getVramBitmapReads(const VramTiming&                 bank_a0,
+                            const VramTiming&                 bank_a1,
+                            const VramTiming&                 bank_b0,
+                            const VramTiming&                 bank_b1,
+                            const Vdp2Regs::VramAccessCommand command) const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::getVramPatternNameDataReads(const VramTiming& bank_a0, const VramTiming& bank_a1,
-    ///     const VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command) const -> u8;
+    /// \fn	auto Vdp2::getVramPatternNameDataReads(const VramTiming& bank_a0, const VramTiming& bank_a1, const VramTiming&
+    /// bank_b0, const VramTiming& bank_b1, const Vdp2Regs::VramAccessCommand command) const -> u8;
     ///
-    /// \brief  Gets VRAM pattern name data reads
+    /// \brief	Gets VRAM pattern name data reads
     ///
-    /// \author Runik
-    /// \date   22/12/2020
+    /// \author	Runik
+    /// \date	22/12/2020
     ///
-    /// \param  bank_a0 VRAM bank a0.
-    /// \param  bank_a1 VRAM bank a1.
-    /// \param  bank_b0 VRAM bank b0.
-    /// \param  bank_b1 VRAM bank b1.
-    /// \param  command The VRAM access command.
+    /// \param 	bank_a0	VRAM bank a0.
+    /// \param 	bank_a1	VRAM bank a1.
+    /// \param 	bank_b0	VRAM bank b0.
+    /// \param 	bank_b1	VRAM bank b1.
+    /// \param 	command	The VRAM access command.
     ///
-    /// \returns    The VRAM pattern name data reads.
+    /// \returns	The VRAM pattern name data reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getVramPatternNameDataReads(const VramTiming&       bank_a0,
-                                     const VramTiming&       bank_a1,
-                                     const VramTiming&       bank_b0,
-                                     const VramTiming&       bank_b1,
-                                     const VramAccessCommand command) const -> u8;
+    auto getVramPatternNameDataReads(const VramTiming&                 bank_a0,
+                                     const VramTiming&                 bank_a1,
+                                     const VramTiming&                 bank_b0,
+                                     const VramTiming&                 bank_b1,
+                                     const Vdp2Regs::VramAccessCommand command) const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Vdp2::getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
@@ -1032,8 +1032,8 @@ class Vdp2 {
     static auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3Bits ccn) ->
-    /// VramAccessNumber;
+    /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber3Bits
+    /// ccn) -> VramAccessNumber;
     ///
     /// \brief	Calculates the required VRAM character/bitmap pattern reads to display a screen.
     ///
@@ -1046,41 +1046,44 @@ class Vdp2 {
     /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber3Bits ccn) -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber3Bits ccn)
+        -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2Bits ccn) ->
-    /// VramAccessNumber;
+    /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber2Bits
+    /// ccn) -> VramAccessNumber;
     ///
-    /// \brief  Calculates the required VRAM character/bitmap pattern reads to display a screen.
+    /// \brief	Calculates the required VRAM character/bitmap pattern reads to display a screen.
     ///
-    /// \author Runik
-    /// \date   12/01/2021
+    /// \author	Runik
+    /// \date	12/01/2021
     ///
-    /// \param  r   The reduction setting.
-    /// \param  ccn The character color number.
+    /// \param 	r  	The reduction setting.
+    /// \param 	ccn	The character color number.
     ///
-    /// \returns    The required VRAM character pattern reads.
+    /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber2Bits ccn) -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber2Bits ccn)
+        -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1Bit ccn) ->
-    /// VramAccessNumber;
+    /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber1Bit
+    /// ccn) -> VramAccessNumber;
     ///
-    /// \brief  Calculates the required VRAM character/bitmap pattern reads to display a screen.
+    /// \brief	Calculates the required VRAM character/bitmap pattern reads to display a screen.
     ///
-    /// \author Runik
-    /// \date   12/01/2021
+    /// \author	Runik
+    /// \date	12/01/2021
     ///
-    /// \param  r   The reduction setting.
-    /// \param  ccn The character color number.
+    /// \param 	r  	The reduction setting.
+    /// \param 	ccn	The character color number.
     ///
-    /// \returns    The required VRAM character pattern reads.
+    /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, CharacterColorNumber1Bit ccn) -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber1Bit ccn)
+        -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Vdp2::calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
@@ -1098,37 +1101,39 @@ class Vdp2 {
     static auto calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Vdp2::getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand;
+    /// \fn	static auto Vdp2::getPatternNameFromCharacterPattern(const Vdp2Regs::VramAccessCommand character_pattern) ->
+    /// Vdp2Regs::VramAccessCommand;
     ///
-    /// \brief  Gets the Pattern Name command corresponding to the Character Pattern command
+    /// \brief	Gets the Pattern Name command corresponding to the Character Pattern command
     ///
-    /// \author Runik
-    /// \date   23/12/2020
+    /// \author	Runik
+    /// \date	23/12/2020
     ///
-    /// \param  character_pattern   Character pattern command.
+    /// \param 	character_pattern	Character pattern command.
     ///
-    /// \returns    Pattern name command.
+    /// \returns	Pattern name command.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getPatternNameFromCharacterPattern(const VramAccessCommand character_pattern) -> VramAccessCommand;
+    static auto getPatternNameFromCharacterPattern(const Vdp2Regs::VramAccessCommand character_pattern)
+        -> Vdp2Regs::VramAccessCommand;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Vdp2::setPatternNameAccess(const VramTiming& bank, const VramAccessCommand pattern, std::array<bool,
-    /// vram_timing_size>& pnd_access);
+    /// \fn	static void Vdp2::setPatternNameAccess(const VramTiming& bank, const Vdp2Regs::VramAccessCommand pattern,
+    /// std::array<bool, vram_timing_size>& pnd_access);
     ///
-    /// \brief  Sets the pattern name accesses for the given bank.
+    /// \brief	Sets the pattern name accesses for the given bank.
     ///
-    /// \author Runik
-    /// \date   23/12/2020
+    /// \author	Runik
+    /// \date	23/12/2020
     ///
-    /// \param          bank        The bank to check.
-    /// \param          pattern     Pattern name data used.
-    /// \param [in,out] pnd_access  Sets true for the index of the pattern name data found in the
-    ///                             bank.
+    /// \param 		   	bank	  	The bank to check.
+    /// \param 		   	pattern   	Pattern name data used.
+    /// \param [in,out]	pnd_access	Sets true for the index of the pattern name data found in the
+    /// 							bank.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static void setPatternNameAccess(const VramTiming&                   bank,
-                                     const VramAccessCommand             pattern,
+                                     const Vdp2Regs::VramAccessCommand   pattern,
                                      std::array<bool, vram_timing_size>& pnd_access);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1152,35 +1157,35 @@ class Vdp2 {
                                                std::array<bool, vram_timing_size>&       allowed_cpd_timing);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Vdp2::getVramCharacterPatternDataReads(const VramTiming& bank_a0, const VramTiming& bank_a1, const
-    /// VramTiming& bank_b0, const VramTiming& bank_b1, const VramAccessCommand command, const ReductionSetting reduction, const
-    /// bool is_screen_mode_normal) -> u8;
+    /// \fn	static auto Vdp2::getVramCharacterPatternDataReads(const VramTiming& bank_a0, const VramTiming& bank_a1, const
+    /// VramTiming& bank_b0, const VramTiming& bank_b1, const Vdp2Regs::VramAccessCommand command, const ReductionSetting
+    /// reduction, const bool is_screen_mode_normal, const bool is_using_2_by_2_cp) -> u8;
     ///
-    /// \brief  Gets VRAM character pattern data reads
+    /// \brief	Gets VRAM character pattern data reads
     ///
-    /// \author Runik
-    /// \date   22/12/2020
+    /// \author	Runik
+    /// \date	22/12/2020
     ///
-    /// \param  bank_a0                 VRAM bank a0.
-    /// \param  bank_a1                 VRAM bank a1.
-    /// \param  bank_b0                 VRAM bank b0.
-    /// \param  bank_b1                 VRAM bank b1.
-    /// \param  command                 The VRAM access command.
-    /// \param  reduction               Reduction setting of current screen.
-    /// \param  is_screen_mode_normal   True if current screen is in normal mode.
-    /// \param  is_using_2_by_2_cp      True if current screen uses 2 by 2 character patterns.
+    /// \param 	bank_a0				 	VRAM bank a0.
+    /// \param 	bank_a1				 	VRAM bank a1.
+    /// \param 	bank_b0				 	VRAM bank b0.
+    /// \param 	bank_b1				 	VRAM bank b1.
+    /// \param 	command				 	The VRAM access command.
+    /// \param 	reduction			 	Reduction setting of current screen.
+    /// \param 	is_screen_mode_normal	True if current screen is in normal mode.
+    /// \param 	is_using_2_by_2_cp   	True if current screen uses 2 by 2 character patterns.
     ///
-    /// \returns    The VRAM character pattern data reads.
+    /// \returns	The VRAM character pattern data reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getVramCharacterPatternDataReads(const VramTiming&       bank_a0,
-                                                 const VramTiming&       bank_a1,
-                                                 const VramTiming&       bank_b0,
-                                                 const VramTiming&       bank_b1,
-                                                 const VramAccessCommand command,
-                                                 const ReductionSetting  reduction,
-                                                 const bool              is_screen_mode_normal,
-                                                 const bool              is_using_2_by_2_cp) -> u8;
+    static auto getVramCharacterPatternDataReads(const VramTiming&                 bank_a0,
+                                                 const VramTiming&                 bank_a1,
+                                                 const VramTiming&                 bank_b0,
+                                                 const VramTiming&                 bank_b1,
+                                                 const Vdp2Regs::VramAccessCommand command,
+                                                 const ReductionSetting            reduction,
+                                                 const bool                        is_screen_mode_normal,
+                                                 const bool                        is_using_2_by_2_cp) -> u8;
 
     //--------------------------------------------------------------------------------------------------------------
     // DISPLAY methods
@@ -1803,22 +1808,22 @@ class Vdp2 {
     // VramSizeRegister                                vrsize_;
     // HCounter                                        hcnt_;
     // VCounter                                        vcnt_;
-    RamControl ramctl_;
+    // RamControl ramctl_;
     // Reserve                                         rsv1_;
-    VramCyclePatternBankLower                       cyca0l_;
-    VramCyclePatternBankUpper                       cyca0u_;
-    VramCyclePatternBankLower                       cyca1l_;
-    VramCyclePatternBankUpper                       cyca1u_;
-    VramCyclePatternBankLower                       cycb0l_;
-    VramCyclePatternBankUpper                       cycb0u_;
-    VramCyclePatternBankLower                       cycb1l_;
-    VramCyclePatternBankUpper                       cycb1u_;
-    ScreenDisplayEnable                             bgon_;
-    MosaicControl                                   mzctl_;
-    SpecialFunctionCodeSelect                       sfsel_;
-    SpecialFunctionCode                             sfcode_;
-    CharacterControlA                               chctla_;
-    CharacterControlB                               chctlb_;
+    // VramCyclePatternBankLower                       cyca0l_;
+    // VramCyclePatternBankUpper                       cyca0u_;
+    // VramCyclePatternBankLower                       cyca1l_;
+    // VramCyclePatternBankUpper                       cyca1u_;
+    // VramCyclePatternBankLower                       cycb0l_;
+    // VramCyclePatternBankUpper                       cycb0u_;
+    // VramCyclePatternBankLower                       cycb1l_;
+    // VramCyclePatternBankUpper                       cycb1u_;
+    // ScreenDisplayEnable                             bgon_;
+    // MosaicControl                                   mzctl_;
+    // SpecialFunctionCodeSelect                       sfsel_;
+    // SpecialFunctionCode                             sfcode_;
+    // CharacterControlA                               chctla_;
+    // CharacterControlB                               chctlb_;
     BitmapPaletteNumberA                            bmpna_;
     BitmapPaletteNumberB                            bmpnb_;
     PatternNameControl                              pncn0_;

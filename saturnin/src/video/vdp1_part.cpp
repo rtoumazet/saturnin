@@ -963,7 +963,7 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
     const auto key = Texture::calculateKey(VdpType::vdp1, start_address, toUnderlying(color_mode));
 
     if (Texture::isTextureLoadingNeeded(key)) {
-        if (modules.vdp2()->getColorRamMode() == ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+        if (modules.vdp2()->getColorRamMode() == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
             // 32 bits access to color RAM
             switch (color_mode) {
                 using enum CmdPmod::ColorMode;

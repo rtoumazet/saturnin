@@ -100,6 +100,7 @@ auto Vdp2::getDebugGlobalMainData() const -> std::vector<LabelValue> {
 
 auto Vdp2::getDebugRamMainData() const -> std::vector<LabelValue> {
     using Vrsize = Vdp2Regs::Vrsize;
+    using Ramctl = Vdp2Regs::Ramctl;
 
     auto values = std::vector<LabelValue>{};
 
@@ -113,9 +114,9 @@ auto Vdp2::getDebugRamMainData() const -> std::vector<LabelValue> {
     };
     values.emplace_back(tr("VRAM size"), getVramSize(ram_status_.vram_size));
 
-    const auto getVramMode = [](const VramMode mode) {
+    const auto getVramMode = [](const Ramctl::VramMode mode) {
         switch (mode) {
-            using enum VramMode;
+            using enum Vdp2Regs::Ramctl::VramMode;
             case no_partition: return tr("No partition");
             case partition_in_2_banks: return tr("Partition in 2 banks");
             default: return tr("Not set");
@@ -124,9 +125,9 @@ auto Vdp2::getDebugRamMainData() const -> std::vector<LabelValue> {
     values.emplace_back(tr("VRAM A mode"), getVramMode(ram_status_.vram_a_mode));
     values.emplace_back(tr("VRAM B mode"), getVramMode(ram_status_.vram_b_mode));
 
-    const auto getColorRamMode = [](const ColorRamMode mode) {
+    const auto getColorRamMode = [](const Ramctl::ColorRamMode mode) {
         switch (mode) {
-            using enum ColorRamMode;
+            using enum Vdp2Regs::Ramctl::ColorRamMode;
             case mode_0_rgb_5_bits_1024_colors: return tr("Mode 0 (RGB 5 bits, 1024 colors) ");
             case mode_1_rgb_5_bits_2048_colors: return tr("Mode 1 (RGB 5 bits, 2048 colors) ");
             case mode_2_rgb_8_bits_1024_colors: return tr("Mode 2 (RGB 8 bits, 1024 colors) ");
@@ -136,9 +137,9 @@ auto Vdp2::getDebugRamMainData() const -> std::vector<LabelValue> {
     };
     values.emplace_back(tr("Color RAM mode"), getColorRamMode(ram_status_.color_ram_mode));
 
-    const auto getCoefficientTable = [](const CoefficientTableStorage cts) {
+    const auto getCoefficientTable = [](const Ramctl::CoefficientTableStorage cts) {
         switch (cts) {
-            using enum CoefficientTableStorage;
+            using enum Vdp2Regs::Ramctl::CoefficientTableStorage;
             case stored_in_color_ram: return tr("Stored in color RAM");
             case stored_in_vram: return tr("Stored in VRAM");
             default: return tr("Not set");
@@ -146,9 +147,9 @@ auto Vdp2::getDebugRamMainData() const -> std::vector<LabelValue> {
     };
     values.emplace_back(tr("Coefficient table"), getCoefficientTable(ram_status_.coefficient_table_storage));
 
-    const auto getRotationBankSelect = [](const RotationDataBankSelect rdbs) {
+    const auto getRotationBankSelect = [](const Ramctl::RotationDataBankSelect rdbs) {
         switch (rdbs) {
-            using enum RotationDataBankSelect;
+            using enum Vdp2Regs::Ramctl::RotationDataBankSelect;
             case not_used: return tr("Not used as RBG0 RAM");
             case used_as_rbg0_character_pattern_table: return tr("Used for RBG0 Character Pattern table (or Bitmap Pattern)");
             case used_as_rbg0_coefficient_table: return tr("Used for RBG0 Coefficient table");
@@ -181,55 +182,57 @@ auto Vdp2::getDebugVramAccessMainData() const -> std::vector<LabelValue> {
 }
 
 auto Vdp2::getDebugVramAccessBanks() const -> std::vector<VramTiming> {
-    using enum VramAccessCommand;
+    using enum Vdp2Regs::VramAccessCommand;
     using Tvmd          = Vdp2Regs::Tvmd;
+    using Cycxxl        = Vdp2Regs::Cycxxl;
+    using Cycxxu        = Vdp2Regs::Cycxxu;
     auto is_normal_mode = (regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_320;
     is_normal_mode |= (regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_352;
 
     const auto banks_used = getDebugVramAccessBanksUsed();
     auto       banks      = std::vector<VramTiming>{};
 
-    const VramTiming bank_a0 = {toEnum<VramAccessCommand>(cyca0l_.t0),
-                                toEnum<VramAccessCommand>(cyca0l_.t1),
-                                toEnum<VramAccessCommand>(cyca0l_.t2),
-                                toEnum<VramAccessCommand>(cyca0l_.t3),
-                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t4) : no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t5) : no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t6) : no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cyca0u_.t7) : no_access};
+    const VramTiming bank_a0 = {regs_.cyca0l >> Cycxxl::t0_enum,
+                                regs_.cyca0l >> Cycxxl::t1_enum,
+                                regs_.cyca0l >> Cycxxl::t2_enum,
+                                regs_.cyca0l >> Cycxxl::t3_enum,
+                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t4_enum : no_access,
+                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t5_enum : no_access,
+                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t6_enum : no_access,
+                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t7_enum : no_access};
     banks.emplace_back(bank_a0);
 
     if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_a1 = {toEnum<VramAccessCommand>(cyca1l_.t0),
-                                    toEnum<VramAccessCommand>(cyca1l_.t1),
-                                    toEnum<VramAccessCommand>(cyca1l_.t2),
-                                    toEnum<VramAccessCommand>(cyca1l_.t3),
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t4) : no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t5) : no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t6) : no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cyca1u_.t7) : no_access};
+        const VramTiming bank_a1 = {regs_.cyca0l >> Cycxxl::t0_enum,
+                                    regs_.cyca1l >> Cycxxl::t1_enum,
+                                    regs_.cyca1l >> Cycxxl::t2_enum,
+                                    regs_.cyca1l >> Cycxxl::t3_enum,
+                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t4_enum : no_access,
+                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t5_enum : no_access,
+                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t6_enum : no_access,
+                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t7_enum : no_access};
         banks.emplace_back(bank_a1);
     }
 
-    const VramTiming bank_b0 = {toEnum<VramAccessCommand>(cycb0l_.t0),
-                                toEnum<VramAccessCommand>(cycb0l_.t1),
-                                toEnum<VramAccessCommand>(cycb0l_.t2),
-                                toEnum<VramAccessCommand>(cycb0l_.t3),
-                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t4) : no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t5) : no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t6) : no_access,
-                                is_normal_mode ? toEnum<VramAccessCommand>(cycb0u_.t7) : no_access};
+    const VramTiming bank_b0 = {regs_.cycb0l >> Cycxxl::t0_enum,
+                                regs_.cycb0l >> Cycxxl::t1_enum,
+                                regs_.cycb0l >> Cycxxl::t2_enum,
+                                regs_.cycb0l >> Cycxxl::t3_enum,
+                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t4_enum : no_access,
+                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t5_enum : no_access,
+                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t6_enum : no_access,
+                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t7_enum : no_access};
     banks.emplace_back(bank_b0);
 
     if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_b1 = {toEnum<VramAccessCommand>(cycb1l_.t0),
-                                    toEnum<VramAccessCommand>(cycb1l_.t1),
-                                    toEnum<VramAccessCommand>(cycb1l_.t2),
-                                    toEnum<VramAccessCommand>(cycb1l_.t3),
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t4) : no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t5) : no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t6) : no_access,
-                                    is_normal_mode ? toEnum<VramAccessCommand>(cycb1u_.t7) : no_access};
+        const VramTiming bank_b1 = {regs_.cycb1l >> Cycxxl::t0_enum,
+                                    regs_.cycb1l >> Cycxxl::t1_enum,
+                                    regs_.cycb1l >> Cycxxl::t2_enum,
+                                    regs_.cycb1l >> Cycxxl::t3_enum,
+                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t4_enum : no_access,
+                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t5_enum : no_access,
+                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t6_enum : no_access,
+                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t7_enum : no_access};
         banks.emplace_back(bank_b1);
     }
     return banks;
@@ -238,9 +241,10 @@ auto Vdp2::getDebugVramAccessBanks() const -> std::vector<VramTiming> {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::getDebugVramAccessBanksUsed() const -> std::array<bool, vram_banks_number> {
     // Bank A/A0 and B/B0 are always used
-    auto banks = std::array{true, false, true, false};
-    if (toEnum<VramMode>(ramctl_.vram_a_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_a1_index] = true; }
-    if (toEnum<VramMode>(ramctl_.vram_b_mode) == VramMode::partition_in_2_banks) { banks[vram_bank_b1_index] = true; }
+    using Ramctl = Vdp2Regs::Ramctl;
+    auto banks   = std::array{true, false, true, false};
+    if ((regs_.ramctl >> Ramctl::vramd_enum) == Ramctl::VramMode::partition_in_2_banks) { banks[vram_bank_a1_index] = true; }
+    if ((regs_.ramctl >> Ramctl::vrbmd_enum) == Ramctl::VramMode::partition_in_2_banks) { banks[vram_bank_b1_index] = true; }
 
     return banks;
 }
@@ -266,9 +270,9 @@ auto Vdp2::getDebugVramAccessBanksName() const -> std::vector<std::string> {
 }
 
 // static
-auto Vdp2::getDebugVramAccessCommandDescription(const VramAccessCommand command) -> LabelValue {
-    using VramCommandsDescription = std::map<VramAccessCommand, LabelValue>;
-    using enum VramAccessCommand;
+auto Vdp2::getDebugVramAccessCommandDescription(const Vdp2Regs::VramAccessCommand command) -> LabelValue {
+    using VramCommandsDescription = std::map<Vdp2Regs::VramAccessCommand, LabelValue>;
+    using enum Vdp2Regs::VramAccessCommand;
     const auto vram_commands_descriptions = VramCommandsDescription{
         {nbg0_pattern_name_read, {"N0PN", tr("NBG0 Pattern Name Data Read")}},
         {nbg1_pattern_name_read, {"N1PN", tr("NBG1 Pattern Name Data Read")}},
@@ -383,7 +387,7 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     }
 
     // Character Pattern size
-    const auto& cp_size = screen.character_pattern_size == CharacterSize::one_by_one ? tr("1x1 cell") : tr("2x2 cells");
+    const auto& cp_size = screen.character_pattern_size == Vdp2Regs::CharacterSize::one_by_one ? tr("1x1 cell") : tr("2x2 cells");
     values.emplace_back(tr("Character Pattern size"), cp_size);
 
     // Character Pattern color number

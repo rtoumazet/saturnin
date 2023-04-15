@@ -26,6 +26,7 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/bit_register.h>
 
 namespace saturnin::video {
 namespace vdp2_register_address {
@@ -491,359 +492,434 @@ struct Vdp2Regs {
     using ReserveType = Reg<u16, Reserve>;
     ReserveType rsv1;
     ReserveType rsv2;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CoefficientTableStorage
-///
-/// \brief  Selects whether to store the coefficient table in the color RAM (CRKTE bit).
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ramctl
+    ///
+    /// \brief	RAM Control register (RAMCTL).
+    ///
+    /// \author	Runik
+    /// \date	14/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class CoefficientTableStorage : bool {
-    stored_in_vram      = false, ///< Coefficient table is stored in VRAM.
-    stored_in_color_ram = true   ///< Coefficient table is stored in color RAM.
-};
+    struct Ramctl {
+        GENERATE_USING(Ramctl, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ColorRamMode
-///
-/// \brief  Selects the color RAM mode (CRMDx bits).
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   CoefficientTableStorage
+        ///
+        /// \brief  Selects whether to store the coefficient table in the color RAM (CRKTE bit).
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ColorRamMode : u8 {
-    mode_0_rgb_5_bits_1024_colors = 0b00, ///< RGB each 5 bits, 1024 colors settings.
-    mode_1_rgb_5_bits_2048_colors = 0b01, ///< RGB each 5 bits, 2048 colors settings.
-    mode_2_rgb_8_bits_1024_colors = 0b10, ///< RGB each 8 bits, 1024 colors settings.
-    setting_not_allowed           = 0b11, ///< Setting not allowed.
-    not_set                       = 0xFF  ///< Not set.
-};
+        enum class CoefficientTableStorage : bool {
+            stored_in_vram      = false, ///< Coefficient table is stored in VRAM.
+            stored_in_color_ram = true   ///< Coefficient table is stored in color RAM.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   VramMode
-///
-/// \brief  VRAM mode bit (VRxMD bit).
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ColorRamMode
+        ///
+        /// \brief  Selects the color RAM mode (CRMDx bits).
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VramMode : bool {
-    no_partition         = false, ///< Do not partition in 2 banks.
-    partition_in_2_banks = true   ///< Partition in 2 banks.
-};
+        enum class ColorRamMode : u8 {
+            mode_0_rgb_5_bits_1024_colors = 0b00, ///< RGB each 5 bits, 1024 colors settings.
+            mode_1_rgb_5_bits_2048_colors = 0b01, ///< RGB each 5 bits, 2048 colors settings.
+            mode_2_rgb_8_bits_1024_colors = 0b10, ///< RGB each 8 bits, 1024 colors settings.
+            setting_not_allowed           = 0b11, ///< Setting not allowed.
+            not_set                       = 0xFF  ///< Not set.
+        };
 
-enum class RotationDataBankSelect : u8 {
-    not_used                             = 0b00, ///< VRAM not used as RBG0 RAM.
-    used_as_rbg0_coefficient_table       = 0b01, ///< VRAM used as RBG0 coefficient table.
-    used_as_rbg0_pattern_name_table      = 0b10, ///< VRAM used as RBG0 Pattern Name table.
-    used_as_rbg0_character_pattern_table = 0b11  ///< VRAM used as RBG0 Character Pattern table (or Bitmap Pattern)
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   VramMode
+        ///
+        /// \brief  VRAM mode bit (VRxMD bit).
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	RamControl
-///
-/// \brief	RAM Control register (RAMCTL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        enum class VramMode : bool {
+            no_partition         = false, ///< Do not partition in 2 banks.
+            partition_in_2_banks = true   ///< Partition in 2 banks.
+        };
 
-union RamControl {
-    u16             raw;                          ///< Raw representation.
-    BitField<15>    coefficient_table_storage;    ///< Defines CRKTE bit.
-    BitField<12, 2> color_ram_mode;               ///< Defines CRMDx bits.
-    BitField<9>     vram_b_mode;                  ///< Defines VRBMD bit.
-    BitField<8>     vram_a_mode;                  ///< Defines VRAMD bit.
-    BitField<0, 2>  vram_a0_rotation_bank_select; ///< Defines RDBSA0x bits.
-    BitField<2, 2>  vram_a1_rotation_bank_select; ///< Defines RDBSA1x bits.
-    BitField<4, 2>  vram_b0_rotation_bank_select; ///< Defines RDBSB0x bits.
-    BitField<6, 2>  vram_b1_rotation_bank_select; ///< Defines RDBSB1x bits.
-    BitField<8, 8>  upper_8_bits;                 ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits;                 ///< Defines the range of the lower 8 bits of the register.
-};
+        enum class RotationDataBankSelect : u8 {
+            not_used                             = 0b00, ///< VRAM not used as RBG0 RAM.
+            used_as_rbg0_coefficient_table       = 0b01, ///< VRAM used as RBG0 coefficient table.
+            used_as_rbg0_pattern_name_table      = 0b10, ///< VRAM used as RBG0 Pattern Name table.
+            used_as_rbg0_character_pattern_table = 0b11  ///< VRAM used as RBG0 Character Pattern table (or Bitmap Pattern)
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   VramAccessCommand
-///
-/// \brief  VRAM access command (VCP0A0x, VCP0A1x, VCP0B0x, VCP0B1x bits).
-////////////////////////////////////////////////////////////////////////////////////////////////////
-enum class VramAccessCommand : u8 {
-    nbg0_pattern_name_read                    = 0b0000,
-    nbg1_pattern_name_read                    = 0b0001,
-    nbg2_pattern_name_read                    = 0b0010,
-    nbg3_pattern_name_read                    = 0b0011,
-    nbg0_character_pattern_data_read          = 0b0100,
-    nbg1_character_pattern_data_read          = 0b0101,
-    nbg2_character_pattern_data_read          = 0b0110,
-    nbg3_character_pattern_data_read          = 0b0111,
-    setting_not_allowed_1                     = 0b1000,
-    setting_not_allowed_2                     = 0b1001,
-    setting_not_allowed_3                     = 0b1010,
-    setting_not_allowed_4                     = 0b1011,
-    nbg0_vertical_cell_scroll_table_data_read = 0b1100,
-    nbg1_vertical_cell_scroll_table_data_read = 0b1101,
-    cpu_read_write                            = 0b1110,
-    no_access                                 = 0b1111
-};
+        GENERATE_BIT_WITH_ENUM(crkte, 15, 0b1, CoefficientTableStorage); ///< Coefficient table storage.
+        GENERATE_BIT_WITH_ENUM(crmd, 12, 0b11, ColorRamMode);            ///< Color RAM mode.
+        GENERATE_BIT_WITH_ENUM(vrbmd, 9, 0b1, VramMode);                 ///< VRAM B mode.
+        GENERATE_BIT_WITH_ENUM(vramd, 8, 0b1, VramMode);                 ///< VRAM A mode.
+        GENERATE_BIT_WITH_ENUM(rdbsa0, 0, 0b11, RotationDataBankSelect); ///< VRAM A0 rotation bank select.
+        GENERATE_BIT_WITH_ENUM(rdbsa1, 2, 0b11, RotationDataBankSelect); ///< VRAM A1 rotation bank select.
+        GENERATE_BIT_WITH_ENUM(rdbsb0, 4, 0b11, RotationDataBankSelect); ///< VRAM B0 rotation bank select.
+        GENERATE_BIT_WITH_ENUM(rdbsb1, 6, 0b11, RotationDataBankSelect); ///< VRAM B1 rotation bank select.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VramCyclePatternBankLower
-///
-/// \brief	VRAM Cycle Pattern lower register (CYCxxL).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-union VramCyclePatternBankLower {
-    u16             raw;          ///< Raw representation.
-    BitField<12, 4> t0;           ///< Defines VCP0xxx bits.
-    BitField<8, 4>  t1;           ///< Defines VCP1xxx bits.
-    BitField<4, 4>  t2;           ///< Defines VCP2xxx bits.
-    BitField<0, 4>  t3;           ///< Defines VCP3xxx bits.
-    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Ramctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Ramctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using RamctlType = Reg<u16, Ramctl>;
+    RamctlType ramctl;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VramCyclePatternBankUpper
-///
-/// \brief	VRAM Cycle Pattern upper register (CYCxxU).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   VramAccessCommand
+    ///
+    /// \brief  VRAM access command (VCP0A0x, VCP0A1x, VCP0B0x, VCP0B1x bits).
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    enum class VramAccessCommand : u8 {
+        nbg0_pattern_name_read                    = 0b0000,
+        nbg1_pattern_name_read                    = 0b0001,
+        nbg2_pattern_name_read                    = 0b0010,
+        nbg3_pattern_name_read                    = 0b0011,
+        nbg0_character_pattern_data_read          = 0b0100,
+        nbg1_character_pattern_data_read          = 0b0101,
+        nbg2_character_pattern_data_read          = 0b0110,
+        nbg3_character_pattern_data_read          = 0b0111,
+        setting_not_allowed_1                     = 0b1000,
+        setting_not_allowed_2                     = 0b1001,
+        setting_not_allowed_3                     = 0b1010,
+        setting_not_allowed_4                     = 0b1011,
+        nbg0_vertical_cell_scroll_table_data_read = 0b1100,
+        nbg1_vertical_cell_scroll_table_data_read = 0b1101,
+        cpu_read_write                            = 0b1110,
+        no_access                                 = 0b1111
+    };
 
-union VramCyclePatternBankUpper {
-    u16             raw;          ///< Raw representation.
-    BitField<12, 4> t4;           ///< Defines VCP4xxx bits.
-    BitField<8, 4>  t5;           ///< Defines VCP5xxx bits.
-    BitField<4, 4>  t6;           ///< Defines VCP6xxx bits.
-    BitField<0, 4>  t7;           ///< Defines VCP7xxx bits.
-    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Cycxxl
+    ///
+    /// \brief	VRAM Cycle Pattern lower register (CYCxxL).
+    ///
+    /// \author	Runik
+    /// \date	14/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TransparentDisplayEnable
-///
-/// \brief  xxTPON bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Cycxxl {
+        GENERATE_USING(Cycxxl, u16);
 
-enum class TransparentDisplayEnable : bool {
-    transparency_code_valid = false, ///< Validates transparency code (transparency code becomes valid).
-    transparency_code_invalid
-    = true ///< Invalidates transparency code (transparency code dots are displayed according to data values).
-};
+        GENERATE_BIT_WITH_ENUM(t0, 12, 0b1111, VramAccessCommand); ///< VCP0xxx bits.
+        GENERATE_BIT_WITH_ENUM(t1, 8, 0b1111, VramAccessCommand);  ///< VCP1xxx bits.
+        GENERATE_BIT_WITH_ENUM(t2, 4, 0b1111, VramAccessCommand);  ///< VCP2xxx bits.
+        GENERATE_BIT_WITH_ENUM(t3, 0, 0b1111, VramAccessCommand);  ///< VCP3xxx bits.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ScreenDisplayEnableBit
-///
-/// \brief  xxON bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0);            ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
 
-enum class ScreenDisplayEnableBit : bool {
-    cannot_display = false, ///< Cannot display (Does not execute VRAM access for display).
-    can_display    = true   ///< Can display.
-};
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Cycxxl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Cycxxl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CycxxlType = Reg<u16, Cycxxl>;
+    CycxxlType cyca0l;
+    CycxxlType cyca1l;
+    CycxxlType cycb0l;
+    CycxxlType cycb1l;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ScreenDisplayEnable
-///
-/// \brief	Screen Display Enable register (BGON).
-///
-/// \author	Runik
-/// \date	24/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Cycxxu
+    ///
+    /// \brief	VRAM Cycle Pattern upper register (CYCxxU).
+    ///
+    /// \author	Runik
+    /// \date	14/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union ScreenDisplayEnable {
-    u16            raw;                              ///< Raw representation.
-    BitField<12>   transparency_display_enable_rbg0; ///< Defines R0TPON bit.
-    BitField<11>   transparency_display_enable_nbg3; ///< Defines N3TPON bit.
-    BitField<10>   transparency_display_enable_nbg2; ///< Defines N2TPON bit.
-    BitField<9>    transparency_display_enable_nbg1; ///< Defines N1TPON bit.
-    BitField<8>    transparency_display_enable_nbg0; ///< Defines N0TPON bit.
-    BitField<5>    screen_display_enable_rbg1;       ///< Defines R1ON bit.
-    BitField<4>    screen_display_enable_rbg0;       ///< Defines R0ON bit.
-    BitField<3>    screen_display_enable_nbg3;       ///< Defines N3ON bit.
-    BitField<2>    screen_display_enable_nbg2;       ///< Defines N2ON bit.
-    BitField<1>    screen_display_enable_nbg1;       ///< Defines N1ON bit.
-    BitField<0>    screen_display_enable_nbg0;       ///< Defines N0ON bit.
-    BitField<8, 8> upper_8_bits;                     ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;                     ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Cycxxu {
+        GENERATE_USING(Cycxxu, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MosaicControl
-///
-/// \brief	Mosaic Control register (MZCTL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITH_ENUM(t4, 12, 0b1111, VramAccessCommand); ///< VCP4xxx bits.
+        GENERATE_BIT_WITH_ENUM(t5, 8, 0b1111, VramAccessCommand);  ///< VCP5xxx bits.
+        GENERATE_BIT_WITH_ENUM(t6, 4, 0b1111, VramAccessCommand);  ///< VCP6xxx bits.
+        GENERATE_BIT_WITH_ENUM(t7, 0, 0b1111, VramAccessCommand);  ///< VCP7xxx bits.
 
-union MosaicControl {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0);            ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SpecialFunctionCodeSelect
-///
-/// \brief	Special Function Code Select register (SFSEL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Cycxxu", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Cycxxu", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CycxxuType = Reg<u16, Cycxxu>;
+    CycxxuType cyca0u;
+    CycxxuType cyca1u;
+    CycxxuType cycb0u;
+    CycxxuType cycb1u;
 
-union SpecialFunctionCodeSelect {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Bgon
+    ///
+    /// \brief	Screen Display Enable register (BGON).
+    ///
+    /// \author	Runik
+    /// \date	15/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SpecialFunctionCodeSelect
-///
-/// \brief	Special Function Code register (SFCODE).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Bgon {
+        GENERATE_USING(Bgon, u16);
 
-union SpecialFunctionCode {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   TransparentDisplayEnable
+        ///
+        /// \brief  xxTPON bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CharacterColorNumber3Bits
-///
-/// \brief  N0CHCNx / R0CHCNx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        enum class TransparentDisplayEnable : bool {
+            transparency_code_valid = false, ///< Validates transparency code (transparency code becomes valid).
+            transparency_code_invalid
+            = true ///< Invalidates transparency code (transparency code dots are displayed according to data values).
+        };
 
-enum class CharacterColorNumber3Bits : u8 {
-    palette_16   = 0b000, ///< Palette format, 16 colors.
-    palette_256  = 0b001, ///< Palette format, 256 colors.
-    palette_2048 = 0b010, ///< Palette format, 2048 colors.
-    rgb_32k      = 0b011, ///< RGB format, 32768 colors.
-    rgb_16m      = 0b100  ///< RGB format, 16770000 colors.
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ScreenDisplayEnableBit
+        ///
+        /// \brief  xxON bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CharacterColorNumber2Bits
-///
-/// \brief  N1CHCNx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        enum class ScreenDisplayEnableBit : bool {
+            cannot_display = false, ///< Cannot display (Does not execute VRAM access for display).
+            can_display    = true   ///< Can display.
+        };
 
-enum class CharacterColorNumber2Bits : u8 {
-    palette_16   = 0b00, ///< Palette format, 16 colors.
-    palette_256  = 0b01, ///< Palette format, 256 colors.
-    palette_2048 = 0b10, ///< Palette format, 2048 colors.
-    rgb_32k      = 0b11, ///< RGB format, 32768 colors.
-};
+        GENERATE_BIT_WITH_ENUM(r0tpon, 12, 0b1, TransparentDisplayEnable); ///< RBG0 transparency display enable.
+        GENERATE_BIT_WITH_ENUM(n3tpon, 11, 0b1, TransparentDisplayEnable); ///< NBG3 transparency display enable.
+        GENERATE_BIT_WITH_ENUM(n2tpon, 10, 0b1, TransparentDisplayEnable); ///< NBG2 transparency display enable.
+        GENERATE_BIT_WITH_ENUM(n1tpon, 9, 0b1, TransparentDisplayEnable);  ///< NBG1 transparency display enable.
+        GENERATE_BIT_WITH_ENUM(n0tpon, 8, 0b1, TransparentDisplayEnable);  ///< NBG0 transparency display enable.
+        GENERATE_BIT_WITH_ENUM(r1on, 5, 0b1, ScreenDisplayEnableBit);      ///< RBG1 screen display enable.
+        GENERATE_BIT_WITH_ENUM(r0on, 4, 0b1, ScreenDisplayEnableBit);      ///< RBG0 screen display enable.
+        GENERATE_BIT_WITH_ENUM(n3on, 3, 0b1, ScreenDisplayEnableBit);      ///< NBG3 screen display enable.
+        GENERATE_BIT_WITH_ENUM(n2on, 2, 0b1, ScreenDisplayEnableBit);      ///< NBG2 screen display enable.
+        GENERATE_BIT_WITH_ENUM(n1on, 1, 0b1, ScreenDisplayEnableBit);      ///< NBG1 screen display enable.
+        GENERATE_BIT_WITH_ENUM(n0on, 0, 0b1, ScreenDisplayEnableBit);      ///< NBG0 screen display enable.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CharacterColorNumberNbg1
-///
-/// \brief  N2CHCNx / N3CHCNx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-enum class CharacterColorNumber1Bit : bool {
-    palette_16  = false, ///< Palette format, 16 colors.
-    palette_256 = true   ///< Palette format, 256 colors.
-};
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Bgon", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Bgon", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using BgonType = Reg<u16, Bgon>;
+    BgonType bgon;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   BitmapSize2Bits
-///
-/// \brief  N0BMSZx / N1BMSZx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mzctl
+    ///
+    /// \brief	Mosaic Control register (MZCTL).
+    ///
+    /// \author	Runik
+    /// \date	15/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class BitmapSize2Bits : u8 {
-    size_512_by_256  = 0b00, ///< 512 H dots* 256 V dots.
-    size_512_by_512  = 0b01, ///< 512 H dots* 512 V dots.
-    size_1024_by_256 = 0b10, ///< 1024 H dots* 256 V dots.
-    size_1024_by_512 = 0b11  ///< 1024 H dots* 512 V dots.
+    struct Mzctl {
+        GENERATE_USING(Mzctl, u16);
 
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   BitmapSize1Bit
-///
-/// \brief  R0BMSZ bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Mzctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Mzctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MzctlType = Reg<u16, Mzctl>;
+    MzctlType mzctl;
 
-enum class BitmapSize1Bit : bool {
-    size_512_by_256 = false, ///< 512 H dots* 256 V dots.
-    size_512_by_512 = true   ///< 512 H dots* 512 V dots.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	sfsel
+    ///
+    /// \brief	Special Function Code Select register (SFSEL).
+    ///
+    /// \author	Runik
+    /// \date	15/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   BitmapEnable
-///
-/// \brief  xxBMEN bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Sfsel {
+        GENERATE_USING(Sfsel, u16);
 
-enum class BitmapEnable : bool {
-    cell_format   = false, ///< Cell Format.
-    bitmap_format = true   ///< Bitmap Format.
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   CharacterSize
-///
-/// \brief  xxCHSZ bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Sfsel", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Sfsel", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using SfselType = Reg<u16, Sfsel>;
+    SfselType sfsel;
 
-enum class CharacterSize : bool {
-    one_by_one = false, ///< 1 H Cell x 1 V Cell.
-    two_by_two = true   ///< 2 H Cells x 2 V Cells.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Sfcode
+    ///
+    /// \brief	Special Function Code register (SFCODE).
+    ///
+    /// \author	Runik
+    /// \date	15/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CharacterControlA
-///
-/// \brief	Character Control (NBG0, NBG1) register (CHCTLA).
-///
-/// \author	Runik
-/// \date	24/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Sfcode {
+        GENERATE_USING(Sfcode, u16);
 
-union CharacterControlA {
-    u16             raw;                         ///< Raw representation.
-    BitField<12, 2> character_color_number_nbg1; ///< Defines N1CHCNx bits.
-    BitField<10, 2> bitmap_size_nbg1;            ///< Defines N1BMSZx bits.
-    BitField<9>     bitmap_enable_nbg1;          ///< Defines N1BMEN bit.
-    BitField<8>     character_size_nbg1;         ///< Defines N1CHSZ bit.
-    BitField<4, 3>  character_color_number_nbg0; ///< Defines N0CHCNx bits.
-    BitField<2, 2>  bitmap_size_nbg0;            ///< Defines N0BMSZx bits.
-    BitField<1>     bitmap_enable_nbg0;          ///< Defines N0BMEN bit.
-    BitField<0>     character_size_nbg0;         ///< Defines N0CHSZ bit.
-    BitField<8, 8>  upper_8_bits;                ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits;                ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CharacterControlB
-///
-/// \brief	Character Control (NBG2, NBG3, RBG0) register (CHCTLB).
-///
-/// \author	Runik
-/// \date	24/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Sfsel", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Sfsel", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using SfcodeType = Reg<u16, Sfcode>;
+    SfcodeType sfcode;
 
-union CharacterControlB {
-    u16              raw;                         ///< Raw representation.
-    BitField<12, 14> character_color_number_rbg0; ///< Defines R0CHCNx bits.
-    BitField<9>      bitmap_enable_rbg0;          ///< Defines R0BMEN bit.
-    BitField<8>      character_size_rbg0;         ///< Defines R0CHSZ bit.
-    BitField<5>      character_color_number_nbg3; ///< Defines N3CHCNx bit.
-    BitField<4>      character_size_nbg3;         ///< Defines N3CHSZ bit.
-    BitField<2>      bitmap_size_rbg0;            ///< Defines R0BMSZ bit.
-    BitField<1>      character_color_number_nbg2; ///< Defines N2CHCNx bit.
-    BitField<0>      character_size_nbg2;         ///< Defines N2CHSZ bit.
-    BitField<8, 8>   upper_8_bits;                ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>   lower_8_bits;                ///< Defines the range of the lower 8 bits of the register.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   CharacterColorNumber3Bits
+    ///
+    /// \brief  N0CHCNx / R0CHCNx bits values.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class CharacterColorNumber3Bits : u8 {
+        palette_16   = 0b000, ///< Palette format, 16 colors.
+        palette_256  = 0b001, ///< Palette format, 256 colors.
+        palette_2048 = 0b010, ///< Palette format, 2048 colors.
+        rgb_32k      = 0b011, ///< RGB format, 32768 colors.
+        rgb_16m      = 0b100  ///< RGB format, 16770000 colors.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   CharacterColorNumber2Bits
+    ///
+    /// \brief  N1CHCNx bits values.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class CharacterColorNumber2Bits : u8 {
+        palette_16   = 0b00, ///< Palette format, 16 colors.
+        palette_256  = 0b01, ///< Palette format, 256 colors.
+        palette_2048 = 0b10, ///< Palette format, 2048 colors.
+        rgb_32k      = 0b11, ///< RGB format, 32768 colors.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   CharacterColorNumberNbg1
+    ///
+    /// \brief  N2CHCNx / N3CHCNx bits values.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class CharacterColorNumber1Bit : bool {
+        palette_16  = false, ///< Palette format, 16 colors.
+        palette_256 = true   ///< Palette format, 256 colors.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   BitmapSize2Bits
+    ///
+    /// \brief  N0BMSZx / N1BMSZx bits values.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class BitmapSize2Bits : u8 {
+        size_512_by_256  = 0b00, ///< 512 H dots* 256 V dots.
+        size_512_by_512  = 0b01, ///< 512 H dots* 512 V dots.
+        size_1024_by_256 = 0b10, ///< 1024 H dots* 256 V dots.
+        size_1024_by_512 = 0b11  ///< 1024 H dots* 512 V dots.
+
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   BitmapSize1Bit
+    ///
+    /// \brief  R0BMSZ bit values.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class BitmapSize1Bit : bool {
+        size_512_by_256 = false, ///< 512 H dots* 256 V dots.
+        size_512_by_512 = true   ///< 512 H dots* 512 V dots.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   BitmapEnable
+    ///
+    /// \brief  xxBMEN bit values.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class BitmapEnable : bool {
+        cell_format   = false, ///< Cell Format.
+        bitmap_format = true   ///< Bitmap Format.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum   CharacterSize
+    ///
+    /// \brief  xxCHSZ bit values.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class CharacterSize : bool {
+        one_by_one = false, ///< 1 H Cell x 1 V Cell.
+        two_by_two = true   ///< 2 H Cells x 2 V Cells.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Chctla
+    ///
+    /// \brief	Character Control (NBG0, NBG1) register (CHCTLA).
+    ///
+    /// \author	Runik
+    /// \date	15/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Chctla {
+        GENERATE_USING(Chctla, u16);
+
+        GENERATE_BIT_WITH_ENUM(n1chcn, 12, 0b11, CharacterColorNumber2Bits); ///< NBG1 character color number.
+        GENERATE_BIT_WITH_ENUM(n1bmsz, 10, 0b11, BitmapSize2Bits);           ///< NBG1 bitmap size.
+        GENERATE_BIT_WITH_ENUM(n1bmen, 9, 0b1, BitmapEnable);                ///< NBG1 bitmap enable.
+        GENERATE_BIT_WITH_ENUM(n1chsz, 8, 0b1, CharacterSize);               ///< NBG1 character size.
+        GENERATE_BIT_WITH_ENUM(n0chcn, 4, 0b111, CharacterColorNumber3Bits); ///< NBG0 character color number.
+        GENERATE_BIT_WITH_ENUM(n0bmsz, 2, 0b11, BitmapSize2Bits);            ///< NBG0 bitmap size.
+        GENERATE_BIT_WITH_ENUM(n0bmen, 1, 0b1, BitmapEnable);                ///< NBG0 bitmap enable.
+        GENERATE_BIT_WITH_ENUM(n0chsz, 0, 0b1, CharacterSize);               ///< NBG0 character size.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Chctla", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Chctla", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ChctlaType = Reg<u16, Chctla>;
+    ChctlaType chctla;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Chctlb
+    ///
+    /// \brief	Character Control (NBG2, NBG3, RBG0) register (CHCTLB).
+    ///
+    /// \author	Runik
+    /// \date	15/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Chctlb {
+        GENERATE_USING(Chctlb, u16);
+
+        GENERATE_BIT_WITH_ENUM(r0chcn, 12, 0b111, CharacterColorNumber3Bits); ///< RBG0 character color number.
+        GENERATE_BIT_WITH_ENUM(r0bmsz, 10, 0b1, BitmapSize1Bit);              ///< RBG0 bitmap size.
+        GENERATE_BIT_WITH_ENUM(r0bmen, 9, 0b1, BitmapEnable);                 ///< RBG0 bitmap enable.
+        GENERATE_BIT_WITH_ENUM(r0chsz, 8, 0b1, CharacterSize);                ///< RBG0 character size.
+        GENERATE_BIT_WITH_ENUM(n3chcn, 5, 0b1, CharacterColorNumber1Bit);     ///< NBG3 character color number.
+        GENERATE_BIT_WITH_ENUM(n3chsz, 4, 0b1, CharacterSize);                ///< NBG3 bitmap size.
+        GENERATE_BIT_WITH_ENUM(n2chcn, 1, 0b1, CharacterColorNumber1Bit);     ///< NBG2 bitmap enable.
+        GENERATE_BIT_WITH_ENUM(n2chsz, 0, 0b1, CharacterSize);                ///< NBG2 character size.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Chctlb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Chctlb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ChctlbType = Reg<u16, Chctlb>;
+    ChctlbType chctlb;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
