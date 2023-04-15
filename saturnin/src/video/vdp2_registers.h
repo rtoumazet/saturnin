@@ -920,45 +920,61 @@ struct Vdp2Regs {
     };
     using ChctlbType = Reg<u16, Chctlb>;
     ChctlbType chctlb;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	BitmapPaletteNumberA
-///
-/// \brief	Bitmap Palette Number (NBG0, NBG1) register (BMPNA).
-///
-/// \author	Runik
-/// \date	24/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Bmpna
+    ///
+    /// \brief	Bitmap Palette Number (NBG0, NBG1) register (BMPNA).
+    ///
+    /// \author	Runik
+    /// \date	15/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union BitmapPaletteNumberA {
-    u16            raw;                                   ///< Raw representation.
-    BitField<13>   bitmap_special_priority_nbg1;          ///< Defines N1BMPR bit.
-    BitField<12>   bitmap_special_color_calculation_nbg1; ///< Defines N1BMCC bit.
-    BitField<8, 3> bitmap_palette_number_nbg1;            ///< Defines N1BMPx bit.
-    BitField<5>    bitmap_special_priority_nbg0;          ///< Defines N0BMPR bit.
-    BitField<4>    bitmap_special_color_calculation_nbg0; ///< Defines N0BMCC bit.
-    BitField<0, 3> bitmap_palette_number_nbg0;            ///< Defines N0BMPx bit.
-    BitField<8, 8> upper_8_bits;                          ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;                          ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Bmpna {
+        GENERATE_USING(Bmpna, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	BitmapPaletteNumberB
-///
-/// \brief	Bitmap Palette Number (RBG0) register (BMPNB).
-///
-/// \author	Runik
-/// \date	24/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(n1bmpr, 13, 0b1);     ///< NBG1 bitmap special priority.
+        GENERATE_BIT_WITHOUT_ENUM(n1bmcc, 12, 0b1);     ///< NBG1 bitmap special color calculation.
+        GENERATE_BIT_WITHOUT_ENUM(n1bmpx, 8, 0b111);    ///< NBG1 bitmap palette number.
+        GENERATE_BIT_WITHOUT_ENUM(n0bmpr, 5, 0b1);      ///< NBG0 bitmap special priority.
+        GENERATE_BIT_WITHOUT_ENUM(n0bmcc, 4, 0b1);      ///< NBG0 bitmap special color calculation.
+        GENERATE_BIT_WITHOUT_ENUM(n0bmpx, 0, 0b111);    ///< NBG0 bitmap palette number.
 
-union BitmapPaletteNumberB {
-    u16            raw;                                   ///< Raw representation.
-    BitField<5>    bitmap_special_priority_rbg0;          ///< Defines N0BMPR bit.
-    BitField<4>    bitmap_special_color_calculation_rbg0; ///< Defines R0BMCC bit.
-    BitField<0, 3> bitmap_palette_number_rbg0;            ///< Defines R0BMPx bit.
-    BitField<8, 8> upper_8_bits;                          ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;                          ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Bmpna", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Bmpna", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using BmpnaType = Reg<u16, Bmpna>;
+    BmpnaType bmpna;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Bmpnb
+    ///
+    /// \brief	Bitmap Palette Number (RBG0) register (BMPNB).
+    ///
+    /// \author	Runik
+    /// \date	15/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Bmpnb {
+        GENERATE_USING(Bmpnb, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(r0bmpr, 5, 0b1);      ///< RBG0 bitmap special priority.
+        GENERATE_BIT_WITHOUT_ENUM(r0bmcc, 4, 0b1);      ///< RBG0 bitmap special color calculation.
+        GENERATE_BIT_WITHOUT_ENUM(r0bmpx, 0, 0b111);    ///< RBG0 bitmap palette number.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using BmpnbType = Reg<u16, Bmpnb>;
+    BmpnbType bmpnb;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

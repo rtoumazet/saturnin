@@ -1824,8 +1824,8 @@ class Vdp2 {
     // SpecialFunctionCode                             sfcode_;
     // CharacterControlA                               chctla_;
     // CharacterControlB                               chctlb_;
-    BitmapPaletteNumberA                            bmpna_;
-    BitmapPaletteNumberB                            bmpnb_;
+    // BitmapPaletteNumberA                            bmpna_;
+    // BitmapPaletteNumberB                            bmpnb_;
     PatternNameControl                              pncn0_;
     PatternNameControl                              pncn1_;
     PatternNameControl                              pncn2_;

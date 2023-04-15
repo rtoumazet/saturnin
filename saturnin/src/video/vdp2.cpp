@@ -373,8 +373,8 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case special_function_code: return regs_.sfcode.data();
         case character_control_a: return regs_.chctla.data();
         case character_control_b: return regs_.chctlb.data();
-        case bitmap_palette_number_a: return bmpna_.raw;
-        case bitmap_palette_number_b: return bmpnb_.raw;
+        case bitmap_palette_number_a: return regs_.bmpna.data();
+        case bitmap_palette_number_b: return regs_.bmpnb.data();
         case pattern_name_control_nbg0: return pncn0_.raw;
         case pattern_name_control_nbg1: return pncn1_.raw;
         case pattern_name_control_nbg2: return pncn2_.raw;
@@ -550,10 +550,10 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case character_control_a + 1: regs_.chctla.upd(Vdp2Regs::Chctla::loByte(data)); break;
         case character_control_b: regs_.chctlb.upd(Vdp2Regs::Chctlb::hiByte(data)); break;
         case character_control_b + 1: regs_.chctlb.upd(Vdp2Regs::Chctlb::loByte(data)); break;
-        case bitmap_palette_number_a: bmpna_.upper_8_bits = data; break;
-        case bitmap_palette_number_a + 1: bmpna_.lower_8_bits = data; break;
-        case bitmap_palette_number_b: bmpnb_.upper_8_bits = data; break;
-        case bitmap_palette_number_b + 1: bmpnb_.lower_8_bits = data; break;
+        case bitmap_palette_number_a: regs_.bmpna.upd(Vdp2Regs::Bmpna::hiByte(data)); break;
+        case bitmap_palette_number_a + 1: regs_.bmpna.upd(Vdp2Regs::Bmpna::loByte(data)); break;
+        case bitmap_palette_number_b: regs_.bmpnb.upd(Vdp2Regs::Bmpnb::hiByte(data)); break;
+        case bitmap_palette_number_b + 1: regs_.bmpnb.upd(Vdp2Regs::Bmpnb::loByte(data)); break;
         case pattern_name_control_nbg0: pncn0_.upper_8_bits = data; break;
         case pattern_name_control_nbg0 + 1: pncn0_.lower_8_bits = data; break;
         case pattern_name_control_nbg1: pncn1_.upper_8_bits = data; break;
@@ -823,8 +823,8 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case special_function_code: regs_.sfcode = data; break;
         case character_control_a: regs_.chctla = data; break;
         case character_control_b: regs_.chctlb = data; break;
-        case bitmap_palette_number_a: bmpna_.raw = data; break;
-        case bitmap_palette_number_b: bmpnb_.raw = data; break;
+        case bitmap_palette_number_a: regs_.bmpna = data; break;
+        case bitmap_palette_number_b: regs_.bmpnb = data; break;
         case pattern_name_control_nbg0: pncn0_.raw = data; break;
         case pattern_name_control_nbg1: pncn1_.raw = data; break;
         case pattern_name_control_nbg2: pncn2_.raw = data; break;
@@ -983,8 +983,8 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.chctlb = l;
             break;
         case bitmap_palette_number_a:
-            bmpna_.raw = h;
-            bmpnb_.raw = l;
+            regs_.bmpna = h;
+            regs_.bmpnb = l;
             break;
         case pattern_name_control_nbg0:
             pncn0_.raw = h;
@@ -2541,6 +2541,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     using Bgon   = Vdp2Regs::Bgon;
     using Chctla = Vdp2Regs::Chctla;
     using Chctlb = Vdp2Regs::Chctlb;
+    using Bmpna  = Vdp2Regs::Bmpna;
+    using Bmpnb  = Vdp2Regs::Bmpnb;
 
     switch (s) {
         using enum ScrollScreen;
@@ -2588,12 +2590,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
-            screen.bitmap_size             = getBitmapSize(regs_.chctla >> Chctla::n0bmsz_enum);
-            screen.bitmap_palette_number   = bmpna_.bitmap_palette_number_nbg0;
-            screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_priority_nbg0));
-            screen.bitmap_special_color_calculation
-                = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_color_calculation_nbg0));
-            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
+            screen.bitmap_size                      = getBitmapSize(regs_.chctla >> Chctla::n0bmsz_enum);
+            screen.bitmap_palette_number            = static_cast<u8>(regs_.bmpna >> Bmpna::n0bmpx_shft);
+            screen.bitmap_special_priority          = static_cast<u8>(regs_.bmpna >> Bmpna::n0bmpr_shft);
+            screen.bitmap_special_color_calculation = static_cast<u8>(regs_.bmpna >> Bmpna::n0bmcc_shft);
+            screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
 
             // Scroll screen
             screen.screen_scroll_horizontal_integer    = scxin0_.integer;
@@ -2648,12 +2649,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
-            screen.bitmap_size             = getBitmapSize(regs_.chctla >> Chctla::n1bmsz_enum);
-            screen.bitmap_palette_number   = static_cast<u8>(bmpna_.bitmap_palette_number_nbg1);
-            screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_priority_nbg1));
-            screen.bitmap_special_color_calculation
-                = static_cast<u8>(static_cast<bool>(bmpna_.bitmap_special_color_calculation_nbg1));
-            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
+            screen.bitmap_size                      = getBitmapSize(regs_.chctla >> Chctla::n1bmsz_enum);
+            screen.bitmap_palette_number            = static_cast<u8>(regs_.bmpna >> Bmpna::n1bmpx_shft);
+            screen.bitmap_special_priority          = static_cast<u8>(regs_.bmpna >> Bmpna::n1bmpr_shft);
+            screen.bitmap_special_color_calculation = static_cast<u8>(regs_.bmpna >> Bmpna::n1bmcc_shft);
+            screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
 
             // Scroll screen
             screen.screen_scroll_horizontal_integer    = scxin1_.integer;
@@ -2826,11 +2826,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             // Bitmap
             // screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(toEnum<BitmapSize1Bit>(chctlb_.bitmap_size_rbg0)));
             screen.bitmap_size = getBitmapSize(static_cast<Vdp2Regs::BitmapSize2Bits>(regs_.chctlb >> Chctlb::r0bmsz_enum));
-            screen.bitmap_palette_number   = bmpnb_.bitmap_palette_number_rbg0;
-            screen.bitmap_special_priority = static_cast<u8>(static_cast<bool>(bmpnb_.bitmap_special_priority_rbg0));
-            screen.bitmap_special_color_calculation
-                = static_cast<u8>(static_cast<bool>(bmpnb_.bitmap_special_color_calculation_rbg0));
-            screen.bitmap_start_address = getBitmapStartAddress(screen.map_offset);
+            screen.bitmap_palette_number            = static_cast<u8>(regs_.bmpnb >> Bmpnb::r0bmpx_shft);
+            screen.bitmap_special_priority          = static_cast<u8>(regs_.bmpnb >> Bmpnb::r0bmpr_shft);
+            screen.bitmap_special_color_calculation = static_cast<u8>(regs_.bmpnb >> Bmpnb::r0bmcc_shft);
+            screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::rbg0);
