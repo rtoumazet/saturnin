@@ -359,7 +359,7 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     // Plane size
     const auto planeSize = [](const ScrollScreenStatus& sss) {
         switch (sss.plane_size) {
-            using enum PlaneSize;
+            using enum Vdp2Regs::Plsz::PlaneSize;
             case size_1_by_1: return tr("1x1 page");
             case size_2_by_1: return tr("2x1 pages");
             case size_2_by_2: return tr("2x2 pages");

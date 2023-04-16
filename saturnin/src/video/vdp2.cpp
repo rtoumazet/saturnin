@@ -380,7 +380,7 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case pattern_name_control_nbg2: return regs_.pncn2.data();
         case pattern_name_control_nbg3: return regs_.pncn3.data();
         case pattern_name_control_rbg0: return regs_.pncr.data();
-        case plane_size: return plsz_.raw;
+        case plane_size: return regs_.plsz.data();
         case map_offset_n: return mpofn_.raw;
         case map_offset_r: return mpofr_.raw;
         case map_nbg0_plane_a_b: return mpabn0_.raw;
@@ -564,8 +564,8 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case pattern_name_control_nbg3 + 1: regs_.pncn3.upd(Vdp2Regs::Pcnxx::loByte(data)); break;
         case pattern_name_control_rbg0: regs_.pncr.upd(Vdp2Regs::Pcnxx::hiByte(data)); break;
         case pattern_name_control_rbg0 + 1: regs_.pncr.upd(Vdp2Regs::Pcnxx::loByte(data)); break;
-        case plane_size: plsz_.upper_8_bits = data; break;
-        case plane_size + 1: plsz_.lower_8_bits = data; break;
+        case plane_size: regs_.plsz.upd(Vdp2Regs::Plsz::hiByte(data)); break;
+        case plane_size + 1: regs_.plsz.upd(Vdp2Regs::Plsz::loByte(data)); break;
         case map_offset_n: mpofn_.upper_8_bits = data; break;
         case map_offset_n + 1: mpofn_.lower_8_bits = data; break;
         case map_offset_r: mpofr_.upper_8_bits = data; break;
@@ -830,7 +830,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case pattern_name_control_nbg2: regs_.pncn2 = data; break;
         case pattern_name_control_nbg3: regs_.pncn3 = data; break;
         case pattern_name_control_rbg0: regs_.pncr = data; break;
-        case plane_size: plsz_.raw = data; break;
+        case plane_size: regs_.plsz = data; break;
         case map_offset_n: mpofn_.raw = data; break;
         case map_offset_r: mpofr_.raw = data; break;
         case map_nbg0_plane_a_b: mpabn0_.raw = data; break;
@@ -996,7 +996,7 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             break;
         case pattern_name_control_rbg0:
             regs_.pncr = h;
-            plsz_.raw  = l;
+            regs_.plsz = l;
             break;
         case map_offset_n:
             mpofn_.raw = h;
@@ -2437,6 +2437,7 @@ auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     using Pcnxx = Vdp2Regs::Pcnxx;
+    using Plsz  = Vdp2Regs::Plsz;
 
     constexpr auto map_size_nbg = u8{2 * 2};
     constexpr auto map_size_rbg = u8{4 * 4};
@@ -2564,7 +2565,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.map_offset = mpofn_.map_offset_nbg0;
 
             // Plane
-            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_nbg0);
+            screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n0plsz_enum;
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn0_.plane_a);
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn0_.plane_b);
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn0_.plane_c);
@@ -2622,7 +2623,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.map_offset = mpofn_.map_offset_nbg1;
 
             // Plane
-            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_nbg1);
+            screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n1plsz_enum;
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn1_.plane_a);
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn1_.plane_b);
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn1_.plane_c);
@@ -2680,7 +2681,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.map_offset = static_cast<u8>(mpofn_.map_offset_nbg2);
 
             // Plane
-            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_nbg2);
+            screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n2plsz_enum;
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn2_.plane_a);
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn2_.plane_b);
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn2_.plane_c);
@@ -2732,7 +2733,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.map_offset = static_cast<u8>(mpofn_.map_offset_nbg3);
 
             // Plane
-            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_nbg3);
+            screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n3plsz_enum;
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn3_.plane_a);
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn3_.plane_b);
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn3_.plane_c);
@@ -2782,7 +2783,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.map_offset = mpofr_.map_offset_rpa;
 
             // Plane
-            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_rpa);
+            screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::raplsz_enum;
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabra_.plane_a);
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabra_.plane_b);
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdra_.plane_c);
@@ -2848,7 +2849,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.map_offset = mpofr_.map_offset_rpb;
 
             // Plane
-            screen.plane_size            = toEnum<PlaneSize>(plsz_.plane_size_rpb);
+            screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::rbplsz_enum;
             screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabrb_.plane_a);
             screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabrb_.plane_b);
             screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdrb_.plane_c);
@@ -2900,9 +2901,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return (sz == Vdp2Regs::CharacterSize::one_by_one) ? ScreenOffset{1, 1} : ScreenOffset{2, 2};
     }(screen.character_pattern_size);
     screen.page_screen_offset  = {cells_nb_64, cells_nb_64};
-    screen.plane_screen_offset = [&](const PlaneSize sz) {
+    screen.plane_screen_offset = [&](const Plsz::PlaneSize sz) {
         switch (sz) {
-            using enum PlaneSize;
+            using enum Vdp2Regs::Plsz::PlaneSize;
             case size_1_by_1: return ScreenOffset{cells_nb_64, cells_nb_64};
             case size_2_by_1: return ScreenOffset{cells_nb_128, cells_nb_64};
             case size_2_by_2: return ScreenOffset{cells_nb_128, cells_nb_128};
@@ -2918,25 +2919,27 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         constexpr auto cells_per_page = 64 * 64; // 32 * 32 * 4 or 64 * 64 * 1
         auto           plane_size     = u16{};
         switch (screen.plane_size) {
-            using enum PlaneSize;
+            using enum Vdp2Regs::Plsz::PlaneSize;
             case size_1_by_1: plane_size = 1; break;
             case size_2_by_1: plane_size = 2; break;
             case size_2_by_2: plane_size = 4; break;
+            default: Log::warning(Logger::vdp2, tr("Unknown plane size for {}!"), screenName(screen.scroll_screen));
         }
 
         return cells_per_page * plane_size * screen.map_size;
     }();
 
     // Calculating the total width of the scroll screen, will be used for scrolling calculation.
-    screen.total_screen_scroll_width = [&screen]() {
+    screen.total_screen_scroll_width = [&screen]() -> u16 {
         constexpr auto pixels_per_cell      = 8;
         constexpr auto cells_per_page_width = 64;
         auto           plane_width          = u8{};
         switch (screen.plane_size) {
-            using enum PlaneSize;
+            using enum Vdp2Regs::Plsz::PlaneSize;
             case size_1_by_1: plane_width = 1; break;
             case size_2_by_1:
             case size_2_by_2: plane_width = 2; break;
+            default: Log::warning(Logger::vdp2, tr("Unknown plane size for {}!"), screenName(screen.scroll_screen));
         }
         auto map_width = u8{};
         switch (screen.scroll_screen) {
@@ -2953,18 +2956,19 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                 map_width = 4;
                 break;
             }
+            default: Log::warning(Logger::vdp2, tr("Unknown scroll screen!"));
         }
 
         return pixels_per_cell * cells_per_page_width * plane_width * map_width;
     }();
 
     // Calculating the total height of the scroll screen, will be used for scrolling calculation.
-    screen.total_screen_scroll_height = [&screen]() {
+    screen.total_screen_scroll_height = [&screen]() -> u16 {
         constexpr auto pixels_per_cell       = 8;
         constexpr auto cells_per_page_height = 64;
         auto           plane_height          = u8{};
         switch (screen.plane_size) {
-            using enum PlaneSize;
+            using enum Vdp2Regs::Plsz::PlaneSize;
             case size_1_by_1:
             case size_2_by_1: {
                 plane_height = 1;
@@ -2974,6 +2978,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                 plane_height = 2;
                 break;
             }
+            default: Log::warning(Logger::vdp2, tr("Unknown plane height for {}!"), screenName(screen.scroll_screen));
         }
         auto map_height = u8{};
         switch (screen.scroll_screen) {
@@ -2990,16 +2995,17 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                 map_height = 4;
                 break;
             }
+            default: Log::warning(Logger::vdp2, tr("Unknown map height for {}!"), screenName(screen.scroll_screen));
         }
 
         return pixels_per_cell * cells_per_page_height * plane_height * map_height;
     }();
 
-    screen.scroll_offset_horizontal = [&]() {
+    screen.scroll_offset_horizontal = [&]() -> u16 {
         constexpr auto plane_width  = 512;
         auto           nb_of_planes = u8{};
         switch (screen.plane_size) {
-            using enum PlaneSize;
+            using enum Vdp2Regs::Plsz::PlaneSize;
             case size_1_by_1: nb_of_planes = 1; break;
             case size_2_by_1:
             case size_2_by_2: nb_of_planes = 2; break;
@@ -3009,11 +3015,11 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
         return screen.screen_scroll_horizontal_integer % (plane_width * nb_of_planes);
     }();
 
-    screen.scroll_offset_vertical = [&]() {
+    screen.scroll_offset_vertical = [&]() -> u16 {
         constexpr auto plane_height = 512;
         auto           nb_of_planes = u8{};
         switch (screen.plane_size) {
-            using enum PlaneSize;
+            using enum Vdp2Regs::Plsz::PlaneSize;
             case size_1_by_1:
             case size_2_by_1: nb_of_planes = 1; break;
             case size_2_by_2: nb_of_planes = 2; break;
@@ -3036,6 +3042,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     using Chctla = Vdp2Regs::Chctla;
     using Chctlb = Vdp2Regs::Chctlb;
     using Pcnxx  = Vdp2Regs::Pcnxx;
+    using Plsz   = Vdp2Regs::Plsz;
 
     constexpr auto multiplier_800   = u32{0x800};
     constexpr auto multiplier_1000  = u32{0x1000};
@@ -3046,7 +3053,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
 
     auto&      screen                 = getScreen(s);
     const auto is_vram_size_4mb       = (regs_.vrsize >> Vrsize::vramsz_enum) == Vrsize::VramSize::size_4_mbits;
-    auto       plane_size             = PlaneSize{};
+    auto       plane_size             = Plsz::PlaneSize{};
     auto       pattern_name_data_size = Pcnxx::PatternNameDataSize{};
     auto       character_size         = Vdp2Regs::CharacterSize{};
     auto       start_address          = u32{screen.map_offset << 6 | map_addr};
@@ -3054,32 +3061,32 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     switch (s) {
         using enum ScrollScreen;
         case nbg0:
-            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg0);
+            plane_size             = regs_.plsz >> Plsz::n0plsz_enum;
             pattern_name_data_size = regs_.pncn0 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctla >> Chctla::n0chsz_enum;
             break;
         case nbg1:
-            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg1);
+            plane_size             = regs_.plsz >> Plsz::n1plsz_enum;
             pattern_name_data_size = regs_.pncn1 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctla >> Chctla::n1chsz_enum;
             break;
         case nbg2:
-            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg2);
+            plane_size             = regs_.plsz >> Plsz::n2plsz_enum;
             pattern_name_data_size = regs_.pncn2 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctlb >> Chctlb::n2chsz_enum;
             break;
         case nbg3:
-            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_nbg3);
+            plane_size             = regs_.plsz >> Plsz::n3plsz_enum;
             pattern_name_data_size = regs_.pncn3 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctlb >> Chctlb::n3chsz_enum;
             break;
         case rbg0:
-            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpa);
+            plane_size             = regs_.plsz >> Plsz::raplsz_enum;
             pattern_name_data_size = regs_.pncr >> Pcnxx::pnb_enum;
             character_size         = regs_.chctlb >> Chctlb::r0chsz_enum;
             break;
         case rbg1:
-            plane_size             = toEnum<PlaneSize>(plsz_.plane_size_rpb);
+            plane_size             = regs_.plsz >> Plsz::rbplsz_enum;
             pattern_name_data_size = regs_.pncn0 >> Pcnxx::pnb_enum;
             character_size         = regs_.chctla >> Chctla::n0chsz_enum;
             break;
@@ -3089,7 +3096,7 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     auto mask       = u32{};
     auto multiplier = u32{};
     switch (plane_size) {
-        using enum PlaneSize;
+        using enum Plsz::PlaneSize;
         case size_1_by_1:
             if (pattern_name_data_size == Pcnxx::PatternNameDataSize::one_word) {
                 if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
@@ -3409,7 +3416,7 @@ void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
 void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset) {
     auto page_start_address = plane_address;
     switch (screen.plane_size) {
-        using enum PlaneSize;
+        using enum Vdp2Regs::Plsz::PlaneSize;
         case size_1_by_1: readPageData(screen, page_start_address, plane_offset); break;
         case size_2_by_1: {
             readPageData(screen, page_start_address, plane_offset);
@@ -4142,5 +4149,18 @@ auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const Scrol
 
     return pattern_name_data;
 };
+
+auto screenName(const ScrollScreen& ss) -> std::string {
+    switch (ss) {
+        using enum ScrollScreen;
+        case nbg0: return "nbg0";
+        case nbg1: return "nbg1";
+        case nbg2: return "nbg2";
+        case nbg3: return "nbg3";
+        case rbg0: return "rbg0";
+        case rbg1: return "rbg1";
+        default: return "unknown scroll screen";
+    }
+}
 
 } // namespace saturnin::video

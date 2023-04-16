@@ -306,12 +306,12 @@ struct ScrollScreenStatus {
     u32        bitmap_start_address{0};            ///< The bitmap start address.
 
     // Cell
-    u8                                             map_size{};   ///< Size of the map (2*2 for NBG / 4*4 for RBG)
-    u8                                             map_offset{}; ///< The map offset
-    PlaneSize                                      plane_size{PlaneSize::not_set}; ///< Size of the plane (1*1, 2*1 or 2*2 pages)
-    u16                                            page_size{};                    ///< Size of the page / pattern name table
-    u32                                            cells_number{};                 ///< Total number of cells
-    Vdp2Regs::Pcnxx::PatternNameDataSize           pattern_name_data_size{}; ///< Size of the pattern name data (1 or 2 words)
+    u8                        map_size{};                                     ///< Size of the map (2*2 for NBG / 4*4 for RBG)
+    u8                        map_offset{};                                   ///< The map offset
+    Vdp2Regs::Plsz::PlaneSize plane_size{Vdp2Regs::Plsz::PlaneSize::not_set}; ///< Size of the plane (1*1, 2*1 or 2*2 pages)
+    u16                       page_size{};                                    ///< Size of the page / pattern name table
+    u32                       cells_number{};                                 ///< Total number of cells
+    Vdp2Regs::Pcnxx::PatternNameDataSize           pattern_name_data_size{};  ///< Size of the pattern name data (1 or 2 words)
     Vdp2Regs::Pcnxx::CharacterNumberSupplementMode character_number_supplement_mode{
         Vdp2Regs::Pcnxx::CharacterNumberSupplementMode::character_number_10_bits}; ///< 10 bits/12 bits
     u8                      special_priority{};                                    ///< Special priority bit
@@ -1831,7 +1831,7 @@ class Vdp2 {
     // PatternNameControl                              pncn2_;
     // PatternNameControl                              pncn3_;
     // PatternNameControl                              pncr_;
-    PlaneSizeRegister                               plsz_;
+    // PlaneSizeRegister                               plsz_;
     MapOffsetNbg                                    mpofn_;
     MapOffsetRbg                                    mpofr_;
     MapPlaneAB                                      mpabn0_;
@@ -1962,4 +1962,18 @@ auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const Scrol
 auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const ScrollScreenStatus& screen) -> PatternNameData;
 ///@}
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	auto screenName(const ScrollScreen& ss) -> std::string;
+///
+/// \brief	Gets the name of a ScrollScreen as a string.
+///
+/// \author	Runik
+/// \date	16/04/2023
+///
+/// \param 	ss	The ScrollScreen
+///
+/// \returns	A std::string.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto screenName(const ScrollScreen& ss) -> std::string;
 } // namespace saturnin::video

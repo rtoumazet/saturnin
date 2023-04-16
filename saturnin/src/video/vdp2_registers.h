@@ -1031,59 +1031,67 @@ struct Vdp2Regs {
     PcnxxType pncn2;
     PcnxxType pncn3;
     PcnxxType pncr;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   PlaneSize
-///
-/// \brief  xxPLSZx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Plsz
+    ///
+    /// \brief	Plane Size register (PLSZ).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class PlaneSize : u8 {
-    not_set     = 0xFF, ///< Not set.
-    size_1_by_1 = 0b00, ///< 1 H Page x 1 V Page.
-    size_2_by_1 = 0b01, ///< 2 H Page x 1 V Page.
-    invalid     = 0b10, ///< Invalid (Do not set).
-    size_2_by_2 = 0b11  ///< 2 H Page x 2 V Page.
-};
+    struct Plsz {
+        GENERATE_USING(Plsz, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ScreenOverProcess
-///
-/// \brief  RxOVRx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   PlaneSize
+        ///
+        /// \brief  xxPLSZx bits values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class ScreenOverProcess : u8 {
-    image_is_repeated = 0b00, ///< Outside the display area, the image set in the display area is repeated.
-    character_pattern_is_repeated
-    = 0b01, ///< Outside the display area,the character pattern specified by screen over pattern name register is repeated (Only
-            ///< when the rotation scroll surface is in cell format).
-    scroll_screen_is_transparent = 0b10, ///< Outside the display area, the scroll screen is transparent.
-    force_display_and_make_transparent
-    = 0b11 ///< Set the display area as 0<=X<=512, 0<=Y<=512 regardless of plane or bitmap size and makes that area transparent.
-};
+        enum class PlaneSize : u8 {
+            not_set     = 0xFF, ///< Not set.
+            size_1_by_1 = 0b00, ///< 1 H Page x 1 V Page.
+            size_2_by_1 = 0b01, ///< 2 H Page x 1 V Page.
+            invalid     = 0b10, ///< Invalid (Do not set).
+            size_2_by_2 = 0b11  ///< 2 H Page x 2 V Page.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  PlaneSize
-///
-/// \brief  Plane Size register (PLSZ).
-///
-/// \author Runik
-/// \date   23/05/2020
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ScreenOverProcess
+        ///
+        /// \brief  RxOVRx bits values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union PlaneSizeRegister {
-    u16             raw;             ///< Raw representation.
-    BitField<14, 2> screen_over_rpb; ///< Defines RBOVRx bits.
-    BitField<12, 2> plane_size_rpb;  ///< Defines RBPLSZx bits.
-    BitField<10, 2> screen_over_rpa; ///< Defines RAOVRx bits.
-    BitField<8, 2>  plane_size_rpa;  ///< Defines RAPLSZx bits.
-    BitField<6, 2>  plane_size_nbg3; ///< Defines N3PLSZx bits.
-    BitField<4, 2>  plane_size_nbg2; ///< Defines N2PLSZx bits.
-    BitField<2, 2>  plane_size_nbg1; ///< Defines N1PLSZx bits.
-    BitField<0, 2>  plane_size_nbg0; ///< Defines N0PLSZx bits.
-    BitField<8, 8>  upper_8_bits;    ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits;    ///< Defines the range of the lower 8 bits of the register.
+        enum class ScreenOverProcess : u8 {
+            image_is_repeated = 0b00, ///< Outside the display area, the image set in the display area is repeated.
+            character_pattern_is_repeated
+            = 0b01, ///< Outside the display area,the character pattern specified by screen over pattern name register is repeated
+                    ///< (Only when the rotation scroll surface is in cell format).
+            scroll_screen_is_transparent       = 0b10, ///< Outside the display area, the scroll screen is transparent.
+            force_display_and_make_transparent = 0b11  ///< Set the display area as 0<=X<=512, 0<=Y<=512 regardless of plane or
+                                                       ///< bitmap size and makes that area transparent.
+        };
+
+        GENERATE_BIT_WITH_ENUM(rbovr, 14, 0b11, ScreenOverProcess); ///< RPB screen over.
+        GENERATE_BIT_WITH_ENUM(rbplsz, 12, 0b11, PlaneSize);        ///< RPB plane size.
+        GENERATE_BIT_WITH_ENUM(raovr, 10, 0b11, ScreenOverProcess); ///< RPA screen over.
+        GENERATE_BIT_WITH_ENUM(raplsz, 8, 0b11, PlaneSize);         ///< RPA plane size.
+        GENERATE_BIT_WITH_ENUM(n3plsz, 6, 0b11, PlaneSize);         ///< NBG3 plane size.
+        GENERATE_BIT_WITH_ENUM(n2plsz, 4, 0b11, PlaneSize);         ///< NBG2  plane size.
+        GENERATE_BIT_WITH_ENUM(n1plsz, 2, 0b11, PlaneSize);         ///< NBG1 plane size.
+        GENERATE_BIT_WITH_ENUM(n0plsz, 0, 0b11, PlaneSize);         ///< NBG0 plane size.
+
+        static constexpr auto lo_byte_pos = PosType(0);             ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);             ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Plsz", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Plsz", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using PlszType = Reg<u16, Plsz>;
+    PlszType plsz;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
