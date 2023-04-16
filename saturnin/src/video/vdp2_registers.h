@@ -1360,38 +1360,64 @@ struct Vdp2Regs {
     using MpopType = Reg<u16, Mpop>;
     MpopType mpopra;
     MpopType mpoprb;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ScreenScrollValueIntegerPart
-///
-/// \brief	Screen Scroll Value (Integer Part) (SCXINx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Scxin
+    ///
+    /// \brief	Screen Scroll Value (Integer Part) (SCxINx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union ScreenScrollValueIntegerPart {
-    u16             raw;          ///< Raw representation.
-    BitField<0, 11> integer;      ///< Defines  NxSCxIx bits.
-    BitField<8, 8>  upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Scin {
+        GENERATE_USING(Scin, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ScreenScrollValueFractionalPart
-///
-/// \brief	Screen Scroll Value (Fractional Part) (SCXDNx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(nsci, 0, 0x7FF);      ///< Screen scroll integer part  (NxSCIx).
 
-union ScreenScrollValueFractionalPart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> fractional;   ///< Defines  NxSCxDx bits.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Scin", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Scin", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ScinType = Reg<u16, Scin>;
+    ScinType scxin0;
+    ScinType scyin0;
+    ScinType scxin1;
+    ScinType scyin1;
+    ScinType scxn2;
+    ScinType scyn2;
+    ScinType scxn3;
+    ScinType scyn3;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Scdn
+    ///
+    /// \brief	Screen Scroll Value (Fractional Part) (SCXDNx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Scdn {
+        GENERATE_USING(Scdn, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(nscd, 8, 0xFF);       ///< Screen scroll integer part  (NxSCIx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Scdn", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Scdn", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ScdnType = Reg<u16, Scdn>;
+    ScdnType scxdn0;
+    ScdnType scydn0;
+    ScdnType scxdn1;
+    ScdnType scydn1;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

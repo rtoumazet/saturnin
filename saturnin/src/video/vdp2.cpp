@@ -407,26 +407,26 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case map_rotation_parameter_b_plane_k_l: return regs_.mpklrb.data();
         case map_rotation_parameter_b_plane_m_n: return regs_.mpmnrb.data();
         case map_rotation_parameter_b_plane_o_p: return regs_.mpoprb.data();
-        case screen_scroll_value_nbg0_h_int_part: return scxin0_.raw;
-        case screen_scroll_value_nbg0_h_fract_part: return scxdn0_.raw;
-        case screen_scroll_value_nbg0_v_int_part: return scyin0_.raw;
-        case screen_scroll_value_nbg0_v_fract_part: return scydn0_.raw;
+        case screen_scroll_value_nbg0_h_int_part: return regs_.scxin0.data();
+        case screen_scroll_value_nbg0_h_fract_part: return regs_.scxdn0.data();
+        case screen_scroll_value_nbg0_v_int_part: return regs_.scyin0.data();
+        case screen_scroll_value_nbg0_v_fract_part: return regs_.scydn0.data();
         case coordinate_increment_nbg0_h_int_part: return zmxin0_.raw;
         case coordinate_increment_nbg0_h_fract_part: return zmxdn0_.raw;
         case coordinate_increment_nbg0_v_int_part: return zmyin0_.raw;
         case coordinate_increment_nbg0_v_fract_part: return zmydn0_.raw;
-        case screen_scroll_value_nbg1_h_int_part: return scxin1_.raw;
-        case screen_scroll_value_nbg1_h_fract_part: return scxdn1_.raw;
-        case screen_scroll_value_nbg1_v_int_part: return scyin1_.raw;
-        case screen_scroll_value_nbg1_v_fract_part: return scydn1_.raw;
+        case screen_scroll_value_nbg1_h_int_part: return regs_.scxin1.data();
+        case screen_scroll_value_nbg1_h_fract_part: return regs_.scxdn1.data();
+        case screen_scroll_value_nbg1_v_int_part: return regs_.scyin1.data();
+        case screen_scroll_value_nbg1_v_fract_part: return regs_.scydn1.data();
         case coordinate_increment_nbg1_h_int_part: return zmxin1_.raw;
         case coordinate_increment_nbg1_h_fract_part: return zmxdn1_.raw;
         case coordinate_increment_nbg1_v_int_part: return zmyin1_.raw;
         case coordinate_increment_nbg1_v_fract_part: return zmydn1_.raw;
-        case screen_scroll_value_nbg2_h: return scxn2_.raw;
-        case screen_scroll_value_nbg2_v: return scyn2_.raw;
-        case screen_scroll_value_nbg3_h: return scxn3_.raw;
-        case screen_scroll_value_nbg3_v: return scyn3_.raw;
+        case screen_scroll_value_nbg2_h: return regs_.scxn2.data();
+        case screen_scroll_value_nbg2_v: return regs_.scyn2.data();
+        case screen_scroll_value_nbg3_h: return regs_.scxn3.data();
+        case screen_scroll_value_nbg3_v: return regs_.scyn3.data();
         case reduction_enable: return zmctl_.raw;
         case line_and_vertical_cell_scroll_control: return scrctl_.raw;
         case vertical_cell_scroll_table_address_upper: return vcstau_.raw;
@@ -618,14 +618,14 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case map_rotation_parameter_b_plane_m_n + 1: regs_.mpmnrb.upd(Vdp2Regs::Mpmn::loByte(data)); break;
         case map_rotation_parameter_b_plane_o_p: regs_.mpoprb.upd(Vdp2Regs::Mpop::hiByte(data)); break;
         case map_rotation_parameter_b_plane_o_p + 1: regs_.mpoprb.upd(Vdp2Regs::Mpop::loByte(data)); break;
-        case screen_scroll_value_nbg0_h_int_part: scxin0_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg0_h_int_part + 1: scxin0_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg0_h_fract_part: scxdn0_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg0_h_fract_part + 1: scxdn0_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg0_v_int_part: scyin0_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg0_v_int_part + 1: scyin0_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg0_v_fract_part: scydn0_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg0_v_fract_part + 1: scydn0_.lower_8_bits = data; break;
+        case screen_scroll_value_nbg0_h_int_part: regs_.scxin0.upd(Vdp2Regs::Scin::hiByte(data)); break;
+        case screen_scroll_value_nbg0_h_int_part + 1: regs_.scxin0.upd(Vdp2Regs::Scin::loByte(data)); break;
+        case screen_scroll_value_nbg0_h_fract_part: regs_.scxdn0.upd(Vdp2Regs::Scdn::hiByte(data)); break;
+        case screen_scroll_value_nbg0_h_fract_part + 1: regs_.scxdn0.upd(Vdp2Regs::Scdn::loByte(data)); break;
+        case screen_scroll_value_nbg0_v_int_part: regs_.scyin0.upd(Vdp2Regs::Scin::hiByte(data)); break;
+        case screen_scroll_value_nbg0_v_int_part + 1: regs_.scyin0.upd(Vdp2Regs::Scin::loByte(data)); break;
+        case screen_scroll_value_nbg0_v_fract_part: regs_.scydn0.upd(Vdp2Regs::Scdn::hiByte(data)); break;
+        case screen_scroll_value_nbg0_v_fract_part + 1: regs_.scydn0.upd(Vdp2Regs::Scdn::loByte(data)); break;
         case coordinate_increment_nbg0_h_int_part: zmxin0_.upper_8_bits = data; break;
         case coordinate_increment_nbg0_h_int_part + 1: zmxin0_.lower_8_bits = data; break;
         case coordinate_increment_nbg0_h_fract_part: zmxdn0_.upper_8_bits = data; break;
@@ -634,14 +634,14 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case coordinate_increment_nbg0_v_int_part + 1: zmyin0_.lower_8_bits = data; break;
         case coordinate_increment_nbg0_v_fract_part: zmydn0_.upper_8_bits = data; break;
         case coordinate_increment_nbg0_v_fract_part + 1: zmydn0_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg1_h_int_part: scxin1_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg1_h_int_part + 1: scxin1_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg1_h_fract_part: scxdn1_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg1_h_fract_part + 1: scxdn1_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg1_v_int_part: scyin1_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg1_v_int_part + 1: scyin1_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg1_v_fract_part: scydn1_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg1_v_fract_part + 1: scydn1_.lower_8_bits = data; break;
+        case screen_scroll_value_nbg1_h_int_part: regs_.scxin1.upd(Vdp2Regs::Scin::hiByte(data)); break;
+        case screen_scroll_value_nbg1_h_int_part + 1: regs_.scxin1.upd(Vdp2Regs::Scin::loByte(data)); break;
+        case screen_scroll_value_nbg1_h_fract_part: regs_.scxdn1.upd(Vdp2Regs::Scdn::hiByte(data)); break;
+        case screen_scroll_value_nbg1_h_fract_part + 1: regs_.scxdn1.upd(Vdp2Regs::Scdn::loByte(data)); break;
+        case screen_scroll_value_nbg1_v_int_part: regs_.scyin1.upd(Vdp2Regs::Scin::hiByte(data)); break;
+        case screen_scroll_value_nbg1_v_int_part + 1: regs_.scyin1.upd(Vdp2Regs::Scin::loByte(data)); break;
+        case screen_scroll_value_nbg1_v_fract_part: regs_.scydn1.upd(Vdp2Regs::Scdn::hiByte(data)); break;
+        case screen_scroll_value_nbg1_v_fract_part + 1: regs_.scydn1.upd(Vdp2Regs::Scdn::loByte(data)); break;
         case coordinate_increment_nbg1_h_int_part: zmxin1_.upper_8_bits = data; break;
         case coordinate_increment_nbg1_h_int_part + 1: zmxin1_.lower_8_bits = data; break;
         case coordinate_increment_nbg1_h_fract_part: zmxdn1_.upper_8_bits = data; break;
@@ -650,14 +650,14 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case coordinate_increment_nbg1_v_int_part + 1: zmyin1_.lower_8_bits = data; break;
         case coordinate_increment_nbg1_v_fract_part: zmydn1_.upper_8_bits = data; break;
         case coordinate_increment_nbg1_v_fract_part + 1: zmydn1_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg2_h: scxn2_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg2_h + 1: scxn2_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg2_v: scyn2_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg2_v + 1: scyn2_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg3_h: scxn3_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg3_h + 1: scxn3_.lower_8_bits = data; break;
-        case screen_scroll_value_nbg3_v: scyn3_.upper_8_bits = data; break;
-        case screen_scroll_value_nbg3_v + 1: scyn3_.lower_8_bits = data; break;
+        case screen_scroll_value_nbg2_h: regs_.scxn2.upd(Vdp2Regs::Scin::hiByte(data)); break;
+        case screen_scroll_value_nbg2_h + 1: regs_.scxn2.upd(Vdp2Regs::Scin::loByte(data)); break;
+        case screen_scroll_value_nbg2_v: regs_.scyn2.upd(Vdp2Regs::Scin::hiByte(data)); break;
+        case screen_scroll_value_nbg2_v + 1: regs_.scyn2.upd(Vdp2Regs::Scin::loByte(data)); break;
+        case screen_scroll_value_nbg3_h: regs_.scxn3.upd(Vdp2Regs::Scin::hiByte(data)); break;
+        case screen_scroll_value_nbg3_h + 1: regs_.scxn3.upd(Vdp2Regs::Scin::loByte(data)); break;
+        case screen_scroll_value_nbg3_v: regs_.scyn3.upd(Vdp2Regs::Scin::hiByte(data)); break;
+        case screen_scroll_value_nbg3_v + 1: regs_.scyn3.upd(Vdp2Regs::Scin::loByte(data)); break;
         case reduction_enable: zmctl_.upper_8_bits = data; break;
         case reduction_enable + 1: zmctl_.lower_8_bits = data; break;
         case line_and_vertical_cell_scroll_control: scrctl_.upper_8_bits = data; break;
@@ -857,26 +857,26 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case map_rotation_parameter_b_plane_k_l: regs_.mpklrb = data; break;
         case map_rotation_parameter_b_plane_m_n: regs_.mpmnrb = data; break;
         case map_rotation_parameter_b_plane_o_p: regs_.mpoprb = data; break;
-        case screen_scroll_value_nbg0_h_int_part: scxin0_.raw = data; break;
-        case screen_scroll_value_nbg0_h_fract_part: scxdn0_.raw = data; break;
-        case screen_scroll_value_nbg0_v_int_part: scyin0_.raw = data; break;
-        case screen_scroll_value_nbg0_v_fract_part: scydn0_.raw = data; break;
+        case screen_scroll_value_nbg0_h_int_part: regs_.scxin0 = data; break;
+        case screen_scroll_value_nbg0_h_fract_part: regs_.scxdn0 = data; break;
+        case screen_scroll_value_nbg0_v_int_part: regs_.scyin0 = data; break;
+        case screen_scroll_value_nbg0_v_fract_part: regs_.scydn0 = data; break;
         case coordinate_increment_nbg0_h_int_part: zmxin0_.raw = data; break;
         case coordinate_increment_nbg0_h_fract_part: zmxdn0_.raw = data; break;
         case coordinate_increment_nbg0_v_int_part: zmyin0_.raw = data; break;
         case coordinate_increment_nbg0_v_fract_part: zmydn0_.raw = data; break;
-        case screen_scroll_value_nbg1_h_int_part: scxin1_.raw = data; break;
-        case screen_scroll_value_nbg1_h_fract_part: scxdn1_.raw = data; break;
-        case screen_scroll_value_nbg1_v_int_part: scyin1_.raw = data; break;
-        case screen_scroll_value_nbg1_v_fract_part: scydn1_.raw = data; break;
+        case screen_scroll_value_nbg1_h_int_part: regs_.scxin1 = data; break;
+        case screen_scroll_value_nbg1_h_fract_part: regs_.scxdn1 = data; break;
+        case screen_scroll_value_nbg1_v_int_part: regs_.scyin1 = data; break;
+        case screen_scroll_value_nbg1_v_fract_part: regs_.scydn1 = data; break;
         case coordinate_increment_nbg1_h_int_part: zmxin1_.raw = data; break;
         case coordinate_increment_nbg1_h_fract_part: zmxdn1_.raw = data; break;
         case coordinate_increment_nbg1_v_int_part: zmyin1_.raw = data; break;
         case coordinate_increment_nbg1_v_fract_part: zmydn1_.raw = data; break;
-        case screen_scroll_value_nbg2_h: scxn2_.raw = data; break;
-        case screen_scroll_value_nbg2_v: scyn2_.raw = data; break;
-        case screen_scroll_value_nbg3_h: scxn3_.raw = data; break;
-        case screen_scroll_value_nbg3_v: scyn3_.raw = data; break;
+        case screen_scroll_value_nbg2_h: regs_.scxn2 = data; break;
+        case screen_scroll_value_nbg2_v: regs_.scyn2 = data; break;
+        case screen_scroll_value_nbg3_h: regs_.scxn3 = data; break;
+        case screen_scroll_value_nbg3_v: regs_.scyn3 = data; break;
         case reduction_enable: zmctl_.raw = data; break;
         case line_and_vertical_cell_scroll_control: scrctl_.raw = data; break;
         case vertical_cell_scroll_table_address_upper: vcstau_.raw = data; break;
@@ -1051,12 +1051,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.mpoprb = l;
             break;
         case screen_scroll_value_nbg0_h_int_part:
-            scxin0_.raw = h;
-            scxdn0_.raw = l;
+            regs_.scxin0 = h;
+            regs_.scxdn0 = l;
             break;
         case screen_scroll_value_nbg0_v_int_part:
-            scyin0_.raw = h;
-            scydn0_.raw = l;
+            regs_.scyin0 = h;
+            regs_.scydn0 = l;
             break;
         case coordinate_increment_nbg0_h_int_part:
             zmxin0_.raw = h;
@@ -1067,12 +1067,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             zmydn0_.raw = l;
             break;
         case screen_scroll_value_nbg1_h_int_part:
-            scxin1_.raw = h;
-            scxdn1_.raw = l;
+            regs_.scxin1 = h;
+            regs_.scxdn1 = l;
             break;
         case screen_scroll_value_nbg1_v_int_part:
-            scyin1_.raw = h;
-            scydn1_.raw = l;
+            regs_.scyin1 = h;
+            regs_.scydn1 = l;
             break;
         case coordinate_increment_nbg1_h_int_part:
             zmxin1_.raw = h;
@@ -1083,12 +1083,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             zmydn1_.raw = l;
             break;
         case screen_scroll_value_nbg2_h:
-            scxn2_.raw = h;
-            scyn2_.raw = l;
+            regs_.scxn2 = h;
+            regs_.scyn2 = l;
             break;
         case screen_scroll_value_nbg3_h:
-            scxn3_.raw = h;
-            scyn3_.raw = l;
+            regs_.scxn3 = h;
+            regs_.scyn3 = l;
             break;
         case reduction_enable:
             zmctl_.raw  = h;
@@ -2438,6 +2438,8 @@ auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
 void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     using Pcnxx = Vdp2Regs::Pcnxx;
     using Plsz  = Vdp2Regs::Plsz;
+    using Scin  = Vdp2Regs::Scin;
+    using Scdn  = Vdp2Regs::Scdn;
 
     constexpr auto map_size_nbg = u8{2 * 2};
     constexpr auto map_size_rbg = u8{4 * 4};
@@ -2609,10 +2611,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer    = scxin0_.integer;
-            screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn0_.fractional);
-            screen.screen_scroll_vertical_integer      = scyin0_.integer;
-            screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn0_.fractional);
+            screen.screen_scroll_horizontal_integer    = regs_.scxin0 >> Scin::nsci_shft;
+            screen.screen_scroll_horizontal_fractional = static_cast<u8>(regs_.scxdn0 >> Scdn::nscd_shft);
+            screen.screen_scroll_vertical_integer      = regs_.scyin0 >> Scin::nsci_shft;
+            screen.screen_scroll_vertical_fractional   = static_cast<u8>(regs_.scydn0 >> Scdn::nscd_shft);
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg0);
@@ -2667,10 +2669,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer    = scxin1_.integer;
-            screen.screen_scroll_horizontal_fractional = static_cast<u8>(scxdn1_.fractional);
-            screen.screen_scroll_vertical_integer      = scyin1_.integer;
-            screen.screen_scroll_vertical_fractional   = static_cast<u8>(scydn1_.fractional);
+            screen.screen_scroll_horizontal_integer    = regs_.scxin1 >> Scin::nsci_shft;
+            screen.screen_scroll_horizontal_fractional = static_cast<u8>(regs_.scxdn1 >> Scdn::nscd_shft);
+            screen.screen_scroll_vertical_integer      = regs_.scyin1 >> Scin::nsci_shft;
+            screen.screen_scroll_vertical_fractional   = static_cast<u8>(regs_.scydn1 >> Scdn::nscd_shft);
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg1);
@@ -2718,10 +2720,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer = scxn2_.integer;
-            // if (screen.screen_scroll_horizontal_integer & 0x400) { screen.screen_scroll_horizontal_integer |= 0xFFFFF800; }
-            screen.screen_scroll_vertical_integer = scyn2_.integer;
-            // if (screen.screen_scroll_vertical_integer & 0x400) { screen.screen_scroll_vertical_integer |= 0xFFFFF800; }
+            screen.screen_scroll_horizontal_integer = regs_.scxn2 >> Scin::nsci_shft;
+            screen.screen_scroll_vertical_integer   = regs_.scyn2 >> Scin::nsci_shft;
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg2);
@@ -2770,8 +2770,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Scroll screen
-            screen.screen_scroll_horizontal_integer = scxn3_.integer;
-            screen.screen_scroll_vertical_integer   = scyn3_.integer;
+            screen.screen_scroll_horizontal_integer = regs_.scxn3 >> Scin::nsci_shft;
+            screen.screen_scroll_vertical_integer   = regs_.scyn3 >> Scin::nsci_shft;
 
             // Color offset
             screen.color_offset = getColorOffset(Layer::nbg3);
@@ -2832,7 +2832,6 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Bitmap
-            // screen.bitmap_size = getBitmapSize(static_cast<BitmapSize2Bits>(toEnum<BitmapSize1Bit>(chctlb_.bitmap_size_rbg0)));
             screen.bitmap_size = getBitmapSize(static_cast<Vdp2Regs::BitmapSize2Bits>(regs_.chctlb >> Chctlb::r0bmsz_enum));
             screen.bitmap_palette_number            = static_cast<u8>(regs_.bmpnb >> Bmpnb::r0bmpx_shft);
             screen.bitmap_special_priority          = static_cast<u8>(regs_.bmpnb >> Bmpnb::r0bmpr_shft);
