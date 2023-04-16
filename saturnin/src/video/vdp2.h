@@ -1016,20 +1016,21 @@ class Vdp2 {
                                      const Vdp2Regs::VramAccessCommand command) const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Vdp2::getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
+    /// \fn	static auto Vdp2::getReductionSetting(Vdp2Regs::Zmctl::ZoomQuarter zq, Vdp2Regs::Zmctl::ZoomHalf zh) ->
+    /// ReductionSetting;
     ///
-    /// \brief  Returns the reduction setting for the specified parameters
+    /// \brief	Returns the reduction setting for the specified parameters
     ///
-    /// \author Runik
-    /// \date   11/08/2020
+    /// \author	Runik
+    /// \date	11/08/2020
     ///
-    /// \param  zq  Zoom quarter reduction setting of the plane.
-    /// \param  zh  Zoom half reduction setting of the plane.
+    /// \param 	zq	Zoom quarter reduction setting of the plane.
+    /// \param 	zh	Zoom half reduction setting of the plane.
     ///
-    /// \returns    The reduction setting.
+    /// \returns	The reduction setting.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting;
+    static auto getReductionSetting(Vdp2Regs::Zmctl::ZoomQuarter zq, Vdp2Regs::Zmctl::ZoomHalf zh) -> ReductionSetting;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber3Bits
@@ -1858,77 +1859,77 @@ class Vdp2 {
     // MapPlaneKL                                      mpklrb_;
     // MapPlaneMN                                      mpmnrb_;
     // MapPlaneOP                                      mpoprb_;
-    //ScreenScrollValueIntegerPart                    scxin0_;
-    //ScreenScrollValueFractionalPart                 scxdn0_;
-    //ScreenScrollValueIntegerPart                    scyin0_;
-    //ScreenScrollValueFractionalPart                 scydn0_;
-    CoordinateIncrementNbg0HorizontalIntegerPart    zmxin0_;
-    CoordinateIncrementNbg0HorizontalFractionalPart zmxdn0_;
-    CoordinateIncrementNbg0VerticalIntegerPart      zmyin0_;
-    CoordinateIncrementNbg0VerticalFractionalPart   zmydn0_;
+    // ScreenScrollValueIntegerPart                    scxin0_;
+    // ScreenScrollValueFractionalPart                 scxdn0_;
+    // ScreenScrollValueIntegerPart                    scyin0_;
+    // ScreenScrollValueFractionalPart                 scydn0_;
+    // CoordinateIncrementNbg0HorizontalIntegerPart    zmxin0_;
+    // CoordinateIncrementNbg0HorizontalFractionalPart zmxdn0_;
+    // CoordinateIncrementNbg0VerticalIntegerPart      zmyin0_;
+    // CoordinateIncrementNbg0VerticalFractionalPart   zmydn0_;
     // ScreenScrollValueIntegerPart                    scxin1_;
     // ScreenScrollValueFractionalPart                 scxdn1_;
     // ScreenScrollValueIntegerPart                    scyin1_;
     // ScreenScrollValueFractionalPart                 scydn1_;
-    CoordinateIncrementNbg1HorizontalIntegerPart    zmxin1_;
-    CoordinateIncrementNbg1HorizontalFractionalPart zmxdn1_;
-    CoordinateIncrementNbg1VerticalIntegerPart      zmyin1_;
-    CoordinateIncrementNbg1VerticalFractionalPart   zmydn1_;
+    // CoordinateIncrementNbg1HorizontalIntegerPart    zmxin1_;
+    // CoordinateIncrementNbg1HorizontalFractionalPart zmxdn1_;
+    // CoordinateIncrementNbg1VerticalIntegerPart      zmyin1_;
+    // CoordinateIncrementNbg1VerticalFractionalPart   zmydn1_;
     // ScreenScrollValueIntegerPart                    scxn2_;
     // ScreenScrollValueIntegerPart                    scyn2_;
     // ScreenScrollValueIntegerPart                    scxn3_;
     // ScreenScrollValueIntegerPart                    scyn3_;
-    ReductionEnable                                 zmctl_;
-    LineAndVerticalCellScrollControl                scrctl_;
-    VerticalCellScrollTableAddressUpper             vcstau_;
-    VerticalCellScrollTableAddressLower             vcstal_;
-    LineScrollTableAddressNbg0Upper                 lsta0u_;
-    LineScrollTableAddressNbg0Lower                 lsta0l_;
-    LineScrollTableAddressNbg1Upper                 lsta1u_;
-    LineScrollTableAddressNbg1Lower                 lsta1l_;
-    LineColorScreenTableAddressUpper                lctau_;
-    LineColorScreenTableAddressLower                lctal_;
-    BackScreenTableAddressUpper                     bktau_;
-    BackScreenTableAddressLower                     bktal_;
-    RotationParameterMode                           rpmd_;
-    RotationParameterReadControl                    rprctl_;
-    CoefficientTableControl                         ktctl_;
-    CoefficientTableAddressOffset                   ktaof_;
-    ScreenOverPatternNameA                          ovpnra_;
-    ScreenOverPatternNameB                          ovpnrb_;
-    RotationParameterTableAddressUpper              rptau_;
-    RotationParameterTableAddressLower              rptal_;
-    WindowPositionW0HorizontalStart                 wpsx0_;
-    WindowPositionW0VerticalStart                   wpsy0_;
-    WindowPositionW0HorizontalEnd                   wpex0_;
-    WindowPositionW0VerticalEnd                     wpey0_;
-    WindowPositionW1HorizontalStart                 wpsx1_;
-    WindowPositionW1VerticalStart                   wpsy1_;
-    WindowPositionW1HorizontalEnd                   wpex1_;
-    WindowPositionW1VerticalEnd                     wpey1_;
-    WindowControlA                                  wctla_;
-    WindowControlB                                  wctlb_;
-    WindowControlC                                  wctlc_;
-    WindowControlD                                  wctld_;
-    LineWindowTableAddressW0Upper                   lwta0u_;
-    LineWindowTableAddressW0Lower                   lwta0l_;
-    LineWindowTableAddressW1Upper                   lwta1u_;
-    LineWindowTableAddressW1Lower                   lwta1l_;
-    SpriteControl                                   spctl_;
-    ShadowControl                                   sdctl_;
-    ColorRamAddressOffsetA                          craofa_;
-    ColorRamAddressOffsetB                          craofb_;
-    LineColorScreenEnable                           lnclen_;
-    SpecialPriorityMode                             sfprmd_;
-    ColorCalculationControl                         ccctl_;
-    SpecialColorCalculationMode                     sfccmd_;
-    PriorityNumberSpriteA                           prisa_;
-    PriorityNumberSpriteB                           prisb_;
-    PriorityNumberSpriteC                           prisc_;
-    PriorityNumberSpriteD                           prisd_;
-    PriorityNumberA                                 prina_;
-    PriorityNumberB                                 prinb_;
-    PriorityNumberR                                 prir_;
+    // ReductionEnable                                 zmctl_;
+    LineAndVerticalCellScrollControl    scrctl_;
+    VerticalCellScrollTableAddressUpper vcstau_;
+    VerticalCellScrollTableAddressLower vcstal_;
+    LineScrollTableAddressNbg0Upper     lsta0u_;
+    LineScrollTableAddressNbg0Lower     lsta0l_;
+    LineScrollTableAddressNbg1Upper     lsta1u_;
+    LineScrollTableAddressNbg1Lower     lsta1l_;
+    LineColorScreenTableAddressUpper    lctau_;
+    LineColorScreenTableAddressLower    lctal_;
+    BackScreenTableAddressUpper         bktau_;
+    BackScreenTableAddressLower         bktal_;
+    RotationParameterMode               rpmd_;
+    RotationParameterReadControl        rprctl_;
+    CoefficientTableControl             ktctl_;
+    CoefficientTableAddressOffset       ktaof_;
+    ScreenOverPatternNameA              ovpnra_;
+    ScreenOverPatternNameB              ovpnrb_;
+    RotationParameterTableAddressUpper  rptau_;
+    RotationParameterTableAddressLower  rptal_;
+    WindowPositionW0HorizontalStart     wpsx0_;
+    WindowPositionW0VerticalStart       wpsy0_;
+    WindowPositionW0HorizontalEnd       wpex0_;
+    WindowPositionW0VerticalEnd         wpey0_;
+    WindowPositionW1HorizontalStart     wpsx1_;
+    WindowPositionW1VerticalStart       wpsy1_;
+    WindowPositionW1HorizontalEnd       wpex1_;
+    WindowPositionW1VerticalEnd         wpey1_;
+    WindowControlA                      wctla_;
+    WindowControlB                      wctlb_;
+    WindowControlC                      wctlc_;
+    WindowControlD                      wctld_;
+    LineWindowTableAddressW0Upper       lwta0u_;
+    LineWindowTableAddressW0Lower       lwta0l_;
+    LineWindowTableAddressW1Upper       lwta1u_;
+    LineWindowTableAddressW1Lower       lwta1l_;
+    SpriteControl                       spctl_;
+    ShadowControl                       sdctl_;
+    ColorRamAddressOffsetA              craofa_;
+    ColorRamAddressOffsetB              craofb_;
+    LineColorScreenEnable               lnclen_;
+    SpecialPriorityMode                 sfprmd_;
+    ColorCalculationControl             ccctl_;
+    SpecialColorCalculationMode         sfccmd_;
+    PriorityNumberSpriteA               prisa_;
+    PriorityNumberSpriteB               prisb_;
+    PriorityNumberSpriteC               prisc_;
+    PriorityNumberSpriteD               prisd_;
+    PriorityNumberA                     prina_;
+    PriorityNumberB                     prinb_;
+    PriorityNumberR                     prir_;
     // Reserve                                         rsv2_;
     ColorCalculationRatioSpriteA       ccrsa_;
     ColorCalculationRatioSpriteB       ccrsb_;

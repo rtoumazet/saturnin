@@ -411,23 +411,23 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case screen_scroll_value_nbg0_h_fract_part: return regs_.scxdn0.data();
         case screen_scroll_value_nbg0_v_int_part: return regs_.scyin0.data();
         case screen_scroll_value_nbg0_v_fract_part: return regs_.scydn0.data();
-        case coordinate_increment_nbg0_h_int_part: return zmxin0_.raw;
-        case coordinate_increment_nbg0_h_fract_part: return zmxdn0_.raw;
-        case coordinate_increment_nbg0_v_int_part: return zmyin0_.raw;
-        case coordinate_increment_nbg0_v_fract_part: return zmydn0_.raw;
+        case coordinate_increment_nbg0_h_int_part: return regs_.zmxin0.data();
+        case coordinate_increment_nbg0_h_fract_part: return regs_.zmxdn0.data();
+        case coordinate_increment_nbg0_v_int_part: return regs_.zmyin0.data();
+        case coordinate_increment_nbg0_v_fract_part: return regs_.zmydn0.data();
         case screen_scroll_value_nbg1_h_int_part: return regs_.scxin1.data();
         case screen_scroll_value_nbg1_h_fract_part: return regs_.scxdn1.data();
         case screen_scroll_value_nbg1_v_int_part: return regs_.scyin1.data();
         case screen_scroll_value_nbg1_v_fract_part: return regs_.scydn1.data();
-        case coordinate_increment_nbg1_h_int_part: return zmxin1_.raw;
-        case coordinate_increment_nbg1_h_fract_part: return zmxdn1_.raw;
-        case coordinate_increment_nbg1_v_int_part: return zmyin1_.raw;
-        case coordinate_increment_nbg1_v_fract_part: return zmydn1_.raw;
+        case coordinate_increment_nbg1_h_int_part: return regs_.zmxin1.data();
+        case coordinate_increment_nbg1_h_fract_part: return regs_.zmxdn1.data();
+        case coordinate_increment_nbg1_v_int_part: return regs_.zmyin1.data();
+        case coordinate_increment_nbg1_v_fract_part: return regs_.zmydn1.data();
         case screen_scroll_value_nbg2_h: return regs_.scxn2.data();
         case screen_scroll_value_nbg2_v: return regs_.scyn2.data();
         case screen_scroll_value_nbg3_h: return regs_.scxn3.data();
         case screen_scroll_value_nbg3_v: return regs_.scyn3.data();
-        case reduction_enable: return zmctl_.raw;
+        case reduction_enable: return regs_.zmctl.data();
         case line_and_vertical_cell_scroll_control: return scrctl_.raw;
         case vertical_cell_scroll_table_address_upper: return vcstau_.raw;
         case vertical_cell_scroll_table_address_lower: return vcstal_.raw;
@@ -626,14 +626,14 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case screen_scroll_value_nbg0_v_int_part + 1: regs_.scyin0.upd(Vdp2Regs::Scin::loByte(data)); break;
         case screen_scroll_value_nbg0_v_fract_part: regs_.scydn0.upd(Vdp2Regs::Scdn::hiByte(data)); break;
         case screen_scroll_value_nbg0_v_fract_part + 1: regs_.scydn0.upd(Vdp2Regs::Scdn::loByte(data)); break;
-        case coordinate_increment_nbg0_h_int_part: zmxin0_.upper_8_bits = data; break;
-        case coordinate_increment_nbg0_h_int_part + 1: zmxin0_.lower_8_bits = data; break;
-        case coordinate_increment_nbg0_h_fract_part: zmxdn0_.upper_8_bits = data; break;
-        case coordinate_increment_nbg0_h_fract_part + 1: zmxdn0_.lower_8_bits = data; break;
-        case coordinate_increment_nbg0_v_int_part: zmyin0_.upper_8_bits = data; break;
-        case coordinate_increment_nbg0_v_int_part + 1: zmyin0_.lower_8_bits = data; break;
-        case coordinate_increment_nbg0_v_fract_part: zmydn0_.upper_8_bits = data; break;
-        case coordinate_increment_nbg0_v_fract_part + 1: zmydn0_.lower_8_bits = data; break;
+        case coordinate_increment_nbg0_h_int_part: regs_.zmxin0.upd(Vdp2Regs::Zmin::hiByte(data)); break;
+        case coordinate_increment_nbg0_h_int_part + 1: regs_.zmxin0.upd(Vdp2Regs::Zmin::loByte(data)); break;
+        case coordinate_increment_nbg0_h_fract_part: regs_.zmxdn0.upd(Vdp2Regs::Zmdn::hiByte(data)); break;
+        case coordinate_increment_nbg0_h_fract_part + 1: regs_.zmxdn0.upd(Vdp2Regs::Zmdn::loByte(data)); break;
+        case coordinate_increment_nbg0_v_int_part: regs_.zmyin0.upd(Vdp2Regs::Zmin::hiByte(data)); break;
+        case coordinate_increment_nbg0_v_int_part + 1: regs_.zmyin0.upd(Vdp2Regs::Zmin::loByte(data)); break;
+        case coordinate_increment_nbg0_v_fract_part: regs_.zmydn0.upd(Vdp2Regs::Zmdn::hiByte(data)); break;
+        case coordinate_increment_nbg0_v_fract_part + 1: regs_.zmydn0.upd(Vdp2Regs::Zmdn::loByte(data)); break;
         case screen_scroll_value_nbg1_h_int_part: regs_.scxin1.upd(Vdp2Regs::Scin::hiByte(data)); break;
         case screen_scroll_value_nbg1_h_int_part + 1: regs_.scxin1.upd(Vdp2Regs::Scin::loByte(data)); break;
         case screen_scroll_value_nbg1_h_fract_part: regs_.scxdn1.upd(Vdp2Regs::Scdn::hiByte(data)); break;
@@ -642,14 +642,14 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case screen_scroll_value_nbg1_v_int_part + 1: regs_.scyin1.upd(Vdp2Regs::Scin::loByte(data)); break;
         case screen_scroll_value_nbg1_v_fract_part: regs_.scydn1.upd(Vdp2Regs::Scdn::hiByte(data)); break;
         case screen_scroll_value_nbg1_v_fract_part + 1: regs_.scydn1.upd(Vdp2Regs::Scdn::loByte(data)); break;
-        case coordinate_increment_nbg1_h_int_part: zmxin1_.upper_8_bits = data; break;
-        case coordinate_increment_nbg1_h_int_part + 1: zmxin1_.lower_8_bits = data; break;
-        case coordinate_increment_nbg1_h_fract_part: zmxdn1_.upper_8_bits = data; break;
-        case coordinate_increment_nbg1_h_fract_part + 1: zmxdn1_.lower_8_bits = data; break;
-        case coordinate_increment_nbg1_v_int_part: zmyin1_.upper_8_bits = data; break;
-        case coordinate_increment_nbg1_v_int_part + 1: zmyin1_.lower_8_bits = data; break;
-        case coordinate_increment_nbg1_v_fract_part: zmydn1_.upper_8_bits = data; break;
-        case coordinate_increment_nbg1_v_fract_part + 1: zmydn1_.lower_8_bits = data; break;
+        case coordinate_increment_nbg1_h_int_part: regs_.zmxin1.upd(Vdp2Regs::Zmin::hiByte(data)); break;
+        case coordinate_increment_nbg1_h_int_part + 1: regs_.zmxin1.upd(Vdp2Regs::Zmin::loByte(data)); break;
+        case coordinate_increment_nbg1_h_fract_part: regs_.zmxdn1.upd(Vdp2Regs::Zmdn::hiByte(data)); break;
+        case coordinate_increment_nbg1_h_fract_part + 1: regs_.zmxdn1.upd(Vdp2Regs::Zmdn::loByte(data)); break;
+        case coordinate_increment_nbg1_v_int_part: regs_.zmyin1.upd(Vdp2Regs::Zmin::hiByte(data)); break;
+        case coordinate_increment_nbg1_v_int_part + 1: regs_.zmyin1.upd(Vdp2Regs::Zmin::loByte(data)); break;
+        case coordinate_increment_nbg1_v_fract_part: regs_.zmydn1.upd(Vdp2Regs::Zmdn::hiByte(data)); break;
+        case coordinate_increment_nbg1_v_fract_part + 1: regs_.zmydn1.upd(Vdp2Regs::Zmdn::loByte(data)); break;
         case screen_scroll_value_nbg2_h: regs_.scxn2.upd(Vdp2Regs::Scin::hiByte(data)); break;
         case screen_scroll_value_nbg2_h + 1: regs_.scxn2.upd(Vdp2Regs::Scin::loByte(data)); break;
         case screen_scroll_value_nbg2_v: regs_.scyn2.upd(Vdp2Regs::Scin::hiByte(data)); break;
@@ -658,8 +658,8 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case screen_scroll_value_nbg3_h + 1: regs_.scxn3.upd(Vdp2Regs::Scin::loByte(data)); break;
         case screen_scroll_value_nbg3_v: regs_.scyn3.upd(Vdp2Regs::Scin::hiByte(data)); break;
         case screen_scroll_value_nbg3_v + 1: regs_.scyn3.upd(Vdp2Regs::Scin::loByte(data)); break;
-        case reduction_enable: zmctl_.upper_8_bits = data; break;
-        case reduction_enable + 1: zmctl_.lower_8_bits = data; break;
+        case reduction_enable: regs_.zmctl.upd(Vdp2Regs::Zmctl::hiByte(data)); break;
+        case reduction_enable + 1: regs_.zmctl.upd(Vdp2Regs::Zmctl::loByte(data)); break;
         case line_and_vertical_cell_scroll_control: scrctl_.upper_8_bits = data; break;
         case line_and_vertical_cell_scroll_control + 1: scrctl_.lower_8_bits = data; break;
         case vertical_cell_scroll_table_address_upper: vcstau_.upper_8_bits = data; break;
@@ -861,23 +861,23 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case screen_scroll_value_nbg0_h_fract_part: regs_.scxdn0 = data; break;
         case screen_scroll_value_nbg0_v_int_part: regs_.scyin0 = data; break;
         case screen_scroll_value_nbg0_v_fract_part: regs_.scydn0 = data; break;
-        case coordinate_increment_nbg0_h_int_part: zmxin0_.raw = data; break;
-        case coordinate_increment_nbg0_h_fract_part: zmxdn0_.raw = data; break;
-        case coordinate_increment_nbg0_v_int_part: zmyin0_.raw = data; break;
-        case coordinate_increment_nbg0_v_fract_part: zmydn0_.raw = data; break;
+        case coordinate_increment_nbg0_h_int_part: regs_.zmxin0 = data; break;
+        case coordinate_increment_nbg0_h_fract_part: regs_.zmxdn0 = data; break;
+        case coordinate_increment_nbg0_v_int_part: regs_.zmyin0 = data; break;
+        case coordinate_increment_nbg0_v_fract_part: regs_.zmydn0 = data; break;
         case screen_scroll_value_nbg1_h_int_part: regs_.scxin1 = data; break;
         case screen_scroll_value_nbg1_h_fract_part: regs_.scxdn1 = data; break;
         case screen_scroll_value_nbg1_v_int_part: regs_.scyin1 = data; break;
         case screen_scroll_value_nbg1_v_fract_part: regs_.scydn1 = data; break;
-        case coordinate_increment_nbg1_h_int_part: zmxin1_.raw = data; break;
-        case coordinate_increment_nbg1_h_fract_part: zmxdn1_.raw = data; break;
-        case coordinate_increment_nbg1_v_int_part: zmyin1_.raw = data; break;
-        case coordinate_increment_nbg1_v_fract_part: zmydn1_.raw = data; break;
+        case coordinate_increment_nbg1_h_int_part: regs_.zmxin1 = data; break;
+        case coordinate_increment_nbg1_h_fract_part: regs_.zmxdn1 = data; break;
+        case coordinate_increment_nbg1_v_int_part: regs_.zmyin1 = data; break;
+        case coordinate_increment_nbg1_v_fract_part: regs_.zmydn1 = data; break;
         case screen_scroll_value_nbg2_h: regs_.scxn2 = data; break;
         case screen_scroll_value_nbg2_v: regs_.scyn2 = data; break;
         case screen_scroll_value_nbg3_h: regs_.scxn3 = data; break;
         case screen_scroll_value_nbg3_v: regs_.scyn3 = data; break;
-        case reduction_enable: zmctl_.raw = data; break;
+        case reduction_enable: regs_.zmctl = data; break;
         case line_and_vertical_cell_scroll_control: scrctl_.raw = data; break;
         case vertical_cell_scroll_table_address_upper: vcstau_.raw = data; break;
         case vertical_cell_scroll_table_address_lower: vcstal_.raw = data; break;
@@ -1059,12 +1059,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.scydn0 = l;
             break;
         case coordinate_increment_nbg0_h_int_part:
-            zmxin0_.raw = h;
-            zmxdn0_.raw = l;
+            regs_.zmxin0 = h;
+            regs_.zmxdn0 = l;
             break;
         case coordinate_increment_nbg0_v_int_part:
-            zmyin0_.raw = h;
-            zmydn0_.raw = l;
+            regs_.zmyin0 = h;
+            regs_.zmydn0 = l;
             break;
         case screen_scroll_value_nbg1_h_int_part:
             regs_.scxin1 = h;
@@ -1075,12 +1075,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.scydn1 = l;
             break;
         case coordinate_increment_nbg1_h_int_part:
-            zmxin1_.raw = h;
-            zmxdn1_.raw = l;
+            regs_.zmxin1 = h;
+            regs_.zmxdn1 = l;
             break;
         case coordinate_increment_nbg1_v_int_part:
-            zmyin1_.raw = h;
-            zmydn1_.raw = l;
+            regs_.zmyin1 = h;
+            regs_.zmydn1 = l;
             break;
         case screen_scroll_value_nbg2_h:
             regs_.scxn2 = h;
@@ -1091,7 +1091,7 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.scyn3 = l;
             break;
         case reduction_enable:
-            zmctl_.raw  = h;
+            regs_.zmctl = h;
             scrctl_.raw = l;
             break;
         case vertical_cell_scroll_table_address_upper:
@@ -1643,6 +1643,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
     using Bgon   = Vdp2Regs::Bgon;
     using Chctla = Vdp2Regs::Chctla;
     using Chctlb = Vdp2Regs::Chctlb;
+    using Zmctl  = Vdp2Regs::Zmctl;
 
     getScreen(s).is_display_enabled = false;
 
@@ -1652,8 +1653,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             if ((regs_.bgon >> Bgon::n0on_enum) == Bgon::ScreenDisplayEnableBit::cannot_display) { return false; }
 
             // Pattern name data reads depend on the reduction setting of the screen
-            const auto reduction = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg0)),
-                                                       static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg0)));
+            const auto reduction = getReductionSetting(regs_.zmctl >> Zmctl::n0zmqt_enum, regs_.zmctl >> Zmctl::n0zmhf_enum);
 
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
             if ((regs_.chctla >> Chctla::n0bmen_enum) == Vdp2Regs::BitmapEnable::bitmap_format) {
@@ -1683,8 +1683,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
         case nbg1: {
             if ((regs_.bgon >> Bgon::n1on_enum) == Bgon::ScreenDisplayEnableBit::cannot_display) { return false; }
             // Pattern name data reads depend on the reduction setting of the screen
-            const auto reduction = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg1)),
-                                                       static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg1)));
+            const auto reduction = getReductionSetting(regs_.zmctl >> Zmctl::n1zmqt_enum, regs_.zmctl >> Zmctl::n1zmhf_enum);
 
             // Character / Bitmap pattern data reads depend on the reduction setting and the number of colors
             if ((regs_.chctla >> Chctla::n1bmen_enum) == Vdp2Regs::BitmapEnable::bitmap_format) {
@@ -1776,12 +1775,12 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
 auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool {
     using Chctla = Vdp2Regs::Chctla;
     using Chctlb = Vdp2Regs::Chctlb;
+    using Zmctl  = Vdp2Regs::Zmctl;
 
     switch (s) {
         using enum ScrollScreen;
         case nbg2: {
-            const auto reduction    = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg0)),
-                                                       static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg0)));
+            const auto reduction    = getReductionSetting(regs_.zmctl >> Zmctl::n0zmqt_enum, regs_.zmctl >> Zmctl::n0zmhf_enum);
             const auto color_number = regs_.chctla >> Chctla::n0chcn_enum;
 
             if ((reduction == ReductionSetting::up_to_one_quarter)
@@ -1795,8 +1794,7 @@ auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool {
             break;
         }
         case nbg3: {
-            const auto reduction    = getReductionSetting(static_cast<ZoomQuarter>(static_cast<bool>(zmctl_.zoom_quarter_nbg1)),
-                                                       static_cast<ZoomHalf>(static_cast<bool>(zmctl_.zoom_half_nbg1)));
+            const auto reduction    = getReductionSetting(regs_.zmctl >> Zmctl::n1zmqt_enum, regs_.zmctl >> Zmctl::n1zmhf_enum);
             const auto color_number = regs_.chctla >> Chctla::n1chcn_enum;
 
             if ((reduction == ReductionSetting::up_to_one_quarter)
@@ -1992,9 +1990,9 @@ auto Vdp2::getVramPatternNameDataReads(const VramTiming&                 bank_a0
 }
 
 // static
-auto Vdp2::getReductionSetting(ZoomQuarter zq, ZoomHalf zh) -> ReductionSetting {
-    if (zq == ZoomQuarter::up_to_one_quarter) { return ReductionSetting::up_to_one_quarter; }
-    if (zh == ZoomHalf::up_to_one_half) { return ReductionSetting::up_to_one_half; }
+auto Vdp2::getReductionSetting(Vdp2Regs::Zmctl::ZoomQuarter zq, Vdp2Regs::Zmctl::ZoomHalf zh) -> ReductionSetting {
+    if (zq == Vdp2Regs::Zmctl::ZoomQuarter::up_to_one_quarter) { return ReductionSetting::up_to_one_quarter; }
+    if (zh == Vdp2Regs::Zmctl::ZoomHalf::up_to_one_half) { return ReductionSetting::up_to_one_half; }
     return ReductionSetting::none;
 };
 

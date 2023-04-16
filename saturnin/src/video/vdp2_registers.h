@@ -1418,161 +1418,103 @@ struct Vdp2Regs {
     ScdnType scydn0;
     ScdnType scxdn1;
     ScdnType scydn1;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoordinateIncrementNbg0HorizontalIntegerPart
-///
-/// \brief	Coordinate Increment (NBG0, Horizontal Integer Part) (ZMXIN0).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Zmin
+    ///
+    /// \brief	Coordinate Increment Integer Part.
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union CoordinateIncrementNbg0HorizontalIntegerPart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Zmin {
+        GENERATE_USING(Zmin, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoordinateIncrementNbg0HorizontalFractionalPart
-///
-/// \brief	Coordinate Increment (NBG0, Horizontal Fractional Part) (ZMXDN0).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(zmin, 0, 0b111);      ///< Coordinate increment (NxZMxIx).
 
-union CoordinateIncrementNbg0HorizontalFractionalPart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoordinateIncrementNbg0VerticalIntegerPart
-///
-/// \brief	CoordinateIncrement (NBG0, Vertical Integer Part) (ZMYIN0).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Zmin", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Zmin", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ZminType = Reg<u16, Zmin>;
+    ZminType zmxin0;
+    ZminType zmyin0;
+    ZminType zmxin1;
+    ZminType zmyin1;
 
-union CoordinateIncrementNbg0VerticalIntegerPart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Zmdn
+    ///
+    /// \brief	Coordinate Increment Fractional Part.
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoordinateIncrementNbg0VerticalFractionalPart
-///
-/// \brief	Coordinate Increment (NBG0, Vertical Fractional Part) (ZMYDN0).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Zmdn {
+        GENERATE_USING(Zmdn, u16);
 
-union CoordinateIncrementNbg0VerticalFractionalPart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        GENERATE_BIT_WITHOUT_ENUM(zmdn, 8, 0xFF);       ///< Coordinate increment (NxZMxDx).
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoordinateIncrementNbg1HorizontalIntegerPart
-///
-/// \brief	Coordinate Increment (NBG1, Horizontal Integer Part) (ZMXIN1).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-union CoordinateIncrementNbg1HorizontalIntegerPart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Zmdn", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Zmdn", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ZmdnType = Reg<u16, Zmdn>;
+    ZmdnType zmxdn0;
+    ZmdnType zmydn0;
+    ZmdnType zmxdn1;
+    ZmdnType zmydn1;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoordinateIncrementNbg1HorizontalFractionalPart
-///
-/// \brief	Coordinate Increment (NBG1, Horizontal Fractional Part) (ZMXDN1).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Zmctl
+    ///
+    /// \brief	Reduction Enable (ZMCTL).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union CoordinateIncrementNbg1HorizontalFractionalPart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Zmctl {
+        GENERATE_USING(Zmctl, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoordinateIncrementNbg1VerticalIntegerPart
-///
-/// \brief	CoordinateIncrement (NBG1, Vertical Integer Part) (ZMYIN1).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ZoomQuarter
+        ///
+        /// \brief  NxZMQT bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union CoordinateIncrementNbg1VerticalIntegerPart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        enum class ZoomQuarter : bool { none = false, up_to_one_quarter = true };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoordinateIncrementNbg1VerticalFractionalPart
-///
-/// \brief	Coordinate Increment (NBG1, Vertical Fractional Part) (ZMYDN1).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ZoomHalf
+        ///
+        /// \brief  NxZMHF bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union CoordinateIncrementNbg1VerticalFractionalPart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        enum class ZoomHalf : bool { none = false, up_to_one_half = true };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ZoomQuarter
-///
-/// \brief  NxZMQT bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITH_ENUM(n1zmqt, 9, 0b1, ZoomQuarter); ///< NBG1 zoom quarter.
+        GENERATE_BIT_WITH_ENUM(n1zmhf, 8, 0b1, ZoomHalf);    ///< NBG1 zoom half.
+        GENERATE_BIT_WITH_ENUM(n0zmqt, 1, 0b1, ZoomQuarter); ///< NBG0 zoom quarter.
+        GENERATE_BIT_WITH_ENUM(n0zmhf, 0, 0b1, ZoomHalf);    ///< NBG0 zoom half.
 
-enum class ZoomQuarter : bool { none = false, up_to_one_quarter = true };
+        static constexpr auto lo_byte_pos = PosType(0);      ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);      ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ZoomHalf
-///
-/// \brief  NxZMHF bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ZoomHalf : bool { none = false, up_to_one_half = true };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ReductionEnable
-///
-/// \brief	Reduction Enable (ZMCTL).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ReductionEnable {
-    u16            raw;               ///< Raw representation.
-    BitField<9>    zoom_quarter_nbg1; ///< Defines N1ZMQT bits.
-    BitField<8>    zoom_half_nbg1;    ///< Defines N1ZMHF bits.
-    BitField<1>    zoom_quarter_nbg0; ///< Defines N0ZMQT bits.
-    BitField<0>    zoom_half_nbg0;    ///< Defines N0ZMHF bits.
-    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Zmctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Zmctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ZmctlType = Reg<u16, Zmctl>;
+    ZmctlType zmctl;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
