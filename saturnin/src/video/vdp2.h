@@ -1832,8 +1832,8 @@ class Vdp2 {
     // PatternNameControl                              pncn3_;
     // PatternNameControl                              pncr_;
     // PlaneSizeRegister                               plsz_;
-    MapOffsetNbg                                    mpofn_;
-    MapOffsetRbg                                    mpofr_;
+    // MapOffsetNbg                                    mpofn_;
+    // MapOffsetRbg                                    mpofr_;
     MapPlaneAB                                      mpabn0_;
     MapPlaneCD                                      mpcdn0_;
     MapPlaneAB                                      mpabn1_;

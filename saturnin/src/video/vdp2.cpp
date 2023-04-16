@@ -381,8 +381,8 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case pattern_name_control_nbg3: return regs_.pncn3.data();
         case pattern_name_control_rbg0: return regs_.pncr.data();
         case plane_size: return regs_.plsz.data();
-        case map_offset_n: return mpofn_.raw;
-        case map_offset_r: return mpofr_.raw;
+        case map_offset_n: return regs_.mpofn.data();
+        case map_offset_r: return regs_.mpofr.data();
         case map_nbg0_plane_a_b: return mpabn0_.raw;
         case map_nbg0_plane_c_d: return mpcdn0_.raw;
         case map_nbg1_plane_a_b: return mpabn1_.raw;
@@ -566,10 +566,10 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case pattern_name_control_rbg0 + 1: regs_.pncr.upd(Vdp2Regs::Pcnxx::loByte(data)); break;
         case plane_size: regs_.plsz.upd(Vdp2Regs::Plsz::hiByte(data)); break;
         case plane_size + 1: regs_.plsz.upd(Vdp2Regs::Plsz::loByte(data)); break;
-        case map_offset_n: mpofn_.upper_8_bits = data; break;
-        case map_offset_n + 1: mpofn_.lower_8_bits = data; break;
-        case map_offset_r: mpofr_.upper_8_bits = data; break;
-        case map_offset_r + 1: mpofr_.lower_8_bits = data; break;
+        case map_offset_n: regs_.mpofn.upd(Vdp2Regs::Mpofn::hiByte(data)); break;
+        case map_offset_n + 1: regs_.mpofn.upd(Vdp2Regs::Mpofn::loByte(data)); break;
+        case map_offset_r: regs_.mpofr.upd(Vdp2Regs::Mpofr::hiByte(data)); break;
+        case map_offset_r + 1: regs_.mpofr.upd(Vdp2Regs::Mpofr::loByte(data)); break;
         case map_nbg0_plane_a_b: mpabn0_.upper_8_bits = data; break;
         case map_nbg0_plane_a_b + 1: mpabn0_.lower_8_bits = data; break;
         case map_nbg0_plane_c_d: mpcdn0_.upper_8_bits = data; break;
@@ -831,8 +831,8 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case pattern_name_control_nbg3: regs_.pncn3 = data; break;
         case pattern_name_control_rbg0: regs_.pncr = data; break;
         case plane_size: regs_.plsz = data; break;
-        case map_offset_n: mpofn_.raw = data; break;
-        case map_offset_r: mpofr_.raw = data; break;
+        case map_offset_n: regs_.mpofn = data; break;
+        case map_offset_r: regs_.mpofr = data; break;
         case map_nbg0_plane_a_b: mpabn0_.raw = data; break;
         case map_nbg0_plane_c_d: mpcdn0_.raw = data; break;
         case map_nbg1_plane_a_b: mpabn1_.raw = data; break;
@@ -999,8 +999,8 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.plsz = l;
             break;
         case map_offset_n:
-            mpofn_.raw = h;
-            mpofr_.raw = l;
+            regs_.mpofn = h;
+            regs_.mpofr = l;
             break;
         case map_nbg0_plane_a_b:
             mpabn0_.raw = h;
@@ -2546,6 +2546,8 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     using Chctlb = Vdp2Regs::Chctlb;
     using Bmpna  = Vdp2Regs::Bmpna;
     using Bmpnb  = Vdp2Regs::Bmpnb;
+    using Mpofn  = Vdp2Regs::Mpofn;
+    using Mpofr  = Vdp2Regs::Mpofr;
 
     switch (s) {
         using enum ScrollScreen;
@@ -2562,7 +2564,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Map
             screen.map_size   = map_size_nbg;
-            screen.map_offset = mpofn_.map_offset_nbg0;
+            screen.map_offset = static_cast<u8>(regs_.mpofn >> Mpofn::n0mp_shft);
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n0plsz_enum;
@@ -2620,7 +2622,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Map
             screen.map_size   = map_size_nbg;
-            screen.map_offset = mpofn_.map_offset_nbg1;
+            screen.map_offset = static_cast<u8>(regs_.mpofn >> Mpofn::n1mp_shft);
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n1plsz_enum;
@@ -2678,7 +2680,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Map
             screen.map_size   = map_size_nbg;
-            screen.map_offset = static_cast<u8>(mpofn_.map_offset_nbg2);
+            screen.map_offset = static_cast<u8>(regs_.mpofn >> Mpofn::n2mp_shft);
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n2plsz_enum;
@@ -2730,7 +2732,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Map
             screen.map_size   = map_size_nbg;
-            screen.map_offset = static_cast<u8>(mpofn_.map_offset_nbg3);
+            screen.map_offset = static_cast<u8>(regs_.mpofn >> Mpofn::n3mp_shft);
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n3plsz_enum;
@@ -2780,7 +2782,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Map
             screen.map_size   = map_size_rbg;
-            screen.map_offset = mpofr_.map_offset_rpa;
+            screen.map_offset = static_cast<u8>(regs_.mpofr >> Mpofr::ramp_shft);
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::raplsz_enum;
@@ -2846,7 +2848,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Map
             screen.map_size   = map_size_rbg;
-            screen.map_offset = mpofr_.map_offset_rpb;
+            screen.map_offset = static_cast<u8>(regs_.mpofr >> Mpofr::rbmp_shft);
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::rbplsz_enum;

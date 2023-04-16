@@ -1092,6 +1092,58 @@ struct Vdp2Regs {
     };
     using PlszType = Reg<u16, Plsz>;
     PlszType plsz;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpofn
+    ///
+    /// \brief	Map Offset (NBG0 - NBG3) register (MPOFN).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Mpofn {
+        GENERATE_USING(Mpofn, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(n3mp, 12, 0b111);      ///< NBG3 map offset.
+        GENERATE_BIT_WITHOUT_ENUM(n2mp, 8, 0b111);      ///< NBG2 map offset.
+        GENERATE_BIT_WITHOUT_ENUM(n1mp, 4, 0b111);      ///< NBG1 map offset.
+        GENERATE_BIT_WITHOUT_ENUM(n0mp, 0, 0b111);      ///< NBG0 map offset.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpofnType = Reg<u16, Mpofn>;
+    MpofnType mpofn;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpofr
+    ///
+    /// \brief	Map Offset (Rotation Parameter A,B) register (MPOFR).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Mpofr {
+        GENERATE_USING(Mpofr, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(rbmp, 4, 0b111);      ///< RPB map offset.
+        GENERATE_BIT_WITHOUT_ENUM(ramp, 0, 0b111);      ///< RPA map offset.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpofrType = Reg<u16, Mpofr>;
+    MpofrType mpofr;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1103,15 +1155,15 @@ struct Vdp2Regs {
 /// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union MapOffsetNbg {
-    u16             raw;             ///< Raw representation.
-    BitField<12, 3> map_offset_nbg3; ///< Defines N3MPx bits.
-    BitField<8, 3>  map_offset_nbg2; ///< Defines N2MPx bits.
-    BitField<4, 3>  map_offset_nbg1; ///< Defines N1MPx bits.
-    BitField<0, 3>  map_offset_nbg0; ///< Defines N0MPx bits.
-    BitField<8, 8>  upper_8_bits;    ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits;    ///< Defines the range of the lower 8 bits of the register.
-};
+// union MapOffsetNbg {
+//     u16             raw;             ///< Raw representation.
+//     BitField<12, 3> map_offset_nbg3; ///< Defines N3MPx bits.
+//     BitField<8, 3>  map_offset_nbg2; ///< Defines N2MPx bits.
+//     BitField<4, 3>  map_offset_nbg1; ///< Defines N1MPx bits.
+//     BitField<0, 3>  map_offset_nbg0; ///< Defines N0MPx bits.
+//     BitField<8, 8>  upper_8_bits;    ///< Defines the range of the upper 8 bits of the register.
+//     BitField<0, 8>  lower_8_bits;    ///< Defines the range of the lower 8 bits of the register.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	MapOffsetRbg
@@ -1122,13 +1174,13 @@ union MapOffsetNbg {
 /// \date	25/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union MapOffsetRbg {
-    u16            raw;            ///< Raw representation.
-    BitField<4, 3> map_offset_rpb; ///< Defines RBMPx bits.
-    BitField<0, 3> map_offset_rpa; ///< Defines RAMPx bits.
-    BitField<8, 8> upper_8_bits;   ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;   ///< Defines the range of the lower 8 bits of the register.
-};
+// union MapOffsetRbg {
+//     u16            raw;            ///< Raw representation.
+//     BitField<4, 3> map_offset_rpb; ///< Defines RBMPx bits.
+//     BitField<0, 3> map_offset_rpa; ///< Defines RAMPx bits.
+//     BitField<8, 8> upper_8_bits;   ///< Defines the range of the upper 8 bits of the register.
+//     BitField<0, 8> lower_8_bits;   ///< Defines the range of the lower 8 bits of the register.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	MapPlaneAB
