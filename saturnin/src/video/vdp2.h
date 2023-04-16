@@ -1880,7 +1880,7 @@ class Vdp2 {
     // ScreenScrollValueIntegerPart                    scxn3_;
     // ScreenScrollValueIntegerPart                    scyn3_;
     // ReductionEnable                                 zmctl_;
-    LineAndVerticalCellScrollControl    scrctl_;
+    // LineAndVerticalCellScrollControl    scrctl_;
     VerticalCellScrollTableAddressUpper vcstau_;
     VerticalCellScrollTableAddressLower vcstal_;
     LineScrollTableAddressNbg0Upper     lsta0u_;

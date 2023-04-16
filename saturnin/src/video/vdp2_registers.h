@@ -1515,21 +1515,85 @@ struct Vdp2Regs {
     };
     using ZmctlType = Reg<u16, Zmctl>;
     ZmctlType zmctl;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineAndVerticalCellScrollControl
-///
-/// \brief	Line And Vertical Cell Scroll Control (NBG0, NBG1) (SRCCTL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Scrctl
+    ///
+    /// \brief	Line And Vertical Cell Scroll Control (NBG0, NBG1) (SRCCTL).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union LineAndVerticalCellScrollControl {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+    struct Scrctl {
+        GENERATE_USING(Scrctl, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	LineScrollInterval
+        ///
+        /// \brief	NxLSSx bits values. Depends of the interlace setting (ni = non-interlace, sdi = single-density interlace,
+        /// 		ddi = double-density interlace.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class LineScrollInterval : u8 {
+            each_line_or_every_2_lines      = 0b00, ///< Each line for ni or ddi, 2 lines for sdi.
+            every_2_lines_or_every_4_lines  = 0b01, ///< Every 2 lines for ni or ddi, 4 lines for sdi.
+            every_4_lines_or_every_8_lines  = 0b10, ///< Every 4 lines for ni or ddi, 8 lines for sdi.
+            every_8_lines_or_every_16_lines = 0b11  ///< Every 8 lines for ni or ddi, 16 lines for sdi.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	LineZoomEnable
+        ///
+        /// \brief	NxLZMX bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class LineZoomEnable : bool { does_not_scale_horizontally = false, scales_horizontally = true };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	LineScrollEnable
+        ///
+        /// \brief	NxLSCY bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class LineScrollYEnable : bool { does_not_scroll_vertically = false, scrolls_vertically = true };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	LineScrollXEnable
+        ///
+        /// \brief	NxLSCX bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class LineScrollXEnable : bool { does_not_scroll_horizontally = false, scrolls_vertically = true };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	VerticalCellScrollEnable
+        ///
+        /// \brief	NxVCSC bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class VerticalCellScrollEnable : bool { does_not_cell_scroll_vertically = false, cell_scrolls_vertically = true };
+
+        GENERATE_BIT_WITH_ENUM(n1lss, 12, 0b11, LineScrollInterval);      ///< NBG1 line scroll interval.
+        GENERATE_BIT_WITH_ENUM(n1lzmx, 11, 0b1, LineZoomEnable);          ///< NBG1 line zoom enable.
+        GENERATE_BIT_WITH_ENUM(n1lscy, 10, 0b1, LineScrollYEnable);       ///< NBG1 vertical line scroll enable.
+        GENERATE_BIT_WITH_ENUM(n1lscx, 9, 0b1, LineScrollXEnable);        ///< NBG1 horizontal line scroll enable.
+        GENERATE_BIT_WITH_ENUM(n1vcsc, 8, 0b1, VerticalCellScrollEnable); ///< NBG1 vertical cell scroll enable.
+        GENERATE_BIT_WITH_ENUM(n0lss, 4, 0b11, LineScrollInterval);       ///< NBG0 line scroll interval.
+        GENERATE_BIT_WITH_ENUM(n0lzmx, 3, 0b1, LineZoomEnable);           ///< NBG0 line zoom enable.
+        GENERATE_BIT_WITH_ENUM(n0lscy, 2, 0b1, LineScrollYEnable);        ///< NBG0 vertical line scroll enable.
+        GENERATE_BIT_WITH_ENUM(n0lscx, 1, 0b1, LineScrollXEnable);        ///< NBG0 horizontal line scroll enable.
+        GENERATE_BIT_WITH_ENUM(n0vcsc, 0, 0b1, VerticalCellScrollEnable); ///< NBG1 vertical cell scroll enable.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Scrctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Scrctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ScrctlType = Reg<u16, Scrctl>;
+    ScrctlType scrctl;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
